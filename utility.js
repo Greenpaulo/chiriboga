@@ -62,11 +62,28 @@ var debugging = false;
 })();
 
 //Normalize numbered card art filenames: convert missing .png references to .jpg
+// function ChangeImageFileToJPG(name) {
+//   if (typeof name === "string" && /^[0-9]{5}\.png$/.test(name)) {
+//     return name.replace(".png", ".jpg");
+//   }
+//   return name;
+// }
+
+// Normalize card art filenames: convert any .png reference to .jpg
 function ChangeImageFileToJPG(name) {
-  if (typeof name === "string" && /^[0-9]{5}\.png$/.test(name)) {
-    return name.replace(".png", ".jpg");
-  }
-  return name;
+  if (!name) return "";
+
+  // Force to string
+  var fileName = String(name);
+
+  // If filename is purely numeric or digit.ext (e.g. "3046" or "3046.jpg" or "3046.png")
+  // Extract the number and pad it to 5 digits
+  fileName = fileName.replace(/^(\d+)/, function (match) {
+    return match.padStart(5, "0");
+  });
+
+  // Convert .png to .jpg if needed
+  return fileName.replace(/\.png$/i, ".jpg");
 }
 
 // ========================================
