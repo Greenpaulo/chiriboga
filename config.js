@@ -185,6 +185,8 @@ var setRegistry = {
     },
   },
 
+  
+
   // DEFAULT sets for GAUNTLET mode (when no localStorage settings exist)
   // User can change via Settings > Gauntlet Settings > Load Player Sets
   // Note: All sets are always LOADED in gauntlet.php so opponent decks work,
@@ -563,4 +565,32 @@ var gauntletConfig = {
       },
     },
   ],
+};
+
+var formatRegistry = {
+  systemgateway_su21: {
+    name: "System Gateway + System Update 2021",
+    sets: ['sg', 'su21'],
+    enabled: true
+  },
+  coresets: {
+    name: "Core Sets",
+    sets: ['sg', 'elev'],
+    enabled: true
+  },
+  startup: {
+    name: "Startup",
+    sets: ['sg', 'elev'], // + 'vp' once Vantage Point is implemented
+    enabled: false
+  },
+  standard: {
+    name: "Standard",
+    sets: ['sg', 'elev', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr'],
+    enabled: false
+  },
+  eternal: {
+    name: "Eternal",
+    sets: ['sg', 'elev', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'core'],
+    enabled: false
+  }
 };

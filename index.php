@@ -3,6 +3,7 @@ $version = "0.6.13-BETA";
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -18,6 +19,7 @@ $version = "0.6.13-BETA";
       gap: 8px;
       overflow: hidden;
     }
+
     .achievements-header-row {
       display: flex;
       justify-content: space-between;
@@ -25,11 +27,13 @@ $version = "0.6.13-BETA";
       padding-bottom: 8px;
       border-bottom: 1px solid var(--crt-green-dim);
     }
+
     .achievements-title {
       font-size: 1.2rem;
       color: var(--crt-green);
       text-shadow: 0 0 10px var(--crt-green);
     }
+
     .achievements-back {
       background: transparent;
       border: 1px solid var(--crt-green-dim);
@@ -40,11 +44,13 @@ $version = "0.6.13-BETA";
       font-size: 0.85rem;
       transition: all 0.2s;
     }
+
     .achievements-back:hover {
       color: var(--crt-green);
       border-color: var(--crt-green);
       text-shadow: 0 0 5px var(--crt-green);
     }
+
     .achievements-content {
       overflow-y: auto;
       flex: 1;
@@ -52,6 +58,7 @@ $version = "0.6.13-BETA";
       flex-direction: column;
       gap: 8px;
     }
+
     .achievements-section-header {
       font-size: 0.85rem;
       color: var(--crt-green-muted);
@@ -60,13 +67,14 @@ $version = "0.6.13-BETA";
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-    
+
     /* Achievements List */
     .achievements-list {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
+
     .achievement-row {
       display: flex;
       justify-content: space-between;
@@ -77,21 +85,26 @@ $version = "0.6.13-BETA";
       cursor: help;
       transition: all 0.2s;
     }
+
     .achievement-row:hover {
       background: rgba(51, 255, 51, 0.1);
       border-color: var(--crt-green);
     }
+
     .achievement-incomplete {
       opacity: 0.4;
       filter: grayscale(0.5);
     }
+
     .achievement-incomplete:hover {
       opacity: 0.6;
     }
+
     .achievement-name {
       font-size: 0.9rem;
       color: var(--crt-green);
     }
+
     .achievement-date {
       font-size: 0.85rem;
       color: var(--crt-green-muted);
@@ -115,18 +128,19 @@ $version = "0.6.13-BETA";
         window.scrollTo(0, 0);
       }
     });
-    
+
     var cardSet = []; // prepare to receive card definitions
     var setIdentifiers = []; // set identifiers
     var runner = {};
     var corp = {};
     var preconDecks = [];
+
     function registerPrecon(deck) {
       preconDecks.push(deck);
     }
 
     // Early shim so menu clicks before scripts load won't throw ReferenceError
-    (function(){
+    (function() {
       if (typeof window.handleMenu === 'undefined') {
         window._queuedMenuClicks = [];
         window.handleMenu = function(option, evt) {
@@ -135,8 +149,13 @@ $version = "0.6.13-BETA";
         };
         window._flushQueuedMenuClicks = function() {
           if (!window._queuedMenuClicks || !window.handleMenuImpl) return;
-          var q = window._queuedMenuClicks.slice(); window._queuedMenuClicks = [];
-          q.forEach(function(opt){ try { window.handleMenuImpl(opt); } catch(e){} });
+          var q = window._queuedMenuClicks.slice();
+          window._queuedMenuClicks = [];
+          q.forEach(function(opt) {
+            try {
+              window.handleMenuImpl(opt);
+            } catch (e) {}
+          });
         };
       }
     })();
@@ -148,7 +167,7 @@ $version = "0.6.13-BETA";
   // =================================================================
   // CARD SETS - Dynamically loaded from setRegistry in config.js
   // =================================================================
-  
+
   // Output filetimes for all set files (for proper cache busting in JS)
   $setFiles = glob('sets/*.js');
   $setFiletimes = array();
@@ -159,30 +178,30 @@ $version = "0.6.13-BETA";
   echo '<script>var setFiletimes = ' . json_encode($setFiletimes) . ';</script>';
   ?>
   <script>
-  // Dynamically load all sets from setRegistry (defined in config.js)
-  (function() {
-    var setsToLoad = [];
-    
-    // Get all sets from setRegistry.availableSets
-    if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
-      for (var setKey in setRegistry.availableSets) {
-        setsToLoad.push(setRegistry.availableSets[setKey].file);
+    // Dynamically load all sets from setRegistry (defined in config.js)
+    (function() {
+      var setsToLoad = [];
+
+      // Get all sets from setRegistry.availableSets
+      if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
+        for (var setKey in setRegistry.availableSets) {
+          setsToLoad.push(setRegistry.availableSets[setKey].file);
+        }
+      } else {
+        // Fallback if setRegistry not available
+        console.error('setRegistry not found in config.js, using fallback sets');
+        setsToLoad = ['systemgateway', 'systemupdate2021'];
       }
-    } else {
-      // Fallback if setRegistry not available
-      console.error('setRegistry not found in config.js, using fallback sets');
-      setsToLoad = ['systemgateway', 'systemupdate2021'];
-    }
-    
-    // Document.write script tags with proper cache busting from PHP filetimes
-    for (var i = 0; i < setsToLoad.length; i++) {
-      var setName = setsToLoad[i];
-      var timestamp = (typeof setFiletimes !== 'undefined' && setFiletimes[setName]) 
-        ? setFiletimes[setName] 
-        : Date.now();
-      document.write('<script src="sets/' + setName + '.js?' + timestamp + '"><\/script>');
-    }
-  })();
+
+      // Document.write script tags with proper cache busting from PHP filetimes
+      for (var i = 0; i < setsToLoad.length; i++) {
+        var setName = setsToLoad[i];
+        var timestamp = (typeof setFiletimes !== 'undefined' && setFiletimes[setName]) ?
+          setFiletimes[setName] :
+          Date.now();
+        document.write('<script src="sets/' + setName + '.js?' + timestamp + '"><\/script>');
+      }
+    })();
   </script>
   <?php
   // Load preconstructed decks
@@ -207,16 +226,25 @@ $version = "0.6.13-BETA";
   }
   ?>
 </head>
+
 <body class="no-scroll">
   <script>
-  // Apply CRT setting immediately to avoid flash of effects
-  (function(){try{var s=localStorage.getItem('chiriboga-settings');if(s){var p=JSON.parse(s);if(p.crtEffects===false)document.body.classList.add('no-crt');}}catch(e){}})();
+    // Apply CRT setting immediately to avoid flash of effects
+    (function() {
+      try {
+        var s = localStorage.getItem('chiriboga-settings');
+        if (s) {
+          var p = JSON.parse(s);
+          if (p.crtEffects === false) document.body.classList.add('no-crt');
+        }
+      } catch (e) {}
+    })();
   </script>
   <div class="terminal-frame">
     <div class="screen">
       <div class="glow-overlay"></div>
       <div class="noise"></div>
-      
+
       <div class="screen-content">
         <div class="system-text">
           CH1R180G4 SYSTEMS v2.71 // NEURAL INTERFACE READY<span class="cursor"></span>
@@ -228,7 +256,8 @@ $version = "0.6.13-BETA";
               <h1>NETRUNNER</h1>
             </div>
             <div class="subtitle-container">
-              <span class="bracket left">[</span><h2>$0LØ MOÐ3</h2><span class="bracket right">]</span>
+              <span class="bracket left">[</span>
+              <h2>$0LØ MOÐ3</h2><span class="bracket right">]</span>
             </div>
             <div class="hex-decoration">
               <div class="hex"></div>
@@ -253,7 +282,48 @@ $version = "0.6.13-BETA";
           <div class="menu-layout">
             <div class="menu-buttons" id="menu-buttons">
               <div class="menu-item" onclick="handleMenu('quick', event)">QUICK GAME</div>
-              <div class="menu-item" onclick="handleMenu('custom', event)">CUSTOM GAME</div>
+              <div class="menu-item-container" id="custom-container">
+                <div class="menu-item" id="custom-main" onclick="handleMenu('custom', event)">CUSTOM GAME</div>
+                <div class="custom-submenu" id="custom-submenu" style="display:none;">
+                  <div class="menu-item-sub" id="format-btn-systemgateway_su21" onclick="selectFormat('systemgateway_su21')">
+                    System Gateway + System Update 2021
+                  </div>
+                  <div class="menu-item-sub" id="format-btn-coresets" onclick="selectFormat('coresets')">
+                    Core Sets
+                  </div>
+                  <div class="menu-item-sub disabled" id="format-btn-startup" onclick="selectFormat('startup')">
+                    Startup
+                  </div>
+                  <div class="menu-item-sub disabled" id="format-btn-standard" onclick="selectFormat('standard')">
+                    Standard
+                  </div>
+                  <div class="menu-item-sub disabled" id="format-btn-eternal" onclick="selectFormat('eternal')">
+                    Eternal
+                  </div>
+                  <div class="menu-item-sub" onclick="hideCustomSubmenu()">BACK</div>
+                </div>
+              </div>
+              <!-- <div class="menu-item-container" id="custom-container">
+                <div class="menu-item" id="custom-main" onclick="handleMenu('custom', event)">CUSTOM GAME</div>
+                <div class="gauntlet-submenu" id="custom-submenu" style="display:none;">
+                  <div class="menu-item-sub" id="format-btn-systemgateway_su21" onclick="selectFormat('systemgateway_su21')">
+                    System Gateway + System Update 2021
+                  </div>
+                  <div class="menu-item-sub" id="format-btn-coresets" onclick="selectFormat('coresets')">
+                    Core Sets
+                  </div>
+                  <div class="menu-item-sub disabled" id="format-btn-startup" onclick="selectFormat('startup')">
+                    Startup
+                  </div>
+                  <div class="menu-item-sub disabled" id="format-btn-standard" onclick="selectFormat('standard')">
+                    Standard
+                  </div>
+                  <div class="menu-item-sub disabled" id="format-btn-eternal" onclick="selectFormat('eternal')">
+                    Eternal
+                  </div>
+                  <div class="menu-item-sub" onclick="hideCustomSubmenu()">BACK</div>
+                </div>
+              </div> -->
               <div class="menu-item-container" id="gauntlet-container">
                 <div class="menu-item" id="gauntlet-main" onclick="handleMenu('tournament', event)">GAUNTLET</div>
                 <div class="gauntlet-submenu" id="gauntlet-submenu" style="display:none;">
@@ -272,20 +342,20 @@ $version = "0.6.13-BETA";
               </div>
               <div class="credits-scroll">
                 <h3>About Netrunner Solo Mode</h3>
-                <p>This Netrunner Solo Mode extension for the Chiriboga engine is developed by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. It adds a more refined interface and game modes to the game. 
-                It is available on <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">Github</a> for bug reports and contributions.</p>                
+                <p>This Netrunner Solo Mode extension for the Chiriboga engine is developed by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. It adds a more refined interface and game modes to the game.
+                  It is available on <a href="https://github.com/NEU-DrBo6/chiriboga" target="_blank" rel="noopener">Github</a> for bug reports and contributions.</p>
                 <h3>About Chiriboga</h3>
-                <p><strong>Chiriboga</strong> is a Netrunner engine developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>. 
-                It implements <em>Android: Netrunner</em> gameplay with an AI opponent. The source is available on <a href="https://github.com/bobtheuberfish/chiriboga" target="_blank" rel="noopener">Github</a>.</p>
+                <p><strong>Chiriboga</strong> is a Netrunner engine developed by <a href="https://github.com/bobtheuberfish" target="_blank" rel="noopener">bobtheuberfish</a>.
+                  It implements <em>Android: Netrunner</em> gameplay with an AI opponent. The source is available on <a href="https://github.com/bobtheuberfish/chiriboga" target="_blank" rel="noopener">Github</a>.</p>
                 <p>Special thanks to testers, including: BadEpsilon, bowlsley, D-Smith, eniteris, Kwaice, Mentlegen, olompumpa, R41B, saff, Saintis, Ysengrin.</p>
                 <p class="aside">"...but who ordered him to wear that hat?"</p>
                 <h3>Pre‑constructed Decks</h3>
                 <p>Girometics SG+SU21 and NSG Core precons designed by <a href="https://netrunnerdb.com/en/decklists/find?faction=&sort=popularity&rotation_id=&author=Girometics&title=&is_legal=&mwl_code=&packs%5B%5D=su21&packs%5B%5D=sg" target="_blank">Girometics</a>. All other precons curated by <a href="https://github.com/drbo6" target="_blank" rel="noopener">DrBo6</a>. Click on them to see their creators on NetrunnerDB.com.</p>
                 <h3>Legal & Attribution</h3>
                 <p><em>Netrunner</em> and <em>Android</em> are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. Not affiliated with FFG, WotC, or NSG.</p>
-                <p>Chiriboga includes cards from <a href="https://nullsignal.games" target="_blank">Null Signal's</a> <em>System Gateway</em> and <em>System Update 2021</em>. 
-                Its card art & symbols are property of Null Signal Games and used under <a href="https://creativecommons.org/licenses/by-nd/4.0/" target="_blank" rel="noopener">CC BY-ND 4.0</a>. This is a fan implementation and it is not endorsed by NSG.</p>
-                <p>All trademarks, card imagery, and faction symbols remain property of their respective owners.</p>                                
+                <p>Chiriboga includes cards from <a href="https://nullsignal.games" target="_blank">Null Signal's</a> <em>System Gateway</em> and <em>System Update 2021</em>.
+                  Its card art & symbols are property of Null Signal Games and used under <a href="https://creativecommons.org/licenses/by-nd/4.0/" target="_blank" rel="noopener">CC BY-ND 4.0</a>. This is a fan implementation and it is not endorsed by NSG.</p>
+                <p>All trademarks, card imagery, and faction symbols remain property of their respective owners.</p>
                 <p>Deck of cards by Daniel Solis from <a href="https://thenounproject.com/icon/deck-of-cards-219525/" target="_blank" title="deck of cards Icons">Noun Project</a> (<a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
                 <p>Book by Ralf Schmitzer from <a href="https://thenounproject.com/icon/book-548893/" target="_blank" title="Book Icons">Noun Project</a> (<a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
                 <p>Debug by Studio GLD from <a href="https://thenounproject.com/icon/debug-3594500/" target="_blank" title="Debug Icons">Noun Project</a> (<a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
@@ -445,7 +515,7 @@ $version = "0.6.13-BETA";
                 </div>
               </div>
             </div>
-            
+
             <div class="match-preview" onclick="selectRandomDecks()">
               <div class="preview-title">QUICK GAME<br />INCOMING..</div>
               <div class="portrait-container" id="player-portrait">
@@ -453,9 +523,9 @@ $version = "0.6.13-BETA";
                 <div class="portrait-glow"></div>
                 <div class="portrait-label">YOU</div>
               </div>
-              
+
               <div class="vs-text">VS</div>
-              
+
               <div class="portrait-container" id="ai-portrait">
                 <img class="portrait" src="" alt="">
                 <div class="portrait-glow"></div>
@@ -487,7 +557,7 @@ $version = "0.6.13-BETA";
     var aiDeck = null;
     var giromRunnerDecks = [];
     var giromCorpDecks = [];
-    
+
     // Settings overrides (initialized from gauntletConfig on page load)
     var settingsOverrides = {
       gauntletLength: null,
@@ -495,19 +565,18 @@ $version = "0.6.13-BETA";
       balancedFactions: null,
       strictPacks: null,
       allowedSets: null,
-      customSets: null,  // Sets loaded in Custom Game / decklauncher
-      preconOverrides: {},  // Maps precon name to boolean override for useForGauntlet
-      crtEffects: true  // CRT visual effects enabled by default
+      customSets: null, // Sets loaded in Custom Game / decklauncher
+      preconOverrides: {}, // Maps precon name to boolean override for useForGauntlet
+      crtEffects: true // CRT visual effects enabled by default
     };
-    
+
     // ========================================
     // ACHIEVEMENTS SYSTEM
     // ========================================
     var ACHIEVEMENTS_STORAGE_KEY = 'chiriboga-achievements';
-    
+
     // Default achievements definition
-    var defaultAchievements = [
-      {
+    var defaultAchievements = [{
         id: 'getHighScore',
         name: 'High Scorer',
         description: 'Record a High Score.',
@@ -540,14 +609,25 @@ $version = "0.6.13-BETA";
         hidden: false
       }
     ];
-    
+
     // Default high scores structure (top 3)
-    var defaultHighScores = [
-      { score: 0, timestamp: null, identity: null },
-      { score: 0, timestamp: null, identity: null },
-      { score: 0, timestamp: null, identity: null }
+    var defaultHighScores = [{
+        score: 0,
+        timestamp: null,
+        identity: null
+      },
+      {
+        score: 0,
+        timestamp: null,
+        identity: null
+      },
+      {
+        score: 0,
+        timestamp: null,
+        identity: null
+      }
     ];
-    
+
     // Initialize achievements in localStorage if not present
     function initializeAchievements() {
       try {
@@ -563,7 +643,7 @@ $version = "0.6.13-BETA";
         } else {
           // Parse existing data and merge any new achievements
           var data = JSON.parse(existing);
-          
+
           if (!Array.isArray(data.highScores)) {
             data.highScores = JSON.parse(JSON.stringify(defaultHighScores));
           } else if (data.highScores.length > 3) {
@@ -574,11 +654,11 @@ $version = "0.6.13-BETA";
             });
             data.highScores = data.highScores.slice(0, 3);
           }
-          
+
           if (!Array.isArray(data.achievements)) {
             data.achievements = [];
           }
-          
+
           // Merge in any new achievements that don't exist yet
           var existingIds = {};
           for (var i = 0; i < data.achievements.length; i++) {
@@ -589,17 +669,20 @@ $version = "0.6.13-BETA";
               data.achievements.push(JSON.parse(JSON.stringify(defaultAchievements[j])));
             }
           }
-          
+
           // Save back with any new achievements added
           localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
           return data;
         }
       } catch (e) {
         console.error('Error initializing achievements:', e);
-        return { highScores: JSON.parse(JSON.stringify(defaultHighScores)), achievements: JSON.parse(JSON.stringify(defaultAchievements)) };
+        return {
+          highScores: JSON.parse(JSON.stringify(defaultHighScores)),
+          achievements: JSON.parse(JSON.stringify(defaultAchievements))
+        };
       }
     }
-    
+
     // Get achievements data
     function getAchievements() {
       try {
@@ -612,13 +695,13 @@ $version = "0.6.13-BETA";
       }
       return initializeAchievements();
     }
-    
+
     // Update high scores if new score qualifies for top 3
     function updateHighScore(score, identity) {
       try {
         var data = getAchievements();
         var dominated = data.highScores[2].score;
-        
+
         if (score > dominated) {
           // Add new score and sort
           data.highScores.push({
@@ -626,7 +709,9 @@ $version = "0.6.13-BETA";
             timestamp: new Date().toISOString(),
             identity: identity
           });
-          data.highScores.sort(function(a, b) { return b.score - a.score; });
+          data.highScores.sort(function(a, b) {
+            return b.score - a.score;
+          });
           data.highScores = data.highScores.slice(0, 3);
           localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(data));
           return true;
@@ -637,7 +722,7 @@ $version = "0.6.13-BETA";
         return false;
       }
     }
-    
+
     // Unlock an achievement by id
     function unlockAchievement(achievementId) {
       try {
@@ -656,12 +741,12 @@ $version = "0.6.13-BETA";
         return null;
       }
     }
-    
+
     // Calculate achievement completion percentage
     function getAchievementPercentage() {
       var data = getAchievements();
       if (!data.achievements || data.achievements.length === 0) return 0;
-      
+
       var achieved = 0;
       for (var i = 0; i < data.achievements.length; i++) {
         if (data.achievements[i].achieved) {
@@ -670,7 +755,7 @@ $version = "0.6.13-BETA";
       }
       return Math.round((achieved / data.achievements.length) * 100);
     }
-    
+
     // Update the achievement percentage display in the menu
     function updateAchievementDisplay() {
       var percent = getAchievementPercentage();
@@ -679,11 +764,11 @@ $version = "0.6.13-BETA";
         displays[i].textContent = '[' + percent + '%]';
       }
     }
-    
+
     // ========================================
     // END ACHIEVEMENTS SYSTEM
     // ========================================
-    
+
     function toggleCustomSet(setCode) {
       var checkbox = document.getElementById('custom-set-' + setCode);
       var idx = settingsOverrides.customSets.indexOf(setCode);
@@ -694,12 +779,12 @@ $version = "0.6.13-BETA";
       }
       saveSettings();
     }
-    
+
     // Hidden sets reveal tracking
     var hiddenSetsRevealed = false;
     var hiddenSetsClickCount = 0;
     var hiddenSetsClickTimeout = null;
-    
+
     // Check if hidden sets were previously revealed
     function checkHiddenSetsRevealed() {
       try {
@@ -712,13 +797,13 @@ $version = "0.6.13-BETA";
         }
       } catch (e) {}
     }
-    
+
     // Handle clicks on "Load Sets" labels to reveal hidden options
     function handleLoadSetsClick() {
       if (hiddenSetsRevealed) return; // Already revealed
-      
+
       hiddenSetsClickCount++;
-      
+
       // Reset click count after 2 seconds of no clicks
       if (hiddenSetsClickTimeout) {
         clearTimeout(hiddenSetsClickTimeout);
@@ -726,7 +811,7 @@ $version = "0.6.13-BETA";
       hiddenSetsClickTimeout = setTimeout(function() {
         hiddenSetsClickCount = 0;
       }, 2000);
-      
+
       // Reveal hidden options after 6 clicks
       if (hiddenSetsClickCount >= 6) {
         hiddenSetsRevealed = true;
@@ -743,7 +828,7 @@ $version = "0.6.13-BETA";
         initializeSettings();
       }
     }
-    
+
     // Count cards in a set based on idRange
     // forGauntlet: if true, only count runner cards; if false, count both corp and runner
     function countCardsInSet(idRange, forGauntlet) {
@@ -751,7 +836,7 @@ $version = "0.6.13-BETA";
       var count = 0;
       var minId = idRange[0];
       var maxId = idRange[1];
-      
+
       for (var cardId in cardSet) {
         var id = parseInt(cardId);
         if (id >= minId && id <= maxId && cardSet[cardId]) {
@@ -763,32 +848,32 @@ $version = "0.6.13-BETA";
       }
       return count;
     }
-    
+
     // Populate set checkboxes dynamically based on setRegistry
     // Sets with hidden: true will not be displayed unless hiddenSetsRevealed is true
     // Sets with untested: true will show "(Untested, X)" after the name where X is card count
     function populateSetCheckboxes() {
       var customContainer = document.getElementById('custom-sets-checkboxes');
       var gauntletContainer = document.getElementById('gauntlet-sets-checkboxes');
-      
+
       if (!customContainer || !gauntletContainer) return;
       if (typeof setRegistry === 'undefined' || !setRegistry.availableSets) return;
-      
+
       var customHtml = '';
       var gauntletHtml = '';
-      
+
       // Iterate through all sets in setRegistry.availableSets
       // Display order follows the order defined in config.js
       for (var setKey in setRegistry.availableSets) {
         var set = setRegistry.availableSets[setKey];
         if (!set) continue;
-        
+
         // Skip hidden sets unless revealed
         if (set.hidden === true && !hiddenSetsRevealed) continue;
-        
+
         var code = set.code;
         var name = set.name;
-        
+
         // For untested sets, add card count
         var customDisplayName = name;
         var gauntletDisplayName = name;
@@ -799,7 +884,7 @@ $version = "0.6.13-BETA";
           gauntletDisplayName = name + ' (Untested, ' + gauntletCardCount + ')';
         }
         var isSystemGateway = (code === 'sg');
-        
+
         // Build checkbox HTML for Custom Game sets
         if (isSystemGateway) {
           customHtml += '<label class="checkbox-label checkbox-disabled" title="Core set, always included">';
@@ -809,7 +894,7 @@ $version = "0.6.13-BETA";
           customHtml += '<input type="checkbox" id="custom-set-' + code + '" onchange="toggleCustomSet(\'' + code + '\')">';
         }
         customHtml += '<span class="checkbox-text">' + customDisplayName + '</span></label>';
-        
+
         // Build checkbox HTML for Gauntlet sets
         if (isSystemGateway) {
           gauntletHtml += '<label class="checkbox-label checkbox-disabled" title="Core set, always included">';
@@ -820,11 +905,11 @@ $version = "0.6.13-BETA";
         }
         gauntletHtml += '<span class="checkbox-text">' + gauntletDisplayName + '</span></label>';
       }
-      
+
       customContainer.innerHTML = customHtml;
       gauntletContainer.innerHTML = gauntletHtml;
     }
-    
+
     // Load settings from localStorage, falling back to config defaults
     function initializeSettings() {
       var saved = null;
@@ -836,12 +921,12 @@ $version = "0.6.13-BETA";
       } catch (e) {
         console.warn('Could not load settings from localStorage:', e);
       }
-      
+
       // Use saved values if available, otherwise fall back to config
       // Valid gauntlet lengths are 4, 8, or 12 - snap to nearest valid value
-      var rawGauntletLength = (saved && typeof saved.gauntletLength === 'number') 
-        ? saved.gauntletLength
-        : (gauntletConfig.gauntletLength || 4);
+      var rawGauntletLength = (saved && typeof saved.gauntletLength === 'number') ?
+        saved.gauntletLength :
+        (gauntletConfig.gauntletLength || 4);
       // Snap to nearest valid value (4, 8, or 12)
       if (rawGauntletLength <= 6) {
         settingsOverrides.gauntletLength = 4;
@@ -850,85 +935,82 @@ $version = "0.6.13-BETA";
       } else {
         settingsOverrides.gauntletLength = 12;
       }
-      settingsOverrides.alternateFactions = (saved && typeof saved.alternateFactions === 'boolean') 
-        ? saved.alternateFactions 
-        : (gauntletConfig.alternateFactions !== false);
-      settingsOverrides.balancedFactions = (saved && typeof saved.balancedFactions === 'boolean') 
-        ? saved.balancedFactions 
-        : (gauntletConfig.balancedFactions || false);
-      settingsOverrides.strictPacks = (saved && typeof saved.strictPacks === 'boolean') 
-        ? saved.strictPacks 
-        : (gauntletConfig.strictPacks || false);
-      
+      settingsOverrides.alternateFactions = (saved && typeof saved.alternateFactions === 'boolean') ?
+        saved.alternateFactions :
+        (gauntletConfig.alternateFactions !== false);
+      settingsOverrides.balancedFactions = (saved && typeof saved.balancedFactions === 'boolean') ?
+        saved.balancedFactions :
+        (gauntletConfig.balancedFactions || false);
+      settingsOverrides.strictPacks = (saved && typeof saved.strictPacks === 'boolean') ?
+        saved.strictPacks :
+        (gauntletConfig.strictPacks || false);
+
       // Load gauntlet allowed sets (default from setRegistry.gauntletSets)
-      var defaultAllowedSets = (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.gauntletSets))
-        ? setRegistry.gauntletSets.map(function(s) {
-            // Convert set file names to set codes
-            if (typeof setRegistry.availableSets !== 'undefined' && setRegistry.availableSets[s]) {
-              return setRegistry.availableSets[s].code;
-            }
-            return s;
-          })
-        : ['sg', 'su21'];
-      settingsOverrides.allowedSets = (saved && Array.isArray(saved.allowedSets)) 
-        ? saved.allowedSets.slice() 
-        : defaultAllowedSets;
-      
+      var defaultAllowedSets = (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.gauntletSets)) ?
+        setRegistry.gauntletSets.map(function(s) {
+          // Convert set file names to set codes
+          if (typeof setRegistry.availableSets !== 'undefined' && setRegistry.availableSets[s]) {
+            return setRegistry.availableSets[s].code;
+          }
+          return s;
+        }) : ['sg', 'su21'];
+      settingsOverrides.allowedSets = (saved && Array.isArray(saved.allowedSets)) ?
+        saved.allowedSets.slice() :
+        defaultAllowedSets;
+
       // Ensure System Gateway is always included
       if (settingsOverrides.allowedSets.indexOf('sg') === -1) {
         settingsOverrides.allowedSets.push('sg');
       }
-      
+
       // Load custom game sets (default: sg, su21, elev per setRegistry.decklauncherSets)
-      var defaultCustomSets = (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.decklauncherSets))
-        ? setRegistry.decklauncherSets.map(function(s) {
-            // Convert set file names to set codes
-            if (typeof setRegistry.availableSets !== 'undefined' && setRegistry.availableSets[s]) {
-              return setRegistry.availableSets[s].code;
-            }
-            return s;
-          })
-        : ['sg', 'su21', 'elev'];
-      settingsOverrides.customSets = (saved && Array.isArray(saved.customSets)) 
-        ? saved.customSets.slice() 
-        : defaultCustomSets;
-      
+      var defaultCustomSets = (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.decklauncherSets)) ?
+        setRegistry.decklauncherSets.map(function(s) {
+          // Convert set file names to set codes
+          if (typeof setRegistry.availableSets !== 'undefined' && setRegistry.availableSets[s]) {
+            return setRegistry.availableSets[s].code;
+          }
+          return s;
+        }) : ['sg', 'su21', 'elev'];
+      settingsOverrides.customSets = (saved && Array.isArray(saved.customSets)) ?
+        saved.customSets.slice() :
+        defaultCustomSets;
+
       // Ensure System Gateway is always included in custom sets
       if (settingsOverrides.customSets.indexOf('sg') === -1) {
         settingsOverrides.customSets.push('sg');
       }
-      
+
       // Load precon overrides
-      settingsOverrides.preconOverrides = (saved && typeof saved.preconOverrides === 'object' && saved.preconOverrides !== null)
-        ? saved.preconOverrides
-        : {};
-      
+      settingsOverrides.preconOverrides = (saved && typeof saved.preconOverrides === 'object' && saved.preconOverrides !== null) ?
+        saved.preconOverrides : {};
+
       // Load game speed (default 350ms)
-      settingsOverrides.gameSpeed = (saved && typeof saved.gameSpeed === 'number')
-        ? saved.gameSpeed
-        : 350;
-      
+      settingsOverrides.gameSpeed = (saved && typeof saved.gameSpeed === 'number') ?
+        saved.gameSpeed :
+        350;
+
       // Load debug menu preference (default false)
-      settingsOverrides.debugMenuEnabled = (saved && typeof saved.debugMenuEnabled === 'boolean')
-        ? saved.debugMenuEnabled
-        : false;
+      settingsOverrides.debugMenuEnabled = (saved && typeof saved.debugMenuEnabled === 'boolean') ?
+        saved.debugMenuEnabled :
+        false;
 
       // Load hi-res preference (default from config or false)
-      settingsOverrides.enableHiRes = (saved && typeof saved.enableHiRes === 'boolean')
-        ? saved.enableHiRes
-        : (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean' ? gauntletConfig.enableHiRes : false);
+      settingsOverrides.enableHiRes = (saved && typeof saved.enableHiRes === 'boolean') ?
+        saved.enableHiRes :
+        (typeof gauntletConfig !== 'undefined' && typeof gauntletConfig.enableHiRes === 'boolean' ? gauntletConfig.enableHiRes : false);
 
       // Load CRT effects preference (default true = enabled)
-      settingsOverrides.crtEffects = (saved && typeof saved.crtEffects === 'boolean')
-        ? saved.crtEffects
-        : true;
-      
+      settingsOverrides.crtEffects = (saved && typeof saved.crtEffects === 'boolean') ?
+        saved.crtEffects :
+        true;
+
       // Update UI to match
       document.getElementById('gauntlet-length-value').textContent = settingsOverrides.gauntletLength;
       document.getElementById('alternate-factions-toggle').checked = settingsOverrides.alternateFactions;
       document.getElementById('balanced-factions-toggle').checked = settingsOverrides.balancedFactions;
       document.getElementById('strict-packs-toggle').checked = settingsOverrides.strictPacks;
-      
+
       // Update Gauntlet Sets UI (dynamically created, may not exist if hidden)
       for (var setKey in setRegistry.availableSets) {
         var set = setRegistry.availableSets[setKey];
@@ -937,7 +1019,7 @@ $version = "0.6.13-BETA";
           gauntletCheckbox.checked = settingsOverrides.allowedSets.indexOf(set.code) !== -1;
         }
       }
-      
+
       // Update Custom Game Sets UI (dynamically created, may not exist if hidden)
       for (var setKey in setRegistry.availableSets) {
         var set = setRegistry.availableSets[setKey];
@@ -946,12 +1028,12 @@ $version = "0.6.13-BETA";
           customCheckbox.checked = settingsOverrides.customSets.indexOf(set.code) !== -1;
         }
       }
-      
+
       // Set game speed checkboxes
       document.getElementById('speed-settings-1').checked = (settingsOverrides.gameSpeed === 1000);
       document.getElementById('speed-settings-2').checked = (settingsOverrides.gameSpeed === 350);
       document.getElementById('speed-settings-3').checked = (settingsOverrides.gameSpeed === 100);
-      
+
       // Set debug menu toggle
       document.getElementById('debug-menu-settings-toggle').checked = settingsOverrides.debugMenuEnabled;
       // Set hi-res toggle
@@ -959,14 +1041,14 @@ $version = "0.6.13-BETA";
       // Set CRT effects toggle
       document.getElementById('crt-effects-toggle').checked = settingsOverrides.crtEffects;
       applyCrtEffects();
-      
+
       // Update stepper button states
       updateStepperButtons();
-      
+
       // Populate precon list
       populatePreconList();
     }
-    
+
     // Save settings to localStorage
     function saveSettings() {
       try {
@@ -989,7 +1071,7 @@ $version = "0.6.13-BETA";
         console.warn('Could not save settings to localStorage:', e);
       }
     }
-    
+
     // Update stepper button disabled states based on current value
     function updateStepperButtons() {
       var minusBtn = document.getElementById('gauntlet-length-minus');
@@ -997,7 +1079,7 @@ $version = "0.6.13-BETA";
       minusBtn.disabled = settingsOverrides.gauntletLength <= 4;
       plusBtn.disabled = settingsOverrides.gauntletLength >= 12;
     }
-    
+
     // Settings control functions
     function adjustGauntletLength(delta) {
       var newVal = settingsOverrides.gauntletLength + delta;
@@ -1009,22 +1091,22 @@ $version = "0.6.13-BETA";
         saveSettings();
       }
     }
-    
+
     function toggleAlternateFactions() {
       settingsOverrides.alternateFactions = document.getElementById('alternate-factions-toggle').checked;
       saveSettings();
     }
-    
+
     function toggleBalancedFactions() {
       settingsOverrides.balancedFactions = document.getElementById('balanced-factions-toggle').checked;
       saveSettings();
     }
-    
+
     function toggleStrictPacks() {
       settingsOverrides.strictPacks = document.getElementById('strict-packs-toggle').checked;
       saveSettings();
     }
-    
+
     function setGameSpeed(speed) {
       settingsOverrides.gameSpeed = speed;
       // Update checkbox states to make them behave like radio buttons
@@ -1033,7 +1115,7 @@ $version = "0.6.13-BETA";
       document.getElementById('speed-settings-3').checked = (speed === 100);
       saveSettings();
     }
-    
+
     function toggleDebugMenu() {
       settingsOverrides.debugMenuEnabled = document.getElementById('debug-menu-settings-toggle').checked;
       saveSettings();
@@ -1057,7 +1139,7 @@ $version = "0.6.13-BETA";
         document.body.classList.add('no-crt');
       }
     }
-    
+
     function toggleAllowedSet(setCode) {
       var checkbox = document.getElementById('set-' + setCode);
       var idx = settingsOverrides.allowedSets.indexOf(setCode);
@@ -1068,36 +1150,36 @@ $version = "0.6.13-BETA";
       }
       saveSettings();
     }
-    
+
     // Populate precon list in settings
     function populatePreconList() {
       var listContainer = document.getElementById('precon-list');
       if (!listContainer) return;
-      
+
       listContainer.innerHTML = '';
-      
+
       // Filter to corp precons only (gauntlet opponents)
       var corpPrecons = preconDecks.filter(function(d) {
         if (!cardSet[d.identity]) return false;
         return cardSet[d.identity].player === corp;
       });
-      
+
       // Separate neutral decks from factioned decks
       var neutralPrecons = [];
       var factionedPrecons = [];
-      
+
       for (var i = 0; i < corpPrecons.length; i++) {
         var precon = corpPrecons[i];
         var identity = cardSet[precon.identity];
         var faction = identity.faction || 'Unknown';
-        
+
         if (faction === 'Neutral') {
           neutralPrecons.push(precon);
         } else {
           factionedPrecons.push(precon);
         }
       }
-      
+
       // Sort each group by faction then name
       factionedPrecons.sort(function(a, b) {
         var factionA = cardSet[a.identity].faction || '';
@@ -1105,24 +1187,24 @@ $version = "0.6.13-BETA";
         if (factionA !== factionB) return factionA.localeCompare(factionB);
         return (a.name || '').localeCompare(b.name || '');
       });
-      
+
       neutralPrecons.sort(function(a, b) {
         return (a.name || '').localeCompare(b.name || '');
       });
-      
+
       // Helper function to create a precon item
       function createPreconItem(precon) {
         var identity = cardSet[precon.identity];
         var faction = identity.faction || 'Unknown';
-        
+
         // Determine if enabled: override takes precedence, otherwise use precon default
-        var isEnabled = settingsOverrides.preconOverrides.hasOwnProperty(precon.name)
-          ? settingsOverrides.preconOverrides[precon.name]
-          : (precon.useForGauntlet === true);
-        
+        var isEnabled = settingsOverrides.preconOverrides.hasOwnProperty(precon.name) ?
+          settingsOverrides.preconOverrides[precon.name] :
+          (precon.useForGauntlet === true);
+
         var item = document.createElement('div');
         item.className = 'precon-item';
-        
+
         var checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'precon-checkbox';
@@ -1131,7 +1213,7 @@ $version = "0.6.13-BETA";
         checkbox.onchange = function() {
           togglePreconOverride(this.dataset.preconName, this.checked);
         };
-        
+
         var nameLink = document.createElement('a');
         nameLink.className = 'precon-name';
         nameLink.textContent = precon.name || 'Unknown Deck';
@@ -1140,7 +1222,7 @@ $version = "0.6.13-BETA";
           nameLink.target = '_blank';
           nameLink.rel = 'noopener';
         }
-        
+
         var factionLabel = document.createElement('span');
         factionLabel.className = 'precon-faction';
         // Abbreviate faction names
@@ -1152,25 +1234,25 @@ $version = "0.6.13-BETA";
           'Neutral': 'NEU'
         };
         factionLabel.textContent = factionAbbrev[faction] || faction.substring(0, 3).toUpperCase();
-        
+
         item.appendChild(checkbox);
         item.appendChild(nameLink);
         item.appendChild(factionLabel);
         return item;
       }
-      
+
       // Add description for factioned precons
       var factionedDesc = document.createElement('div');
       factionedDesc.className = 'precon-section-desc';
       factionedDesc.style.cssText = 'padding: 4px 8px 8px 8px; font-size: 10px; color: #00ff00aa; line-height: 1.4;';
       factionedDesc.textContent = 'The default Corp decks have been tested and should not lead to unexpected potentially game-breaking bugs.';
       listContainer.appendChild(factionedDesc);
-      
+
       // Add factioned precons first
       for (var i = 0; i < factionedPrecons.length; i++) {
         listContainer.appendChild(createPreconItem(factionedPrecons[i]));
       }
-      
+
       // Add neutral section if there are neutral decks
       if (neutralPrecons.length > 0) {
         var neutralHeader = document.createElement('div');
@@ -1178,25 +1260,25 @@ $version = "0.6.13-BETA";
         neutralHeader.title = 'Neutral corp decks that can replace the final gauntlet opponent when Alternate Factions is ON';
         neutralHeader.textContent = 'NEUTRAL GAUNTLET OPPONENTS';
         listContainer.appendChild(neutralHeader);
-        
+
         var neutralDesc = document.createElement('div');
         neutralDesc.className = 'precon-section-desc';
         neutralDesc.style.cssText = 'padding: 4px 8px 8px 8px; font-size: 10px; color: #00ff00aa; line-height: 1.4;';
         neutralDesc.textContent = 'When Alternate Factions is ON, enabled neutral decks can replace the final gauntlet opponent.';
         listContainer.appendChild(neutralDesc);
-        
+
         for (var i = 0; i < neutralPrecons.length; i++) {
           listContainer.appendChild(createPreconItem(neutralPrecons[i]));
         }
       }
     }
-    
+
     // Toggle precon override
     function togglePreconOverride(preconName, enabled) {
       settingsOverrides.preconOverrides[preconName] = enabled;
       saveSettings();
     }
-    
+
     // Helper function to check if a precon is enabled for gauntlet
     function isPreconEnabledForGauntlet(precon) {
       if (settingsOverrides.preconOverrides.hasOwnProperty(precon.name)) {
@@ -1204,7 +1286,7 @@ $version = "0.6.13-BETA";
       }
       return precon.useForGauntlet === true;
     }
-    
+
     // Function to select random decks
     function selectRandomDecks() {
       // Pick random decks
@@ -1214,7 +1296,7 @@ $version = "0.6.13-BETA";
       if (giromCorpDecks.length > 0) {
         selectedCorpDeck = giromCorpDecks[Math.floor(Math.random() * giromCorpDecks.length)];
       }
-      
+
       // Randomly assign player vs AI
       if (Math.random() < 0.5) {
         playerDeck = selectedRunnerDeck;
@@ -1223,22 +1305,22 @@ $version = "0.6.13-BETA";
         playerDeck = selectedCorpDeck;
         aiDeck = selectedRunnerDeck;
       }
-      
+
       updatePortraits();
     }
-    
+
     // Function to update portraits
     function updatePortraits() {
       if (playerDeck && aiDeck) {
         var playerIdentity = cardSet[playerDeck.identity];
         var aiIdentity = cardSet[aiDeck.identity];
-        
+
         // Update player portrait
         var playerImg = document.querySelector('#player-portrait .portrait');
         if (playerIdentity) {
           playerImg.src = 'images/' + playerIdentity.imageFile.replace('.png', '.jpg');
         }
-        
+
         // Update AI portrait
         var aiImg = document.querySelector('#ai-portrait .portrait');
         if (aiIdentity) {
@@ -1246,40 +1328,40 @@ $version = "0.6.13-BETA";
         }
       }
     }
-    
+
     // Function to launch gauntlet mode
     function LaunchGauntlet() {
       // Generate gauntlet card subset
       var gauntletCardIds = [];
       var gauntletCardCounts = {};
-      
+
       // Helper to check if card matches subtype requirements
       function CardMatchesRequirement(cardId, matchSubtypes, excludeSubtypes) {
         if (!cardSet[cardId] || !cardSet[cardId].subTypes) return false;
         var cardSubtypes = cardSet[cardId].subTypes || [];
-        
+
         if (excludeSubtypes && excludeSubtypes.length > 0) {
           for (var i = 0; i < excludeSubtypes.length; i++) {
             if (cardSubtypes.indexOf(excludeSubtypes[i]) !== -1) return false;
           }
         }
-        
+
         if (!matchSubtypes || matchSubtypes.length === 0) return true;
-        
+
         for (var i = 0; i < matchSubtypes.length; i++) {
           if (cardSubtypes.indexOf(matchSubtypes[i]) === -1) return false;
         }
         return true;
       }
-      
+
       // Helper to check if card is from an allowed set
       function CardFromAllowedSet(cardId) {
         if (!settingsOverrides.allowedSets || settingsOverrides.allowedSets.length === 0) return true;
-        
+
         var allowedSets = settingsOverrides.allowedSets;
         var cardIdInt = parseInt(cardId);
         var cardSetCode = null;
-        
+
         // Use setRegistry to determine which set this card belongs to
         if (typeof setRegistry !== 'undefined' && setRegistry.availableSets) {
           for (var setKey in setRegistry.availableSets) {
@@ -1294,11 +1376,11 @@ $version = "0.6.13-BETA";
             }
           }
         }
-        
+
         if (!cardSetCode) return false;
         return allowedSets.indexOf(cardSetCode) !== -1;
       }
-      
+
       // Build exclusion list for locked fixed cards
       var excludedCardIds = {};
       if (gauntletConfig && gauntletConfig.lockedFixedCards && gauntletConfig.fixedCards) {
@@ -1306,7 +1388,7 @@ $version = "0.6.13-BETA";
           excludedCardIds[gauntletConfig.fixedCards[i].id] = true;
         }
       }
-      
+
       // Add fixed cards
       if (gauntletConfig && gauntletConfig.fixedCards) {
         for (var i = 0; i < gauntletConfig.fixedCards.length; i++) {
@@ -1319,26 +1401,26 @@ $version = "0.6.13-BETA";
           }
         }
       }
-      
+
       // Add random cards
       if (gauntletConfig && gauntletConfig.randomCardRequirements) {
         var useBalancedFactions = settingsOverrides.balancedFactions || false;
         var runnerFactions = ['Anarch', 'Criminal', 'Shaper', 'Neutral'];
-        
+
         for (var req = 0; req < gauntletConfig.randomCardRequirements.length; req++) {
           var requirement = gauntletConfig.randomCardRequirements[req];
           var quantity = requirement.quantity || 0;
           var cardType = requirement.cardType;
           var matchSubtypes = requirement.matchSubtypes || [];
           var excludeSubtypes = requirement.excludeSubtypes || [];
-          
+
           if (useBalancedFactions) {
             // Faction-balanced selection: distribute cards evenly across factions
             var cardsByFaction = {};
             for (var f = 0; f < runnerFactions.length; f++) {
               cardsByFaction[runnerFactions[f]] = [];
             }
-            
+
             for (var cardId in cardSet) {
               if (!cardSet[cardId]) continue;
               if (cardSet[cardId].player !== runner) continue;
@@ -1353,7 +1435,7 @@ $version = "0.6.13-BETA";
                 }
               }
             }
-            
+
             // Get factions that have at least one matching card
             var factionsWithCards = [];
             for (var f = 0; f < runnerFactions.length; f++) {
@@ -1361,24 +1443,24 @@ $version = "0.6.13-BETA";
                 factionsWithCards.push(runnerFactions[f]);
               }
             }
-            
-            if (factionsWithCards.length === 0) continue;  // Skip if no cards match
-            
+
+            if (factionsWithCards.length === 0) continue; // Skip if no cards match
+
             // Sort factions by pool size (smallest first) to prioritize smaller pools
             factionsWithCards.sort(function(a, b) {
               return cardsByFaction[a].length - cardsByFaction[b].length;
             });
-            
+
             // Calculate even distribution with remainder
             var basePerFaction = Math.floor(quantity / factionsWithCards.length);
             var remainder = quantity % factionsWithCards.length;
-            
+
             // Select cards from each faction according to quota
             for (var f = 0; f < factionsWithCards.length; f++) {
               var faction = factionsWithCards[f];
               var pool = cardsByFaction[faction].slice(); // Make a copy to sample without replacement
-              var target = basePerFaction + (f < remainder ? 1 : 0);  // First factions get +1 for remainder
-              
+              var target = basePerFaction + (f < remainder ? 1 : 0); // First factions get +1 for remainder
+
               // If target exceeds pool size, we need to cycle through the pool multiple times
               for (var s = 0; s < target; s++) {
                 if (pool.length === 0) {
@@ -1407,7 +1489,7 @@ $version = "0.6.13-BETA";
                 matchingCards.push(parseInt(cardId));
               }
             }
-            
+
             var selected = 0;
             while (selected < quantity && matchingCards.length > 0) {
               var randomIdx = Math.floor(Math.random() * matchingCards.length);
@@ -1419,11 +1501,11 @@ $version = "0.6.13-BETA";
           }
         }
       }
-      
+
       // Select opponents based on gauntlet configuration
       var gauntletLength = settingsOverrides.gauntletLength || 4;
       var alternateFactions = settingsOverrides.alternateFactions;
-      
+
       // Initialize perk pools for opponent starting perks
       // Regular perks are clustered: each cluster contains [1,2,3] shuffled
       // This ensures perks 1, 2, and 3 each appear once before any repeats
@@ -1440,8 +1522,8 @@ $version = "0.6.13-BETA";
         // Add shuffled cluster to pool
         regularPerks = regularPerks.concat(clusterPerks);
       }
-      var bossPerks = [4,5,6];
-      
+      var bossPerks = [4, 5, 6];
+
       // Shuffle the boss perk pool
       for (var i = bossPerks.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -1449,7 +1531,7 @@ $version = "0.6.13-BETA";
         bossPerks[i] = bossPerks[j];
         bossPerks[j] = temp;
       }
-      
+
       // Helper function to get starting perk for opponent number (1-indexed)
       function getStartingPerk(opponentNum) {
         // Opponents 1-3 => Draw from regularPerks
@@ -1479,14 +1561,14 @@ $version = "0.6.13-BETA";
         // Opponent 13 and up => Always 0
         return 0;
       }
-      
+
       var selectedOpponents = [];
-      
+
       if (alternateFactions) {
         // Select opponents cycling through factions, with each faction getting equal representation
         // Re-shuffle faction order every 4 opponents so no repeats within a cluster
         var allCorpFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
-        
+
         // Build a list of factions with reshuffling every 4
         var corpFactions = [];
         for (var cluster = 0; cluster < Math.ceil(gauntletLength / 4); cluster++) {
@@ -1503,10 +1585,10 @@ $version = "0.6.13-BETA";
             corpFactions.push(clusterFactions[i]);
           }
         }
-        
+
         // Trim to gauntletLength
         corpFactions = corpFactions.slice(0, gauntletLength);
-        
+
         for (var f = 0; f < corpFactions.length; f++) {
           var faction = corpFactions[f];
           var candidateDecks = preconDecks.filter(function(d) {
@@ -1515,11 +1597,18 @@ $version = "0.6.13-BETA";
             var identity = cardSet[d.identity];
             return identity.player === corp && identity.faction === faction;
           });
-          
+
           if (candidateDecks.length > 0) {
             var chosen = candidateDecks[Math.floor(Math.random() * candidateDecks.length)];
             var chosenIdentity = cardSet[chosen.identity];
-            var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || '', hasbeendefeated: false};
+            var opponent = {
+              identity: parseInt(chosen.identity),
+              cards: [],
+              name: chosen.name || 'Unknown Deck',
+              faction: chosenIdentity.faction || 'Unknown',
+              URL: chosen.URL || '',
+              hasbeendefeated: false
+            };
             selectedOpponents.push(opponent);
             // Populate cards from precon
             for (var cc in chosen.cards) {
@@ -1531,13 +1620,13 @@ $version = "0.6.13-BETA";
             }
           }
         }
-        
+
         // Check if we should replace the final opponent with a neutral deck
         if (gauntletLength > 0 && selectedOpponents.length === gauntletLength) {
-          var neutralBossChance = (typeof gauntletConfig.neutralBossChance === 'number') 
-            ? gauntletConfig.neutralBossChance 
-            : 0.25;
-          
+          var neutralBossChance = (typeof gauntletConfig.neutralBossChance === 'number') ?
+            gauntletConfig.neutralBossChance :
+            0.25;
+
           if (Math.random() < neutralBossChance) {
             // Find available neutral corp decks
             var neutralDecks = preconDecks.filter(function(d) {
@@ -1546,13 +1635,20 @@ $version = "0.6.13-BETA";
               var identity = cardSet[d.identity];
               return identity.player === corp && identity.faction === 'Neutral';
             });
-            
+
             if (neutralDecks.length > 0) {
               // Replace the last opponent with a random neutral deck
               var chosen = neutralDecks[Math.floor(Math.random() * neutralDecks.length)];
               var chosenIdentity = cardSet[chosen.identity];
-              var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || '', hasbeendefeated: false};
-              
+              var opponent = {
+                identity: parseInt(chosen.identity),
+                cards: [],
+                name: chosen.name || 'Unknown Deck',
+                faction: chosenIdentity.faction || 'Unknown',
+                URL: chosen.URL || '',
+                hasbeendefeated: false
+              };
+
               // Populate cards from precon
               for (var cc in chosen.cards) {
                 if (!chosen.cards.hasOwnProperty(cc)) continue;
@@ -1561,7 +1657,7 @@ $version = "0.6.13-BETA";
                   opponent.cards.push(parseInt(cc));
                 }
               }
-              
+
               // Replace the last opponent
               selectedOpponents[selectedOpponents.length - 1] = opponent;
             }
@@ -1576,13 +1672,13 @@ $version = "0.6.13-BETA";
           var identity = cardSet[d.identity];
           return identity.player === corp;
         });
-        
+
         // Track which decks have been used to avoid repeating until all are cycled
         var availableIndices = [];
         for (var idx = 0; idx < candidateDecks.length; idx++) {
           availableIndices.push(idx);
         }
-        
+
         for (var o = 0; o < gauntletLength && candidateDecks.length > 0; o++) {
           // If we've used all available decks, reset the pool
           if (availableIndices.length === 0) {
@@ -1590,17 +1686,24 @@ $version = "0.6.13-BETA";
               availableIndices.push(idx);
             }
           }
-          
+
           // Pick a random index from available indices
           var randomAvailablePos = Math.floor(Math.random() * availableIndices.length);
           var deckIndex = availableIndices[randomAvailablePos];
-          
+
           // Remove this index from available pool
           availableIndices.splice(randomAvailablePos, 1);
-          
+
           var chosen = candidateDecks[deckIndex];
           var chosenIdentity = cardSet[chosen.identity];
-          var opponent = {identity: parseInt(chosen.identity), cards: [], name: chosen.name || 'Unknown Deck', faction: chosenIdentity.faction || 'Unknown', URL: chosen.URL || '', hasbeendefeated: false};
+          var opponent = {
+            identity: parseInt(chosen.identity),
+            cards: [],
+            name: chosen.name || 'Unknown Deck',
+            faction: chosenIdentity.faction || 'Unknown',
+            URL: chosen.URL || '',
+            hasbeendefeated: false
+          };
           selectedOpponents.push(opponent);
           // Populate cards from precon
           for (var cc in chosen.cards) {
@@ -1612,12 +1715,12 @@ $version = "0.6.13-BETA";
           }
         }
       }
-      
+
       // Assign starting perks to all selected opponents
       for (var opIdx = 0; opIdx < selectedOpponents.length; opIdx++) {
         selectedOpponents[opIdx].startingPerk = getStartingPerk(opIdx + 1); // opIdx+1 for 1-indexed opponent number
       }
-      
+
       // Generate unique 1337-speak corp names for each opponent (max 8 chars each)
       var leetCorpNames = [
         'xX_C0rP', 'D4t4.VuL', 'n3X7~g3N', 'SyS7_c0r',
@@ -1630,7 +1733,7 @@ $version = "0.6.13-BETA";
         'Null.p7R', 'w4RM_h0L', '1c3~Br34', 'Pr0Xy|99',
         'd33P_w3B', 'n0D3.x3C', 'Z3r0|d4Y', 'C0r3~DmP'
       ];
-      
+
       // Shuffle the names array
       for (var i = leetCorpNames.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -1638,12 +1741,12 @@ $version = "0.6.13-BETA";
         leetCorpNames[i] = leetCorpNames[j];
         leetCorpNames[j] = temp;
       }
-      
+
       // Assign unique names to each opponent
       for (var opIdx = 0; opIdx < selectedOpponents.length; opIdx++) {
         selectedOpponents[opIdx].gauntletCorpName = leetCorpNames[opIdx % leetCorpNames.length];
       }
-      
+
       // Create gauntlet state object
       var seed = Math.random().toString(36).substring(2, 15);
       var gauntletState = {
@@ -1662,10 +1765,10 @@ $version = "0.6.13-BETA";
         seed: seed,
         shopPurchaseCount: 0
       };
-      
+
       // Encode gauntlet state
       var encodedG = LZString.compressToEncodedURIComponent(JSON.stringify(gauntletState));
-      
+
       // Select random runner identity
       var runnerIdentities = [];
       for (var i = 0; i < cardSet.length; i++) {
@@ -1682,21 +1785,24 @@ $version = "0.6.13-BETA";
           }
         }
       }
-      
+
       var randomRunner = runnerIdentities[Math.floor(Math.random() * runnerIdentities.length)];
-      
+
       // Create empty runner deck with random identity
-      var runnerDeck = {identity: randomRunner, cards: []};
+      var runnerDeck = {
+        identity: randomRunner,
+        cards: []
+      };
       var encodedR = LZString.compressToEncodedURIComponent(JSON.stringify(runnerDeck));
-      
+
       // Use first corp opponent as starting opponent
       var corpOpponentDeck = selectedOpponents[0];
       var encodedC = LZString.compressToEncodedURIComponent(JSON.stringify(corpOpponentDeck));
-      
+
       // Navigate to gauntlet
       window.location.href = 'gauntlet.php?r=' + encodedR + '&c=' + encodedC + '&g=' + encodedG;
     }
-    
+
 
     // Wait for all scripts to load before selecting decks
     window.addEventListener('load', function() {
@@ -1713,19 +1819,19 @@ $version = "0.6.13-BETA";
         var isCorp = hasIdentity && cardSet[d.identity].player === corp;
         return isQuickGameDeck && hasIdentity && isCorp;
       });
-      
+
       // Select initial random decks
       selectRandomDecks();
 
       // Check if hidden sets were previously revealed
       checkHiddenSetsRevealed();
-      
+
       // Populate set checkboxes dynamically (respects hidden flag in config)
       populateSetCheckboxes();
-      
+
       // Initialize settings from config
       initializeSettings();
-      
+
       // Initialize achievements and update display
       initializeAchievements();
       updateAchievementDisplay();
@@ -1736,14 +1842,59 @@ $version = "0.6.13-BETA";
       // Track resolution bucket changes and auto-refresh if we cross breakpoints
       initResolutionAutoRefresh();
     });
-    
+
+    function launchCustomGame() {
+      if (!playerDeck || !aiDeck) return;
+
+      var playerJson = {
+        identity: parseInt(playerDeck.identity),
+        cards: []
+      };
+      if (playerDeck.notes) playerJson.notes = playerDeck.notes;
+      if (playerDeck.name) playerJson.name = playerDeck.name;
+      if (playerDeck.URL) playerJson.url = playerDeck.URL;
+      for (var cardId in playerDeck.cards) {
+        var count = playerDeck.cards[cardId];
+        for (var i = 0; i < count; i++) {
+          playerJson.cards.push(parseInt(cardId));
+        }
+      }
+      var aiJson = {
+        identity: parseInt(aiDeck.identity),
+        cards: []
+      };
+      if (aiDeck.notes) aiJson.notes = aiDeck.notes;
+      if (aiDeck.name) aiJson.name = aiDeck.name;
+      if (aiDeck.URL) aiJson.url = aiDeck.URL;
+      for (var cardId in aiDeck.cards) {
+        var count = aiDeck.cards[cardId];
+        for (var i = 0; i < count; i++) {
+          aiJson.cards.push(parseInt(cardId));
+        }
+      }
+
+      var playerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(playerJson));
+      var aiCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(aiJson));
+
+      var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
+      var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
+
+      window.location.href = 'decklauncher.php?p=' + playerSide +
+        '&' + aiSide + '=' + aiCompressed +
+        '&' + playerSide + '=' + playerCompressed;
+    }
+
     function handleMenu(option, evt) {
       // Initialize achievements if not already present
       initializeAchievements();
-      
+
       // Register implementation so early queued clicks can be flushed
-      try { window.handleMenuImpl = handleMenu; } catch(e) {}
-      try { if (window._flushQueuedMenuClicks) window._flushQueuedMenuClicks(); } catch(e) {}
+      try {
+        window.handleMenuImpl = handleMenu;
+      } catch (e) {}
+      try {
+        if (window._flushQueuedMenuClicks) window._flushQueuedMenuClicks();
+      } catch (e) {}
 
       var item = null;
       if (evt && evt.target) {
@@ -1752,40 +1903,51 @@ $version = "0.6.13-BETA";
         // Try to locate the menu item using the onclick attribute matching
         try {
           item = document.querySelector('.menu-item[onclick*="handleMenu(\'' + option + "'" + ')"]');
-        } catch(e) { item = null; }
+        } catch (e) {
+          item = null;
+        }
         if (!item) {
           // Fallback: find by text
           var nodes = document.querySelectorAll('.menu-item');
-          for (var i=0;i<nodes.length;i++) {
-            if (nodes[i].textContent.trim().toLowerCase().indexOf(option) !== -1) { item = nodes[i]; break; }
+          for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].textContent.trim().toLowerCase().indexOf(option) !== -1) {
+              item = nodes[i];
+              break;
+            }
           }
         }
       }
-      
+
       // Handle tutorial
       if (option === 'tutorial') {
         openTutorial();
         return;
       }
-      
+
       // Handle gauntlet/tournament mode - show submenu
       if (option === 'tournament') {
         showGauntletSubmenu();
         return;
       }
-      
+
+      // Handle custom game - show format submenu instead of launching immediately
+      if (option === 'custom') {
+        showCustomSubmenu();
+        return;
+      }
+
       // Handle settings
       if (option === 'settings') {
         openSettings();
         return;
       }
-      
+
       // Handle achievements
       if (option === 'achievements') {
         openAchievements();
         return;
       }
-      
+
       // Show "COMING SOON" for non-implemented features
       if (option !== 'quick' && option !== 'custom') {
         item.innerHTML = 'COMING SOON';
@@ -1802,9 +1964,9 @@ $version = "0.6.13-BETA";
         }, 1500);
         return;
       }
-      
+
       item.innerHTML = 'LOADING...';
-      
+
       setTimeout(() => {
         const labels = {
           quick: 'QUICK GAME',
@@ -1815,11 +1977,14 @@ $version = "0.6.13-BETA";
           settings: 'SETTINGS'
         };
         item.innerHTML = labels[option];
-        
+
         // Navigate based on option
         if (option === 'custom' && playerDeck && aiDeck) {
           // Build compressed deck strings from precon format
-          var playerJson = {identity: parseInt(playerDeck.identity), cards: []};
+          var playerJson = {
+            identity: parseInt(playerDeck.identity),
+            cards: []
+          };
           if (playerDeck.notes) playerJson.notes = playerDeck.notes;
           if (playerDeck.name) playerJson.name = playerDeck.name;
           if (playerDeck.URL) playerJson.url = playerDeck.URL;
@@ -1829,7 +1994,10 @@ $version = "0.6.13-BETA";
               playerJson.cards.push(parseInt(cardId));
             }
           }
-          var aiJson = {identity: parseInt(aiDeck.identity), cards: []};
+          var aiJson = {
+            identity: parseInt(aiDeck.identity),
+            cards: []
+          };
           if (aiDeck.notes) aiJson.notes = aiDeck.notes;
           if (aiDeck.name) aiJson.name = aiDeck.name;
           if (aiDeck.URL) aiJson.url = aiDeck.URL;
@@ -1839,20 +2007,23 @@ $version = "0.6.13-BETA";
               aiJson.cards.push(parseInt(cardId));
             }
           }
-          
+
           var playerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(playerJson));
           var aiCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(aiJson));
-          
+
           // Determine player side (r=runner, c=corp)
           var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
           var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
-          
-          window.location.href = 'decklauncher.php?p=' + playerSide + 
-                                 '&' + aiSide + '=' + aiCompressed + 
-                                 '&' + playerSide + '=' + playerCompressed;
+
+          window.location.href = 'decklauncher.php?p=' + playerSide +
+            '&' + aiSide + '=' + aiCompressed +
+            '&' + playerSide + '=' + playerCompressed;
         } else if (option === 'quick' && playerDeck && aiDeck) {
           // Build compressed deck strings from precon format
-          var playerJson = {identity: parseInt(playerDeck.identity), cards: []};
+          var playerJson = {
+            identity: parseInt(playerDeck.identity),
+            cards: []
+          };
           if (playerDeck.notes) playerJson.notes = playerDeck.notes;
           if (playerDeck.name) playerJson.name = playerDeck.name;
           if (playerDeck.URL) playerJson.url = playerDeck.URL;
@@ -1862,7 +2033,10 @@ $version = "0.6.13-BETA";
               playerJson.cards.push(parseInt(cardId));
             }
           }
-          var aiJson = {identity: parseInt(aiDeck.identity), cards: []};
+          var aiJson = {
+            identity: parseInt(aiDeck.identity),
+            cards: []
+          };
           if (aiDeck.notes) aiJson.notes = aiDeck.notes;
           if (aiDeck.name) aiJson.name = aiDeck.name;
           if (aiDeck.URL) aiJson.url = aiDeck.URL;
@@ -1872,56 +2046,77 @@ $version = "0.6.13-BETA";
               aiJson.cards.push(parseInt(cardId));
             }
           }
-          
+
           var playerCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(playerJson));
           var aiCompressed = LZString.compressToEncodedURIComponent(JSON.stringify(aiJson));
-          
+
           // Determine player side (r=runner, c=corp)
           var playerSide = (cardSet[playerDeck.identity].player === runner) ? 'r' : 'c';
           var aiSide = (cardSet[aiDeck.identity].player === runner) ? 'r' : 'c';
-          
-          window.location.href = 'engine.php?p=' + playerSide + 
-                                 '&' + aiSide + '=' + aiCompressed + 
-                                 '&' + playerSide + '=' + playerCompressed +
-                                 '&showdeck=1';
+
+          window.location.href = 'engine.php?p=' + playerSide +
+            '&' + aiSide + '=' + aiCompressed +
+            '&' + playerSide + '=' + playerCompressed +
+            '&showdeck=1';
         }
       }, 500);
     }
 
     // Random glitch for CHIRIBOGA
     const chiriboga = document.querySelector('.game-title h2');
-    
+
     function triggerGlitch() {
       chiriboga.classList.add('glitch');
-      
+
       setTimeout(() => {
         chiriboga.classList.remove('glitch');
       }, 300);
-      
+
       // Schedule next glitch at random interval (1-6 seconds)
       const nextDelay = 1000 + Math.random() * 5000;
       setTimeout(triggerGlitch, nextDelay);
     }
-    
+
     // Start the random glitch cycle after initial delay
     setTimeout(triggerGlitch, 2000);
 
     // Threat level indicator: start GREEN and hold >= 60s, then cycle every 1-10 min
-    var threatLevels = [
-      { name: '1', color: '#33ff33' },
-      { name: '2', color: '#ffff33' },
-      { name: '3', color: '#ff9933' },
-      { name: '4', color: '#ff3333' }
+    var threatLevels = [{
+        name: '1',
+        color: '#33ff33'
+      },
+      {
+        name: '2',
+        color: '#ffff33'
+      },
+      {
+        name: '3',
+        color: '#ff9933'
+      },
+      {
+        name: '4',
+        color: '#ff3333'
+      }
     ];
-    function setThreat(threat){
+
+    function setThreat(threat) {
       var el1 = document.getElementById('threat-color');
       var el2 = document.getElementById('threat-color-portrait');
-      if (el1) { el1.textContent = threat.name; el1.style.color = threat.color; el1.style.textShadow = '0 0 5px ' + threat.color; }
-      if (el2) { el2.textContent = threat.name; el2.style.color = threat.color; el2.style.textShadow = '0 0 5px ' + threat.color; }
+      if (el1) {
+        el1.textContent = threat.name;
+        el1.style.color = threat.color;
+        el1.style.textShadow = '0 0 5px ' + threat.color;
+      }
+      if (el2) {
+        el2.textContent = threat.name;
+        el2.style.color = threat.color;
+        el2.style.textShadow = '0 0 5px ' + threat.color;
+      }
     }
-    function scheduleNextThreatChange(minSec, maxSec){
+
+    function scheduleNextThreatChange(minSec, maxSec) {
       var delay = (minSec + Math.random() * (maxSec - minSec)) * 1000;
-      setTimeout(function(){
+      setTimeout(function() {
         // pick a random threat (could be same as current; spec allows)
         var idx = Math.floor(Math.random() * threatLevels.length);
         setThreat(threatLevels[idx]);
@@ -1934,7 +2129,7 @@ $version = "0.6.13-BETA";
     scheduleNextThreatChange(60, 600);
 
     // Keep the menu layout dimensions fixed to avoid layout shifts when toggling panels
-    function lockMenuLayoutDimensions(){
+    function lockMenuLayoutDimensions() {
       var layout = document.querySelector('.menu-layout');
       if (!layout) return;
       var rect = layout.getBoundingClientRect();
@@ -1945,26 +2140,30 @@ $version = "0.6.13-BETA";
     // Auto-refresh when switching between major responsive breakpoints
     var resolutionBucket = null;
     var reloadScheduled = false;
-    function getResolutionBucket(){
+
+    function getResolutionBucket() {
       var w = window.innerWidth;
       var h = window.innerHeight;
       if (h <= 768) return 'short-height';
       if (h >= 769 && w <= 678) return 'narrow-width';
       return 'standard';
     }
-    function initResolutionAutoRefresh(){
+
+    function initResolutionAutoRefresh() {
       resolutionBucket = getResolutionBucket();
-      window.addEventListener('resize', function(){
+      window.addEventListener('resize', function() {
         var next = getResolutionBucket();
-        if (next !== resolutionBucket && !reloadScheduled){
+        if (next !== resolutionBucket && !reloadScheduled) {
           reloadScheduled = true;
-          setTimeout(function(){ location.reload(); }, 200);
+          setTimeout(function() {
+            location.reload();
+          }, 200);
         }
       });
     }
 
     // Credits toggle
-    function openCredits(){
+    function openCredits() {
       var menu = document.getElementById('menu-buttons');
       var panel = document.getElementById('credits-panel');
       // If already open, act like back button
@@ -1976,22 +2175,23 @@ $version = "0.6.13-BETA";
       var rect = menu.getBoundingClientRect();
       var w = rect.width;
       var h = rect.height; // match visual height
-      menu.style.display='none';
+      menu.style.display = 'none';
       panel.style.width = w + 'px';
       panel.style.maxHeight = h + 'px';
-      panel.style.display='flex';
+      panel.style.display = 'flex';
     }
-    function closeCredits(){
-      document.getElementById('credits-panel').style.display='none';
-      document.getElementById('menu-buttons').style.display='flex';
+
+    function closeCredits() {
+      document.getElementById('credits-panel').style.display = 'none';
+      document.getElementById('menu-buttons').style.display = 'flex';
       // Clear explicit width so menu layout can adapt on resize
       var p = document.getElementById('credits-panel');
-      p.style.width='';
-      p.style.maxHeight='';
+      p.style.width = '';
+      p.style.maxHeight = '';
     }
 
     // Settings toggle
-    function openSettings(){
+    function openSettings() {
       var menu = document.getElementById('menu-buttons');
       var panel = document.getElementById('settings-panel');
       // If already open, act like back button
@@ -2003,22 +2203,23 @@ $version = "0.6.13-BETA";
       var rect = menu.getBoundingClientRect();
       var w = rect.width;
       var h = rect.height;
-      menu.style.display='none';
+      menu.style.display = 'none';
       panel.style.width = w + 'px';
       panel.style.maxHeight = h + 'px';
-      panel.style.display='flex';
+      panel.style.display = 'flex';
     }
-    function closeSettings(){
-      document.getElementById('settings-panel').style.display='none';
-      document.getElementById('menu-buttons').style.display='flex';
+
+    function closeSettings() {
+      document.getElementById('settings-panel').style.display = 'none';
+      document.getElementById('menu-buttons').style.display = 'flex';
       // Clear explicit width so menu layout can adapt on resize
       var p = document.getElementById('settings-panel');
-      p.style.width='';
-      p.style.maxHeight='';
+      p.style.width = '';
+      p.style.maxHeight = '';
     }
 
     // Achievements panel toggle
-    function openAchievements(){
+    function openAchievements() {
       var menu = document.getElementById('menu-buttons');
       var panel = document.getElementById('achievements-panel');
       // If already open, act like back button
@@ -2030,23 +2231,23 @@ $version = "0.6.13-BETA";
       var rect = menu.getBoundingClientRect();
       var w = rect.width;
       var h = rect.height;
-      menu.style.display='none';
+      menu.style.display = 'none';
       panel.style.width = w + 'px';
       panel.style.maxHeight = h + 'px';
-      panel.style.display='flex';
+      panel.style.display = 'flex';
       // Populate the achievements panel
       populateAchievementsPanel();
     }
-    
-    function closeAchievements(){
-      document.getElementById('achievements-panel').style.display='none';
-      document.getElementById('menu-buttons').style.display='flex';
+
+    function closeAchievements() {
+      document.getElementById('achievements-panel').style.display = 'none';
+      document.getElementById('menu-buttons').style.display = 'flex';
       // Clear explicit width so menu layout can adapt on resize
       var p = document.getElementById('achievements-panel');
-      p.style.width='';
-      p.style.maxHeight='';
+      p.style.width = '';
+      p.style.maxHeight = '';
     }
-    
+
     // Format timestamp to yy|mm|dd format
     function formatAchievementDate(timestamp) {
       if (!timestamp) return '';
@@ -2056,7 +2257,7 @@ $version = "0.6.13-BETA";
       var dd = String(date.getDate()).padStart(2, '0');
       return yy + '|' + mm + '|' + dd;
     }
-    
+
     // Get card image path from identity ID
     function getIdentityImagePath(identityId) {
       if (!identityId || !cardSet[identityId]) return '';
@@ -2066,25 +2267,27 @@ $version = "0.6.13-BETA";
       }
       return '';
     }
-    
+
     // Populate the achievements panel with high scores and achievements
     function populateAchievementsPanel() {
       var data = getAchievements();
-      
+
       // Populate high scores (sorted descending by score)
       var highScoresList = document.getElementById('high-scores-list');
       highScoresList.innerHTML = '';
-      
+
       // Sort high scores by score descending, then by timestamp descending for ties (latest first)
       var sortedScores = data.highScores.slice().sort(function(a, b) {
         if (b.score !== a.score) return b.score - a.score;
         // For ties, latest timestamp first (descending)
         return new Date(b.timestamp) - new Date(a.timestamp);
       });
-      
+
       // Check if there are any valid scores
-      var hasValidScores = sortedScores.some(function(hs) { return hs.score > 0; });
-      
+      var hasValidScores = sortedScores.some(function(hs) {
+        return hs.score > 0;
+      });
+
       if (!hasValidScores) {
         var emptyRow = document.createElement('div');
         emptyRow.className = 'high-score-row high-score-empty';
@@ -2096,10 +2299,10 @@ $version = "0.6.13-BETA";
           var hs = sortedScores[i];
           if (hs.score <= 0) continue; // Skip empty scores
           displayCount++;
-          
+
           var row = document.createElement('div');
           row.className = 'high-score-row';
-          
+
           // Identity thumbnail
           var thumb = document.createElement('div');
           thumb.className = 'high-score-thumb';
@@ -2113,40 +2316,40 @@ $version = "0.6.13-BETA";
             }
           }
           row.appendChild(thumb);
-          
+
           // Score
           var scoreEl = document.createElement('div');
           scoreEl.className = 'high-score-score';
           scoreEl.textContent = hs.score;
           row.appendChild(scoreEl);
-          
+
           // Date
           var dateEl = document.createElement('div');
           dateEl.className = 'high-score-date';
           dateEl.textContent = formatAchievementDate(hs.timestamp);
           row.appendChild(dateEl);
-          
+
           highScoresList.appendChild(row);
         }
       }
-      
+
       // Populate achievements
       var achievementsList = document.getElementById('achievements-list');
       achievementsList.innerHTML = '';
-      
+
       for (var i = 0; i < data.achievements.length; i++) {
         var achievement = data.achievements[i];
-        
+
         var row = document.createElement('div');
         row.className = 'achievement-row' + (achievement.achieved ? '' : ' achievement-incomplete');
         row.title = achievement.description;
-        
+
         // Achievement name
         var nameEl = document.createElement('div');
         nameEl.className = 'achievement-name';
         nameEl.textContent = achievement.name;
         row.appendChild(nameEl);
-        
+
         // Achievement date (only if achieved)
         var dateEl = document.createElement('div');
         dateEl.className = 'achievement-date';
@@ -2154,23 +2357,23 @@ $version = "0.6.13-BETA";
           dateEl.textContent = formatAchievementDate(achievement.achievedAt);
         }
         row.appendChild(dateEl);
-        
+
         achievementsList.appendChild(row);
       }
     }
 
     // Data modal helper functions
     var dataModalCallback = null;
-    
+
     function showDataModal(title, message, buttons) {
       var modal = document.getElementById('data-modal');
       var titleEl = document.getElementById('data-modal-title');
       var messageEl = document.getElementById('data-modal-message');
       var buttonsEl = document.getElementById('data-modal-buttons');
-      
+
       titleEl.textContent = title;
       messageEl.innerHTML = message;
-      
+
       // Build buttons
       buttonsEl.innerHTML = '';
       buttons.forEach(function(btn) {
@@ -2183,25 +2386,32 @@ $version = "0.6.13-BETA";
         };
         buttonsEl.appendChild(button);
       });
-      
+
       modal.style.display = 'flex';
     }
-    
+
     function closeDataModal() {
       var modal = document.getElementById('data-modal');
       modal.style.display = 'none';
     }
-    
+
     function showDataAlert(title, message, callback) {
-      showDataModal(title, message, [
-        { text: 'OK', callback: callback }
-      ]);
+      showDataModal(title, message, [{
+        text: 'OK',
+        callback: callback
+      }]);
     }
-    
+
     function showDataConfirm(title, message, onConfirm, onCancel) {
-      showDataModal(title, message, [
-        { text: 'CANCEL', secondary: true, callback: onCancel },
-        { text: 'CONFIRM', callback: onConfirm }
+      showDataModal(title, message, [{
+          text: 'CANCEL',
+          secondary: true,
+          callback: onCancel
+        },
+        {
+          text: 'CONFIRM',
+          callback: onConfirm
+        }
       ]);
     }
 
@@ -2209,7 +2419,7 @@ $version = "0.6.13-BETA";
     function exportLocalData() {
       try {
         var exportData = {};
-        
+
         // Iterate through all localStorage keys
         for (var i = 0; i < localStorage.length; i++) {
           var key = localStorage.key(i);
@@ -2218,22 +2428,24 @@ $version = "0.6.13-BETA";
             exportData[key] = localStorage.getItem(key);
           }
         }
-        
+
         var keyCount = Object.keys(exportData).length;
         if (keyCount === 0) {
           showDataAlert('NO DATA', 'There is no saved data to export.');
           return;
         }
-        
+
         // Create the export object with metadata
         var exportWrapper = {
           version: 1,
           exportDate: new Date().toISOString(),
           data: exportData
         };
-        
+
         // Create and download the file
-        var blob = new Blob([JSON.stringify(exportWrapper, null, 2)], { type: 'application/json' });
+        var blob = new Blob([JSON.stringify(exportWrapper, null, 2)], {
+          type: 'application/json'
+        });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
@@ -2242,7 +2454,7 @@ $version = "0.6.13-BETA";
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         showDataAlert('EXPORT COMPLETE', 'Your data has been saved to a backup file.');
         console.log('Data exported successfully');
       } catch (e) {
@@ -2250,29 +2462,29 @@ $version = "0.6.13-BETA";
         showDataAlert('EXPORT FAILED', 'Could not export data: ' + e.message);
       }
     }
-    
+
     // Import localStorage data from a JSON file
     function importLocalData(event) {
       var file = event.target.files[0];
       if (!file) return;
-      
+
       // Limit file size to 5MB to prevent abuse
       if (file.size > 5 * 1024 * 1024) {
         showDataAlert('FILE TOO LARGE', 'Backup file exceeds the 5MB size limit.');
         event.target.value = '';
         return;
       }
-      
+
       var reader = new FileReader();
       reader.onload = function(e) {
         try {
           var importWrapper = JSON.parse(e.target.result);
-          
+
           // Validate the import file
           if (!importWrapper || !importWrapper.data || typeof importWrapper.data !== 'object') {
             throw new Error('Invalid backup file format');
           }
-          
+
           // Filter to only allow chiriboga-prefixed keys (security)
           var validKeys = {};
           var skippedKeys = 0;
@@ -2285,18 +2497,18 @@ $version = "0.6.13-BETA";
               }
             }
           }
-          
+
           var keyCount = Object.keys(validKeys).length;
           if (keyCount === 0) {
             throw new Error('No valid data found in backup');
           }
-          
+
           // Build confirmation message
           var exportDate = importWrapper.exportDate ? new Date(importWrapper.exportDate).toLocaleDateString() : 'Unknown';
           var message = 'Restore data from this backup?';
           message += '<br><br>Backup date: <strong>' + exportDate + '</strong>';
           message += '<br><br><span style="color:var(--crt-green-muted);font-size:11px;">This will overwrite your current settings and saves.</span>';
-          
+
           showDataConfirm('RESTORE DATA', message, function() {
             // Import each validated key
             for (var key in validKeys) {
@@ -2304,7 +2516,7 @@ $version = "0.6.13-BETA";
                 localStorage.setItem(key, validKeys[key]);
               }
             }
-            
+
             showDataAlert('IMPORT COMPLETE', 'Your data has been restored.<br><br>The page will now reload.', function() {
               location.reload();
             });
@@ -2314,9 +2526,9 @@ $version = "0.6.13-BETA";
           showDataAlert('IMPORT FAILED', 'Could not restore data: ' + err.message);
         }
       };
-      
+
       reader.readAsText(file);
-      
+
       // Reset the file input so the same file can be selected again
       event.target.value = '';
     }
@@ -2325,54 +2537,131 @@ $version = "0.6.13-BETA";
     var screenContentWidth = null;
     var screenContentHeight = null;
 
-    function openTutorial(){
+    function openTutorial() {
       var menu = document.getElementById('menu-buttons');
       var panel = document.getElementById('tutorial-panel');
       var screenContent = document.querySelector('.screen-content');
-      
+
       // Lock screen-content dimensions
       var rect = screenContent.getBoundingClientRect();
       screenContentWidth = rect.width;
       screenContentHeight = rect.height;
       screenContent.style.width = screenContentWidth + 'px';
       screenContent.style.height = screenContentHeight + 'px';
-      
+
       // If already open, act like back button
       if (menu.style.display === 'none' && panel.style.display === 'flex') {
         closeTutorial();
         return;
       }
-      
+
       // Capture current width/height of menu buttons before hiding (for short resolutions)
       var rect = menu.getBoundingClientRect();
       var w = rect.width;
       var h = rect.height;
-      menu.style.display='none';
+      menu.style.display = 'none';
       panel.style.width = w + 'px';
       panel.style.height = h + 'px';
       panel.style.maxHeight = h + 'px';
       panel.style.minWidth = w + 'px';
       panel.style.minHeight = h + 'px';
-      panel.style.display='flex';
+      panel.style.display = 'flex';
     }
-    
-    function closeTutorial(){
+
+    function closeTutorial() {
       var screenContent = document.querySelector('.screen-content');
-      document.getElementById('tutorial-panel').style.display='none';
-      document.getElementById('menu-buttons').style.display='flex';
+      document.getElementById('tutorial-panel').style.display = 'none';
+      document.getElementById('menu-buttons').style.display = 'flex';
       // Clear explicit width/height so menu layout can adapt on resize
       var p = document.getElementById('tutorial-panel');
-      p.style.width='';
-      p.style.height='';
-      p.style.minWidth='';
-      p.style.minHeight='';
-      p.style.maxHeight='';
-      screenContent.style.width='';
-      screenContent.style.height='';
+      p.style.width = '';
+      p.style.height = '';
+      p.style.minWidth = '';
+      p.style.minHeight = '';
+      p.style.maxHeight = '';
+      screenContent.style.width = '';
+      screenContent.style.height = '';
       screenContentWidth = null;
       screenContentHeight = null;
     }
-    
+
+    // All top-level menu options (Quick Game, Custom Game, Gauntlet, Tutorial,
+    // Achievements, Settings) are siblings under #menu-buttons (see index.php
+    // ~line 254). Showing the format list should hide every one of them except
+    // the custom-container itself, not just swap custom-main for the submenu —
+    // otherwise Quick Game/Gauntlet/etc. all stay visible alongside it.
+    function showCustomSubmenu() {
+      var menuButtons = document.getElementById('menu-buttons');
+      var mainBtn = document.getElementById('custom-main');
+      var submenu = document.getElementById('custom-submenu');
+      if (!menuButtons || !mainBtn || !submenu) return;
+
+      for (var i = 0; i < menuButtons.children.length; i++) {
+        var child = menuButtons.children[i];
+        if (child.id !== 'custom-container') {
+          child.style.display = 'none';
+        }
+      }
+
+      mainBtn.style.display = 'none';
+      submenu.style.display = 'flex';
+    }
+
+    function hideCustomSubmenu() {
+      var menuButtons = document.getElementById('menu-buttons');
+      var mainBtn = document.getElementById('custom-main');
+      var submenu = document.getElementById('custom-submenu');
+      if (!menuButtons || !mainBtn || !submenu) return;
+
+      // Revert every sibling back to its CSS default display rather than
+      // hardcoding 'block' (menu-item vs menu-item-container may differ).
+      for (var i = 0; i < menuButtons.children.length; i++) {
+        menuButtons.children[i].style.display = '';
+      }
+
+      mainBtn.style.display = 'block';
+      submenu.style.display = 'none';
+    }
+
+    function selectFormat(formatKey) {
+      var format = formatRegistry[formatKey];
+      if (!format) return;
+
+      if (!format.enabled) {
+        // Same "flash COMING SOON, then revert" pattern used elsewhere in handleMenu()
+        var btn = document.getElementById('format-btn-' + formatKey);
+        if (!btn) return;
+        var originalLabel = btn.innerHTML;
+        btn.innerHTML = 'COMING SOON';
+        setTimeout(function() {
+          btn.innerHTML = originalLabel;
+        }, 1500);
+        return;
+      }
+
+      // 'sg' is always force-included (its checkbox is permanently
+      // checked/disabled in the settings panel) — exclude it here to match
+      // how toggleCustomSet() already treats it.
+      settingsOverrides.customSets = format.sets.filter(function(code) {
+        return code !== 'sg';
+      });
+
+      // Keep the Settings panel's checkboxes in sync in case the user opens
+      // it later and expects it to reflect what's actually active.
+      for (var setKey in setRegistry.availableSets) {
+        var set = setRegistry.availableSets[setKey];
+        if (!set || set.code === 'sg') continue;
+        var checkbox = document.getElementById('custom-set-' + set.code);
+        if (checkbox) {
+          checkbox.checked = settingsOverrides.customSets.indexOf(set.code) !== -1;
+        }
+      }
+
+      saveSettings();
+      hideCustomSubmenu();
+      launchCustomGame();
+    }
+
     // Gauntlet submenu toggle
     function showGauntletSubmenu() {
       var mainBtn = document.getElementById('gauntlet-main');
@@ -2384,7 +2673,7 @@ $version = "0.6.13-BETA";
         updateGauntletContinueButton();
       }
     }
-    
+
     function hideGauntletSubmenu() {
       var mainBtn = document.getElementById('gauntlet-main');
       var submenu = document.getElementById('gauntlet-submenu');
@@ -2393,7 +2682,7 @@ $version = "0.6.13-BETA";
         submenu.style.display = 'none';
       }
     }
-    
+
     // Check if a saved gauntlet exists in localStorage
     function hasGauntletSave() {
       try {
@@ -2408,7 +2697,7 @@ $version = "0.6.13-BETA";
       }
       return false;
     }
-    
+
     // Update the continue button state
     function updateGauntletContinueButton() {
       var continueBtn = document.getElementById('gauntlet-continue-btn');
@@ -2420,21 +2709,21 @@ $version = "0.6.13-BETA";
         }
       }
     }
-    
+
     // Handle Continue button click
     function handleGauntletContinue(evt) {
       // Initialize achievements if not already present
       initializeAchievements();
-      
+
       var continueBtn = document.getElementById('gauntlet-continue-btn');
       if (!hasGauntletSave() || continueBtn.classList.contains('disabled')) {
         return false;
       }
-      
+
       try {
         var savedJson = localStorage.getItem('chiriboga-gauntlet-save');
         var saveData = JSON.parse(savedJson);
-        
+
         // Navigate to gauntlet.php with saved parameters
         var gauntletUrl = 'gauntlet.php?r=' + saveData.r + '&g=' + saveData.g;
         window.location.href = gauntletUrl;
@@ -2447,11 +2736,11 @@ $version = "0.6.13-BETA";
         }, 1500);
       }
     }
-    
+
     function handleGauntletNew(evt) {
       // Initialize achievements if not already present
       initializeAchievements();
-      
+
       // Check if there are enough gauntlet precons before launching
       var gauntletCorpDecks = preconDecks.filter(function(d) {
         if (!isPreconEnabledForGauntlet(d)) return false;
@@ -2459,11 +2748,11 @@ $version = "0.6.13-BETA";
         var identity = cardSet[d.identity];
         return identity.player === corp;
       });
-      
+
       // Need at least gauntletLength precons total
       var gauntletLength = settingsOverrides.gauntletLength || 4;
       var newBtn = evt.target;
-      
+
       if (gauntletCorpDecks.length < gauntletLength) {
         newBtn.innerHTML = 'MISSING';
         setTimeout(function() {
@@ -2471,7 +2760,7 @@ $version = "0.6.13-BETA";
         }, 1500);
         return;
       }
-      
+
       // Need at least 1 precon for each corp faction
       var requiredFactions = ['Jinteki', 'Haas-Bioroid', 'NBN', 'Weyland Consortium'];
       var missingFaction = false;
@@ -2485,7 +2774,7 @@ $version = "0.6.13-BETA";
           break;
         }
       }
-      
+
       if (missingFaction) {
         newBtn.innerHTML = 'MISSING';
         setTimeout(function() {
@@ -2493,10 +2782,10 @@ $version = "0.6.13-BETA";
         }, 1500);
         return;
       }
-      
+
       LaunchGauntlet();
     }
-    
+
     // Hide gauntlet submenu when clicking elsewhere
     document.addEventListener('click', function(e) {
       var container = document.getElementById('gauntlet-container');
@@ -2504,18 +2793,42 @@ $version = "0.6.13-BETA";
         hideGauntletSubmenu();
       }
     });
-    
+
+    document.addEventListener('click', function(e) {
+      var container = document.getElementById('custom-container');
+      if (container && !container.contains(e.target)) {
+        hideCustomSubmenu();
+      }
+    });
+
     function startTutorial(mentorIndex) {
       // Initialize achievements if not already present
       initializeAchievements();
-      
-      var tutorials = [
-        { side: 'r', mentor: 0 },
-        { side: 'r', mentor: 1 },
-        { side: 'r', mentor: 2 },
-        { side: 'r', mentor: 3 },
-        { side: 'r', mentor: 4 },
-        { side: 'c', mentor: 5 }
+
+      var tutorials = [{
+          side: 'r',
+          mentor: 0
+        },
+        {
+          side: 'r',
+          mentor: 1
+        },
+        {
+          side: 'r',
+          mentor: 2
+        },
+        {
+          side: 'r',
+          mentor: 3
+        },
+        {
+          side: 'r',
+          mentor: 4
+        },
+        {
+          side: 'c',
+          mentor: 5
+        }
       ];
       var t = tutorials[mentorIndex];
       if (!t) return;
@@ -2523,4 +2836,5 @@ $version = "0.6.13-BETA";
     }
   </script>
 </body>
+
 </html>
