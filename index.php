@@ -2658,6 +2658,49 @@ $version = "0.6.13-BETA";
       }
 
       saveSettings();
+
+      // Pick a random precon legal for this format, for each side — mirrors
+      // the existing giromRunnerDecks/giromCorpDecks + selectRandomDecks()
+      // pattern used for Quick Game, but filtered on "every set this precon
+      // needs is covered by the chosen format" via each precon's own
+      // `sets: [...]` field, instead of `useForQuickGame`.
+      var formatRunnerDecks = preconDecks.filter(function(d) {
+        if (d.useForCustomGame !== true) return false;
+        if (!Array.isArray(d.sets)) return false;
+        var setsCovered = d.sets.every(function(code) {
+          return format.sets.indexOf(code) !== -1;
+        });
+        var identityCard = cardSet[d.identity];
+        return setsCovered && identityCard && identityCard.player === runner;
+      });
+
+      var formatCorpDecks = preconDecks.filter(function(d) {
+        if (d.useForCustomGame !== true) return false;
+        if (!Array.isArray(d.sets)) return false;
+        var setsCovered = d.sets.every(function(code) {
+          return format.sets.indexOf(code) !== -1;
+        });
+        var identityCard = cardSet[d.identity];
+        return setsCovered && identityCard && identityCard.player === corp;
+      });
+
+      if (formatRunnerDecks.length === 0 || formatCorpDecks.length === 0) {
+        console.error('No eligible precons found for format: ' + formatKey);
+        return;
+      }
+
+      var chosenRunnerDeck = formatRunnerDecks[Math.floor(Math.random() * formatRunnerDecks.length)];
+      var chosenCorpDeck = formatCorpDecks[Math.floor(Math.random() * formatCorpDecks.length)];
+
+      // Same 50/50 player-side assignment convention as selectRandomDecks()
+      if (Math.random() < 0.5) {
+        playerDeck = chosenRunnerDeck;
+        aiDeck = chosenCorpDeck;
+      } else {
+        playerDeck = chosenCorpDeck;
+        aiDeck = chosenRunnerDeck;
+      }
+
       hideCustomSubmenu();
       launchCustomGame();
     }
