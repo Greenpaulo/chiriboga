@@ -3177,8 +3177,11 @@ cardSet[31036] = {
       },
       Resolve: function (params) {
         SpendClicks(runner, 1);
+        PlaySound('professionalContacts');
+        suppressCreditDrawSound = true;
         GainCredits(runner, 1);
-		Draw(runner, 1);
+        Draw(runner, 1);
+        suppressCreditDrawSound = false;
       },
     },
   ],
@@ -5854,6 +5857,7 @@ cardSet[31075] = {
   title: "Archer",
   imageFile: "31075.png",
   cardText: "As an additional cost to rez this ice, forfeit 1 agenda. Subroutine Gain 2 credits. Subroutine Trash 1 installed program. Subroutine Trash 1 installed program. Subroutine End the run.",
+  customRezSound: "archer",
   elo: 1750,
   player: corp,
   faction: "Weyland Consortium",

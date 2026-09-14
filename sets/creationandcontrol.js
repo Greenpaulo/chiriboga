@@ -2523,8 +2523,11 @@ cardSet[3049] = {
       },
       Resolve: function () {
         SpendClicks(runner, 1);
+        PlaySound('professionalContacts');
+        suppressCreditDrawSound = true;
         GainCredits(runner, 1, "ability", this);
         Draw(runner, 1);
+        suppressCreditDrawSound = false;
         Log("Professional Contacts used: Gained 1[c] and drew 1 card.");
       },
     },

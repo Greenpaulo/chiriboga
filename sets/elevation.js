@@ -5214,6 +5214,7 @@ cardSet[35033] = {
 cardSet[35025] = {
   title: "Illumination",
   imageFile: "35025.png",
+  customPlaySound: "illumination",
   player: runner,
   faction: "Shaper",
   influence: 3,

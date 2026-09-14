@@ -1866,6 +1866,7 @@ function PlayerWin(player, msgstr) {
   $("#cmdform").hide();
   window.clearTimeout(mainLoop);
   */
+  PlaySound('gameEnd');
   var winner = player;
 
   // Track game end in Google Analytics
@@ -2647,6 +2648,7 @@ function AccessAllInArchives() {
  */
 function ResolveAccess() {
   if (!accessingCard) return; //already done
+  PlaySound('runSuccessful');
   if (accessingCard.cardLocation != corp.HQ.cards)
     accessingCard.knownToRunner = true;
   var ret = accessingCard;

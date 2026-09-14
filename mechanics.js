@@ -9,6 +9,7 @@
  * @param {Server} server e.g. corp.HQ or corp.remoteServers[0]
  */
 function MakeRun(server) {
+  PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
   Log("Run initiated attacking " + server.serverName);
@@ -54,6 +55,7 @@ function Bypass() {
  * @param {Card} card the card to advance
  */
 function Advance(card) {
+  PlaySound('advance');
   if (typeof card.advancement === "undefined") card.advancement = 0;
   card.advancement++;
   Log("Card advanced");
@@ -89,6 +91,13 @@ function PlaceAdvancement(card, num) {
  * @param {Boolean} [allowCancel] whether to allow cancel rez when choosing additional costs
  */
 function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true) {
+   if (card.customRezSound) {
+    PlaySound(card.customRezSound);
+  } else if (card.cardType === 'ice') {
+    PlaySound('rezIce');
+  } else {
+    PlaySound('rezOther');
+  }
   //costs need to be paid? pay them then recurse with ignoreAllCosts=true
   if (!ignoreAllCosts) {
 	//forfeit agenda first if relevant
@@ -571,6 +580,11 @@ function Install(
   onPaymentComplete,
   allowCancel=true
 ) {
+  if (installingCard.player === corp) {
+    PlaySound('installCorp');
+  } else {
+    PlaySound('installRunner');
+  }
   var oldLocation = installingCard.cardLocation; //in case of cancel
   var oldPhase = currentPhase; //in case of cancel
   MoveCard(installingCard, installingCard.player.installingCards); //installing cards are kept here instead of resolvingCards, so they sit where you put them while they resolve
@@ -851,6 +865,11 @@ function Install(
  * @returns {Phase} the phase object created and changed to
  */
 function Play(card, onPlayResolve, context) {
+  if (card.customPlaySound) {
+    PlaySound(card.customPlaySound);
+  } else if (card.cardType === 'operation' || card.cardType === 'event') {
+    PlaySound('playInstant');
+  }
   var oldLocation = card.cardLocation; //in case of cancel
   var oldPhase = currentPhase; //in case of cancel
   MoveCard(card, card.player.resolvingCards);
@@ -1072,6 +1091,7 @@ function Purge() {
 		card.virus = 0;
 	}
   });
+  if (numPurged > 0) PlaySound('purge');
   Log("Virus counters purged");
   TriggeredResponsePhase(playerTurn, "responseOnPurge", [numPurged], function () {}, "Purged");
 }
@@ -1087,6 +1107,11 @@ function Purge() {
  * @returns {int} the number of cards drawn
  */
 function Draw(player, num=1, afterDraw, context) {
+  if (!suppressCreditDrawSound) {
+    if (num === 1) PlaySound('drawCard');
+    else if (num === 2) PlaySound('drawCard2');
+    else if (num >= 3) PlaySound('drawCard3');
+  }
   num += ModifyingTriggers("modifyDraw", player, -num); //lower limit of -num means the total will not be any lower than zero
   if (num < 1) return 0;
   var cards = [];
@@ -1355,6 +1380,12 @@ function GainCredits(player, num, temporary = "", sourceCard = null) {
       TriggeredResponsePhase(corp, "responseOnGainCreditsFromCard", [num, sourceCard], null, "Gained Credits");
     }
   }
+
+  if (!suppressCreditDrawSound) {
+    if (num === 1) PlaySound('gainCredit');
+    else if (num === 2) PlaySound('gainCredit2');
+    else if (num >= 3) PlaySound('gainCredit3');
+  }
 }
 
 /**
@@ -1415,10 +1446,14 @@ function TakeCredits(player, card, num) {
  */
 function RemoveTags(num) {
   if (runner.tags >= num) {
+    if (num > 0) PlaySound('removeTag');
     runner.tags -= num;
     if (num == 1) Log("1 tag removed");
     else Log(num + " tags removed");
-  } else runner.tags = 0;
+  } else {
+    if (runner.tags > 0) PlaySound('removeTag');
+    runner.tags = 0
+  }
   UpdateCounters();
 }
 
@@ -1566,6 +1601,7 @@ function LoseCredits(player, num) {
  * @method RunUnsuccessful
  */
 function RunUnsuccessful() {
+  PlaySound('runUnsuccessful');
     // Remove run-active class and clear watermark
     document.body.classList.remove('run-active');
     var watermark = document.querySelector('.netrunner-bg-watermark');
@@ -1640,6 +1676,7 @@ function Score(card, afterScore, context) {
   intended.score = card; //if callback sets this to null, the score will not happen
   OpportunityForAvoidPrevent(runner, "responsePreventableScore", [], function () {
     if (intended.score == null) return;
+    PlaySound('agendaScore');
     MoveCard(intended.score, corp.scoreArea);
     intended.score.faceUp = true;
     if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(intended.score);
@@ -1684,6 +1721,7 @@ function Steal() {
   OpportunityForAvoidPrevent(corp, "responsePreventableSteal", [], function () {
     ResolveAccess();
     if (intended.steal == null) return;
+    PlaySound('agendaSteal');
 	var stolenFromString = "remote";
 	if (attackedServer == corp.HQ.cards) stolenFromString = "HQ";
 	else if (attackedServer == corp.RnD.cards) stolenFromString = "R&D";

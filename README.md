@@ -19,29 +19,34 @@ Try it here: https://chiriboga.cronbach.com
 Post them here: https://github.com/drbo6/chiriboga/issues
 
 If you do, there are two things that help a lot:
+
 - If there is a relevant game state, please open the menu and click on "Download Debug Log". If you upload that txt file here, I can restore your game state on my computer.
 - If you are on a computer, open the developer console (F12 in most browsers) and copy-paste any errors here.
 
 ## Credits
 
 ### Original Engine
+
 **Chiriboga** - Developed by [bobtheuberfish](https://github.com/bobtheuberfish)  
 Source: https://github.com/bobtheuberfish/chiriboga
 
 ### Solo Mode Extension
+
 Developed by [DrBo6](https://github.com/drbo6)  
 Enhanced interface, game modes, and Gauntlet system
 
 ### Preconstructed Decks
+
 - Girometics SG+SU21 and NSG Core precons
 - Additional precons curated by DrBo6
 
 ### Special Thanks
+
 Testers: BadEpsilon, bowlsley, D-Smith, eniteris, Kwaice, Mentlegen, olompumpa, R41B, saff, Saintis, Ysengrin
 
 ## Legal
 
-*Netrunner* and *Android* are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. This is a fan-made project and is not affiliated with or endorsed by FFG, WotC, or Null Signal Games.
+_Netrunner_ and _Android_ are trademarks of Fantasy Flight Publishing, Inc. and/or Wizards of the Coast LLC. This is a fan-made project and is not affiliated with or endorsed by FFG, WotC, or Null Signal Games.
 
 Card art and symbols are property of Null Signal Games and used under [CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/).
 
@@ -54,6 +59,7 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 The following Elevation cards are not yet implemented (6 cards):
 
 ### NBN
+
 - **35057** - Nebula Talent Management: Making Stars (Identity - Flip)
 - **35058** - Synapse Global: Faster than Thought (Identity)
 - **35059** - Embedded Reporting (Agenda - Initiative)
@@ -71,6 +77,10 @@ I'll get to these when I have a minute.
 
 > **Note:** Card images are not included in this repository due to licensing. See `LICENSE.txt` in the zip for attribution details.
 
+#### Running the app locally
+
+php -S localhost:8000
+
 ## Debugging and Testing Guide for Chiriboga
 
 This guide explains how to create specific board states, enable debugging features, and test scenarios in the Netrunner implementation.
@@ -82,35 +92,35 @@ This guide explains how to create specific board states, enable debugging featur
 Add or modify these lines at the start of your game session (in browser console or in `decks.js` around line 712):
 
 ```javascript
-enableDebugMenu = true;  // Shows the debug menu button in the UI
-debugging = true;        // Enables detailed logging and pauses on errors
-viewAllFronts = false;   // Set true to see all card faces (changes AI behavior)
+enableDebugMenu = true; // Shows the debug menu button in the UI
+debugging = true; // Enables detailed logging and pauses on errors
+viewAllFronts = false; // Set true to see all card faces (changes AI behavior)
 ```
 
 #### What Each Flag Does
 
-| Flag | Effect |
-|------|--------|
-| `enableDebugMenu` | Displays a debug menu button in the game interface |
-| `debugging` | Pauses execution on `console.error()` calls; enables extra AI logging |
-| `viewAllFronts` | Shows card fronts for all cards when zoomed (note: AI plays differently when enabled) |
+| Flag              | Effect                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| `enableDebugMenu` | Displays a debug menu button in the game interface                                    |
+| `debugging`       | Pauses execution on `console.error()` calls; enables extra AI logging                 |
+| `viewAllFronts`   | Shows card fronts for all cards when zoomed (note: AI plays differently when enabled) |
 
 ### Using the Debug Menu
 
 Once `enableDebugMenu = true`, a debug button appears in the UI. It provides these functions:
 
-| Function | Description |
-|----------|-------------|
-| Add Click | Gives the viewing player +1 click |
-| Add Credit | Gives the viewing player +1 credit |
-| Draw Card | Draws a card from stack/R&D to hand |
-| Win Game | Immediately wins the game for the viewing player |
-| Lose Game | Immediately loses the game for the viewing player |
+| Function         | Description                                         |
+| ---------------- | --------------------------------------------------- |
+| Add Click        | Gives the viewing player +1 click                   |
+| Add Credit       | Gives the viewing player +1 credit                  |
+| Draw Card        | Draws a card from stack/R&D to hand                 |
+| Win Game         | Immediately wins the game for the viewing player    |
+| Lose Game        | Immediately loses the game for the viewing player   |
 | Add Card to Hand | Spawns any card from a dropdown menu into your hand |
 
 ### Creating a Test Board State
 
-The codebase provides two functions for setting up specific board states: `RunnerTestField()` and `CorpTestField()`. 
+The codebase provides two functions for setting up specific board states: `RunnerTestField()` and `CorpTestField()`.
 
 **These are called in `decks.js` after the normal deck loading**. There is a condition set to false that you can set to true to enable it and see it in action. (Just start a game to see the board state that is present there.)
 
@@ -121,24 +131,32 @@ Paste this code in `decks.js` at line 711 (where it says `//PASTE REPLICATION CO
 ```javascript
 debugging = true; // Enable detailed logging
 
-RunnerTestField(31002,         // Identity
-    [30032],                   // Heap: one card
-    [31004,31004,31004,31004], // Stack: four copies of a card
-    [31037,31037,31037],       // Grip: three cards in hand
-    [30014,31008],             // Installed: two cards (auto-sorted by type)
-    [],                        // Stolen: no agendas yet
-    cardBackTexturesRunner,glowTextures,strengthTextures);
+RunnerTestField(
+  31002, // Identity
+  [30032], // Heap: one card
+  [31004, 31004, 31004, 31004], // Stack: four copies of a card
+  [31037, 31037, 31037], // Grip: three cards in hand
+  [30014, 31008], // Installed: two cards (auto-sorted by type)
+  [], // Stolen: no agendas yet
+  cardBackTexturesRunner,
+  glowTextures,
+  strengthTextures,
+);
 
-CorpTestField(30035,           // Identity
-    [],                        // Archives: empty
-    [30073,30072,30047],       // R&D: three cards
-    [30065,31061,30039],       // HQ: three cards in hand
-    [],                        // Archives ice/upgrades: none
-    [31067],                   // R&D ice: one piece of ice
-    [31067],                   // HQ ice: one piece of ice
-    [[30047,30047]],           // Remotes: one server with two cards
-    [],                        // Scored: no agendas
-    cardBackTexturesCorp,glowTextures,strengthTextures);
+CorpTestField(
+  30035, // Identity
+  [], // Archives: empty
+  [30073, 30072, 30047], // R&D: three cards
+  [30065, 31061, 30039], // HQ: three cards in hand
+  [], // Archives ice/upgrades: none
+  [31067], // R&D ice: one piece of ice
+  [31067], // HQ ice: one piece of ice
+  [[30047, 30047]], // Remotes: one server with two cards
+  [], // Scored: no agendas
+  cardBackTexturesCorp,
+  glowTextures,
+  strengthTextures,
+);
 ```
 
 #### Setting Card Properties After Creation
@@ -187,16 +205,16 @@ ChangePhase(phases.runApproachServer); // Skip all ice
 
 #### Common Phases
 
-| Phase | Description |
-|-------|-------------|
-| `phases.corpMulligan` | Corp mulligan decision |
-| `phases.runnerMulligan` | Runner mulligan decision |
-| `phases.corpStartDraw` | Start of corp turn (mandatory draw) |
-| `phases.corpActionMain` | Corp's action phase |
-| `phases.corpDiscardStart` | Corp discard phase |
-| `phases.runnerStartResponse` | Start of runner turn |
-| `phases.runnerEndOfTurn` | End of runner turn |
-| `phases.runApproachServer` | Runner approaching server (after ice) |
+| Phase                        | Description                           |
+| ---------------------------- | ------------------------------------- |
+| `phases.corpMulligan`        | Corp mulligan decision                |
+| `phases.runnerMulligan`      | Runner mulligan decision              |
+| `phases.corpStartDraw`       | Start of corp turn (mandatory draw)   |
+| `phases.corpActionMain`      | Corp's action phase                   |
+| `phases.corpDiscardStart`    | Corp discard phase                    |
+| `phases.runnerStartResponse` | Start of runner turn                  |
+| `phases.runnerEndOfTurn`     | End of runner turn                    |
+| `phases.runApproachServer`   | Runner approaching server (after ice) |
 
 ### Capturing Current Game State
 
@@ -206,7 +224,7 @@ At any point during a game, you can generate code that recreates the current boa
 
 ```javascript
 // In browser console:
-console.log(ReproductionCode(true));  // true = include full state (credits, clicks, phase)
+console.log(ReproductionCode(true)); // true = include full state (credits, clicks, phase)
 console.log(ReproductionCode(false)); // false = just card positions
 ```
 
@@ -273,26 +291,26 @@ To find a specific card by name at runtime:
 ```javascript
 // Search for a card in the card set by name
 for (var id in cardSet) {
-  if (cardSet[id].title && cardSet[id].title.toLowerCase().includes("hedge")) {
+  if (cardSet[id].title && cardSet[id].title.toLowerCase().includes('hedge')) {
     console.log(id, cardSet[id].title);
   }
 }
 
 // Find a card already in hand
-var targetCard = runner.grip.find(c => c.title === "Sure Gamble");
-var corpCard = corp.HQ.cards.find(c => c.title === "Hedge Fund");
+var targetCard = runner.grip.find((c) => c.title === 'Sure Gamble');
+var corpCard = corp.HQ.cards.find((c) => c.title === 'Hedge Fund');
 
 // Find an installed card
-var installedCard = runner.rig.programs.find(c => c.title === "Corroder");
+var installedCard = runner.rig.programs.find((c) => c.title === 'Corroder');
 ```
 
 #### Server References
 
-| Server | Reference |
-|--------|-----------|
-| HQ | `corp.HQ` |
-| R&D | `corp.RnD` |
-| Archives | `corp.archives` |
+| Server   | Reference               |
+| -------- | ----------------------- |
+| HQ       | `corp.HQ`               |
+| R&D      | `corp.RnD`              |
+| Archives | `corp.archives`         |
 | Remote 1 | `corp.remoteServers[0]` |
 | Remote 2 | `corp.remoteServers[1]` |
 
@@ -301,51 +319,51 @@ var installedCard = runner.rig.programs.find(c => c.title === "Corroder");
 ```javascript
 // Play an operation
 corp.AI.preferred = {
-  command: "play",
-  cardToPlay: corp.HQ.cards[0]
+  command: 'play',
+  cardToPlay: corp.HQ.cards[0],
 };
 
 // Install a card in a specific server
 corp.AI.preferred = {
-  command: "install",
+  command: 'install',
   cardToInstall: corp.HQ.cards[0],
-  serverToInstallTo: corp.remoteServers[0]  // or corp.HQ, corp.RnD, null for new remote
+  serverToInstallTo: corp.remoteServers[0], // or corp.HQ, corp.RnD, null for new remote
 };
 
 // Advance a card
 corp.AI.preferred = {
-  command: "advance",
-  cardToAdvance: corp.remoteServers[0].root[0]
+  command: 'advance',
+  cardToAdvance: corp.remoteServers[0].root[0],
 };
 
 // Rez a card
 corp.AI.preferred = {
-  command: "rez",
-  cardToRez: corp.HQ.ice[0]
+  command: 'rez',
+  cardToRez: corp.HQ.ice[0],
 };
 
 // Score an agenda
 corp.AI.preferred = {
-  command: "score",
-  cardToScore: corp.remoteServers[0].root[0]
+  command: 'score',
+  cardToScore: corp.remoteServers[0].root[0],
 };
 
 // Trigger an ability
 corp.AI.preferred = {
-  command: "trigger",
-  cardToTrigger: someActiveCard
+  command: 'trigger',
+  cardToTrigger: someActiveCard,
 };
 
 // Trash a runner's resource (when runner is tagged)
 corp.AI.preferred = {
-  command: "trash",
-  cardToTrash: runner.rig.resources[0]
+  command: 'trash',
+  cardToTrash: runner.rig.resources[0],
 };
 
 // Set trace strength
 corp.AI.preferred = {
-  command: "trace",
-  strengthToIncrease: 5
+  command: 'trace',
+  strengthToIncrease: 5,
 };
 ```
 
@@ -354,34 +372,34 @@ corp.AI.preferred = {
 ```javascript
 // Play an event
 runner.AI.preferred = {
-  command: "play",
-  cardToPlay: runner.grip[0]
+  command: 'play',
+  cardToPlay: runner.grip[0],
 };
 
 // Make a run on a specific server
 runner.AI.preferred = {
-  command: "run",
-  serverToRun: corp.RnD
+  command: 'run',
+  serverToRun: corp.RnD,
 };
 
 // Install a card (optionally on a host)
 runner.AI.preferred = {
-  command: "install",
+  command: 'install',
   cardToInstall: runner.grip[0],
-  hostToInstallTo: someHostCard  // optional, for cards that host on others
+  hostToInstallTo: someHostCard, // optional, for cards that host on others
 };
 
 // Trigger an ability
 runner.AI.preferred = {
-  command: "trigger",
+  command: 'trigger',
   cardToTrigger: runner.rig.programs[0],
-  abilityAlt: 0  // optional: which ability if card has multiple
+  abilityAlt: 0, // optional: which ability if card has multiple
 };
 
 // Trash a card
 runner.AI.preferred = {
-  command: "trash",
-  cardToTrash: runner.rig.resources[0]
+  command: 'trash',
+  cardToTrash: runner.rig.resources[0],
 };
 ```
 
@@ -392,21 +410,21 @@ Some actions require follow-up choices (e.g., playing a run event requires choos
 ```javascript
 // Play an event that targets a server (like Shred, Legwork, etc.)
 runner.AI.preferred = {
-  command: "play",
-  cardToPlay: runner.grip.find(c => c.title === "Shred"),
+  command: 'play',
+  cardToPlay: runner.grip.find((c) => c.title === 'Shred'),
   nextPrefs: {
-    chooseServer: corp.RnD
-  }
+    chooseServer: corp.RnD,
+  },
 };
 
 // Corp installs ice, then needs to choose position
 corp.AI.preferred = {
-  command: "install",
-  cardToInstall: corp.HQ.cards.find(c => c.cardType === "ice"),
+  command: 'install',
+  cardToInstall: corp.HQ.cards.find((c) => c.cardType === 'ice'),
   serverToInstallTo: corp.HQ,
   nextPrefs: {
     // Additional preferences for ice position if needed
-  }
+  },
 };
 ```
 
@@ -417,7 +435,7 @@ The `chooseServer` property works regardless of the current phase—useful for a
 ```javascript
 // Force server choice in any context
 runner.AI.preferred = {
-  chooseServer: corp.archives
+  chooseServer: corp.archives,
 };
 ```
 
@@ -427,13 +445,17 @@ runner.AI.preferred = {
 debugging = true;
 
 // Set up runner with the card you want to test
-RunnerTestField(31002,
-    [],                      // heap
-    [30001, 30001, 30001],   // stack
-    [XXXXX],                 // grip - your test card's set number
-    [],                      // installed
-    [],                      // stolen
-    cardBackTexturesRunner, glowTextures, strengthTextures);
+RunnerTestField(
+  31002,
+  [], // heap
+  [30001, 30001, 30001], // stack
+  [XXXXX], // grip - your test card's set number
+  [], // installed
+  [], // stolen
+  cardBackTexturesRunner,
+  glowTextures,
+  strengthTextures,
+);
 
 // Give runner resources
 runner.creditPool = 20;
@@ -445,30 +467,30 @@ ChangePhase(phases.runnerActionMain);
 
 // Force AI to play the card targeting R&D
 runner.AI.preferred = {
-  command: "play",
+  command: 'play',
   cardToPlay: runner.grip[0],
   nextPrefs: {
-    chooseServer: corp.RnD
-  }
+    chooseServer: corp.RnD,
+  },
 };
 ```
 
 #### Preference Reference Table
 
-| Command | Key(s) | Player | Description |
-|---------|--------|--------|-------------|
-| `play` | `cardToPlay` | Both | Play an event/operation from hand |
-| `install` | `cardToInstall`, `serverToInstallTo` | Corp | Install a card |
-| `install` | `cardToInstall`, `hostToInstallTo` | Runner | Install a card |
-| `run` | `serverToRun` | Runner | Initiate a run |
-| `advance` | `cardToAdvance` | Corp | Advance an installed card |
-| `rez` | `cardToRez` | Corp | Rez an installed card |
-| `score` | `cardToScore` | Corp | Score an agenda |
-| `trigger` | `cardToTrigger`, `abilityAlt` | Both | Use a card ability |
-| `trash` | `cardToTrash` | Both | Trash a card |
-| `trace` | `strengthToIncrease` | Corp | Set trace strength |
-| (any) | `chooseServer` | Runner | Select a server (works in any phase) |
-| (any) | `nextPrefs` | Both | Chain another preference for sub-decisions |
+| Command   | Key(s)                               | Player | Description                                |
+| --------- | ------------------------------------ | ------ | ------------------------------------------ |
+| `play`    | `cardToPlay`                         | Both   | Play an event/operation from hand          |
+| `install` | `cardToInstall`, `serverToInstallTo` | Corp   | Install a card                             |
+| `install` | `cardToInstall`, `hostToInstallTo`   | Runner | Install a card                             |
+| `run`     | `serverToRun`                        | Runner | Initiate a run                             |
+| `advance` | `cardToAdvance`                      | Corp   | Advance an installed card                  |
+| `rez`     | `cardToRez`                          | Corp   | Rez an installed card                      |
+| `score`   | `cardToScore`                        | Corp   | Score an agenda                            |
+| `trigger` | `cardToTrigger`, `abilityAlt`        | Both   | Use a card ability                         |
+| `trash`   | `cardToTrash`                        | Both   | Trash a card                               |
+| `trace`   | `strengthToIncrease`                 | Corp   | Set trace strength                         |
+| (any)     | `chooseServer`                       | Runner | Select a server (works in any phase)       |
+| (any)     | `nextPrefs`                          | Both   | Chain another preference for sub-decisions |
 
 ### Quick Reference: Browser Console Commands
 
@@ -479,10 +501,10 @@ ShowDebugMenuButtonIfEnabled();
 debugging = true;
 
 // Check game state
-console.log(runner.grip);           // Runner's hand
-console.log(corp.HQ.cards);         // Corp's hand
-console.log(corp.remoteServers);    // All remote servers
-console.log(currentPhase.title);    // Current game phase
+console.log(runner.grip); // Runner's hand
+console.log(corp.HQ.cards); // Corp's hand
+console.log(corp.remoteServers); // All remote servers
+console.log(currentPhase.title); // Current game phase
 
 // Capture state
 console.log(ReproductionCode(true));
