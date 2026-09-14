@@ -169,14 +169,14 @@
 							}
 						}
 						// Ensure defaults from setRegistry.decklauncherSets (e.g. downfall) are included
-						if (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.decklauncherSets)) {
-							for (var d = 0; d < setRegistry.decklauncherSets.length; d++) {
-								var dSet = setRegistry.decklauncherSets[d];
-								if (dSet !== 'systemgateway' && setsToLoad.indexOf(dSet) === -1) {
-									setsToLoad.push(dSet);
-								}
-							}
-						}
+						// if (typeof setRegistry !== 'undefined' && Array.isArray(setRegistry.decklauncherSets)) {
+						// 	for (var d = 0; d < setRegistry.decklauncherSets.length; d++) {
+						// 		var dSet = setRegistry.decklauncherSets[d];
+						// 		if (dSet !== 'systemgateway' && setsToLoad.indexOf(dSet) === -1) {
+						// 			setsToLoad.push(dSet);
+						// 		}
+						// 	}
+						// }
 						if (setsToLoad.length > 0) {
 							console.log('Loading custom sets from localStorage + defaults:', setsToLoad);
 						} else {
@@ -254,6 +254,11 @@
 			function registerPrecon(deck) {
 				preconDecks.push(deck);
 			}
+
+			function MarkDeckModified() {
+				deckModified = true;
+				$('#preconselect').val('-1');
+			} 
 		</script>
 		<?php
 		// Load preconstructed decks
@@ -289,11 +294,23 @@
 					var dropdown = $('#preconselect');
 					dropdown.empty();
 					dropdown.append('<option value="-1">Load Precon Deck</option>');
+					var matchedIdx = -1;
 					for (var i = 0; i < preconDecks.length; i++) {
 						var deck = preconDecks[i];
-						if (String(identityId) === String(deck.identity) && deck.useForCustomGame) {
-							dropdown.append('<option value="' + i + '">' + deck.name + '</option>');
+						if (String(identityId) !== String(deck.identity)) continue;
+						if (!deck.useForCustomGame) continue;
+						if (!Array.isArray(deck.sets)) continue;
+						var setsLegal = deck.sets.every(function (code) {
+							return loadedSetCodes.indexOf(code) !== -1;
+						});
+						if (!setsLegal) continue;
+						dropdown.append('<option value="' + i + '">' + deck.name + '</option>');
+						if (!deckModified && json && json.name === deck.name) {
+							matchedIdx = i;
 						}
+					}
+					if (matchedIdx !== -1) {
+						dropdown.val(matchedIdx);
 					}
 				}
 				// Initial populate: use current identity if selected in dropdown, else placeholder
@@ -369,7 +386,7 @@
 				if (typeof deckCounts[id] === 'undefined') deckCounts[id]=0;
 				deckCounts[id]++;
 				json.cards.push(id);
-				deckModified = true;
+				MarkDeckModified()
 				UpdateDeckTextareaFromCounts();
 				Parse();
 				if (showingOnlySelected) ApplyFilter();
@@ -380,7 +397,7 @@
 				//remove one occurrence from json.cards
 				var idx = json.cards.indexOf(id);
 				if (idx>-1) json.cards.splice(idx,1);
-				deckModified = true;
+				MarkDeckModified()
 				UpdateDeckTextareaFromCounts();
 				Parse();
 				if (showingOnlySelected) ApplyFilter();
@@ -518,7 +535,7 @@
 					json.cards.push(cardId);
 				}
 				
-				deckModified = true;
+				MarkDeckModified();
 				UpdateDeckTextareaFromCounts();
 				Parse();
 				UpdateCardCountsUI();
@@ -767,12 +784,12 @@
 							}
 						}
 						// Ensure defaults from setRegistry.decklauncherSets are included
-						var defaultCodes = getDefaultSetCodes();
-						for (var d = 0; d < defaultCodes.length; d++) {
-							if (loadedSetCodes.indexOf(defaultCodes[d]) === -1) {
-								loadedSetCodes.push(defaultCodes[d]);
-							}
-						}
+						// var defaultCodes = getDefaultSetCodes();
+						// for (var d = 0; d < defaultCodes.length; d++) {
+						// 	if (loadedSetCodes.indexOf(defaultCodes[d]) === -1) {
+						// 		loadedSetCodes.push(defaultCodes[d]);
+						// 	}
+						// }
 					} else {
 						// localStorage exists but no customSets - use defaults
 						loadedSetCodes = getDefaultSetCodes();
@@ -814,7 +831,7 @@
 				deckCounts = {};
 				$("#deck").val('');
 				UpdateCardCountsUI();
-				deckModified = true;
+				MarkDeckModified();
 				Parse();
 			}
 
@@ -1155,32 +1172,44 @@
 
 			// Helper: Select a precon for the given identity with priority order
 			function SelectPreconForIdentity(identityId) {
-				// Priority 1: Find all default precons matching identity
+				// Priority 1: Find all default precons matching identity, legal for the active format
 				var defaultPrecons = [];
 				for (var i = 0; i < preconDecks.length; i++) {
-					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].useAsCustomDefault === true) {
-						defaultPrecons.push(i);
-					}
+					var p = preconDecks[i];
+					if (String(p.identity) !== String(identityId)) continue;
+					if (p.useAsCustomDefault !== true) continue;
+					if (p.useForCustomGame !== true) continue;
+					if (!Array.isArray(p.sets)) continue;
+					var setsLegal = p.sets.every(function (code) {
+						return loadedSetCodes.indexOf(code) !== -1;
+					});
+					if (!setsLegal) continue;
+					defaultPrecons.push(i);
 				}
 				if (defaultPrecons.length > 0) {
-					// Pick one randomly if multiple exist
 					var randomIdx = defaultPrecons[RandomRange(0, defaultPrecons.length - 1)];
 					return randomIdx;
 				}
-				
-				// Priority 2: Find all non-default precons matching identity
+
+				// Priority 2: Find all non-default precons matching identity, legal for the active format
 				var nonDefaultPrecons = [];
 				for (var i = 0; i < preconDecks.length; i++) {
-					if (String(preconDecks[i].identity) === String(identityId) && preconDecks[i].useAsCustomDefault !== true) {
-						nonDefaultPrecons.push(i);
-					}
+					var p = preconDecks[i];
+					if (String(p.identity) !== String(identityId)) continue;
+					if (p.useAsCustomDefault === true) continue;
+					if (p.useForCustomGame !== true) continue;
+					if (!Array.isArray(p.sets)) continue;
+					var setsLegal = p.sets.every(function (code) {
+						return loadedSetCodes.indexOf(code) !== -1;
+					});
+					if (!setsLegal) continue;
+					nonDefaultPrecons.push(i);
 				}
 				if (nonDefaultPrecons.length > 0) {
-					// Pick one randomly if multiple exist
 					var randomIdx = nonDefaultPrecons[RandomRange(0, nonDefaultPrecons.length - 1)];
 					return randomIdx;
 				}
-				
+
 				// Priority 3: No matching precon found
 				return -1;
 			}
@@ -1195,6 +1224,10 @@
 				json = JSON.parse(
 				  LZString.decompressFromEncodedURIComponent(specifiedPlayerDeck)
 				);
+				// Metadata (name/notes/url) is only included in the URI when the deck was
+				// unmodified at the time it was sent (see deckForUri logic) — so its
+				// presence is a reliable signal this fresh load should also start clean.
+				deckModified = (typeof json.name === 'undefined');
 				if (typeof json.cards == 'undefined') json.cards = [];
 				//support legacy (gateway) format by looping through .systemGateway and converting to 30000 + set number
 				if (typeof json.systemGateway !== 'undefined') {
@@ -1293,7 +1326,7 @@
 			  }
 			  $("#deck").val(deckText);
 			  $("#deck").prop("rows", numRows); //resize textarea height to fit
-			  $("#deck").on("input propertychange paste", function(){ deckModified = true; Parse(); });
+			  $("#deck").on("input propertychange paste", function(){ MarkDeckModified(); Parse(); });
 			  //initial deckCounts from generated deck
 			  deckCounts = {};
 			  for (var i=0;i<playerCards.length;i++) {
@@ -2062,7 +2095,8 @@
 				UpdateCardCountsUI();
 				
 				// Reset dropdown
-				$('#preconselect').val('-1');
+				// $('#preconselect').val('-1');
+
 				// Add metadata and mark unmodified so URI includes it
 				json.name = precon.name || '';
 				if (precon.notes) json.notes = precon.notes;
