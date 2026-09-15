@@ -31,20 +31,20 @@ Specific card titles (e.g., _Quetzal_, _Kit_, _Inside Job_, _Botulus_, _Ice Carv
 
 ### Layer 1: Tactical ICE & Breaker Math — `[COMPLETED]`
 
-- **Breaker Matching:** Maps installed breakers against ICE subtypes (Barrier/Code Gate/Sentry) using engine hooks (`runner.AI._matchingBreakerInstalled` / `BreakerMatchesIce`).
-- **Break Cost Estimation:** Dynamically parses per-subroutine break costs and per-strength boost costs directly from card text regex (`(\d+) credit:` / `(\d+)[c]:`).
-- **Subroutine-Specific Filtering:** Classifies each subroutine from its ice's `AIImplementIce` output (`_requiredSubroutines()`), so resource-denial effects (program trash, tags, etc.) count toward `totalBreakCost`, not just end-the-run and damage. Negligible subroutines (`misc_minor`/`loseCredits`/`payCredits`) are still ignored; an unbreakable resource-denial ice is not treated as a lockout (the Runner can let it fire).
+- **Breaker Matching:** Maps active installed breakers and identities against ICE subtypes using `AIMatchingBreakerInstalled` / `BreakerMatchesIce` for both human and AI Runners. Hosted counter contributions are evaluated separately, and matching paid breakers are compared by estimated cost.
+- **Break Cost Estimation:** Reads activation prices and sizes from existing `AIImplementBreaker` hooks, with card-text regex as a fallback. Pump and break batches are rounded to whole activations. Public installed-breaker counts are prepared on a fresh Corp-owned calculator.
+- **Subroutine-Specific Filtering:** Classifies the Corp's actual ice, including unrezzed ice, through a Corp-owned calculator and `AIImplementIce`. Resource-denial effects contribute to `totalBreakCost` (the estimated cost of avoiding punishment). `totalMandatoryBreakCost` counts breaks needed to avoid ETR or lethal damage; only this mandatory cost is compared with Runner credits to declare security. Optional tags or program trash never establish a lockout by themselves. Negligible effects (`misc_minor`/`loseCredits`/`payCredits`) are ignored by the avoidance filter.
 - **Effective ICE Strength:** Factors in active strength-reducing cards and virus counters via `_effectiveIceStrength()`.
 
 ### Layer 2: Global & Root Security — `[COMPLETED]`
 
 - **Defensive Upgrades:** Inspects server root for breach-preventing upgrades (`Ash 2X3301`, `Caprice Nisei`) via `_hasDefensiveUpgrade()` using `card.AIPreventBreach`.
 - **Global ETR Counters:** Evaluates scored agendas with hosted counters (`Nisei MK II`) to recognize global, click-free ETR capabilities via `_hasGlobalETR()`.
-- **Punitive Lethality:** Calculates hand-size flatline risks (`_iceIsLethal()`), treating unpreventable lethal damage as a functional hard stop.
+- **Punitive Lethality:** Calculates hand-size flatline risks (`_iceIsLethal()`); damage must exceed grip size to be lethal. The mandatory-break estimate breaks only enough damage subroutines on a piece of ice to avoid flatlining.
 
 ### Layer 3: Non-Standard Tools & Efficiency — `[COMPLETED / REFACTORING PENDING]`
 
-- **Hosted Virus Breakers:** Detects cards hosted on ICE (`Botulus`) with sufficient virus counters, treating them as free breaks (`_hostedBreakerForIce()`).
+- **Hosted Virus Breakers:** Uses the shared subroutine classification for complete free coverage (`_hostedBreakerForIce()`); partial contributions reduce remaining paid breaks. Insufficient counters and unrelated hosted cards never disable the host ice.
 - **ID Ability Lockouts:** Models single-subroutine Barrier bypasses for Runner identities.
 - **Set-Agnostic Design:** Uses text-pattern matching fallbacks (e.g., `"hosted virus counter … break … subroutine"`) alongside title fast-paths (to be removed in refactor).
 
@@ -97,9 +97,15 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 | Engine Hook / Method              | Role                                                                                               |
 | --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `_evaluateServerSecurity(server)` | Primary entry point. Returns `{isSecure, hasHardLockout, totalBreakCost, runnerCredits, reasons}`. |
+| `_evaluateServerSecurity(server)` | Primary entry point. Returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, reasons}`. |
 | `card.modifyStrength`             | Engine hook defining strength modifiers. Inspected in `_effectiveIceStrength()`.                   |
 | `card.AIMatchingBreakerInstalled` | Engine hook on cards/identities that return matching capability for an ICE.                        |
 | `card.AIPreventBreach`            | Engine hook on root cards/upgrades that prevent breach.                                            |
 | `_effectiveIceStrength(iceCard)`  | Returns ICE strength minus active debuffs from engine hooks and virus counters.                    |
 | `_matchingBreakerForIce(ice)`     | Resolves matching breaker via active card hooks, hosted cards, or subtype fallbacks.               |
+
+## Regression Validation and Current Limits
+
+Run `node tests/corp-server-security.test.js` for focused checks of calculator ownership, actual unrezzed ice classification, breaker activation costs, mandatory versus optional punishment, hosted coverage, lethality, and human/AI identity matching. These tests load the real AI classes and priority card definitions with deterministic engine helpers; they do not replace browser gameplay testing.
+
+Security remains a per-ice heuristic, not a complete run simulation. It does not yet model cumulative damage across encounters, encounter payments, combined optional-effect sequences that disable later breakers, shared strength-reducer counter spending across multiple ice, or the effective-credit ceiling planned in Layer 6. `AIImplementBreaker` pricing probes support the standard `ImplementIcebreaker` activation path; other special breaker mechanisms need their own capability hooks.

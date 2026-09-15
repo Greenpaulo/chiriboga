@@ -36,7 +36,7 @@ class RunCalculator {
   // misc_moderate e.g. trash 1 program
   // misc_serious e.g. install another ice inward (like endTheRun, paths that fire these will be avoided)
   //encounterEffects is an array of OR arrays of effects
-  IceAI(ice, maxCorpCred, assumeWeakerUnknown = false, incomplete = false, startIceIdx = -1) {
+  IceAI(ice, maxCorpCred, assumeWeakerUnknown = false, incomplete = false, startIceIdx = -1, knowledgePlayer = runner) {
     var result = {
       ice: ice,
       subTypes: [],
@@ -44,7 +44,7 @@ class RunCalculator {
       strength: 0,
       encounterEffects: [[]],
     };
-    var iceKnown = PlayerCanLook(runner, ice);
+    var iceKnown = PlayerCanLook(knowledgePlayer, ice);
     if (!iceKnown) {
       //unknown ice
 	  var extraRezCost = RezCost(ice) - ice.rezCost; //this isn't cheating because we only check the bonus cost (easy way of summarising any card effects)

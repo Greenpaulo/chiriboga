@@ -2572,14 +2572,17 @@ cardSet[30032] = {
 	//note: args for ImplementIcebreaker are: point, card, cardStrength, iceAI, iceStrength, iceSubTypes, costToUpStr, amtToUpStr, costToBreak, amtToBreak, creditsLeft
     //unless have a spare, only use Mayfly for worthwhile targets (the 1.5 is arbitrary)
     var anotherInGrip = false;
-    for (var i = 0; i < runner.grip.length; i++) {
+    var runnerCalculation = runner.AI && runner.AI.rc === rc;
+    //Only the Runner's own calculator may inspect its grip or private run cache.
+    if (runnerCalculation) {
+      for (var i = 0; i < runner.grip.length; i++) {
         if (runner.grip[i].title == "Mayfly") {
           anotherInGrip = true;
           break;
         }
+      }
     }
-	//the !runner.AI check is in case the corp is doing the calculation
-    if (!runner.AI || runner.AI._getCachedPotential(server) > 1.5 || anotherInGrip) {
+    if (!runnerCalculation || runner.AI._getCachedPotential(server) > 1.5 || anotherInGrip) {
         result = result.concat(
           rc.ImplementIcebreaker(
             point,

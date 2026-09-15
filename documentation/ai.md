@@ -1350,15 +1350,15 @@ if (corp.AI != null) {
 - `corp.AI._iceWorthRezzing(ice, cost, server)` — returns true if the ice is worth rezzing
 - `corp.AI._isAScoringServer(server)` — true if the server can be used for scoring
 - `corp.AI._potentialDamageOnBreach(server)` — estimated damage runner would take
-- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, runnerCredits, reasons}`
+- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, reasons}`; `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts
 - `corp.AI._iceHasETR(ice)` — true if the ice can end the run (subroutine or encounter effect)
-- `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if the ice could flatline the Runner
+- `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if printed damage exceeds the Runner's grip size
 - `corp.AI._hasDefensiveUpgrade(server)` — true if an upgrade in the server prevents the breach
 - `corp.AI._hasGlobalETR()` — true if a scored card with a counter can end the run (e.g. Nisei MK II)
-- `corp.AI._estimateBreakCost(ice, breaker)` — crude credit estimate for the Runner to break the subroutines worth avoiding on the ice (`Infinity` if unbreakable). Subroutine severity comes from the Run Calculator's `AIImplementIce` output, so resource-denial effects (trash a program, tags, etc.) count too — only `misc_minor`/`loseCredits`/`payCredits` subroutines are ignored
-- `corp.AI._requiredSubroutines(ice)` — number of subroutines worth breaking per the Run Calculator's classification (falls back to the end-the-run/damage text regex when no Run Calculator is available, e.g. a human Runner)
+- `corp.AI._estimateBreakCost(ice, breaker, mandatoryOnly = false)` — estimated credit cost for avoiding punishment (`Infinity` when required breaks cannot be covered). Pass `true` to count only breaks needed to avoid ETR or lethal damage. Uses Corp-owned `AIImplementIce` classification, partial hosted contributions, and whole activation prices from `AIImplementBreaker`, falling back to card text. Optional punishment never establishes a security lockout.
+- `corp.AI._requiredSubroutines(ice)` — number of subroutines worth breaking per the Corp-owned Run Calculator's classification. Human and AI Runners use the same path; the end-the-run/damage regex is a fallback only when the calculator is unavailable.
 - `corp.AI._effectiveIceStrength(ice)` — ice strength after Runner reductions (Ice Carver, Leech, Datasucker)
-- `corp.AI._matchingBreakerForIce(ice)` — the Runner's matching breaker, or a synthetic zero-cost breaker when a hosted virus breaker (e.g. Botulus) has enough counters
+- `corp.AI._matchingBreakerForIce(ice)` — the cheapest matching active Runner breaker found through public matching hooks, including human Runner identities; returns a synthetic free breaker only when hosted contributions cover the shared severity list
 - `corp.AI._countETRSubroutines(ice)` — number of printed end-the-run subroutines on the ice
 - `corp.AI._agendasInHand()` — count of agendas currently in HQ
 - `corp.AI._isAmbush(server)` — true if server contains an ambush card

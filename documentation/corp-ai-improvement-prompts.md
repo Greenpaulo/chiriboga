@@ -222,3 +222,18 @@ Read the full `_evaluateServerSecurity`, `_estimateBreakCost`,
 in full before editing anything, so the fallback logic you preserve actually
 matches what's there today rather than an assumption from this spec. Ask
 before making a structural decision this spec doesn't cover.
+
+---
+
+## Review corrections (supersede conflicting implementation details above)
+
+The initial two-part brief is retained as historical task context. The following corrections are required for sound security estimates:
+
+- Use a fresh Corp-owned Run Calculator, with public installed-card counts prepared and `IceAI`'s knowledge player set to Corp. Reusing `runner.AI.rc` permits hidden-hand reads in hooks such as Diviner; breaker pricing hooks must also gate private information by calculator ownership (Mayfly now does this); leaving knowledge at Runner produces guesses for the Corp's unrezzed ice.
+- Use public matching hooks for both human and AI Runners. A matching hook is a capability hint, not a guarantee of affordable or complete breaking.
+- Read standard activation prices/sizes from `AIImplementBreaker`, and round pumps and break batches to whole activations. Retain card-text fallback for cards without that hook.
+- Use a shared severity list for regular and hosted breakers, and subtract partial hosted contributions. Hosting alone never disables ice.
+- Preserve resource-denial taxes in `totalBreakCost`, but compare only `totalMandatoryBreakCost` with Runner credits when deciding `isSecure`. A Runner may accept optional punishment, even if a matching breaker is installed. This applies within mixed punishment/ETR ice as well.
+- Damage equal to grip size is survivable; zero damage against an empty grip is harmless.
+
+Validation: `node tests/corp-server-security.test.js`. See the architecture roadmap's current limits for mechanics that still need full run simulation or additional hooks.
