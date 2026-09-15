@@ -1407,6 +1407,63 @@ class CorpAI {
     return Infinity; //no printed boost ability
   }
 
+  //returns the run calculator's own subroutine classification (result.sr) for
+  //this ice, reusing the exact call path the Runner AI uses (rc.IceAI, which in
+  //turn invokes the ice's AIImplementIce hook). Returns null when there is no
+  //Run Calculator available (e.g. a human Runner) so callers can fall back.
+  _iceSubroutineEffects(iceCard) {
+    if (!iceCard) return null;
+    if (
+      typeof runner == "undefined" ||
+      runner.AI == null ||
+      runner.AI.rc == null ||
+      typeof runner.AI.rc.IceAI != "function"
+    )
+      return null;
+    var iceAI = runner.AI.rc.IceAI(iceCard, AvailableCredits(corp));
+    if (iceAI == null || typeof iceAI.sr == "undefined") return null;
+    return iceAI.sr;
+  }
+
+  //returns true if the given sr "OR" branch contains an effect worth spending
+  //credits to avoid. The negligible effects (corp gains a credit, minor credit
+  //swings) are not worth breaking; anything else (endTheRun, netDamage, tag,
+  //misc_moderate, misc_serious, ...) counts as requiring a break.
+  _branchRequiresBreak(branch) {
+    if (typeof branch == "undefined" || branch == null) return false;
+    for (var i = 0; i < branch.length; i++) {
+      var effect = branch[i];
+      if (
+        effect != "misc_minor" &&
+        effect != "loseCredits" &&
+        effect != "payCredits"
+      )
+        return true;
+    }
+    return false;
+  }
+
+  //counts the subroutines the Runner must break according to the run
+  //calculator's classification. A subroutine is required if ANY of its OR
+  //branches contains an effect worth avoiding. Returns null when no
+  //classification is available so the caller can use its text-regex fallback.
+  _requiredSubroutines(iceCard) {
+    var sr = this._iceSubroutineEffects(iceCard);
+    if (sr == null) return null;
+    var required = 0;
+    for (var i = 0; i < sr.length; i++) {
+      var branches = sr[i];
+      if (typeof branches == "undefined" || branches == null) continue;
+      for (var j = 0; j < branches.length; j++) {
+        if (this._branchRequiresBreak(branches[j])) {
+          required++;
+          break;
+        }
+      }
+    }
+    return required;
+  }
+
   //crude estimate of the credits needed to break this ice
   //returns Infinity if it cannot be broken (no matching breaker / strength too high for its type)
   _estimateBreakCost(iceCard, breaker) {
@@ -1421,14 +1478,20 @@ class CorpAI {
       iceCard.subroutines.length < 1
     )
       return 0;
-    //only count the subroutines the Runner actually has to break - the ones that
-    //end the run or deal damage. Other subroutines can simply be allowed to fire,
-    //so breaking them would just waste credits (this matters for multi-subroutine ice)
-    var requiredSubroutines = 0;
-    for (var i = 0; i < iceCard.subroutines.length; i++) {
-      var subText = iceCard.subroutines[i].text;
-      if (this._textEndsTheRun(subText) || this._damageInText(subText) > 0)
-        requiredSubroutines++;
+    //only count the subroutines the Runner actually has to break - the ones
+    //worth spending credits to avoid. Use the run calculator's own subroutine
+    //classification (via each ice's AIImplementIce hook) where available, so
+    //resource-denial effects (trash a program, tags, etc.) are counted too, not
+    //just end-the-run and damage. Fall back to the text-regex heuristic when no
+    //Run Calculator is available (e.g. a human Runner).
+    var requiredSubroutines = this._requiredSubroutines(iceCard);
+    if (requiredSubroutines == null) {
+      requiredSubroutines = 0;
+      for (var i = 0; i < iceCard.subroutines.length; i++) {
+        var subText = iceCard.subroutines[i].text;
+        if (this._textEndsTheRun(subText) || this._damageInText(subText) > 0)
+          requiredSubroutines++;
+      }
     }
     if (requiredSubroutines < 1) return 0;
     var ret = requiredSubroutines * this._breakerBreakCost(breaker);
@@ -1516,10 +1579,14 @@ class CorpAI {
         }
         continue;
       }
-      //only ice the Runner *must* break contributes to the cost of getting in
-      //(non-ETR, non-lethal subroutines can simply be allowed to fire)
-      if (!endsTheRun && !lethal) continue;
-      result.totalBreakCost += this._estimateBreakCost(iceCard, breaker);
+      //every ice the Runner can get past contributes its break cost as a tax,
+      //including resource-denial subroutines (trash a program, tags, etc.) - not
+      //just end-the-run and lethal ones. An unbreakable ice only locks the Runner
+      //out if it would genuinely stop them (ETR or lethal); otherwise its
+      //subroutines can simply be allowed to fire, so it does not contribute.
+      var breakCost = this._estimateBreakCost(iceCard, breaker);
+      if (breakCost == Infinity && !endsTheRun && !lethal) continue;
+      result.totalBreakCost += breakCost;
     }
     if (result.totalBreakCost > result.runnerCredits) {
       result.reasons.push(

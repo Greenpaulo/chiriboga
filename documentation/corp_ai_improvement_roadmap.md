@@ -33,7 +33,7 @@ Specific card titles (e.g., _Quetzal_, _Kit_, _Inside Job_, _Botulus_, _Ice Carv
 
 - **Breaker Matching:** Maps installed breakers against ICE subtypes (Barrier/Code Gate/Sentry) using engine hooks (`runner.AI._matchingBreakerInstalled` / `BreakerMatchesIce`).
 - **Break Cost Estimation:** Dynamically parses per-subroutine break costs and per-strength boost costs directly from card text regex (`(\d+) credit:` / `(\d+)[c]:`).
-- **Subroutine-Specific Filtering:** Filters out non-ETR and non-lethal subroutines when calculating `totalBreakCost` (counting only subroutines the Runner _must_ break to breach).
+- **Subroutine-Specific Filtering:** Classifies each subroutine from its ice's `AIImplementIce` output (`_requiredSubroutines()`), so resource-denial effects (program trash, tags, etc.) count toward `totalBreakCost`, not just end-the-run and damage. Negligible subroutines (`misc_minor`/`loseCredits`/`payCredits`) are still ignored; an unbreakable resource-denial ice is not treated as a lockout (the Runner can let it fire).
 - **Effective ICE Strength:** Factors in active strength-reducing cards and virus counters via `_effectiveIceStrength()`.
 
 ### Layer 2: Global & Root Security — `[COMPLETED]`

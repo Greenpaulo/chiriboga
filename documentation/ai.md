@@ -1355,7 +1355,8 @@ if (corp.AI != null) {
 - `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if the ice could flatline the Runner
 - `corp.AI._hasDefensiveUpgrade(server)` — true if an upgrade in the server prevents the breach
 - `corp.AI._hasGlobalETR()` — true if a scored card with a counter can end the run (e.g. Nisei MK II)
-- `corp.AI._estimateBreakCost(ice, breaker)` — crude credit estimate for the Runner to break only the subroutines that matter (end the run or deal damage) on the ice (`Infinity` if unbreakable)
+- `corp.AI._estimateBreakCost(ice, breaker)` — crude credit estimate for the Runner to break the subroutines worth avoiding on the ice (`Infinity` if unbreakable). Subroutine severity comes from the Run Calculator's `AIImplementIce` output, so resource-denial effects (trash a program, tags, etc.) count too — only `misc_minor`/`loseCredits`/`payCredits` subroutines are ignored
+- `corp.AI._requiredSubroutines(ice)` — number of subroutines worth breaking per the Run Calculator's classification (falls back to the end-the-run/damage text regex when no Run Calculator is available, e.g. a human Runner)
 - `corp.AI._effectiveIceStrength(ice)` — ice strength after Runner reductions (Ice Carver, Leech, Datasucker)
 - `corp.AI._matchingBreakerForIce(ice)` — the Runner's matching breaker, or a synthetic zero-cost breaker when a hosted virus breaker (e.g. Botulus) has enough counters
 - `corp.AI._countETRSubroutines(ice)` — number of printed end-the-run subroutines on the ice
