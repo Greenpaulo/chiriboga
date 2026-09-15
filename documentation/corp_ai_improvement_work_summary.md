@@ -1,4 +1,4 @@
-# Corp AI Improvement — Complete Process Summary
+# Corp AI Improvement — Work Process Summary
 
 This documents the full process behind the Corp AI's server security evaluation
 system, from initial code review through to the final, tested implementation.

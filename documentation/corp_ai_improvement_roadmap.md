@@ -58,12 +58,14 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 - **Goal:** Replace legacy title fast-paths with engine-hook evaluation and generic pattern matchers for type shifts, targeted bypasses, and layer-depth threats.
 - **Dynamic Subtype Shifts:**
-  - Generic helper `_effectiveIceSubtypes(iceCard, server, iceIndex)` that checks active card modifier hooks or text patterns for `gains [subtype]` / `treat as [subtype]` (e.g., _Chromatophores_, _Rielle "Kit" Peddler_).
+  - Generic helper `_effectiveIceSubtypes(iceCard, server, iceIndex)` that checks active card modifier hooks or text patterns for `gains [subtype]` / `treat as [subtype]` (e.g., _Chromatophores_, _Rielle "Kit" Peddler_, _Egret_).
   - Replaces subtype-specific breaker matching with effective subtype matching (e.g., matching outer ICE against Decoders when type-shifted).
 - **Targeted ICE Bypasses:**
   - Generic helper `_iceIsBypassed(iceCard)` checking core engine bypass flags (`iceCard.bypassed` / targeted host relationships).
 - **Server Structural Depth:**
   - Evaluates 1-ICE vs. Multi-ICE server resilience against outermost-ICE bypass abilities. Single-ICE remote servers holding high-value agendas carry higher structural risk penalties.
+- **Entire ice bypasses:**
+  - Evaluate threat from cards that redirect runs to a different server therefore bypasses all the ICE (e.g., _Sneakdoor Beta_).
 
 ### Layer 5: Public Threat Memory (Imperfect Information Engine)
 
@@ -90,6 +92,13 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   - Scale central server protection urgency based on active multi-access cards installed in the Runner's rig (_Conduit_, _Maker's Eye_, _Interface_, _HQ Interface_).
 - **Macro Win-Con Classification:**
   - Detect non-interactive or central-focused Runner archetypes (e.g., heavy keyhole/milling or burn decks) to prevent the AI Corp from over-investing in remote servers while Centrals collapse.
+
+---
+
+### Layer 8: Baits
+
+- **Goal:** Understand when to leave a server with less security to bait the runner into a trap (e.g, _Urtica Cipher_), but without being too obvious.
+- TODO
 
 ---
 
