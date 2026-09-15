@@ -19,7 +19,7 @@ The AI Corp **must operate under strict imperfect information**.
 
 ### 2. Card-Agnostic Engine Hooks (No Hardcoded Titles)
 
-Specific card titles (e.g., _Quetzal_, _Kit_, _Inside Job_, _Botulus_, _Ice Carver_, _Leech_, _Datasucker_) mentioned throughout this roadmap are provided **strictly for context, illustration, and test-case validation**.
+Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Inside Job_, _Datasucker_) mentioned throughout this roadmap are provided **strictly for context, illustration, and test-case validation**.
 
 - **Do Not Hardcode Titles:** Logic must never rely on explicit `card.title === "X"` or `GetTitle(card) == "X"` checks unless an engine hook is completely absent.
 - **Target Mechanics & Engine Hooks:** All threat modules must target generic engine attributes (subtypes, counters, hosted statuses), rule-modifier objects (`modifyStrength`, `AIMatchingBreakerInstalled`, `AIPreventBreach`), and standardized text regex fallbacks so that mechanics apply seamlessly across past, present, and future card sets.
@@ -38,15 +38,15 @@ Specific card titles (e.g., _Quetzal_, _Kit_, _Inside Job_, _Botulus_, _Ice Carv
 
 ### Layer 2: Global & Root Security — `[COMPLETED]`
 
-- **Defensive Upgrades:** Inspects server root for breach-preventing upgrades (`Ash 2X3301`, `Caprice Nisei`) via `_hasDefensiveUpgrade()` using `card.AIPreventBreach`.
-- **Global ETR Counters:** Evaluates scored agendas with hosted counters (`Nisei MK II`) to recognize global, click-free ETR capabilities via `_hasGlobalETR()`.
+- **Defensive Upgrades:** Inspects server root for breach-preventing upgrades (_Ash 2X3301_, _Caprice Nisei_) via `_hasDefensiveUpgrade()` using `card.AIPreventBreach`.
+- **Global ETR Counters:** Evaluates scored agendas with hosted counters (_Nisei MK II_) to recognize global, click-free ETR capabilities via `_hasGlobalETR()`.
 - **Punitive Lethality:** Calculates hand-size flatline risks (`_iceIsLethal()`); damage must exceed grip size to be lethal. The mandatory-break estimate breaks only enough damage subroutines on a piece of ice to avoid flatlining.
 
-### Layer 3: Non-Standard Tools & Efficiency — `[COMPLETED / REFACTORING PENDING]`
+### Layer 3: Non-Standard Tools & Efficiency — `[COMPLETED]`
 
 - **Hosted Virus Breakers:** Uses the shared subroutine classification for complete free coverage (`_hostedBreakerForIce()`); partial contributions reduce remaining paid breaks. Insufficient counters and unrelated hosted cards never disable the host ice.
-- **ID Ability Lockouts:** Models single-subroutine Barrier bypasses for Runner identities.
-- **Set-Agnostic Design:** Uses text-pattern matching fallbacks (e.g., `"hosted virus counter … break … subroutine"`) alongside title fast-paths (to be removed in refactor).
+- **ID Ability Lockouts:** Models single-subroutine Barrier bypasses for Runner identities (e.g., _Quetzal: Free Spirit_).
+- **Set-Agnostic Design:** Uses declarative hooks (`AIReducesIceStrength`, `AIHostedBreakContribution`, `AIMatchingBreakerInstalled`) as the primary path, with text-pattern matching fallbacks (e.g., `"hosted virus counter … break … subroutine"`) only for cards that don't declare a hook. Title fast-paths were removed from `ai_corp.js` in the declarative-hooks refactor.
 
 ---
 
@@ -58,7 +58,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 - **Goal:** Replace legacy title fast-paths with engine-hook evaluation and generic pattern matchers for type shifts, targeted bypasses, and layer-depth threats.
 - **Dynamic Subtype Shifts:**
-  - Generic helper `_effectiveIceSubtypes(iceCard, server, iceIndex)` that checks active card modifier hooks or text patterns for `gains [subtype]` / `treat as [subtype]`.
+  - Generic helper `_effectiveIceSubtypes(iceCard, server, iceIndex)` that checks active card modifier hooks or text patterns for `gains [subtype]` / `treat as [subtype]` (e.g., _Chromatophores_, _Rielle "Kit" Peddler_).
   - Replaces subtype-specific breaker matching with effective subtype matching (e.g., matching outer ICE against Decoders when type-shifted).
 - **Targeted ICE Bypasses:**
   - Generic helper `_iceIsBypassed(iceCard)` checking core engine bypass flags (`iceCard.bypassed` / targeted host relationships).
@@ -95,14 +95,14 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 ## Reference Engine Hooks & Helpers in `ai_corp.js`
 
-| Engine Hook / Method              | Role                                                                                               |
-| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Engine Hook / Method              | Role                                                                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `_evaluateServerSecurity(server)` | Primary entry point. Returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, reasons}`. |
-| `card.modifyStrength`             | Engine hook defining strength modifiers. Inspected in `_effectiveIceStrength()`.                   |
-| `card.AIMatchingBreakerInstalled` | Engine hook on cards/identities that return matching capability for an ICE.                        |
-| `card.AIPreventBreach`            | Engine hook on root cards/upgrades that prevent breach.                                            |
-| `_effectiveIceStrength(iceCard)`  | Returns ICE strength minus active debuffs from engine hooks and virus counters.                    |
-| `_matchingBreakerForIce(ice)`     | Resolves matching breaker via active card hooks, hosted cards, or subtype fallbacks.               |
+| `card.modifyStrength`             | Engine hook defining strength modifiers. Inspected in `_effectiveIceStrength()`.                                            |
+| `card.AIMatchingBreakerInstalled` | Engine hook on cards/identities that return matching capability for an ICE.                                                 |
+| `card.AIPreventBreach`            | Engine hook on root cards/upgrades that prevent breach.                                                                     |
+| `_effectiveIceStrength(iceCard)`  | Returns ICE strength minus active debuffs from engine hooks and virus counters.                                             |
+| `_matchingBreakerForIce(ice)`     | Resolves matching breaker via active card hooks, hosted cards, or subtype fallbacks.                                        |
 
 ## Regression Validation and Current Limits
 

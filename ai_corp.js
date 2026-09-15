@@ -1280,7 +1280,6 @@ class CorpAI {
     //declarative hook: the hosted card reports how many subroutines it can break
     if (typeof hosted.AIHostedBreakContribution == "function")
       return hosted.AIHostedBreakContribution(iceCard) > 0;
-    if (GetTitle(hosted) == "Botulus") return true;
     //set-agnostic fallback: the standard 'hosted virus counter ... break ... subroutine' wording
     if (typeof hosted.cardText == "undefined" || hosted.cardText == null)
       return false;
@@ -1313,13 +1312,6 @@ class CorpAI {
         reduction += card.AIReducesIceStrength(iceCard);
         continue;
       }
-      var title = GetTitle(card);
-      if (typeof title != "string") continue; //guard against pseudo-cards
-      //Ice Carver fallback: while you are encountering a piece of ice, it gets -1 strength
-      if (title.indexOf("Ice Carver") > -1) {
-        reduction += 1;
-        continue;
-      }
       //virus cards that spend their counters for -1 strength each
       if (this._virusCountersReduceStrength(card, iceCard)) {
         reduction += Counters(card, "virus");
@@ -1332,22 +1324,20 @@ class CorpAI {
 
   //returns true if the card spends its virus counters to reduce the strength of
   //the ice the Runner is encountering (e.g. Leech, Datasucker)
-  _virusCountersReduceStrength(card, iceCard) {
-    if (!card) return false;
-    //declarative hook takes precedence (covers both virus-based and flat reducers)
-    if (typeof card.AIReducesIceStrength == "function")
-      return card.AIReducesIceStrength(iceCard) > 0;
-    if (Counters(card, "virus") < 1) return false;
-    var title = GetTitle(card);
-    if (title == "Leech" || title == "Datasucker") return true;
-    //set-agnostic fallback: the standard 'hosted virus counter ... strength' wording
-    if (typeof card.cardText == "undefined" || card.cardText == null)
-      return false;
-    var text = card.cardText.toString().toLowerCase();
-    return (
-      text.indexOf("hosted virus counter") > -1 && text.indexOf("strength") > -1
-    );
-  }
+   _virusCountersReduceStrength(card, iceCard) {
+      if (!card) return false;
+      //declarative hook takes precedence (covers both virus-based and flat reducers)
+      if (typeof card.AIReducesIceStrength == "function")
+        return card.AIReducesIceStrength(iceCard) > 0;
+      if (Counters(card, "virus") < 1) return false;
+      //set-agnostic fallback: the standard 'hosted virus counter ... strength' wording
+      if (typeof card.cardText == "undefined" || card.cardText == null)
+        return false;
+      var text = card.cardText.toString().toLowerCase();
+      return (
+        text.indexOf("hosted virus counter") > -1 && text.indexOf("strength") > -1
+      );
+    }
 
   //counts the printed end-the-run subroutines on the ice
   _countETRSubroutines(iceCard) {

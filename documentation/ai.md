@@ -962,6 +962,57 @@ if (runner.AI != null && choices.length > 0) {
 
 ---
 
+### 4.16 Ice Strength Reduction — `AIReducesIceStrength`
+
+Cards that reduce the strength of ice the runner is encountering (via virus
+counters, a flat modifier, or any other mechanism) should implement this so
+the Corp AI's `_effectiveIceStrength()` can account for them when deciding
+whether a server is actually secure — without it, the Corp AI will assume
+ice is at full printed strength even when it effectively isn't.
+
+**Signature:**
+```js
+AIReducesIceStrength: function(iceCard) { return amount; }
+```
+Return how much strength this card currently removes from `iceCard`. Return
+`0` if it isn't currently reducing anything (e.g. no virus counters yet).
+
+**Example — Leech (spends virus counters):**
+```js
+AIReducesIceStrength: function (iceCard) {
+    return Counters(this, "virus");
+},
+```
+
+**Example — Ice Carver (flat -1, no counters involved):**
+```js
+AIReducesIceStrength: function (iceCard) {
+    return 1;
+},
+```
+
+### 4.17 Hosted Subroutine Breakers — `AIHostedBreakContribution`
+
+Cards hosted on ice that break its subroutines using counters (rather than
+credits, e.g. Botulus) should implement this alongside the `AIMatchingBreakerInstalled` hook from [section 4.2](#42-special--trojan-breakers), so the
+Corp AI's server security evaluation can correctly account for partial
+coverage — a hosted breaker with 1 counter against 2 required subroutines
+should reduce, not eliminate, the remaining break cost.
+
+**Signature:**
+```js
+AIHostedBreakContribution: function(iceCard) { return subsItCanBreak; }
+```
+Return how many subroutines on `iceCard` this card can currently break for
+free. Return `0` (or omit the hook) if it can't currently break anything.
+
+**Example — Botulus:**
+```js
+AIHostedBreakContribution: function (iceCard) {
+    return Counters(this, "virus");
+},
+```
+
 ## 5. Corp AI Hooks
 
 ### 5.1 ICE — `AIImplementIce`
