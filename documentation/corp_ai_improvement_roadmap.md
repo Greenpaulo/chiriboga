@@ -95,9 +95,9 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 ---
 
-### Layer 8: Baits
+### Layer 8: Baits & Bluffs
 
-- **Goal:** Understand when to leave a server with less security to bait the runner into a trap (e.g, _Urtica Cipher_), but without being too obvious.
+- **Goal:** Understand when to leave a server with less security to bait the runner into a trap (e.g, _Urtica Cipher_), but without being too obvious. Conversly, when to bluff by unprotecting a server to look like a trap (e.g. deadly asset that can be advanced), but playing an agenda in there instead.
 - TODO
 
 ---
