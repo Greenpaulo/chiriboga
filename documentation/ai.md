@@ -1350,6 +1350,15 @@ if (corp.AI != null) {
 - `corp.AI._iceWorthRezzing(ice, cost, server)` — returns true if the ice is worth rezzing
 - `corp.AI._isAScoringServer(server)` — true if the server can be used for scoring
 - `corp.AI._potentialDamageOnBreach(server)` — estimated damage runner would take
+- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, runnerCredits, reasons}`
+- `corp.AI._iceHasETR(ice)` — true if the ice can end the run (subroutine or encounter effect)
+- `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if the ice could flatline the Runner
+- `corp.AI._hasDefensiveUpgrade(server)` — true if an upgrade in the server prevents the breach
+- `corp.AI._hasGlobalETR()` — true if a scored card with a counter can end the run (e.g. Nisei MK II)
+- `corp.AI._estimateBreakCost(ice, breaker)` — crude credit estimate for the Runner to break only the subroutines that matter (end the run or deal damage) on the ice (`Infinity` if unbreakable)
+- `corp.AI._effectiveIceStrength(ice)` — ice strength after Runner reductions (Ice Carver, Leech, Datasucker)
+- `corp.AI._matchingBreakerForIce(ice)` — the Runner's matching breaker, or a synthetic zero-cost breaker when a hosted virus breaker (e.g. Botulus) has enough counters
+- `corp.AI._countETRSubroutines(ice)` — number of printed end-the-run subroutines on the ice
 - `corp.AI._agendasInHand()` — count of agendas currently in HQ
 - `corp.AI._isAmbush(server)` — true if server contains an ambush card
 - `corp.AI._bestRecurToHQOption(options, serverUnderThreat, useNowIfPossible)` — picks the best card to recur to HQ

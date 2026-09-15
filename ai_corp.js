@@ -1119,6 +1119,427 @@ class CorpAI {
     return "HQ_SAFE";
   }
 
+  //**SERVER SECURITY EVALUATION**
+  //Heuristic estimates of whether a server is genuinely safe from the Runner
+  //this turn: either the Runner has no way through ('hard lockout') or they
+  //cannot afford to break the ice that would otherwise stop them. This is kept
+  //deliberately crude, in the same spirit as _cardProtectionValue.
+  //Runner-specific effects (Quetzal, Botulus, Leech/Ice Carver) are folded in
+  //wherever they would change the verdict.
+
+  //returns true if the given text describes an effect that ends the run
+  _textEndsTheRun(text) {
+    if (typeof text == "undefined" || text == null) return false;
+    return text.toString().toLowerCase().indexOf("nd the run") > -1;
+  }
+
+  //returns true if the ice can end the run (printed subroutine or encounter effect)
+  _iceHasETR(iceCard) {
+    if (!iceCard) return false;
+    if (typeof iceCard.subroutines !== "undefined") {
+      for (var i = 0; i < iceCard.subroutines.length; i++) {
+        if (this._textEndsTheRun(iceCard.subroutines[i].text)) return true;
+      }
+    }
+    //some ice end the run without a printed subroutine (e.g. Tollbooth's encounter effect)
+    return this._textEndsTheRun(iceCard.cardText);
+  }
+
+  //sums the printed damage in the given text (e.g. "Do 2 net damage.")
+  _damageInText(text) {
+    var ret = 0;
+    if (typeof text == "undefined" || text == null) return ret;
+    //note: conditional damage (e.g. 'if the Runner has 2 tags') is counted as if it will happen
+    var pattern = /(\d+)\s*(?:net|meat|core|brain)\s*damage/gi;
+    var match = pattern.exec(text);
+    while (match != null) {
+      ret += parseInt(match[1]);
+      match = pattern.exec(text);
+    }
+    return ret;
+  }
+
+  //returns true if the ice could flatline the Runner
+  //runnerHandSize defaults to the Runner's current grip size
+  _iceIsLethal(iceCard, runnerHandSize) {
+    if (!iceCard) return false;
+    if (typeof runnerHandSize == "undefined") runnerHandSize = runner.grip.length;
+    if (runnerHandSize < 1) return true;
+    //printed subroutines are the usual source of damage
+    var subDamage = 0;
+    if (typeof iceCard.subroutines !== "undefined") {
+      for (var i = 0; i < iceCard.subroutines.length; i++) {
+        subDamage += this._damageInText(iceCard.subroutines[i].text);
+      }
+    }
+    //take the highest rather than the sum so printed card text isn't double counted
+    var damage = Math.max(subDamage, this._damageInText(iceCard.cardText));
+    if (damage >= runnerHandSize) {
+      this._log(
+        iceCard.title +
+          " could do " +
+          damage +
+          " damage to a hand of " +
+          runnerHandSize,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  //returns true if a card (in this server, or already active) will prevent the
+  //Runner from breaching it. Deliberately stricter than AIDefensiveValue, which
+  //is only a graded protection value (already counted by _cardProtectionValue).
+  _hasDefensiveUpgrade(server) {
+    if (!server) return false;
+    if (typeof server.root !== "undefined") {
+      for (var i = 0; i < server.root.length; i++) {
+        var card = server.root[i];
+        //unrezzed cards only count if we could afford to rez them
+        if (!card.rezzed && !CheckCredits(corp, RezCost(card), "rezzing", card))
+          continue;
+        if (typeof card.AIPreventBreach == "function") {
+          if (card.AIPreventBreach.call(card, server)) return true;
+        }
+      }
+    }
+    //catches prevention from already-active cards (e.g. a scored agenda or the identity)
+    return this._breachWouldBePrevented(ActiveCards(corp), server);
+  }
+
+  //returns true if the Corp has a scored card with a counter that can end the run
+  //(e.g. a scored Nisei MK II) - this is not tied to a particular server
+  _hasGlobalETR() {
+    for (var i = 0; i < corp.scoreArea.length; i++) {
+      var scoredCard = corp.scoreArea[i];
+      if (Counters(scoredCard, "agenda") < 1) continue;
+      if (typeof scoredCard.abilities == "undefined") continue;
+      for (var j = 0; j < scoredCard.abilities.length; j++) {
+        if (this._textEndsTheRun(scoredCard.abilities[j].text)) return true;
+      }
+    }
+    return false;
+  }
+
+  //returns the Runner's installed breaker that matches this ice (using the
+  //Runner AI's own matching logic where possible, so special cases still work)
+  _matchingBreakerForIce(iceCard) {
+    if (!iceCard) return null;
+    //a hosted virus breaker (e.g. Botulus) can break subroutines on its host ice
+    var hostedBreaker = this._hostedBreakerForIce(iceCard);
+    if (hostedBreaker) return hostedBreaker;
+    if (
+      runner.AI != null &&
+      typeof runner.AI._matchingBreakerInstalled == "function"
+    ) {
+      return runner.AI._matchingBreakerInstalled(iceCard);
+    }
+    //fallback for a human Runner (no AI to ask)
+    var installed = ActiveCards(runner);
+    for (var i = 0; i < installed.length; i++) {
+      if (CheckSubType(installed[i], "Icebreaker")) {
+        if (BreakerMatchesIce(installed[i], iceCard)) return installed[i];
+      }
+    }
+    return null;
+  }
+
+  //returns a synthetic breaker if a hosted virus breaker (e.g. Botulus) on this
+  //ice has enough counters to break the subroutines that matter, otherwise null
+  _hostedBreakerForIce(iceCard) {
+    if (!iceCard || typeof iceCard.hostedCards == "undefined") return null;
+    var requiredSubroutines = 0;
+    if (typeof iceCard.subroutines !== "undefined") {
+      for (var i = 0; i < iceCard.subroutines.length; i++) {
+        var subText = iceCard.subroutines[i].text;
+        if (this._textEndsTheRun(subText) || this._damageInText(subText) > 0)
+          requiredSubroutines++;
+      }
+    }
+    if (requiredSubroutines < 1) return null;
+    for (var i = 0; i < iceCard.hostedCards.length; i++) {
+      var hosted = iceCard.hostedCards[i];
+      if (!this._isHostedVirusBreaker(hosted)) continue;
+      if (Counters(hosted, "virus") >= requiredSubroutines) {
+        this._log(
+          GetTitle(hosted) +
+            " can break " +
+            requiredSubroutines +
+            " subroutine(s) on " +
+            GetTitle(iceCard) +
+            " for free",
+        );
+        //zero break/boost cost - the counters do all the work
+        return {
+          cardText: "0 credit: break 1 subroutine",
+          AIFixedStrength: false,
+          AIBotulus: true,
+        };
+      }
+    }
+    return null;
+  }
+
+  //returns true for a card hosted on ice that breaks subroutines using its virus
+  //counters (e.g. Botulus)
+  _isHostedVirusBreaker(hosted) {
+    if (!hosted) return false;
+    if (GetTitle(hosted) == "Botulus") return true;
+    //set-agnostic fallback: the standard 'hosted virus counter ... break ... subroutine' wording
+    if (typeof hosted.cardText == "undefined" || hosted.cardText == null)
+      return false;
+    var text = hosted.cardText.toString().toLowerCase();
+    return (
+      text.indexOf("hosted virus counter") > -1 &&
+      text.indexOf("break") > -1 &&
+      text.indexOf("subroutine") > -1
+    );
+  }
+
+  //returns the strength the ice is effectively at when the Runner encounters it,
+  //accounting for the Runner's strength-reduction cards. Kept crude but
+  //set-agnostic: Ice Carver is found by title, while virus counters are counted
+  //on cards whose printed text spends them for -1 strength (e.g. Leech, Datasucker).
+  _effectiveIceStrength(iceCard) {
+    if (!iceCard) return 0;
+    var printedStrength = Strength(iceCard);
+    //some ice cannot be weakened at all (e.g. by Ice Carver or Datasucker)
+    if (iceCard.strengthCannotBeLowered) return printedStrength;
+    var reduction = 0;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      //only the Runner's own cards can weaken ice
+      if (card.player != runner) continue;
+      var title = GetTitle(card);
+      if (typeof title != "string") continue; //guard against pseudo-cards
+      //Ice Carver: while you are encountering a piece of ice, it gets -1 strength
+      if (title.indexOf("Ice Carver") > -1) {
+        reduction += 1;
+        continue;
+      }
+      //virus cards that spend their counters for -1 strength each
+      if (this._virusCountersReduceStrength(card)) {
+        reduction += Counters(card, "virus");
+      }
+    }
+    var ret = printedStrength - reduction;
+    if (ret < 0) ret = 0; //strength can never drop below zero
+    return ret;
+  }
+
+  //returns true if the card spends its virus counters to reduce the strength of
+  //the ice the Runner is encountering (e.g. Leech, Datasucker)
+  _virusCountersReduceStrength(card) {
+    if (!card || Counters(card, "virus") < 1) return false;
+    var title = GetTitle(card);
+    if (title == "Leech" || title == "Datasucker") return true;
+    //set-agnostic fallback: the standard 'hosted virus counter ... strength' wording
+    if (typeof card.cardText == "undefined" || card.cardText == null)
+      return false;
+    var text = card.cardText.toString().toLowerCase();
+    return (
+      text.indexOf("hosted virus counter") > -1 &&
+      text.indexOf("strength") > -1
+    );
+  }
+
+  //counts the printed end-the-run subroutines on the ice
+  _countETRSubroutines(iceCard) {
+    var ret = 0;
+    if (!iceCard || typeof iceCard.subroutines == "undefined") return ret;
+    for (var i = 0; i < iceCard.subroutines.length; i++) {
+      if (this._textEndsTheRun(iceCard.subroutines[i].text)) ret++;
+    }
+    return ret;
+  }
+
+  //returns the Runner's identity title (empty string if none can be found)
+  _runnerIdentityTitle() {
+    if (typeof runner.identityCard !== "undefined" && runner.identityCard)
+      return GetTitle(runner.identityCard);
+    if (typeof runner.identity !== "undefined" && runner.identity)
+      return GetTitle(runner.identity);
+    return "";
+  }
+
+  //estimated credits a breaker spends per subroutine broken (from its printed text)
+  _breakerBreakCost(breaker) {
+    var match = /(\d+)\s*(?:\[c\]|credits?)\s*:[^.]*?break\s+(?:up to\s+)?(\d+)/i.exec(
+      breaker.cardText,
+    );
+    if (match != null) {
+      var amount = parseInt(match[2]);
+      if (amount > 0) return parseInt(match[1]) / amount;
+    }
+    return 2; //arbitrary fallback (the most common printed break cost)
+  }
+
+  //estimated credits a breaker spends per point of strength (Infinity if fixed strength)
+  _breakerBoostCost(breaker) {
+    if (breaker.AIFixedStrength) return Infinity;
+    var match = /(\d+)\s*(?:\[c\]|credits?)\s*:[^.]*?\+(\d+)\s*strength/i.exec(
+      breaker.cardText,
+    );
+    if (match != null) {
+      var amount = parseInt(match[2]);
+      if (amount > 0) return parseInt(match[1]) / amount;
+    }
+    return Infinity; //no printed boost ability
+  }
+
+  //crude estimate of the credits needed to break this ice
+  //returns Infinity if it cannot be broken (no matching breaker / strength too high for its type)
+  _estimateBreakCost(iceCard, breaker) {
+    if (!iceCard) return 0;
+    if (typeof breaker == "undefined")
+      breaker = this._matchingBreakerForIce(iceCard);
+    if (!breaker) return Infinity;
+    //a hosted virus breaker with enough counters (e.g. Botulus) breaks for free
+    if (breaker.AIBotulus) return 0;
+    if (
+      typeof iceCard.subroutines == "undefined" ||
+      iceCard.subroutines.length < 1
+    )
+      return 0;
+    //only count the subroutines the Runner actually has to break - the ones that
+    //end the run or deal damage. Other subroutines can simply be allowed to fire,
+    //so breaking them would just waste credits (this matters for multi-subroutine ice)
+    var requiredSubroutines = 0;
+    for (var i = 0; i < iceCard.subroutines.length; i++) {
+      var subText = iceCard.subroutines[i].text;
+      if (this._textEndsTheRun(subText) || this._damageInText(subText) > 0)
+        requiredSubroutines++;
+    }
+    if (requiredSubroutines < 1) return 0;
+    var ret = requiredSubroutines * this._breakerBreakCost(breaker);
+    var strengthGap = this._effectiveIceStrength(iceCard) - Strength(breaker);
+    if (strengthGap > 0) {
+      var boostCost = this._breakerBoostCost(breaker);
+      if (boostCost == Infinity) return Infinity;
+      ret += Math.ceil(strengthGap) * boostCost;
+    }
+    return ret;
+  }
+
+  //Estimates whether the Runner could breach this server this turn.
+  //'secure' means the Runner either cannot get through at all (hasHardLockout)
+  //or must spend more credits than they have to break the ice that would stop them.
+  //Takes into account Runner identity abilities (e.g. Quetzal), hosted virus
+  //breakers (e.g. Botulus) and strength-reduction cards (e.g. Leech, Ice Carver).
+  //Returns {isSecure, hasHardLockout, totalBreakCost, runnerCredits, reasons}
+  _evaluateServerSecurity(server) {
+    var result = {
+      isSecure: false,
+      hasHardLockout: false,
+      totalBreakCost: 0,
+      runnerCredits: Credits(runner),
+      reasons: [],
+    };
+    if (!server) return result;
+    //a global way to end the run (e.g. a scored Nisei MK II counter) can save any server
+    if (this._hasGlobalETR()) {
+      result.hasHardLockout = true;
+      result.reasons.push("global end the run available");
+    }
+    //defensive upgrades can prevent the breach outright
+    if (this._hasDefensiveUpgrade(server)) {
+      result.hasHardLockout = true;
+      result.reasons.push("defensive upgrade prevents breach");
+    }
+    var runnerHandSize = runner.grip.length;
+    //Quetzal can break one barrier subroutine for free, once per turn
+    var hasQuetzal = this._runnerIdentityTitle().indexOf("Quetzal") > -1;
+    var quetzalUsedThisTurn = false;
+    for (var i = 0; i < server.ice.length; i++) {
+      var iceCard = server.ice[i];
+      //unrezzed ice we can't afford is effectively not there
+      if (
+        !iceCard.rezzed &&
+        !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
+      )
+        continue;
+      var breaker = this._matchingBreakerForIce(iceCard);
+      var botulus = breaker && breaker.AIBotulus;
+      //disabled ice (hosted cards / Femme Fatale) provides no protection, unless
+      //a hosted virus breaker (e.g. Botulus) is breaking subroutines for the Runner
+      if (this._iceIsDisabled(iceCard) && !botulus) continue;
+      var endsTheRun = this._iceHasETR(iceCard);
+      //Quetzal's identity ability breaks one barrier subroutine for free each turn
+      if (
+        endsTheRun &&
+        hasQuetzal &&
+        !quetzalUsedThisTurn &&
+        CheckSubType(iceCard, "Barrier") &&
+        this._countETRSubroutines(iceCard) == 1
+      ) {
+        quetzalUsedThisTurn = true;
+        endsTheRun = false;
+        result.reasons.push(
+          "Quetzal breaks " +
+            GetTitle(iceCard) +
+            "'s end-the-run subroutine for free",
+        );
+      }
+      var lethal = this._iceIsLethal(iceCard, runnerHandSize);
+      //note the ways the Runner can reduce the cost/effectiveness of this ice
+      //(Botulus is only returned as a breaker when it can cover the required subroutines)
+      if (botulus) {
+        result.reasons.push(
+          "Botulus breaks subroutines on " + GetTitle(iceCard) + " for free",
+        );
+      }
+      var effectiveStrength = this._effectiveIceStrength(iceCard);
+      if (Strength(iceCard) != effectiveStrength) {
+        result.reasons.push(
+          GetTitle(iceCard) +
+            " is effectively strength " +
+            effectiveStrength +
+            " for the Runner",
+        );
+      }
+      if (!breaker) {
+        //nothing the Runner has can avoid this ice
+        if (endsTheRun) {
+          result.hasHardLockout = true;
+          result.reasons.push(
+            GetTitle(iceCard) + " ends the run with no matching breaker",
+          );
+        } else if (lethal) {
+          result.hasHardLockout = true;
+          result.reasons.push(
+            GetTitle(iceCard) + " is lethal with no matching breaker",
+          );
+        }
+        continue;
+      }
+      //only ice the Runner *must* break contributes to the cost of getting in
+      //(non-ETR, non-lethal subroutines can simply be allowed to fire)
+      if (!endsTheRun && !lethal) continue;
+      result.totalBreakCost += this._estimateBreakCost(iceCard, breaker);
+    }
+    if (result.totalBreakCost > result.runnerCredits) {
+      result.reasons.push(
+        "break cost " +
+          result.totalBreakCost +
+          " > Runner credits " +
+          result.runnerCredits,
+      );
+    }
+    result.isSecure =
+      result.hasHardLockout || result.totalBreakCost > result.runnerCredits;
+    if (result.isSecure) {
+      this._log(
+        ServerName(server) +
+          " appears secure: " +
+          (result.reasons.length > 0
+            ? result.reasons.join("; ")
+            : "unaffordable"),
+      );
+    }
+    return result;
+  }
+
   _protectionScore(
     server, //higher number = more protected
     options, //ignoreSuccessfulRuns, ignoreBackdoorFromArchives, returnArchivesLowerScoreForHQIfBackdoor
@@ -1137,6 +1558,11 @@ class CorpAI {
     if (this._obsoleteBluffInstalledInServer(server)) ret += 5; //the value is arbitrary, test and tweak
     //protection score depends on ice and upgrades protecting
     ret += this._iceAndRootProtection(server);
+    //a server the Runner cannot get into needs no further protection
+    //(the 2 is arbitrary, test and tweak - bounded so it doesn't swamp other factors)
+    if (server.ice.length > 0 || server.root.length > 0) {
+      if (this._evaluateServerSecurity(server).isSecure) ret += 2;
+    }
     if (!options.ignoreSuccessfulRuns) {
       //if it is being run successfully a lot, need extra protection
       var successfulRuns = 0;
