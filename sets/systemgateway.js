@@ -179,6 +179,11 @@ cardSet[30003] = {
 };
 cardSet[30004] = {
   title: "Botulus",
+  //AI: reports how many subroutines this card can break on the given ice
+  AIHostedBreakContribution: function (iceCard) {
+    if (this.host && iceCard != this.host) return 0;
+    return Counters(this, "virus");
+  },
   imageFile: "30004.png",
   elo: 1817,
   player: runner,
@@ -593,6 +598,10 @@ cardSet[30007] = {
 };
 cardSet[30008] = {
   title: "Leech",
+  //AI: reports how much strength this card currently reduces via its virus counters
+  AIReducesIceStrength: function (iceCard) {
+    return Counters(this, "virus");
+  },
   imageFile: "30008.png",
   elo: 1695,
   player: runner,

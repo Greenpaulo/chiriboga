@@ -3,6 +3,8 @@
 setIdentifiers.push('su21');
 cardSet[31001] = {
   title: 'Quetzal: Free Spirit',
+  //AI: Quetzal's identity ability is not limited by the encountered ice's strength
+  AIBreaksRegardlessOfStrength: true,
   imageFile: "31001.png",
   cardText: "0 credits: Break 1 barrier subroutine. Use this ability only once per turn.",
   elo: 1506,
@@ -81,7 +83,7 @@ cardSet[31001] = {
   },
   AIMatchingBreakerInstalled: function (iceCard) {
 	//returns a matching breaker installed, or null
-	//in this case, true if it's a Barrier, if it's the only Barrier in the server, has only one subroutine, and the ability hasn't been used this turn
+	//in this case, returns this if it's a Barrier, if it's the only Barrier in the server, has only one subroutine, and the ability hasn't been used this turn
 	if (this.usedThisTurn) return null;
 	if (CheckSubType(iceCard, "Barrier")) {
 		if (iceCard.subroutines.length > 1) return null;
@@ -93,7 +95,7 @@ cardSet[31001] = {
 				}
 			}
 		}
-		return true;
+		return this;
 	}
 	return null;
   },
@@ -630,6 +632,10 @@ cardSet[31009] = {
   imageFile: "31009.png",
   cardText: "While you are encountering a piece of ice, it gets -1 strength.",
   elo: 1662,
+  //AI: reports how much strength this card currently reduces (a flat -1)
+  AIReducesIceStrength: function (iceCard) {
+    return 1;
+  },
   player: runner,
   faction: "Anarch",
   influence: 3,
