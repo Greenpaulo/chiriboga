@@ -1553,6 +1553,12 @@ cardSet[31022] = {
   strength: 2,
   strengthBoost: 0,
   chosenCard: null,
+  //Public Corp security evaluation: the chosen ice can be bypassed for 1
+  //credit per printed subroutine.
+  AIBypassesIce: function(iceCard) {
+	if (iceCard != this.chosenCard) return false;
+	return (iceCard.subroutines || []).length;
+  },
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
@@ -1749,6 +1755,9 @@ cardSet[31023] = {
   memoryCost: 2,
   installCost: 4,
   runningWithThis: false,
+  AIRedirectsRun: function(fromServer, toServer) {
+	return fromServer == corp.archives && toServer == corp.HQ;
+  },
   //[click]: Run Archives.
   abilities: [
     {

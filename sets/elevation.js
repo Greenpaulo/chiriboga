@@ -687,6 +687,9 @@ cardSet[35016] = {
   //Run Archives. When you would approach Archives (after passing all ice), 
   //instead change the attacked server to HQ and approach HQ.
   runningWithThis: false,
+  AIRedirectsRun: function(fromServer, toServer) {
+    return fromServer == corp.archives && toServer == corp.HQ;
+  },
   Enumerate: function () {
     return [{}];
   },
@@ -4769,6 +4772,9 @@ cardSet[35021] = {
   subTypes: ["Connection"],
   installCost: 3,
   unique: true,
+  AIBypassesOneIce: function(iceCard, server) {
+    return Credits(corp) >= 15 && server && server.ice.includes(iceCard);
+  },
   
   //The rez cost of each piece of ice is increased by 1c
   modifyRezCost: {

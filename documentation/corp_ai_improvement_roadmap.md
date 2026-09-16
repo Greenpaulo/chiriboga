@@ -27,6 +27,19 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 
 ---
 
+## Card implementation
+
+- Cards that need updating with the new AI Hooks implemented in this work exist in `/sets`. For this initial implementation we are only focused on 3 sets - `systemgateway.js`, `systemupdate2021.js` and `elevation.js`.
+- If cards need changes due to new hooks being added in order for them to be picked up by this new threat evaluation architecture, then please make sure to update them as part of the work, and then also update the relevant layer with notes on the cards that were updated as part of that layer, ensuring that all relevant cards have been updated and none missed.
+
+## Follow-up documentation
+
+- If implementing a layer reveals a worthwhile refinement, limitation, calibration task, or architectural follow-up that is outside the current layer's safe scope, add it to this roadmap beneath the relevant layer rather than leaving it only in code comments or the implementation summary.
+- Document it as a clearly labelled follow-up subsection, following the pattern used by **Layer 4.1: Unified Bypass Capability Allocation**. Include the goal, proposed design, compatibility or safety constraints, deterministic regression scenarios, and an acceptance gate where applicable.
+- Keep the completed layer marked as completed when its stated scope is delivered. The follow-up should have its own status so it does not obscure what is implemented today or imply that speculative work has already shipped.
+
+---
+
 ## Architecture Roadmap & Status
 
 ### Layer 1: Tactical ICE & Breaker Math — `[COMPLETED]`
@@ -77,7 +90,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Simulation matrix:** Compare the current flat-debt baseline against candidate weightings for simultaneous naked centrals, HQ agenda flood, an advanced scoring remote, an HVT remote, an Archives backdoor, a poor Corp with one affordable ICE, and a Corp with no installable ICE. Run fixed seeds for reproducibility, then broader randomized batches to detect allocation bias.
 - **Acceptance gate:** Implement weighted debt only if it reduces high-consequence breaches without increasing any continuously insecure server's worst-case wait beyond the configured cap. Keep the present flat-debt behavior as the fallback until those measurements exist.
 
-### Layer 4: Structural & Type Shifts (Mechanic Classes)
+### Layer 4: Structural & Type Shifts (Mechanic Classes) — `[COMPLETED]`
 
 - **Goal:** Replace legacy title fast-paths with engine-hook evaluation and generic pattern matchers for type shifts, targeted bypasses, and layer-depth threats.
 - **Dynamic Subtype Shifts:**
@@ -89,6 +102,30 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   - Evaluates 1-ICE vs. Multi-ICE server resilience against outermost-ICE bypass abilities. Single-ICE remote servers holding high-value agendas carry higher structural risk penalties.
 - **Entire ice bypasses:**
   - Evaluate threat from cards that redirect runs to a different server therefore bypasses all the ICE (e.g., _Sneakdoor Beta_).
+
+**Implemented notes:** `_effectiveIceSubtypes()` now combines the Corp-owned run calculator with active `modifySubTypes`/`AIModifyIceAI` hooks and a hosted-card wording fallback, including correct outermost-encounter handling for _Rielle "Kit" Peddler_. Targeted paid bypasses use `AIBypassesIce`; reusable single-encounter and outermost-only structural bypasses use `AIBypassesOneIce` and `AIBypassesOutermostIce`. Single-ICE agenda remotes receive a bounded protection penalty while one of those public bypasses is live, while multi-ICE servers retain their inner layer. Server redirects use `AIRedirectsRun` plus a generic wording fallback, removing the former _Sneakdoor Beta_ title check. Updated cards in the scoped sets: _Femme Fatale_ and _Sneakdoor Beta_ (`systemupdate2021.js`), plus _Fransofia Ward_ and _Maintenance Access_ (`elevation.js`). _Egret_, _Chromatophores_, and _Rielle "Kit" Peddler_ already exposed sufficient subtype engine hooks and required no card-definition changes. No relevant Layer 4 card in `systemgateway.js` required an update.
+
+#### Layer 4.1: Unified Bypass Capability Allocation — `[FOLLOW-UP]`
+
+- **Goal:** Replace the separate targeted, outermost, one-shot, and redirect checks with one normalized capability model, allowing the evaluator to allocate all public bypass tools across the complete run instead of optimizing each mechanic class independently.
+- **Capability contract:** Introduce a declarative hook such as `AIBypassCapabilities(server)` that returns capability objects describing:
+  - scope (`ice`, `outermost`, `any-one-ice`, or `server-redirect`);
+  - eligible target or target predicate;
+  - credit cost and any non-credit cost (trash, counters, clicks, once-per-turn usage);
+  - number of available uses and whether use persists across encounters;
+  - source and destination servers for redirects.
+- **Normalization and compatibility:** Add `_runnerBypassCapabilities(server)` to normalize the new objects and adapt the existing `AIBypassesIce`, `AIBypassesOneIce`, `AIBypassesOutermostIce`, and `AIRedirectsRun` hooks. Keep those hooks as compatibility shims until scoped cards have migrated.
+- **Run-wide allocation:** Add `_allocateBypassesForServer(server, capabilities)` to assign finite-use capabilities to ICE layers jointly. Optimize for the cheapest path through mandatory effects first, then total punishment avoided; never spend the same card, counter, or once-per-run ability twice. An outermost-only capability must target the first relevant encounter after unaffordable unrezzed ICE is skipped, while an any-one-ICE capability may be saved for a more expensive inner lockout.
+- **Cost fidelity:** Preserve the distinction between a hard lockout and an unaffordable soft lockout. A finite bypass cost proves that the Runner has a capability even when their current credits cannot pay for it. Optional bypasses must not add mandatory cost when simply allowing the ICE to fire is cheaper.
+- **Information boundary:** Build capabilities only from public, active Runner cards and public state. Hidden grip events remain the responsibility of Layer 5's probabilistic threat estimator.
+- **Deterministic regression scenarios:**
+  1. Two one-use bypass tools are allocated to two different ICE and are never double-spent.
+  2. An outermost-only bypass skips the first relevant encounter, including when an unrezzable outer ICE is passed without encounter.
+  3. An any-one-ICE bypass is saved for an inner hard lockout when the outer ICE has no mandatory effect.
+  4. A paid targeted bypass produces a soft credit lockout when unaffordable and is ignored when taking the subroutines costs less.
+  5. A server redirect compares the complete source-server route with the direct destination route without counting destination ICE twice.
+  6. Capability results do not change when hidden Runner grip contents change without a corresponding public-state change.
+- **Acceptance gate:** Adopt the unified allocator only if all existing Layer 4 regressions remain unchanged and combined bypass scenarios produce a traversal cost no higher than the current per-class heuristic. Keep the current hooks as the fallback during migration.
 
 ### Layer 5: Public Threat Memory (Imperfect Information Engine)
 

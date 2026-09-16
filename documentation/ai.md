@@ -25,6 +25,9 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [4.13 Run Ability Extras — `AIRunAbilityExtraPotential`, `AIRunExtraPotential`, `AIBreachNotRequired`](#413-run-ability-extras)
    - [4.14 Trash Cost Reduction — `AIReducesTrashCost`](#414-trash-cost-reduction)
    - [4.15 Inline AI Code for Runner](#415-inline-ai-code-for-runner)
+   - [4.16 Ice Strength Reduction — `AIReducesIceStrength`](#416-ice-strength-reduction--aireducesicestrength)
+   - [4.17 Hosted Subroutine Breakers — `AIHostedBreakContribution`](#417-hosted-subroutine-breakers--aihostedbreakcontribution)
+   - [4.18 Corp Security: Type Shifts, Bypasses, and Redirects](#418-corp-security-type-shifts-bypasses-and-redirects)
 5. [Corp AI Hooks](#5-corp-ai-hooks)
    - [5.1 ICE — `AIImplementIce`](#51-ice--aiimplementice)
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
@@ -1013,6 +1016,38 @@ AIHostedBreakContribution: function (iceCard) {
 },
 ```
 
+### 4.18 Corp Security: Type Shifts, Bypasses, and Redirects
+
+The Corp's server-security evaluator reads only public, active Runner cards.
+Use these hooks for mechanics that change which breaker matches or let the
+Runner skip an ice/server. Hidden run events belong to the public-threat model,
+not these hooks.
+
+- `AIEffectiveIceSubtypes(iceCard, server, iceIndex)` returns an object with
+  `add` and/or `remove` subtype arrays. Existing `modifySubTypes` and
+  `AIModifyIceAI` hooks are also consumed, so most subtype cards need no extra
+  hook.
+- `AIBypassesIce(iceCard, server, iceIndex)` returns `false`, `true` for a free
+  targeted bypass, or the bypass's credit cost.
+- `AIBypassesOutermostIce(server)` returns whether this card can skip the next
+  outermost ice once during the run.
+- `AIBypassesOneIce(iceCard, server, iceIndex)` returns whether a once-per-run
+  bypass can target that ice. The evaluator spends it on the layer with the
+  highest mandatory break cost.
+- `AIRedirectsRun(fromServer, toServer)` returns whether a run through the
+  first server can become a run on the second, bypassing the destination's ice.
+
+```js
+AIBypassesIce: function(iceCard) {
+    if (iceCard != this.chosenCard) return false;
+    return iceCard.subroutines.length;
+},
+
+AIRedirectsRun: function(fromServer, toServer) {
+    return fromServer == corp.archives && toServer == corp.HQ;
+},
+```
+
 ## 5. Corp AI Hooks
 
 ### 5.1 ICE — `AIImplementIce`
@@ -1497,6 +1532,11 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AISpecialBreaker` | bool | Marks non-standard breakers (Trojans etc.) |
 | `AIFixedStrength` | bool | Marks breakers that can't pump strength normally |
 | `AIMatchingBreakerInstalled(iceCard)` | function | Return self if this covers the given ice, else null |
+| `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
+| `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
+| `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
+| `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
+| `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
 | `AIPrepareHypotheticalForRC(host)` | function | Pre-run: set up fake state for run calculation |
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |

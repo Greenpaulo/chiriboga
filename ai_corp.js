@@ -163,10 +163,24 @@ class CorpAI {
     return iceToChooseFrom[0]; //just random for now
   }
 
-  //special case e.g Sneakdoor Beta
+  //Public, active cards can expose a generic server-redirection hook. The
+  //wording fallback keeps older implementations useful without title checks.
   _archivesIsBackdoorToHQ() {
-    if (this._copyOfCardExistsIn("Sneakdoor Beta", runner.rig.programs)) {
-      return true;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      if (
+        typeof card.AIRedirectsRun == "function" &&
+        card.AIRedirectsRun.call(card, corp.archives, corp.HQ)
+      )
+        return true;
+      var text = (card.cardText || "").toString().toLowerCase();
+      if (
+        text.indexOf("run archives") > -1 &&
+        text.indexOf("attacked server to hq") > -1
+      )
+        return true;
     }
     return false;
   }
@@ -1223,7 +1237,72 @@ class CorpAI {
 
   //Use the same public matching hooks for human and AI Runners. Hosted
   //counter breakers are handled separately so insufficient counters never hide ice.
-  _matchingBreakerForIce(iceCard) {
+  //Returns the subtypes that matter for the next hypothetical run, including
+  //hosted modifiers and identity effects that only apply during an encounter.
+  _effectiveIceSubtypes(iceCard, server, iceIndex) {
+    if (!iceCard) return [];
+    if (!server) server = GetServer(iceCard);
+    if (typeof iceIndex == "undefined" || iceIndex < 0)
+      iceIndex = server && server.ice ? server.ice.indexOf(iceCard) : -1;
+    var rc = this._securityRunCalculator();
+    var iceAI = this._securityIceAI(iceCard, rc, server, iceIndex);
+    var ret = iceAI
+      ? [].concat(iceAI.subTypes || [])
+      : [].concat(iceCard.subTypes || []);
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      var mod = null;
+      var storedEncounter =
+        typeof AIIceEncounterSaveState == "function"
+          ? AIIceEncounterSaveState()
+          : null;
+      if (storedEncounter && typeof AIIceEncounterModifyState == "function")
+        AIIceEncounterModifyState(iceCard);
+      try {
+        if (typeof card.AIEffectiveIceSubtypes == "function")
+          mod = card.AIEffectiveIceSubtypes.call(card, iceCard, server, iceIndex);
+        else if (
+          card.modifySubTypes &&
+          typeof card.modifySubTypes.Resolve == "function"
+        )
+          mod = card.modifySubTypes.Resolve.call(card, iceCard);
+      } finally {
+        if (storedEncounter && typeof AIIceEncounterRestoreState == "function")
+          AIIceEncounterRestoreState(storedEncounter);
+      }
+      if (mod && Array.isArray(mod.add)) {
+        for (var j = 0; j < mod.add.length; j++)
+          if (!ret.includes(mod.add[j])) ret.push(mod.add[j]);
+      }
+      if (mod && Array.isArray(mod.remove))
+        ret = ret.filter((type) => !mod.remove.includes(type));
+
+      //Fallback for conventional "gains [subtype]" / "treat as [subtype]"
+      //wording. First-encounter effects apply to the outermost relevant ice.
+      var text = (card.cardText || "").toString();
+      var hostedShift =
+        card.host == iceCard && /host(?:ed)? ice gains/i.test(text);
+      var encounterShift =
+        /encounter[^.]*ice[^.]*(?:gains|treat[^.]*\bas\b)/i.test(text) &&
+        (!/first time/i.test(text) ||
+          (!card.usedThisTurn && this._outermostRelevantIce(server) == iceCard));
+      if (hostedShift || encounterShift) {
+        ["Barrier", "Code Gate", "Sentry"].forEach((type) => {
+          var pattern = new RegExp("\\b" + type.replace(" ", "\\s+") + "\\b", "i");
+          if (pattern.test(text) && !ret.includes(type)) ret.push(type);
+        });
+      }
+    }
+    return ret;
+  }
+
+  _iceHasEffectiveSubtype(iceCard, subtype, server, iceIndex) {
+    return this._effectiveIceSubtypes(iceCard, server, iceIndex).includes(subtype);
+  }
+
+  _matchingBreakerForIce(iceCard, server, iceIndex) {
     if (!iceCard) return null;
     var hosted = this._hostedBreakerForIce(iceCard);
     if (hosted) return hosted;
@@ -1241,9 +1320,29 @@ class CorpAI {
       var match = null;
       if (typeof card.AIMatchingBreakerInstalled == "function") {
         match = card.AIMatchingBreakerInstalled.call(card, iceCard);
+        if (!match) {
+          //Keep object identity intact because some hooks inspect the ice's
+          //server and neighbouring layers. Restore the printed list immediately.
+          var printedSubTypes = iceCard.subTypes;
+          iceCard.subTypes = this._effectiveIceSubtypes(
+            iceCard,
+            server,
+            iceIndex,
+          );
+          try {
+            match = card.AIMatchingBreakerInstalled.call(card, iceCard);
+          } finally {
+            iceCard.subTypes = printedSubTypes;
+          }
+        }
       } else if (
         CheckSubType(card, "Icebreaker") &&
-        BreakerMatchesIce(card, iceCard)
+        ((CheckSubType(card, "Fracter") &&
+          this._iceHasEffectiveSubtype(iceCard, "Barrier", server, iceIndex)) ||
+          (CheckSubType(card, "Decoder") &&
+            this._iceHasEffectiveSubtype(iceCard, "Code Gate", server, iceIndex)) ||
+          (CheckSubType(card, "Killer") &&
+            this._iceHasEffectiveSubtype(iceCard, "Sentry", server, iceIndex)))
       ) {
         match = card;
       }
@@ -1412,9 +1511,18 @@ class CorpAI {
     return rc;
   }
 
-  _securityIceAI(iceCard, rc) {
+  _securityIceAI(iceCard, rc, server, iceIndex) {
     if (!iceCard || !rc) return null;
-    return rc.IceAI(iceCard, AvailableCredits(corp), false, false, -1, corp);
+    if (!server) server = GetServer(iceCard);
+    var startIceIdx = server && server.ice ? server.ice.length - 1 : iceIndex;
+    return rc.IceAI(
+      iceCard,
+      AvailableCredits(corp),
+      false,
+      false,
+      typeof startIceIdx == "number" ? startIceIdx : -1,
+      corp,
+    );
   }
 
   _iceSubroutineEffects(iceCard) {
@@ -1509,6 +1617,7 @@ class CorpAI {
   _breakerActivationCost(iceCard, breaker, count) {
     var rc = this._securityRunCalculator();
     var iceAI = this._securityIceAI(iceCard, rc);
+    if (iceAI) iceAI.subTypes = this._effectiveIceSubtypes(iceCard);
     if (rc && iceAI && typeof breaker.AIImplementBreaker == "function") {
       var best = Infinity;
       rc.ImplementIcebreaker = function (
@@ -1525,7 +1634,7 @@ class CorpAI {
       ) {
         if (
           subTypes.length &&
-          !subTypes.some((type) => CheckSubType(iceCard, type))
+          !subTypes.some((type) => iceAI.subTypes.includes(type))
         )
           return [];
         if (breakAmount <= 0) return [];
@@ -1602,6 +1711,125 @@ class CorpAI {
     return this._breakerActivationCost(iceCard, breaker, count);
   }
 
+  //Credit cost of a public targeted bypass, or Infinity if none is available.
+  //AIBypassesIce returns false when unavailable, true for free, or a number.
+  _iceBypassCost(iceCard, server, iceIndex) {
+    if (!iceCard) return Infinity;
+    if (iceCard.bypassed) return 0;
+    var best = Infinity;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      var cost = false;
+      if (typeof card.AIBypassesIce == "function")
+        cost = card.AIBypassesIce.call(card, iceCard, server, iceIndex);
+      else {
+        var text = (card.cardText || "").toString().toLowerCase();
+        var targetsIce = card.chosenCard == iceCard || card.host == iceCard;
+        if (targetsIce && text.indexOf("bypass") > -1) {
+          var perSub = /pay\s+(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s+for each subroutine/i.exec(text);
+          cost = perSub
+            ? Number(perSub[1]) * (iceCard.subroutines || []).length
+            : 0;
+        }
+      }
+      if (cost === true) cost = 0;
+      if (typeof cost == "number" && cost >= 0) best = Math.min(best, cost);
+    }
+    return best;
+  }
+
+  _iceIsBypassed(iceCard, server, iceIndex) {
+    return this._iceBypassCost(iceCard, server, iceIndex) <= Credits(runner);
+  }
+
+  _outermostIceBypassAvailable(server) {
+    if (!server || !server.ice || server.ice.length < 1) return false;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      if (
+        typeof card.AIBypassesOutermostIce == "function" &&
+        card.AIBypassesOutermostIce.call(card, server)
+      )
+        return true;
+    }
+    return false;
+  }
+
+  _outermostRelevantIce(server) {
+    if (!server || !server.ice) return null;
+    for (var i = server.ice.length - 1; i >= 0; i--) {
+      var iceCard = server.ice[i];
+      if (
+        iceCard.rezzed ||
+        CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
+      )
+        return iceCard;
+    }
+    return null;
+  }
+
+  //Choose the most important ice covered by a public, once-per-run bypass.
+  //This is separate from an outermost-only bypass because some installed cards
+  //can wait and spend themselves on any one encounter.
+  _oneShotIceBypassTarget(server) {
+    if (!server || !server.ice) return null;
+    var activeCards = ActiveCards(runner);
+    var best = null;
+    var bestCost = -1;
+    for (var iceIndex = 0; iceIndex < server.ice.length; iceIndex++) {
+      var iceCard = server.ice[iceIndex];
+      if (
+        !iceCard.rezzed &&
+        !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
+      )
+        continue;
+      var available = false;
+      for (var i = 0; i < activeCards.length; i++) {
+        var card = activeCards[i];
+        if (card.player != runner || !CheckHasAbilities(card)) continue;
+        if (
+          typeof card.AIBypassesOneIce == "function" &&
+          card.AIBypassesOneIce.call(card, iceCard, server, iceIndex)
+        ) {
+          available = true;
+          break;
+        }
+      }
+      if (!available) continue;
+      var breaker = this._matchingBreakerForIce(iceCard, server, iceIndex);
+      var cost = this._estimateBreakCost(iceCard, breaker, true);
+      if (best == null || cost > bestCost) {
+        best = iceCard;
+        bestCost = cost;
+      }
+    }
+    return best;
+  }
+
+  //Single-ice agenda remotes are structurally fragile against one-shot bypass.
+  _serverStructuralRisk(server) {
+    if (
+      !server ||
+      typeof server.cards !== "undefined" ||
+      server.ice.length != 1 ||
+      (!this._outermostIceBypassAvailable(server) &&
+        !this._oneShotIceBypassTarget(server))
+    )
+      return 0;
+    var agendaPoints = this._agendaPointsInServer(server);
+    var advancedAgenda = server.root.some(
+      (card) =>
+        CheckCardType(card, ["agenda"]) &&
+        Counters(card, "advancement") > 0,
+    );
+    if (agendaPoints < 1 && !advancedAgenda) return 0;
+    return Math.min(5, 2 + agendaPoints + (advancedAgenda ? 1 : 0));
+  }
+
   //Estimates whether the Runner could breach this server this turn.
   //'secure' means the Runner either cannot get through at all (hasHardLockout)
   //or must spend more credits than they have to break the ice that would stop them.
@@ -1615,9 +1843,11 @@ class CorpAI {
       totalBreakCost: 0,
       totalMandatoryBreakCost: 0,
       runnerCredits: Credits(runner),
+      structuralRisk: 0,
       reasons: [],
     };
     if (!server) return result;
+    result.structuralRisk = this._serverStructuralRisk(server);
     //a global way to end the run (e.g. a scored Nisei MK II counter) can save any server
     if (this._hasGlobalETR()) {
       result.hasHardLockout = true;
@@ -1628,6 +1858,11 @@ class CorpAI {
       result.hasHardLockout = true;
       result.reasons.push("defensive upgrade prevents breach");
     }
+    var outermostBypassAvailable = this._outermostIceBypassAvailable(server);
+    var outermostBypassTarget = outermostBypassAvailable
+      ? this._outermostRelevantIce(server)
+      : null;
+    var oneShotBypassTarget = this._oneShotIceBypassTarget(server);
     for (var i = 0; i < server.ice.length; i++) {
       var iceCard = server.ice[i];
       //unrezzed ice we can't afford is effectively not there
@@ -1636,12 +1871,26 @@ class CorpAI {
         !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
       )
         continue;
-      var breaker = this._matchingBreakerForIce(iceCard);
-      //Hosting a card does not disable ice. Only an explicit bypass flag does.
-      if (iceCard.bypassed) continue;
+      var bypassCost = this._iceBypassCost(iceCard, server, i);
+      var usesOutermostBypass =
+        outermostBypassAvailable && iceCard == outermostBypassTarget;
+      var usesOneShotBypass = iceCard == oneShotBypassTarget;
+      if (usesOutermostBypass || usesOneShotBypass) {
+        result.reasons.push(GetTitle(iceCard) + " can be bypassed");
+        continue;
+      }
+      var breaker = this._matchingBreakerForIce(iceCard, server, i);
       var avoidanceCost = this._estimateBreakCost(iceCard, breaker);
+      if (bypassCost < avoidanceCost) {
+        avoidanceCost = bypassCost;
+        result.reasons.push(GetTitle(iceCard) + " has a targeted bypass");
+      }
       result.totalBreakCost += avoidanceCost;
       var mandatoryCost = this._estimateBreakCost(iceCard, breaker, true);
+      //A bypass is optional: use it only when cheaper than dealing with the
+      //mandatory subroutines normally. Finite but unaffordable means a soft
+      //credit lockout, not "no capable breaker".
+      if (bypassCost < mandatoryCost) mandatoryCost = bypassCost;
       if (mandatoryCost == Infinity) {
         result.hasHardLockout = true;
         result.reasons.push(
@@ -1691,6 +1940,9 @@ class CorpAI {
     if (this._obsoleteBluffInstalledInServer(server)) ret += 5; //the value is arbitrary, test and tweak
     //protection score depends on ice and upgrades protecting
     ret += this._iceAndRootProtection(server);
+    //A valuable one-ice remote is still brittle when the public board exposes
+    //an outermost-ice bypass; make adding a second layer more urgent.
+    ret -= this._serverStructuralRisk(server);
     //a server the Runner cannot get into needs no further protection
     //(the 2 is arbitrary, test and tweak - bounded so it doesn't swamp other factors)
     if (server.ice.length > 0 || server.root.length > 0) {

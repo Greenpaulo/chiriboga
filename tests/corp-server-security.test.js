@@ -36,7 +36,7 @@ context.ServerName = () => 'Regression server';
 vm.createContext(context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
-['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js'].forEach(file =>
+['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
@@ -211,6 +211,89 @@ test('Mayfly Runner-owned pricing keeps the existing spare-in-grip decision', ()
   runner.grip = [{title: 'Mayfly'}];
   mayfly.AIImplementBreaker(rc, [], {}, target, 1, iceAI, 3, 3, 10);
   assert.strictEqual(offers, 1);
+});
+test('hosted subtype shifts let an installed decoder cover non-code-gate ice', () => {
+  const wall = etr();
+  const chromatophores = card(35030); chromatophores.host = wall;
+  const decoder = card(30005);
+  runner.cards = [chromatophores, decoder]; runner.creditPool = 5;
+  server([wall]);
+  assert(ai._effectiveIceSubtypes(wall).includes('Code Gate'));
+  assert.strictEqual(ai._evaluateServerSecurity(servers[0]).isSecure, false);
+});
+test('Kit shifts only the first ice encountered for Corp planning', () => {
+  const inner = etr(), outer = etr();
+  runner.identityCard = card(31026);
+  runner.cards = [card(30005)]; runner.creditPool = 10;
+  server([inner, outer]);
+  assert(ai._effectiveIceSubtypes(outer, servers[0], 1).includes('Code Gate'));
+  assert(!ai._effectiveIceSubtypes(inner, servers[0], 0).includes('Code Gate'));
+  assert.strictEqual(ai._evaluateServerSecurity(servers[0]).hasHardLockout, true);
+});
+test('generic first-encounter subtype wording applies only to the outermost relevant ice', () => {
+  const inner = etr(), outer = etr();
+  runner.cards = [{player: runner, usedThisTurn: false,
+    cardText: 'The first time each turn you encounter a piece of ice, treat it as a code gate.'}];
+  server([inner, outer]);
+  assert(ai._effectiveIceSubtypes(outer, servers[0], 1).includes('Code Gate'));
+  assert(!ai._effectiveIceSubtypes(inner, servers[0], 0).includes('Code Gate'));
+});
+test('targeted bypass pays its declared cost instead of treating hosted cards as disabling ice', () => {
+  const wall = etr();
+  const femme = card(31022); femme.chosenCard = wall;
+  runner.cards = [femme]; runner.creditPool = 1;
+  const result = ai._evaluateServerSecurity(server([wall]));
+  assert.strictEqual(ai._iceIsBypassed(wall, servers[0], 0), true);
+  assert.strictEqual(result.totalMandatoryBreakCost, 1);
+  assert.strictEqual(result.isSecure, false);
+  runner.creditPool = 0;
+  const unaffordable = ai._evaluateServerSecurity(servers[0]);
+  assert.strictEqual(unaffordable.hasHardLockout, false);
+  assert.strictEqual(unaffordable.isSecure, true);
+});
+test('targeted bypass is not paid when an ice has no mandatory effect', () => {
+  const harmless = ice(['Trash 1 program.'], [[['misc_moderate']]]);
+  const bypass = {player: runner, AIBypassesIce: target => target === harmless ? 1 : false};
+  runner.cards = [bypass]; runner.creditPool = 0;
+  const result = ai._evaluateServerSecurity(server([harmless]));
+  assert.strictEqual(result.totalMandatoryBreakCost, 0);
+  assert.strictEqual(result.isSecure, false);
+});
+test('one-shot outer bypass defeats one layer but not a second inner ETR', () => {
+  const bypass = {player: runner, AIBypassesOutermostIce: () => true};
+  runner.cards = [bypass];
+  assert.strictEqual(ai._evaluateServerSecurity(server([etr()])).isSecure, false);
+  assert.strictEqual(ai._evaluateServerSecurity(server([etr(), etr()])).hasHardLockout, true);
+});
+test('outermost bypass falls through ice the Corp cannot afford to rez', () => {
+  const bypass = {player: runner, AIBypassesOutermostIce: () => true};
+  const inner = etr(), outer = etr(); outer.rezzed = false; outer.rezCost = 3;
+  runner.cards = [bypass]; corp.creditPool = 0;
+  assert.strictEqual(ai._evaluateServerSecurity(server([inner, outer])).isSecure, false);
+});
+test('a flexible one-ice bypass targets the hard lockout and leaves another layer', () => {
+  const bypass = {player: runner, AIBypassesOneIce: () => true};
+  const inner = etr();
+  const outer = ice(['Gain 1 credit.'], [[['misc_minor']]]);
+  runner.cards = [bypass];
+  const result = ai._evaluateServerSecurity(server([inner, outer]));
+  assert.strictEqual(ai._oneShotIceBypassTarget(servers[0]), inner);
+  assert.strictEqual(result.isSecure, false);
+});
+test('single-ice agenda remote receives structural risk only while bypass is live', () => {
+  const remote = {ice: [etr()], root: [{cardType: 'agenda', agendaPoints: 2, advancement: 1}]};
+  servers = [remote];
+  runner.cards = [{player: runner, AIBypassesOutermostIce: () => true}];
+  assert.strictEqual(ai._serverStructuralRisk(remote), 5);
+  remote.ice.push(etr());
+  assert.strictEqual(ai._serverStructuralRisk(remote), 0);
+});
+test('server redirects are detected by hook and generic wording without title checks', () => {
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}});
+  runner.cards = [{player: runner, AIRedirectsRun: (from, to) => from === corp.archives && to === corp.HQ}];
+  assert.strictEqual(ai._archivesIsBackdoorToHQ(), true);
+  runner.cards = [{player: runner, cardText: 'click: Run Archives. Change the attacked server to HQ.'}];
+  assert.strictEqual(ai._archivesIsBackdoorToHQ(), true);
 });
 test('protection allocation rotates through insecure servers during a turn', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};
