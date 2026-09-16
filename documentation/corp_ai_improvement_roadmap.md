@@ -54,12 +54,28 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 
 Future AI prompts should implement the remaining macro-threat capabilities listed below in sequence.
 
-### Layer 3.5: Multi-Server Protection Allocation — `[GAP — NOT ADDRESSED BY LAYERS 1-3]`
+### Layer 3.5: Multi-Server Protection Allocation — `[COMPLETED]`
 
 - **Goal:** Layers 1-3 improved the _accuracy_ of evaluating whether a given server is secure. None of that work touches _allocation_ — which server actually gets an install action when several are simultaneously insecure. This is a distinct, more foundational problem: accurate evaluation of a server that never gets chosen for protection is wasted.
-- **The concrete gap:** `_serverToProtect()` computes a protection score for every server (HQ, R&D, each remote, archives) but returns exactly one `serverToProtect` per call — the single worst-scoring server. It does not fix multiple simultaneously-insecure servers across a turn, and does not carry state across turns to ensure a server that lost out this turn gets priority next turn.
-- **Why this matters more than it looks:** this was the root cause of the original "HQ left with zero ice" bug that started this whole investigation — a server can be correctly judged insecure by the now-accurate Layer 1-3 machinery and still never receive protection, because something else keeps scoring as more urgent that specific turn.
-- **Suggested approach:** either (a) extend the Corp AI's main-phase install loop to spend multiple clicks/install actions per turn against the _ranked list_ of insecure servers already computed by `_serverToProtect()`'s internals, rather than discarding all but the single worst score, or (b) add a persistence mechanism so a server that loses the ranking this turn is weighted higher next turn if it's still unaddressed. Needs a decision on which approach before implementation — this is a design question, not just a coding task.
+- **The original gap:** `_serverToProtect()` computed a protection score for every server (HQ, R&D, each remote, archives) but returned exactly one `serverToProtect` per call — the single worst-scoring server. It did not fix multiple simultaneously-insecure servers across a turn or carry state across turns to prioritize a server that previously lost the ranking.
+- **Why this matters more than it looks:** this was the root cause of the original "HQ left with zero ice" bug that started this whole investigation — a server could be correctly judged insecure by the Layer 1-3 machinery and still never receive protection because something else kept scoring as more urgent.
+- **Implemented approach:** `_rankedServersToProtect()` retains the full ordered target list. During a Corp turn, protection installs rotate through as-yet-unprotected insecure servers before adding another layer to a server already handled that turn. At the end of the Runner turn, skipped insecure servers gain a bounded protection-debt adjustment, while protected or secure servers reset their debt. This hybrid preserves the existing one-action-at-a-time main-phase priorities while preventing both same-turn and cross-turn starvation.
+
+#### Layer 3.5.1: Value-Weighted Protection Debt — `[FOLLOW-UP — REQUIRES CALIBRATION]`
+
+- **Goal:** Let a repeatedly skipped high-consequence server gain urgency faster than an ordinary empty server without recreating starvation in the opposite direction.
+- **Proposed design:** Add `_protectionDebtIncrement(entry)` and use it when aging an insecure server. Start with a narrow, bounded range rather than multiplying the complete protection score—for example, a base increment plus a small public-information consequence bonus. Candidate signals include agenda points exposed by a breach, whether a remote contains an advanced agenda, whether a breach could win the game, and whether Archives is a live backdoor. Existing protection-score inputs must not be counted twice.
+- **Safety constraints:** Same-turn rotation remains authoritative; weighting affects only cross-turn debt. Keep both the per-turn increment and total accumulated debt capped. Every continuously insecure server must still have a maximum waiting time, while secure, protected, removed, or repurposed servers must clear or decay their debt. The calculation must use public Corp knowledge and must never inspect hidden Runner cards.
+- **Telemetry before tuning:** For each protection decision, record the raw score, security result, current debt, debt increment, adjusted score, chosen server, available ICE, and whether the server was breached before the next Corp turn. Aggregate protection-share, time-to-first-protection, successful breaches, stolen agenda points, and win-causing breaches by server class. Logging should be opt-in so normal games remain quiet.
+- **Deterministic regression scenarios:**
+  1. Equal-risk insecure servers still rotate within the same turn.
+  2. A repeatedly skipped agenda-rich HQ or game-winning remote accumulates debt faster than an empty remote.
+  3. A low-value insecure server is selected within the configured maximum wait despite competing with a high-value server.
+  4. Installing protection or becoming secure resets debt; destroying a remote removes stale debt.
+  5. Archives gains extra urgency only while it is an active backdoor.
+  6. Results are unchanged when hidden Runner grip contents change without any corresponding public-information change.
+- **Simulation matrix:** Compare the current flat-debt baseline against candidate weightings for simultaneous naked centrals, HQ agenda flood, an advanced scoring remote, an HVT remote, an Archives backdoor, a poor Corp with one affordable ICE, and a Corp with no installable ICE. Run fixed seeds for reproducibility, then broader randomized batches to detect allocation bias.
+- **Acceptance gate:** Implement weighted debt only if it reduces high-consequence breaches without increasing any continuously insecure server's worst-case wait beyond the configured cap. Keep the present flat-debt behavior as the fallback until those measurements exist.
 
 ### Layer 4: Structural & Type Shifts (Mechanic Classes)
 

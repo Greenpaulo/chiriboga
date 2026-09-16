@@ -212,4 +212,44 @@ test('Mayfly Runner-owned pricing keeps the existing spare-in-grip decision', ()
   mayfly.AIImplementBreaker(rc, [], {}, target, 1, iceAI, 3, 3, 10);
   assert.strictEqual(offers, 1);
 });
+test('protection allocation rotates through insecure servers during a turn', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 1};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 10};
+  const remote = {serverName: 'Remote 1', ice: [], root: [], score: 2};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote]});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 1;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._isAScoringServer = () => false;
+  ai._emptyProtectedRemotes = () => [remote];
+  ai._HVTsInstalled = () => 0;
+  ai._protectionInstallsThisTurn = [];
+  ai._serverProtectionDebt = new Map();
+  assert.strictEqual(ai._serverToProtect(), hq);
+  ai._recordProtectionInstall(hq);
+  assert.strictEqual(ai._serverToProtect(), rnd);
+  ai._recordProtectionInstall(rnd);
+  assert.strictEqual(ai._serverToProtect(), remote);
+});
+test('unaddressed insecure servers gain bounded priority across turns', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 3};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 20};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 1;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._emptyProtectedRemotes = () => [{}];
+  ai._HVTsInstalled = () => 0;
+  ai._protectionInstallsThisTurn = [];
+  ai._serverProtectionDebt = new Map();
+  for (let turn = 0; turn < 4; turn++) {
+    ai._recordProtectionInstall(hq);
+    ai._ageProtectionPriorities();
+  }
+  assert.strictEqual(ai._serverToProtect(), rnd);
+  assert.strictEqual(ai._serverProtectionDebt.get(hq), 0);
+  assert.strictEqual(ai._serverProtectionDebt.get(rnd), 4);
+});
 console.log(tests + ' regression cases passed.');

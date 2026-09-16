@@ -1771,72 +1771,139 @@ class CorpAI {
     return false; //usually we are ok with adding more ice
   }
 
+  //Returns every eligible protection target, weakest first. Keeping the full
+  //ranking lets consecutive install actions protect different insecure servers
+  //instead of repeatedly throwing away all but the weakest result.
+  _rankedServersToProtect(ignoreArchives = false) {
+    var entries = [];
+    var order = 0;
+    var addServer = (server, name, score) => {
+      if (server && this._NoMoreProtectionForThisServer(server)) return;
+      var debt = server ? this._serverProtectionDebt.get(server) || 0 : 0;
+      entries.push({
+        server: server,
+        name: name,
+        score: score,
+        adjustedScore: score - debt,
+        debt: debt,
+        isSecure: server ? this._evaluateServerSecurity(server).isSecure : false,
+        order: order++,
+      });
+    };
+
+    //Preserve the old faction-based tie break while making all scores visible.
+    if (runner.identityCard.faction == "Shaper") {
+      addServer(corp.RnD, "R&D", this._protectionScore(corp.RnD, {}));
+      addServer(corp.HQ, "HQ", this._protectionScore(corp.HQ, {}));
+    } else {
+      addServer(corp.HQ, "HQ", this._protectionScore(corp.HQ, {}));
+      addServer(corp.RnD, "R&D", this._protectionScore(corp.RnD, {}));
+    }
+
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      var remote = corp.remoteServers[i];
+      var remoteScore = this._protectionScore(remote, {});
+      if (this._isAScoringServer(remote)) remoteScore -= this._agendasInHand();
+      addServer(remote, remote.serverName, remoteScore);
+    }
+
+    if (this._emptyProtectedRemotes().length == 0)
+      addServer(null, "null", this._protectionScore(null, {}));
+
+    if (!ignoreArchives)
+      addServer(
+        corp.archives,
+        "archives",
+        this._protectionScore(corp.archives, {}),
+      );
+
+    //When an important installed card needs a remote, transfer the urgency of
+    //the weakest generic/new remote target to the actual HVT server.
+    if (this._HVTsInstalled() > 0) {
+      var hvtServer = this._HVTserver();
+      var hvtEntry = entries.find((entry) => entry.server == hvtServer);
+      var remoteEntries = entries.filter(
+        (entry) =>
+          entry.server == null ||
+          (entry.server && typeof entry.server.cards == "undefined"),
+      );
+      if (hvtEntry && remoteEntries.length > 0) {
+        var weakestRemoteScore = Math.min(
+          ...remoteEntries.map((entry) => entry.adjustedScore),
+        );
+        hvtEntry.adjustedScore = Math.min(
+          hvtEntry.adjustedScore,
+          weakestRemoteScore,
+        );
+      }
+    }
+
+    entries.sort(
+      (a, b) => a.adjustedScore - b.adjustedScore || a.order - b.order,
+    );
+    return entries;
+  }
+
+  _recordProtectionInstall(server) {
+    if (!this._protectionInstallsThisTurn.includes(server))
+      this._protectionInstallsThisTurn.push(server);
+    if (server) this._serverProtectionDebt.set(server, 0);
+  }
+
+  //At the end of each Runner turn, servers that remained insecure and received
+  //no protection gain bounded urgency. Six points is enough to break sustained
+  //ties/starvation without permanently overwhelming current board evaluation.
+  _ageProtectionPriorities() {
+    var entries = this._rankedServersToProtect(false);
+    var liveServers = entries
+      .filter((entry) => entry.server)
+      .map((entry) => entry.server);
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      if (!entry.server || entry.isSecure) {
+        if (entry.server) this._serverProtectionDebt.set(entry.server, 0);
+      } else if (this._protectionInstallsThisTurn.includes(entry.server)) {
+        this._serverProtectionDebt.set(entry.server, 0);
+      } else {
+        this._serverProtectionDebt.set(
+          entry.server,
+          Math.min(6, (this._serverProtectionDebt.get(entry.server) || 0) + 1),
+        );
+      }
+    }
+    for (var server of this._serverProtectionDebt.keys()) {
+      if (!liveServers.includes(server)) this._serverProtectionDebt.delete(server);
+    }
+    this._protectionInstallsThisTurn = [];
+  }
+
   _serverToProtect(
     ignoreArchives = false, //returns the server that most needs increased protection (does not return null, will be HQ by default or R&D against shapers)
     outputToLog = false,
   ) {
-    var protectionScores = {};
-
-    var serverToProtect = corp.HQ;
-    if (runner.identityCard.faction == "Shaper") serverToProtect = corp.RnD;
-    var protectionScore = this._protectionScore(serverToProtect, {});
-
-    protectionScores.HQ = this._protectionScore(corp.HQ, {});
-    if (protectionScores.HQ < protectionScore) {
-      serverToProtect = corp.HQ;
-      protectionScore = protectionScores.HQ;
-    }
-
-    protectionScores.RnD = this._protectionScore(corp.RnD, {});
-    if (protectionScores.RnD < protectionScore) {
-      serverToProtect = corp.RnD;
-      protectionScore = protectionScores.RnD;
-    }
-    for (var i = 0; i < corp.remoteServers.length; i++) {
-      protectionScores[corp.remoteServers[i].serverName] =
-        this._protectionScore(corp.remoteServers[i], {});
-      if (this._isAScoringServer(corp.remoteServers[i]))
-        protectionScores[corp.remoteServers[i].serverName] -=
-          this._agendasInHand(); //scoring servers need more protection than other remotes (and the more agendas in hand, the more need to strengthen them
-      if (
-        protectionScores[corp.remoteServers[i].serverName] < protectionScore &&
-        !this._NoMoreProtectionForThisServer(corp.remoteServers[i])
-      ) {
-        serverToProtect = corp.remoteServers[i];
-        protectionScore = protectionScores[corp.remoteServers[i].serverName];
+    var ranked = this._rankedServersToProtect(ignoreArchives);
+    var unallocatedInsecure = ranked.filter(
+      (entry) =>
+        !entry.isSecure &&
+        !this._protectionInstallsThisTurn.includes(entry.server),
+    );
+    var selected =
+      unallocatedInsecure.length > 0 ? unallocatedInsecure[0] : ranked[0];
+    if (outputToLog) {
+      var protectionScores = {};
+      for (var i = 0; i < ranked.length; i++) {
+        protectionScores[ranked[i].name] = {
+          score: ranked[i].score,
+          debt: ranked[i].debt,
+          adjusted: ranked[i].adjustedScore,
+          secure: ranked[i].isSecure,
+        };
       }
-    }
-    if (this._emptyProtectedRemotes().length == 0) {
-      protectionScores["null"] = this._protectionScore(null, {});
-      if (protectionScores["null"] < protectionScore) {
-        serverToProtect = null;
-        protectionScore = protectionScores["null"];
-      }
-    }
-    if (
-      (serverToProtect == null ||
-        typeof serverToProtect.cards == "undefined") &&
-      this._HVTsInstalled() > 0
-    ) {
-      //protect a HVT server instead of other remotes
-      if (!this._HVTsInServer(serverToProtect)) {
-        //this server is fine if it has a HVT
-        //don't update the protection score - don't compare archives to the HVT server
-        serverToProtect = this._HVTserver();
-      }
-    }
-    if (!ignoreArchives) {
-      protectionScores.archives = this._protectionScore(corp.archives, {});
-      if (protectionScores.archives < protectionScore) {
-        serverToProtect = corp.archives;
-        protectionScore = protectionScores.archives;
-      }
-    }
-    if (outputToLog)
       this._log(
-        "Server protection scores: " + JSON.stringify(protectionScores),
+        "Ranked server protection: " + JSON.stringify(protectionScores),
       );
-    return serverToProtect;
+    }
+    return selected ? selected.server : corp.HQ;
   }
 
   _bestProtectedRemote() {
@@ -2494,6 +2561,7 @@ class CorpAI {
       for (var i = 0; i < iceInstallOptions.length; i++) {
         iceInstallOptions[i].reason =
           "returned by _iceInstallOptions for server that needs protection";
+        iceInstallOptions[i].AIProtectionInstall = true;
       }
       ret = ret.concat(iceInstallOptions);
     }
@@ -2617,6 +2685,7 @@ class CorpAI {
       for (var i = 0; i < iceInstallOptions.length; i++) {
         iceInstallOptions[i].reason =
           "returned by _iceInstallOptions for new server";
+        iceInstallOptions[i].AIProtectionInstall = true;
       }
       ret = ret.concat(iceInstallOptions);
     }
@@ -3142,6 +3211,7 @@ class CorpAI {
     if (optionList.indexOf("trigger") > -1)
       return optionList.indexOf("trigger");
 
+    this._ageProtectionPriorities();
     return optionList.indexOf("n");
   }
 
@@ -3182,6 +3252,8 @@ class CorpAI {
   _returnPreference(optionList, cmd, prefs) {
     this.preferred = prefs;
     this.preferred.command = cmd;
+    if (cmd == "install" && prefs.AIProtectionInstall)
+      this._recordProtectionInstall(prefs.serverToInstallTo);
     if (optionList.indexOf(cmd) > -1) return optionList.indexOf(cmd);
     else if (optionList.indexOf("n") > -1) return optionList.indexOf("n"); //cmd might be coming up next phase
     LogError(
@@ -4432,6 +4504,8 @@ class CorpAI {
   //***CLASS DEFINITION AND CORE AI CODE***
   constructor() {
     this.preferred = null;
+    this._protectionInstallsThisTurn = [];
+    this._serverProtectionDebt = new Map();
   }
 
   //returns index of choice
