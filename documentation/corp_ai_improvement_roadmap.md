@@ -187,7 +187,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 ---
 
-### Layer 8: Baits & Bluffs
+### Layer 8: Baits & Bluffs — `[PARTIALLY COMPLETED — POSTURE LIFECYCLE AND FEEDBACK PENDING]`
 
 - **Goal:** Understand when to leave a server with less security to bait the Runner into a trap (e.g., _Urtica Cipher_), but without being too obvious. Conversely, when to bluff by leaving a server looking like a trap (e.g., a deadly asset that can be advanced) while actually playing an agenda there.
 - **Key design constraint — who is actually being deceived:** the Corp AI never plays against the Runner AI; it plays against a human. This layer is not solvable with deterministic unit tests the way Layers 1-7 are (there's no "correct" objective answer to check against) — its correctness is about long-run unpredictability across many games against a human who is actively trying to learn the AI's patterns, not about any single decision being locally optimal.
@@ -211,17 +211,72 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 **Unpredictability requirement (applies to 8.1 and 8.2):** the random roll must never observably correlate with any single game-state variable a human could learn to read over repeated games (e.g., always baiting on turn 3, or only when a specific card is in hand) — a human doesn't need to break any single decision, only find a pattern across many games. Long-run frequency across many games is the thing that has to hold up, not any individual roll.
 
+**Implemented notes:** Facedown access-punishing cards now expose the generic
+`AIPunishesAccess(server)` hook. `_calculateBaitFrequency()` uses bounded
+exposure-versus-punishment odds, so higher-severity traps deliberately adopt a
+light-defense posture less often. `_shouldBaitServer()` makes one injectable
+random roll per installed trap/server and caches it, preventing repeated AI
+evaluations from rerolling the same decision. Updated scoped cards: _Urtica
+Cipher_ (`systemgateway.js`) and _Snare!_ (`systemupdate2021.js`); no relevant
+access-punishing card in `elevation.js` required an update.
+
+Agenda and trap play now share `_remoteDeceptionProfile(card)`. Each eligible
+hidden card independently selects a target ICE depth of one, two, or three; an
+opening advancement target of one or two counters; and immediate or one-turn
+delayed advancement. The same profile influences candidate scoring-remote
+selection, how many ICE layers the Corp adds, and the first turns of advancement
+sequencing. This removes the previous deterministic signature in which every
+agenda bluff stopped at exactly one ICE. Tactical scoring-window value remains
+the primary install signal, profiles never create naked agenda servers, and
+agenda deception is disabled when a breach could win the game.
+
+This is still not a complete human-like bluff engine. Posture and bait decisions
+are currently cached for the installed card's lifetime, and the AI does not yet
+feed public outcomes back into later posture weights. Those are required Layer
+8 follow-ups below, not optional polish. Finally, `_tagPunishmentDeterrence()`
+gives a bounded protection-score benefit when the Runner is tagged and the Corp
+holds an affordable `AITagPunishment`; it never changes deterministic security.
+
+#### Layer 8.4: Bounded Posture Epochs — `[FOLLOW-UP — REQUIRED]`
+
+- **Goal:** Preserve one stable decision during an AI planning window without permanently committing an installed card to a stale bait or bluff posture.
+- **Proposed design:** Replace lifetime booleans with a posture record containing an epoch id, selected public script, commitment horizon, and reevaluation reasons. Roll once on install or at the start of a Corp planning epoch. Reevaluate only after a meaningful boundary: the Runner turn ends, the server is challenged, credits or public Runner pressure materially change, advancement changes the server's stakes, or either player reaches match point. Repeated evaluator calls inside the same epoch must reuse the existing result.
+- **Compatibility and safety:** Keep `_random` injectable and never reroll because `_NoMoreProtectionForThisServer()` or another scorer happened to run again. A reevaluation may retain the old posture. Match-winning safety overrides remain authoritative, and hidden Runner card identities remain forbidden.
+- **Deterministic regression scenarios:** Repeated calls in one epoch consume no extra randomness; a new Corp turn permits at most one reevaluation; a material threat change can abandon a bait; irrelevant state changes do not reroll; reaching match point immediately disables an unsafe agenda posture; seeded games reproduce the same epoch sequence.
+- **Acceptance gate:** No installed card remains locked to a posture after its commitment horizon, and instrumentation confirms exactly one posture decision per eligible card per epoch.
+
+#### Layer 8.5: Match-Local Public Outcome Feedback — `[FOLLOW-UP — REQUIRED]`
+
+- **Goal:** Let the Corp adjust later mixed strategies when the human repeatedly challenges or ignores particular visible remote postures during the current game.
+- **Proposed design:** Record public outcomes by posture class: turns ignored, runs initiated, ICE exposed, successful accesses, traps fired, agendas stolen, and agendas scored. Maintain bounded match-local weights or Beta-style priors for the shared scripts, then use those weights when selecting later profiles. Reset all opponent-response memory when a new game begins.
+- **Compatibility and safety:** Learn only from public actions and Corp-known outcomes. Never inspect Runner Grip/Stack identities, persist a player fingerprint, or allow a small sample to collapse any script's probability to zero. Agenda and trap cards must continue drawing from overlapping distributions.
+- **Deterministic regression scenarios:** Ignored light postures modestly increase their later use; repeated challenges shift some weight toward deeper or delayed scripts; one outcome cannot dominate; a new game resets weights; changing hidden Runner cards changes nothing; identical seeded public histories produce identical weights.
+- **Acceptance gate:** Public-history adaptation changes future script weights within configured bounds while every script retains a non-zero exploration floor and agenda/trap trace distributions remain overlapping.
+
+#### Layer 8.6: Outcome-Calibrated Bluff Telemetry — `[FOLLOW-UP — OPTIONAL, REQUIRES HUMAN DATA]`
+
+- **Goal:** Validate and tune long-run bait/bluff frequencies against humans rather than inferring success from deterministic games.
+- **Proposed design:** Add opt-in, anonymous local telemetry for posture probability, roll bucket, visible server shape, current match-local feedback weights, whether the server was run, and the resulting agenda/punishment outcome. Compare policy versions before changing the present bounds. Telemetry must not itself alter decisions; any match-local adaptation belongs to Layer 8.5.
+- **Safety and compatibility:** Never record card identities from the Runner's hidden zones, player identifiers, or free text. Keep telemetry disabled by default and preserve injectable randomness for reproducible tests. Offline tuning may change global coefficients only; the AI must not fingerprint or learn an individual opponent.
+- **Deterministic regression scenarios:** A posture is rolled once per decision epoch; replacing hidden Runner cards changes no decision; match-winning agendas never bluff; known traps stop baiting; disabled/unaffordable punishment returns zero; fixed seeded rolls reproduce identical postures.
+- **Acceptance gate:** Change frequencies only after a sufficiently large human sample shows that run rates are not predictable from any single visible variable and that agenda losses caused by bluffs are offset by improved scoring or trap outcomes.
+
 ---
 
 ## Reference Engine Hooks & Helpers in `ai_corp.js`
 
 | Engine Hook / Method              | Role                                                                                                                        |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `_evaluateServerSecurity(server)` | Primary entry point. Returns security, break costs, effective `runnerCredits`, its `runnerCreditPool` breakdown, risks, and reasons. |
+| `_evaluateServerSecurity(server)` | Primary entry point. Returns security, break costs, effective `runnerCredits`, its `runnerCreditPool` breakdown, risks, deterrence, and reasons. |
 | `_effectiveRunnerCreditPool(server)` | Public, route-specific credit ceiling from pool, eligible hosted credits, Bad Publicity, and click economy. |
 | `card.AICentralPressure(server)` | Public installed multi-access, alternative central pressure, and growth exposed by Runner cards. |
 | `_centralServerThreat(server)` | Aggregates central-pressure hooks into a bounded server-specific protection penalty. |
 | `_classifyRunnerMacroThreat()` | Classifies visible central focus and persistent non-access win conditions. |
+| `card.AIPunishesAccess(server)` | Corp-card hook returning current access-punishment severity for bait planning. |
+| `_calculateBaitFrequency(server)` | Returns the bounded severity-weighted probability for a trap server's cached posture roll. |
+| `_remoteDeceptionProfile(card)` | Selects shared agenda/trap ICE-depth and advancement-sequence signals. |
+| `_deceptionAdvancementTarget(card, server, normalTarget)` | Applies the posture's delayed/opening advancement cadence before returning to normal advancement. |
+| `_tagPunishmentDeterrence(server)` | Returns bounded protection urgency relief from an affordable live tag punishment; never security. |
 | `card.modifyStrength`             | Engine hook defining strength modifiers. Inspected in `_effectiveIceStrength()`.                                            |
 | `card.AIMatchingBreakerInstalled` | Engine hook on cards/identities that return matching capability for an ICE.                                                 |
 | `card.AIPreventBreach`            | Engine hook on root cards/upgrades that prevent breach.                                                                     |

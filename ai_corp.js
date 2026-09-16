@@ -1024,6 +1024,183 @@ class CorpAI {
     return false;
   }
 
+  //Return the strongest access punishment declared by a facedown card in this
+  //remote. Future ambushes can join the policy without title-specific logic.
+  _accessPunishmentSeverity(server) {
+    if (!server || typeof server.cards !== "undefined") return 0;
+    var severity = 0;
+    for (var i = 0; i < server.root.length; i++) {
+      var card = server.root[i];
+      if (
+        !card ||
+        card.player != corp ||
+        PlayerCanLook(runner, card) ||
+        typeof card.AIPunishesAccess != "function"
+      )
+        continue;
+      var value = Number(card.AIPunishesAccess.call(card, server));
+      if (isFinite(value)) severity = Math.max(severity, Math.max(0, value));
+    }
+    return severity;
+  }
+
+  //A severe trap needs fewer deliberately light defenses to keep the choice
+  //credible. Server exposure is the "bet" and access punishment is the "pot".
+  _calculateBaitFrequency(server) {
+    var punishment = this._accessPunishmentSeverity(server);
+    if (punishment <= 0) return 0;
+    var exposure = 1 + Math.min(3, (server.root || []).length);
+    var frequency = exposure / (exposure + punishment * 2);
+    return Math.max(0.08, Math.min(0.35, frequency));
+  }
+
+  //Agendas and access traps draw from the same visible posture distribution.
+  //This describes public action shape, not card identity or tactical value.
+  _remoteDeceptionProfile(card) {
+    if (!card) return null;
+    var eligible =
+      CheckCardType(card, ["agenda"]) ||
+      CheckSubType(card, "Ambush") ||
+      typeof card.AIPunishesAccess == "function";
+    if (!eligible) return null;
+    var stored = this._cardDeceptionProfiles.get(card);
+    if (stored) return stored;
+    var depthRoll = this._random();
+    var advanceRoll = this._random();
+    var delayRoll = this._random();
+    var profile = {
+      targetIce: depthRoll < 0.3 ? 1 : depthRoll < 0.78 ? 2 : 3,
+      openingAdvances: advanceRoll < 0.55 ? 1 : 2,
+      delayTurns: delayRoll < 0.3 ? 1 : 0,
+    };
+    this._cardDeceptionProfiles.set(card, profile);
+    return profile;
+  }
+
+  //Prefer an empty protected remote whose current shape is close to this
+  //card's shared agenda/trap posture. This is only one component of the normal
+  //scoring-window sort, so deception does not override tactical viability.
+  _deceptionInstallDistance(card, server) {
+    var profile = this._remoteDeceptionProfile(card);
+    if (!profile || !server || !server.ice) return 0;
+    return Math.abs(server.ice.length - profile.targetIce);
+  }
+
+  _deceptionPostureActive(card, server) {
+    if (!card || !server) return false;
+    if (CheckCardType(card, ["agenda"]))
+      return this._shouldBluffAgendaServer(server);
+    if (typeof card.AIPunishesAccess == "function")
+      return this._shouldBaitServer(server);
+    return false;
+  }
+
+  //During an active posture, agendas and advanceable traps expose the same
+  //opening cadence: optionally wait a turn, then place one or two counters,
+  //then resume their ordinary target on a later turn.
+  _deceptionAdvancementTarget(card, server, normalTarget) {
+    if (!this._deceptionPostureActive(card, server)) return normalTarget;
+    var profile = this._remoteDeceptionProfile(card);
+    if (!profile) return normalTarget;
+    var age = Math.max(0, card.AITurnsInstalled || 0);
+    var current = Math.max(0, Counters(card, "advancement"));
+    if (age < profile.delayTurns) return current;
+    if (age == profile.delayTurns)
+      return Math.min(normalTarget, profile.openingAdvances);
+    return normalTarget;
+  }
+
+  _deceptionProtectionTarget(server) {
+    if (!server || !server.root || server.root.length != 1) return null;
+    var card = server.root[0];
+    if (!this._deceptionPostureActive(card, server)) return null;
+    var profile = this._remoteDeceptionProfile(card);
+    return profile ? profile.targetIce : null;
+  }
+
+  //Roll once for this installed trap, then retain the posture. Re-evaluating a
+  //server must not offer repeated chances to hit the threshold.
+  _shouldBaitServer(server) {
+    var punishment = this._accessPunishmentSeverity(server);
+    if (punishment <= 0) return false;
+    var trap = server.root.find(
+      (card) =>
+        card &&
+        card.player == corp &&
+        !PlayerCanLook(runner, card) &&
+        typeof card.AIPunishesAccess == "function",
+    );
+    if (!trap) return false;
+    var stored = this._serverBaitDecisions.get(server);
+    if (stored && stored.card == trap) return stored.bait;
+    var probability = this._calculateBaitFrequency(server);
+    var roll = this._random();
+    var bait = roll < probability;
+    this._serverBaitDecisions.set(server, {
+      card: trap,
+      probability: probability,
+      roll: roll,
+      bait: bait,
+    });
+    return bait;
+  }
+
+  //Occasionally apply a shared variable-depth agenda/trap posture to a facedown
+  //advanceable agenda. Never risk a game-winning steal this way.
+  _shouldBluffAgendaServer(server) {
+    if (
+      !server ||
+      typeof server.cards !== "undefined" ||
+      server.root.length != 1
+    )
+      return false;
+    var card = server.root[0];
+    if (
+      !CheckCardType(card, ["agenda"]) ||
+      PlayerCanLook(runner, card) ||
+      !CheckAdvance(card) ||
+      AgendaPoints(corp) + (card.agendaPoints || 0) >= AgendaPointsToWin() ||
+      this._runnerMayWinIfServerBreached(server)
+    )
+      return false;
+    var stored = this._agendaBluffDecisions.get(server);
+    if (stored && stored.card == card) return stored.bluff;
+    var points = Math.max(1, card.agendaPoints || 1);
+    var runnerPressure = Math.min(4, (runner.grip || []).length * 0.25);
+    var probability = Math.max(
+      0.05,
+      Math.min(0.18, 0.22 / points + 0.02 - runnerPressure * 0.01),
+    );
+    var roll = this._random();
+    var bluff = roll < probability;
+    this._agendaBluffDecisions.set(server, {
+      card: card,
+      probability: probability,
+      roll: roll,
+      bluff: bluff,
+    });
+    return bluff;
+  }
+
+  //A playable punishment in HQ is a real consequence once the Runner is
+  //tagged. It reduces, but never replaces, the need for actual protection.
+  _tagPunishmentDeterrence(server) {
+    if (!server || Math.max(0, runner.tags || 0) < 1) return 0;
+    if (this._runnerMayWinIfServerBreached(server)) return 0;
+    var best = 0;
+    var hand = corp.HQ && corp.HQ.cards ? corp.HQ.cards : [];
+    for (var i = 0; i < hand.length; i++) {
+      var card = hand[i];
+      var requiredTags = Number(card && card.AITagPunishment);
+      if (!isFinite(requiredTags) || requiredTags < 1) continue;
+      if ((runner.tags || 0) < requiredTags) continue;
+      var cost = typeof PlayCost == "function" ? PlayCost(card) : card.playCost || 0;
+      if (!CheckCredits(corp, cost, "playing", card)) continue;
+      best = Math.max(best, 1 + Math.min(2, requiredTags));
+    }
+    return best;
+  }
+
   _aCompatibleBreakerIsInstalled(
     iceCard, //ignores strength and credit requirements
   ) {
@@ -2089,11 +2266,13 @@ class CorpAI {
       runnerCreditPool: effectiveCredits,
       structuralRisk: 0,
       publicThreatRisk: 0,
+      deterrence: 0,
       reasons: [],
     };
     if (!server) return result;
     result.structuralRisk = this._serverStructuralRisk(server);
     result.publicThreatRisk = this._estimateRunnerBypassRisk(server);
+    result.deterrence = this._tagPunishmentDeterrence(server);
     //a global way to end the run (e.g. a scored Nisei MK II counter) can save any server
     if (this._hasGlobalETR()) {
       result.hasHardLockout = true;
@@ -2184,6 +2363,9 @@ class CorpAI {
     var ret = 0;
     //servers with obsolete bluffs get bonus protection score (they don't really need protecting)
     if (this._obsoleteBluffInstalledInServer(server)) ret += 5; //the value is arbitrary, test and tweak
+    //A live tag punishment is real deterrence, but does not alter deterministic
+    //security or claim that the Runner is physically unable to breach.
+    ret += this._tagPunishmentDeterrence(server);
     //protection score depends on ice and upgrades protecting
     ret += this._iceAndRootProtection(server);
     //A valuable one-ice remote is still brittle when the public board exposes
@@ -2259,11 +2441,15 @@ class CorpAI {
   //returns true if we don't want to add more protection to this server
   _NoMoreProtectionForThisServer(server) {
     if (!server) return false;
+    var deceptionTarget = this._deceptionProtectionTarget(server);
+    if (deceptionTarget !== null && server.ice.length >= deceptionTarget)
+      return true;
     //for now we'll just use this check to limit AIAvoidInstallingOverThis asset protection to 1 ice
     for (var i = 0; i < server.root.length; i++) {
       if (
         server.root[i].cardType == "asset" &&
         server.root[i].AIAvoidInstallingOverThis &&
+        typeof server.root[i].AIPunishesAccess != "function" &&
         server.ice.length > 0
       ) {
         return true;
@@ -3149,8 +3335,20 @@ class CorpAI {
         if (scoringServers[i] == b.serverToInstallTo)
           bWindow = scoringWindows[i];
       }
-      var aDiff = Math.abs(aAdvReq - aWindow);
-      var bDiff = Math.abs(bAdvReq - bWindow);
+      var aDiff =
+        Math.abs(aAdvReq - aWindow) +
+        0.75 *
+          corp.AI._deceptionInstallDistance(
+            a.cardToInstall,
+            a.serverToInstallTo,
+          );
+      var bDiff =
+        Math.abs(bAdvReq - bWindow) +
+        0.75 *
+          corp.AI._deceptionInstallDistance(
+            b.cardToInstall,
+            b.serverToInstallTo,
+          );
       return aDiff - bDiff;
     });
     //this._log(JSON.stringify(intoServerOptions));
@@ -4737,6 +4935,11 @@ class CorpAI {
               var blufflim = this._bluffAdvanceLimit(card);
               if (blufflim > advancementLimit) advancementLimit = blufflim;
             }
+            advancementLimit = this._deceptionAdvancementTarget(
+              card,
+              corp.remoteServers[i],
+              advancementLimit,
+            );
             //check if agenda is well-protected or HQ is weak (in which case we need to start moving agendas into servers)
             var thisRemoteProtectionScore = this._protectionScore(
               corp.remoteServers[i],
@@ -5007,6 +5210,10 @@ class CorpAI {
     this.preferred = null;
     this._protectionInstallsThisTurn = [];
     this._serverProtectionDebt = new Map();
+    this._serverBaitDecisions = new WeakMap();
+    this._agendaBluffDecisions = new WeakMap();
+    this._cardDeceptionProfiles = new WeakMap();
+    this._random = Math.random;
   }
 
   //returns index of choice

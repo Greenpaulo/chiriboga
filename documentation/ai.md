@@ -40,6 +40,7 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [5.6 Operations — `AIFastAdvance`, `AIDamageOperation`, `AITagPunishment`, `AIWouldPlay`, `AIWouldPlayBeforeScore`](#56-operations)
    - [5.7 Agendas — `AIAdvancementLimit`, `AIOverAdvance`](#57-agendas)
    - [5.8 Inline AI Code for Corp](#58-inline-ai-code-for-corp)
+   - [5.9 Access Punishment — `AIPunishesAccess`](#59-access-punishment--aipunishesaccess)
 6. [The Run Calculator (`rc`)](#6-the-run-calculator-rc)
 7. [Quick Reference Table](#7-quick-reference-table)
 8. [Step-by-Step Worked Example](#8-step-by-step-worked-example)
@@ -1591,6 +1592,64 @@ if (corp.AI != null) {
 - `corp.AI._isAmbush(server)` — true if server contains an ambush card
 - `corp.AI._bestRecurToHQOption(options, serverUnderThreat, useNowIfPossible)` — picks the best card to recur to HQ
 
+### 5.9 Access Punishment — `AIPunishesAccess`
+
+Corp assets and upgrades that impose a real consequence when accessed can
+declare its current severity to the bait policy:
+
+```js
+AIPunishesAccess: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    return 2 + Counters(this, "advancement");
+},
+```
+
+**Signature:** `AIPunishesAccess(server) -> number`
+
+Return a non-negative, comparable severity value for accessing this card while
+it is installed in `server`; return `0` if the consequence cannot currently
+fire. Damage can use one point per damage, while serious non-damage riders such
+as a tag may add another point. The value is a planning weight, not expected
+damage and not a promise that the effect is unpreventable.
+
+The hook is called outside a run. It must be read-only, safe while the card is
+unrezzed, and use only Corp-known game state. It may inspect its own public or
+Corp-known counters, whether it is installed in the supplied server, and the
+Corp's ability to pay its trigger cost. It must not inspect hidden Runner Grip
+or Stack identities. Do not encode protection choices or randomness in the
+card hook; `_calculateBaitFrequency(server)` owns policy and caches one
+independent posture roll for each installed trap.
+
+Tag punishment is separate: `AITagPunishment` continues to declare the minimum
+tags needed by an operation. When the Runner is already tagged and the Corp can
+pay for such a card in HQ, the Corp protection score receives bounded
+deterrence. `_evaluateServerSecurity()` exposes that value as `deterrence`, but
+it never changes `isSecure`.
+
+#### Shared agenda/trap remote postures
+
+`corp.AI._remoteDeceptionProfile(card)` gives agendas and declared access traps
+the same distribution of public action shapes. A profile contains:
+
+- `targetIce`: one, two, or three ICE layers;
+- `openingAdvances`: one or two counters during the opening advancement turn;
+- `delayTurns`: advance immediately or wait one Runner turn first.
+
+The profile contributes to scoring-remote selection, stops additional protection
+only after its selected ICE depth, and controls the opening advancement cadence.
+After that opening sequence, the card returns to its ordinary advancement target.
+Agenda and trap profiles use the same generator so “one ICE” is not an agenda
+bluff signature. Scoring-window value remains the dominant install criterion,
+and the policy never deliberately creates a naked agenda or retains an unsafe
+agenda posture when a breach could win the game or when the Corp could score
+that agenda to win immediately.
+
+These profiles and their bait/bluff activation decisions are currently cached
+for the installed card's lifetime. This prevents accidental rerolling during
+repeated evaluator calls, but is intentionally documented as an incomplete
+policy. The roadmap's required Layer 8.4 replaces lifetime caching with bounded
+decision epochs, and Layer 8.5 adds match-local feedback from public outcomes.
+
 ---
 
 ## 6. The Run Calculator (`rc`)
@@ -1719,6 +1778,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIIsScoringUpgrade` | bool | True if this is a fast-advance scoring upgrade |
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
+| `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |

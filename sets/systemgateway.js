@@ -3597,6 +3597,10 @@ cardSet[30045] = {
   AIAdvancementLimit: function() {
 	  return 4; //this may be overridden to bluff under certain circumstances
   },
+  AIPunishesAccess: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    return 2 + Counters(this, "advancement");
+  },
 };
 cardSet[30046] = {
   title: "Diviner",

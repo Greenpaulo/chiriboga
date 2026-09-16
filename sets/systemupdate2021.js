@@ -4613,6 +4613,11 @@ cardSet[31054] = {
 	//never
 	return false;
   },
+  AIPunishesAccess: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCredits(corp, 4, "using", this)) return 0;
+    return 4; //3 net damage plus a tag
+  },
   AIAvoidInstallingOverThis: true,
 };
 

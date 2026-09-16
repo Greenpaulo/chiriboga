@@ -26,6 +26,9 @@ context.ActiveCards = player => {
 context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
+context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';
+context.AgendaPoints = player => player.agendaPoints || 0;
+context.AgendaPointsToWin = () => 7;
 context.ChoicesInstalledCards = (player, predicate) => context.InstalledCards(player).filter(predicate).map(card => ({card}));
 context.BreakerMatchesIce = (breaker, ice) => (
   [['Fracter', 'Barrier'], ['Decoder', 'Code Gate'], ['Killer', 'Sentry']].some(types =>
@@ -55,6 +58,9 @@ function test(name, body) {
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
   runner.temporaryCredits = 0; runner.clickTracker = 0; context.playerTurn = runner; context.attackedServer = null;
   corp.creditPool = 20; corp.badPublicity = 0; corp.scoreArea = []; servers = [];
+  corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
+  ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
+  ai._cardDeceptionProfiles = new WeakMap(); ai._random = Math.random;
   body(); tests++; console.log('PASS ' + name);
 }
 
@@ -457,6 +463,78 @@ test('central pressure directly increases protection urgency', () => {
   runner.cards = [];
   const baseline = ai._protectionScore(corp.RnD, {});
   assert.strictEqual(pressured, baseline - 3);
+});
+test('access-punishment hooks drive a severity-weighted bait frequency', () => {
+  const mildCard = card(30045); mildCard.advancement = 0;
+  const severeCard = card(30045); severeCard.advancement = 4;
+  const mild = {ice: [], root: [mildCard]};
+  const severe = {ice: [], root: [severeCard]};
+  assert.strictEqual(mildCard.AIPunishesAccess(mild), 2);
+  assert.strictEqual(severeCard.AIPunishesAccess(severe), 6);
+  assert(ai._calculateBaitFrequency(severe) < ai._calculateBaitFrequency(mild));
+});
+test('Snare access punishment is live only while its trigger is affordable', () => {
+  const snare = card(31054);
+  const remote = {ice: [], root: [snare]};
+  corp.creditPool = 4;
+  assert.strictEqual(snare.AIPunishesAccess(remote), 4);
+  corp.creditPool = 3;
+  assert.strictEqual(snare.AIPunishesAccess(remote), 0);
+});
+test('bait posture rolls once per installed trap and can stop extra protection', () => {
+  const trap = card(30045);
+  const remote = {ice: [etr()], root: [trap]};
+  let rolls = 0;
+  ai._random = () => {rolls++; return 0;};
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), true);
+  ai._random = () => {throw Error('bait posture rerolled');};
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), true);
+  assert.strictEqual(rolls, 4); //one posture decision and three shared-script dimensions
+});
+test('a failed bait roll permits ordinary trap protection', () => {
+  const trap = card(30045);
+  const remote = {ice: [etr()], root: [trap]};
+  ai._random = () => 1;
+  assert.strictEqual(ai._shouldBaitServer(remote), false);
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), false);
+});
+test('agenda bluff supports variable ice depth and never risks the winning steal', () => {
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2, canBeAdvanced: true};
+  const remote = {ice: [etr()], root: [agenda]};
+  const rolls = [0, 0.6, 0.2, 0.8]; //active, two ice, one advance, no delay
+  ai._random = () => rolls.shift();
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), false);
+  remote.ice.push(etr());
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), true);
+  runner.agendaPoints = 5;
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
+  runner.agendaPoints = 0; corp.agendaPoints = 5;
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
+});
+test('shared remote posture varies install shape and advancement cadence', () => {
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2, canBeAdvanced: true, advancement: 0};
+  const remote = {ice: [etr()], root: [agenda]};
+  const rolls = [0, 0.9, 0.2, 0.1]; //active, three ice, one opening advance, wait a turn
+  ai._random = () => rolls.shift();
+  assert.strictEqual(ai._deceptionAdvancementTarget(agenda, remote, 4), 0);
+  agenda.AITurnsInstalled = 1;
+  assert.strictEqual(ai._deceptionAdvancementTarget(agenda, remote, 4), 1);
+  agenda.AITurnsInstalled = 2;
+  assert.strictEqual(ai._deceptionAdvancementTarget(agenda, remote, 4), 4);
+  assert.strictEqual(ai._deceptionInstallDistance(agenda, remote), 2);
+  remote.ice.push(etr(), etr());
+  assert.strictEqual(ai._deceptionInstallDistance(agenda, remote), 0);
+});
+test('tag punishment is bounded deterrence and never deterministic security', () => {
+  const punishment = {player: corp, cardType: 'operation', playCost: 2, AITagPunishment: 1};
+  corp.HQ.cards = [punishment]; runner.tags = 1; corp.creditPool = 2;
+  const remote = server([]);
+  assert.strictEqual(ai._tagPunishmentDeterrence(remote), 2);
+  const security = ai._evaluateServerSecurity(remote);
+  assert.strictEqual(security.deterrence, 2);
+  assert.strictEqual(security.isSecure, false);
+  corp.creditPool = 1;
+  assert.strictEqual(ai._tagPunishmentDeterrence(remote), 0);
 });
 test('protection allocation rotates through insecure servers during a turn', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};
