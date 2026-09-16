@@ -127,7 +127,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   6. Capability results do not change when hidden Runner grip contents change without a corresponding public-state change.
 - **Acceptance gate:** Adopt the unified allocator only if all existing Layer 4 regressions remain unchanged and combined bypass scenarios produce a traversal cost no higher than the current per-class heuristic. Keep the current hooks as the fallback during migration.
 
-### Layer 5: Public Threat Memory (Imperfect Information Engine)
+### Layer 5: Public Threat Memory (Imperfect Information Engine) — `[COMPLETED]`
 
 - **Goal:** Model hidden-card threats (_Inside Job_, _Spear Phishing_, _Forged Activation Orders_) without cheating.
 - **Public Threat Estimator:** `_estimateRunnerBypassRisk(server)`
@@ -136,6 +136,16 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   3. Calculate remaining unaccounted copies: `Math.max(0, expectedCopies - heapMatches)`.
   4. Fold in grip size as an additional public signal — `runner.grip.length` (or the Runner's hand-size equivalent) is public information: a Runner sitting on a large hand is statistically more likely to be holding a bypass/run event than one on a near-empty hand. Cheap to add to the same estimator, not a separate module.
   5. Apply risk penalty to single-ICE servers proportional to remaining unaccounted copies. If all copies are in the Heap, threat probability drops to 0.
+
+**Implemented notes:** Relevant cards declare a mechanic-level `AIHiddenThreat` profile, so `_estimateRunnerBypassRisk(server)` does not hardcode card titles. The estimator uses the Runner identity faction as a deckbuilding prior, discounts rather than excludes out-of-faction threats, subtracts publicly revealed Heap copies, and combines the remaining expected copies with the public Grip and Stack sizes. The result is a bounded protection-score penalty for one-ICE servers only; it is exposed as `publicThreatRisk` for diagnostics but never changes deterministic security or run-cost results. Updated scoped cards: _Inside Job_ and _Forged Activation Orders_ (`systemupdate2021.js`). No relevant hidden single-ICE threat was present in `systemgateway.js` or `elevation.js`; _Spear Phishing_ is not currently implemented in the scoped card pool.
+
+#### Layer 5.1: Observed-Deck Bayesian Priors — `[FOLLOW-UP — REQUIRES CALIBRATION]`
+
+- **Goal:** Replace fixed faction/import weights with priors learned from public deck evidence while preserving imperfect information.
+- **Proposed design:** Adjust mechanic-class expectations from revealed Heap cards, installed cards, influence already observed, deck size, and optionally an offline archetype table. Keep `AIHiddenThreat` as the card-level contract and return both probability and evidence for telemetry.
+- **Safety constraints:** Never inspect Grip or Stack card identities, saved decklists, or Runner-AI private caches. Public pile sizes and faceup cards are valid; hidden-card contents are not. Fall back to the current fixed prior when evidence is sparse or no calibrated archetype data exists.
+- **Deterministic regression scenarios:** Hidden Grip/Stack substitutions do not change risk; revealing an in-faction threat increases the posterior before its copy is consumed by the Heap count; observed influence caps reduce implausible imported-copy estimates; exhausting all expected copies still yields zero risk.
+- **Acceptance gate:** Adopt only after seeded simulations show better-calibrated predicted-versus-observed threat rates than the fixed prior without increasing false confidence on uncommon decklists.
 
 ### Layer 6: Runner Effective Credit Ceiling
 

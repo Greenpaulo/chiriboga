@@ -1830,6 +1830,84 @@ class CorpAI {
     return Math.min(5, 2 + agendaPoints + (advancedAgenda ? 1 : 0));
   }
 
+  //Estimate hidden single-ice threats from public information only. Relevant
+  //card definitions declare an AIHiddenThreat profile; cards with the same
+  //mechanical kind share a copy pool, so revealed Heap copies reduce the prior
+  //without requiring title checks or inspecting any card in the Runner's grip.
+  _estimateRunnerBypassRisk(server) {
+    if (!server || !server.ice || server.ice.length != 1) return 0;
+    var identity = runner.identityCard || runner.identity;
+    var runnerFaction = identity ? identity.faction : null;
+    var profiles = {};
+
+    for (var cardId in cardSet) {
+      var definition = cardSet[cardId];
+      var threat = definition && definition.AIHiddenThreat;
+      if (!threat || !threat.kind) continue;
+      if (
+        typeof threat.AppliesToServer == "function" &&
+        !threat.AppliesToServer.call(definition, server)
+      )
+        continue;
+
+      //Faction is a public deckbuilding prior, not knowledge of the decklist.
+      //Out-of-faction copies remain possible, but are deliberately discounted.
+      var factionWeight = 0.25;
+      if (!runnerFaction || definition.faction == runnerFaction)
+        factionWeight = 1;
+      else if (definition.faction == "Neutral") factionWeight = 0.5;
+
+      if (!profiles[threat.kind])
+        profiles[threat.kind] = {
+          expectedCopies: 0,
+          severity: 0,
+        };
+      profiles[threat.kind].expectedCopies +=
+        Math.max(0, threat.expectedCopies || 0) * factionWeight;
+      profiles[threat.kind].severity = Math.max(
+        profiles[threat.kind].severity,
+        Math.max(0, threat.severity || 1),
+      );
+    }
+
+    var heap = runner.heap || [];
+    var gripSize = runner.grip ? runner.grip.length : 0;
+    var unknownPoolSize = gripSize;
+    if (runner.stack) unknownPoolSize += runner.stack.length;
+    //The normal game state always exposes Stack size. Keep isolated callers
+    //conservative when it is unavailable rather than treating the entire prior
+    //as certain to be in a five-card grip.
+    if (unknownPoolSize < gripSize + 1) unknownPoolSize = gripSize + 40;
+    var totalRisk = 0;
+
+    for (var kind in profiles) {
+      var revealedCopies = 0;
+      for (var i = 0; i < heap.length; i++) {
+        var heapThreat = heap[i] && heap[i].AIHiddenThreat;
+        if (heapThreat && heapThreat.kind == kind) revealedCopies++;
+      }
+      var remainingCopies = Math.max(
+        0,
+        profiles[kind].expectedCopies - revealedCopies,
+      );
+      if (remainingCopies <= 0 || gripSize <= 0) continue;
+
+      //Hypergeometric-style probability that at least one remaining copy is in
+      //the public-size grip. Fractional expected copies are allowed because the
+      //faction prior discounts imported cards.
+      var missProbability = 1;
+      var copies = Math.min(remainingCopies, unknownPoolSize);
+      for (var draw = 0; draw < gripSize; draw++) {
+        missProbability *= Math.max(
+          0,
+          (unknownPoolSize - copies - draw) / (unknownPoolSize - draw),
+        );
+      }
+      totalRisk += profiles[kind].severity * (1 - missProbability);
+    }
+    return Math.min(4, totalRisk);
+  }
+
   //Estimates whether the Runner could breach this server this turn.
   //'secure' means the Runner either cannot get through at all (hasHardLockout)
   //or must spend more credits than they have to break the ice that would stop them.
@@ -1844,10 +1922,12 @@ class CorpAI {
       totalMandatoryBreakCost: 0,
       runnerCredits: Credits(runner),
       structuralRisk: 0,
+      publicThreatRisk: 0,
       reasons: [],
     };
     if (!server) return result;
     result.structuralRisk = this._serverStructuralRisk(server);
+    result.publicThreatRisk = this._estimateRunnerBypassRisk(server);
     //a global way to end the run (e.g. a scored Nisei MK II counter) can save any server
     if (this._hasGlobalETR()) {
       result.hasHardLockout = true;
@@ -1943,6 +2023,9 @@ class CorpAI {
     //A valuable one-ice remote is still brittle when the public board exposes
     //an outermost-ice bypass; make adding a second layer more urgent.
     ret -= this._serverStructuralRisk(server);
+    //Hidden events never change deterministic security or run-cost math. They
+    //only make a brittle one-ice server somewhat more urgent to reinforce.
+    ret -= this._estimateRunnerBypassRisk(server);
     //a server the Runner cannot get into needs no further protection
     //(the 2 is arbitrary, test and tweak - bounded so it doesn't swamp other factors)
     if (server.ice.length > 0 || server.root.length > 0) {

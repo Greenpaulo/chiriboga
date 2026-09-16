@@ -6,7 +6,7 @@ const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const corp = {creditPool: 20, scoreArea: [], HQ: {cards: []}, archives: {cards: []}};
-const runner = {creditPool: 0, grip: [], cards: [], AI: null};
+const runner = {creditPool: 0, grip: [], stack: [], heap: [], cards: [], AI: null};
 const context = {console, corp, runner, cardSet: {}, setIdentifiers: [], encountering: false, attackedServer: null, approachIce: -1};
 let servers = [];
 context.GetTitle = card => card.title;
@@ -51,7 +51,7 @@ const etr = () => ice(['End the run.'], [[['endTheRun']]]);
 let tests = 0;
 function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
-  runner.grip = [{}, {}, {}, {}, {}]; runner.creditPool = 0;
+  runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
   corp.creditPool = 20; corp.scoreArea = []; servers = [];
   body(); tests++; console.log('PASS ' + name);
 }
@@ -287,6 +287,52 @@ test('single-ice agenda remote receives structural risk only while bypass is liv
   assert.strictEqual(ai._serverStructuralRisk(remote), 5);
   remote.ice.push(etr());
   assert.strictEqual(ai._serverStructuralRisk(remote), 0);
+});
+test('public hidden-threat risk uses faction, grip size, and Heap evidence', () => {
+  const remote = server([etr()]);
+  runner.identityCard = {faction: 'Criminal'};
+  runner.grip = Array(5).fill({}); runner.stack = Array(35).fill({});
+  const fullGripRisk = ai._estimateRunnerBypassRisk(remote);
+  assert(fullGripRisk > 0);
+  runner.grip = [{}]; runner.stack = Array(39).fill({});
+  assert(ai._estimateRunnerBypassRisk(remote) < fullGripRisk);
+  runner.grip = Array(5).fill({}); runner.stack = Array(35).fill({});
+  runner.heap = [card(31018), card(31018), card(31018)];
+  assert(ai._estimateRunnerBypassRisk(remote) < fullGripRisk);
+  runner.heap.push(card(31017), card(31017), card(31017));
+  assert.strictEqual(ai._estimateRunnerBypassRisk(remote), 0);
+});
+test('hidden-threat estimator never inspects grip contents and ignores layered servers', () => {
+  runner.identityCard = {faction: 'Criminal'};
+  runner.grip = [{get title() {throw Error('Hidden grip read');}}];
+  runner.stack = Array(39).fill({});
+  assert(ai._estimateRunnerBypassRisk(server([etr()])) > 0);
+  servers[0].ice.push(etr());
+  assert.strictEqual(ai._estimateRunnerBypassRisk(servers[0]), 0);
+});
+test('unrezzed-ice pressure applies only to a single unrezzed layer', () => {
+  runner.identityCard = {faction: 'Criminal'};
+  const wall = etr(); wall.rezzed = false;
+  const remote = server([wall]);
+  const unrezzedRisk = ai._estimateRunnerBypassRisk(remote);
+  wall.rezzed = true;
+  const rezzedRisk = ai._estimateRunnerBypassRisk(remote);
+  assert(unrezzedRisk > rezzedRisk);
+  runner.identityCard = {faction: 'Shaper'};
+  assert(ai._estimateRunnerBypassRisk(remote) < rezzedRisk);
+});
+test('hidden threats affect protection urgency but not deterministic security', () => {
+  runner.identityCard = {faction: 'Criminal'};
+  const remote = server([etr()]);
+  const risk = ai._estimateRunnerBypassRisk(remote);
+  const security = ai._evaluateServerSecurity(remote);
+  assert(risk > 0);
+  assert.strictEqual(security.publicThreatRisk, risk);
+  assert.strictEqual(security.hasHardLockout, true);
+  const withoutRisk = ai._protectionScore(remote, {}) + risk;
+  runner.heap = [card(31018), card(31018), card(31018)];
+  //Forged Activation Orders does not apply to this rezzed layer.
+  assert(Math.abs(ai._protectionScore(remote, {}) - withoutRisk) < 1e-9);
 });
 test('server redirects are detected by hook and generic wording without title checks', () => {
   Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}});

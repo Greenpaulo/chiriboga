@@ -1134,6 +1134,14 @@ cardSet[31017] = {
 	cardType: "event",
     subTypes: ["Sabotage"],
     playCost: 1,
+	AIHiddenThreat: {
+		kind: "unrezzed-ice-removal",
+		expectedCopies: 3,
+		severity: 2,
+		AppliesToServer: function(server) {
+			return !!server.ice[0] && !server.ice[0].rezzed;
+		},
+	},
 	//Choose 1 unrezzed piece of ice.
 	Enumerate: function () {
         var choices = ChoicesInstalledCards(corp, function (card) {
@@ -1238,6 +1246,14 @@ cardSet[31018] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 2,
+  AIHiddenThreat: {
+    kind: "first-encounter-bypass",
+    expectedCopies: 3,
+    severity: 3,
+    AppliesToServer: function(server) {
+      return server.ice.length == 1;
+    },
+  },
   //Run any server. The first time this run you encounter a piece of ice, bypass it.
   encounteredIceThisRun: false,
   Enumerate: function () {
