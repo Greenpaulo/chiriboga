@@ -1233,17 +1233,26 @@ class CorpAI {
     for (var i = 0; i < installed.length; i++) {
       var card = installed[i];
       if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (typeof card.AIHostedBreakContribution == "function" || card.host == iceCard)
+      if (
+        typeof card.AIHostedBreakContribution == "function" ||
+        card.host == iceCard
+      )
         continue;
       var match = null;
       if (typeof card.AIMatchingBreakerInstalled == "function") {
         match = card.AIMatchingBreakerInstalled.call(card, iceCard);
-      } else if (CheckSubType(card, "Icebreaker") && BreakerMatchesIce(card, iceCard)) {
+      } else if (
+        CheckSubType(card, "Icebreaker") &&
+        BreakerMatchesIce(card, iceCard)
+      ) {
         match = card;
       }
       if (match && typeof match == "object") {
         var cost = this._estimateBreakCost(iceCard, match);
-        if (best == null || cost < bestCost) { best = match; bestCost = cost; }
+        if (best == null || cost < bestCost) {
+          best = match;
+          bestCost = cost;
+        }
       }
     }
     return best;
@@ -1257,9 +1266,10 @@ class CorpAI {
       var card = hosted[i];
       if (card.player != runner || !CheckHasAbilities(card)) continue;
       if (!this._isHostedVirusBreaker(card, iceCard)) continue;
-      contribution += typeof card.AIHostedBreakContribution == "function"
-        ? card.AIHostedBreakContribution.call(card, iceCard)
-        : Counters(card, "virus");
+      contribution +=
+        typeof card.AIHostedBreakContribution == "function"
+          ? card.AIHostedBreakContribution.call(card, iceCard)
+          : Counters(card, "virus");
     }
     return Math.max(0, contribution);
   }
@@ -1324,20 +1334,20 @@ class CorpAI {
 
   //returns true if the card spends its virus counters to reduce the strength of
   //the ice the Runner is encountering (e.g. Leech, Datasucker)
-   _virusCountersReduceStrength(card, iceCard) {
-      if (!card) return false;
-      //declarative hook takes precedence (covers both virus-based and flat reducers)
-      if (typeof card.AIReducesIceStrength == "function")
-        return card.AIReducesIceStrength(iceCard) > 0;
-      if (Counters(card, "virus") < 1) return false;
-      //set-agnostic fallback: the standard 'hosted virus counter ... strength' wording
-      if (typeof card.cardText == "undefined" || card.cardText == null)
-        return false;
-      var text = card.cardText.toString().toLowerCase();
-      return (
-        text.indexOf("hosted virus counter") > -1 && text.indexOf("strength") > -1
-      );
-    }
+  _virusCountersReduceStrength(card, iceCard) {
+    if (!card) return false;
+    //declarative hook takes precedence (covers both virus-based and flat reducers)
+    if (typeof card.AIReducesIceStrength == "function")
+      return card.AIReducesIceStrength(iceCard) > 0;
+    if (Counters(card, "virus") < 1) return false;
+    //set-agnostic fallback: the standard 'hosted virus counter ... strength' wording
+    if (typeof card.cardText == "undefined" || card.cardText == null)
+      return false;
+    var text = card.cardText.toString().toLowerCase();
+    return (
+      text.indexOf("hosted virus counter") > -1 && text.indexOf("strength") > -1
+    );
+  }
 
   //counts the printed end-the-run subroutines on the ice
   _countETRSubroutines(iceCard) {
@@ -1394,9 +1404,11 @@ class CorpAI {
     var installed = InstalledCards(runner);
     rc.precalculated.runnerInstalledCardsLength = installed.length;
     rc.precalculated.runnerInstalledIcebreakersLength = installed.filter(
-      card => CheckSubType(card, "Icebreaker") && CheckHasAbilities(card),
+      (card) => CheckSubType(card, "Icebreaker") && CheckHasAbilities(card),
     ).length;
-    rc.precalculated.activeCards = ActiveCards(null).filter(card => CheckHasAbilities(card));
+    rc.precalculated.activeCards = ActiveCards(null).filter((card) =>
+      CheckHasAbilities(card),
+    );
     return rc;
   }
 
@@ -1438,29 +1450,49 @@ class CorpAI {
     var damage = 0;
     for (var i = 0; i < subs.length; i++) {
       if (subs[i].broken) continue;
-      var branches = sr ? (sr[i] || [[]]) : null;
+      var branches = sr ? sr[i] || [[]] : null;
       if (!mandatoryOnly) {
-        if (branches ? branches.some(branch => this._branchRequiresBreak(branch))
-          : this._textEndsTheRun(subs[i].text) || this._damageInText(subs[i].text) > 0)
+        if (
+          branches
+            ? branches.some((branch) => this._branchRequiresBreak(branch))
+            : this._textEndsTheRun(subs[i].text) ||
+              this._damageInText(subs[i].text) > 0
+        )
           indices.push(i);
         continue;
       }
-      var etr = branches && typeof iceCard.AIImplementIce == "function"
-        ? branches.length > 0 && branches.every(branch => branch.includes("endTheRun"))
-        : this._textEndsTheRun(subs[i].text);
+      var etr =
+        branches && typeof iceCard.AIImplementIce == "function"
+          ? branches.length > 0 &&
+            branches.every((branch) => branch.includes("endTheRun"))
+          : this._textEndsTheRun(subs[i].text);
       if (etr) indices.push(i);
       else {
-        var amount = branches && typeof iceCard.AIImplementIce == "function"
-          ? Math.min(...branches.map(branch => branch.filter(effect =>
-              effect == "netDamage" || effect == "meatDamage" || effect == "coreDamage").length))
-          : this._damageInText(subs[i].text);
+        var amount =
+          branches && typeof iceCard.AIImplementIce == "function"
+            ? Math.min(
+                ...branches.map(
+                  (branch) =>
+                    branch.filter(
+                      (effect) =>
+                        effect == "netDamage" ||
+                        effect == "meatDamage" ||
+                        effect == "coreDamage",
+                    ).length,
+                ),
+              )
+            : this._damageInText(subs[i].text);
         damage += amount;
-        if (amount > 0) damageSubs.push({index: i, damage: amount});
+        if (amount > 0) damageSubs.push({ index: i, damage: amount });
       }
     }
     if (mandatoryOnly) {
       damageSubs.sort((a, b) => b.damage - a.damage);
-      for (var j = 0; j < damageSubs.length && damage > runner.grip.length; j++) {
+      for (
+        var j = 0;
+        j < damageSubs.length && damage > runner.grip.length;
+        j++
+      ) {
         indices.push(damageSubs[j].index);
         damage -= damageSubs[j].damage;
       }
@@ -1479,30 +1511,79 @@ class CorpAI {
     var iceAI = this._securityIceAI(iceCard, rc);
     if (rc && iceAI && typeof breaker.AIImplementBreaker == "function") {
       var best = Infinity;
-      rc.ImplementIcebreaker = function(point, card, cardStrength, ice, iceStrength,
-        subTypes, pumpCost, pumpAmount, breakCost, breakAmount) {
-        if (subTypes.length && !subTypes.some(type => CheckSubType(iceCard, type))) return [];
+      rc.ImplementIcebreaker = function (
+        point,
+        card,
+        cardStrength,
+        ice,
+        iceStrength,
+        subTypes,
+        pumpCost,
+        pumpAmount,
+        breakCost,
+        breakAmount,
+      ) {
+        if (
+          subTypes.length &&
+          !subTypes.some((type) => CheckSubType(iceCard, type))
+        )
+          return [];
         if (breakAmount <= 0) return [];
         var gap = Math.max(0, iceStrength - cardStrength);
-        var pump = gap > 0 ? (pumpAmount > 0 ? Math.ceil(gap / pumpAmount) * pumpCost : Infinity) : 0;
-        best = Math.min(best, pump + Math.ceil(count / breakAmount) * breakCost);
+        var pump =
+          gap > 0
+            ? pumpAmount > 0
+              ? Math.ceil(gap / pumpAmount) * pumpCost
+              : Infinity
+            : 0;
+        best = Math.min(
+          best,
+          pump + Math.ceil(count / breakAmount) * breakCost,
+        );
         return [];
       };
-      var point = {iceIdx: 0, runner_credits_spent: 0, runner_credits_lost: 0,
-        runner_clicks_spent: 0, virus_counters_spent: 0, card_str_mods: [],
-        persistents: [], sr_broken: [], effects: []};
-      breaker.AIImplementBreaker.call(breaker, rc, [], point, GetServer(iceCard),
-        Strength(breaker), iceAI, this._effectiveIceStrength(iceCard), 0, Infinity);
+      var point = {
+        iceIdx: 0,
+        runner_credits_spent: 0,
+        runner_credits_lost: 0,
+        runner_clicks_spent: 0,
+        virus_counters_spent: 0,
+        card_str_mods: [],
+        persistents: [],
+        sr_broken: [],
+        effects: [],
+      };
+      breaker.AIImplementBreaker.call(
+        breaker,
+        rc,
+        [],
+        point,
+        GetServer(iceCard),
+        Strength(breaker),
+        iceAI,
+        this._effectiveIceStrength(iceCard),
+        0,
+        Infinity,
+      );
       return best;
     }
     var text = (breaker.cardText || "").replace(/<[^>]*>/g, "");
-    var breakMatch = /(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s*:[^.]*?break\s+(?:up to\s+)?(\d+)/i.exec(text);
-    var ret = breakMatch ? Math.ceil(count / Number(breakMatch[2])) * Number(breakMatch[1]) : count * 2;
+    var breakMatch =
+      /(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s*:[^.]*?break\s+(?:up to\s+)?(\d+)/i.exec(
+        text,
+      );
+    var ret = breakMatch
+      ? Math.ceil(count / Number(breakMatch[2])) * Number(breakMatch[1])
+      : count * 2;
     if (breaker.AIBreaksRegardlessOfStrength) return ret;
     var gap = this._effectiveIceStrength(iceCard) - Strength(breaker);
     if (gap > 0) {
-      var pumpMatch = /(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s*:[^.]*?\+(\d+)\s*strength/i.exec(text);
-      if (breaker.AIFixedStrength || !pumpMatch || Number(pumpMatch[2]) <= 0) return Infinity;
+      var pumpMatch =
+        /(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s*:[^.]*?\+(\d+)\s*strength/i.exec(
+          text,
+        );
+      if (breaker.AIFixedStrength || !pumpMatch || Number(pumpMatch[2]) <= 0)
+        return Infinity;
       ret += Math.ceil(gap / Number(pumpMatch[2])) * Number(pumpMatch[1]);
     }
     return ret;
@@ -1515,7 +1596,8 @@ class CorpAI {
     var count = this._requiredSubroutineIndices(iceCard, mandatoryOnly).length;
     count = Math.max(0, count - this._hostedBreakContribution(iceCard));
     if (count == 0) return 0;
-    if (typeof breaker == "undefined") breaker = this._matchingBreakerForIce(iceCard);
+    if (typeof breaker == "undefined")
+      breaker = this._matchingBreakerForIce(iceCard);
     if (!breaker || breaker.AIBotulus) return Infinity;
     return this._breakerActivationCost(iceCard, breaker, count);
   }
@@ -1562,7 +1644,9 @@ class CorpAI {
       var mandatoryCost = this._estimateBreakCost(iceCard, breaker, true);
       if (mandatoryCost == Infinity) {
         result.hasHardLockout = true;
-        result.reasons.push(GetTitle(iceCard) + " has mandatory breaks with no capable breaker");
+        result.reasons.push(
+          GetTitle(iceCard) + " has mandatory breaks with no capable breaker",
+        );
       }
       result.totalMandatoryBreakCost += mandatoryCost;
     }
@@ -1575,7 +1659,8 @@ class CorpAI {
       );
     }
     result.isSecure =
-      result.hasHardLockout || result.totalMandatoryBreakCost > result.runnerCredits;
+      result.hasHardLockout ||
+      result.totalMandatoryBreakCost > result.runnerCredits;
     if (result.isSecure) {
       this._log(
         ServerName(server) +
@@ -1634,21 +1719,25 @@ class CorpAI {
       server == corp.HQ ||
       (server == corp.archives && archivesIsBackdoorToHQ)
     ) {
-      var hqIce = server.ice.length;
+      var hqRealProtection = this._iceAndRootProtection(server);
+      var rndRealProtection = this._iceAndRootProtection(corp.RnD);
       var agendaCount = this._agendasInServer(server);
-      // When HQ has 0 ICE, hand size does NOT equal safety - drawing agendas increases density
-      if (hqIce === 0) {
-        // Severely penalize protection score when HQ is naked - it's a critical hazard
+      if (hqRealProtection < rndRealProtection) {
+        // R&D is currently the safer home for agendas — HQ shouldn't be
+        // treated as safe just because it has *some* ice, only because
+        // it's genuinely at least as well-defended as the alternative.
         ret -= 5;
-        // Additional penalty for each agenda in HQ when unprotected
         ret -= agendaCount * 2;
         this._log(
-          "HQ CRITICAL: 0 ICE protecting HQ with " +
+          "HQ WEAKER THAN R&D: protection " +
+            hqRealProtection +
+            " vs " +
+            rndRealProtection +
+            " with " +
             agendaCount +
             " agenda(s) - protection score penalized",
         );
       } else {
-        // Normal evaluation when HQ has ICE
         ret += corp.HQ.cards.length - this._agendaPointsInServer(corp.HQ) - 2.5;
       }
     }

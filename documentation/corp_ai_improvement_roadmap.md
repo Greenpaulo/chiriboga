@@ -52,7 +52,14 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 
 ## Pending Roadmap: Advanced Threat Modules
 
-Future AI prompts should implement the remaining macro-threat capabilities listed below in sequence:
+Future AI prompts should implement the remaining macro-threat capabilities listed below in sequence.
+
+### Layer 3.5: Multi-Server Protection Allocation — `[GAP — NOT ADDRESSED BY LAYERS 1-3]`
+
+- **Goal:** Layers 1-3 improved the _accuracy_ of evaluating whether a given server is secure. None of that work touches _allocation_ — which server actually gets an install action when several are simultaneously insecure. This is a distinct, more foundational problem: accurate evaluation of a server that never gets chosen for protection is wasted.
+- **The concrete gap:** `_serverToProtect()` computes a protection score for every server (HQ, R&D, each remote, archives) but returns exactly one `serverToProtect` per call — the single worst-scoring server. It does not fix multiple simultaneously-insecure servers across a turn, and does not carry state across turns to ensure a server that lost out this turn gets priority next turn.
+- **Why this matters more than it looks:** this was the root cause of the original "HQ left with zero ice" bug that started this whole investigation — a server can be correctly judged insecure by the now-accurate Layer 1-3 machinery and still never receive protection, because something else keeps scoring as more urgent that specific turn.
+- **Suggested approach:** either (a) extend the Corp AI's main-phase install loop to spend multiple clicks/install actions per turn against the _ranked list_ of insecure servers already computed by `_serverToProtect()`'s internals, rather than discarding all but the single worst score, or (b) add a persistence mechanism so a server that loses the ranking this turn is weighted higher next turn if it's still unaddressed. Needs a decision on which approach before implementation — this is a design question, not just a coding task.
 
 ### Layer 4: Structural & Type Shifts (Mechanic Classes)
 
@@ -74,7 +81,8 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   1. Inspect `runner.identity.faction` (e.g., Criminal carries inherently higher early-game bypass probability).
   2. Inspect `runner.heap` / discard to count revealed copies of run events.
   3. Calculate remaining unaccounted copies: `Math.max(0, expectedCopies - heapMatches)`.
-  4. Apply risk penalty to single-ICE servers proportional to remaining unaccounted copies. If all copies are in the Heap, threat probability drops to 0.
+  4. Fold in grip size as an additional public signal — `runner.grip.length` (or the Runner's hand-size equivalent) is public information: a Runner sitting on a large hand is statistically more likely to be holding a bypass/run event than one on a near-empty hand. Cheap to add to the same estimator, not a separate module.
+  5. Apply risk penalty to single-ICE servers proportional to remaining unaccounted copies. If all copies are in the Heap, threat probability drops to 0.
 
 ### Layer 6: Runner Effective Credit Ceiling
 
@@ -97,8 +105,27 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 ### Layer 8: Baits & Bluffs
 
-- **Goal:** Understand when to leave a server with less security to bait the runner into a trap (e.g, _Urtica Cipher_), but without being too obvious. Conversly, when to bluff by unprotecting a server to look like a trap (e.g. deadly asset that can be advanced), but playing an agenda in there instead.
-- TODO
+- **Goal:** Understand when to leave a server with less security to bait the Runner into a trap (e.g., _Urtica Cipher_), but without being too obvious. Conversely, when to bluff by leaving a server looking like a trap (e.g., a deadly asset that can be advanced) while actually playing an agenda there.
+- **Key design constraint — who is actually being deceived:** the Corp AI never plays against the Runner AI; it plays against a human. This layer is not solvable with deterministic unit tests the way Layers 1-7 are (there's no "correct" objective answer to check against) — its correctness is about long-run unpredictability across many games against a human who is actively trying to learn the AI's patterns, not about any single decision being locally optimal.
+
+**8.1 Baiting (under-defend a real trap) — build this first, lower risk**
+
+- Generic hook `AIPunishesAccess(server)` on trap/ambush cards (e.g., _Urtica Cipher_), returning the severity of the punishment if accessed unprotected. Set-agnostic by construction — any future punishing asset/upgrade just declares this, same pattern as every other hook in this codebase.
+- `_calculateBaitFrequency(server)`: instead of a fixed random chance, calculate the bait probability per-server using the same logic as a poker bluff-frequency (`bet / (bet + pot)`-style ratio): a server with a severe `AIPunishesAccess` value needs a _lower_ bait frequency to stay correctly balanced than a mild one, since the downside of guessing wrong is bigger — dangerous traps can therefore be baited rarely and still stay credible.
+- Roll `Math.random()` against that calculated threshold, independently per server per game — the randomness itself is necessary and correct, it's the threshold that must be computed rather than fixed.
+
+**8.2 Bluffing (protect a real agenda to look like a trap) — harder, sequence after 8.1**
+
+- Requires the Corp AI to act _against_ its own otherwise-optimal install/protection pattern purely to create a false signal, which risks measurably worse average play if the bluff doesn't land — unlike baiting, which is a locally-contained decision on a server that's already a trap.
+- Needs the same generic legibility signals a human would actually read (server card count, remote-vs-central framing, protection posture relative to the AI's recent actions) rather than anything Urtica-Cipher-specific, since there's no card-level hook to hang this on the way `AIPunishesAccess` works for baiting.
+
+**8.3 Tag-and-Bag Deterrence (real threat, not a fake trap)**
+
+- A different mechanism achieving the same goal as 8.1/8.2 — shaping the Runner's uncertainty — but through an actual credible threat rather than a bluff. A tagged Runner facing a Corp holding a tag-punishment operation is in a genuinely different risk situation than an untagged one, even against the identical server.
+- Generic hook `AITagPunishment` already exists (used elsewhere in `ai_corp.js`) — this layer's work is surfacing that existing signal into the security/deterrence picture: when deciding whether a server needs _actual_ ice investment versus relying on the deterrent value of a live tag-punishment play in hand, factor in `runner.tags > 0` and whether the Corp currently holds a card with `AITagPunishment`.
+- Unlike 8.1/8.2, this doesn't need calculated randomness — the deterrence is real, not simulated, so it's closer to Layers 1-7 in character (an objective factor to evaluate) than to 8.1/8.2's game-theory framing.
+
+**Unpredictability requirement (applies to 8.1 and 8.2):** the random roll must never observably correlate with any single game-state variable a human could learn to read over repeated games (e.g., always baiting on turn 3, or only when a specific card is in hand) — a human doesn't need to break any single decision, only find a pattern across many games. Long-run frequency across many games is the thing that has to hold up, not any individual roll.
 
 ---
 
