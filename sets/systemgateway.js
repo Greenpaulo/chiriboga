@@ -1103,6 +1103,11 @@ cardSet[30013] = {
       if (this.breachedHQThisTurn) return 0; //first time only
       return 1;
   },
+  //Public, out-of-run description for Corp central-security planning.
+  AICentralPressure: function(server) {
+      if (server != corp.HQ || this.breachedHQThisTurn) return {};
+      return { additionalAccess: 1 };
+  },
   //install before run if the server is HQ and Docklands is in worthkeeping
   AIInstallBeforeRun: function(server,potential,useRunEvent,runCreditCost,runClickCost) {
 	if (server == corp.HQ) {
@@ -1969,6 +1974,11 @@ cardSet[30024] = {
       }
       return ret;
     },
+  },
+  //Public next-breach pressure; unlike modifyBreachAccess this is safe outside a run.
+  AICentralPressure: function(server) {
+    if (server != corp.RnD) return {};
+    return { additionalAccess: Counters(this, "virus"), growth: 2 };
   },
   //Whenever a successful run on R&D ends, you may place 1 virus counter on this program
   responseOnRunEnds: {

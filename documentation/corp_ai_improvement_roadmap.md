@@ -167,13 +167,23 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Deterministic regression scenarios:** A breaker-only credit cannot pay a bypass; a stealth breaker receives its required stealth composition; one recurring credit cannot cover two encounters; central-only credits apply only to centrals; unrestricted credits fill any remaining payment.
 - **Acceptance gate:** Adopt when constrained allocation never reports a cheaper route than the legal payment engine and existing Layer 6 ceiling cases remain stable.
 
-### Layer 7: Central Server Threat Asymmetry & Win-Cons
+### Layer 7: Central Server Threat Asymmetry & Win-Cons — `[COMPLETED]`
 
 - **Goal:** Differentiate Remote server defense from HQ/R&D defense based on game state.
 - **Access Multiplier Penalty:**
   - Scale central server protection urgency based on active multi-access cards installed in the Runner's rig (_Conduit_, _Maker's Eye_, _Interface_, _HQ Interface_).
 - **Macro Win-Con Classification:**
   - Detect non-interactive or central-focused Runner archetypes (e.g., heavy keyhole/milling or burn decks) to prevent the AI Corp from over-investing in remote servers while Centrals collapse.
+
+**Implemented notes:** Public installed Runner cards now expose `AICentralPressure(server)`, describing immediate additional access, persistent non-access pressure (milling/burn), and bounded future growth. `_centralServerThreat()` aggregates those mechanics into an eight-point maximum server-specific protection penalty, while `_classifyRunnerMacroThreat()` reports whether the visible board is balanced, HQ-focused, R&D-focused, or split across both centrals and separately identifies non-interactive pressure. Hidden run events are deliberately excluded and remain Layer 5's responsibility. Updated scoped cards: _Docklands Pass_ and _Conduit_ (`systemgateway.js`) and _Devadatta Drone_ (`elevation.js`). No installed central-pressure card in `systemupdate2021.js` required an update; _Legwork_ and _The Maker's Eye_ are hidden events, so treating them as active board threats would violate imperfect information.
+
+#### Layer 7.1: Consequence-Calibrated Central Pressure — `[FOLLOW-UP — REQUIRES CALIBRATION]`
+
+- **Goal:** Scale the mechanic-level penalty by the actual consequence of the next central breach rather than treating every extra access as equally dangerous.
+- **Proposed design:** Combine `AICentralPressure` with public state: agenda points needed to win, HQ size and Corp-known agenda density, R&D size, already-seen top cards, and remaining uses/counters. Keep the hook mechanical; consequence weighting belongs in the evaluator.
+- **Safety constraints:** The Corp may use its own HQ and R&D knowledge, but must never inspect hidden Runner cards. Do not double-count the existing HQ agenda-flood adjustment, successful-run history, or Layer 3.5 protection debt. A zero-counter scaling engine may contribute bounded growth pressure but must not claim current multi-access.
+- **Deterministic regression scenarios:** One extra HQ access is more urgent when HQ is agenda-rich; R&D multi-access becomes critical when a breach could win; exhausted limited-use hardware contributes zero; zero-counter scaling pressure stays below live multi-access; changing hidden Runner Grip/Stack identities changes nothing.
+- **Acceptance gate:** Adopt only after seeded games reduce agenda points lost from centrals without materially suppressing viable remote scoring or causing persistent over-protection of exhausted central tools.
 
 ---
 
@@ -209,6 +219,9 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `_evaluateServerSecurity(server)` | Primary entry point. Returns security, break costs, effective `runnerCredits`, its `runnerCreditPool` breakdown, risks, and reasons. |
 | `_effectiveRunnerCreditPool(server)` | Public, route-specific credit ceiling from pool, eligible hosted credits, Bad Publicity, and click economy. |
+| `card.AICentralPressure(server)` | Public installed multi-access, alternative central pressure, and growth exposed by Runner cards. |
+| `_centralServerThreat(server)` | Aggregates central-pressure hooks into a bounded server-specific protection penalty. |
+| `_classifyRunnerMacroThreat()` | Classifies visible central focus and persistent non-access win conditions. |
 | `card.modifyStrength`             | Engine hook defining strength modifiers. Inspected in `_effectiveIceStrength()`.                                            |
 | `card.AIMatchingBreakerInstalled` | Engine hook on cards/identities that return matching capability for an ICE.                                                 |
 | `card.AIPreventBreach`            | Engine hook on root cards/upgrades that prevent breach.                                                                     |

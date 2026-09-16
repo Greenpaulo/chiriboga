@@ -5122,6 +5122,10 @@ cardSet[35031] = {
   },
   
   //AI code
+  AICentralPressure: function(server) {
+    if (server !== corp.RnD || Counters(this, "power") < 1) return {};
+    return { additionalAccess: 1 };
+  },
   AIWorthKeeping: function(installedRunnerCards, spareMU) {
     if (runner.AI._getCachedCost(corp.RnD) !== Infinity) return true;
     return false;

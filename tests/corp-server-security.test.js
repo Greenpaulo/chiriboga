@@ -403,6 +403,61 @@ test('server redirects are detected by hook and generic wording without title ch
   runner.cards = [{player: runner, cardText: 'click: Run Archives. Change the attacked server to HQ.'}];
   assert.strictEqual(ai._archivesIsBackdoorToHQ(), true);
 });
+test('central pressure aggregates installed public hooks and stays server-specific', () => {
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []}});
+  runner.cards = [
+    {player: runner, AICentralPressure: target => target === corp.RnD ? {additionalAccess: 2, growth: 1} : {}},
+    {player: runner, AICentralPressure: target => target === corp.RnD ? {persistentPressure: 1} : {}},
+    {player: runner, disabled: true, AICentralPressure: () => {throw Error('disabled hook called');}},
+  ];
+  const threat = ai._centralServerThreat(corp.RnD);
+  assert.strictEqual(threat.additionalAccess, 2);
+  assert.strictEqual(threat.persistentPressure, 1);
+  assert.strictEqual(threat.growth, 1);
+  assert.strictEqual(threat.sources, 2);
+  assert.strictEqual(threat.penalty, 6);
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).penalty, 0);
+});
+test('scoped installed multi-access cards expose out-of-run public pressure', () => {
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []}});
+  const docklands = card(30013), conduit = card(30024), drone = card(35031);
+  conduit.virus = 2; drone.power = 1; runner.cards = [docklands, conduit, drone];
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 1);
+  const rnd = ai._centralServerThreat(corp.RnD);
+  assert.strictEqual(rnd.additionalAccess, 3);
+  assert.strictEqual(rnd.growth, 2);
+  assert.strictEqual(ai._classifyRunnerMacroThreat().focus, 'rd');
+  drone.power = 0;
+  assert.strictEqual(ai._centralServerThreat(corp.RnD).additionalAccess, 2);
+});
+test('macro classification distinguishes central focus and persistent win conditions', () => {
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []}});
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.RnD ? {persistentPressure: 2} : {}}];
+  const classification = ai._classifyRunnerMacroThreat();
+  assert.strictEqual(classification.centralFocused, true);
+  assert.strictEqual(classification.nonInteractive, true);
+  assert.strictEqual(classification.focus, 'rd');
+});
+test('central pressure never reads hidden Runner card identities', () => {
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []}});
+  runner.grip = [{get title() {throw Error('hidden grip read');}}];
+  runner.stack = [{get title() {throw Error('hidden stack read');}}];
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.HQ ? 2 : 0}];
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 2);
+});
+test('central pressure directly increases protection urgency', () => {
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+  });
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.RnD ? {additionalAccess: 2} : {}}];
+  const pressured = ai._protectionScore(corp.RnD, {});
+  runner.cards = [];
+  const baseline = ai._protectionScore(corp.RnD, {});
+  assert.strictEqual(pressured, baseline - 3);
+});
 test('protection allocation rotates through insecure servers during a turn', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 1};

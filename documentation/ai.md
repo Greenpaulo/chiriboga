@@ -30,6 +30,7 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [4.18 Corp Security: Type Shifts, Bypasses, and Redirects](#418-corp-security-type-shifts-bypasses-and-redirects)
    - [4.19 Hidden Single-ICE Threats — `AIHiddenThreat`](#419-hidden-single-ice-threats--aihiddenthreat)
    - [4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`](#420-run-credit-sources--canusecredits-airunpoolcreditoffset)
+   - [4.21 Public Central Pressure — `AICentralPressure`](#421-public-central-pressure--aicentralpressure)
 5. [Corp AI Hooks](#5-corp-ai-hooks)
    - [5.1 ICE — `AIImplementIce`](#51-ice--aiimplementice)
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
@@ -1151,6 +1152,39 @@ The return value is the non-negative number of additional credits available for 
 
 `corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn the next Runner allotment is projected, while an active run receives no click-to-credit allowance.
 
+### 4.21 Public Central Pressure — `AICentralPressure`
+
+Installed Runner cards that amplify attacks on HQ or R&D should describe their
+public threat to Corp protection planning:
+
+```js
+AICentralPressure: function(server) {
+  if (server != corp.RnD) return {};
+  return {
+    additionalAccess: Counters(this, "virus"),
+    persistentPressure: 0,
+    growth: 2,
+  };
+},
+```
+
+The hook returns an object with non-negative numeric fields:
+
+| Field | Meaning |
+|---|---|
+| `additionalAccess` | Extra cards the installed card can expose on the next breach of `server` |
+| `persistentPressure` | Severity of a central-focused payoff that replaces or bypasses normal access, such as milling/burn |
+| `growth` | Bounded warning that successful central runs strengthen the installed engine |
+
+Return `{}` when the card does not currently apply. The hook is called outside
+runs and must be read-only, depend only on the supplied server and public state,
+and never inspect Runner Grip or Stack identities. Hidden run events must not use
+this hook: they belong to `AIHiddenThreat` or a future hidden central-event model.
+Limited-use cards should return zero after their public counters or uses are
+exhausted. `corp.AI._centralServerThreat(server)` aggregates installed sources;
+`_classifyRunnerMacroThreat()` reports the visible board's central focus and
+whether persistent non-access pressure is live.
+
 ## 5. Corp AI Hooks
 
 ### 5.1 ICE — `AIImplementIce`
@@ -1542,6 +1576,8 @@ if (corp.AI != null) {
 - `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, runnerCreditPool, structuralRisk, publicThreatRisk, reasons}`. `runnerCredits` is the effective ceiling and `runnerCreditPool` is its component breakdown. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
 - `corp.AI._effectiveRunnerCreditPool(server)` — returns the public, server-specific effective credit ceiling, including compatible hosted credits, Bad Publicity, and available click-to-credit conversion while preserving the run click.
 - `corp.AI._estimateRunnerBypassRisk(server)` — returns the bounded hidden-threat protection penalty for a one-ice server using `AIHiddenThreat` profiles and only public faction, pile-size, and Heap information
+- `corp.AI._centralServerThreat(server)` — aggregates public installed central access, persistent pressure, and growth into a bounded server-specific protection penalty
+- `corp.AI._classifyRunnerMacroThreat()` — classifies the public board as balanced, HQ-focused, R&D-focused, or split-central and reports persistent non-access pressure
 - `corp.AI._iceHasETR(ice)` — true if the ice can end the run (subroutine or encounter effect)
 - `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if printed damage exceeds the Runner's grip size
 - `corp.AI._hasDefensiveUpgrade(server)` — true if an upgrade in the server prevents the breach
@@ -1646,6 +1682,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
 | `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
 | `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |
+| `AICentralPressure(server)` | function | Describe public installed multi-access, non-access central pressure, and growth |
 | `AIPrepareHypotheticalForRC(host)` | function | Pre-run: set up fake state for run calculation |
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |

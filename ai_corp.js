@@ -185,16 +185,78 @@ class CorpAI {
     return false;
   }
 
-  //special case e.g Sneakdoor Beta
-  //returns a protection value to be subtracted
-  _extraThreatOnRnD() {
-    var conduit = this._copyOfCardExistsIn("Conduit", runner.rig.programs);
-    if (conduit) {
-      //the numbers are arbitrary but basically a bit for each counter and some for existing at all
-      //multiplier was 0.5 and constant was 2.5. AI still seemed to underappreciate it so I increased these.
-      return 1.0 * Counters(conduit, "virus") + 3.0;
+  //Normalize public, installed central-pressure hooks. The hook deliberately
+  //describes mechanics rather than card names, and must be safe outside a run.
+  _centralPressureFromCard(card, server) {
+    var ret = { additionalAccess: 0, persistentPressure: 0, growth: 0 };
+    if (!card || card.player != runner || !CheckHasAbilities(card)) return ret;
+    var pressure = null;
+    if (typeof card.AICentralPressure == "function")
+      pressure = card.AICentralPressure.call(card, server);
+    if (typeof pressure == "number") pressure = { additionalAccess: pressure };
+    if (!pressure || typeof pressure != "object") return ret;
+    ["additionalAccess", "persistentPressure", "growth"].forEach((key) => {
+      var value = Number(pressure[key]);
+      if (isFinite(value) && value > 0) ret[key] = value;
+    });
+    return ret;
+  }
+
+  //Returns a diagnostic summary and a bounded protection-score penalty for a
+  //central server. Hidden run events remain Layer 5's responsibility.
+  _centralServerThreat(server) {
+    var ret = {
+      additionalAccess: 0,
+      persistentPressure: 0,
+      growth: 0,
+      penalty: 0,
+      sources: 0,
+    };
+    if (server != corp.HQ && server != corp.RnD) return ret;
+    var installed = InstalledCards(runner);
+    for (var i = 0; i < installed.length; i++) {
+      var contribution = this._centralPressureFromCard(installed[i], server);
+      if (
+        contribution.additionalAccess > 0 ||
+        contribution.persistentPressure > 0 ||
+        contribution.growth > 0
+      )
+        ret.sources++;
+      ret.additionalAccess += contribution.additionalAccess;
+      ret.persistentPressure += contribution.persistentPressure;
+      ret.growth += contribution.growth;
     }
-    return 0;
+    ret.penalty = Math.min(
+      8,
+      ret.additionalAccess * 1.5 +
+        ret.persistentPressure * 2 +
+        Math.min(2, ret.growth),
+    );
+    return ret;
+  }
+
+  //Classify the visible Runner board's macro plan without hidden-card access.
+  _classifyRunnerMacroThreat() {
+    var hq = this._centralServerThreat(corp.HQ);
+    var rnd = this._centralServerThreat(corp.RnD);
+    var centralFocused =
+      hq.penalty + rnd.penalty >= 3 ||
+      hq.growth + rnd.growth >= 2 ||
+      hq.persistentPressure + rnd.persistentPressure > 0;
+    var focus = "balanced";
+    if (centralFocused) {
+      if (hq.penalty > rnd.penalty + 0.5) focus = "hq";
+      else if (rnd.penalty > hq.penalty + 0.5) focus = "rd";
+      else focus = "centrals";
+    }
+    return {
+      centralFocused: centralFocused,
+      nonInteractive:
+        hq.persistentPressure + rnd.persistentPressure >= 2,
+      focus: focus,
+      hq: hq,
+      rnd: rnd,
+    };
   }
 
   //returns the preferred server. input is the upgrade to install
@@ -2180,10 +2242,10 @@ class CorpAI {
         ret += corp.HQ.cards.length - this._agendaPointsInServer(corp.HQ) - 2.5;
       }
     }
-    //if it is R&D and there is extra threat e.g. a Conduit, need more protection
-    if (server == corp.RnD) {
-      ret -= this._extraThreatOnRnD();
-    }
+    //Central multi-access and alternative central win conditions make the
+    //relevant central more urgent than an equivalently defended remote.
+    if (server == corp.HQ || server == corp.RnD)
+      ret -= this._centralServerThreat(server).penalty;
     if (options.returnArchivesLowerScoreForHQIfBackdoor) {
       //if it is HQ we will return the lowest protection of either HQ or Archives
       if (server == corp.HQ && archivesIsBackdoorToHQ) {
