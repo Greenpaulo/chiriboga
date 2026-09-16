@@ -148,7 +148,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Deterministic regression scenarios:** Hidden Grip/Stack substitutions do not change risk; revealing an in-faction threat increases the posterior before its copy is consumed by the Heap count; observed influence caps reduce implausible imported-copy estimates; exhausting all expected copies still yields zero risk.
 - **Acceptance gate:** Adopt only after seeded simulations show better-calibrated predicted-versus-observed threat rates than the fixed prior without increasing false confidence on uncommon decklists.
 
-### Layer 6: Runner Effective Credit Ceiling
+### Layer 6: Runner Effective Credit Ceiling — `[COMPLETED]`
 
 - **Goal:** Prevent false confidence when the Runner's raw credit pool is low but their action economy is rich.
 - **Effective Credit Pool Calculation:**
@@ -156,6 +156,16 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   - Add active recurring credits (e.g., _Cyberfeeder_, _Multithreader_, _Ghost Runner_, stealth credits).
   - Add available Bad Publicity credits.
   - Factor in click-to-credit conversion potential if the Runner has remaining clicks.
+
+**Implemented notes:** `_effectiveRunnerCreditPool(server)` now returns a public-information breakdown of the Runner's base pool, already-created temporary run credits, eligible hosted/recurring credits, Bad Publicity credits, and click-to-credit potential. Corp-turn planning projects the Runner's next public click allotment and reserves one click to initiate the run; evaluation during an active run does not invent additional click credits or count Bad Publicity twice. Hosted credits are included only when their `canUseCredits("using", card)` restriction permits a public installed breaker/bypass tool. Existing `AIRunPoolCreditOffset(server, runEventCardToUse)` hooks provide server-specific public run credits, with `null` passed for the hidden run-event argument; cards exposing both interfaces are counted once. `_evaluateServerSecurity()` uses this ceiling for affordability lockouts and exposes the breakdown as `runnerCreditPool` while retaining numeric `runnerCredits` compatibility. No scoped card definitions required changes: the relevant cards in `systemgateway.js`, `systemupdate2021.js`, and `elevation.js` either expose non-run credit restrictions or hidden run-event economy, which must not be assumed by the Corp.
+
+#### Layer 6.1: Payment-Constraint Allocation — `[FOLLOW-UP]`
+
+- **Goal:** Replace the scalar credit ceiling with a payment allocator when a route combines restrictions such as stealth requirements, breaker-specific recurring credits, and paid bypass abilities.
+- **Proposed design:** Return credit-source objects with an amount and an eligibility predicate, then allocate each source against the actual per-ICE payments. Spend the most restricted sources first and preserve unrestricted pool credits for later encounters.
+- **Safety constraints:** Use only active public cards and declared hooks; never infer economy events from Grip contents. Do not mutate counters or run state while planning, and never allocate one hosted credit twice.
+- **Deterministic regression scenarios:** A breaker-only credit cannot pay a bypass; a stealth breaker receives its required stealth composition; one recurring credit cannot cover two encounters; central-only credits apply only to centrals; unrestricted credits fill any remaining payment.
+- **Acceptance gate:** Adopt when constrained allocation never reports a cheaper route than the legal payment engine and existing Layer 6 ceiling cases remain stable.
 
 ### Layer 7: Central Server Threat Asymmetry & Win-Cons
 
@@ -197,7 +207,8 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 | Engine Hook / Method              | Role                                                                                                                        |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `_evaluateServerSecurity(server)` | Primary entry point. Returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, reasons}`. |
+| `_evaluateServerSecurity(server)` | Primary entry point. Returns security, break costs, effective `runnerCredits`, its `runnerCreditPool` breakdown, risks, and reasons. |
+| `_effectiveRunnerCreditPool(server)` | Public, route-specific credit ceiling from pool, eligible hosted credits, Bad Publicity, and click economy. |
 | `card.modifyStrength`             | Engine hook defining strength modifiers. Inspected in `_effectiveIceStrength()`.                                            |
 | `card.AIMatchingBreakerInstalled` | Engine hook on cards/identities that return matching capability for an ICE.                                                 |
 | `card.AIPreventBreach`            | Engine hook on root cards/upgrades that prevent breach.                                                                     |
@@ -206,6 +217,6 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 ## Regression Validation and Current Limits
 
-Run `node tests/corp-server-security.test.js` for focused checks of calculator ownership, actual unrezzed ice classification, breaker activation costs, mandatory versus optional punishment, hosted coverage, lethality, and human/AI identity matching. These tests load the real AI classes and priority card definitions with deterministic engine helpers; they do not replace browser gameplay testing.
+Run `node tests/corp-server-security.test.js` for focused checks of calculator ownership, actual unrezzed ice classification, breaker activation costs, mandatory versus optional punishment, hosted coverage, lethality, human/AI identity matching, and effective Runner credit sources. These tests load the real AI classes and priority card definitions with deterministic engine helpers; they do not replace browser gameplay testing.
 
-Security remains a per-ice heuristic, not a complete run simulation. It does not yet model cumulative damage across encounters, encounter payments, combined optional-effect sequences that disable later breakers, shared strength-reducer counter spending across multiple ice, or the effective-credit ceiling planned in Layer 6. `AIImplementBreaker` pricing probes support the standard `ImplementIcebreaker` activation path; other special breaker mechanisms need their own capability hooks.
+Security remains a per-ice heuristic, not a complete run simulation. It does not yet model cumulative damage across encounters, combined optional-effect sequences that disable later breakers, shared strength-reducer counter spending across multiple ice, or exact allocation of restricted credit sources across payments (Layer 6.1). `AIImplementBreaker` pricing probes support the standard `ImplementIcebreaker` activation path; other special breaker mechanisms need their own capability hooks.

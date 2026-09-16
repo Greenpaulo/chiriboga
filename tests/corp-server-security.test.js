@@ -5,9 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
-const corp = {creditPool: 20, scoreArea: [], HQ: {cards: []}, archives: {cards: []}};
-const runner = {creditPool: 0, grip: [], stack: [], heap: [], cards: [], AI: null};
-const context = {console, corp, runner, cardSet: {}, setIdentifiers: [], encountering: false, attackedServer: null, approachIce: -1};
+const corp = {creditPool: 20, badPublicity: 0, scoreArea: [], HQ: {cards: []}, archives: {cards: []}};
+const runner = {creditPool: 0, temporaryCredits: 0, clickTracker: 0, grip: [], stack: [], heap: [], cards: [], AI: null};
+const context = {console, corp, runner, playerTurn: runner, cardSet: {}, setIdentifiers: [], encountering: false, attackedServer: null, approachIce: -1};
 let servers = [];
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
@@ -16,6 +16,7 @@ context.Credits = player => player.creditPool;
 context.AvailableCredits = context.Credits;
 context.RezCost = card => card.rezCost || 0;
 context.CheckCredits = (player, cost) => player.creditPool >= cost;
+context.AllottedClicks = player => player === runner ? 4 : 3;
 context.InstalledCards = player => player === runner ? runner.cards : servers.reduce((cards, server) => cards.concat(server.ice, server.root), []);
 context.ActiveCards = player => {
   const runnerCards = runner.cards.concat(runner.identityCard ? [runner.identityCard] : []);
@@ -52,7 +53,8 @@ let tests = 0;
 function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
-  corp.creditPool = 20; corp.scoreArea = []; servers = [];
+  runner.temporaryCredits = 0; runner.clickTracker = 0; context.playerTurn = runner; context.attackedServer = null;
+  corp.creditPool = 20; corp.badPublicity = 0; corp.scoreArea = []; servers = [];
   body(); tests++; console.log('PASS ' + name);
 }
 
@@ -333,6 +335,66 @@ test('hidden threats affect protection urgency but not deterministic security', 
   runner.heap = [card(31018), card(31018), card(31018)];
   //Forged Activation Orders does not apply to this rezzed layer.
   assert(Math.abs(ai._protectionScore(remote, {}) - withoutRisk) < 1e-9);
+});
+test('effective credit pool combines public bad publicity and click economy', () => {
+  const target = server([etr()]);
+  runner.clickTracker = 4;
+  corp.badPublicity = 2;
+  const pool = ai._effectiveRunnerCreditPool(target);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(pool)), {
+    baseCredits: 0, temporaryCredits: 0, recurringCredits: 0,
+    badPublicityCredits: 2, clickCredits: 3, total: 5,
+  });
+});
+test('Corp-turn security projects the next Runner click allotment', () => {
+  const costly = ice(['End the run.', 'End the run.', 'End the run.'],
+    [[['endTheRun']], [['endTheRun']], [['endTheRun']]]);
+  const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],
+    cardText: '1 credit: Break 1 barrier subroutine.'};
+  runner.cards = [breaker]; runner.clickTracker = 0; context.playerTurn = corp;
+  const result = ai._evaluateServerSecurity(server([costly]));
+  assert.strictEqual(result.runnerCreditPool.clickCredits, 3);
+  assert.strictEqual(result.totalMandatoryBreakCost, 3);
+  assert.strictEqual(result.isSecure, false);
+});
+test('breaker-compatible hosted credits count but trash-only credits do not', () => {
+  const wall = ice(['End the run.', 'End the run.'], [[['endTheRun']], [['endTheRun']]]);
+  const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],
+    cardText: '1 credit: Break 1 barrier subroutine.'};
+  const breakerCredits = {player: runner, credits: 2,
+    canUseCredits: (doing, target) => doing === 'using' && target === breaker};
+  const trashCredits = {player: runner, credits: 9,
+    canUseCredits: doing => doing === 'paying trash costs'};
+  runner.cards = [breaker, breakerCredits, trashCredits];
+  const result = ai._evaluateServerSecurity(server([wall]));
+  assert.strictEqual(result.runnerCreditPool.recurringCredits, 2);
+  assert.strictEqual(result.runnerCredits, 2);
+  assert.strictEqual(result.isSecure, false);
+});
+test('server credit hook is route-aware and is not double counted with hosted credits', () => {
+  const central = {cards: [], ice: [etr()], root: []};
+  const remote = {ice: [etr()], root: []};
+  servers = [central, remote];
+  const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],
+    cardText: '1 credit: Break 1 barrier subroutine.'};
+  const source = {player: runner, credits: 2,
+    canUseCredits: doing => doing === 'using',
+    AIRunPoolCreditOffset: target => typeof target.cards !== 'undefined' ? 2 : 0};
+  runner.cards = [breaker, source];
+  assert.strictEqual(ai._effectiveRunnerCreditPool(central).recurringCredits, 2);
+  assert.strictEqual(ai._effectiveRunnerCreditPool(remote).recurringCredits, 2);
+  assert.strictEqual(context.attackedServer, null);
+});
+test('an active run uses temporary credits without adding future clicks or bad pub twice', () => {
+  const target = server([etr()]);
+  runner.creditPool = 1; runner.temporaryCredits = 2; runner.clickTracker = 3;
+  corp.badPublicity = 2; context.attackedServer = target;
+  const pool = ai._effectiveRunnerCreditPool(target);
+  assert.strictEqual(pool.baseCredits, 1);
+  assert.strictEqual(pool.temporaryCredits, 2);
+  assert.strictEqual(pool.badPublicityCredits, 0);
+  assert.strictEqual(pool.clickCredits, 0);
+  assert.strictEqual(pool.total, 3);
 });
 test('server redirects are detected by hook and generic wording without title checks', () => {
   Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}});

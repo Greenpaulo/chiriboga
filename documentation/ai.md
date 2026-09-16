@@ -29,6 +29,7 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [4.17 Hosted Subroutine Breakers — `AIHostedBreakContribution`](#417-hosted-subroutine-breakers--aihostedbreakcontribution)
    - [4.18 Corp Security: Type Shifts, Bypasses, and Redirects](#418-corp-security-type-shifts-bypasses-and-redirects)
    - [4.19 Hidden Single-ICE Threats — `AIHiddenThreat`](#419-hidden-single-ice-threats--aihiddenthreat)
+   - [4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`](#420-run-credit-sources--canusecredits-airunpoolcreditoffset)
 5. [Corp AI Hooks](#5-corp-ai-hooks)
    - [5.1 ICE — `AIImplementIce`](#51-ice--aiimplementice)
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
@@ -1133,6 +1134,23 @@ Rules for new cards:
 - When every expected copy of a threat class is faceup in the Heap, its hidden
   risk must be zero.
 
+### 4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`
+
+Corp security planning calculates a public effective credit ceiling for each server. Existing hosted-credit cards participate through the engine's normal `canUseCredits(doing, card)` hook. A source is eligible for breaking when `canUseCredits("using", installedBreaker)` returns true; credits restricted to installs, event plays, tag removal, or trash costs are deliberately excluded.
+
+Server-specific credits that cannot be described reliably through `canUseCredits` should expose:
+
+```js
+AIRunPoolCreditOffset: function(server, runEventCardToUse) {
+  if (typeof server.cards === "undefined") return 0;
+  return this.credits;
+},
+```
+
+The return value is the non-negative number of additional credits available for that route. `server` is the proposed attacked server. `runEventCardToUse` is the proposed event for Runner-AI simulation; Corp security planning always passes `null`, because hidden Grip identities are unavailable to the Corp. The hook must be read-only, use only public active state when called with `null`, and be safe outside a run. If a card exposes both usable hosted credits and this hook, the security evaluator takes the larger value rather than adding both.
+
+`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn the next Runner allotment is projected, while an active run receives no click-to-credit allowance.
+
 ## 5. Corp AI Hooks
 
 ### 5.1 ICE — `AIImplementIce`
@@ -1521,7 +1539,8 @@ if (corp.AI != null) {
 - `corp.AI._iceWorthRezzing(ice, cost, server)` — returns true if the ice is worth rezzing
 - `corp.AI._isAScoringServer(server)` — true if the server can be used for scoring
 - `corp.AI._potentialDamageOnBreach(server)` — estimated damage runner would take
-- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, structuralRisk, publicThreatRisk, reasons}`. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
+- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, runnerCreditPool, structuralRisk, publicThreatRisk, reasons}`. `runnerCredits` is the effective ceiling and `runnerCreditPool` is its component breakdown. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
+- `corp.AI._effectiveRunnerCreditPool(server)` — returns the public, server-specific effective credit ceiling, including compatible hosted credits, Bad Publicity, and available click-to-credit conversion while preserving the run click.
 - `corp.AI._estimateRunnerBypassRisk(server)` — returns the bounded hidden-threat protection penalty for a one-ice server using `AIHiddenThreat` profiles and only public faction, pile-size, and Heap information
 - `corp.AI._iceHasETR(ice)` — true if the ice can end the run (subroutine or encounter effect)
 - `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if printed damage exceeds the Runner's grip size
@@ -1639,6 +1658,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunEventModify(server)` | function | Temporarily modify game state for run calc |
 | `AIRunEventRestore(server)` | function | Restore state after run calc |
 | `AIRunEventExtraCredits` | number | Credits this run event provides |
+| `AIRunPoolCreditOffset(server, runEventCardToUse)` | function | Public extra credits available for a hypothetical route; must be safe with a null event |
 | `AIAdditionalAccess(server)` | function | Return extra accesses for given server |
 | `AIInstallBeforeRun(server, ...)` | function | Return priority to install before running server |
 | `AIInstallBeforeInstall(card)` | function | Return true to install this before the given card |

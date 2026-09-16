@@ -1908,19 +1908,123 @@ class CorpAI {
     return Math.min(4, totalRisk);
   }
 
+  //Return a conservative upper bound on the credits the Runner can bring to a
+  //run on this server. Unlike Credits(runner), this includes public run-only
+  //money and clicks that can be converted before initiating the run.
+  _effectiveRunnerCreditPool(server) {
+    var evaluatingActiveRun =
+      !!server &&
+      typeof attackedServer != "undefined" &&
+      attackedServer == server;
+    var baseCredits = Math.max(0, runner.creditPool || 0);
+    var temporaryCredits = evaluatingActiveRun
+      ? Math.max(0, runner.temporaryCredits || 0)
+      : 0;
+    var badPublicityCredits = evaluatingActiveRun
+      ? 0
+      : Math.max(0, corp.badPublicity || 0);
+    var recurringCredits = 0;
+    var activeCards = ActiveCards(runner);
+    var spendTargets = activeCards.filter(
+      (card) =>
+        card &&
+        card.player == runner &&
+        CheckHasAbilities(card) &&
+        (CheckSubType(card, "Icebreaker") ||
+          typeof card.AIImplementBreaker == "function" ||
+          typeof card.AIBypassesIce == "function" ||
+          typeof card.AIBypassesOneIce == "function" ||
+          typeof card.AIBypassesOutermostIce == "function"),
+    );
+
+    //Some canUseCredits hooks are route-sensitive and consult attackedServer.
+    //Provide that public hypothetical context, then restore the real run state.
+    var previousAttackedServer =
+      typeof attackedServer == "undefined" ? null : attackedServer;
+    if (typeof attackedServer != "undefined") attackedServer = server;
+    try {
+      for (var i = 0; i < activeCards.length; i++) {
+        var source = activeCards[i];
+        if (
+          !source ||
+          source.player != runner ||
+          !CheckHasAbilities(source)
+        )
+          continue;
+        var sourceCredits = 0;
+        if (
+          typeof source.credits == "number" &&
+          source.credits > 0 &&
+          typeof source.canUseCredits == "function"
+        ) {
+          for (var j = 0; j < spendTargets.length; j++) {
+            if (source.canUseCredits.call(source, "using", spendTargets[j])) {
+              sourceCredits = source.credits;
+              break;
+            }
+          }
+        }
+        //AIRunPoolCreditOffset covers public server-specific run credits that
+        //cannot be discovered reliably through canUseCredits alone. Taking the
+        //larger value prevents cards which expose both interfaces being counted
+        //twice (for example, a server-restricted recurring-credit source).
+        if (typeof source.AIRunPoolCreditOffset == "function") {
+          var offset = Number(
+            source.AIRunPoolCreditOffset.call(source, server, null),
+          );
+          if (isFinite(offset)) sourceCredits = Math.max(sourceCredits, offset);
+        }
+        recurringCredits += Math.max(0, sourceCredits);
+      }
+    } finally {
+      if (typeof attackedServer != "undefined")
+        attackedServer = previousAttackedServer;
+    }
+
+    var clicks = Math.max(0, runner.clickTracker || 0);
+    //During the Corp turn, plan against the Runner's public next-turn click
+    //allotment rather than the exhausted tracker left by their previous turn.
+    if (
+      typeof playerTurn != "undefined" &&
+      playerTurn == corp &&
+      typeof AllottedClicks == "function"
+    ) {
+      clicks = AllottedClicks(runner) + Math.max(0, runner.tempBonusClicks || 0);
+    }
+    //One click must remain to initiate an ordinary run. Once a run has begun,
+    //click-for-credit is no longer available.
+    var clickCredits = evaluatingActiveRun ? 0 : Math.max(0, clicks - 1);
+    return {
+      baseCredits: baseCredits,
+      temporaryCredits: temporaryCredits,
+      recurringCredits: recurringCredits,
+      badPublicityCredits: badPublicityCredits,
+      clickCredits: clickCredits,
+      total:
+        baseCredits +
+        temporaryCredits +
+        recurringCredits +
+        badPublicityCredits +
+        clickCredits,
+    };
+  }
+
   //Estimates whether the Runner could breach this server this turn.
   //'secure' means the Runner either cannot get through at all (hasHardLockout)
   //or must spend more credits than they have to break the ice that would stop them.
   //Takes into account Runner identity abilities (e.g. Quetzal), hosted virus
   //breakers (e.g. Botulus) and strength-reduction cards (e.g. Leech, Ice Carver).
-  //Returns {isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, reasons}
+  //Returns security, break costs, the effective runnerCredits ceiling and its
+  //runnerCreditPool component breakdown, structural/public risks, and reasons.
   _evaluateServerSecurity(server) {
+    var effectiveCredits = this._effectiveRunnerCreditPool(server);
     var result = {
       isSecure: false,
       hasHardLockout: false,
       totalBreakCost: 0,
       totalMandatoryBreakCost: 0,
-      runnerCredits: Credits(runner),
+      runnerCredits: effectiveCredits.total,
+      runnerCreditPool: effectiveCredits,
       structuralRisk: 0,
       publicThreatRisk: 0,
       reasons: [],
