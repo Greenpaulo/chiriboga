@@ -31,6 +31,7 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 
 - Cards that need updating with the new AI Hooks implemented in this work exist in `/sets`. For this initial implementation we are only focused on 3 sets - `systemgateway.js`, `systemupdate2021.js` and `elevation.js`.
 - If cards need changes due to new hooks being added in order for them to be picked up by this new threat evaluation architecture, then please make sure to update them as part of the work, and then also update the relevant layer with notes on the cards that were updated as part of that layer, ensuring that all relevant cards have been updated and none missed.
+- **AI hook documentation is a crucial part of completing every layer.** Whenever a layer adds, changes, or begins consuming a card-facing AI hook, update `documentation/ai.md` in the same change. Document the hook's signature or schema, return semantics, valid information sources and out-of-run safety constraints, at least one card-definition example, and its quick-reference entry. A layer is not complete until future card implementations can discover and correctly adopt its hooks from that document.
 
 ## Follow-up documentation
 

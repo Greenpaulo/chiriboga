@@ -28,6 +28,7 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [4.16 Ice Strength Reduction — `AIReducesIceStrength`](#416-ice-strength-reduction--aireducesicestrength)
    - [4.17 Hosted Subroutine Breakers — `AIHostedBreakContribution`](#417-hosted-subroutine-breakers--aihostedbreakcontribution)
    - [4.18 Corp Security: Type Shifts, Bypasses, and Redirects](#418-corp-security-type-shifts-bypasses-and-redirects)
+   - [4.19 Hidden Single-ICE Threats — `AIHiddenThreat`](#419-hidden-single-ice-threats--aihiddenthreat)
 5. [Corp AI Hooks](#5-corp-ai-hooks)
    - [5.1 ICE — `AIImplementIce`](#51-ice--aiimplementice)
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
@@ -1024,9 +1025,14 @@ Runner skip an ice/server. Hidden run events belong to the public-threat model,
 not these hooks.
 
 - `AIEffectiveIceSubtypes(iceCard, server, iceIndex)` returns an object with
-  `add` and/or `remove` subtype arrays. Existing `modifySubTypes` and
-  `AIModifyIceAI` hooks are also consumed, so most subtype cards need no extra
-  hook.
+  `add` and/or `remove` subtype arrays. Use this when the type shift is needed
+  specifically for Corp security planning.
+- `AIModifyIceAI(iceAI, startIceIdx)` mutates and returns the Run Calculator's
+  `iceAI` object. It can update `iceAI.subTypes` for route-aware effects such as
+  changing only the next ice that will be encountered. Existing cards that
+  already expose this hook are also understood by Corp security planning.
+  Standard engine `modifySubTypes` modifiers are consumed too, so most subtype
+  cards do not need an additional AI-only hook.
 - `AIBypassesIce(iceCard, server, iceIndex)` returns `false`, `true` for a free
   targeted bypass, or the bypass's credit cost.
 - `AIBypassesOutermostIce(server)` returns whether this card can skip the next
@@ -1037,16 +1043,95 @@ not these hooks.
 - `AIRedirectsRun(fromServer, toServer)` returns whether a run through the
   first server can become a run on the second, bypassing the destination's ice.
 
+These hooks are called during Corp-turn planning as well as run simulation.
+Base their answers on the supplied arguments and public persistent state; do
+not require `CheckEncounter()` or assume `attackedServer` and `approachIce`
+describe a real active run.
+
 ```js
+AIEffectiveIceSubtypes: function(iceCard, server, iceIndex) {
+    if (iceCard != this.host) return {};
+    return { add: ["Code Gate"] };
+},
+
 AIBypassesIce: function(iceCard) {
     if (iceCard != this.chosenCard) return false;
     return iceCard.subroutines.length;
+},
+
+AIBypassesOutermostIce: function(server) {
+    return !this.usedThisTurn && server.ice.length > 0;
+},
+
+AIBypassesOneIce: function(iceCard, server, iceIndex) {
+    return !this.usedThisTurn && CheckSubType(iceCard, "Sentry");
 },
 
 AIRedirectsRun: function(fromServer, toServer) {
     return fromServer == corp.archives && toServer == corp.HQ;
 },
 ```
+
+### 4.19 Hidden Single-ICE Threats — `AIHiddenThreat`
+
+Hidden events that can invalidate a single layer of ice should declare an
+`AIHiddenThreat` profile. The Corp AI uses these profiles to estimate risk from
+public information without reading the Runner's Grip or Stack contents.
+
+`AIHiddenThreat` is an object with these fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `kind` | string | A mechanic-level identifier shared by cards that create the same class of threat. Do not use a card title. |
+| `expectedCopies` | number | Prior estimate of copies in an on-faction deck, normally `3`. Public Heap copies are subtracted from this estimate. |
+| `severity` | number | Maximum protection-score pressure contributed when the threat is very likely. Keep this bounded and proportional to the layer invalidated. |
+| `AppliesToServer(server)` | function | Return `true` when the card could threaten this server's current ice configuration. |
+
+The estimator applies only to one-ice servers. It groups profiles by `kind`,
+weights them using the public Runner identity faction, subtracts faceup copies
+in the Heap, and combines the remaining expectation with the public Grip and
+Stack sizes. The resulting probability changes the Corp's protection priority;
+it does **not** assert that the card is in Grip and does not alter deterministic
+run-cost or server-security calculations.
+
+**Example — hidden run event that bypasses the first encountered ice:**
+
+```js
+AIHiddenThreat: {
+    kind: "first-encounter-bypass",
+    expectedCopies: 3,
+    severity: 3,
+    AppliesToServer: function(server) {
+        return server.ice.length == 1;
+    },
+},
+```
+
+**Example — event that pressures an unrezzed ice:**
+
+```js
+AIHiddenThreat: {
+    kind: "unrezzed-ice-removal",
+    expectedCopies: 3,
+    severity: 2,
+    AppliesToServer: function(server) {
+        return !!server.ice[0] && !server.ice[0].rezzed;
+    },
+},
+```
+
+Rules for new cards:
+
+- Use a mechanic class for `kind`, so equivalent future cards contribute to
+  the same public threat pool without title checks.
+- Keep `AppliesToServer` deterministic and safe outside a run. It may inspect
+  the supplied server and public game state, but never Grip or Stack card
+  identities, Runner-AI caches, or active encounter state without a safe guard.
+- Do not add this hook to a public installed bypass card. Use the appropriate
+  `AIBypassesIce`, `AIBypassesOutermostIce`, or `AIBypassesOneIce` hook from
+  [section 4.18](#418-corp-security-type-shifts-bypasses-and-redirects).
+- When every expected copy of a threat class is faceup in the Heap, its hidden
+  risk must be zero.
 
 ## 5. Corp AI Hooks
 
@@ -1436,7 +1521,8 @@ if (corp.AI != null) {
 - `corp.AI._iceWorthRezzing(ice, cost, server)` — returns true if the ice is worth rezzing
 - `corp.AI._isAScoringServer(server)` — true if the server can be used for scoring
 - `corp.AI._potentialDamageOnBreach(server)` — estimated damage runner would take
-- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, reasons}`; `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts
+- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, structuralRisk, publicThreatRisk, reasons}`. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
+- `corp.AI._estimateRunnerBypassRisk(server)` — returns the bounded hidden-threat protection penalty for a one-ice server using `AIHiddenThreat` profiles and only public faction, pile-size, and Heap information
 - `corp.AI._iceHasETR(ice)` — true if the ice can end the run (subroutine or encounter effect)
 - `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if printed damage exceeds the Runner's grip size
 - `corp.AI._hasDefensiveUpgrade(server)` — true if an upgrade in the server prevents the breach
@@ -1532,11 +1618,15 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AISpecialBreaker` | bool | Marks non-standard breakers (Trojans etc.) |
 | `AIFixedStrength` | bool | Marks breakers that can't pump strength normally |
 | `AIMatchingBreakerInstalled(iceCard)` | function | Return self if this covers the given ice, else null |
+| `AIReducesIceStrength(ice)` | function | Return the amount this active card currently reduces the ice's strength |
+| `AIHostedBreakContribution(ice)` | function | Return how many subroutines this hosted card can currently break for free |
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
+| `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
 | `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
+| `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |
 | `AIPrepareHypotheticalForRC(host)` | function | Pre-run: set up fake state for run calculation |
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |
