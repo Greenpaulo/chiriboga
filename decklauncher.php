@@ -604,6 +604,8 @@
       UpdateCardCountsUI();
       // Apply current sort after rendering
       SortCardContainer();
+      // Preserve both filters when changing identity, loading, or importing a deck.
+      ApplyFilter();
     }
 
     function AttachCardListEvents() {
@@ -806,15 +808,21 @@
       CycleFilterReverse();
       return false;
     });
+    $(document).on('contextmenu', '#filterfaction', function(e) {
+      e.preventDefault();
+      CycleFactionFilterReverse();
+      return false;
+    });
 
     var showingOnlySelected = false;
     var currentFilter = 'all'; // Will cycle through 'all' and set codes from setRegistry
+    var currentFactionFilter = 'all';
 
     // Build filter options dynamically from LOADED sets only
     // (based on localStorage settings or setRegistry defaults)
     var filterOptions = ['all'];
     var filterLabels = {
-      'all': 'ALL CARDS'
+      'all': 'ALL SETS'
     };
 
     // Helper to get default set codes from setRegistry
@@ -888,7 +896,7 @@
       // Fallback if setRegistry not available
       filterOptions = ['all', 'sg', 'su21', 'df'];
       filterLabels = {
-        'all': 'ALL CARDS',
+        'all': 'ALL SETS',
         'sg': 'SG',
         'su21': 'SU21',
         'df': 'DOWNFALL'
@@ -909,7 +917,7 @@
       filterIndex = (filterIndex + 1) % filterOptions.length;
       currentFilter = filterOptions[filterIndex];
       var label = filterLabels[currentFilter] || currentFilter.toUpperCase();
-      $('#filterdeck').html('FILTER:<br>' + label);
+      $('#filterdeck').html('SETS:<br>' + label);
       ApplyFilter();
     }
 
@@ -917,8 +925,65 @@
       filterIndex = (filterIndex - 1 + filterOptions.length) % filterOptions.length;
       currentFilter = filterOptions[filterIndex];
       var label = filterLabels[currentFilter] || currentFilter.toUpperCase();
-      $('#filterdeck').html('FILTER:<br>' + label);
+      $('#filterdeck').html('SETS:<br>' + label);
       ApplyFilter();
+    }
+
+    function GetFactionFilterOptions() {
+      if (deckPlayer === runner) {
+        return [
+          { value: 'all', label: 'ALL FACTIONS' },
+          { value: 'anarch', label: 'ANARCH' },
+          { value: 'criminal', label: 'CRIMINAL' },
+          { value: 'shaper', label: 'SHAPER' },
+          { value: 'neutral', label: 'NEUTRAL' }
+        ];
+      }
+      return [
+        { value: 'all', label: 'ALL FACTIONS' },
+        { value: 'haas-bioroid', label: 'HAAS-BIOROID' },
+        { value: 'jinteki', label: 'JINTEKI' },
+        { value: 'nbn', label: 'NBN' },
+        { value: 'weyland-consortium', label: 'WEYLAND' },
+        { value: 'neutral', label: 'NEUTRAL' }
+      ];
+    }
+
+    function UpdateFactionFilterButton() {
+      var options = GetFactionFilterOptions();
+      var selected = options[0];
+      for (var i = 0; i < options.length; i++) {
+        if (options[i].value === currentFactionFilter) {
+          selected = options[i];
+          break;
+        }
+      }
+      // A faction from the other side should not leave the new card list empty.
+      currentFactionFilter = selected.value;
+      $('#filterfaction').html('FACTION:<br>' + selected.label);
+    }
+
+    function CycleFactionFilterBy(delta) {
+      var options = GetFactionFilterOptions();
+      var currentIndex = 0;
+      for (var i = 0; i < options.length; i++) {
+        if (options[i].value === currentFactionFilter) {
+          currentIndex = i;
+          break;
+        }
+      }
+      currentIndex = (currentIndex + delta + options.length) % options.length;
+      currentFactionFilter = options[currentIndex].value;
+      UpdateFactionFilterButton();
+      ApplyFilter();
+    }
+
+    function CycleFactionFilter() {
+      CycleFactionFilterBy(1);
+    }
+
+    function CycleFactionFilterReverse() {
+      CycleFactionFilterBy(-1);
     }
 
     function CycleSortReverse() {
@@ -943,14 +1008,14 @@
     }
 
     function ApplyFilter() {
+      UpdateFactionFilterButton();
       $('#cardcontainer .card-item').each(function() {
         var cardId = parseInt($(this).find('.count-badge').attr('data-id'));
         var card = cardSet[cardId];
         if (!card) return;
 
-        if (currentFilter === 'all') {
-          $(this).show();
-        } else {
+        var setVisible = currentFilter === 'all';
+        if (!setVisible) {
           // Look up the card in cardData by code (cardId is the code)
           var cardCode = String(cardId).padStart(5, '0');
           var cardInfo = null;
@@ -966,16 +1031,13 @@
           if (cardInfo) {
             var packCode = cardInfo.pack_code || '';
             // currentFilter is now a set code (e.g., 'sg', 'su21', 'elev', 'ms', 'ph')
-            if (packCode === currentFilter) {
-              $(this).show();
-            } else {
-              $(this).hide();
-            }
-          } else {
-            // If not found in cardData, hide it when filtering
-            $(this).hide();
+            setVisible = packCode === currentFilter;
           }
         }
+
+        var cardFaction = (card.faction || '').toLowerCase().replace(/\s+/g, '-');
+        var factionVisible = currentFactionFilter === 'all' || cardFaction === currentFactionFilter;
+        $(this).toggle(setVisible && factionVisible);
       }); // If also showing only selected cards, re-apply that filter
       if (showingOnlySelected) {
         $('#cardcontainer .card-item').each(function() {
@@ -2542,7 +2604,8 @@
         <button id="randomdeck" onclick="GenerateRandomDeck();" class="button">RANDOM<br>DECK</button>
         <button id="cleardeck" onclick="ClearDeck();" class="button">CLEAR<br>DECK</button>
         <button id="sortdeck" onclick="CycleSort();" class="button">SORT BY:<br>ID</button>
-        <button id="filterdeck" onclick="CycleFilter();" class="button">FILTER:<br>ALL CARDS</button>
+        <button id="filterdeck" onclick="CycleFilter();" class="button">SETS:<br>ALL SETS</button>
+        <button id="filterfaction" onclick="CycleFactionFilter();" class="button">FACTION:<br>ALL FACTIONS</button>
         <button id="togglecards" onclick="ToggleOtherCards();" class="button">HIDE UNSELECTED</button>
         <button id="exittomenu" onclick="window.location.href='index.php';" class="button">BACK TO MENU</button>
       </div>
