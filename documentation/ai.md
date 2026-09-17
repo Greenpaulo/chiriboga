@@ -291,7 +291,7 @@ AISpecialBreaker: true,
 
 You still implement `AIImplementBreaker` to explain how they break ice, and `AIMatchingBreakerInstalled` so the AI can check whether a given piece of ice is already covered.
 
-**`AIMatchingBreakerInstalled(iceCard)`** — Called on every installed program to find a match for a given ice. Return `this` if this card can handle that ice, or `null` if not.
+**`AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)`** — Called on every installed program to find a match for a given ice. Return `this` if this card can handle that ice, or `null` if not. `effectiveSubTypes` is an optional array used by Corp security planning for public subtype shifts; use it instead of mutating or retaining `iceCard.subTypes`. Runner-AI callers may omit it, so fall back to the ice's current subtypes.
 
 ```js
 // Botulus: only matches the ice it is hosted on
@@ -1184,7 +1184,9 @@ this hook: they belong to `AIHiddenThreat` or a future hidden central-event mode
 Limited-use cards should return zero after their public counters or uses are
 exhausted. `corp.AI._centralServerThreat(server)` aggregates installed sources;
 `_classifyRunnerMacroThreat()` reports the visible board's central focus and
-whether persistent non-access pressure is live.
+whether persistent non-access pressure is live. Its `focus` field is currently
+diagnostic input for future install planning; protection scoring uses each
+central's penalty directly.
 
 ## 5. Corp AI Hooks
 
@@ -1731,7 +1733,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWorthKeeping(installed, spareMU)` | function | Return true to keep this card in hand during discard |
 | `AISpecialBreaker` | bool | Marks non-standard breakers (Trojans etc.) |
 | `AIFixedStrength` | bool | Marks breakers that can't pump strength normally |
-| `AIMatchingBreakerInstalled(iceCard)` | function | Return self if this covers the given ice, else null |
+| `AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)` | function | Return self if this covers the given ice, else null; the optional list includes public subtype shifts |
 | `AIReducesIceStrength(ice)` | function | Return the amount this active card currently reduces the ice's strength |
 | `AIHostedBreakContribution(ice)` | function | Return how many subroutines this hosted card can currently break for free |
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |

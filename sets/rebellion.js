@@ -120,10 +120,10 @@ cardSet[34082] = {
   AISpecialBreaker: true,
   
   //AI: Check if Physarum can handle specific ice (will bypass on encounter)
-  AIMatchingBreakerInstalled: function (iceCard) {
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
     if (this.host && this.host == iceCard) {
       //Check if this ice is not a barrier
-      if (!CheckSubType(iceCard, "Barrier")) {
+      if (!(effectiveSubTypes || iceCard.subTypes || []).includes("Barrier")) {
         //Check if we can afford to bypass
         var numSubs = iceCard.subroutines ? iceCard.subroutines.length : 0;
         if (numSubs > 0 && Credits(runner) >= numSubs) {

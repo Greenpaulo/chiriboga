@@ -236,6 +236,8 @@ class CorpAI {
   }
 
   //Classify the visible Runner board's macro plan without hidden-card access.
+  //`focus` is diagnostic groundwork for install planning; protection scoring
+  //uses the server-specific penalties below rather than applying it twice.
   _classifyRunnerMacroThreat() {
     var hq = this._centralServerThreat(corp.HQ);
     var rnd = this._centralServerThreat(corp.RnD);
@@ -1123,6 +1125,10 @@ class CorpAI {
   _shouldBaitServer(server) {
     var punishment = this._accessPunishmentSeverity(server);
     if (punishment <= 0) return false;
+    //Normally an access-punishing root cannot also expose agenda points, but
+    //keep the same authoritative safety boundary as every deception path for
+    //mixed/future root configurations.
+    if (this._runnerMayWinIfServerBreached(server)) return false;
     var trap = server.root.find(
       (card) =>
         card &&
@@ -1558,22 +1564,13 @@ class CorpAI {
         continue;
       var match = null;
       if (typeof card.AIMatchingBreakerInstalled == "function") {
-        match = card.AIMatchingBreakerInstalled.call(card, iceCard);
-        if (!match) {
-          //Keep object identity intact because some hooks inspect the ice's
-          //server and neighbouring layers. Restore the printed list immediately.
-          var printedSubTypes = iceCard.subTypes;
-          iceCard.subTypes = this._effectiveIceSubtypes(
-            iceCard,
-            server,
-            iceIndex,
-          );
-          try {
-            match = card.AIMatchingBreakerInstalled.call(card, iceCard);
-          } finally {
-            iceCard.subTypes = printedSubTypes;
-          }
-        }
+        //Pass the effective list separately so hooks can retain the real ice
+        //object for identity/server checks without mutating shared game state.
+        match = card.AIMatchingBreakerInstalled.call(
+          card,
+          iceCard,
+          this._effectiveIceSubtypes(iceCard, server, iceIndex),
+        );
       } else if (
         CheckSubType(card, "Icebreaker") &&
         ((CheckSubType(card, "Fracter") &&
@@ -1980,7 +1977,10 @@ class CorpAI {
   }
 
   _iceIsBypassed(iceCard, server, iceIndex) {
-    return this._iceBypassCost(iceCard, server, iceIndex) <= Credits(runner);
+    return (
+      this._iceBypassCost(iceCard, server, iceIndex) <=
+      this._effectiveRunnerCreditPool(server).total
+    );
   }
 
   _outermostIceBypassAvailable(server) {
@@ -2073,22 +2073,15 @@ class CorpAI {
   //card definitions declare an AIHiddenThreat profile; cards with the same
   //mechanical kind share a copy pool, so revealed Heap copies reduce the prior
   //without requiring title checks or inspecting any card in the Runner's grip.
-  _estimateRunnerBypassRisk(server) {
-    if (!server || !server.ice || server.ice.length != 1) return 0;
-    var identity = runner.identityCard || runner.identity;
-    var runnerFaction = identity ? identity.faction : null;
-    var profiles = {};
-
+  _hiddenThreatProfiles(runnerFaction) {
+    var cacheKey = runnerFaction || "__unknown__";
+    if (this._hiddenThreatProfilesByFaction.has(cacheKey))
+      return this._hiddenThreatProfilesByFaction.get(cacheKey);
+    var profiles = [];
     for (var cardId in cardSet) {
       var definition = cardSet[cardId];
       var threat = definition && definition.AIHiddenThreat;
       if (!threat || !threat.kind) continue;
-      if (
-        typeof threat.AppliesToServer == "function" &&
-        !threat.AppliesToServer.call(definition, server)
-      )
-        continue;
-
       //Faction is a public deckbuilding prior, not knowledge of the decklist.
       //Out-of-faction copies remain possible, but are deliberately discounted.
       var factionWeight = 0.25;
@@ -2096,16 +2089,37 @@ class CorpAI {
         factionWeight = 1;
       else if (definition.faction == "Neutral") factionWeight = 0.5;
 
-      if (!profiles[threat.kind])
-        profiles[threat.kind] = {
-          expectedCopies: 0,
-          severity: 0,
-        };
-      profiles[threat.kind].expectedCopies +=
-        Math.max(0, threat.expectedCopies || 0) * factionWeight;
-      profiles[threat.kind].severity = Math.max(
-        profiles[threat.kind].severity,
-        Math.max(0, threat.severity || 1),
+      profiles.push({
+        definition: definition,
+        threat: threat,
+        expectedCopies:
+          Math.max(0, threat.expectedCopies || 0) * factionWeight,
+        severity: Math.max(0, threat.severity || 1),
+      });
+    }
+    this._hiddenThreatProfilesByFaction.set(cacheKey, profiles);
+    return profiles;
+  }
+
+  _estimateRunnerBypassRisk(server) {
+    if (!server || !server.ice || server.ice.length != 1) return 0;
+    var identity = runner.identityCard || runner.identity;
+    var runnerFaction = identity ? identity.faction : null;
+    var definitions = this._hiddenThreatProfiles(runnerFaction);
+    var profiles = {};
+    for (var profileIndex = 0; profileIndex < definitions.length; profileIndex++) {
+      var profile = definitions[profileIndex];
+      if (
+        typeof profile.threat.AppliesToServer == "function" &&
+        !profile.threat.AppliesToServer.call(profile.definition, server)
+      )
+        continue;
+      if (!profiles[profile.threat.kind])
+        profiles[profile.threat.kind] = {expectedCopies: 0, severity: 0};
+      profiles[profile.threat.kind].expectedCopies += profile.expectedCopies;
+      profiles[profile.threat.kind].severity = Math.max(
+        profiles[profile.threat.kind].severity,
+        profile.severity,
       );
     }
 
@@ -2504,29 +2518,28 @@ class CorpAI {
         this._protectionScore(corp.archives, {}),
       );
 
-    //When an important installed card needs a remote, transfer the urgency of
-    //the weakest generic/new remote target to the actual HVT server.
+    //Preserve the legacy HVT guarantee: when the natural winner is a generic
+    //remote/new server, redirect that protection action to the HVT's server.
     if (this._HVTsInstalled() > 0) {
       var hvtServer = this._HVTserver();
       var hvtEntry = entries.find((entry) => entry.server == hvtServer);
-      var remoteEntries = entries.filter(
-        (entry) =>
-          entry.server == null ||
-          (entry.server && typeof entry.server.cards == "undefined"),
+      var naturalWinner = entries.slice().sort(
+        (a, b) => a.adjustedScore - b.adjustedScore || a.order - b.order,
       );
-      if (hvtEntry && remoteEntries.length > 0) {
-        var weakestRemoteScore = Math.min(
-          ...remoteEntries.map((entry) => entry.adjustedScore),
-        );
-        hvtEntry.adjustedScore = Math.min(
-          hvtEntry.adjustedScore,
-          weakestRemoteScore,
-        );
-      }
+      naturalWinner = naturalWinner.length > 0 ? naturalWinner[0] : null;
+      var genericRemoteWon =
+        naturalWinner &&
+        naturalWinner.server != hvtServer &&
+        (naturalWinner.server == null ||
+          typeof naturalWinner.server.cards == "undefined");
+      if (hvtEntry && genericRemoteWon) hvtEntry.hvtOverride = true;
     }
 
     entries.sort(
-      (a, b) => a.adjustedScore - b.adjustedScore || a.order - b.order,
+      (a, b) =>
+        (b.hvtOverride ? 1 : 0) - (a.hvtOverride ? 1 : 0) ||
+        a.adjustedScore - b.adjustedScore ||
+        a.order - b.order,
     );
     return entries;
   }
@@ -5213,6 +5226,7 @@ class CorpAI {
     this._serverBaitDecisions = new WeakMap();
     this._agendaBluffDecisions = new WeakMap();
     this._cardDeceptionProfiles = new WeakMap();
+    this._hiddenThreatProfilesByFaction = new Map();
     this._random = Math.random;
   }
 

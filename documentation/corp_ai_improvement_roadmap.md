@@ -73,7 +73,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Goal:** Layers 1-3 improved the _accuracy_ of evaluating whether a given server is secure. None of that work touches _allocation_ — which server actually gets an install action when several are simultaneously insecure. This is a distinct, more foundational problem: accurate evaluation of a server that never gets chosen for protection is wasted.
 - **The original gap:** `_serverToProtect()` computed a protection score for every server (HQ, R&D, each remote, archives) but returned exactly one `serverToProtect` per call — the single worst-scoring server. It did not fix multiple simultaneously-insecure servers across a turn or carry state across turns to prioritize a server that previously lost the ranking.
 - **Why this matters more than it looks:** this was the root cause of the original "HQ left with zero ice" bug that started this whole investigation — a server could be correctly judged insecure by the Layer 1-3 machinery and still never receive protection because something else kept scoring as more urgent.
-- **Implemented approach:** `_rankedServersToProtect()` retains the full ordered target list. During a Corp turn, protection installs rotate through as-yet-unprotected insecure servers before adding another layer to a server already handled that turn. At the end of the Runner turn, skipped insecure servers gain a bounded protection-debt adjustment, while protected or secure servers reset their debt. This hybrid preserves the existing one-action-at-a-time main-phase priorities while preventing both same-turn and cross-turn starvation.
+- **Implemented approach:** `_rankedServersToProtect()` retains the full ordered target list. During a Corp turn, protection installs rotate through as-yet-unprotected insecure servers before adding another layer to a server already handled that turn. At the end of the Runner turn, skipped insecure servers gain a bounded protection-debt adjustment, while protected or secure servers reset their debt. This hybrid preserves the existing one-action-at-a-time main-phase priorities while preventing both same-turn and cross-turn starvation. The legacy HVT guarantee remains authoritative: if a generic remote or new-server slot would otherwise win the ranking while an HVT is installed, that protection action is redirected to the HVT's server rather than merely tying its score and relying on insertion order.
 
 #### Layer 3.5.1: Value-Weighted Protection Debt — `[FOLLOW-UP — REQUIRES CALIBRATION]`
 
@@ -175,7 +175,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Macro Win-Con Classification:**
   - Detect non-interactive or central-focused Runner archetypes (e.g., heavy keyhole/milling or burn decks) to prevent the AI Corp from over-investing in remote servers while Centrals collapse.
 
-**Implemented notes:** Public installed Runner cards now expose `AICentralPressure(server)`, describing immediate additional access, persistent non-access pressure (milling/burn), and bounded future growth. `_centralServerThreat()` aggregates those mechanics into an eight-point maximum server-specific protection penalty, while `_classifyRunnerMacroThreat()` reports whether the visible board is balanced, HQ-focused, R&D-focused, or split across both centrals and separately identifies non-interactive pressure. Hidden run events are deliberately excluded and remain Layer 5's responsibility. Updated scoped cards: _Docklands Pass_ and _Conduit_ (`systemgateway.js`) and _Devadatta Drone_ (`elevation.js`). No installed central-pressure card in `systemupdate2021.js` required an update; _Legwork_ and _The Maker's Eye_ are hidden events, so treating them as active board threats would violate imperfect information.
+**Implemented notes:** Public installed Runner cards now expose `AICentralPressure(server)`, describing immediate additional access, persistent non-access pressure (milling/burn), and bounded future growth. `_centralServerThreat()` aggregates those mechanics into an eight-point maximum server-specific protection penalty, while `_classifyRunnerMacroThreat()` reports whether the visible board is balanced, HQ-focused, R&D-focused, or split across both centrals and separately identifies non-interactive pressure. Its `focus` field is intentionally diagnostic groundwork for install planning; current protection scoring consumes the server-specific penalties directly so the classification is not counted twice. Hidden run events are deliberately excluded and remain Layer 5's responsibility. Updated scoped cards: _Docklands Pass_ and _Conduit_ (`systemgateway.js`) and _Devadatta Drone_ (`elevation.js`). No installed central-pressure card in `systemupdate2021.js` required an update; _Legwork_ and _The Maker's Eye_ are hidden events, so treating them as active board threats would violate imperfect information.
 
 #### Layer 7.1: Consequence-Calibrated Central Pressure — `[FOLLOW-UP — REQUIRES CALIBRATION]`
 
@@ -216,8 +216,11 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 exposure-versus-punishment odds, so higher-severity traps deliberately adopt a
 light-defense posture less often. `_shouldBaitServer()` makes one injectable
 random roll per installed trap/server and caches it, preventing repeated AI
-evaluations from rerolling the same decision. Updated scoped cards: _Urtica
-Cipher_ (`systemgateway.js`) and _Snare!_ (`systemupdate2021.js`); no relevant
+evaluations from rerolling the same decision. A trap posture is not permitted
+when breaching that root could give the Runner enough agenda points to win,
+preserving the same authoritative safety guard as agenda bluffs and
+tag-punishment deterrence. Updated scoped cards: _Urtica Cipher_
+(`systemgateway.js`) and _Snare!_ (`systemupdate2021.js`); no relevant
 access-punishing card in `elevation.js` required an update.
 
 Agenda and trap play now share `_remoteDeceptionProfile(card)`. Each eligible

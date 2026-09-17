@@ -81,11 +81,11 @@ cardSet[31001] = {
 	}
 	return result;
   },
-  AIMatchingBreakerInstalled: function (iceCard) {
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
 	//returns a matching breaker installed, or null
 	//in this case, returns this if it's a Barrier, if it's the only Barrier in the server, has only one subroutine, and the ability hasn't been used this turn
 	if (this.usedThisTurn) return null;
-	if (CheckSubType(iceCard, "Barrier")) {
+	if ((effectiveSubTypes || iceCard.subTypes || []).includes("Barrier")) {
 		if (iceCard.subroutines.length > 1) return null;
 		var server = GetServer(iceCard);
 		if (server) {
@@ -1744,9 +1744,9 @@ cardSet[31022] = {
 	}
 	return [];
   },
-  AIMatchingBreakerInstalled: function (iceCard) {
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
 	//returns a matching breaker installed, or null
-	if (CheckSubType(iceCard, "Sentry")) return this;
+	if ((effectiveSubTypes || iceCard.subTypes || []).includes("Sentry")) return this;
 	if (iceCard == this.chosenCard) return this;
 	return null;
   },
@@ -2751,10 +2751,10 @@ cardSet[31031] = {
   AIRestoreHypotheticalFromRC:function() {
 	this.chosenWord='';
   },
-  AIMatchingBreakerInstalled: function (iceCard) {
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
 	//returns a matching breaker installed, or null
 	//in this case, must match type and sufficient strength to interface
-	if (CheckSubType(iceCard, this.chosenWord)) {
+	if ((effectiveSubTypes || iceCard.subTypes || []).includes(this.chosenWord)) {
 		//for Chameleon the strength check is important so we need to take into account potential encounter effects
 		//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
 		var sufficientStrength = false;

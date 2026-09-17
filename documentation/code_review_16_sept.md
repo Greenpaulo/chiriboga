@@ -40,6 +40,13 @@ debt accumulation across turns).
   that installs an HVT alongside a lower-scoring generic remote and
   asserts the HVT server is still selected for protection.
 
+**Resolved — 17 Sept:** The weaker score-tie was not retained. The ranking now
+detects when a generic remote or new-server slot is the natural winner and
+gives the installed HVT server an explicit override, restoring the legacy
+redirection guarantee without overriding a central-server winner. Layer 3.5's
+implemented notes now document this rule, and the regression suite includes an
+HVT beside a lower-scoring generic remote and asserts that the HVT is selected.
+
 ---
 
 ## `cc2777e` — Implement layer 4
@@ -93,6 +100,15 @@ implementation stores a reference to `iceCard.subTypes` (rather than reading
 it once inline) instead of copying it, it'd end up holding a stale/swapped
 array. Not a currently-observed bug, just worth a second pair of eyes if
 breaker-matching ever behaves oddly for type-shifted ice in the future.
+
+**Resolved — 17 Sept:** `_matchingBreakerForIce()` no longer changes the live
+ICE object. It passes the computed subtype list as the optional
+`effectiveSubTypes` argument to `AIMatchingBreakerInstalled()` while retaining
+the real `iceCard` for identity, server, and neighboring-layer checks. The
+subtype-dependent Quetzal, Femme Fatale, Chameleon, and Physarum Entangler
+hooks use the new argument, `documentation/ai.md` documents the contract, and
+a regression asserts that both the subtype-array value and reference remain
+unchanged throughout matching.
 
 No other issues found — this one looks clean and well-scoped to what the
 roadmap asked for.
@@ -150,6 +166,18 @@ faction, which doesn't change turn to turn, so it's a good candidate to
 compute once per game (or once per turn) and reuse rather than rebuilding
 from scratch on every call.
 
+**Resolved — 17 Sept:** The full scan moved into
+`_hiddenThreatProfiles(runnerFaction)`, whose result is cached on the Corp AI
+instance in `_hiddenThreatProfilesByFaction`. Each faction-specific cache entry
+still includes same-faction, Neutral, and out-of-faction threats with weights
+of 1.0, 0.5, and 0.25 respectively; faction-specific means the weights depend
+on the identity, not that other factions are excluded. Repeated security checks
+now iterate only the small cached threat-definition list. Dynamic
+`AppliesToServer(server)` checks, Heap evidence, and public Grip/Stack sizes
+remain live so ICE and public-state changes are not cached incorrectly. A
+regression calls the estimator twice and verifies the synthetic threat
+definition is read only once.
+
 No correctness issues found otherwise — this layer's scope, safety
 boundary (public-only info), and score-vs-security separation all check
 out against what the roadmap asked for.
@@ -175,6 +203,10 @@ reasonable self-correction, but it does mean Layers 3.5/4/5 up to this
 point weren't held to that standard while being written. Worth a quick
 skim to confirm nothing from Layers 6-8 (which come after this point)
 reintroduces the same gap now that the rule formally exists.
+
+**Confirmed — 17 Sept:** The Layer 6–8 card-facing hooks are present in
+`documentation/ai.md`. The new `effectiveSubTypes` hook argument introduced by
+this review's fix was also documented in the same change.
 
 ---
 
@@ -218,6 +250,11 @@ this bypass right now," it'll silently use the narrower, pre-Layer-6
 credit definition. Worth a one-line fix or a comment flagging it as
 unused/stale.
 
+**Resolved — 17 Sept:** `_iceIsBypassed()` now compares the bypass cost with
+`_effectiveRunnerCreditPool(server).total`. A regression with zero base
+credits and one public Bad Publicity credit proves that the broader ceiling is
+used.
+
 No other issues found — the credit-ceiling logic itself looks correct and
 well-isolated from the active-run case.
 
@@ -244,6 +281,12 @@ installed board state, and the commit note explicitly says so.
 commit again — doc-rule is holding since `4bd2055`.
 
 Nothing flagged — didn't spot an issue worth a callout here. `_classifyRunnerMacroThreat()`'s `focus` field isn't actually consumed anywhere in `_protectionScore()` yet (only `.penalty` is), so it's currently diagnostic-only — worth confirming with the agent whether that's intentional groundwork for a later layer or dead output.
+
+**Confirmed — 17 Sept:** `focus` is intentional diagnostic groundwork for the
+install planner. Protection scoring consumes the individual HQ and R&D
+penalties directly; also consuming `focus` would count the same visible
+pressure twice. This intent is now stated in `ai_corp.js`,
+`documentation/ai.md`, and the Layer 7 implemented notes.
 
 ---
 
@@ -288,6 +331,13 @@ stealing an agenda does — but it's an asymmetry with the other two
 deception paths worth a quick confirm-and-comment from the agent (either
 "traps can never trigger a Runner win so this is intentionally omitted,"
 or it's a gap).
+
+**Resolved — 17 Sept:** The guard is now present. `_shouldBaitServer()` returns
+false before rolling or caching a bait posture whenever
+`_runnerMayWinIfServerBreached(server)` is true. This protects mixed and future
+root configurations even though today's ordinary trap-only root cannot award
+agenda points. A regression verifies that no random roll occurs in the unsafe
+case, and Layer 8's implemented notes document the safety rule.
 
 ---
 
@@ -338,8 +388,29 @@ pass cumulatively and each layer matches its roadmap section reasonably
 closely. Items 1 and 7 are the two worth actually deciding on rather than
 just noting.
 
+## Resolution status — 17 Sept
+
+All actionable findings above have been addressed. The focused suite now has
+64 passing regression cases (five added by this resolution), the changed
+JavaScript files pass syntax checks, and `git diff --check` reports no errors.
+The commit-timestamp observation and the docs-only `439064e` description did
+not require code changes; cumulative tests confirmed that the intervening
+layers remained present.
+
 # Feedback on documentation\corp_ai_install_decision_roadmap.md
 
 1. Phase 2 (ICE Selection) doesn't say how it interacts with a bait-postured server. Phase 3 already notes deception profiles should be "bounded inputs, not dominant policy," and the existing code gates ICE count on bait servers via \_deceptionProtectionTarget. But Phase 2 is purely about picking the best ICE for security once a server is eligible for another layer — it never says whether the ICE chosen for a bait server should stay "credibly light" (consistent with the under-defended signal) or just be whatever scores highest under Phase 2's marginal-security formula. If Phase 2 always picks the objectively strongest option regardless of posture, that's a second, independent channel for the same trap to look more/less credible than intended — worth an explicit line tying Phase 2 back to the active posture, the same way Phase 3 already does for role selection.
 
+   **Resolved — 17 Sept:** Phase 2 now requires ICE selection to respect the
+   active posture's bounded depth and credible-light-defense signal, while
+   retaining tactical safety as an authoritative override. Its deterministic
+   scenarios now cover both an active bait posture and the same candidate set
+   after that posture ends.
+
 2. Phase 9's calibration metrics list doesn't include an unpredictability check. Layer 8's own bar for its randomness is "no observable correlation with any single game-state variable across many games" — that's the standard you and the doc both hold as essential to the fun surviving. But Phase 9's metrics list (agenda points, breach rates, insolvency, decision latency, etc.) is entirely about win/loss efficiency — nothing there would catch it if, say, Phase 3's role-selection logic later introduces a pattern like "the Corp only ever assigns trap role to a remote when it has exactly 8+ credits banked," even though the underlying \_shouldBaitServer() roll itself stays statistically clean. That's a real risk specifically because install-level decisions sit above the posture roll in the stack — they could leak a pattern the posture system itself never would. Worth adding the same exploitability bar to Phase 9's acceptance gate explicitly, not just the existing "deception safety" line, which is vaguer.
+
+   **Resolved — 17 Sept:** Phase 9 now includes deception exploitability by
+   observable public-state variable in its metrics, requires correlation
+   audits across many seeds and games, and has an explicit acceptance gate
+   rejecting learnable single-variable bait/bluff signals outside documented
+   bounded inputs and confidence thresholds.

@@ -229,6 +229,25 @@ test('hosted subtype shifts let an installed decoder cover non-code-gate ice', (
   assert(ai._effectiveIceSubtypes(wall).includes('Code Gate'));
   assert.strictEqual(ai._evaluateServerSecurity(servers[0]).isSecure, false);
 });
+test('effective subtype matching never swaps the live ice subtype array', () => {
+  const wall = etr();
+  const printedSubTypes = wall.subTypes;
+  let observedSubTypes = null;
+  const shift = {player: runner, AIEffectiveIceSubtypes: () => ({add: ['Code Gate']})};
+  const breaker = {
+    player: runner,
+    AIMatchingBreakerInstalled(target, effectiveSubTypes) {
+      observedSubTypes = target.subTypes;
+      return effectiveSubTypes.includes('Code Gate') ? this : null;
+    },
+  };
+  runner.cards = [shift, breaker];
+  server([wall]);
+  assert.strictEqual(ai._matchingBreakerForIce(wall), breaker);
+  assert.strictEqual(observedSubTypes, printedSubTypes);
+  assert.strictEqual(wall.subTypes, printedSubTypes);
+  assert.deepStrictEqual(wall.subTypes, ['Barrier']);
+});
 test('Kit shifts only the first ice encountered for Corp planning', () => {
   const inner = etr(), outer = etr();
   runner.identityCard = card(31026);
@@ -258,6 +277,14 @@ test('targeted bypass pays its declared cost instead of treating hosted cards as
   const unaffordable = ai._evaluateServerSecurity(servers[0]);
   assert.strictEqual(unaffordable.hasHardLockout, false);
   assert.strictEqual(unaffordable.isSecure, true);
+});
+test('targeted bypass affordability uses the effective Runner credit ceiling', () => {
+  const wall = etr();
+  runner.cards = [{player: runner, AIBypassesIce: target => target === wall ? 1 : false}];
+  runner.creditPool = 0;
+  corp.badPublicity = 1;
+  const target = server([wall]);
+  assert.strictEqual(ai._iceIsBypassed(wall, target, 0), true);
 });
 test('targeted bypass is not paid when an ice has no mandatory effect', () => {
   const harmless = ice(['Trash 1 program.'], [[['misc_moderate']]]);
@@ -317,6 +344,23 @@ test('hidden-threat estimator never inspects grip contents and ignores layered s
   assert(ai._estimateRunnerBypassRisk(server([etr()])) > 0);
   servers[0].ice.push(etr());
   assert.strictEqual(ai._estimateRunnerBypassRisk(servers[0]), 0);
+});
+test('hidden-threat definitions are cached by public Runner faction', () => {
+  let profileReads = 0;
+  const definition = {player: runner, faction: 'Cache Test Faction'};
+  Object.defineProperty(definition, 'AIHiddenThreat', {
+    get() {
+      profileReads++;
+      return {kind: 'cache-test', expectedCopies: 1, severity: 1, AppliesToServer: () => true};
+    },
+  });
+  context.cardSet[99999] = definition;
+  runner.identityCard = {faction: 'Cache Test Faction'};
+  const remote = server([etr()]);
+  ai._estimateRunnerBypassRisk(remote);
+  ai._estimateRunnerBypassRisk(remote);
+  delete context.cardSet[99999];
+  assert.strictEqual(profileReads, 1);
 });
 test('unrezzed-ice pressure applies only to a single unrezzed layer', () => {
   runner.identityCard = {faction: 'Criminal'};
@@ -498,6 +542,14 @@ test('a failed bait roll permits ordinary trap protection', () => {
   assert.strictEqual(ai._shouldBaitServer(remote), false);
   assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), false);
 });
+test('bait posture is disabled when breaching the same root could win the game', () => {
+  const trap = card(30045);
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const remote = {ice: [etr()], root: [trap, agenda]};
+  runner.agendaPoints = 5;
+  ai._random = () => {throw Error('unsafe bait posture rolled');};
+  assert.strictEqual(ai._shouldBaitServer(remote), false);
+});
 test('agenda bluff supports variable ice depth and never risks the winning steal', () => {
   const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2, canBeAdvanced: true};
   const remote = {ice: [etr()], root: [agenda]};
@@ -575,5 +627,23 @@ test('unaddressed insecure servers gain bounded priority across turns', () => {
   assert.strictEqual(ai._serverToProtect(), rnd);
   assert.strictEqual(ai._serverProtectionDebt.get(hq), 0);
   assert.strictEqual(ai._serverProtectionDebt.get(rnd), 4);
+});
+test('an HVT server overrides a naturally weaker generic remote', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 10};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 11};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 20};
+  const generic = {serverName: 'Remote 1', ice: [], root: [], score: 0};
+  const hvt = {serverName: 'Remote 2', ice: [], root: [{cardType: 'agenda'}], score: 5};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [generic, hvt]});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 1;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._isAScoringServer = () => false;
+  ai._emptyProtectedRemotes = () => [generic];
+  ai._HVTsInstalled = () => 1;
+  ai._HVTserver = () => hvt;
+  ai._protectionInstallsThisTurn = [];
+  ai._serverProtectionDebt = new Map();
+  assert.strictEqual(ai._serverToProtect(), hvt);
 });
 console.log(tests + ' regression cases passed.');

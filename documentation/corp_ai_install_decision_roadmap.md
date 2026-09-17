@@ -331,6 +331,7 @@ Hard rejection rules should remain separate from soft score penalties. An illega
 - Adding a second layer may be valuable against outermost or one-ICE bypass even when raw break cost changes little.
 - Expensive unrezzed ICE should not receive full value when the Corp cannot afford the route's rez obligations.
 - ICE-specific `AIWorthwhileIce` hooks remain valid for mechanics the generic evaluator cannot infer, but should reject or modify candidates rather than establish their entire ordering.
+- When a server has an active bait or bluff posture, ICE selection must respect that posture's bounded target depth and credible-light-defense signal. Marginal security still ranks candidates within the allowed posture; it must not silently choose an ICE whose cost or visible strength makes the intended deception deterministic or implausible. Tactical safety overrides the posture whenever the lighter choice could enable a game-winning breach.
 
 **Deterministic regression scenarios:**
 
@@ -341,6 +342,7 @@ Hard rejection rules should remain separate from soft score penalties. An illega
 5. An ICE with only optional punishment increases deterrent/tax value but does not claim a mandatory lockout.
 6. Effective subtype changes and targeted bypass hooks affect hypothetical results exactly as they affect installed ICE.
 7. Candidate evaluation is unchanged when hidden Runner Grip cards are substituted.
+8. A bait-postured remote receives an ICE choice consistent with its bounded light-defense script, while the same candidates are ranked purely by marginal security after the posture ends.
 
 **Acceptance gate:** In deterministic fixtures, the selected ICE maximizes the intended bounded marginal-security value, and seeded simulations reduce preventable breaches without producing chronic Corp insolvency.
 
@@ -517,6 +519,7 @@ protect HVT server -> reinforce another insecure central
 - time from agenda install to score or steal;
 - asset install/rez/click cost versus realized return;
 - trap trigger and runner-engagement rates;
+- deception exploitability by observable public-state variable, including turn, credits, server shape, and installed-card context;
 - ICE install count, rez rate, marginal break-cost gain, and stranded unrezzed cost;
 - central versus remote protection share;
 - Corp insolvency caused by install commitments;
@@ -527,11 +530,12 @@ protect HVT server -> reinforce another insecure central
 
 - Compare fixed-seed baselines before and after every scoring-policy change.
 - Run broader randomized matches only after deterministic regression tests pass.
+- Audit bait/bluff outcomes for learnable single-variable correlations across many seeds and games; install-level role and card selection must not leak a deterministic signal even when the underlying posture roll is balanced.
 - Keep coefficients bounded and documented beside their semantic score component.
 - Remove compatibility score bands and dead legacy ordering only after the replacement demonstrates equivalent coverage.
 - Keep a clear fallback path until candidate scoring outperforms baseline without major regressions.
 
-**Acceptance gate:** The unified policy improves scoring, asset return, or breach prevention in seeded comparisons without material regressions in economy, action latency, deception safety, or imperfect-information compliance.
+**Acceptance gate:** The unified policy improves scoring, asset return, or breach prevention in seeded comparisons without material regressions in economy, action latency, deception safety, or imperfect-information compliance. No bait/bluff decision may show an exploitable correlation with a single observable game-state variable beyond its documented bounded inputs and confidence threshold.
 
 ---
 
@@ -616,4 +620,3 @@ A phase is complete only when:
 - hypothetical evaluation is proven not to mutate live game state;
 - logs or score breakdowns make the selected choice explainable;
 - no speculative follow-up is mislabeled as completed behavior.
-
