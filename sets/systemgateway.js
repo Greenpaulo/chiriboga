@@ -1980,6 +1980,12 @@ cardSet[30024] = {
     if (server != corp.RnD) return {};
     return { additionalAccess: Counters(this, "virus"), growth: 2 };
   },
+  //A purge removes the counters before the next breach. Conduit can begin
+  //growing again afterward, but contributes no additional access immediately.
+  AICentralPressureAfterPurge: function(server) {
+    if (server != corp.RnD) return {};
+    return { growth: 2 };
+  },
   //Whenever a successful run on R&D ends, you may place 1 virus counter on this program
   responseOnRunEnds: {
 	Enumerate: function() {
@@ -3979,6 +3985,9 @@ cardSet[30053] = {
   rezCost: 0,
   unique: true,
   trashCost: 2,
+  //Immediate cards available after install-and-rez. The Corp uses this only
+  //when a critically exposed server has no ICE available in HQ.
+  AIEmergencyDraw: 2,
   //When you rez this asset, draw 2 cards.
   responseOnRez: {
     Enumerate: function (card) {

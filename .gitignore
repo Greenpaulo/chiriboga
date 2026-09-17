@@ -1,3 +1,4 @@
+images/
 images/*
 images2/
 sounds/
@@ -10,3 +11,4 @@ Netrunner Comprehensive Rules (v25.08).pdf
 .vscode/sftp.json
 .DS_Store 
 ai_corp_original.js
+documentation/debug_logs

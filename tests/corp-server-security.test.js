@@ -16,6 +16,7 @@ context.Credits = player => player.creditPool;
 context.AvailableCredits = context.Credits;
 context.RezCost = card => card.rezCost || 0;
 context.CheckCredits = (player, cost) => player.creditPool >= cost;
+context.CheckRez = (card, types) => types.includes(card.cardType) && !card.rezzed && card.rezCost !== undefined;
 context.AllottedClicks = player => player === runner ? 4 : 3;
 context.InstalledCards = player => player === runner ? runner.cards : servers.reduce((cards, server) => cards.concat(server.ice, server.root), []);
 context.ActiveCards = player => {
@@ -154,6 +155,12 @@ test('damage equal to grip is survivable; zero damage against empty grip is harm
   assert.strictEqual(ai._evaluateServerSecurity(servers[0]).isSecure, true);
   const harmless = ice(['Gain 1 credit.'], [[['misc_minor']]]);
   assert.strictEqual(ai._iceIsLethal(harmless), false);
+});
+test('Tithe taxes a breach but is not secure when its damage is survivable', () => {
+  const tithe = card(30073); tithe.rezzed = true; runner.grip = [{}, {}];
+  const result = ai._evaluateServerSecurity(server([tithe]));
+  assert.strictEqual(result.totalMandatoryBreakCost, 0);
+  assert.strictEqual(result.isSecure, false);
 });
 test('lethal multiple damage subroutines require only enough breaks to survive', () => {
   runner.grip = [{}]; const damage = ice(['Do 1 net damage.', 'Do 1 net damage.'], [[['netDamage']], [['netDamage']]]); server([damage]);
@@ -508,6 +515,81 @@ test('central pressure directly increases protection urgency', () => {
   const baseline = ai._protectionScore(corp.RnD, {});
   assert.strictEqual(pressured, baseline - 3);
 });
+test('central breach loss risk uses fair combinations rather than hidden order', () => {
+  const agenda = () => ({player: corp, cardType: 'agenda', agendaPoints: 2});
+  const operation = () => ({player: corp, cardType: 'operation'});
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [agenda(), agenda(), operation(), operation()], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+  });
+  runner.agendaPoints = 5;
+  runner.cards = [{player: runner, AICentralPressure: target =>
+    target === corp.RnD ? {additionalAccess: 1} : {}}];
+  const risk = ai._centralBreachLossRisk(corp.RnD);
+  assert.strictEqual(risk.accessCount, 2);
+  assert(Math.abs(risk.probability - (5 / 6)) < 1e-9);
+  assert.strictEqual(risk.canBreach, true);
+});
+test('critical Conduit pressure triggers purge before a non-winning score', () => {
+  const agenda = () => ({player: corp, cardType: 'agenda', agendaPoints: 2});
+  const operation = () => ({player: corp, cardType: 'operation'});
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [agenda(), agenda(), agenda(), operation(), operation(), operation(), operation(), operation(), operation(), operation()], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+    clickTracker: 3,
+  });
+  const conduit = card(30024); conduit.virus = 4; runner.cards = [conduit];
+  runner.agendaPoints = 5; corp.agendaPoints = 3;
+  const nonWinningAgenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  assert.strictEqual(ai._criticalBreachDefenseAction(['purge', 'advance'], nonWinningAgenda), 0);
+  corp.agendaPoints = 5;
+  assert.strictEqual(ai._criticalBreachDefenseAction(['purge', 'advance'], nonWinningAgenda), -1);
+});
+test('critical defence prefers ICE that actually secures the threatened central', () => {
+  const agenda = () => ({player: corp, cardType: 'agenda', agendaPoints: 2});
+  const operation = () => ({player: corp, cardType: 'operation'});
+  const wall = etr(); wall.cardType = 'ice'; wall.rezzed = false; wall.rezCost = 1;
+  Object.assign(corp, {
+    HQ: {cards: [wall], ice: [], root: []},
+    RnD: {cards: [agenda(), agenda(), operation(), operation()], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+    clickTracker: 3,
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  runner.identityCard = {faction: 'Shaper'};
+  runner.agendaPoints = 5;
+  runner.cards = [{player: runner, AICentralPressure: target =>
+    target === corp.RnD ? {additionalAccess: 1} : {}}];
+  const oldRankedInstallOptions = ai._rankedInstallOptions;
+  ai._rankedInstallOptions = () => [{cardToInstall: wall, serverToInstallTo: corp.RnD}];
+  try {
+    ai.preferred = null;
+    assert.strictEqual(ai._criticalBreachDefenseAction(['install', 'purge']), 0);
+    assert.strictEqual(ai.preferred.cardToInstall, wall);
+    assert.strictEqual(ai.preferred.serverToInstallTo, corp.RnD);
+  } finally {
+    ai._rankedInstallOptions = oldRankedInstallOptions;
+  }
+});
+test('modest breach risk does not interrupt ordinary advancement', () => {
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 1};
+  const operations = Array.from({length: 9}, () => ({player: corp, cardType: 'operation'}));
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [agenda].concat(operations), ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+    clickTracker: 3,
+  });
+  runner.agendaPoints = 6;
+  assert.strictEqual(ai._centralBreachLossRisk(corp.RnD).probability, 0.1);
+  assert.strictEqual(ai._criticalBreachDefenseAction(['purge', 'advance']), -1);
+});
 test('access-punishment hooks drive a severity-weighted bait frequency', () => {
   const mildCard = card(30045); mildCard.advancement = 0;
   const severeCard = card(30045); severeCard.advancement = 4;
@@ -645,5 +727,73 @@ test('an HVT server overrides a naturally weaker generic remote', () => {
   ai._protectionInstallsThisTurn = [];
   ai._serverProtectionDebt = new Map();
   assert.strictEqual(ai._serverToProtect(), hvt);
+});
+test('critical naked server with no ICE uses install-and-rez draw before basic draw', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [etr()], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const spin = card(30053);
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], clickTracker: 3});
+  hq.cards = [spin, {player: corp, cardType: 'agenda'}];
+  servers = [hq, rnd, archives];
+  const oldRanked = ai._rankedServersToProtect;
+  const oldEconomy = ai._sufficientEconomy;
+  ai._rankedServersToProtect = () => [{server: rnd, adjustedScore: -6, isSecure: false}];
+  ai._sufficientEconomy = () => true;
+  try {
+    ai.preferred = null;
+    assert.strictEqual(ai._emergencyProtectionRecoveryAction(['install', 'draw', 'gain']), 0);
+    assert.strictEqual(ai.preferred.cardToInstall, spin);
+    assert.strictEqual(ai.preferred.serverToInstallTo, null);
+
+    hq.cards = hq.cards.filter(cardInHand => cardInHand !== spin);
+    const drawRemote = {serverName: 'Remote 1', cards: [], ice: [], root: [spin]};
+    spin.rezzed = false;
+    servers.push(drawRemote);
+    corp.remoteServers = [drawRemote];
+    ai.preferred = null;
+    assert.strictEqual(ai._emergencyProtectionRecoveryAction(['rez', 'draw', 'gain']), 0);
+    assert.strictEqual(ai.preferred.cardToRez, spin);
+
+    spin.rezzed = true;
+    ai.preferred = null;
+    assert.strictEqual(ai._emergencyProtectionRecoveryAction(['draw', 'gain']), 0);
+    assert.strictEqual(ai.preferred, null);
+  } finally {
+    ai._rankedServersToProtect = oldRanked;
+    ai._sufficientEconomy = oldEconomy;
+  }
+});
+test('emergency draw preserves ordinary economy and agenda-flood safeguards', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], clickTracker: 3});
+  servers = [hq, rnd, archives];
+  const oldRanked = ai._rankedServersToProtect;
+  const oldEconomy = ai._sufficientEconomy;
+  ai._rankedServersToProtect = () => [{server: rnd, adjustedScore: -6, isSecure: false}];
+  ai._sufficientEconomy = () => true;
+  try {
+    hq.cards = [{player: corp, cardType: 'agenda'}, {player: corp, cardType: 'agenda'}];
+    assert.strictEqual(ai._emergencyProtectionRecovery(), null);
+    hq.cards = [{player: corp, cardType: 'ice', rezCost: 20}];
+    assert.strictEqual(ai._emergencyProtectionRecovery(), null);
+    hq.cards = [];
+    ai._sufficientEconomy = () => false;
+    assert.strictEqual(ai._emergencyProtectionRecovery(), null);
+    ai._sufficientEconomy = () => true;
+    corp.clickTracker = 1;
+    assert.strictEqual(ai._emergencyProtectionRecovery(), null);
+    corp.clickTracker = 3;
+    ai._rankedServersToProtect = () => [{server: rnd, adjustedScore: -2.9, isSecure: false}];
+    assert.strictEqual(ai._emergencyProtectionRecovery(), null);
+    ai._rankedServersToProtect = () => [{server: rnd, adjustedScore: -6, isSecure: false}];
+    rnd.ice = [{player: corp, cardType: 'ice', rezzed: false, rezCost: 3}];
+    assert.strictEqual(ai._emergencyProtectionRecovery(), null);
+  } finally {
+    ai._rankedServersToProtect = oldRanked;
+    ai._sufficientEconomy = oldEconomy;
+  }
 });
 console.log(tests + ' regression cases passed.');

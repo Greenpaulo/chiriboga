@@ -204,7 +204,7 @@ class CorpAI {
 
   //Returns a diagnostic summary and a bounded protection-score penalty for a
   //central server. Hidden run events remain Layer 5's responsibility.
-  _centralServerThreat(server) {
+  _centralServerThreat(server, options = {}) {
     var ret = {
       additionalAccess: 0,
       persistentPressure: 0,
@@ -215,7 +215,34 @@ class CorpAI {
     if (server != corp.HQ && server != corp.RnD) return ret;
     var installed = InstalledCards(runner);
     for (var i = 0; i < installed.length; i++) {
-      var contribution = this._centralPressureFromCard(installed[i], server);
+      var contribution = null;
+      if (
+        options.afterPurge &&
+        installed[i].player == runner &&
+        CheckHasAbilities(installed[i]) &&
+        typeof installed[i].AICentralPressureAfterPurge == "function"
+      ) {
+        contribution = installed[i].AICentralPressureAfterPurge.call(
+          installed[i],
+          server,
+        );
+        if (typeof contribution == "number")
+          contribution = { additionalAccess: contribution };
+        contribution = contribution || {};
+        contribution = {
+          additionalAccess: Math.max(
+            0,
+            Number(contribution.additionalAccess) || 0,
+          ),
+          persistentPressure: Math.max(
+            0,
+            Number(contribution.persistentPressure) || 0,
+          ),
+          growth: Math.max(0, Number(contribution.growth) || 0),
+        };
+      } else {
+        contribution = this._centralPressureFromCard(installed[i], server);
+      }
       if (
         contribution.additionalAccess > 0 ||
         contribution.persistentPressure > 0 ||
@@ -232,6 +259,74 @@ class CorpAI {
         ret.persistentPressure * 2 +
         Math.min(2, ret.growth),
     );
+    return ret;
+  }
+
+  //Estimate the fair, order-agnostic chance that one immediately available
+  //central breach supplies enough agenda points to win. The Corp may count the
+  //contents of its own server, but must not use the engine's hidden card order.
+  _centralBreachLossRisk(server, options = {}) {
+    var ret = {
+      server: server,
+      canBreach: false,
+      accessCount: 0,
+      pointsNeeded: Math.max(
+        0,
+        AgendaPointsToWin() - AgendaPoints(runner),
+      ),
+      probability: 0,
+    };
+    if (
+      (server != corp.HQ && server != corp.RnD) ||
+      !server ||
+      !server.cards ||
+      server.cards.length < 1
+    )
+      return ret;
+    if (this._evaluateServerSecurity(server).isSecure) return ret;
+
+    ret.canBreach = true;
+    var threat = this._centralServerThreat(server, options);
+    ret.accessCount = Math.min(
+      server.cards.length,
+      Math.max(1, 1 + Math.floor(threat.additionalAccess)),
+    );
+    if (ret.pointsNeeded < 1) {
+      ret.probability = 1;
+      return ret;
+    }
+
+    //Dynamic programming counts equally likely combinations without relying
+    //on the actual order of HQ or R&D. Scores at/above the target are collapsed
+    //into one bucket because only a game-winning breach matters here.
+    var ways = [];
+    for (var chosen = 0; chosen <= ret.accessCount; chosen++) {
+      ways.push(new Array(ret.pointsNeeded + 1).fill(0));
+    }
+    ways[0][0] = 1;
+    var seen = 0;
+    for (var i = 0; i < server.cards.length; i++) {
+      var card = server.cards[i];
+      var points = CheckCardType(card, ["agenda"])
+        ? Math.max(0, Number(card.agendaPoints) || 0)
+        : 0;
+      var maximumChosen = Math.min(ret.accessCount - 1, seen);
+      for (var chosen = maximumChosen; chosen >= 0; chosen--) {
+        for (var score = 0; score <= ret.pointsNeeded; score++) {
+          if (ways[chosen][score] <= 0) continue;
+          var nextScore = Math.min(ret.pointsNeeded, score + points);
+          ways[chosen + 1][nextScore] += ways[chosen][score];
+        }
+      }
+      seen++;
+    }
+    var totalWays = ways[ret.accessCount].reduce(
+      (total, count) => total + count,
+      0,
+    );
+    if (totalWays > 0)
+      ret.probability =
+        ways[ret.accessCount][ret.pointsNeeded] / totalWays;
     return ret;
   }
 
@@ -4657,6 +4752,180 @@ class CorpAI {
     return ret;
   }
 
+  //When the security planner has identified a critically exposed server but
+  //HQ contains no ICE, credits alone cannot improve the position. Return a
+  //narrow recovery plan that can find ICE while preserving a click to install
+  //it. This intentionally does not inspect Corp R&D or hidden Runner cards.
+  _emergencyProtectionRecovery() {
+    if (this._clicksLeft() < 2 || !this._sufficientEconomy()) return null;
+    if (corp.HQ.cards.some((card) => CheckCardType(card, ["ice"])))
+      return null;
+
+    var ranked = this._rankedServersToProtect(false);
+    if (ranked.length < 1) return null;
+    var target = ranked[0];
+    if (
+      !target.server ||
+      target.isSecure ||
+      target.adjustedScore > -3 ||
+      this._unrezzedIce(target.server).length > 0
+    )
+      return null;
+
+    //Do not worsen an agenda-flooded, breachable HQ merely to solve a
+    //different server. If HQ itself is the emergency, drawing remains the
+    //only route to finding protection and is allowed.
+    if (
+      target.server != corp.HQ &&
+      this._agendasInHand() >= 2 &&
+      !this._evaluateServerSecurity(corp.HQ).isSecure
+    )
+      return null;
+
+    var installedDraw = InstalledCards(corp)
+      .filter(
+        (card) =>
+          Number(card.AIEmergencyDraw) > 0 &&
+          CheckRez(card, ["asset", "upgrade"]) &&
+          RezCost(card) <= AvailableCredits(corp, "rezzing", card),
+      )
+      .sort((a, b) => Number(b.AIEmergencyDraw) - Number(a.AIEmergencyDraw));
+    var handDraw = corp.HQ.cards
+      .filter(
+        (card) =>
+          Number(card.AIEmergencyDraw) > 0 &&
+          CheckCardType(card, ["asset", "upgrade"]) &&
+          !this._uniqueCopyAlreadyInstalled(card) &&
+          RezCost(card) <= AvailableCredits(corp, "rezzing", card),
+      )
+      .sort((a, b) => Number(b.AIEmergencyDraw) - Number(a.AIEmergencyDraw));
+
+    return {
+      server: target.server,
+      score: target.adjustedScore,
+      installedDrawCard: installedDraw.length > 0 ? installedDraw[0] : null,
+      handDrawCard: handDraw.length > 0 ? handDraw[0] : null,
+    };
+  }
+
+  _emergencyProtectionRecoveryAction(optionList) {
+    var recovery = this._emergencyProtectionRecovery();
+    if (!recovery) return -1;
+    this._log(
+      "Critical server has no available ICE; seeking protection for " +
+        ServerName(recovery.server),
+    );
+    if (recovery.installedDrawCard && optionList.includes("rez")) {
+      this._log("Rezzing emergency draw to find ICE");
+      return this._returnPreference(optionList, "rez", {
+        cardToRez: recovery.installedDrawCard,
+      });
+    }
+    if (recovery.handDrawCard && optionList.includes("install")) {
+      this._log("Installing emergency draw to find ICE");
+      return this._returnPreference(optionList, "install", {
+        cardToInstall: recovery.handDrawCard,
+        serverToInstallTo: null,
+      });
+    }
+    if (optionList.includes("draw")) {
+      this._log("Drawing for ICE to protect the critical server");
+      return optionList.indexOf("draw");
+    }
+    return -1;
+  }
+
+  //Interrupt an ordinary scoring/economy plan only when a realistically
+  //breachable central has a high chance to give the Runner the game next turn.
+  //Winning Corp scores are intentionally exempt: this is a tactical guardrail,
+  //not a general bias against advancing agendas.
+  _criticalBreachDefenseAction(optionList, almostDoneAgenda = null) {
+    if (
+      almostDoneAgenda &&
+      AgendaPoints(corp) + (almostDoneAgenda.agendaPoints || 0) >=
+        AgendaPointsToWin()
+    )
+      return -1;
+
+    var criticalThreshold = 0.35;
+    var minimumImprovement = 0.15;
+    var risks = [corp.RnD, corp.HQ]
+      .filter((server) => server)
+      .map((server) => this._centralBreachLossRisk(server))
+      .filter((risk) => risk.probability >= criticalThreshold)
+      .sort((a, b) => b.probability - a.probability);
+    if (risks.length < 1) return -1;
+    var risk = risks[0];
+
+    //Prefer an affordable ICE install when the actual public-board security
+    //model says that layer materially lowers the immediate loss chance.
+    if (optionList.includes("install")) {
+      var installOptions = this._rankedInstallOptions(corp.HQ.cards, true);
+      var bestInstall = null;
+      var bestPostInstallRisk = risk.probability;
+      for (var i = 0; i < installOptions.length; i++) {
+        var option = installOptions[i];
+        if (
+          option.serverToInstallTo != risk.server ||
+          !CheckCardType(option.cardToInstall, ["ice"])
+        )
+          continue;
+        var installCost = risk.server.ice.length;
+        var postInstallRisk = null;
+        corp.creditPool -= installCost;
+        risk.server.ice.push(option.cardToInstall);
+        try {
+          postInstallRisk = this._centralBreachLossRisk(risk.server);
+        } finally {
+          risk.server.ice.pop();
+          corp.creditPool += installCost;
+        }
+        if (postInstallRisk.probability < bestPostInstallRisk) {
+          bestInstall = option;
+          bestPostInstallRisk = postInstallRisk.probability;
+        }
+      }
+      if (
+        bestInstall &&
+        risk.probability - bestPostInstallRisk >= minimumImprovement
+      ) {
+        this._log(
+          "Critical breach risk on " +
+            ServerName(risk.server) +
+            "; installing effective ICE",
+        );
+        return this._returnPreference(optionList, "install", bestInstall);
+      }
+    }
+
+    //Purge only when public, purgeable pressure is a material part of the
+    //danger. This replaces a coin-flip response with a deterministic tactical
+    //answer while leaving the ordinary low-stakes purge heuristic intact.
+    if (optionList.includes("purge")) {
+      var postPurgeRisk = this._centralBreachLossRisk(risk.server, {
+        afterPurge: true,
+      });
+      if (
+        postPurgeRisk.accessCount < risk.accessCount &&
+        risk.probability - postPurgeRisk.probability >= minimumImprovement
+      ) {
+        this._log(
+          "Critical breach risk on " +
+            ServerName(risk.server) +
+            "; purging reduces access from " +
+            risk.accessCount +
+            " to " +
+            postPurgeRisk.accessCount,
+        );
+        return optionList.indexOf("purge");
+      }
+    }
+
+    //If no immediate install or purge solves the threat, seek ICE using the
+    //existing guarded recovery path before committing clicks to advancement.
+    return this._emergencyProtectionRecoveryAction(optionList);
+  }
+
   //check if a card should be fast advanced (true or false)
   _cardShouldBeFastAdvanced(card) {
     if (this._isFullyAdvanceableAgenda(card)) return true;
@@ -4865,6 +5134,13 @@ class CorpAI {
         }
       }
     }
+
+    var criticalDefense = this._criticalBreachDefenseAction(
+      optionList,
+      almostDoneAgenda,
+    );
+    if (criticalDefense > -1) return criticalDefense;
+
     if (!almostDoneAgenda && !almostDoneHostileAsset) {
       //take advantage of a temporary window of opportunity (i.e., play right away)
       if (optionList.includes("play")) {
@@ -5153,6 +5429,12 @@ class CorpAI {
         );
     }
     this._log("No obvious install options");
+
+    //Threat evaluation is only useful if the Corp can act on it. When a
+    //critical server has no ICE available in HQ, use immediate draw tools or
+    //basic draws before accumulating credits that cannot protect the server.
+    var emergencyRecovery = this._emergencyProtectionRecoveryAction(optionList);
+    if (emergencyRecovery > -1) return emergencyRecovery;
 
     //how bad is the economy? it may be necessary even to click for credits
     if (!this._sufficientEconomy()) {

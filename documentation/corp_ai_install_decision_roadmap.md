@@ -155,6 +155,17 @@ gain a credit and wait
 
 The underlying missing abstraction is a scored **install candidate**, including the card, destination, intended role, immediate value, future obligations, risks, and reasons.
 
+### 8. Critical protection now has a narrow acquisition fallback
+
+The completed security roadmap now bridges one urgent failure mode into action
+planning: when the highest-ranked server is critically insecure and HQ contains
+no ICE, the Corp may install/rez declared immediate draw or spend clicks drawing
+while preserving a click to install protection. This is deliberately a bounded
+safety fallback, not a replacement for the unified action comparison proposed
+in Phases 7-8. Future install planning must preserve its agenda-flood, economy,
+last-click, and imperfect-information guards while comparing it against tutors,
+operations, and other short plans.
+
 ---
 
 ## Guiding Principles

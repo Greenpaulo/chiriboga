@@ -41,6 +41,7 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [5.7 Agendas — `AIAdvancementLimit`, `AIOverAdvance`](#57-agendas)
    - [5.8 Inline AI Code for Corp](#58-inline-ai-code-for-corp)
    - [5.9 Access Punishment — `AIPunishesAccess`](#59-access-punishment--aipunishesaccess)
+   - [5.10 Emergency Protection Draw — `AIEmergencyDraw`](#510-emergency-protection-draw--aiemergencydraw)
 6. [The Run Calculator (`rc`)](#6-the-run-calculator-rc)
 7. [Quick Reference Table](#7-quick-reference-table)
 8. [Step-by-Step Worked Example](#8-step-by-step-worked-example)
@@ -1188,6 +1189,24 @@ whether persistent non-access pressure is live. Its `focus` field is currently
 diagnostic input for future install planning; protection scoring uses each
 central's penalty directly.
 
+If purging changes the card's immediate central pressure, it may additionally
+expose the same schema through `AICentralPressureAfterPurge(server)`. This hook
+describes the next breach after all virus counters are removed; pressure not
+affected by a purge should be omitted from the hook and remains unchanged on
+cards without it. For example, Conduit returns `{growth: 2}` but no
+`additionalAccess`, because it can grow again only after the post-purge breach.
+The Corp compares the resulting game-loss probability with the current state
+before choosing a tactical purge.
+
+`corp.AI._centralBreachLossRisk(server)` calculates an order-agnostic
+probability that the next affordable HQ or R&D breach supplies the agenda
+points needed to win. It uses combinations of the Corp-known server contents,
+never the engine's hidden card order. At a probability of 35% or higher, the
+main-phase planner may interrupt a non-winning advancement plan for an ICE
+install that materially secures the central, a purge that materially removes
+multi-access, or emergency ICE acquisition. A Corp score that wins immediately
+always retains priority.
+
 ## 5. Corp AI Hooks
 
 ### 5.1 ICE — `AIImplementIce`
@@ -1652,6 +1671,30 @@ repeated evaluator calls, but is intentionally documented as an incomplete
 policy. The roadmap's required Layer 8.4 replaces lifetime caching with bounded
 decision epochs, and Layer 8.5 adds match-local feedback from public outcomes.
 
+### 5.10 Emergency Protection Draw — `AIEmergencyDraw`
+
+Corp assets and upgrades that can draw cards immediately after being installed
+and rezzed may declare the number of cards drawn:
+
+```js
+// Spin Doctor: installing and rezzing it immediately draws 2 cards.
+AIEmergencyDraw: 2,
+```
+
+**Schema:** `AIEmergencyDraw: number`
+
+Use a positive number only when the draw is immediate and reliably available
+after the card is installed and rezzed. The emergency protection planner may
+install or rez the card when a critically exposed server needs ICE, HQ contains
+none, the Corp can afford its current obligations and rez cost, and enough
+clicks remain to install any ICE found. It will not defend a different server
+by drawing while an agenda-flooded HQ remains deterministically breachable. The
+hook describes card capability only; it must not encode server urgency,
+agenda-flood policy, or inspect hidden Runner information. Delayed,
+conditional, optional-cost, or click-ability draw
+should not use this hook unless the declared number is guaranteed in the
+planner's install-and-rez sequence.
+
 ---
 
 ## 6. The Run Calculator (`rc`)
@@ -1781,6 +1824,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
+| `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |
