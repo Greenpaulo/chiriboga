@@ -6,7 +6,7 @@ const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const corp = {creditPool: 20, badPublicity: 0, scoreArea: [], HQ: {cards: []}, archives: {cards: []}};
-const runner = {creditPool: 0, temporaryCredits: 0, clickTracker: 0, grip: [], stack: [], heap: [], cards: [], AI: null};
+const runner = {creditPool: 0, temporaryCredits: 0, clickTracker: 0, grip: [], stack: [], heap: [], cards: [], resolvingCards: [], AI: null};
 const context = {console, corp, runner, playerTurn: runner, cardSet: {}, setIdentifiers: [], encountering: false, attackedServer: null, approachIce: -1};
 let servers = [];
 context.GetTitle = card => card.title;
@@ -58,6 +58,7 @@ function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
   runner.temporaryCredits = 0; runner.clickTracker = 0; context.playerTurn = runner; context.attackedServer = null;
+  runner.resolvingCards = [];
   corp.creditPool = 20; corp.badPublicity = 0; corp.scoreArea = []; servers = [];
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
   ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
@@ -161,6 +162,38 @@ test('Tithe taxes a breach but is not secure when its damage is survivable', () 
   const result = ai._evaluateServerSecurity(server([tithe]));
   assert.strictEqual(result.totalMandatoryBreakCost, 0);
   assert.strictEqual(result.isSecure, false);
+});
+test('game-saving Brân rez overrides reservation for another central', () => {
+  const rndBran = card(30039); rndBran.rezzed = false;
+  const hqBran = card(30039); hqBran.rezzed = false;
+  const extraHQIce = etr();
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const rnd = {serverName: 'R&D', cards: [agenda, {cardType: 'operation'}], ice: [rndBran], root: []};
+  const hq = {serverName: 'HQ', cards: [], ice: [hqBran, extraHQIce], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 8});
+  servers = [hq, rnd, archives];
+  runner.agendaPoints = 5; runner.clickTracker = 2;
+
+  assert.strictEqual(ai._icePreventsGameWinningBreach(rndBran, 6, rnd), true);
+  assert.strictEqual(ai._iceWorthRezzing(rndBran, 6, rnd), true);
+
+  runner.agendaPoints = 0;
+  assert.strictEqual(ai._iceWorthRezzing(rndBran, 6, rnd), false);
+});
+test('game point does not force a non-stopping ICE rez', () => {
+  const tithe = card(30073); tithe.rezzed = false;
+  const hqBran = card(30039); hqBran.rezzed = false;
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const rnd = {serverName: 'R&D', cards: [agenda], ice: [tithe], root: []};
+  const hq = {serverName: 'HQ', cards: [], ice: [hqBran], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 6});
+  servers = [hq, rnd, archives];
+  runner.agendaPoints = 5; runner.clickTracker = 2; runner.grip = [{}, {}];
+
+  assert.strictEqual(ai._icePreventsGameWinningBreach(tithe, 1, rnd), false);
+  assert.strictEqual(ai._iceWorthRezzing(tithe, 1, rnd), false);
 });
 test('lethal multiple damage subroutines require only enough breaks to survive', () => {
   runner.grip = [{}]; const damage = ice(['Do 1 net damage.', 'Do 1 net damage.'], [[['netDamage']], [['netDamage']]]); server([damage]);

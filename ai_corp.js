@@ -3634,6 +3634,44 @@ class CorpAI {
     return server.ice.length;
   }
 
+  //Return true when paying for this approached ICE changes a potentially
+  //game-winning breach from possible to deterministically prevented. Evaluate
+  //the post-rez credit state so other unrezzed ICE is not assumed affordable
+  //with credits that have already been spent, and compare it with the best
+  //security available if this ICE is left unrezzed.
+  _icePreventsGameWinningBreach(card, currentRezCost, server) {
+    if (
+      !card ||
+      !server ||
+      !server.ice.includes(card) ||
+      !this._runnerMayWinIfServerBreached(server)
+    )
+      return false;
+
+    var iceIndex = server.ice.indexOf(card);
+    var originalRezzed = card.rezzed;
+    var withIce = null;
+    var withoutIce = null;
+
+    card.rezzed = true;
+    corp.creditPool -= currentRezCost;
+    try {
+      withIce = this._evaluateServerSecurity(server);
+    } finally {
+      corp.creditPool += currentRezCost;
+      card.rezzed = originalRezzed;
+    }
+
+    server.ice.splice(iceIndex, 1);
+    try {
+      withoutIce = this._evaluateServerSecurity(server);
+    } finally {
+      server.ice.splice(iceIndex, 0, card);
+    }
+
+    return withIce.isSecure && !withoutIce.isSecure;
+  }
+
   //returns true to rez, false not to
   //passing the rez cost is an optimisation
   //input server to hypothesise if the ice isn't installed yet
@@ -3642,6 +3680,17 @@ class CorpAI {
     if (typeof server == "undefined") server = GetServer(card);
     if (typeof currentRezCost == "undefined") {
       currentRezCost = RezCost(card);
+    }
+    //Do not reserve credits for another server when this affordable ICE is the
+    //difference between a breach and a deterministic lockout at game point.
+    if (this._icePreventsGameWinningBreach(card, currentRezCost, server)) {
+      this._log(
+        "Rezzing " +
+          GetTitle(card) +
+          " prevents a game-winning breach on " +
+          ServerName(server),
+      );
+      return true;
     }
     //make sure there isn't better ice behind or in another server this will prevent us from rezzing
     //for optimisation, we'll make a list of unrezzed ice with {card, server, cost, value} where value is the server value
