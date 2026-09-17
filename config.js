@@ -588,9 +588,14 @@ var formatRegistry = {
     sets: ['sg', 'elev', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr'],
     enabled: false
   },
+  // Eternal: every card ever released. Includes every set listed in
+  // setRegistry.availableSets (rotated NSG sets + the original Core Set and
+  // Creation and Control). Keep 'su21' and 'cac' in this list: selectFormat()
+  // only offers precons whose own `sets` are fully covered by the format, and
+  // most precons use su21/cac.
   eternal: {
     name: "Eternal",
-    sets: ['sg', 'elev', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'core'],
-    enabled: false
+    sets: ['sg', 'su21', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'elev', 'core', 'cac'],
+    enabled: true
   }
 };

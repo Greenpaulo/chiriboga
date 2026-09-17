@@ -69,6 +69,16 @@ The following Elevation cards are not yet implemented (6 cards):
 
 I'll get to these when I have a minute.
 
+## Known Limitations
+
+- **Random deck generation ignores legacy card sets.** `DeckBuild()` in
+  `utility.js` only builds its card pools from `sg`, `su21`, and `ms`, so with
+  the **Eternal** format enabled (all sets loaded) pressing *Random deck*, or
+  picking an identity that has no matching precon, still produces a deck drawn
+  only from those three sets — even though the manual card pool offers every
+  card. Tracked with a proposed fix in
+  `documentation/eternal-format-hooks-backlog.md` (section 4).
+
 ## Setup
 
 1. Clone the repository
