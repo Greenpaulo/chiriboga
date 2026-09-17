@@ -553,18 +553,13 @@
       UpdateDeckTextareaFromCounts();
     }
 
-    // Random Deck function
-    function GenerateRandomDeck() {
-      // Use the existing DeckBuild function from utility.js to generate a valid random deck
-      var cardsChosen = DeckBuild(cardSet[json.identity]);
-
-      // Clear current deck
+    function ApplyGeneratedDeck(cardsChosen) {
       json.cards = [];
       deckCounts = {};
-
-      // Convert generated deck into counts
       for (var i = 0; i < cardsChosen.length; i++) {
         var cardId = cardsChosen[i];
+        // Never let a malformed precon or stale card ID cross player sides.
+        if (!cardSet[cardId] || cardSet[cardId].player != deckPlayer) continue;
         if (typeof deckCounts[cardId] === 'undefined') {
           deckCounts[cardId] = 1;
         } else {
@@ -577,6 +572,13 @@
       UpdateDeckTextareaFromCounts();
       Parse();
       UpdateCardCountsUI();
+    }
+
+    // Random Deck function
+    function GenerateRandomDeck() {
+      // Use the existing DeckBuild function to generate a valid deck for the
+      // currently selected identity, including its deck and influence limits.
+      ApplyGeneratedDeck(DeckBuild(cardSet[json.identity]));
     }
 
     function RenderAllCardsList() {
@@ -1288,6 +1290,46 @@
       return -1;
     }
 
+    //Build a fresh deck whenever the identity changes. Prefer a legal precon
+    //for that identity, but treat missing, unloaded, or wrong-side cards as a
+    //bad precon and fall back to the same generator as the Random Deck button.
+    function GenerateDeckForIdentity(identityId) {
+      var identity = cardSet[identityId];
+      if (!identity || identity.cardType != 'identity') return;
+      var cardsChosen = null;
+      var preconIdx = SelectPreconForIdentity(identityId);
+      if (preconIdx >= 0) {
+        var precon = preconDecks[preconIdx];
+        var preconCards = [];
+        var preconIsValid = true;
+        for (var cardCode in precon.cards) {
+          if (!Object.prototype.hasOwnProperty.call(precon.cards, cardCode))
+            continue;
+          var cardId = parseInt(cardCode);
+          var quantity = parseInt(precon.cards[cardCode]);
+          if (
+            !cardSet[cardId] ||
+            cardSet[cardId].player != identity.player ||
+            !isFinite(quantity) ||
+            quantity < 1
+          ) {
+            preconIsValid = false;
+            break;
+          }
+          for (var copy = 0; copy < quantity; copy++)
+            preconCards.push(cardId);
+        }
+        if (preconIsValid && preconCards.length > 0)
+          cardsChosen = preconCards;
+        else
+          console.warn(
+            'Ignoring invalid precon for ' + identity.title + '; generating a random deck instead.'
+          );
+      }
+      if (cardsChosen === null) cardsChosen = DeckBuild(identity);
+      ApplyGeneratedDeck(cardsChosen);
+    }
+
     function GenerateDeck() {
       var playerCards = [];
       var countSoFar = []; //of each card (by index in playerCards)
@@ -1597,6 +1639,7 @@
 
       //identity select will regenerate a deck if changed
       $("#identityselect").change(function() {
+        var previousDeckPlayer = deckPlayer;
         json.identity = parseInt($("select#identityselect option:checked").val());
         if (cardSet[json.identity]) {
           $("#identity").prop(
@@ -1606,12 +1649,18 @@
           // Update deckPlayer to match selected identity's side
           deckPlayer = cardSet[json.identity].player;
         }
+        //The first identity selection happens before the visual list is built.
+        //Also rebuild it defensively if a loaded selection changes player side.
+        if (
+          allCardIdsForPlayer.length === 0 ||
+          previousDeckPlayer != deckPlayer
+        )
+          RenderAllCardsList();
         // Repopulate precon dropdown to only show matching decks (if loaded)
         if (typeof window.PopulatePreconDropdownForIdentity === 'function') {
           window.PopulatePreconDropdownForIdentity(json.identity);
         }
-        // Update deck stats with new identity's requirements
-        Parse();
+        GenerateDeckForIdentity(json.identity);
       });
 
       //set up identity select

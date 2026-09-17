@@ -2648,7 +2648,6 @@ function AccessAllInArchives() {
  */
 function ResolveAccess() {
   if (!accessingCard) return; //already done
-  PlaySound('runSuccessful');
   if (accessingCard.cardLocation != corp.HQ.cards)
     accessingCard.knownToRunner = true;
   var ret = accessingCard;

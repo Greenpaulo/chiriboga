@@ -89,8 +89,9 @@ function PlaceAdvancement(card, num) {
  * @param {function} [onRezResolve] fires if the rez is not cancelled
  * @param {Object} [context] for onRezResolve
  * @param {Boolean} [allowCancel] whether to allow cancel rez when choosing additional costs
+ * @param {int} [costReduction] credit reduction supplied by the effect initiating the rez
  */
-function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true) {
+function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true, costReduction=0) {
    if (card.customRezSound) {
     PlaySound(card.customRezSound);
   } else if (card.cardType === 'ice') {
@@ -102,8 +103,9 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
   if (!ignoreAllCosts) {
 	//forfeit agenda first if relevant
 	var payCreditsAndRez = function() {
-	  //Calculate rez cost, applying any reduction from optional forfeit
-	  var costToPay = RezCost(card);
+	  //Calculate rez cost, applying the initiating effect's reduction and any
+	  //additional reduction from an optional forfeit.
+	  var costToPay = Math.max(0, RezCost(card) - Math.max(0, Number(costReduction) || 0));
 	  if (typeof card._rezReduction === 'number') {
 		costToPay = Math.max(0, costToPay - card._rezReduction);
 	  }
@@ -1381,11 +1383,7 @@ function GainCredits(player, num, temporary = "", sourceCard = null) {
     }
   }
 
-  if (!suppressCreditDrawSound) {
-    if (num === 1) PlaySound('gainCredit');
-    else if (num === 2) PlaySound('gainCredit2');
-    else if (num >= 3) PlaySound('gainCredit3');
-  }
+  PlayCreditGainSound(num);
 }
 
 /**
@@ -1436,6 +1434,7 @@ function TakeCredits(player, card, num) {
   if (num == 1) Log("1 credit taken from " + GetTitle(card, true));
   else Log(num + " credits taken from " + GetTitle(card, true));
   UpdateCounters();
+  PlayCreditGainSound(num);
 }
 
 /**

@@ -4270,10 +4270,9 @@ cardSet[35053] = {
           iceChoices,
           function(iceParams) {
             if (iceParams.skip) return;
-            //Rez with 2 credit discount
-            SpendCredits(corp, iceParams.rezCost, "rezzing", iceParams.card, function() {
-              Rez(iceParams.card);
-            });
+            //Let Rez apply and pay the discount once so additional non-credit
+            //rez costs are still handled by the central rez path.
+            Rez(iceParams.card, false, null, null, true, 2);
           },
           "Mycoweb",
           "Rez ice (paying 2[c] less)?",

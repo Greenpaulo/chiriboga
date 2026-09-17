@@ -457,6 +457,7 @@ phaseTemplates.globalTriggers = {
 	  if (modifySuccess == 0) {
 		  //now declare successful
 		  Log("Run successful");
+		  PlaySound('runSuccessful');
 		  //and fire the pre-phase succesful automatics
 		  AutomaticTriggers("automaticOnRunSuccessful", [attackedServer]);
 	  }

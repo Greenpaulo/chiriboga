@@ -1374,6 +1374,7 @@ var CardRenderer = {
         );
         this.dummy.parent.removeChild(this.dummy);
         this.zoomed = false;
+        pixi_setCardZoomLayer(this, false);
         //some properties need to immediately change back when zooming out (rather than animating)
         if (this == pixi_holdCard && pixi_holdZoom) {
           //i.e. touch to zoom (we visually moved the card into another place to avoid finger obstructing)
@@ -1403,6 +1404,7 @@ var CardRenderer = {
         this.glowSprite.parent.addChild(this.glowSprite);
         this.sprite.parent.addChild(this.sprite); //because the card is going on top!
         this.zoomed = true;
+        pixi_setCardZoomLayer(this, true);
         if (this.canView) this.flipProgress = 1.0;
       }
     }
@@ -2316,6 +2318,21 @@ var pixi_mouseStart = { x: 0, y: 0 };
 var pixi_mousePosition = { x: 0, y: 0 };
 var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = timeout running
 var pixi_holdCard = null; //for touch and hold
+var pixi_zoomedCards = new Set();
+
+//The game field is one transparent canvas, so a sprite cannot independently
+//cross the DOM stacking context used by the fixed menu. Raise that canvas only
+//while at least one card is zoomed, then restore normal interface priority.
+function pixi_setCardZoomLayer(card, zoomed) {
+  if (zoomed) pixi_zoomedCards.add(card);
+  else pixi_zoomedCards.delete(card);
+  if (typeof document !== "undefined" && document.body)
+    document.body.classList.toggle(
+      "card-zoom-active",
+      pixi_zoomedCards.size > 0,
+    );
+}
+
 var pixi_holdZoom = false; //for touch to distinguish between lift-to-top and zoom
 var pixi_subroutineDelay = 0; //to help prevent unwanted card unzoom when selecting subroutines
 

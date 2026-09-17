@@ -39,3 +39,13 @@ function PlaySound(name) {
     // only ever fires (harmlessly) if something plays before that.
   });
 }
+
+//Use the same sound policy for credits gained from the bank and credits taken
+//from hosted card pools (for example Red Team and Telework Contract).
+function PlayCreditGainSound(num) {
+  if (suppressCreditDrawSound) return;
+  num = Number(num);
+  if (num === 1) PlaySound('gainCredit');
+  else if (num === 2) PlaySound('gainCredit2');
+  else if (num >= 3) PlaySound('gainCredit3');
+}

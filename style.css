@@ -614,6 +614,13 @@ canvas {
   /*-1*/
 }
 
+/* A zoomed PIXI card must be able to cross the fixed interface panels. The
+   canvas is transparent outside rendered objects, and returns to z-index 0 as
+   soon as the final card unzooms. */
+body.card-zoom-active canvas {
+  z-index: 3;
+}
+
 #footer {
   z-index: 2;
   position: fixed;
