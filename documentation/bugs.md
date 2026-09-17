@@ -40,11 +40,14 @@
    are separate stacking contexts. Zooming now registers the card in a shared
    zoom set and adds `card-zoom-active` to the document body. While that set is
    non-empty, CSS raises the transparent game canvas from `z-index: 0` to
-   `z-index: 3`, allowing the rendered card to appear over the menu, header, and
-   footer where they overlap. Unzooming the final card removes the class and
-   restores normal interface priority. The set handles overlapping enforced and
-   hovered zoom states without lowering the canvas too early. Four regressions
-   cover activation, multiple zoomed cards, final cleanup, and the CSS rule.
+   `z-index: 3`, allowing the rendered card to appear over the top-left menu
+   where they overlap. The gameplay footer remains one layer higher so controls
+   such as the R&D access "Next" button stay clickable while an accessed card is
+   automatically zoomed. Unzooming the final card removes the class and restores
+   normal canvas priority. The set handles overlapping enforced and hovered zoom
+   states without lowering the canvas too early. Five regressions cover
+   activation, multiple zoomed cards, final cleanup, the raised canvas, and the
+   footer remaining above it.
 5. [FIXED] Corp went into negative credits; investigated using `chiriboga-log-2026-09-16T20_57_27.816Z.txt` and `chiriboga-log-2026-09-16T21_09_16.816Z.txt`.
 
    **Resolved — 17 Sept:** Both logs identify Mycoweb's second subroutine as

@@ -32,7 +32,15 @@ assert.strictEqual(active, true, 'another zoomed card must keep the canvas raise
 context.pixi_setCardZoomLayer(second, false);
 assert.strictEqual(active, false);
 
-assert(/body\.card-zoom-active\s+canvas\s*\{[^}]*z-index:\s*3/s.test(css));
+const zoomLayer = css.match(/body\.card-zoom-active\s+canvas\s*\{[^}]*z-index:\s*(\d+)/s);
+const footerLayer = css.match(/body\.card-zoom-active\s+#footer\s*\{[^}]*z-index:\s*(\d+)/s);
+assert(zoomLayer, 'zoomed canvas must have an explicit stacking layer');
+assert(footerLayer, 'footer must have an explicit stacking layer');
+assert.strictEqual(Number(zoomLayer[1]), 3, 'zoomed canvas must remain above the menu');
+assert(
+  Number(footerLayer[1]) > Number(zoomLayer[1]),
+  'footer choices must remain clickable above the zoomed canvas'
+);
 assert(rendererSource.includes('pixi_setCardZoomLayer(this, true);'));
 assert(rendererSource.includes('pixi_setCardZoomLayer(this, false);'));
-console.log('4 card zoom-layer regression cases passed.');
+console.log('5 card zoom-layer regression cases passed.');

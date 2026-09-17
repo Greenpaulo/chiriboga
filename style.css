@@ -621,6 +621,12 @@ body.card-zoom-active canvas {
   z-index: 3;
 }
 
+/* Keep gameplay choices clickable while a zoomed card raises the canvas
+   above the top-left menu. */
+body.card-zoom-active #footer {
+  z-index: 4;
+}
+
 #footer {
   z-index: 2;
   position: fixed;
