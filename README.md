@@ -35,6 +35,11 @@ Source: https://github.com/bobtheuberfish/chiriboga
 Developed by [DrBo6](https://github.com/drbo6)  
 Enhanced interface, game modes, and Gauntlet system
 
+### AI Improvements & Extended Card Pool
+
+Developed by [Greenpaulo](https://github.com/greenpaulo)
+Strengthened the AI opponent, added custom game formats and new card sets
+
 ### Preconstructed Decks
 
 - Girometics SG+SU21 and NSG Core precons
