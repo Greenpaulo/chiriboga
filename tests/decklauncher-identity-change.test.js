@@ -33,6 +33,8 @@ function fixture(precon, generatedCards) {
     DeckBuildCalls: 0,
     generatedCards,
     generatedForIdentity: null,
+    generatedWithSetCodes: null,
+    deckBuildAllowedSetCodes: ['sg', 'elev'],
     MarkDeckModified() {},
     UpdateDeckTextareaFromCounts() {},
     Parse() {},
@@ -40,7 +42,7 @@ function fixture(precon, generatedCards) {
   };
   vm.createContext(context);
   vm.runInContext(
-    'function DeckBuild(selectedIdentity) { DeckBuildCalls++; generatedForIdentity = selectedIdentity; return generatedCards.slice(); }',
+    'function DeckBuild(selectedIdentity, destination, cardBack, glowTextures, strengthTextures, allowedSetCodes) { DeckBuildCalls++; generatedForIdentity = selectedIdentity; generatedWithSetCodes = allowedSetCodes; return generatedCards.slice(); }',
     context,
   );
   vm.runInContext(helperSource, context);
@@ -53,6 +55,10 @@ function fixture(precon, generatedCards) {
   assert.deepStrictEqual(Array.from(context.json.cards), [1, 1]);
   assert.strictEqual(context.DeckBuildCalls, 1);
   assert.strictEqual(context.generatedForIdentity, context.cardSet[0]);
+  assert.deepStrictEqual(
+    Array.from(context.generatedWithSetCodes),
+    Array.from(context.deckBuildAllowedSetCodes),
+  );
 }
 
 {

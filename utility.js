@@ -4270,6 +4270,112 @@ const combinations = (set) => {
 
 var deckBuildingMaxTime = 200; //ms
 
+// Optional list of set codes (e.g. ["sg", "elev"]) that deckbuilding may use.
+// decklauncher.php sets this from the sets it actually loaded, so the Custom
+// Game "Random deck" button and the identity-change generator can draw on every
+// legal set instead of only the curated sg/su21/ms lists.  gauntlet.php and
+// engine.php leave it null, which preserves their existing behaviour exactly.
+// DeckBuild's 6th argument overrides this.
+var deckBuildAllowedSetCodes = null;
+
+/**
+ * Resolve which registered set a card id belongs to, using the idRange entries
+ * in setRegistry.availableSets (config.js).<br/>Returns null for ids outside
+ * every registered range (gauntlet/tutorial/cheat cards).<br/>Nothing is logged.
+ *
+ * @method DeckBuildSetCodeForCard
+ * @param {int} cardId card definition index
+ * @returns {String|null} set code such as "sg", or null
+ */
+function DeckBuildSetCodeForCard(cardId) {
+  if (
+    typeof setRegistry === "undefined" ||
+    !setRegistry ||
+    !setRegistry.availableSets
+  )
+    return null;
+  var sets = setRegistry.availableSets;
+  for (var key in sets) {
+    var range = sets[key].idRange;
+    if (range && cardId >= range[0] && cardId <= range[1]) return sets[key].code;
+  }
+  return null;
+}
+
+/**
+ * Remove duplicate card ids while preserving order.<br/>Nothing is logged.
+ *
+ * @method DeckBuildDedupeIndices
+ * @param {int[]} indices card ids
+ * @returns {int[]} deduplicated card ids
+ */
+function DeckBuildDedupeIndices(indices) {
+  var ret = [];
+  for (var i = 0; i < indices.length; i++) {
+    if (ret.indexOf(indices[i]) === -1) ret.push(indices[i]);
+  }
+  return ret;
+}
+
+/**
+ * Collect every card from the allowed sets for the identity's side, grouped by
+ * the role DeckBuild needs.<br/>Only cards that can be accounted for are
+ * included: the owning set must be registered, the card needs a numeric
+ * influence (otherwise influence bookkeeping becomes NaN) and an agenda needs
+ * agendaPoints (otherwise the agenda phase could never reach its quota).
+ * Note that partially implemented cards ARE included by design.<br/>Nothing is logged.
+ *
+ * @method DeckBuildCollectSetCards
+ * @param {Card} identityCard identity card being built around
+ * @param {String[]} allowedSetCodes set codes deckbuilding may use
+ * @returns {Object} arrays of card ids per role
+ */
+function DeckBuildCollectSetCards(identityCard, allowedSetCodes) {
+  var ret = {
+    nonAgenda: [],
+    consoles: [],
+    fracters: [],
+    decoders: [],
+    killers: [],
+    agendas: [],
+    ice: [],
+  };
+  if (!Array.isArray(allowedSetCodes) || allowedSetCodes.length === 0) return ret;
+  for (var i = 0; i < cardSet.length; i++) {
+    var card = cardSet[i];
+    if (!card || card.cardType === "identity") continue;
+    if (card.player !== identityCard.player) continue;
+    var code = DeckBuildSetCodeForCard(i);
+    if (code === null || allowedSetCodes.indexOf(code) === -1) continue;
+    if (card.cardType === "agenda") {
+      if (
+        typeof card.agendaPoints === "number" &&
+        isFinite(card.agendaPoints)
+      )
+        ret.agendas.push(i);
+      continue;
+    }
+    if (typeof card.influence !== "number" || !isFinite(card.influence))
+      continue;
+    ret.nonAgenda.push(i);
+    var subTypes = card.subTypes || [];
+    if (card.cardType === "ice") {
+      ret.ice.push(i);
+      continue;
+    }
+    if (card.cardType === "program" && subTypes.indexOf("Icebreaker") !== -1) {
+      if (subTypes.indexOf("Fracter") !== -1) ret.fracters.push(i);
+      else if (subTypes.indexOf("Decoder") !== -1) ret.decoders.push(i);
+      else if (subTypes.indexOf("Killer") !== -1) ret.killers.push(i);
+      continue;
+    }
+    if (card.cardType === "hardware" && subTypes.indexOf("Console") !== -1) {
+      ret.consoles.push(i);
+    }
+  }
+  return ret;
+}
+
 /**
  * Count the influence in a list of card indices (set numbers)<br/>Nothing is logged.
  *
@@ -4280,10 +4386,25 @@ var deckBuildingMaxTime = 200; //ms
  */
 function CountInfluence(identityCard, indices) {
   var ret = 0;
+  var professorPrograms = {};
   for (var i = 0; i < indices.length; i++) {
     var cardNumber = indices[i];
-    if (cardSet[cardNumber].faction !== identityCard.faction)
-      ret += cardSet[cardNumber].influence;
+    var card = cardSet[cardNumber];
+    if (!card || card.cardType === "agenda") continue;
+    if (card.faction === identityCard.faction) continue;
+    if (typeof card.influence !== "number" || !isFinite(card.influence))
+      continue;
+    if (
+      identityCard.title === "The Professor: Keeper of Knowledge" &&
+      card.cardType === "program"
+    ) {
+      var programKey = card.title || cardNumber;
+      if (!professorPrograms[programKey]) {
+        professorPrograms[programKey] = true;
+        continue;
+      }
+    }
+    ret += card.influence;
   }
   return ret;
 }
@@ -4408,6 +4529,7 @@ function DeckBuildRandomly(
     for (var j = 0; j < 2; j++) {
       var randomIndex = RandomRange(0, indices.length - 1);
       var cardNumber = indices[randomIndex];
+      if (!cardSet[cardNumber]) continue; // safety: skip any index that is not a loaded card (sparse cardSet may contain holes)
       var limitPerDeck = 3;
       if (typeof cardSet[cardNumber].limitPerDeck !== "undefined")
         limitPerDeck = cardSet[cardNumber].limitPerDeck;
@@ -4524,7 +4646,6 @@ function DeckBuildRandomAgendas(
       }
     }
   }
-  var threePointerIncluded = false; //system gateway decks require at least one Send a Message
   var totalAgendaPoints = 0;
   while (
     totalAgendaPoints < agendaMin &&
@@ -4532,11 +4653,6 @@ function DeckBuildRandomAgendas(
   ) {
     var randomIndex = RandomRange(0, indices.length - 1);
     var cardNumber = indices[randomIndex];
-    if (!threePointerIncluded) {
-      cardNumber = 30069;
-      randomIndex = indices.indexOf(30069);
-      threePointerIncluded = true;
-    }
     var limitPerDeck = 3;
     if (typeof cardSet[cardNumber].limitPerDeck !== "undefined")
       limitPerDeck = cardSet[cardNumber].limitPerDeck;
@@ -4576,6 +4692,285 @@ function DeckBuildRandomAgendas(
   }
   return ret;
 }
+
+function DeckBuildCardLimit(card) {
+  if (typeof card.AILimitPerDeck === "number") return card.AILimitPerDeck;
+  if (typeof card.limitPerDeck === "number") return card.limitPerDeck;
+  return 3;
+}
+
+function DeckBuildCardElo(card) {
+  if (typeof card.elo === "number" && isFinite(card.elo)) return card.elo;
+  return 1500;
+}
+
+function DeckBuildDestinationIds(destination) {
+  var ret = [];
+  for (var i = 0; i < destination.length; i++) {
+    if (typeof destination[i] === "number") ret.push(destination[i]);
+    else if (
+      destination[i] &&
+      typeof destination[i].setNumber === "number"
+    )
+      ret.push(destination[i].setNumber);
+  }
+  return ret;
+}
+
+function DeckBuildPushCard(
+  cardNumber,
+  destination,
+  cardBack,
+  glowTextures,
+  strengthTextures,
+) {
+  if (typeof cardBack !== "undefined")
+    InstanceCardsPush(
+      cardNumber,
+      destination,
+      1,
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+  else destination.push(cardNumber);
+}
+
+function DeckBuildAddFromPool(
+  identityCard,
+  indices,
+  destination,
+  cardsAdded,
+  targetLength,
+  cardBack,
+  glowTextures,
+  strengthTextures,
+) {
+  indices = DeckBuildDedupeIndices(indices);
+  while (destination.length < targetLength) {
+    var currentIds = DeckBuildDestinationIds(destination);
+    var counts = {};
+    for (var i = 0; i < currentIds.length; i++)
+      counts[currentIds[i]] = (counts[currentIds[i]] || 0) + 1;
+
+    var candidates = [];
+    for (var i = 0; i < indices.length; i++) {
+      var cardNumber = indices[i];
+      var card = cardSet[cardNumber];
+      if (!card) continue;
+      if ((counts[cardNumber] || 0) >= DeckBuildCardLimit(card)) continue;
+      if (
+        CountInfluence(identityCard, currentIds.concat([cardNumber])) >
+        identityCard.influenceLimit
+      )
+        continue;
+      candidates.push(cardNumber);
+    }
+    if (candidates.length === 0) break;
+
+    var first = candidates[RandomRange(0, candidates.length - 1)];
+    var chosen = first;
+    if (candidates.length > 1) {
+      var second = candidates[RandomRange(0, candidates.length - 1)];
+      if (DeckBuildCardElo(cardSet[second]) > DeckBuildCardElo(cardSet[first]))
+        chosen = second;
+    }
+    DeckBuildPushCard(
+      chosen,
+      destination,
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+    cardsAdded.push(chosen);
+  }
+}
+
+function DeckBuildChooseAgendas(identityCard, indices, deckSize) {
+  var agendaMin = 2 * Math.floor(deckSize / 5) + 2;
+  var agendaMax = agendaMin + 1;
+  var best = [];
+  var bestPoints = 0;
+  indices = DeckBuildDedupeIndices(indices);
+
+  for (var attempt = 0; attempt < 100; attempt++) {
+    var chosen = [];
+    var counts = {};
+    var points = 0;
+    while (points < agendaMin) {
+      var candidates = [];
+      for (var i = 0; i < indices.length; i++) {
+        var cardNumber = indices[i];
+        var card = cardSet[cardNumber];
+        if (!card) continue;
+        if (card.faction !== identityCard.faction && card.faction !== "Neutral")
+          continue;
+        if ((counts[cardNumber] || 0) >= DeckBuildCardLimit(card)) continue;
+        if (points + card.agendaPoints > agendaMax) continue;
+        candidates.push(cardNumber);
+      }
+      if (candidates.length === 0) break;
+      var cardNumber = candidates[RandomRange(0, candidates.length - 1)];
+      chosen.push(cardNumber);
+      counts[cardNumber] = (counts[cardNumber] || 0) + 1;
+      points += cardSet[cardNumber].agendaPoints;
+    }
+    if (points >= agendaMin && points <= agendaMax) return chosen;
+    if (points > bestPoints) {
+      best = chosen;
+      bestPoints = points;
+    }
+  }
+  return best;
+}
+
+function DeckBuildFilterAllowedCards(indices, allowedSetCodes) {
+  var ret = [];
+  for (var i = 0; i < indices.length; i++) {
+    var cardNumber = indices[i];
+    var code = DeckBuildSetCodeForCard(cardNumber);
+    if (
+      cardSet[cardNumber] &&
+      code !== null &&
+      allowedSetCodes.indexOf(code) !== -1
+    )
+      ret.push(cardNumber);
+  }
+  return ret;
+}
+
+function DeckBuildFromAllowedSets(
+  identityCard,
+  allowedSetCodes,
+  destination,
+  cardBack,
+  glowTextures,
+  strengthTextures,
+) {
+  var cardsAdded = [];
+  var setCards = DeckBuildCollectSetCards(identityCard, allowedSetCodes);
+
+  if (identityCard.player === runner) {
+    DeckBuildAddFromPool(
+      identityCard,
+      setCards.consoles,
+      destination,
+      cardsAdded,
+      Math.min(1, identityCard.deckSize),
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+    var breakerPools = [setCards.fracters, setCards.decoders, setCards.killers];
+    for (var i = 0; i < breakerPools.length; i++)
+      DeckBuildAddFromPool(
+        identityCard,
+        breakerPools[i],
+        destination,
+        cardsAdded,
+        Math.min(destination.length + RandomRange(1, 2), identityCard.deckSize),
+        cardBack,
+        glowTextures,
+        strengthTextures,
+      );
+
+    var runnerEconomy = DeckBuildFilterAllowedCards(
+      [
+        30007, 30018, 30020, 30027, 30029, 30030, 30033, 31010, 31011,
+        31015, 31024, 31034, 31035, 31037, 31038, 33005,
+      ],
+      allowedSetCodes,
+    );
+    DeckBuildAddFromPool(
+      identityCard,
+      runnerEconomy,
+      destination,
+      cardsAdded,
+      Math.min(destination.length + RandomRange(9, 11), identityCard.deckSize),
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+    var runnerDraw = DeckBuildFilterAllowedCards(
+      [30002, 30011, 30021, 30034, 31004, 31027, 31028, 31036, 31039, 33004],
+      allowedSetCodes,
+    );
+    DeckBuildAddFromPool(
+      identityCard,
+      runnerDraw,
+      destination,
+      cardsAdded,
+      Math.min(destination.length + RandomRange(4, 5), identityCard.deckSize),
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+    DeckBuildAddFromPool(
+      identityCard,
+      setCards.nonAgenda,
+      destination,
+      cardsAdded,
+      identityCard.deckSize,
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+  } else {
+    var desiredDeckSize = identityCard.deckSize + 4;
+    var agendas = DeckBuildChooseAgendas(
+      identityCard,
+      setCards.agendas,
+      desiredDeckSize,
+    );
+    for (var i = 0; i < agendas.length; i++) {
+      DeckBuildPushCard(
+        agendas[i],
+        destination,
+        cardBack,
+        glowTextures,
+        strengthTextures,
+      );
+      cardsAdded.push(agendas[i]);
+    }
+
+    var corpEconomy = DeckBuildFilterAllowedCards(
+      [30037, 30048, 30056, 30064, 30071, 30075, 31042, 31057, 31080, 31082],
+      allowedSetCodes,
+    );
+    DeckBuildAddFromPool(
+      identityCard,
+      corpEconomy,
+      destination,
+      cardsAdded,
+      Math.min(destination.length + RandomRange(9, 11), desiredDeckSize),
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+    DeckBuildAddFromPool(
+      identityCard,
+      setCards.ice,
+      destination,
+      cardsAdded,
+      Math.min(destination.length + RandomRange(15, 17), desiredDeckSize),
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+    DeckBuildAddFromPool(
+      identityCard,
+      setCards.nonAgenda,
+      destination,
+      cardsAdded,
+      desiredDeckSize,
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
+  }
+  return cardsAdded;
+}
+
 /**
  * Instance and add cards to a given array to generate a random deck for the given identityCard.<br/>Nothing is logged.
  *
@@ -4590,10 +4985,27 @@ function DeckBuild(
   cardBack,
   glowTextures,
   strengthTextures,
+  allowedSetCodes,
 ) {
   var cardsAdded = [];
   if (typeof destination == "undefined") destination = [];
 
+  // Generic pool mode: decklauncher passes the sets it actually loaded (see
+  // deckBuildAllowedSetCodes) so the deck can draw on every legal set rather
+  // than only the curated sg/su21/ms lists.  Undefined/null keeps the legacy
+  // behaviour used by gauntlet.php and decks.js.
+  if (allowedSetCodes === undefined) allowedSetCodes = deckBuildAllowedSetCodes;
+  if (!Array.isArray(allowedSetCodes) || allowedSetCodes.length === 0)
+    allowedSetCodes = null;
+  if (allowedSetCodes)
+    return DeckBuildFromAllowedSets(
+      identityCard,
+      allowedSetCodes,
+      destination,
+      cardBack,
+      glowTextures,
+      strengthTextures,
+    );
   if (identityCard.player == runner) {
     //RUNNER deckbuilding
     var runnerFaction = identityCard.faction;

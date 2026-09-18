@@ -578,7 +578,16 @@
     function GenerateRandomDeck() {
       // Use the existing DeckBuild function to generate a valid deck for the
       // currently selected identity, including its deck and influence limits.
-      ApplyGeneratedDeck(DeckBuild(cardSet[json.identity]));
+      ApplyGeneratedDeck(
+        DeckBuild(
+          cardSet[json.identity],
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          deckBuildAllowedSetCodes
+        )
+      );
     }
 
     function RenderAllCardsList() {
@@ -875,6 +884,13 @@
       console.warn('Could not read settings for filter, using defaults:', e);
       loadedSetCodes = getDefaultSetCodes();
     }
+
+    // Hand the deck builder the sets actually loaded for this table, so its
+    // "Random deck" generation can draw from every legal set (e.g. Elevation in
+    // Core Sets/Startup, the full Eternal roster) instead of only the curated
+    // sg/su21/ms pools. gauntlet.php/engine.php set it elsewhere; the default
+    // null here preserves legacy behaviour for decks.js callers.
+    deckBuildAllowedSetCodes = loadedSetCodes.slice();
 
     // Custom display names for filter labels
     var customSetFilterLabels = {
@@ -1388,7 +1404,15 @@
             'Ignoring invalid precon for ' + identity.title + '; generating a random deck instead.'
           );
       }
-      if (cardsChosen === null) cardsChosen = DeckBuild(identity);
+      if (cardsChosen === null)
+        cardsChosen = DeckBuild(
+          identity,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          deckBuildAllowedSetCodes
+        );
       ApplyGeneratedDeck(cardsChosen);
     }
 
@@ -1477,7 +1501,14 @@
           }
         } else {
           // No matching precon - use random generation
-          var cardsChosen = DeckBuild(cardSet[json.identity]);
+          var cardsChosen = DeckBuild(
+            cardSet[json.identity],
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            deckBuildAllowedSetCodes
+          );
           //convert generated deck into counts
           for (var i = 0; i < cardsChosen.length; i++) {
             var pci = playerCards.indexOf(cardsChosen[i]);
