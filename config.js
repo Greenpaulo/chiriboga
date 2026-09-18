@@ -10,11 +10,15 @@
 // HOW TO ADD A NEW SET
 // =============================================================================
 //
+// Full mechanics, AI, ELO and verification checklist:
+// documentation/new-set-integration-guide.md
+//
 // 1. CREATE THE SET FILE
 //    - Create a new file: sets/yoursetname.js
 //    - Follow the format of existing set files (e.g., systemgateway.js)
 //    - Each card needs a unique ID in an unused range:
 //        Core Set:           1000-1999
+//        Creation and Control: 3001-3055
 //        Downfall:           26001-26065
 //        Uprising:           26066-26130
 //        System Gateway:     30000-30999
@@ -71,6 +75,7 @@
 //   Key              File               Code   Description
 //   ─────────────────────────────────────────────────────────────────────
 //   coreset          coreset.js         core   Original Core Set (1000-1999)
+//   creationandcontrol creationandcontrol.js cac Creation and Control (3001-3055)
 //   downfall         downfall.js        df     Downfall (26001-26065)
 //   uprising         uprising.js        ur     Uprising (26066-26130)
 //   systemgateway    systemgateway.js   sg     System Gateway (30000-30999)

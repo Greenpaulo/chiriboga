@@ -120,14 +120,10 @@ spec:**
 
 ## 5. New documentation and artifacts produced
 
-- **`documentation/eternal-format-hooks-backlog.md`** (new) — records every
-  out-of-scope card found during discovery (`Datasucker`, `Wyrm`,
-  `Sandstone`, `Parasite`, `Chisel`, and a newly-found `Physarum` in
-  `rebellion.js`), with file paths and line numbers, so a future pass on
-  these sets can implement hooks directly without re-searching. Also logs
-  `Chromatophores` as the flagged 4th category, and separately notes `Atman`,
-  `Chameleon`, and `"Kit" Peddler` as standard breaker/identity patterns
-  observed but not requiring changes.
+- **`documentation/card-implementation-backlog.md`** supersedes the original
+  Eternal-specific discovery backlog. It retains the actionable gaps and
+  distinguishes them from cards whose hooks are now verified as handled,
+  avoiding stale tasks after later AI work.
 - **`tests/corp-server-security.test.js`** (new) — 23 regression tests
   covering calculator ownership/isolation, unrezzed ice classification,
   breaker activation costs, mandatory-vs-optional punishment, partial and

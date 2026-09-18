@@ -133,8 +133,8 @@ PACK_MAP = {
     "ph": ("parhelion", "ph"),
 
     # Liberation Cycle
-    "tai": ("theautomatainitiative", "tai"),
-    "rwr": ("rebellionwithoutrehearsal", "rwr"),
+    "tai": ("automatainitiative", "tai"),
+    "rwr": ("rebellion", "rwr"),
 
     # Elevation & Vantage Point
     "elev": ("elevation", "elev"),
@@ -210,6 +210,10 @@ def generate_card_stub(card):
     lines.append(f"cardSet[{code}] = {{")
     lines.append(f'  title: "{title}",')
     lines.append(f'  imageFile: "{code}.png",')
+    lines.append(
+        "  // TODO: Add the exact ELO from "
+        "https://trash-or-busto.herokuapp.com/ranking"
+    )
     lines.append(f"  player: {player_str},")
     lines.append(f'  faction: "{faction}",')
     if type_code != "identity":
@@ -344,4 +348,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

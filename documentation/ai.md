@@ -114,7 +114,9 @@ This is useful for more complex cards where the AI needs to make a choice mid-re
 
 ## 3. The ELO Property
 
-Every card has an `elo` property — a number representing the card's general power level. It is used as a tiebreaker when the AI must choose between cards that are otherwise equally attractive.
+Every completed card definition must have a finite numeric `elo` property. It
+represents the card's general power level and is used as a tiebreaker when the
+AI must choose between cards that are otherwise equally attractive.
 
 ```js
 cardSet[30005] = {
@@ -124,9 +126,18 @@ cardSet[30005] = {
 };
 ```
 
-Think of this number as an approximate Elo rating. Stronger, more universally useful cards have higher values. Weaker, situational, or card-draw cards have lower values.
+Higher-ranked cards have higher values, while weaker or more situational cards
+have lower values. The value is not a rating for this project to estimate.
 
-**When you add a new card**, assign a reasonable Elo. Start around 1500 for an average card, higher for a powerful card, lower for a niche card.
+**When you add a new card**, find it in the
+[Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking) and
+copy its published ELO exactly. Do not guess, substitute a neutral value or tune
+the rating against similar cards. Record the lookup date in the set header
+because the published rankings can change. Do not omit the property either:
+although the format-aware random deckbuilder uses 1500 as a defensive runtime
+fallback, other AI paths read `card.elo` directly and a missing value can result
+in `undefined`/`NaN` comparisons. The current missing-value inventory is in
+[`card-implementation-backlog.md`](card-implementation-backlog.md#4-missing-elo-values).
 
 ---
 
@@ -1849,7 +1860,7 @@ This section walks through adding AI support to two hypothetical new cards.
 ```js
 cardSet[99001] = {
     title: "Spike Drill",
-    elo: 1500,           // average power level
+    elo: 1500,           // fictional example only; real cards use the exact published rating
     player: runner,
     faction: "Anarch",
     influence: 2,
