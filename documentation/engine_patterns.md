@@ -60,6 +60,11 @@ cardSet[NNNNN] = {
 
 All hooks are properties on the card object. `this` = the card in all Resolve/Enumerate functions.
 
+Paid abilities normally go in `abilities`. For an ability controlled by the
+opponent, use `runnerAbilities` on a Corp card or `corpAbilities` on a Runner
+card; each entry has the same `text`, `Enumerate` and `Resolve` shape as a
+normal paid ability.
+
 ### Turn / Phase
 
 ```js
@@ -76,6 +81,7 @@ automaticOnRunBegins:  { Resolve }          // fires at start of EVERY run, no E
 responseOnRunSuccessful: { Resolve, automatic: true }
 responseOnRunEnds:       { Resolve, automatic: true }
 responseOnPassesIce:     { Resolve, automatic: true }
+responseOnWouldApproachServer: { Enumerate?, Resolve } // optional pre-approach redirect window
 ```
 
 ### Encounter

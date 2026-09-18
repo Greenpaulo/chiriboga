@@ -107,3 +107,31 @@ is deliberately not represented as damage prevention.
 access cases, hosted-install eligibility and discount scope, hand-size state,
 grouped Archives draws and AI timing, and temporary-subroutine ordering,
 turn reset, cleanup and route modelling.
+
+## Batch 3 engine support
+
+`ChoicesTriggerableAbilities` now recognizes `corpAbilities` on active Runner
+cards, mirroring the existing `runnerAbilities` path on Corp cards. Rotary uses
+this to expose its Corp-controlled click ability without making the whole card
+active for the opponent.
+
+Runs now include `responseOnWouldApproachServer` immediately before the normal
+approach-server phase. Baker uses this decision-safe window to choose and pay
+for a redirect; the destination's approach phase is then initialized normally,
+so its approach triggers see the changed attacked server.
+
+## Batch 3 confirmed patterns
+
+Kompromat remains active through its initiated run, records success, gives the
+Corp the derez-or-bad-publicity choice at run end and then removes itself from
+the game. Tailgate uses `modifyPlayCost` while inactive and the established
+successful-run `modifyBreachAccess` pattern.
+
+Underdome Irregulars tracks ice rez events while inactive so installing it
+later in the same Runner turn does not lose public history. Its state resets at
+turn boundaries, and the action-phase-end effect handles draw, tag removal and
+self-trash branches explicitly.
+
+`tests/vantagepoint-integration.test.js` covers Batch 3 costs, restrictions,
+choices, run and turn cleanup, current Stealth-credit spending, redirect and
+central-pressure AI hooks, plus the two shared engine paths above.

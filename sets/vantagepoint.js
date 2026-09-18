@@ -825,6 +825,44 @@ cardSet[36009] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 0,
+  usedThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  abilities: [
+    {
+      text: "[click], 1[c]: Draw 1 card and remove 1 tag.",
+      Enumerate: function () {
+        if (this.usedThisTurn) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        this.usedThisTurn = true;
+        SpendClicks(runner, 1);
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Draw(runner, 1);
+            RemoveTags(1);
+          },
+          this,
+        );
+      },
+    },
+  ],
+  AIDrawTrigger: 2,
+  AIWouldTrigger: function () {
+    if (runner.tags > 0) return true;
+    return runner.AI._currentOverDraw() < runner.AI._maxOverDraw();
+  },
 };
 
 //Kompromat (36010)
@@ -840,8 +878,86 @@ cardSet[36010] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 2,
+  runningWithThis: false,
+  runWasSuccessful: false,
+  Enumerate: function () {
+    return ChoicesExistingServers().filter(function (choice) {
+      return choice.server.ice.length > 0;
+    });
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.runningWithThis = true;
+    this.runWasSuccessful = false;
+    MakeRun(params.server);
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (this.runningWithThis) this.runWasSuccessful = true;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      var kompromat = this;
+      var finish = function () {
+        kompromat.runningWithThis = false;
+        kompromat.runWasSuccessful = false;
+        RemoveFromGame(kompromat);
+      };
+      if (!this.runWasSuccessful) {
+        finish();
+        return;
+      }
+      var choices = ChoicesArrayCards(
+        attackedServer.ice.filter(function (ice) {
+          return ice.rezzed;
+        }),
+      );
+      for (var i = 0; i < choices.length; i++) {
+        choices[i].derez = true;
+        choices[i].label = "Derez " + GetTitle(choices[i].card);
+      }
+      choices.push({
+        badPublicity: true,
+        label: "Take 1 bad publicity",
+        button: "Take bad publicity",
+      });
+      if (corp.AI) {
+        var rezzedChoice = null;
+        for (var j = 0; j < choices.length; j++) {
+          if (
+            choices[j].derez &&
+            (!rezzedChoice || choices[j].card.rezCost < rezzedChoice.card.rezCost)
+          )
+            rezzedChoice = choices[j];
+        }
+        if (rezzedChoice && rezzedChoice.card.rezCost <= 3)
+          choices = [rezzedChoice];
+        else choices = [choices[choices.length - 1]];
+      }
+      DecisionPhase(
+        corp,
+        choices,
+        function (params) {
+          if (params.derez) Derez(params.card);
+          else AddBadPublicity(1);
+          finish();
+        },
+        "Kompromat",
+        "Derez ice protecting " + ServerName(attackedServer) + "?",
+        kompromat,
+      );
+    },
+    automatic: true,
+  },
+  AIBreachNotRequired: true,
+  AIRunEventExtraPotential: function (server) {
+    if (!server || server.ice.length < 1) return 0;
+    return 0.4;
+  },
+  AIWorthKeeping: function () {
+    return true;
   },
 };
 
@@ -858,9 +974,56 @@ cardSet[36011] = {
   cardType: "event",
   subTypes: [],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["resource"]) && CheckTrash(card);
+    });
   },
+  Resolve: function (params) {
+    var sellOut = this;
+    Trash(
+      params.card,
+      false,
+      function () {
+        GainCredits(runner, 4, "", sellOut);
+        Draw(runner, 2);
+      },
+      this,
+    );
+  },
+  AIPreferredPlayChoice: function (card, choices) {
+    for (var i = 0; i < choices.length; i++) {
+      if (
+        typeof choices[i].card.AIOkToTrash === "function" &&
+        choices[i].card.AIOkToTrash.call(choices[i].card)
+      )
+        return i;
+    }
+    var preferred = -1;
+    var lowestCost = Infinity;
+    for (var j = 0; j < choices.length; j++) {
+      var cost = InstallCost(choices[j].card);
+      if (cost < lowestCost) {
+        lowestCost = cost;
+        preferred = j;
+      }
+    }
+    return preferred;
+  },
+  AIWouldPlay: function () {
+    var choices = this.Enumerate();
+    for (var i = 0; i < choices.length; i++) {
+      if (
+        (typeof choices[i].card.AIOkToTrash === "function" &&
+          choices[i].card.AIOkToTrash.call(choices[i].card)) ||
+        InstallCost(choices[i].card) <= 1
+      )
+        return true;
+    }
+    return false;
+  },
+  AIEconomyPlay: 2,
+  AIPlayToDraw: 2,
 };
 
 //Tailgate (36012)
@@ -876,8 +1039,47 @@ cardSet[36012] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  runWasSuccessful: false,
+  modifyPlayCost: {
+    Resolve: function (card) {
+      if (card == this) return -corp.HQ.ice.length;
+      return 0;
+    },
+    availableWhenInactive: true,
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.runWasSuccessful = false;
+    MakeRun(corp.HQ);
+  },
+  responseOnRunSuccessful: {
+    Resolve: function (server) {
+      if (server == corp.HQ) this.runWasSuccessful = true;
+    },
+    automatic: true,
+  },
+  modifyBreachAccess: {
+    Resolve: function () {
+      if (this.runWasSuccessful && attackedServer == corp.HQ) return 2;
+      return 0;
+    },
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.runWasSuccessful = false;
+    },
+    automatic: true,
+  },
+  AIAdditionalAccess: function (server) {
+    if (server != corp.HQ) return 0;
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid"))
+      return 0;
+    return 2;
+  },
+  AIRunEventExtraPotential: function (server) {
+    if (server != corp.HQ) return 0;
+    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid"))
+      return 0;
+    return 0.5 * runner.AI._additionalHQAccessValue(this);
   },
 };
 
@@ -894,7 +1096,19 @@ cardSet[36013] = {
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  memoryUnits: 1,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this && runner.tags < 1) AddTags(1);
+    },
+  },
+  AIPreferredInstallChoice: function () {
+    if (MemoryUnits() - InstalledMemoryCost() >= 2) return -1;
+    return 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    return spareMU < 2;
+  },
 };
 
 //Rotary (36014)
@@ -912,7 +1126,85 @@ cardSet[36014] = {
   cardType: "hardware",
   subTypes: ["Console"],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  additionalAccessThisBreach: false,
+  responseOnBreach: {
+    Enumerate: function (server) {
+      if (server != corp.HQ && server != corp.RnD) return [];
+      return [
+        { use: true, label: "Take 1 tag to access 1 additional card" },
+        { use: false, label: "Continue without taking a tag", button: "Continue" },
+      ];
+    },
+    Resolve: function (params) {
+      if (!params.use) return;
+      AddTags(
+        1,
+        function () {
+          this.additionalAccessThisBreach = true;
+        },
+        this,
+      );
+    },
+    text: "Take 1 tag to access 1 additional card?",
+  },
+  modifyBreachAccess: {
+    Resolve: function () {
+      if (this.additionalAccessThisBreach) return 1;
+      return 0;
+    },
+  },
+  automaticOnBreach: {
+    Resolve: function () {
+      this.additionalAccessThisBreach = false;
+    },
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.additionalAccessThisBreach = false;
+    },
+    automatic: true,
+  },
+  corpAbilities: [
+    {
+      text: "[click], 2[c]: Trash Rotary.",
+      Enumerate: function () {
+        if (runner.tags < 1) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
+        if (!CheckCredits(corp, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        SpendCredits(
+          corp,
+          2,
+          "using",
+          this,
+          function () {
+            Trash(this, false);
+          },
+          this,
+        );
+      },
+    },
+  ],
+  AITriggerWhenCan: true,
+  AIAdditionalAccess: function (server) {
+    if (server != corp.HQ && server != corp.RnD) return 0;
+    return 1;
+  },
+  AICentralPressure: function (server) {
+    if (server != corp.HQ && server != corp.RnD) return {};
+    return { additionalAccess: 1 };
+  },
+  AIInstallBeforeRun: function (server) {
+    return server == corp.HQ || server == corp.RnD ? 1 : 0;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Baker (36015)
@@ -928,7 +1220,113 @@ cardSet[36015] = {
   subTypes: [],
   installCost: 3,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  runningWithThis: false,
+  _stealthCreditCards: function () {
+    var baker = this;
+    return InstalledCards(runner).filter(function (card) {
+      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
+        return false;
+      return (
+        typeof card.canUseCredits !== "function" ||
+        card.canUseCredits("using", baker)
+      );
+    });
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  abilities: [
+    {
+      text: "[click]: Run Archives.",
+      Enumerate: function () {
+        if (this.usedThisTurn) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(runner, 1);
+        this.usedThisTurn = true;
+        this.runningWithThis = true;
+        MakeRun(corp.archives);
+      },
+    },
+  ],
+  responseOnWouldApproachServer: {
+    Enumerate: function () {
+      if (!this.runningWithThis || attackedServer != corp.archives) return [];
+      if (this._stealthCreditCards().length < 1) return [];
+      var choices = [
+        { server: corp.HQ, label: "Pay 1 stealth credit and approach HQ" },
+        { server: corp.RnD, label: "Pay 1 stealth credit and approach R&D" },
+      ];
+      if (runner.AI) {
+        var hqPotential = runner.AI._getCachedPotential(corp.HQ);
+        var rndPotential = runner.AI._getCachedPotential(corp.RnD);
+        return [hqPotential >= rndPotential ? choices[0] : choices[1]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      var baker = this;
+      var creditChoices = ChoicesArrayCards(this._stealthCreditCards());
+      var spendAndRedirect = function (creditParams) {
+        creditParams.card.credits -= 1;
+        UpdateCounters();
+        attackedServer = params.server;
+        Log("Attacked server changed to " + ServerName(params.server));
+      };
+      if (creditChoices.length == 1) spendAndRedirect(creditChoices[0]);
+      else
+        DecisionPhase(
+          runner,
+          creditChoices,
+          spendAndRedirect,
+          "Baker",
+          "Choose a Stealth card to spend 1 credit from",
+          baker,
+        );
+    },
+    text: "Pay 1 stealth credit to change the attacked server?",
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.runningWithThis = false;
+    },
+    automatic: true,
+  },
+  AIRedirectsRun: function (fromServer, toServer) {
+    return (
+      !this.usedThisTurn &&
+      fromServer == corp.archives &&
+      (toServer == corp.HQ || toServer == corp.RnD) &&
+      this._stealthCreditCards().length > 0
+    );
+  },
+  AIRunAbilityExtraPotential: function (server, potential) {
+    if (server != corp.archives || this.usedThisTurn) return 0;
+    if (this._stealthCreditCards().length < 1) return 0;
+    var redirectedPotential = Math.max(
+      runner.AI._getCachedPotential(corp.HQ),
+      runner.AI._getCachedPotential(corp.RnD),
+    );
+    return Math.max(0, redirectedPotential - potential);
+  },
+  AIWouldTrigger: function () {
+    if (this.usedThisTurn || this._stealthCreditCards().length < 1) return false;
+    return (
+      Math.max(
+        runner.AI._getCachedPotential(corp.HQ),
+        runner.AI._getCachedPotential(corp.RnD),
+      ) > 0
+    );
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    return spareMU >= 1;
+  },
 };
 
 //Underdome Irregulars (36016)
@@ -943,7 +1341,56 @@ cardSet[36016] = {
   cardType: "resource",
   subTypes: ["Connection"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  iceRezzedThisTurn: false,
+  automaticOnRez: {
+    Resolve: function (card) {
+      if (CheckCardType(card, ["ice"])) this.iceRezzedThisTurn = true;
+    },
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.iceRezzedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.iceRezzedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerActionPhaseEnds: {
+    Enumerate: function () {
+      if (!this.iceRezzedThisTurn) return [{}];
+      var choices = [{ draw: true, label: "Draw 2 cards" }];
+      if (runner.tags > 0)
+        choices.push({ removeTag: true, label: "Remove 1 tag" });
+      if (runner.AI) {
+        if (runner.tags > 0) return [choices[choices.length - 1]];
+        return [choices[0]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!this.iceRezzedThisTurn) {
+        Trash(this, true);
+      } else if (params.removeTag) {
+        RemoveTags(1);
+      } else {
+        Draw(runner, 2);
+      }
+    },
+    text: "Resolve Underdome Irregulars",
+  },
+  AIDrawInstall: function () {
+    return 1;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Hiram “0mission” Svensson: Shadow of the Past (36017)

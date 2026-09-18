@@ -4018,6 +4018,31 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
     }
   }
 
+  //For Corp, also check for corpAbilities on Runner cards (e.g. Rotary)
+  if (player === corp) {
+    var runnerCards = ActiveCards(runner);
+    for (var i = 0; i < runnerCards.length; i++) {
+      if (typeof runnerCards[i].corpAbilities !== "undefined") {
+        var abilities = ChoicesAbility(
+          runnerCards[i],
+          limitTo,
+          "corpAbilities",
+        );
+        for (var j = 0; j < abilities.length; j++) {
+          var choiceLabel = abilities[j].ability.text;
+          var choiceObj = {
+            card: runnerCards[i],
+            ability: abilities[j].ability,
+            label: choiceLabel,
+          };
+          if (typeof abilities[j].ability.alt != "undefined")
+            choiceObj.alt = abilities[j].ability.alt;
+          ret.push(choiceObj);
+        }
+      }
+    }
+  }
+
   return ret;
 }
 

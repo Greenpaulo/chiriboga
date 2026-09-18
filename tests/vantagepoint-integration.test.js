@@ -503,4 +503,244 @@ assert(
   'zero prevented damage still continues its resolution callback',
 );
 
-console.log('Vantage Point integration and Batch 1-2 behavior checks passed.');
+// Batch 3: Criminal cards 36009-36016.
+context.runner.tags = 1;
+context.runner.clickTracker = 4;
+context.corp.clickTracker = 3;
+context.CheckActionClicks = (player, amount) => player.clickTracker >= amount;
+context.SpendClicks = (player, amount) => {
+  player.clickTracker -= amount;
+};
+context.RemoveTags = (amount) => {
+  context.runner.tags = Math.max(0, context.runner.tags - amount);
+};
+context.AddTags = (amount, callback, callbackContext) => {
+  context.runner.tags += amount;
+  if (callback) callback.call(callbackContext);
+};
+context.MemoryUnits = () => 4;
+context.InstalledMemoryCost = () => 4;
+context.ServerName = (server) => server.serverName;
+context.ChoicesExistingServers = () => [
+  {server: context.corp.HQ, label: 'HQ'},
+  {server: context.corp.RnD, label: 'R&D'},
+  {server: context.corp.archives, label: 'Archives'},
+];
+
+const vic = context.cardSet[36009];
+cardsDrawn = 0;
+vic.usedThisTurn = false;
+vic.abilities[0].Resolve.call(vic);
+assert.strictEqual(context.runner.clickTracker, 3);
+assert.strictEqual(cardsDrawn, 1);
+assert.strictEqual(context.runner.tags, 0);
+assert.strictEqual(vic.abilities[0].Enumerate.call(vic).length, 0);
+vic.responseOnRunnerTurnBegins.Resolve.call(vic);
+assert.strictEqual(vic.usedThisTurn, false, '36009 resets once-per-turn state');
+
+context.corp.HQ.ice = [{title: 'HQ ice', rezzed: true}];
+context.corp.RnD.ice = [];
+context.corp.archives.ice = [{title: 'Archives ice', rezzed: false}];
+const kompromat = context.cardSet[36010];
+assert.deepStrictEqual(
+  Array.from(kompromat.Enumerate.call(kompromat), (choice) => choice.server),
+  [context.corp.HQ, context.corp.archives],
+  '36010 only targets servers protected by ice',
+);
+kompromat.Resolve.call(kompromat, {server: context.corp.HQ});
+kompromat.responseOnRunSuccessful.Resolve.call(kompromat);
+decisions = [];
+removedCard = null;
+let derezzedCard = null;
+context.Derez = (card) => {
+  derezzedCard = card;
+  card.rezzed = false;
+};
+kompromat.responseOnRunEnds.Resolve.call(kompromat);
+assert.strictEqual(decisions.length, 1);
+assert.strictEqual(decisions[0].choices.length, 2);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.derez));
+assert.strictEqual(derezzedCard.title, 'HQ ice');
+assert.strictEqual(removedCard, kompromat, '36010 removes itself after its run');
+kompromat.Resolve.call(kompromat, {server: context.corp.archives});
+removedCard = null;
+decisions = [];
+kompromat.responseOnRunEnds.Resolve.call(kompromat);
+assert.strictEqual(decisions.length, 0, '36010 has no Corp choice after a failed run');
+assert.strictEqual(removedCard, kompromat);
+
+const sellOut = context.cardSet[36011];
+const cheapResource = {
+  title: 'Cheap resource',
+  cardType: 'resource',
+  subTypes: [],
+  installCost: 0,
+};
+const protectedResource = {
+  title: 'Protected resource',
+  cardType: 'resource',
+  subTypes: [],
+  installCost: 1,
+  trashable: false,
+};
+installed = {corp: [], runner: [cheapResource, protectedResource, runnerCard]};
+assert.deepStrictEqual(
+  Array.from(sellOut.Enumerate.call(sellOut), (choice) => choice.card),
+  [cheapResource],
+  '36011 requires a trashable installed resource',
+);
+creditsGained = 0;
+cardsDrawn = 0;
+trashCalls = [];
+sellOut.Resolve.call(sellOut, {card: cheapResource});
+assert.strictEqual(trashCalls[0].canBePrevented, false);
+assert.strictEqual(creditsGained, 4);
+assert.strictEqual(cardsDrawn, 2);
+
+const tailgate = context.cardSet[36012];
+context.corp.HQ.ice = [{}, {}, {}];
+assert.strictEqual(
+  tailgate.modifyPlayCost.Resolve.call(tailgate, tailgate),
+  -3,
+  '36012 discounts itself for every HQ ice',
+);
+assert.strictEqual(tailgate.modifyPlayCost.Resolve.call(tailgate, sellOut), 0);
+tailgate.Resolve.call(tailgate);
+assert.strictEqual(runTarget, context.corp.HQ);
+context.attackedServer = context.corp.HQ;
+assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 0);
+tailgate.responseOnRunSuccessful.Resolve.call(tailgate, context.corp.HQ);
+assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 2);
+
+const borrowedGoods = context.cardSet[36013];
+assert.strictEqual(borrowedGoods.memoryUnits, 1);
+context.runner.tags = 0;
+borrowedGoods.automaticOnInstall.Resolve.call(borrowedGoods, borrowedGoods);
+assert.strictEqual(context.runner.tags, 1, '36013 tags an untagged Runner');
+borrowedGoods.automaticOnInstall.Resolve.call(borrowedGoods, borrowedGoods);
+assert.strictEqual(context.runner.tags, 1, '36013 does not tag an already-tagged Runner');
+
+const rotary = context.cardSet[36014];
+assert.strictEqual(rotary.unique, true);
+assert.strictEqual(rotary.memoryUnits, 1);
+rotary.automaticOnBreach.Resolve.call(rotary, context.corp.HQ);
+rotary.responseOnBreach.Resolve.call(rotary, {use: true});
+assert.strictEqual(rotary.modifyBreachAccess.Resolve.call(rotary), 1);
+rotary.responseOnRunEnds.Resolve.call(rotary);
+assert.strictEqual(rotary.modifyBreachAccess.Resolve.call(rotary), 0);
+context.runner.tags = 1;
+context.corp.clickTracker = 3;
+trashCalls = [];
+rotary.corpAbilities[0].Resolve.call(rotary);
+assert.strictEqual(context.corp.clickTracker, 2);
+assert.strictEqual(trashCalls[0].cards[0], rotary);
+assert.strictEqual(trashCalls[0].canBePrevented, false);
+assert.strictEqual(rotary.AIAdditionalAccess.call(rotary, context.corp.HQ), 1);
+assert.strictEqual(
+  JSON.stringify(rotary.AICentralPressure.call(rotary, context.corp.RnD)),
+  '{"additionalAccess":1}',
+);
+assert(
+  utilitySource.includes('"corpAbilities"'),
+  '36014 Corp-only Runner-card abilities are exposed by the engine',
+);
+const triggerFunctionStart = utilitySource.indexOf(
+  'function ChoicesTriggerableAbilities',
+);
+const triggerFunctionEnd = utilitySource.indexOf(
+  '/**\n * Gets choices of card to access',
+  triggerFunctionStart,
+);
+const abilityContext = {
+  corp: context.corp,
+  runner: context.runner,
+  ActiveCards(player) {
+    return player === context.runner ? [rotary] : [];
+  },
+  ChoicesAbility(card, limitTo, property = 'abilities') {
+    if (!card[property]) return [];
+    return card[property]
+      .filter((ability) => ability.Enumerate.call(card).length > 0)
+      .map((ability) => ({ability}));
+  },
+};
+vm.createContext(abilityContext);
+vm.runInContext(
+  utilitySource.slice(triggerFunctionStart, triggerFunctionEnd),
+  abilityContext,
+);
+assert.strictEqual(
+  abilityContext.ChoicesTriggerableAbilities(context.corp, 'click')[0].card,
+  rotary,
+  '36014 appears among Corp triggerable abilities',
+);
+
+const baker = context.cardSet[36015];
+const stealthSource = {
+  title: 'Stealth source',
+  cardType: 'resource',
+  subTypes: ['Stealth'],
+  credits: 1,
+  recurringCredits: 1,
+};
+installed = {corp: [], runner: [baker, stealthSource]};
+context.runner.clickTracker = 3;
+baker.usedThisTurn = false;
+baker.abilities[0].Resolve.call(baker);
+assert.strictEqual(runTarget, context.corp.archives);
+decisions = [];
+context.attackedServer = context.corp.archives;
+const bakerRedirects = baker.responseOnWouldApproachServer.Enumerate.call(baker);
+assert.strictEqual(bakerRedirects.length, 2);
+baker.responseOnWouldApproachServer.Resolve.call(baker, bakerRedirects[0]);
+assert.strictEqual(context.attackedServer, context.corp.HQ);
+assert.strictEqual(stealthSource.credits, 0);
+assert.strictEqual(stealthSource.recurringCredits, 1);
+baker.responseOnRunEnds.Resolve.call(baker);
+assert.strictEqual(baker.runningWithThis, false);
+assert.strictEqual(
+  baker.AIRedirectsRun.call(baker, context.corp.archives, context.corp.HQ),
+  false,
+  '36015 public redirect model respects its once-per-turn use',
+);
+baker.responseOnRunnerTurnBegins.Resolve.call(baker);
+stealthSource.credits = 1;
+assert.strictEqual(
+  baker.AIRedirectsRun.call(baker, context.corp.archives, context.corp.RnD),
+  true,
+);
+stealthSource.credits = 0;
+assert.strictEqual(
+  baker.AIRedirectsRun.call(baker, context.corp.archives, context.corp.RnD),
+  false,
+  '36015 cannot redirect without a current Stealth credit',
+);
+assert(
+  phaseSource.includes('"responseOnWouldApproachServer"'),
+  '36015 uses a decision-safe response window before server approach',
+);
+
+const underdome = context.cardSet[36016];
+underdome.responseOnRunnerTurnBegins.Resolve.call(underdome);
+trashCalls = [];
+underdome.responseOnRunnerActionPhaseEnds.Resolve.call(underdome, {});
+assert.strictEqual(trashCalls[0].cards[0], underdome);
+assert.strictEqual(trashCalls[0].canBePrevented, true);
+underdome.responseOnRunnerTurnBegins.Resolve.call(underdome);
+underdome.automaticOnRez.Resolve.call(underdome, {
+  title: 'Rezzed ice',
+  cardType: 'ice',
+});
+context.runner.tags = 0;
+cardsDrawn = 0;
+const underdomeChoices = underdome.responseOnRunnerActionPhaseEnds.Enumerate.call(underdome);
+assert.strictEqual(underdomeChoices.length, 1);
+underdome.responseOnRunnerActionPhaseEnds.Resolve.call(underdome, underdomeChoices[0]);
+assert.strictEqual(cardsDrawn, 2);
+assert.strictEqual(
+  underdome.automaticOnRez.availableWhenInactive,
+  true,
+  '36016 remembers ice rezzed before it was installed',
+);
+
+console.log('Vantage Point integration and Batch 1-3 behavior checks passed.');

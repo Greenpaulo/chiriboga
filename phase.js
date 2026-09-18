@@ -196,7 +196,7 @@ phaseTemplates.standardResponse = {
           } else approachIce--;
           if (approachIce > -1) ChangePhase(phases.runApproachIce);
           //runners position has moved but approach triggers fire after paid ability window
-          else ChangePhase(phases.runApproachServer); //by default approach server
+          else ChangePhase(phases.runWouldApproachServer); //by default approach server
           return;
         }
         IncrementPhase();
@@ -1467,6 +1467,19 @@ phases.runResponseBeforeApproach = CreatePhaseFromTemplate(
 );
 phases.runResponseBeforeApproach.lessOpportunities = true; //this phase is sort of treated like a corp response to previous phase
 
+//Run: optional responses immediately before approaching a server. This sits
+//before the approach phase so redirects can rebuild that phase's trigger list
+//for the destination server.
+phases.runWouldApproachServer = CreatePhaseFromTemplate(
+  phaseTemplates.globalTriggers,
+  runner,
+  "Run: Before Approach Server",
+  "Run 4.6.1",
+  null
+);
+phases.runWouldApproachServer.triggerCallbackName =
+  "responseOnWouldApproachServer";
+
 //Run: approach server ('approaches server' triggers fire) (Nisei 2021 4.6.2)
 phases.runApproachServer = CreatePhaseFromTemplate(
   phaseTemplates.globalTriggers,
@@ -1804,7 +1817,8 @@ phases.runSubroutines.next = phases.runEncounterEnd; //"Run Subroutines"
 phases.runEncounterEnd.next = phases.runPassesIce; //"Run 3.5"
 phases.runPassesIce.next = phases.runDecideContinue; //"Run 4.1"
 phases.runDecideContinue.next = phases.runResponseBeforeApproach; //"Run 4.3"
-phases.runResponseBeforeApproach.next = phases.runApproachServer; //"Run 4.5"  by default after ice will move to approach server (change to indicate ice is there to approach)
+phases.runResponseBeforeApproach.next = phases.runWouldApproachServer; //"Run 4.5"  by default after ice will move to pre-approach responses
+phases.runWouldApproachServer.next = phases.runApproachServer; //"Run 4.6.1"
 phases.runApproachServer.next = phases.runSuccessful; //"Run 4.6.2"
 phases.runSuccessful.next = phases.runBreachServer; //"Run 5.1"
 phases.runBreachServer.next = phases.runAccessingCard; //"Run 5.2"
