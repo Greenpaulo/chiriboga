@@ -85,6 +85,7 @@
 //   automatainitiative automatainitiative.js tai The Automata Initiative (34001-34065)
 //   rebellion        rebellion.js       rwr    Rebellion Without Rehearsal (34066-34130)
 //   elevation        elevation.js       elev   Elevation (35000-35999)
+//   vantagepoint     vantagepoint.js    vp     Vantage Point (36000-36999)
 //
 // Special engine-only sets (not in registry, loaded directly by engine.php):
 //   gauntlet         gauntlet.js        -      Gauntlet-specific cards
@@ -155,6 +156,14 @@ var setRegistry = {
       hidden: false,
       untested: true,
       idRange: [35000, 35999],
+    },
+    vantagepoint: {
+      file: "vantagepoint",
+      code: "vp",
+      name: "Vantage Point",
+      hidden: true,
+      untested: true,
+      idRange: [36000, 36999],
     },
     uprising: {
       file: "uprising",
@@ -585,12 +594,12 @@ var formatRegistry = {
   },
   startup: {
     name: "Startup",
-    sets: ['sg', 'elev'], // + 'vp' once Vantage Point is implemented
+    sets: ['sg', 'elev', 'vp'],
     enabled: false
   },
   standard: {
     name: "Standard",
-    sets: ['sg', 'elev', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr'],
+    sets: ['sg', 'elev', 'vp', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr'],
     enabled: false
   },
   // Eternal: every card ever released. Includes every set listed in
@@ -600,7 +609,7 @@ var formatRegistry = {
   // most precons use su21/cac.
   eternal: {
     name: "Eternal",
-    sets: ['sg', 'su21', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'elev', 'core', 'cac'],
+    sets: ['sg', 'su21', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr', 'elev', 'vp', 'core', 'cac'],
     enabled: true
   }
 };

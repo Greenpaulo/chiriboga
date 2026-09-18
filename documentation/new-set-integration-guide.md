@@ -25,9 +25,43 @@ range from the largest card ID; reserve and document the whole range.
 
 ## 2. Confirm metadata and local images
 
-Add the set's cards to `carddata/carddata.json`. In particular, each entry needs
-a card `code`, `title` and `pack_code` matching the new registry code. The
-deckbuilder uses this data for card details and set filtering.
+`carddata/carddata.json` is a local snapshot of card metadata supplied by the
+[NetrunnerDB API](https://api.netrunnerdb.com/api/docs/). It is intended to
+contain every released card, so first check whether the new set is already
+present rather than assuming data must be added:
+
+```sh
+jq -r '.data[] | select(.pack_code == "vp") | [.code, .title] | @tsv' \
+  carddata/carddata.json
+```
+
+Replace `vp` with the set's legacy NetrunnerDB pack code. If the command lists
+the complete set, do not regenerate or replace the file.
+
+If the set is missing, use the set-specific sync script from the repository
+root:
+
+```sh
+python3 sync_card_set.py <pack_code> --check
+python3 sync_card_set.py <pack_code>
+```
+
+The script resolves the legacy pack code through NetrunnerDB's v3 `card_sets`
+endpoint, follows that set's filtered `printings` endpoint, converts the v3
+records to the legacy shape used by this project, and appends only card codes
+that are missing locally. It preserves all existing entries, rejects code
+collisions, validates the API's expected card count and updates the root
+`total`. Re-running it is safe: a complete set produces no file change.
+
+Do not use `https://netrunnerdb.com/api/2.0/public/cards?pack_code=...` for this
+job. The legacy endpoint currently ignores that query parameter and returns the
+entire card database. The v3 API also uses canonical set IDs such as
+`vantage_point`, which is why the sync script performs the legacy-code lookup
+instead of interpolating `<pack_code>` directly into the endpoint URL.
+
+After syncing, review the diff. Each new entry must at least have a `code`,
+`title` and `pack_code` matching the registry code. The deckbuilder uses this
+metadata for card details and set filtering.
 
 The repository's root `images/` directory already contains a JPG for every card
 code currently present in `carddata/carddata.json`. Do not redownload those
@@ -116,13 +150,13 @@ triggers, choices, lingering effects, reset points and unusual hosting rules.
 
 At minimum, check the structural fields relevant to the card type:
 
-| Applies to | Required fields used by loading/deckbuilding |
-| --- | --- |
-| Every card | `title`, `imageFile`, `player`, `faction`, `cardType`, `subTypes`, finite numeric `elo` |
-| Identity | `deckSize`, `influenceLimit` |
-| Non-identity, non-agenda | finite numeric `influence` |
-| Agenda | `advancementRequirement`, finite numeric `agendaPoints` |
-| Installed card | appropriate install/rez and trash/memory/strength fields |
+| Applies to               | Required fields used by loading/deckbuilding                                            |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| Every card               | `title`, `imageFile`, `player`, `faction`, `cardType`, `subTypes`, finite numeric `elo` |
+| Identity                 | `deckSize`, `influenceLimit`                                                            |
+| Non-identity, non-agenda | finite numeric `influence`                                                              |
+| Agenda                   | `advancementRequirement`, finite numeric `agendaPoints`                                 |
+| Installed card           | appropriate install/rez and trash/memory/strength fields                                |
 
 The exact mechanics require more than these fields; this table only prevents
 the most common loading and deckbuilding omissions.

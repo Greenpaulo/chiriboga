@@ -4,8 +4,8 @@ This is the living inventory of known unfinished card definitions and AI data.
 It distinguishes confirmed code gaps from areas that have not received a full
 rules audit. Update it when a card is implemented or a new gap is found.
 
-Snapshot: current `main` after the format-aware random-deck work. Counts below
-cover the 444 card objects in registered set files, not every entry in the
+Snapshot: Vantage Point integration scaffold, 2026-09-18. Counts below cover
+the 510 card objects in registered set files, not every entry in the
 larger `carddata/carddata.json` database.
 
 ## 1. Missing card definitions
@@ -102,6 +102,12 @@ cards into generated decks.
 
 ### Other sets
 
+`sets/vantagepoint.js` contains structural definitions and exact, dated ELO
+values for all 66 cards, but its generated rules bodies are not implementations.
+There are 75 explicit TODO markers, and the identity abilities are also absent.
+The set is therefore registered as both hidden and untested and must not be
+treated as playable.
+
 No repository-wide rules-text comparison has yet been completed for the other
 registered definitions. A lack of `TODO` does not prove a card is complete.
 Their `untested` registry flags should be treated literally. Add confirmed
@@ -142,11 +148,12 @@ existing number against its dated source snapshot.
 | Parhelion | 4 | 0 | 4 |
 | The Automata Initiative | 3 | 0 | 3 |
 | Elevation | 76 | 1 | 75 |
+| Vantage Point | 66 | 66 | 0 |
 | Uprising | 6 | 0 | 6 |
 | Rebellion Without Rehearsal | 2 | 0 | 2 |
 | Core Set | 62 | 0 | 62 |
 | Creation and Control | 55 | 0 | 55 |
-| **Total** | **444** | **167** | **277** |
+| **Total** | **510** | **233** | **277** |
 
 Of the 277 omissions, 27 are identities and 250 are playable deck cards. The
 five Midnight Sun omissions are:
