@@ -81,11 +81,25 @@ responseOnPassesIce:     { Resolve, automatic: true }
 ### Encounter
 
 ```js
-responseOnEncounter:        { Resolve, automatic: true }   // runner hits this ice
+automaticOnEncounter:       { Resolve }                    // receives encountered ice
+responseOnEncounter:        { Enumerate?, Resolve, automatic? }
 responseOnEncounterEnds:    { Resolve, automatic: true }
 responseOnSubroutineBroken: { Resolve, automatic: true }   // a sub on this ice is broken
 automaticOnSubroutineResolved: { Resolve }                 // an unbroken sub resolves
 ```
+
+An automatic `responseOnEncounter` receives no parameters; use
+`automaticOnEncounter` when the effect needs the encountered ice argument.
+
+### Breach
+
+```js
+automaticOnArchivesCardsTurnedFaceUp: { Resolve } // receives the facedown cards turned faceup as one array
+```
+
+The Archives hook fires once while the server is breached, before access
+choices are enumerated. It does not fire when no facedown Archives cards were
+turned faceup.
 
 ### Install / Rez / Trash
 
@@ -110,10 +124,10 @@ onSteal: {
 
 ```js
 modifyStrength: Resolve(card); // card = target card being checked
-modifyInstallCost: Resolve(card),
-  availableWhenInactive ? modifyTrashCost : Resolve(card);
+modifyInstallCost: Resolve(card, destination); // destination is a server or host, null for a normal Runner install
+modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
-modifyMaxHandSize: Resolve();
+modifyMaxHandSize: Resolve(player);
 modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
 ```
 

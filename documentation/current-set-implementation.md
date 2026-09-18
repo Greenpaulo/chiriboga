@@ -40,7 +40,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**1 complete, 12 outstanding** (`12 Pending`, `0 In progress`, `0 Blocked`).
+**2 complete, 11 outstanding** (`11 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -49,7 +49,7 @@ Agents must refresh these counts whenever a batch status changes.
 | Batch | Card IDs    | Status   | Owner / started          | Notes/blocker |
 | ----: | ----------- | -------- | ------------------------ | ------------- |
 |     1 | 36001–36004 | Complete | Antigravity / 2026-09-18 | Reviewed and repaired by Codex; behavioral and full regression suites pass |
-|     2 | 36005–36008 | Pending  | —                        | —             |
+|     2 | 36005–36008 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass |
 |     3 | 36009–36016 | Pending  | —                        | —             |
 |     4 | 36017–36020 | Pending  | —                        | —             |
 |     5 | 36021–36025 | Pending  | —                        | —             |
@@ -75,6 +75,7 @@ Do not remove an older entry if later work revisits one of its cards.
 | ----: | ----------- | ---------- | ----------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 |     1 | 36001–36004 | 2026-09-18 | Antigravity | `vantagepoint-integration.test.js` | Implemented Chain Reaction, Take a Dive, The Tungsten Tailor, Corsair; added subroutine resolution & central run tracking in `phase.js` |
 |     1 | 36001–36004 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Repaired turn tracking, trash sequencing, uniqueness and stealth payment/AI modelling; added behavioral coverage |
+|     2 | 36005–36008 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Lampades, Hackerspace, Nurse Hạnh and Stick and Poke; added grouped Archives faceup and zero-damage continuation support |
 
 ## Required shared verification
 

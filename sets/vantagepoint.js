@@ -514,7 +514,132 @@ cardSet[36005] = {
   subTypes: [],
   installCost: 1,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  AIUsesStealthCredits: true,
+  _printedAccessCost: function (card) {
+    if (CheckCardType(card, ["operation"])) return card.playCost;
+    if (CheckCardType(card, ["asset", "upgrade", "ice"]))
+      return card.rezCost;
+    return undefined;
+  },
+  _stealthCreditCards: function () {
+    var lampades = this;
+    return InstalledCards(runner).filter(function (card) {
+      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
+        return false;
+      return (
+        typeof card.canUseCredits !== "function" ||
+        card.canUseCredits("using", lampades)
+      );
+    });
+  },
+  _availableStealthCredits: function () {
+    return this._stealthCreditCards().reduce(function (total, card) {
+      return total + card.credits;
+    }, 0);
+  },
+  _spendStealthCredits: function (amount, callback) {
+    var lampades = this;
+    if (amount < 1) {
+      callback.call(lampades);
+      return;
+    }
+    var choices = [];
+    var sources = this._stealthCreditCards();
+    for (var i = 0; i < sources.length; i++) {
+      var maximum = Math.min(amount, sources[i].credits);
+      for (var spend = 1; spend <= maximum; spend++) {
+        choices.push({
+          card: sources[i],
+          amount: spend,
+          label:
+            "Spend " +
+            spend +
+            " credit" +
+            (spend == 1 ? "" : "s") +
+            " from " +
+            GetTitle(sources[i]),
+        });
+      }
+    }
+    if (choices.length < 1) return;
+    if (runner.AI) {
+      choices = [choices[choices.length - 1]];
+    }
+    var spendFromChoice = function (params) {
+      params.card.credits -= params.amount;
+      UpdateCounters();
+      Log(
+        GetTitle(lampades) +
+          " spent " +
+          params.amount +
+          " credit" +
+          (params.amount == 1 ? "" : "s") +
+          " from " +
+          GetTitle(params.card),
+      );
+      lampades._spendStealthCredits(amount - params.amount, callback);
+    };
+    if (choices.length == 1) spendFromChoice(choices[0]);
+    else {
+      DecisionPhase(
+        runner,
+        choices,
+        spendFromChoice,
+        "Lampades",
+        "Pay " + amount + " more credit" + (amount == 1 ? "" : "s"),
+        lampades,
+      );
+    }
+  },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 3);
+    },
+  },
+  abilities: [
+    {
+      text: "Hosted power counter, printed rez or play cost (Stealth credits only): Trash the accessed card.",
+      Enumerate: function () {
+        if (!CheckAccessing()) return [];
+        if (!CheckTrash(accessingCard)) return [];
+        if (!CheckCounters(this, "power", 1)) return [];
+        var cost = this._printedAccessCost(accessingCard);
+        if (typeof cost !== "number") return [];
+        if (this._availableStealthCredits() < cost) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var cost = this._printedAccessCost(accessingCard);
+        RemoveCounters(this, "power", 1);
+        this._spendStealthCredits(cost, function () {
+          TrashAccessedCard(true);
+        });
+      },
+    },
+  ],
+  AIInstallBeforeRun: function () {
+    return 1;
+  },
+  AIOkToTrash: function () {
+    return !CheckCounters(this, "power", 1);
+  },
+  AIAccessTriggerPriority: function (optionList) {
+    var printedCost = this._printedAccessCost(accessingCard);
+    if (typeof printedCost !== "number") return 0;
+    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost)
+      return 3;
+    return 0;
+  },
+  AIReducesTrashCost: function (card) {
+    if (!CheckCounters(this, "power", 1)) return 0;
+    var printedCost = this._printedAccessCost(card);
+    if (
+      typeof printedCost !== "number" ||
+      this._availableStealthCredits() < printedCost
+    )
+      return 0;
+    return Math.max(0, TrashCost(card) - printedCost);
+  },
 };
 
 //Hackerspace (36006)
@@ -530,7 +655,44 @@ cardSet[36006] = {
   cardType: "resource",
   subTypes: ["Location"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  hostedCards: [],
+  _hostableCard: function (card) {
+    return (
+      card.player == runner &&
+      card.cardType == "resource" &&
+      card.unique === true &&
+      (CheckSubType(card, "Companion") || CheckSubType(card, "Connection"))
+    );
+  },
+  canHost: function (card) {
+    return this._hostableCard(card);
+  },
+  modifyInstallCost: {
+    Resolve: function (card, destination) {
+      if (destination == this && this._hostableCard(card)) return -1;
+      return 0;
+    },
+    automatic: true,
+  },
+  modifyMaxHandSize: {
+    Resolve: function (player) {
+      if (player != runner) return 0;
+      var hasCompanion = false;
+      var hasConnection = false;
+      for (var i = 0; i < this.hostedCards.length; i++) {
+        if (CheckSubType(this.hostedCards[i], "Companion")) hasCompanion = true;
+        if (CheckSubType(this.hostedCards[i], "Connection")) hasConnection = true;
+      }
+      return hasCompanion && hasConnection ? 2 : 0;
+    },
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
+  AIOkToTrash: function () {
+    return this.hostedCards.length < 1;
+  },
 };
 
 //Nurse Hạnh (36007)
@@ -545,7 +707,24 @@ cardSet[36007] = {
   cardType: "resource",
   subTypes: ["Connection"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  automaticOnArchivesCardsTurnedFaceUp: {
+    Resolve: function (cards) {
+      if (cards.length >= 2) Draw(runner, 2);
+    },
+  },
+  AIWorthKeeping: function () {
+    return corp.archives.cards.filter(function (card) {
+      return !card.faceUp;
+    }).length >= 2;
+  },
+  AIInstallBeforeRun: function (server) {
+    if (server != corp.archives) return 0;
+    return this.AIWorthKeeping() ? 2 : 0;
+  },
+  AIDrawInstall: function () {
+    return this.AIWorthKeeping() ? 2 : 0;
+  },
 };
 
 //Stick and Poke (36008)
@@ -560,7 +739,77 @@ cardSet[36008] = {
   cardType: "resource",
   subTypes: ["Companion", "Virtual"],
   installCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  usedThisTurn: false,
+  modifiedIce: null,
+  addedSubroutine: null,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (this.usedThisTurn) return;
+      this.usedThisTurn = true;
+      this.modifiedIce = ice;
+      this.addedSubroutine = {
+        text: "Do 1 net damage. The Runner draws 1 card.",
+        Resolve: function () {
+          Damage(
+            "net",
+            1,
+            true,
+            function () {
+              Draw(runner, 1);
+            },
+            this,
+          );
+        },
+      };
+      ice.subroutines.unshift(this.addedSubroutine);
+    },
+  },
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      if (this.modifiedIce && this.addedSubroutine) {
+        var index = this.modifiedIce.subroutines.indexOf(this.addedSubroutine);
+        if (index > -1) this.modifiedIce.subroutines.splice(index, 1);
+      }
+      this.modifiedIce = null;
+      this.addedSubroutine = null;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  AIModifyIceAI: function (iceAI, startIceIdx) {
+    if (this.usedThisTurn) return iceAI;
+    var server = GetServer(iceAI.ice);
+    if (!server) return iceAI;
+    for (var i = startIceIdx; i > -1; i--) {
+      if (server.ice[i] == iceAI.ice) {
+        // The run calculator has no draw token, so retain the immediately
+        // flatline-relevant net damage as the conservative route effect.
+        iceAI.sr.unshift([["netDamage"]]);
+        return iceAI;
+      }
+      if (server.ice[i].rezzed) return iceAI;
+    }
+    return iceAI;
+  },
+  AIInstallBeforeRun: function () {
+    return 2;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Virtual Intelligence, P.I.: “You Can Call Me Vic” (36009)

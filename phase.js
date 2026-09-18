@@ -1495,6 +1495,16 @@ phases.runBreachServer = {
   title: "Run: Breach", //was 'Access' (i.e. access cards in server) but Nisei changed it so it's not confused with each individual access
   identifier: "Run 5.2",
   Init: function() {
+	if (attackedServer == corp.archives) {
+	  var cardsTurnedFaceUp = attackedServer.cards.filter(function(card) {
+		return !card.faceUp;
+	  });
+	  for (var i=0; i<cardsTurnedFaceUp.length; i++) {
+		cardsTurnedFaceUp[i].faceUp = true;
+	  }
+	  if (cardsTurnedFaceUp.length > 0)
+		AutomaticTriggers("automaticOnArchivesCardsTurnedFaceUp", [cardsTurnedFaceUp]);
+	}
 	AutomaticTriggers("automaticOnBreach", [attackedServer]);
   // DRBO6 - enable Devadatta
   TriggeredResponsePhase(playerTurn, "responseOnBreach", [attackedServer], function () {}, "Breach");

@@ -15,13 +15,13 @@ const context = {
   console,
   cardSet: [],
   setIdentifiers: [],
-  runner: {side: 'runner', AI: null},
+  runner: {side: 'runner', AI: null, grip: [], clickTracker: 4},
   corp: {
     side: 'corp',
     AI: null,
     HQ: {serverName: 'HQ'},
     RnD: {serverName: 'R&D'},
-    archives: {serverName: 'Archives'},
+    archives: {serverName: 'Archives', cards: []},
   },
 };
 vm.createContext(context);
@@ -91,6 +91,7 @@ let installed = {runner: [], corp: []};
 let decisions = [];
 let trashCalls = [];
 let creditsGained = 0;
+let cardsDrawn = 0;
 
 context.InstalledCards = (player) => installed[player.side];
 context.ChoicesArrayCards = (cards, check) =>
@@ -129,11 +130,28 @@ context.UpdateCounters = () => {};
 context.Strength = (card) => card.currentStrength;
 context.CheckEncounter = () => true;
 context.CheckCredits = () => true;
+context.CheckCounters = (card, type, amount) => (card[type] || 0) >= amount;
+context.AddCounters = (card, type, amount) => {
+  card[type] = (card[type] || 0) + amount;
+};
+context.RemoveCounters = (card, type, amount) => {
+  card[type] = (card[type] || 0) - amount;
+};
+context.CheckAccessing = () => !!context.accessingCard;
+context.TrashCost = (card) => card.trashCost;
+context.TrashAccessedCard = (canBePrevented) => {
+  trashCalls.push({cards: [context.accessingCard], canBePrevented});
+};
+context.Draw = (player, amount) => {
+  cardsDrawn += amount;
+};
+context.InstallCost = (card) => card.installCost;
 context.CheckStrength = () => true;
 context.ChoicesEncounteredSubroutines = () => [{subroutine: {text: 'End the run'}}];
 context.SpendCredits = (player, amount, doing, card, callback, callbackContext) =>
   callback.call(callbackContext);
 context.Break = () => {};
+context.GetServer = (card) => card.server || null;
 
 const chainReaction = context.cardSet[36001];
 chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.HQ);
@@ -320,4 +338,169 @@ assert(
   '36002 engine hook records a resolved subroutine',
 );
 
-console.log('Vantage Point integration and Batch 1 behavior checks passed.');
+const lampades = context.cardSet[36005];
+const ghostRunner = {
+  title: 'Ghost Runner',
+  player: context.runner,
+  cardType: 'resource',
+  subTypes: ['Stealth'],
+  credits: 2,
+};
+installed = {corp: [], runner: [lampades, ghostRunner]};
+lampades.power = 0;
+lampades.automaticOnInstall.Resolve.call(lampades, lampades);
+assert.strictEqual(lampades.power, 3, '36005 enters with 3 power counters');
+context.accessingCard = {
+  title: 'Expensive asset',
+  player: context.corp,
+  cardType: 'asset',
+  subTypes: [],
+  rezCost: 2,
+  trashCost: 5,
+};
+assert.strictEqual(lampades.abilities[0].Enumerate.call(lampades).length, 1);
+decisions = [];
+trashCalls = [];
+lampades.abilities[0].Resolve.call(lampades);
+assert.strictEqual(decisions.length, 1, '36005 prompts for a Stealth credit source');
+decisions[0].choose(
+  decisions[0].choices.find((choice) => choice.amount === 2),
+);
+assert.strictEqual(ghostRunner.credits, 0);
+assert.strictEqual(lampades.power, 2);
+assert.strictEqual(trashCalls[0].cards[0], context.accessingCard);
+assert.strictEqual(trashCalls[0].canBePrevented, true);
+context.accessingCard = {
+  title: 'Agenda',
+  player: context.corp,
+  cardType: 'agenda',
+  subTypes: [],
+};
+assert.strictEqual(
+  lampades.abilities[0].Enumerate.call(lampades).length,
+  0,
+  '36005 cannot pay a nonexistent printed rez or play cost',
+);
+
+const hackerspace = context.cardSet[36006];
+const companion = {
+  title: 'Unique companion',
+  player: context.runner,
+  cardType: 'resource',
+  subTypes: ['Companion'],
+  unique: true,
+  installCost: 3,
+};
+const ordinaryResource = {
+  title: 'Ordinary resource',
+  player: context.runner,
+  cardType: 'resource',
+  subTypes: ['Companion'],
+  unique: false,
+  installCost: 1,
+};
+context.runner.grip = [companion, ordinaryResource];
+assert.strictEqual(hackerspace.canHost.call(hackerspace, companion), true);
+assert.strictEqual(
+  hackerspace.canHost.call(hackerspace, ordinaryResource),
+  false,
+  '36006 only hosts unique matching resources',
+);
+assert.strictEqual(
+  hackerspace.modifyInstallCost.Resolve.call(
+    hackerspace,
+    companion,
+    hackerspace,
+  ),
+  -1,
+);
+assert.strictEqual(
+  hackerspace.modifyInstallCost.Resolve.call(hackerspace, companion, null),
+  0,
+  '36006 does not discount an ordinary install',
+);
+const hostedConnection = {subTypes: ['Connection']};
+hackerspace.hostedCards = [companion];
+assert.strictEqual(
+  hackerspace.modifyMaxHandSize.Resolve.call(hackerspace, context.runner),
+  0,
+);
+hackerspace.hostedCards.push(hostedConnection);
+assert.strictEqual(
+  hackerspace.modifyMaxHandSize.Resolve.call(hackerspace, context.runner),
+  2,
+  '36006 grants hand size only with both hosted subtypes',
+);
+
+const nurseHanh = context.cardSet[36007];
+cardsDrawn = 0;
+nurseHanh.automaticOnArchivesCardsTurnedFaceUp.Resolve.call(nurseHanh, [
+  {title: 'One'},
+]);
+assert.strictEqual(cardsDrawn, 0);
+nurseHanh.automaticOnArchivesCardsTurnedFaceUp.Resolve.call(nurseHanh, [
+  {title: 'One'},
+  {title: 'Two'},
+]);
+assert.strictEqual(cardsDrawn, 2, '36007 draws for one group of 2 or more cards');
+context.corp.archives.cards = [{faceUp: false}, {faceUp: false}];
+assert.strictEqual(nurseHanh.AIInstallBeforeRun.call(nurseHanh, context.corp.archives), 2);
+assert.strictEqual(nurseHanh.AIInstallBeforeRun.call(nurseHanh, context.corp.HQ), 0);
+assert(
+  phaseSource.includes('automaticOnArchivesCardsTurnedFaceUp'),
+  '36007 breach hook is wired into the run engine',
+);
+const utilitySource = fs.readFileSync(path.join(root, 'utility.js'), 'utf8');
+assert(
+  !utilitySource.includes('attackedServer.cards[cardIndex].faceUp = true'),
+  'Archives cards are turned faceup once at breach, not while enumerating access choices',
+);
+assert(
+  utilitySource.includes(
+    'GetCardProperty(installingCard, "installCost", [destination])',
+  ),
+  '36006 install-cost modifiers receive the selected host destination',
+);
+
+const stickAndPoke = context.cardSet[36008];
+const originalSubroutine = {text: 'End the run.'};
+const firstIce = {title: 'First ice', subTypes: [], subroutines: [originalSubroutine]};
+const secondIce = {title: 'Second ice', subTypes: [], subroutines: []};
+let damageCalls = 0;
+context.Damage = (type, amount, preventable, callback, callbackContext) => {
+  damageCalls++;
+  assert.strictEqual(type, 'net');
+  assert.strictEqual(amount, 1);
+  assert.strictEqual(preventable, true);
+  callback.call(callbackContext, []);
+};
+cardsDrawn = 0;
+stickAndPoke.usedThisTurn = false;
+stickAndPoke.automaticOnEncounter.Resolve.call(stickAndPoke, firstIce);
+assert.strictEqual(firstIce.subroutines[0], stickAndPoke.addedSubroutine);
+firstIce.subroutines[0].Resolve.call(firstIce);
+assert.strictEqual(damageCalls, 1);
+assert.strictEqual(cardsDrawn, 1);
+stickAndPoke.automaticOnEncounter.Resolve.call(stickAndPoke, secondIce);
+assert.strictEqual(secondIce.subroutines.length, 0, '36008 is limited to once per turn');
+stickAndPoke.responseOnEncounterEnds.Resolve.call(stickAndPoke);
+assert.deepStrictEqual(firstIce.subroutines, [originalSubroutine]);
+stickAndPoke.responseOnCorpTurnBegins.Resolve.call(stickAndPoke);
+stickAndPoke.automaticOnEncounter.Resolve.call(stickAndPoke, secondIce);
+assert.strictEqual(secondIce.subroutines.length, 1, '36008 resets on the next turn');
+const routeServer = {ice: [firstIce, secondIce]};
+firstIce.server = routeServer;
+secondIce.server = routeServer;
+stickAndPoke.usedThisTurn = false;
+const firstIceAI = {ice: firstIce, sr: [[['endTheRun']]]};
+stickAndPoke.AIModifyIceAI.call(stickAndPoke, firstIceAI, 1);
+assert.strictEqual(JSON.stringify(firstIceAI.sr[0]), '[["netDamage"]]');
+const mechanicsSource = fs.readFileSync(path.join(root, 'mechanics.js'), 'utf8');
+assert(
+  /cards\.length < 1[\s\S]*afterTrashing\.call\(context, cards\)/.test(
+    mechanicsSource,
+  ),
+  'zero prevented damage still continues its resolution callback',
+);
+
+console.log('Vantage Point integration and Batch 1-2 behavior checks passed.');

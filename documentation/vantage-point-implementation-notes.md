@@ -72,3 +72,38 @@ bounded Corsair AI strength reduction in addition to set metadata checks.
 
 Run the full command list in `documentation/current-set-implementation.md`
 before changing a batch status.
+
+## Batch 2 engine support
+
+Archives cards are now turned faceup together when Archives is breached.
+`automaticOnArchivesCardsTurnedFaceUp` receives that group once, which lets
+Nurse Hạnh distinguish one card from two or more without access-choice
+enumeration mutating game state.
+
+`Trash([], ..., callback, context)` now invokes its continuation callback.
+This preserves ordered instructions after fully prevented damage: Stick and
+Poke's added subroutine still draws 1 card when its 1 net damage is prevented.
+
+## Batch 2 confirmed patterns
+
+Lampades pays the accessed card's printed rez or play cost from currently
+hosted credits on eligible Stealth cards. Multi-credit payments can be split
+across sources, and agendas are not eligible because they have neither printed
+rez nor play cost.
+
+Hackerspace exposes matching cards as normal hosted install destinations. The
+install-cost pipeline receives that destination, so its one-credit modifier
+applies to installs onto Hackerspace—including card-effect installs—without
+discounting ordinary resource installs. Its hand-size modifier independently
+checks the hosted Companion and Connection subtypes.
+
+Stick and Poke inserts its temporary subroutine at index 0 and removes that
+exact object at encounter end, including if the resource becomes inactive
+during the encounter. Corp route planning models the immediately relevant net
+damage; the Run Calculator has no draw effect token, so its accompanying draw
+is deliberately not represented as damage prevention.
+
+`tests/vantagepoint-integration.test.js` covers Batch 2 payments and negative
+access cases, hosted-install eligibility and discount scope, hand-size state,
+grouped Archives draws and AI timing, and temporary-subroutine ordering,
+turn reset, cleanup and route modelling.

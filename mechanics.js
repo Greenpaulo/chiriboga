@@ -474,6 +474,8 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
   }
   if (cards.length < 1) {
 	  Log("No cards trashed");
+	  if (typeof afterTrashing === "function")
+		afterTrashing.call(context, cards);
 	  return;
   }
   if (canBePrevented) {

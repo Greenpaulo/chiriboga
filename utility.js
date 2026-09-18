@@ -2610,8 +2610,6 @@ function AccessCardList() {
         var cardIndex = attackedServer.cards.length - i - 1;
         if (!accessedCards.cards.includes(attackedServer.cards[cardIndex])) {
           ret.push(attackedServer.cards[cardIndex]); //card move triggers not required, this is just a reference list (copy) not move
-          if (attackedServer == corp.archives)
-            attackedServer.cards[cardIndex].faceUp = true;
         } else {
           //invalid candidate, try next card
           if (num < attackedServer.cards.length) num++;
@@ -3238,7 +3236,7 @@ function InstallCost(
       var cardlist = InstallDestination(installingCard, destination);
       return cardlist.length;
     }
-  } else return GetCardProperty(installingCard, "installCost");
+  } else return GetCardProperty(installingCard, "installCost", [destination]);
 }
 
 /**
@@ -3543,6 +3541,7 @@ function ModifyingTriggers(
   parameter = null,
   lowerLimit,
   upperLimit,
+  additionalParameters = [],
 ) {
   var ret = 0; //default is no modification
   //special cases
@@ -3555,9 +3554,9 @@ function ModifyingTriggers(
   //any relevant triggers (assume automatic for now, if you want player choice use TriggeredResponsePhase)
   var triggerList = ChoicesActiveTriggers(callbackName);
   for (var i = 0; i < triggerList.length; i++) {
-    var mod = triggerList[i].card[callbackName].Resolve.call(
+    var mod = triggerList[i].card[callbackName].Resolve.apply(
       triggerList[i].card,
-      parameter,
+      [parameter].concat(additionalParameters),
     );
     if (mod > 0 || canBeLowered) ret += mod;
   }
@@ -3726,17 +3725,40 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
       }
     } else if (card.player == runner) {
       if (CheckCardType(card, ["program", "resource", "hardware"])) {
+        var affordableHostExists = ChoicesInstalledCards(null, function (host) {
+          var canHost = false;
+          if (typeof card.installOnlyOn === "function")
+            canHost = card.installOnlyOn(host);
+          else if (typeof host.canHost === "function") canHost = host.canHost(card);
+          return (
+            canHost &&
+            CheckCredits(
+              runner,
+              InstallCost(card, host),
+              "installing",
+              card,
+            )
+          );
+        }).length > 0;
         if (
           ignoreCreditCost ||
-          CheckCredits(runner, InstallCost(card), "installing", card)
+          CheckCredits(runner, InstallCost(card), "installing", card) ||
+          affordableHostExists
         ) {
           if (typeof card.installOnlyOn === "function") {
             //this card may only be installed hosted on cards as defined
             var validHosts = ChoicesInstalledCards(null, card.installOnlyOn); //null means both players
             for (var j = 0; j < validHosts.length; j++) {
               if (
-                typeof card.memoryCost === "undefined" ||
-                card.memoryCost <= MemoryUnits(validHosts[j].card)
+                (ignoreCreditCost ||
+                  CheckCredits(
+                    runner,
+                    InstallCost(card, validHosts[j].card),
+                    "installing",
+                    card,
+                  )) &&
+                (typeof card.memoryCost === "undefined" ||
+                  card.memoryCost <= MemoryUnits(validHosts[j].card))
               ) {
                 //make sure you could even install this if you trashed everything
                 validHosts[j].host = validHosts[j].card;
@@ -3755,8 +3777,15 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
             });
             for (var j = 0; j < validHosts.length; j++) {
               if (
-                typeof card.memoryCost === "undefined" ||
-                card.memoryCost <= MemoryUnits(validHosts[j].card)
+                (ignoreCreditCost ||
+                  CheckCredits(
+                    runner,
+                    InstallCost(card, validHosts[j].card),
+                    "installing",
+                    card,
+                  )) &&
+                (typeof card.memoryCost === "undefined" ||
+                  card.memoryCost <= MemoryUnits(validHosts[j].card))
               ) {
                 //make sure you could even install this if you trashed everything
                 validHosts[j].host = validHosts[j].card;
@@ -3769,8 +3798,10 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
 
             //install in the usual places
             if (
-              typeof card.memoryCost === "undefined" ||
-              card.memoryCost <= MemoryUnits()
+              (ignoreCreditCost ||
+                CheckCredits(runner, InstallCost(card), "installing", card)) &&
+              (typeof card.memoryCost === "undefined" ||
+                card.memoryCost <= MemoryUnits())
             ) {
               //make sure you could even install this if you trashed everything
               ret.push({
@@ -4145,13 +4176,19 @@ function GetGlobalProperty(propertyName) {
  * @param {String} propertyName name of int property to get value for
  * @returns {int} card property value
  */
-function GetCardProperty(card, propertyName) {
+function GetCardProperty(card, propertyName, additionalParameters = []) {
   var ret = 0;
   if (typeof card[propertyName] !== "undefined") ret = card[propertyName];
   //any relevant triggers that would modify the result (assume automatic for now, if you want player choice see phaseTemplates.globalTriggers for an example)
   var triggerCallbackName =
     "modify" + propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
-  ret += ModifyingTriggers(triggerCallbackName, card, -ret); //null means no parameter is sent, lower limit of -ret means the total will not be any lower than zero
+  ret += ModifyingTriggers(
+    triggerCallbackName,
+    card,
+    -ret,
+    undefined,
+    additionalParameters,
+  ); //lower limit of -ret means the total will not be any lower than zero
   return ret;
 }
 
