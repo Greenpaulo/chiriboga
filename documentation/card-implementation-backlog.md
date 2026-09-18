@@ -108,6 +108,11 @@ There are 75 explicit TODO markers, and the identity abilities are also absent.
 The set is therefore registered as both hidden and untested and must not be
 treated as playable.
 
+Vantage Point is the active batched implementation. Its live queue, ownership,
+status summary and append-only completion log are maintained in
+`documentation/current-set-implementation.md`. The generic agent runbooks must
+update that tracker after every status transition and completed batch.
+
 No repository-wide rules-text comparison has yet been completed for the other
 registered definitions. A lack of `TODO` does not prove a card is complete.
 Their `untested` registry flags should be treated literally. Add confirmed

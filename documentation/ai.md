@@ -1356,7 +1356,19 @@ AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, ice
 
 **`AIWorthwhileIce(server, purpose)`**
 
-Return `true` if this ice is worth installing in `server` for the given `purpose`. Purpose is a string like `"protect"` or `"scoring"`. Generally you do not need to implement this unless the ice has special restrictions.
+Return `true` if this ice is worth using in `server` for the given `purpose`.
+The implemented purpose values are `"install"` and `"rez"`. Generally you do
+not need this hook unless the ice is situational; omitting it means the ice is
+treated as worthwhile.
+
+**`AIWorthInstalling(emptyProtectedRemotes)`**
+
+Corp assets can use this legacy placement hook to decide whether and where to
+install. Return `-1` to decline, an index from `0` through
+`emptyProtectedRemotes.length - 1` to choose an existing remote, or
+`emptyProtectedRemotes.length` to request a new remote. The supplied remotes
+are already ordered by protection. The hook should check its own affordability
+and payoff conditions; it must not inspect hidden Runner information.
 
 ---
 
@@ -1830,6 +1842,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIImplementIce(rc, result, maxCred, incomplete)` | function | Describe what subroutines do in the run calculator |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
+| `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
 | `AIDefensiveValue(server)` | function | Numeric protection value of this upgrade |
 | `AIIsScoringUpgrade` | bool | True if this is a fast-advance scoring upgrade |
 | `AILimitPerServer(server)` | function | Max copies of this card per server |

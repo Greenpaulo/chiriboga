@@ -6,10 +6,18 @@ of `config.js` are a registry reference; this document is the complete workflow.
 
 Use these companion references while implementing cards:
 
-- `documentation/engine_patterns.md` — established patterns for card mechanics.
-- `documentation/ai.md` — AI hook contracts and examples.
+- `documentation/engine_patterns.md` — the compact, first-read reference for
+  established mechanics and the current AI-hook index.
+- `documentation/ai.md` — detailed AI contracts and examples; read the sections
+  relevant to the current cards rather than reloading the whole tutorial for
+  every small batch.
 - `documentation/card-implementation-backlog.md` — known unfinished cards and
   the current ELO audit.
+
+The Corp AI roadmap and work-summary documents explain architecture and history,
+but they are not card-authoring API references. In particular, hooks proposed by
+`corp_ai_install_decision_roadmap.md` must not be used until its phase is marked
+implemented and the hook also appears in `engine_patterns.md` and `ai.md`.
 
 ## 1. Decide the scope before adding the set
 
@@ -148,6 +156,60 @@ leave an empty `Resolve`, empty subroutine array or comment-only placeholder in
 a set that is marked complete. Implement all costs, restrictions, prevention,
 triggers, choices, lingering effects, reset points and unusual hosting rules.
 
+### Work in reviewable batches
+
+For a large set, implement related cards in separate sessions. Prefer 6–8
+ordinary cards or 4–6 cards with identities, multi-step choices, run redirects,
+hosting, prevention or unusual access rules. Ten cards is reasonable only when
+most are mechanically simple. Keep faction/mechanic boundaries together where
+possible, but split a complex faction rather than overflowing the session.
+
+At the start of each batch:
+
+1. Read this guide's mechanics, AI and verification sections.
+2. Read `engine_patterns.md` as the compact source of established patterns.
+3. Read only the relevant detailed sections of `ai.md` identified by its table
+   of contents and the hook index in `engine_patterns.md`.
+4. Inspect the current definitions for the batch and only the closest existing
+   card examples or engine call sites needed for unusual behavior.
+5. Implement human mechanics and AI behavior together, add focused tests, run
+   the shared integration tests, and update the backlog before ending the batch.
+
+This keeps each session independently verifiable without repeatedly spending
+context on the full 2,000-line AI tutorial or broad source-code searches.
+
+A concise prompt for a new session is enough because the repository carries the
+handoff state:
+
+```text
+Implement <set> cards <first ID>-<last ID> completely in <set file>.
+Follow documentation/new-set-integration-guide.md. Read engine_patterns.md,
+then only the relevant ai.md sections. Implement human mechanics and AI hooks,
+add focused tests, run the shared integration tests, and update the backlog.
+Do not modify later card stubs or mark the set complete.
+```
+
+Include any known ruling or accepted limitation in that prompt. Do not paste
+the documentation or previous chat transcript; ask the session to inspect the
+current worktree and tests instead.
+
+For batched set implementation, the repository provides two set-agnostic,
+executable one-batch runbooks and one current-set tracker:
+
+- `documentation/card-set-agent-operator-guide.md` — user instructions, exact
+  prompts, review/recovery steps and the procedure for switching sets;
+- `documentation/card-set-codex-batch-runbook.md` for Codex;
+- `documentation/card-set-external-agent-batch-runbook.md` for Claude Code,
+  Cline and other repository-aware coding agents;
+- `documentation/current-set-implementation.md` for the active set metadata,
+  batch queue, ownership, verification commands and completion log.
+
+The user can simply ask the chosen agent to read and follow its runbook. Each
+runbook reads the tracker to discover the active set, selects the next unfinished
+batch, performs the work, updates status/ownership and appends test evidence.
+Switching sets changes only the tracker, so batch IDs and prior chat history do
+not need to be pasted and the runbooks do not drift between sets.
+
 At minimum, check the structural fields relevant to the card type:
 
 | Applies to               | Required fields used by loading/deckbuilding                                            |
@@ -163,9 +225,12 @@ the most common loading and deckbuilding omissions.
 
 ## 6. Implement AI support while implementing the card
 
-Read `documentation/ai.md`, then add the hooks that describe how the AI should
-value and use the card. Do this in the same change as the mechanics rather than
-treating AI as a later polish pass.
+Use the hook checklist in `documentation/engine_patterns.md`, then read the
+relevant detailed sections of `documentation/ai.md` and add the hooks that
+describe how the AI should value and use the card. Read the full AI tutorial
+for the first batch or when changing AI architecture; it need not be reread in
+full for every later batch. Implement AI in the same change as the mechanics
+rather than treating it as a later polish pass.
 
 Common checks include:
 

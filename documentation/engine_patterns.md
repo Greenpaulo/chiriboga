@@ -1,7 +1,15 @@
 # Chiriboga Engine — Pattern Reference
 
-> Read this file at the START of every card-implementation session.
-> Do NOT read systemgateway.js / elevation.js / mechanics.js for pattern lookups — use this instead.
+> Read this file at the start of every card-implementation session. It is the
+> compact pattern index; follow its links into `ai.md` only for hooks relevant
+> to the current cards. For unusual mechanics, confirm the pattern against a
+> current implemented card and the engine call site rather than assuming this
+> reference replaces the source code.
+>
+> AI hook audit: 2026-09-18. The implemented hooks from the Corp server-security
+> work are summarized below. Proposals in
+> `corp_ai_install_decision_roadmap.md` are not available card APIs until that
+> document explicitly marks their phase implemented.
 
 ---
 
@@ -307,9 +315,42 @@ AIWorthwhileIce: function(server, purpose) {
 
 **`AILimitPerServer: function(server) { return 1; }`** — for upgrades/ice that should be capped per server; return the max count.
 
+### Public Runner capabilities used by Corp security planning
+
+These hooks are called outside an active run, so they must be read-only, use
+only public state and rely on their arguments rather than `attackedServer` or
+`approachIce`. See `ai.md` §§4.16–4.21 for full contracts and examples.
+
+| Hook | Use |
+| --- | --- |
+| `AIReducesIceStrength(iceCard)` | Current amount by which an active Runner card reduces that ice's strength. |
+| `AIHostedBreakContribution(iceCard)` | Number of subroutines a hosted breaker can currently break for free. |
+| `AIEffectiveIceSubtypes(iceCard, server, iceIndex)` | Add/remove effective subtypes for security evaluation. |
+| `AIModifyIceAI(iceAI, startIceIdx)` | Apply route-aware changes to the Run Calculator's ice model. |
+| `AIBypassesIce(iceCard, server, iceIndex)` | `false`, `true`, or the credit cost of a targeted bypass. |
+| `AIBypassesOutermostIce(server)` | Whether the next outermost ice can be skipped. |
+| `AIBypassesOneIce(iceCard, server, iceIndex)` | Whether a once-per-run bypass can target this ice. |
+| `AIRedirectsRun(fromServer, toServer)` | Whether one server's route can redirect to another. |
+| `AIHiddenThreat` | Bounded profile for a hidden event that threatens a single-ice server. |
+| `AIRunPoolCreditOffset(server, runEvent)` | Route-specific credits not expressible through `canUseCredits`. |
+| `AICentralPressure(server)` | Public additional access, persistent pressure and growth on HQ/R&D. |
+| `AICentralPressureAfterPurge(server)` | The same pressure profile immediately after a purge. |
+
+Do not duplicate standard mechanics unnecessarily: the evaluator already reads
+normal `modifySubTypes`, `canUseCredits`, `AIImplementBreaker`,
+`AIMatchingBreakerInstalled` and `AIImplementIce` hooks.
+
 ---
 
 ### "Should the AI use this at all" hooks
+
+**`AIWorthInstalling: function(emptyProtectedRemotes) { return index; }`**
+(Corp assets) — return `-1` to decline installation, an index into the supplied
+protection-ranked remote list to use that server, or
+`emptyProtectedRemotes.length` to request a new remote. This is a current,
+legacy placement hook—not the unified candidate scorer proposed in
+`corp_ai_install_decision_roadmap.md`. Check affordability and whether the
+effect has a plausible payoff inside the hook.
 
 **`AIWorthKeeping: function(installedRunnerCards, spareMU) { return true/false; }`** (runner side — events, resources, hardware, programs) — should the runner treat this as something to hold onto and use? Cards judged "worth keeping" get proactively played/installed by the generic AI loop; cards without it are just along for the ride.
 
@@ -503,6 +544,17 @@ AITagPunishment: 1, //can be used to punish if at least 1 tag
 **`AIAvoidInstallingOverThis: true`** (boolean, on an installed asset) — corp AI will avoid replacing it when picking what to trash-and-replace in a server.
 
 **`AIDefensiveValue: function(server) { return n; }`** (upgrades) — return `< 1` to tell the corp this upgrade isn't worth it in `server` right now.
+
+**`AIPunishesAccess: function(server) { return n; }`** (assets/upgrades) —
+return a non-negative severity for the consequence of accessing this installed
+card, or `0` when it cannot currently fire. This informs bait planning; it does
+not make the server deterministically secure. The hook must be read-only and
+safe while the card is unrezzed. See `ai.md` §5.9.
+
+**`AIEmergencyDraw: n`** (Corp assets/upgrades) — positive number of cards
+drawn immediately and reliably after install-and-rez. The critical-protection
+planner may use it when HQ contains no ice. Do not use it for delayed,
+conditional or click-ability draw. See `ai.md` §5.10.
 
 ## Common Patterns (copy-paste ready)
 
