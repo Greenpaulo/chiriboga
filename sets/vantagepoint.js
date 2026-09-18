@@ -1,8 +1,6 @@
 // CARD DEFINITIONS FOR VANTAGE POINT
 // Trash or Busto ELO values retrieved 2026-09-18.
-setIdentifiers.push('vp');
-
-
+setIdentifiers.push("vp");
 
 //Chain Reaction (36001)
 // Play only if you made a successful run on HQ, R&D, and Archives this turn.
@@ -17,8 +15,149 @@ cardSet[36001] = {
   cardType: "event",
   subTypes: [],
   playCost: 1,
+  madeSuccessfulRunOnHQThisTurn: false,
+  madeSuccessfulRunOnRnDThisTurn: false,
+  madeSuccessfulRunOnArchivesThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this._resetSuccessfulCentralRuns();
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this._resetSuccessfulCentralRuns();
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunSuccessful: {
+    Resolve: function (server) {
+      if (server == corp.HQ) this.madeSuccessfulRunOnHQThisTurn = true;
+      else if (server == corp.RnD) this.madeSuccessfulRunOnRnDThisTurn = true;
+      else if (server == corp.archives)
+        this.madeSuccessfulRunOnArchivesThisTurn = true;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _resetSuccessfulCentralRuns: function () {
+    this.madeSuccessfulRunOnHQThisTurn = false;
+    this.madeSuccessfulRunOnRnDThisTurn = false;
+    this.madeSuccessfulRunOnArchivesThisTurn = false;
+  },
+  Enumerate: function () {
+    if (
+      !this.madeSuccessfulRunOnHQThisTurn ||
+      !this.madeSuccessfulRunOnRnDThisTurn ||
+      !this.madeSuccessfulRunOnArchivesThisTurn
+    )
+      return [];
+    return [{}];
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    var choices = ChoicesInstalledCards(corp, CheckTrash);
+    var requiredCount = Math.min(2, choices.length);
+    if (requiredCount < 1) {
+      this._corpTrashRunnerCard();
+      return;
+    }
+
+    if (runner.AI != null) {
+      choices.sort(function (a, b) {
+        var aScore = a.card.rezzed ? 100 + (a.card.trashCost || 0) : 0;
+        var bScore = b.card.rezzed ? 100 + (b.card.trashCost || 0) : 0;
+        return bScore - aScore;
+      });
+      this._trashCorpCards(
+        choices.slice(0, requiredCount).map(function (choice) {
+          return choice.card;
+        }),
+      );
+      return;
+    }
+
+    choices.push({
+      id: choices.length,
+      label: "Trash selected cards",
+      button: "Trash 0/" + requiredCount + " cards",
+      multiSelectDynamicButtonText: function (numSelected) {
+        return "Trash " + numSelected + "/" + requiredCount + " cards";
+      },
+      multiSelectDynamicButtonEnabler: function (numSelected) {
+        return numSelected === requiredCount;
+      },
+    });
+    for (var i = 0; i < choices.length; i++) {
+      choices[i].cards = Array(requiredCount).fill(null);
+    }
+    DecisionPhase(
+      runner,
+      choices,
+      function (selection) {
+        this._trashCorpCards(
+          selection.cards.filter(function (card) {
+            return card != null;
+          }),
+        );
+      },
+      "Chain Reaction",
+      "Choose " + requiredCount + " installed Corp cards to trash",
+      this,
+    );
+  },
+  _trashCorpCards: function (cards) {
+    Trash(
+      cards,
+      true,
+      function () {
+        this._corpTrashRunnerCard();
+      },
+      this,
+    );
+  },
+  _corpTrashRunnerCard: function () {
+    var runnerCards = ChoicesInstalledCards(runner, CheckTrash);
+    if (runnerCards.length > 0) {
+      if (corp.AI != null) {
+        var preferred = runnerCards[0];
+        for (var i = 0; i < runnerCards.length; i++) {
+          if (
+            (runnerCards[i].card.installCost || 0) >
+            (preferred.card.installCost || 0)
+          ) {
+            preferred = runnerCards[i];
+          }
+        }
+        corp.AI.preferred = {
+          title: "Chain Reaction",
+          option: preferred,
+        };
+      }
+      DecisionPhase(
+        corp,
+        runnerCards,
+        function (params) {
+          if (params && params.card) Trash(params.card, true);
+        },
+        "Chain Reaction",
+        "Choose 1 installed Runner card to trash",
+        this,
+      );
+    }
+  },
+  AIWouldPlay: function () {
+    if (
+      !this.madeSuccessfulRunOnHQThisTurn ||
+      !this.madeSuccessfulRunOnRnDThisTurn ||
+      !this.madeSuccessfulRunOnArchivesThisTurn
+    )
+      return false;
+    return ChoicesInstalledCards(corp, CheckTrash).length >= 1;
+  },
+  AIWorthKeeping: function () {
+    return true;
   },
 };
 
@@ -35,8 +174,67 @@ cardSet[36002] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 2,
+  runningWithThis: false,
+  subroutineResolvedThisRun: false,
+  Enumerate: function () {
+    var choices = [];
+    choices.push({ id: 0, server: corp.HQ, label: "Run HQ", button: "Run HQ" });
+    choices.push({
+      id: 1,
+      server: corp.RnD,
+      label: "Run R&D",
+      button: "Run R&D",
+    });
+    return choices;
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.runningWithThis = true;
+    this.subroutineResolvedThisRun = false;
+    var targetServer =
+      params && params.server
+        ? params.server
+        : params && params.id === 1
+          ? corp.RnD
+          : corp.HQ;
+    if (targetServer) {
+      MakeRun(targetServer);
+    }
+  },
+  automaticOnSubroutineResolved: {
+    Resolve: function (ice, resolvedSubroutine) {
+      if (this.runningWithThis) this.subroutineResolvedThisRun = true;
+    },
+  },
+  responseOnRunSuccessful: {
+    Resolve: function (server) {
+      if (this.runningWithThis) {
+        if (this.subroutineResolvedThisRun) {
+          Log(
+            GetTitle(this) +
+              ": a subroutine resolved during this run; giving Corp 1 bad publicity.",
+          );
+          AddBadPublicity(1);
+        }
+      }
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      if (this.runningWithThis) {
+        this.runningWithThis = false;
+        RemoveFromGame(this);
+      }
+    },
+    automatic: true,
+  },
+  AIBreachNotRequired: true,
+  AIRunEventExtraPotential: function (server, potential) {
+    if (server == corp.HQ || server == corp.RnD) return 0.3;
+    return 0;
+  },
+  AIWorthKeeping: function () {
+    return true;
   },
 };
 
@@ -53,7 +251,53 @@ cardSet[36003] = {
   cardType: "hardware",
   subTypes: [],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  usedThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card.player == corp && CheckCardType(card, ["ice"])) {
+        return -1;
+      }
+      return 0;
+    },
+  },
+  AIReducesIceStrength: function (iceCard) {
+    return 1;
+  },
+  responseOnSubroutineBroken: {
+    Resolve: function (subroutine) {
+      if (this.usedThisTurn) return;
+      if (!CheckEncounter()) return;
+      var currentIce = attackedServer.ice[approachIce];
+      if (currentIce && Strength(currentIce) <= 0) {
+        this.usedThisTurn = true;
+        Log(
+          GetTitle(this) +
+            " triggers: gained 1[c] for breaking subroutine on ice with strength <= 0.",
+        );
+        GainCredits(runner, 1, "", this);
+      }
+    },
+    automatic: true,
+  },
+  AIEconomyInstall: function () {
+    return 2;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Corsair (36004)
@@ -72,15 +316,188 @@ cardSet[36004] = {
   memoryCost: 1,
   strength: 0,
   strengthBoost: 0,
+  barrierDebuff: 0,
+  AIUsesStealthCredits: true,
+  _stealthCreditCards: function () {
+    var corsair = this;
+    return InstalledCards(runner).filter(function (card) {
+      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
+        return false;
+      return (
+        typeof card.canUseCredits !== "function" ||
+        card.canUseCredits("using", corsair)
+      );
+    });
+  },
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
+      if (
+        CheckEncounter() &&
+        card == attackedServer.ice[approachIce] &&
+        CheckSubType(card, "Barrier") &&
+        this.barrierDebuff
+      ) {
+        return -this.barrierDebuff;
+      }
       return 0;
     },
   },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "1[c]: Break 1 barrier subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier"))
+          return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "1[c]: Encountered barrier gets -3 strength. (Stealth credits only)",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier"))
+          return [];
+        if (this._stealthCreditCards().length === 0) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var stealthCards = ChoicesArrayCards(this._stealthCreditCards());
+        if (stealthCards.length === 0) return;
+        var self = this;
+        var applyDebuff = function (selection) {
+          if (!selection || !selection.card || selection.card.credits < 1)
+            return;
+          selection.card.credits -= 1;
+          UpdateCounters();
+          self.barrierDebuff = (self.barrierDebuff || 0) + 3;
+          var targetIce = attackedServer.ice[approachIce];
+          if (targetIce) {
+            Log(
+              GetTitle(self) +
+                " spent 1 credit from " +
+                GetTitle(selection.card) +
+                ": " +
+                GetTitle(targetIce) +
+                " gets -3 strength for this encounter.",
+            );
+          }
+        };
+        if (stealthCards.length === 1) {
+          applyDebuff(stealthCards[0]);
+        } else {
+          DecisionPhase(
+            runner,
+            stealthCards,
+            applyDebuff,
+            "Corsair",
+            "Select a Stealth card to spend 1 credit from:",
+            self,
+          );
+        }
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+      this.barrierDebuff = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function (
+    rc,
+    result,
+    point,
+    server,
+    cardStrength,
+    iceAI,
+    iceStrength,
+    clicksLeft,
+    creditsLeft,
+  ) {
+    if (!iceAI.subTypes.includes("Barrier")) return result;
+    if (cardStrength >= iceStrength) {
+      return result.concat(
+        rc.ImplementIcebreaker(
+          point,
+          this,
+          cardStrength,
+          iceAI,
+          iceStrength,
+          ["Barrier"],
+          Infinity,
+          0,
+          1,
+          1,
+          creditsLeft,
+        ),
+      );
+    }
+
+    var stealthCredits = this._stealthCreditCards().reduce(function (
+      total,
+      card,
+    ) {
+      return total + card.credits;
+    }, 0);
+    var reductionsUsed = point.card_str_mods.filter(
+      function (modification) {
+        return (
+          modification.use &&
+          modification.use.AIUsesStealthCredits &&
+          modification.card == iceAI.ice &&
+          modification.amt == -3
+        );
+      },
+    ).length;
+    if (reductionsUsed < stealthCredits) {
+      var reduction = rc.StrModify(iceAI.ice, this, point, -3, false);
+      reduction.runner_credits_spent += 1;
+      result.push(reduction);
+    }
+    return result;
+  },
+  AIRunPoolCreditOffset: function (server, runEventCardToUse) {
+    var corsair = this;
+    var installedCorsairs = InstalledCards(runner).filter(function (card) {
+      return card.AIUsesStealthCredits;
+    });
+    if (installedCorsairs[0] != this) return 0;
+    return this._stealthCreditCards().reduce(function (total, card) {
+      if (
+        typeof card.canUseCredits === "function" &&
+        card.canUseCredits("using", corsair)
+      )
+        return total;
+      return total + card.credits;
+    }, 0);
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Fracter")) return spareMU >= 1;
+    }
+    return true;
+  },
 };
 
 //Lampades (36005)

@@ -84,6 +84,7 @@ responseOnPassesIce:     { Resolve, automatic: true }
 responseOnEncounter:        { Resolve, automatic: true }   // runner hits this ice
 responseOnEncounterEnds:    { Resolve, automatic: true }
 responseOnSubroutineBroken: { Resolve, automatic: true }   // a sub on this ice is broken
+automaticOnSubroutineResolved: { Resolve }                 // an unbroken sub resolves
 ```
 
 ### Install / Rez / Trash

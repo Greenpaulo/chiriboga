@@ -1,7 +1,9 @@
 # Chiriboga — Netrunner Browser Game
 
 ## Project Overview
+
 This is a browser-based implementation of the Netrunner card game.
+
 - **Main project path**: `/Users/paulbingham/apps/netrunner/chiriboga-dev`
 - **Workspace path** (for sandbox commands): `/Users/paulbingham/chiriboga`
 
@@ -10,7 +12,7 @@ This is a browser-based implementation of the Netrunner card game.
 **Before looking up any engine patterns or functions, read this file first:**
 
 ```
-/Users/paulbingham/apps/netrunner/chiriboga-dev/docs/engine_patterns.md
+/Users/paulbingham/apps/netrunner/chiriboga-dev/documentation/engine_patterns.md
 ```
 
 This file contains ALL trigger hooks, engine function signatures, subroutine shapes, and copy-paste-ready patterns. **Do NOT read `systemgateway.js`, `elevation.js`, or `mechanics.js` to look up patterns** — they are huge files and will waste tokens. The patterns doc has everything you need.
@@ -26,12 +28,14 @@ This file contains ALL trigger hooks, engine function signatures, subroutine sha
 ## Current Card Set Work
 
 ### Downfall (set code: `df`, file: `sets/downfall.js`)
+
 - **Config**: `hidden: false, untested: false`, included in `decklauncherSets`
 - **Decklauncher**: DOWNFALL filter added
-- **Batch 1 (21 cards)**: ✅ Complete — see `docs/engine_patterns.md` for implemented list
+- **Batch 1 (21 cards)**: ✅ Complete — see `documentation/engine_patterns.md` for implemented list
 - **Remaining**: ~42 cards still stubbed — see batch estimates in conversation history
 
 ### Batch 2 candidates (easy tier, ~14 cards):
+
 26042 Public Health Portal, 26007 Fencer Fueno, 26009 Trickster Taka,
 26043 Storgotic Resonator, 26038 Cold Site Server, 26062 Reduced Service,
 26055 Divested Trust, 26056 SDS Drone Deployment, 26063 Vulnerability Audit,
@@ -48,8 +52,8 @@ This file contains ALL trigger hooks, engine function signatures, subroutine sha
 
 ## Workflow for Card Implementation Sessions
 
-1. Read `docs/engine_patterns.md` (this is your only pattern reference)
-2. Read the target card stubs from `sets/downfall.js` (grep for `TODO`)  
+1. Read `documentation/engine_patterns.md` (this is your only pattern reference)
+2. Read the target card stubs from `sets/downfall.js` (grep for `TODO`)
 3. Implement all cards in the batch in as few file edits as possible
 4. Run `node -c sets/downfall.js` to verify syntax
 5. Do NOT re-read large source files unless the pattern doc is truly insufficient

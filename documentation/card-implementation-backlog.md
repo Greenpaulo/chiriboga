@@ -103,10 +103,11 @@ cards into generated decks.
 ### Other sets
 
 `sets/vantagepoint.js` contains structural definitions and exact, dated ELO
-values for all 66 cards, but its generated rules bodies are not implementations.
-There are 75 explicit TODO markers, and the identity abilities are also absent.
-The set is therefore registered as both hidden and untested and must not be
-treated as playable.
+values for all 66 cards. Batch 1 (36001–36004) is implemented and behavior
+tested; the remaining generated rules bodies are not implementations. There
+are 39 explicit TODO markers, and the identity abilities are also absent. The
+set is therefore registered as both hidden and untested and must not yet be
+treated as a complete playable set.
 
 Vantage Point is the active batched implementation. Its live queue, ownership,
 status summary and append-only completion log are maintained in

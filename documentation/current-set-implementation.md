@@ -12,17 +12,17 @@ same time.
 
 ## Active set
 
-| Field | Value |
-| --- | --- |
-| Status | Active |
-| Set name | Vantage Point |
-| Registry key | `vantagepoint` |
-| Pack code | `vp` |
-| Definition file | `sets/vantagepoint.js` |
-| Metadata file | `carddata/carddata.json` |
-| Card range | `36001–36066` |
-| Registry state during batches | `hidden: true`, `untested: true` |
-| Focused integration test | `tests/vantagepoint-integration.test.js` |
+| Field                         | Value                                    |
+| ----------------------------- | ---------------------------------------- |
+| Status                        | Active                                   |
+| Set name                      | Vantage Point                            |
+| Registry key                  | `vantagepoint`                           |
+| Pack code                     | `vp`                                     |
+| Definition file               | `sets/vantagepoint.js`                   |
+| Metadata file                 | `carddata/carddata.json`                 |
+| Card range                    | `36001–36066`                            |
+| Registry state during batches | `hidden: true`, `untested: true`         |
+| Focused integration test      | `tests/vantagepoint-integration.test.js` |
 
 If `Status` is `Inactive`, an agent must not infer or start a set. It should
 report that no current set has been selected.
@@ -40,27 +40,27 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**0 complete, 13 outstanding** (`13 Pending`, `0 In progress`, `0 Blocked`).
+**1 complete, 12 outstanding** (`12 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
 ## Batch queue
 
-| Batch | Card IDs | Status | Owner / started | Notes/blocker |
-| ---: | --- | --- | --- | --- |
-| 1 | 36001–36004 | Pending | — | — |
-| 2 | 36005–36008 | Pending | — | — |
-| 3 | 36009–36016 | Pending | — | — |
-| 4 | 36017–36020 | Pending | — | — |
-| 5 | 36021–36025 | Pending | — | — |
-| 6 | 36026–36030 | Pending | — | — |
-| 7 | 36031–36035 | Pending | — | — |
-| 8 | 36036–36040 | Pending | — | — |
-| 9 | 36041–36045 | Pending | — | — |
-| 10 | 36046–36050 | Pending | — | — |
-| 11 | 36051–36055 | Pending | — | — |
-| 12 | 36056–36060 | Pending | — | — |
-| 13 | 36061–36066 | Pending | — | — |
+| Batch | Card IDs    | Status   | Owner / started          | Notes/blocker |
+| ----: | ----------- | -------- | ------------------------ | ------------- |
+|     1 | 36001–36004 | Complete | Antigravity / 2026-09-18 | Reviewed and repaired by Codex; behavioral and full regression suites pass |
+|     2 | 36005–36008 | Pending  | —                        | —             |
+|     3 | 36009–36016 | Pending  | —                        | —             |
+|     4 | 36017–36020 | Pending  | —                        | —             |
+|     5 | 36021–36025 | Pending  | —                        | —             |
+|     6 | 36026–36030 | Pending  | —                        | —             |
+|     7 | 36031–36035 | Pending  | —                        | —             |
+|     8 | 36036–36040 | Pending  | —                        | —             |
+|     9 | 36041–36045 | Pending  | —                        | —             |
+|    10 | 36046–36050 | Pending  | —                        | —             |
+|    11 | 36051–36055 | Pending  | —                        | —             |
+|    12 | 36056–36060 | Pending  | —                        | —             |
+|    13 | 36061–36066 | Pending  | —                        | —             |
 
 When claiming a batch, record the agent/extension name and current date in
 `Owner / started`. When blocked, put the actionable reason in `Notes/blocker`.
@@ -71,10 +71,10 @@ This table is append-only evidence of completed batches. A batch is not complete
 until its queue row and this log have both been updated after all tests pass.
 Do not remove an older entry if later work revisits one of its cards.
 
-| Batch | Card IDs | Completed | Agent | Focused tests | Notes |
-| ---: | --- | --- | --- | --- | --- |
-
-_No completed batches yet._
+| Batch | Card IDs    | Completed  | Agent       | Focused tests                      | Notes                                                                                                                                   |
+| ----: | ----------- | ---------- | ----------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+|     1 | 36001–36004 | 2026-09-18 | Antigravity | `vantagepoint-integration.test.js` | Implemented Chain Reaction, Take a Dive, The Tungsten Tailor, Corsair; added subroutine resolution & central run tracking in `phase.js` |
+|     1 | 36001–36004 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Repaired turn tracking, trash sequencing, uniqueness and stealth payment/AI modelling; added behavioral coverage |
 
 ## Required shared verification
 
