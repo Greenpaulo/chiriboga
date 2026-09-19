@@ -1,17 +1,14 @@
 images/
 images/*
-images2/
 sounds/
-images_sg_su21_ms (1).7z
-/sounds
 chiriboga.code-workspace
 carddata/Netrunner Comprehensive Rules (v25.08).pdf
 Netrunner Comprehensive Rules (v25.08).pdf
+Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf
 .vscode/
 .vscode/sftp.json
 .DS_Store 
 ai_corp_original.js
 documentation/debug_logs
-/scripts
-Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf
 documentation/agents_summaries
+style2.css

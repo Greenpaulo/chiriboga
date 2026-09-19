@@ -11,7 +11,7 @@
 // =============================================================================
 //
 // Full mechanics, AI, ELO and verification checklist:
-// documentation/new-set-integration-guide.md
+// documentation/new-sets/new-set-integration-guide.md
 //
 // 1. CREATE THE SET FILE
 //    - Create a new file: sets/yoursetname.js

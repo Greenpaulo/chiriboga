@@ -7,13 +7,13 @@ what the user should do and say.
 
 ## Files and responsibilities
 
-| File | Purpose | Normally edited by |
-| --- | --- | --- |
-| `current-set-implementation.md` | Active set, batch queue, ownership, status and completion evidence | Setup agent and batch agents |
-| `card-set-codex-batch-runbook.md` | Set-agnostic execution instructions for Codex | Maintainers only |
-| `card-set-external-agent-batch-runbook.md` | Set-agnostic instructions for other repository-aware agents | Maintainers only |
-| `card-implementation-backlog.md` | Long-term unfinished work and archived set-level status | Batch/final-review agents |
-| `new-set-integration-guide.md` | Definition of done for adding a complete set | Maintainers only |
+| File                                       | Purpose                                                            | Normally edited by           |
+| ------------------------------------------ | ------------------------------------------------------------------ | ---------------------------- |
+| `current-set-implementation.md`            | Active set, batch queue, ownership, status and completion evidence | Setup agent and batch agents |
+| `card-set-codex-batch-runbook.md`          | Set-agnostic execution instructions for Codex                      | Maintainers only             |
+| `card-set-external-agent-batch-runbook.md` | Set-agnostic instructions for other repository-aware agents        | Maintainers only             |
+| `card-implementation-backlog.md`           | Long-term unfinished work and archived set-level status            | Batch/final-review agents    |
+| `new-set-integration-guide.md`             | Definition of done for adding a complete set                       | Maintainers only             |
 
 The checked-out repository is the shared handoff. Agents do not need earlier
 chat transcripts when they can read these files and the current worktree.
@@ -21,7 +21,7 @@ chat transcripts when they can read these files and the current worktree.
 ## Before starting
 
 1. Open the repository root as the agent's VS Code workspace.
-2. Confirm `documentation/current-set-implementation.md` names the intended
+2. Confirm `documentation/new-sets/current-set-implementation.md` names the intended
    active set and its file paths are correct.
 3. Check that no other agent is currently working on the definition file or
    tracker.
@@ -36,7 +36,7 @@ overwrite the shared set file even if their intended card ranges differ.
 Start a new Codex chat in the repository and paste exactly:
 
 ```text
-Read documentation/card-set-codex-batch-runbook.md and follow it.
+Read documentation/new-sets/card-set-codex-batch-runbook.md and follow it.
 ```
 
 That instruction authorizes one batch only. Codex will read the current-set
@@ -48,7 +48,7 @@ and test it, and update the queue and completion log.
 Start a new agent chat in the same repository and paste exactly:
 
 ```text
-Read documentation/card-set-external-agent-batch-runbook.md and follow it.
+Read documentation/new-sets/card-set-external-agent-batch-runbook.md and follow it.
 ```
 
 The external-agent runbook is tool-neutral. The extension must be able to read
@@ -60,7 +60,7 @@ are transferred.
 
 Do not rely only on the agent's chat response. Inspect the repository:
 
-1. Open `documentation/current-set-implementation.md`.
+1. Open `documentation/new-sets/current-set-implementation.md`.
 2. Confirm the batch is `Complete`, the summary counts changed and a completion
    log row names focused tests. If it is `Blocked` or `In progress`, read the
    recorded reason before starting another agent.
@@ -100,7 +100,7 @@ Completing every batch does not automatically make the set production-ready.
 Start a separate chat and paste:
 
 ```text
-Read documentation/current-set-implementation.md and
+Read documentation/new-sets/current-set-implementation.md and
 documentation/new-set-integration-guide.md. All implementation batches should
 now be complete. Perform the full set-wide definition-of-done review: audit all
 card mechanics and AI hooks, search for unfinished stubs, run focused and shared
@@ -125,7 +125,7 @@ Prepare documentation/current-set-implementation.md for <SET DISPLAY NAME>
 using pack code <PACK CODE>, registry key <REGISTRY KEY>, definition file
 <SET FILE>, and card range <FIRST ID>-<LAST ID>.
 
-Read documentation/card-set-agent-operator-guide.md and
+Read documentation/new-sets/card-set-agent-operator-guide.md and
 documentation/new-set-integration-guide.md. Inspect the metadata and card text,
 archive the previous active set's final status in the backlog, create sensible
 reviewable batches based on card complexity, reset the completion log, add the
@@ -138,7 +138,7 @@ Replace every angle-bracketed value before sending it.
 
 ### Tracker fields that must change
 
-In `documentation/current-set-implementation.md`, update all of these together:
+In `documentation/new-sets/current-set-implementation.md`, update all of these together:
 
 - `Status` (`Active` or `Inactive`);
 - set display name;
@@ -155,7 +155,7 @@ In `documentation/current-set-implementation.md`, update all of these together:
 
 Before replacing the previous tracker contents, preserve its completed-batch
 summary, unresolved limitations and final review state in
-`documentation/card-implementation-backlog.md`.
+`documentation/new-sets/card-implementation-backlog.md`.
 
 ### Choosing batches
 

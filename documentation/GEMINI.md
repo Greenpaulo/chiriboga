@@ -4,15 +4,12 @@
 
 This is a browser-based implementation of the Netrunner card game.
 
-- **Main project path**: `/Users/paulbingham/apps/netrunner/chiriboga-dev`
-- **Workspace path** (for sandbox commands): `/Users/paulbingham/chiriboga`
-
 ## IMPORTANT: Read Before Implementing Cards
 
 **Before looking up any engine patterns or functions, read this file first:**
 
 ```
-/Users/paulbingham/apps/netrunner/chiriboga-dev/documentation/engine_patterns.md
+documentation/engine_patterns.md
 ```
 
 This file contains ALL trigger hooks, engine function signatures, subroutine shapes, and copy-paste-ready patterns. **Do NOT read `systemgateway.js`, `elevation.js`, or `mechanics.js` to look up patterns** — they are huge files and will waste tokens. The patterns doc has everything you need.

@@ -3,7 +3,7 @@
 ## Instruction to the agent
 
 When asked to read and follow this document, implement exactly one batch for the
-active set defined by `documentation/current-set-implementation.md`. This is an
+active set defined by `documentation/new-sets/current-set-implementation.md`. This is an
 execution task, not a request for a summary or plan. Continue through code,
 tests and tracker updates unless an unresolved rule or materially out-of-scope
 engine change requires user input.
@@ -14,7 +14,7 @@ previous chat history.
 
 ## 1. Discover and claim the batch
 
-Read `documentation/current-set-implementation.md` completely. It is the only
+Read `documentation/new-sets/current-set-implementation.md` completely. It is the only
 source for the active set name, paths, IDs, batch queue, completion log and
 verification commands.
 
@@ -33,7 +33,7 @@ file or tracker.
 - Inspect working-tree status. Preserve existing edits and never reset, revert,
   overwrite or broadly reformat unrelated work.
 - Obey repository-level agent instructions supplied by the environment.
-- Read §§5, 6 and 8 of `documentation/new-set-integration-guide.md`.
+- Read §§5, 6 and 8 of `documentation/new-sets/new-set-integration-guide.md`.
 - Read `documentation/engine_patterns.md` completely.
 - Read only relevant sections of `documentation/ai.md`, using its contents and
   the hook index in `engine_patterns.md`.

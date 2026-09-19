@@ -120,7 +120,7 @@ spec:**
 
 ## 5. New documentation and artifacts produced
 
-- **`documentation/card-implementation-backlog.md`** supersedes the original
+- **`documentation/new-sets/card-implementation-backlog.md`** supersedes the original
   Eternal-specific discovery backlog. It retains the actionable gaps and
   distinguishes them from cards whose hooks are now verified as handled,
   avoiding stale tasks after later AI work.

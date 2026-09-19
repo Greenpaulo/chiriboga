@@ -11,7 +11,7 @@ Use these companion references while implementing cards:
 - `documentation/ai.md` — detailed AI contracts and examples; read the sections
   relevant to the current cards rather than reloading the whole tutorial for
   every small batch.
-- `documentation/card-implementation-backlog.md` — known unfinished cards and
+- `documentation/new-sets/card-implementation-backlog.md` — known unfinished cards and
   the current ELO audit.
 
 The Corp AI roadmap and work-summary documents explain architecture and history,
@@ -77,7 +77,7 @@ images while adding a set that is already in the metadata. Definitions normally
 use `imageFile: "<code>.png"`; the existing image helper converts that name to
 the local `<code>.jpg` path.
 
-If new metadata introduces genuinely new codes, run `python3 download_images.py`
+If new metadata introduces genuinely new codes, run `python3 scripts/download_images.py`
 from the repository root. It reads `carddata/carddata.json`, writes directly to
 the runtime `images/` directory and skips files already present. The older
 `download-all-images.py` currently expects a different JSON location and writes
@@ -88,11 +88,11 @@ definition in the set file.
 
 ## 3. Scaffold the set file
 
-`scaffold_set.py` creates definitions from the local metadata and preserves
+`scripts/scaffold_set.py` creates definitions from the local metadata and preserves
 card IDs that are already present in the target set file:
 
 ```sh
-python3 scaffold_set.py <pack_code>
+python3 scripts/scaffold_set.py <pack_code>
 ```
 
 If the pack is new to the script, first add its pack code, target filename and
@@ -107,7 +107,7 @@ Review the generated diff before doing that work.
 For a new file the scaffolder also adds:
 
 ```js
-setIdentifiers.push("code");
+setIdentifiers.push('code');
 ```
 
 ## 4. Register the set
@@ -137,14 +137,14 @@ Each card is assigned to its reserved ID:
 
 ```js
 cardSet[36001] = {
-  title: "Example Card",
-  imageFile: "36001.png",
+  title: 'Example Card',
+  imageFile: '36001.png',
   elo: CARD_ELO_FROM_TRASH_OR_BUSTO,
   player: runner,
-  faction: "Shaper",
+  faction: 'Shaper',
   influence: 2,
-  cardType: "program",
-  subTypes: ["Icebreaker", "Decoder"],
+  cardType: 'program',
+  subTypes: ['Icebreaker', 'Decoder'],
   installCost: 3,
   memoryCost: 1,
   // mechanics and AI hooks
@@ -196,12 +196,12 @@ current worktree and tests instead.
 For batched set implementation, the repository provides two set-agnostic,
 executable one-batch runbooks and one current-set tracker:
 
-- `documentation/card-set-agent-operator-guide.md` — user instructions, exact
+- `documentation/new-sets/card-set-agent-operator-guide.md` — user instructions, exact
   prompts, review/recovery steps and the procedure for switching sets;
-- `documentation/card-set-codex-batch-runbook.md` for Codex;
-- `documentation/card-set-external-agent-batch-runbook.md` for Claude Code,
+- `documentation/new-sets/card-set-codex-batch-runbook.md` for Codex;
+- `documentation/new-sets/card-set-external-agent-batch-runbook.md` for Claude Code,
   Cline and other repository-aware coding agents;
-- `documentation/current-set-implementation.md` for the active set metadata,
+- `documentation/new-sets/current-set-implementation.md` for the active set metadata,
   batch queue, ownership, verification commands and completion log.
 
 The user can simply ask the chosen agent to read and follow its runbook. Each
@@ -310,7 +310,7 @@ node tests/decklauncher-identity-change.test.js
 
 7. Run syntax checks for every edited JavaScript file and `php -l` for every
    edited PHP file.
-8. Update `documentation/card-implementation-backlog.md`: remove completed
+8. Update `documentation/new-sets/card-implementation-backlog.md`: remove completed
    entries, add any accepted limitations, and refresh its ELO counts if card
    definitions changed.
 

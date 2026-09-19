@@ -3,7 +3,7 @@
 ## Execution contract
 
 When the user says to read and follow this document, implement exactly one batch
-for the active set in `documentation/current-set-implementation.md`. Do not
+for the active set in `documentation/new-sets/current-set-implementation.md`. Do not
 merely summarize this file or return a plan. Work through implementation, tests
 and the shared tracker update, stopping only for a genuine rules ambiguity or a
 required change that would materially exceed the selected batch.
@@ -12,7 +12,7 @@ The repository is the handoff. Do not require an earlier chat transcript.
 
 ## 1. Discover and claim the work
 
-Read `documentation/current-set-implementation.md` completely. It defines the
+Read `documentation/new-sets/current-set-implementation.md` completely. It defines the
 active set, definition and metadata files, card range, batch queue, completion
 log and required verification.
 
@@ -30,7 +30,7 @@ definition file or tracker.
 ## 2. Inspect before editing
 
 - Inspect `git status` and preserve unrelated and pre-existing changes.
-- Read §§5, 6 and 8 of `documentation/new-set-integration-guide.md`.
+- Read §§5, 6 and 8 of `documentation/new-sets/new-set-integration-guide.md`.
 - Read `documentation/engine_patterns.md` completely.
 - Read only the `documentation/ai.md` sections relevant to the selected cards,
   following its table of contents and the hook index.
@@ -81,7 +81,7 @@ Only after all selected cards and tests are complete:
 3. Append a completion-log row with the date, `Codex`, focused test filenames
    and a concise implementation note; remove the no-completions placeholder
    when adding the first entry.
-4. Update `documentation/card-implementation-backlog.md` when unfinished-card
+4. Update `documentation/new-sets/card-implementation-backlog.md` when unfinished-card
    or TODO counts and accepted limitations change.
 
 If blocked, leave the batch `In progress` or mark it `Blocked`, record the exact

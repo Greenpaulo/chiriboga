@@ -30,7 +30,7 @@ with at least 1 current credit and use the selected choice's `.card` property:
 ```js
 var choices = ChoicesArrayCards(
   InstalledCards(runner).filter(function (card) {
-    return CheckSubType(card, "Stealth") && (card.credits || 0) > 0;
+    return CheckSubType(card, 'Stealth') && (card.credits || 0) > 0;
   }),
 );
 
@@ -70,7 +70,7 @@ as a strength increase to the breaker.
 filtering and sequencing, turn/run/encounter cleanup, stealth payment, and the
 bounded Corsair AI strength reduction in addition to set metadata checks.
 
-Run the full command list in `documentation/current-set-implementation.md`
+Run the full command list in `documentation/new-sets/current-set-implementation.md`
 before changing a batch status.
 
 ## Batch 2 engine support

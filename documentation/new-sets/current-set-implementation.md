@@ -5,7 +5,7 @@ being implemented in batches. The generic agent runbooks read this file to learn
 which set and batch to work on; they must not hardcode a set name themselves.
 
 User-facing prompts and operating instructions are in
-`documentation/card-set-agent-operator-guide.md`.
+`documentation/new-sets/card-set-agent-operator-guide.md`.
 
 Do not run multiple agents against this tracker or its definition file at the
 same time.
@@ -46,21 +46,21 @@ Agents must refresh these counts whenever a batch status changes.
 
 ## Batch queue
 
-| Batch | Card IDs    | Status   | Owner / started          | Notes/blocker |
-| ----: | ----------- | -------- | ------------------------ | ------------- |
+| Batch | Card IDs    | Status   | Owner / started          | Notes/blocker                                                              |
+| ----: | ----------- | -------- | ------------------------ | -------------------------------------------------------------------------- |
 |     1 | 36001–36004 | Complete | Antigravity / 2026-09-18 | Reviewed and repaired by Codex; behavioral and full regression suites pass |
-|     2 | 36005–36008 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass |
-|     3 | 36009–36016 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass |
-|     4 | 36017–36020 | Pending  | —                        | —             |
-|     5 | 36021–36025 | Pending  | —                        | —             |
-|     6 | 36026–36030 | Pending  | —                        | —             |
-|     7 | 36031–36035 | Pending  | —                        | —             |
-|     8 | 36036–36040 | Pending  | —                        | —             |
-|     9 | 36041–36045 | Pending  | —                        | —             |
-|    10 | 36046–36050 | Pending  | —                        | —             |
-|    11 | 36051–36055 | Pending  | —                        | —             |
-|    12 | 36056–36060 | Pending  | —                        | —             |
-|    13 | 36061–36066 | Pending  | —                        | —             |
+|     2 | 36005–36008 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
+|     3 | 36009–36016 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
+|     4 | 36017–36020 | Pending  | —                        | —                                                                          |
+|     5 | 36021–36025 | Pending  | —                        | —                                                                          |
+|     6 | 36026–36030 | Pending  | —                        | —                                                                          |
+|     7 | 36031–36035 | Pending  | —                        | —                                                                          |
+|     8 | 36036–36040 | Pending  | —                        | —                                                                          |
+|     9 | 36041–36045 | Pending  | —                        | —                                                                          |
+|    10 | 36046–36050 | Pending  | —                        | —                                                                          |
+|    11 | 36051–36055 | Pending  | —                        | —                                                                          |
+|    12 | 36056–36060 | Pending  | —                        | —                                                                          |
+|    13 | 36061–36066 | Pending  | —                        | —                                                                          |
 
 When claiming a batch, record the agent/extension name and current date in
 `Owner / started`. When blocked, put the actionable reason in `Notes/blocker`.
@@ -71,11 +71,11 @@ This table is append-only evidence of completed batches. A batch is not complete
 until its queue row and this log have both been updated after all tests pass.
 Do not remove an older entry if later work revisits one of its cards.
 
-| Batch | Card IDs    | Completed  | Agent       | Focused tests                      | Notes                                                                                                                                   |
-| ----: | ----------- | ---------- | ----------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-|     1 | 36001–36004 | 2026-09-18 | Antigravity | `vantagepoint-integration.test.js` | Implemented Chain Reaction, Take a Dive, The Tungsten Tailor, Corsair; added subroutine resolution & central run tracking in `phase.js` |
-|     1 | 36001–36004 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Repaired turn tracking, trash sequencing, uniqueness and stealth payment/AI modelling; added behavioral coverage |
-|     2 | 36005–36008 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Lampades, Hackerspace, Nurse Hạnh and Stick and Poke; added grouped Archives faceup and zero-damage continuation support |
+| Batch | Card IDs    | Completed  | Agent       | Focused tests                                             | Notes                                                                                                                                                                             |
+| ----: | ----------- | ---------- | ----------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|     1 | 36001–36004 | 2026-09-18 | Antigravity | `vantagepoint-integration.test.js`                        | Implemented Chain Reaction, Take a Dive, The Tungsten Tailor, Corsair; added subroutine resolution & central run tracking in `phase.js`                                           |
+|     1 | 36001–36004 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Repaired turn tracking, trash sequencing, uniqueness and stealth payment/AI modelling; added behavioral coverage                                                                  |
+|     2 | 36005–36008 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Lampades, Hackerspace, Nurse Hạnh and Stick and Poke; added grouped Archives faceup and zero-damage continuation support                                              |
 |     3 | 36009–36016 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Vic, Kompromat, Sell Out, Tailgate, Borrowed Goods, Rotary, Baker and Underdome Irregulars; added Corp-controlled Runner abilities and a pre-approach response window |
 
 ## Required shared verification
@@ -101,7 +101,7 @@ set-wide review or the user explicitly changes priorities.
 Before replacing the active set:
 
 1. Preserve its final completion summary and accepted limitations in
-   `documentation/card-implementation-backlog.md`.
+   `documentation/new-sets/card-implementation-backlog.md`.
 2. Replace every value in **Active set**, the status summary, batch queue,
    completion log and verification commands.
 3. Verify the new batches cover every intended card exactly once without gaps

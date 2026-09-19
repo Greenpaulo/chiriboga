@@ -2,7 +2,7 @@
 
 ## Status
 
-This is a proposed successor to `documentation/corp_ai_improvement_roadmap.md`. None of the phases in this document are implemented unless their status is changed explicitly after code, documentation, and regression tests have been completed.
+This is a proposed successor to `documentation/corp-ai/roadmaps/corp_ai_improvement_roadmap.md`. None of the phases in this document are implemented unless their status is changed explicitly after code, documentation, and regression tests have been completed.
 
 The server-security roadmap answers:
 
@@ -252,11 +252,11 @@ Names and exact fields may change during implementation, but every option should
 Candidate APIs to refine during Phase 1:
 
 ```js
-_enumerateInstallCandidates(cards, context)
-_evaluateInstallCandidate(card, server, context)
-_rankedInstallCandidates(cards, context)
-_hypotheticalServerAfterInstall(card, server)
-_installRoleForCard(card, server, context)
+_enumerateInstallCandidates(cards, context);
+_evaluateInstallCandidate(card, server, context);
+_rankedInstallCandidates(cards, context);
+_hypotheticalServerAfterInstall(card, server);
+_installRoleForCard(card, server, context);
 ```
 
 `_rankedInstallOptions()` may remain as a compatibility wrapper while callers migrate. Engine-facing preferences should still resolve back to the existing `{cardToInstall, serverToInstallTo}` form.
@@ -562,14 +562,14 @@ Keep server-security mechanics in `tests/corp-server-security.test.js`; install 
 
 Minimum fixture matrix:
 
-| Dimension | Required cases |
-| --- | --- |
-| Server | naked HQ, naked R&D, Archives backdoor, empty remote, scoring remote, economy remote, trap remote |
-| Security | hard lockout, soft credit lockout, affordable breach, no matching breaker, public bypass, hidden-threat risk only |
-| Corp economy | cannot install, can install but not rez, can rez one candidate, rich enough for route, credits reserved elsewhere |
-| Root card | agenda, economy asset, Ambush, disposable asset, scoring upgrade, defensive upgrade |
-| Game state | opening, agenda flood, normal midgame, Corp match point, Runner match point, last click, multiple insecure servers |
-| Runner pressure | balanced, HQ pressure, R&D pressure, non-interactive pressure, compatible breaker, missing breaker subtype |
+| Dimension       | Required cases                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Server          | naked HQ, naked R&D, Archives backdoor, empty remote, scoring remote, economy remote, trap remote                  |
+| Security        | hard lockout, soft credit lockout, affordable breach, no matching breaker, public bypass, hidden-threat risk only  |
+| Corp economy    | cannot install, can install but not rez, can rez one candidate, rich enough for route, credits reserved elsewhere  |
+| Root card       | agenda, economy asset, Ambush, disposable asset, scoring upgrade, defensive upgrade                                |
+| Game state      | opening, agenda flood, normal midgame, Corp match point, Runner match point, last click, multiple insecure servers |
+| Runner pressure | balanced, HQ pressure, R&D pressure, non-interactive pressure, compatible breaker, missing breaker subtype         |
 
 All fixtures that purport to test imperfect information should run at least twice with different hidden Runner Grip/Stack contents and assert identical choices.
 
