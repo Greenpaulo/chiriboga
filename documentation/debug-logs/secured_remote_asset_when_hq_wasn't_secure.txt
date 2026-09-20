@@ -1,0 +1,734 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[René Loup Arcemont: Party Animal,2 Carnivore,2 Botulus,1 Buzzsaw,3 Fermenter,2 Leech,2 Cookbook,1 Docklands Pass,2 Creative Commission,1 DZMZ Optimizer,2 Telework Contract,3 Sure Gamble,2 Verbal Plasticity,3 Scrounge,3 Gourmand,1 Hantu,3 Rising Tide,3 Cacophony,2 Rent Rioters,1 Ritual,1 Azimat]
+[AU Co.: The Gold Standard in Clones,3 Seamless Launch,1 Longevity Serum,1 Diviner,2 Karunā,3 Hansei Review,2 Anoetic Void,3 Spin Doctor,3 Offworld Office,2 Regolith Mining License,3 Tithe,3 Hedge Fund,3 Proprionegation,3 Sericulture Expansion,3 Byte!,3 Phật Gioan Baotixita,3 Empiricist,1 Mycoweb,3 Semak-samun,3 Anthill Excavation Contract,1 Flyswatter]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: This hand will do
+Corp chose to keep
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Tithe,Sericulture Expansion,Diviner,Tithe,Tithe]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Leech,Carnivore,Sure Gamble,Ritual,DZMZ Optimizer]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-0.5,debt:0,adjusted:-0.5,secure:false},R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:2.525036580688596,debt:0,adjusted:2.525036580688596,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:1.525036580688596,debt:0,adjusted:1.525036580688596,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.025036580688596,debt:0,adjusted:4.025036580688596,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Longevity Serum,Sericulture Expansion,Tithe,Diviner]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Leech,Carnivore,Sure Gamble,Ritual,DZMZ Optimizer]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+Runner spent one click
+Runner installed Leech
+Runner spent one click
+Runner spent 4 credits
+Runner installed Carnivore
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Longevity Serum,Sericulture Expansion,Tithe,Diviner]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Ritual]
+Corp drew a card
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:2.895833333333333,debt:0,adjusted:2.895833333333333,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.395833333333333,debt:0,adjusted:4.395833333333333,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Ranked server protection: {Remote 0:{score:1.395833333333333,debt:0,adjusted:1.395833333333333,secure:false},HQ:{score:1.895833333333333,debt:0,adjusted:1.895833333333333,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.395833333333333,debt:0,adjusted:4.395833333333333,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Ranked server protection: {HQ:{score:0.895833333333333,debt:0,adjusted:0.895833333333333,secure:false},Remote 0:{score:1.3000000000000003,debt:0,adjusted:1.3000000000000003,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.395833333333333,debt:0,adjusted:4.395833333333333,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [2.954166666666667]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 2 card(s) in hand: [Longevity Serum,Hedge Fund]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Ritual]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent one credit
+Corp rezzed Tithe
+Encountering Tithe
+Firing Do 1 net damage. on Tithe:
+Runner takes 1 net damage
+Creative Commission trashed
+1 power counter placed on AU Co.: The Gold Standard in Clones
+AU Co.: The Gold Standard in Clones gains 1 power counter (damage dealt)
+Firing Gain 1[c]. on Tithe:
+Corp gained one credit
+Approaching next piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Diviner
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Ritual trashed
+1 power counter placed on AU Co.: The Gold Standard in Clones
+AU Co.: The Gold Standard in Clones gains 1 power counter (damage dealt)
+Ritual has a printed cost of 0
+Approaching Remote 0
+Run successful
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 2 card(s) in hand: [Longevity Serum,Hedge Fund]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Ritual]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent one credit
+Corp rezzed Tithe
+Encountering Tithe
+Firing Do 1 net damage. on Tithe:
+Runner takes 1 net damage
+Creative Commission trashed
+1 power counter placed on AU Co.: The Gold Standard in Clones
+AU Co.: The Gold Standard in Clones gains 1 power counter (damage dealt)
+Firing Gain 1[c]. on Tithe:
+Corp gained one credit
+Approaching next piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Diviner
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Ritual trashed
+1 power counter placed on AU Co.: The Gold Standard in Clones
+AU Co.: The Gold Standard in Clones gains 1 power counter (damage dealt)
+Ritual has a printed cost of 0
+Approaching Remote 0
+Run successful
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 2 card(s) in hand: [Longevity Serum,Hedge Fund]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Carnivore,Rising Tide]
+AU Co.: Look at top 3 of R&D triggered
+2 power counters removed from AU Co.: The Gold Standard in Clones
+[hidden card] added to HQ
+[hidden card] added to HQ
+AU Co.: The Gold Standard in Clones trashes [hidden card]
+[hidden card] trashed
+Corp drew a card
+AI: Ranked server protection: {Remote 0:{score:1.2000000000000002,debt:0,adjusted:1.2000000000000002,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.278576203208556,debt:0,adjusted:4.278576203208556,secure:false},HQ:{score:4.778576203208556,debt:0,adjusted:4.778576203208556,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting a remote server
+AI: Ranked server protection: {Remote 0:{score:1.282842712474619,debt:0,adjusted:1.282842712474619,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.778576203208556,debt:0,adjusted:3.778576203208556,secure:false},R&D:{score:4.278576203208556,debt:0,adjusted:4.278576203208556,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 3
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: Ranked server protection: {Remote 0:{score:1.282842712474619,debt:0,adjusted:1.282842712474619,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.278576203208556,debt:0,adjusted:4.278576203208556,secure:false},HQ:{score:4.778576203208556,debt:0,adjusted:4.778576203208556,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 1 credit(s) and 4 card(s) in hand: [Hedge Fund,Byte!,Longevity Serum,Anthill Excavation Contract]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Carnivore,Rising Tide]
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Runner spent one click
+Runner installed Rising Tide
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent one credit
+Corp rezzed Tithe
+Encountering Tithe
+Firing Do 1 net damage. on Tithe:
+Runner takes 1 net damage
+Carnivore trashed
+1 power counter placed on AU Co.: The Gold Standard in Clones
+AU Co.: The Gold Standard in Clones gains 1 power counter (damage dealt)
+Firing Gain 1[c]. on Tithe:
+Corp gained one credit
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Longevity Serum accessed
+Longevity Serum stolen
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 1 credit(s) and 3 card(s) in hand: [Hedge Fund,Byte!,Anthill Excavation Contract]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Corp drew a card
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: Rez might help draw
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: there is an active card I would use ability of
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 0:{score:3.2828427124746185,debt:0,adjusted:3.2828427124746185,secure:true},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.349509379141286]
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},Remote 1:{score:0,debt:0,adjusted:0,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 0:{score:3.2828427124746185,debt:0,adjusted:3.2828427124746185,secure:true},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance (can't afford it)
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.049509379141285]
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+Rewinding...
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 1 credit(s) and 3 card(s) in hand: [Hedge Fund,Byte!,Anthill Excavation Contract]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Corp drew a card
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: Rez might help draw
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: there is an active card I would use ability of
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 0:{score:3.2828427124746185,debt:0,adjusted:3.2828427124746185,secure:true},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.349509379141286]
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},Remote 2:{score:0,debt:0,adjusted:0,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 0:{score:3.2828427124746185,debt:0,adjusted:3.2828427124746185,secure:true},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance (can't afford it)
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.049509379141285]
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-1,debt:0,adjusted:-1,secure:true},Remote 2:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:6.5,debt:0,adjusted:6.5,secure:true}}
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: R&D appears secure: Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Remote 0 appears secure: Diviner has mandatory breaks with no capable breaker; Tithe has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Just need a little more cred...
+Corp spent one click
+Corp gained one credit
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 1 credit(s) and 4 card(s) in hand: [Hedge Fund,Byte!,Longevity Serum,Anthill Excavation Contract]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Carnivore,Rising Tide]
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Spin Doctor]
+
+RunnerTestField(30001, [30030,30020,35026], [35029,30007,35008,35007,30009,30020,30013,35007,30034,30007,35004,30004,35011,30027,30030,30009,30008,30027,35010,35004,35010,30007,30030,30005,35009,35004,35007,35009,30004,35011,35010,30034], [30003,35009], [30022,30003,30008], [35049], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [30048], [35072,30040,35051,35049,30071,30075,30053,35051,35072,35052,30067,35050,35053,35050,35051,30048,30075,35052,30048,35054,30050,35049,35052,35048,30067,35079,30047,30067,30050,30053,35048,30047,30040,35048,35054,30071,30040], [30075,35050,30044,35072], [], [30073], [30073], [[30053,30046,30073,35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].AITurnsInstalled=1;
+runner.heap[1].host=null;
+runner.heap[2].host=null;
+corp.archives.cards[0].host=null;
+corp.RnD.cards[1].cardsInstalledThisTurn=[corp.remoteServers[0].ice[2],corp.remoteServers[0].root[0],];
+corp.RnD.cards[32].cardsInstalledThisTurn=[corp.remoteServers[0].ice[2],corp.remoteServers[0].root[0],];
+corp.RnD.cards[36].cardsInstalledThisTurn=[corp.remoteServers[0].ice[2],corp.remoteServers[0].root[0],];
+corp.HQ.cards[2].AICardsDiscarded=[];
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[1].rezzed=true;
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.HQ.AISuccessfulRuns=1;
+
+Version reference: Sat Sep 19 2026 22:23:18 GMT+0100 (GMT+01:00)

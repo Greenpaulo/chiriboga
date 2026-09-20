@@ -1,0 +1,1089 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[René Loup Arcemont: Party Animal,2 Carnivore,2 Botulus,1 Buzzsaw,3 Fermenter,2 Leech,2 Cookbook,1 Docklands Pass,2 Creative Commission,1 DZMZ Optimizer,2 Telework Contract,3 Sure Gamble,2 Verbal Plasticity,3 Scrounge,3 Gourmand,1 Hantu,3 Rising Tide,3 Cacophony,2 Rent Rioters,1 Ritual,1 Azimat]
+[Weyland Consortium: Built to Last,1 Sprint,1 Anoetic Void,3 Spin Doctor,1 Above the Law,2 Ballista,3 Pharos,2 Government Subsidy,3 Offworld Office,2 Send a Message,2 Regolith Mining License,3 Hedge Fund,3 Bumi 1.0,2 Idiosyncresis,2 Off the Books,3 Kessleroid,3 Syailendra,3 Key Performance Indicators,2 Flyswatter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: 0 ICE in hand - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Idiosyncresis,Government Subsidy,Hedge Fund,Above the Law,Ballista]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Gourmand,Rent Rioters,Fermenter,Cacophony,Telework Contract]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-0.5,debt:0,adjusted:-0.5,secure:false},R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.025036580688596,debt:0,adjusted:6.025036580688596,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: No obvious economy option
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:5.025036580688596,debt:0,adjusted:5.025036580688596,secure:true}}
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Offworld Office,Idiosyncresis,Government Subsidy,Above the Law,Petty Cash]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Gourmand,Rent Rioters,Fermenter,Cacophony,Telework Contract]
+Runner spent one click
+Runner installed Gourmand
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Anoetic Void accessed
+Trash Gourmand: Trash the non-agenda card you are accessing. If you do, draw 1 card. chosen
+Using Gourmand:
+Gourmand trashed
+Anoetic Void trashed
+Runner gained one credit
+Runner drew a card
+Runner drew a card
+Run ends
+Runner spent one click
+Runner installed Gourmand
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Regolith Mining License accessed
+Trash Gourmand: Trash the non-agenda card you are accessing. If you do, draw 1 card. chosen
+Using Gourmand:
+Gourmand trashed
+Regolith Mining License trashed
+Runner drew a card
+Run ends
+Runner discarded Rent Rioters
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Offworld Office,Idiosyncresis,Government Subsidy,Above the Law,Petty Cash]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Fermenter,Cacophony,Telework Contract,Scrounge]
+Corp drew a card
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Ranked server protection: {R&D:{score:-1,debt:0,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.9859451063854205,debt:0,adjusted:6.9859451063854205,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Nothing to advance
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.9859451063854205,debt:0,adjusted:4.9859451063854205,secure:true},HQ:{score:5.9859451063854205,debt:0,adjusted:5.9859451063854205,secure:true}}
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Nothing to advance
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: No obvious economy option
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.9859451063854205,debt:0,adjusted:4.9859451063854205,secure:true},HQ:{score:5.9859451063854205,debt:0,adjusted:5.9859451063854205,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Nothing to advance
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 9
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Government Subsidy might be good economy play?
+Corp spent one click
+Corp spent 10 credits
+Played Government Subsidy
+Corp gained 15 credits
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 4 card(s) in hand: [Offworld Office,Idiosyncresis,Petty Cash,Above the Law]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Fermenter,Cacophony,Telework Contract,Scrounge]
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 15 credit(s) and 4 card(s) in hand: [Offworld Office,Idiosyncresis,Petty Cash,Above the Law]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Cacophony,Scrounge,Telework Contract,Sure Gamble]
+Corp drew a card
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.956098437083061,debt:0,adjusted:3.956098437083061,secure:false},R&D:{score:4.956098437083061,debt:0,adjusted:4.956098437083061,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Nothing to advance
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: No obvious economy option
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Scoring windows for empty servers: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Government Subsidy might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 10 credits
+Played Government Subsidy
+Corp gained 15 credits
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:2.956098437083061,debt:0,adjusted:2.956098437083061,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.956098437083061,debt:0,adjusted:4.956098437083061,secure:true}}
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Nothing to advance
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.956098437083061,debt:0,adjusted:3.956098437083061,secure:false},R&D:{score:4.956098437083061,debt:0,adjusted:4.956098437083061,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Nothing to advance
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Key Performance Indicators,Idiosyncresis,Petty Cash,Offworld Office,Above the Law]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Cacophony,Scrounge,Telework Contract,Sure Gamble]
+1 virus counter placed on Fermenter
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Key Performance Indicators,Idiosyncresis,Petty Cash,Offworld Office,Above the Law]
+SPOILER: Runner has 15 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Cacophony,Scrounge,Telework Contract]
+Corp drew a card
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:5.039981965095766,debt:0,adjusted:5.039981965095766,secure:false},R&D:{score:5.039981965095766,debt:0,adjusted:5.039981965095766,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Nothing to advance
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Ranked server protection: {Remote 0:{score:2.539981965095766,debt:0,adjusted:2.539981965095766,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.039981965095766,debt:0,adjusted:4.039981965095766,secure:false},R&D:{score:5.039981965095766,debt:0,adjusted:5.039981965095766,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Nothing to advance
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Scoring windows for empty servers: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: No obvious install options
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: No obvious economy option
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Scoring windows for empty servers: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Scoring windows for empty servers: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Ranked server protection: {Remote 0:{score:2.539981965095766,debt:0,adjusted:2.539981965095766,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.039981965095766,debt:0,adjusted:4.039981965095766,secure:false},R&D:{score:5.039981965095766,debt:0,adjusted:5.039981965095766,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Nothing to advance
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: Scoring windows for empty servers: []
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 18
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 23 credit(s) and 5 card(s) in hand: [Petty Cash,Idiosyncresis,Above the Law,Key Performance Indicators,Offworld Office]
+SPOILER: Runner has 15 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Cacophony,Scrounge,Telework Contract]
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 5 credits
+Corp rezzed Ballista
+Encountering Ballista
+Firing Trash 1 installed program or end the run. on Ballista:
+AI: I know this one
+Fermenter trashed
+Approaching HQ
+Run successful
+Idiosyncresis accessed
+Runner spent 2 credits
+Idiosyncresis trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 18 credit(s) and 4 card(s) in hand: [Offworld Office,Above the Law,Petty Cash,Key Performance Indicators]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Cacophony,Scrounge,Telework Contract]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0.7599033493315988,debt:0,adjusted:0.7599033493315988,secure:false},Remote 0:{score:1.0099033493315988,debt:0,adjusted:1.0099033493315988,secure:false},HQ:{score:1.2059420095989593,debt:0,adjusted:1.2059420095989593,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Ranked server protection: {HQ:{score:0.20594200959895925,debt:0,adjusted:0.20594200959895925,secure:false},Remote 0:{score:0.40000000000000036,debt:0,adjusted:0.40000000000000036,secure:false},R&D:{score:0.7599033493315988,debt:0,adjusted:0.7599033493315988,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [3.101750298093349]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Ranked server protection: {R&D:{score:0.7599033493315988,debt:0,adjusted:0.7599033493315988,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:1.2059420095989593,debt:0,adjusted:1.2059420095989593,secure:false},Remote 0:{score:1.4000000000000004,debt:0,adjusted:1.4000000000000004,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: I could advance a card by 1 with these cards: [null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp gained 2 credits
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 18 credit(s) and 3 card(s) in hand: [Offworld Office,Petty Cash,Key Performance Indicators]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Cacophony,Scrounge,Telework Contract]
+1 virus counter placed on Fermenter
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Kessleroid
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Syailendra
+Encountering Syailendra
+Firing You may place 1 advancement counter on an installed card you can advance. on Syailendra:
+1 advancement counter placed on Syailendra
+Syailendra places 1 advancement counter on Syailendra
+Firing The Runner loses 2[credit]. on Syailendra:
+Runner lost 2 credits
+Firing Do 1 net damage. on Syailendra:
+Runner takes 1 net damage
+Cacophony trashed
+Approaching Remote 0
+Run successful
+Above the Law accessed
+Above the Law stolen
+Run ends
+Runner spent 2 clicks
+Runner spent one credit
+Played Scrounge
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+Gourmand added to bottom of stack
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 3 card(s) in hand: [Offworld Office,Petty Cash,Key Performance Indicators]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 2 card(s) in hand: [Rent Rioters,Telework Contract]
+Corp drew a card
+AI: Ranked server protection: {Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},R&D:{score:0.9989224137931036,debt:0,adjusted:0.9989224137931036,secure:false},HQ:{score:2.349353448275862,debt:0,adjusted:2.349353448275862,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: I intend to advance ice
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: Ranked server protection: {Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},R&D:{score:0.9989224137931036,debt:0,adjusted:0.9989224137931036,secure:false},HQ:{score:2.349353448275862,debt:0,adjusted:2.349353448275862,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: I intend to advance ice
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: Ranked server protection: {Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},R&D:{score:0.9989224137931036,debt:0,adjusted:0.9989224137931036,secure:false},HQ:{score:2.349353448275862,debt:0,adjusted:2.349353448275862,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 3
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Key Performance Indicators,Offworld Office,Petty Cash,Regolith Mining License,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 2 card(s) in hand: [Rent Rioters,Telework Contract]
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Kessleroid
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching R&D
+Run successful
+Flyswatter accessed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 8 credit(s) and 5 card(s) in hand: [Key Performance Indicators,Offworld Office,Petty Cash,Regolith Mining License,Spin Doctor]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Telework Contract,Azimat,Scrounge]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:-0.8039971713362069,debt:0,adjusted:-0.8039971713362069,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.196002828663794,debt:0,adjusted:4.196002828663794,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting Archives
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {R&D:{score:-0.8039971713362069,debt:0,adjusted:-0.8039971713362069,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},HQ:{score:3.196002828663793,debt:0,adjusted:3.196002828663793,secure:false},archives:{score:8.993338047772989,debt:0,adjusted:8.993338047772989,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: No obvious install options
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: No obvious economy option
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {R&D:{score:-0.8039971713362069,debt:0,adjusted:-0.8039971713362069,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},HQ:{score:3.196002828663793,debt:0,adjusted:3.196002828663793,secure:false},archives:{score:8.993338047772989,debt:0,adjusted:8.993338047772989,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Petty Cash,Regolith Mining License,Key Performance Indicators,Spin Doctor,Offworld Office]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Telework Contract,Azimat,Scrounge]
+1 virus counter placed on Fermenter
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+Runner spent one click
+Runner installed Azimat
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Petty Cash,Regolith Mining License,Key Performance Indicators,Spin Doctor,Offworld Office]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 3 card(s) in hand: [Rent Rioters,Telework Contract,Scrounge]
+Corp drew a card
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Ranked server protection: {R&D:{score:-0.7433393429487181,debt:0,adjusted:-0.7433393429487181,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},HQ:{score:1.256660657051282,debt:0,adjusted:1.256660657051282,secure:false},archives:{score:9.094434428418804,debt:0,adjusted:9.094434428418804,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: No obvious install options
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: No obvious economy option
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Ranked server protection: {R&D:{score:-0.7433393429487181,debt:0,adjusted:-0.7433393429487181,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},HQ:{score:1.256660657051282,debt:0,adjusted:1.256660657051282,secure:false},archives:{score:9.094434428418804,debt:0,adjusted:9.094434428418804,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: No obvious install options
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: No obvious economy option
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Ranked server protection: {R&D:{score:-0.7433393429487181,debt:0,adjusted:-0.7433393429487181,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},HQ:{score:1.256660657051282,debt:0,adjusted:1.256660657051282,secure:false},archives:{score:9.094434428418804,debt:0,adjusted:9.094434428418804,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: No obvious install options
+AI: No obvious economy option
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Offworld Office,Send a Message,Regolith Mining License,Spin Doctor,Key Performance Indicators]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 3 card(s) in hand: [Rent Rioters,Telework Contract,Scrounge]
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching R&D
+Run successful
+Sprint accessed
+Run ends
+Runner spent 2 clicks
+Runner spent one credit
+Played Scrounge
+Runner installed Gourmand
+Fermenter added to bottom of stack
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching R&D
+Run successful
+Sprint accessed
+Trash Gourmand: Trash the non-agenda card you are accessing. If you do, draw 1 card. chosen
+Using Gourmand:
+Gourmand trashed
+Sprint trashed
+Runner gained one credit
+Runner drew a card
+Runner drew a card
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Offworld Office,Send a Message,Regolith Mining License,Spin Doctor,Key Performance Indicators]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Telework Contract,Leech,Creative Commission]
+Corp drew a card
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {R&D:{score:-0.8260391626602566,debt:0,adjusted:-0.8260391626602566,secure:false},Remote 0:{score:0.6000000000000001,debt:0,adjusted:0.6000000000000001,secure:false},HQ:{score:1.1739608373397434,debt:0,adjusted:1.1739608373397434,secure:false},archives:{score:8.956601395566238,debt:0,adjusted:8.956601395566238,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {R&D:{score:-0.8260391626602566,debt:0,adjusted:-0.8260391626602566,secure:false},HQ:{score:0.17396083733974343,debt:0,adjusted:0.17396083733974343,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:8.956601395566238,debt:0,adjusted:8.956601395566238,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {HQ:{score:-6.326039162660257,debt:0,adjusted:-6.326039162660257,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.625,debt:0,adjusted:2.625,secure:false},archives:{score:8.956601395566238,debt:0,adjusted:8.956601395566238,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 16
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Send a Message,Offworld Office,Key Performance Indicators,Regolith Mining License]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Telework Contract,Leech,Creative Commission]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Botulus
+1 virus counter placed on Botulus
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Telework Contract trashed
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Send a Message,Offworld Office,Key Performance Indicators,Regolith Mining License]
+SPOILER: Runner has 19 credit(s), 0 tag(s) and 3 card(s) in hand: [Rent Rioters,Telework Contract,Leech]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Ranked server protection: {HQ:{score:-8.262256610576923,debt:0,adjusted:-8.262256610576923,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.625,debt:0,adjusted:2.625,secure:false},archives:{score:9.062905649038463,debt:0,adjusted:9.062905649038463,secure:true}}
+AI: Nothing to advance
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Rezzing emergency draw to find ICE
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Ranked server protection: {HQ:{score:-10.262256610576923,debt:0,adjusted:-10.262256610576923,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.625,debt:0,adjusted:2.625,secure:false},archives:{score:9.062905649038463,debt:0,adjusted:9.062905649038463,secure:true}}
+AI: there is an active card I would use ability of
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+Hedge Fund shuffled into R&D from Archives
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Ranked server protection: {HQ:{score:-10.262256610576923,debt:0,adjusted:-10.262256610576923,secure:false},Remote 0:{score:-4.4,debt:0,adjusted:-4.4,secure:false},R&D:{score:2.625,debt:0,adjusted:2.625,secure:false},archives:{score:9.062905649038463,debt:0,adjusted:9.062905649038463,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [10.412256610576923]
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 4 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Ranked server protection: {HQ:{score:-8.262256610576923,debt:0,adjusted:-8.262256610576923,secure:false},Remote 0:{score:-3.4,debt:0,adjusted:-3.4,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.625,debt:0,adjusted:2.625,secure:false},archives:{score:9.062905649038463,debt:0,adjusted:9.062905649038463,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: I could advance a card by 2 with these cards: [null,null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp gained 2 credits
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 22
+AI: Ranked server protection: {HQ:{score:-8.262256610576923,debt:0,adjusted:-8.262256610576923,secure:false},Remote 0:{score:-3.4,debt:0,adjusted:-3.4,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.625,debt:0,adjusted:2.625,secure:false},archives:{score:9.062905649038463,debt:0,adjusted:9.062905649038463,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 3 agenda(s) - protection score penalized
+AI: I could advance a card by 1 with these cards: [null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Key Performance Indicators,Offworld Office,Key Performance Indicators,Offworld Office,Off the Books]
+SPOILER: Runner has 19 credit(s), 0 tag(s) and 3 card(s) in hand: [Rent Rioters,Telework Contract,Leech]
+1 virus counter placed on Botulus
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting Remote 0
+Encountering Syailendra
+Place advancement counter (3+ counters) triggered
+Using Botulus:
+1 virus counter removed from Botulus
+Subroutine The Runner loses 2[credit]. broken
+Using Botulus:
+1 virus counter removed from Botulus
+Subroutine You may place 1 advancement counter on an installed card you can advance. broken
+Firing Do 1 net damage. on Syailendra:
+Runner takes 1 net damage
+Telework Contract trashed
+Approaching Remote 0
+Run successful
+Send a Message accessed
+Send a Message stolen
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+You may rez 1 installed piece of ice, ignoring all costs triggered
+AI: Archives appears secure: Flyswatter has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: I know this one
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Key Performance Indicators,Offworld Office,Key Performance Indicators,Offworld Office,Off the Books]
+SPOILER: Runner has 19 credit(s), 0 tag(s) and 3 card(s) in hand: [Rent Rioters,Telework Contract,Leech]
+1 virus counter placed on Botulus
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Send a Message]
+
+RunnerTestField(30001, [35011,30030,30020,35010,35004,30007,35004,35007,30027,30020], [30007,35007,30013,30004,30030,30007,30005,35010,35004,30003,30034,35009,30009,30009,30034,30030,35007,30003,35008,30008,35009,35026,35010], [35011,30027,30008], [30022,35009,35029], [30060], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30059, [30050,30071,30064,30064,35061,30041,30071], [30069,30063,35081,35041,30053,30063,30062,35076,35075,35081,30067,30075,30075,35077,35061,35041,30075,30053,30063,35071,35081,35041,35079], [35077,30067,35077,30067,35071], [35079], [35075,35076], [30062], [[30069,35076,35075]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].AITurnsInstalled=1;
+runner.scoreArea[0].rezzed=false;
+runner.stack[0].host=null;
+runner.stack[1].host=null;
+runner.heap[3].host=null;
+runner.heap[5].host=null;
+runner.heap[7].host=null;
+runner.heap[8].host=null;
+runner.rig.programs[0].AInumCompatibleIceInstalled=2;
+runner.rig.programs[1].credits=2;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[0].host=null;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[1].host=null;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[4].host=null;
+corp.archives.cards[5].faceUp=true;
+corp.archives.cards[5].host=null;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].root[0].advancement=2;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].advancement=3;
+corp.remoteServers[0].ice[0].hostedCards = [];
+InstanceCardsPush(30004,corp.remoteServers[0].ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.remoteServers[0].ice[0];
+corp.remoteServers[0].ice[0].hostedCards[0].faceUp=true;
+corp.remoteServers[0].ice[0].hostedCards[0].virus=2;
+corp.remoteServers[0].ice[0].hostedCards[0].host=corp.remoteServers[0].ice[0];
+corp.remoteServers[0].ice[1].rezzed=true;
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.RnD.AISuccessfulRuns=5;
+corp.HQ.AISuccessfulRuns=1;
+
+Version reference: Sat Sep 19 2026 22:23:18 GMT+0100 (GMT+01:00)
