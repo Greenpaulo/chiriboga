@@ -1,0 +1,6 @@
+// PHASE: Phase_Mulligan
+// OPTIONS: m, n
+// EXPECT: n
+// NOTE: 1 ICE + 3 economy cards + 1 agenda. Currently mulligans because the rule wants >= 2 ICE (see findings item 4).
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [], [30072,30075,30075,30064,30044], [], [], [], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);

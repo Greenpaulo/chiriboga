@@ -1,0 +1,8 @@
+// PHASE: Phase_Main
+// OPTIONS: install, advance, gain, draw
+// EXPECT: advance
+// SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=5
+// NOTE: Hostile Takeover (needs 2) sits in a remote with 1 advancement. Advancing sets up a score this turn.
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [], [31077], [], [], [], [[31071]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.remoteServers[0].root[0].advancement=1;
