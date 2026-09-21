@@ -48,6 +48,41 @@ Two separate threads of work, landed back-to-back:
 4. **The deckbuilder's "curated economy/draw" card lists are hardcoded by numeric ID and won't pick up new sets automatically.** `DeckBuildFromAllowedSets` fills a chunk of each generated deck from fixed lists like `[30007, 30018, ..., 33005]` for runner economy and `[30037, 30048, ..., 31082]` for corp economy — spanning several existing sets but, naturally, none of Vantage Point's ids (36000+), since those cards didn't exist yet at commit time. That's not a bug in this commit, but it means Vantage Point's own economy/draw cards will only ever get picked up via the generic catch-all `nonAgenda` fill at the end rather than the "quality-weighted" curated pools — worth a follow-up note (maybe in the new integration guide) so this list doesn't quietly go stale as more sets land.
 5. **Minor:** `DeckBuildChooseAgendas`'s retry loop is bounded by a fixed 100 attempts rather than the existing `deckBuildingMaxTime` wall-clock budget used elsewhere in the file (`DeckBuildRandomAgendas`, `DeckBuildRandomly`). Not a correctness issue — each attempt is cheap and bounded — but it's an inconsistent throttling convention within the same file, worth aligning if it's ever revisited.
 
+### Resolution (21 September 2026)
+
+1. **Confirmed as intentional; documented here.** Removing the forced copy of
+   Send a Message fixes a legacy deckbuilding special case and applies to both
+   format-aware and legacy callers. The supplied agenda pool is now authoritative,
+   as the existing regression test requires. Since the issue was that the
+   historical commit message did not advertise the wider behavior change, no
+   further runtime change can improve it.
+2. **Addressed.** Renamed the hook to `automaticOnSubroutineFiring` everywhere.
+   The hook intentionally runs immediately before `Trigger()`: a subroutine can
+   open decision pseudophases, so an after-`Trigger()` call would not reliably
+   mean that the complete effect had resolved. The new name and engine-pattern
+   documentation describe the actual timing without creating that false
+   guarantee.
+3. **Addressed.** Added `tests/mechanics-trash-empty.test.js`, which calls
+   `Trash([], false, callback, context)` and verifies that the callback runs
+   exactly once with the original empty array and the supplied context. Removed
+   the weaker source-text regex assertion from the Vantage Point integration test.
+4. **Addressed as integration guidance and tracked design work.** The new-set
+   guide now distinguishes automatic general-pool eligibility from the curated
+   economy/draw role pools and directs set implementers to review those pools.
+   The data-driven replacement remains scoped in
+   `documentation/backlog/deckbuilder-economy-draw-classification-backlog.md`;
+   retrofitting role metadata across the card pool is deliberately not folded
+   into this review cleanup.
+5. **Accepted; no code change.** The fixed 100-attempt bound is cheap,
+   deterministic and independently guarantees termination. Replacing it with a
+   wall-clock-only limit would make agenda selection depend on machine load.
+   The different bound is therefore a consistency difference, not a defect.
+
+Verification after these changes: `node tests/run-all-tests.js` passes all 16
+test files, including `corp-decision-fixtures.test.js` and
+`decision-snapshots.test.js`. The new empty-trash regression and the updated
+Vantage Point integration coverage both pass within that run.
+
 Nothing above broke a test, and I didn't find any undefined-function references, off-by-one errors, or unhandled-exception paths in the new engine code.
 
 ## Bottom line

@@ -232,7 +232,7 @@ takeADive.Resolve.call(takeADive, {server: context.corp.RnD});
 assert.strictEqual(runTarget, context.corp.RnD);
 takeADive.responseOnRunSuccessful.Resolve.call(takeADive, context.corp.RnD);
 assert.strictEqual(badPublicityGained, 0);
-takeADive.automaticOnSubroutineResolved.Resolve.call(takeADive, {}, {});
+takeADive.automaticOnSubroutineFiring.Resolve.call(takeADive, {}, {});
 context.attackedServer = context.corp.HQ;
 takeADive.responseOnRunSuccessful.Resolve.call(takeADive, context.corp.RnD);
 assert.strictEqual(badPublicityGained, 1, '36002 survives an attacked-server redirect');
@@ -334,8 +334,8 @@ assert.strictEqual(paths.length, 0, '36004 AI cannot reuse one stealth credit');
 
 const phaseSource = fs.readFileSync(path.join(root, 'phase.js'), 'utf8');
 assert(
-  phaseSource.includes('AutomaticTriggers("automaticOnSubroutineResolved"'),
-  '36002 engine hook records a resolved subroutine',
+  phaseSource.includes('AutomaticTriggers("automaticOnSubroutineFiring"'),
+  '36002 engine hook records a subroutine as it starts firing',
 );
 
 const lampades = context.cardSet[36005];
@@ -495,14 +495,6 @@ stickAndPoke.usedThisTurn = false;
 const firstIceAI = {ice: firstIce, sr: [[['endTheRun']]]};
 stickAndPoke.AIModifyIceAI.call(stickAndPoke, firstIceAI, 1);
 assert.strictEqual(JSON.stringify(firstIceAI.sr[0]), '[["netDamage"]]');
-const mechanicsSource = fs.readFileSync(path.join(root, 'mechanics.js'), 'utf8');
-assert(
-  /cards\.length < 1[\s\S]*afterTrashing\.call\(context, cards\)/.test(
-    mechanicsSource,
-  ),
-  'zero prevented damage still continues its resolution callback',
-);
-
 // Batch 3: Criminal cards 36009-36016.
 context.runner.tags = 1;
 context.runner.clickTracker = 4;

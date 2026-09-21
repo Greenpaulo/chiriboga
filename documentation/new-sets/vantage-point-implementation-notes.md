@@ -6,10 +6,10 @@ notes supplement it rather than replacing its required repository reading.
 
 ## Batch 1 engine support
 
-`phase.js` fires `automaticOnSubroutineResolved` immediately before an unbroken
-ice subroutine resolves, passing the ice and subroutine. Take a Dive uses that
-hook to record state on its own resolving event, so the state remains correct
-if another effect changes the attacked server during the run.
+`phase.js` fires `automaticOnSubroutineFiring` immediately before an unbroken
+ice subroutine starts resolving, passing the ice and subroutine. Take a Dive
+uses that hook to record state on its own resolving event, so the state remains
+correct if another effect changes the attacked server during the run.
 
 Chain Reaction does not use global properties on `runner`. It tracks successful
 central runs on its own card object with `responseOnRunSuccessful`, using

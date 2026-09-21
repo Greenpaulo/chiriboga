@@ -1409,7 +1409,7 @@ phases.runSubroutines = {
   },
   Resolve: {
     trigger: function (params) {
-      AutomaticTriggers("automaticOnSubroutineResolved", [params.card, params.ability]);
+      AutomaticTriggers("automaticOnSubroutineFiring", [params.card, params.ability]);
       Trigger(params.card, params.ability, params.choice, "Firing");
       //note: the below code is immediately executed, even if the Trigger involves pseudophases...
       subroutine++;

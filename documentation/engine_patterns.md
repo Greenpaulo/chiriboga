@@ -91,7 +91,7 @@ automaticOnEncounter:       { Resolve }                    // receives encounter
 responseOnEncounter:        { Enumerate?, Resolve, automatic? }
 responseOnEncounterEnds:    { Resolve, automatic: true }
 responseOnSubroutineBroken: { Resolve, automatic: true }   // a sub on this ice is broken
-automaticOnSubroutineResolved: { Resolve }                 // an unbroken sub resolves
+automaticOnSubroutineFiring:   { Resolve }                 // an unbroken sub starts resolving
 ```
 
 An automatic `responseOnEncounter` receives no parameters; use

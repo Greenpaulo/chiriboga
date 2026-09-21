@@ -200,8 +200,8 @@ cardSet[36002] = {
       MakeRun(targetServer);
     }
   },
-  automaticOnSubroutineResolved: {
-    Resolve: function (ice, resolvedSubroutine) {
+  automaticOnSubroutineFiring: {
+    Resolve: function (ice, firingSubroutine) {
       if (this.runningWithThis) this.subroutineResolvedThisRun = true;
     },
   },

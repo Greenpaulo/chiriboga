@@ -277,15 +277,23 @@ Add the set's code to each applicable `formatRegistry.<format>.sets` array in
 short code) to `setRegistry.decklauncherSets` or
 `setRegistry.gauntletSets` only when it should be selected by default there.
 
-No card-ID list needs to be added to `utility.js`. In Custom Game mode,
-`DeckBuildCollectSetCards()` derives the random-deck pool from all loaded cards
-whose set codes are legal for the selected format. It classifies cards using
-`player`, `cardType` and `subTypes`, and excludes definitions with unusable
-influence or agenda-point data.
+No card-ID list is needed for basic eligibility in `utility.js`. In Custom
+Game mode, `DeckBuildCollectSetCards()` derives the random-deck pool from all
+loaded cards whose set codes are legal for the selected format. It classifies
+cards using `player`, `cardType` and `subTypes`, and excludes definitions with
+unusable influence or agenda-point data.
 
 This means registration and card fields are the integration points. A new set
 with correct definitions automatically becomes available to random decks in
 every format that lists its code.
+
+However, `DeckBuildFromAllowedSets()` still uses curated numeric-ID pools to
+guarantee that part of each deck supplies economy and, for the Runner, draw.
+New cards remain eligible for the general fill without those lists, but new
+sets do not automatically contribute to the guaranteed role slots. Review the
+curated pools when integrating a set that adds economy or draw cards. The
+planned move to per-card role metadata is tracked in
+`documentation/backlog/deckbuilder-economy-draw-classification-backlog.md`.
 
 ## 8. Verify the integration
 
