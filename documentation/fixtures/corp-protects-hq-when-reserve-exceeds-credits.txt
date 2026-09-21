@@ -1,0 +1,10 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, advance, n
+// EXPECT: install
+// EXPECT_SERVER: HQ
+// SETUP: corp.creditPool=7; corp.clickTracker=3; runner.creditPool=3
+// NOTE: Reconstructed before click 1: HQ holds two agendas and Semak-samun, while the global ICE reserve requires 16 credits.
+RunnerTestField(30001, [30020,35026,30020,30007], [35007,35004,30004,35007,35011,35007,35029,30030,35011,35004,35004,30030,35009,35009,30009,30030,30034,30008,30007,30027,30004,35010,30003,30008,30027,35009,30022,30013,30034], [30003,35010,35008], [35010,30009,30007,30005], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [35072,30050,30053,30053,30053], [30046,35054,30050,35054,35051,35051,30040,30048,35050,35048,35050,30067,35052,35051,35049,30047,30075,30075,35072,30048,30073,30073,35049,30040,30071,35072,35049,35048,30067,30071,30040,35050,30048,35052], [30044,35048,35054], [35053], [30047], [35079], [[30067,30073,35052]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.AISuccessfulRuns=9;

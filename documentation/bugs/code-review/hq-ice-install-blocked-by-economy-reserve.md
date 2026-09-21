@@ -1,9 +1,9 @@
 # Corp AI: never considers installing ICE on an unsecure HQ holding 2 agendas (Semak-samun stays in hand all turn) because the "too poor for new layers" reserve is 16 credits
 
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/fixed/` once the fixture in section 5 is merged).
-**Source:** `documentation/debug-logs/corp_didnt_choose_to_play_ice_to_secure_hq_even_though_its_unsecure.txt`
+**Source:** `documentation/debug-logs/bug_raised/corp_didnt_choose_to_play_ice_to_secure_hq_even_though_its_unsecure.txt`
 **File:** `ai_corp.js` (line numbers are from `main` at `bd9bd79` and will drift; search by function name).
-**Status:** Diagnosed and reproduced. Every bad decision in this log is already corrected on `main` by the fixes for `pointless-archives-ice-install.md`, `hq-draw-gate-ignores-server-security.md` and `rez-decision-saves-credits-for-other-server-on-tie.md`. Nothing new needs implementing except regression coverage (section 5) and the maintainer decisions in section 4.3.
+**Status:** Validated against current `main` and covered by a regression fixture. Every bad decision in this log is already corrected by the fixes for `pointless-archives-ice-install.md`, `hq-draw-gate-ignores-server-security.md` and `rez-decision-saves-credits-for-other-server-on-tie.md`. No additional AI decision-logic change is needed; the remaining real-game observation and optional fixture are follow-ups.
 
 ---
 
@@ -217,10 +217,26 @@ Also run `node documentation/fixtures/corp-decision-fixtures.test.js`, `node tes
 
 ## 8. Acceptance criteria
 
-- [ ] Fixture A is added under `documentation/fixtures/` and passes on `main`.
-- [ ] Fixture A fails (returns `gain`) when the `serverAtRisk` term in `_shouldInstallIceLayer()` is temporarily disabled, confirming it guards the right behaviour.
+- [x] Fixture A is added under `documentation/fixtures/` and passes on `main`.
+- [x] Fixture A fails (returns `gain`) when the `serverAtRisk` term in `_shouldInstallIceLayer()` is temporarily disabled, confirming it guards the right behaviour.
 - [ ] (Optional) Fixture B is added, with `EXPECT_SERVER` extended to accept `!`, and passes on `main`.
-- [ ] `node documentation/fixtures/corp-decision-fixtures.test.js` passes apart from the pre-existing `mulligan-one-ice-three-economy.txt` failure.
-- [ ] `node tests/corp-server-security.test.js` and `node -c ai_corp.js` pass.
-- [ ] No AI decision logic is changed unless the maintainer chooses otherwise in section 4.3.
+- [x] `node documentation/fixtures/corp-decision-fixtures.test.js` passes apart from the pre-existing `mulligan-one-ice-three-economy.txt` failure.
+- [x] `node tests/corp-server-security.test.js` and `node -c ai_corp.js` pass.
+- [x] No AI decision logic is changed unless the maintainer chooses otherwise in section 4.3.
 - [ ] In the next real-game debug log, ranking lines show non-zero `debt:` values (evidence that the aging hook from `86a898f` runs in real games).
+
+---
+
+## 9. Implementation record (2026-09-21)
+
+Reviewed the report against the current `_shouldInstallIceLayer()` implementation and the source log. The diagnosis and recommendation in section 4.3 still hold: the existing `serverAtRisk` exemption is the correct fix for this state, while broadening it to servers that already have unrezzed ICE or replacing the global reserve remains out of scope.
+
+Added `documentation/fixtures/corp-protects-hq-when-reserve-exceeds-credits.txt` from the source log's final board dump, with Hedge Fund removed from Archives to reconstruct the state before click 1. The fixture reproduces the logged HQ score exactly (`-10.712662235383064`) and selects `install`, Semak-samun, on HQ. With only the `serverAtRisk` exemption disabled in memory, it fails by selecting `gain`, confirming that it covers the intended behaviour.
+
+Validation results:
+
+- `node documentation/fixtures/corp-decision-fixtures.test.js`: 7 passed, with only the documented pre-existing `mulligan-one-ice-three-economy.txt` failure.
+- `node tests/corp-server-security.test.js`: all 81 regression cases passed.
+- `node -c ai_corp.js`: passed.
+
+No AI decision logic was changed. Fixture B remains optional, and the non-zero protection-debt check still requires a future real-game log.
