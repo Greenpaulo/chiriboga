@@ -1425,54 +1425,6 @@ class CorpAI {
     return ret;
   }
 
-  // Evaluate HQ danger state - returns danger level string and logs analysis
-  // Returns: "HQ_CRITICAL_HAZARD", "HQ_MODERATE_HAZARD", or "HQ_SAFE"
-  _evaluateHQDanger() {
-    var hqIce = corp.HQ.ice ? corp.HQ.ice.length : 0;
-    var agendaCount = this._agendasInHand();
-    var nonAgendaCount = corp.HQ.cards.length - agendaCount;
-
-    this._log(
-      "HQ Danger Evaluation - ICE: " +
-        hqIce +
-        ", Agendas: " +
-        agendaCount +
-        ", Non-Agendas: " +
-        nonAgendaCount,
-    );
-
-    // Critical hazard: HQ has 0 ICE and multiple agendas (agenda flood risk)
-    if (hqIce === 0 && agendaCount >= 2) {
-      this._log(
-        "HQ_CRITICAL_HAZARD: Naked HQ with " +
-          agendaCount +
-          " agendas - drawing increases agenda density!",
-      );
-      return "HQ_CRITICAL_HAZARD";
-    }
-
-    // Moderate hazard: HQ has 0 ICE with 1 agenda, or 1+ ICE with many agendas
-    if (hqIce === 0 && agendaCount === 1) {
-      this._log("HQ_MODERATE_HAZARD: Naked HQ with 1 agenda");
-      return "HQ_MODERATE_HAZARD";
-    }
-
-    if (hqIce > 0 && agendaCount >= 3) {
-      this._log(
-        "HQ_MODERATE_HAZARD: HQ has " +
-          hqIce +
-          " ICE but " +
-          agendaCount +
-          " agendas (potential flood)",
-      );
-      return "HQ_MODERATE_HAZARD";
-    }
-
-    // Safe: HQ has ICE or no agendas to worry about
-    this._log("HQ_SAFE: HQ is adequately protected or no agenda flood risk");
-    return "HQ_SAFE";
-  }
-
   //**SERVER SECURITY EVALUATION**
   //Heuristic estimates of whether a server is genuinely safe from the Runner
   //this turn: either the Runner has no way through ('hard lockout') or they
@@ -3131,26 +3083,30 @@ class CorpAI {
         }
       }
 
-      // Check HQ danger state before drawing - avoid increasing agenda density when HQ is naked
-      var hqDanger = this._evaluateHQDanger();
+      // Drawing raises agenda density in HQ. That only matters if the Runner
+      // can actually get into HQ.
+      var hqSecure = this._evaluateServerSecurity(corp.HQ).isSecure;
+      var agendasInHand = this._agendasInHand();
       var drawIsOK = true;
 
-      if (hqDanger === "HQ_CRITICAL_HAZARD") {
-        // Severely penalize drawing when HQ is naked with multiple agendas
-        // Drawing increases agenda density, giving runner easy points
+      if (hqSecure) {
+        // Runner cannot breach HQ this turn: drawing is safe.
+      } else if (agendasInHand >= 2) {
         drawIsOK = false;
         this._log(
-          "HQ_CRITICAL_HAZARD: Deprioritizing draw to avoid increasing agenda density",
+          "HQ is breachable with " +
+            agendasInHand +
+            " agendas in hand: not drawing",
         );
         // Don't return early - let the standard decision loop handle priorities
         // This allows the AI to still score agendas, play economy cards, or install ICE
         // through the normal action selection process
-      } else if (hqDanger === "HQ_MODERATE_HAZARD" && this._clicksLeft() < 2) {
-        // Moderate hazard on last click - be cautious about drawing
+      } else if (agendasInHand === 1 && this._clicksLeft() < 2) {
         drawIsOK = false;
-        this._log("HQ_MODERATE_HAZARD on last click: Deprioritizing draw");
+        this._log(
+          "HQ is breachable with 1 agenda in hand on last click: not drawing",
+        );
       } else if (this._clicksLeft() < 2) {
-        // Original protection score check for non-hazard situations
         if (
           this._protectionScore(corp.HQ, {
             returnArchivesLowerScoreForHQIfBackdoor: true,

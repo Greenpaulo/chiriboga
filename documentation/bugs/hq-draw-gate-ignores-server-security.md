@@ -3,7 +3,7 @@
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/fixed/` once merged).
 **Source:** `documentation/debug-logs/corp_drew_3_agendas_even_though_hq_wasn't_secure.txt`
 **File:** `ai_corp.js` (line numbers are from `main` when this was written and will drift; search by function name).
-**Status:** Diagnosed by reading the log and the code. The fix below has **not** been run.
+**Status:** Fixed and regression-tested. See section 9 for the implementation record.
 
 ---
 
@@ -202,10 +202,49 @@ These came up while tracing the log. They are unverified beyond what is noted.
 
 ## 8. Acceptance criteria
 
-- [ ] `_evaluateHQDanger()` and its comment header are removed, and `grep -rn "_evaluateHQDanger\|HQ_CRITICAL_HAZARD\|HQ_MODERATE_HAZARD" --include="*.js" .` returns nothing.
-- [ ] The click-draw gate uses `this._evaluateServerSecurity(corp.HQ).isSecure` and `this._agendasInHand()`.
-- [ ] A breachable HQ with 2+ agendas in hand never chooses `draw` at any click count.
-- [ ] A secure HQ still allows `draw`.
-- [ ] New fixture(s) from section 5 fail before the change and pass after.
-- [ ] `node -c ai_corp.js` passes and existing tests still pass.
-- [ ] No other AI decision logic was changed.
+- [x] `_evaluateHQDanger()` and its comment header are removed, and `grep -rn "_evaluateHQDanger\|HQ_CRITICAL_HAZARD\|HQ_MODERATE_HAZARD" --include="*.js" .` returns nothing.
+- [x] The click-draw gate uses `this._evaluateServerSecurity(corp.HQ).isSecure` and `this._agendasInHand()`.
+- [x] A breachable HQ with 2+ agendas in hand never chooses `draw` at any click count.
+- [x] A secure HQ still allows `draw`.
+- [x] New fixture(s) from section 5 fail before the change and pass after.
+- [x] `node -c ai_corp.js` passes and existing tests still pass.
+- [x] No other AI decision logic was changed.
+
+---
+
+## 9. Implementation record
+
+Implemented the minimal-threshold version proposed in section 4.
+
+### 9.1 Code changes
+
+- Removed `_evaluateHQDanger()` and all uses of `HQ_CRITICAL_HAZARD`, `HQ_MODERATE_HAZARD`, and `HQ_SAFE` from `ai_corp.js`.
+- Changed the click-draw gate to evaluate HQ once with `this._evaluateServerSecurity(corp.HQ).isSecure` and count agendas with `this._agendasInHand()`.
+- A breachable HQ containing 2 or more agendas now blocks a basic draw at every click count.
+- A breachable HQ containing 1 agenda blocks a basic draw only on the last click, preserving the existing minimal threshold.
+- A secure HQ permits the draw without applying the old last-click HQ-versus-R&D protection comparison.
+- When a draw is blocked, the AI continues through the normal decision ladder instead of returning early. In the reproduction fixture it chooses `gain`.
+
+No other Corp AI decision logic was changed.
+
+### 9.2 Regression fixtures
+
+Added these fixtures under `documentation/fixtures/`:
+
+| Fixture | Coverage | Result |
+|---|---|---|
+| `corp-no-draw-breachable-hq-two-agendas.txt` | Reproduces Flyswatter being cheaply broken by Buzzsaw with 2 agendas in HQ | Chooses `gain`, not `draw` |
+| `corp-draw-ok-when-hq-secure.txt` | Uses the same HQ state without an installed decoder, making Flyswatter a hard lockout | Chooses `draw` |
+| `corp-draw-ok-one-agenda-early.txt` | Confirms the retained minimal threshold with 1 agenda and 3 clicks | Chooses `draw` |
+
+The fixture runner in `documentation/fixtures/corp-decision-fixtures.test.js` was also corrected to load the repository from its actual location, supply the engine helpers required by `Phase_Main`, discover fixtures from its current directory, and accept fixture filenames so focused subsets can be run.
+
+### 9.3 Verification
+
+- The three new decision fixtures pass: **3 passed, 0 failed**.
+- `node tests/corp-server-security.test.js` passes: **73 regression cases passed**.
+- `node -c ai_corp.js` passes.
+- `git diff --check` passes.
+- A JavaScript search for `_evaluateHQDanger`, `HQ_CRITICAL_HAZARD`, `HQ_MODERATE_HAZARD`, and `HQ_SAFE` returns no matches.
+
+The complete decision-fixture collection still includes the pre-existing intentionally failing `mulligan-one-ice-three-economy.txt` fixture described in the fixture guide. That unrelated known-red case was not changed as part of this fix.

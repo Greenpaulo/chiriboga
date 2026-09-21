@@ -5,10 +5,11 @@
 // at the end of a downloaded game log. This file supplies headless versions of those
 // functions (plain card objects, no PIXI) so the dump can be evaluated as-is.
 //
-// Usage:  node tests/corp-decision-fixtures.test.js            run every fixture
-//         AI_LOG=1 node tests/corp-decision-fixtures.test.js   also print the AI's own reasoning
-//         node tests/corp-decision-fixtures.test.js --ids      list card ids to help write fixtures
-//         node tests/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
+// Usage:  node documentation/fixtures/corp-decision-fixtures.test.js          run every fixture
+//         node documentation/fixtures/corp-decision-fixtures.test.js FILE...  run selected fixtures
+//         AI_LOG=1 node documentation/fixtures/corp-decision-fixtures.test.js also print the AI's own reasoning
+//         node documentation/fixtures/corp-decision-fixtures.test.js --ids    list card ids to help write fixtures
+//         node documentation/fixtures/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
 //                                                    (returns false; results are NOT trustworthy until real stubs are written)
 //
 // Directives:  // PHASE: Phase_Main        (default Phase_Main; e.g. Phase_Mulligan, Phase_Score)
@@ -19,7 +20,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '..', '..');
 const corp = {}, runner = {};
 const context = {console, corp, runner, playerTurn: corp, cardSet: {}, setIdentifiers: [], encountering: false, attackedServer: null, approachIce: -1};
 let servers = [];
@@ -34,6 +35,11 @@ context.CheckCredits = (player, cost) => player.creditPool >= cost;
 context.CheckRez = (card, types) => types.includes(card.cardType) && !card.rezzed && card.rezCost !== undefined;
 context.AllottedClicks = player => player === runner ? 4 : 3;
 context.InstalledCards = player => player === runner ? runner.cards : servers.reduce((cards, server) => cards.concat(server.ice, server.root), []);
+context.AllCards = player => {
+  const corpCards = context.InstalledCards(corp).concat(corp.scoreArea, corp.HQ.cards, corp.RnD.cards, corp.archives.cards);
+  const runnerCards = context.InstalledCards(runner).concat(runner.scoreArea, runner.grip, runner.stack, runner.heap);
+  return player === corp ? corpCards : player === runner ? runnerCards : corpCards.concat(runnerCards);
+};
 context.ActiveCards = player => {
   const runnerCards = runner.cards.concat(runner.identityCard ? [runner.identityCard] : []);
   const corpCards = corp.scoreArea;
@@ -53,6 +59,9 @@ context.PlayerCanLook = (player, card) => player === corp || !!card.rezzed;
 context.GetServer = card => servers.find(server => server.ice.includes(card));
 context.ServerName = () => 'Fixture server';
 context.AdvancementRequirement = card => card.advancementRequirement || 0;
+context.MaxHandSize = () => 5;
+context.PlayerHand = player => player === corp ? corp.HQ.cards : runner.grip;
+context.Link = () => (runner.identityCard && runner.identityCard.link) || 0;
 context.CheckTags = num => (runner.tags || 0) >= num;
 context.CheckScore = card => (card.advancement || 0) >= context.AdvancementRequirement(card);  // approximation of the engine check
 
@@ -114,6 +123,9 @@ function finaliseState() {
 }
 
 vm.createContext(context);
+// Establish mutable global bindings as well as properties on the context object.
+// Some AI helpers temporarily replace these values while evaluating an encounter.
+vm.runInContext('var attackedServer = null, encountering = false, approachIce = -1;', context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
 ['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js'].forEach(file =>
@@ -133,8 +145,10 @@ if (process.argv.includes('--ids')) {
 }
 
 // ---- run fixtures ----
-const dir = path.join(__dirname, 'fixtures', 'corp-decisions');
-const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort() : [];
+const dir = __dirname;
+const requestedFixtures = process.argv.slice(2).filter(arg => arg.endsWith('.txt'));
+const files = requestedFixtures.length ? requestedFixtures :
+  (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort() : []);
 let passed = 0, failed = 0;
 files.forEach(file => {
   const src = fs.readFileSync(path.join(dir, file), 'utf8').replace(/\r/g, '');

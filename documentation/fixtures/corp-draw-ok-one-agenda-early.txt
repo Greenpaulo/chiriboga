@@ -1,0 +1,7 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw
+// EXPECT: draw
+// SETUP: corp.creditPool=15; corp.clickTracker=3; runner.creditPool=0; corp.HQ.ice[0].rezzed=true
+// NOTE: The minimal threshold still allows an early draw with one agenda in a breachable HQ.
+RunnerTestField(30019, [], [], [], [30005], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [], [35048,30075,30075,30075], [], [], [35079], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);

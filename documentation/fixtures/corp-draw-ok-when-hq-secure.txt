@@ -1,0 +1,7 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw
+// EXPECT: draw
+// SETUP: corp.creditPool=15; corp.clickTracker=2; runner.creditPool=0; corp.HQ.ice[0].rezzed=true
+// NOTE: With no decoder installed, Flyswatter is a hard lockout and drawing remains safe.
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [], [35048,35049,30075,30075], [], [], [35079], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
