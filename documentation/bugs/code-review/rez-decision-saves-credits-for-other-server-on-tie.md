@@ -172,7 +172,7 @@ This document assumes the minimal change unless told otherwise.
 
 ## 5. Tests
 
-Follow `documentation/fixtures/corp_ai_decision_fixtures_guide.md`. Note that the guide says mid-run state is probably not covered by the fixture runner, and this decision is made in `Phase_Approaching` with `attackedServer` and `approachIce` set. Two options:
+Follow `tests/fixtures/README.md`. This decision is made in `Phase_Approaching` with `attackedServer` and `approachIce` set; current decision snapshots preserve that run state. Two options:
 
 1. Try a fixture with `// PHASE: Phase_Approaching` and `// OPTIONS: rez, ...`, setting `attackedServer=corp.HQ; approachIce=0` in `SETUP`. The runner may need extra stubs (`CheckRez`, `RezCost`, `CheckCredits`, `ServerName`, `GetServer`, ...).
 2. Call `ai._iceWorthRezzing(card, RezCost(card))` directly in the `tests/corp-server-security.test.js` sandbox. This avoids the encounter-state problem and is the more reliable option.

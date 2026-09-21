@@ -13,11 +13,11 @@ On the last Corp turn in the log, HQ held 3 agendas and was protected by a singl
 
 Three separate problems combine to produce this:
 
-| # | Problem | Where it comes from |
-|---|---|---|
-| A | The "already protected this turn" list (`_protectionInstallsThisTurn`) is never cleared in real games, so every server that matters looks "already handled" and the AI falls through to the least important one. | **This fork** (Layer 3.5, commit `82d1387`, 2026-09-16) |
-| B | Archives is an eligible ICE-install target even when it holds nothing worth protecting. | The fallback in `_serverToProtect()` (fork code) plus the +3 deprioritisation in `_protectionScore()` (upstream) |
-| C | The "too poor for new layers" gate refuses to add ICE to a server that already has any rezzed ICE, however weak that ICE is, whenever the Corp's credits are below a global reserve. It ignores how breachable the server is and what is at stake. | **Upstream** (`bobtheuberfish/chiriboga`), unchanged in `drbo6/chiriboga`, present since this repo's first commit |
+| #   | Problem                                                                                                                                                                                                                                            | Where it comes from                                                                                               |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| A   | The "already protected this turn" list (`_protectionInstallsThisTurn`) is never cleared in real games, so every server that matters looks "already handled" and the AI falls through to the least important one.                                   | **This fork** (Layer 3.5, commit `82d1387`, 2026-09-16)                                                           |
+| B   | Archives is an eligible ICE-install target even when it holds nothing worth protecting.                                                                                                                                                            | The fallback in `_serverToProtect()` (fork code) plus the +3 deprioritisation in `_protectionScore()` (upstream)  |
+| C   | The "too poor for new layers" gate refuses to add ICE to a server that already has any rezzed ICE, however weak that ICE is, whenever the Corp's credits are below a global reserve. It ignores how breachable the server is and what is at stake. | **Upstream** (`bobtheuberfish/chiriboga`), unchanged in `drbo6/chiriboga`, present since this repo's first commit |
 
 Fixing A and B stops the Archives install. Fixing C is what makes the AI protect HQ at low credits instead of doing nothing.
 
@@ -29,13 +29,13 @@ Corp: AU Co. Runner: René "Loup" Arcemont (rig: DZMZ Optimizer, Carnivore, Leec
 
 Last Corp turn (log lines ~848-914):
 
-| Step | State / decision | Notes |
-|---|---|---|
-| Start of turn | 5 credits, hand `[Longevity Serum, Anthill Excavation Contract, Hedge Fund, Proprionegation, Semak-samun]` | AU Co. "look at top 3" added 2 cards to HQ and trashed 1; then the mandatory draw. **Inferred** hand at click 1 (8 cards): the five above plus Spin Doctor, Karunā, a second Proprionegation. |
-| Click 1 | `Ranked server protection: HQ -10.075, null 1, archives 3, R&D 4.375`, then `Corp installed ice protecting Archives` | Semak-samun (rez 3) went on Archives. |
-| Click 2 | `I am feeling poor`, plays Hedge Fund (+4 net, 9 credits) | The new unrezzed Semak-samun raised the "reserve", so the Corp now counted as poor. |
-| Click 3 | `No obvious install options`, gains a credit | 9 credits, HQ still at -10.075, Karunā still in hand. |
-| Runner turn | Corp has 10 credits and 5 cards: `[Spin Doctor, Karunā, Proprionegation, Longevity Serum, Proprionegation]` | HQ still has one Tithe. |
+| Step          | State / decision                                                                                                     | Notes                                                                                                                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Start of turn | 5 credits, hand `[Longevity Serum, Anthill Excavation Contract, Hedge Fund, Proprionegation, Semak-samun]`           | AU Co. "look at top 3" added 2 cards to HQ and trashed 1; then the mandatory draw. **Inferred** hand at click 1 (8 cards): the five above plus Spin Doctor, Karunā, a second Proprionegation. |
+| Click 1       | `Ranked server protection: HQ -10.075, null 1, archives 3, R&D 4.375`, then `Corp installed ice protecting Archives` | Semak-samun (rez 3) went on Archives.                                                                                                                                                         |
+| Click 2       | `I am feeling poor`, plays Hedge Fund (+4 net, 9 credits)                                                            | The new unrezzed Semak-samun raised the "reserve", so the Corp now counted as poor.                                                                                                           |
+| Click 3       | `No obvious install options`, gains a credit                                                                         | 9 credits, HQ still at -10.075, Karunā still in hand.                                                                                                                                         |
+| Runner turn   | Corp has 10 credits and 5 cards: `[Spin Doctor, Karunā, Proprionegation, Longevity Serum, Proprionegation]`          | HQ still has one Tithe.                                                                                                                                                                       |
 
 The `HQ WEAKER THAN R&D ... protection score penalized` line and the -10.075 score show the evaluator knew HQ was in trouble the whole time. The decision about where to install ICE ignored it.
 
@@ -43,19 +43,19 @@ The `HQ WEAKER THAN R&D ... protection score penalized` line and the -10.075 sco
 
 ## 3. How this was reproduced
 
-The log's final `RunnerTestField(...)`/`CorpTestField(...)` dump is the state **after** the turn. I rebuilt the state before click 1 from it (Semak-samun moved back from Archives into HQ, Hedge Fund and Anthill moved from Archives to HQ, HQ hand of 8) and ran `Phase_Main` in the fixture runner (`documentation/fixtures/corp-decision-fixtures.test.js`). The full fixture is in Appendix A.
+The log's final `RunnerTestField(...)`/`CorpTestField(...)` dump is the state **after** the turn. I rebuilt the state before click 1 from it (Semak-samun moved back from Archives into HQ, Hedge Fund and Anthill moved from Archives to HQ, HQ hand of 8) and ran `Phase_Main` in the fixture runner (`tests/corp-decision-fixtures.test.js`). The full fixture is in Appendix A.
 
 The reconstruction reproduces the log's ranking exactly (`HQ -10.075, null 1, archives 3, R&D 4.375`), which is the main reason to trust it. The hand contents and which ICE were rezzed are inferred (see Appendix A notes).
 
 Results (Corp credits 5, clicks 3 unless noted):
 
-| Scenario | Allocation list | Code | Result |
-|---|---|---|---|
-| 1 | Empty (clean) | baseline | **No install at all** (`No obvious install options`). HQ stays exposed. This is problem C. |
-| 2 | Empty (clean), **9 credits** | baseline | Installs Semak-samun on **HQ**. |
-| 3 | HQ, R&D, new-remote slot and Remote 0 already marked | baseline | `_serverToProtect()` returns Archives; installs Semak-samun on **Archives**. **This is exactly the log.** This is problems A and B. |
-| 4 | Empty (clean) | prototype gate change (Appendix C) | Installs Semak-samun on HQ at 5 credits. |
-| 5 | HQ, R&D, new-remote slot and Remote 0 already marked | both prototype changes | Installs Semak-samun on HQ. |
+| Scenario | Allocation list                                      | Code                               | Result                                                                                                                              |
+| -------- | ---------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1        | Empty (clean)                                        | baseline                           | **No install at all** (`No obvious install options`). HQ stays exposed. This is problem C.                                          |
+| 2        | Empty (clean), **9 credits**                         | baseline                           | Installs Semak-samun on **HQ**.                                                                                                     |
+| 3        | HQ, R&D, new-remote slot and Remote 0 already marked | baseline                           | `_serverToProtect()` returns Archives; installs Semak-samun on **Archives**. **This is exactly the log.** This is problems A and B. |
+| 4        | Empty (clean)                                        | prototype gate change (Appendix C) | Installs Semak-samun on HQ at 5 credits.                                                                                            |
+| 5        | HQ, R&D, new-remote slot and Remote 0 already marked | both prototype changes             | Installs Semak-samun on HQ.                                                                                                         |
 
 Scenario 3 shows the Archives choice needs stale allocations. Scenario 1 shows that even without them the AI would have done nothing useful for HQ at 5 credits.
 
@@ -95,12 +95,14 @@ Not added in this fork: the gate, its comment (`//too poor? don't spend frivolou
 What it actually does:
 
 ```js
-var iceInstallEconomyCheck = this._sufficientEconomy(false, 4);   // "the 4 is arbitrary"
+var iceInstallEconomyCheck = this._sufficientEconomy(false, 4); // "the 4 is arbitrary"
 var serverToInstallTo = this._serverToProtect();
 var iceInstallSituationCheck = this._unrezzedIce(serverToInstallTo).length == 0;
 if (!iceInstallEconomyCheck && this._rezzedIce(serverToInstallTo).length > 0)
-  iceInstallSituationCheck = false;                                 // "too poor" gate
-if (iceInstallSituationCheck || iceInstallEconomyCheck) { /* consider ICE for serverToInstallTo */ }
+  iceInstallSituationCheck = false; // "too poor" gate
+if (iceInstallSituationCheck || iceInstallEconomyCheck) {
+  /* consider ICE for serverToInstallTo */
+}
 ```
 
 It is not a fixed "under 8 credits" rule. `_sufficientEconomy(false, 4)` requires `Credits(corp) >= (sum of rez costs of EVERY unrezzed installed ICE, asset and upgrade) + (reserved use costs for a 13-title table, remotes only) + 4`. In the reconstructed board that sum is R&D Tithe (1) + Remote 0's unrezzed Semak-samun (3) = 4, so the threshold happens to be 8. I confirmed 5, 6, 7 credits fail and 8+ pass. The threshold moves whenever any ICE anywhere on the board is unrezzed.
@@ -124,9 +126,12 @@ Move `_ageProtectionPriorities()` out of `Phase_EOT` and into the engine's exist
 
 ```js
 // phase.js, in the start-of-turn block, for the Corp's turn only:
-if (currentPhase.identifier == "Corp 1.2" && corp.AI &&
-    typeof corp.AI._ageProtectionPriorities === "function") {
-  corp.AI._ageProtectionPriorities();   // end of the Runner turn = start of the Corp turn
+if (
+  currentPhase.identifier == "Corp 1.2" &&
+  corp.AI &&
+  typeof corp.AI._ageProtectionPriorities === "function"
+) {
+  corp.AI._ageProtectionPriorities(); // end of the Runner turn = start of the Corp turn
 }
 ```
 
@@ -153,7 +158,7 @@ Exclude an Archives that holds no agendas and is not a backdoor into HQ from the
 1. **How insecure is the target?** Use `_evaluateServerSecurity(target)`: `isSecure`, and how far `totalBreakCost` is below the Runner's effective credit pool. A server the Runner can breach for free needs a layer far more than one that costs 6 to break.
 2. **What is at stake?** HQ: agendas in hand (and hand size). Remote: agenda or asset value and advancement. Archives: agendas in it, or being a backdoor to HQ. R&D: no hidden-information shortcut, so keep the current handling.
 3. **Would this specific ICE change the answer?** Compare the evaluator before and after a hypothetical install (the install-decision roadmap already requires hypothetical evaluation to be side-effect free; use the same overlay).
-4. **Can we afford it?** Install cost plus rez cost against current credits (plus expected income if it can wait a click). Only reserve credits that are *needed* for rezzing ICE that protects something, and compare that reserve against the gap being closed, rather than blocking outright.
+4. **Can we afford it?** Install cost plus rez cost against current credits (plus expected income if it can wait a click). Only reserve credits that are _needed_ for rezzing ICE that protects something, and compare that reserve against the gap being closed, rather than blocking outright.
 5. Keep the old frugality only for servers that are already secure or have nothing to lose.
 
 Related: `documentation/backlog/corp_ai_review_findings.md` item 8 already flags `_sufficientEconomy()`'s hard-coded reserve table (`AIReserveCredits` proposal). This gate is a separate problem, but a shared redesign of the reserve would help both.
@@ -164,18 +169,18 @@ Related: `documentation/backlog/corp_ai_review_findings.md` item 8 already flags
 
 ## 6. Tests
 
-Use the fixture runner (`documentation/fixtures/corp-decision-fixtures.test.js`; its guide says `tests/`, the file currently sits in `documentation/fixtures/`, so check where it should live) and `tests/corp-server-security.test.js`.
+Use the fixture runner (`tests/corp-decision-fixtures.test.js`; see `tests/fixtures/README.md`) and `tests/corp-server-security.test.js`.
 
 Fixture A (Appendix A) reproduces the log. The runner currently checks only the chosen command name, so it needs a small extension to also check the install target. Add an `// EXPECT_SERVER: HQ` directive that compares `ai.preferred.serverToInstallTo.serverName` after `Phase_Main` returns.
 
-| Test | Setup | Expected |
-|---|---|---|
-| `corp-protects-hq-not-archives-stale-allocation` | Appendix A, plus `SETUP: reviewAI._protectionInstallsThisTurn=[corp.HQ, corp.RnD, null, corp.remoteServers[0]]` | install, server HQ (fails before Fix 2, currently Archives) |
-| `corp-protects-hq-when-poor` | Appendix A, 5 credits, clean allocation | install, server HQ (fails before Fix 3, currently no install) |
-| `corp-no-ice-on-empty-archives` | Unit test in `corp-server-security.test.js`: `_serverToProtect()` never returns Archives when Archives holds no agenda and is not a backdoor, even if every other server is allocated | HQ (worst server) |
-| `corp-archives-with-agenda-still-protectable` | Same, with an agenda in Archives | Archives allowed |
-| `corp-gate-still-skips-secure-server` | Target server secure, Corp poor | no extra layer (old behaviour preserved) |
-| `allocation-reset-each-turn` | Unit test: after the turn-start hook, `_protectionInstallsThisTurn` is empty and debt reflects the previous round exactly once | passes with and without a `Phase_EOT` call |
+| Test                                             | Setup                                                                                                                                                                                 | Expected                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `corp-protects-hq-not-archives-stale-allocation` | Appendix A, plus `SETUP: reviewAI._protectionInstallsThisTurn=[corp.HQ, corp.RnD, null, corp.remoteServers[0]]`                                                                       | install, server HQ (fails before Fix 2, currently Archives)   |
+| `corp-protects-hq-when-poor`                     | Appendix A, 5 credits, clean allocation                                                                                                                                               | install, server HQ (fails before Fix 3, currently no install) |
+| `corp-no-ice-on-empty-archives`                  | Unit test in `corp-server-security.test.js`: `_serverToProtect()` never returns Archives when Archives holds no agenda and is not a backdoor, even if every other server is allocated | HQ (worst server)                                             |
+| `corp-archives-with-agenda-still-protectable`    | Same, with an agenda in Archives                                                                                                                                                      | Archives allowed                                              |
+| `corp-gate-still-skips-secure-server`            | Target server secure, Corp poor                                                                                                                                                       | no extra layer (old behaviour preserved)                      |
+| `allocation-reset-each-turn`                     | Unit test: after the turn-start hook, `_protectionInstallsThisTurn` is empty and debt reflects the previous round exactly once                                                        | passes with and without a `Phase_EOT` call                    |
 
 Also run `node -c ai_corp.js`, `node -c phase.js`, and the existing suite.
 
@@ -225,7 +230,7 @@ Implemented Fixes 1 and 2 plus Fix 3 Option A, as recommended in section 5.
 
 ### 10.2 Regression coverage
 
-- Extended `documentation/fixtures/corp-decision-fixtures.test.js` with `EXPECT_SERVER`, so a fixture can verify the install destination as well as the command. Also added the missing deterministic `Shuffle` stub needed by this reconstruction.
+- Extended `tests/corp-decision-fixtures.test.js` with `EXPECT_SERVER`, so a fixture can verify the install destination as well as the command. Also added the missing deterministic `Shuffle` stub needed by this reconstruction.
 - Added `corp-protects-hq-when-poor.txt`: with 5 credits and a clean allocation list, the AI chooses `install` targeting HQ.
 - Added `corp-protects-hq-not-archives-stale-allocation.txt`: with HQ, R&D, the new-remote slot and Remote 0 already allocated, the AI still chooses `install` targeting HQ rather than Archives.
 - Added unit coverage for empty Archives exclusion, Archives containing an agenda, the poor/breachable versus poor/secure economy rule, and the opening-turn aging guard.
@@ -246,7 +251,7 @@ The code-level behavior and reconstructed decision are verified. A real graphica
 
 ## Appendix A: reconstructed fixture (`corp-protects-hq-not-archives.txt`)
 
-This is the log's final dump with the end-of-turn changes reversed (Semak-samun back in HQ instead of Archives, Hedge Fund and Anthill back in HQ). The implemented clean and stale-allocation variants are saved under `documentation/fixtures/`.
+This is the log's final dump with the end-of-turn changes reversed (Semak-samun back in HQ instead of Archives, Hedge Fund and Anthill back in HQ). The implemented clean and stale-allocation variants are saved under `tests/fixtures/corp-decisions/`.
 
 ```
 // PHASE: Phase_Main
@@ -275,10 +280,10 @@ Assumptions in this reconstruction: HQ hand of 8 as described in section 2; only
 These were the missing stubs identified during diagnosis. The needed equivalents, including deterministic `Shuffle`, are now present in `corp-decision-fixtures.test.js`; `FullCheckPlay` was not needed to verify the selected install command and target.
 
 ```js
-context.PlayerHand = p => p === corp ? corp.HQ.cards : runner.grip;
-context.MaxHandSize = p => 5;
+context.PlayerHand = (p) => (p === corp ? corp.HQ.cards : runner.grip);
+context.MaxHandSize = (p) => 5;
 context.Link = () => 0;
-context.Shuffle = a => a;
+context.Shuffle = (a) => a;
 context.AllCards = () => [];
 // still needed to get past the install decision to the economy branch (was missing when I stopped):
 // context.FullCheckPlay = ...
@@ -287,9 +292,16 @@ context.AllCards = () => [];
 To print the chosen install target from the runner, after `ai[phase](options.slice())`:
 
 ```js
-if (ai.preferred) console.log('preferred', ai.preferred.command,
-  ai.preferred.cardToInstall && ai.preferred.cardToInstall.title,
-  ai.preferred.serverToInstallTo === null ? 'NEW' : ai.preferred.serverToInstallTo && ai.preferred.serverToInstallTo.serverName);
+if (ai.preferred)
+  console.log(
+    "preferred",
+    ai.preferred.command,
+    ai.preferred.cardToInstall && ai.preferred.cardToInstall.title,
+    ai.preferred.serverToInstallTo === null
+      ? "NEW"
+      : ai.preferred.serverToInstallTo &&
+          ai.preferred.serverToInstallTo.serverName,
+  );
 ```
 
 ## Appendix C: prototype patch (Fix 2 and Fix 3 Option A only)
@@ -342,3 +354,9 @@ Tested against the Appendix A reconstruction (scenarios 4 and 5) and `tests/corp
 ```
 
 Note: `ai_corp.js` uses CRLF line endings. Preserve them when editing.
+
+## 11. Remediation
+
+During live testing it was noticed that the corp now never protects archives even after several redirection events that accessed HQ through archives, many runs to archives just to gain creds through "successful run" text on events or to get virus counters on cards like `Leech`. See `documentation/bugs/action-needed/chiriboga-log-2026-09-21T12_47_27.790Z.txt`
+
+So it's not just "no agenda in archives, no need to protect". It's more complicated than that.

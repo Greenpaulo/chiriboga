@@ -654,6 +654,109 @@ function AutoContinueButtonHTML(showEvenIfOff = false) {
   );
 }
 
+// BEGIN DecisionSnapshots
+//Keep a bounded record of replayable Corp AI decisions. Downloaded logs include
+//the record so a reported bad choice can become a deterministic test fixture.
+var DecisionSnapshots = {
+  enabled: true,
+  max: 12,
+  interesting: ["Corp Mulligan", "Corp 2.1", "Corp 2.2", "Run 2.1"],
+  count: 0,
+  totalMs: 0,
+  worstMs: 0,
+  list: [],
+  Label: function (option) {
+    var label = "[object]";
+    if (typeof option === "string") label = option;
+    else if (option && typeof option.label === "string") label = option.label;
+    else if (option && option.card && option.card.title)
+      label = option.card.title;
+    return label.replace(/[\r\n]+/g, " ");
+  },
+  ServerExpression: function (server) {
+    if (server === corp.HQ) return "corp.HQ";
+    if (server === corp.RnD) return "corp.RnD";
+    if (server === corp.archives) return "corp.archives";
+    var i = corp.remoteServers.indexOf(server);
+    return i > -1 ? "corp.remoteServers[" + i + "]" : "null";
+  },
+  Before: function (choiceType, optionList) {
+    try {
+      if (
+        optionList.length < 2 ||
+        this.interesting.indexOf(currentPhase.identifier) < 0
+      )
+        return null;
+      var startedAt =
+        typeof performance !== "undefined" ? performance.now() : 0;
+      var run = "";
+      if (typeof attackedServer !== "undefined" && attackedServer) {
+        run =
+          "attackedServer = " +
+          this.ServerExpression(attackedServer) +
+          "; approachIce = " +
+          approachIce +
+          ";";
+      }
+      var entry = {
+        n: ++this.count,
+        identifier: currentPhase.identifier,
+        title: currentPhase.title,
+        command:
+          typeof executingCommand === "undefined" || !executingCommand
+            ? ""
+            : executingCommand,
+        choiceType: choiceType || "",
+        options: optionList.map(this.Label),
+        replayable: optionList.every(function (option) {
+          return typeof option === "string";
+        }),
+        run: run,
+        repro: ReproductionCode(true),
+        chosen: "",
+      };
+      this.list.push(entry);
+      if (this.list.length > this.max) this.list.shift();
+      var elapsed =
+        typeof performance !== "undefined" ? performance.now() - startedAt : 0;
+      this.totalMs += elapsed;
+      if (elapsed > this.worstMs) this.worstMs = elapsed;
+      return entry;
+    } catch (e) {
+      return null;
+    }
+  },
+  After: function (entry, chosenIndex) {
+    if (entry && typeof chosenIndex === "number" && entry.options[chosenIndex])
+      entry.chosen = entry.options[chosenIndex];
+  },
+  Text: function () {
+    var out =
+      "\n=== DECISION SNAPSHOTS (Corp AI, oldest first; " +
+      this.count +
+      " recorded, recorder cost " +
+      this.totalMs.toFixed(1) +
+      "ms total, " +
+      this.worstMs.toFixed(1) +
+      "ms worst) ===\n";
+    for (var i = 0; i < this.list.length; i++) {
+      var entry = this.list[i];
+      out += "### DECISION " + entry.n + "\n";
+      out += "// IDENTIFIER: " + entry.identifier + "\n";
+      out += "// TITLE: " + entry.title + "\n";
+      out += "// COMMAND: " + entry.command + "\n";
+      out += "// CHOICETYPE: " + entry.choiceType + "\n";
+      out += "// OPTIONS: " + entry.options.join(", ") + "\n";
+      out += "// CHOSEN: " + entry.chosen + "\n";
+      out += "// REPLAYABLE: " + entry.replayable + "\n";
+      if (entry.run) out += "// SETUP: " + entry.run + "\n";
+      out += entry.repro + "\n### END DECISION " + entry.n + "\n";
+    }
+    return out;
+  },
+};
+// END DecisionSnapshots
+
 // Function to download capturedlog to a file
 //source: https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
 function DownloadCapturedLog() {
@@ -666,6 +769,8 @@ function DownloadCapturedLog() {
       ": " +
       Readablify(corp.remoteServers[i].root);
   }
+  if (typeof DecisionSnapshots !== "undefined")
+    extraOutput += DecisionSnapshots.Text();
   extraOutput += "\n" + ReproductionCode(debugging);
   var verdate = new Date(versionReference * 1000);
   extraOutput += "\nVersion reference: " + verdate.toString();

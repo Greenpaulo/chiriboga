@@ -1,4 +1,8 @@
 // PHASE: Phase_Main
+// IDENTIFIER: Corp 2.2
+// TITLE: Corporation's Action Phase
+// COMMAND:
+// CHOICETYPE: command
 // OPTIONS: install, advance, gain, draw
 // EXPECT: advance
 // SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=5

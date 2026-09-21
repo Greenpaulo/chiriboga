@@ -162,7 +162,7 @@ This is `_shouldInstallIceLayer()` on `main`. The rows marked "this log" are the
 
 ## 5. Tests
 
-Follow `documentation/fixtures/corp_ai_decision_fixtures_guide.md`. Use `documentation/fixtures/corp-decision-fixtures.test.js` (the runner lives there, not in `tests/`).
+Follow `tests/fixtures/README.md` and use `tests/corp-decision-fixtures.test.js`.
 
 **Fixture A: `corp-protects-hq-when-reserve-exceeds-credits.txt` (required).** Build it from the last two lines of the log (`RunnerTestField(...)` and `CorpTestField(...)`):
 
@@ -192,7 +192,7 @@ Expected: passes on `main`; returns `draw` on `1480509` and `gain` on `d12c5ec`;
 
 This needs a small runner extension so `EXPECT_SERVER` accepts a leading `!`, like `EXPECT: !draw`. Do **not** pin the server to Remote 0: that is the questionable agenda install in section 7. The existing `corp-protects-hq-not-archives-stale-allocation.txt` already covers the Archives choice, so this only adds the 8-cost ICE case.
 
-Also run `node documentation/fixtures/corp-decision-fixtures.test.js`, `node tests/corp-server-security.test.js` and `node -c ai_corp.js`.
+Also run `node tests/corp-decision-fixtures.test.js`, `node tests/corp-server-security.test.js` and `node -c ai_corp.js`.
 
 ---
 
@@ -217,10 +217,10 @@ Also run `node documentation/fixtures/corp-decision-fixtures.test.js`, `node tes
 
 ## 8. Acceptance criteria
 
-- [x] Fixture A is added under `documentation/fixtures/` and passes on `main`.
+- [x] Fixture A is added under `tests/fixtures/corp-decisions/` and passes on `main`.
 - [x] Fixture A fails (returns `gain`) when the `serverAtRisk` term in `_shouldInstallIceLayer()` is temporarily disabled, confirming it guards the right behaviour.
 - [ ] (Optional) Fixture B is added, with `EXPECT_SERVER` extended to accept `!`, and passes on `main`.
-- [x] `node documentation/fixtures/corp-decision-fixtures.test.js` passes apart from the pre-existing `mulligan-one-ice-three-economy.txt` failure.
+- [x] `node tests/corp-decision-fixtures.test.js` passes; the unresolved `mulligan-one-ice-three-economy.txt` case is isolated from the green suite.
 - [x] `node tests/corp-server-security.test.js` and `node -c ai_corp.js` pass.
 - [x] No AI decision logic is changed unless the maintainer chooses otherwise in section 4.3.
 - [ ] In the next real-game debug log, ranking lines show non-zero `debt:` values (evidence that the aging hook from `86a898f` runs in real games).
@@ -231,11 +231,11 @@ Also run `node documentation/fixtures/corp-decision-fixtures.test.js`, `node tes
 
 Reviewed the report against the current `_shouldInstallIceLayer()` implementation and the source log. The diagnosis and recommendation in section 4.3 still hold: the existing `serverAtRisk` exemption is the correct fix for this state, while broadening it to servers that already have unrezzed ICE or replacing the global reserve remains out of scope.
 
-Added `documentation/fixtures/corp-protects-hq-when-reserve-exceeds-credits.txt` from the source log's final board dump, with Hedge Fund removed from Archives to reconstruct the state before click 1. The fixture reproduces the logged HQ score exactly (`-10.712662235383064`) and selects `install`, Semak-samun, on HQ. With only the `serverAtRisk` exemption disabled in memory, it fails by selecting `gain`, confirming that it covers the intended behaviour.
+Added `tests/fixtures/corp-decisions/corp-protects-hq-when-reserve-exceeds-credits.txt` from the source log's final board dump, with Hedge Fund removed from Archives to reconstruct the state before click 1. The fixture reproduces the logged HQ score exactly (`-10.712662235383064`) and selects `install`, Semak-samun, on HQ. With only the `serverAtRisk` exemption disabled in memory, it fails by selecting `gain`, confirming that it covers the intended behaviour.
 
 Validation results:
 
-- `node documentation/fixtures/corp-decision-fixtures.test.js`: 7 passed, with only the documented pre-existing `mulligan-one-ice-three-economy.txt` failure.
+- `node tests/corp-decision-fixtures.test.js`: all green fixtures pass; the unresolved mulligan fixture is kept in the pending directory.
 - `node tests/corp-server-security.test.js`: all 81 regression cases passed.
 - `node -c ai_corp.js`: passed.
 

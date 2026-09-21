@@ -5,11 +5,12 @@
 // at the end of a downloaded game log. This file supplies headless versions of those
 // functions (plain card objects, no PIXI) so the dump can be evaluated as-is.
 //
-// Usage:  node documentation/fixtures/corp-decision-fixtures.test.js          run every fixture
-//         node documentation/fixtures/corp-decision-fixtures.test.js FILE...  run selected fixtures
-//         AI_LOG=1 node documentation/fixtures/corp-decision-fixtures.test.js also print the AI's own reasoning
-//         node documentation/fixtures/corp-decision-fixtures.test.js --ids    list card ids to help write fixtures
-//         node documentation/fixtures/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
+// Usage:  node tests/corp-decision-fixtures.test.js          run every green fixture
+//         node tests/corp-decision-fixtures.test.js FILE...  run selected green fixtures
+//         node tests/corp-decision-fixtures.test.js --pending run known-red fixtures
+//         AI_LOG=1 node tests/corp-decision-fixtures.test.js  also print the AI's own reasoning
+//         node tests/corp-decision-fixtures.test.js --ids     list card ids to help write fixtures
+//         node tests/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
 //                                                    (returns false; results are NOT trustworthy until real stubs are written)
 //
 // Directives:  // PHASE: Phase_Main        (default Phase_Main; e.g. Phase_Mulligan, Phase_Score)
@@ -22,10 +23,13 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const root = path.resolve(__dirname, '..', '..');
+const root = path.resolve(__dirname, '..');
 const corp = {}, runner = {};
-const context = {console, corp, runner, playerTurn: corp, cardSet: {}, setIdentifiers: [], encountering: false, attackedServer: null, approachIce: -1};
+const context = {console, corp, runner, playerTurn: corp, cardSet: {}, setIdentifiers: [],
+  encountering: false, attackedServer: null, approachIce: -1,
+  currentPhase: {identifier: '', title: ''}, executingCommand: ''};
 let servers = [];
+let ai = null;
 // ---- engine stubs (keep in sync with tests/corp-server-security.test.js) ----
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
@@ -111,13 +115,25 @@ Object.assign(context, {InstanceCard, InstanceCardsPush, CorpTestField, RunnerTe
   cardBackTexturesCorp: null, cardBackTexturesRunner: null, glowTextures: null, strengthTextures: null});
 
 function resetState() {
+  vm.runInContext('reviewAI = new CorpAI();', context);
+  ai = context.reviewAI;
+  ai._log = process.env.AI_LOG ? m => console.log('    [ai] ' + m) : function() {};
   const central = name => ({serverName: name, cards: [], ice: [], root: []});
   Object.assign(corp, {HQ: central('HQ'), RnD: central('R&D'), archives: central('Archives'), remoteServers: [],
-    scoreArea: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 3, badPublicity: 0, agendaPoints: 0});
+    scoreArea: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 3,
+    tempBonusClicks: 0, badPublicity: 0, agendaPoints: 0});
   Object.assign(runner, {rig: {programs: [], hardware: [], resources: []}, scoreArea: [], grip: [], stack: [], heap: [],
-    cards: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 0, tags: 0, agendaPoints: 0, AI: null});
+    cards: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 0,
+    tempBonusClicks: 0, temporaryCredits: 0, tags: 0, coreDamage: 0, agendaPoints: 0, AI: null});
   ai._random = () => 1;
-  corp.AI = ai; context.playerTurn = corp; context.attackedServer = null;
+  corp.AI = ai;
+  servers = [];
+  context.playerTurn = corp;
+  context.attackedServer = null;
+  context.encountering = false;
+  context.approachIce = -1;
+  context.currentPhase = {identifier: '', title: ''};
+  context.executingCommand = '';
 }
 function finaliseState() {
   servers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers);
@@ -135,9 +151,7 @@ const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
 ['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
-vm.runInContext('reviewAI = new CorpAI(); runnerRC = new RunCalculator();', context);
-const ai = context.reviewAI;
-ai._log = process.env.AI_LOG ? m => console.log('    [ai] ' + m) : function() {};
+vm.runInContext('runnerRC = new RunCalculator();', context);
 
 if (process.argv.includes('--ids')) {
   const show = (label, pred) => console.log(label + ': ' + Object.entries(context.cardSet)
@@ -150,7 +164,12 @@ if (process.argv.includes('--ids')) {
 }
 
 // ---- run fixtures ----
-const dir = __dirname;
+const pending = process.argv.includes('--pending');
+const dir = path.join(
+  __dirname,
+  'fixtures',
+  pending ? 'corp-decisions-pending' : 'corp-decisions',
+);
 const requestedFixtures = process.argv.slice(2).filter(arg => arg.endsWith('.txt'));
 const files = requestedFixtures.length ? requestedFixtures :
   (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort() : []);
@@ -168,7 +187,23 @@ files.forEach(file => {
       vm.runInContext(src, context, {filename: file});
       if (directive('SETUP')) vm.runInContext(directive('SETUP'), context);
       finaliseState();
-      const idx = ai[phase](options.slice());
+      if (!expect) throw new Error('Missing required EXPECT directive');
+      if (options.length < 1) throw new Error('Missing required OPTIONS directive');
+      if (directive('REPLAYABLE') === 'false')
+        throw new Error('Fixture contains non-text options and cannot be replayed exactly');
+      const identifier = directive('IDENTIFIER');
+      const title = directive('TITLE');
+      const command = directive('COMMAND');
+      const choiceType = directive('CHOICETYPE');
+      let idx;
+      if (identifier) {
+        context.currentPhase = {identifier, title};
+        context.executingCommand = command;
+        idx = ai.Choice(options.slice(), choiceType);
+      } else {
+        if (typeof ai[phase] != 'function') throw new Error('Unknown PHASE ' + phase);
+        idx = ai[phase](options.slice());
+      }
       const chosen = typeof idx === 'number' ? options[idx] : JSON.stringify(idx);
       const negate = expect.startsWith('!');
       const expectedServer = directive('EXPECT_SERVER');
@@ -180,12 +215,13 @@ files.forEach(file => {
       const serverOK = !expectedServer || chosenServer === expectedServer;
       const cardOK = !expectedCard || chosenCard === expectedCard;
       const ok = commandOK && serverOK && cardOK;
+      const replayPath = identifier ? 'Choice ' + identifier : phase;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
-      if (ok) { passed++; console.log('PASS ' + file + '  (' + phase + ' -> ' + chosen + ')' + note); }
+      if (ok) { passed++; console.log('PASS ' + file + '  (' + replayPath + ' -> ' + chosen + ')' + note); }
       else {
         const serverNote = expectedServer ? ', server ' + (chosenServer || 'none') + ', expected ' + expectedServer : '';
         const cardNote = expectedCard ? ', card ' + (chosenCard || 'none') + ', expected ' + expectedCard : '';
-        failed++; console.log('FAIL ' + file + '  (' + phase + ' -> ' + chosen + ', expected ' + expect + serverNote + cardNote + ')' + note);
+        failed++; console.log('FAIL ' + file + '  (' + replayPath + ' -> ' + chosen + ', expected ' + expect + serverNote + cardNote + ')' + note);
       }
       break;
     } catch (e) {

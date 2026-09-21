@@ -5647,6 +5647,16 @@ class CorpAI {
 
   //returns index of choice
   Choice(optionList, choiceType) {
+    var snapshot =
+      typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
+        ? DecisionSnapshots.Before(choiceType, optionList)
+        : null;
+    var ret = this._choiceInner(optionList, choiceType);
+    if (snapshot) DecisionSnapshots.After(snapshot, ret);
+    return ret;
+  }
+
+  _choiceInner(optionList, choiceType) {
     if (optionList.length < 1) {
       LogError("No valid commands available");
       return;

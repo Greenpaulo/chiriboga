@@ -158,7 +158,7 @@ Keep the thresholds above (minimal change), or make the 1-agenda case stricter b
 
 ## 5. Tests
 
-Follow `documentation/fixtures/corp_ai_decision_fixtures_guide.md` (note: the guide refers to `tests/corp-decision-fixtures.test.js`, but the repo currently has the runner and template in `documentation/fixtures/`, so check where it should live before adding fixtures). Existing security tests live in `tests/corp-server-security.test.js`.
+Follow `tests/fixtures/README.md`. The fixture runner is `tests/corp-decision-fixtures.test.js`; existing security tests live in `tests/corp-server-security.test.js`.
 
 **Important:** the reproduction block at the end of the log is the state *after* the three draws, with HQ full at 5 cards. A draw fixture needs a hand with room, so build the pre-decision state:
 
@@ -229,7 +229,7 @@ No other Corp AI decision logic was changed.
 
 ### 9.2 Regression fixtures
 
-Added these fixtures under `documentation/fixtures/`:
+Added these fixtures under `tests/fixtures/corp-decisions/`:
 
 | Fixture | Coverage | Result |
 |---|---|---|
@@ -237,7 +237,7 @@ Added these fixtures under `documentation/fixtures/`:
 | `corp-draw-ok-when-hq-secure.txt` | Uses the same HQ state without an installed decoder, making Flyswatter a hard lockout | Chooses `draw` |
 | `corp-draw-ok-one-agenda-early.txt` | Confirms the retained minimal threshold with 1 agenda and 3 clicks | Chooses `draw` |
 
-The fixture runner in `documentation/fixtures/corp-decision-fixtures.test.js` was also corrected to load the repository from its actual location, supply the engine helpers required by `Phase_Main`, discover fixtures from its current directory, and accept fixture filenames so focused subsets can be run.
+The fixture runner in `tests/corp-decision-fixtures.test.js` loads the repository from its actual location, supplies the engine helpers required by `Phase_Main`, discovers fixtures from `tests/fixtures/corp-decisions/`, and accepts fixture filenames so focused subsets can be run.
 
 ### 9.3 Verification
 

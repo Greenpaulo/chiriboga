@@ -1,0 +1,2112 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[MuslihaT: Multifarious Marketeer,2 Leech,1 Mutual Favor,2 Tread Lightly,1 Docklands Pass,2 Pennyshaver,3 Marjanah,2 Echelon,3 Jailbreak,3 Overclock,3 Sure Gamble,2 Shred,1 Rising Tide,3 Clean Getaway,2 Maintenance Access,3 Transfer of Wealth,2 Sang Kancil,3 Open Market,3 Ritual,1 Azimat,3 Side Hustle]
+[PT Untaian: Life's Building Blocks,3 Seamless Launch,1 Longevity Serum,2 Urtica Cipher,3 Diviner,3 Hansei Review,2 Neurospike,2 Spin Doctor,2 Clearinghouse,3 Offworld Office,2 Send a Message,3 Palisade,3 Sericulture Expansion,3 Byte!,2 Phật Gioan Baotixita,3 Empiricist,3 Mycoweb,3 Semak-samun,3 Peer Review,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: 0 playable ICE in hand - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Diviner,Mycoweb,Urtica Cipher,Urtica Cipher,Phật Gioan Baotixita]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Rising Tide,Clean Getaway,Jailbreak,Mutual Favor,Tread Lightly]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.5,debt:0,adjusted:3.5,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5,debt:0,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.9813248766737144,debt:0,adjusted:2.9813248766737144,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.9813248766737144,debt:0,adjusted:2.9813248766737144,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.481324876673714,debt:0,adjusted:4.481324876673714,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Urtica Cipher,Urtica Cipher,Phật Gioan Baotixita,Mycoweb,Clearinghouse]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Rising Tide,Clean Getaway,Jailbreak,Mutual Favor,Tread Lightly]
+Look at top of stack; reveal if icebreaker or run event triggered
+Overclock revealed
+Overclock added to grip from top of stack
+Runner spent one click
+Runner spent 3 credits
+Played Clean Getaway
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Runner gained 6 credits
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+Runner spent one click
+Played Jailbreak
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Diviner
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Tread Lightly trashed
+Tread Lightly has a printed cost of 1
+Run ends
+Runner spent one click
+Played Mutual Favor
+Echelon revealed
+Runner spent 3 credits
+Runner installed Echelon
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Urtica Cipher,Urtica Cipher,Phật Gioan Baotixita,Mycoweb,Clearinghouse]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Overclock]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.230769230769231,debt:0,adjusted:-2.230769230769231,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},R&D:{score:4.115384615384616,debt:0,adjusted:4.115384615384616,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.230769230769231,debt:0,adjusted:-2.230769230769231,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},R&D:{score:4.115384615384616,debt:0,adjusted:4.115384615384616,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.230769230769231,debt:0,adjusted:-2.230769230769231,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},R&D:{score:4.115384615384616,debt:0,adjusted:4.115384615384616,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Urtica Cipher,Mycoweb,Seamless Launch,Phật Gioan Baotixita,Clearinghouse]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Overclock]
+Look at top of stack; reveal if icebreaker or run event triggered
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Marjanah revealed
+Marjanah added to grip from top of stack
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+Runner spent one click
+Runner spent one credit
+Played Overclock
+5 credits placed on Overclock
+Run initiated attacking HQ
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting HQ
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Marjanah trashed
+Marjanah has a printed cost of 0
+Approaching HQ
+Run successful
+Urtica Cipher accessed
+Runner spent 2 credits from Overclock
+Urtica Cipher trashed
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Urtica Cipher,Mycoweb,Seamless Launch,Phật Gioan Baotixita,Clearinghouse]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Overclock]
+Look at top of stack; reveal if icebreaker or run event triggered
+Marjanah revealed
+Marjanah added to grip from top of stack
+Runner spent one click
+Runner installed Marjanah
+Runner spent one click
+Runner spent one credit
+Played Overclock
+5 credits placed on Overclock
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Runner flatlined
+Corp wins
+Corp (PT Untaian: Life's Building Blocks) agenda points: 0
+Runner (MuslihaT: Multifarious Marketeer) agenda points: 0
+R&D size: 41
+Grip size: 0
+Agendas were stolen from: []
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Urtica Cipher,Urtica Cipher,Phật Gioan Baotixita,Mycoweb,Clearinghouse]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Rising Tide,Clean Getaway,Jailbreak,Mutual Favor,Tread Lightly]
+Look at top of stack; reveal if icebreaker or run event triggered
+Overclock revealed
+Overclock added to grip from top of stack
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+Runner spent one click
+Runner spent 3 credits
+Played Clean Getaway
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Runner gained 6 credits
+Run ends
+Runner spent one click
+Played Jailbreak
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Diviner
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Overclock trashed
+Overclock has a printed cost of 1
+Run ends
+Runner spent one click
+Played Mutual Favor
+Sang Kancil revealed
+Runner spent 3 credits
+Runner installed Sang Kancil
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Urtica Cipher,Urtica Cipher,Phật Gioan Baotixita,Mycoweb,Clearinghouse]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Tread Lightly]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.730769230769231,debt:1,adjusted:-5.730769230769231,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},R&D:{score:1.8653846153846156,debt:1,adjusted:0.8653846153846156,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.730769230769231,debt:1,adjusted:-5.730769230769231,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},R&D:{score:1.8653846153846156,debt:1,adjusted:0.8653846153846156,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.730769230769231,debt:1,adjusted:-5.730769230769231,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},R&D:{score:1.8653846153846156,debt:1,adjusted:0.8653846153846156,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Urtica Cipher,Mycoweb,Phật Gioan Baotixita,Seamless Launch,Clearinghouse]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Tread Lightly]
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Diviner
+Using Sang Kancil:
+Runner spent 3 credits
+Sang Kancil gets +2 strength
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching HQ
+Run successful
+Mycoweb accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Seamless Launch,Urtica Cipher,Mycoweb,Clearinghouse,Phật Gioan Baotixita]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 3 card(s) in hand: [Tread Lightly,Sure Gamble,Echelon]
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5.156198708830288,debt:2,adjusted:-7.156198708830288,secure:false},archives:{score:1,debt:3,adjusted:-2,secure:false},R&D:{score:1.1563354852828542,debt:2,adjusted:-0.8436645147171458,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.45,debt:2,adjusted:-6.45,secure:false},archives:{score:1,debt:3,adjusted:-2,secure:false},R&D:{score:1.1563354852828542,debt:2,adjusted:-0.8436645147171458,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.45,debt:2,adjusted:-6.45,secure:false},archives:{score:1,debt:3,adjusted:-2,secure:false},R&D:{score:1.1563354852828542,debt:2,adjusted:-0.8436645147171458,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Phật Gioan Baotixita,Phật Gioan Baotixita,Clearinghouse,Seamless Launch,Urtica Cipher]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 3 card(s) in hand: [Tread Lightly,Sure Gamble,Echelon]
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Phật Gioan Baotixita,Phật Gioan Baotixita,Clearinghouse,Seamless Launch,Urtica Cipher]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Tread Lightly,Sure Gamble,Echelon]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.45,debt:3,adjusted:-9.45,secure:false},archives:{score:1,debt:4,adjusted:-3,secure:false},R&D:{score:1.1563354852828542,debt:3,adjusted:-1.8436645147171458,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 2.25 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:1,debt:4,adjusted:-3,secure:false},R&D:{score:1.1563354852828542,debt:3,adjusted:-1.8436645147171458,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:5.125,debt:3,adjusted:2.125,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:1,debt:4,adjusted:-3,secure:false},R&D:{score:1.1563354852828542,debt:3,adjusted:-1.8436645147171458,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:5.125,debt:3,adjusted:2.125,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Urtica Cipher,Phật Gioan Baotixita,Clearinghouse,Offworld Office,Seamless Launch]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Tread Lightly,Sure Gamble,Echelon]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 3 credits
+Runner installed Echelon
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 8 credits
+Corp rezzed Mycoweb
+Encountering Mycoweb
+Using Sang Kancil:
+Runner spent 3 credits
+Sang Kancil gets +2 strength
+Firing You may install 1 piece of ice from Archives, ignoring all costs. on Mycoweb:
+Firing You may rez 1 installed piece of ice, paying 2[c] less. on Mycoweb:
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,continue,[{card:Diviner,rezCost:0,label:Diviner (rez cost: 0[c]),command:continue},{skip:true,label:Decline,button:Decline,command:continue}]]
+Corp rezzed Diviner
+Firing Resolve 1 subroutine on a rezzed sentry. on Mycoweb:
+Firing Resolve 1 subroutine on another rezzed code gate. on Mycoweb:
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,continue,[{card:Diviner,label:Diviner,command:continue},{card:Diviner,label:Diviner,command:continue}]]
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Tread Lightly trashed
+Tread Lightly has a printed cost of 1
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 2 credit(s) and 5 card(s) in hand: [Urtica Cipher,Phật Gioan Baotixita,Clearinghouse,Offworld Office,Seamless Launch]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Corp drew a card
+AI: HQ appears secure: Diviner has mandatory breaks with no capable breaker; Mycoweb has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: R&D appears secure: Diviner has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {archives:{score:1,debt:5,adjusted:-4,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:3.0999999999999996,debt:0,adjusted:3.0999999999999996,secure:true},R&D:{score:3.5,debt:0,adjusted:3.5,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for Archives
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: R&D appears secure: Diviner has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Diviner has mandatory breaks with no capable breaker; Mycoweb has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {archives:{score:1,debt:5,adjusted:-4,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.5,debt:0,adjusted:3.5,secure:true},HQ:{score:4.1,debt:0,adjusted:4.1,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for Archives
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: R&D appears secure: Diviner has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Diviner has mandatory breaks with no capable breaker; Mycoweb has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {archives:{score:1,debt:5,adjusted:-4,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.5,debt:0,adjusted:3.5,secure:true},HQ:{score:5.1,debt:0,adjusted:5.1,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Urtica Cipher,Offworld Office,Send a Message,Seamless Launch,Clearinghouse]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Urtica Cipher,Offworld Office,Send a Message,Seamless Launch,Clearinghouse]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Azimat,Sang Kancil,Transfer of Wealth]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:1,debt:6,adjusted:-5,secure:false},R&D:{score:0.7924369747899158,debt:1,adjusted:-0.20756302521008418,secure:false},HQ:{score:1.0999999999999996,debt:1,adjusted:0.09999999999999964,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:1,debt:6,adjusted:-5,secure:false},R&D:{score:0.7924369747899158,debt:1,adjusted:-0.20756302521008418,secure:false},HQ:{score:1.0999999999999996,debt:1,adjusted:0.09999999999999964,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:1,adjusted:-7.4,secure:false},archives:{score:1,debt:6,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:0,adjusted:3.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Offworld Office,Seamless Launch,Send a Message,Clearinghouse,Urtica Cipher]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Azimat,Sang Kancil,Transfer of Wealth]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Offworld Office,Seamless Launch,Send a Message,Clearinghouse,Urtica Cipher]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Azimat,Sang Kancil,Transfer of Wealth]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:2,adjusted:-8.4,secure:false},archives:{score:1,debt:6,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:0,adjusted:3.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:2,adjusted:-8.4,secure:false},archives:{score:1,debt:6,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:0,adjusted:3.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:2,adjusted:-8.4,secure:false},archives:{score:1,debt:6,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:0,adjusted:3.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Offworld Office,Seamless Launch,Clearinghouse,Clearinghouse,Send a Message]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Azimat,Sang Kancil,Transfer of Wealth]
+Look at top of stack; reveal if icebreaker or run event triggered
+Shred revealed
+Shred added to grip from top of stack
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+Hansei Review accessed
+Hansei Review accessed
+Urtica Cipher accessed
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Offworld Office,Seamless Launch,Clearinghouse,Clearinghouse,Send a Message]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Azimat,Sang Kancil,Transfer of Wealth,Shred,Clean Getaway]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:3,adjusted:-9.4,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:1,adjusted:2.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:3,adjusted:-9.4,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:1,adjusted:2.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.4,debt:3,adjusted:-9.4,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:1,adjusted:2.875,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5999999999999996 vs 3.875 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting HQ
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Send a Message,Offworld Office,Clearinghouse,Seamless Launch,Clearinghouse]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Azimat,Sang Kancil,Transfer of Wealth,Shred,Clean Getaway]
+Look at top of stack; reveal if icebreaker or run event triggered
+Maintenance Access revealed
+Maintenance Access added to grip from top of stack
+Runner spent 2 clicks
+Played Maintenance Access
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+Offworld Office accessed
+Offworld Office stolen
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Played Clean Getaway
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching Archives
+Run successful
+Runner gained 6 credits
+Hansei Review accessed
+Hansei Review accessed
+Urtica Cipher accessed
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner discarded Azimat
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Seamless Launch,Clearinghouse,Clearinghouse,Send a Message]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Transfer of Wealth,Shred,Ritual,Open Market]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5.358578643762691,debt:4,adjusted:-9.35857864376269,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:2,adjusted:1.875,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5.358578643762691,debt:4,adjusted:-9.35857864376269,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:2,adjusted:1.875,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.6414213562373092 vs 3.875 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:4.247487373415291,debt:4,adjusted:0.24748737341529115,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.875,debt:2,adjusted:1.875,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 5 card(s) in hand: [Spin Doctor,Clearinghouse,Seamless Launch,Send a Message,Clearinghouse]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Transfer of Wealth,Shred,Ritual,Open Market]
+Look at top of stack; reveal if icebreaker or run event triggered
+Tread Lightly revealed
+Tread Lightly added to grip from top of stack
+Runner spent one click
+Played Transfer of Wealth
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: Rez this is better than Palisade in R&D
+AI: I will rez the approached ice
+Corp spent 7 credits
+Corp rezzed Empiricist
+Encountering Empiricist
+Using Echelon:
+Runner spent 3 credits
+Echelon gets +2 strength
+Using Echelon:
+Runner spent one credit
+Subroutine Do 2 net damage. broken
+Using Echelon:
+Runner spent one credit
+Subroutine Do 1 net damage. Give the Runner 1 tag. broken
+Firing Draw 1 card. You may add 1 card from HQ to the top of R&D. on Empiricist:
+Corp drew a card
+Approaching next piece of ice protecting HQ
+Encountering Mycoweb
+Using Sang Kancil:
+Runner spent one credit
+Sang Kancil gets +2 strength
+Using Sang Kancil:
+Runner spent one credit
+Sang Kancil gets +2 strength
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Resolve 1 subroutine on another rezzed code gate. broken
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Resolve 1 subroutine on a rezzed sentry. broken
+Using Sang Kancil:
+Runner spent one credit
+Subroutine You may rez 1 installed piece of ice, paying 2[c] less. broken
+Using Sang Kancil:
+Runner spent one credit
+Subroutine You may install 1 piece of ice from Archives, ignoring all costs. broken
+Approaching next piece of ice protecting HQ
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Tread Lightly trashed
+Tread Lightly has a printed cost of 1
+Run ends
+Runner spent one click
+Played Ritual
+Runner drew 2 cards
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Leech
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 1 credit(s) and 6 card(s) in hand: [Seamless Launch,Send a Message,Spin Doctor,Clearinghouse,Clearinghouse,Seamless Launch]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Shred,Open Market,Marjanah,Ritual]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:3.212132034355964,debt:5,adjusted:-1.7878679656440362,secure:false},R&D:{score:1.55,debt:3,adjusted:-1.45,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:3.212132034355964,debt:5,adjusted:-1.7878679656440362,secure:false},R&D:{score:1.55,debt:3,adjusted:-1.45,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:3.212132034355964,debt:5,adjusted:-1.7878679656440362,secure:false},R&D:{score:3.875,debt:3,adjusted:0.875,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Seamless Launch,Spin Doctor,Sericulture Expansion,Send a Message,Seamless Launch]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Shred,Open Market,Marjanah,Ritual]
+Runner spent one click
+Played Ritual
+Runner drew 3 cards
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner discarded Marjanah
+Runner discarded Shred
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Seamless Launch,Spin Doctor,Sericulture Expansion,Send a Message,Seamless Launch]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Open Market,Sure Gamble,Docklands Pass,Pennyshaver]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.21213203435596384,debt:6,adjusted:-5.787867965644036,secure:false},R&D:{score:3.875,debt:4,adjusted:-0.125,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Ranked server protection: {HQ:{score:-0.7878679656440362,debt:6,adjusted:-6.787867965644036,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:3.875,debt:4,adjusted:-0.125,secure:false},Remote 0:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.21213203435596384,debt:6,adjusted:-5.787867965644036,secure:false},R&D:{score:3.875,debt:4,adjusted:-0.125,secure:false},Remote 0:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 3 credits
+Corp installed ice protecting HQ
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 1 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Seamless Launch,Sericulture Expansion,Seamless Launch]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Open Market,Sure Gamble,Docklands Pass,Pennyshaver]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 3 credits
+Runner installed Pennyshaver
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 1 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Seamless Launch,Sericulture Expansion,Seamless Launch]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 3 card(s) in hand: [Sang Kancil,Open Market,Docklands Pass]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:1.55,debt:5,adjusted:-3.45,secure:false},Remote 0:{score:0,debt:1,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:1.55,debt:5,adjusted:-3.45,secure:false},Remote 0:{score:0,debt:1,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:1.55,debt:5,adjusted:-3.45,secure:false},Remote 0:{score:0,debt:1,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:3.875,debt:5,adjusted:-1.125,secure:false},Remote 0:{score:0,debt:1,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Sericulture Expansion,Send a Message,Seamless Launch]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 3 card(s) in hand: [Sang Kancil,Open Market,Docklands Pass]
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Runner spent one click
+Runner spent 2 credits
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Run initiated attacking Archives
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+Approaching Archives
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Seamless Launch accessed
+Hansei Review accessed
+Hansei Review accessed
+Urtica Cipher accessed
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Palisade
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Spin Doctor accessed
+Run ends
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 1 credit(s) and 7 card(s) in hand: [Semak-samun,Sericulture Expansion,Empiricist,Seamless Launch,Send a Message,Sericulture Expansion,Send a Message]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 3 card(s) in hand: [Sang Kancil,Docklands Pass,Side Hustle]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-0.740192378864668,debt:6,adjusted:-6.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:2.1,debt:6,adjusted:-3.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {HQ:{score:-0.740192378864668,debt:6,adjusted:-6.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:2.1,debt:6,adjusted:-3.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {HQ:{score:-0.740192378864668,debt:6,adjusted:-6.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:2.1,debt:6,adjusted:-3.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Seamless Launch,Send a Message,Sericulture Expansion,Send a Message]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 3 card(s) in hand: [Sang Kancil,Docklands Pass,Side Hustle]
+1 credit taken from Open Market
+Runner spent one click
+Runner spent 2 credits from Open Market
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+Runner spent one click
+Run initiated attacking R&D
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Neurospike accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Using Pennyshaver:
+Runner spent one click
+1 credit placed on Pennyshaver
+4 credits taken from Pennyshaver
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Seamless Launch,Send a Message,Sericulture Expansion,Send a Message]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:2.1,debt:6,adjusted:-3.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:2.1,debt:6,adjusted:-3.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {HQ:{score:-2.740192378864668,debt:6,adjusted:-8.740192378864668,secure:false},archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:2.1,debt:6,adjusted:-3.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Send a Message,Seamless Launch,Send a Message,Sericulture Expansion]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver]
+1 credit taken from Open Market
+Look at top of stack; reveal if icebreaker or run event triggered
+Jailbreak revealed
+Jailbreak added to grip from top of stack
+Runner spent one click
+Played Jailbreak
+Run initiated attacking R&D
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Runner drew a card
+Palisade accessed
+Longevity Serum accessed
+Longevity Serum stolen
+Run ends
+Runner spent one click
+Runner spent 2 credits from Open Market
+Open Market trashed (empty)
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Neurospike accessed
+Semak-samun accessed
+Spin Doctor accessed
+Empiricist accessed
+Seamless Launch accessed
+Hansei Review accessed
+Hansei Review accessed
+Urtica Cipher accessed
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Send a Message,Seamless Launch,Send a Message,Sericulture Expansion]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 4 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver,Maintenance Access]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},R&D:{score:1.1,debt:6,adjusted:-4.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},R&D:{score:1.1,debt:6,adjusted:-4.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},R&D:{score:1.1,debt:6,adjusted:-4.9,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Sericulture Expansion,Seamless Launch,Send a Message]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 4 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver,Maintenance Access]
+Runner spent 2 clicks
+Played Maintenance Access
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+1 credit placed on Side Hustle
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Diviner accessed
+Run ends
+Using Pennyshaver:
+Runner spent one click
+1 credit placed on Pennyshaver
+5 credits taken from Pennyshaver
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Send a Message,Send a Message,Sericulture Expansion,Seamless Launch]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver,Open Market]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:1.1,debt:6,adjusted:-4.9,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},R&D:{score:1.1,debt:6,adjusted:-4.9,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting R&D
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.497487373415292,debt:0,adjusted:3.497487373415292,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 3 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Seamless Launch,Send a Message,Send a Message,Sericulture Expansion]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver,Open Market]
+Look at top of stack; reveal if icebreaker or run event triggered
+Transfer of Wealth revealed
+Transfer of Wealth added to grip from top of stack
+Runner spent one click
+Run initiated attacking R&D
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Diviner
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Clearinghouse accessed
+Runner spent 3 credits
+Clearinghouse trashed
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching outermost piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Semak-samun accessed
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Leech
+Runner spent one click
+Runner drew a card
+Runner discarded Marjanah
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 8 credit(s) and 4 card(s) in hand: [Seamless Launch,Send a Message,Send a Message,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver,Open Market,Transfer of Wealth]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.7121320343559647,debt:0,adjusted:2.7121320343559647,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.7121320343559647,debt:0,adjusted:2.7121320343559647,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.7121320343559647,debt:0,adjusted:2.7121320343559647,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Seamless Launch,Semak-samun,Send a Message]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Docklands Pass,Pennyshaver,Open Market,Transfer of Wealth]
+Look at top of stack; reveal if icebreaker or run event triggered
+Marjanah revealed
+Marjanah added to grip from top of stack
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Sang Kancil:
+Runner spent 3 credits
+Sang Kancil gets +2 strength
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Clearinghouse accessed
+Runner spent 3 credits
+Clearinghouse trashed
+Run ends
+Using Pennyshaver:
+Runner spent one click
+1 credit placed on Pennyshaver
+4 credits taken from Pennyshaver
+Runner spent one click
+Runner drew a card
+Runner discarded Marjanah
+Runner discarded Shred
+Runner discarded Pennyshaver
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Seamless Launch,Semak-samun,Send a Message]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Docklands Pass,Open Market,Transfer of Wealth,Sure Gamble]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:2.389711431702999,debt:6,adjusted:-3.610288568297001,secure:false},R&D:{score:1.7121320343559647,debt:1,adjusted:0.7121320343559647,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},Remote 1:{score:-3.25,debt:0,adjusted:-3.25,secure:false},R&D:{score:1.7121320343559647,debt:1,adjusted:0.7121320343559647,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:1.3897114317029988,debt:6,adjusted:-4.610288568297001,secure:false},Remote 1:{score:-3.25,debt:0,adjusted:-3.25,secure:false},R&D:{score:1.7121320343559647,debt:1,adjusted:0.7121320343559647,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Seamless Launch,Peer Review,Send a Message]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Docklands Pass,Open Market,Transfer of Wealth,Sure Gamble]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner discarded Open Market
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Send a Message,Sericulture Expansion,Seamless Launch,Peer Review,Send a Message]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Docklands Pass,Open Market,Transfer of Wealth,Overclock]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},Remote 1:{score:-3.25,debt:1,adjusted:-4.25,secure:false},R&D:{score:1.7121320343559647,debt:2,adjusted:-0.2878679656440353,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},Remote 1:{score:-3.25,debt:1,adjusted:-4.25,secure:false},R&D:{score:1.7121320343559647,debt:2,adjusted:-0.2878679656440353,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},HQ:{score:0.3897114317029988,debt:6,adjusted:-5.610288568297001,secure:false},Remote 1:{score:-3.25,debt:1,adjusted:-4.25,secure:false},R&D:{score:1.7121320343559647,debt:2,adjusted:-0.2878679656440353,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 16 credit(s) and 5 card(s) in hand: [Offworld Office,Seamless Launch,Sericulture Expansion,Send a Message,Send a Message]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 5 card(s) in hand: [Sang Kancil,Docklands Pass,Open Market,Transfer of Wealth,Overclock]
+Runner spent one click
+Runner spent one credit
+Played Overclock
+5 credits placed on Overclock
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 7 credits
+Corp rezzed Empiricist
+Encountering Empiricist
+Using Leech:
+1 virus counter removed from Leech
+Using Leech:
+1 virus counter removed from Leech
+Using Echelon:
+Runner spent one credit from Overclock
+Subroutine Do 2 net damage. broken
+Using Echelon:
+Runner spent one credit from Overclock
+Subroutine Do 1 net damage. Give the Runner 1 tag. broken
+Using Echelon:
+Runner spent one credit from Overclock
+Subroutine Draw 1 card. You may add 1 card from HQ to the top of R&D. broken
+Approaching next piece of ice protecting HQ
+Encountering Empiricist
+Using Echelon:
+Runner spent 2 credits from Overclock
+Runner spent one credit
+Echelon gets +2 strength
+Using Echelon:
+Runner spent one credit
+Subroutine Do 2 net damage. broken
+Using Echelon:
+Runner spent one credit
+Subroutine Do 1 net damage. Give the Runner 1 tag. broken
+Using Echelon:
+Runner spent one credit
+Subroutine Draw 1 card. You may add 1 card from HQ to the top of R&D. broken
+Approaching next piece of ice protecting HQ
+Encountering Mycoweb
+Firing You may install 1 piece of ice from Archives, ignoring all costs. on Mycoweb:
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,continue,[{card:Empiricist,label:Empiricist,command:continue},{card:Semak-samun,label:Semak-samun,command:continue},{card:Palisade,label:Palisade,command:continue},{skip:true,label:Decline,button:Decline,command:continue}]]
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,server,[{server:{isServer:true,cards:[Offworld Office,Seamless Launch,Sericulture Expansion,Send a Message,Send a Message],root:[],ice:[Diviner,Mycoweb,Empiricist,Empiricist],serverName:HQ,xStart:539.8999961853027,xEnd:749.8999961853027,yCards:100,AISuccessfulRuns:4},label:HQ,command:server},{server:{isServer:true,cards:[Semak-samun,Seamless Launch,Sericulture Expansion,Peer Review,Mycoweb,Offworld Office,Petty Cash,Petty Cash,Petty Cash,Palisade,Hansei Review,Mycoweb,Peer Review,Neurospike,Byte!],root:[],ice:[Diviner,Palisade,Diviner],serverName:R&D,xStart:289.8999961853027,xEnd:499.8999961853027,yCards:100,AISuccessfulRuns:7},label:R&D,command:server},{server:{isServer:true,cards:[Urtica Cipher,Phật Gioan Baotixita,Phật Gioan Baotixita,Byte!,Byte!,Urtica Cipher,Hansei Review,Hansei Review,Seamless Launch,Empiricist,Spin Doctor,Semak-samun,Neurospike,Palisade,Clearinghouse,Clearinghouse,Peer Review],root:[],ice:[],serverName:Archives,xStart:40,xEnd:249.8999961853027,yCards:100,AISuccessfulRuns:10},label:Archives,command:server},{server:{isServer:true,root:[],ice:[Semak-samun],serverName:Remote 1,xStart:789.8999961853027,xEnd:998.8999961853027,yCards:100},label:Remote 1,command:server},{server:null,label:New remote server,button:New remote,command:server}]]
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp installed ice protecting HQ
+Firing You may rez 1 installed piece of ice, paying 2[c] less. on Mycoweb:
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,continue,[{card:Empiricist,rezCost:5,label:Empiricist (rez cost: 5[c]),command:continue},{card:Semak-samun,rezCost:1,label:Semak-samun (rez cost: 1[c]),command:continue},{skip:true,label:Decline,button:Decline,command:continue}]]
+Corp spent 5 credits
+Corp rezzed Empiricist
+Firing Resolve 1 subroutine on a rezzed sentry. on Mycoweb:
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,continue,[{card:Empiricist,label:Empiricist,command:continue},{card:Empiricist,label:Empiricist,command:continue},{card:Empiricist,label:Empiricist,command:continue}]]
+AI: I don't have code to handle this situation: [Empiricist,Run Subroutines,continue,[{card:Empiricist,subroutine:{text:Draw 1 card. You may add 1 card from HQ to the top of R&D.,visual:{y:67,h:32},broken:true},label:Draw 1 card. You may add 1 card from HQ to the top of R&D.,command:continue},{card:Empiricist,subroutine:{text:Do 1 net damage. Give the Runner 1 tag.,visual:{y:102,h:32},broken:true},label:Do 1 net damage. Give the Runner 1 tag.,command:continue},{card:Empiricist,subroutine:{text:Do 2 net damage.,visual:{y:129,h:16},broken:true},label:Do 2 net damage.,command:continue}]]
+Firing Draw 1 card. You may add 1 card from HQ to the top of R&D. on Empiricist:
+Corp drew a card
+Firing Resolve 1 subroutine on another rezzed code gate. on Mycoweb:
+AI: I don't have code to handle this situation: [Mycoweb,Run Subroutines,continue,[{card:Diviner,label:Diviner,command:continue},{card:Diviner,label:Diviner,command:continue},{card:Diviner,label:Diviner,command:continue}]]
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Sang Kancil trashed
+Sang Kancil has a printed cost of 3
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner discarded Ritual
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 6 card(s) in hand: [Send a Message,Send a Message,Byte!,Sericulture Expansion,Seamless Launch,Offworld Office]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Docklands Pass,Open Market,Transfer of Wealth,Transfer of Wealth,Overclock]
+Corp drew a card
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},Remote 1:{score:-3.25,debt:2,adjusted:-5.25,secure:false},HQ:{score:2.5,debt:6,adjusted:-3.5,secure:false},R&D:{score:1.7121320343559647,debt:3,adjusted:-1.2878679656440353,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},Remote 1:{score:-3.25,debt:2,adjusted:-5.25,secure:false},HQ:{score:2.5,debt:6,adjusted:-3.5,secure:false},R&D:{score:1.7121320343559647,debt:3,adjusted:-1.2878679656440353,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {archives:{score:0,debt:6,adjusted:-6,secure:false},Remote 1:{score:-3.25,debt:2,adjusted:-5.25,secure:false},HQ:{score:2.5,debt:6,adjusted:-3.5,secure:false},R&D:{score:1.7121320343559647,debt:3,adjusted:-1.2878679656440353,secure:false}}
+AI: Scoring windows for empty servers: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Send a Message,Seamless Launch,Offworld Office,Sericulture Expansion,Send a Message]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Docklands Pass,Open Market,Transfer of Wealth,Transfer of Wealth,Overclock]
+Look at top of stack; reveal if icebreaker or run event triggered
+Echelon revealed
+Echelon added to grip from top of stack
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+1 virus counter placed on Leech
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Neurospike accessed
+Byte! accessed
+Peer Review accessed
+Clearinghouse accessed
+Clearinghouse accessed
+Palisade accessed
+Neurospike accessed
+Semak-samun accessed
+Spin Doctor accessed
+Seamless Launch accessed
+Hansei Review accessed
+Hansei Review accessed
+Urtica Cipher accessed
+Byte! accessed
+Byte! accessed
+Phật Gioan Baotixita accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Peer Review accessed
+Run ends
+Runner spent one click
+Runner spent one credit
+Played Overclock
+5 credits placed on Overclock
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Diviner
+Firing Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. on Diviner:
+Runner takes 1 net damage
+Transfer of Wealth trashed
+Transfer of Wealth has a printed cost of 0
+Approaching next piece of ice protecting R&D
+Encountering Palisade
+Using Rising Tide:
+Runner spent one credit from Overclock
+Subroutine End the run. broken
+Approaching next piece of ice protecting R&D
+Encountering Diviner
+Using Leech:
+1 virus counter removed from Leech
+Using Sang Kancil:
+Runner spent one credit from Overclock
+Subroutine Do 1 net damage. If you trash a card with a printed play or install cost that is an odd number, end the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+1 virus counter placed on Leech
+1 credit placed on Pennyshaver
+Peer Review accessed
+Run ends
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 1: []
+
+RunnerTestField(35013, [35014,30029,30028,30011,30030,30012,35016,35034,35014,35029,30012,35017,35026,35026,30016,35005,30030,30028,35022,35016,35034,35034,30016,30016,35005,30014,30030,35022,35020,30029,35026,35017,30029], [35014,30028], [30013,35022,35017,30025], [30014,35009,35020,30025,30008,30008], [30067,30044,35049], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [30045,35051,35051,35050,35050,30045,30048,30048,30040,30053,35054,30049,30072,30061,30061,35055,35050,30049], [35054,30040,35049,35055,35053,30067,35081,35081,35081,30072,30048,35053,35055], [30069,30040,30067,35049,30069], [], [30046,30072,30046], [30046,35053,35052,35052,35052], [[35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[1].AICardsDiscarded=[];
+runner.scoreArea[2].rezzed=false;
+runner.grip[2].knownToRunner=true;
+runner.grip[3].knownToRunner=true;
+runner.heap[1].host=null;
+runner.heap[3].madeSuccessfulRunThisTurn=true;
+runner.heap[3].installingCard=runner.rig.programs[1];
+runner.heap[5].host=null;
+runner.heap[10].host=null;
+runner.heap[14].madeSuccessfulRunThisTurn=true;
+runner.heap[17].runWasSuccessful=true;
+runner.heap[22].madeSuccessfulRunThisTurn=true;
+runner.heap[23].madeSuccessfulRunThisTurn=true;
+runner.heap[28].host=null;
+runner.heap[31].host=null;
+runner.rig.hardware[0].credits=3;
+runner.rig.programs[3].virus=1;
+runner.rig.programs[4].virus=2;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[5].faceUp=true;
+corp.archives.cards[6].faceUp=true;
+corp.archives.cards[7].faceUp=true;
+corp.archives.cards[8].faceUp=true;
+corp.archives.cards[8].cardsInstalledThisTurn=[];
+corp.archives.cards[9].faceUp=true;
+corp.archives.cards[10].faceUp=true;
+corp.archives.cards[11].faceUp=true;
+corp.archives.cards[12].faceUp=true;
+corp.archives.cards[13].faceUp=true;
+corp.archives.cards[13].host=null;
+corp.archives.cards[14].faceUp=true;
+corp.archives.cards[14].host=null;
+corp.archives.cards[15].faceUp=true;
+corp.archives.cards[16].faceUp=true;
+corp.archives.cards[17].faceUp=true;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.ice[1].rezzed=true;
+corp.RnD.ice[2].rezzed=true;
+corp.RnD.cards[1].cardsInstalledThisTurn=[];
+corp.RnD.cards[12].knownToRunner=true;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.HQ.ice[2].rezzed=true;
+corp.HQ.ice[3].rezzed=true;
+corp.HQ.ice[4].rezzed=true;
+corp.HQ.cards[1].cardsInstalledThisTurn=[];
+corp.archives.AISuccessfulRuns=11;
+corp.RnD.AISuccessfulRuns=9;
+corp.HQ.AISuccessfulRuns=4;
+
+Version reference: Mon Sep 21 2026 12:05:38 GMT+0100 (British Summer Time)

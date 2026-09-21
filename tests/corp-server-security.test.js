@@ -644,6 +644,60 @@ test('Corp-turn security projects the next Runner click allotment', () => {
   assert.strictEqual(result.totalMandatoryBreakCost, 3);
   assert.strictEqual(result.isSecure, false);
 });
+test('one Nisei counter adds one repeated route cost without a global lockout', () => {
+  const nisei = card(31052); nisei.agenda = 1; corp.scoreArea = [nisei];
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const target = {serverName: 'Remote 0', ice: [etr()], root: [agenda]};
+  const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],
+    cardText: '1 credit: Break 1 barrier subroutine.'};
+  servers = [target]; runner.cards = [breaker]; runner.creditPool = 10;
+  runner.agendaPoints = 5; context.playerTurn = corp;
+  const result = ai._evaluateServerSecurity(target);
+  assert.strictEqual(ai._projectedRunnerRuns(target), 4);
+  assert.strictEqual(ai._globalETRUses(target), 1);
+  assert.strictEqual(result.hasHardLockout, false);
+  assert.strictEqual(result.totalMandatoryBreakCost, 2);
+});
+test('global ETR capacity covering every projected run is a hard lockout', () => {
+  const nisei = card(31052); nisei.agenda = 4; corp.scoreArea = [nisei];
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const target = {serverName: 'Remote 0', ice: [], root: [agenda]};
+  servers = [target]; runner.agendaPoints = 5; context.playerTurn = corp;
+  const result = ai._evaluateServerSecurity(target);
+  assert.strictEqual(ai._globalETRUses(target), 4);
+  assert.strictEqual(result.hasHardLockout, true);
+  assert.strictEqual(result.isSecure, true);
+});
+test('Nisei policy gives no credit where a breach cannot win and ignores hidden Grip', () => {
+  const nisei = card(31052); nisei.agenda = 1; corp.scoreArea = [nisei];
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 1};
+  const target = {serverName: 'Remote 0', ice: [etr()], root: [agenda]};
+  const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],
+    cardText: '1 credit: Break 1 barrier subroutine.'};
+  servers = [target]; runner.cards = [breaker]; runner.creditPool = 10;
+  runner.agendaPoints = 0; context.playerTurn = corp;
+  runner.grip = [{get title() {throw Error('Hidden grip read');}}];
+  const result = ai._evaluateServerSecurity(target);
+  assert.strictEqual(ai._globalETRUses(target), 0);
+  assert.strictEqual(result.hasHardLockout, false);
+  assert.strictEqual(result.totalMandatoryBreakCost, 1);
+});
+test('Nisei activation and security evaluation share the global ETR policy hook', () => {
+  const nisei = card(31052); nisei.agenda = 1; corp.scoreArea = [nisei];
+  const target = {serverName: 'Remote 0', ice: [], root: []};
+  const calls = [];
+  nisei.AIGlobalETRUses = function(targetServer) {
+    calls.push(targetServer);
+    return 1;
+  };
+  servers = [target]; runner.clickTracker = 4;
+  ai._evaluateServerSecurity(target);
+  context.attackedServer = target; context.approachIce = 0;
+  context.currentPhase = {identifier: 'Run 4.5'};
+  const options = nisei.abilities[0].Enumerate.call(nisei);
+  assert.strictEqual(options.length, 1);
+  assert.deepStrictEqual(calls, [target, target]);
+});
 test('breaker-compatible hosted credits count but trash-only credits do not', () => {
   const wall = ice(['End the run.', 'End the run.'], [[['endTheRun']], [['endTheRun']]]);
   const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],

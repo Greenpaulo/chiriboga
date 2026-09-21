@@ -88,6 +88,8 @@ php -S localhost:8000
 
 ## Debugging and Testing Guide for Chiriboga
 
+Automated regression tests live under `tests/`. Run the complete collection with `node tests/run-all-tests.js`. Corp AI decision fixtures, log extraction, and pending reproductions are documented in [`tests/fixtures/README.md`](tests/fixtures/README.md).
+
 This guide explains how to create specific board states, enable debugging features, and test scenarios in the Netrunner implementation.
 
 ### Enabling Debug Mode

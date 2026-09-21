@@ -190,7 +190,7 @@ No hidden-information access, counter mutation, or run-state mutation was added 
 ### 8.2 Verification
 
 - `node tests/corp-server-security.test.js`: **95 regression cases passed**.
-- Every `tests/*.test.js` file passes: **12 test files passed**.
+- Every `tests/*.test.js` file passes: **15 test files passed**, including the decision-fixture and snapshot-recorder suites.
 - `node -c ai_corp.js` passes.
 - `git diff --check` passes.
 - A repository search shows no remaining production or active-reference use of `_hasGlobalETR()`; historical planning documents retain the old name only when describing the previous implementation.

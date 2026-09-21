@@ -43,10 +43,21 @@ if (require.main === module) {
   }
   const snapshot = pick === 'last' ? snapshots[snapshots.length - 1] : snapshots.find(s => s.n === Number(pick));
   if (!snapshot || !name) { console.log('Decision not found, or no fixture name given. Use --list.'); process.exit(1); }
-  if (!snapshot.replayable) console.log('Warning: this decision had non-text options, so the runner cannot replay it exactly.');
+  if (!expect) {
+    console.log('A fixture expectation is required. Pass --expect X or --expect "!X".');
+    process.exit(1);
+  }
+  if (!snapshot.replayable) {
+    console.log('This decision used non-text options and cannot be replayed exactly by the fixture runner. Write a purpose-built test instead.');
+    process.exit(1);
+  }
   const dir = path.join(__dirname, 'fixtures', 'corp-decisions');
   fs.mkdirSync(dir, {recursive: true});
-  const file = path.join(dir, name.replace(/\.txt$/, '') + '.txt');
+  const file = path.join(dir, path.basename(name).replace(/\.txt$/, '') + '.txt');
+  if (fs.existsSync(file)) {
+    console.log('Refusing to overwrite existing fixture ' + file);
+    process.exit(1);
+  }
   fs.writeFileSync(file, buildFixture(snapshot, path.basename(logPath), expect));
-  console.log('Wrote ' + file + (expect ? '' : '\nNow set the "// EXPECT:" line (e.g. "// EXPECT: advance" or "// EXPECT: !install") before running.'));
+  console.log('Wrote ' + file);
 }

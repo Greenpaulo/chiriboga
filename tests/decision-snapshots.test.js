@@ -6,6 +6,7 @@ const path = require('path');
 const vm = require('vm');
 const {parseSnapshots, buildFixture} = require('./extract-fixture.js');
 const source = fs.readFileSync(path.join(__dirname, '..', 'utility.js'), 'utf8');
+const aiSource = fs.readFileSync(path.join(__dirname, '..', 'ai_corp.js'), 'utf8');
 const start = source.indexOf('// BEGIN DecisionSnapshots'), end = source.indexOf('// END DecisionSnapshots');
 assert(start > -1 && end > start, 'DecisionSnapshots markers not found in utility.js');
 const remote = [{}, {}];
@@ -19,6 +20,12 @@ vm.runInContext(source.slice(start, end) + '\nthis.DS = DecisionSnapshots;', con
 const DS = context.DS;
 let tests = 0;
 const test = (name, body) => { body(); tests++; console.log('PASS ' + name); };
+
+test('CorpAI Choice wraps decisions with the snapshot recorder', () => {
+  assert(aiSource.includes('DecisionSnapshots.Before(choiceType, optionList)'));
+  assert(aiSource.includes('DecisionSnapshots.After(snapshot, ret)'));
+  assert(aiSource.includes('_choiceInner(optionList, choiceType)'));
+});
 
 test('records options, choice, run state and asks for a full dump', () => {
   const entry = DS.Before('', ['install', 'play', 'gain']);

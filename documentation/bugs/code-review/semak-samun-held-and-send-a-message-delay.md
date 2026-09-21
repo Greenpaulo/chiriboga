@@ -1,7 +1,7 @@
 # Corp AI: holds Semak-samun while a breachable agenda remote needs another ICE layer
 
 **Source:** `documentation/debug-logs/chiriboga-log-2026-09-19T22_44_37.628Z.txt`  
-**Files:** `ai_corp.js`, `tests/corp-server-security.test.js`, `documentation/fixtures/corp-decision-fixtures.test.js`  
+**Files:** `ai_corp.js`, `tests/corp-server-security.test.js`, `tests/corp-decision-fixtures.test.js`
 **Status:** Fixed and regression-tested. The log exposed both a protection-layer gap and a scoring-plan commitment gap.
 
 ---
@@ -127,9 +127,9 @@ The decision-fixture runner also gained `EXPECT_CARD`, so this regression checks
 
 ## 5. Tests
 
-Added `documentation/fixtures/corp-continues-send-a-message-scoring-plan.txt`, reconstructed immediately after the agenda install with two clicks and 7 credits remaining. It asserts that the AI advances despite the unaffordable global reserve. This is the decision that previously became the first two wasted credit clicks.
+Added `tests/fixtures/corp-decisions/corp-continues-send-a-message-scoring-plan.txt`, reconstructed immediately after the agenda install with two clicks and 7 credits remaining. It asserts that the AI advances despite the unaffordable global reserve. This is the decision that previously became the first two wasted credit clicks.
 
-Added `documentation/fixtures/corp-layers-breachable-agenda-remote.txt`, reconstructed from the reported board immediately after Buzzsaw became active. It asserts:
+Added `tests/fixtures/corp-decisions/corp-layers-breachable-agenda-remote.txt`, reconstructed from the reported board immediately after Buzzsaw became active. It asserts:
 
 - command: `install`
 - card: `Semak-samun`
@@ -146,9 +146,9 @@ Added three direct regression cases to `tests/corp-server-security.test.js`:
 Validation results:
 
 - `node tests/corp-server-security.test.js`: all 85 cases passed.
-- `node documentation/fixtures/corp-decision-fixtures.test.js`: 9 passed; only the documented pre-existing `mulligan-one-ice-three-economy.txt` failure remains.
+- `node tests/corp-decision-fixtures.test.js`: all green fixtures pass; the unresolved mulligan case is isolated under `tests/fixtures/corp-decisions-pending/`.
 - `node -c ai_corp.js`: passed.
-- `node -c documentation/fixtures/corp-decision-fixtures.test.js`: passed.
+- `node -c tests/corp-decision-fixtures.test.js`: passed.
 
 ---
 
