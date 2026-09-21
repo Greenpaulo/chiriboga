@@ -1513,18 +1513,17 @@ class CorpAI {
     return this._breachWouldBePrevented(ActiveCards(corp), server);
   }
 
-  //returns true if the Corp has a scored card with a counter that can end the run
-  //(e.g. a scored Nisei MK II) - this is not tied to a particular server
-  _hasGlobalETR() {
+  //Returns the number of global end-the-run effects the Corp's declared card
+  //policies say it would actually spend to protect this server.
+  _globalETRUses(server) {
+    var ret = 0;
     for (var i = 0; i < corp.scoreArea.length; i++) {
       var scoredCard = corp.scoreArea[i];
-      if (Counters(scoredCard, "agenda") < 1) continue;
-      if (typeof scoredCard.abilities == "undefined") continue;
-      for (var j = 0; j < scoredCard.abilities.length; j++) {
-        if (this._textEndsTheRun(scoredCard.abilities[j].text)) return true;
-      }
+      if (typeof scoredCard.AIGlobalETRUses != "function") continue;
+      var uses = Number(scoredCard.AIGlobalETRUses.call(scoredCard, server));
+      if (isFinite(uses)) ret += Math.max(0, Math.floor(uses));
     }
-    return false;
+    return ret;
   }
 
   //Use the same public matching hooks for human and AI Runners. Hosted
@@ -2208,6 +2207,33 @@ class CorpAI {
     return Math.min(4, totalRisk);
   }
 
+  //Return the Runner's public click allotment relevant to the next run. During
+  //the Corp turn, the exhausted tracker belongs to the previous Runner turn.
+  _projectedRunnerClicks() {
+    var clicks = Math.max(0, runner.clickTracker || 0);
+    if (
+      typeof playerTurn != "undefined" &&
+      playerTurn == corp &&
+      typeof AllottedClicks == "function"
+    ) {
+      clicks = AllottedClicks(runner) + Math.max(0, runner.tempBonusClicks || 0);
+    }
+    return Math.max(0, clicks);
+  }
+
+  //Each available click can initiate an ordinary run. If this server is
+  //already being attacked, include the current run as well as future reruns.
+  _projectedRunnerRuns(server) {
+    var runs = this._projectedRunnerClicks();
+    if (
+      !!server &&
+      typeof attackedServer != "undefined" &&
+      attackedServer == server
+    )
+      runs++;
+    return runs;
+  }
+
   //Return a conservative upper bound on the credits the Runner can bring to a
   //run on this server. Unlike Credits(runner), this includes public run-only
   //money and clicks that can be converted before initiating the run.
@@ -2281,16 +2307,7 @@ class CorpAI {
         attackedServer = previousAttackedServer;
     }
 
-    var clicks = Math.max(0, runner.clickTracker || 0);
-    //During the Corp turn, plan against the Runner's public next-turn click
-    //allotment rather than the exhausted tracker left by their previous turn.
-    if (
-      typeof playerTurn != "undefined" &&
-      playerTurn == corp &&
-      typeof AllottedClicks == "function"
-    ) {
-      clicks = AllottedClicks(runner) + Math.max(0, runner.tempBonusClicks || 0);
-    }
+    var clicks = this._projectedRunnerClicks();
     //One click must remain to initiate an ordinary run. Once a run has begun,
     //click-for-credit is no longer available.
     var clickCredits = evaluatingActiveRun ? 0 : Math.max(0, clicks - 1);
@@ -2334,11 +2351,6 @@ class CorpAI {
     result.structuralRisk = this._serverStructuralRisk(server);
     result.publicThreatRisk = this._estimateRunnerBypassRisk(server);
     result.deterrence = this._tagPunishmentDeterrence(server);
-    //a global way to end the run (e.g. a scored Nisei MK II counter) can save any server
-    if (this._hasGlobalETR()) {
-      result.hasHardLockout = true;
-      result.reasons.push("global end the run available");
-    }
     //defensive upgrades can prevent the breach outright
     if (this._hasDefensiveUpgrade(server)) {
       result.hasHardLockout = true;
@@ -2384,6 +2396,21 @@ class CorpAI {
         );
       }
       result.totalMandatoryBreakCost += mandatoryCost;
+    }
+    var globalETRUses = this._globalETRUses(server);
+    var projectedRuns = this._projectedRunnerRuns(server);
+    if (globalETRUses > 0 && globalETRUses >= projectedRuns) {
+      result.hasHardLockout = true;
+      result.reasons.push(
+        "global end the run covers " + projectedRuns + " projected runs",
+      );
+    } else if (globalETRUses > 0) {
+      //A finite supply makes the Runner pay this route again after each ETR.
+      result.totalMandatoryBreakCost +=
+        globalETRUses * result.totalMandatoryBreakCost;
+      result.reasons.push(
+        "global end the run adds " + globalETRUses + " repeated route cost",
+      );
     }
     if (result.totalMandatoryBreakCost > result.runnerCredits) {
       result.reasons.push(

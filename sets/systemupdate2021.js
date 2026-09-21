@@ -4437,6 +4437,15 @@ cardSet[31052] = {
   subTypes: ["Initiative"],
   agendaPoints: 2,
   advancementRequirement: 4,
+  //How many counters the Corp AI will actually spend defending this server.
+  //Keep this policy shared with Enumerate so security planning does not value
+  //counters which the live card decision would preserve.
+  AIGlobalETRUses: function(server) {
+	if (!corp.AI || !corp.AI._runnerMayWinIfServerBreached(server)) return 0;
+	//On R&D, the current policy saves Nisei for a multi-access run.
+	if (server == corp.RnD && !corp.AI._copyOfCardExistsIn("The Maker's Eye", runner.resolvingCards)) return 0;
+	return Counters(this, "agenda");
+  },
   //When you score this agenda, place 1 agenda counter on it.
   responseOnScored: {
     Resolve: function () {
@@ -4459,16 +4468,7 @@ cardSet[31052] = {
 				if (corp.AI) {
 					//only on approach to server (4e) for maximum effect
 					if (currentPhase.identifier == "Run 4.5" && approachIce < 1) {
-						//save this for something crucial e.g. the runner might win
-						if (corp.AI._runnerMayWinIfServerBreached(attackedServer)) {
-							//for R&D save for wasting The Maker's Eye
-							if (attackedServer == corp.RnD) {
-								if (corp.AI._copyOfCardExistsIn("The Maker's Eye", runner.resolvingCards)) return [{}];
-								return [];
-							}
-							//other servers, just use it
-							return [{}];
-						}
+						if (this.AIGlobalETRUses(attackedServer) > 0) return [{}];
 					}
 					return [];
 				}

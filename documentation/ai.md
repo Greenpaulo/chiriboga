@@ -1163,7 +1163,7 @@ AIRunPoolCreditOffset: function(server, runEventCardToUse) {
 
 The return value is the non-negative number of additional credits available for that route. `server` is the proposed attacked server. `runEventCardToUse` is the proposed event for Runner-AI simulation; Corp security planning always passes `null`, because hidden Grip identities are unavailable to the Corp. The hook must be read-only, use only public active state when called with `null`, and be safe outside a run. If a card exposes both usable hosted credits and this hook, the security evaluator takes the larger value rather than adding both.
 
-`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn the next Runner allotment is projected, while an active run receives no click-to-credit allowance.
+`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
 
 ### 4.21 Public Central Pressure — `AICentralPressure`
 
@@ -1626,7 +1626,7 @@ if (corp.AI != null) {
 - `corp.AI._iceHasETR(ice)` — true if the ice can end the run (subroutine or encounter effect)
 - `corp.AI._iceIsLethal(ice, runnerHandSize)` — true if printed damage exceeds the Runner's grip size
 - `corp.AI._hasDefensiveUpgrade(server)` — true if an upgrade in the server prevents the breach
-- `corp.AI._hasGlobalETR()` — true if a scored card with a counter can end the run (e.g. Nisei MK II)
+- `corp.AI._globalETRUses(server)` — number of declared global end-the-run uses the Corp will actually spend defending this server. Cards expose `AIGlobalETRUses(server)` and share it with their live activation policy; finite capacity taxes repeated routes, while capacity covering all projected runs is a hard lockout.
 - `corp.AI._estimateBreakCost(ice, breaker, mandatoryOnly = false)` — estimated credit cost for avoiding punishment (`Infinity` when required breaks cannot be covered). Pass `true` to count only breaks needed to avoid ETR or lethal damage. Uses Corp-owned `AIImplementIce` classification, partial hosted contributions, and whole activation prices from `AIImplementBreaker`, falling back to card text. Optional punishment never establishes a security lockout.
 - `corp.AI._requiredSubroutines(ice)` — number of subroutines worth breaking per the Corp-owned Run Calculator's classification. Human and AI Runners use the same path; the end-the-run/damage regex is a fallback only when the calculator is unavailable.
 - `corp.AI._effectiveIceStrength(ice)` — ice strength after Runner reductions (Ice Carver, Leech, Datasucker)

@@ -52,9 +52,17 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 
 ### Layer 2: Global & Root Security — `[COMPLETED]`
 
-- **Defensive Upgrades:** Inspects server root for breach-preventing upgrades (_Ash 2X3301_, _Caprice Nisei_) via `_hasDefensiveUpgrade()` using `card.AIPreventBreach`.
-- **Global ETR Counters:** Evaluates scored agendas with hosted counters (_Nisei MK II_) to recognize global, click-free ETR capabilities via `_hasGlobalETR()`.
+- **Defensive Upgrades:** Inspects server root and active Corp cards via `_hasDefensiveUpgrade()` using `card.AIPreventBreach`. _Ash 2X3ZB9CY_ and _Caprice Nisei_ are intended examples, but neither currently has a set implementation; because their prevention depends on a trace or psi game, they should not receive an unconditional boolean hook.
+- **Global ETR Counters:** Evaluates scored agendas with declared, server-specific global ETR policy (_Nisei MK II_) via `_globalETRUses(server)`.
 - **Punitive Lethality:** Calculates hand-size flatline risks (`_iceIsLethal()`); damage must exceed grip size to be lethal. The mandatory-break estimate breaks only enough damage subroutines on a piece of ice to avoid flatlining.
+
+#### Layer 2.1: Finite Global ETR Capacity — `[FOLLOW-UP]`
+
+- **Goal:** Model global end-the-run counters as finite run taxes rather than permanent server lockouts.
+- **Design:** Cards expose `AIGlobalETRUses(server)`, shared by their live `Enumerate` policy and `_globalETRUses(server)`. Capacity at least equal to the Runner's projected run attempts is a hard lockout; smaller capacity adds one repeated mandatory route cost per use.
+- **Compatibility and safety:** The hook must be deterministic from public state, safe outside a run, and must not inspect hidden Runner card identities. Conditional cards should return zero on servers where their live policy would preserve the counter.
+- **Regression scenarios:** One counter against four clicks adds one route cost without locking the server; capacity covering every projected run is a lockout; Nisei gives no security credit when a breach cannot win; hidden Grip contents are never inspected.
+- **Acceptance gate:** The evaluator and the card's activation decision consume the same hook, and all security regressions pass.
 
 ### Layer 3: Non-Standard Tools & Efficiency — `[COMPLETED]`
 
