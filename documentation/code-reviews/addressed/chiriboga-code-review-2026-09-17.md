@@ -45,6 +45,15 @@ Together they add a new tactical layer to the Corp AI: a way to estimate the pro
 3. **`_centralBreachLossRisk`'s access-count estimate is still a heuristic, and the code says so** (`Math.max(1, 1 + Math.floor(threat.additionalAccess))`) — it only accounts for *installed* Runner multi-access, not one-shot/hidden effects, consistent with the file's existing stated boundary ("Hidden run events remain Layer 5's responsibility"). Not a defect, just worth knowing this is a deliberately bounded model, not a full solve — the roadmap doc already flags this as expected future work.
 4. **Minor:** the `.gitignore` change adds `images/` even though `images/*` was already present on the line below — redundant (not harmful, `images/` is arguably clearer/broader, but one of the two lines is now dead weight).
 
+### Resolution (21 Sept 2026)
+
+1. **Addressed.** The second call site now explains that it is a deliberately lower-bar fallback, reached after normal install planning finds no useful option, while the earlier call belongs to the immediate central-loss interrupt.
+2. **Addressed.** The two values are now named `CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD` and `CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT`. `documentation/ai.md` names those constants beside the prose description so future tuning has a clear synchronization point.
+3. **Accepted boundary; no change.** Hidden and one-shot access effects remain outside this public-board estimate as designed and documented. Treating that limitation as a bug here would give the Corp AI hidden Runner information.
+4. **Addressed.** Removed the redundant `images/*` entry and retained the clearer `images/` directory rule.
+
+Verification after these changes: `node tests/run-all-tests.js` passes all 15 test files, including `corp-decision-fixtures.test.js` and `decision-snapshots.test.js`.
+
 Nothing in either commit broke an existing test, introduced an undefined function/property reference (checked: `_rankedServersToProtect`, `_unrezzedIce`, `_agendasInHand`, `AgendaPointsToWin`, `CheckRez`, etc. all resolve to real, pre-existing definitions), or left temp state unrestored on an exception path.
 
 ## Bottom line

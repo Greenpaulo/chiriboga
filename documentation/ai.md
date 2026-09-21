@@ -1217,7 +1217,10 @@ never the engine's hidden card order. At a probability of 35% or higher, the
 main-phase planner may interrupt a non-winning advancement plan for an ICE
 install that materially secures the central, a purge that materially removes
 multi-access, or emergency ICE acquisition. A Corp score that wins immediately
-always retains priority.
+always retains priority. These tuning values are named in `ai_corp.js` as
+`CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD` and
+`CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT`; keep this description aligned
+when adjusting them.
 
 ### 4.22 Public Successful-Run Pressure — `AIPublicRunPressure`
 

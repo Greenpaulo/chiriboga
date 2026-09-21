@@ -1,5 +1,8 @@
 //AI decisionmaking
 
+const CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD = 0.35;
+const CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT = 0.15;
+
 class CorpAI {
   //**CORP UTILITY FUNCTIONS**
   _log(message) {
@@ -5068,12 +5071,13 @@ class CorpAI {
     )
       return -1;
 
-    var criticalThreshold = 0.35;
-    var minimumImprovement = 0.15;
     var risks = [corp.RnD, corp.HQ]
       .filter((server) => server)
       .map((server) => this._centralBreachLossRisk(server))
-      .filter((risk) => risk.probability >= criticalThreshold)
+      .filter(
+        (risk) =>
+          risk.probability >= CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD,
+      )
       .sort((a, b) => b.probability - a.probability);
     if (risks.length < 1) return -1;
     var risk = risks[0];
@@ -5108,7 +5112,8 @@ class CorpAI {
       }
       if (
         bestInstall &&
-        risk.probability - bestPostInstallRisk >= minimumImprovement
+        risk.probability - bestPostInstallRisk >=
+          CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT
       ) {
         this._log(
           "Critical breach risk on " +
@@ -5128,7 +5133,8 @@ class CorpAI {
       });
       if (
         postPurgeRisk.accessCount < risk.accessCount &&
-        risk.probability - postPurgeRisk.probability >= minimumImprovement
+        risk.probability - postPurgeRisk.probability >=
+          CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT
       ) {
         this._log(
           "Critical breach risk on " +
@@ -5684,9 +5690,10 @@ class CorpAI {
     }
     this._log("No obvious install options");
 
-    //Threat evaluation is only useful if the Corp can act on it. When a
-    //critical server has no ICE available in HQ, use immediate draw tools or
-    //basic draws before accumulating credits that cannot protect the server.
+    //This lower-bar recovery is intentionally separate from the immediate
+    //central-loss interrupt: it catches any severely exposed server after the
+    //normal install plan has found no useful option. Use immediate draw tools
+    //or basic draws before accumulating credits that cannot protect it.
     var emergencyRecovery = this._emergencyProtectionRecoveryAction(optionList);
     if (emergencyRecovery > -1) return emergencyRecovery;
 
