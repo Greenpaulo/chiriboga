@@ -13,4 +13,6 @@
 5. [FIXED] Debug menu need to close when click outside of the popup
 
    **Resolved — 21 Sept:** Clicking outside the debug menu now closes it. This provides a way to dismiss the menu when browser zoom pushes the **X** close button off-screen, while clicks on buttons and controls inside the menu continue to work normally. Added focused regression coverage for both outside and inside clicks. See `documentation/bugs/code-review/debug-menu-does-not-close-on-backdrop.md`.
-6. ICE advancement tokens block reading subroutines when breaking that ICE
+6. [FIXED] ICE advancement tokens block reading subroutines when breaking that ICE
+
+   **Resolved — 21 Sept:** While the Runner is choosing subroutines to break, advancement-counter artwork and its number are now temporarily hidden on the encountered ICE so the subroutine text and selection controls remain readable. The counter is restored as soon as subroutine selection ends; counters on other cards and other counter types are unchanged. Added focused renderer regression coverage. See `documentation/bugs/code-review/ice-advancement-counters-block-subroutines.md`.

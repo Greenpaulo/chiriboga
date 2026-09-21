@@ -249,13 +249,19 @@ var CardRenderer = {
       }, this);
     }
 
-    Update() {
-      if (this.hideWhenZero && !this.address[this.key]) {
+    UpdateVisibility(forceHidden = false) {
+      if (forceHidden || (this.hideWhenZero && !this.address[this.key])) {
         this.sprite.visible = false;
         this.richText.visible = false;
       } else {
         this.sprite.visible = true;
         this.richText.visible = true;
+      }
+    }
+
+    Update() {
+      this.UpdateVisibility();
+      if (this.sprite.visible) {
         var targetValue = this.address[this.key];
         //add incrementers to animate increase/decrease
         while (this.storedValue < targetValue) {
@@ -2099,6 +2105,8 @@ var CardRenderer = {
     }
 
     UpdateCounters(skipUpdate=false) {
+      var choosingSubroutines = OptionsAreOnlyUniqueSubroutines();
+      var relevantIce = GetMostRelevantIce();
       for (var i = 0; i < this.counters.length; i++) {
 		if (this.counters[i].sprite.parent) {
 			var unrotation = this.app.stage.rotation;
@@ -2107,6 +2115,13 @@ var CardRenderer = {
 			this.counters[i].sprite.rotation = -unrotation;
 			this.counters[i].richText.rotation = -unrotation;
 			if (!skipUpdate) this.counters[i].Update();
+			this.counters[i].UpdateVisibility(
+			  pixi_shouldHideCounterDuringSubroutineChoice(
+				this.counters[i],
+				choosingSubroutines,
+				relevantIce
+			  )
+			);
 			this.counters[i].sprite.parent.addChild(this.counters[i].sprite);
 			this.counters[i].richText.parent.addChild(this.counters[i].richText);
 		}
@@ -2312,6 +2327,18 @@ var CardRenderer = {
 };
 
 //some utility variables and functions
+function pixi_shouldHideCounterDuringSubroutineChoice(
+  counter,
+  choosingSubroutines,
+  relevantIce
+) {
+  return (
+    choosingSubroutines &&
+    counter.key == "advancement" &&
+    counter.address === relevantIce
+  );
+}
+
 var pixi_draggingData = null;
 var pixi_draggingCard = null;
 var pixi_mouseStart = { x: 0, y: 0 };
