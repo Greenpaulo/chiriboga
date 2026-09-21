@@ -1,0 +1,369 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[René Loup Arcemont: Party Animal,2 Carnivore,2 Botulus,1 Buzzsaw,3 Fermenter,2 Leech,2 Cookbook,1 Docklands Pass,2 Creative Commission,1 DZMZ Optimizer,2 Telework Contract,3 Sure Gamble,2 Verbal Plasticity,3 Scrounge,3 Gourmand,1 Hantu,3 Rising Tide,3 Cacophony,2 Rent Rioters,1 Ritual,1 Azimat]
+[LEO Construction: Labor Solutions,1 Luminal Transubstantiation,2 Ansel 1.0,3 Brân 1.0,1 Seamless Launch,1 Sprint,3 Manegarm Skunkworks,3 Spin Doctor,3 Offworld Office,2 Send a Message,1 Regolith Mining License,3 Hedge Fund,3 Project Ingatan,3 Otto Campaign,3 Bumi 1.0,1 Scatter Field,1 Nanomanagement,3 Mercia B4LL4RD,3 Semak-samun,3 Syailendra,1 Flyswatter,3 Petty Cash,2 Mahkota Langit Grid]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Agenda flood with weak ICE defense - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Mercia B4LL4RD,Seamless Launch,Spin Doctor,Mercia B4LL4RD,Manegarm Skunkworks]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Scrounge,Telework Contract,Botulus]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.5,debt:0,adjusted:3.5,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5,debt:0,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.025036580688596,debt:0,adjusted:4.025036580688596,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Installing emergency draw to find ICE
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5,debt:0,adjusted:-5,secure:false},Remote 0:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.025036580688596,debt:0,adjusted:4.025036580688596,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 0, Agendas: 0, Non-Agendas: 4
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Seamless Launch,Mercia B4LL4RD,Manegarm Skunkworks,Mercia B4LL4RD]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Scrounge,Telework Contract,Botulus]
+Runner spent one click
+Run initiated attacking HQ
+Approaching HQ
+Run successful
+Manegarm Skunkworks accessed
+Runner spent 3 credits
+Manegarm Skunkworks trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Run initiated attacking Remote 0
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+Manegarm Skunkworks shuffled into R&D from Archives
+AI: I know this one
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Mercia B4LL4RD,Mercia B4LL4RD,Hedge Fund,Bumi 1.0,Seamless Launch]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Scrounge,Botulus,Carnivore]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-8,debt:0,adjusted:-8,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.012684342524752,debt:0,adjusted:4.012684342524752,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.512684342524752,debt:0,adjusted:3.512684342524752,secure:false},R&D:{score:4.012684342524752,debt:0,adjusted:4.012684342524752,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:2.512684342524752,debt:0,adjusted:2.512684342524752,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.012684342524752,debt:0,adjusted:4.012684342524752,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 3 card(s) in hand: [Seamless Launch,Mercia B4LL4RD,Offworld Office]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Scrounge,Botulus,Carnivore]
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Run initiated attacking Remote 1
+Approaching Remote 1
+Run successful
+Mercia B4LL4RD accessed
+Runner spent 2 credits
+Mercia B4LL4RD trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Runner spent 2 credits
+Runner installed Botulus
+1 virus counter placed on Botulus
+Runner spent one click
+Runner spent 2 credits
+Runner installed Botulus
+1 virus counter placed on Botulus
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 3 card(s) in hand: [Seamless Launch,Mercia B4LL4RD,Offworld Office]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Scrounge,Scrounge,Carnivore,Rent Rioters]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-0.40973058881491875,debt:0,adjusted:-0.40973058881491875,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0902694111850812,debt:0,adjusted:3.0902694111850812,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Ranked server protection: {HQ:{score:-1.4097305888149188,debt:0,adjusted:-1.4097305888149188,secure:false},Remote 2:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0902694111850812,debt:0,adjusted:3.0902694111850812,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 1
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-2.4097305888149188,debt:0,adjusted:-2.4097305888149188,secure:false},Remote 2:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0902694111850812,debt:0,adjusted:3.0902694111850812,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 3, Non-Agendas: 1
+AI: HQ_MODERATE_HAZARD: HQ has 1 ICE but 3 agendas (potential flood)
+AI: HQ_MODERATE_HAZARD on last click: Deprioritizing draw
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 4 card(s) in hand: [Seamless Launch,Offworld Office,Offworld Office,Offworld Office]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Scrounge,Scrounge,Carnivore,Rent Rioters]
+1 virus counter placed on Botulus
+1 virus counter placed on Botulus
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Telework Contract trashed
+Runner spent one click
+Run initiated attacking Remote 2
+Approaching Remote 2
+Run successful
+Mercia B4LL4RD accessed
+Runner spent 2 credits
+Mercia B4LL4RD trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Runner spent 4 credits
+Runner installed Carnivore
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching HQ
+Run successful
+Offworld Office accessed
+Offworld Office stolen
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 3 card(s) in hand: [Offworld Office,Offworld Office,Seamless Launch]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Scrounge,Scrounge,Rent Rioters,Leech]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-0.4212422362410875,debt:0,adjusted:-0.4212422362410875,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0787577637589125,debt:0,adjusted:3.0787577637589125,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Ranked server protection: {HQ:{score:-1.4212422362410875,debt:0,adjusted:-1.4212422362410875,secure:false},Remote 3:{score:2.5787577637589125,debt:0,adjusted:2.5787577637589125,secure:true},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0787577637589125,debt:0,adjusted:3.0787577637589125,secure:false}}
+AI: Nothing to advance
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Scoring windows for empty servers: [11.1]
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Ranked server protection: {HQ:{score:-0.4212422362410875,debt:0,adjusted:-0.4212422362410875,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0787577637589125,debt:0,adjusted:3.0787577637589125,secure:false},Remote 3:{score:3.5787577637589125,debt:0,adjusted:3.5787577637589125,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 1
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 2 card(s) in hand: [Offworld Office,Seamless Launch]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Scrounge,Scrounge,Rent Rioters,Leech]
+1 virus counter placed on Botulus
+1 virus counter placed on Botulus
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching HQ
+Run successful
+Seamless Launch accessed
+Trash 2 cards from your grip: Trash the card you are accessing. chosen
+Using Carnivore:
+Rent Rioters trashed
+Leech trashed
+Seamless Launch trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching HQ
+Run successful
+Offworld Office accessed
+Offworld Office stolen
+Run ends
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+Runner spent one click
+Run initiated attacking Remote 3
+Approaching outermost piece of ice protecting Remote 3
+AI: I will rez the approached ice
+Corp spent 6 credits
+Corp rezzed Brân 1.0
+Using LEO Construction: Labor Solutions:
+Brân 1.0 trashed
+LEO Construction trashes Brân 1.0 to end the run
+Run ends
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 3: [Offworld Office]
+
+RunnerTestField(30001, [30027,35011,30008], [35011,30034,35010,35009,30007,30022,35007,30013,30030,30020,35004,35007,30009,30030,30008,35010,35007,35009,30020,30005,30034,30007,35010,30003,35009,35008,30027,35029,30009,35026,30007], [35004,35004,30030], [30003], [30067,30067], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [30075,35045,35045,30040,30039], [35045,30075,35041,35082,35038,35054,30071,35081,30041,35082,35040,35040,30039,35043,30053,30042,35079,35081,35076,35038,35076,35076,30069,30038,30038,35040,35081,35038,30036,35042,30042,35054,30069,30039,30075,30042,30053,35054], [], [], [35041], [35041], [[30067]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[1].rezzed=false;
+runner.stack[7].breachedHQThisTurn=true;
+runner.heap[0].host=null;
+runner.heap[1].host=null;
+runner.heap[2].host=null;
+runner.rig.hardware[0].usedThisTurn=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[1].host=null;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[2].host=null;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[3].cardsInstalledThisTurn=[corp.archives.cards[4],corp.remoteServers[0].root[0],];
+corp.archives.cards[3].host=null;
+corp.archives.cards[4].rezzed=true;
+corp.archives.cards[4].host=null;
+corp.RnD.ice[0].hostedCards = [];
+InstanceCardsPush(30004,corp.RnD.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.RnD.ice[0];
+corp.RnD.ice[0].hostedCards[0].faceUp=true;
+corp.RnD.ice[0].hostedCards[0].virus=3;
+corp.RnD.ice[0].hostedCards[0].host=corp.RnD.ice[0];
+corp.RnD.cards[15].host=null;
+corp.HQ.ice[0].hostedCards = [];
+InstanceCardsPush(30004,corp.HQ.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.HQ.ice[0];
+corp.HQ.ice[0].hostedCards[0].faceUp=true;
+corp.HQ.ice[0].hostedCards[0].virus=3;
+corp.HQ.ice[0].hostedCards[0].host=corp.HQ.ice[0];
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.HQ.AISuccessfulRuns=4;
+
+Version reference: Sat Sep 19 2026 22:23:18 GMT+0100 (GMT+01:00)

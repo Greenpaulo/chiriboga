@@ -1,0 +1,1990 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[René Loup Arcemont: Party Animal,2 Carnivore,2 Botulus,1 Buzzsaw,3 Fermenter,2 Leech,2 Cookbook,1 Docklands Pass,2 Creative Commission,1 DZMZ Optimizer,2 Telework Contract,3 Sure Gamble,2 Verbal Plasticity,3 Scrounge,3 Gourmand,1 Hantu,3 Rising Tide,3 Cacophony,2 Rent Rioters,1 Ritual,1 Azimat]
+[LEO Construction: Labor Solutions,1 Luminal Transubstantiation,2 Ansel 1.0,3 Brân 1.0,1 Seamless Launch,1 Sprint,3 Manegarm Skunkworks,3 Spin Doctor,3 Offworld Office,2 Send a Message,1 Regolith Mining License,3 Hedge Fund,3 Project Ingatan,3 Otto Campaign,3 Bumi 1.0,1 Scatter Field,1 Nanomanagement,3 Mercia B4LL4RD,3 Semak-samun,3 Syailendra,1 Flyswatter,3 Petty Cash,2 Mahkota Langit Grid]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: 0 ICE in hand - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Semak-samun,Nanomanagement,Spin Doctor,Scatter Field,Hedge Fund]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Fermenter,Rising Tide,Scrounge,Cookbook]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.5,debt:0,adjusted:3.5,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5,debt:0,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.025036580688596,debt:0,adjusted:4.025036580688596,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.025036580688596,debt:0,adjusted:4.025036580688596,secure:false},HQ:{score:7.525036580688596,debt:0,adjusted:7.525036580688596,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hedge Fund might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Spin Doctor,Nanomanagement,Syailendra]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Fermenter,Rising Tide,Scrounge,Cookbook]
+Runner spent one click
+Runner spent one credit
+Runner installed Cookbook
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+Runner spent one click
+Runner spent 2 credits
+Runner installed Rent Rioters
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Spin Doctor,Nanomanagement,Syailendra]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 1 card(s) in hand: [Scrounge]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.145833333333333,debt:0,adjusted:2.145833333333333,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.895833333333333,debt:0,adjusted:4.895833333333333,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 0:{score:1.395833333333333,debt:0,adjusted:1.395833333333333,secure:false},R&D:{score:2.145833333333333,debt:0,adjusted:2.145833333333333,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.895833333333333,debt:0,adjusted:3.895833333333333,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: No obvious install options
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 0:{score:1.395833333333333,debt:0,adjusted:1.395833333333333,secure:false},R&D:{score:2.145833333333333,debt:0,adjusted:2.145833333333333,secure:false},HQ:{score:2.895833333333333,debt:0,adjusted:2.895833333333333,secure:true},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: No obvious install options
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Spin Doctor,Bumi 1.0,Send a Message,Offworld Office,Nanomanagement]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 1 card(s) in hand: [Scrounge]
+1 virus counter placed on Fermenter
+Using Rent Rioters:
+Runner spent 3 clicks
+Rent Rioters trashed
+Runner gained 9 credits
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Scatter Field
+Encountering Scatter Field
+Firing You may install 1 card from HQ. on Scatter Field:
+ERROR: {name:TypeError,message:Cannot read properties of null (reading 'unique'),stack:TypeError: Cannot read properties of null (reading 'unique')\n    at CorpAI._uniqueCopyAlreadyInstalled (http://localhost:8000/ai_corp.js?1789762344:117:15)\n    at CorpAI._rankedInstallOptions (http://localhost:8000/ai_corp.js?1789762344:3307:17)\n    at CorpAI._bestInstallOption (http://localhost:8000/ai_corp.js?1789762344:2886:37)\n    at CorpAI.Choice (http://localhost:8000/ai_corp.js?1789762344:5645:20)\n    at http://localhost:8000/ai_corp.js?1789762344:5783:20\n    at new Promise (<anonymous>)\n    at CorpAI.SelectChoice (http://localhost:8000/ai_corp.js?1789762344:5775:12)\n    at MakeChoice (http://localhost:8000/command.js?1775645364:805:18)\n    at Execute (http://localhost:8000/command.js?1775645364:36:5)\n    at ExecuteChosen (http://localhost:8000/init.js?1775645364:2078:5)}
+AI: Error executing select choice asynchronously, using arbitrary option from:
+[{card:Spin Doctor,server:null,label:[hidden card] -> new server,command:install},{card:Spin Doctor,server:{isServer:true,root:[],ice:[Syailendra],serverName:Remote 0,xStart:729,xEnd:938,yCards:100},label:[hidden card] -> Remote 0,command:install},{card:Bumi 1.0,server:null,label:[hidden card] -> new server,command:install},{card:Bumi 1.0,server:{isServer:true,root:[],ice:[Syailendra],serverName:Remote 0,xStart:729,xEnd:938,yCards:100},label:[hidden card] -> Remote 0,command:install},{card:Bumi 1.0,server:{isServer:true,cards:[Spin Doctor,Bumi 1.0,Send a Message,Offworld Office,Nanomanagement],root:[],ice:[Scatter Field],serverName:HQ,xStart:479,xEnd:689,yCards:100},label:[hidden card] -> HQ,command:install},{card:Bumi 1.0,server:{isServer:true,cards:[Offworld Office,Sprint,Spin Doctor,Semak-samun,Regolith Mining License,Syailendra,Brân 1.0,Otto Campaign,Project Ingatan,Project Ingatan,Semak-samun,Manegarm Skunkworks,Mercia B4LL4RD,Petty Cash,Petty Cash,Brân 1.0,Flyswatter,Bumi 1.0,Luminal Transubstantiation,Bumi 1.0,Project Ingatan,Offworld Office,Petty Cash,Seamless Launch,Mahkota Langit Grid,Mercia B4LL4RD,Mercia B4LL4RD,Spin Doctor,Brân 1.0,Otto Campaign,Manegarm Skunkworks,Ansel 1.0,Otto Campaign,Send a Message,Hedge Fund,Syailendra,Ansel 1.0,Mahkota Langit Grid,Hedge Fund,Manegarm Skunkworks],root:[],ice:[Semak-samun],serverName:R&D,xStart:230,xEnd:439,yCards:100},label:[hidden card] -> R&D,command:install},{card:Bumi 1.0,server:{isServer:true,cards:[Hedge Fund],root:[],ice:[],serverName:Archives,xStart:40,xEnd:190,yCards:100},label:[hidden card] -> Archives,command:install},{card:Send a Message,server:null,label:[hidden card] -> new server,command:install},{card:Send a Message,server:{isServer:true,root:[],ice:[Syailendra],serverName:Remote 0,xStart:729,xEnd:938,yCards:100},label:[hidden card] -> Remote 0,command:install},{card:Offworld Office,server:null,label:[hidden card] -> new server,command:install},{card:Offworld Office,server:{isServer:true,root:[],ice:[Syailendra],serverName:Remote 0,xStart:729,xEnd:938,yCards:100},label:[hidden card] -> Remote 0,command:install},{card:null,label:Decline,button:Decline,command:install}]
+Corp created a new remote server
+Corp installed a card in root of a remote server
+Firing End the run. on Scatter Field:
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Bumi 1.0,Send a Message,Offworld Office,Nanomanagement]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 1 card(s) in hand: [Scrounge]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {Remote 1:{score:0,debt:0,adjusted:0,secure:false},Remote 0:{score:1.395833333333333,debt:0,adjusted:1.395833333333333,secure:false},R&D:{score:2.145833333333333,debt:0,adjusted:2.145833333333333,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.4375,debt:0,adjusted:3.4375,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {Remote 0:{score:1.395833333333333,debt:0,adjusted:1.395833333333333,secure:false},R&D:{score:2.145833333333333,debt:0,adjusted:2.145833333333333,secure:false},HQ:{score:2.4375,debt:0,adjusted:2.4375,secure:true},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: No obvious install options
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {Remote 0:{score:1.395833333333333,debt:0,adjusted:1.395833333333333,secure:false},R&D:{score:2.145833333333333,debt:0,adjusted:2.145833333333333,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.4375,debt:0,adjusted:3.4375,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: No obvious install options
+AI: Hedge Fund might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Offworld Office,Manegarm Skunkworks,Nanomanagement,Send a Message]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 1 card(s) in hand: [Scrounge]
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner drew a card
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 8 credits
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Offworld Office,Manegarm Skunkworks,Nanomanagement,Send a Message]
+SPOILER: Runner has 21 credit(s), 0 tag(s) and 2 card(s) in hand: [Scrounge,Fermenter]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Ranked server protection: {Remote 0:{score:1.284926470588235,debt:0,adjusted:1.284926470588235,secure:false},R&D:{score:2.034926470588235,debt:0,adjusted:2.034926470588235,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3709558823529413,debt:0,adjusted:3.3709558823529413,secure:true}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance
+AI: No obvious install options
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Ranked server protection: {Remote 0:{score:1.284926470588235,debt:0,adjusted:1.284926470588235,secure:false},R&D:{score:2.034926470588235,debt:0,adjusted:2.034926470588235,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3709558823529413,debt:0,adjusted:3.3709558823529413,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: No obvious install options
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: No obvious economy option
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Ranked server protection: {Remote 0:{score:1.284926470588235,debt:0,adjusted:1.284926470588235,secure:false},R&D:{score:2.034926470588235,debt:0,adjusted:2.034926470588235,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3709558823529413,debt:0,adjusted:3.3709558823529413,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: No obvious install options
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: No obvious economy option
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Ranked server protection: {Remote 0:{score:1.284926470588235,debt:0,adjusted:1.284926470588235,secure:false},R&D:{score:2.034926470588235,debt:0,adjusted:2.034926470588235,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3709558823529413,debt:0,adjusted:3.3709558823529413,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Send a Message,Manegarm Skunkworks,Offworld Office,Mahkota Langit Grid,Nanomanagement]
+SPOILER: Runner has 21 credit(s), 0 tag(s) and 2 card(s) in hand: [Scrounge,Fermenter]
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+Runner spent 2 clicks
+Runner spent one credit
+Played Scrounge
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner drew a card
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Send a Message,Manegarm Skunkworks,Offworld Office,Mahkota Langit Grid,Nanomanagement]
+SPOILER: Runner has 18 credit(s), 0 tag(s) and 1 card(s) in hand: [Cookbook]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Ranked server protection: {Remote 0:{score:1.3863636363636365,debt:0,adjusted:1.3863636363636365,secure:false},R&D:{score:2.1363636363636367,debt:0,adjusted:2.1363636363636367,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.431818181818182,debt:0,adjusted:4.431818181818182,secure:true}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Ranked server protection: {Remote 0:{score:1.3863636363636365,debt:0,adjusted:1.3863636363636365,secure:false},R&D:{score:2.1363636363636367,debt:0,adjusted:2.1363636363636367,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.431818181818182,debt:0,adjusted:4.431818181818182,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Ranked server protection: {R&D:{score:2.1363636363636367,debt:0,adjusted:2.1363636363636367,secure:false},Remote 0:{score:2.7250000000000005,debt:0,adjusted:2.7250000000000005,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.4318181818181817,debt:0,adjusted:3.4318181818181817,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Scoring windows for empty servers: [1.5247607655502398]
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Ranked server protection: {Remote 0:{score:3.7250000000000005,debt:0,adjusted:3.7250000000000005,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.1363636363636367,debt:0,adjusted:2.1363636363636367,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.431818181818182,debt:0,adjusted:4.431818181818182,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 3
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Nanomanagement,Syailendra,Mahkota Langit Grid,Manegarm Skunkworks,Send a Message]
+SPOILER: Runner has 18 credit(s), 0 tag(s) and 1 card(s) in hand: [Cookbook]
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 3 credits
+Runner installed Verbal Plasticity
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Nanomanagement,Syailendra,Mahkota Langit Grid,Manegarm Skunkworks,Send a Message]
+SPOILER: Runner has 27 credit(s), 0 tag(s) and 1 card(s) in hand: [Cookbook]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Ranked server protection: {Remote 0:{score:3.7250000000000005,debt:0,adjusted:3.7250000000000005,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.1328125,debt:0,adjusted:2.1328125,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.4296875,debt:0,adjusted:6.4296875,secure:true}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Ranked server protection: {Remote 0:{score:3.7250000000000005,debt:0,adjusted:3.7250000000000005,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.1328125,debt:0,adjusted:2.1328125,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.4296875,debt:0,adjusted:6.4296875,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting Archives
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Ranked server protection: {Remote 0:{score:3.7250000000000005,debt:0,adjusted:3.7250000000000005,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.1328125,debt:0,adjusted:2.1328125,secure:false},HQ:{score:5.4296875,debt:0,adjusted:5.4296875,secure:true},archives:{score:5.8828125,debt:0,adjusted:5.8828125,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hedge Fund might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: Ranked server protection: {Remote 0:{score:3.7250000000000005,debt:0,adjusted:3.7250000000000005,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.1328125,debt:0,adjusted:2.1328125,secure:false},HQ:{score:4.4296875,debt:0,adjusted:4.4296875,secure:true},archives:{score:5.8828125,debt:0,adjusted:5.8828125,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 30
+AI: I could advance a card by 1 with these cards: [null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 4 card(s) in hand: [Nanomanagement,Send a Message,Mahkota Langit Grid,Manegarm Skunkworks]
+SPOILER: Runner has 27 credit(s), 0 tag(s) and 1 card(s) in hand: [Cookbook]
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 3 credits
+Runner installed Hantu
+2 virus counters placed on Hantu
+1 virus counter placed on Hantu
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 6 credits
+Corp rezzed Ansel 1.0
+Using LEO Construction: Labor Solutions:
+Ansel 1.0 trashed
+LEO Construction trashes Ansel 1.0 to end the run
+Run ends
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Syailendra
+Encountering Syailendra
+Firing You may place 1 advancement counter on an installed card you can advance. on Syailendra:
+1 advancement counter placed on Syailendra
+Syailendra places 1 advancement counter on Syailendra
+Firing The Runner loses 2[credit]. on Syailendra:
+Runner lost 2 credits
+Firing Do 1 net damage. on Syailendra:
+Runner takes 1 net damage
+Fermenter trashed
+Approaching Remote 0
+Run successful
+Offworld Office accessed
+Offworld Office stolen
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Nanomanagement,Send a Message,Mahkota Langit Grid,Manegarm Skunkworks]
+SPOILER: Runner has 22 credit(s), 0 tag(s) and 1 card(s) in hand: [Cookbook]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Ranked server protection: {Remote 0:{score:-0.07500000000000007,debt:0,adjusted:-0.07500000000000007,secure:false},R&D:{score:2.125,debt:0,adjusted:2.125,secure:false},HQ:{score:2.425,debt:0,adjusted:2.425,secure:true},archives:{score:5.875,debt:0,adjusted:5.875,secure:false}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Ranked server protection: {Remote 0:{score:-0.07500000000000007,debt:0,adjusted:-0.07500000000000007,secure:false},R&D:{score:2.125,debt:0,adjusted:2.125,secure:false},HQ:{score:2.425,debt:0,adjusted:2.425,secure:true},archives:{score:5.875,debt:0,adjusted:5.875,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Ranked server protection: {Remote 0:{score:-0.07500000000000007,debt:0,adjusted:-0.07500000000000007,secure:false},R&D:{score:2.125,debt:0,adjusted:2.125,secure:false},HQ:{score:2.425,debt:0,adjusted:2.425,secure:true},archives:{score:5.875,debt:0,adjusted:5.875,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Ranked server protection: {Remote 0:{score:-0.07500000000000007,debt:0,adjusted:-0.07500000000000007,secure:false},R&D:{score:2.125,debt:0,adjusted:2.125,secure:false},HQ:{score:2.425,debt:0,adjusted:2.425,secure:true},archives:{score:5.875,debt:0,adjusted:5.875,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 25
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 5 card(s) in hand: [Send a Message,Manegarm Skunkworks,Mahkota Langit Grid,Nanomanagement,Send a Message]
+SPOILER: Runner has 22 credit(s), 0 tag(s) and 1 card(s) in hand: [Cookbook]
+Runner spent one click
+Runner drew 2 cards
+Runner spent 2 clicks
+Runner spent one credit
+Played Scrounge
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+Fermenter added to bottom of stack
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching R&D
+Run successful
+Otto Campaign accessed
+Runner spent 2 credits
+Otto Campaign trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Send a Message,Manegarm Skunkworks,Mahkota Langit Grid,Nanomanagement,Send a Message]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 3 card(s) in hand: [Cookbook,Gourmand,Rising Tide]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Ranked server protection: {Remote 0:{score:-0.22696851908866988,debt:0,adjusted:-0.22696851908866988,secure:false},R&D:{score:0.2730314809113301,debt:0,adjusted:0.2730314809113301,secure:false},HQ:{score:3.27303148091133,debt:0,adjusted:3.27303148091133,secure:true},archives:{score:5.621719134852217,debt:0,adjusted:5.621719134852217,secure:false}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Ranked server protection: {Remote 0:{score:-0.22696851908866988,debt:0,adjusted:-0.22696851908866988,secure:false},R&D:{score:0.2730314809113301,debt:0,adjusted:0.2730314809113301,secure:false},HQ:{score:3.27303148091133,debt:0,adjusted:3.27303148091133,secure:true},archives:{score:5.621719134852217,debt:0,adjusted:5.621719134852217,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Ranked server protection: {Remote 0:{score:-0.22696851908866988,debt:0,adjusted:-0.22696851908866988,secure:false},R&D:{score:0.2730314809113301,debt:0,adjusted:0.2730314809113301,secure:false},HQ:{score:3.27303148091133,debt:0,adjusted:3.27303148091133,secure:true},archives:{score:5.621719134852217,debt:0,adjusted:5.621719134852217,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: Ranked server protection: {Remote 0:{score:-0.22696851908866988,debt:0,adjusted:-0.22696851908866988,secure:false},R&D:{score:0.2730314809113301,debt:0,adjusted:0.2730314809113301,secure:false},HQ:{score:3.27303148091133,debt:0,adjusted:3.27303148091133,secure:true},archives:{score:5.621719134852217,debt:0,adjusted:5.621719134852217,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 19
+AI: I intend to advance ice
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Manegarm Skunkworks,Ansel 1.0,Nanomanagement,Send a Message,Send a Message]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 3 card(s) in hand: [Cookbook,Gourmand,Rising Tide]
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Semak-samun
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching R&D
+Run successful
+Manegarm Skunkworks accessed
+Runner spent 3 credits
+Manegarm Skunkworks trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Manegarm Skunkworks,Ansel 1.0,Nanomanagement,Send a Message,Send a Message]
+SPOILER: Runner has 14 credit(s), 0 tag(s) and 4 card(s) in hand: [Cookbook,Gourmand,Rising Tide,Leech]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Ranked server protection: {Remote 0:{score:-0.32603916266025645,debt:0,adjusted:-0.32603916266025645,secure:false},R&D:{score:0.17396083733974343,debt:0,adjusted:0.17396083733974343,secure:false},HQ:{score:3.1739608373397434,debt:0,adjusted:3.1739608373397434,secure:true},archives:{score:5.456601395566239,debt:0,adjusted:5.456601395566239,secure:false}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Ranked server protection: {Remote 0:{score:-0.32603916266025645,debt:0,adjusted:-0.32603916266025645,secure:false},R&D:{score:0.17396083733974343,debt:0,adjusted:0.17396083733974343,secure:false},HQ:{score:3.1739608373397434,debt:0,adjusted:3.1739608373397434,secure:true},archives:{score:5.456601395566239,debt:0,adjusted:5.456601395566239,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Ranked server protection: {Remote 0:{score:-0.32603916266025645,debt:0,adjusted:-0.32603916266025645,secure:false},R&D:{score:0.17396083733974343,debt:0,adjusted:0.17396083733974343,secure:false},HQ:{score:3.1739608373397434,debt:0,adjusted:3.1739608373397434,secure:true},archives:{score:5.456601395566239,debt:0,adjusted:5.456601395566239,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: I intend to advance ice
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Ranked server protection: {Remote 0:{score:-0.32603916266025645,debt:0,adjusted:-0.32603916266025645,secure:false},R&D:{score:0.17396083733974343,debt:0,adjusted:0.17396083733974343,secure:false},HQ:{score:3.1739608373397434,debt:0,adjusted:3.1739608373397434,secure:true},archives:{score:5.456601395566239,debt:0,adjusted:5.456601395566239,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Send a Message,Otto Campaign,Send a Message,Nanomanagement,Ansel 1.0]
+SPOILER: Runner has 14 credit(s), 0 tag(s) and 4 card(s) in hand: [Cookbook,Gourmand,Rising Tide,Leech]
+1 virus counter placed on Fermenter
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 8 credits
+Runner spent one click
+Runner spent one credit
+Runner installed Leech
+1 virus counter placed on Leech
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Send a Message,Otto Campaign,Send a Message,Nanomanagement,Ansel 1.0]
+SPOILER: Runner has 25 credit(s), 0 tag(s) and 4 card(s) in hand: [Cookbook,Gourmand,Rising Tide,Docklands Pass]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Ranked server protection: {Remote 0:{score:-0.3515308515363712,debt:0,adjusted:-0.3515308515363712,secure:false},R&D:{score:0.1484691484636289,debt:0,adjusted:0.1484691484636289,secure:false},HQ:{score:3.1484691484636294,debt:0,adjusted:3.1484691484636294,secure:true},archives:{score:5.414115247439382,debt:0,adjusted:5.414115247439382,secure:false}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Ranked server protection: {Remote 0:{score:-0.3515308515363712,debt:0,adjusted:-0.3515308515363712,secure:false},R&D:{score:0.1484691484636289,debt:0,adjusted:0.1484691484636289,secure:false},HQ:{score:3.1484691484636294,debt:0,adjusted:3.1484691484636294,secure:true},archives:{score:5.414115247439382,debt:0,adjusted:5.414115247439382,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Ranked server protection: {R&D:{score:0.1484691484636289,debt:0,adjusted:0.1484691484636289,secure:false},Remote 0:{score:1.625,debt:0,adjusted:1.625,secure:false},HQ:{score:2.1484691484636294,debt:0,adjusted:2.1484691484636294,secure:true},archives:{score:5.414115247439382,debt:0,adjusted:5.414115247439382,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Ranked server protection: {R&D:{score:0.1484691484636289,debt:0,adjusted:0.1484691484636289,secure:false},Remote 0:{score:1.625,debt:0,adjusted:1.625,secure:false},HQ:{score:2.1484691484636294,debt:0,adjusted:2.1484691484636294,secure:true},archives:{score:5.414115247439382,debt:0,adjusted:5.414115247439382,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Nothing to advance
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: Scoring windows for empty servers: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 28
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Send a Message,Otto Campaign,Nanomanagement,Send a Message]
+SPOILER: Runner has 25 credit(s), 0 tag(s) and 4 card(s) in hand: [Cookbook,Gourmand,Rising Tide,Docklands Pass]
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+Runner spent one click
+Runner spent 2 credits
+Runner installed Docklands Pass
+Runner spent one click
+Runner installed Gourmand
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Send a Message,Otto Campaign,Nanomanagement,Send a Message]
+SPOILER: Runner has 21 credit(s), 0 tag(s) and 3 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.79687941134952,debt:0,adjusted:-4.79687941134952,secure:true},Remote 0:{score:-0.375,debt:0,adjusted:-0.375,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.505200981084133,debt:0,adjusted:5.505200981084133,secure:false}}
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.79687941134952,debt:0,adjusted:-4.79687941134952,secure:true},Remote 0:{score:-0.375,debt:0,adjusted:-0.375,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.505200981084133,debt:0,adjusted:5.505200981084133,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [6.594606684076793]
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.7968794113495203,debt:0,adjusted:-2.7968794113495203,secure:true},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.505200981084133,debt:0,adjusted:5.505200981084133,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 3
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.7968794113495203,debt:0,adjusted:-2.7968794113495203,secure:true},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.505200981084133,debt:0,adjusted:5.505200981084133,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 24
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Spin Doctor,Mercia B4LL4RD,Otto Campaign,Send a Message,Nanomanagement]
+SPOILER: Runner has 21 credit(s), 0 tag(s) and 3 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters]
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent 3 credits
+Runner installed Cacophony
+Runner spent one click
+Run initiated attacking Remote 1
+Approaching outermost piece of ice protecting Remote 1
+AI: Rez cost not worth it, need to save it for Brân 1.0 in R&D
+AI: Rez cost not worth it, need to save it for Ansel 1.0 in Remote 0
+Corp did not rez ice
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+Approaching Remote 1
+Run successful
+Run ends
+Runner spent one click
+Runner spent 4 credits
+Runner installed Carnivore
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 7 card(s) in hand: [Mercia B4LL4RD,Otto Campaign,Send a Message,Nanomanagement,Mahkota Langit Grid,Mercia B4LL4RD,Spin Doctor]
+SPOILER: Runner has 14 credit(s), 0 tag(s) and 3 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-4.825534539473684,debt:0,adjusted:-4.825534539473684,secure:true},Remote 1:{score:-1.7925575657894732,debt:0,adjusted:-1.7925575657894732,secure:false},Remote 0:{score:-0.375,debt:0,adjusted:-0.375,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.4574424342105265,debt:0,adjusted:5.4574424342105265,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [5.399643640350877]
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 2 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Ranked server protection: {HQ:{score:-2.8255345394736837,debt:0,adjusted:-2.8255345394736837,secure:true},Remote 1:{score:-0.7925575657894732,debt:0,adjusted:-0.7925575657894732,secure:false},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.4574424342105265,debt:0,adjusted:5.4574424342105265,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Ranked server protection: {HQ:{score:-2.8255345394736837,debt:0,adjusted:-2.8255345394736837,secure:true},Remote 1:{score:-0.7925575657894732,debt:0,adjusted:-0.7925575657894732,secure:false},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.4574424342105265,debt:0,adjusted:5.4574424342105265,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 17
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Otto Campaign,Mercia B4LL4RD,Nanomanagement,Luminal Transubstantiation]
+SPOILER: Runner has 14 credit(s), 0 tag(s) and 3 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters]
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner installed Azimat
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Otto Campaign,Mercia B4LL4RD,Nanomanagement,Luminal Transubstantiation]
+SPOILER: Runner has 18 credit(s), 0 tag(s) and 4 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters,Verbal Plasticity]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Ranked server protection: {HQ:{score:-2.9840533844088615,debt:0,adjusted:-2.9840533844088615,secure:true},Remote 1:{score:-1.0567556406814362,debt:0,adjusted:-1.0567556406814362,secure:false},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.193244359318564,debt:0,adjusted:5.193244359318564,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent 2 credits
+Corp rezzed Regolith Mining License
+15 credits loaded onto Regolith Mining License
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.9840533844088615,debt:0,adjusted:-2.9840533844088615,secure:true},Remote 1:{score:-1.0567556406814362,debt:0,adjusted:-1.0567556406814362,secure:false},Remote 2:{score:0,debt:0,adjusted:0,secure:false},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.193244359318564,debt:0,adjusted:5.193244359318564,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-2.9840533844088615,debt:0,adjusted:-2.9840533844088615,secure:true},Remote 1:{score:-1.0567556406814362,debt:0,adjusted:-1.0567556406814362,secure:false},Remote 2:{score:0,debt:0,adjusted:0,secure:false},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.625,debt:0,adjusted:3.625,secure:false},archives:{score:5.193244359318564,debt:0,adjusted:5.193244359318564,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 21
+AI: HQ WEAKER THAN R&D: protection 4 vs 4.625 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: a click ability could provide economy
+Using Regolith Mining License:
+Corp spent one click
+3 credits taken from Regolith Mining License
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Otto Campaign,Nanomanagement,Mercia B4LL4RD,Mahkota Langit Grid,Luminal Transubstantiation]
+SPOILER: Runner has 18 credit(s), 0 tag(s) and 4 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters,Verbal Plasticity]
+Runner spent one click
+Run initiated attacking Remote 2
+Approaching Remote 2
+Run successful
+Regolith Mining License accessed
+Runner spent 2 credits from Azimat
+Runner spent one credit
+Regolith Mining License trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 6 credits
+Corp rezzed Brân 1.0
+Using LEO Construction: Labor Solutions:
+Brân 1.0 trashed
+LEO Construction trashes Brân 1.0 to end the run
+Run ends
+Runner discarded Verbal Plasticity
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Otto Campaign,Nanomanagement,Mercia B4LL4RD,Mahkota Langit Grid,Luminal Transubstantiation]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 5 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters,Scrounge,Ritual]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Ranked server protection: {Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},Remote 1:{score:-1.3905226763556986,debt:0,adjusted:-1.3905226763556986,secure:false},R&D:{score:-0.18431360581341916,debt:0,adjusted:-0.18431360581341916,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:4.859477323644302,debt:0,adjusted:4.859477323644302,secure:false},HQ:{score:5.315686394186581,debt:0,adjusted:5.315686394186581,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Ranked server protection: {Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},Remote 1:{score:-1.3905226763556986,debt:0,adjusted:-1.3905226763556986,secure:false},R&D:{score:-0.18431360581341916,debt:0,adjusted:-0.18431360581341916,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:4.859477323644302,debt:0,adjusted:4.859477323644302,secure:false},HQ:{score:5.315686394186581,debt:0,adjusted:5.315686394186581,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Ranked server protection: {Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},Remote 1:{score:-1.3905226763556986,debt:0,adjusted:-1.3905226763556986,secure:false},R&D:{score:-0.18431360581341916,debt:0,adjusted:-0.18431360581341916,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:4.859477323644302,debt:0,adjusted:4.859477323644302,secure:false},HQ:{score:5.315686394186581,debt:0,adjusted:5.315686394186581,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Nothing to advance (can't afford it)
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 20
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Luminal Transubstantiation,Otto Campaign,Mercia B4LL4RD,Nanomanagement,Semak-samun]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 5 card(s) in hand: [Cookbook,Rising Tide,Rent Rioters,Scrounge,Ritual]
+Runner spent one click
+Played Ritual
+Runner drew 3 cards
+Gourmand trashed
+Runner spent one click
+Runner spent 3 credits
+Runner installed Buzzsaw
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine You may install 1 card from HQ. broken
+Subroutine End the run. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Mercia B4LL4RD accessed
+Trash 2 cards from your grip: Trash the card you are accessing. chosen
+Using Carnivore:
+Cookbook trashed
+Rising Tide trashed
+1 power counter placed on Cacophony
+Cacophony gains 1 power counter
+Mercia B4LL4RD trashed
+Runner gained one credit
+Runner drew a card
+Nanomanagement accessed
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine End the run. broken
+Subroutine You may install 1 card from HQ. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Nanomanagement accessed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Otto Campaign,Luminal Transubstantiation,Semak-samun,Nanomanagement]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Creative Commission,Botulus,Botulus]
+Corp drew a card
+AI: Ranked server protection: {Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},Remote 1:{score:-1.760056715745192,debt:0,adjusted:-1.760056715745192,secure:false},R&D:{score:-0.4060340294471153,debt:0,adjusted:-0.4060340294471153,secure:false},HQ:{score:0.5939659705528846,debt:0,adjusted:0.5939659705528846,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:4.489943284254808,debt:0,adjusted:4.489943284254808,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},Remote 1:{score:-1.760056715745192,debt:0,adjusted:-1.760056715745192,secure:false},R&D:{score:-0.4060340294471153,debt:0,adjusted:-0.4060340294471153,secure:false},HQ:{score:0.5939659705528846,debt:0,adjusted:0.5939659705528846,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:4.489943284254808,debt:0,adjusted:4.489943284254808,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Ranked server protection: {Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},Remote 1:{score:-1.760056715745192,debt:0,adjusted:-1.760056715745192,secure:false},R&D:{score:-0.4060340294471153,debt:0,adjusted:-0.4060340294471153,secure:false},HQ:{score:0.5939659705528846,debt:0,adjusted:0.5939659705528846,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:4.489943284254808,debt:0,adjusted:4.489943284254808,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Seamless Launch,Otto Campaign,Semak-samun,Luminal Transubstantiation,Nanomanagement]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Creative Commission,Botulus,Botulus]
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine End the run. broken
+Subroutine You may install 1 card from HQ. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Luminal Transubstantiation accessed
+Luminal Transubstantiation stolen
+1 power counter placed on Cacophony
+Cacophony gains 1 power counter
+Nanomanagement accessed
+Trash 2 cards from your grip: Trash the card you are accessing. chosen
+Using Carnivore:
+Botulus trashed
+Botulus trashed
+Nanomanagement trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine You may install 1 card from HQ. broken
+Subroutine End the run. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Otto Campaign accessed
+Runner spent 2 credits from Azimat
+Otto Campaign trashed
+Run ends
+Runner spent one click
+Runner drew 2 cards
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+2 power counters removed from Cacophony
+AI: considering sabotage options, need to trash at least 0 from HQ
+Sabotaged 2 from HQ and 1 from R&D
+[hidden card] trashed
+[hidden card] trashed
+[hidden card] trashed
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 0 card(s) in hand: []
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Cacophony,Leech,Gourmand]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-2.699005126953125,debt:0,adjusted:-2.699005126953125,secure:false},Remote 1:{score:-1.2483418782552083,debt:0,adjusted:-1.2483418782552083,secure:false},R&D:{score:-0.699005126953125,debt:0,adjusted:-0.699005126953125,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:1.625,debt:0,adjusted:1.625,secure:false},archives:{score:4.001658121744792,debt:0,adjusted:4.001658121744792,secure:false}}
+AI: I could advance a card by 3 with these cards: [null,null,null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: Ranked server protection: {HQ:{score:-2.699005126953125,debt:0,adjusted:-2.699005126953125,secure:false},Remote 1:{score:-1.2483418782552083,debt:0,adjusted:-1.2483418782552083,secure:false},R&D:{score:-0.699005126953125,debt:0,adjusted:-0.699005126953125,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:1.625,debt:0,adjusted:1.625,secure:false},archives:{score:4.001658121744792,debt:0,adjusted:4.001658121744792,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 0, Non-Agendas: 1
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-1.699005126953125,debt:0,adjusted:-1.699005126953125,secure:false},Remote 1:{score:-1.2483418782552083,debt:0,adjusted:-1.2483418782552083,secure:false},R&D:{score:-0.699005126953125,debt:0,adjusted:-0.699005126953125,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:1.625,debt:0,adjusted:1.625,secure:false},archives:{score:4.001658121744792,debt:0,adjusted:4.001658121744792,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 0, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 2 card(s) in hand: [Manegarm Skunkworks,Otto Campaign]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Cacophony,Leech,Gourmand]
+Runner spent one click
+Run initiated attacking Archives
+Approaching outermost piece of ice protecting Archives
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Syailendra
+Encountering Syailendra
+Using Leech:
+1 virus counter removed from Leech
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Subroutine You may place 1 advancement counter on an installed card you can advance. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine The Runner loses 2[credit]. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine Do 1 net damage. broken
+Approaching Archives
+Run successful
+1 virus counter placed on Leech
+Petty Cash accessed
+Seamless Launch accessed
+Semak-samun accessed
+Otto Campaign accessed
+Nanomanagement accessed
+Mercia B4LL4RD accessed
+Mahkota Langit Grid accessed
+Brân 1.0 accessed
+Regolith Mining License accessed
+Mercia B4LL4RD accessed
+Spin Doctor accessed
+Manegarm Skunkworks accessed
+Otto Campaign accessed
+Ansel 1.0 accessed
+Hedge Fund accessed
+Hedge Fund accessed
+Hedge Fund accessed
+Run ends
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Run initiated attacking Remote 1
+Approaching outermost piece of ice protecting Remote 1
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Bumi 1.0
+Using LEO Construction: Labor Solutions:
+Bumi 1.0 trashed
+LEO Construction trashes Bumi 1.0 to end the run
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 2 card(s) in hand: [Manegarm Skunkworks,Otto Campaign]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Cacophony,Leech,Gourmand]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-4.199005126953125,debt:0,adjusted:-4.199005126953125,secure:false},Remote 1:{score:-1,debt:0,adjusted:-1,secure:false},R&D:{score:-0.699005126953125,debt:0,adjusted:-0.699005126953125,secure:false},Remote 0:{score:0.625,debt:0,adjusted:0.625,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2.800994873046875,debt:0,adjusted:2.800994873046875,secure:false}}
+AI: I could advance a card by 3 with these cards: [null,null,null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: Ranked server protection: {HQ:{score:-4.199005126953125,debt:0,adjusted:-4.199005126953125,secure:false},Remote 1:{score:-1,debt:0,adjusted:-1,secure:false},Remote 0:{score:-0.95,debt:0,adjusted:-0.95,secure:false},R&D:{score:-0.699005126953125,debt:0,adjusted:-0.699005126953125,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2.800994873046875,debt:0,adjusted:2.800994873046875,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 1, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+Corp spent one click
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-5.199005126953125,debt:0,adjusted:-5.199005126953125,secure:false},Remote 1:{score:-2,debt:0,adjusted:-2,secure:false},Remote 0:{score:-1.95,debt:0,adjusted:-1.95,secure:false},R&D:{score:-0.699005126953125,debt:0,adjusted:-0.699005126953125,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2.800994873046875,debt:0,adjusted:2.800994873046875,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ Danger Evaluation - ICE: 1, Agendas: 2, Non-Agendas: 2
+AI: HQ_SAFE: HQ is adequately protected or no agenda flood risk
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Otto Campaign,Manegarm Skunkworks,Offworld Office,Project Ingatan]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Cacophony,Leech,Gourmand]
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Semak-samun
+Using Leech:
+1 virus counter removed from Leech
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+Brân 1.0 accessed
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Otto Campaign,Manegarm Skunkworks,Offworld Office,Project Ingatan]
+SPOILER: Runner has 17 credit(s), 0 tag(s) and 5 card(s) in hand: [Rent Rioters,Scrounge,Cacophony,Leech,Gourmand]
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Semak-samun
+Using Leech:
+1 virus counter removed from Leech
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+Brân 1.0 accessed
+Trash 2 cards from your grip: Trash the card you are accessing. chosen
+Using Carnivore:
+Cacophony trashed
+Leech trashed
+1 power counter placed on Cacophony
+Cacophony gains 1 power counter
+Brân 1.0 trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Semak-samun
+Using Rising Tide:
+Runner spent one credit
+Rising Tide gets +1 strength
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+Petty Cash accessed
+Run ends
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Otto Campaign,Manegarm Skunkworks,Offworld Office,Project Ingatan]
+SPOILER: Runner has 21 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Scrounge,Gourmand,Carnivore]
+Corp drew a card
+AI: Ranked server protection: {HQ:{score:-4.194580078125,debt:0,adjusted:-4.194580078125,secure:false},Remote 1:{score:-2,debt:0,adjusted:-2,secure:false},R&D:{score:-1.6945800781249996,debt:0,adjusted:-1.6945800781249996,secure:false},Remote 0:{score:-0.375,debt:0,adjusted:-0.375,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2.8054199218750004,debt:0,adjusted:2.8054199218750004,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: I could get an agenda done this turn
+AI: I could advance a card by 3 with these cards: [null,null,null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: Ranked server protection: {HQ:{score:-4.194580078125,debt:0,adjusted:-4.194580078125,secure:false},Remote 1:{score:-2,debt:0,adjusted:-2,secure:false},Remote 0:{score:-1.95,debt:0,adjusted:-1.95,secure:false},R&D:{score:-1.6945800781249996,debt:0,adjusted:-1.6945800781249996,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2.8054199218750004,debt:0,adjusted:2.8054199218750004,secure:false}}
+AI: I could get an agenda done this turn
+AI: I could advance a card by 2 with these cards: [null,null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: Ranked server protection: {HQ:{score:-4.194580078125,debt:0,adjusted:-4.194580078125,secure:false},Remote 1:{score:-2,debt:0,adjusted:-2,secure:false},Remote 0:{score:-1.95,debt:0,adjusted:-1.95,secure:false},R&D:{score:-1.6945800781249996,debt:0,adjusted:-1.6945800781249996,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2.8054199218750004,debt:0,adjusted:2.8054199218750004,secure:false}}
+AI: I could get an agenda done this turn
+AI: I could advance a card by 1 with these cards: [null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+Send a Message scored
+You may rez 1 installed piece of ice, ignoring all costs triggered
+AI: I know this one
+Corp rezzed Ansel 1.0
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Petty Cash,Offworld Office,Manegarm Skunkworks,Otto Campaign,Project Ingatan]
+SPOILER: Runner has 21 credit(s), 0 tag(s) and 4 card(s) in hand: [Rent Rioters,Scrounge,Gourmand,Carnivore]
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine End the run. broken
+Subroutine You may install 1 card from HQ. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Otto Campaign accessed
+Runner spent 2 credits from Azimat
+Otto Campaign trashed
+Runner gained one credit
+Runner drew a card
+Offworld Office accessed
+Offworld Office stolen
+1 power counter placed on Cacophony
+Cacophony gains 1 power counter
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine You may install 1 card from HQ. broken
+Subroutine End the run. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Manegarm Skunkworks accessed
+Runner spent 3 credits
+Manegarm Skunkworks trashed
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Scatter Field
+Using Leech:
+1 virus counter removed from Leech
+Using Buzzsaw:
+Runner spent one credit
+Subroutine End the run. broken
+Subroutine You may install 1 card from HQ. broken
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Project Ingatan accessed
+Project Ingatan stolen
+Runner has reached 7 agenda points
+Runner wins
+Corp (LEO Construction: Labor Solutions) agenda points: 3
+Runner (René Loup Arcemont: Party Animal) agenda points: 8
+R&D size: 15
+Grip size: 5
+Agendas were stolen from: [remote,remote,remote,remote]
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: []
+SPOILER: Remote 1: [Send a Message]
+
+RunnerTestField(30001, [35011,30030,35004,30007,35004,30030,30030,30007,30020,30034,35026,35007,30009,35009,30004,30004,30020,35010,30008], [30007,35010,35007], [35011,35004,35007,30003,35009], [30009,30034,30027,35010,30027,30022,30013,30003,35009,35008,30008,35029,30005], [30067,30036,30067,35038], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [30075,30075,30075,30038,35040,30042,30053,35045,30071,30039,35082,35045,35043,35040,35054,30040,35081,35041,30039,35040,30042], [35081,35038,35079,30042,30039,35045,35076,35041,30053,35054,35082,30067,35038,30041,35041], [35081], [35076], [35054], [35042], [[35076,30038],[30069]], [30069], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].AITurnsInstalled=3;
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[1].rezzed=false;
+runner.stack[0].host=null;
+runner.heap[0].host=null;
+runner.heap[3].host=null;
+runner.heap[7].host=null;
+runner.heap[11].host=null;
+runner.heap[12].host=null;
+runner.heap[13].host=null;
+runner.heap[14].host=null;
+runner.heap[15].host=null;
+runner.heap[17].host=null;
+runner.heap[18].host=null;
+runner.rig.resources[2].credits=3;
+runner.rig.resources[3].power=2;
+runner.rig.resources[3].placedCounterThisTurn=true;
+runner.rig.resources[4].credits=3;
+runner.rig.hardware[1].breachedHQThisTurn=true;
+runner.rig.programs[1].virus=3;
+runner.rig.programs[2].virus=2;
+corp.scoreArea[0].faceUp=true;
+corp.scoreArea[0].AITurnsInstalled=14;
+corp.archives.ice[0].rezzed=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[3].rezzed=true;
+corp.archives.cards[3].host=null;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[4].host=null;
+corp.archives.cards[5].faceUp=true;
+corp.archives.cards[5].host=null;
+corp.archives.cards[6].faceUp=true;
+corp.archives.cards[7].faceUp=true;
+corp.archives.cards[8].rezzed=true;
+corp.archives.cards[8].host=null;
+corp.archives.cards[9].rezzed=true;
+corp.archives.cards[9].host=null;
+corp.archives.cards[10].faceUp=true;
+corp.archives.cards[11].faceUp=true;
+corp.archives.cards[11].host=null;
+corp.archives.cards[12].faceUp=true;
+corp.archives.cards[12].host=null;
+corp.archives.cards[13].faceUp=true;
+corp.archives.cards[13].host=null;
+corp.archives.cards[14].faceUp=true;
+corp.archives.cards[14].host=null;
+corp.archives.cards[15].faceUp=true;
+corp.archives.cards[15].cardsInstalledThisTurn=[];
+corp.archives.cards[15].host=null;
+corp.archives.cards[16].faceUp=true;
+corp.archives.cards[16].host=null;
+corp.archives.cards[17].rezzed=true;
+corp.archives.cards[17].host=null;
+corp.archives.cards[18].faceUp=true;
+corp.archives.cards[18].host=null;
+corp.archives.cards[19].faceUp=true;
+corp.archives.cards[19].host=null;
+corp.archives.cards[20].faceUp=true;
+corp.archives.cards[20].host=null;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].advancement=3;
+corp.remoteServers[0].ice[1].rezzed=true;
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.remoteServers[1].root[0].AITurnsInstalled=13;
+corp.archives.AISuccessfulRuns=1;
+corp.RnD.AISuccessfulRuns=4;
+corp.HQ.AISuccessfulRuns=7;
+
+Version reference: Sat Sep 19 2026 22:23:18 GMT+0100 (GMT+01:00)
