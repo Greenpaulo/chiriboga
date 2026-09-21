@@ -10,5 +10,7 @@
 4. [FIXED] In the same debug log refered to above why is the code logging - "AI: Remote 3 appears secure: Brân 1.0 has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4" - six times in a row! Why is that logic looping so much?
 
    **Resolved — 21 Sept:** It was not a gameplay loop. The security evaluator was called repeatedly by protection scoring, server ranking, and candidate planning, and it logged the same result on every query (29 times in the relevant section of this log). Security evaluation is now side-effect free; the detailed reason is emitted once per secure server by the ranked protection report. Added regression coverage proving repeated calculations stay silent while the report retains one useful explanation. See `documentation/bugs/code-review/leo-secure-ice-and-duplicate-security-logging.md`.
-5. Debug menu need to close when click outside of the popup
+5. [FIXED] Debug menu need to close when click outside of the popup
+
+   **Resolved — 21 Sept:** Clicking outside the debug menu now closes it. This provides a way to dismiss the menu when browser zoom pushes the **X** close button off-screen, while clicks on buttons and controls inside the menu continue to work normally. Added focused regression coverage for both outside and inside clicks. See `documentation/bugs/code-review/debug-menu-does-not-close-on-backdrop.md`.
 6. ICE advancement tokens block reading subroutines when breaking that ICE

@@ -2099,6 +2099,12 @@ function ExecuteChosen(chosenCommand) {
 }
 
 // Debug menu action handlers
+function debugCloseOnBackdrop(event) {
+  if (event.target === event.currentTarget) {
+    event.currentTarget.style.display = 'none';
+  }
+}
+
 function debugToggleViewAllFronts() {
   viewAllFronts = !viewAllFronts;
   var btn = document.getElementById('debug-view-all-fronts-btn');

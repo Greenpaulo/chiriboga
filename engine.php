@@ -675,7 +675,7 @@
       </div>
     </div>
   </div>
-  <div id="debug-modal" class="modal">
+  <div id="debug-modal" class="modal" onclick="debugCloseOnBackdrop(event);">
     <div class="solo-menu">
       <span class="menu-close" onclick="$('#debug-modal').css('display','none');">✕</span>
       <div class="solo-logo">
