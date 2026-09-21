@@ -405,6 +405,13 @@ phaseTemplates.globalTriggers = {
       currentPhase.identifier == "Corp 1.2" ||
       currentPhase.identifier == "Runner 1.2"
     ) {
+      if (
+        currentPhase.identifier == "Corp 1.2" &&
+        corp.AI &&
+        typeof corp.AI._prepareProtectionPrioritiesForCorpTurn === "function"
+      ) {
+        corp.AI._prepareProtectionPrioritiesForCorpTurn();
+      }
       ApplyToAllActiveCards(function (card) {
         if (typeof card.recurringCredits !== "undefined")
           card.credits = card.recurringCredits;

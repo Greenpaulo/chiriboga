@@ -3,7 +3,7 @@
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/fixed/` once merged).
 **Source log:** `documentation/debug-logs/corp_secured_pointless_archives_when_hq_has_no_etr_and_3_agendas_in_hand.txt`
 **File:** `ai_corp.js` (line numbers are from `main` as of 2026-09-20 and will drift; search by function name). One small engine change is also proposed in `phase.js`.
-**Status:** Diagnosed by reading the code and by replaying a reconstructed board in the headless fixture harness. The prototype patch in Appendix C was checked only against that reconstruction and the existing `tests/corp-server-security.test.js` (73 cases pass before and after). It has not been played in the real game.
+**Status:** Fixed and regression-tested. See section 10 for the implementation record. The reconstructed decision now installs ICE on HQ in both the clean and stale-allocation variants; the change has not yet been played in the graphical game.
 
 ---
 
@@ -200,26 +200,59 @@ Also run `node -c ai_corp.js`, `node -c phase.js`, and the existing suite.
 
 ## 9. Acceptance criteria
 
-- [ ] `_ageProtectionPriorities()` is called exactly once per round from an engine hook that always runs, is not called from `Phase_EOT`, and does nothing before the Corp's first action phase.
-- [ ] `_serverToProtect()` never returns an Archives that has no agenda and is not a backdoor to HQ.
-- [ ] A breachable HQ holding agendas gets a layer even when the Corp is under the old "reserve + 4" threshold.
-- [ ] A secure server (or one with nothing to lose) still respects the old economy gate.
-- [ ] Fixture A passes with `EXPECT: install` and `EXPECT_SERVER: HQ` under both allocation states.
-- [ ] After the change, `debt:` values in ranking logs are non-zero when a server is skipped and reset when it is protected.
-- [ ] `node -c ai_corp.js`, `node -c phase.js`, and `node tests/corp-server-security.test.js` all pass.
-- [ ] No other AI decision logic was changed.
+- [x] `_ageProtectionPriorities()` is called exactly once per round from an engine hook that always runs, is not called from `Phase_EOT`, and does nothing before the Corp's first action phase.
+- [x] `_serverToProtect()` never returns an Archives that has no agenda and is not a backdoor to HQ.
+- [x] A breachable HQ holding agendas gets a layer even when the Corp is under the old "reserve + 4" threshold.
+- [x] A secure server (or one with nothing to lose) still respects the old economy gate.
+- [x] Fixture A passes with `EXPECT: install` and `EXPECT_SERVER: HQ` under both allocation states.
+- [x] After the change, protection debt increases for skipped insecure servers, resets for protected servers, and the per-turn allocation list is cleared by the turn-start path.
+- [x] `node -c ai_corp.js`, `node -c phase.js`, and `node tests/corp-server-security.test.js` all pass.
+- [x] No unrelated AI decision logic was changed.
+
+---
+
+## 10. Implementation record
+
+Implemented Fixes 1 and 2 plus Fix 3 Option A, as recommended in section 5.
+
+### 10.1 Code changes
+
+- Moved protection-priority aging out of `Phase_EOT()` and into the guaranteed Corp `1.2` start-of-turn hook in `phase.js`.
+- Added `_hasReachedCorpMainPhase` and `_prepareProtectionPrioritiesForCorpTurn()` so the first Corp turn does not age priorities before the Corp has made any allocation decisions.
+- Excluded a valueless Archives from both the normal unallocated choice and the ranked fallback. This is slightly stronger than the Appendix C prototype and guarantees `_serverToProtect()` cannot return an empty Archives unless it is a backdoor to HQ. Archives remains eligible when it contains an agenda.
+- Added `_serverHasStakes()` and `_shouldInstallIceLayer()` to make the low-economy exception explicit and independently testable. A breachable HQ with an agenda, or a breachable remote containing an agenda or asset, may receive another ICE layer despite failing the old global reserve check. Secure and low-stakes servers retain the old frugality rule.
+- Marked the allocation only through the existing `AIProtectionInstall` path; no ICE-choice or unrelated install priorities were changed.
+
+### 10.2 Regression coverage
+
+- Extended `documentation/fixtures/corp-decision-fixtures.test.js` with `EXPECT_SERVER`, so a fixture can verify the install destination as well as the command. Also added the missing deterministic `Shuffle` stub needed by this reconstruction.
+- Added `corp-protects-hq-when-poor.txt`: with 5 credits and a clean allocation list, the AI chooses `install` targeting HQ.
+- Added `corp-protects-hq-not-archives-stale-allocation.txt`: with HQ, R&D, the new-remote slot and Remote 0 already allocated, the AI still chooses `install` targeting HQ rather than Archives.
+- Added unit coverage for empty Archives exclusion, Archives containing an agenda, the poor/breachable versus poor/secure economy rule, and the opening-turn aging guard.
+
+### 10.3 Verification
+
+- `node -c ai_corp.js`: passes.
+- `node -c phase.js`: passes.
+- `node tests/corp-server-security.test.js`: **77 regression cases passed**.
+- The two new decision fixtures: **2 passed, 0 failed**.
+- `git diff --check`: passes.
+
+The complete fixture directory reports **6 passed, 1 failed**. The one failure is the pre-existing, intentionally documented `mulligan-one-ice-three-economy.txt` case; it is unrelated to this fix.
+
+The code-level behavior and reconstructed decision are verified. A real graphical-game replay remains useful follow-up coverage, particularly to observe non-zero `debt:` values in live ranking logs now that the previously skipped aging path runs.
 
 ---
 
 ## Appendix A: reconstructed fixture (`corp-protects-hq-not-archives.txt`)
 
-This is the log's final dump with the end-of-turn changes reversed (Semak-samun back in HQ instead of Archives, Hedge Fund and Anthill back in HQ). Save it as `tests/fixtures/corp-decisions/corp-protects-hq-not-archives.txt`.
+This is the log's final dump with the end-of-turn changes reversed (Semak-samun back in HQ instead of Archives, Hedge Fund and Anthill back in HQ). The implemented clean and stale-allocation variants are saved under `documentation/fixtures/`.
 
 ```
 // PHASE: Phase_Main
 // OPTIONS: gain, draw, install, play, advance, n
 // EXPECT: install
-// EXPECT_SERVER: HQ   (needs the small runner extension described in section 6)
+// EXPECT_SERVER: HQ
 // SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=4
 // NOTE: HQ (1 rezzed Tithe, no ETR) with 3 agendas in hand; Runner has run it 4 times. Expect ICE onto HQ, never Archives.
 // NOTE: for the stale-allocation variant add to SETUP: ;reviewAI._protectionInstallsThisTurn=[corp.HQ,corp.RnD,null,corp.remoteServers[0]]
@@ -237,9 +270,9 @@ Card IDs: 30044 Longevity Serum, 35072 Anthill Excavation Contract, 30075 Hedge 
 
 Assumptions in this reconstruction: HQ hand of 8 as described in section 2; only the remote's first two ICE are rezzed (as in the final dump); Spin Doctor in Remote 0 is unrezzed (as in the final dump); Archives holds the 5 cards left after removing Hedge Fund and Anthill.
 
-## Appendix B: harness stubs needed in the fixture runner
+## Appendix B: harness notes from diagnosis
 
-Add to the stub block near `context.CheckTags` in `corp-decision-fixtures.test.js`:
+These were the missing stubs identified during diagnosis. The needed equivalents, including deterministic `Shuffle`, are now present in `corp-decision-fixtures.test.js`; `FullCheckPlay` was not needed to verify the selected install command and target.
 
 ```js
 context.PlayerHand = p => p === corp ? corp.HQ.cards : runner.grip;

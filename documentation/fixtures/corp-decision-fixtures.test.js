@@ -15,6 +15,7 @@
 // Directives:  // PHASE: Phase_Main        (default Phase_Main; e.g. Phase_Mulligan, Phase_Score)
 //              // OPTIONS: install, advance, gain, draw   (option list the engine would offer)
 //              // EXPECT: advance          (or  // EXPECT: !purge  for "must not choose")
+//              // EXPECT_SERVER: HQ        (checks the preferred install target)
 //              // SETUP: corp.creditPool=6; corp.clickTracker=3   (needed for non-debug logs, which omit them)
 const assert = require('assert');
 const fs = require('fs');
@@ -64,6 +65,7 @@ context.PlayerHand = player => player === corp ? corp.HQ.cards : runner.grip;
 context.Link = () => (runner.identityCard && runner.identityCard.link) || 0;
 context.CheckTags = num => (runner.tags || 0) >= num;
 context.CheckScore = card => (card.advancement || 0) >= context.AdvancementRequirement(card);  // approximation of the engine check
+context.Shuffle = cards => cards;
 
 // ---- headless versions of the engine's board-setup functions ----
 const clone = o => Array.isArray(o) ? o.map(clone) :
@@ -166,10 +168,18 @@ files.forEach(file => {
       const idx = ai[phase](options.slice());
       const chosen = typeof idx === 'number' ? options[idx] : JSON.stringify(idx);
       const negate = expect.startsWith('!');
-      const ok = negate ? chosen !== expect.slice(1) : chosen === expect;
+      const expectedServer = directive('EXPECT_SERVER');
+      const chosenServer = ai.preferred && ai.preferred.serverToInstallTo === null ? 'NEW' :
+        ai.preferred && ai.preferred.serverToInstallTo && ai.preferred.serverToInstallTo.serverName;
+      const commandOK = negate ? chosen !== expect.slice(1) : chosen === expect;
+      const serverOK = !expectedServer || chosenServer === expectedServer;
+      const ok = commandOK && serverOK;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
       if (ok) { passed++; console.log('PASS ' + file + '  (' + phase + ' -> ' + chosen + ')' + note); }
-      else { failed++; console.log('FAIL ' + file + '  (' + phase + ' -> ' + chosen + ', expected ' + expect + ')' + note); }
+      else {
+        const serverNote = expectedServer ? ', server ' + (chosenServer || 'none') + ', expected ' + expectedServer : '';
+        failed++; console.log('FAIL ' + file + '  (' + phase + ' -> ' + chosen + ', expected ' + expect + serverNote + ')' + note);
+      }
       break;
     } catch (e) {
       const missing = /^(\w+) is not defined/.exec(String(e.message));

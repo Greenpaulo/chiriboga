@@ -63,6 +63,8 @@ function test(name, body) {
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
   ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
   ai._cardDeceptionProfiles = new WeakMap(); ai._random = Math.random;
+  ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
+  ai._hasReachedCorpMainPhase = false;
   body(); tests++; console.log('PASS ' + name);
 }
 
@@ -722,6 +724,55 @@ test('protection allocation rotates through insecure servers during a turn', () 
   assert.strictEqual(ai._serverToProtect(), rnd);
   ai._recordProtectionInstall(rnd);
   assert.strictEqual(ai._serverToProtect(), remote);
+});
+test('empty Archives is never selected for protection', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 1};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 2};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 0};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 3;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._emptyProtectedRemotes = () => [];
+  ai._HVTsInstalled = () => 0;
+  ai._protectionInstallsThisTurn = [hq, rnd, null];
+  assert.strictEqual(ai._serverToProtect(), hq);
+});
+test('Archives containing an agenda remains a valid protection target', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 1};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 2};
+  const archives = {serverName: 'Archives', cards: [{cardType: 'agenda'}], ice: [], root: [], score: 0};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 3;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._emptyProtectedRemotes = () => [];
+  ai._HVTsInstalled = () => 0;
+  ai._protectionInstallsThisTurn = [hq, rnd, null];
+  assert.strictEqual(ai._serverToProtect(), archives);
+});
+test('poor Corp reinforces breachable HQ with an agenda but not a secure HQ', () => {
+  const hq = {serverName: 'HQ', cards: [{cardType: 'agenda'}], ice: [etr()], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}});
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  assert.strictEqual(ai._shouldInstallIceLayer(hq, false), true);
+  ai._evaluateServerSecurity = () => ({isSecure: true});
+  assert.strictEqual(ai._shouldInstallIceLayer(hq, false), false);
+});
+test('Corp turn-start protection aging skips the opening turn and then runs once', () => {
+  let calls = 0;
+  const oldAge = ai._ageProtectionPriorities;
+  ai._ageProtectionPriorities = () => { calls++; };
+  try {
+    ai._hasReachedCorpMainPhase = false;
+    ai._prepareProtectionPrioritiesForCorpTurn();
+    assert.strictEqual(calls, 0);
+    ai._hasReachedCorpMainPhase = true;
+    ai._prepareProtectionPrioritiesForCorpTurn();
+    assert.strictEqual(calls, 1);
+  } finally {
+    ai._ageProtectionPriorities = oldAge;
+  }
 });
 test('unaddressed insecure servers gain bounded priority across turns', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};

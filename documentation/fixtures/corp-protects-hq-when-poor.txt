@@ -1,0 +1,13 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, advance, n
+// EXPECT: install
+// EXPECT_SERVER: HQ
+// SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=4
+RunnerTestField(30001, [30030,30020,35026,30003,35010,30034], [35029,30007,35008,35007,30009,30020,30013,35007,30034,30007,35004,30004,35011,30027,30030,30009,30008,30027,35010,35004,35010,30007,30030,30005,35009,35004,35007,35009,30004], [35011], [30022,30003,30008,35009], [35049], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [30048,35050,30040,30071,30040], [35072,30040,35051,35049,30071,30075,30053,35051,35072,35052,30067,35050,35053,35050,35051,30048,30075,35052,30048,35054,30050,35049,35052,35048,30067,35079,30047,30067,30050], [30044,35072,30075,35048,35054,30053,30047,35048], [], [30073], [30073], [[30053,30046,30073,35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[1].rezzed=true;
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.HQ.AISuccessfulRuns=4;
+runner.rig.programs[0].virus=3;

@@ -2624,18 +2624,29 @@ class CorpAI {
     this._protectionInstallsThisTurn = [];
   }
 
+  _prepareProtectionPrioritiesForCorpTurn() {
+    //The first Corp turn has no previous allocation round to age.
+    if (!this._hasReachedCorpMainPhase) return;
+    this._ageProtectionPriorities();
+  }
+
   _serverToProtect(
     ignoreArchives = false, //returns the server that most needs increased protection (does not return null, will be HQ by default or R&D against shapers)
     outputToLog = false,
   ) {
     var ranked = this._rankedServersToProtect(ignoreArchives);
-    var unallocatedInsecure = ranked.filter(
+    var eligibleRanked = ranked.filter(
+      (entry) => !this._nothingWorthProtecting(entry.server),
+    );
+    var unallocatedInsecure = eligibleRanked.filter(
       (entry) =>
         !entry.isSecure &&
         !this._protectionInstallsThisTurn.includes(entry.server),
     );
     var selected =
-      unallocatedInsecure.length > 0 ? unallocatedInsecure[0] : ranked[0];
+      unallocatedInsecure.length > 0
+        ? unallocatedInsecure[0]
+        : eligibleRanked[0];
     if (outputToLog) {
       var protectionScores = {};
       for (var i = 0; i < ranked.length; i++) {
@@ -2651,6 +2662,16 @@ class CorpAI {
       );
     }
     return selected ? selected.server : corp.HQ;
+  }
+
+  _nothingWorthProtecting(server) {
+    //An empty Archives is not worth an ICE install unless it is a route into HQ.
+    if (server !== corp.archives) return false;
+    if (this._archivesIsBackdoorToHQ()) return false;
+    for (var i = 0; i < corp.archives.cards.length; i++) {
+      if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
+    }
+    return true;
   }
 
   _bestProtectedRemote() {
@@ -3223,6 +3244,32 @@ class CorpAI {
     return ret;
   }
 
+  _serverHasStakes(server) {
+    if (server == corp.HQ) return this._agendasInHand() > 0;
+    //R&D and Archives retain the existing economy behaviour here.
+    if (server == null || typeof server.cards !== "undefined") return false;
+    for (var i = 0; i < server.root.length; i++) {
+      if (CheckCardType(server.root[i], ["agenda", "asset"])) return true;
+    }
+    return false;
+  }
+
+  _shouldInstallIceLayer(server, economyIsSufficient) {
+    var shouldInstall = this._unrezzedIce(server).length == 0;
+    var serverAtRisk =
+      server != null &&
+      !this._evaluateServerSecurity(server).isSecure &&
+      this._serverHasStakes(server);
+    if (
+      !economyIsSufficient &&
+      this._rezzedIce(server).length > 0 &&
+      !serverAtRisk
+    ) {
+      shouldInstall = false;
+    }
+    return shouldInstall || economyIsSufficient;
+  }
+
   _rankedInstallOptions(
     cards, //return list of preferred install options (0 highest preference) or empty array if don't want to install
     priorityOnly = false, //set true to exclude low priorities like unaffordable ice or non-ice into new server
@@ -3290,18 +3337,9 @@ class CorpAI {
     //Find out if any servers need protection. If so, we will choose an ice card if possible.
     var serverToInstallTo = this._serverToProtect();
 
-    //Simple situational checks
-    //ice is all rezzed? need to install another layer (or any at all)
-    var iceInstallSituationCheck =
-      this._unrezzedIce(serverToInstallTo).length == 0;
-    //too poor? don't spend frivolously on new layers
-    if (
-      !iceInstallEconomyCheck &&
-      this._rezzedIce(serverToInstallTo).length > 0
-    )
-      iceInstallSituationCheck = false;
-
-    if (iceInstallSituationCheck || iceInstallEconomyCheck) {
+    //Too poor? Do not spend frivolously on new layers. A breachable server
+    //with something to lose is not frivolous to reinforce.
+    if (this._shouldInstallIceLayer(serverToInstallTo, iceInstallEconomyCheck)) {
       //this is our worst-protected server. if the server already has unrezzed ice, let's not install ice unless we have economy
       //prioritise placing ice that I can afford to rez (for now we make no effort to sort them)
       var iceInstallOptions = this._iceInstallOptions(
@@ -4023,7 +4061,6 @@ class CorpAI {
     if (optionList.indexOf("trigger") > -1)
       return optionList.indexOf("trigger");
 
-    this._ageProtectionPriorities();
     return optionList.indexOf("n");
   }
 
@@ -5043,6 +5080,9 @@ class CorpAI {
   }
 
   Phase_Main(optionList) {
+    //The next Corp turn-start hook may now age the protection priorities.
+    this._hasReachedCorpMainPhase = true;
+
     //for debugging, list server protection including archives
     this._serverToProtect(false, true);
 
@@ -5510,6 +5550,7 @@ class CorpAI {
     this.preferred = null;
     this._protectionInstallsThisTurn = [];
     this._serverProtectionDebt = new Map();
+    this._hasReachedCorpMainPhase = false;
     this._serverBaitDecisions = new WeakMap();
     this._agendaBluffDecisions = new WeakMap();
     this._cardDeceptionProfiles = new WeakMap();
