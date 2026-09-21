@@ -1,0 +1,16 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, advance, n
+// EXPECT: advance
+// SETUP: corp.creditPool=7; corp.clickTracker=2; runner.creditPool=17
+// NOTE: Bug 2 after installing Send a Message: the Corp can afford five advances over this and the next turn even though the global rez reserve is unaffordable.
+RunnerTestField(30001, [], [], [30009,35009,35011], [35010,30009,35009,30003], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [30075,35040], [30067,35038,30039], [35045,35040,30069,35043,35082,35045,30053], [35076], [35054,30039], [35042], [[35076,30038],[35041,30069]], [30069], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=false;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.ice[1].rezzed=false;
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].advancement=3;
+corp.remoteServers[0].ice[1].rezzed=false;
+corp.remoteServers[1].ice[0].rezzed=false;
+corp.remoteServers[1].root[0].AIScoringPlanCommitted=true;

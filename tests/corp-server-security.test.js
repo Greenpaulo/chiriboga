@@ -11,6 +11,7 @@ const context = {console, corp, runner, playerTurn: runner, cardSet: {}, setIden
 let servers = [];
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
+context.CheckCounters = (card, type, amount) => context.Counters(card, type) >= amount;
 context.Strength = card => card.strength || 0;
 context.Credits = player => player.creditPool;
 context.AvailableCredits = context.Credits;
@@ -394,6 +395,38 @@ test('one-shot outer bypass defeats one layer but not a second inner ETR', () =>
   runner.cards = [bypass];
   assert.strictEqual(ai._evaluateServerSecurity(server([etr()])).isSecure, false);
   assert.strictEqual(ai._evaluateServerSecurity(server([etr(), etr()])).hasHardLockout, true);
+});
+test('poor Corp may layer a breachable agenda remote with unrezzed ICE', () => {
+  const unrezzedWall = etr(); unrezzedWall.rezzed = false;
+  const target = {serverName: 'Remote 0', ice: [unrezzedWall], root: [{player: corp, cardType: 'agenda', agendaPoints: 3}]};
+  servers = [target];
+  runner.cards = [card(30006)]; runner.creditPool = 10;
+  assert.strictEqual(ai._evaluateServerSecurity(target).isSecure, false);
+  assert.strictEqual(ai._shouldInstallIceLayer(target, false), true);
+});
+test('poor Corp does not layer an empty remote with unrezzed ICE', () => {
+  const unrezzedWall = etr(); unrezzedWall.rezzed = false;
+  const target = {serverName: 'Remote 0', ice: [unrezzedWall], root: []};
+  servers = [target];
+  runner.cards = [card(30006)]; runner.creditPool = 10;
+  assert.strictEqual(ai._shouldInstallIceLayer(target, false), false);
+});
+test('poor Corp does not layer a secure agenda remote with unrezzed ICE', () => {
+  const unrezzedWall = etr(); unrezzedWall.rezzed = false;
+  const target = {serverName: 'Remote 0', ice: [unrezzedWall], root: [{player: corp, cardType: 'agenda', agendaPoints: 3}]};
+  servers = [target];
+  runner.cards = []; runner.creditPool = 10;
+  assert.strictEqual(ai._evaluateServerSecurity(target).isSecure, true);
+  assert.strictEqual(ai._shouldInstallIceLayer(target, false), false);
+});
+test('choosing an agenda install records a scoring-plan commitment', () => {
+  const agenda = {player: corp, cardType: 'agenda'};
+  assert.strictEqual(
+    ai._returnPreference(['install'], 'install', {cardToInstall: agenda}),
+    0,
+  );
+  assert.strictEqual(agenda.AIScoringPlanCommitted, true);
+  ai.preferred = null;
 });
 test('outermost bypass falls through ice the Corp cannot afford to rez', () => {
   const bypass = {player: runner, AIBypassesOutermostIce: () => true};

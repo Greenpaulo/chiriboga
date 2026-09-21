@@ -16,6 +16,7 @@
 //              // OPTIONS: install, advance, gain, draw   (option list the engine would offer)
 //              // EXPECT: advance          (or  // EXPECT: !purge  for "must not choose")
 //              // EXPECT_SERVER: HQ        (checks the preferred install target)
+//              // EXPECT_CARD: Semak-samun (checks the preferred card)
 //              // SETUP: corp.creditPool=6; corp.clickTracker=3   (needed for non-debug logs, which omit them)
 const assert = require('assert');
 const fs = require('fs');
@@ -28,6 +29,7 @@ let servers = [];
 // ---- engine stubs (keep in sync with tests/corp-server-security.test.js) ----
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
+context.CheckCounters = (card, type, amount) => context.Counters(card, type) >= amount;
 context.Strength = card => card.strength || 0;
 context.Credits = player => player.creditPool;
 context.AvailableCredits = context.Credits;
@@ -114,6 +116,7 @@ function resetState() {
     scoreArea: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 3, badPublicity: 0, agendaPoints: 0});
   Object.assign(runner, {rig: {programs: [], hardware: [], resources: []}, scoreArea: [], grip: [], stack: [], heap: [],
     cards: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 0, tags: 0, agendaPoints: 0, AI: null});
+  ai._random = () => 1;
   corp.AI = ai; context.playerTurn = corp; context.attackedServer = null;
 }
 function finaliseState() {
@@ -169,16 +172,20 @@ files.forEach(file => {
       const chosen = typeof idx === 'number' ? options[idx] : JSON.stringify(idx);
       const negate = expect.startsWith('!');
       const expectedServer = directive('EXPECT_SERVER');
+      const expectedCard = directive('EXPECT_CARD');
       const chosenServer = ai.preferred && ai.preferred.serverToInstallTo === null ? 'NEW' :
         ai.preferred && ai.preferred.serverToInstallTo && ai.preferred.serverToInstallTo.serverName;
+      const chosenCard = ai.preferred && ai.preferred.cardToInstall && ai.preferred.cardToInstall.title;
       const commandOK = negate ? chosen !== expect.slice(1) : chosen === expect;
       const serverOK = !expectedServer || chosenServer === expectedServer;
-      const ok = commandOK && serverOK;
+      const cardOK = !expectedCard || chosenCard === expectedCard;
+      const ok = commandOK && serverOK && cardOK;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
       if (ok) { passed++; console.log('PASS ' + file + '  (' + phase + ' -> ' + chosen + ')' + note); }
       else {
         const serverNote = expectedServer ? ', server ' + (chosenServer || 'none') + ', expected ' + expectedServer : '';
-        failed++; console.log('FAIL ' + file + '  (' + phase + ' -> ' + chosen + ', expected ' + expect + serverNote + ')' + note);
+        const cardNote = expectedCard ? ', card ' + (chosenCard || 'none') + ', expected ' + expectedCard : '';
+        failed++; console.log('FAIL ' + file + '  (' + phase + ' -> ' + chosen + ', expected ' + expect + serverNote + cardNote + ')' + note);
       }
       break;
     } catch (e) {

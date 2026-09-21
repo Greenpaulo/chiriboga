@@ -1,0 +1,16 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, advance, n
+// EXPECT: install
+// EXPECT_SERVER: Remote 1
+// EXPECT_CARD: Semak-samun
+// SETUP: corp.creditPool=10; corp.clickTracker=3; runner.creditPool=13
+// NOTE: Bug 2 reconstruction before click 1: Send a Message is exposed behind one breachable, unrezzed Bumi; Semak-samun is affordable while the global reserve is not.
+RunnerTestField(30001, [], [], [35011,35004,30003,30008,35007], [35010,30009,30027,35029,30005,30008,35009,30003], [30067,30036,30067], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [], [], [35040,30036,35054,35043,30040], [35076], [35054], [35042], [[35076,30038],[35041,30069]], [30069], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=false;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].advancement=3;
+corp.remoteServers[0].ice[1].rezzed=false;
+corp.remoteServers[1].ice[0].rezzed=false;

@@ -3267,7 +3267,11 @@ class CorpAI {
     ) {
       shouldInstall = false;
     }
-    return shouldInstall || economyIsSufficient;
+    //An existing unrezzed ICE is not protection if the evaluator already
+    //knows the Runner can breach the server. Allow another affordable layer
+    //when an agenda or asset is actually at stake; _iceInstallOptions still
+    //filters out ICE the Corp cannot afford to install and rez.
+    return shouldInstall || economyIsSufficient || serverAtRisk;
   }
 
   _rankedInstallOptions(
@@ -4105,6 +4109,12 @@ class CorpAI {
   _returnPreference(optionList, cmd, prefs) {
     this.preferred = prefs;
     this.preferred.command = cmd;
+    if (
+      cmd == "install" &&
+      prefs.cardToInstall &&
+      CheckCardType(prefs.cardToInstall, ["agenda"])
+    )
+      prefs.cardToInstall.AIScoringPlanCommitted = true;
     if (cmd == "install" && prefs.AIProtectionInstall)
       this._recordProtectionInstall(prefs.serverToInstallTo);
     if (optionList.indexOf(cmd) > -1) return optionList.indexOf(cmd);
@@ -4981,6 +4991,33 @@ class CorpAI {
     return false;
   }
 
+  //Once an agenda has been committed to a remote, the global rez reserve must
+  //not indefinitely freeze a scoring plan that the Corp can actually afford.
+  //The normal per-card protection check still decides whether it is safe to
+  //start revealing the agenda by advancing it.
+  _installedAgendaCanBeCompleted() {
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      var server = corp.remoteServers[i];
+      for (var j = 0; j < server.root.length; j++) {
+        var card = server.root[j];
+        if (
+          !CheckCardType(card, ["agenda"]) ||
+          !CheckAdvance(card) ||
+          !card.AIScoringPlanCommitted
+        )
+          continue;
+        var limit = this._advancementLimit(card, server);
+        var remaining = Math.max(0, limit - Counters(card, "advancement"));
+        if (
+          remaining > 0 &&
+          this._potentialAdvancement(card, limit, false) >= remaining
+        )
+          return true;
+      }
+    }
+    return false;
+  }
+
   _isFullyAdvanceableHostileAsset(card, fastAdvanceArray) {
     //can be finished and used this turn
     if (typeof fastAdvanceArray == "undefined")
@@ -5256,7 +5293,10 @@ class CorpAI {
 
     //is there something I could advance?
     if (
-      (almostDoneAgenda || almostDoneHostileAsset || sufficientEconomy) &&
+      (almostDoneAgenda ||
+        almostDoneHostileAsset ||
+        sufficientEconomy ||
+        this._installedAgendaCanBeCompleted()) &&
       optionList.indexOf("advance") > -1
     ) {
       //agendas and assets
