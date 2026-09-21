@@ -1994,6 +1994,12 @@ cardSet[31024] = {
 	  if (!this.madeSuccessfulRunOnChosenServerThisTurn && server == this.chosenServer) return true; //cannot breach
 	  return false; //allow breach
   },
+  //The chosen-server state is cleared at the Corp turn boundary, but the
+  //installed card can publicly choose an open Archives again next Runner turn.
+  AIPublicRunPressure: function(server) {
+    if (this.chosenServer && this.chosenServer != server) return {};
+    return { economy: 2, persistentPressure: 1 };
+  },
 };
 
 cardSet[31025] = {

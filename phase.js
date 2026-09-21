@@ -465,6 +465,11 @@ phaseTemplates.globalTriggers = {
 		  //now declare successful
 		  Log("Run successful");
 		  PlaySound('runSuccessful');
+		  if (
+			corp.AI &&
+			typeof corp.AI._recordSuccessfulRunForProtection === "function"
+		  )
+			corp.AI._recordSuccessfulRunForProtection(attackedServer);
 		  //and fire the pre-phase succesful automatics
 		  AutomaticTriggers("automaticOnRunSuccessful", [attackedServer]);
 	  }

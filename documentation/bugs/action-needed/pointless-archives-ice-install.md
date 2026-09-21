@@ -360,3 +360,111 @@ Note: `ai_corp.js` uses CRLF line endings. Preserve them when editing.
 During live testing it was noticed that the corp now never protects archives even after several redirection events that accessed HQ through archives, many runs to archives just to gain creds through "successful run" text on events or to get virus counters on cards like `Leech`. See `documentation/bugs/action-needed/chiriboga-log-2026-09-21T12_47_27.790Z.txt`
 
 So it's not just "no agenda in archives, no need to protect". It's more complicated than that.
+
+### 11.1 Implemented refinement
+
+The first attempted remediation made an empty Archives eligible after its third
+successful run. That was rejected because a lifetime run-count threshold does
+not answer the relevant question: **what can the Runner gain by reaching
+Archives now?** It would ignore a visible high-value threat until an arbitrary
+count was reached, then remember obsolete runs forever.
+
+The replacement is a scoped public-board run-pressure model.
+
+#### Public run-pressure contract
+
+Runner cards can expose `AIPublicRunPressure(server)`. The hook is deliberately
+separate from the Runner AI's existing `AIRunExtraPotential` family: Runner
+planning can inspect Grip and use mutable Runner-only calculation state, neither
+of which the Corp may safely consume. The public hook is called only on active,
+visible Runner cards and returns these independently aggregated dimensions:
+
+- `economy`: visible credits or equivalent resources gained from completing the
+  run;
+- `growth`: counters or other effects that make later attacks stronger;
+- `persistentPressure`: repeatable strategic pressure not adequately described
+  as a one-off payout.
+
+`_publicRunPressureFromCard()` validates and normalises each contribution.
+`_serverRunPressure()` aggregates them without referring to card titles. It
+currently has declarations for:
+
+- **Leech:** one unit of growth for any successful central run;
+- **Pennyshaver:** one unit of economy for any successful run;
+- **Security Testing:** its visible two-credit payout plus persistent pressure
+  while it can choose that server.
+
+Archives-to-HQ routes remain handled by the existing generic
+`AIRedirectsRun(from, to)` contract and `_archivesIsBackdoorToHQ()`, because the
+value at risk is HQ access rather than a successful-run reward.
+
+#### Recent observed pressure
+
+Hidden run events such as Clean Getaway cannot be inspected fairly while they
+are in Grip. Their value becomes public evidence once the Runner actually makes
+a successful run. The engine therefore reports declared successful runs to
+`_recordSuccessfulRunForProtection()`.
+
+The AI retains counts for the last two completed Runner turns: the most recent
+turn has full weight and the preceding turn half weight. Older evidence is
+discarded. This is a recency model, not an eligibility count: one recent run can
+make Archives eligible, but it contributes only its proportional value to the
+normal ranking and does not force an install. Multiple runs in a turn naturally
+produce more pressure. A lifetime `AISuccessfulRuns` value, even 99, no longer
+makes an otherwise valueless Archives eligible.
+
+#### Reachability and ranking
+
+`_serverRunPressure()` reuses `_evaluateServerSecurity()`. Public rewards and
+recent runs produce no protection penalty while the Runner is currently locked
+out. For a reachable server the bounded pressure contribution is subtracted
+from `_protectionScore()`:
+
+```text
+economy × 0.5 + growth + persistent pressure × 1.5 + recent runs
+```
+
+The contribution is capped at 6 so successful-run rewards cannot overwhelm
+agenda stakes. These are continuous score weights that can be calibrated with
+fixtures; none is a switch based on the number of lifetime runs.
+
+`_nothingWorthProtecting()` now excludes Archives only when all of the following
+are absent:
+
+1. an agenda in Archives;
+2. a public route from Archives into HQ;
+3. a currently reachable public successful-run reward;
+4. recent observed successful-run pressure.
+
+Passing this check merely lets Archives take part in `_serverToProtect()`'s
+existing comparison against HQ, R&D, remotes, security evaluation, allocation
+history and protection debt. If allocation rotation nominates Archives, it must
+also be the naturally highest-ranked insecure server. Thus a visible Leech or a
+recent run can make Archives a candidate, but cannot make it jump ahead of an
+agenda-heavy HQ merely because HQ was already marked as handled this turn.
+
+`_ageProtectionPriorities()` also resets rather than accumulates debt for a
+currently valueless Archives. Otherwise several quiet turns could bank six
+points of artificial urgency and overwhelm the state-based score as soon as any
+later reward appeared.
+
+#### Regression coverage
+
+The tests verify that:
+
+- a cumulative lifetime count of 99 cannot revive a presently valueless
+  Archives;
+- one observed run creates pressure, that evidence loses half its weight on the
+  next quiet Runner turn, and disappears after the second;
+- the run-success phase records pressure exactly once and only after the final
+  success-prevention check passes;
+- Leech, Pennyshaver and Security Testing aggregate through the public contract
+  without title checks in Corp AI;
+- Archives must win the natural urgency comparison rather than relying on
+  allocation rotation to jump a more urgent server;
+- run pressure is suppressed when `_evaluateServerSecurity()` reports a
+  lockout;
+- a valueless Archives cannot accumulate latent protection debt;
+- agendas and Archives-to-HQ routes retain their immediate eligibility;
+- the original agenda-heavy HQ fixtures still install on HQ rather than an
+  irrelevant Archives.

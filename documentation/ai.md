@@ -31,6 +31,7 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [4.19 Hidden Single-ICE Threats — `AIHiddenThreat`](#419-hidden-single-ice-threats--aihiddenthreat)
    - [4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`](#420-run-credit-sources--canusecredits-airunpoolcreditoffset)
    - [4.21 Public Central Pressure — `AICentralPressure`](#421-public-central-pressure--aicentralpressure)
+   - [4.22 Public Successful-Run Pressure — `AIPublicRunPressure`](#422-public-successful-run-pressure--aipublicrunpressure)
 5. [Corp AI Hooks](#5-corp-ai-hooks)
    - [5.1 ICE — `AIImplementIce`](#51-ice--aiimplementice)
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
@@ -1218,6 +1219,49 @@ install that materially secures the central, a purge that materially removes
 multi-access, or emergency ICE acquisition. A Corp score that wins immediately
 always retains priority.
 
+### 4.22 Public Successful-Run Pressure — `AIPublicRunPressure`
+
+Installed Runner cards that gain value merely by completing a successful run
+should expose that visible value to Corp server-protection planning:
+
+```js
+AIPublicRunPressure: function(server) {
+  if (typeof server.cards === "undefined") return {};
+  return {
+    economy: 0,
+    growth: 1,
+    persistentPressure: 0,
+  };
+},
+```
+
+The hook returns an object containing non-negative numeric fields:
+
+| Field | Meaning |
+|---|---|
+| `economy` | Visible credits, cards, or equivalent resources gained from a successful run |
+| `growth` | Counters or other visible effects that make later attacks stronger |
+| `persistentPressure` | Repeatable strategic pressure not adequately represented as a one-off payout |
+
+Return `{}` when the card does not benefit from a successful run on `server` in
+the current public state. The hook is evaluated outside runs, so it must be
+read-only and must use only the supplied server and public information. It must
+never inspect Runner Grip or Stack identities. Hidden run events are represented
+only after use by the Corp AI's recent-run evidence; they must not expose this
+hook while hidden.
+
+`corp.AI._serverRunPressure(server)` combines these declarations with recent
+observed successful runs and `_evaluateServerSecurity(server)`. Currently the
+result affects Archives protection: it can make an otherwise empty Archives a
+legitimate candidate, but Archives must still win the natural server-urgency
+comparison before receiving ICE.
+
+Examples include Leech (`growth: 1` on centrals), Pennyshaver (`economy: 1`),
+and Security Testing (`economy: 2`, `persistentPressure: 1`). Add this hook to
+future cards whenever their public installed ability rewards successful runs.
+Place new AI hooks with the card's other AI hooks at the bottom of its card
+object, after gameplay properties and abilities.
+
 ## 5. Corp AI Hooks
 
 ### 5.1 ICE — `AIImplementIce`
@@ -1810,6 +1854,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
 | `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |
 | `AICentralPressure(server)` | function | Describe public installed multi-access, non-access central pressure, and growth |
+| `AIPublicRunPressure(server)` | function | Describe visible economy, growth, or persistent value from a successful run |
 | `AIPrepareHypotheticalForRC(host)` | function | Pre-run: set up fake state for run calculation |
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |

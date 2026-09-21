@@ -598,10 +598,6 @@ cardSet[30007] = {
 };
 cardSet[30008] = {
   title: "Leech",
-  //AI: reports how much strength this card currently reduces via its virus counters
-  AIReducesIceStrength: function (iceCard) {
-    return Counters(this, "virus");
-  },
   imageFile: "30008.png",
   elo: 1695,
   player: runner,
@@ -730,6 +726,16 @@ cardSet[30008] = {
         result = result.concat(modifyresult);
       }
 	return result;
+  },
+  //Public information for Corp protection planning: every successful central
+  //run grows Leech even if the server itself contains nothing worth accessing.
+  AIPublicRunPressure: function (server) {
+    if (typeof server.cards === "undefined") return {};
+    return { growth: 1 };
+  },
+  //AI: reports how much strength this card currently reduces via its virus counters
+  AIReducesIceStrength: function (iceCard) {
+    return Counters(this, "virus");
   },
 };
 cardSet[30009] = {
@@ -1173,6 +1179,10 @@ cardSet[30014] = {
 	  return 2; //priority 2 (moderate)
   },
   AIEconomyTrigger: 1, //priority 1 (yes trigger but there are better options)
+  //Each successful run visibly banks a credit for later collection.
+  AIPublicRunPressure: function () {
+    return { economy: 1 };
+  },
 };
 cardSet[30015] = {
   title: "Carmen",

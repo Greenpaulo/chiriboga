@@ -39,5 +39,18 @@ assert(
   successfulRunSource.indexOf("PlaySound('runSuccessful')") > successfulRunSource.lastIndexOf('if (modifySuccess == 0)'),
   'the sound must only play after the run passes the final success-prevention check'
 );
+assert.strictEqual(
+  (
+    successfulRunSource.match(
+      /corp\.AI\._recordSuccessfulRunForProtection\(attackedServer\)/g
+    ) || []
+  ).length,
+  1,
+  'a declared successful run must report recent pressure to the Corp AI exactly once'
+);
+assert(
+  successfulRunSource.indexOf('corp.AI._recordSuccessfulRunForProtection(attackedServer)') > successfulRunSource.lastIndexOf('if (modifySuccess == 0)'),
+  'prevented successful runs must not create Corp protection pressure'
+);
 
-console.log('3 run-success sound regression cases passed.');
+console.log('5 run-success regression cases passed.');

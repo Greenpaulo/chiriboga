@@ -185,6 +185,103 @@ class CorpAI {
     return false;
   }
 
+  //Read a declarative, public-board description of the value a Runner card
+  //gets from completing a run. Unlike Runner run planning, this must never
+  //inspect Grip or call hooks whose implementation assumes Runner-private state.
+  _publicRunPressureFromCard(card, server) {
+    var ret = { economy: 0, growth: 0, persistentPressure: 0 };
+    if (!card || card.player != runner || !CheckHasAbilities(card)) return ret;
+    if (typeof card.AIPublicRunPressure != "function") return ret;
+    var pressure = card.AIPublicRunPressure.call(card, server);
+    if (typeof pressure == "number") pressure = { persistentPressure: pressure };
+    if (!pressure || typeof pressure != "object") return ret;
+    ["economy", "growth", "persistentPressure"].forEach((key) => {
+      var value = Number(pressure[key]);
+      if (isFinite(value) && value > 0) ret[key] = value;
+    });
+    return ret;
+  }
+
+  //Public installed rewards and observed recent behaviour describe why a run
+  //matters; server security describes whether the Runner can currently collect
+  //that value. This is intentionally server-generic even though Archives is the
+  //first protection decision to consume it.
+  _serverRunPressure(server, securityEvaluation) {
+    var ret = {
+      economy: 0,
+      growth: 0,
+      persistentPressure: 0,
+      recentRuns: 0,
+      sources: 0,
+      rawPenalty: 0,
+      penalty: 0,
+      isReachable: false,
+    };
+    if (!server) return ret;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var contribution = this._publicRunPressureFromCard(activeCards[i], server);
+      if (
+        contribution.economy > 0 ||
+        contribution.growth > 0 ||
+        contribution.persistentPressure > 0
+      )
+        ret.sources++;
+      ret.economy += contribution.economy;
+      ret.growth += contribution.growth;
+      ret.persistentPressure += contribution.persistentPressure;
+    }
+    var history = this._recentSuccessfulRunPressure.get(server);
+    if (history)
+      ret.recentRuns = history.lastTurn + history.previousTurn * 0.5;
+
+    //Economy is discounted because a credit of Runner value is not a full point
+    //of Corp protection. Growth and repeatable pressure are strategically more
+    //important, while observed runs contribute directly and decay after two
+    //Runner turns. Bound the result so this signal cannot swamp agenda stakes.
+    ret.rawPenalty = Math.min(
+      6,
+      ret.economy * 0.5 +
+        ret.growth +
+        ret.persistentPressure * 1.5 +
+        ret.recentRuns,
+    );
+    var security = securityEvaluation;
+    if (typeof security == "undefined")
+      security = this._evaluateServerSecurity(server);
+    ret.isReachable = !security.isSecure;
+    if (ret.isReachable) ret.penalty = ret.rawPenalty;
+    return ret;
+  }
+
+  _recordSuccessfulRunForProtection(server) {
+    if (!server) return;
+    var history = this._recentSuccessfulRunPressure.get(server) || {
+      currentTurn: 0,
+      lastTurn: 0,
+      previousTurn: 0,
+    };
+    history.currentTurn++;
+    this._recentSuccessfulRunPressure.set(server, history);
+  }
+
+  _rollRecentSuccessfulRunPressure() {
+    var liveServers = [corp.HQ, corp.RnD, corp.archives].concat(
+      corp.remoteServers || [],
+    );
+    for (var i = 0; i < liveServers.length; i++) {
+      var server = liveServers[i];
+      var history = this._recentSuccessfulRunPressure.get(server);
+      if (!history) continue;
+      history.previousTurn = history.lastTurn;
+      history.lastTurn = history.currentTurn;
+      history.currentTurn = 0;
+      if (history.lastTurn == 0 && history.previousTurn == 0)
+        this._recentSuccessfulRunPressure.delete(server);
+      else this._recentSuccessfulRunPressure.set(server, history);
+    }
+  }
+
   //Normalize public, installed central-pressure hooks. The hook deliberately
   //describes mechanics rather than card names, and must be safe outside a run.
   _centralPressureFromCard(card, server) {
@@ -2479,7 +2576,12 @@ class CorpAI {
     if (!options.ignoreSuccessfulRuns) {
       //if it is being run successfully a lot, need extra protection
       var successfulRuns = 0;
-      if (typeof server.AISuccessfulRuns !== "undefined")
+      //Archives uses the recent, state-aware pressure model below instead of a
+      //permanent lifetime counter. Backdoor runs retain HQ's historical signal.
+      if (
+        (server != corp.archives || archivesIsBackdoorToHQ) &&
+        typeof server.AISuccessfulRuns !== "undefined"
+      )
         successfulRuns = server.AISuccessfulRuns;
       //if archives is a backdoor to HQ, consider successful runs on HQ
       if (
@@ -2493,7 +2595,10 @@ class CorpAI {
       if (successfulRuns > 0) ret -= Math.round(Math.sqrt(successfulRuns));
     }
     //if it is archives we will deprioritise protection (if it is not a backdoor into HQ)
-    if (server == corp.archives && !archivesIsBackdoorToHQ) ret += 3; //archives (the 3 is arbitrary)
+    if (server == corp.archives && !archivesIsBackdoorToHQ) {
+      ret += 3; //archives (the 3 is arbitrary)
+      ret -= this._serverRunPressure(server, securityEvaluation).penalty;
+    }
     //if it is HQ (or backdoor), evaluate danger based on ICE protection and agenda count
     if (
       server == corp.HQ ||
@@ -2642,7 +2747,11 @@ class CorpAI {
       .map((entry) => entry.server);
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
-      if (!entry.server || entry.isSecure) {
+      if (
+        !entry.server ||
+        entry.isSecure ||
+        this._nothingWorthProtecting(entry.server, entry.security)
+      ) {
         if (entry.server) this._serverProtectionDebt.set(entry.server, 0);
       } else if (this._protectionInstallsThisTurn.includes(entry.server)) {
         this._serverProtectionDebt.set(entry.server, 0);
@@ -2660,6 +2769,7 @@ class CorpAI {
   }
 
   _prepareProtectionPrioritiesForCorpTurn() {
+    this._rollRecentSuccessfulRunPressure();
     //The first Corp turn has no previous allocation round to age.
     if (!this._hasReachedCorpMainPhase) return;
     this._ageProtectionPriorities();
@@ -2671,7 +2781,7 @@ class CorpAI {
   ) {
     var ranked = this._rankedServersToProtect(ignoreArchives);
     var eligibleRanked = ranked.filter(
-      (entry) => !this._nothingWorthProtecting(entry.server),
+      (entry) => !this._nothingWorthProtecting(entry.server, entry.security),
     );
     var unallocatedInsecure = eligibleRanked.filter(
       (entry) =>
@@ -2682,6 +2792,15 @@ class CorpAI {
       unallocatedInsecure.length > 0
         ? unallocatedInsecure[0]
         : eligibleRanked[0];
+    //Run rewards can make an empty Archives a legitimate target, but allocation
+    //rotation must not promote it over a naturally more urgent insecure server.
+    //This preserves rotation among ordinary protection targets while requiring
+    //Archives to win the actual state-based comparison before receiving ICE.
+    if (selected && selected.server == corp.archives) {
+      var naturalInsecure = eligibleRanked.find((entry) => !entry.isSecure);
+      if (naturalInsecure && naturalInsecure.server != corp.archives)
+        selected = naturalInsecure;
+    }
     if (outputToLog) {
       var protectionScores = {};
       for (var i = 0; i < ranked.length; i++) {
@@ -2703,14 +2822,17 @@ class CorpAI {
     return selected ? selected.server : corp.HQ;
   }
 
-  _nothingWorthProtecting(server) {
-    //An empty Archives is not worth an ICE install unless it is a route into HQ.
+  _nothingWorthProtecting(server, securityEvaluation) {
+    //An empty Archives is valueless only when there is no direct access stake,
+    //route into HQ, public successful-run reward, or recent observed pressure.
     if (server !== corp.archives) return false;
     if (this._archivesIsBackdoorToHQ()) return false;
     for (var i = 0; i < corp.archives.cards.length; i++) {
       if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
     }
-    return true;
+    return (
+      this._serverRunPressure(corp.archives, securityEvaluation).penalty <= 0
+    );
   }
 
   _bestProtectedRemote() {
@@ -5637,6 +5759,7 @@ class CorpAI {
     this.preferred = null;
     this._protectionInstallsThisTurn = [];
     this._serverProtectionDebt = new Map();
+    this._recentSuccessfulRunPressure = new WeakMap();
     this._hasReachedCorpMainPhase = false;
     this._serverBaitDecisions = new WeakMap();
     this._agendaBluffDecisions = new WeakMap();

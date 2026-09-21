@@ -66,6 +66,7 @@ function test(name, body) {
   ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
   ai._cardDeceptionProfiles = new WeakMap(); ai._random = Math.random;
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
+  ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
   body(); tests++; console.log('PASS ' + name);
 }
@@ -974,7 +975,20 @@ test('protection allocation rotates through insecure servers during a turn', () 
   ai._recordProtectionInstall(rnd);
   assert.strictEqual(ai._serverToProtect(), remote);
 });
-test('empty Archives is never selected for protection', () => {
+test('empty Archives without current run pressure is not selected for protection', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 1};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 2};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 0, AISuccessfulRuns: 99};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 3;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._emptyProtectedRemotes = () => [];
+  ai._HVTsInstalled = () => 0;
+  ai._protectionInstallsThisTurn = [hq, rnd, null];
+  assert.strictEqual(ai._serverToProtect(), hq);
+});
+test('a recent successful run makes an empty reachable Archives eligible temporarily', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 1};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 2};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 0};
@@ -985,7 +999,55 @@ test('empty Archives is never selected for protection', () => {
   ai._emptyProtectedRemotes = () => [];
   ai._HVTsInstalled = () => 0;
   ai._protectionInstallsThisTurn = [hq, rnd, null];
+  ai._recordSuccessfulRunForProtection(archives);
+  ai._rollRecentSuccessfulRunPressure();
+  assert.strictEqual(ai._serverToProtect(), archives);
+  assert.strictEqual(ai._serverRunPressure(archives, {isSecure: false}).recentRuns, 1);
+  ai._rollRecentSuccessfulRunPressure();
+  assert.strictEqual(ai._serverRunPressure(archives, {isSecure: false}).recentRuns, 0.5);
+  ai._rollRecentSuccessfulRunPressure();
+  assert.strictEqual(ai._serverRunPressure(archives, {isSecure: false}).recentRuns, 0);
   assert.strictEqual(ai._serverToProtect(), hq);
+});
+test('public installed run rewards create state-based Archives pressure', () => {
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []}, archives, remoteServers: []});
+  runner.cards = [card(30008), card(30014), card(31024)];
+  const pressure = ai._serverRunPressure(archives, {isSecure: false});
+  assert.strictEqual(pressure.economy, 3);
+  assert.strictEqual(pressure.growth, 1);
+  assert.strictEqual(pressure.persistentPressure, 1);
+  assert.strictEqual(pressure.rawPenalty, 4);
+  assert.strictEqual(pressure.penalty, 4);
+  assert.strictEqual(ai._nothingWorthProtecting(archives), false);
+  assert.strictEqual(ai._serverRunPressure(archives, {isSecure: true}).penalty, 0);
+});
+test('Archives run rewards do not override a naturally more urgent allocated server', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: -5};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 2};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 1};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  runner.cards = [card(30008)];
+  ai._protectionScore = target => target ? target.score : 3;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._emptyProtectedRemotes = () => [];
+  ai._HVTsInstalled = () => 0;
+  ai._protectionInstallsThisTurn = [hq, rnd, null];
+  assert.strictEqual(ai._serverToProtect(), hq);
+});
+test('valueless Archives does not bank protection debt for a later threat', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 0};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 3};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 20};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  ai._protectionScore = target => target ? target.score : 1;
+  ai._evaluateServerSecurity = () => ({isSecure: false});
+  ai._emptyProtectedRemotes = () => [{}];
+  ai._HVTsInstalled = () => 0;
+  for (let turn = 0; turn < 4; turn++) ai._ageProtectionPriorities();
+  assert.strictEqual(ai._serverProtectionDebt.get(archives), 0);
 });
 test('Archives containing an agenda remains a valid protection target', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 1};
