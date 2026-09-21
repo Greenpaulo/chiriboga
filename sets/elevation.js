@@ -8068,6 +8068,17 @@ cardSet[35035] = {
     }
     
     if (cheapestBioroid === null) return false;
+
+    //Do not trade away a deterministic lock for a one-shot end-the-run. In the
+    //reported game Brân already locked the Runner out, but LEO trashed it and
+    //the Runner simply spent the next click running the now-naked remote.
+    if (
+      corp.AI &&
+      typeof corp.AI._evaluateServerSecurity == "function" &&
+      corp.AI._evaluateServerSecurity(attackedServer).isSecure
+    ) {
+      return false;
+    }
     
     //Decision: is it worth trashing a bioroid to end the run?
     //Generally yes if:

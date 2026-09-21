@@ -2396,21 +2396,27 @@ class CorpAI {
     result.isSecure =
       result.hasHardLockout ||
       result.totalMandatoryBreakCost > result.runnerCredits;
-    if (result.isSecure) {
-      this._log(
-        ServerName(server) +
-          " appears secure: " +
-          (result.reasons.length > 0
-            ? result.reasons.join("; ")
-            : "unaffordable"),
-      );
-    }
     return result;
+  }
+
+  //Security evaluation is used repeatedly while scoring possible actions. Keep
+  //that calculation side-effect free, and emit its diagnostic only from the
+  //single ranked-protection report for the current Corp decision.
+  _logServerSecurityEvaluation(server, result) {
+    if (!server || !result || !result.isSecure) return;
+    this._log(
+      ServerName(server) +
+        " appears secure: " +
+        (result.reasons.length > 0
+          ? result.reasons.join("; ")
+          : "unaffordable"),
+    );
   }
 
   _protectionScore(
     server, //higher number = more protected
     options, //ignoreSuccessfulRuns, ignoreBackdoorFromArchives, returnArchivesLowerScoreForHQIfBackdoor
+    securityEvaluation, //optional result already calculated for this exact server state
   ) {
     if (typeof options == "undefined") {
       console.error("options not defined for call to corp.AI._protectionScore");
@@ -2438,7 +2444,10 @@ class CorpAI {
     //a server the Runner cannot get into needs no further protection
     //(the 2 is arbitrary, test and tweak - bounded so it doesn't swamp other factors)
     if (server.ice.length > 0 || server.root.length > 0) {
-      if (this._evaluateServerSecurity(server).isSecure) ret += 2;
+      var security = securityEvaluation;
+      if (typeof security == "undefined")
+        security = this._evaluateServerSecurity(server);
+      if (security.isSecure) ret += 2;
     }
     if (!options.ignoreSuccessfulRuns) {
       //if it is being run successfully a lot, need extra protection
@@ -2525,45 +2534,44 @@ class CorpAI {
   _rankedServersToProtect(ignoreArchives = false) {
     var entries = [];
     var order = 0;
-    var addServer = (server, name, score) => {
+    var addServer = (server, name, scoreAdjustment = 0) => {
       if (server && this._NoMoreProtectionForThisServer(server)) return;
       var debt = server ? this._serverProtectionDebt.get(server) || 0 : 0;
+      var security = server ? this._evaluateServerSecurity(server) : null;
+      var score = this._protectionScore(server, {}, security) + scoreAdjustment;
       entries.push({
         server: server,
         name: name,
         score: score,
         adjustedScore: score - debt,
         debt: debt,
-        isSecure: server ? this._evaluateServerSecurity(server).isSecure : false,
+        security: security,
+        isSecure: security ? security.isSecure : false,
         order: order++,
       });
     };
 
     //Preserve the old faction-based tie break while making all scores visible.
     if (runner.identityCard.faction == "Shaper") {
-      addServer(corp.RnD, "R&D", this._protectionScore(corp.RnD, {}));
-      addServer(corp.HQ, "HQ", this._protectionScore(corp.HQ, {}));
+      addServer(corp.RnD, "R&D");
+      addServer(corp.HQ, "HQ");
     } else {
-      addServer(corp.HQ, "HQ", this._protectionScore(corp.HQ, {}));
-      addServer(corp.RnD, "R&D", this._protectionScore(corp.RnD, {}));
+      addServer(corp.HQ, "HQ");
+      addServer(corp.RnD, "R&D");
     }
 
     for (var i = 0; i < corp.remoteServers.length; i++) {
       var remote = corp.remoteServers[i];
-      var remoteScore = this._protectionScore(remote, {});
-      if (this._isAScoringServer(remote)) remoteScore -= this._agendasInHand();
-      addServer(remote, remote.serverName, remoteScore);
+      var scoringAdjustment = this._isAScoringServer(remote)
+        ? -this._agendasInHand()
+        : 0;
+      addServer(remote, remote.serverName, scoringAdjustment);
     }
 
     if (this._emptyProtectedRemotes().length == 0)
-      addServer(null, "null", this._protectionScore(null, {}));
+      addServer(null, "null");
 
-    if (!ignoreArchives)
-      addServer(
-        corp.archives,
-        "archives",
-        this._protectionScore(corp.archives, {}),
-      );
+    if (!ignoreArchives) addServer(corp.archives, "archives");
 
     //Preserve the legacy HVT guarantee: when the natural winner is a generic
     //remote/new server, redirect that protection action to the HVT's server.
@@ -2650,6 +2658,10 @@ class CorpAI {
     if (outputToLog) {
       var protectionScores = {};
       for (var i = 0; i < ranked.length; i++) {
+        this._logServerSecurityEvaluation(
+          ranked[i].server,
+          ranked[i].security,
+        );
         protectionScores[ranked[i].name] = {
           score: ranked[i].score,
           debt: ranked[i].debt,
@@ -2679,9 +2691,13 @@ class CorpAI {
     var bestProtectedRemote = null;
     var protectionScore = 0;
     for (var i = 0; i < corp.remoteServers.length; i++) {
-      if (this._protectionScore(corp.remoteServers[i], {}) > protectionScore) {
+      var thisProtectionScore = this._protectionScore(
+        corp.remoteServers[i],
+        {},
+      );
+      if (thisProtectionScore > protectionScore) {
         bestProtectedRemote = corp.remoteServers[i];
-        protectionScore = this._protectionScore(bestProtectedRemote, {});
+        protectionScore = thisProtectionScore;
       }
     }
     return bestProtectedRemote;

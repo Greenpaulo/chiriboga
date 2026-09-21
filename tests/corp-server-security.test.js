@@ -18,6 +18,7 @@ context.AvailableCredits = context.Credits;
 context.RezCost = card => card.rezCost || 0;
 context.CheckCredits = (player, cost) => player.creditPool >= cost;
 context.CheckRez = (card, types) => types.includes(card.cardType) && !card.rezzed && card.rezCost !== undefined;
+context.CheckRunning = () => context.attackedServer !== null;
 context.AllottedClicks = player => player === runner ? 4 : 3;
 context.InstalledCards = player => player === runner ? runner.cards : servers.reduce((cards, server) => cards.concat(server.ice, server.root), []);
 context.ActiveCards = player => {
@@ -418,6 +419,114 @@ test('poor Corp does not layer a secure agenda remote with unrezzed ICE', () => 
   runner.cards = []; runner.creditPool = 10;
   assert.strictEqual(ai._evaluateServerSecurity(target).isSecure, true);
   assert.strictEqual(ai._shouldInstallIceLayer(target, false), false);
+});
+test('approached HQ Bumi does not save credits for Semak-samun on other centrals', () => {
+  const bumi = card(35041); bumi.rezzed = false;
+  const archivesSemak = card(35054); archivesSemak.rezzed = false;
+  const rndSemak = card(35054); rndSemak.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [{player: corp, cardType: 'agenda'}], ice: [bumi], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [rndSemak], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [archivesSemak], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 5});
+  servers = [hq, rnd, archives];
+  runner.clickTracker = 3; runner.creditPool = 4;
+  assert.strictEqual(ai._iceWorthRezzing(bumi, 3, hq), true);
+});
+test('LEO keeps Brân when it already locks the Runner out of an agenda remote', () => {
+  const bran = card(30039); bran.rezzed = true;
+  const target = {
+    serverName: 'Remote 3',
+    ice: [bran],
+    root: [{player: corp, cardType: 'agenda', agendaPoints: 2}],
+  };
+  Object.assign(corp, {AI: ai, HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []},
+    remoteServers: [target]});
+  servers = [corp.HQ, corp.RnD, corp.archives, target];
+  runner.clickTracker = 1; runner.creditPool = 4; runner.cards = [];
+  context.attackedServer = target;
+  const leo = card(35035); leo.usedThisTurn = false;
+  assert.strictEqual(ai._evaluateServerSecurity(target).isSecure, true);
+  assert.strictEqual(leo.AIWouldTrigger.call(leo), false);
+});
+test('LEO still ends a run when the rezzed bioroid does not secure an agenda remote', () => {
+  const harmlessBioroid = ice(['Gain 1 credit.'], [[['misc_minor']]], {
+    title: 'Harmless Bioroid', cardType: 'ice', subTypes: ['Bioroid'], rezCost: 2,
+  });
+  const target = {
+    serverName: 'Remote 0',
+    ice: [harmlessBioroid],
+    root: [{player: corp, cardType: 'agenda', agendaPoints: 2}],
+  };
+  Object.assign(corp, {AI: ai, HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []},
+    remoteServers: [target]});
+  servers = [corp.HQ, corp.RnD, corp.archives, target];
+  runner.clickTracker = 1; runner.creditPool = 4;
+  context.attackedServer = target;
+  const leo = card(35035); leo.usedThisTurn = false;
+  assert.strictEqual(ai._evaluateServerSecurity(target).isSecure, false);
+  assert.strictEqual(leo.AIWouldTrigger.call(leo), true);
+});
+test('security evaluation logs once from a ranked report, not during every calculation', () => {
+  const target = {serverName: 'Remote 3', ice: [etr()], root: []};
+  const messages = [];
+  const oldRanked = ai._rankedServersToProtect;
+  const oldLog = ai._log;
+  ai._log = message => messages.push(message);
+  try {
+    const security = ai._evaluateServerSecurity(target);
+    ai._evaluateServerSecurity(target);
+    assert.strictEqual(messages.length, 0);
+    ai._rankedServersToProtect = () => [{
+      server: target, name: 'Remote 3', score: 3, debt: 0,
+      adjustedScore: 3, security, isSecure: true,
+    }];
+    ai._serverToProtect(false, true);
+  } finally {
+    ai._rankedServersToProtect = oldRanked;
+    ai._log = oldLog;
+  }
+  assert.strictEqual(messages.filter(message => message.includes('appears secure')).length, 1);
+  assert.strictEqual(messages.filter(message => message.includes('Ranked server protection')).length, 1);
+});
+test('ranked protection evaluates security once per real server', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [etr()], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [etr()], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [etr()], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  servers = [hq, rnd, archives];
+  runner.identityCard = {faction: 'Criminal'};
+  const originalEvaluate = ai._evaluateServerSecurity;
+  let evaluations = 0;
+  ai._evaluateServerSecurity = function(target) {
+    evaluations++;
+    return originalEvaluate.call(this, target);
+  };
+  try {
+    ai._rankedServersToProtect(false);
+  } finally {
+    ai._evaluateServerSecurity = originalEvaluate;
+  }
+  assert.strictEqual(evaluations, 3);
+});
+test('best protected remote scores each candidate once', () => {
+  const first = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const second = {serverName: 'Remote 1', ice: [etr(), etr()], root: []};
+  corp.remoteServers = [first, second];
+  servers = [first, second];
+  const originalProtectionScore = ai._protectionScore;
+  let scores = 0;
+  ai._protectionScore = function(target, options, security) {
+    scores++;
+    return originalProtectionScore.call(this, target, options, security);
+  };
+  try {
+    assert.strictEqual(ai._bestProtectedRemote(), second);
+  } finally {
+    ai._protectionScore = originalProtectionScore;
+  }
+  assert.strictEqual(scores, 2);
 });
 test('choosing an agenda install records a scoring-plan commitment', () => {
   const agenda = {player: corp, cardType: 'agenda'};
