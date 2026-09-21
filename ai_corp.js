@@ -2144,10 +2144,11 @@ class CorpAI {
     return false;
   }
 
-  _outermostRelevantIce(server) {
+  _outermostRelevantIce(server, eligibleIce) {
     if (!server || !server.ice) return null;
     for (var i = server.ice.length - 1; i >= 0; i--) {
       var iceCard = server.ice[i];
+      if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
       if (
         iceCard.rezzed ||
         CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
@@ -2160,13 +2161,14 @@ class CorpAI {
   //Choose the most important ice covered by a public, once-per-run bypass.
   //This is separate from an outermost-only bypass because some installed cards
   //can wait and spend themselves on any one encounter.
-  _oneShotIceBypassTarget(server) {
+  _oneShotIceBypassTarget(server, eligibleIce) {
     if (!server || !server.ice) return null;
     var activeCards = ActiveCards(runner);
     var best = null;
     var bestCost = -1;
     for (var iceIndex = 0; iceIndex < server.ice.length; iceIndex++) {
       var iceCard = server.ice[iceIndex];
+      if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
       if (
         !iceCard.rezzed &&
         !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
@@ -2457,19 +2459,44 @@ class CorpAI {
       result.reasons.push("defensive upgrade prevents breach");
     }
     var outermostBypassAvailable = this._outermostIceBypassAvailable(server);
-    var outermostBypassTarget = outermostBypassAvailable
-      ? this._outermostRelevantIce(server)
-      : null;
-    var oneShotBypassTarget = this._oneShotIceBypassTarget(server);
-    for (var i = 0; i < server.ice.length; i++) {
-      var iceCard = server.ice[i];
-      //unrezzed ice we can't afford is effectively not there
-      if (
-        !iceCard.rezzed &&
-        !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
-      )
+    //ICE are approached from the highest index inward. Reserve each rez cost
+    //from one local pool so multiple unrezzed layers cannot each claim the
+    //Corp's full credit pool. Rezzed ICE require no further budget.
+    var remainingRezCredits = Credits(corp);
+    var eligibleIce = [];
+    for (var routeIndex = server.ice.length - 1; routeIndex >= 0; routeIndex--) {
+      var routeIce = server.ice[routeIndex];
+      if (routeIce.rezzed) {
+        eligibleIce.push(routeIce);
         continue;
-      var bypassCost = this._iceBypassCost(iceCard, server, i);
+      }
+      var routeRezCost = Math.max(0, RezCost(routeIce));
+      if (
+        routeRezCost <= remainingRezCredits &&
+        CheckCredits(corp, routeRezCost, "rezzing", routeIce)
+      ) {
+        eligibleIce.push(routeIce);
+        remainingRezCredits -= routeRezCost;
+      } else {
+        result.reasons.push(
+          GetTitle(routeIce) +
+            " cannot be rezzed within the remaining " +
+            remainingRezCredits +
+            " credits",
+        );
+      }
+    }
+    var outermostBypassTarget = outermostBypassAvailable
+      ? this._outermostRelevantIce(server, eligibleIce)
+      : null;
+    var oneShotBypassTarget = this._oneShotIceBypassTarget(
+      server,
+      eligibleIce,
+    );
+    for (var i = eligibleIce.length - 1; i >= 0; i--) {
+      var iceCard = eligibleIce[i];
+      var iceIndex = server.ice.indexOf(iceCard);
+      var bypassCost = this._iceBypassCost(iceCard, server, iceIndex);
       var usesOutermostBypass =
         outermostBypassAvailable && iceCard == outermostBypassTarget;
       var usesOneShotBypass = iceCard == oneShotBypassTarget;
@@ -2477,7 +2504,7 @@ class CorpAI {
         result.reasons.push(GetTitle(iceCard) + " can be bypassed");
         continue;
       }
-      var breaker = this._matchingBreakerForIce(iceCard, server, i);
+      var breaker = this._matchingBreakerForIce(iceCard, server, iceIndex);
       var avoidanceCost = this._estimateBreakCost(iceCard, breaker);
       if (bypassCost < avoidanceCost) {
         avoidanceCost = bypassCost;

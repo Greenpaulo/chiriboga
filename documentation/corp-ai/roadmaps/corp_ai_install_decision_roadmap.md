@@ -349,7 +349,7 @@ Hard rejection rules should remain separate from soft score penalties. An illega
 1. Against a publicly installed Fracter only, otherwise comparable Code Gate or Sentry ICE outranks an efficiently broken Barrier.
 2. An affordable ETR ICE that creates a hard lockout outranks higher printed-strength ICE that leaves the route open.
 3. A second affordable layer outranks deepening another server when it neutralizes public outermost-bypass risk on a valuable remote, subject to multi-server safety.
-4. ICE that cannot be rezzed within the projected defense budget does not receive active-security credit.
+4. ICE that cannot be rezzed within the projected defense budget does not receive active-security credit; consume the security evaluator's shared unrezzed-ICE budget fix rather than reimplementing it here.
 5. An ICE with only optional punishment increases deterrent/tax value but does not claim a mandatory lockout.
 6. Effective subtype changes and targeted bypass hooks affect hypothetical results exactly as they affect installed ICE.
 7. Candidate evaluation is unchanged when hidden Runner Grip cards are substituted.

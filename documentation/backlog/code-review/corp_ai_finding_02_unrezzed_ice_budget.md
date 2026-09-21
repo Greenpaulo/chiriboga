@@ -31,3 +31,15 @@ Each unrezzed ICE is checked against the Corp's full credits on its own. Two 4c 
 ## Cross-reference to add
 
 Add a one-line cross-reference from Install roadmap Phase 2, scenario 4: "consume the evaluator fix, do not reimplement it".
+
+---
+
+## Resolution — 21 September 2026
+
+Implemented in `_evaluateServerSecurity()`.
+
+- The evaluator now reserves unrezzed ICE rez costs from a single local budget in encounter order, outermost to innermost.
+- Rezzed ICE remain active without consuming that budget; skipped unrezzed ICE are excluded from bypass and break-cost evaluation and identified in `reasons`.
+- The calculation remains side-effect free: it does not spend credits, change rez state, or reorder ICE.
+- Added deterministic regression coverage for the 5-credit and 8-credit two-layer cases, rezzed ICE, and state preservation.
+- Added the completed Layer 1.1 roadmap entry, the Install Phase 2 cross-reference, and the evaluator behavior note in `documentation/ai.md`.

@@ -286,6 +286,32 @@ test('unaffordable unrezzed ice does not protect server', () => {
   corp.creditPool = 0; const wall = etr(); wall.rezzed = false;
   assert.strictEqual(ai._evaluateServerSecurity(server([wall])).isSecure, false);
 });
+test('unrezzed ice share one outer-to-inner rez budget without mutating state', () => {
+  const breaker = {player: runner, title: 'Text fracter', strength: 3,
+    subTypes: ['Icebreaker', 'Fracter'], cardText: '1 credit: Break 1 barrier subroutine.'};
+  runner.cards = [breaker]; runner.creditPool = 10;
+  const inner = etr(), outer = etr();
+  inner.title = 'Inner wall'; outer.title = 'Outer wall';
+  inner.rezzed = false; outer.rezzed = false;
+  inner.rezCost = 4; outer.rezCost = 4;
+  const target = server([inner, outer]);
+  const originalIce = target.ice.slice();
+
+  corp.creditPool = 5;
+  const constrained = ai._evaluateServerSecurity(target);
+  assert.strictEqual(constrained.totalMandatoryBreakCost, 1);
+  assert(constrained.reasons.some(reason => reason.includes('Inner wall cannot be rezzed')));
+
+  corp.creditPool = 8;
+  assert.strictEqual(ai._evaluateServerSecurity(target).totalMandatoryBreakCost, 2);
+
+  inner.rezzed = true; corp.creditPool = 4;
+  assert.strictEqual(ai._evaluateServerSecurity(target).totalMandatoryBreakCost, 2);
+  assert.strictEqual(corp.creditPool, 4);
+  assert.strictEqual(inner.rezzed, true);
+  assert.strictEqual(outer.rezzed, false);
+  assert.deepStrictEqual(target.ice, originalIce);
+});
 test('already broken subroutines do not create mandatory breaks', () => {
   const wall = ice(['End the run.'], null); wall.subroutines[0].broken = true;
   assert.strictEqual(ai._evaluateServerSecurity(server([wall])).isSecure, false);

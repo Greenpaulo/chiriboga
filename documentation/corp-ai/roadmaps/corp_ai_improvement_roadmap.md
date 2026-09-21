@@ -50,6 +50,13 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 - **Subroutine-Specific Filtering:** Classifies the Corp's actual ice, including unrezzed ice, through a Corp-owned calculator and `AIImplementIce`. Resource-denial effects contribute to `totalBreakCost` (the estimated cost of avoiding punishment). `totalMandatoryBreakCost` counts breaks needed to avoid ETR or lethal damage; only this mandatory cost is compared with Runner credits to declare security. Optional tags or program trash never establish a lockout by themselves. Negligible effects (`misc_minor`/`loseCredits`/`payCredits`) are ignored by the avoidance filter.
 - **Effective ICE Strength:** Factors in active strength-reducing cards and virus counters via `_effectiveIceStrength()`.
 
+#### Layer 1.1: Shared Unrezzed-ICE Rez Budget — `[COMPLETED]`
+
+- **Goal:** Prevent a route containing several unrezzed ICE from counting the Corp's full credit pool independently for every layer.
+- **Implemented design:** `_evaluateServerSecurity()` walks ICE in encounter order (outermost/highest index inward) and reserves each affordable unrezzed ICE's current `RezCost` from one local base-credit budget. Rezzed ICE consume no budget. An unrezzed layer that does not fit is excluded from bypass targeting and break-cost evaluation, with the skip recorded in `reasons`.
+- **Safety and compatibility:** Evaluation does not spend credits, rez cards, or reorder the server. Per-card `CheckCredits(..., "rezzing", ice)` remains an additional legality/credit-source check, while the shared base pool prevents the same live credits from being promised twice. All existing consumers of the evaluator inherit the route budget.
+- **Regression coverage:** Two 4-credit unrezzed layers count once at 5 credits and twice at 8; an already-rezzed layer consumes no budget; credits, rez flags, and ICE order remain unchanged.
+
 ### Layer 2: Global & Root Security — `[COMPLETED]`
 
 - **Defensive Upgrades:** Inspects server root and active Corp cards via `_hasDefensiveUpgrade()` using `card.AIPreventBreach`. _Ash 2X3ZB9CY_ and _Caprice Nisei_ are intended examples, but neither currently has a set implementation; because their prevention depends on a trace or psi game, they should not receive an unconditional boolean hook.
