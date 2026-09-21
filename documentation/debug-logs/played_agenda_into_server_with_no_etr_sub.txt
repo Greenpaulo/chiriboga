@@ -117,24 +117,20 @@ Run successful
 Sericulture Expansion accessed
 Sericulture Expansion stolen
 Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 2 card(s) in hand: [Longevity Serum,Hedge Fund]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Ritual]
 
 SPOILER: Contents of remote servers:
-SPOILER: Remote 0: []
+SPOILER: Remote 0: [Sericulture Expansion]
 
-RunnerTestField(30001, [30030,30020,35026], [35029,30007,35008,35007,30009,30020,30013,35007,30034,30007,35004,30004,35011,30027,30030,30009,30008,30027,35010,35004,35010,30007,30030,30005,35009,35004,35007,35009,30004,35011,35010,30034,35009,30003], [], [30022,30003,30008], [35049], cardBackTexturesRunner,glowTextures,strengthTextures);
-CorpTestField(35046, [], [35072,30040,35051,35049,30071,30075,30053,35051,35072,35052,30067,35050,35053,35050,35051,30048,30075,35052,30048,35054,30050,35049,35052,35048,30067,35079,30047,30067,30050,30053,35048,30047,30040,35048,35054,30071,30040,30053,35054,30048,35050,35072], [30044,30075], [], [30073], [30073], [[30046,30073]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
-runner.scoreArea[0].AITurnsInstalled=1;
-runner.scoreArea[0].rezzed=false;
-runner.stack[8].usedBasicActionDrawThisTurn=true;
-runner.stack[31].usedBasicActionDrawThisTurn=true;
-runner.heap[1].host=null;
-runner.heap[2].host=null;
-corp.RnD.cards[1].cardsInstalledThisTurn=[corp.remoteServers[0].ice[0],corp.remoteServers[0].ice[1],runner.scoreArea[0],];
-corp.RnD.cards[32].cardsInstalledThisTurn=[corp.remoteServers[0].ice[0],corp.remoteServers[0].ice[1],runner.scoreArea[0],];
-corp.RnD.cards[36].cardsInstalledThisTurn=[corp.remoteServers[0].ice[0],corp.remoteServers[0].ice[1],runner.scoreArea[0],];
+RunnerTestField(30001, [30030], [35029,30007,35008,35007,30009,30020,30013,35007,30034,30007,35004,30004,35011,30027,30030,30009,30008,30027,35010,35004,35010,30007,30030,30005,35009,35004,35007,35009,30004,35011,35010,30034,35009,30003,30020], [35026], [30022,30003,30008], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [35072,30040,35051,35049,30071,30075,30053,35051,35072,35052,30067,35050,35053,35050,35051,30048,30075,35052,30048,35054,30050,35049,35052,35048,30067,35079,30047,30067,30050,30053,35048,30047,30040,35048,35054,30071,30040,30053,35054,30048,35050,35072], [30044,30075], [], [30073], [30073], [[35049,30046,30073]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.RnD.cards[1].cardsInstalledThisTurn=[corp.remoteServers[0].ice[0],corp.remoteServers[0].ice[1],corp.remoteServers[0].root[0],];
+corp.RnD.cards[32].cardsInstalledThisTurn=[corp.remoteServers[0].ice[0],corp.remoteServers[0].ice[1],corp.remoteServers[0].root[0],];
+corp.RnD.cards[36].cardsInstalledThisTurn=[corp.remoteServers[0].ice[0],corp.remoteServers[0].ice[1],corp.remoteServers[0].root[0],];
 corp.HQ.cards[0].AICardsDiscarded=[];
-corp.remoteServers[0].ice[0].rezzed=true;
-corp.remoteServers[0].ice[1].rezzed=true;
-corp.remoteServers[0].AISuccessfulRuns=1;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
 
 Version reference: Sat Sep 19 2026 22:23:18 GMT+0100 (GMT+01:00)
