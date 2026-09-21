@@ -397,7 +397,21 @@ The commit-timestamp observation and the docs-only `439064e` description did
 not require code changes; cumulative tests confirmed that the intervening
 layers remained present.
 
-# Feedback on documentation\corp_ai_install_decision_roadmap.md
+## Revalidation — 21 Sept 2026
+
+Rechecked every finding against the current tree. The recorded fixes and their
+targeted regressions are still present: authoritative HVT redirection,
+non-mutating effective-subtype matching, faction-keyed hidden-threat profile
+caching, effective-credit bypass affordability, diagnostic-only macro-threat
+`focus`, and the game-winning-breach guard for bait postures. No further code
+change was required. The focused Corp server-security suite now passes all 99
+regression cases.
+
+The successor install roadmap has since moved to
+`documentation/corp-ai/roadmaps/corp_ai_install_decision_roadmap.md`; both
+follow-up documentation fixes reviewed below remain present at that location.
+
+# Feedback on `documentation/corp-ai/roadmaps/corp_ai_install_decision_roadmap.md`
 
 1. Phase 2 (ICE Selection) doesn't say how it interacts with a bait-postured server. Phase 3 already notes deception profiles should be "bounded inputs, not dominant policy," and the existing code gates ICE count on bait servers via \_deceptionProtectionTarget. But Phase 2 is purely about picking the best ICE for security once a server is eligible for another layer — it never says whether the ICE chosen for a bait server should stay "credibly light" (consistent with the under-defended signal) or just be whatever scores highest under Phase 2's marginal-security formula. If Phase 2 always picks the objectively strongest option regardless of posture, that's a second, independent channel for the same trap to look more/less credible than intended — worth an explicit line tying Phase 2 back to the active posture, the same way Phase 3 already does for role selection.
 
