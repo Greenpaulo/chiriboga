@@ -1,9 +1,9 @@
 # Corp AI: `_iceWorthRezzing()` saves credits for unrezzed ice in another server on a tie, so it waves the Runner through HQ until the Runner is out of clicks
 
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/fixed/` once merged).
-**Source:** `documentation/debug-logs/corp_didnt_rez_ice_when_it_would_force_runner_to_pay_credits_only_rezzed_ice_3_runs_later_on_same_server.txt`
+**Source:** `documentation/debug-logs/bug_raised/corp_didnt_rez_ice_when_it_would_force_runner_to_pay_credits_only_rezzed_ice_3_runs_later_on_same_server.txt`
 **File:** `ai_corp.js` (line numbers are from `main` when this was written and will drift; search by function name).
-**Status:** Diagnosed by reading the log and the code. The fix below has **not** been run. The protection-value numbers in section 3.2 were worked out by hand from the code, not printed by the game.
+**Status:** Fixed and regression-tested. See section 9 for the implementation record. The protection-value numbers in section 3.2 were worked out by hand from the code, not printed by the game.
 
 ---
 
@@ -216,10 +216,46 @@ These came up while tracing the log. They are unverified beyond what is noted.
 
 ## 8. Acceptance criteria
 
-- [ ] In `_iceWorthRezzing()`, ICE in a different server only reserves credits when that server's value is strictly greater than this server's.
-- [ ] ICE further in the same server still uses the protection-value tie-break.
-- [ ] With the board from the log (Corp 9 credits, Flyswatter on HQ, Mycoweb on Archives, Runner with clicks left), the AI logs `Rez this is better than Mycoweb in Archives` and `I will rez the approached ice` on the first HQ run.
-- [ ] A remote server with an agenda in its root and unrezzed ICE it cannot afford alongside this one still makes the AI save credits.
-- [ ] New test(s) from section 5 fail before the change and pass after.
-- [ ] `node -c ai_corp.js` passes and existing tests still pass.
-- [ ] No other AI decision logic was changed.
+- [x] In `_iceWorthRezzing()`, ICE in a different server only reserves credits when that server's value is strictly greater than this server's.
+- [x] ICE further in the same server still uses the protection-value tie-break.
+- [x] With the board from the log (Corp 9 credits, Flyswatter on HQ, Mycoweb on Archives, Runner with clicks left), `_iceWorthRezzing()` logs `Rez this is better than Mycoweb in Archives` and returns `true`; `Phase_Approaching` therefore follows its existing `I will rez the approached ice` path.
+- [x] A remote server with an agenda in its root and unrezzed ICE it cannot afford alongside this one still makes the AI save credits.
+- [x] New tests from section 5 fail before the change and pass after.
+- [x] `node -c ai_corp.js` passes and existing tests still pass.
+- [x] No other AI decision logic was changed.
+
+---
+
+## 9. Implementation record
+
+Implemented the minimal fix proposed in section 4.1. The broader alternatives in section 4.3 were deliberately left out because they would change how central-server contents or current-run intent contribute to server value and need separate fixtures and balancing.
+
+### 9.1 Code changes
+
+- Added a `sameServer` check to the unaffordable-ICE comparison in `_iceWorthRezzing()`.
+- ICE in another server now reserves credits only when that server's `_serverValue()` is strictly greater than the approached server's value.
+- ICE behind the approached ICE in the same server still uses `_cardProtectionValue()` to break equal-server-value ties.
+- The same-server defensive-upgrade comparison and all later rez heuristics were left unchanged.
+
+No other Corp AI decision logic was changed.
+
+### 9.2 Regression tests
+
+Added four cases to `tests/corp-server-security.test.js`:
+
+| Test | Coverage | Result |
+|---|---|---|
+| `approached Flyswatter does not save credits for equal-value Archives Mycoweb` | Reproduces the reported 9-credit HQ-versus-Archives decision with Buzzsaw installed and Runner clicks remaining | Returns `true` and logs `Rez this is better than Mycoweb in Archives` |
+| `approached Flyswatter rezzes when Runner has no clicks left` | Guards the existing other-server click gate | Returns `true` |
+| `approached Flyswatter still saves for Mycoweb on a higher-value remote` | Guards against over-fixing when the other ICE protects an agenda remote | Returns `false` |
+| `same-server ICE ordering retains the protection-value tie-break` | Guards the intended ordering between Flyswatter and stronger inner Mycoweb in one server | Returns `false` |
+
+The primary reproduction test failed before the code change (`false !== true`) and passes after it.
+
+Two existing game-point tests previously used equal-value central ICE as their reservation setup. Their assertions were still useful, but that setup depended on the behavior removed by this fix. They now use an agenda remote with a strictly higher server value, so they continue to verify the game-winning-breach override and the non-stopping-ICE case against a reservation that remains valid.
+
+### 9.3 Verification
+
+- `node tests/corp-server-security.test.js` passes: **81 regression cases passed**.
+- `node -c ai_corp.js` passes.
+- `git diff --check` passes.

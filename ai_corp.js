@@ -3761,10 +3761,14 @@ class CorpAI {
       if (CheckCredits(corp, rezCostToCompare, "rezzing")) {
         //but couldn't be rezzed if we do rez this
         if (!CheckCredits(corp, currentRezCost + rezCostToCompare, "rezzing")) {
-          //save credits for that ice if the server value is greater, or if server value equal and ice value greater
+          //For another server, only a strictly higher server value justifies
+          //passing the ICE the Runner is approaching. Within this server, keep
+          //the protection-value tie-break so credits go to the better inner ICE.
+          var sameServer = serverToCompare === server;
           if (
             valueToCompare > thisServerValue ||
-            (valueToCompare == thisServerValue &&
+            (sameServer &&
+              valueToCompare == thisServerValue &&
               this._cardProtectionValue(iceToCompare) > thisIceProtectionValue)
           ) {
             this._log(

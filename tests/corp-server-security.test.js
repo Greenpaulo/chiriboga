@@ -37,7 +37,7 @@ context.BreakerMatchesIce = (breaker, ice) => (
 );
 context.PlayerCanLook = (player, card) => player === corp || !!card.rezzed;
 context.GetServer = card => servers.find(server => server.ice.includes(card));
-context.ServerName = () => 'Regression server';
+context.ServerName = server => server.serverName || 'Regression server';
 vm.createContext(context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
@@ -165,16 +165,16 @@ test('Tithe taxes a breach but is not secure when its damage is survivable', () 
   assert.strictEqual(result.totalMandatoryBreakCost, 0);
   assert.strictEqual(result.isSecure, false);
 });
-test('game-saving Brân rez overrides reservation for another central', () => {
+test('game-saving Brân rez overrides reservation for a higher-value remote', () => {
   const rndBran = card(30039); rndBran.rezzed = false;
-  const hqBran = card(30039); hqBran.rezzed = false;
-  const extraHQIce = etr();
+  const remoteBran = card(30039); remoteBran.rezzed = false;
   const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
   const rnd = {serverName: 'R&D', cards: [agenda, {cardType: 'operation'}], ice: [rndBran], root: []};
-  const hq = {serverName: 'HQ', cards: [], ice: [hqBran, extraHQIce], root: []};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
-  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 8});
-  servers = [hq, rnd, archives];
+  const remote = {serverName: 'Remote 0', ice: [remoteBran], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 8});
+  servers = [hq, rnd, archives, remote];
   runner.agendaPoints = 5; runner.clickTracker = 2;
 
   assert.strictEqual(ai._icePreventsGameWinningBreach(rndBran, 6, rnd), true);
@@ -183,15 +183,68 @@ test('game-saving Brân rez overrides reservation for another central', () => {
   runner.agendaPoints = 0;
   assert.strictEqual(ai._iceWorthRezzing(rndBran, 6, rnd), false);
 });
+test('approached Flyswatter does not save credits for equal-value Archives Mycoweb', () => {
+  const flyswatter = card(35079); flyswatter.rezzed = false;
+  const mycoweb = card(35053); mycoweb.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [flyswatter], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [mycoweb], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 9});
+  servers = [hq, rnd, archives];
+  runner.cards = [card(30005)]; runner.clickTracker = 3; runner.creditPool = 9;
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), true);
+  } finally {
+    ai._log = oldLog;
+  }
+  assert(messages.includes('Rez this is better than Mycoweb in Archives'));
+});
+test('approached Flyswatter rezzes when Runner has no clicks left', () => {
+  const flyswatter = card(35079); flyswatter.rezzed = false;
+  const mycoweb = card(35053); mycoweb.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [flyswatter], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [mycoweb], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 9});
+  servers = [hq, rnd, archives];
+  runner.cards = [card(30005)]; runner.clickTracker = 0; runner.creditPool = 9;
+  assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), true);
+});
+test('approached Flyswatter still saves for Mycoweb on a higher-value remote', () => {
+  const flyswatter = card(35079); flyswatter.rezzed = false;
+  const mycoweb = card(35053); mycoweb.rezzed = false;
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const hq = {serverName: 'HQ', cards: [], ice: [flyswatter], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const remote = {serverName: 'Remote 0', ice: [mycoweb], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 9});
+  servers = [hq, rnd, archives, remote];
+  runner.cards = [card(30005)]; runner.clickTracker = 3; runner.creditPool = 9;
+  assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), false);
+});
+test('same-server ICE ordering retains the protection-value tie-break', () => {
+  const flyswatter = card(35079); flyswatter.rezzed = false;
+  const mycoweb = card(35053); mycoweb.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [mycoweb, flyswatter], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 9});
+  servers = [hq, rnd, archives];
+  runner.cards = [card(30005)]; runner.clickTracker = 3; runner.creditPool = 9;
+  assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), false);
+});
 test('game point does not force a non-stopping ICE rez', () => {
   const tithe = card(30073); tithe.rezzed = false;
-  const hqBran = card(30039); hqBran.rezzed = false;
+  const remoteBran = card(30039); remoteBran.rezzed = false;
   const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
   const rnd = {serverName: 'R&D', cards: [agenda], ice: [tithe], root: []};
-  const hq = {serverName: 'HQ', cards: [], ice: [hqBran], root: []};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
-  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 6});
-  servers = [hq, rnd, archives];
+  const remote = {serverName: 'Remote 0', ice: [remoteBran], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 6});
+  servers = [hq, rnd, archives, remote];
   runner.agendaPoints = 5; runner.clickTracker = 2; runner.grip = [{}, {}];
 
   assert.strictEqual(ai._icePreventsGameWinningBreach(tithe, 1, rnd), false);
