@@ -1222,6 +1222,15 @@ always retains priority. These tuning values are named in `ai_corp.js` as
 `CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT`; keep this description aligned
 when adjusting them.
 
+The ordinary three-click purge uses `corp.AI._ordinaryPurgeOutcome()`. It does
+not assign an arbitrary value to raw virus-counter totals. A guarded
+hypothetical clears counters and disables installed Runner cards whose
+`AIDisabledByPurge` hook is `true`, then chooses purge only if this opens an
+immediate agenda score or makes a staked server secure. The helper restores all
+temporary values in `finally`. Cards trashed by purge, including _Clot_ and
+_Physarum Entangler_, must declare `AIDisabledByPurge` at the bottom of their
+card object so counterless purge effects are represented.
+
 ### 4.22 Public Successful-Run Pressure — `AIPublicRunPressure`
 
 Installed Runner cards that gain value merely by completing a successful run
@@ -1254,10 +1263,14 @@ only after use by the Corp AI's recent-run evidence; they must not expose this
 hook while hidden.
 
 `corp.AI._serverRunPressure(server)` combines these declarations with recent
-observed successful runs and `_evaluateServerSecurity(server)`. Currently the
-result affects Archives protection: it can make an otherwise empty Archives a
+observed successful runs and `_evaluateServerSecurity(server)`. The component
+totals are diagnostic rather than a calibrated exchange rate. Any live public
+source or recent-run evidence applies one bounded
+`CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE` while the server is reachable. Currently
+this affects Archives protection: it can make an otherwise empty Archives a
 legitimate candidate, but Archives must still win the natural server-urgency
-comparison before receiving ICE.
+comparison before receiving ICE. Hooks must reflect exhausted public state;
+Security Testing returns `{}` after its reward has been used for the turn.
 
 Examples include Leech (`growth: 1` on centrals), Pennyshaver (`economy: 1`),
 and Security Testing (`economy: 2`, `persistentPressure: 1`). Add this hook to
@@ -1665,7 +1678,7 @@ if (corp.AI != null) {
 - `corp.AI._iceWorthRezzing(ice, cost, server)` — returns true if the ice is worth rezzing
 - `corp.AI._isAScoringServer(server)` — true if the server can be used for scoring
 - `corp.AI._potentialDamageOnBreach(server)` — estimated damage runner would take
-- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, runnerCreditPool, structuralRisk, publicThreatRisk, reasons}`. Unrezzed ICE share one outer-to-inner rez budget, while already-rezzed ICE consume none; skipped unaffordable layers are listed in `reasons`. `runnerCredits` is the effective ceiling and `runnerCreditPool` is its component breakdown. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
+- `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, runnerCreditPool, structuralRisk, publicThreatRisk, reasons}`. It compares affordable rez plans for unrezzed ICE, including target-compatible hosted rez credits, and may omit a weak outer layer to fund a decisive inner layer; already-rezzed ICE consume no plan budget and omitted layers are listed in `reasons`. `runnerCredits` is the effective ceiling and `runnerCreditPool` is its component breakdown. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
 - `corp.AI._effectiveRunnerCreditPool(server)` — returns the public, server-specific effective credit ceiling, including compatible hosted credits, Bad Publicity, and available click-to-credit conversion while preserving the run click.
 - `corp.AI._estimateRunnerBypassRisk(server)` — returns the bounded hidden-threat protection penalty for a one-ice server using `AIHiddenThreat` profiles and only public faction, pile-size, and Heap information
 - `corp.AI._centralServerThreat(server)` — aggregates public installed central access, persistent pressure, and growth into a bounded server-specific protection penalty
@@ -1853,6 +1866,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
+| `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
 | `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
 | `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
 | `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |

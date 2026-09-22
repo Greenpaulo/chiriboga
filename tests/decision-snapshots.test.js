@@ -27,6 +27,10 @@ test('CorpAI Choice wraps decisions with the snapshot recorder', () => {
   assert(aiSource.includes('_choiceInner(optionList, choiceType)'));
 });
 
+test('snapshot recording is opt-in', () => {
+  assert.strictEqual(DS.enabled, false);
+});
+
 test('records options, choice, run state and asks for a full dump', () => {
   const entry = DS.Before('', ['install', 'play', 'gain']);
   DS.After(entry, 0);

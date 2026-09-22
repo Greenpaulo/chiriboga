@@ -468,3 +468,20 @@ The tests verify that:
 - agendas and Archives-to-HQ routes retain their immediate eligibility;
 - the original agenda-heavy HQ fixtures still install on HQ rather than an
   irrelevant Archives.
+
+### Follow-up design correction — 22 September 2026
+
+The continuous weighting described above was reviewed before handoff and is
+superseded. Economy, growth, persistent pressure, and recent-run counts are
+heterogeneous evidence, not calibrated units of Corp protection. The AI now
+retains those component totals for diagnostics but applies one bounded
+`CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE` when any live source or recent evidence
+exists and the server is reachable. This can admit and gently distinguish an
+otherwise empty Archives without arbitrary multipliers swamping agenda stakes.
+
+Security Testing now reports no public run pressure after its successful-run
+reward has been used for the turn. The poor-economy stakes exception was also
+narrowed: a remote qualifies through `_isHVT()` (agenda, live ambush, or
+Hostile), rather than merely containing any asset. Regression tests cover both
+boundaries. These corrections supersede the weighting formula and the broad
+"agenda or asset" wording earlier in this implementation record.

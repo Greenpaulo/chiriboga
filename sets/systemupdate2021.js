@@ -362,6 +362,8 @@ cardSet[31005] = {
 	if (runner.AI._copyOfCardExistsIn("Clot", InstalledCards(runner))) return -1; //don't install
     return 0; //do install
   },
+  //A purge trashes this card, including its restriction on scoring agendas.
+  AIDisabledByPurge: true,
 };
 
 cardSet[31006] = {
@@ -1997,6 +1999,7 @@ cardSet[31024] = {
   //The chosen-server state is cleared at the Corp turn boundary, but the
   //installed card can publicly choose an open Archives again next Runner turn.
   AIPublicRunPressure: function(server) {
+    if (this.madeSuccessfulRunOnChosenServerThisTurn) return {};
     if (this.chosenServer && this.chosenServer != server) return {};
     return { economy: 2, persistentPressure: 1 };
   },
@@ -4443,15 +4446,6 @@ cardSet[31052] = {
   subTypes: ["Initiative"],
   agendaPoints: 2,
   advancementRequirement: 4,
-  //How many counters the Corp AI will actually spend defending this server.
-  //Keep this policy shared with Enumerate so security planning does not value
-  //counters which the live card decision would preserve.
-  AIGlobalETRUses: function(server) {
-	if (!corp.AI || !corp.AI._runnerMayWinIfServerBreached(server)) return 0;
-	//On R&D, the current policy saves Nisei for a multi-access run.
-	if (server == corp.RnD && !corp.AI._copyOfCardExistsIn("The Maker's Eye", runner.resolvingCards)) return 0;
-	return Counters(this, "agenda");
-  },
   //When you score this agenda, place 1 agenda counter on it.
   responseOnScored: {
     Resolve: function () {
@@ -4489,6 +4483,15 @@ cardSet[31052] = {
       },
     },
   ],
+  //How many counters the Corp AI will actually spend defending this server.
+  //Keep this policy shared with Enumerate so security planning does not value
+  //counters which the live card decision would preserve.
+  AIGlobalETRUses: function(server) {
+	if (!corp.AI || !corp.AI._runnerMayWinIfServerBreached(server)) return 0;
+	//On R&D, the current policy saves Nisei for a multi-access run.
+	if (server == corp.RnD && !corp.AI._copyOfCardExistsIn("The Maker's Eye", runner.resolvingCards)) return 0;
+	return Counters(this, "agenda");
+  },
 };
 
 cardSet[31053] = {

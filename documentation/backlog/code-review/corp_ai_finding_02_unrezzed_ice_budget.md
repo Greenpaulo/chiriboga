@@ -34,12 +34,14 @@ Add a one-line cross-reference from Install roadmap Phase 2, scenario 4: "consum
 
 ---
 
-## Resolution — 21 September 2026
+## Resolution — corrected 22 September 2026
 
 Implemented in `_evaluateServerSecurity()`.
 
-- The evaluator now reserves unrezzed ICE rez costs from a single local budget in encounter order, outermost to innermost.
-- Rezzed ICE remain active without consuming that budget; skipped unrezzed ICE are excluded from bypass and break-cost evaluation and identified in `reasons`.
+- The first implementation used one outer-to-inner base-credit budget. Review found that this could spend the budget on a weak outer layer while excluding a decisive inner layer, and it did not allocate target-compatible hosted rez credits.
+- The evaluator now enumerates affordable subsets of unrezzed ICE and keeps the plan with the strongest deterministic outcome: hard lockout, then mandatory break cost, then total avoidance cost, with lower rez cost as the final tie-break. Rezzed ICE are always included.
+- `_canFundRezPlan()` allocates base credits plus active, target-compatible hosted credits with a small max-flow calculation, so a restricted source cannot be promised to an ineligible ICE or spent twice.
+- ICE outside the selected plan are excluded from bypass and break-cost evaluation and identified in `reasons` as omitted from the best affordable plan.
 - The calculation remains side-effect free: it does not spend credits, change rez state, or reorder ICE.
-- Added deterministic regression coverage for the 5-credit and 8-credit two-layer cases, rezzed ICE, and state preservation.
+- Added deterministic regression coverage for the original 5-credit and 8-credit cases, state preservation, skipping a weak outer layer for a decisive inner layer, and compatible versus incompatible hosted rez credits.
 - Added the completed Layer 1.1 roadmap entry, the Install Phase 2 cross-reference, and the evaluator behavior note in `documentation/ai.md`.

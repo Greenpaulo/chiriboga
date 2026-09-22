@@ -30,6 +30,8 @@ context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
 context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';
+context.CheckScore = (card, ignoreRequirement) => !runner.cards.some(active =>
+  !active.disabled && (active.agendasInstalledThisTurn || []).includes(card));
 context.AgendaPoints = player => player.agendaPoints || 0;
 context.AgendaPointsToWin = () => 7;
 context.ChoicesInstalledCards = (player, predicate) => context.InstalledCards(player).filter(predicate).map(card => ({card}));
@@ -214,18 +216,32 @@ test('approached Flyswatter rezzes when Runner has no clicks left', () => {
   runner.cards = [card(30005)]; runner.clickTracker = 0; runner.creditPool = 9;
   assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), true);
 });
-test('approached Flyswatter still saves for Mycoweb on a higher-value remote', () => {
+test('approached Flyswatter saves for decisive Brân on a higher-value remote', () => {
   const flyswatter = card(35079); flyswatter.rezzed = false;
-  const mycoweb = card(35053); mycoweb.rezzed = false;
+  const bran = card(30039); bran.rezzed = false;
   const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
   const hq = {serverName: 'HQ', cards: [], ice: [flyswatter], root: []};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
-  const remote = {serverName: 'Remote 0', ice: [mycoweb], root: [agenda]};
-  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 9});
+  const remote = {serverName: 'Remote 0', ice: [bran], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 7});
   servers = [hq, rnd, archives, remote];
   runner.cards = [card(30005)]; runner.clickTracker = 3; runner.creditPool = 9;
   assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), false);
+});
+test('approached Flyswatter does not reserve for redundant ICE on an agenda remote', () => {
+  const flyswatter = card(35079); flyswatter.rezzed = false;
+  const mycoweb = card(35053); mycoweb.rezzed = false;
+  const inner = etr(); inner.rezzed = true;
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const hq = {serverName: 'HQ', cards: [], ice: [flyswatter], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const remote = {serverName: 'Remote 0', ice: [inner, mycoweb], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 9});
+  servers = [hq, rnd, archives, remote];
+  runner.cards = [card(30005)]; runner.clickTracker = 3; runner.creditPool = 9;
+  assert.strictEqual(ai._iceWorthRezzing(flyswatter, 2, hq), true);
 });
 test('same-server ICE ordering retains the protection-value tie-break', () => {
   const flyswatter = card(35079); flyswatter.rezzed = false;
@@ -286,7 +302,7 @@ test('unaffordable unrezzed ice does not protect server', () => {
   corp.creditPool = 0; const wall = etr(); wall.rezzed = false;
   assert.strictEqual(ai._evaluateServerSecurity(server([wall])).isSecure, false);
 });
-test('unrezzed ice share one outer-to-inner rez budget without mutating state', () => {
+test('unrezzed ice share one affordable rez plan without mutating state', () => {
   const breaker = {player: runner, title: 'Text fracter', strength: 3,
     subTypes: ['Icebreaker', 'Fracter'], cardText: '1 credit: Break 1 barrier subroutine.'};
   runner.cards = [breaker]; runner.creditPool = 10;
@@ -300,7 +316,7 @@ test('unrezzed ice share one outer-to-inner rez budget without mutating state', 
   corp.creditPool = 5;
   const constrained = ai._evaluateServerSecurity(target);
   assert.strictEqual(constrained.totalMandatoryBreakCost, 1);
-  assert(constrained.reasons.some(reason => reason.includes('Inner wall cannot be rezzed')));
+  assert(constrained.reasons.some(reason => reason.includes('Inner wall omitted')));
 
   corp.creditPool = 8;
   assert.strictEqual(ai._evaluateServerSecurity(target).totalMandatoryBreakCost, 2);
@@ -311,6 +327,33 @@ test('unrezzed ice share one outer-to-inner rez budget without mutating state', 
   assert.strictEqual(inner.rezzed, true);
   assert.strictEqual(outer.rezzed, false);
   assert.deepStrictEqual(target.ice, originalIce);
+});
+test('rez planning may skip a weak outer layer to fund decisive inner ice', () => {
+  const inner = etr();
+  const outer = ice(['Gain 1 credit.'], [[['misc_minor']]]);
+  inner.title = 'Decisive inner wall'; outer.title = 'Weak outer tax';
+  inner.rezzed = false; outer.rezzed = false;
+  inner.rezCost = 4; outer.rezCost = 4;
+  corp.creditPool = 5;
+  const result = ai._evaluateServerSecurity(server([inner, outer]));
+  assert.strictEqual(result.hasHardLockout, true);
+  assert(result.reasons.some(reason => reason.includes('Weak outer tax omitted')));
+});
+test('rez planning includes target-compatible hosted credits', () => {
+  const wall = etr(); wall.rezzed = false; wall.rezCost = 5;
+  const target = server([wall]);
+  const rezCredits = {
+    player: corp,
+    credits: 2,
+    canUseCredits: (doing, cardToRez) =>
+      doing === 'rezzing' && target.ice.includes(cardToRez),
+  };
+  corp.creditPool = 3; corp.scoreArea = [rezCredits];
+  assert.strictEqual(ai._canFundRezPlan([wall]), true);
+  assert.strictEqual(ai._icePlanOutcome(target, [wall]).hasHardLockout, true);
+  assert.strictEqual(ai._evaluateServerSecurity(target).hasHardLockout, true);
+  rezCredits.canUseCredits = () => false;
+  assert.strictEqual(ai._evaluateServerSecurity(target).hasHardLockout, false);
 });
 test('already broken subroutines do not create mandatory breaks', () => {
   const wall = ice(['End the run.'], null); wall.subroutines[0].broken = true;
@@ -901,6 +944,85 @@ test('modest breach risk does not interrupt ordinary advancement', () => {
   assert.strictEqual(ai._centralBreachLossRisk(corp.RnD).probability, 0.1);
   assert.strictEqual(ai._criticalBreachDefenseAction(['purge', 'advance']), -1);
 });
+test('ordinary purge is deterministic and closes a staked route opened by Botulus', () => {
+  const wall = etr();
+  const botulus = card(30004); botulus.host = wall; botulus.virus = 1;
+  wall.hostedCards = [botulus]; runner.cards = [botulus];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{}], ice: [wall], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  const first = ai._ordinaryPurgeOutcome();
+  const second = ai._ordinaryPurgeOutcome();
+  assert(first && first.reason.includes('secures'));
+  assert.deepStrictEqual(second, first);
+  assert.strictEqual(botulus.virus, 1);
+  assert.strictEqual(botulus.disabled, undefined);
+});
+test('purge models cards trashed by purge even when they have no counters', () => {
+  const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});
+  const bypass = {
+    player: runner, host: wall, AIDisabledByPurge: true,
+    AIBypassCost(target) { return target === wall ? 0 : Infinity; },
+  };
+  runner.cards = [bypass]; runner.creditPool = 5;
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{}], ice: [wall], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert(ai._ordinaryPurgeOutcome().reason.includes('secures'));
+  assert.strictEqual(bypass.disabled, undefined);
+});
+test('purge models Clot leaving play when that opens an immediate score', () => {
+  const agenda = {player: corp, cardType: 'agenda'};
+  const clot = card(31005); clot.agendasInstalledThisTurn = [agenda];
+  runner.cards = [clot];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [{ice: [], root: [agenda]}],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers);
+  const original = ai._fullyAdvanceableAgendaInstalled;
+  ai._fullyAdvanceableAgendaInstalled = () => clot.disabled === true;
+  try {
+    assert.strictEqual(clot.AIDisabledByPurge, true);
+    assert(ai._ordinaryPurgeOutcome().reason.includes('score'));
+    assert.strictEqual(clot.disabled, undefined);
+  } finally {
+    ai._fullyAdvanceableAgendaInstalled = original;
+  }
+});
+test('purge hypothetical restores counters and disabled state after an exception', () => {
+  const virus = {player: runner, virus: 4, AIDisabledByPurge: true};
+  runner.cards = [virus];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{}], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []},
+    remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  const original = ai._fullyAdvanceableAgendaInstalled;
+  ai._fullyAdvanceableAgendaInstalled = () => {
+    if (virus.disabled) throw Error('hypothetical failure');
+    return false;
+  };
+  try {
+    assert.throws(() => ai._ordinaryPurgeOutcome(), /hypothetical failure/);
+    assert.strictEqual(virus.virus, 4);
+    assert.strictEqual(virus.disabled, undefined);
+  } finally {
+    ai._fullyAdvanceableAgendaInstalled = original;
+  }
+});
 test('access-punishment hooks drive a severity-weighted bait frequency', () => {
   const mildCard = card(30045); mildCard.advancement = 0;
   const severeCard = card(30045); severeCard.advancement = 4;
@@ -1043,10 +1165,18 @@ test('public installed run rewards create state-based Archives pressure', () => 
   assert.strictEqual(pressure.economy, 3);
   assert.strictEqual(pressure.growth, 1);
   assert.strictEqual(pressure.persistentPressure, 1);
-  assert.strictEqual(pressure.rawPenalty, 4);
-  assert.strictEqual(pressure.penalty, 4);
+  assert.strictEqual(pressure.rawPenalty, 1);
+  assert.strictEqual(pressure.penalty, 1);
   assert.strictEqual(ai._nothingWorthProtecting(archives), false);
   assert.strictEqual(ai._serverRunPressure(archives, {isSecure: true}).penalty, 0);
+});
+test('used Security Testing does not create stale run pressure', () => {
+  const target = {cards: [], ice: [], root: []};
+  const securityTesting = card(31024);
+  securityTesting.chosenServer = target;
+  securityTesting.madeSuccessfulRunOnChosenServerThisTurn = true;
+  runner.cards = [securityTesting];
+  assert.strictEqual(ai._serverRunPressure(target, {isSecure: false}).penalty, 0);
 });
 test('Archives run rewards do not override a naturally more urgent allocated server', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: -5};
@@ -1095,6 +1225,12 @@ test('poor Corp reinforces breachable HQ with an agenda but not a secure HQ', ()
   assert.strictEqual(ai._shouldInstallIceLayer(hq, false), true);
   ai._evaluateServerSecurity = () => ({isSecure: true});
   assert.strictEqual(ai._shouldInstallIceLayer(hq, false), false);
+});
+test('poor Corp does not treat a generic remote asset as emergency stakes', () => {
+  const remote = {ice: [etr()], root: [{player: corp, cardType: 'asset'}]};
+  assert.strictEqual(ai._serverHasStakes(remote), false);
+  remote.root[0].subTypes = ['Hostile'];
+  assert.strictEqual(ai._serverHasStakes(remote), true);
 });
 test('Corp turn-start protection aging skips the opening turn and then runs once', () => {
   let calls = 0;

@@ -53,9 +53,10 @@ Specific card titles (e.g., _Quetzal: Free Spirit_, _Rielle "Kit" Peddler_, _Ins
 #### Layer 1.1: Shared Unrezzed-ICE Rez Budget — `[COMPLETED]`
 
 - **Goal:** Prevent a route containing several unrezzed ICE from counting the Corp's full credit pool independently for every layer.
-- **Implemented design:** `_evaluateServerSecurity()` walks ICE in encounter order (outermost/highest index inward) and reserves each affordable unrezzed ICE's current `RezCost` from one local base-credit budget. Rezzed ICE consume no budget. An unrezzed layer that does not fit is excluded from bypass targeting and break-cost evaluation, with the skip recorded in `reasons`.
-- **Safety and compatibility:** Evaluation does not spend credits, rez cards, or reorder the server. Per-card `CheckCredits(..., "rezzing", ice)` remains an additional legality/credit-source check, while the shared base pool prevents the same live credits from being promised twice. All existing consumers of the evaluator inherit the route budget.
-- **Regression coverage:** Two 4-credit unrezzed layers count once at 5 credits and twice at 8; an already-rezzed layer consumes no budget; credits, rez flags, and ICE order remain unchanged.
+- **Implemented design:** `_evaluateServerSecurity()` compares affordable subsets of unrezzed ICE and selects the plan with the strongest deterministic result: hard lockout, mandatory break cost, total avoidance cost, then lower rez spend. This permits a weak outer layer to be omitted when preserving credits for a decisive inner layer. Rezzed ICE are always included; omitted layers are recorded in `reasons`.
+- **Funding model:** `_canFundRezPlan()` combines the base pool with active hosted credit sources and uses target compatibility from `canUseCredits("rezzing", ice)`. A max-flow allocation prevents restricted credits from paying for an ineligible layer or being counted twice.
+- **Safety and compatibility:** Evaluation does not spend credits, rez cards, alter hosted credits, or reorder the server. All evaluator consumers inherit the selected plan.
+- **Regression coverage:** Covers 5-credit and 8-credit two-layer cases, an already-rezzed layer, weak-outer/decisive-inner selection, compatible hosted rez credits, and preservation of all live state.
 
 ### Layer 2: Global & Root Security — `[COMPLETED]`
 
@@ -201,6 +202,7 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Acceptance gate:** Adopt only after seeded games reduce agenda points lost from centrals without materially suppressing viable remote scoring or causing persistent over-protection of exhausted central tools.
 - **Implemented tactical boundary:** `_centralBreachLossRisk()` now computes the fair, order-agnostic probability that the next breach supplies enough agenda points for the Runner to win. At 35% or greater, `_criticalBreachDefenseAction()` may interrupt a non-winning advancement plan, preferring an affordable ICE layer that materially reduces the risk, then a materially effective purge, then guarded emergency ICE acquisition. A game-winning Corp score is explicitly exempt, and risks below the threshold leave ordinary advancement unchanged. `AICentralPressureAfterPurge(server)` lets scaling cards such as _Conduit_ describe their immediate post-purge pressure without title checks.
 - **Approach-time consistency:** `_icePreventsGameWinningBreach()` compares server security with an approached ICE rezzed (including the post-payment credit state) and with that ICE absent. If the affordable rez changes a potentially game-winning breach from possible to deterministically prevented, `_iceWorthRezzing()` rezzes it before considering cross-server credit reservations. This prevents the planner from counting an unrezzed hard lock such as _Brân 1.0_ as security and then withholding its rez to save for another server; taxing ICE that does not stop the breach receives no such override.
+- **Cross-server rez reservation:** `_iceWorthRezzing()` reserves credits for ICE elsewhere only when that server has higher stakes and a with/without comparison shows the specific saved rez changes it from breachable to secure. Higher server value alone is insufficient. Same-server ICE ordering retains its existing protection-value tie-break.
 - **Remaining calibration:** The broader consequence weighting proposed above is still pending for non-lethal central pressure, known-top-card information, exhausted limited-use hardware, and seeded-game tuning of the tactical thresholds.
 
 #### Layer 7.2: Emergency Protection Acquisition — `[COMPLETED]`
@@ -210,6 +212,14 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Agenda-flood safety:** Emergency drawing does not solve a different server while HQ holds multiple agendas and remains deterministically breachable, even if it has nominal ICE. If HQ itself is the critical target, drawing remains permitted because finding protection is the only available recovery route. Game-winning scores retain priority. Ordinary scoring and advancement retain their normal priority unless the tactical Layer 7.1 evaluator finds at least a 35% next-breach game-loss risk and no direct install or purge resolves it; once invoked, emergency acquisition intentionally outranks optional economy and credit accumulation.
 - **Card hook:** `AIEmergencyDraw` declares the number of cards immediately drawn by installing/rezzing a Corp asset or upgrade. _Spin Doctor_ in `systemgateway.js` declares `2`; no matching scoped card in `systemupdate2021.js` or `elevation.js` required an update.
 - **Regression coverage:** Deterministic tests cover install-and-rez draw before basic draw, fallback basic drawing, the agenda-flood veto, existing ICE in HQ, inadequate economy, and the last-click boundary.
+
+#### Layer 7.3: Outcome-Based Ordinary Purge — `[COMPLETED]`
+
+- **Decision boundary:** Because a basic purge consumes the Corp's turn, `_ordinaryPurgeOutcome()` acts only when a guarded post-purge comparison opens an immediate agenda score or changes a staked server from breachable to secure. The critical-central path continues to handle a material reduction in immediate game-loss probability.
+- **Complete purge model:** Virus counters are cleared and cards declaring `AIDisabledByPurge` are treated as inactive. This covers purge-triggered trash such as _Clot_ and _Physarum Entangler_, not merely cards with counters.
+- **State safety:** `_withHypothetical()` restores counter values, disabled state, and property ownership through `finally`, including when evaluation throws.
+- **Rejected design:** The earlier weighted server-value threshold was not retained because its coefficients were uncalibrated and could hide the three-click opportunity cost behind an arbitrary score.
+- **Regression coverage:** Botulus route security, zero-counter purge-trash effects, Clot score windows, deterministic repeated evaluation, and exception-safe restoration.
 
 ---
 

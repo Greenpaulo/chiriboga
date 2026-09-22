@@ -250,6 +250,9 @@ cardSet[34082] = {
     var persistents = [{ use: this, target: iceAI.ice, iceIdx: iceIdx, action: "bypass" }];
     return [{ effects: credEff, persistents: persistents }];
   },
+  //A purge trashes this card; hypothetical purge evaluation disables its AI
+  //effects as well as clearing virus counters.
+  AIDisabledByPurge: true,
 };
 
 //Coalescence (34089)

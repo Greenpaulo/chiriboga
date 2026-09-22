@@ -40,7 +40,11 @@ Pending fixtures are intentionally excluded from the normal regression command.
 
 ## Creating a fixture from a downloaded log
 
-The game keeps a bounded `DecisionSnapshots` record for replayable Corp mulligan, action-phase, and approach decisions. Downloaded logs include those snapshots.
+The game can keep a bounded `DecisionSnapshots` record for replayable Corp
+mulligan, action-phase, and approach decisions. Recording is off during ordinary
+play because each entry contains a full reproduction dump. Enable it explicitly
+for a debugging session with `DecisionSnapshots.enabled = true`; downloaded
+logs then include the captured snapshots.
 
 List the recorded decisions:
 

@@ -2,12 +2,91 @@
 
 const CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD = 0.35;
 const CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT = 0.15;
+const CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE = 1;
 
 class CorpAI {
   //**CORP UTILITY FUNCTIONS**
   _log(message) {
     //just comment this line to suppress AI log
     console.log("AI: " + message);
+  }
+
+  _withHypothetical(apply, evaluate, restore) {
+    try {
+      apply();
+      return evaluate();
+    } finally {
+      restore();
+    }
+  }
+
+  //A basic purge costs the whole turn, so use it only for a concrete change in
+  //what the Corp can accomplish: opening a score window or closing a route to
+  //a server with something at stake. Critical central multi-access remains in
+  //_criticalBreachDefenseAction(), where the loss probability is available.
+  _ordinaryPurgeOutcome() {
+    var runnerCards = InstalledCards(runner);
+    var purgeable = runnerCards.filter(
+      (card) =>
+        Counters(card, "virus") > 0 || card.AIDisabledByPurge === true,
+    );
+    if (purgeable.length < 1) return null;
+
+    var servers = [corp.HQ, corp.RnD, corp.archives]
+      .concat(corp.remoteServers || [])
+      .filter((server) => server);
+    var beforeCanScore = this._fullyAdvanceableAgendaInstalled();
+    var beforeSecurity = servers.map((server) => ({
+      server: server,
+      secure: this._evaluateServerSecurity(server).isSecure,
+    }));
+    var saved = purgeable.map((card) => ({
+      card: card,
+      virusOwn: Object.prototype.hasOwnProperty.call(card, "virus"),
+      virus: card.virus,
+      disabledOwn: Object.prototype.hasOwnProperty.call(card, "disabled"),
+      disabled: card.disabled,
+    }));
+
+    return this._withHypothetical(
+      () => {
+        for (var i = 0; i < purgeable.length; i++) {
+          if (Counters(purgeable[i], "virus") > 0) purgeable[i].virus = 0;
+          if (purgeable[i].AIDisabledByPurge === true)
+            purgeable[i].disabled = true;
+        }
+      },
+      () => {
+        if (!beforeCanScore && this._fullyAdvanceableAgendaInstalled())
+          return { reason: "purge opens an immediate agenda score" };
+        for (var i = 0; i < beforeSecurity.length; i++) {
+          var state = beforeSecurity[i];
+          if (
+            !state.secure &&
+            this._purgeServerHasStakes(state.server) &&
+            this._evaluateServerSecurity(state.server).isSecure
+          )
+            return { reason: "purge secures " + ServerName(state.server) };
+        }
+        return null;
+      },
+      () => {
+        for (var i = 0; i < saved.length; i++) {
+          var state = saved[i];
+          if (state.virusOwn) state.card.virus = state.virus;
+          else delete state.card.virus;
+          if (state.disabledOwn) state.card.disabled = state.disabled;
+          else delete state.card.disabled;
+        }
+      },
+    );
+  }
+
+  _purgeServerHasStakes(server) {
+    if (server == corp.HQ) return this._agendasInHand() > 0;
+    if (server == corp.RnD) return (server.cards || []).length > 0;
+    if (server == corp.archives) return (server.cards || []).length > 0;
+    return this._HVTsInServer(server) > 0;
   }
 
   _iceIsDisabled(iceCard) {
@@ -238,17 +317,12 @@ class CorpAI {
     if (history)
       ret.recentRuns = history.lastTurn + history.previousTurn * 0.5;
 
-    //Economy is discounted because a credit of Runner value is not a full point
-    //of Corp protection. Growth and repeatable pressure are strategically more
-    //important, while observed runs contribute directly and decay after two
-    //Runner turns. Bound the result so this signal cannot swamp agenda stakes.
-    ret.rawPenalty = Math.min(
-      6,
-      ret.economy * 0.5 +
-        ret.growth +
-        ret.persistentPressure * 1.5 +
-        ret.recentRuns,
-    );
+    //These heterogeneous declarations are evidence that the server matters,
+    //not a calibrated exchange rate between credits, counters, and protection.
+    //Use one bounded ranking nudge and let ordinary server stakes decide the
+    //ordering; the component totals remain available for logs and diagnostics.
+    if (ret.sources > 0 || ret.recentRuns > 0)
+      ret.rawPenalty = CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE;
     var security = securityEvaluation;
     if (typeof security == "undefined")
       security = this._evaluateServerSecurity(server);
@@ -1897,9 +1971,13 @@ class CorpAI {
     if (!iceCard || !rc) return null;
     if (!server) server = GetServer(iceCard);
     var startIceIdx = server && server.ice ? server.ice.length - 1 : iceIndex;
+    //Affordability is evaluated by the rez-plan allocator. Once a card is in
+    //that plan, let the calculator inspect the Corp-known ICE even when part
+    //of its rez cost would be paid by a target-restricted hosted source.
+    var analysisCredits = Math.max(AvailableCredits(corp), RezCost(iceCard));
     return rc.IceAI(
       iceCard,
-      AvailableCredits(corp),
+      analysisCredits,
       false,
       false,
       typeof startIceIdx == "number" ? startIceIdx : -1,
@@ -2106,6 +2184,8 @@ class CorpAI {
       var cost = false;
       if (typeof card.AIBypassesIce == "function")
         cost = card.AIBypassesIce.call(card, iceCard, server, iceIndex);
+      else if (typeof card.AIBypassCost == "function")
+        cost = card.AIBypassCost.call(card, iceCard, server, iceIndex);
       else {
         var text = (card.cardText || "").toString().toLowerCase();
         var targetsIce = card.chosenCard == iceCard || card.host == iceCard;
@@ -2150,6 +2230,7 @@ class CorpAI {
       var iceCard = server.ice[i];
       if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
       if (
+        eligibleIce ||
         iceCard.rezzed ||
         CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
       )
@@ -2170,6 +2251,7 @@ class CorpAI {
       var iceCard = server.ice[iceIndex];
       if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
       if (
+        !eligibleIce &&
         !iceCard.rezzed &&
         !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
       )
@@ -2428,6 +2510,154 @@ class CorpAI {
     };
   }
 
+  //Return whether the Corp can pay all of these rez costs from its base pool
+  //and the currently active, target-restricted hosted credit sources. This is
+  //a small max-flow calculation: each hosted source can fund only the ICE for
+  //which its canUseCredits hook permits payment, while base credits fund any.
+  _canFundRezPlan(iceCards) {
+    var demands = iceCards.map((card) => Math.max(0, RezCost(card)));
+    var totalDemand = demands.reduce((total, cost) => total + cost, 0);
+    var baseCredits = Math.max(0, Credits(corp));
+    if (totalDemand <= baseCredits) return true;
+
+    var sources = [];
+    var activeCards = ActiveCards(corp);
+    for (var i = 0; i < activeCards.length; i++) {
+      var source = activeCards[i];
+      if (
+        typeof source.credits != "number" ||
+        source.credits <= 0 ||
+        typeof source.canUseCredits != "function"
+      )
+        continue;
+      var eligible = [];
+      for (var j = 0; j < iceCards.length; j++) {
+        eligible.push(
+          !!source.canUseCredits.call(source, "rezzing", iceCards[j]),
+        );
+      }
+      if (eligible.some((value) => value))
+        sources.push({ credits: source.credits, eligible: eligible });
+    }
+
+    var requiredHosted = totalDemand - baseCredits;
+    if (
+      sources.reduce((total, source) => total + source.credits, 0) <
+      requiredHosted
+    )
+      return false;
+
+    //Edmonds-Karp over source -> hosted-credit nodes -> ICE demand nodes -> sink.
+    var sourceNode = 0;
+    var creditOffset = 1;
+    var iceOffset = creditOffset + sources.length;
+    var sinkNode = iceOffset + iceCards.length;
+    var size = sinkNode + 1;
+    var capacity = Array.from({ length: size }, () =>
+      new Array(size).fill(0),
+    );
+    for (var i = 0; i < sources.length; i++) {
+      capacity[sourceNode][creditOffset + i] = sources[i].credits;
+      for (var j = 0; j < iceCards.length; j++) {
+        if (sources[i].eligible[j])
+          capacity[creditOffset + i][iceOffset + j] = sources[i].credits;
+      }
+    }
+    for (var j = 0; j < demands.length; j++)
+      capacity[iceOffset + j][sinkNode] = demands[j];
+
+    var flow = 0;
+    while (flow < requiredHosted) {
+      var parent = new Array(size).fill(-1);
+      parent[sourceNode] = sourceNode;
+      var queue = [sourceNode];
+      while (queue.length > 0 && parent[sinkNode] < 0) {
+        var from = queue.shift();
+        for (var to = 0; to < size; to++) {
+          if (parent[to] < 0 && capacity[from][to] > 0) {
+            parent[to] = from;
+            queue.push(to);
+          }
+        }
+      }
+      if (parent[sinkNode] < 0) break;
+      var amount = Infinity;
+      for (var node = sinkNode; node != sourceNode; node = parent[node])
+        amount = Math.min(amount, capacity[parent[node]][node]);
+      for (var node = sinkNode; node != sourceNode; node = parent[node]) {
+        capacity[parent[node]][node] -= amount;
+        capacity[node][parent[node]] += amount;
+      }
+      flow += amount;
+    }
+    return flow >= requiredHosted;
+  }
+
+  _icePlanOutcome(server, eligibleIce) {
+    var outcome = {
+      hasHardLockout: false,
+      totalBreakCost: 0,
+      totalMandatoryBreakCost: 0,
+      reasons: [],
+      rezCost: 0,
+    };
+    for (var i = 0; i < eligibleIce.length; i++) {
+      if (!eligibleIce[i].rezzed)
+        outcome.rezCost += Math.max(0, RezCost(eligibleIce[i]));
+    }
+    var outermostBypassTarget = this._outermostIceBypassAvailable(server)
+      ? this._outermostRelevantIce(server, eligibleIce)
+      : null;
+    var oneShotBypassTarget = this._oneShotIceBypassTarget(
+      server,
+      eligibleIce,
+    );
+    for (var routeIndex = 0; routeIndex < server.ice.length; routeIndex++) {
+      var iceCard = server.ice[routeIndex];
+      if (eligibleIce.indexOf(iceCard) < 0) continue;
+      var bypassCost = this._iceBypassCost(iceCard, server, routeIndex);
+      if (
+        iceCard == outermostBypassTarget ||
+        iceCard == oneShotBypassTarget
+      ) {
+        outcome.reasons.push(GetTitle(iceCard) + " can be bypassed");
+        continue;
+      }
+      var breaker = this._matchingBreakerForIce(
+        iceCard,
+        server,
+        routeIndex,
+      );
+      var avoidanceCost = this._estimateBreakCost(iceCard, breaker);
+      if (bypassCost < avoidanceCost) {
+        avoidanceCost = bypassCost;
+        outcome.reasons.push(GetTitle(iceCard) + " has a targeted bypass");
+      }
+      outcome.totalBreakCost += avoidanceCost;
+      var mandatoryCost = this._estimateBreakCost(iceCard, breaker, true);
+      if (bypassCost < mandatoryCost) mandatoryCost = bypassCost;
+      if (mandatoryCost == Infinity) {
+        outcome.hasHardLockout = true;
+        outcome.reasons.push(
+          GetTitle(iceCard) + " has mandatory breaks with no capable breaker",
+        );
+      }
+      outcome.totalMandatoryBreakCost += mandatoryCost;
+    }
+    return outcome;
+  }
+
+  _icePlanIsBetter(candidate, current) {
+    if (!current) return true;
+    if (candidate.hasHardLockout != current.hasHardLockout)
+      return candidate.hasHardLockout;
+    if (candidate.totalMandatoryBreakCost != current.totalMandatoryBreakCost)
+      return candidate.totalMandatoryBreakCost > current.totalMandatoryBreakCost;
+    if (candidate.totalBreakCost != current.totalBreakCost)
+      return candidate.totalBreakCost > current.totalBreakCost;
+    return candidate.rezCost < current.rezCost;
+  }
+
   //Estimates whether the Runner could breach this server this turn.
   //'secure' means the Runner either cannot get through at all (hasHardLockout)
   //or must spend more credits than they have to break the ice that would stop them.
@@ -2458,71 +2688,42 @@ class CorpAI {
       result.hasHardLockout = true;
       result.reasons.push("defensive upgrade prevents breach");
     }
-    var outermostBypassAvailable = this._outermostIceBypassAvailable(server);
-    //ICE are approached from the highest index inward. Reserve each rez cost
-    //from one local pool so multiple unrezzed layers cannot each claim the
-    //Corp's full credit pool. Rezzed ICE require no further budget.
-    var remainingRezCredits = Credits(corp);
-    var eligibleIce = [];
-    for (var routeIndex = server.ice.length - 1; routeIndex >= 0; routeIndex--) {
-      var routeIce = server.ice[routeIndex];
-      if (routeIce.rezzed) {
-        eligibleIce.push(routeIce);
-        continue;
-      }
-      var routeRezCost = Math.max(0, RezCost(routeIce));
-      if (
-        routeRezCost <= remainingRezCredits &&
-        CheckCredits(corp, routeRezCost, "rezzing", routeIce)
-      ) {
-        eligibleIce.push(routeIce);
-        remainingRezCredits -= routeRezCost;
-      } else {
-        result.reasons.push(
-          GetTitle(routeIce) +
-            " cannot be rezzed within the remaining " +
-            remainingRezCredits +
-            " credits",
+    //Choose the strongest server-local rez plan the Corp can actually fund.
+    //The Corp may decline a weak outer rez to preserve credits for a decisive
+    //inner layer, and target-restricted hosted credits are allocated only to
+    //ICE they can legally pay for.
+    var rezzedIce = server.ice.filter((card) => card.rezzed);
+    var unrezzedIce = server.ice.filter((card) => !card.rezzed);
+    var bestPlan = null;
+    var bestCards = rezzedIce.concat([]);
+    var considerPlans = (index, selected) => {
+      if (index >= unrezzedIce.length) {
+        var eligible = server.ice.filter(
+          (card) => card.rezzed || selected.indexOf(card) > -1,
         );
+        var outcome = this._icePlanOutcome(server, eligible);
+        if (this._icePlanIsBetter(outcome, bestPlan)) {
+          bestPlan = outcome;
+          bestCards = eligible;
+        }
+        return;
       }
-    }
-    var outermostBypassTarget = outermostBypassAvailable
-      ? this._outermostRelevantIce(server, eligibleIce)
-      : null;
-    var oneShotBypassTarget = this._oneShotIceBypassTarget(
-      server,
-      eligibleIce,
-    );
-    for (var i = eligibleIce.length - 1; i >= 0; i--) {
-      var iceCard = eligibleIce[i];
-      var iceIndex = server.ice.indexOf(iceCard);
-      var bypassCost = this._iceBypassCost(iceCard, server, iceIndex);
-      var usesOutermostBypass =
-        outermostBypassAvailable && iceCard == outermostBypassTarget;
-      var usesOneShotBypass = iceCard == oneShotBypassTarget;
-      if (usesOutermostBypass || usesOneShotBypass) {
-        result.reasons.push(GetTitle(iceCard) + " can be bypassed");
-        continue;
-      }
-      var breaker = this._matchingBreakerForIce(iceCard, server, iceIndex);
-      var avoidanceCost = this._estimateBreakCost(iceCard, breaker);
-      if (bypassCost < avoidanceCost) {
-        avoidanceCost = bypassCost;
-        result.reasons.push(GetTitle(iceCard) + " has a targeted bypass");
-      }
-      result.totalBreakCost += avoidanceCost;
-      var mandatoryCost = this._estimateBreakCost(iceCard, breaker, true);
-      //A bypass is optional: use it only when cheaper than dealing with the
-      //mandatory subroutines normally. Finite but unaffordable means a soft
-      //credit lockout, not "no capable breaker".
-      if (bypassCost < mandatoryCost) mandatoryCost = bypassCost;
-      if (mandatoryCost == Infinity) {
-        result.hasHardLockout = true;
+      considerPlans(index + 1, selected);
+      var withCard = selected.concat([unrezzedIce[index]]);
+      if (this._canFundRezPlan(withCard))
+        considerPlans(index + 1, withCard);
+    };
+    considerPlans(0, []);
+    if (!bestPlan) bestPlan = this._icePlanOutcome(server, rezzedIce);
+    result.hasHardLockout = result.hasHardLockout || bestPlan.hasHardLockout;
+    result.totalBreakCost = bestPlan.totalBreakCost;
+    result.totalMandatoryBreakCost = bestPlan.totalMandatoryBreakCost;
+    result.reasons = result.reasons.concat(bestPlan.reasons);
+    for (var i = 0; i < unrezzedIce.length; i++) {
+      if (bestCards.indexOf(unrezzedIce[i]) < 0)
         result.reasons.push(
-          GetTitle(iceCard) + " has mandatory breaks with no capable breaker",
+          GetTitle(unrezzedIce[i]) + " omitted from best affordable rez plan",
         );
-      }
-      result.totalMandatoryBreakCost += mandatoryCost;
     }
     var globalETRUses = this._globalETRUses(server);
     var projectedRuns = this._projectedRunnerRuns(server);
@@ -3443,9 +3644,8 @@ class CorpAI {
     if (server == corp.HQ) return this._agendasInHand() > 0;
     //R&D and Archives retain the existing economy behaviour here.
     if (server == null || typeof server.cards !== "undefined") return false;
-    for (var i = 0; i < server.root.length; i++) {
-      if (CheckCardType(server.root[i], ["agenda", "asset"])) return true;
-    }
+    for (var i = 0; i < server.root.length; i++)
+      if (this._isHVT(server.root[i])) return true;
     return false;
   }
 
@@ -3865,6 +4065,32 @@ class CorpAI {
     return withIce.isSecure && !withoutIce.isSecure;
   }
 
+  //Whether reserving this ICE would change its server from breachable to
+  //secure. Cross-server reservations must buy this concrete outcome; a high
+  //value root alone is not evidence that an arbitrary unrezzed layer matters.
+  _iceWouldSecureServer(card, rezCost, server) {
+    if (!card || !server || !server.ice.includes(card)) return false;
+    var iceIndex = server.ice.indexOf(card);
+    var originalRezzed = card.rezzed;
+    var withIce = null;
+    var withoutIce = null;
+    card.rezzed = true;
+    corp.creditPool -= rezCost;
+    try {
+      withIce = this._evaluateServerSecurity(server);
+    } finally {
+      corp.creditPool += rezCost;
+      card.rezzed = originalRezzed;
+    }
+    server.ice.splice(iceIndex, 1);
+    try {
+      withoutIce = this._evaluateServerSecurity(server);
+    } finally {
+      server.ice.splice(iceIndex, 0, card);
+    }
+    return withIce.isSecure && !withoutIce.isSecure;
+  }
+
   //returns true to rez, false not to
   //passing the rez cost is an optimisation
   //input server to hypothesise if the ice isn't installed yet
@@ -3960,12 +4186,18 @@ class CorpAI {
       if (CheckCredits(corp, rezCostToCompare, "rezzing")) {
         //but couldn't be rezzed if we do rez this
         if (!CheckCredits(corp, currentRezCost + rezCostToCompare, "rezzing")) {
-          //For another server, only a strictly higher server value justifies
-          //passing the ICE the Runner is approaching. Within this server, keep
-          //the protection-value tie-break so credits go to the better inner ICE.
+          //Within this server, keep the protection-value ordering. Elsewhere,
+          //reserve only for a higher-value server when this specific rez is the
+          //difference between a breachable route and a secure one.
           var sameServer = serverToCompare === server;
           if (
-            valueToCompare > thisServerValue ||
+            (!sameServer &&
+              valueToCompare > thisServerValue &&
+              this._iceWouldSecureServer(
+                iceToCompare,
+                rezCostToCompare,
+                serverToCompare,
+              )) ||
             (sameServer &&
               valueToCompare == thisServerValue &&
               this._cardProtectionValue(iceToCompare) > thisIceProtectionValue)
@@ -5472,19 +5704,10 @@ class CorpAI {
 
       //would it be worth purging?
       if (optionList.indexOf("purge") > -1) {
-        //this logic is very basic for now...
-        //each card with virus counters over 2 has a chance of provoking a purge
-        var virus_max = 10; //the higher this number, the less chance of a purge
-        var virus_min = 2;
-        var installedRunnerCards = InstalledCards(runner);
-        if (this._copyOfCardExistsIn("Clot", installedRunnerCards)) {
-          //if a Clot is in play, increased chance to purge
-          virus_min -= 2;
-        }
-        for (var i = 0; i < installedRunnerCards.length; i++) {
-          var randomNum = RandomRange(virus_min, virus_max);
-          if (Counters(installedRunnerCards[i], "virus") > randomNum)
-            return optionList.indexOf("purge");
+        var purgeOutcome = this._ordinaryPurgeOutcome();
+        if (purgeOutcome) {
+          this._log(purgeOutcome.reason);
+          return optionList.indexOf("purge");
         }
       }
     }

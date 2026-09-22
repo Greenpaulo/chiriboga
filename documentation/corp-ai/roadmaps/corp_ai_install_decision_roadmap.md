@@ -467,6 +467,12 @@ Hard rejection rules should remain separate from soft score penalties. An illega
 
 ### Phase 7: Install Versus Other Corp Actions — `[PROPOSED]`
 
+`Phase_Main` currently considers purge and tag-trash before ordinary install
+selection. Any unified install-versus-action comparison must include those
+actions explicitly. Ordinary purge now has a conservative outcome contract
+(open an immediate score or secure a staked server), which should be consumed
+rather than replaced by an unrelated install-score bonus.
+
 **Goal:** Compare the best install with gaining credits, playing operations, advancing, rezzing, triggering abilities, or waiting.
 
 **Work:**

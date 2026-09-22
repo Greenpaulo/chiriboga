@@ -259,3 +259,23 @@ Two existing game-point tests previously used equal-value central ICE as their r
 - `node tests/corp-server-security.test.js` passes: **81 regression cases passed**.
 - `node -c ai_corp.js` passes.
 - `git diff --check` passes.
+
+## 10. Follow-up design correction — 22 September 2026
+
+The strict-higher-server rule fixed the reported central tie, but review found
+that it still reserved credits for any ICE on a higher-value remote even when
+that particular rez did not improve the breach outcome. That was another proxy
+decision rather than evidence that the reservation was useful.
+
+Cross-server reservation now requires both:
+
+1. the other server has strictly higher `_serverValue()`; and
+2. `_iceWouldSecureServer()` shows that rezzing the specific candidate changes
+   that server from breachable to secure, using post-payment credits and a
+   side-effect-free with/without comparison.
+
+The same-server protection-value tie-break remains an ICE-ordering heuristic.
+Regression coverage now distinguishes decisive Brân on an agenda remote (save
+credits) from a redundant Mycoweb on an already-secure agenda remote (rez the
+approached ICE). This supersedes the broader statement in section 9 that server
+value alone is sufficient for another-server reservation.

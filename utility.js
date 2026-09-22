@@ -658,7 +658,9 @@ function AutoContinueButtonHTML(showEvenIfOff = false) {
 //Keep a bounded record of replayable Corp AI decisions. Downloaded logs include
 //the record so a reported bad choice can become a deterministic test fixture.
 var DecisionSnapshots = {
-  enabled: true,
+  //Opt in while collecting a reproducible Corp-AI report. Full reproduction
+  //dumps are intentionally not generated during ordinary play.
+  enabled: false,
   max: 12,
   interesting: ["Corp Mulligan", "Corp 2.1", "Corp 2.2", "Run 2.1"],
   count: 0,

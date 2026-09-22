@@ -7,6 +7,13 @@
 **Depends on:** Findings 1 and 2 (the evaluator's behaviour must be correct before caching it). Finding 12 measures the call-count/latency improvement.
 **Status:** Follow-up remains open. The safe local duplication found while fixing `bugs2.md` items 3 and 4 has been removed; this ticket now owns only cross-helper, decision-scoped reuse.
 
+**22 September 2026 audit note:** `_withHypothetical()` now exists and is used
+by ordinary purge evaluation with exception-safe restoration. The broader cache
+remains open. Decision-snapshot recording is now explicitly opt-in
+(`DecisionSnapshots.enabled = false` by default), so ordinary play does not pay
+for reproduction-code generation at every interesting decision. This does not
+claim the cache work below is complete.
+
 ---
 
 ## Problem
