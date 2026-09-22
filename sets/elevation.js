@@ -2448,7 +2448,7 @@ cardSet[35002] = {
   faction: "Anarch",
   cardType: "identity",
   deckSize: 45,
-  influenceLimit: 12,
+  influenceLimit: 15,
   link: 0,
   
   //Track which card is being installed via Topan's ability
