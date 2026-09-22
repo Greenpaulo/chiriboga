@@ -637,3 +637,25 @@ A phase is complete only when:
 - hypothetical evaluation is proven not to mutate live game state;
 - logs or score breakdowns make the selected choice explainable;
 - no speculative follow-up is mislabeled as completed behavior.
+
+---
+
+## Things to Consider: Edge Cases & Mitigations
+
+### 1. The "Derelict Remote" Problem (Phase 3 & Phase 5)
+
+- **The Scenario:** The Corp installs a temporary economy asset (e.g., _Pad Campaign_ or _Mumba Temple_) into a remote with 1 ICE. Later, the asset is trashed or used up. The remote is now empty with 1 ICE.
+- **The Danger:** Phase 3 might categorize this server as `disposable` or `uncommitted`, while Phase 4 treats it as a non-scoring server. The Corp might repeatedly spin up new remotes for agendas instead of recycling its existing 1-ICE server.
+- **Mitigation:** Ensure `_remoteRole(server)` dynamically evaluates an empty server's **upgraded potential** rather than being permanently locked to its historical role.
+
+### 2. Hidden Cost Collisions in Multi-Click Planning (Phase 8)
+
+- **The Scenario:** A 2-click plan evaluates: `Click 1: Install ICE on HQ` -> `Click 2: Install Agenda in Remote 1`.
+- **The Danger:** `Click 1` incurs an install credit cost equal to the current ICE count on HQ. If `Click 2` also considers installing another card or triggering an ability whose cost depends on available credits, the credit budget for `Click 2` must reflect `Credits - ImmediateCost(Click 1)`.
+- **Mitigation:** Ensure the candidate evaluation pipeline explicitly tracks a projected credit pool (`projectedCredits`) across multi-action sequences so it does not double-count available funds.
+
+### 3. Protection Debt vs. Strategic Sacrifice (Phase 2 & Phase 7)
+
+- **The Scenario:** HQ or R&D is deeply vulnerable, creating high "Protection Debt." Phase 2 aggressively ranks ICE installs on Centrals. However, the Corp is at 5 points and holds a winning agenda in hand with a secure scoring remote available.
+- **The Danger:** Central pressure score overpowers the immediate winning agenda line.
+- **Mitigation:** Phase 7 Tactical Overrides must act as a hard short-circuit: if `ScoreWinProbability >= 1.0`, all Central protection debt checks are suppressed in favor of the winning sequence.
