@@ -1,9 +1,9 @@
 # Corp AI: never considers installing ICE on an unsecure HQ holding 2 agendas (Semak-samun stays in hand all turn) because the "too poor for new layers" reserve is 16 credits
 
-**Suggested location:** `documentation/bugs/` (move to `documentation/bugs/fixed/` once the fixture in section 5 is merged).
+**Location:** `documentation/bugs/done/`.
 **Source:** `documentation/debug-logs/bug_raised/corp_didnt_choose_to_play_ice_to_secure_hq_even_though_its_unsecure.txt`
 **File:** `ai_corp.js` (line numbers are from `main` at `bd9bd79` and will drift; search by function name).
-**Status:** Validated against current `main` and covered by a regression fixture. Every bad decision in this log is already corrected by the fixes for `pointless-archives-ice-install.md`, `hq-draw-gate-ignores-server-security.md` and `rez-decision-saves-credits-for-other-server-on-tie.md`. No additional AI decision-logic change is needed; the remaining real-game observation and optional fixture are follow-ups.
+**Status:** Done. Validated against current `main` and covered by a regression fixture. Every bad decision in this log is already corrected by the fixes for `pointless-archives-ice-install.md`, `hq-draw-gate-ignores-server-security.md` and `rez-decision-saves-credits-for-other-server-on-tie.md`. No additional AI decision-logic change is needed. Live graphical validation of the shared protection-debt mechanism is tracked separately in [`ice-install-remote-over-hq-stale-allocation.md`](../ice-install-remote-over-hq-stale-allocation.md).
 
 ---
 
@@ -219,11 +219,11 @@ Also run `node tests/corp-decision-fixtures.test.js`, `node tests/corp-server-se
 
 - [x] Fixture A is added under `tests/fixtures/corp-decisions/` and passes on `main`.
 - [x] Fixture A fails (returns `gain`) when the `serverAtRisk` term in `_shouldInstallIceLayer()` is temporarily disabled, confirming it guards the right behaviour.
-- [ ] (Optional) Fixture B is added, with `EXPECT_SERVER` extended to accept `!`, and passes on `main`.
+- Optional follow-up: add Fixture B with `EXPECT_SERVER` extended to accept `!`; this is additional coverage, not a closure requirement.
 - [x] `node tests/corp-decision-fixtures.test.js` passes; the unresolved `mulligan-one-ice-three-economy.txt` case is isolated from the green suite.
 - [x] `node tests/corp-server-security.test.js` and `node -c ai_corp.js` pass.
 - [x] No AI decision logic is changed unless the maintainer chooses otherwise in section 4.3.
-- [ ] In the next real-game debug log, ranking lines show non-zero `debt:` values (evidence that the aging hook from `86a898f` runs in real games).
+- Live graphical confirmation of non-zero protection debt is owned by [`ice-install-remote-over-hq-stale-allocation.md`](../ice-install-remote-over-hq-stale-allocation.md) and is not a closure requirement for this reproduced HQ decision.
 
 ---
 
@@ -239,4 +239,8 @@ Validation results:
 - `node tests/corp-server-security.test.js`: all 81 regression cases passed.
 - `node -c ai_corp.js`: passed.
 
-No AI decision logic was changed. Fixture B remains optional, and the non-zero protection-debt check still requires a future real-game log.
+No AI decision logic was changed. Fixture B remains optional. The separate
+[`ice-install-remote-over-hq-stale-allocation.md`](../ice-install-remote-over-hq-stale-allocation.md)
+ticket owns the future real-game check of the shared debt-aging path; this
+ticket is complete because its reported decisions are reproduced and protected
+by the passing fixtures above.
