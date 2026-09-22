@@ -13,7 +13,7 @@ registerPrecon({
     // useForCustomGame: Whether to include this deck in Custom Game mode
     useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
-    deck_set: "none",
+    deck_set: "",
     URL: "https://netrunnerdb.com/en/decklist/494fec55-e58f-4187-9769-aa44eb03a63c/bio-builder",
     notes: "This is a classic Architects of Tomorrow glacier that uses efficient bioroid ICE to tax runs, bounce a rezzed ICE with the ID ability, and compound that tax with Manegarm Skunkworks and Anoetic Void on the scoring remote. The deck builds economy with campaigns, then scores behind stacked ICE using Seamless Launch and the threat of fast-advance via Biotic Labor, with Vitruvius counters and Archived Memories giving recursion and inevitability. Send a Message and Luminal provide tempo bursts after successful defenses, letting you stay ahead on credits while forcing the Runner to keep slamming into an increasingly punishing remote.",
     cards: {

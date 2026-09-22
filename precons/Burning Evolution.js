@@ -13,7 +13,7 @@ registerPrecon({
     // useForCustomGame: Whether to include this deck in Custom Game mode
     useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
-    deck_set: "none",
+    deck_set: "",
     URL: "https://netrunnerdb.com/en/decklist/201f6554-7454-43ec-a00e-eaf4aefe23f7/sg-su21-burning-evolution",
     notes: "This deck aims to flatline the Runner by applying constant net damage pressure through the ID ability, House of Knives, Diviner, and Karunā. It exploits uncertainty by advancing cards that could be agendas, Urtica Cipher, or a lethal Clearinghouse, forcing risky runs and punishing wrong guesses. Subliminal Messaging baits runs while Orbital Superiority taxes clicks and credits via tags, setting up the final kill with traps or ambush assets.",
     cards: {

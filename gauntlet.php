@@ -2134,7 +2134,7 @@
 					}
 				}
 				
-				// Sort identities alphabetically by display title
+				// Sort identities by faction (A-Z), then alphabetically within each faction
 				playerIdentities.sort(function(a, b) {
 					var fullTitleA = cardSet[a].title || '';
 					var fullTitleB = cardSet[b].title || '';
@@ -2152,6 +2152,10 @@
 						if (fullTitleB.indexOf(':') > -1) shortTitleB = fullTitleB.split(':')[0].trim();
 					}
 					
+					var factionA = (cardSet[a] && cardSet[a].faction) || '';
+					var factionB = (cardSet[b] && cardSet[b].faction) || '';
+					var factionCompare = factionA.localeCompare(factionB);
+					if (factionCompare !== 0) return factionCompare;
 					return shortTitleA.localeCompare(shortTitleB);
 				});
 				

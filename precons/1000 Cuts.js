@@ -13,7 +13,7 @@ registerPrecon({
     // useForCustomGame: Whether to include this deck in Custom Game mode
     useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
-    deck_set: "none",
+    deck_set: "",
     URL: "https://netrunnerdb.com/en/decklist/36e81c41-5297-47b3-8b15-0f0702976928/1-000-cuts-the-restricted-collection-",
     notes: "This PT Untaian deck chips away at the Runner's grip with constant net damage while building up advancement counters for free during the discard phase. Byte! and Urtica Cipher punish the Runner for checking your servers, while Clearinghouse threatens a lethal flatline if left unchecked. If the Runner is low on cards after all that chip damage, scoring an agenda with Seamless Launch and following up with Neurospike can finish them off. Phật Gioan Baotixita adds even more net damage whenever agendas are scored or stolen, and Sericulture Expansion's dividends ability lets PT Untaian load up advancement counters on your installed cards even faster. The ice suite features Jinteki's painful Elevation-era options like Empiricist and Semak-samun, making every run cost the Runner cards as well as credits.",
     cards: {

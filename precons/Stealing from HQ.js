@@ -13,7 +13,7 @@ registerPrecon({
     // useForCustomGame: Whether to include this deck in Custom Game mode
     useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
-    deck_set: "none",
+    deck_set: "",
     URL: "https://netrunnerdb.com/en/decklist/bd8454f0-5d57-4c06-bb6a-4bfe4d8613ca/sg-su21-stealing-from-hq",
     notes: "The main strategy is to generate money through successful runs. Pennyshaver and Zahya’s ability form the core engine, with Dirty Laundry adding extra credits. Legwork and Docklands Pass make HQ very tempting to run, while Sneakdoor Beta expands your attack options. Security Testing targets the least defended server and works well with Pennyshaver.",
     cards: {

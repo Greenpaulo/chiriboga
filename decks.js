@@ -603,7 +603,7 @@ function LoadDecks() {
 	for (var i=0; i<cardSet.length; i++) {
 		if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
 			if (cardSet[i].cardType == 'identity') {
-				if (cardSet[i].player == runner) runnerIdentities.push(i);
+				if (cardSet[i].player == runner && !IsIdentityExcludedFromQuickCustom(i)) runnerIdentities.push(i);
 			}
 		}
 	}
@@ -684,7 +684,7 @@ function LoadDecks() {
 	for (var i=0; i<cardSet.length; i++) {
 		if (typeof cardSet[i] != 'undefined' &&  typeof cardSet[i].faction != 'undefined') {
 			if (cardSet[i].cardType == 'identity') {
-				if (cardSet[i].player == corp) corpIdentities.push(i);
+				if (cardSet[i].player == corp && !IsIdentityExcludedFromQuickCustom(i)) corpIdentities.push(i);
 			}
 		}
 	}

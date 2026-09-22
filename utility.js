@@ -4372,6 +4372,27 @@ function UpdateCounters() {
 }
 
 /**
+ * Identities reserved for Tutorial mode (The Catalyst / The Syndicate). They
+ * ship with scripted 30-card starter decks and 9001 influence, so Quick Game
+ * and Custom Game must never select them — for the player, the AI, or the
+ * random-deck generators. Tutorial games (engine.php?...&t=1) are unaffected.
+ */
+var quickCustomExcludedIdentities = [30076, 30077];
+
+/**
+ * Whether an identity must be kept out of Quick Game and Custom Game.
+ *
+ * @method IsIdentityExcludedFromQuickCustom
+ * @param {int|string} identityId card id of the identity
+ * @returns {boolean} true when the identity is Tutorial-only
+ */
+function IsIdentityExcludedFromQuickCustom(identityId) {
+  var id = parseInt(identityId, 10);
+  if (isNaN(id)) return false;
+  return quickCustomExcludedIdentities.indexOf(id) !== -1;
+}
+
+/**
  * Random integer from min to max, inclusive
  *
  * @method RandomRange

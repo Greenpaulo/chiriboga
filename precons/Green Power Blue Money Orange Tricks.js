@@ -13,7 +13,7 @@ registerPrecon({
 	// useForCustomGame: Whether to include this deck in Custom Game mode
 	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
-	deck_set: "none",
+	deck_set: "",
 	URL: "https://netrunnerdb.com/en/decklist/ea6cb4cb-2af1-408d-86ef-167b13bec6ae/green-power-blue-money-orange-tricks",
 	notes: "Kate's install discount helps you build your rig efficiently. This deck splashes Criminal and Anarch cards for versatility: Account Siphon and Bank Job pressure the Corp's economy, Forged Activation Orders forces them to rez or trash ice, and Déjà Vu lets you recover key cards from your heap. Magnum Opus is your economy engine, Tinkering helps when you're missing an icebreaker type, and Ice Carver makes all ice easier to break.",
 	cards: {

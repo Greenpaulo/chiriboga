@@ -13,7 +13,7 @@ registerPrecon({
     // useForCustomGame: Whether to include this deck in Custom Game mode
     useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
-    deck_set: "none",
+    deck_set: "",
     URL: "https://netrunnerdb.com/en/decklist/288aed16-328e-4678-b461-ed46272cfa29/sg-su21-decoding-you",
     notes: "This Shaper starter deck centers on Unity as an efficient breaker that can also handle non-code gate ICE via Rielle “Kit” Peddler’s ability or Egret. It builds long-term value through sustained draw and click efficiency with Verbal Plasticity and Smartware Distributor, while threatening explosive R&D pressure with an early Conduit. Overall, it showcases the Shaper philosophy of flexibility, efficiency, and clever problem-solving over brute force.",
     cards: {

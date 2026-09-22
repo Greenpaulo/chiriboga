@@ -13,7 +13,7 @@ registerPrecon({
 	// useForCustomGame: Whether to include this deck in Custom Game mode
 	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
-	deck_set: "none",
+	deck_set: "",
 	URL: "https://netrunnerdb.com/en/decklist/8b58fb00-8ba6-4445-aafd-d0a1f6d86a7a/starter-deck-runner-intermediate",
 	notes: "This deck introduces virus programs and fixed-strength breakers. Yog.0 and Mimic break ice for free when Datasucker lowers their strength. Parasite destroys ice over time, and Medium lets you see more cards from R&D. Noise's ability mills a card whenever you install a virus, so keep installing to disrupt the Corp's plans. Special Order finds the breaker you need.",
 	cards: {

@@ -1808,12 +1808,16 @@ $version = "0.6.13-BETA";
     window.addEventListener('load', function() {
       // Filter Quick Game decks by side
       giromRunnerDecks = preconDecks.filter(function(d) {
+        // Tutorial-reserved identities never appear in Quick Game
+        if (IsIdentityExcludedFromQuickCustom(d.identity)) return false;
         var isQuickGameDeck = d.useForQuickGame === true;
         var hasIdentity = cardSet[d.identity];
         var isRunner = hasIdentity && cardSet[d.identity].player === runner;
         return isQuickGameDeck && hasIdentity && isRunner;
       });
       giromCorpDecks = preconDecks.filter(function(d) {
+        // Tutorial-reserved identities never appear in Quick Game
+        if (IsIdentityExcludedFromQuickCustom(d.identity)) return false;
         var isQuickGameDeck = d.useForQuickGame === true;
         var hasIdentity = cardSet[d.identity];
         var isCorp = hasIdentity && cardSet[d.identity].player === corp;
@@ -2665,6 +2669,8 @@ $version = "0.6.13-BETA";
       // needs is covered by the chosen format" via each precon's own
       // `sets: [...]` field, instead of `useForQuickGame`.
       var formatRunnerDecks = preconDecks.filter(function(d) {
+        // Tutorial-reserved identities never appear in Custom Game
+        if (IsIdentityExcludedFromQuickCustom(d.identity)) return false;
         if (d.useForCustomGame !== true) return false;
         if (!Array.isArray(d.sets)) return false;
         var setsCovered = d.sets.every(function(code) {
@@ -2675,6 +2681,8 @@ $version = "0.6.13-BETA";
       });
 
       var formatCorpDecks = preconDecks.filter(function(d) {
+        // Tutorial-reserved identities never appear in Custom Game
+        if (IsIdentityExcludedFromQuickCustom(d.identity)) return false;
         if (d.useForCustomGame !== true) return false;
         if (!Array.isArray(d.sets)) return false;
         var setsCovered = d.sets.every(function(code) {

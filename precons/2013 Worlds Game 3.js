@@ -13,7 +13,7 @@ registerPrecon({
 	// useForCustomGame: Whether to include this deck in Custom Game mode
 	useForCustomGame: true,
 	// deck_set: The set or category this deck belongs to
-	deck_set: "none",
+	deck_set: "",
 	URL: "https://netrunnerdb.com/en/decklist/8f29204e-ab6c-4c66-889c-fe348865e09f/netrunner-worlds-game-3-gabe-deck",
 	notes: "This classic Worlds deck showcases Criminal aggression at its finest. Account Siphon keeps the Corp poor while you get rich. Parasite and Datasucker destroy ice permanently, and Yog.0 breaks code gates for free once Datasucker lowers their strength. Femme Fatale bypasses expensive ice, and Sneakdoor Beta sneaks into HQ through Archives.",
 	cards: {

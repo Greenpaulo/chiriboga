@@ -82,6 +82,21 @@ fs.readdirSync(path.join(root, 'sets'))
   });
 const cardSet = cardContext.cardSet;
 
+// --- Load the Quick/Custom exclusion helper from utility.js ----------------
+// selectFormat() also skips Tutorial-reserved identities (The Catalyst / The
+// Syndicate), so the mirror below must apply the same rule.
+const utilitySource = fs.readFileSync(path.join(root, 'utility.js'), 'utf8');
+const helperStart = utilitySource.indexOf('var quickCustomExcludedIdentities');
+const helperEnd = utilitySource.indexOf('function RandomRange(', helperStart);
+assert(
+  helperStart >= 0 && helperEnd > helperStart,
+  'Could not locate the Quick/Custom identity exclusion helper in utility.js',
+);
+const helperContext = { console };
+vm.createContext(helperContext);
+vm.runInContext(utilitySource.slice(helperStart, helperEnd), helperContext);
+const isIdentityExcludedFromQuickCustom = helperContext.IsIdentityExcludedFromQuickCustom;
+
 // --- Load all precons -----------------------------------------------------
 const preconDecks = [];
 // Dedicated context that shares the loaded cardSet but only needs to supply
@@ -106,9 +121,10 @@ fs.readdirSync(path.join(root, 'precons'))
 
 assert(preconDecks.length > 0, 'Expected precons to load');
 
-// --- Mirror selectFormat()'s precon filter ---------------------------------
+// --- Mirror selectFormat()'s precon filter (set legality + mode exclusion) --
 function eligibleForSide(side) {
   return preconDecks.filter((d) => {
+    if (isIdentityExcludedFromQuickCustom(d.identity)) return false;
     if (d.useForCustomGame !== true) return false;
     if (!Array.isArray(d.sets)) return false;
     const covered = d.sets.every((code) => eternalSets.indexOf(code) !== -1);

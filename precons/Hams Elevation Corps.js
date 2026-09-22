@@ -13,7 +13,7 @@ registerPrecon({
     // useForCustomGame: Whether to include this deck in Custom Game mode
     useForCustomGame: true,
     // deck_set: The set or category this deck belongs to
-    deck_set: "none",
+    deck_set: "",
     URL: "https://netrunnerdb.com/en/decklist/1d73ebf6-ba40-4d7a-9891-bdc2add6676b/elevation-core-au-co",
     notes: "This Jinteki deck uses AU Co.'s identity ability to filter through R&D by doing net damage and trashing cards from HQ with Hansei Review. The deck's economy is strong, with Anthill Excavation Contract, Regolith Mining License, Offworld Office, and Hedge Fund keeping the credits flowing. Byte! and Phật Gioan Baotixita punish careless runners with net damage, while dangerous ice like Empiricist and Semak-samun make every run painful. Seamless Launch lets you fast-advance agendas, and Anoetic Void protects your scoring remote by forcing the runner out. Sericulture Expansion's dividends ability works well with AU Co., letting you over-advance to bank extra advancement counters for later. A well-rounded deck that rewards careful timing and keeps the runner guessing.",
     cards: {

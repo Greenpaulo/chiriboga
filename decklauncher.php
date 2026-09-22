@@ -1088,6 +1088,20 @@
       }
     }
 
+    // True when a compressed deck string belongs to an identity that is
+    // reserved for Tutorial mode (and therefore cannot be played here).
+    function IsDeckStringUsingExcludedIdentity(compressedDeck) {
+      if (!compressedDeck || compressedDeck === "random") return false;
+      try {
+        var parsed = JSON.parse(
+          LZString.decompressFromEncodedURIComponent(compressedDeck)
+        );
+        return !!(parsed && IsIdentityExcludedFromQuickCustom(parsed.identity));
+      } catch (e) {
+        return false;
+      }
+    }
+
     function IdentityImageFromDeckString(compressed) {
       var oppjson = JSON.parse(
         LZString.decompressFromEncodedURIComponent(compressed)
@@ -1102,13 +1116,15 @@
     if (URIParameter("r") !== "" && URIParameter("p") !== "c") {
       deckPlayer = runner;
       var uric = URIParameter("c");
-      if (uric) {
+      // An opponent deck using a Tutorial-reserved identity is ignored; a legal
+      // random opponent is chosen further down instead.
+      if (uric && !IsDeckStringUsingExcludedIdentity(uric)) {
         opponentdeckstr = "c=" + uric + "&";
         IdentityImageFromDeckString(uric);
       }
     } else {
       var urir = URIParameter("r")
-      if (urir) {
+      if (urir && !IsDeckStringUsingExcludedIdentity(urir)) {
         opponentdeckstr = "r=" + urir + "&";
         IdentityImageFromDeckString(urir);
       }
@@ -1120,6 +1136,7 @@
       var candidatePrecons = [];
       for (var pi = 0; pi < preconDecks.length; pi++) {
         var pre = preconDecks[pi];
+        if (IsIdentityExcludedFromQuickCustom(pre.identity)) continue;
         var identCode = parseInt(pre.identity);
         if (cardSet[identCode] && cardSet[identCode].player === oppositePlayer) {
           candidatePrecons.push(pre);
@@ -1203,27 +1220,54 @@
     for (var i = 0; i < cardSet.length; i++) {
       if (typeof cardSet[i] != 'undefined' && typeof cardSet[i].faction != 'undefined') {
         if (cardSet[i].cardType == 'identity') {
+          // Tutorial-reserved identities are never offered in Custom Game
+          if (IsIdentityExcludedFromQuickCustom(i)) continue;
           if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
         }
       }
     }
-    // Sort identities alphabetically by display title
-    playerIdentities.sort(function(a, b) {
-      var fullTitleA = cardSet[a].title || '';
-      var fullTitleB = cardSet[b].title || '';
-      var shortTitleA = fullTitleA;
-      var shortTitleB = fullTitleB;
+    // Display title shown for an identity in the dropdown: Runner identities use
+    // the text before the colon; Corp identities drop a leading "<Faction>: "
+    // prefix only when that prefix actually matches the identity's faction.
+    function GetIdentityDisplayTitle(identityIdx) {
+      var card = cardSet[identityIdx];
+      var fullTitle = (card && card.title) || '';
       if (deckPlayer === corp) {
-        var colonIdxA = fullTitleA.indexOf(': ');
-        if (colonIdxA > -1) shortTitleA = fullTitleA.substring(colonIdxA + 2).trim();
-        var colonIdxB = fullTitleB.indexOf(': ');
-        if (colonIdxB > -1) shortTitleB = fullTitleB.substring(colonIdxB + 2).trim();
-      } else {
-        if (fullTitleA.indexOf(':') > -1) shortTitleA = fullTitleA.split(':')[0].trim();
-        if (fullTitleB.indexOf(':') > -1) shortTitleB = fullTitleB.split(':')[0].trim();
+        var colonIdx = fullTitle.indexOf(': ');
+        if (colonIdx > -1) {
+          var beforeColon = fullTitle.substring(0, colonIdx).trim();
+          var faction = (card && card.faction) || '';
+          // Normalize for comparison (remove non-letters and lowercase)
+          var beforeColonNorm = beforeColon.toLowerCase().replace(/[^a-z]/g, '');
+          var factionNorm = faction.toLowerCase().replace(/[^a-z]/g, '');
+          if (beforeColonNorm === factionNorm) {
+            return fullTitle.substring(colonIdx + 2).trim();
+          }
+          return beforeColon;
+        }
+        return fullTitle;
       }
-      return shortTitleA.localeCompare(shortTitleB);
-    });
+      // Runner
+      if (fullTitle.indexOf(':') > -1) return fullTitle.split(':')[0].trim();
+      return fullTitle;
+    }
+
+    // Order identities by faction (A-Z), then by their displayed title (A-Z), so
+    // the dropdown reads as alphabetical faction groups instead of one flat list.
+    function SortIdentitiesByFaction(identityIdxs) {
+      identityIdxs.sort(function(a, b) {
+        var cardA = cardSet[a];
+        var cardB = cardSet[b];
+        var factionA = (cardA && cardA.faction) || '';
+        var factionB = (cardB && cardB.faction) || '';
+        var factionCompare = factionA.localeCompare(factionB);
+        if (factionCompare !== 0) return factionCompare;
+        return GetIdentityDisplayTitle(a).localeCompare(GetIdentityDisplayTitle(b));
+      });
+      return identityIdxs;
+    }
+
+    SortIdentitiesByFaction(playerIdentities);
 
     function UpdateLaunchStrings() {
       // Extra sets parameter (empty for decklauncher - sets are loaded from localStorage)
@@ -1570,27 +1614,14 @@
       for (var i = 0; i < cardSet.length; i++) {
         if (typeof cardSet[i] != 'undefined' && typeof cardSet[i].faction != 'undefined') {
           if (cardSet[i].cardType == 'identity') {
+            // Tutorial-reserved identities are never offered in Custom Game
+            if (IsIdentityExcludedFromQuickCustom(i)) continue;
             if (deckPlayer == cardSet[i].player) playerIdentities.push(i);
           }
         }
       }
-      // Sort identities alphabetically by display title
-      playerIdentities.sort(function(a, b) {
-        var fullTitleA = cardSet[a].title || '';
-        var fullTitleB = cardSet[b].title || '';
-        var shortTitleA = fullTitleA;
-        var shortTitleB = fullTitleB;
-        if (deckPlayer === corp) {
-          var colonIdxA = fullTitleA.indexOf(': ');
-          if (colonIdxA > -1) shortTitleA = fullTitleA.substring(colonIdxA + 2).trim();
-          var colonIdxB = fullTitleB.indexOf(': ');
-          if (colonIdxB > -1) shortTitleB = fullTitleB.substring(colonIdxB + 2).trim();
-        } else {
-          if (fullTitleA.indexOf(':') > -1) shortTitleA = fullTitleA.split(':')[0].trim();
-          if (fullTitleB.indexOf(':') > -1) shortTitleB = fullTitleB.split(':')[0].trim();
-        }
-        return shortTitleA.localeCompare(shortTitleB);
-      });
+      // Group identities by faction, then alphabetically within each faction
+      SortIdentitiesByFaction(playerIdentities);
       console.log('Rebuilt playerIdentities with ' + playerIdentities.length + ' identities after sets loaded');
 
       // Rebuild titles array for autocomplete now that all sets are loaded
@@ -1633,6 +1664,7 @@
         var candidatePrecons = [];
         for (var pi = 0; pi < preconDecks.length; pi++) {
           var pre = preconDecks[pi];
+          if (IsIdentityExcludedFromQuickCustom(pre.identity)) continue;
           var identCode = parseInt(pre.identity);
           if (cardSet[identCode] && cardSet[identCode].player === oppositePlayer) {
             candidatePrecons.push(pre);
@@ -1885,14 +1917,22 @@
             return;
           }
 
-          // Load the deck into the current deck
-          json.identity = parseInt(deck.identity);
+          var loadedIdentity = parseInt(deck.identity);
+
+          // Tutorial-reserved identities cannot be played in Custom Game
+          if (IsIdentityExcludedFromQuickCustom(loadedIdentity)) {
+            alert('That identity is reserved for Tutorial mode and cannot be played in Custom Game.');
+            return;
+          }
 
           // Check if identity exists in loaded sets
-          if (typeof cardSet[json.identity] === 'undefined') {
+          if (typeof cardSet[loadedIdentity] === 'undefined') {
             alert('Deck identity is not in loaded sets. Please enable the required card set in Settings.');
             return;
           }
+
+          // Load the deck into the current deck
+          json.identity = loadedIdentity;
 
           // Filter out cards not in loaded sets
           json.cards = [];
@@ -2088,6 +2128,11 @@
                   if (typeof cardSet[i] !== 'undefined' && cardSet[i].cardType === 'identity') {
                     var cardTitle = normalizeTitle(cardSet[i].title);
                     if (cardTitle === identTitle) {
+                      // Tutorial-reserved identities cannot be imported here
+                      if (IsIdentityExcludedFromQuickCustom(i)) {
+                        $('#import-nrdb-modal-message').html('<span style="color: #ff6666;">That identity is reserved for Tutorial mode and cannot be played here.</span>');
+                        return;
+                      }
                       // Set identity without triggering change yet
                       $("#identityselect").val(i);
                       $("#identity").prop("src", "images/" + ChangeImageFileToJPG(cardSet[i].imageFile));
@@ -2255,6 +2300,12 @@
             return;
           }
 
+          // Tutorial-reserved identities cannot be played in Custom Game
+          if (IsIdentityExcludedFromQuickCustom(identityId)) {
+            alert('That identity is reserved for Tutorial mode and cannot be played in Custom Game.');
+            return;
+          }
+
           // Apply imported deck safely
           json = {
             identity: identityId,
@@ -2351,28 +2402,7 @@
         }
       });
       for (var i = 0; i < playerIdentities.length; i++) {
-        var fullTitle = cardSet[playerIdentities[i]].title || '';
-        var shortTitle = fullTitle; // fallback
-        // Determine shortening based on side: runner before colon, corp after colon+space (only if faction matches)
-        if (deckPlayer === corp) {
-          var colonIdx = fullTitle.indexOf(': ');
-          if (colonIdx > -1) {
-            var beforeColon = fullTitle.substring(0, colonIdx).trim();
-            var afterColon = fullTitle.substring(colonIdx + 2).trim();
-            var faction = cardSet[playerIdentities[i]].faction || '';
-            // Normalize for comparison (remove non-letters and lowercase)
-            var beforeColonNorm = beforeColon.toLowerCase().replace(/[^a-z]/g, '');
-            var factionNorm = faction.toLowerCase().replace(/[^a-z]/g, '');
-            if (beforeColonNorm === factionNorm) {
-              shortTitle = afterColon;
-            } else {
-              shortTitle = beforeColon;
-            }
-          }
-        } else {
-          // Runner
-          if (fullTitle.indexOf(':') > -1) shortTitle = fullTitle.split(':')[0].trim();
-        }
+        var shortTitle = GetIdentityDisplayTitle(playerIdentities[i]);
         $("#identityselect").append(
           "<option value=" +
           playerIdentities[i] +
@@ -2391,6 +2421,11 @@
 
       //choose an identity at random, unless a load string was specified
       var specifiedPlayerDeck = URIParameter(dC);
+      // Tutorial-reserved identities cannot be played in Custom Game: treat a
+      // deck that uses one like an unspecified deck so a fresh one is generated.
+      if (IsDeckStringUsingExcludedIdentity(specifiedPlayerDeck)) {
+        specifiedPlayerDeck = "random";
+      }
       if (specifiedPlayerDeck == "" || specifiedPlayerDeck == "random") {
         var randomIdentity =
           playerIdentities[RandomRange(0, playerIdentities.length - 1)];
