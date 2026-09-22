@@ -340,7 +340,10 @@
             return loadedSetCodes.indexOf(code) !== -1;
           });
           if (!setsLegal) continue;
-          dropdown.append('<option value="' + i + '">' + deck.name + '</option>');
+          // Show the deck set in parentheses after the name so players can tell
+          // precons from different sets apart (falls back to just the name).
+          var deckSetLabel = deck.deck_set ? ' (' + deck.deck_set + ')' : '';
+          dropdown.append('<option value="' + i + '">' + deck.name + deckSetLabel + '</option>');
           if (!deckModified && json && json.name === deck.name) {
             matchedIdx = i;
           }

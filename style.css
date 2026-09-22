@@ -2721,7 +2721,12 @@ body::-webkit-scrollbar-track {
   background: var(--bg-dark);
   border: 1px solid var(--border-green);
   color: var(--crt-green) !important;
-  padding: 10px 12px;
+  /* Reserve room for the 16px chevron drawn at right:10px, so long identity
+     titles truncate with an ellipsis instead of running under the arrow. */
+  padding: 10px 34px 10px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border-radius: 8px;
   font-size: 15px;
   box-shadow: 0 0 6px var(--border-green), inset 0 0 12px rgba(31, 109, 31, 0.25);
@@ -2751,7 +2756,12 @@ body::-webkit-scrollbar-track {
   background: var(--bg-dark);
   border: 1px solid var(--border-green);
   color: var(--crt-green) !important;
-  padding: 10px 12px;
+  /* Reserve room for the 16px chevron drawn at right:10px, so long
+     "Name (Deck Set)" labels truncate instead of overlapping the arrow. */
+  padding: 10px 34px 10px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border-radius: 8px;
   font-size: 15px;
   font-weight: normal;
@@ -3401,6 +3411,12 @@ select::-ms-expand {
     padding: 8px 10px;
   }
 
+  /* Keep the chevron area clear (the arrow sits at right:10px and is 16px wide). */
+  #identityselect,
+  #preconselect {
+    padding-right: 34px;
+  }
+
   .deck-stats {
     font-size: 11px;
     padding: 6px 8px;
@@ -3503,6 +3519,12 @@ select::-ms-expand {
   #deck {
     font-size: 11px;
     padding: 6px 8px;
+  }
+
+  /* Keep the chevron area clear (the arrow sits at right:10px and is 16px wide). */
+  #identityselect,
+  #preconselect {
+    padding-right: 34px;
   }
 
   .deck-stats {

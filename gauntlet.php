@@ -2204,7 +2204,9 @@
 					for (var i = 0; i < preconDecks.length; i++) {
 						var deck = preconDecks[i];
 						if (String(identityId) === String(deck.identity)) {
-							dropdown.append('<option value="' + i + '">' + deck.name + '</option>');
+							// Show the deck set in parentheses after the name (falls back to just the name).
+							var deckSetLabel = deck.deck_set ? ' (' + deck.deck_set + ')' : '';
+							dropdown.append('<option value="' + i + '">' + deck.name + deckSetLabel + '</option>');
 						}
 					}
 				}
