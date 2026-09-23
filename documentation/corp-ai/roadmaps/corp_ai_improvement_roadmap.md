@@ -326,6 +326,8 @@ holds an affordable `AITagPunishment`; it never changes deterministic security.
 
 ## Regression Validation and Current Limits
 
+Shared deterministic-RNG, hypothetical-evaluation, decision-cache, and batch-harness infrastructure is tracked in the [Corp AI foundations roadmap](corp_ai_foundations_roadmap.md).
+
 Run `node tests/corp-server-security.test.js` for focused checks of calculator ownership, actual unrezzed ice classification, breaker activation costs, mandatory versus optional punishment, hosted coverage, lethality, human/AI identity matching, and effective Runner credit sources. These tests load the real AI classes and priority card definitions with deterministic engine helpers; they do not replace browser gameplay testing.
 
 Security remains a per-ice heuristic, not a complete run simulation. It does not yet model cumulative damage across encounters, combined optional-effect sequences that disable later breakers, shared strength-reducer counter spending across multiple ice, or exact allocation of restricted credit sources across payments (Layer 6.1). `AIImplementBreaker` pricing probes support the standard `ImplementIcebreaker` activation path; other special breaker mechanisms need their own capability hooks.

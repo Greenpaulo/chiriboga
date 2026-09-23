@@ -67,6 +67,7 @@ function test(name, body) {
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
   ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
   ai._cardDeceptionProfiles = new WeakMap(); ai._random = Math.random;
+  ai._decisionRandomState = null;
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
@@ -987,6 +988,104 @@ test('ordinary purge ignores virus counters with no modeled outcome', () => {
   servers = [corp.HQ, corp.RnD, corp.archives];
   assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
   assert.strictEqual(irrelevant.virus, 20);
+});
+test('asset destination shuffle uses injected randomness without mutating its input', () => {
+  const destinations = [{name: 'strongest'}, {name: 'second'}, {name: 'third'}];
+  const originalOrder = destinations.slice();
+  const seededRandom = seed => () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 0x100000000;
+  };
+  ai._random = seededRandom(42);
+  const firstOrder = ai._shuffleCopy(destinations);
+  ai._random = seededRandom(42);
+  const secondOrder = ai._shuffleCopy(destinations);
+  assert.deepStrictEqual(destinations, originalOrder);
+  assert.deepStrictEqual(secondOrder, firstOrder);
+
+  context.failGlobalRandom = () => {throw Error('global Math.random used');};
+  vm.runInContext('savedMathRandom = Math.random; Math.random = failGlobalRandom;', context);
+  try {
+    let rolls = 0;
+    ai._random = () => {rolls++; return 0;};
+    assert.deepStrictEqual(ai._shuffleCopy(destinations), [destinations[1], destinations[2], destinations[0]]);
+    assert.strictEqual(rolls, 2);
+  } finally {
+    vm.runInContext('Math.random = savedMathRandom; delete savedMathRandom;', context);
+    delete context.failGlobalRandom;
+  }
+});
+test('asset destination tie-break is rolled once per Choice', () => {
+  const destinations = [{name: 'strongest'}, {name: 'second'}, {name: 'third'}];
+  const oldChoiceInner = ai._choiceInner;
+  let firstOrder = null;
+  let secondOrder = null;
+  let rolls = 0;
+  ai._random = () => {rolls++; return rolls % 2 ? 0.1 : 0.9;};
+  ai._choiceInner = () => {
+    firstOrder = ai._assetDestinationOrder(destinations);
+    secondOrder = ai._assetDestinationOrder(destinations);
+    return 0;
+  };
+  try {
+    assert.strictEqual(ai.Choice(['install'], 'command'), 0);
+  } finally {
+    ai._choiceInner = oldChoiceInner;
+  }
+  assert.deepStrictEqual(secondOrder, firstOrder);
+  assert.strictEqual(rolls, 2);
+  assert.strictEqual(ai._decisionRandomState, null);
+});
+test('ranked asset installs preserve remote ranking and share one destination order', () => {
+  const strongest = {name: 'strongest', ice: [{}], root: []};
+  const second = {name: 'second', ice: [{}], root: []};
+  const third = {name: 'third', ice: [{}], root: []};
+  const destinations = [strongest, second, third];
+  const originalOrder = destinations.slice();
+  const firstAsset = {player: corp, cardType: 'asset'};
+  const secondAsset = {player: corp, cardType: 'asset'};
+  const cards = [firstAsset, secondAsset];
+  corp.HQ.cards = cards;
+  firstAsset.cardLocation = cards;
+  secondAsset.cardLocation = cards;
+  const replacements = {
+    _emptyProtectedRemotes: () => destinations,
+    _potentialAdvancement: () => 0,
+    _uniqueCopyAlreadyInstalled: () => false,
+    _sufficientEconomy: () => false,
+    _serverToProtect: () => null,
+    _shouldInstallIceLayer: () => false,
+    _scoringServers: () => [],
+    _isHVT: () => false,
+    _bestProtectedRemote: () => null,
+    _agendasInHand: () => 0,
+    _upgradeInstallPreferences: () => [],
+    _iceInstallOptions: () => [],
+    _copyOfCardExistsIn: () => null,
+    _advancementLimit: () => 0,
+    _deceptionInstallDistance: () => 0,
+  };
+  const originals = {};
+  Object.keys(replacements).forEach(name => {
+    originals[name] = ai[name];
+    ai[name] = replacements[name];
+  });
+  let rolls = 0;
+  ai._random = () => {rolls++; return 0;};
+  let options;
+  try {
+    options = ai._rankedInstallOptions(cards);
+  } finally {
+    Object.keys(originals).forEach(name => {ai[name] = originals[name];});
+  }
+  const firstOrder = options.filter(option => option.cardToInstall === firstAsset)
+    .map(option => option.serverToInstallTo);
+  const secondOrder = options.filter(option => option.cardToInstall === secondAsset)
+    .map(option => option.serverToInstallTo);
+  assert.deepStrictEqual(destinations, originalOrder);
+  assert.deepStrictEqual(secondOrder, firstOrder);
+  assert(!firstOrder.includes(strongest));
+  assert.strictEqual(rolls, 2);
 });
 test('purge models cards trashed by purge even when they have no counters', () => {
   const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});

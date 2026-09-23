@@ -3698,6 +3698,50 @@ class CorpAI {
     return shouldInstall || economyIsSufficient || serverAtRisk;
   }
 
+  //Return a shuffled copy so planning never changes a caller-owned ranking.
+  //All Corp AI randomness must use the injectable _random seam.
+  _shuffleCopy(array) {
+    var ret = array.slice();
+    for (var currentIndex = ret.length - 1; currentIndex > 0; currentIndex--) {
+      var roll = this._random();
+      var randomIndex = Math.max(
+        0,
+        Math.min(currentIndex, Math.floor(roll * (currentIndex + 1))),
+      );
+      var temporaryValue = ret[currentIndex];
+      ret[currentIndex] = ret[randomIndex];
+      ret[randomIndex] = temporaryValue;
+    }
+    return ret;
+  }
+
+  //Repeated install evaluation within one Choice must reuse its tie-break.
+  //Keep separate orders when the candidate set differs (for example, when an
+  //Archives install is also allowed to create a new remote).
+  _assetDestinationOrder(destinations) {
+    var cache = this._decisionRandomState
+      ? this._decisionRandomState.assetDestinationOrders
+      : null;
+    if (cache) {
+      for (var i = 0; i < cache.length; i++) {
+        if (
+          cache[i].destinations.length == destinations.length &&
+          cache[i].destinations.every(function (destination, index) {
+            return destination == destinations[index];
+          })
+        )
+          return cache[i].order.slice();
+      }
+    }
+    var order = this._shuffleCopy(destinations);
+    if (cache)
+      cache.push({
+        destinations: destinations.slice(),
+        order: order.slice(),
+      });
+    return order;
+  }
+
   _rankedInstallOptions(
     cards, //return list of preferred install options (0 highest preference) or empty array if don't want to install
     priorityOnly = false, //set true to exclude low priorities like unaffordable ice or non-ice into new server
@@ -3786,6 +3830,8 @@ class CorpAI {
     //choose an card and server to install to
     var scoringServers = this._scoringServers(emptyProtectedRemotes);
     var intoServerOptions = [];
+    var standardAssetDestinations = null;
+    var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
         //loop through scoring servers
@@ -3799,16 +3845,28 @@ class CorpAI {
         }
       } else if (CheckCardType(cards[i], ["asset"])) {
         //if installing from archives, creating a new server is fine (what's to lose? uh except: when needed, add an exception for 'trashed while being accessed' cards)
-        var assetDestinations = emptyProtectedRemotes;
-        if (assetDestinations.length < 2) {
+        var canCreateRemote = false;
+        if (emptyProtectedRemotes.length < 2) {
           if (
             cards[i].cardLocation == corp.archives.cards ||
             cards[i].cardLocation == corp.resolvingCards
           )
-            assetDestinations = assetDestinations.concat([null]);
+            canCreateRemote = true;
         }
         //loop through empty remotes in random order (skip strongest empty remote)
-        Shuffle(assetDestinations);
+        var assetDestinations = null;
+        if (canCreateRemote) {
+          if (extendedAssetDestinations == null)
+            extendedAssetDestinations = this._assetDestinationOrder(
+              emptyProtectedRemotes.concat([null]),
+            );
+          assetDestinations = extendedAssetDestinations;
+        } else {
+          if (standardAssetDestinations == null)
+            standardAssetDestinations =
+              this._assetDestinationOrder(emptyProtectedRemotes);
+          assetDestinations = standardAssetDestinations;
+        }
         for (var j = 0; j < assetDestinations.length; j++) {
           serverToInstallTo = assetDestinations[j];
           if (serverToInstallTo != strongestEmptyRemote) {
@@ -6130,17 +6188,24 @@ class CorpAI {
     this._cardDeceptionProfiles = new WeakMap();
     this._hiddenThreatProfilesByFaction = new Map();
     this._random = Math.random;
+    this._decisionRandomState = null;
   }
 
   //returns index of choice
   Choice(optionList, choiceType) {
-    var snapshot =
-      typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
-        ? DecisionSnapshots.Before(choiceType, optionList)
-        : null;
-    var ret = this._choiceInner(optionList, choiceType);
-    if (snapshot) DecisionSnapshots.After(snapshot, ret);
-    return ret;
+    var previousDecisionRandomState = this._decisionRandomState;
+    this._decisionRandomState = { assetDestinationOrders: [] };
+    try {
+      var snapshot =
+        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
+          ? DecisionSnapshots.Before(choiceType, optionList)
+          : null;
+      var ret = this._choiceInner(optionList, choiceType);
+      if (snapshot) DecisionSnapshots.After(snapshot, ret);
+      return ret;
+    } finally {
+      this._decisionRandomState = previousDecisionRandomState;
+    }
   }
 
   _choiceInner(optionList, choiceType) {
