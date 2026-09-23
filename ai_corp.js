@@ -3615,29 +3615,13 @@ class CorpAI {
       totalCost += rezCosts[i];
     }
 
-    //can I afford to rez/use all my ambushes, upgrades and hostiles?
-    var rootUseCosts = [
-      { title: "Aggressive Secretary", cost: 2 },
-      { title: "Ghost Branch", cost: 0 },
-      { title: "Project Junebug", cost: 1 },
-      { title: "Snare!", cost: 4 },
-      { title: "Urtica Cipher", cost: 0 },
-      { title: "Manegarm Skunkworks", cost: 2 },
-      { title: "Anoetic Void", cost: 0 },
-      { title: "Clearinghouse", cost: 0 },
-      { title: "Ronin", cost: 0 },
-      { title: "Hokusai Grid", cost: 2 },
-      { title: "Reversed Accounts", cost: 0 },
-      { title: "SanSan City Grid", cost: 6 },
-      { title: "Crisium Grid", cost: 3 },
-    ];
-    for (var i = 0; i < corp.remoteServers.length; i++) {
-      for (var j = 0; j < corp.remoteServers[i].root.length; j++) {
-        for (var k = 0; k < rootUseCosts.length; k++) {
-          if (GetTitle(corp.remoteServers[i].root[j]) == rootUseCosts[k].title)
-            totalCost += rootUseCosts[k].cost;
-        }
-      }
+    //Rez costs above already cover unrezzed cards in both central and remote
+    //roots. Add only the credits a card declares it expects to spend after rez.
+    for (var i = 0; i < installedCards.length; i++) {
+      totalCost += this._reserveCreditsForCard(
+        installedCards[i],
+        GetServer(installedCards[i]),
+      );
     }
 
     if (totalCost > 12 && Credits(corp) > Credits(runner)) totalCost = 12; //reduce chance Corp will get stuck
@@ -3646,6 +3630,15 @@ class CorpAI {
 
     //economy looking good
     return true;
+  }
+
+  //Cards declare state-sensitive post-rez spending with AIReserveCredits.
+  //Keep malformed third-party hooks from poisoning economy comparisons.
+  _reserveCreditsForCard(card, server) {
+    if (!card || typeof card.AIReserveCredits != "function") return 0;
+    var reserve = Number(card.AIReserveCredits.call(card, server));
+    if (!isFinite(reserve)) return 0;
+    return Math.max(0, reserve);
   }
 
   //used in _rankedInstallOptions
@@ -4231,22 +4224,20 @@ class CorpAI {
           });
         }
       }
-      //include ambushes with costs as pretend ice of infinite value in this server
-      var costyAmbushes = [{ title: "Snare!", cost: 4 }];
-      for (var i = 0; i < costyAmbushes.length; i++) {
-        var arrayToCheck = server.root;
-        if (typeof server.cards != "undefined")
-          arrayToCheck = arrayToCheck.concat(server.cards);
-        var cocin = this._copyOfCardExistsIn(
-          costyAmbushes[i].title,
-          arrayToCheck,
-        );
-        if (cocin)
+      //Access and defensive abilities can be more important than this ICE.
+      //Central cards are included because hooks such as Snare! can fire there.
+      var cardsToCheck = server.root.slice();
+      if (typeof server.cards != "undefined")
+        cardsToCheck = cardsToCheck.concat(server.cards);
+      for (var i = 0; i < cardsToCheck.length; i++) {
+        var reserveCost = this._reserveCreditsForCard(cardsToCheck[i], server);
+        if (reserveCost > 0)
           iceToCompareList.push({
-            card: cocin,
+            card: cardsToCheck[i],
             server: server,
-            cost: costyAmbushes[i].cost,
+            cost: reserveCost,
             value: Infinity,
+            isCreditReserve: true,
           });
       }
     }
@@ -4285,15 +4276,31 @@ class CorpAI {
       var serverToCompare = iceToCompareList[i].server;
       var rezCostToCompare = iceToCompareList[i].cost;
       var valueToCompare = iceToCompareList[i].value;
+      var isCreditReserve = iceToCompareList[i].isCreditReserve;
       //only check ice that could be rezzed if we don't rez this
-      if (CheckCredits(corp, rezCostToCompare, "rezzing")) {
+      if (
+        CheckCredits(
+          corp,
+          rezCostToCompare,
+          isCreditReserve ? "using" : "rezzing",
+          iceToCompare,
+        )
+      ) {
         //but couldn't be rezzed if we do rez this
-        if (!CheckCredits(corp, currentRezCost + rezCostToCompare, "rezzing")) {
+        if (
+          !CheckCredits(
+            corp,
+            currentRezCost + rezCostToCompare,
+            isCreditReserve ? "using" : "rezzing",
+            iceToCompare,
+          )
+        ) {
           //Within this server, keep the protection-value ordering. Elsewhere,
           //reserve only for a higher-value server when this specific rez is the
           //difference between a breachable route and a secure one.
           var sameServer = serverToCompare === server;
           if (
+            isCreditReserve ||
             (!sameServer &&
               valueToCompare > thisServerValue &&
               this._iceWouldSecureServer(

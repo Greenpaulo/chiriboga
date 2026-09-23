@@ -4627,6 +4627,12 @@ cardSet[31054] = {
     if (!CheckCredits(corp, 4, "using", this)) return 0;
     return 4; //3 net damage plus a tag
   },
+  AIReserveCredits: function(server) {
+    if (!server || server == corp.archives) return 0;
+    if (server.root && server.root.includes(this)) return 4;
+    if (server.cards && server.cards.includes(this)) return 4;
+    return 0;
+  },
   AIAvoidInstallingOverThis: true,
 };
 

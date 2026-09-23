@@ -2321,6 +2321,11 @@ coreSet[1057] = {
       }
     },
   },
+  AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCounters(this, "advancement", 1)) return 0;
+    return 2;
+  },
 };
 coreSet[1060] = {
   title: "Shipment from MirrorMorph",
@@ -2622,6 +2627,11 @@ coreSet[1069] = {
         );
       }
     },
+  },
+  AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCounters(this, "advancement", 1)) return 0;
+    return 1;
   },
 };
 // coreSet[1070] = {

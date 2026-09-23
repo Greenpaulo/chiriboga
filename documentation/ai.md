@@ -42,7 +42,8 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [5.7 Agendas — `AIAdvancementLimit`, `AIOverAdvance`](#57-agendas)
    - [5.8 Inline AI Code for Corp](#58-inline-ai-code-for-corp)
    - [5.9 Access Punishment — `AIPunishesAccess`](#59-access-punishment--aipunishesaccess)
-   - [5.10 Emergency Protection Draw — `AIEmergencyDraw`](#510-emergency-protection-draw--aiemergencydraw)
+   - [5.10 Reserved Credits — `AIReserveCredits`](#510-reserved-credits--aireservecredits)
+   - [5.11 Emergency Protection Draw — `AIEmergencyDraw`](#511-emergency-protection-draw--aiemergencydraw)
 6. [The Run Calculator (`rc`)](#6-the-run-calculator-rc)
 7. [Quick Reference Table](#7-quick-reference-table)
 8. [Step-by-Step Worked Example](#8-step-by-step-worked-example)
@@ -1744,6 +1745,36 @@ pay for such a card in HQ, the Corp protection score receives bounded
 deterrence. `_evaluateServerSecurity()` exposes that value as `deterrence`, but
 it never changes `isSecure`.
 
+### 5.10 Reserved Credits — `AIReserveCredits`
+
+Corp cards whose abilities expect to spend credits after installation can
+declare that amount to economy and ICE-rez planning:
+
+```js
+AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCounters(this, "advancement", 1)) return 0;
+    return 1;
+},
+```
+
+**Signature:** `AIReserveCredits(server) -> number`
+
+Return the non-negative number of credits this card would currently expect to
+spend if its ability fires in `server`, or `0` when the ability is unavailable
+or the AI would decline it. The hook must be deterministic, read-only, and safe
+outside a run. It may also recognize a card in a central server's `cards`
+array when its ability can fire from that location, as Snare! does in R&D and
+HQ.
+
+Do not include a card's rez cost. `_sufficientEconomy()` already gathers
+unrezzed asset and upgrade costs from every central and remote root, and the
+rez-decision code separately compares defensive upgrade costs. The hook is for
+additional spending such as an access trigger or a paid defensive ability.
+`_sufficientEconomy()` sums declared reserves for installed cards, while
+`_iceWorthRezzing()` uses declarations from the attacked server's root and
+central cards to avoid spending those credits on ICE first.
+
 #### Shared agenda/trap remote postures
 
 `corp.AI._remoteDeceptionProfile(card)` gives agendas and declared access traps
@@ -1768,7 +1799,7 @@ repeated evaluator calls, but is intentionally documented as an incomplete
 policy. The roadmap's required Layer 8.4 replaces lifetime caching with bounded
 decision epochs, and Layer 8.5 adds match-local feedback from public outcomes.
 
-### 5.10 Emergency Protection Draw — `AIEmergencyDraw`
+### 5.11 Emergency Protection Draw — `AIEmergencyDraw`
 
 Corp assets and upgrades that can draw cards immediately after being installed
 and rezzed may declare the number of cards drawn:
@@ -1926,6 +1957,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
+| `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |

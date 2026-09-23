@@ -40,7 +40,7 @@ context.BreakerMatchesIce = (breaker, ice) => (
     context.CheckSubType(breaker, types[0]) && context.CheckSubType(ice, types[1]))
 );
 context.PlayerCanLook = (player, card) => player === corp || !!card.rezzed;
-context.GetServer = card => servers.find(server => server.ice.includes(card));
+context.GetServer = card => servers.find(server => server.ice.includes(card) || server.root.includes(card));
 context.ServerName = server => server.serverName || 'Regression server';
 vm.createContext(context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
@@ -1085,6 +1085,55 @@ test('Snare access punishment is live only while its trigger is affordable', () 
   assert.strictEqual(snare.AIPunishesAccess(remote), 4);
   corp.creditPool = 3;
   assert.strictEqual(snare.AIPunishesAccess(remote), 0);
+});
+test('central-root rez costs are reserved once without card-title tables', () => {
+  const hokusai = card(31059); hokusai.rezzed = false;
+  const crisium = card(31079); crisium.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [hokusai]};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [crisium]};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  servers = [hq, rnd, archives];
+  corp.creditPool = 4;
+  assert.strictEqual(ai._sufficientEconomy(), false);
+  corp.creditPool = 5;
+  assert.strictEqual(ai._sufficientEconomy(), true);
+
+  const remote = {serverName: 'Remote 0', ice: [], root: [crisium]};
+  Object.assign(corp, {remoteServers: [remote]});
+  rnd.root = [];
+  servers = [hq, rnd, archives, remote];
+  corp.creditPool = 5;
+  assert.strictEqual(ai._sufficientEconomy(), true);
+});
+test('AIReserveCredits drives economy and ICE-rez planning without a title check', () => {
+  const reserveCard = {
+    title: 'Future paid ambush', player: corp, cardType: 'asset', rezCost: 0,
+    rezzed: true,
+    AIReserveCredits(server) {return server && server.root.includes(this) ? 3 : 0;},
+  };
+  const outer = etr(); outer.rezzed = false; outer.rezCost = 2;
+  const remote = {serverName: 'Remote 0', ice: [], root: [reserveCard]};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote]});
+  servers = [hq, rnd, archives, remote];
+
+  corp.creditPool = 2;
+  assert.strictEqual(ai._sufficientEconomy(), false);
+  corp.creditPool = 3;
+  assert.strictEqual(ai._sufficientEconomy(), true);
+  remote.ice.push(outer);
+  assert.strictEqual(ai._iceWorthRezzing(outer, 2, remote), false);
+});
+test('Snare reserves its actual access cost except from Archives', () => {
+  const snare = card(31054);
+  const rnd = {serverName: 'R&D', cards: [snare], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [snare], ice: [], root: []};
+  Object.assign(corp, {RnD: rnd, archives});
+  assert.strictEqual(snare.AIReserveCredits(rnd), 4);
+  assert.strictEqual(snare.AIReserveCredits(archives), 0);
 });
 test('bait posture rolls once per installed trap and can stop extra protection', () => {
   const trap = card(30045);
