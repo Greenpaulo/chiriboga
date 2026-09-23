@@ -1596,12 +1596,15 @@ AIAdvancementLimit: function() {
 },
 ```
 
-**`AIOverAdvance`** (boolean)
+**`AIOverAdvance`** (boolean, agendas only)
 
-Set to `true` if the AI should place extra counters on an already-scoreable agenda (e.g. for point bonuses from over-advancement):
+Set to `true` to keep the advance action available for an already-scoreable agenda. Pair it with `AIAdvancementLimit()` to define the total advancement-counter target; the flag itself never supplies or overrides that target. The AI may score before that limit when doing so wins the game.
 
 ```js
 AIOverAdvance: true,
+AIAdvancementLimit: function() {
+    return AdvancementRequirement(this) + 2;
+},
 ```
 
 ---
@@ -1932,7 +1935,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
-| `AIOverAdvance` | bool | True if AI should over-advance this agenda |
+| `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
 
 ---

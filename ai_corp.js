@@ -867,16 +867,15 @@ class CorpAI {
     return this._advancementLimit(card) - Counters(card, "advancement");
   }
 
+  _cardNeedsAdvancement(card, server) {
+    return Counters(card, "advancement") < this._advancementLimit(card, server);
+  }
+
   _bestAdvanceOption(optionList) {
     //currently just chooses first reasonable option (TODO need to do more work here to include/exclude/rank them)
     //e.g. using _cardShouldBeFastAdvanced and/or _isFullyAdvanceableAgenda or similar
     for (var i = 0; i < optionList.length; i++) {
-      if (
-        typeof optionList[i].card.advancement === "undefined" ||
-        optionList[i].card.advancement <
-          this._advancementLimit(optionList[i].card) ||
-        optionList[i].card.AIOverAdvance
-      )
+      if (this._cardNeedsAdvancement(optionList[i].card))
         return i;
     }
     return 0; //just arbitrary
@@ -4711,10 +4710,13 @@ class CorpAI {
   Phase_Score(optionList) {
     var cardToScore =
       phaseTemplates.corpScorableResponse.Enumerate.score()[0].card; //just use the first available score option (there's unlikely to be more than one)
-    if (cardToScore.AIOverAdvance) {
+    var scoreWinsGame =
+      AgendaPoints(corp) + (cardToScore.agendaPoints || 0) >=
+      AgendaPointsToWin();
+    if (cardToScore.AIOverAdvance && !scoreWinsGame) {
       if (typeof cardToScore.AIAdvancementLimit == "function") {
         var advLim = cardToScore.AIAdvancementLimit.call(cardToScore);
-        if (cardToScore.advancement < advLim) return -1; //don't score yet
+        if (Counters(cardToScore, "advancement") < advLim) return -1; //don't score yet
       }
     }
     var serverToScoreIn = GetServer(cardToScore);
@@ -5871,11 +5873,7 @@ class CorpAI {
                 startOrContinueAdvancement = true;
             }
             if (startOrContinueAdvancement) {
-              if (
-                typeof card.advancement === "undefined" ||
-                card.advancement < advancementLimit ||
-                card.AIOverAdvance
-              ) {
+              if (Counters(card, "advancement") < advancementLimit) {
                 //if there is an economy or fast advance card in hand, consider using it
                 var potentialAdvCards = [];
                 var potentialAdvancement = this._potentialAdvancement(
@@ -6012,9 +6010,7 @@ class CorpAI {
               );
             if (advancementLimit > 0) {
               if (
-                typeof installedCards[i].advancement === "undefined" ||
-                installedCards[i].advancement < advancementLimit ||
-                installedCards[i].advancement.AIOverAdvance
+                Counters(installedCards[i], "advancement") < advancementLimit
               ) {
                 this._log("I intend to advance ice");
                 return this._returnPreference(optionList, "advance", {

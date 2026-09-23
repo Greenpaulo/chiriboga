@@ -5,6 +5,7 @@
 **Belongs in:** Bug ticket. The findings say `documentation/backlog/bugs.md`; that path does not exist (the old file lives at `documentation/bugs/done/bugs.md`). Live tickets are raised under `documentation/bugs/` (see the `code-review/*.md` ticket format used by the recent "Added fixture files, raised bug tickets" commits). Raise it there.
 **Suggested order:** Step 2 of 5 — quick fixes.
 **Depends on:** Nothing.
+**Status:** Fixed with findings 6 and 7, documented, and regression-tested on 23 September 2026.
 
 ---
 
@@ -25,3 +26,11 @@ For `AIOverAdvance` cards, `Phase_Score` returns "don't score yet" until `AIAdva
 ## Related
 
 Findings 6 and 7 are also about the `AIOverAdvance` hook and should be fixed in the same pass; finding 7 decides the hook's final contract (boolean vs numeric).
+
+## Resolution — 23 September 2026
+
+The reported win bug was confirmed. `Phase_Score()` now compares the Corp's current points plus the scoreable agenda's points with `AgendaPointsToWin()`. A winning agenda bypasses only the optional over-advance hold, then continues through the normal before-score decision path.
+
+The implementation uses `AgendaPoints(corp)` and `AgendaPointsToWin()` rather than reading score-area totals or a fixed seven-point threshold. Regression coverage verifies the winning exemption, the unchanged non-winning hold, and scoring at the configured advancement limit.
+
+The related hook-contract work is recorded in findings 6 and 7. `node tests/run-all-tests.js` passed all 21 test files, including the Corp decision fixtures and decision snapshots.
