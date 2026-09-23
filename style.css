@@ -2751,6 +2751,115 @@ body::-webkit-scrollbar-track {
   color: var(--crt-green) !important;
 }
 
+/* Custom identity dropdown (decklauncher). The native popup is rendered by
+   the OS and opens anchored around the selected option, so long lists appear
+   as a clipped slice until you scroll them. The wrapper hides the select and
+   opens a styled listbox panel that is always fully visible (capped to 70vh
+   with its own scrollbar). Scoped to .custom-select so other pages sharing
+   this stylesheet (e.g. gauntlet.php) keep the native popup. */
+.custom-select {
+  position: relative;
+  width: 100%;
+  z-index: 30;
+}
+
+.custom-select > select {
+  display: none;
+}
+
+.custom-select-trigger {
+  display: block;
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-green);
+  color: var(--crt-green);
+  /* Reserve room for the 16px chevron drawn at right:10px, so long identity
+     titles truncate with an ellipsis instead of running under the arrow. */
+  padding: 10px 34px 10px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: normal;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--border-green), inset 0 0 12px rgba(31, 109, 31, 0.25);
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--bg-dark);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%2333ff33" d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+}
+
+.custom-select-trigger .custom-select-label {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-select-trigger:hover {
+  box-shadow: 0 0 14px rgba(51, 255, 51, 0.35), inset 0 0 16px rgba(51, 255, 51, 0.2);
+}
+
+.custom-select-trigger:focus {
+  box-shadow: 0 0 14px rgba(51, 255, 51, 0.35), inset 0 0 16px rgba(51, 255, 51, 0.2);
+  outline: 1px solid var(--crt-green);
+}
+
+/* The panel always opens fully visible: absolutely positioned under the
+   trigger and capped to the viewport with its own internal scrollbar, so the
+   whole list panel is on screen at once instead of an OS-anchored slice. */
+.custom-select-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-green);
+  border-radius: 8px;
+  box-shadow: 0 0 10px var(--border-green), inset 0 0 12px rgba(31, 109, 31, 0.25);
+  padding: 4px 0;
+  z-index: 30;
+  scrollbar-width: thin;
+  scrollbar-color: var(--crt-green) var(--bg-dark);
+}
+
+.custom-select-list.open {
+  display: block;
+}
+
+.custom-select-option {
+  padding: 8px 12px;
+  font-size: 15px;
+  color: var(--crt-green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.custom-select-option:hover,
+.custom-select-option.active {
+  background: rgba(51, 255, 51, 0.15);
+  color: var(--crt-green-pale);
+}
+
+.custom-select-option.selected {
+  background: rgba(51, 255, 51, 0.25);
+  color: var(--crt-green-pale);
+}
+
+.custom-select-option.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 #preconselect {
   width: 100%;
   background: var(--bg-dark);
@@ -3406,6 +3515,8 @@ select::-ms-expand {
 
   #identityselect,
   #preconselect,
+  .custom-select-trigger,
+  .custom-select-option,
   #deck {
     font-size: 12px;
     padding: 8px 10px;
@@ -3413,7 +3524,8 @@ select::-ms-expand {
 
   /* Keep the chevron area clear (the arrow sits at right:10px and is 16px wide). */
   #identityselect,
-  #preconselect {
+  #preconselect,
+  .custom-select-trigger {
     padding-right: 34px;
   }
 
@@ -3516,6 +3628,8 @@ select::-ms-expand {
 
   #identityselect,
   #preconselect,
+  .custom-select-trigger,
+  .custom-select-option,
   #deck {
     font-size: 11px;
     padding: 6px 8px;
@@ -3523,7 +3637,8 @@ select::-ms-expand {
 
   /* Keep the chevron area clear (the arrow sits at right:10px and is 16px wide). */
   #identityselect,
-  #preconselect {
+  #preconselect,
+  .custom-select-trigger {
     padding-right: 34px;
   }
 

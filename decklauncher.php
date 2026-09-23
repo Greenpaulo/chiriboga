@@ -1598,6 +1598,180 @@
       UpdateCardCountsUI();
     }
 
+    // Custom dropdown for #identityselect. The native popup is rendered and
+    // anchored by the OS: with a long identity list it opens as a slice
+    // around the selected option, and you must scroll it before the whole
+    // list appears. CSS cannot control that popup, so the wrapper hides the
+    // <select> and opens a styled listbox panel that is always fully visible
+    // (viewport-capped, own scrollbar). The select stays in the DOM as the
+    // single source of truth, so every existing .val(), .change(), .append()
+    // and option:checked call keeps working; picking a row sets the value and
+    // fires change exactly like the native popup did.
+    function InitIdentityCustomSelect() {
+      var $wrap = $("#identityselect-custom");
+      var $select = $("#identityselect");
+      var $trigger = $("#identityselect-trigger");
+      var $list = $("#identityselect-list");
+      if (!$wrap.length || !$select.length || !$trigger.length || !$list.length) return;
+      var $label = $trigger.find(".custom-select-label");
+      var lastSyncedValue = null;
+      var lastSyncedCount = -1;
+
+      function IsOpen() {
+        return $list.hasClass("open");
+      }
+
+      function MarkActive($opt) {
+        $list.find(".custom-select-option.active").removeClass("active");
+        if ($opt && $opt.length) $opt.addClass("active");
+      }
+
+      function ActiveAsOption() {
+        var $selected = $list.find(".custom-select-option.selected");
+        return $selected.length ? $selected : $list.find(".custom-select-option").first();
+      }
+
+      function ScrollActiveIntoView() {
+        // Scroll only the panel so the page itself never moves.
+        var el = $list.find(".custom-select-option.active")[0];
+        var listEl = $list[0];
+        if (!el) return;
+        if (el.offsetTop < listEl.scrollTop) listEl.scrollTop = el.offsetTop;
+        else if (el.offsetTop + el.offsetHeight > listEl.scrollTop + listEl.clientHeight)
+          listEl.scrollTop = el.offsetTop + el.offsetHeight - listEl.clientHeight;
+      }
+
+      function RenderIdentitySelect() {
+        var select = $select[0];
+        lastSyncedValue = select.value;
+        lastSyncedCount = select.options.length;
+        $list.empty();
+        for (var i = 0; i < select.options.length; i++) {
+          var opt = select.options[i];
+          var $opt = $('<div class="custom-select-option" role="option"></div>')
+            .attr("data-value", opt.value)
+            .text(opt.textContent)
+            .toggleClass("selected", opt.selected)
+            .attr("aria-selected", opt.selected ? "true" : "false");
+          if (opt.disabled) $opt.addClass("disabled").attr("aria-disabled", "true");
+          $list.append($opt);
+        }
+        var selected = select.options[select.selectedIndex];
+        $label.text(selected ? selected.textContent : "Select Identity");
+        if (IsOpen()) MarkActive(ActiveAsOption());
+      }
+
+      function OpenList() {
+        if (IsOpen()) return;
+        RenderIdentitySelect();
+        $list.addClass("open");
+        $trigger.attr("aria-expanded", "true");
+        MarkActive(ActiveAsOption());
+        var active = $list.find(".custom-select-option.active")[0];
+        if (active) {
+          // Centre the selection inside the panel; the panel sits at the top
+          // of the page and is capped to 70vh, so it is always completely on
+          // screen — no page scrolling needed to see the whole list.
+          $list[0].scrollTop = Math.max(0, active.offsetTop - ($list[0].clientHeight - active.offsetHeight) / 2);
+        }
+        $list.focus();
+      }
+
+      function CloseList(refocusTrigger) {
+        if (!IsOpen()) return;
+        $list.removeClass("open");
+        $trigger.attr("aria-expanded", "false");
+        if (refocusTrigger) $trigger.focus();
+      }
+
+      function ChooseOption($opt) {
+        if (!$opt || !$opt.length || $opt.hasClass("disabled")) return;
+        $select.val($opt.attr("data-value"));
+        RenderIdentitySelect();
+        CloseList(true);
+        // Same effect as picking from the native popup: value is set and
+        // change fires, so the existing handler regenerates the deck.
+        $select.trigger("change");
+      }
+
+      if ($wrap.data("custom-select-render")) {
+        // Defensive: if setup runs again, re-render instead of binding
+        // duplicate handlers or starting a second sync interval.
+        $wrap.data("custom-select-render")();
+        return;
+      }
+      $trigger.on("click", function() {
+        if (IsOpen()) CloseList(false);
+        else OpenList();
+      });
+
+      $trigger.on("keydown", function(e) {
+        // Enter/Space fall through to the button's native click toggle.
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          OpenList();
+        } else if (e.key === "Escape") {
+          CloseList(false);
+        }
+      });
+
+      $list.on("click", ".custom-select-option", function() {
+        ChooseOption($(this));
+      });
+
+      $list.on("keydown", function(e) {
+        var $opts = $list.find(".custom-select-option");
+        if (!$opts.length) return;
+        var $active = $list.find(".custom-select-option.active");
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          var step = e.key === "ArrowDown" ? 1 : -1;
+          var idx = $active.length ? $opts.index($active[0]) : -1;
+          var next = idx < 0 ? (step > 0 ? 0 : $opts.length - 1) : (idx + step + $opts.length) % $opts.length;
+          for (var i = 0; i < $opts.length && $opts.eq(next).hasClass("disabled"); i++) {
+            next = (next + step + $opts.length) % $opts.length;
+          }
+          MarkActive($opts.eq(next));
+          ScrollActiveIntoView();
+        } else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          ChooseOption($active);
+        } else if (e.key === "Escape") {
+          CloseList(true);
+        } else if (e.key === "Tab") {
+          CloseList(false);
+        }
+      });
+
+      // Close when clicking anywhere outside the widget.
+      $(document).on("mousedown.identitySelectCustom", function(e) {
+        if (!$(e.target).closest("#identityselect-custom").length) CloseList(false);
+      });
+
+      $select.on("change", RenderIdentitySelect);
+      if (window.MutationObserver) {
+        // Catch option lists rebuilt after init (append/empty/disable).
+        new MutationObserver(RenderIdentitySelect).observe($select[0], {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["disabled", "selected", "value"],
+        });
+      }
+      // .val() and .prop("selected", ...) can change the selection without
+      // firing an event or mutating an observed attribute, so poll cheaply to
+      // keep the trigger label and highlighted row in sync.
+      setInterval(function() {
+        var select = $select[0];
+        if (select.value !== lastSyncedValue || select.options.length !== lastSyncedCount) {
+          RenderIdentitySelect();
+        }
+      }, 300);
+
+      $wrap.data("custom-select-render", RenderIdentitySelect);
+      RenderIdentitySelect();
+    }
+
     function Init() {
       // Wait for additional sets to be loaded
       if (!window._customSetsReady) {
@@ -2412,6 +2586,12 @@
         );
       }
 
+      // Build the custom identity dropdown now that all <option>s exist. The
+      // native popup renders clipped near the window edge for long lists; the
+      // styled panel always opens fully visible while the hidden select stays
+      // the source of truth for every existing handler.
+      InitIdentityCustomSelect();
+
       // Clicking the identity image opens the lightbox for that identity
       $('#identity').off('click').on('click', function() {
         if (json && json.identity) {
@@ -2656,7 +2836,13 @@
   <div id="contentcontainer">
     <div id="dataentry">
       <div class="leftrow toprow">
-        <select id="identityselect"></select>
+        <div class="custom-select" id="identityselect-custom">
+          <select id="identityselect"></select>
+          <button type="button" class="custom-select-trigger" id="identityselect-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="identityselect-list">
+            <span class="custom-select-label"></span>
+          </button>
+          <div class="custom-select-list" id="identityselect-list" role="listbox" tabindex="-1" aria-label="Identity"></div>
+        </div>
         <select id="preconselect">
           <option value="-1">Load Precon Deck</option>
         </select>
