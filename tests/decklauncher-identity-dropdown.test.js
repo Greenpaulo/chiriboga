@@ -56,6 +56,37 @@ assert(
   'option list rebuilds must be observed to re-render the panel',
 );
 
+// --- Precon dropdown uses the same widget ---
+assert(
+  source.includes('<div class="custom-select" id="preconselect-custom">'),
+  'precon select needs the custom-select wrapper',
+);
+assert(
+  source.includes('<select id="preconselect">'),
+  'native precon select must stay in the DOM as the source of truth',
+);
+assert(source.includes('id="preconselect-trigger"'), 'precon trigger button is missing');
+assert(source.includes('id="preconselect-list"'), 'precon listbox panel is missing');
+assert(
+  source.includes('function InitCustomSelect(selectId'),
+  'generic custom select widget is missing',
+);
+assert(
+  widget.includes('InitCustomSelect("identityselect"'),
+  'identity dropdown must go through the generic widget',
+);
+const preconInitIdx = source.indexOf('InitCustomSelect("preconselect"');
+const preconHandlerIdx = source.indexOf("$('#preconselect').off('change')");
+assert(preconInitIdx > -1, 'precon dropdown must be initialized');
+assert(
+  preconInitIdx > preconHandlerIdx,
+  'precon widget must initialize after its change handler is bound so the widget render listener survives',
+);
+assert(
+  /#preconselect-custom\s*\{\s*margin-top:\s*8px/.test(css),
+  'precon wrapper must keep the 8px gap the native select had',
+);
+
 // --- CSS: panel always fully visible, scrollable inside itself ---
 const listRule = css.match(/\.custom-select-list\s*\{[^}]*\}/);
 assert(listRule, '.custom-select-list rule missing');

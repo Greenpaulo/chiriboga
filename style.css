@@ -2898,6 +2898,12 @@ body::-webkit-scrollbar-track {
   color: var(--crt-green) !important;
 }
 
+/* The native select's 8px gap lived on #preconselect, which the widget now
+   hides; move it to the visible wrapper so vertical spacing is unchanged. */
+#preconselect-custom {
+  margin-top: 8px;
+}
+
 #identity {
   width: 100%;
   display: block;

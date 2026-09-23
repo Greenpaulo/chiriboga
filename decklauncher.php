@@ -1598,20 +1598,28 @@
       UpdateCardCountsUI();
     }
 
-    // Custom dropdown for #identityselect. The native popup is rendered and
-    // anchored by the OS: with a long identity list it opens as a slice
-    // around the selected option, and you must scroll it before the whole
-    // list appears. CSS cannot control that popup, so the wrapper hides the
-    // <select> and opens a styled listbox panel that is always fully visible
-    // (viewport-capped, own scrollbar). The select stays in the DOM as the
-    // single source of truth, so every existing .val(), .change(), .append()
-    // and option:checked call keeps working; picking a row sets the value and
-    // fires change exactly like the native popup did.
+    // Custom dropdown widget for the deck launcher's selects (identity and
+    // precon). The native popup is rendered and anchored by the OS: with a
+    // long list it opens as a slice around the selected option, and you must
+    // scroll it before the whole list appears. CSS cannot control that popup,
+    // so each wrapper hides its <select> and opens a styled listbox panel
+    // that is always fully visible (viewport-capped, own scrollbar). The
+    // select stays in the DOM as the single source of truth, so every
+    // existing .val(), .change(), .append() and option:checked call keeps
+    // working; picking a row sets the value and fires change exactly like
+    // the native popup did.
     function InitIdentityCustomSelect() {
-      var $wrap = $("#identityselect-custom");
-      var $select = $("#identityselect");
-      var $trigger = $("#identityselect-trigger");
-      var $list = $("#identityselect-list");
+      InitCustomSelect("identityselect", "Select Identity");
+    }
+
+    // Generic widget: wrapper/trigger/list ids are derived from the select
+    // id (e.g. "preconselect" -> #preconselect-custom/-trigger/-list), so
+    // every select wrapped in .custom-select markup shares one behaviour.
+    function InitCustomSelect(selectId, placeholderLabel) {
+      var $wrap = $("#" + selectId + "-custom");
+      var $select = $("#" + selectId);
+      var $trigger = $("#" + selectId + "-trigger");
+      var $list = $("#" + selectId + "-list");
       if (!$wrap.length || !$select.length || !$trigger.length || !$list.length) return;
       var $label = $trigger.find(".custom-select-label");
       var lastSyncedValue = null;
@@ -1657,7 +1665,7 @@
           $list.append($opt);
         }
         var selected = select.options[select.selectedIndex];
-        $label.text(selected ? selected.textContent : "Select Identity");
+        $label.text(selected ? selected.textContent : (placeholderLabel || "Select"));
         if (IsOpen()) MarkActive(ActiveAsOption());
       }
 
@@ -1743,9 +1751,10 @@
         }
       });
 
-      // Close when clicking anywhere outside the widget.
-      $(document).on("mousedown.identitySelectCustom", function(e) {
-        if (!$(e.target).closest("#identityselect-custom").length) CloseList(false);
+      // Close when clicking anywhere outside this widget. The event namespace
+      // is per select so multiple widgets on the page never collide.
+      $(document).on("mousedown.selectCustom." + selectId, function(e) {
+        if (!$(e.target).closest("#" + selectId + "-custom").length) CloseList(false);
       });
 
       $select.on("change", RenderIdentitySelect);
@@ -2586,11 +2595,15 @@
         );
       }
 
-      // Build the custom identity dropdown now that all <option>s exist. The
-      // native popup renders clipped near the window edge for long lists; the
-      // styled panel always opens fully visible while the hidden select stays
-      // the source of truth for every existing handler.
+      // Build the custom dropdowns now that all identity <option>s exist. The
+      // native popups render clipped near the window edge for long lists; the
+      // styled panels always open fully visible while the hidden selects stay
+      // the source of truth for every existing handler. The precon widget is
+      // set up after its change handler bound above, so the widget's own
+      // render listener is never removed; PopulatePreconDropdownForIdentity
+      // repopulating its options is observed and re-rendered.
       InitIdentityCustomSelect();
+      InitCustomSelect("preconselect", "Load Precon Deck");
 
       // Clicking the identity image opens the lightbox for that identity
       $('#identity').off('click').on('click', function() {
@@ -2843,9 +2856,15 @@
           </button>
           <div class="custom-select-list" id="identityselect-list" role="listbox" tabindex="-1" aria-label="Identity"></div>
         </div>
-        <select id="preconselect">
-          <option value="-1">Load Precon Deck</option>
-        </select>
+        <div class="custom-select" id="preconselect-custom">
+          <select id="preconselect">
+            <option value="-1">Load Precon Deck</option>
+          </select>
+          <button type="button" class="custom-select-trigger" id="preconselect-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="preconselect-list">
+            <span class="custom-select-label"></span>
+          </button>
+          <div class="custom-select-list" id="preconselect-list" role="listbox" tabindex="-1" aria-label="Precon deck"></div>
+        </div>
         <img id="identity" src="images/glow_outline.png">
         <div class="rightpart">
           <div id="output">
