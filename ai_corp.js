@@ -3960,56 +3960,123 @@ class CorpAI {
 
   //**CORP PHASE RESPONSES**
   //(these take optionList as input, and return index of choice)
+  _openingHandEconomyCard(card) {
+    if (!card) return false;
+    //Transactions and Advertisements cover the standard economy categories;
+    //other economy cards can opt in without adding title checks here.
+    if (CheckSubType(card, "Transaction")) return true;
+    if (CheckSubType(card, "Advertisement")) return true;
+    return card.AIEconomyCard === true;
+  }
+
+  _openingHandSummary(cards) {
+    var ret = { iceCount: 0, iceValue: 0, economyCount: 0, agendaCount: 0 };
+    for (var i = 0; i < cards.length; i++) {
+      var card = cards[i];
+      if (card.cardType == "ice") {
+        ret.iceCount++;
+        //Cheap ICE is more useful in an opening hand because two centrals need
+        //cover and both installs and rezzes must come from the initial credits.
+        var iceValue = Math.max(0.5, 3 - 0.5 * RezCost(card));
+        if (RezCost(card) > corp.creditPool) iceValue *= 0.5;
+        ret.iceValue += iceValue;
+      } else if (card.cardType == "agenda") ret.agendaCount++;
+      if (this._openingHandEconomyCard(card)) ret.economyCount++;
+    }
+    return ret;
+  }
+
+  _openingHandCountValue(kind, count) {
+    if (kind == "ice") return [0, 1.5, 2.5][Math.min(2, count)];
+    if (kind == "economy")
+      return [0, 1.25, 2.25, 2.75][Math.min(3, count)];
+    //One agenda is normal. Further agendas compound HQ exposure and reduce the
+    //number of cards available to establish defense and economy.
+    if (kind == "agenda")
+      return -[0, 0, 1.5, 4.5, 8, 12][Math.min(5, count)];
+    return 0;
+  }
+
+  _openingHandScore(cards) {
+    var summary = this._openingHandSummary(cards);
+    return (
+      summary.iceValue +
+      this._openingHandCountValue("ice", summary.iceCount) +
+      this._openingHandCountValue("economy", summary.economyCount) +
+      this._openingHandCountValue("agenda", summary.agendaCount)
+    );
+  }
+
+  _combinationCount(n, k) {
+    if (k < 0 || k > n) return 0;
+    k = Math.min(k, n - k);
+    var ret = 1;
+    for (var i = 1; i <= k; i++) ret = (ret * (n - k + i)) / i;
+    return ret;
+  }
+
+  _expectedOpeningHandCountValue(kind, population, matches, draws) {
+    var denominator = this._combinationCount(population, draws);
+    if (denominator <= 0) return 0;
+    var ret = 0;
+    var minimum = Math.max(0, draws - (population - matches));
+    var maximum = Math.min(draws, matches);
+    for (var count = minimum; count <= maximum; count++) {
+      var ways =
+        this._combinationCount(matches, count) *
+        this._combinationCount(population - matches, draws - count);
+      ret +=
+        (ways / denominator) * this._openingHandCountValue(kind, count);
+    }
+    return ret;
+  }
+
+  _expectedOpeningHandScore(cards, handSize) {
+    var draws = Math.min(handSize, cards.length);
+    if (draws < 1) return 0;
+    var summary = this._openingHandSummary(cards);
+    return (
+      (summary.iceValue * draws) / cards.length +
+      this._expectedOpeningHandCountValue(
+        "ice",
+        cards.length,
+        summary.iceCount,
+        draws,
+      ) +
+      this._expectedOpeningHandCountValue(
+        "economy",
+        cards.length,
+        summary.economyCount,
+        draws,
+      ) +
+      this._expectedOpeningHandCountValue(
+        "agenda",
+        cards.length,
+        summary.agendaCount,
+        draws,
+      )
+    );
+  }
+
   Phase_Mulligan(optionList) {
-    //check if total playable ICE count in the opening hand equals 0
-    var playableIceCount = 0;
     var handCards = corp.HQ.cards || [];
-    for (var i = 0; i < handCards.length; i++) {
-      if (handCards[i].cardType == "ice") {
-        playableIceCount++;
-      }
-    }
-    if (playableIceCount === 0) {
-      this._log("0 ICE in hand - mulligan");
+    var redrawPool = handCards.concat((corp.RnD && corp.RnD.cards) || []);
+    var handScore = this._openingHandScore(handCards);
+    var redrawScore = this._expectedOpeningHandScore(
+      redrawPool,
+      handCards.length,
+    );
+    this._log(
+      "Opening hand score " +
+        handScore.toFixed(2) +
+        "; fresh-hand expectation " +
+        redrawScore.toFixed(2),
+    );
+    if (handScore < redrawScore) {
+      this._log("Fresh hand has better expected value - mulligan");
       return optionList.indexOf("m");
     }
-    var handCards = corp.HQ.cards || [];
-    var playableIceCount = this._affordableIce(null).length;
-    var agendaCount = handCards.filter((c) => c.cardType === "agenda").length;
-
-    // Condition 1: Absolutely no playable ICE to defend HQ/R&D on Turn 1
-    if (playableIceCount === 0) {
-      this._log("0 playable ICE in hand - mulligan");
-      return optionList.indexOf("m");
-    }
-
-    // Condition 2: Flooded with Agendas without sufficient early defense
-    if (agendaCount >= 2 && playableIceCount < 2) {
-      this._log("Agenda flood with weak ICE defense - mulligan");
-      return optionList.indexOf("m");
-    }
-
-    // Condition 3: Baseline ICE density check
-    if (playableIceCount < 2) {
-      this._log("Didn't draw enough playable ICE");
-      return optionList.indexOf("m");
-    }
-
-    //check there is enough ice
-    if (this._affordableIce(null).length < 2) {
-      this._log("Didn't draw enough ice");
-      return optionList.indexOf("m");
-    }
-    //check there aren't too many agendas in hand
-    var agendasInHand = 0;
-    for (var i = 0; i < corp.HQ.cards.length; i++) {
-      if (corp.HQ.cards[i].cardType == "agenda") agendasInHand++;
-    }
-    if (agendasInHand > 2) {
-      this._log("Drew too many agendas");
-      return optionList.indexOf("m");
-    }
-    this._log("This hand will do");
+    this._log("Opening hand meets fresh-hand expectation");
     return optionList.indexOf("n"); //not mulligan
   }
 

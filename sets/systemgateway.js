@@ -5192,6 +5192,7 @@ cardSet[30071] = {
     }
     return -1; //don't install
   },
+  AIEconomyCard: true,
 };
 cardSet[30072] = {
   title: "Palisade",

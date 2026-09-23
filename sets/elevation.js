@@ -3900,6 +3900,7 @@ cardSet[35072] = {
     if (currentPhase.identifier === "Runner 2.2") return true;
     return false;
   },
+  AIEconomyCard: true,
 };
 
 //Card 29: Otto Campaign
