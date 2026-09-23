@@ -215,11 +215,11 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 #### Layer 7.3: Outcome-Based Ordinary Purge — `[COMPLETED]`
 
-- **Decision boundary:** Because a basic purge consumes the Corp's turn, `_ordinaryPurgeOutcome()` acts only when a guarded post-purge comparison opens an immediate agenda score or changes a staked server from breachable to secure. The critical-central path continues to handle a material reduction in immediate game-loss probability.
-- **Complete purge model:** Virus counters are cleared and cards declaring `AIDisabledByPurge` are treated as inactive. This covers purge-triggered trash such as _Clot_ and _Physarum Entangler_, not merely cards with counters.
-- **State safety:** `_withHypothetical()` restores counter values, disabled state, and property ownership through `finally`, including when evaluation throws.
+- **Decision boundary:** Because a basic purge consumes the Corp's turn, `_ordinaryPurgeOutcome()` acts only when a guarded post-purge comparison opens an immediate agenda score or changes a server containing an agenda or remote HVT from breachable to secure. A merely nonempty R&D or Archives is not sufficient. The critical-central path continues to handle a material reduction in immediate game-loss probability.
+- **Complete purge model:** Virus counters are cleared and cards declaring `AIDisabledByPurge` are temporarily removed from their installed locations. This covers purge-triggered trash such as _Clot_ and _Physarum Entangler_, not merely cards with counters, and matches production `InstalledCards()`/`ActiveCards()` semantics. If a public card declares `AIPreventsPurgeTrash`, purge-trash cards conservatively remain active because the Runner can prevent the assumed removal.
+- **State safety:** `_withHypothetical()` restores counter values, exact installed-array positions, `notInstalled` property ownership/value, and card ordering through `finally`, including when evaluation throws.
 - **Rejected design:** The earlier weighted server-value threshold was not retained because its coefficients were uncalibrated and could hide the three-click opportunity cost behind an arbitrary score.
-- **Regression coverage:** Botulus route security, zero-counter purge-trash effects, Clot score windows, deterministic repeated evaluation, and exception-safe restoration.
+- **Regression coverage:** Botulus route security, irrelevant counter totals, a central without agendas, zero-counter purge-trash effects and public trash prevention, Clot score windows, deterministic evaluation without RNG, and exception-safe restoration of exact installed state.
 
 ---
 

@@ -1224,12 +1224,16 @@ when adjusting them.
 
 The ordinary three-click purge uses `corp.AI._ordinaryPurgeOutcome()`. It does
 not assign an arbitrary value to raw virus-counter totals. A guarded
-hypothetical clears counters and disables installed Runner cards whose
-`AIDisabledByPurge` hook is `true`, then chooses purge only if this opens an
-immediate agenda score or makes a staked server secure. The helper restores all
-temporary values in `finally`. Cards trashed by purge, including _Clot_ and
-_Physarum Entangler_, must declare `AIDisabledByPurge` at the bottom of their
-card object so counterless purge effects are represented.
+hypothetical clears counters and temporarily removes installed Runner cards
+whose `AIDisabledByPurge` hook is `true`, then chooses purge only if this opens
+an immediate agenda score or makes a server containing an agenda or remote HVT
+secure. The helper restores exact card locations, ordering, counters, and
+install-state properties in `finally`. Cards trashed by purge, including _Clot_
+and _Physarum Entangler_, must declare `AIDisabledByPurge` at the bottom of
+their card object so counterless purge effects are represented. Public trash
+prevention such as _Sacrificial Construct_ declares `AIPreventsPurgeTrash`; the
+ordinary purge evaluation then conservatively keeps purge-trash cards active
+while still clearing their virus counters.
 
 ### 4.22 Public Successful-Run Pressure — `AIPublicRunPressure`
 
@@ -1867,6 +1871,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
+| `AIPreventsPurgeTrash` | boolean | Conservatively keep purge-trashed Runner cards active in an ordinary-purge hypothetical while this public prevention is available |
 | `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
 | `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
 | `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |

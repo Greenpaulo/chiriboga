@@ -1,6 +1,6 @@
 # Corp AI finding 3: Purge is a random roll instead of a value decision
 
-**Status:** Implemented after design review on 22 September 2026.
+**Status:** Corrected after implementation review on 23 September 2026; ready for code review.
 
 **Source:** `documentation/backlog/corp_ai_review_findings.md`, item 3.
 **File:** `ai_corp.js` — `Phase_Main` purge branch (~5238) and `_criticalBreachDefenseAction()` (~4950). Line numbers drift; search by function name.
@@ -47,9 +47,10 @@ one concrete, full-turn-worthy state transition:
 - a currently unavailable immediate agenda score becomes available; or
 - a currently breachable server with real stakes becomes secure.
 
-The guarded hypothetical clears virus counters and disables cards declaring
-`AIDisabledByPurge`, then restores both own-property state and values in a
-`finally` block. Clot and Physarum Entangler declare that hook. The separate
+The guarded hypothetical clears virus counters and removes cards declaring
+`AIDisabledByPurge` from the hypothetical installed state, then restores their
+exact locations, ordering, own-property state, and values in a `finally` block.
+Clot and Physarum Entangler declare that hook. The separate
 critical-central path remains probability based because it compares a specific
 immediate game-loss risk before and after purge.
 
@@ -57,3 +58,40 @@ Regression coverage includes Botulus counters, a zero-counter purge-trash card,
 Clot opening a score window, deterministic repeat evaluation, and restoration
 after an evaluator exception. Raw counter totals, card-title checks and RNG no
 longer decide the ordinary purge.
+
+## Implementation review correction — 23 September 2026
+
+Review against the production engine found that the initial hypothetical was
+not valid: it set an ad-hoc `card.disabled` property, while the real
+`CheckHasAbilities()` does not consult that property. The focused test harness
+did, masking the discrepancy. A purge-trash card could therefore remain active
+in real AI evaluation.
+
+The corrected hypothetical temporarily detaches cards declaring
+`AIDisabledByPurge` from their actual installed arrays and marks them
+`notInstalled`. It restores their exact array positions, prior `notInstalled`
+ownership/value, and virus counters in `finally`, including when evaluation
+throws. This represents the post-purge absence consumed by `InstalledCards()`,
+`ActiveCards()`, and `CheckInstalled()` without invoking live move/trash
+triggers during planning.
+
+The review also narrowed central-server stakes. A nonempty R&D or Archives no
+longer justifies spending the whole Corp turn on an ordinary purge by itself;
+the central must contain agenda points. HQ still requires an agenda in hand,
+and remotes still require an agenda, ambush, or hostile card. Added regressions
+cover unmodeled counters regardless of quantity, deterministic behavior with
+`Math.random` made unusable, a central with no agenda, real installed-location
+removal, exact restoration, and exception safety.
+
+Finally, purge-triggered trash is preventable. _Sacrificial Construct_ now
+declares `AIPreventsPurgeTrash`. While public prevention is active, the
+hypothetical conservatively keeps purge-trash cards installed but still clears
+virus counters. This prevents the Corp from spending its turn for a security or
+scoring transition the Runner can publicly stop.
+
+## Verification
+
+- `node -c ai_corp.js`: passed.
+- `node tests/corp-server-security.test.js`: **112 regression cases passed**.
+- `node tests/run-all-tests.js`: **19 test files passed**, including the Corp decision-fixture and decision-snapshot suites.
+- `git diff --check`: passed.

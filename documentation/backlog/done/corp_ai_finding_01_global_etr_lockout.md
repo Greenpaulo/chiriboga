@@ -1,6 +1,6 @@
 # Corp AI: global end-the-run counters are treated as a permanent server lockout
 
-**Suggested location:** `documentation/backlog/` (currently in `documentation/backlog/code-review/`; move to the completed findings location once merged).
+**Archived location:** `documentation/backlog/done/` after implementation and code review.
 **Source:** `documentation/backlog/corp_ai_review_findings.md`, finding 1.
 **Files:** `ai_corp.js`, `sets/systemupdate2021.js`, `tests/corp-server-security.test.js`, and `documentation/corp-ai/roadmaps/corp_ai_improvement_roadmap.md` (line numbers drift; search by function name).
 **Status:** Fixed and regression-tested. See section 8 for the implementation record.
@@ -194,3 +194,11 @@ No hidden-information access, counter mutation, or run-state mutation was added 
 - `node -c ai_corp.js` passes.
 - `git diff --check` passes.
 - A repository search shows no remaining production or active-reference use of `_hasGlobalETR()`; historical planning documents retain the old name only when describing the previous implementation.
+
+### 8.3 Code-review validation — 23 September 2026
+
+- Revalidated the implementation against the current evaluator, Nisei's live activation path, the AI hook reference, the security roadmap, and the acceptance criteria above.
+- Confirmed the hook remains at the bottom of the card object with the other AI hooks and that planning and activation both call it.
+- `node tests/corp-server-security.test.js`: **109 regression cases passed**.
+- `node tests/run-all-tests.js`: **19 test files passed**, including the Corp decision-fixture and decision-snapshot suites.
+- No corrective code change was required; the ticket is ready for the completed backlog.

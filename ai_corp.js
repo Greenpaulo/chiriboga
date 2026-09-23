@@ -40,20 +40,48 @@ class CorpAI {
       server: server,
       secure: this._evaluateServerSecurity(server).isSecure,
     }));
+    //Trash caused by purge can be preventable. If public prevention is live,
+    //conservatively keep purge-trash cards installed; counters are still
+    //cleared, so a purge justified independently of the trash remains visible.
+    var purgeTrashCanBePrevented = ActiveCards(runner).some(
+      (card) =>
+        card &&
+        CheckHasAbilities(card) &&
+        card.AIPreventsPurgeTrash === true,
+    );
     var saved = purgeable.map((card) => ({
       card: card,
       virusOwn: Object.prototype.hasOwnProperty.call(card, "virus"),
       virus: card.virus,
-      disabledOwn: Object.prototype.hasOwnProperty.call(card, "disabled"),
-      disabled: card.disabled,
+      notInstalledOwn: Object.prototype.hasOwnProperty.call(
+        card,
+        "notInstalled",
+      ),
+      notInstalled: card.notInstalled,
+      location: Array.isArray(card.cardLocation) ? card.cardLocation : null,
+      locationIndex: Array.isArray(card.cardLocation)
+        ? card.cardLocation.indexOf(card)
+        : -1,
     }));
 
     return this._withHypothetical(
       () => {
         for (var i = 0; i < purgeable.length; i++) {
           if (Counters(purgeable[i], "virus") > 0) purgeable[i].virus = 0;
-          if (purgeable[i].AIDisabledByPurge === true)
-            purgeable[i].disabled = true;
+        }
+        //A purge-trash card must be absent, not merely marked with an ad-hoc
+        //property: the production CheckHasAbilities() does not read .disabled.
+        //Remove in reverse installed order so saved indices remain valid.
+        for (var i = saved.length - 1; i >= 0; i--) {
+          var state = saved[i];
+          if (
+            state.card.AIDisabledByPurge !== true ||
+            purgeTrashCanBePrevented
+          )
+            continue;
+          state.card.notInstalled = true;
+          if (state.location && state.locationIndex > -1)
+            state.location.splice(state.locationIndex, 1);
         }
       },
       () => {
@@ -73,10 +101,19 @@ class CorpAI {
       () => {
         for (var i = 0; i < saved.length; i++) {
           var state = saved[i];
+          if (
+            state.card.AIDisabledByPurge === true &&
+            !purgeTrashCanBePrevented &&
+            state.location &&
+            state.locationIndex > -1 &&
+            state.location.indexOf(state.card) < 0
+          )
+            state.location.splice(state.locationIndex, 0, state.card);
           if (state.virusOwn) state.card.virus = state.virus;
           else delete state.card.virus;
-          if (state.disabledOwn) state.card.disabled = state.disabled;
-          else delete state.card.disabled;
+          if (state.notInstalledOwn)
+            state.card.notInstalled = state.notInstalled;
+          else delete state.card.notInstalled;
         }
       },
     );
@@ -84,8 +121,8 @@ class CorpAI {
 
   _purgeServerHasStakes(server) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
-    if (server == corp.RnD) return (server.cards || []).length > 0;
-    if (server == corp.archives) return (server.cards || []).length > 0;
+    if (server == corp.RnD || server == corp.archives)
+      return this._agendaPointsInServer(server) > 0;
     return this._HVTsInServer(server) > 0;
   }
 

@@ -950,17 +950,43 @@ test('ordinary purge is deterministic and closes a staked route opened by Botulu
   wall.hostedCards = [botulus]; runner.cards = [botulus];
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
-    RnD: {cards: [{}], ice: [wall], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [wall], root: []},
     archives: {cards: [], ice: [], root: []},
     remoteServers: [],
   });
   servers = [corp.HQ, corp.RnD, corp.archives];
   const first = ai._ordinaryPurgeOutcome();
-  const second = ai._ordinaryPurgeOutcome();
+  const oldRandom = Math.random; Math.random = () => {throw Error('random purge');};
+  let second;
+  try { second = ai._ordinaryPurgeOutcome(); } finally { Math.random = oldRandom; }
   assert(first && first.reason.includes('secures'));
   assert.deepStrictEqual(second, first);
   assert.strictEqual(botulus.virus, 1);
   assert.strictEqual(botulus.disabled, undefined);
+});
+test('ordinary purge ignores modeled route pressure when the central has no agenda', () => {
+  const wall = etr();
+  const botulus = card(30004); botulus.host = wall; botulus.virus = 1;
+  wall.hostedCards = [botulus]; runner.cards = [botulus];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{player: corp, cardType: 'operation'}], ice: [wall], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
+  assert.strictEqual(botulus.virus, 1);
+});
+test('ordinary purge ignores virus counters with no modeled outcome', () => {
+  const irrelevant = {player: runner, virus: 20}; runner.cards = [irrelevant];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
+  assert.strictEqual(irrelevant.virus, 20);
 });
 test('purge models cards trashed by purge even when they have no counters', () => {
   const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});
@@ -968,21 +994,39 @@ test('purge models cards trashed by purge even when they have no counters', () =
     player: runner, host: wall, AIDisabledByPurge: true,
     AIBypassCost(target) { return target === wall ? 0 : Infinity; },
   };
-  runner.cards = [bypass]; runner.creditPool = 5;
+  runner.cards = [bypass]; bypass.cardLocation = runner.cards; runner.creditPool = 5;
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
-    RnD: {cards: [{}], ice: [wall], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [wall], root: []},
     archives: {cards: [], ice: [], root: []},
     remoteServers: [],
   });
   servers = [corp.HQ, corp.RnD, corp.archives];
   assert(ai._ordinaryPurgeOutcome().reason.includes('secures'));
-  assert.strictEqual(bypass.disabled, undefined);
+  assert.deepStrictEqual(runner.cards, [bypass]);
+  assert.strictEqual(bypass.notInstalled, undefined);
+});
+test('ordinary purge does not assume preventable purge-trash cards leave play', () => {
+  const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});
+  const bypass = {
+    player: runner, host: wall, AIDisabledByPurge: true,
+    AIBypassCost(target) { return target === wall ? 0 : Infinity; },
+  };
+  const prevention = {player: runner, AIPreventsPurgeTrash: true};
+  runner.cards = [bypass, prevention]; bypass.cardLocation = runner.cards;
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [wall], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
+  assert.deepStrictEqual(runner.cards, [bypass, prevention]);
 });
 test('purge models Clot leaving play when that opens an immediate score', () => {
   const agenda = {player: corp, cardType: 'agenda'};
   const clot = card(31005); clot.agendasInstalledThisTurn = [agenda];
-  runner.cards = [clot];
+  runner.cards = [clot]; clot.cardLocation = runner.cards;
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
     RnD: {cards: [], ice: [], root: []},
@@ -991,18 +1035,19 @@ test('purge models Clot leaving play when that opens an immediate score', () => 
   });
   servers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers);
   const original = ai._fullyAdvanceableAgendaInstalled;
-  ai._fullyAdvanceableAgendaInstalled = () => clot.disabled === true;
+  ai._fullyAdvanceableAgendaInstalled = () => !runner.cards.includes(clot);
   try {
     assert.strictEqual(clot.AIDisabledByPurge, true);
     assert(ai._ordinaryPurgeOutcome().reason.includes('score'));
-    assert.strictEqual(clot.disabled, undefined);
+    assert.deepStrictEqual(runner.cards, [clot]);
+    assert.strictEqual(clot.notInstalled, undefined);
   } finally {
     ai._fullyAdvanceableAgendaInstalled = original;
   }
 });
-test('purge hypothetical restores counters and disabled state after an exception', () => {
+test('purge hypothetical restores counters, location and install state after an exception', () => {
   const virus = {player: runner, virus: 4, AIDisabledByPurge: true};
-  runner.cards = [virus];
+  runner.cards = [virus]; virus.cardLocation = runner.cards;
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
     RnD: {cards: [{}], ice: [], root: []},
@@ -1012,13 +1057,14 @@ test('purge hypothetical restores counters and disabled state after an exception
   servers = [corp.HQ, corp.RnD, corp.archives];
   const original = ai._fullyAdvanceableAgendaInstalled;
   ai._fullyAdvanceableAgendaInstalled = () => {
-    if (virus.disabled) throw Error('hypothetical failure');
+    if (!runner.cards.includes(virus)) throw Error('hypothetical failure');
     return false;
   };
   try {
     assert.throws(() => ai._ordinaryPurgeOutcome(), /hypothetical failure/);
     assert.strictEqual(virus.virus, 4);
-    assert.strictEqual(virus.disabled, undefined);
+    assert.deepStrictEqual(runner.cards, [virus]);
+    assert.strictEqual(virus.notInstalled, undefined);
   } finally {
     ai._fullyAdvanceableAgendaInstalled = original;
   }

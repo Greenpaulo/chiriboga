@@ -2073,6 +2073,9 @@ coreSet[1048] = {
       );
     },
   },
+  //Conservatively assume the Runner preserves a purge-trashed program or
+  //hardware when evaluating whether the Corp should spend its turn purging.
+  AIPreventsPurgeTrash: true,
 };
 coreSet[1049] = {
   title: "Infiltration",
