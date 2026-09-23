@@ -1,0 +1,8 @@
+// PHASE: Phase_Main
+// OPTIONS: install, gain, draw
+// EXPECT: !install
+// SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=0
+// SOURCE: documentation/bugs/code-review/agenda-scored-behind-ice-with-no-etr.md
+// NOTE: Tithe can punish a run but cannot deny access. Its deterrence value must not make this an agenda destination.
+RunnerTestField(30001, [], [], [35026], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [], [35049], [], [], [], [[30073]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

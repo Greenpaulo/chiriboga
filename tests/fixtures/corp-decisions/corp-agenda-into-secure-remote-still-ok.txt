@@ -1,0 +1,10 @@
+// PHASE: Phase_Main
+// OPTIONS: install, gain, draw
+// EXPECT: install
+// EXPECT_SERVER: Remote 0
+// EXPECT_CARD: Send a Message
+// SETUP: corp.creditPool=10; corp.clickTracker=3; runner.creditPool=0
+// SOURCE: documentation/bugs/code-review/corp-installs-agendas-into-a-never-secure-remote.md
+// NOTE: Control variation. With no matching breaker, Kessleroid is a hard lockout and the existing relative comparison may still approve the remote.
+RunnerTestField(30001, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35036, [], [], [30069], [], [], [], [[35075]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

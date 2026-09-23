@@ -1,0 +1,8 @@
+// PHASE: Phase_Main
+// OPTIONS: install, gain, draw
+// EXPECT: !install
+// SETUP: corp.creditPool=10; corp.clickTracker=3; runner.creditPool=10
+// SOURCE: documentation/debug-logs/bug_raised/corp_played_agenda_into_unsecure_server_after_agenda_was_stolen_from_that_server_last_turn.txt
+// NOTE: Minimal variation of the reported decision. Kessleroid is affordable but breachable by Cleaver, so the remote must not receive an agenda merely because its protection score outranks HQ.
+RunnerTestField(30001, [], [], [], [30006], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35036, [], [], [30069], [], [], [], [[35075]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

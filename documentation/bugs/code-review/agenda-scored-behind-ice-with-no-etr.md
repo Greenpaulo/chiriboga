@@ -1,9 +1,10 @@
 # Corp AI: scores an agenda behind ICE that can never end the run, partly because `_cardProtectionValue()` gives any rezzable ICE a flat protection point regardless of what its subroutines actually do
 
-**Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
-**Source:** `documentation/debug-logs/played_agenda_into_server_with_no_etr_sub.txt` (`Version reference: Sat Sep 19 2026 22:23:18 GMT+0100`).
+**Review location:** `documentation/bugs/code-review/`.
+**Original source:** `documentation/debug-logs/bug_raised/played_agenda_into_server_with_no_etr_sub.txt` (`Version reference: Sat Sep 19 2026 22:23:18 GMT+0100`).
+**Additional verified logs:** [`corp_played_agenda_into_unsecure_server_after_agenda_was_stolen_from_that_server_last_turn.txt`](../../debug-logs/bug_raised/corp_played_agenda_into_unsecure_server_after_agenda_was_stolen_from_that_server_last_turn.txt) and [`same_again_install_agenda_into_insecure_server.txt`](../../debug-logs/bug_raised/same_again_install_agenda_into_insecure_server.txt). These newer logs use breakable ETR ICE rather than no-ETR ICE and therefore confirm that the absolute security floor—not ETR-aware coarse scoring alone—is the essential fix.
 **File:** `ai_corp.js` (line numbers are from `main` as of this writing and will drift; search by function name).
-**Status:** Diagnosed, not yet fixed. Shares its primary root cause with `documentation/bugs/corp-installs-agendas-into-a-never-secure-remote.md` (also not yet fixed): `_isAScoringServer()` compares a remote's protection score to HQ's instead of consulting `_evaluateServerSecurity()`. That document's fix would also stop this install. This document additionally identifies why Remote 0's protection score was high enough to clear that relative bar in the first place: `_cardProtectionValue()` credits any affordable ICE with baseline protection whether or not it can end the run.
+**Status:** Fixed on `23Sept-fixes`, awaiting code review. The shared `_isAScoringServer()` security floor prevents all reproduced insecure installs. `_cardProtectionValue()` now gives ETR-capable ICE the existing baseline/high-stat bonus and non-ETR ICE a smaller explicit deterrence baseline of `0.25`.
 
 ---
 
@@ -100,13 +101,13 @@ A repo-wide search (`grep -rn "_iceHasETR" --include="*.js" .`) finds exactly on
 
 ---
 
-## 4. Proposed fix
+## 4. Implemented fix
 
-### 4.1 Primary: apply the `_isAScoringServer()` fix from `corp-installs-agendas-into-a-never-secure-remote.md`
+### 4.1 Primary: applied the `_isAScoringServer()` security floor
 
 That fix (an absolute `_evaluateServerSecurity(server).isSecure` floor before the relative HQ comparison) prevents this install outright, independent of anything below. Implement it there; nothing more is required to stop this specific mistake from recurring.
 
-### 4.2 Secondary: make `_cardProtectionValue()` ETR-aware
+### 4.2 Secondary: made `_cardProtectionValue()` ETR-aware
 
 Wire in the existing, unused `_iceHasETR()` helper so ICE that cannot end the run doesn't get credited as if it could:
 
@@ -123,11 +124,11 @@ if (card.rezzed || Credits(corp) >= RezCost(card)) {
   ...
 ```
 
-The exact non-ETR value (`0.25` above) is a placeholder — Tithe and Diviner-style ICE aren't worthless (they cost the Runner cards and clicks, and stack toward a flatline), just not access-denying, so a small nonzero credit seems right; tune alongside the fixtures in §5. Keep the existing rez-cost/strength bonus, same-server bonus, unrezzed multiplier, and hosted-card adjustments unchanged, and apply them only within whichever branch the ICE falls into.
+The non-ETR baseline is `0.25`: such ICE can still impose damage, taxes, or card disadvantage, but does not receive the high-rez-cost/high-strength bonus intended for access-denying ICE. Existing same-server, unrezzed, compatible-breaker, hosted-card, and central adjustments remain unchanged.
 
-### 4.3 Decision for the maintainer: is 3.2 worth fixing independently of 3.1?
+### 4.3 Why both changes landed together
 
-Since 4.1 alone stops this exact install, the maintainer may reasonably choose to land only the `_isAScoringServer()` fix and treat 4.2 as backlog. The case for doing both together: `_protectionScore()` is read by several other decisions (§3.4) that don't go through `_isAScoringServer()` at all, and an ETR-blind protection number will keep misleading those in ways this log doesn't happen to demonstrate. This document assumes both are worth doing but does not force the order.
+The security floor alone stops every reproduced agenda install, including the newer Kessleroid logs where the ICE does contain ETR subroutines. The ETR-aware coarse value also landed because `_protectionScore()` feeds ICE placement and server ranking outside `_isAScoringServer()`; retaining the flat point would continue to overrate Tithe-style ICE elsewhere.
 
 ---
 
@@ -146,8 +147,8 @@ Fixtures to add under `tests/fixtures/corp-decisions/`:
 
 | Fixture | Setup | Expected |
 |---|---|---|
-| `corp-no-agenda-behind-no-etr-ice` | Remote 0 guarded only by ICE with no ETR subroutine at all (Tithe-style), scoring above a weak HQ | `// EXPECT: !install` with `EXPECT_SERVER: Remote 0` (reproduces this log; fails before either fix, passes after 4.1) |
-| `corp-no-agenda-behind-conditional-etr-ice` | Remote 0 guarded by Diviner-style conditional-ETR ICE where the condition is known to be unmet (e.g. Runner's grip has no odd-cost card) | `// EXPECT: !install` with `EXPECT_SERVER: Remote 0` |
+| `corp-no-agenda-behind-no-etr-ice` | Remote 0 guarded only by Tithe, with a nonempty Runner grip so its damage is survivable | `// EXPECT: !install`; passes by choosing `draw` |
+| `corp-no-agenda-behind-conditional-etr-ice` | Remote 0 guarded only by Diviner; Corp-owned evaluation cannot assume its hidden-information condition succeeds | `// EXPECT: !install`; passes by choosing `draw` |
 
 For unit-level coverage of §3.2/4.2 specifically, add a focused test (not a full decision fixture) asserting `_cardProtectionValue(tithe) < _cardProtectionValue(anETRIce)` for two otherwise-identical rez costs, in whichever suite already covers `_protectionScore`/`_cardProtectionValue` helpers (check `tests/corp-server-security.test.js` first).
 
@@ -172,10 +173,10 @@ Also run: `node tests/corp-server-security.test.js`, `node tests/decision-snapsh
 
 ## 8. Acceptance criteria
 
-- [ ] `_isAScoringServer()` fix from `corp-installs-agendas-into-a-never-secure-remote.md` is applied (shared prerequisite).
-- [ ] `_cardProtectionValue()` calls `this._iceHasETR(card)` and gives ETR-capable ICE the existing baseline/bonus scoring, while non-ETR ICE gets a smaller, explicit deterrent value instead of the same flat point.
-- [ ] `corp-no-agenda-behind-no-etr-ice` fails before the change and passes after.
-- [ ] `corp-no-agenda-behind-conditional-etr-ice` is added and its result recorded even if it still fails after 4.2 alone (expected, per §7.1) — do not silently mark it passing without the conditional-ETR text-matching fix.
-- [ ] A focused unit test confirms `_cardProtectionValue()` scores a no-ETR ICE lower than an otherwise-equivalent ETR ICE.
-- [ ] `node -c ai_corp.js` passes and `node tests/run-all-tests.js` still passes.
-- [ ] No other Corp AI decision logic is changed.
+- [x] The shared `_isAScoringServer()` security floor is applied.
+- [x] `_cardProtectionValue()` calls `this._iceHasETR(card)`: ETR ICE retains the baseline/high-stat bonus and non-ETR ICE receives a `0.25` deterrence baseline.
+- [x] `corp-no-agenda-behind-no-etr-ice` passes after the change.
+- [x] `corp-no-agenda-behind-conditional-etr-ice` is added and passes because the Corp-owned security evaluator does not assume Diviner's hidden-information condition succeeds.
+- [x] A focused unit test confirms equivalent no-ETR ICE scores below ETR ICE.
+- [x] `node -c ai_corp.js` and `node tests/run-all-tests.js` pass (`21 test files passed`).
+- [x] No card-specific decision workaround was added.

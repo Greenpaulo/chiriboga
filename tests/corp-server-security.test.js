@@ -34,6 +34,7 @@ context.CheckScore = (card, ignoreRequirement) => !runner.cards.some(active =>
   !active.disabled && (active.agendasInstalledThisTurn || []).includes(card));
 context.AgendaPoints = player => player.agendaPoints || 0;
 context.AgendaPointsToWin = () => 7;
+context.MaxHandSize = () => 5;
 context.ChoicesInstalledCards = (player, predicate) => context.InstalledCards(player).filter(predicate).map(card => ({card}));
 context.BreakerMatchesIce = (breaker, ice) => (
   [['Fracter', 'Barrier'], ['Decoder', 'Code Gate'], ['Killer', 'Sentry']].some(types =>
@@ -97,6 +98,55 @@ test('unrezzed minor ice uses actual hook, while Runner calculator still guesses
 test('no-hook ice uses actual printed subroutine count', () => {
   const unknown = ice(['Trash 1 program.', 'End the run.'], null, {rezzed: false}); server([unknown]);
   assert.strictEqual(ai._requiredSubroutines(unknown), 2);
+});
+test('non-ETR ice has less protection value than equivalent ETR ice', () => {
+  const harmless = ice(['Gain 1 credit.'], [[['misc_minor']]], {title: 'Harmless ice', cardType: 'ice', strength: 1});
+  const stopping = ice(['End the run.'], [[['endTheRun']]], {title: 'Stopping ice', cardType: 'ice', strength: 1});
+  server([harmless, stopping]);
+  assert.strictEqual(ai._iceHasETR(harmless), false);
+  assert.strictEqual(ai._iceHasETR(stopping), true);
+  const harmlessValue = ai._cardProtectionValue(harmless);
+  const stoppingValue = ai._cardProtectionValue(stopping);
+  assert.ok(harmlessValue < stoppingValue, harmlessValue + ' should be less than ' + stoppingValue);
+});
+test('an insecure remote is never a scoring server even when it outranks HQ', () => {
+  const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const hq = {serverName: 'HQ', cards: [{player: corp, cardType: 'agenda'}], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}, remoteServers: [remote]});
+  const oldEvaluate = ai._evaluateServerSecurity;
+  const oldProtection = ai._protectionScore;
+  const oldEmpty = ai._emptyProtectedRemotes;
+  ai._evaluateServerSecurity = target => ({isSecure: target !== remote});
+  ai._protectionScore = target => target === remote ? 10 : 0;
+  ai._emptyProtectedRemotes = () => [remote];
+  try {
+    assert.strictEqual(ai._isAScoringServer(remote), false);
+    assert.strictEqual(ai._scoringServers([remote]).length, 0);
+  } finally {
+    ai._evaluateServerSecurity = oldEvaluate;
+    ai._protectionScore = oldProtection;
+    ai._emptyProtectedRemotes = oldEmpty;
+  }
+});
+test('a secure remote still uses the relative scoring-server comparison', () => {
+  const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const hq = {serverName: 'HQ', cards: [{player: corp, cardType: 'agenda'}], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}, remoteServers: [remote]});
+  const oldEvaluate = ai._evaluateServerSecurity;
+  const oldProtection = ai._protectionScore;
+  const oldEmpty = ai._emptyProtectedRemotes;
+  ai._evaluateServerSecurity = () => ({isSecure: true});
+  ai._protectionScore = target => target === remote ? 2 : 1;
+  ai._emptyProtectedRemotes = () => [remote];
+  try {
+    assert.strictEqual(ai._isAScoringServer(remote), true);
+    ai._protectionScore = target => target === remote ? 0 : 1;
+    assert.strictEqual(ai._isAScoringServer(remote), false);
+  } finally {
+    ai._evaluateServerSecurity = oldEvaluate;
+    ai._protectionScore = oldProtection;
+    ai._emptyProtectedRemotes = oldEmpty;
+  }
 });
 [30006, 30005].forEach(id => test('Gateway breaker ' + id + ' pumps and rounds whole break batches without cardText', () => {
   const breaker = card(id); runner.cards = [breaker]; runner.creditPool = 10;
@@ -246,8 +296,8 @@ test('approached Flyswatter does not reserve for redundant ICE on an agenda remo
 });
 test('same-server ICE ordering retains the protection-value tie-break', () => {
   const flyswatter = card(35079); flyswatter.rezzed = false;
-  const mycoweb = card(35053); mycoweb.rezzed = false;
-  const hq = {serverName: 'HQ', cards: [], ice: [mycoweb, flyswatter], root: []};
+  const tollbooth = card(31066); tollbooth.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [tollbooth, flyswatter], root: []};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
   Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 9});

@@ -601,6 +601,12 @@ class CorpAI {
     if (server == null) return false; //protection is too weak
     if (typeof server.cards == "undefined") {
       //is remote
+      //A relative protection score cannot establish that the Runner is unable
+      //to breach this server. Never offer an insecure remote for scoring,
+      //regardless of how poorly HQ or Archives currently score.
+      var security = this._evaluateServerSecurity(server);
+      if (!security.isSecure) return false;
+
       //yes if it has a scoring upgrade, an agenda or an ambush installed
       //this code was originally after the protection check but this lead to AI installing random assets in scoring servers
       for (var j = 0; j < server.root.length; j++) {
@@ -610,7 +616,7 @@ class CorpAI {
       }
 
       //no if its protection is too weak
-      var protScore = this._protectionScore(server, {});
+      var protScore = this._protectionScore(server, {}, security);
       var minProt = this._protectionScore(corp.HQ, {
         returnArchivesLowerScoreForHQIfBackdoor: true,
       }); //new method: just needs to be at least as strong as HQ
@@ -1582,9 +1588,15 @@ class CorpAI {
     if (CheckCardType(card, ["ice"])) {
       //if unrezzed and can't afford to rez, consider to be no protection (just a simple check ignoring cost of other ice in server)
       if (card.rezzed || Credits(corp) >= RezCost(card)) {
-        ret++; //1 point for any ice
-        if (card.rezCost > 4 || Strength(card) > 3) {
-          ret++; //plus bonus point for high rez cost (based on printed value) or strong
+        if (this._iceHasETR(card)) {
+          ret++; //1 point for ice that can actually stop the run
+          if (card.rezCost > 4 || Strength(card) > 3) {
+            ret++; //plus bonus point for high rez cost (based on printed value) or strong
+          }
+        } else {
+          //Damage, taxes and other encounter effects still deter a run, but
+          //they must not rank like access-denying ice.
+          ret += 0.25;
         }
         //special case: ice wall gets extra strength for advancement tokens (constant is arbitrary)
         if (card.title == "Ice Wall") ret += 0.5 * card.advancement;

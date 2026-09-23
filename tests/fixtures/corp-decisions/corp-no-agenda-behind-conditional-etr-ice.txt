@@ -1,0 +1,8 @@
+// PHASE: Phase_Main
+// OPTIONS: install, gain, draw
+// EXPECT: !install
+// SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=0
+// SOURCE: documentation/bugs/code-review/agenda-scored-behind-ice-with-no-etr.md
+// NOTE: Corp-owned security evaluation cannot assume Diviner's conditional ETR will fire from hidden Grip contents, so the remote remains an invalid agenda destination.
+RunnerTestField(30001, [], [], [35026], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [], [35049], [], [], [], [[30046]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
