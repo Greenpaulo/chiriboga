@@ -1,0 +1,614 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Zahya Sadeghi: Versatile Smuggler,2 Leech,2 Mutual Favor,2 Tread Lightly,2 Docklands Pass,2 Pennyshaver,1 Carmen,3 Marjanah,1 Conduit,1 Unity,3 Jailbreak,3 Sure Gamble,1 Scrounge,1 Rising Tide,3 Clean Getaway,3 Lie Low,2 Maintenance Access,3 Open Market,1 Ritual,1 GAMEDRAGON™ Pro,3 Side Hustle]
+[The Zwicky Group: Invisible Hands,3 Brân 1.0,3 Spin Doctor,1 Above the Law,3 Government Subsidy,3 Offworld Office,1 Send a Message,1 Palisade,3 Hedge Fund,3 Humanoid Resources,3 Greenmail,3 Off the Books,3 Anthill Excavation Contract,3 Biawak,3 Kessleroid,2 Syailendra,3 Key Performance Indicators,3 Measured Response,2 Flyswatter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 8.75; fresh-hand expectation 4.16
+AI: Opening hand meets fresh-hand expectation
+Corp chose to keep
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Kessleroid,Syailendra,Flyswatter,Anthill Excavation Contract,Offworld Office]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Lie Low,Open Market,Tread Lightly,Jailbreak,Maintenance Access]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:1.5,debt:0,adjusted:1.5,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-7,debt:0,adjusted:-7,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.812246963562753,debt:0,adjusted:4.812246963562753,secure:true}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-5.312753036437247,debt:0,adjusted:-5.312753036437247,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.812246963562753,debt:0,adjusted:4.812246963562753,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 1 agenda in hand on last click: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Offworld Office,Petty Cash,Flyswatter,Anthill Excavation Contract]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Lie Low,Open Market,Tread Lightly,Jailbreak,Maintenance Access]
+Runner spent one click
+Runner spent 2 credits
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent 2 clicks
+Played Maintenance Access
+Run initiated attacking Archives
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+Flyswatter accessed
+Run ends
+Runner gained one credit
+Runner spent one click
+Runner spent one credit
+Played Tread Lightly
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching HQ
+Run successful
+Petty Cash accessed
+Run ends
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Flyswatter,Anthill Excavation Contract,Petty Cash,Offworld Office]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Lie Low,Jailbreak]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {HQ:{score:-5.413288288288288,debt:0,adjusted:-5.413288288288288,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:5.711711711711712,debt:0,adjusted:5.711711711711712,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:5.711711711711712,debt:0,adjusted:5.711711711711712,secure:true},HQ:{score:8.675,debt:0,adjusted:8.675,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: R&D appears secure: Kessleroid has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:5.711711711711712,debt:0,adjusted:5.711711711711712,secure:true},HQ:{score:7.675000000000001,debt:0,adjusted:7.675000000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Offworld Office,Petty Cash,Measured Response,Above the Law,Anthill Excavation Contract]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 2 card(s) in hand: [Lie Low,Jailbreak]
+1 credit taken from Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+Runner spent one click
+Played Jailbreak
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Kessleroid
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching R&D
+Run successful
+Runner drew a card
+Government Subsidy accessed
+Off the Books accessed
+Off the Books stolen
+Run ends
+Runner gained 2 credits
+Runner spent one click
+Runner spent 2 credits from Open Market
+Runner installed Open Market
+6 credits loaded onto Open Market
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Offworld Office,Petty Cash,Measured Response,Above the Law,Anthill Excavation Contract]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Lie Low]
+Corp drew a card
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:0.23529411764705888,debt:1,adjusted:-0.7647058823529411,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:0.23529411764705888,debt:1,adjusted:-0.7647058823529411,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:0.23529411764705888,debt:1,adjusted:-0.7647058823529411,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Above the Law,Government Subsidy,Petty Cash,Measured Response,Offworld Office]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [Lie Low]
+1 credit taken from Open Market
+1 credit taken from Open Market
+Runner spent 2 clicks
+Runner spent one credit
+Played Lie Low
+Runner drew 4 cards
+Runner spent one click
+Runner spent 2 credits from Open Market
+Open Market trashed (empty)
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching R&D
+Run successful
+Government Subsidy accessed
+Run ends
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Above the Law,Government Subsidy,Petty Cash,Measured Response,Offworld Office]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Tread Lightly,Unity,Mutual Favor]
+Corp drew a card
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:-0.2899193548387097,debt:2,adjusted:-2.28991935483871,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:-0.2899193548387097,debt:2,adjusted:-2.28991935483871,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:-0.2899193548387097,debt:2,adjusted:-2.28991935483871,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Petty Cash,Government Subsidy,Measured Response,Offworld Office,Above the Law]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Tread Lightly,Unity,Mutual Favor]
+1 credit taken from Open Market
+1 credit taken from Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Leech
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Encountering Kessleroid
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Using Rising Tide:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching R&D
+Run successful
+1 virus counter placed on Leech
+Brân 1.0 accessed
+Run ends
+Runner gained one credit
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Petty Cash,Government Subsidy,Measured Response,Offworld Office,Above the Law]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Tread Lightly,Unity,Mutual Favor,GAMEDRAGON™ Pro]
+Corp drew a card
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:-1.547830923248053,debt:3,adjusted:-4.547830923248053,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},HQ:{score:6.912500000000001,debt:0,adjusted:6.912500000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+AI: R&D appears secure: break cost 8 > Runner credits 6
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true},HQ:{score:5.912500000000001,debt:0,adjusted:5.912500000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: R&D appears secure: break cost 8 > Runner credits 6
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true},HQ:{score:5.912500000000001,debt:0,adjusted:5.912500000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Government Subsidy might be good economy play?
+Corp spent one click
+Corp spent 10 credits
+Played Government Subsidy
+Corp gained 15 credits
+Draw 1 card? triggered
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 5 card(s) in hand: [Spin Doctor,Offworld Office,Above the Law,Petty Cash,Measured Response]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Tread Lightly,Unity,Mutual Favor,GAMEDRAGON™ Pro]
+1 credit taken from Open Market
+1 credit taken from Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed Docklands Pass
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+1 virus counter placed on Leech
+Government Subsidy accessed
+Government Subsidy accessed
+Anthill Excavation Contract accessed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 15 credit(s) and 5 card(s) in hand: [Spin Doctor,Offworld Office,Above the Law,Petty Cash,Measured Response]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Tread Lightly,Unity,Mutual Favor,GAMEDRAGON™ Pro,Marjanah]
+Corp drew a card
+AI: R&D appears secure: break cost 7 > Runner credits 6
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true},HQ:{score:5.412500000000001,debt:0,adjusted:5.412500000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: R&D appears secure: break cost 7 > Runner credits 6
+AI: Ranked server protection: {archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:4.412500000000001,debt:0,adjusted:4.412500000000001,secure:true},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: R&D appears secure: break cost 7 > Runner credits 6
+AI: Ranked server protection: {archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:4.412500000000001,debt:0,adjusted:4.412500000000001,secure:true},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Offworld Office,Above the Law,Measured Response,Spin Doctor,Petty Cash]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Tread Lightly,Unity,Mutual Favor,GAMEDRAGON™ Pro,Marjanah]
+1 credit taken from Open Market
+1 credit taken from Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 3 credits
+Runner installed Unity
+Runner spent one click
+Played Jailbreak
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Flyswatter
+Virus counters purged
+Encountering Flyswatter
+Using Unity:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Syailendra
+Encountering Syailendra
+Firing You may place 1 advancement counter on an installed card you can advance. on Syailendra:
+1 advancement counter placed on Syailendra
+Syailendra places 1 advancement counter on Syailendra
+Firing The Runner loses 2[credit]. on Syailendra:
+Runner lost 1 credit
+Firing Do 1 net damage. on Syailendra:
+Runner takes 1 net damage
+Tread Lightly trashed
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Runner drew a card
+Above the Law accessed
+Above the Law stolen
+Offworld Office accessed
+Offworld Office stolen
+Petty Cash accessed
+Run ends
+Runner gained 3 credits
+Runner spent one click
+Runner spent 2 credits
+Runner installed GAMEDRAGON™ Pro
+GAMEDRAGON™ Pro hosted on Rising Tide
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 15 credit(s) and 3 card(s) in hand: [Measured Response,Spin Doctor,Petty Cash]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Mutual Favor,Marjanah,Leech]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: break cost 7 > Runner credits 4
+AI: Ranked server protection: {HQ:{score:-4.275,debt:1,adjusted:-5.275,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: I intend to advance ice
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: break cost 7 > Runner credits 4
+AI: Ranked server protection: {HQ:{score:-4.275,debt:1,adjusted:-5.275,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: I intend to advance ice
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: break cost 7 > Runner credits 4
+AI: Ranked server protection: {HQ:{score:-4.275,debt:1,adjusted:-5.275,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:4.625,debt:0,adjusted:4.625,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+Draw 1 card? triggered
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 4 card(s) in hand: [Spin Doctor,Measured Response,Kessleroid,Petty Cash]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Mutual Favor,Marjanah,Leech]
+1 credit taken from Open Market
+1 credit taken from Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 3 credits
+Played Clean Getaway
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+1 virus counter placed on Leech
+Runner gained 6 credits
+Hedge Fund accessed
+Hedge Fund accessed
+Government Subsidy accessed
+Government Subsidy accessed
+Anthill Excavation Contract accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 3 credits
+Runner installed Carmen
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 17 credit(s) and 4 card(s) in hand: [Spin Doctor,Measured Response,Kessleroid,Petty Cash]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Mutual Favor,Marjanah,Leech]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 2.725 vs 4.625 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5.775,debt:2,adjusted:-7.775,secure:false},archives:{score:2,debt:4,adjusted:-2,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.625,debt:1,adjusted:1.625,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: purge secures R&D
+Corp spent 3 clicks
+Virus counters purged
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Measured Response,Measured Response,Petty Cash,Kessleroid,Spin Doctor]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Mutual Favor,Marjanah,Leech]
+1 credit taken from Open Market
+Open Market trashed (empty)
+1 credit taken from Open Market
+GAMEDRAGON™ Pro hosted on Unity
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Flyswatter
+Using Unity:
+Runner spent one credit
+Subroutine End the run. broken
+Approaching next piece of ice protecting HQ
+Encountering Syailendra
+Place advancement counter (3+ counters) triggered
+
+SPOILER: Contents of remote servers:
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(30010, [35016,30012,30028,35015,35022,30012,30028,35014,35022], [35034,30030,30030,30024,30014,30028,35014,35014,30016,30030,35004,35015,30016,35026,30014,35016,30013,35034,30011,35034,35015], [30011,30016,30008], [35022,30013,35009,30008,30026,30015], [35071,30060,30067], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35069, [35072,30064,30064,30075,30075], [30067,35075,35070,35070,35078,35077,30039,35039,30053,35081,35071,35076,30072,35039,35077,35074,30067,35074,30075,35072,30053,35074,35081,35071,35039,35070,35072,30039,35077,35079,30069,30064], [35078,35078,35081,35075,30053], [], [35075,30039], [35076,35079], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[1].rezzed=false;
+runner.scoreArea[2].rezzed=false;
+runner.heap[2].runWasSuccessful=true;
+runner.heap[5].host=null;
+runner.heap[6].runWasSuccessful=true;
+runner.rig.resources[0].credits=1;
+runner.rig.programs[0].hostedCards = [];
+runner.rig.programs[2].hostedCards = [];
+InstanceCardsPush(35027,runner.rig.programs[2].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = runner.rig.programs[2];
+runner.rig.programs[2].hostedCards[0].faceUp=true;
+runner.rig.programs[2].hostedCards[0].host=runner.rig.programs[2];
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[0].advancement=3;
+corp.HQ.ice[1].rezzed=true;
+corp.archives.AISuccessfulRuns=2;
+corp.RnD.AISuccessfulRuns=3;
+corp.HQ.AISuccessfulRuns=3;
+
+Version reference: Wed Sep 23 2026 12:02:31 GMT+0100 (British Summer Time)
