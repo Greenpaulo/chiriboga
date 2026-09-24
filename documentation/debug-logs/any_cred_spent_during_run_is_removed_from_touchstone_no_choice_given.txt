@@ -1,0 +1,791 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Virtual Intelligence, P.I.: “You Can Call Me Vic”,2 Mutual Favor,2 Sell Out,3 Sure Gamble,2 Lie Low,2 Kompromat,3 Tailgate,3 Transfer of Wealth,2 Baker,3 Unity,1 Cleaver,2 Marjanah,3 Carmen,2 Stowaway,2 Docklands Pass,2 Borrowed Goods,2 Rotary,2 Touchstone,1 Underdome Irregulars,3 Red Team,2 Side Hustle,2 Open Market]
+[PT Untaian: Life's Building Blocks,3 Seamless Launch,1 Longevity Serum,2 Urtica Cipher,3 Diviner,3 Hansei Review,2 Neurospike,2 Spin Doctor,2 Clearinghouse,3 Offworld Office,2 Send a Message,3 Palisade,3 Sericulture Expansion,3 Byte!,2 Phật Gioan Baotixita,3 Empiricist,3 Mycoweb,3 Semak-samun,3 Peer Review,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 1.50; fresh-hand expectation 4.06
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Empiricist,Offworld Office,Semak-samun,Diviner,Urtica Cipher]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Carmen,Sure Gamble,Open Market,Baker,Touchstone]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:1.5,debt:0,adjusted:1.5,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-7,debt:0,adjusted:-7,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0111989459815547,debt:0,adjusted:3.0111989459815547,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},HQ:{score:2.5111989459815547,debt:0,adjusted:2.5111989459815547,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.0111989459815547,debt:0,adjusted:3.0111989459815547,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 1 agenda in hand on last click: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Urtica Cipher,Empiricist,Offworld Office,Diviner]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Carmen,Sure Gamble,Open Market,Baker,Touchstone]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 2 credits
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Runner spent 2 credits
+Runner installed Touchstone
+Runner spent one click
+Runner spent 3 credits
+Runner installed Baker
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Urtica Cipher,Empiricist,Offworld Office,Diviner]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 1 card(s) in hand: [Carmen]
+Corp drew a card
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 5
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.142857142857143,debt:0,adjusted:4.142857142857143,secure:false},HQ:{score:4.642857142857143,debt:0,adjusted:4.642857142857143,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 5
+AI: Ranked server protection: {Remote 0:{score:1.142857142857143,debt:0,adjusted:1.142857142857143,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.6428571428571432,debt:0,adjusted:3.6428571428571432,secure:true},R&D:{score:4.142857142857143,debt:0,adjusted:4.142857142857143,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 5
+AI: Ranked server protection: {Remote 0:{score:1.142857142857143,debt:0,adjusted:1.142857142857143,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:4.142857142857143,debt:0,adjusted:4.142857142857143,secure:false},HQ:{score:4.642857142857143,debt:0,adjusted:4.642857142857143,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Urtica Cipher,Sericulture Expansion,Empiricist,Offworld Office]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 1 card(s) in hand: [Carmen]
+1 credit taken from Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 5 credits from Open Market
+Open Market trashed (empty)
+Runner installed Red Team
+12 credits loaded onto Red Team
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Urtica Cipher,Sericulture Expansion,Empiricist,Offworld Office]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Carmen,Side Hustle,Borrowed Goods]
+Corp drew a card
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {R&D:{score:3.4568480300187625,debt:1,adjusted:2.4568480300187625,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 0:{score:3.3000000000000007,debt:0,adjusted:3.3000000000000007,secure:true},HQ:{score:3.9568480300187625,debt:0,adjusted:3.9568480300187625,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [2.493151969981238]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {Remote 0:{score:3.3000000000000007,debt:0,adjusted:3.3000000000000007,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.4568480300187625,debt:1,adjusted:2.4568480300187625,secure:false},HQ:{score:2.9568480300187625,debt:0,adjusted:2.9568480300187625,secure:true},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {Remote 0:{score:3.3000000000000007,debt:0,adjusted:3.3000000000000007,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.4568480300187625,debt:1,adjusted:2.4568480300187625,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.9568480300187625,debt:0,adjusted:3.9568480300187625,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Empiricist,Phật Gioan Baotixita,Offworld Office,Mycoweb,Sericulture Expansion]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Carmen,Side Hustle,Borrowed Goods]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Runner installed Carmen
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Empiricist,Phật Gioan Baotixita,Offworld Office,Mycoweb,Sericulture Expansion]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 3 card(s) in hand: [Side Hustle,Borrowed Goods,Transfer of Wealth]
+Corp drew a card
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 0:{score:3.3000000000000007,debt:0,adjusted:3.3000000000000007,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.432186234817814,debt:2,adjusted:1.4321862348178138,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.932186234817814,debt:0,adjusted:4.932186234817814,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 0:{score:3.3000000000000007,debt:0,adjusted:3.3000000000000007,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.432186234817814,debt:2,adjusted:1.4321862348178138,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.932186234817814,debt:0,adjusted:4.932186234817814,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 0:{score:3.3000000000000007,debt:0,adjusted:3.3000000000000007,secure:true},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.432186234817814,debt:2,adjusted:1.4321862348178138,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.932186234817814,debt:0,adjusted:4.932186234817814,secure:true}}
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: considering discard options...
+Corp discarded [hidden card]
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Phật Gioan Baotixita,Empiricist,Mycoweb]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 3 card(s) in hand: [Side Hustle,Borrowed Goods,Transfer of Wealth]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Played Transfer of Wealth
+1 credit placed on Touchstone
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+Using Baker:
+Runner spent one click
+Run initiated attacking Archives
+Pay 1 stealth credit to change the attacked server? triggered
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+Offworld Office accessed
+Offworld Office stolen
+Run ends
+Runner spent one click
+Runner drew a card
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 4 card(s) in hand: [Phật Gioan Baotixita,Sericulture Expansion,Empiricist,Mycoweb]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Side Hustle,Borrowed Goods,Sure Gamble]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {HQ:{score:-3.6561987088302876,debt:0,adjusted:-3.6561987088302876,secure:true},R&D:{score:3.4063354852828542,debt:3,adjusted:0.40633548528285424,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},Remote 0:{score:4.300000000000001,debt:0,adjusted:4.300000000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {HQ:{score:-3.6561987088302876,debt:0,adjusted:-3.6561987088302876,secure:true},R&D:{score:3.4063354852828542,debt:3,adjusted:0.40633548528285424,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},Remote 0:{score:4.300000000000001,debt:0,adjusted:4.300000000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {HQ:{score:-3.6561987088302876,debt:0,adjusted:-3.6561987088302876,secure:true},R&D:{score:3.4063354852828542,debt:3,adjusted:0.40633548528285424,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},Remote 0:{score:4.300000000000001,debt:0,adjusted:4.300000000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Empiricist,Sericulture Expansion,Phật Gioan Baotixita,Neurospike,Mycoweb]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 3 card(s) in hand: [Side Hustle,Borrowed Goods,Sure Gamble]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+1 credit placed on Touchstone
+Runner gained 9 credits
+Using Baker:
+Runner spent one click
+Run initiated attacking Archives
+Pay 1 stealth credit to change the attacked server? triggered
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+Mycoweb accessed
+Run ends
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Neurospike,Phật Gioan Baotixita,Empiricist,Mycoweb,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 2 card(s) in hand: [Side Hustle,Borrowed Goods]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {HQ:{score:-3.460881934566145,debt:0,adjusted:-3.460881934566145,secure:true},R&D:{score:3.7318634423897583,debt:4,adjusted:-0.2681365576102417,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:4.300000000000001,debt:0,adjusted:4.300000000000001,secure:true}}
+AI: I could advance a card by 3 with these cards: [null,null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {HQ:{score:-3.460881934566145,debt:0,adjusted:-3.460881934566145,secure:true},R&D:{score:3.7318634423897583,debt:4,adjusted:-0.2681365576102417,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:4.300000000000001,debt:0,adjusted:4.300000000000001,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {HQ:{score:-3.460881934566145,debt:0,adjusted:-3.460881934566145,secure:true},R&D:{score:3.7318634423897583,debt:4,adjusted:-0.2681365576102417,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:4.300000000000001,debt:0,adjusted:4.300000000000001,secure:true}}
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: considering discard options...
+Corp discarded [hidden card]
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Clearinghouse,Mycoweb,Neurospike,Empiricist,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 2 card(s) in hand: [Side Hustle,Borrowed Goods]
+Runner spent one click
+Runner spent 2 credits
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Using Baker:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Clearinghouse,Mycoweb,Neurospike,Empiricist,Sericulture Expansion]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 2 card(s) in hand: [Borrowed Goods,Baker]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 13
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 13
+AI: Ranked server protection: {HQ:{score:-3.472972972972973,debt:0,adjusted:-3.472972972972973,secure:true},R&D:{score:3.711711711711712,debt:5,adjusted:-1.288288288288288,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},Remote 0:{score:9.3,debt:0,adjusted:9.3,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [14.218427518427518]
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+[hidden card] trashed
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 13
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 13
+AI: Ranked server protection: {HQ:{score:-3.472972972972973,debt:0,adjusted:-3.472972972972973,secure:true},R&D:{score:3.711711711711712,debt:5,adjusted:-1.288288288288288,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:5.300000000000001,debt:0,adjusted:5.300000000000001,secure:true}}
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ appears secure: Semak-samun has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 13
+AI: Remote 0 appears secure: Semak-samun has mandatory breaks with no capable breaker; Diviner omitted from best affordable rez plan; break cost Infinity > Runner credits 13
+AI: Ranked server protection: {HQ:{score:-3.472972972972973,debt:0,adjusted:-3.472972972972973,secure:true},R&D:{score:3.711711711711712,debt:5,adjusted:-1.288288288288288,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:5.300000000000001,debt:0,adjusted:5.300000000000001,secure:true}}
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Mycoweb,Empiricist,Mycoweb,Sericulture Expansion,Neurospike]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 2 card(s) in hand: [Borrowed Goods,Baker]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Urtica Cipher accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Mycoweb,Empiricist,Mycoweb,Sericulture Expansion,Neurospike]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 2 card(s) in hand: [Borrowed Goods,Baker]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Urtica Cipher accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Mycoweb,Empiricist,Mycoweb,Sericulture Expansion,Neurospike]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Baker,Tailgate,Carmen,Marjanah]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.084942084942085,debt:1,adjusted:-7.084942084942085,secure:false},R&D:{score:2.691763191763192,debt:6,adjusted:-3.308236808236808,secure:false},archives:{score:2,debt:4,adjusted:-2,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:3.3000000000000003,debt:1,adjusted:2.3000000000000003,secure:false}}
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.084942084942085,debt:1,adjusted:-7.084942084942085,secure:false},R&D:{score:2.691763191763192,debt:6,adjusted:-3.308236808236808,secure:false},archives:{score:2,debt:4,adjusted:-2,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:3.3000000000000003,debt:1,adjusted:2.3000000000000003,secure:false}}
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-6.084942084942085,debt:1,adjusted:-7.084942084942085,secure:false},R&D:{score:2.691763191763192,debt:6,adjusted:-3.308236808236808,secure:false},archives:{score:2,debt:4,adjusted:-2,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},Remote 0:{score:3.3000000000000003,debt:1,adjusted:2.3000000000000003,secure:false}}
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Mycoweb,Spin Doctor,Neurospike,Sericulture Expansion,Empiricist]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Baker,Tailgate,Carmen,Marjanah]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Red Team trashed
+Mycoweb accessed
+Urtica Cipher accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner installed Marjanah
+Runner spent one click
+Runner spent 2 credits
+Played Tailgate
+1 credit placed on Touchstone
+Run initiated attacking HQ
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching outermost piece of ice protecting HQ
+Encountering Semak-samun
+Using Marjanah:
+Runner spent one credit from Touchstone
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching HQ
+Run successful
+Empiricist accessed
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Mycoweb,Spin Doctor,Neurospike,Sericulture Expansion,Empiricist]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Baker,Tailgate,Carmen,Marjanah]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Red Team trashed
+Mycoweb accessed
+Urtica Cipher accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner installed Marjanah
+Runner spent one click
+Runner spent 2 credits
+Played Tailgate
+1 credit placed on Touchstone
+Run initiated attacking HQ
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching outermost piece of ice protecting HQ
+Encountering Semak-samun
+Using Marjanah:
+Runner spent one credit from Touchstone
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching HQ
+Run successful
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Mycoweb,Spin Doctor,Neurospike,Sericulture Expansion,Empiricist]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Baker,Tailgate,Carmen,Marjanah]
+Runner spent one click
+Runner spent 2 credits
+Played Tailgate
+1 credit placed on Touchstone
+Run initiated attacking HQ
+1 credit placed on Side Hustle
+Approaching outermost piece of ice protecting HQ
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Mycoweb,Spin Doctor,Neurospike,Sericulture Expansion,Empiricist]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Baker,Tailgate,Carmen,Marjanah]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Red Team trashed
+Mycoweb accessed
+Urtica Cipher accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner installed Marjanah
+Runner spent one click
+Runner spent 2 credits
+Played Tailgate
+1 credit placed on Touchstone
+Run initiated attacking HQ
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching outermost piece of ice protecting HQ
+Encountering Semak-samun
+Using Marjanah:
+Runner spent one credit from Touchstone
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching HQ
+Run successful
+Spin Doctor accessed
+Runner spent 2 credits
+Spin Doctor trashed
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Mycoweb,Spin Doctor,Neurospike,Sericulture Expansion,Empiricist]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Baker,Tailgate,Carmen,Marjanah]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Red Team trashed
+Mycoweb accessed
+Urtica Cipher accessed
+Phật Gioan Baotixita accessed
+Urtica Cipher accessed
+Run ends
+Runner spent one click
+Runner installed Marjanah
+Runner spent one click
+Runner spent 2 credits
+Played Tailgate
+1 credit placed on Touchstone
+Run initiated attacking HQ
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching outermost piece of ice protecting HQ
+Encountering Semak-samun
+Using Marjanah:
+Runner spent one credit from Touchstone
+Marjanah gets +1 strength
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Clearinghouse]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(36009, [30030,35022,35017,30030,30018,35034], [35017,36021,30018,36011,36011,35015,30030,30026,35015,35017,30026,35022,36024,35034,36024,36014,36010,36016,36012,36014,36010,30018,30011,30026,30006,30013,30011,36012,30013,30015,30016], [36013,36015,30015,36013], [36021,36015,30015,30016], [30067], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [30045,35051,30045,35053], [35055,35081,35053,30072,30040,30044,30067,35055,30046,35050,35081,35081,35051,30072,30049,30040,30061,35052,35052,30069,35054,30069,35050,30053,30048,35049,35050,30072,35049,35055,30067,30048,30040,30048], [35053,30053,30049,35049,35052], [], [30046], [35054], [[30061,30046,35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].rezzed=false;
+runner.grip[2].madeSuccessfulRunThisTurn=true;
+runner.stack[1].playedEventThisTurn=true;
+runner.stack[2].runHQ=true;
+runner.stack[2].runArchives=true;
+runner.stack[15].corpAbilities=[];
+runner.stack[19].corpAbilities=[];
+runner.stack[21].runHQ=true;
+runner.stack[21].runArchives=true;
+runner.stack[22].madeSuccessfulRunThisTurn=true;
+runner.stack[26].madeSuccessfulRunThisTurn=true;
+runner.stack[29].madeSuccessfulRunThisTurn=true;
+runner.stack[30].madeSuccessfulRunThisTurn=true;
+runner.heap[4].runHQ=true;
+runner.heap[4].runArchives=true;
+runner.heap[4].host=null;
+runner.rig.hardware[0].playedEventThisTurn=true;
+runner.rig.programs[1].madeSuccessfulRunThisTurn=true;
+runner.rig.programs[2].strengthBoost=1;
+runner.rig.programs[2].madeSuccessfulRunThisTurn=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[2].host=null;
+corp.archives.cards[3].faceUp=true;
+corp.RnD.cards[4].cardsInstalledThisTurn=[runner.rig.programs[2],];
+corp.RnD.cards[5].AICardsDiscarded=[];
+corp.RnD.cards[15].cardsInstalledThisTurn=[runner.rig.programs[2],];
+corp.RnD.cards[32].cardsInstalledThisTurn=[runner.rig.programs[2],];
+corp.HQ.ice[0].rezzed=true;
+corp.remoteServers[0].root[0].advancement=2;
+corp.remoteServers[0].root[0].AITurnsInstalled=3;
+corp.archives.AISuccessfulRuns=5;
+corp.HQ.AISuccessfulRuns=2;
+
+Version reference: Thu Sep 24 2026 12:25:56 GMT+0100 (British Summer Time)

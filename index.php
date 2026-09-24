@@ -291,7 +291,7 @@ $version = "0.6.13-BETA";
                   <div class="menu-item-sub" id="format-btn-coresets" onclick="selectFormat('coresets')">
                     Core Sets
                   </div>
-                  <div class="menu-item-sub disabled" id="format-btn-startup" onclick="selectFormat('startup')">
+                  <div class="menu-item-sub" id="format-btn-startup" onclick="selectFormat('startup')">
                     Startup
                   </div>
                   <div class="menu-item-sub disabled" id="format-btn-standard" onclick="selectFormat('standard')">
