@@ -1256,14 +1256,14 @@ cardSet[26035] = {
           );
         }
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 102, h: 32 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 129, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -1752,7 +1752,7 @@ cardSet[26050] = {
         GainCredits(corp, 2, "", this);
         GainCredits(runner, 1, "", this);
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 94, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -1800,7 +1800,7 @@ cardSet[26051] = {
           EndTheRun();
         }
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 59, h: 16 },
     },
     {
       text: "Reveal top 3 cards of stack, add 1 to grip and gain X[c] (cost of card). Runner shuffles. Trash this ice.",
@@ -1843,7 +1843,7 @@ cardSet[26051] = {
           Trash(cardRef, false);
         }
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 106, h: 80 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -2040,14 +2040,14 @@ cardSet[26058] = {
       Resolve: function () {
         LoseCredits(runner, 2);
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 124, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 144, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -2091,7 +2091,7 @@ cardSet[26059] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 104, h: 16 },
+      visual: { y: 129, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -2160,7 +2160,7 @@ cardSet[26060] = {
           );
         }
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 94, h: 16 },
     },
     {
       text: "Trace[6]. If successful, the Runner cannot steal or trash Corp cards for the remainder of this run.",
@@ -2175,7 +2175,7 @@ cardSet[26060] = {
           }
         });
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 129, h: 48 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -2296,7 +2296,7 @@ cardSet[26065] = {
         Log("Rime: Runner loses 1[c]");
         LoseCredits(runner, 1);
       },
-      visual: { y: 104, h: 16 },
+      visual: { y: 144, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {

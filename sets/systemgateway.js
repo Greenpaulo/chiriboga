@@ -2898,7 +2898,7 @@ cardSet[30038] = {
           );
         }
       },
-      visual: { y: 89, h: 16 },
+      visual: { y: 94, h: 16 },
     },
     {
       text: "You may install 1 card from HQ or Archives.",
@@ -2975,7 +2975,7 @@ cardSet[30038] = {
           corp.AI.preferred = { title: "Ansel 1.0", option: choice }; //title must match currentPhase.title for AI to fire
         }
       },
-      visual: { y: 113, h: 31 },
+      visual: { y: 122, h: 32 },
     },
     {
       text: "The Runner cannot steal or trash Corp cards for the remainder of this run.",
@@ -2998,7 +2998,7 @@ cardSet[30038] = {
           "Runner cannot steal or trash Corp cards for the remainder of this run."
         );
       },
-      visual: { y: 150, h: 46 },
+      visual: { y: 174, h: 64 },
     },
   ],
   //Lose [click]: Break 1 subroutine on this ice. Only the runner can use this ability.
@@ -3184,21 +3184,21 @@ cardSet[30039] = {
           corp.AI.preferred = { title: "Brân 1.0", option: choice }; //title must match currentPhase.title for AI to fire
         }
       },
-      visual: { y: 105, h: 46 },
+      visual: { y: 110, h: 48 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 134, h: 16 },
+      visual: { y: 144, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 150, h: 16 },
+      visual: { y: 164, h: 16 },
     },
   ],
   //Lose [click]: Break 1 subroutine on this ice. Only the runner can use this ability.
@@ -3652,7 +3652,7 @@ cardSet[30046] = {
           }
         });
       },
-      visual: { y: 79, h: 66 },
+      visual: { y: 83, h: 64 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -3720,7 +3720,7 @@ cardSet[30047] = {
           );
         });
       },
-      visual: { y: 65, h: 31 },
+      visual: { y: 68, h: 32 },
     },
     {
       text: "Do 2 net damage.",
@@ -3728,7 +3728,7 @@ cardSet[30047] = {
 		//damage can be prevented
         Damage("net", 2, true);
       },
-      visual: { y: 87, h: 16 },
+      visual: { y: 94, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -4272,7 +4272,7 @@ cardSet[30054] = {
           this
         );
       },
-      visual: { y: 110, h: 31 },
+      visual: { y: 118, h: 32 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -4316,7 +4316,7 @@ cardSet[30055] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 102, h: 16 },
+      visual: { y: 109, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -4711,10 +4711,7 @@ cardSet[30062] = {
         }
       },
       text: "Trash 1 installed program or end the run.",
-      visual: {
-        y: 63,
-        h: 31,
-      },
+      visual: { y: 67, h: 32 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -4773,21 +4770,21 @@ cardSet[30063] = {
       Resolve: function () {
         AddTags(1);
       },
-      visual: { y: 102, h: 16 },
+      visual: { y: 109, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 118, h: 16 },
+      visual: { y: 129, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 134, h: 16 },
+      visual: { y: 149, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5230,7 +5227,7 @@ cardSet[30072] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 94, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5259,14 +5256,14 @@ cardSet[30073] = {
 		//damage can be prevented
         Damage("net", 1, true);
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 60, h: 16 },
     },
     {
       text: "Gain 1[c].",
       Resolve: function () {
         GainCredits(corp, 1, "", this);
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 79, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5299,14 +5296,14 @@ cardSet[30074] = {
       Resolve: function () {
         LoseCredits(runner, 3);
       },
-      visual: { y: 56, h: 16 },
+      visual: { y: 59, h: 16 },
     },
     {
       text: "If the Runner has 6[c] or less, end the run.",
       Resolve: function () {
         if (Credits(runner) <= 6) EndTheRun(); //CheckCredits is not used here because it is a pool check not a cost
       },
-      visual: { y: 80, h: 31 },
+      visual: { y: 87, h: 32 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {

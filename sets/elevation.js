@@ -4244,7 +4244,7 @@ cardSet[35053] = {
           this
         );
       },
-      visual: { y: 58, h: 31 },
+      visual: { y: 67, h: 32 },
     },
     {
       //↳ You may rez 1 installed piece of ice, paying 2 credits less.
@@ -4280,7 +4280,7 @@ cardSet[35053] = {
           this
         );
       },
-      visual: { y: 95, h: 31 },
+      visual: { y: 102, h: 32 },
     },
     {
       //↳ Resolve 1 subroutine on a rezzed sentry.
@@ -4289,7 +4289,7 @@ cardSet[35053] = {
         var cardRef = this;
         mycowebResolveSubroutine(cardRef, "Sentry", false); //false = don't exclude self
       },
-      visual: { y: 128, h: 31 },
+      visual: { y: 137, h: 32 },
     },
     {
       //↳ Resolve 1 subroutine on another rezzed code gate.
@@ -4298,7 +4298,7 @@ cardSet[35053] = {
         var cardRef = this;
         mycowebResolveSubroutine(cardRef, "Code Gate", true); //true = exclude self
       },
-      visual: { y: 166, h: 31 },
+      visual: { y: 172, h: 32 },
     },
   ],
   
@@ -7382,7 +7382,7 @@ cardSet[35080] = {
           this
         );
       },
-      visual: { y: 102, h: 36 },
+      visual: { y: 103, h: 32 },
     },
     {
       text: "End the run if the Runner is tagged.",
@@ -7542,7 +7542,7 @@ cardSet[35064] = {
           EndTheRun();
         }
       },
-      visual: { y: 122, h: 29 },
+      visual: { y: 122, h: 32 },
     },
     {
       text: "If the threat level is 4 or greater, end the run.",
@@ -7552,7 +7552,7 @@ cardSet[35064] = {
           EndTheRun();
         }
       },
-      visual: { y: 156, h: 29 },
+      visual: { y: 157, h: 32 },
     },
   ],
   

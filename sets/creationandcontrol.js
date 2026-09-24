@@ -599,7 +599,7 @@ cardSet[3015] = {
       Resolve: function () {
         Damage("brain", 1, true);
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 116, h: 16 },
     },
     {
       text: "Do 1 core damage and end the run.",
@@ -607,14 +607,14 @@ cardSet[3015] = {
         Damage("brain", 1, true);
         EndTheRun();
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 142, h: 32 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 89, h: 16 },
+      visual: { y: 166, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -686,6 +686,7 @@ cardSet[3016] = {
           "Select a Bioroid ICE from HQ/Archives to install inward:",
         );
       },
+      visual: { y: 96, h: 80 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -730,7 +731,7 @@ cardSet[3017] = {
           "Select an installed program to trash:",
         );
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 102, h: 16 },
     },
     {
       text: "Trash 1 installed program.",
@@ -750,7 +751,7 @@ cardSet[3017] = {
           "Select an installed program to trash:",
         );
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 120, h: 16 },
     },
     {
       text: "Trace[3]. If successful, do 1 core damage and give the Runner 1 tag.",
@@ -762,7 +763,7 @@ cardSet[3017] = {
           }
         });
       },
-      visual: { y: 89, h: 16 },
+      visual: { y: 152, h: 48 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -813,7 +814,7 @@ cardSet[3018] = {
           "Select an ICE from HQ to install on this server:",
         );
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 88, h: 64 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -863,14 +864,14 @@ cardSet[3019] = {
           }
         });
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 158, h: 32 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 183, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -903,7 +904,7 @@ cardSet[3020] = {
           Damage("brain", 1, true);
         }
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 116, h: 48 },
     },
     {
       text: "If the Runner has lost [click] to break a subroutine during this run, do 1 core damage.",
@@ -912,7 +913,7 @@ cardSet[3020] = {
           Damage("brain", 1, true);
         }
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 163, h: 48 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -1183,7 +1184,7 @@ cardSet[3026] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 65, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -1217,14 +1218,14 @@ cardSet[3027] = {
           EndTheRun();
         }
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 81, h: 48 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 113, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {

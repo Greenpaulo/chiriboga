@@ -3702,14 +3702,14 @@ cardSet[31043] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 89, h: 16 },
+      visual: { y: 109, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 105, h: 16 },
+      visual: { y: 129, h: 16 },
     },
   ],
   //Lose [click]: Break 1 subroutine on this ice. Only the runner can use this ability.
@@ -3813,7 +3813,7 @@ cardSet[31044] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 121, h: 16 },
+      visual: { y: 144, h: 16 },
     },
   ],
   AIDisablesHostedPrograms: true,
@@ -3918,14 +3918,14 @@ cardSet[31045] = {
       Resolve: function () {
 		this.SharedSubroutineResolve();
       },
-      visual: { y: 96, h: 32 },
+      visual: { y: 102, h: 32 },
     },
     {
       text: "Resolve 1 subroutine on another rezzed bioroid ice.",
       Resolve: function () {
 		this.SharedSubroutineResolve();
       },
-      visual: { y: 127, h: 32 },
+      visual: { y: 137, h: 32 },
     },
   ],
   //Lose [click]: Break 1 subroutine on this ice. Only the runner can use this ability.
@@ -4036,14 +4036,14 @@ cardSet[31046] = {
           );
         }
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 59, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 79, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -4657,7 +4657,7 @@ cardSet[31055] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 94, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -4707,7 +4707,7 @@ cardSet[31056] = {
           );
         }
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 96, h: 16 },
     },
     {
       text: "Do 1 net damage.",
@@ -4715,7 +4715,7 @@ cardSet[31056] = {
 		//damage can be prevented
         Damage("net", 1, true);
       },
-      visual: { y: 104, h: 16 },
+      visual: { y: 115, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5432,7 +5432,7 @@ cardSet[31065] = {
           this
         );
       },
-      visual: { y: 96, h: 31 },
+      visual: { y: 102, h: 32 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5480,7 +5480,7 @@ cardSet[31066] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 103, h: 16 },
+      visual: { y: 109, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5525,7 +5525,7 @@ cardSet[31067] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 94, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -5930,7 +5930,7 @@ cardSet[31075] = {
       Resolve: function () {
         GainCredits(corp, 2);
       },
-      visual: { y: 88, h: 16 },
+      visual: { y: 94, h: 16 },
     },
     {
       text: "Trash 1 installed program.",
@@ -5955,7 +5955,7 @@ cardSet[31075] = {
           );
         }
       },
-      visual: { y: 104, h: 16 },
+      visual: { y: 115, h: 16 },
     },
     {
       text: "Trash 1 installed program.",
@@ -5980,14 +5980,14 @@ cardSet[31075] = {
           );
         }
       },
-      visual: { y: 120, h: 16 },
+      visual: { y: 134, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 136, h: 16 },
+      visual: { y: 154, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -6073,7 +6073,7 @@ cardSet[31076] = {
         if (CheckCounters(this, "advancement", 3)) GainCredits(corp, 4);
 		else GainCredits(corp, 1);
       },
-      visual: { y: 118, h: 32 },
+      visual: { y: 124, h: 32 },
     },
     {
       text: "End the run. If there are 3 or more hosted advancement counters, instead search R&D for up to 2 cards. Add those cards to HQ, then end the run.",
@@ -6158,7 +6158,7 @@ cardSet[31076] = {
 		}
         else EndTheRun();
       },
-      visual: { y: 160, h: 64 },
+      visual: { y: 169, h: 64 },
     },  
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -6221,7 +6221,7 @@ cardSet[31077] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 102, h: 16 },
+      visual: { y: 109, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
@@ -6466,14 +6466,14 @@ cardSet[31081] = {
       Resolve: function () {
         LoseClicks(runner, 1);
       },
-      visual: { y: 56, h: 16 },
+      visual: { y: 59, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 72, h: 16 },
+      visual: { y: 79, h: 16 },
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
