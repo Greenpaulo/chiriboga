@@ -1281,14 +1281,14 @@ coreSet[1031] = {
       Enumerate: function () {
         if (!CheckActionClicks(runner, 1)) return [];
         // Must have an agenda in score area to forfeit
-        if (runner.scoreArea.length == 0) return [];
+        if (ChoicesForfeitableAgendas(runner).length == 0) return [];
         return [{}];
       },
       Resolve: function (params) {
         SpendClicks(runner, 1);
         var dataDealerCard = this;
         // Choose agenda to forfeit
-        var choices = ChoicesArrayCards(runner.scoreArea);
+        var choices = ChoicesForfeitableAgendas(runner);
         
         // AI: Prefer the lowest-value agenda
         if (runner.AI != null && choices.length > 1) {
@@ -1308,8 +1308,8 @@ coreSet[1031] = {
           runner,
           choices,
           function (params) {
-            Forfeit(params.card, function () {
-              GainCredits(runner, 9, "", dataDealerCard);
+            Forfeit(params.card, function (wasForfeited) {
+              if (wasForfeited) GainCredits(runner, 9, "", dataDealerCard);
             });
           },
           null,

@@ -1983,6 +1983,21 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
 
+### Vantage Point Batch 5 card hooks
+
+- Touchstone uses `AIEconomyInstall`, `AIWorthKeeping` and
+  `AIRunPoolCreditOffset`; the offset reports only its currently hosted credits.
+- Read-Write Share uses `AIWorthKeeping`, and its optional hosting choices keep
+  the AI from hiding a card when its grip is already low.
+- Sipa uses `AIWorthKeeping`; its inline trigger preference swaps a passed ICE
+  only for a lower-valued installed ICE. There is no route-planning hook that
+  safely models future ICE swaps.
+- Stowaway uses `AIPreferredInstallChoice`, `AIRunExtraPotential`,
+  `AIBreachNotRequired` and `AIWorthKeeping` to favor protected servers and
+  value its successful-run payout without requiring a breach.
+- Word on the Street uses `AIWorthKeeping`; its scoring effects are mandatory
+  once installed and therefore need no activation hook.
+
 ---
 
 ## 8. Step-by-Step Worked Example

@@ -182,3 +182,44 @@ hooks avoid treating unrelated grip cards as valid fuel.
 run chaining and cleanup, tutor filtering and temporary-install cleanup, hosted
 credits and AI hooks. `tests/credit-pool-lock.test.js` covers the shared credit
 availability, spending and loss behavior.
+
+## Batch 5 engine support
+
+`ChoicesForfeitableAgendas` is the shared source for forfeit choices. Cards
+marked `cannotForfeit` are omitted from optional and mandatory rez costs and
+Data Dealer, and `Forfeit` rejects a direct attempt as a final safeguard. Corp
+AI chooses from the actual legal option list rather than indexing the complete
+score area. `tests/forfeit-restriction.test.js` covers both choice filtering and
+resolution.
+
+## Batch 5 confirmed patterns
+
+Touchstone observes event plays while inactive so installing it after the
+first event of a turn cannot retroactively earn a credit. Its hosted credits
+are available only during runs and its public route model reports the current
+credit count.
+
+Read-Write Share marks facedown hosted grip cards as not installed. Its trash
+ability detaches and moves them before paying the self-trash cost, preventing
+the normal hosted-card cleanup from trashing cards that must be shuffled into
+the Stack.
+
+Sipa checks the current outermost ICE at the pass-ICE response window and
+requires at least one subroutine with every subroutine broken. Its exchange
+preserves card positions, hosted cards and a remote that would otherwise be
+briefly empty during the two moves. Runner AI accepts the optional swap only
+when it can replace the passed ICE with a lower-valued installed ICE.
+
+Stowaway uses the normal hosted-program install path with an ICE-only
+`installOnlyOn` predicate. Its successful-run reward compares the attacked
+server with its host's current server, so moving the host moves the reward.
+
+Word on the Street records Corp installs while inactive. During the
+pre-scoring window it pays the additional cost for an agenda installed that
+turn by moving itself to the Corp score area as a non-forfeitable −1-point
+agenda. Scoring an older agenda instead triggers the normal preventable trash
+sequence before gaining credits and drawing.
+
+`tests/vantagepoint-integration.test.js` covers Batch 5 first-event tracking,
+hosting limits and cleanup, fully-broken ICE swaps, Trojan server matching,
+scoring branches, cleanup and AI valuation hooks.

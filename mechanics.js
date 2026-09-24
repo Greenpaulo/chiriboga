@@ -128,12 +128,12 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 	};
 	if (!allowCancel) cancelCallback = undefined;
 	//Optional forfeit to reduce rez cost (e.g. Biawak)
-	if (typeof card.optionalForfeitRezReduction === 'number' && corp.scoreArea.length > 0) {
+	if (typeof card.optionalForfeitRezReduction === 'number' && ChoicesForfeitableAgendas(corp).length > 0) {
 		var oldPhase = currentPhase;
 		var oldActivePlayer = activePlayer;
 		var rezReduction = card.optionalForfeitRezReduction;
 		var fullRezCost = RezCost(card);
-		var choices = ChoicesArrayCards(corp.scoreArea);
+		var choices = ChoicesForfeitableAgendas(corp);
 		//Add decline option only if player can afford full rez cost
 		if (CheckCredits(corp, fullRezCost, "rezzing", card)) {
 			choices.push({
@@ -192,7 +192,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		var oldActivePlayer = activePlayer; //also for cancel
 		var forfdec = DecisionPhase(
 		  corp,
-		  ChoicesArrayCards(corp.scoreArea),
+		  ChoicesForfeitableAgendas(corp),
 		  function(fparams) {
 			  Forfeit(fparams.card, function() {
 				  payCreditsAndRez();
@@ -214,7 +214,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		var choices = [];
 		
 		//Option 1: Forfeit any scored agenda
-		var agendaChoices = ChoicesArrayCards(corp.scoreArea);
+		var agendaChoices = ChoicesForfeitableAgendas(corp);
 		for (var i = 0; i < agendaChoices.length; i++) {
 			agendaChoices[i].action = "forfeit";
 			agendaChoices[i].label = "Forfeit " + agendaChoices[i].card.title;
@@ -443,6 +443,10 @@ function RemoveFromGame(card) {
  * @param {function} [afterForfeit] callback to run after forfeit completes
  */
 function Forfeit(card, afterForfeit) {
+  if (!card || card.cannotForfeit) {
+    if (card) Log(GetTitle(card, true) + " cannot be forfeited");
+    return false;
+  }
   //Trigger responseOnForfeit BEFORE moving the card (so it's still in scoreArea and active)
   //This allows cards like Greenmail to gain credits when forfeited
   //Uses TriggeredResponsePhase because the trigger may cause phase changes (e.g. Greenmail + Zwicky)
@@ -452,9 +456,10 @@ function Forfeit(card, afterForfeit) {
     MoveCard(forfeitedCard, removedFromGame);
     Log(GetTitle(forfeitedCard, true) + " forfeited");
     if (typeof afterForfeit === "function") {
-      afterForfeit();
+      afterForfeit(true);
     }
   }, "Forfeited");
+  return true;
 }
 
 /**

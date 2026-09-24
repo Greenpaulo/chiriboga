@@ -1748,7 +1748,42 @@ cardSet[36021] = {
   cardType: "hardware",
   subTypes: ["Stealth"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  credits: 0,
+  playedEventThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.playedEventThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.playedEventThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnPlay: {
+    Resolve: function (card) {
+      if (card.player != runner || !CheckCardType(card, ["event"])) return;
+      if (this.playedEventThisTurn) return;
+      this.playedEventThisTurn = true;
+      if (CheckActive(this)) PlaceCredits(this, 1);
+    },
+    availableWhenInactive: true,
+  },
+  canUseCredits: function () {
+    return attackedServer !== null;
+  },
+  AIRunPoolCreditOffset: function () {
+    return this.credits;
+  },
+  AIEconomyInstall: 2,
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Read-Write Share (36022)
@@ -1766,7 +1801,77 @@ cardSet[36022] = {
   subTypes: [],
   installCost: 0,
   memoryCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  hostedCards: [],
+  _hostFromGripChoices: function () {
+    if (this.hostedCards.length >= 4 || runner.grip.length < 1) return [];
+    var choices = ChoicesArrayCards(runner.grip);
+    choices.push({ card: null, label: "Decline", button: "Decline" });
+    if (runner.AI != null) {
+      if (runner.grip.length < 3) return [choices[choices.length - 1]];
+      var lowestEloChoice = choices[0];
+      for (var i = 1; i < choices.length - 1; i++) {
+        if ((choices[i].card.elo || 1500) < (lowestEloChoice.card.elo || 1500))
+          lowestEloChoice = choices[i];
+      }
+      return [lowestEloChoice];
+    }
+    return choices;
+  },
+  _hostFromGripResolve: function (params) {
+    if (!params || !params.card) return;
+    MoveCard(params.card, this.hostedCards);
+    params.card.host = this;
+    params.card.faceUp = false;
+    params.card.notInstalled = true;
+    Draw(runner, 1);
+  },
+  responseOnInstall: {
+    Enumerate: function (installedCard) {
+      if (installedCard != this) return [];
+      return this._hostFromGripChoices();
+    },
+    Resolve: function (params) {
+      this._hostFromGripResolve(params);
+    },
+    text: "Read-Write Share: host a card from the grip to draw 1 card?",
+  },
+  responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      return this._hostFromGripChoices();
+    },
+    Resolve: function (params) {
+      this._hostFromGripResolve(params);
+    },
+    text: "Read-Write Share: host a card from the grip to draw 1 card?",
+  },
+  abilities: [
+    {
+      text: "[trash]: Shuffle all hosted cards into your stack.",
+      Enumerate: function () {
+        if (this.hostedCards.length < 1) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var hosted = this.hostedCards.slice();
+        for (var i = 0; i < hosted.length; i++) {
+          hosted[i].host = null;
+          hosted[i].notInstalled = false;
+          MoveCard(hosted[i], runner.stack);
+        }
+        Trash(
+          this,
+          false,
+          function () {
+            Shuffle(runner.stack);
+          },
+          this,
+        );
+      },
+    },
+  ],
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Sipa (36023)
@@ -1782,7 +1887,77 @@ cardSet[36023] = {
   subTypes: [],
   installCost: 1,
   memoryCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnPassesIce: {
+    Enumerate: function () {
+      if (this.usedThisTurn || !attackedServer || approachIce < 0) return [];
+      var passedIce = attackedServer.ice[approachIce];
+      if (!passedIce || approachIce != attackedServer.ice.length - 1) return [];
+      if (!passedIce.subroutines || passedIce.subroutines.length < 1) return [];
+      for (var i = 0; i < passedIce.subroutines.length; i++) {
+        if (!passedIce.subroutines[i].broken) return [];
+      }
+      var choices = ChoicesInstalledCards(corp, function (card) {
+        return CheckCardType(card, ["ice"]) && card != passedIce;
+      });
+      var declineChoice = { card: null, label: "Decline", button: "Decline" };
+      choices.push(declineChoice);
+      if (runner.AI != null) {
+        var passedScore = runner.AI._iceComparisonScore(passedIce);
+        var bestChoice = declineChoice;
+        var bestScore = passedScore;
+        for (var j = 0; j < choices.length - 1; j++) {
+          var targetScore = runner.AI._iceComparisonScore(choices[j].card);
+          if (targetScore < bestScore) {
+            bestScore = targetScore;
+            bestChoice = choices[j];
+          }
+        }
+        runner.AI.preferred = { title: "Sipa", option: bestChoice };
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.usedThisTurn = true;
+      if (!params || !params.card) return;
+      var passedIce = attackedServer.ice[approachIce];
+      var passedServer = GetServer(passedIce);
+      var otherServer = GetServer(params.card);
+      if (!passedServer || !otherServer) return;
+      var passedIndex = passedServer.ice.indexOf(passedIce);
+      var otherIndex = otherServer.ice.indexOf(params.card);
+      var passedRemoteIndex = corp.remoteServers.indexOf(passedServer);
+      MoveCard(passedIce, otherServer.ice, otherIndex);
+      // Moving the only card out briefly empties a remote, but a swap must not
+      // destroy that server before the replacement card moves in.
+      if (
+        passedRemoteIndex > -1 &&
+        corp.remoteServers.indexOf(passedServer) < 0
+      )
+        corp.remoteServers.splice(passedRemoteIndex, 0, passedServer);
+      MoveCard(params.card, passedServer.ice, passedIndex);
+      Log(
+        GetTitle(this) + " swapped " + GetTitle(passedIce) + " with " +
+          GetTitle(params.card),
+      );
+    },
+    text: "Sipa: swap the fully broken outermost ice?",
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Stowaway (36024)
@@ -1799,7 +1974,38 @@ cardSet[36024] = {
   subTypes: ["Trojan"],
   installCost: 0,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  installOnlyOn: function (card) {
+    return card.player == corp && CheckCardType(card, ["ice"]);
+  },
+  responseOnRunSuccessful: {
+    Resolve: function (server) {
+      if (this.host && GetServer(this.host) == server) GainCredits(runner, 2, "", this);
+    },
+    automatic: true,
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (choices.length < 1) return -1;
+    var bestIndex = 0;
+    var bestIceCount = -1;
+    for (var i = 0; i < choices.length; i++) {
+      var server = GetServer(choices[i].host);
+      var iceCount = server && server.ice ? server.ice.length : 0;
+      if (iceCount > bestIceCount) {
+        bestIceCount = iceCount;
+        bestIndex = i;
+      }
+    }
+    return bestIndex;
+  },
+  AIRunExtraPotential: function (server) {
+    return this.host && GetServer(this.host) == server ? 0.6 : 0;
+  },
+  AIBreachNotRequired: true,
+  AIWorthKeeping: function () {
+    return InstalledCards(corp).some(function (card) {
+      return CheckCardType(card, ["ice"]);
+    });
+  },
 };
 
 //Word on the Street (36025)
@@ -1815,7 +2021,60 @@ cardSet[36025] = {
   cardType: "resource",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  corpCardsInstalledThisTurn: [],
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.corpCardsInstalledThisTurn = [];
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.corpCardsInstalledThisTurn = [];
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card.player == corp && !this.corpCardsInstalledThisTurn.includes(card))
+        this.corpCardsInstalledThisTurn.push(card);
+    },
+    availableWhenInactive: true,
+  },
+  responsePreventableScore: {
+    Resolve: function () {
+      if (!intended.score || !this.corpCardsInstalledThisTurn.includes(intended.score))
+        return;
+      this.agendaPoints = -1;
+      this.cannotForfeit = true;
+      this.faceUp = true;
+      MoveCard(this, corp.scoreArea);
+      Log(GetTitle(this) + " was added to the Corp's score area as an agenda worth -1 point");
+    },
+    automatic: true,
+  },
+  responseOnScored: {
+    Enumerate: function () {
+      return [{}];
+    },
+    Resolve: function () {
+      Trash(
+        this,
+        true,
+        function () {
+          GainCredits(runner, 4, "", this);
+          Draw(runner, 1);
+        },
+        this,
+      );
+    },
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Méliès City Luxury Line (36026)

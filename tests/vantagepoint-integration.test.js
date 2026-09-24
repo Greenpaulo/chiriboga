@@ -166,6 +166,8 @@ context.GetServer = (card) => card.server || null;
 context.PlaceCredits = (card, amount) => {
   card.credits = (card.credits || 0) + amount;
 };
+let activeCards = new Set();
+context.CheckActive = (card) => activeCards.has(card);
 
 const chainReaction = context.cardSet[36001];
 chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.HQ);
@@ -844,12 +846,13 @@ context.Install = (card, host, ignoreCosts, position, returnToPhase, callback, c
   card.cardLocation = installed.runner;
   callback.call(callbackContext);
 };
-context.MoveCard = (card, destination) => {
+context.MoveCard = (card, destination, position) => {
   if (card.cardLocation) {
     const index = card.cardLocation.indexOf(card);
     if (index > -1) card.cardLocation.splice(index, 1);
   }
-  destination.push(card);
+  if (Number.isInteger(position)) destination.splice(position, 0, card);
+  else destination.push(card);
   card.cardLocation = destination;
 };
 const betaChoices = betaBuild.Enumerate.call(betaBuild);
@@ -913,4 +916,183 @@ assert(
   '36018 has a post-cleanup hook for safely starting its optional second run',
 );
 
-console.log('Vantage Point integration and Batch 1-4 behavior checks passed.');
+// Batch 5: Shaper and neutral-runner cards 36021-36025.
+const touchstone = context.cardSet[36021];
+touchstone.credits = 0;
+touchstone.responseOnRunnerTurnBegins.Resolve.call(touchstone);
+touchstone.automaticOnPlay.Resolve.call(touchstone, {
+  player: context.runner,
+  cardType: 'event',
+  subTypes: [],
+});
+assert.strictEqual(touchstone.credits, 0, '36021 records the first event while inactive');
+activeCards.add(touchstone);
+touchstone.automaticOnPlay.Resolve.call(touchstone, {
+  player: context.runner,
+  cardType: 'event',
+  subTypes: [],
+});
+assert.strictEqual(touchstone.credits, 0, '36021 does not reward a later event that turn');
+touchstone.responseOnCorpTurnBegins.Resolve.call(touchstone);
+touchstone.automaticOnPlay.Resolve.call(touchstone, {
+  player: context.runner,
+  cardType: 'event',
+  subTypes: [],
+});
+assert.strictEqual(touchstone.credits, 1);
+context.attackedServer = remote;
+assert.strictEqual(touchstone.canUseCredits.call(touchstone), true);
+assert.strictEqual(touchstone.AIRunPoolCreditOffset.call(touchstone, remote), 1);
+context.attackedServer = null;
+assert.strictEqual(touchstone.canUseCredits.call(touchstone), false);
+assert.strictEqual(touchstone.unique, true);
+
+const readWriteShare = context.cardSet[36022];
+const lowValueCard = {
+  title: 'Low value',
+  player: context.runner,
+  cardType: 'event',
+  subTypes: [],
+  elo: 1200,
+};
+const highValueCard = {
+  title: 'High value',
+  player: context.runner,
+  cardType: 'event',
+  subTypes: [],
+  elo: 1800,
+};
+context.runner.grip = [lowValueCard, highValueCard];
+lowValueCard.cardLocation = context.runner.grip;
+highValueCard.cardLocation = context.runner.grip;
+readWriteShare.hostedCards = [];
+cardsDrawn = 0;
+const shareChoices = readWriteShare.responseOnInstall.Enumerate.call(
+  readWriteShare,
+  readWriteShare,
+);
+assert.strictEqual(shareChoices.length, 3);
+readWriteShare.responseOnInstall.Resolve.call(readWriteShare, shareChoices[0]);
+assert.strictEqual(readWriteShare.hostedCards[0], lowValueCard);
+assert.strictEqual(lowValueCard.faceUp, false);
+assert.strictEqual(lowValueCard.notInstalled, true);
+assert.strictEqual(cardsDrawn, 1);
+readWriteShare.hostedCards.push(highValueCard);
+highValueCard.cardLocation = readWriteShare.hostedCards;
+highValueCard.host = readWriteShare;
+highValueCard.notInstalled = true;
+context.runner.stack = [];
+shuffled = false;
+trashCalls = [];
+readWriteShare.abilities[0].Resolve.call(readWriteShare);
+assert.deepStrictEqual(Array.from(context.runner.stack), [lowValueCard, highValueCard]);
+assert.strictEqual(lowValueCard.notInstalled, false);
+assert.strictEqual(highValueCard.host, null);
+assert.strictEqual(trashCalls[0].canBePrevented, false);
+assert.strictEqual(shuffled, true);
+
+const sipa = context.cardSet[36023];
+const passedIce = {
+  title: 'Passed ice',
+  player: context.corp,
+  cardType: 'ice',
+  subTypes: ['Barrier'],
+  subroutines: [{broken: true}, {broken: true}],
+};
+const swapIce = {
+  title: 'Swap ice',
+  player: context.corp,
+  cardType: 'ice',
+  subTypes: ['Code Gate'],
+  subroutines: [{broken: false}],
+};
+remote.ice = [passedIce];
+context.corp.HQ.ice = [swapIce];
+passedIce.cardLocation = remote.ice;
+swapIce.cardLocation = context.corp.HQ.ice;
+passedIce.server = remote;
+swapIce.server = context.corp.HQ;
+installed = {corp: [passedIce, swapIce], runner: [sipa]};
+context.attackedServer = remote;
+context.approachIce = 0;
+sipa.responseOnRunnerTurnBegins.Resolve.call(sipa);
+context.runner.AI = {
+  preferred: null,
+  _iceComparisonScore(ice) {
+    return ice === passedIce ? 5 : 1;
+  },
+};
+const sipaChoices = sipa.responseOnPassesIce.Enumerate.call(sipa);
+assert.strictEqual(sipaChoices.length, 2);
+assert.strictEqual(context.runner.AI.preferred.option.card, swapIce);
+context.runner.AI = null;
+sipa.responseOnPassesIce.Resolve.call(sipa, sipaChoices[0]);
+assert.strictEqual(remote.ice[0], swapIce);
+assert.strictEqual(context.corp.HQ.ice[0], passedIce);
+passedIce.server = context.corp.HQ;
+swapIce.server = remote;
+assert.strictEqual(sipa.usedThisTurn, true);
+sipa.responseOnRunnerTurnBegins.Resolve.call(sipa);
+swapIce.subroutines[0].broken = false;
+assert.strictEqual(
+  sipa.responseOnPassesIce.Enumerate.call(sipa).length,
+  0,
+  '36023 requires every subroutine on the outermost ice to be broken',
+);
+
+const stowaway = context.cardSet[36024];
+creditsGained = 0;
+stowaway.host = passedIce;
+assert.strictEqual(stowaway.installOnlyOn.call(stowaway, passedIce), true);
+assert.strictEqual(stowaway.installOnlyOn.call(stowaway, sipa), false);
+stowaway.responseOnRunSuccessful.Resolve.call(stowaway, context.corp.HQ);
+assert.strictEqual(creditsGained, 2);
+stowaway.responseOnRunSuccessful.Resolve.call(stowaway, remote);
+assert.strictEqual(creditsGained, 2, '36024 only pays for its host server');
+assert.strictEqual(stowaway.AIRunExtraPotential.call(stowaway, context.corp.HQ), 0.6);
+assert.strictEqual(stowaway.AIBreachNotRequired, true);
+
+const wordOnTheStreet = context.cardSet[36025];
+const newAgenda = {
+  title: 'New agenda',
+  player: context.corp,
+  cardType: 'agenda',
+  agendaPoints: 2,
+};
+const oldAgenda = {
+  title: 'Old agenda',
+  player: context.corp,
+  cardType: 'agenda',
+  agendaPoints: 2,
+};
+context.corp.scoreArea = [];
+context.intended = {score: newAgenda};
+wordOnTheStreet.corpCardsInstalledThisTurn = [];
+wordOnTheStreet.automaticOnInstall.Resolve.call(wordOnTheStreet, newAgenda);
+wordOnTheStreet.responsePreventableScore.Resolve.call(wordOnTheStreet);
+assert.strictEqual(context.corp.scoreArea[0], wordOnTheStreet);
+assert.strictEqual(wordOnTheStreet.agendaPoints, -1);
+assert.strictEqual(wordOnTheStreet.cannotForfeit, true);
+assert.strictEqual(trashCalls.some((call) => call.cards.includes(wordOnTheStreet)), false);
+
+context.intended.score = oldAgenda;
+wordOnTheStreet.cardLocation = installed.runner;
+wordOnTheStreet.corpCardsInstalledThisTurn = [];
+creditsGained = 0;
+cardsDrawn = 0;
+trashCalls = [];
+wordOnTheStreet.responsePreventableScore.Resolve.call(wordOnTheStreet);
+assert.strictEqual(wordOnTheStreet.responseOnScored.Enumerate.call(wordOnTheStreet).length, 1);
+wordOnTheStreet.responseOnScored.Resolve.call(wordOnTheStreet);
+assert.strictEqual(trashCalls[0].cards[0], wordOnTheStreet);
+assert.strictEqual(trashCalls[0].canBePrevented, true);
+assert.strictEqual(creditsGained, 4);
+assert.strictEqual(cardsDrawn, 1);
+
+const mechanicsSource = fs.readFileSync(path.join(root, 'mechanics.js'), 'utf8');
+assert(
+  mechanicsSource.includes('card.cannotForfeit'),
+  '36025 score-area penalty cannot be selected or resolved as a forfeit',
+);
+
+console.log('Vantage Point integration and Batch 1-5 behavior checks passed.');

@@ -4003,6 +4003,21 @@ function ChoicesHandInstall(player, ignoreCreditCost = false, cardCheck) {
 }
 
 /**
+ * Gets scored agendas that may legally be forfeited.
+ * Cards such as Word on the Street can be in a score area while explicitly
+ * forbidding forfeiture.
+ *
+ * @method ChoicesForfeitableAgendas
+ * @param {Player} player owner of the score area
+ * @returns {Choice[]} legal agenda choices
+ */
+function ChoicesForfeitableAgendas(player) {
+  return ChoicesArrayCards(player.scoreArea, function (agenda) {
+    return !agenda.cannotForfeit;
+  });
+}
+
+/**
  * Gets list of valid/legal abilities on a card.<br/>Nothing is logged.
  *
  * @method ChoicesAbility
@@ -4080,7 +4095,10 @@ function FullCheckPlay(card, requireActionPhase = true) {
  * @returns {boolean} true if can rez, false if not
  */
 function FullCheckRez(card, validTypes = ["upgrade", "asset", "ice"]) {
-  if (card.additionalRezCostForfeitAgenda && card.player.scoreArea.length < 1)
+  if (
+    card.additionalRezCostForfeitAgenda &&
+    ChoicesForfeitableAgendas(card.player).length < 1
+  )
     return false;
   if (CheckRez(card, validTypes)) {
     var currentRezCost = RezCost(card);
@@ -4093,7 +4111,7 @@ function FullCheckRez(card, validTypes = ["upgrade", "asset", "ice"]) {
     //Check if can afford reduced rez cost with optional forfeit (e.g. Biawak)
     if (
       typeof card.optionalForfeitRezReduction === "number" &&
-      card.player.scoreArea.length > 0
+      ChoicesForfeitableAgendas(card.player).length > 0
     ) {
       var reducedCost = Math.max(
         0,
