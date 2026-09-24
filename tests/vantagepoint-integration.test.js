@@ -1328,4 +1328,199 @@ assert.strictEqual(shuffled, true);
 sleipnir.subroutines[2].Resolve.call(sleipnir);
 assert.strictEqual(endedRuns, 3);
 
-console.log('Vantage Point integration and Batch 1-6 behavior checks passed.');
+// Batch 7: Haas-Bioroid cards 36031-36035.
+const lingering = [];
+context.AddLingeringEffect = (effect) => lingering.push(effect);
+context.RemoveLingeringEffect = (effect) => {
+  const index = lingering.indexOf(effect);
+  if (index > -1) lingering.splice(index, 1);
+};
+
+const vertigo = context.cardSet[36031];
+const vertigoServer = {serverName: 'HQ', root: [], cards: [], ice: [vertigo]};
+context.attackedServer = vertigoServer;
+context.approachIce = 0;
+context.runner.clickTracker = 1;
+vertigo.subroutines[0].Resolve.call(vertigo);
+assert.strictEqual(context.runner.clickTracker, 0, '36031 subroutine removes 1 click');
+vertigo.responseOnPassesIce.Resolve.call(vertigo);
+assert.strictEqual(lingering.length, 1, '36031 creates a run-duration restriction');
+const vertigoCorpCard = {title: 'Corp card', player: context.corp};
+assert.strictEqual(
+  lingering[0].modifyCannot.Resolve.call(lingering[0], 'steal', vertigoCorpCard),
+  true,
+);
+assert.strictEqual(
+  lingering[0].modifyCannot.Resolve.call(lingering[0], 'trash', {player: context.runner}),
+  false,
+  '36031 only restricts Corp cards',
+);
+lingering[0].responseOnRunEnds.Resolve.call(lingering[0]);
+assert.strictEqual(lingering.length, 0, '36031 restriction cleans up at run end');
+context.runner.clickTracker = 1;
+vertigo.responseOnPassesIce.Resolve.call(vertigo);
+assert.strictEqual(lingering.length, 0, '36031 does not restrict with a click remaining');
+const vertigoAI = {sr: []};
+vertigo.AIImplementIce.call(vertigo, {}, vertigoAI, 0, false);
+assert.deepStrictEqual(
+  JSON.parse(JSON.stringify(vertigoAI.sr)),
+  [[['loseClicks', 'iceSpecificEffect']]],
+);
+assert.deepStrictEqual(
+  Array.from(vertigo.AIIceSpecificEffect.call(vertigo, 0, 0, 0)),
+  ['misc_serious'],
+);
+assert.deepStrictEqual(
+  Array.from(vertigo.AIIceSpecificEffect.call(vertigo, 0, 0, 1)),
+  [],
+);
+
+const clickAdjustments = [];
+context.AddTempBonusClicks = (player, amount) => {
+  player.tempBonusClicks = (player.tempBonusClicks || 0) + amount;
+  clickAdjustments.push(amount);
+};
+const caveatEmptor = context.cardSet[36032];
+creditsGained = 0;
+context.runner.tempBonusClicks = 0;
+context.corp.AI = null;
+const caveatChoices = caveatEmptor.Enumerate.call(caveatEmptor);
+caveatEmptor.Resolve.call(caveatEmptor, caveatChoices[0]);
+caveatEmptor.Resolve.call(caveatEmptor, caveatChoices[1]);
+assert.strictEqual(creditsGained, 16);
+assert.deepStrictEqual(clickAdjustments, [-1, 1]);
+assert.strictEqual(context.runner.tempBonusClicks, 0);
+context.AgendaPoints = () => 0;
+context.AgendaPointsToWin = () => 7;
+context.corp.AI = {};
+assert.strictEqual(
+  caveatEmptor.Enumerate.call(caveatEmptor)[0].credits,
+  10,
+  '36032 AI normally chooses the larger credit gain',
+);
+context.AgendaPoints = () => 6;
+assert.strictEqual(
+  caveatEmptor.Enumerate.call(caveatEmptor)[0].clicks,
+  -1,
+  '36032 AI denies a click when the Runner is at match point',
+);
+
+const realloc = context.cardSet[36033];
+const cheapIce = {title: 'Cheap ICE', cardType: 'ice', subTypes: [], rezzed: true, rezCost: 1};
+const mediumIce = {title: 'Medium ICE', cardType: 'ice', subTypes: [], rezzed: true, rezCost: 4};
+const expensiveIce = {title: 'Expensive ICE', cardType: 'ice', subTypes: [], rezzed: true, rezCost: 7};
+installed = {corp: [cheapIce, mediumIce, expensiveIce], runner: []};
+context.corp.AI = null;
+assert.strictEqual(realloc.Enumerate.call(realloc).length, 3);
+const derezzed = [];
+context.Derez = (card) => {
+  card.rezzed = false;
+  derezzed.push(card);
+};
+creditsGained = 0;
+realloc.Resolve.call(realloc, {cards: [mediumIce, expensiveIce]});
+assert.strictEqual(creditsGained, 11, '36033 gains printed rez costs');
+assert.deepStrictEqual(derezzed, [mediumIce, expensiveIce]);
+installed = {corp: [cheapIce], runner: []};
+assert.strictEqual(realloc.Enumerate.call(realloc).length, 0, '36033 needs two targets');
+mediumIce.rezzed = true;
+expensiveIce.rezzed = true;
+installed = {corp: [cheapIce, mediumIce, expensiveIce], runner: []};
+context.corp.AI = {_cardProtectionValue: () => 0};
+assert.deepStrictEqual(
+  Array.from(realloc.Enumerate.call(realloc)[0].cards),
+  [mediumIce, expensiveIce],
+  '36033 AI selects the best economic pair',
+);
+
+const retirementPlan = context.cardSet[36034];
+const archivedAgenda = {title: 'Archived agenda', cardType: 'agenda', subTypes: []};
+const archivedUpgrade = {title: 'Archived upgrade', cardType: 'upgrade', subTypes: []};
+const retirementInstall = {card: archivedAgenda, server: remote, label: 'Archived agenda'};
+context.corp.archives.cards = [archivedAgenda, archivedUpgrade];
+context.ChoicesArrayInstall = (cards, ignoreCreditCost, check) =>
+  cards
+    .filter((card) => !check || check(card))
+    .map((card) => ({card, server: remote, label: card.title}));
+context.corp.AI = null;
+assert.deepStrictEqual(
+  retirementPlan.Enumerate.call(retirementPlan).map((choice) => choice.card),
+  [archivedAgenda],
+  '36034 only offers agendas, assets, and ICE',
+);
+installedChoice = null;
+retirementPlan.Resolve.call(retirementPlan, retirementInstall);
+assert.deepStrictEqual(installedChoice, {card: archivedAgenda, server: remote});
+context.corp.AI = {_bestInstallOption: () => 0};
+assert.strictEqual(retirementPlan.Enumerate.call(retirementPlan).length, 1);
+assert.strictEqual(retirementPlan.AIPlayWhenCan, 1);
+assert.strictEqual(retirementPlan.AIIsRecurOrTutor, true);
+
+const perfectRecall = context.cardSet[36035];
+const recallServer = {serverName: 'Remote', root: [perfectRecall], cards: [], ice: []};
+perfectRecall.server = recallServer;
+perfectRecall.power = 0;
+perfectRecall.responseOnRez.Resolve.call(perfectRecall);
+assert.strictEqual(perfectRecall.power, 1);
+const scoredFromRecall = {title: 'Scored agenda', cardType: 'agenda', server: recallServer};
+context.intended.score = scoredFromRecall;
+perfectRecall.responsePreventableScore.Resolve.call(perfectRecall);
+scoredFromRecall.server = null;
+perfectRecall.responseOnScored.Resolve.call(perfectRecall);
+assert.strictEqual(perfectRecall.power, 2, '36035 remembers the pre-score server');
+context.attackedServer = recallServer;
+perfectRecall.responseOnStolen.Resolve.call(perfectRecall);
+assert.strictEqual(perfectRecall.power, 3, '36035 gains a counter on a local steal');
+
+const protectedAgenda = {
+  title: 'Protected title',
+  player: context.corp,
+  cardType: 'agenda',
+  subTypes: [],
+  agendaPoints: 2,
+};
+const otherHQCard = {
+  title: 'Other title',
+  player: context.corp,
+  cardType: 'operation',
+  subTypes: [],
+};
+context.corp.HQ.cards = [protectedAgenda, otherHQCard];
+context.corp.AI = null;
+let revealedCard = null;
+context.Reveal = (card, callback, callbackContext) => {
+  revealedCard = card;
+  callback.call(callbackContext);
+};
+lingering.length = 0;
+perfectRecall.abilities[0].Resolve.call(perfectRecall, {card: protectedAgenda});
+assert.strictEqual(revealedCard, protectedAgenda);
+assert.strictEqual(perfectRecall.power, 2);
+assert.strictEqual(lingering.length, 1);
+assert.strictEqual(
+  lingering[0].modifyCannot.Resolve.call(lingering[0], 'steal', protectedAgenda),
+  true,
+);
+assert.strictEqual(
+  lingering[0].modifyCannot.Resolve.call(lingering[0], 'trash', otherHQCard),
+  false,
+  '36035 protects only copies of the revealed title',
+);
+lingering[0].responseOnRunEnds.Resolve.call(lingering[0]);
+assert.strictEqual(lingering.length, 0, '36035 protection cleans up at run end');
+context.attackedServer = context.corp.HQ;
+context.corp.HQ.root = [];
+context.corp.AI = {};
+assert.strictEqual(
+  perfectRecall.abilities[0].Enumerate.call(perfectRecall)[0].card,
+  protectedAgenda,
+  '36035 AI prioritizes an agenda in HQ',
+);
+
+const corpAISource = fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8');
+assert(corpAISource.includes('typeof card.AIEconomyPlay != "number"'));
+assert(corpAISource.includes('typeof card.AIPlayWhenCan == "number"'));
+const runCalculatorSource = fs.readFileSync(path.join(root, 'runcalculator.js'), 'utf8');
+assert(/AIIceSpecificEffect\.call\([\s\S]{0,200}clicksLeft/.test(runCalculatorSource));
+
+console.log('Vantage Point integration and Batch 1-7 behavior checks passed.');

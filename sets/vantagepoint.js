@@ -2236,7 +2236,7 @@ cardSet[36028] = {
           "trash",
         );
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 103, h: 16 },
     },
     {
       text: "Remove 1 card in the heap from the game.",
@@ -2261,7 +2261,7 @@ cardSet[36028] = {
           this,
         );
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 128, h: 32 },
     },
     {
       text: "You may install 1 card from HQ or Archives.",
@@ -2308,14 +2308,14 @@ cardSet[36028] = {
           this,
         );
       },
-      visual: { y: 89, h: 16 },
+      visual: { y: 159, h: 32 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 105, h: 16 },
+      visual: { y: 182, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -2378,14 +2378,14 @@ cardSet[36029] = {
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 94, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 114, h: 16 },
     },
   ],
   modifyRezCost: {
@@ -2443,7 +2443,7 @@ cardSet[36030] = {
           this,
         );
       },
-      visual: { y: 57, h: 16 },
+      visual: { y: 60, h: 16 },
     },
     {
       text: "You may shuffle 1 card from HQ or Archives into R&D.",
@@ -2474,14 +2474,14 @@ cardSet[36030] = {
           this,
         );
       },
-      visual: { y: 73, h: 16 },
+      visual: { y: 87, h: 32 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
-      visual: { y: 89, h: 16 },
+      visual: { y: 114, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -2510,12 +2510,51 @@ cardSet[36031] = {
   subTypes: ["Code Gate"],
   rezCost: 1,
   strength: 1,
+  responseOnPassesIce: {
+    Resolve: function () {
+      if (
+        !attackedServer ||
+        approachIce < 0 ||
+        attackedServer.ice[approachIce] != this ||
+        runner.clickTracker > 0
+      )
+        return;
+      AddLingeringEffect({
+        modifyCannot: {
+          Resolve: function (id, card) {
+            return (
+              card &&
+              card.player == corp &&
+              (id == "steal" || id == "trash")
+            );
+          },
+        },
+        responseOnRunEnds: {
+          Resolve: function () {
+            RemoveLingeringEffect(this);
+          },
+          automatic: true,
+        },
+      });
+    },
+    automatic: true,
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "The Runner loses [click].",
+      Resolve: function () {
+        LoseClicks(runner, 1);
+      },
+      visual: { y: 57, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["loseClicks", "iceSpecificEffect"]]];
     return result;
+  },
+  AIIceSpecificEffect: function (poolCreditsLeft, otherCreditsLeft, clicksLeft) {
+    if (clicksLeft < 1) return ["misc_serious"];
+    return [];
   },
 };
 
@@ -2532,9 +2571,38 @@ cardSet[36032] = {
   cardType: "operation",
   subTypes: ["Transaction"],
   playCost: 5,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    var choices = [
+      {
+        credits: 6,
+        clicks: -1,
+        label: "Gain 6[c]; Runner gets -1 allotted click next turn",
+        button: "Gain 6[c]",
+      },
+      {
+        credits: 10,
+        clicks: 1,
+        label: "Gain 10[c]; Runner gets +1 allotted click next turn",
+        button: "Gain 10[c]",
+      },
+    ];
+    if (corp.AI != null) {
+      var preferred = choices[1];
+      if (
+        typeof AgendaPoints == "function" &&
+        typeof AgendaPointsToWin == "function" &&
+        AgendaPoints(runner) >= AgendaPointsToWin() - 1
+      )
+        preferred = choices[0];
+      return [preferred];
+    }
+    return choices;
   },
+  Resolve: function (params) {
+    GainCredits(corp, params.credits, "", this);
+    AddTempBonusClicks(runner, params.clicks);
+  },
+  AIEconomyPlay: 2,
 };
 
 //realloc() (36033)
@@ -2550,9 +2618,54 @@ cardSet[36033] = {
   cardType: "operation",
   subTypes: ["Double"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    var iceChoices = ChoicesInstalledCards(corp, function (card) {
+      return card.rezzed && CheckCardType(card, ["ice"]);
+    });
+    var pairs = [];
+    for (var i = 0; i < iceChoices.length; i++) {
+      for (var j = i + 1; j < iceChoices.length; j++) {
+        pairs.push({
+          cards: [iceChoices[i].card, iceChoices[j].card],
+          label:
+            GetTitle(iceChoices[i].card) +
+            " and " +
+            GetTitle(iceChoices[j].card),
+        });
+      }
+    }
+    if (corp.AI != null && pairs.length > 0) {
+      var best = pairs[0];
+      var bestValue = -Infinity;
+      for (var k = 0; k < pairs.length; k++) {
+        var value =
+          (pairs[k].cards[0].rezCost || 0) +
+          (pairs[k].cards[1].rezCost || 0);
+        if (typeof corp.AI._cardProtectionValue == "function") {
+          value -= 0.5 * corp.AI._cardProtectionValue(pairs[k].cards[0]);
+          value -= 0.5 * corp.AI._cardProtectionValue(pairs[k].cards[1]);
+        }
+        if (value > bestValue) {
+          bestValue = value;
+          best = pairs[k];
+        }
+      }
+      if (bestValue < 3) return [];
+      return [best];
+    }
+    return pairs;
   },
+  Resolve: function (params) {
+    if (!params || !params.cards || params.cards.length != 2) return;
+    for (var i = 0; i < params.cards.length; i++) {
+      GainCredits(corp, params.cards[i].rezCost || 0, "", this);
+      Derez(params.cards[i]);
+    }
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AIEconomyPlay: 1,
 };
 
 //Retirement Plan (36034)
@@ -2568,9 +2681,34 @@ cardSet[36034] = {
   cardType: "operation",
   subTypes: ["Double"],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    var choices = ChoicesArrayInstall(
+      corp.archives.cards,
+      false,
+      function (card) {
+        return CheckCardType(card, ["agenda", "asset", "ice"]);
+      },
+    );
+    if (
+      corp.AI != null &&
+      choices.length > 0 &&
+      typeof corp.AI._bestInstallOption == "function"
+    ) {
+      var bestIndex = corp.AI._bestInstallOption(choices, true);
+      if (bestIndex < 0) return [];
+      return [choices[bestIndex]];
+    }
+    return choices;
   },
+  Resolve: function (params) {
+    if (params && params.card) Install(params.card, params.server);
+  },
+  command: "install",
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AIPlayWhenCan: 1,
+  AIIsRecurOrTutor: true,
 };
 
 //Perfect Recall (36035)
@@ -2587,7 +2725,109 @@ cardSet[36035] = {
   subTypes: [],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  _scoringServer: null,
+  responseOnRez: {
+    Resolve: function () {
+      AddCounters(this, "power", 1);
+    },
+    automatic: true,
+  },
+  responsePreventableScore: {
+    Resolve: function () {
+      this._scoringServer = intended.score ? GetServer(intended.score) : null;
+    },
+    automatic: true,
+  },
+  responseOnScored: {
+    Resolve: function () {
+      if (this._scoringServer && this._scoringServer == GetServer(this))
+        AddCounters(this, "power", 1);
+      this._scoringServer = null;
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      if (attackedServer && attackedServer == GetServer(this))
+        AddCounters(this, "power", 1);
+    },
+    automatic: true,
+  },
+  abilities: [
+    {
+      text: "Hosted power counter: Reveal 1 card in HQ and protect copies for this run.",
+      Enumerate: function () {
+        if (!attackedServer || !CheckCounters(this, "power", 1)) return [];
+        var choices = ChoicesArrayCards(corp.HQ.cards);
+        if (corp.AI != null) {
+          var cardsAtRisk = attackedServer.root.concat(attackedServer.cards || []);
+          var best = null;
+          var bestScore = 0;
+          for (var i = 0; i < choices.length; i++) {
+            var score = 0;
+            if (attackedServer == corp.HQ) score += 1;
+            for (var j = 0; j < cardsAtRisk.length; j++) {
+              if (GetTitle(cardsAtRisk[j]) == GetTitle(choices[i].card))
+                score += 20;
+            }
+            if (CheckCardType(choices[i].card, ["agenda"]))
+              score += 10 + (choices[i].card.agendaPoints || 0);
+            else score += choices[i].card.trashCost || 0;
+            if (score > bestScore) {
+              bestScore = score;
+              best = choices[i];
+            }
+          }
+          if (!best || bestScore < 1) return [];
+          return [best];
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        if (!params || !params.card) return;
+        RemoveCounters(this, "power", 1);
+        var protectedTitle = GetTitle(params.card);
+        Reveal(
+          params.card,
+          function () {
+            if (runner.AI != null && typeof runner.AI.GainInfoAboutHQCards == "function")
+              runner.AI.GainInfoAboutHQCards([params.card]);
+            AddLingeringEffect({
+              titleToProtect: protectedTitle,
+              modifyCannot: {
+                Resolve: function (id, card) {
+                  return (
+                    card &&
+                    card.player == corp &&
+                    GetTitle(card) == this.titleToProtect &&
+                    (id == "steal" || id == "trash")
+                  );
+                },
+              },
+              responseOnRunEnds: {
+                Resolve: function () {
+                  RemoveLingeringEffect(this);
+                },
+                automatic: true,
+              },
+            });
+          },
+          this,
+        );
+      },
+    },
+  ],
+  AIIsScoringUpgrade: true,
+  AIDefensiveValue: function (server) {
+    if (!server || corp.HQ.cards.length < 1) return 0;
+    return 2;
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  AIWouldRezBeforeScore: function (cardToScore, serverToScoreIn) {
+    return serverToScoreIn == GetServer(this) || GetServer(cardToScore) == GetServer(this);
+  },
 };
 
 //Méliès U: Only the Brightest (36036)

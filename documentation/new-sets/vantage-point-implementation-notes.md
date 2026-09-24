@@ -261,3 +261,41 @@ tracking, Runner-controlled breaks, target selection, install cancellation,
 dynamic rez cost, optional draw/recursion, and ICE AI models.
 `tests/play-and-steal-cost.test.js` covers the shared play-click and steal-cost
 helpers, affordability failures and action-phase payment integration.
+
+## Batch 7 engine support
+
+The Run Calculator now passes remaining clicks to `AIIceSpecificEffect`, after
+applying earlier `loseClicks` entries in the same branch. Vertigo uses that
+state to distinguish an ordinary click loss from the serious steal/trash lock
+created when the Runner reaches zero clicks.
+
+Corp main-phase planning now consumes numeric `AIEconomyPlay` declarations on
+operations and numeric `AIPlayWhenCan` declarations for currently valid
+opportunities. The established hard-coded economy and urgent-operation lists
+retain priority; card-defined declarations extend those policies for new sets.
+
+`AddTempBonusClicks` accepts both bonuses and penalties and logs negative
+adjustments as fewer allotted clicks. `ResetClicks` already consumes the
+accumulated one-shot modifier at the beginning of the affected turn.
+
+## Batch 7 confirmed patterns
+
+Vertigo creates a lingering steal/trash restriction only when it is passed
+with the Runner on zero clicks, and removes that restriction at run end.
+Caveat Emptor stores its selected positive or negative next-turn click change
+through the shared temporary-click helper.
+
+`realloc()` enumerates pairs, so it cannot be played with fewer than two
+rezzed ICE, and gains each chosen ICE's printed rez cost before derezzing it.
+Retirement Plan uses normal Archives install choices and normal install costs,
+limited to agendas, assets and ICE.
+
+Perfect Recall records an agenda's server in the pre-score window, before the
+agenda moves to the score area. Its paid ability reveals one HQ card, spends a
+power counter and creates a title-specific lingering restriction independent
+of whether the upgrade remains active; the restriction cleans up at run end.
+
+`tests/vantagepoint-integration.test.js` covers Batch 7 target requirements,
+both Caveat Emptor modes, printed-cost income and derez choices, Archives
+install filtering, score/steal counter placement, title-specific prevention,
+run cleanup and the meaningful Corp/Runner AI decisions.

@@ -3349,6 +3349,22 @@ class CorpAI {
       economyCards.push("PAD Campaign");
     if (corp.creditPool < corp.HQ.cards.length)
       economyCards.push("Predictive Planogram"); //simple check whether to use for econ or save for draw
+    // Card-defined Corp economy plays. This mirrors the Runner's existing
+    // AIEconomyPlay priority without requiring every new economy operation to
+    // be added to the title list above.
+    var declaredEconomy = corp.HQ.cards.filter(function (card) {
+      if (!CheckCardType(card, ["operation"])) return false;
+      if (typeof card.AIEconomyPlay != "number" || card.AIEconomyPlay <= 0)
+        return false;
+      return !affordableOnly || corp.creditPool >= PlayCost(card);
+    });
+    declaredEconomy.sort(function (a, b) {
+      return b.AIEconomyPlay - a.AIEconomyPlay;
+    });
+    for (var i = 0; i < declaredEconomy.length; i++) {
+      if (!economyCards.includes(GetTitle(declaredEconomy[i])))
+        economyCards.push(GetTitle(declaredEconomy[i]));
+    }
     return economyCards;
   }
 
@@ -5859,6 +5875,30 @@ class CorpAI {
             this._commonCardToPlayChecks(
               cardToPlay,
               "if opportunity arises",
+              true,
+            )
+          ) {
+            return this._returnPreference(optionList, "play", {
+              cardToPlay: cardToPlay,
+            });
+          }
+        }
+        var declaredPriorityPlays = corp.HQ.cards.filter(function (card) {
+          return (
+            CheckCardType(card, ["operation"]) &&
+            typeof card.AIPlayWhenCan == "number" &&
+            card.AIPlayWhenCan > 0
+          );
+        });
+        declaredPriorityPlays.sort(function (a, b) {
+          return b.AIPlayWhenCan - a.AIPlayWhenCan;
+        });
+        for (var i = 0; i < declaredPriorityPlays.length; i++) {
+          cardToPlay = declaredPriorityPlays[i];
+          if (
+            this._commonCardToPlayChecks(
+              cardToPlay,
+              "because its declared opportunity is available",
               true,
             )
           ) {

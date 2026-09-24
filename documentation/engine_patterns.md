@@ -477,9 +477,9 @@ AIEconomyInstall: function() {
 },
 ```
 
-**`AIEconomyPlay: <number>`** — plain numeric property (not a function in existing usage) for prioritizing playing an economy operation/event.
+**`AIEconomyPlay: <number>`** — plain numeric property (not a function in existing usage) for prioritizing playing an economy operation/event. Both AI sides consume it; Corp declarations join the main-phase economy list after the established core economy cards.
 
-**`AIEconomyTrigger: <number>`**, **`AIDrawTrigger: <number>`**, **`AIPlayWhenCan: <number>`**, **`AIPlayToDraw: <number>`** — plain numeric priority properties (not functions) used to rank competing trigger/play options in their respective decision loops. Higher wins.
+**`AIEconomyTrigger: <number>`**, **`AIDrawTrigger: <number>`**, **`AIPlayWhenCan: <number>`**, **`AIPlayToDraw: <number>`** — plain numeric priority properties (not functions) used to rank competing trigger/play options in their respective decision loops. Higher wins. Corp operations with `AIPlayWhenCan` are proactively checked after the built-in urgent-operation list and should also validate their opportunity with `AIWouldPlay` or `Enumerate`.
 
 **`AIPlayToRemoveTags: function() { return n; }`** — how many tags this removes if played; used to prioritize tag-removal.
 

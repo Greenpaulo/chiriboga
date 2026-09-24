@@ -31,6 +31,7 @@ class RunCalculator {
   // tag
   // endTheRun
   // loseCredits (runner) from main credit pool, not from extra credits. Will not reduce credits remaining to below zero
+  // loseClicks (runner), capped at the number of remaining clicks
   // payCredits will be an ignored path if cannot be afforded (i.e. only use it for sr that has an option e.g. Funhouse or if there is no alternative e.g. Tollbooth)
   // misc_minor e.g. corp gains credit
   // misc_moderate e.g. trash 1 program
@@ -335,7 +336,12 @@ class RunCalculator {
 
 		  //apply special per-ice unique conditional effects (from current ice, not encountering new one)
 		  if (iceAI && eff == "iceSpecificEffect") {
-			  var new_effs = iceAI.ice.AIIceSpecificEffect.call(iceAI.ice, poolCreditsLeft, otherCreditsLeft);
+			  var new_effs = iceAI.ice.AIIceSpecificEffect.call(
+				iceAI.ice,
+				poolCreditsLeft,
+				otherCreditsLeft,
+				clicksLeft,
+			  );
 			  //remove from encounter_effects and insert instead any effects that are returned
 			  encounter_effects.splice(j, 1, ...new_effs); //remove 1 item at position j and insert all returned items (not compatible with older browsers)
 			  j--; //step back so next item isn't skipped

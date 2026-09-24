@@ -1412,6 +1412,15 @@ These are the effect strings you can use inside `result.sr` arrays:
 - For unknown or partially-known effects, default to `misc_moderate`.
 - Use `incomplete: true` guards when a subroutine list might be partial to avoid over-punishing the runner AI.
 
+**`AIIceSpecificEffect(poolCreditsLeft, otherCreditsLeft, clicksLeft)`**
+
+Use `"iceSpecificEffect"` in a subroutine branch when its consequence depends
+on the resources remaining after earlier effects in that branch. The hook
+returns replacement effect strings. `clicksLeft` includes earlier
+`"loseClicks"` effects in the same branch; Vertigo uses this to make reaching
+zero clicks a serious access restriction without treating every click loss as
+the same threat.
+
 ---
 
 ### 5.3 Bioroid Click-Break
@@ -1593,6 +1602,19 @@ Set to `true` for recursion or tutor operations. These are given lower priority 
 ```js
 AIIsRecurOrTutor: true,
 ```
+
+**`AIEconomyPlay`** (number)
+
+Marks a Corp economy operation for the main-phase economy policy. Higher
+values are considered first among card-declared economy plays; normal play
+legality, `Enumerate()` and `AIWouldPlay()` still decide whether it can be used.
+
+**`AIPlayWhenCan`** (number)
+
+Marks a Corp operation whose current opportunity should be used proactively.
+Higher values are checked first after the built-in urgent operation list.
+Pair it with `AIWouldPlay()` or a target-validating `Enumerate()` so the Corp
+does not play it without a useful effect.
 
 ---
 
@@ -1962,6 +1984,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | Hook | Type | Purpose |
 |---|---|---|
 | `AIImplementIce(rc, result, maxCred, incomplete)` | function | Describe what subroutines do in the run calculator |
+| `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
 | `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
@@ -1977,6 +2000,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIDamageOperation` | bool | True if this operation deals damage |
 | `AITagPunishment` | number | Min tags needed for this punishment op to fire |
 | `AIWouldPlay()` | function | Return true to play this operation |
+| `AIEconomyPlay` | number | Priority for treating a Corp operation as a main-phase economy play |
+| `AIPlayWhenCan` | number | Priority for proactively using a currently valid Corp operation opportunity |
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
@@ -2016,6 +2041,23 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Méliès City Luxury Line has no activation decision. Its steal-click cost is
   enforced by the access engine, and its mandatory on-score click gain uses no
   AI hook.
+
+### Vantage Point Batch 7 card hooks
+
+- Vertigo uses `AIImplementIce` with `loseClicks`, then
+  `AIIceSpecificEffect` to classify the no-click steal/trash lock as serious
+  only when the subroutine actually leaves the Runner on zero clicks.
+- Caveat Emptor uses `AIEconomyPlay`. Its inline mode choice normally takes
+  the larger credit gain, but denies a click when the Runner is at match point.
+- `realloc()` uses `AIEconomyPlay` and `AIWouldPlay`; its inline pair scorer
+  balances printed rez-cost income against the ICE protection being given up.
+- Retirement Plan uses `AIPlayWhenCan`, `AIWouldPlay` and
+  `AIIsRecurOrTutor`, with the normal install scorer choosing a legal Archives
+  target and destination.
+- Perfect Recall uses `AIIsScoringUpgrade`, `AIDefensiveValue`,
+  `AILimitPerServer` and `AIWouldRezBeforeScore`. Its inline ability choice
+  favors titles actually at risk in the attacked server, then agendas and
+  high-trash-cost cards.
 
 ---
 

@@ -2655,7 +2655,15 @@ function AddTempBonusClicks(player, amount) {
   if (typeof player.tempBonusClicks === "undefined") player.tempBonusClicks = 0;
   player.tempBonusClicks += amount;
   var playerName = player == corp ? "Corp" : "Runner";
-  Log(playerName + " will receive +" + amount + " allotted click(s) next turn");
+  if (amount < 0)
+    Log(
+      playerName +
+        " will receive " +
+        Math.abs(amount) +
+        " fewer allotted click(s) next turn",
+    );
+  else
+    Log(playerName + " will receive +" + amount + " allotted click(s) next turn");
 }
 
 /**
