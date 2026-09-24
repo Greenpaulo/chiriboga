@@ -40,7 +40,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**3 complete, 10 outstanding** (`10 Pending`, `0 In progress`, `0 Blocked`).
+**3 complete, 10 outstanding** (`9 Pending`, `1 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -51,7 +51,7 @@ Agents must refresh these counts whenever a batch status changes.
 |     1 | 36001–36004 | Complete | Antigravity / 2026-09-18 | Reviewed and repaired by Codex; behavioral and full regression suites pass |
 |     2 | 36005–36008 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
 |     3 | 36009–36016 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
-|     4 | 36017–36020 | Pending  | —                        | —                                                                          |
+|     4 | 36017–36020 | In progress | Codex / 2026-09-24       | —                                                                          |
 |     5 | 36021–36025 | Pending  | —                        | —                                                                          |
 |     6 | 36026–36030 | Pending  | —                        | —                                                                          |
 |     7 | 36031–36035 | Pending  | —                        | —                                                                          |
