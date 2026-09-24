@@ -2091,7 +2091,13 @@ cardSet[36026] = {
   subTypes: ["Expansion"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  stealCost: { clicks: 1 },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) GainClicks(corp, 1);
+    },
+    automatic: true,
+  },
 };
 
 //Synchrocyclotron (36027)
@@ -2107,7 +2113,57 @@ cardSet[36027] = {
   subTypes: ["Facility"],
   rezCost: 3,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  playedDoubleOperationThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.playedDoubleOperationThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.playedDoubleOperationThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnPlay: {
+    Resolve: function (card) {
+      if (
+        card.player == corp &&
+        CheckCardType(card, ["operation"]) &&
+        CheckSubType(card, "Double")
+      )
+        this.playedDoubleOperationThisTurn = true;
+    },
+    availableWhenInactive: true,
+  },
+  modifyPlayClickCost: {
+    Resolve: function (card) {
+      if (
+        !this.playedDoubleOperationThisTurn &&
+        card.player == corp &&
+        CheckCardType(card, ["operation"]) &&
+        CheckSubType(card, "Double")
+      )
+        return -1;
+      return 0;
+    },
+  },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.creditPool < this.rezCost) return -1;
+    var doubles = corp.HQ.cards.filter(function (card) {
+      return CheckCardType(card, ["operation"]) && CheckSubType(card, "Double");
+    });
+    if (doubles.length < 1) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //Ansel 2.0 (36028)
@@ -2127,11 +2183,176 @@ cardSet[36028] = {
   subTypes: ["Sentry", "Bioroid", "Destroyer"],
   rezCost: 8,
   strength: 5,
+  runnerAbilities: [
+    {
+      text: "Lose [click][click]: Break up to 2 subroutines on this ice.",
+      runnerAbility: true,
+      Enumerate: function () {
+        if (!CheckEncounter() || GetApproachEncounterIce() != this) return [];
+        if (!CheckClicks(runner, 2)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        LoseClicks(runner, 2);
+        Break(params.subroutine);
+        var choices = ChoicesEncounteredSubroutines();
+        if (choices.length < 1) return;
+        choices.push({ id: -1, label: "Done", button: "Done" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (choice) {
+            if (choice && choice.subroutine) Break(choice.subroutine);
+          },
+          "Ansel 2.0",
+          "Break up to 1 more subroutine",
+          this,
+        );
+      },
+    },
+  ],
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trash 1 installed Runner card.",
+      Resolve: function () {
+        var choices = ChoicesInstalledCards(runner, CheckTrash);
+        if (choices.length < 1) return;
+        if (corp.AI != null) {
+          var best = choices[0];
+          for (var i = 1; i < choices.length; i++) {
+            if ((choices[i].card.elo || 0) > (best.card.elo || 0)) best = choices[i];
+          }
+          corp.AI.preferred = { title: "Ansel 2.0", option: best };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (choice && choice.card) Trash(choice.card, true);
+          },
+          "Ansel 2.0",
+          "Trash 1 installed Runner card",
+          this,
+          "trash",
+        );
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "Remove 1 card in the heap from the game.",
+      Resolve: function () {
+        var choices = ChoicesArrayCards(runner.heap);
+        if (choices.length < 1) return;
+        if (corp.AI != null) {
+          var best = choices[0];
+          for (var i = 1; i < choices.length; i++) {
+            if ((choices[i].card.elo || 0) > (best.card.elo || 0)) best = choices[i];
+          }
+          corp.AI.preferred = { title: "Ansel 2.0", option: best };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (choice && choice.card) RemoveFromGame(choice.card);
+          },
+          "Ansel 2.0",
+          "Remove 1 card in the heap from the game",
+          this,
+        );
+      },
+      visual: { y: 73, h: 16 },
+    },
+    {
+      text: "You may install 1 card from HQ or Archives.",
+      Resolve: function () {
+        var handOptions = ChoicesHandInstall(corp);
+        var archivesOptions = ChoicesArrayInstall(corp.archives.cards);
+        var sourceChoices = [];
+        if (handOptions.length > 0)
+          sourceChoices.push({ id: 0, label: "Install from HQ", button: "HQ" });
+        if (archivesOptions.length > 0)
+          sourceChoices.push({ id: 1, label: "Install from Archives", button: "Archives" });
+        sourceChoices.push({ id: -1, label: "Do not install", button: "Continue" });
+        var ansel = this;
+        if (corp.AI != null && typeof corp.AI._bestInstallOption === "function") {
+          var archiveIndex = corp.AI._bestInstallOption(archivesOptions, false);
+          var handIndex = corp.AI._bestInstallOption(handOptions, true);
+          var preferred = sourceChoices[sourceChoices.length - 1];
+          if (archiveIndex > -1)
+            preferred = sourceChoices.find(function (choice) { return choice.id === 1; });
+          else if (handIndex > -1)
+            preferred = sourceChoices.find(function (choice) { return choice.id === 0; });
+          corp.AI.preferred = { title: "Ansel 2.0", option: preferred };
+        }
+        DecisionPhase(
+          corp,
+          sourceChoices,
+          function (source) {
+            if (!source || source.id < 0) return;
+            var installChoices = source.id === 0 ? handOptions : archivesOptions;
+            DecisionPhase(
+              corp,
+              installChoices,
+              function (choice) {
+                if (choice && choice.card) Install(choice.card, choice.server);
+              },
+              "Ansel 2.0",
+              "Choose a card to install",
+              ansel,
+              "install",
+            );
+          },
+          "Ansel 2.0",
+          "You may install 1 card from HQ or Archives",
+          this,
+        );
+      },
+      visual: { y: 89, h: 16 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 105, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var installed = ChoicesInstalledCards(runner);
+    var programs = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]);
+    });
+    result.sr = [
+      installed.length < 1
+        ? [[]]
+        : programs.length > 0
+          ? [["misc_serious"]]
+          : [["misc_moderate"]],
+      runner.heap.length > 0 ? [["misc_moderate"]] : [[]],
+      corp.HQ.cards.length + corp.archives.cards.length > 0
+        ? [["misc_moderate"]]
+        : [[]],
+      [["endTheRun"]],
+    ];
+    return result;
+  },
+  AIImplementBreaker: function (
+    rc,
+    result,
+    point,
+    server,
+    cardStrength,
+    iceAI,
+    iceStrength,
+    clicksLeft,
+  ) {
+    if (this == iceAI.ice && clicksLeft >= 2) {
+      var breakresult = rc.SrBreak(this, iceAI, point, 2);
+      for (var i = 0; i < breakresult.length; i++)
+        breakresult[i].runner_clicks_spent += 2;
+      result = result.concat(breakresult);
+    }
     return result;
   },
 };
@@ -2152,10 +2373,37 @@ cardSet[36029] = {
   rezCost: 4,
   strength: 2,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 73, h: 16 },
+    },
   ],
+  modifyRezCost: {
+    Resolve: function (card) {
+      if (card != this) return 0;
+      var otherUnrezzedIce = ChoicesInstalledCards(corp, function (installedCard) {
+        return (
+          installedCard != card &&
+          CheckCardType(installedCard, ["ice"]) &&
+          !installedCard.rezzed
+        );
+      });
+      return -otherUnrezzedIce.length;
+    },
+    availableWhenInactive: true,
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]], [["endTheRun"]]];
     return result;
   },
 };
@@ -2176,10 +2424,74 @@ cardSet[36030] = {
   rezCost: 4,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "You may draw 1 card.",
+      Resolve: function () {
+        var choices = [{ id: 0, label: "Do not draw", button: "Continue" }];
+        if (corp.RnD.cards.length > 0)
+          choices.unshift({ id: 1, label: "Draw 1 card", button: "Draw" });
+        if (corp.AI != null)
+          corp.AI.preferred = { title: "Sleipnir", option: choices[0] };
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (choice && choice.id === 1) Draw(corp, 1);
+          },
+          "Sleipnir",
+          "You may draw 1 card",
+          this,
+        );
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "You may shuffle 1 card from HQ or Archives into R&D.",
+      Resolve: function () {
+        var choices = ChoicesArrayCards(corp.HQ.cards.concat(corp.archives.cards));
+        choices.push({ card: null, label: "Do not shuffle a card", button: "Continue" });
+        if (corp.AI != null) {
+          var preferred = choices[choices.length - 1];
+          for (var i = 0; i < choices.length - 1; i++) {
+            if (
+              choices[i].card.cardLocation == corp.archives.cards &&
+              (!preferred.card || (choices[i].card.elo || 0) > (preferred.card.elo || 0))
+            )
+              preferred = choices[i];
+          }
+          corp.AI.preferred = { title: "Sleipnir", option: preferred };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (!choice || !choice.card) return;
+            MoveCard(choice.card, corp.RnD.cards);
+            Shuffle(corp.RnD.cards);
+          },
+          "Sleipnir",
+          "You may shuffle 1 card from HQ or Archives into R&D",
+          this,
+        );
+      },
+      visual: { y: 73, h: 16 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 89, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      corp.RnD.cards.length > 0 ? [["misc_minor"]] : [[]],
+      corp.HQ.cards.length + corp.archives.cards.length > 0
+        ? [["misc_moderate"]]
+        : [[]],
+      [["endTheRun"]],
+    ];
     return result;
   },
 };

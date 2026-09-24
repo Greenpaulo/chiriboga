@@ -402,6 +402,9 @@ function CheckSteal() {
   if (accessingCard == null) return false;
   if (accessingCard.cardType != "agenda") return false;
   if (CardEffectsForbid("steal", accessingCard)) return false; //forbidden by card effects
+  var cost = StealCost(accessingCard);
+  if (!CheckCredits(runner, cost.credits, "stealing", accessingCard)) return false;
+  if (!CheckClicks(runner, cost.clicks)) return false;
   return true;
 }
 

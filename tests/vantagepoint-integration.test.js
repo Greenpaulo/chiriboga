@@ -1095,4 +1095,237 @@ assert(
   '36025 score-area penalty cannot be selected or resolved as a forfeit',
 );
 
-console.log('Vantage Point integration and Batch 1-5 behavior checks passed.');
+// Batch 6: Haas-Bioroid cards 36026-36030.
+context.corp.creditPool = 10;
+context.GainClicks = (player, amount) => {
+  player.clickTracker += amount;
+};
+context.LoseClicks = (player, amount) => {
+  const lost = Math.min(player.clickTracker, amount);
+  player.clickTracker -= lost;
+  return lost;
+};
+context.CheckClicks = (player, amount) => player.clickTracker >= amount;
+
+const melies = context.cardSet[36026];
+assert.deepStrictEqual(
+  JSON.parse(JSON.stringify(melies.stealCost)),
+  {clicks: 1},
+  '36026 requires an additional click to steal',
+);
+context.intended.score = melies;
+context.corp.clickTracker = 0;
+melies.responseOnScored.Resolve.call(melies);
+assert.strictEqual(context.corp.clickTracker, 1, '36026 gains a click when scored');
+context.intended.score = oldAgenda;
+melies.responseOnScored.Resolve.call(melies);
+assert.strictEqual(context.corp.clickTracker, 1, '36026 ignores other scored agendas');
+
+const synchrocyclotron = context.cardSet[36027];
+const doubleOperation = {
+  player: context.corp,
+  cardType: 'operation',
+  subTypes: ['Double'],
+};
+synchrocyclotron.playedDoubleOperationThisTurn = false;
+assert.strictEqual(
+  synchrocyclotron.modifyPlayClickCost.Resolve.call(
+    synchrocyclotron,
+    doubleOperation,
+  ),
+  -1,
+  '36027 discounts the first double operation',
+);
+synchrocyclotron.automaticOnPlay.Resolve.call(
+  synchrocyclotron,
+  doubleOperation,
+);
+assert.strictEqual(
+  synchrocyclotron.modifyPlayClickCost.Resolve.call(
+    synchrocyclotron,
+    doubleOperation,
+  ),
+  0,
+  '36027 does not discount later double operations that turn',
+);
+synchrocyclotron.responseOnRunnerTurnBegins.Resolve.call(synchrocyclotron);
+assert.strictEqual(synchrocyclotron.playedDoubleOperationThisTurn, false);
+context.corp.HQ.cards = [doubleOperation];
+context.corp.AI = {_isAScoringServer: () => false};
+assert.strictEqual(
+  synchrocyclotron.AIWorthInstalling.call(synchrocyclotron, [remote]),
+  0,
+  '36027 AI installs when a double operation can benefit',
+);
+
+const ansel = context.cardSet[36028];
+context.GetApproachEncounterIce = () => ansel;
+context.runner.clickTracker = 3;
+context.ChoicesEncounteredSubroutines = () =>
+  ansel.subroutines
+    .filter((subroutine) => !subroutine.broken)
+    .map((subroutine) => ({subroutine, label: subroutine.text}));
+const brokenSubroutines = [];
+context.Break = (subroutine) => {
+  subroutine.broken = true;
+  brokenSubroutines.push(subroutine);
+};
+decisions = [];
+ansel.runnerAbilities[0].Resolve.call(ansel, {
+  subroutine: ansel.subroutines[0],
+});
+assert.strictEqual(context.runner.clickTracker, 1);
+assert.strictEqual(decisions.length, 1, '36028 offers an optional second break');
+decisions[0].choose({subroutine: ansel.subroutines[1]});
+assert.deepStrictEqual(brokenSubroutines, [ansel.subroutines[0], ansel.subroutines[1]]);
+assert.strictEqual(
+  ansel.runnerAbilities[0].Enumerate.call(ansel).length,
+  0,
+  '36028 cannot use its Runner ability without 2 clicks',
+);
+ansel.subroutines.forEach((subroutine) => {
+  subroutine.broken = false;
+});
+
+const installedProgram = {
+  title: 'Valuable program',
+  cardType: 'program',
+  subTypes: [],
+  elo: 1800,
+};
+installed = {corp: [], runner: [installedProgram]};
+trashCalls = [];
+decisions = [];
+ansel.subroutines[0].Resolve.call(ansel);
+assert.strictEqual(decisions.length, 1);
+decisions[0].choose(decisions[0].choices[0]);
+assert.strictEqual(trashCalls[0].cards[0], installedProgram);
+assert.strictEqual(trashCalls[0].canBePrevented, true);
+
+const heapCard = {title: 'Heap card', elo: 1600};
+context.runner.heap = [heapCard];
+heapCard.cardLocation = context.runner.heap;
+let removedFromGame = null;
+context.RemoveFromGame = (card) => {
+  removedFromGame = card;
+};
+decisions = [];
+ansel.subroutines[1].Resolve.call(ansel);
+decisions[0].choose(decisions[0].choices[0]);
+assert.strictEqual(removedFromGame, heapCard);
+
+const installCard = {title: 'Install target', cardType: 'asset', subTypes: []};
+const installChoice = {card: installCard, server: remote, label: 'Install target'};
+context.ChoicesHandInstall = () => [installChoice];
+context.ChoicesArrayInstall = () => [];
+let installedChoice = null;
+context.Install = (card, server) => {
+  installedChoice = {card, server};
+};
+context.corp.AI = null;
+decisions = [];
+ansel.subroutines[2].Resolve.call(ansel);
+assert.strictEqual(decisions[0].choices.some((choice) => choice.id === -1), true);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 0));
+decisions[1].choose(installChoice);
+assert.deepStrictEqual(installedChoice, {card: installCard, server: remote});
+
+const anselIceAI = {ice: ansel, sr: []};
+const runPoint = {runner_clicks_spent: 0};
+const fakeRc = {
+  precalculated: {runnerInstalledCardsLength: 1},
+  SrBreak(card, iceAI, point, count) {
+    assert.strictEqual(count, 2);
+    return [{runner_clicks_spent: point.runner_clicks_spent}];
+  },
+};
+const breakerResults = ansel.AIImplementBreaker.call(
+  ansel,
+  fakeRc,
+  [],
+  runPoint,
+  remote,
+  ansel.strength,
+  anselIceAI,
+  ansel.strength,
+  2,
+  0,
+);
+assert.strictEqual(breakerResults[0].runner_clicks_spent, 2);
+assert.strictEqual(
+  ansel.AIImplementBreaker.call(
+    ansel,
+    fakeRc,
+    [],
+    runPoint,
+    remote,
+    ansel.strength,
+    anselIceAI,
+    ansel.strength,
+    1,
+    0,
+  ).length,
+  0,
+  '36028 run calculator requires both clicks',
+);
+
+const reverb = context.cardSet[36029];
+const otherUnrezzedIce = {cardType: 'ice', rezzed: false, subTypes: []};
+const rezzedIce = {cardType: 'ice', rezzed: true, subTypes: []};
+installed = {corp: [reverb, otherUnrezzedIce, rezzedIce], runner: []};
+assert.strictEqual(
+  reverb.modifyRezCost.Resolve.call(reverb, reverb),
+  -1,
+  '36029 counts only other unrezzed ice',
+);
+let endedRuns = 0;
+context.EndTheRun = () => {
+  endedRuns++;
+};
+reverb.subroutines[0].Resolve.call(reverb);
+reverb.subroutines[1].Resolve.call(reverb);
+assert.strictEqual(endedRuns, 2);
+
+const sleipnir = context.cardSet[36030];
+const rndCard = {title: 'R&D card'};
+context.corp.RnD.cards = [rndCard];
+cardsDrawn = 0;
+decisions = [];
+sleipnir.subroutines[0].Resolve.call(sleipnir);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
+assert.strictEqual(cardsDrawn, 1);
+context.corp.RnD.cards = [];
+decisions = [];
+sleipnir.subroutines[0].Resolve.call(sleipnir);
+assert.strictEqual(
+  decisions[0].choices.some((choice) => choice.id === 1),
+  false,
+  '36030 cannot choose to draw from empty R&D',
+);
+
+const archiveCard = {title: 'Archived card', elo: 1700};
+context.corp.HQ.cards = [];
+context.corp.archives.cards = [archiveCard];
+archiveCard.cardLocation = context.corp.archives.cards;
+context.corp.RnD.cards = [];
+shuffled = false;
+context.MoveCard = (card, destination) => {
+  const sourceIndex = card.cardLocation.indexOf(card);
+  if (sourceIndex > -1) card.cardLocation.splice(sourceIndex, 1);
+  destination.push(card);
+  card.cardLocation = destination;
+};
+context.Shuffle = () => {
+  shuffled = true;
+};
+context.corp.AI = {preferred: null};
+decisions = [];
+sleipnir.subroutines[1].Resolve.call(sleipnir);
+assert.strictEqual(context.corp.AI.preferred.option.card, archiveCard);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.card === archiveCard));
+assert.strictEqual(context.corp.RnD.cards[0], archiveCard);
+assert.strictEqual(shuffled, true);
+sleipnir.subroutines[2].Resolve.call(sleipnir);
+assert.strictEqual(endedRuns, 3);
+
+console.log('Vantage Point integration and Batch 1-6 behavior checks passed.');

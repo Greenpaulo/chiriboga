@@ -3395,6 +3395,51 @@ function PlayCost(card) {
 }
 
 /**
+ * Gets the number of clicks required to play an operation or event.
+ * Double cards normally cost 2 clicks; active card effects may modify that
+ * cost, but never below 0.
+ *
+ * @method PlayClickCost
+ * @param {Card} card card to check
+ * @returns {int} click cost to play the card
+ */
+function PlayClickCost(card) {
+  var ret = CheckSubType(card, "Double") ? 2 : 1;
+  ret += ModifyingTriggers("modifyPlayClickCost", card, -ret);
+  return ret;
+}
+
+/**
+ * Gets the additional credit and click costs to steal an agenda.
+ * A cost printed on the accessed agenda is combined with active modifying
+ * effects such as The Source.
+ *
+ * @method StealCost
+ * @param {Card} card agenda being accessed
+ * @returns {{credits:int, clicks:int}} additional steal costs
+ */
+function StealCost(card) {
+  var ret = { credits: 0, clicks: 0 };
+  if (card && card.stealCost) {
+    ret.credits += card.stealCost.credits || 0;
+    ret.clicks += card.stealCost.clicks || 0;
+  }
+  var triggerList = ChoicesActiveTriggers("modifyStealCost");
+  for (var i = 0; i < triggerList.length; i++) {
+    var modification = triggerList[i].card.modifyStealCost.Resolve.call(
+      triggerList[i].card,
+      card,
+    );
+    if (!modification) continue;
+    ret.credits += modification.credits || 0;
+    ret.clicks += modification.clicks || 0;
+  }
+  ret.credits = Math.max(0, ret.credits);
+  ret.clicks = Math.max(0, ret.clicks);
+  return ret;
+}
+
+/**
  * Gets the trash cost of a card.<br/>Nothing is logged.
  *
  * @method TrashCost
@@ -4066,8 +4111,7 @@ function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
  */
 function FullCheckPlay(card, requireActionPhase = true) {
   if (card == null) return false;
-  var clicksRequired = 1;
-  if (CheckSubType(card, "Double")) clicksRequired = 2;
+  var clicksRequired = PlayClickCost(card);
   if (
     (!requireActionPhase && CheckClicks(card.player, clicksRequired)) ||
     CheckActionClicks(card.player, clicksRequired)

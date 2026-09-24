@@ -223,3 +223,41 @@ sequence before gaining credits and drawing.
 `tests/vantagepoint-integration.test.js` covers Batch 5 first-event tracking,
 hosting limits and cleanup, fully-broken ICE swaps, Trojan server matching,
 scoring branches, cleanup and AI valuation hooks.
+
+## Batch 6 engine support
+
+`PlayClickCost` centralizes the click cost to play an operation or event. A
+Double starts at 2 clicks and active `modifyPlayClickCost` effects can change
+that value. Both play-action legality and payment use the helper, allowing
+Synchrocyclotron to make the first Double operation cost 1 click even when the
+Corp has only that click remaining.
+
+`StealCost` combines an accessed agenda's printed `stealCost` with active
+`modifyStealCost` effects. Access checks require both the returned credits and
+clicks, and steal resolution pays them before moving the agenda. This activates
+the previously unused credit-cost hook on The Source while supporting Méliès
+City Luxury Line's printed click cost.
+
+## Batch 6 confirmed patterns
+
+Synchrocyclotron observes Double operations while inactive, because the first
+Double played earlier in the turn consumes its discount even if the asset is
+rezzed later. Its state resets at either turn boundary.
+
+Ansel 2.0 exposes its click-break as a Runner-controlled ability on Corp ICE.
+The two clicks are lost before the first selected subroutine is broken, then
+the Runner may select one remaining subroutine or stop. Its four subroutines
+handle no-target cases, preventable installed-card trashing, heap removal,
+normal paid installs from HQ or Archives, and ending the run. The Run Calculator
+models the exact two-click/up-to-two-subroutine exchange.
+
+Reverb's self-only rez modifier is available while inactive and counts every
+other installed unrezzed piece of ICE. Sleipnir presents explicit decline
+choices for both optional subroutines and suppresses the draw choice when R&D
+is empty.
+
+`tests/vantagepoint-integration.test.js` covers Batch 6 scoring, first-Double
+tracking, Runner-controlled breaks, target selection, install cancellation,
+dynamic rez cost, optional draw/recursion, and ICE AI models.
+`tests/play-and-steal-cost.test.js` covers the shared play-click and steal-cost
+helpers, affordability failures and action-phase payment integration.

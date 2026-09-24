@@ -981,8 +981,7 @@ phases.corpActionMain = {
         params.card,
         function (finishResolve) {
           SetHistoryThumbnail(params.card.imageFile, "Play");
-		  if (CheckSubType(params.card, "Double")) SpendClicks(corp, 2);
-          else SpendClicks(corp, 1);
+          SpendClicks(corp, PlayClickCost(params.card));
           SpendCredits(
             corp,
             PlayCost(params.card),
@@ -1262,8 +1261,7 @@ phases.runnerActionMain = {
         params.card,
         function (finishResolve) {
           SetHistoryThumbnail(params.card.imageFile, "Play");
-		  if (CheckSubType(params.card, "Double")) SpendClicks(runner, 2);
-          else SpendClicks(runner, 1);
+          SpendClicks(runner, PlayClickCost(params.card));
           SpendCredits(
             runner,
             PlayCost(params.card),
@@ -1633,7 +1631,19 @@ phases.runAccessingCard = {
     },
     steal: function () {
       SetHistoryThumbnail(accessingCard.imageFile, "Steal");
-      Steal();
+      var agenda = accessingCard;
+      var cost = StealCost(agenda);
+      SpendCredits(
+        runner,
+        cost.credits,
+        "stealing",
+        agenda,
+        function () {
+          SpendClicks(runner, cost.clicks);
+          Steal();
+        },
+        this
+      );
     },
     trigger: function (params) {
       TriggerAbility(params.card, params.ability);

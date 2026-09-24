@@ -134,6 +134,8 @@ modifyStrength: Resolve(card); // card = target card being checked
 modifyInstallCost: Resolve(card, destination); // destination is a server or host, null for a normal Runner install
 modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
+modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
+modifyStealCost: Resolve(card); // returns {credits, clicks} additional costs
 modifyMaxHandSize: Resolve(player);
 modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
 ```
@@ -184,6 +186,7 @@ eligible hosted credits and Runner temporary credits, and `SpendCredits` and
 SpendClicks(player, n);
 GainClicks(player, n);
 CheckClicks(player, n); // alias CheckActionClicks
+PlayClickCost(card); // 1 normally, 2 for Double, including active modifiers
 ```
 
 ### Cards / Zones
@@ -244,6 +247,7 @@ runner.grip / runner.stack / runner.heap;
 ```js
 CheckCardType(card, ["ice","asset",...])
 CheckSubType(card, "Barrier")
+StealCost(card); // {credits, clicks}, including printed and active additional costs
 InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)

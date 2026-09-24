@@ -1998,6 +1998,25 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Word on the Street uses `AIWorthKeeping`; its scoring effects are mandatory
   once installed and therefore need no activation hook.
 
+### Vantage Point Batch 6 card hooks
+
+- Synchrocyclotron uses `AIWorthInstalling` to seek a non-scoring remote only
+  when HQ contains a Double operation and the Corp can afford to rez it, plus
+  `AIAvoidInstallingOverThis` because its ongoing click discount is valuable.
+- Ansel 2.0 uses `AIImplementIce` for its trash, heap-removal, install and
+  end-the-run subroutines. `AIImplementBreaker` models its exact exchange of 2
+  Runner clicks for up to 2 broken subroutines; inline Corp preferences choose
+  high-ELO trash/removal targets and use the established install-option scorer.
+- Reverb uses `AIImplementIce` for its two end-the-run subroutines. Its dynamic
+  rez discount flows through the normal `RezCost` calculation, so it needs no
+  separate valuation hook.
+- Sleipnir uses `AIImplementIce` for its draw, recursion and end-the-run
+  subroutines. Inline preferences draw only from nonempty R&D and preferentially
+  shuffle a public Archives card rather than blindly cycling HQ.
+- Méliès City Luxury Line has no activation decision. Its steal-click cost is
+  enforced by the access engine, and its mandatory on-score click gain uses no
+  AI hook.
+
 ---
 
 ## 8. Step-by-Step Worked Example

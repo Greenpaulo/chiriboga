@@ -40,7 +40,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**5 complete, 8 outstanding** (`8 Pending`, `0 In progress`, `0 Blocked`).
+**6 complete, 7 outstanding** (`7 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -53,7 +53,7 @@ Agents must refresh these counts whenever a batch status changes.
 |     3 | 36009–36016 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
 |     4 | 36017–36020 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
 |     5 | 36021–36025 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
-|     6 | 36026–36030 | Pending  | —                        | —                                                                          |
+|     6 | 36026–36030 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
 |     7 | 36031–36035 | Pending  | —                        | —                                                                          |
 |     8 | 36036–36040 | Pending  | —                        | —                                                                          |
 |     9 | 36041–36045 | Pending  | —                        | —                                                                          |
@@ -79,6 +79,7 @@ Do not remove an older entry if later work revisits one of its cards.
 |     3 | 36009–36016 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Vic, Kompromat, Sell Out, Tailgate, Borrowed Goods, Rotary, Baker and Underdome Irregulars; added Corp-controlled Runner abilities and a pre-approach response window |
 |     4 | 36017–36020 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `credit-pool-lock.test.js`; all `tests/*.test.js` | Implemented Hiram, Aircheck, Beta Build and Methuselah; added credit-pool locking and post-run cleanup hooks plus payment/tutor compatibility repairs |
 |     5 | 36021–36025 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `forfeit-restriction.test.js`; all `tests/*.test.js` | Implemented Touchstone, Read-Write Share, Sipa, Stowaway and Word on the Street; added non-forfeitable score-area cards and legal forfeit filtering |
+|     6 | 36026–36030 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `play-and-steal-cost.test.js`; all `tests/*.test.js` | Implemented Méliès City Luxury Line, Synchrocyclotron, Ansel 2.0, Reverb and Sleipnir; added shared play-click and additional steal-cost handling |
 
 ## Required shared verification
 
