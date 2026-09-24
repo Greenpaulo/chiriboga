@@ -16,6 +16,14 @@ Replace the scalar credit ceiling in `_effectiveRunnerCreditPool()` with a credi
    - Do NOT mutate counters or run state while planning.
    - Never allocate one hosted credit twice.
 
+## Things to consider:
+
+Layer 6.1 (Payment-Constraint Allocation Complexity):
+
+Combining stealth credits, central-only recurring credits, breaker-specific credits, and paid bypasses in a single route optimization can quickly become a miniature knapsack/matching problem.
+
+Mitigation: Keep the credit-source predicates declarative and greedy (spending the most restrictive credits first) to avoid performance hits during multi-ICE route evaluations.
+
 ## Required Card & Documentation Updates
 
 - Update `documentation/ai.md` with any schema changes for credit-eligibility predicates.
