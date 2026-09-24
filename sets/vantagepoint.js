@@ -1406,6 +1406,45 @@ cardSet[36017] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 0,
+  _lookAtTopOfRnD: function () {
+    if (corp.RnD.cards.length < 1) return;
+    var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
+    topCard.knownToRunner = true;
+    Log(GetTitle(this) + " looks at the top card of R&D");
+  },
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (
+        card &&
+        card.player == runner &&
+        CheckCardType(card, ["hardware"]) &&
+        corp.RnD.cards.length > 0
+      )
+        return [{}];
+      return [];
+    },
+    Resolve: function () {
+      this._lookAtTopOfRnD();
+    },
+    text: "Look at the top card of R&D",
+  },
+  responseOnTrash: {
+    Enumerate: function (cards) {
+      if (corp.RnD.cards.length < 1) return [];
+      for (var i = 0; i < cards.length; i++) {
+        if (
+          cards[i].player == runner &&
+          CheckCardType(cards[i], ["hardware"])
+        )
+          return [{}];
+      }
+      return [];
+    },
+    Resolve: function () {
+      this._lookAtTopOfRnD();
+    },
+    text: "Look at the top card of R&D",
+  },
 };
 
 //Aircheck (36018)
@@ -1422,8 +1461,98 @@ cardSet[36018] = {
   cardType: "event",
   subTypes: ["Run", "Stealth"],
   playCost: 1,
+  runningWithThis: false,
+  primaryRun: false,
+  primaryRunWasSuccessful: false,
+  pendingRunServer: null,
+  credits: 0,
+  Enumerate: function () {
+    return [
+      {server: corp.HQ, label: "HQ"},
+      {server: corp.RnD, label: "R&D"},
+    ];
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    PlaceCredits(this, 4);
+    this.runningWithThis = true;
+    this.primaryRun = true;
+    this.primaryRunWasSuccessful = false;
+    this.pendingRunServer = null;
+    MakeRun(params.server);
+  },
+  canUseCredits: function () {
+    return this.runningWithThis;
+  },
+  preventCreditPoolUse: function (player, action) {
+    return this.runningWithThis && player == runner &&
+      (action == "spend" || action == "lose");
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (this.runningWithThis && this.primaryRun)
+        this.primaryRunWasSuccessful = true;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Enumerate: function () {
+      if (!this.runningWithThis || !this.primaryRun)
+        return [];
+      if (!this.primaryRunWasSuccessful) return [];
+      var choices = ChoicesExistingServers().filter(function (choice) {
+        return typeof choice.server.cards === "undefined";
+      });
+      choices.push({server: null, label: "Do not run", button: "Continue"});
+      if (runner.AI && choices.length > 1) {
+        var bestChoice = choices[choices.length - 1];
+        var bestPotential = 0;
+        for (var i = 0; i < choices.length - 1; i++) {
+          var potential = runner.AI._getCachedPotential(choices[i].server);
+          if (potential > bestPotential) {
+            bestPotential = potential;
+            bestChoice = choices[i];
+          }
+        }
+        return [bestChoice];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.primaryRun = false;
+      this.primaryRunWasSuccessful = false;
+      this.pendingRunServer = params.server;
+    },
+    text: "You may run a remote server",
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      if (this.pendingRunServer) {
+        var nextServer = this.pendingRunServer;
+        this.pendingRunServer = null;
+        MakeRun(nextServer);
+      } else {
+        this.runningWithThis = false;
+        this.primaryRun = false;
+        this.primaryRunWasSuccessful = false;
+      }
+    },
+  },
+  AIRunEventExtraPotential: function (server, potential) {
+    if (server != corp.HQ && server != corp.RnD) return 0;
+    return potential > 1.5 ? 0.2 : 0.05;
+  },
+  AIRunEventExtraCredits: 4,
+  AIRunEventModify: function () {
+    this.storedAIRunnerCreditPool = runner.creditPool;
+    runner.creditPool = this.playCost;
+  },
+  AIRunEventRestore: function () {
+    runner.creditPool = this.storedAIRunnerCreditPool;
+    this.storedAIRunnerCreditPool = null;
+  },
+  AIWorthKeeping: function () {
+    return true;
   },
 };
 
@@ -1440,8 +1569,93 @@ cardSet[36019] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  lingeringEffectTarget: null,
+  runningWithThis: false,
+  Enumerate: function () {
+    var programs = ChoicesArrayInstall(runner.stack, true, function (card) {
+      return CheckCardType(card, ["program"]) && !CheckSubType(card, "Virus");
+    });
+    var servers = ChoicesExistingServers();
+    var choices = [];
+    for (var i = 0; i < programs.length; i++) {
+      for (var j = 0; j < servers.length; j++) {
+        choices.push({
+          card: programs[i].card,
+          host: programs[i].host,
+          server: servers[j].server,
+          label:
+            programs[i].label + "; run " + ServerName(servers[j].server),
+        });
+      }
+    }
+    return choices;
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    Shuffle(runner.stack);
+    var betaBuild = this;
+    Install(
+      params.card,
+      params.host,
+      true,
+      null,
+      true,
+      function () {
+        betaBuild.lingeringEffectTarget = params.card;
+        betaBuild.runningWithThis = true;
+        MakeRun(params.server);
+      },
+      this,
+      null,
+      null,
+      false,
+    );
+  },
+  automaticOnUninstall: {
+    Resolve: function (card) {
+      if (card == this.lingeringEffectTarget)
+        this.lingeringEffectTarget = null;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      this.runningWithThis = false;
+      if (!this.lingeringEffectTarget) return;
+      var target = this.lingeringEffectTarget;
+      this.lingeringEffectTarget = null;
+      MoveCard(target, runner.stack);
+      Log(GetTitle(target) + " added to top of the stack");
+    },
+    automatic: true,
+  },
+  AIPreferredPlayChoice: function (choices) {
+    var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(
+      runner.stack,
+      InstalledCards(runner),
+    );
+    var preferredServer = null;
+    if (runner.AI.serverList && runner.AI.serverList.length > 0)
+      preferredServer = runner.AI.serverList[0].server;
+    for (var i = 0; i < choices.length; i++) {
+      if (
+        (!preferredCard || choices[i].card == preferredCard) &&
+        (!preferredServer || choices[i].server == preferredServer)
+      )
+        return i;
+    }
+    return choices.length > 0 ? 0 : -1;
+  },
+  AIIcebreakerTutor: function () {
+    return runner.stack.filter(function (card) {
+      return CheckCardType(card, ["program"]) &&
+        CheckSubType(card, "Icebreaker") &&
+        !CheckSubType(card, "Virus");
+    });
+  },
+  AIWorthKeeping: function (installedRunnerCards) {
+    return this.AIIcebreakerTutor(installedRunnerCards).length > 0;
   },
 };
 
@@ -1460,7 +1674,65 @@ cardSet[36020] = {
   cardType: "hardware",
   subTypes: ["Console", "Stealth"],
   installCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  credits: 0,
+  responseOnRunBegins: {
+    Enumerate: function () {
+      var choices = ChoicesArrayCards(runner.grip, function (card) {
+        return CheckCardType(card, ["hardware"]) && CheckTrash(card);
+      });
+      if (choices.length < 1) return [];
+      choices.push({card: null, label: "Do not trash hardware", button: "Continue"});
+      if (runner.AI) {
+        var trashChoices = choices.slice(0, choices.length - 1);
+        var index = runner.AI._indexOfBestDiscardOption(trashChoices);
+        var runCost = runner.AI._getCachedCost(attackedServer);
+        if (
+          index > -1 &&
+          (runCost > AvailableCredits(runner) ||
+            !runner.AI.cardsWorthKeeping.includes(trashChoices[index].card))
+        )
+          return [trashChoices[index]];
+        return [choices[choices.length - 1]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params.card) return;
+      Trash(
+        params.card,
+        false,
+        function () {
+          PlaceCredits(this, 2);
+        },
+        this,
+      );
+    },
+    text: "You may trash hardware from your grip to place 2[c]",
+  },
+  canUseCredits: function () {
+    return attackedServer !== null;
+  },
+  AIRunPoolCreditOffset: function () {
+    return this.credits;
+  },
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost) {
+    if (runCreditCost <= AvailableCredits(runner)) return 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (runner.grip[i] != this && CheckCardType(runner.grip[i], ["hardware"]))
+        return 2;
+    }
+    return 0;
+  },
+  AIEconomyInstall: 2,
+  AIWorthKeeping: function () {
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (runner.grip[i] != this && CheckCardType(runner.grip[i], ["hardware"]))
+        return true;
+    }
+    return false;
+  },
 };
 
 //Touchstone (36021)

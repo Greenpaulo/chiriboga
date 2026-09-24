@@ -82,6 +82,7 @@ responseOnRunSuccessful: { Resolve, automatic: true }
 responseOnRunEnds:       { Resolve, automatic: true }
 responseOnPassesIce:     { Resolve, automatic: true }
 responseOnWouldApproachServer: { Enumerate?, Resolve } // optional pre-approach redirect window
+automaticOnRunEndCleanup: { Resolve } // after responses and run state cleanup
 ```
 
 ### Encounter
@@ -168,7 +169,14 @@ GainCredits(player, amount, reason, source);
 LoseCredits(player, amount);
 SpendCredits(player, amount, reason, source, callback, context);
 CheckCredits(player, amount); // true if player can afford
+CreditPoolCanBeUsed(player, action, reason, source); // pool only; hosted/temporary credits are separate
 ```
+
+An active card can temporarily forbid pool spending or loss with
+`preventCreditPoolUse(player, action, doing, card)`. Return `true` to lock the
+pool for that action. `AvailableCredits` and `CheckCredits` will still count
+eligible hosted credits and Runner temporary credits, and `SpendCredits` and
+`LoseCredits` will leave the locked pool unchanged.
 
 ### Clicks
 

@@ -15,13 +15,24 @@ const context = {
   console,
   cardSet: [],
   setIdentifiers: [],
-  runner: {side: 'runner', AI: null, grip: [], clickTracker: 4},
+  runner: {
+    side: 'runner',
+    AI: null,
+    grip: [],
+    stack: [],
+    heap: [],
+    resolvingCards: [],
+    creditPool: 5,
+    temporaryCredits: 0,
+    clickTracker: 4,
+  },
   corp: {
     side: 'corp',
     AI: null,
-    HQ: {serverName: 'HQ'},
-    RnD: {serverName: 'R&D'},
-    archives: {serverName: 'Archives', cards: []},
+    HQ: {serverName: 'HQ', cards: [], root: [], ice: []},
+    RnD: {serverName: 'R&D', cards: [], root: [], ice: []},
+    archives: {serverName: 'Archives', cards: [], root: [], ice: []},
+    remoteServers: [],
   },
 };
 vm.createContext(context);
@@ -152,6 +163,9 @@ context.SpendCredits = (player, amount, doing, card, callback, callbackContext) 
   callback.call(callbackContext);
 context.Break = () => {};
 context.GetServer = (card) => card.server || null;
+context.PlaceCredits = (card, amount) => {
+  card.credits = (card.credits || 0) + amount;
+};
 
 const chainReaction = context.cardSet[36001];
 chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.HQ);
@@ -735,4 +749,168 @@ assert.strictEqual(
   '36016 remembers ice rezzed before it was installed',
 );
 
-console.log('Vantage Point integration and Batch 1-3 behavior checks passed.');
+// Batch 4: Shaper cards 36017-36020.
+const hiram = context.cardSet[36017];
+const hiddenTopCard = {title: 'Hidden agenda', knownToRunner: false};
+context.corp.RnD.cards = [hiddenTopCard];
+const installedHardware = {
+  title: 'Installed hardware',
+  player: context.runner,
+  cardType: 'hardware',
+  subTypes: [],
+};
+assert.strictEqual(hiram.responseOnInstall.Enumerate.call(hiram, installedHardware).length, 1);
+hiram.responseOnInstall.Resolve.call(hiram);
+assert.strictEqual(hiddenTopCard.knownToRunner, true, '36017 looks at R&D after hardware install');
+hiddenTopCard.knownToRunner = false;
+assert.strictEqual(hiram.responseOnTrash.Enumerate.call(hiram, [installedHardware]).length, 1);
+hiram.responseOnTrash.Resolve.call(hiram);
+assert.strictEqual(hiddenTopCard.knownToRunner, true, '36017 looks at R&D after hardware trash');
+assert.strictEqual(
+  hiram.responseOnTrash.Enumerate.call(hiram, [{player: context.runner, cardType: 'program'}]).length,
+  0,
+  '36017 ignores non-hardware trash events',
+);
+
+const remote = {serverName: 'Remote 1', root: [], ice: []};
+context.corp.remoteServers = [remote];
+context.ChoicesExistingServers = () => [
+  {server: context.corp.HQ, label: 'HQ'},
+  {server: context.corp.RnD, label: 'R&D'},
+  {server: context.corp.archives, label: 'Archives'},
+  {server: remote, label: 'Remote 1'},
+];
+const aircheck = context.cardSet[36018];
+aircheck.credits = 0;
+aircheck.Resolve.call(aircheck, {server: context.corp.HQ});
+assert.strictEqual(runTarget, context.corp.HQ);
+assert.strictEqual(aircheck.credits, 4);
+assert.strictEqual(aircheck.canUseCredits.call(aircheck, 'using', corsair), true);
+assert.strictEqual(
+  aircheck.preventCreditPoolUse.call(aircheck, context.runner, 'spend'),
+  true,
+);
+aircheck.responseOnRunSuccessful.Resolve.call(aircheck);
+const aircheckRunChoices = aircheck.responseOnRunEnds.Enumerate.call(aircheck);
+assert.deepStrictEqual(
+  Array.from(aircheckRunChoices, (choice) => choice.server),
+  [remote, null],
+  '36018 offers only remote servers after its successful central run',
+);
+aircheck.responseOnRunEnds.Resolve.call(aircheck, aircheckRunChoices[0]);
+aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck);
+assert.strictEqual(runTarget, remote, '36018 launches the chosen run after cleanup');
+assert.strictEqual(aircheck.runningWithThis, true);
+aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck);
+assert.strictEqual(aircheck.runningWithThis, false, '36018 unlocks the pool after its final run');
+aircheck.Resolve.call(aircheck, {server: context.corp.RnD});
+aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck);
+assert.strictEqual(aircheck.runningWithThis, false, '36018 cleans up after an unsuccessful run');
+context.runner.creditPool = 8;
+aircheck.AIRunEventModify.call(aircheck);
+assert.strictEqual(context.runner.creditPool, 1, '36018 AI excludes the inaccessible pool');
+aircheck.AIRunEventRestore.call(aircheck);
+assert.strictEqual(context.runner.creditPool, 8);
+
+const betaBuild = context.cardSet[36019];
+const nonVirusBreaker = {
+  title: 'Decoder',
+  player: context.runner,
+  cardType: 'program',
+  subTypes: ['Icebreaker', 'Decoder'],
+  memoryCost: 1,
+};
+const virusProgram = {
+  title: 'Virus',
+  player: context.runner,
+  cardType: 'program',
+  subTypes: ['Virus'],
+  memoryCost: 1,
+};
+context.runner.stack = [virusProgram, nonVirusBreaker];
+let shuffled = false;
+context.Shuffle = () => {
+  shuffled = true;
+};
+context.ChoicesArrayInstall = (cards, ignoreCost, check) =>
+  cards
+    .filter((card) => !check || check(card))
+    .map((card) => ({card, host: null, label: 'Install ' + card.title}));
+context.Install = (card, host, ignoreCosts, position, returnToPhase, callback, callbackContext) => {
+  assert.strictEqual(ignoreCosts, true);
+  const stackIndex = context.runner.stack.indexOf(card);
+  if (stackIndex > -1) context.runner.stack.splice(stackIndex, 1);
+  installed.runner.push(card);
+  card.cardLocation = installed.runner;
+  callback.call(callbackContext);
+};
+context.MoveCard = (card, destination) => {
+  if (card.cardLocation) {
+    const index = card.cardLocation.indexOf(card);
+    if (index > -1) card.cardLocation.splice(index, 1);
+  }
+  destination.push(card);
+  card.cardLocation = destination;
+};
+const betaChoices = betaBuild.Enumerate.call(betaBuild);
+assert.strictEqual(betaChoices.some((choice) => choice.card === virusProgram), false);
+const betaChoice = betaChoices.find(
+  (choice) => choice.card === nonVirusBreaker && choice.server === context.corp.HQ,
+);
+installed = {corp: [], runner: []};
+betaBuild.Resolve.call(betaBuild, betaChoice);
+assert.strictEqual(shuffled, true);
+assert.strictEqual(runTarget, context.corp.HQ);
+assert.strictEqual(betaBuild.lingeringEffectTarget, nonVirusBreaker);
+betaBuild.responseOnRunEnds.Resolve.call(betaBuild);
+assert.strictEqual(context.runner.stack[context.runner.stack.length - 1], nonVirusBreaker);
+assert.strictEqual(betaBuild.lingeringEffectTarget, null);
+betaBuild.lingeringEffectTarget = nonVirusBreaker;
+betaBuild.automaticOnUninstall.Resolve.call(betaBuild, nonVirusBreaker);
+assert.strictEqual(betaBuild.lingeringEffectTarget, null, '36019 does not return an uninstalled target');
+assert.deepStrictEqual(
+  Array.from(betaBuild.AIIcebreakerTutor.call(betaBuild)),
+  [nonVirusBreaker],
+  '36019 AI tutors only eligible non-virus icebreakers',
+);
+const runnerAISource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
+assert.strictEqual(
+  runnerAISource.includes('this.tutorableIcebreakers'),
+  false,
+  '36019 tutor candidates are read from the local hook result',
+);
+
+const methuselah = context.cardSet[36020];
+const fodderHardware = {
+  title: 'Spare hardware',
+  player: context.runner,
+  cardType: 'hardware',
+  subTypes: [],
+};
+context.runner.grip = [fodderHardware, nonVirusBreaker];
+context.runner.AI = null;
+methuselah.credits = 0;
+const methuselahChoices = methuselah.responseOnRunBegins.Enumerate.call(methuselah);
+assert.deepStrictEqual(
+  Array.from(methuselahChoices, (choice) => choice.card),
+  [fodderHardware, null],
+  '36020 offers only hardware from the grip plus a decline option',
+);
+trashCalls = [];
+methuselah.responseOnRunBegins.Resolve.call(methuselah, methuselahChoices[0]);
+assert.strictEqual(trashCalls[0].canBePrevented, false);
+assert.strictEqual(methuselah.credits, 2);
+context.attackedServer = remote;
+assert.strictEqual(methuselah.canUseCredits.call(methuselah), true);
+assert.strictEqual(methuselah.AIRunPoolCreditOffset.call(methuselah, remote), 2);
+context.attackedServer = null;
+assert.strictEqual(methuselah.canUseCredits.call(methuselah), false);
+assert.strictEqual(methuselah.unique, true);
+assert.strictEqual(methuselah.memoryUnits, 1);
+
+assert(
+  phaseSource.includes('AutomaticTriggers("automaticOnRunEndCleanup"'),
+  '36018 has a post-cleanup hook for safely starting its optional second run',
+);
+
+console.log('Vantage Point integration and Batch 1-4 behavior checks passed.');

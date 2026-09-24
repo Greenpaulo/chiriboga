@@ -7512,9 +7512,16 @@ cardSet[35064] = {
         return ChoicesEncounteredSubroutines();
       },
       Resolve: function (params) {
-        runner.creditPool -= 3;
-        Log("Runner spent 3[c] to break subroutine on N-Pot");
-        Break(params.subroutine);
+        SpendCredits(
+          runner,
+          3,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this,
+        );
       },
     },
   ],

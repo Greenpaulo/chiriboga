@@ -677,6 +677,12 @@ AIRunEventRestore: function(server) {
 },
 ```
 
+Aircheck uses the same paired-hook pattern to model its inaccessible Runner
+credit pool. It temporarily sets `runner.creditPool` to its play cost, which is
+then subtracted by the normal run-event calculation, leaving zero pool credits
+for the hypothetical run. `AIRunEventExtraCredits` supplies its hosted credits
+separately, and `AIRunEventRestore` restores the exact stored pool value.
+
 **`AIRunEventExtraCredits`** (a plain number)
 
 If the run event gives the runner extra credits to spend during the run (like Overclock), declare the amount here. The AI will subtract the play cost to determine net gain:
@@ -846,12 +852,18 @@ Cards that search for and fetch another card (tutors) need to tell the AI what t
 
 **`AIIcebreakerTutor(installedRunnerCards)`**
 
-Return the icebreaker card object (from the stack) that this tutor would likely fetch, or `null` if nothing useful:
+Return an array of eligible icebreaker card objects from the stack. The route
+planner ranks those candidates for the ice protecting each proposed server;
+return an empty array if nothing useful is available:
 
 ```js
 // Mutual Favor: fetch the most-needed icebreaker that's in the stack but not installed
 AIIcebreakerTutor: function(installedRunnerCards) {
-    return runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
+    var preferred = runner.AI._icebreakerInPileNotInHandOrArray(
+        runner.stack,
+        installedRunnerCards,
+    );
+    return preferred ? [preferred] : [];
 },
 ```
 

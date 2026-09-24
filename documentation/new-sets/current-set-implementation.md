@@ -40,7 +40,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**3 complete, 10 outstanding** (`9 Pending`, `1 In progress`, `0 Blocked`).
+**4 complete, 9 outstanding** (`9 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -51,7 +51,7 @@ Agents must refresh these counts whenever a batch status changes.
 |     1 | 36001–36004 | Complete | Antigravity / 2026-09-18 | Reviewed and repaired by Codex; behavioral and full regression suites pass |
 |     2 | 36005–36008 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
 |     3 | 36009–36016 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
-|     4 | 36017–36020 | In progress | Codex / 2026-09-24       | —                                                                          |
+|     4 | 36017–36020 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
 |     5 | 36021–36025 | Pending  | —                        | —                                                                          |
 |     6 | 36026–36030 | Pending  | —                        | —                                                                          |
 |     7 | 36031–36035 | Pending  | —                        | —                                                                          |
@@ -77,6 +77,7 @@ Do not remove an older entry if later work revisits one of its cards.
 |     1 | 36001–36004 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Repaired turn tracking, trash sequencing, uniqueness and stealth payment/AI modelling; added behavioral coverage                                                                  |
 |     2 | 36005–36008 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Lampades, Hackerspace, Nurse Hạnh and Stick and Poke; added grouped Archives faceup and zero-damage continuation support                                              |
 |     3 | 36009–36016 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Vic, Kompromat, Sell Out, Tailgate, Borrowed Goods, Rotary, Baker and Underdome Irregulars; added Corp-controlled Runner abilities and a pre-approach response window |
+|     4 | 36017–36020 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `credit-pool-lock.test.js`; all `tests/*.test.js` | Implemented Hiram, Aircheck, Beta Build and Methuselah; added credit-pool locking and post-run cleanup hooks plus payment/tutor compatibility repairs |
 
 ## Required shared verification
 

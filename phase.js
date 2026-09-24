@@ -1723,6 +1723,9 @@ phases.runEnds.Resolve.n = function () {
     if (watermark) {
       watermark.textContent = '';
     }
+    //Some effects schedule another run only after the completed run and all of
+    //its response windows have finished (for example, Aircheck).
+    AutomaticTriggers("automaticOnRunEndCleanup", []);
   });
 };
 

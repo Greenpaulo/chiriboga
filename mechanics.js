@@ -1271,7 +1271,7 @@ function SpendCredits(
     }
   }
   //lastly, credit pool
-  if (num > 0) {
+  if (num > 0 && CreditPoolCanBeUsed(player, "spend", doing, card)) {
     player.creditPool -= num; //spend the rest from default pool
     if (num == 1) Log(PlayerName(player) + " spent one credit");
     else Log(PlayerName(player) + " spent " + num + " credits");
@@ -1586,7 +1586,8 @@ function LoseCredits(player, num) {
     }
   }
   //lose the rest from default pool
-  if (player.creditPool < num) num = player.creditPool;
+  if (!CreditPoolCanBeUsed(player, "lose")) num = 0;
+  else if (player.creditPool < num) num = player.creditPool;
   numberLost += num;
   player.creditPool -= num;
   if (numberLost == 1) Log(PlayerName(player) + " lost 1 credit");

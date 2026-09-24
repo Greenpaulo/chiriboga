@@ -135,3 +135,50 @@ self-trash branches explicitly.
 `tests/vantagepoint-integration.test.js` covers Batch 3 costs, restrictions,
 choices, run and turn cleanup, current Stealth-credit spending, redirect and
 central-pressure AI hooks, plus the two shared engine paths above.
+
+## Batch 4 engine support
+
+`CreditPoolCanBeUsed` lets an active card prevent credit-pool spending or loss
+without hiding the pool's actual value or disabling eligible hosted and Runner
+temporary credits. Aircheck uses `preventCreditPoolUse` only while its event is
+active. The focused credit-pool regression covers affordability, spending,
+loss and unchanged ordinary behavior. N-Pot's Runner-paid break ability now
+uses `SpendCredits`, so it consumes eligible hosted credits and cannot bypass
+the lock with a direct pool deduction.
+
+The run-end phase fires `automaticOnRunEndCleanup` after all run-end responses
+and after clearing the completed run's global state. Aircheck records the
+optional remote target in its response, then starts that run from the cleanup
+hook so no run-end responses are skipped and the new run is not overwritten by
+the old phase transition.
+
+Runner tutor planning now consistently reads the local array returned by
+`AIIcebreakerTutor`; the previous `this.tutorableIcebreakers` typo was dormant
+until Beta Build supplied eligible candidates.
+
+## Batch 4 confirmed patterns
+
+Hiram marks the current top card of R&D as known to the Runner after a Runner
+hardware install or trash, including hardware trashed from a non-installed
+location. Non-hardware events and empty R&D do not trigger the look.
+
+Aircheck restricts its first run to HQ or R&D, supplies four hosted credits,
+locks only the ordinary credit pool, and offers an optional remote run only
+after a successful first run. Its paired run-calculation hooks exclude the
+inaccessible pool and restore the exact hypothetical state afterward.
+
+Beta Build searches only installable non-virus programs, shuffles before the
+cost-free install, begins the selected run after installation completes and
+returns the same program to the top of the stack at run end only if it remained
+installed. Its tutor hook exposes eligible non-virus icebreakers to route
+planning.
+
+Methuselah is a unique +1 MU console. At each run start it can trash hardware
+from the grip as an unpreventable conditional cost to place two hosted credits,
+which are usable during runs. Its AI install, fuel-selection and route-credit
+hooks avoid treating unrelated grip cards as valid fuel.
+
+`tests/vantagepoint-integration.test.js` covers Batch 4 triggers, restrictions,
+run chaining and cleanup, tutor filtering and temporary-install cleanup, hosted
+credits and AI hooks. `tests/credit-pool-lock.test.js` covers the shared credit
+availability, spending and loss behavior.

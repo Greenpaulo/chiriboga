@@ -3288,6 +3288,40 @@ function Credits(player) {
 }
 
 /**
+ * Checks whether effects on active cards permit a player to use credits from
+ * their credit pool. Hosted and temporary credits are handled separately.
+ *
+ * @method CreditPoolCanBeUsed
+ * @param {Player} player either corp or runner
+ * @param {String} [action] "spend" or "lose"
+ * @param {String} [doing] purpose supplied to recurring-credit checks
+ * @param {Card} [card] card being paid for or used
+ * @returns {Boolean} true unless an active effect forbids using the pool
+ */
+function CreditPoolCanBeUsed(
+  player,
+  action = "spend",
+  doing = "",
+  card = null,
+) {
+  var activeCards = ActiveCards(player);
+  for (var i = 0; i < activeCards.length; i++) {
+    if (
+      typeof activeCards[i].preventCreditPoolUse === "function" &&
+      activeCards[i].preventCreditPoolUse.call(
+        activeCards[i],
+        player,
+        action,
+        doing,
+        card,
+      )
+    )
+      return false;
+  }
+  return true;
+}
+
+/**
  * Gets the available credit pool for a player, including bad publicity and recurring credits.<br/>Nothing is logged.
  *
  * @method AvailableCredits
@@ -3297,7 +3331,10 @@ function Credits(player) {
  * @returns {int} credits available, including recurring credits
  */
 function AvailableCredits(player, doing = "", card = null) {
-  var availableCred = Credits(player);
+  var availableCred = 0;
+  if (CreditPoolCanBeUsed(player, "spend", doing, card))
+    availableCred += player.creditPool;
+  if (player == runner) availableCred += runner.temporaryCredits;
   var activeCards = ActiveCards(player);
   for (var i = 0; i < activeCards.length; i++) {
     if (typeof activeCards[i].credits !== "undefined") {
