@@ -213,6 +213,7 @@ Install(
 Damage('net' | 'meat' | 'brain', amount, preventable);
 AddTags(n);
 RemoveTags(n);
+Purge(afterPurge?, context?);
 ```
 
 ### Counters

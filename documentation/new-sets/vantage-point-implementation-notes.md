@@ -299,3 +299,47 @@ of whether the upgrade remains active; the restriction cleans up at run end.
 both Caveat Emptor modes, printed-cost income and derez choices, Archives
 install filtering, score/steal counter placement, title-specific prevention,
 run cleanup and the meaningful Corp/Runner AI decisions.
+
+## Batch 8 engine support
+
+`Purge(afterPurge, context)` now accepts an optional continuation that runs
+after purge-response windows resolve. Knowledge Seeker uses it to preserve the
+printed order of purging virus counters before derezzing, without replacing a
+pending purge-response phase with a derez-response phase.
+
+Méliès U models its three physical extra identity copies as a secret department
+value. The normal trigger decision does not log the chosen department; flipping
+reveals the department name and changes the active identity subtype from
+Division to Department until the Runner's discard phase ends.
+
+The renderer maps Tenure Floors, Subsurface Labs and Disposal Grounds to
+`36036-0.webp`, `36036-1.webp` and `36036-2.webp`, respectively, and restores
+the normal `36036.jpg` front when the identity flips back.
+
+## Batch 8 confirmed patterns
+
+Lotus Haze moves a rezzed upgrade between existing server roots without
+changing its rez state, excludes the source server, and enforces the one-Region
+limit at the destination. Its agenda counter is spent only after a legal source
+and destination have been selected.
+
+Esca resolves its mandatory credit loss from every access and its net damage
+only while the Runner is tagged. An R&D access makes the card public for the
+duration of that access and restores its previous faceup state afterward.
+
+ezaM preserves both ICE positions and a remote that is only briefly empty
+during a cross-server swap. Its strength subroutine snapshots the installed ICE
+it affects, stacks through separate lingering effects and cleans each effect up
+at run end. The Run Calculator's `strengthenAllIce` effect carries that
+subroutine's +1 modifier into later encounters instead of treating it as a
+generic threat.
+
+Knowledge Seeker offers a mandatory bottom-to-top arrangement of up to four
+R&D cards, purges and derezzes after an encounter at three virus counters, and
+models the third-counter purge pressure separately from its end-the-run
+subroutine.
+
+`tests/vantagepoint-integration.test.js` covers Batch 8 identity state and
+matching-server effects, upgrade movement restrictions, tagged and untagged
+accesses, ICE swaps and lingering strength cleanup, R&D ordering, purge/derez
+sequencing and the meaningful Corp/Runner AI decisions.

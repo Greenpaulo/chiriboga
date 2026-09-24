@@ -1091,8 +1091,10 @@ function Damage(damageType, num, canBePrevented, afterTrashing, context) {
  * Purges all virus counters from all cards.</br>Makes no checks or payments.<br/>Logs the result.
  *
  * @method Purge
+ * @param {function()} [afterPurge] called after purge responses resolve
+ * @param {Object} [context] context for afterPurge
  */
-function Purge() {
+function Purge(afterPurge, context) {
   var numPurged = 0;
   ApplyToAllCards(function (card) {
     if (typeof (card.virus !== "undefined")) {
@@ -1102,7 +1104,15 @@ function Purge() {
   });
   if (numPurged > 0) PlaySound('purge');
   Log("Virus counters purged");
-  TriggeredResponsePhase(playerTurn, "responseOnPurge", [numPurged], function () {}, "Purged");
+  TriggeredResponsePhase(
+    playerTurn,
+    "responseOnPurge",
+    [numPurged],
+    function () {
+      if (typeof afterPurge === "function") afterPurge.call(context, numPurged);
+    },
+    "Purged",
+  );
 }
 
 /**

@@ -36,6 +36,7 @@ class RunCalculator {
   // misc_minor e.g. corp gains credit
   // misc_moderate e.g. trash 1 program
   // misc_serious e.g. install another ice inward (like endTheRun, paths that fire these will be avoided)
+  // strengthenAllIce gives every ice on the route +1 strength for the remainder of the run
   //encounterEffects is an array of OR arrays of effects
   IceAI(ice, maxCorpCred, assumeWeakerUnknown = false, incomplete = false, startIceIdx = -1, knowledgePlayer = runner) {
     var result = {
@@ -390,6 +391,23 @@ class RunCalculator {
 			  encounter_effects.splice(j, 1); //remove 1 item at position j
 			  j--; //step back so next item isn't skipped
 			  if (clicksLeft > 0) clickLoss++;
+		  }
+
+		  //Persist a +1 strength modifier on every piece of ice in this route.
+		  //This models subroutines such as ezaM's which strengthen all ice for
+		  //the remainder of the run, including ice encountered later.
+		  else if (eff == "strengthenAllIce") {
+			  encounter_effects.splice(j, 1);
+			  j--;
+			  for (var k = 0; k < this.precalculated.iceAIs.length; k++) {
+				  card_str_mods.push({
+					  iceIdx: point.iceIdx,
+					  card: this.precalculated.iceAIs[k].ice,
+					  use: iceAI.ice,
+					  amt: 1,
+					  persist: true,
+				  });
+			  }
 		  }
 	  }
 	  

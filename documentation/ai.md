@@ -1406,6 +1406,7 @@ These are the effect strings you can use inside `result.sr` arrays:
 | `"misc_minor"` | A minor Corp-side benefit (e.g. corp gains 1 credit). |
 | `"misc_moderate"` | A moderate threat (e.g. trash 1 program). Paths with this are avoided if possible. |
 | `"misc_serious"` | A serious threat (e.g. install another ice inward, runner cannot steal). Treated similarly to `endTheRun`. |
+| `"strengthenAllIce"` | Give every ICE on the calculated route +1 strength for the remainder of the run. Multiple entries stack. |
 
 **Tips:**
 - For subroutines with optional choices (e.g. "pay 4[c] or take a tag"), represent each option as a separate branch in the OR array.
@@ -2058,6 +2059,24 @@ if (!runner.AI || runner.AI.rc !== rc) {
   `AILimitPerServer` and `AIWouldRezBeforeScore`. Its inline ability choice
   favors titles actually at risk in the attacked server, then agendas and
   high-trash-cost cards.
+
+### Vantage Point Batch 8 card hooks
+
+- Méliès U uses inline Corp preferences to set the department corresponding to
+  the least-protected central, and only trades the top card of R&D for an
+  Archives card when the recursion improves card quality.
+- Lotus Haze uses `AITriggerWhenCan`; its enumeration suppresses moves that do
+  not improve the destination score, and its inline destination preference
+  favors protected agenda servers and an upgrade's existing
+  `AIDefensiveValue` declaration.
+- Esca uses `AIPunishesAccess` to report its mandatory credit loss plus its
+  tagged-only net damage, and `AIAvoidInstallingOverThis` preserves the ambush.
+- ezaM uses `AIImplementIce` for its R&D filtering and run-long ICE-strength
+  boost, plus `AITriggerWhenCan`; inline choices move agendas away from the top
+  of R&D and avoid ICE swaps without a protection gain.
+- Knowledge Seeker uses `AIImplementIce` for its counter/purge pressure, R&D
+  arrangement and end-the-run subroutines. Its inline arrangement places the
+  highest-valued card on top of R&D.
 
 ---
 

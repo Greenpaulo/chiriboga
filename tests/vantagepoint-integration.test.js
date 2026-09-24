@@ -15,6 +15,8 @@ const context = {
   console,
   cardSet: [],
   setIdentifiers: [],
+  ChangeImageFileToJPG: (name) =>
+    String(name).replace(/^(\d+)/, (digits) => digits.padStart(5, '0')).replace(/\.png$/i, '.jpg'),
   runner: {
     side: 'runner',
     AI: null,
@@ -1523,4 +1525,326 @@ assert(corpAISource.includes('typeof card.AIPlayWhenCan == "number"'));
 const runCalculatorSource = fs.readFileSync(path.join(root, 'runcalculator.js'), 'utf8');
 assert(/AIIceSpecificEffect\.call\([\s\S]{0,200}clicksLeft/.test(runCalculatorSource));
 
-console.log('Vantage Point integration and Batch 1-7 behavior checks passed.');
+// Batch 8: Jinteki cards 36036-36040.
+context.CheckTags = (amount) => context.runner.tags >= amount;
+let creditsLost = 0;
+context.LoseCredits = (player, amount) => {
+  const lost = Math.min(player.creditPool || 0, amount);
+  player.creditPool -= lost;
+  creditsLost += lost;
+};
+context.Reveal = (card, callback, callbackContext) => {
+  card.faceUp = false;
+  callback.call(callbackContext);
+};
+context.MoveCard = (card, destination, position) => {
+  if (card.cardLocation) {
+    const index = card.cardLocation.indexOf(card);
+    if (index > -1) card.cardLocation.splice(index, 1);
+  }
+  if (Number.isInteger(position)) destination.splice(position, 0, card);
+  else destination.push(card);
+  card.cardLocation = destination;
+};
+
+const meliesU = context.cardSet[36036];
+context.corp.AI = null;
+let loadedIdentityTexture = null;
+let identityFaceUpdates = 0;
+context.cardRenderer = {
+  LoadTexture: (imagePath) => {
+    loadedIdentityTexture = imagePath;
+    return {imagePath};
+  },
+};
+meliesU.renderer = {
+  frontTexture: null,
+  loresTexture: null,
+  dummy: {texture: null},
+  SetTextureToFront: () => {
+    identityFaceUpdates++;
+  },
+};
+meliesU._setDepartment.call(meliesU, 'R&D');
+assert.deepStrictEqual(Array.from(meliesU.subTypes), ['Division']);
+assert.strictEqual(meliesU.imageFile, '36036.png');
+assert.strictEqual(loadedIdentityTexture, 'images/36036.jpg');
+assert.strictEqual(
+  meliesU.responseOnRunSuccessful.Enumerate.call(meliesU, context.corp.archives).length,
+  1,
+  '36036 flips after any successful central run',
+);
+decisions = [];
+meliesU.responseOnRunSuccessful.Resolve.call(meliesU, context.corp.archives);
+assert.strictEqual(meliesU.flipped, true);
+assert.deepStrictEqual(Array.from(meliesU.subTypes), ['Department']);
+assert.strictEqual(meliesU.imageFile, '36036-1.webp');
+assert.strictEqual(loadedIdentityTexture, 'images/36036-1.webp');
+assert.strictEqual(meliesU.renderer.frontTexture.imagePath, 'images/36036-1.webp');
+assert.strictEqual(meliesU.renderer.loresTexture.imagePath, 'images/36036-1.webp');
+assert.strictEqual(meliesU.renderer.dummy.texture.imagePath, 'images/36036-1.webp');
+assert.strictEqual(decisions.length, 0, '36036 only resolves the matching department effect');
+const creditsBeforeMelies = creditsGained;
+meliesU.responseOnRunnerActionPhaseEnds.Resolve.call(meliesU);
+assert.strictEqual(creditsGained, creditsBeforeMelies, '36036 front ability is inactive while flipped');
+meliesU.responseOnRunnerDiscardEnds.Resolve.call(meliesU);
+assert.strictEqual(meliesU.flipped, false);
+assert.strictEqual(meliesU.imageFile, '36036.png');
+assert.strictEqual(loadedIdentityTexture, 'images/36036.jpg');
+assert(identityFaceUpdates >= 3, '36036 refreshes its renderer when its face changes');
+for (const mapping of [
+  ['HQ', '36036-0.webp'],
+  ['R&D', '36036-1.webp'],
+  ['Archives', '36036-2.webp'],
+]) {
+  meliesU._setDepartment.call(meliesU, mapping[0]);
+  meliesU._flipToDepartment.call(meliesU);
+  assert.strictEqual(meliesU.imageFile, mapping[1]);
+}
+meliesU._flipToFront.call(meliesU);
+meliesU.responseOnRunnerActionPhaseEnds.Resolve.call(meliesU);
+assert.strictEqual(creditsGained, creditsBeforeMelies + 1);
+
+const meliesTopCard = {title: 'Weak R&D card', cardType: 'operation', subTypes: [], elo: 1200};
+const meliesArchiveCard = {title: 'Strong Archives card', cardType: 'ice', subTypes: [], elo: 1800};
+context.corp.RnD.cards = [meliesTopCard];
+meliesTopCard.cardLocation = context.corp.RnD.cards;
+context.corp.archives.cards = [meliesArchiveCard];
+meliesArchiveCard.cardLocation = context.corp.archives.cards;
+context.corp.HQ.cards = [];
+meliesU._setDepartment.call(meliesU, 'R&D');
+decisions = [];
+trashCalls = [];
+meliesU.responseOnRunSuccessful.Resolve.call(meliesU, context.corp.RnD);
+assert.strictEqual(decisions.length, 1);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
+assert.strictEqual(trashCalls[0].cards[0], meliesTopCard);
+assert.strictEqual(trashCalls[0].canBePrevented, true);
+assert.strictEqual(decisions.length, 2);
+decisions[1].choose(decisions[1].choices[0]);
+assert.strictEqual(context.corp.HQ.cards[0], meliesArchiveCard);
+
+const lotusHaze = context.cardSet[36037];
+lotusHaze.agenda = 0;
+context.intended.score = lotusHaze;
+lotusHaze.responseOnScored.Resolve.call(lotusHaze);
+assert.strictEqual(lotusHaze.agenda, 3);
+const secondRemote = {serverName: 'Remote 2', root: [], ice: [{title: 'Protecting ICE'}]};
+context.corp.remoteServers = [remote, secondRemote];
+context.ChoicesExistingServers = () => [
+  {server: context.corp.HQ, label: 'HQ'},
+  {server: context.corp.RnD, label: 'R&D'},
+  {server: context.corp.archives, label: 'Archives'},
+  {server: remote, label: 'Remote 1'},
+  {server: secondRemote, label: 'Remote 2'},
+];
+const movableUpgrade = {
+  title: 'Movable upgrade',
+  cardType: 'upgrade',
+  subTypes: [],
+  rezzed: true,
+  server: remote,
+};
+remote.root = [movableUpgrade];
+movableUpgrade.cardLocation = remote.root;
+installed = {corp: [movableUpgrade], runner: []};
+decisions = [];
+lotusHaze.abilities[0].Resolve.call(lotusHaze, {card: movableUpgrade});
+assert.strictEqual(
+  decisions[0].choices.some((choice) => choice.server === remote),
+  false,
+  '36037 requires another server',
+);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.server === secondRemote));
+assert.strictEqual(secondRemote.root.includes(movableUpgrade), true);
+assert.strictEqual(lotusHaze.agenda, 2);
+const regionUpgrade = {
+  title: 'Region',
+  cardType: 'upgrade',
+  subTypes: ['Region'],
+  rezzed: true,
+  server: remote,
+};
+const existingRegion = {title: 'Existing Region', cardType: 'upgrade', subTypes: ['Region']};
+remote.root = [regionUpgrade];
+regionUpgrade.cardLocation = remote.root;
+secondRemote.root = [existingRegion];
+assert.strictEqual(
+  lotusHaze._destinationChoices.call(lotusHaze, regionUpgrade).some(
+    (choice) => choice.server === secondRemote,
+  ),
+  false,
+  '36037 cannot move a Region into a server that already has one',
+);
+
+const esca = context.cardSet[36038];
+context.runner.tags = 0;
+context.runner.creditPool = 3;
+creditsLost = 0;
+damageCalls = 0;
+context.Damage = (type, amount, preventable, callback, callbackContext) => {
+  assert.strictEqual(type, 'net');
+  assert.strictEqual(amount, 1);
+  assert.strictEqual(preventable, true);
+  damageCalls++;
+  if (callback) callback.call(callbackContext, []);
+};
+esca.cardLocation = remote.root;
+esca.automaticOnAccess.Resolve.call(esca, esca);
+assert.strictEqual(creditsLost, 1);
+assert.strictEqual(damageCalls, 0);
+context.runner.tags = 1;
+context.corp.RnD.cards = [esca];
+esca.cardLocation = context.corp.RnD.cards;
+esca.faceUp = false;
+esca.automaticOnAccess.Resolve.call(esca, esca);
+assert.strictEqual(creditsLost, 2);
+assert.strictEqual(damageCalls, 1, '36038 does net damage only to a tagged Runner');
+assert.strictEqual(esca.faceUp, true, '36038 remains revealed through its R&D access');
+esca.automaticOnAccessComplete.Resolve.call(esca, esca);
+assert.strictEqual(esca.faceUp, false);
+assert.strictEqual(esca.AIPunishesAccess.call(esca, context.corp.RnD), 2);
+
+const ezam = context.cardSet[36039];
+const ezamSwapIce = {
+  title: 'Swap target',
+  cardType: 'ice',
+  subTypes: ['Barrier'],
+  rezzed: true,
+  server: secondRemote,
+};
+remote.root = [];
+remote.ice = [ezam];
+secondRemote.root = [];
+secondRemote.ice = [ezamSwapIce];
+ezam.cardLocation = remote.ice;
+ezam.server = remote;
+ezamSwapIce.cardLocation = secondRemote.ice;
+context.corp.remoteServers = [remote, secondRemote];
+installed = {corp: [ezam, ezamSwapIce], runner: []};
+context.corp.clickTracker = 3;
+ezam.abilities[0].Resolve.call(ezam, {card: ezamSwapIce});
+assert.strictEqual(context.corp.clickTracker, 2);
+assert.strictEqual(remote.ice[0], ezamSwapIce);
+assert.strictEqual(secondRemote.ice[0], ezam);
+const topAgenda = {title: 'Top agenda', cardType: 'agenda', subTypes: [], elo: 1600};
+const lowerCard = {title: 'Lower card', cardType: 'operation', subTypes: [], elo: 1500};
+context.corp.RnD.cards = [lowerCard, topAgenda];
+lowerCard.cardLocation = context.corp.RnD.cards;
+topAgenda.cardLocation = context.corp.RnD.cards;
+context.corp.AI = {preferred: null};
+decisions = [];
+ezam.subroutines[0].Resolve.call(ezam);
+assert.strictEqual(context.corp.AI.preferred.option.id, 1);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
+assert.strictEqual(context.corp.RnD.cards[0], topAgenda);
+lingering.length = 0;
+ezam.subroutines[1].Resolve.call(ezam);
+assert.strictEqual(lingering[0].modifyStrength.Resolve.call(lingering[0], ezamSwapIce), 1);
+assert.strictEqual(
+  lingering[0].modifyStrength.Resolve.call(lingering[0], {cardType: 'ice'}),
+  0,
+  '36039 snapshots the ICE present when its subroutine resolves',
+);
+lingering[0].responseOnRunEnds.Resolve.call(lingering[0]);
+assert.strictEqual(lingering.length, 0);
+const ezamAI = {sr: []};
+ezam.AIImplementIce.call(ezam, {}, ezamAI, 0, false);
+assert.deepStrictEqual(JSON.parse(JSON.stringify(ezamAI.sr)), [
+  [['misc_minor']],
+  [['strengthenAllIce']],
+]);
+vm.runInContext(
+  runCalculatorSource + '\nthis.Batch8RunCalculator = RunCalculator;',
+  context,
+  {filename: 'runcalculator.js'},
+);
+const routeCalculator = new context.Batch8RunCalculator();
+const routeOuterIce = {title: 'Outer route ICE'};
+const routeInnerIce = {title: 'Inner route ICE'};
+routeCalculator.precalculated.iceAIs = [
+  {ice: routeInnerIce},
+  {ice: routeOuterIce},
+];
+const strengthenedRoute = routeCalculator.ValidateEncounterPoint(
+  0,
+  routeCalculator.EmptyPoint(1),
+  false,
+  ['strengthenAllIce'],
+  [],
+  {ice: routeOuterIce},
+  [],
+  [],
+);
+assert.deepStrictEqual(
+  Array.from(strengthenedRoute.card_str_mods, (mod) => [mod.card.title, mod.amt, mod.persist]),
+  [
+    ['Inner route ICE', 1, true],
+    ['Outer route ICE', 1, true],
+  ],
+  '36039 run model carries the strength gain to later ICE',
+);
+
+const knowledgeSeeker = context.cardSet[36040];
+knowledgeSeeker.virus = 0;
+knowledgeSeeker.rezzed = true;
+knowledgeSeeker.subroutines[0].Resolve.call(knowledgeSeeker);
+assert.strictEqual(knowledgeSeeker.virus, 1);
+const rndLow = {title: 'Low', cardType: 'operation', subTypes: [], elo: 1100};
+const rndAgenda = {title: 'Agenda', cardType: 'agenda', subTypes: [], elo: 1400};
+const rndHigh = {title: 'High', cardType: 'ice', subTypes: [], elo: 1800};
+const rndMiddle = {title: 'Middle', cardType: 'asset', subTypes: [], elo: 1500};
+context.corp.RnD.cards = [rndHigh, rndAgenda, rndLow, rndMiddle];
+for (const card of context.corp.RnD.cards) card.cardLocation = context.corp.RnD.cards;
+context.corp.AI = {};
+knowledgeSeeker.subroutines[1].Resolve.call(knowledgeSeeker);
+assert.strictEqual(
+  context.corp.RnD.cards[context.corp.RnD.cards.length - 1],
+  rndHigh,
+  '36040 AI arranges the highest-value card on top',
+);
+let purges = 0;
+context.Purge = (callback, callbackContext) => {
+  purges++;
+  knowledgeSeeker.virus = 0;
+  if (callback) callback.call(callbackContext);
+};
+context.Derez = (card) => {
+  card.rezzed = false;
+};
+knowledgeSeeker.virus = 3;
+knowledgeSeeker.responseOnEncounterEnds.Resolve.call(knowledgeSeeker);
+assert.strictEqual(purges, 1);
+assert.strictEqual(knowledgeSeeker.rezzed, false);
+assert.strictEqual(knowledgeSeeker.virus, 0);
+const seekerAI = {sr: []};
+knowledgeSeeker.virus = 2;
+knowledgeSeeker.AIImplementIce.call(knowledgeSeeker, {}, seekerAI, 0, false);
+assert.deepStrictEqual(JSON.parse(JSON.stringify(seekerAI.sr)), [
+  [['misc_moderate']],
+  [['misc_minor']],
+  [['endTheRun']],
+]);
+const purgeMechanicsSource = fs.readFileSync(path.join(root, 'mechanics.js'), 'utf8');
+vm.runInContext(purgeMechanicsSource, context, {filename: 'mechanics.js'});
+const purgeOrder = [];
+const purgedCard = {virus: 2};
+context.ApplyToAllCards = (callback) => callback(purgedCard);
+context.PlaySound = () => {};
+context.playerTurn = context.corp;
+context.TriggeredResponsePhase = (player, hook, params, continuation) => {
+  assert.strictEqual(hook, 'responseOnPurge');
+  assert.strictEqual(params[0], 2);
+  purgeOrder.push('responses');
+  continuation();
+};
+const purgeCallbackContext = {};
+context.Purge(function (numPurged) {
+  assert.strictEqual(this, purgeCallbackContext);
+  assert.strictEqual(numPurged, 2);
+  purgeOrder.push('callback');
+}, purgeCallbackContext);
+assert.deepStrictEqual(purgeOrder, ['responses', 'callback']);
+assert.strictEqual(purgedCard.virus, 0, 'Purge callback runs after counters are removed');
+
+console.log('Vantage Point integration and Batch 1-8 behavior checks passed.');

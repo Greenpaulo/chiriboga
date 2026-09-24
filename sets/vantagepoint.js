@@ -2850,6 +2850,194 @@ cardSet[36036] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
+  department: "HQ",
+  flipped: false,
+  _departmentChoices: function () {
+    return [
+      { department: "HQ", label: "Tenure Floors (HQ)" },
+      { department: "R&D", label: "Subsurface Labs (R&D)" },
+      { department: "Archives", label: "Disposal Grounds (Archives)" },
+    ];
+  },
+  _serverForDepartment: function (department) {
+    if (department == "HQ") return corp.HQ;
+    if (department == "R&D") return corp.RnD;
+    return corp.archives;
+  },
+  _departmentForServer: function (server) {
+    if (server == corp.HQ) return "HQ";
+    if (server == corp.RnD) return "R&D";
+    if (server == corp.archives) return "Archives";
+    return null;
+  },
+  _departmentTitle: function () {
+    if (this.department == "HQ") return "Tenure Floors";
+    if (this.department == "R&D") return "Subsurface Labs";
+    return "Disposal Grounds";
+  },
+  _departmentImageFile: function () {
+    if (this.department == "HQ") return "36036-0.webp";
+    if (this.department == "R&D") return "36036-1.webp";
+    return "36036-2.webp";
+  },
+  _showIdentityFace: function (imageFile) {
+    this.imageFile = imageFile;
+    if (
+      typeof this.renderer !== "undefined" &&
+      typeof cardRenderer !== "undefined"
+    ) {
+      var texture = cardRenderer.LoadTexture(
+        "images/" + ChangeImageFileToJPG(imageFile),
+      );
+      this.renderer.frontTexture = texture;
+      this.renderer.loresTexture = texture;
+      if (this.renderer.dummy) this.renderer.dummy.texture = texture;
+      if (typeof this.renderer.SetTextureToFront == "function")
+        this.renderer.SetTextureToFront();
+    }
+  },
+  _setDepartment: function (department) {
+    this.department = department;
+    this.flipped = false;
+    this.subTypes = ["Division"];
+    this._showIdentityFace("36036.png");
+  },
+  _flipToDepartment: function () {
+    this.flipped = true;
+    this.subTypes = ["Department"];
+    this._showIdentityFace(this._departmentImageFile());
+    Log(GetTitle(this) + " flipped to " + this._departmentTitle());
+  },
+  _flipToFront: function () {
+    this.flipped = false;
+    this.subTypes = ["Division"];
+    this._showIdentityFace("36036.png");
+    Log(GetTitle(this) + " flipped to its front side");
+  },
+  _bestArchiveCard: function () {
+    if (corp.archives.cards.length < 1) return null;
+    var choices = ChoicesArrayCards(corp.archives.cards);
+    if (corp.AI && typeof corp.AI._bestRecurToHQOption == "function") {
+      var preferred = corp.AI._bestRecurToHQOption(choices, corp.archives, true);
+      if (preferred) return preferred.card;
+    }
+    var best = corp.archives.cards[0];
+    for (var i = 1; i < corp.archives.cards.length; i++) {
+      if ((corp.archives.cards[i].elo || 0) > (best.elo || 0))
+        best = corp.archives.cards[i];
+    }
+    return best;
+  },
+  _resolveDepartmentEffect: function () {
+    if (corp.RnD.cards.length < 1) return;
+    var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
+    var trashChoice = {
+      id: 1,
+      label: "Trash " + GetTitle(topCard),
+      button: "Trash",
+    };
+    var keepChoice = { id: 0, label: "Keep the card", button: "Keep" };
+    var choices = [trashChoice, keepChoice];
+    if (corp.AI) {
+      var archiveCard = this._bestArchiveCard();
+      var topValue = topCard.elo || 1500;
+      var archiveValue = archiveCard ? archiveCard.elo || 1500 : 0;
+      corp.AI.preferred = {
+        title: this.title,
+        option: archiveCard && archiveValue > topValue ? trashChoice : keepChoice,
+      };
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || params.id !== 1) return;
+        Trash(
+          topCard,
+          true,
+          function (cardsTrashed) {
+            if (!cardsTrashed || !cardsTrashed.includes(topCard)) return;
+            if (corp.archives.cards.length < 1) return;
+            var archiveChoices = ChoicesArrayCards(corp.archives.cards);
+            if (corp.AI) {
+              var preferredCard = this._bestArchiveCard();
+              for (var i = 0; i < archiveChoices.length; i++) {
+                if (archiveChoices[i].card == preferredCard) {
+                  corp.AI.preferred = { title: this.title, option: archiveChoices[i] };
+                  break;
+                }
+              }
+            }
+            DecisionPhase(
+              corp,
+              archiveChoices,
+              function (archiveParams) {
+                if (!archiveParams || !archiveParams.card) return;
+                MoveCard(archiveParams.card, corp.HQ.cards);
+                Log(GetTitle(archiveParams.card) + " added from Archives to HQ");
+              },
+              this._departmentTitle(),
+              "Choose a card in Archives to add to HQ",
+              this,
+            );
+          },
+          this,
+        );
+      },
+      this._departmentTitle(),
+      "Look at the top card of R&D: " + GetTitle(topCard),
+      this,
+    );
+  },
+  responseOnCorpDiscardEnds: {
+    Enumerate: function () {
+      if (this.flipped) return [];
+      var choices = this._departmentChoices();
+      if (corp.AI) {
+        var preferred = choices[0];
+        var fewestIce = corp.HQ.ice.length;
+        for (var i = 1; i < choices.length; i++) {
+          var server = this._serverForDepartment(choices[i].department);
+          if (server.ice.length < fewestIce) {
+            preferred = choices[i];
+            fewestIce = server.ice.length;
+          }
+        }
+        corp.AI.preferred = { title: this.title, option: preferred };
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params && params.department) this._setDepartment(params.department);
+    },
+    text: "Secretly set Méliès U",
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function (server) {
+      if (!this.flipped && this._departmentForServer(server || attackedServer))
+        return [{}];
+      return [];
+    },
+    Resolve: function (server) {
+      var successfulServer = this._departmentForServer(server) ? server : attackedServer;
+      if (!this._departmentForServer(successfulServer)) return;
+      this._flipToDepartment();
+      if (this.department == this._departmentForServer(successfulServer))
+        this._resolveDepartmentEffect();
+    },
+  },
+  responseOnRunnerActionPhaseEnds: {
+    Resolve: function () {
+      if (!this.flipped) GainCredits(corp, 1, "", this);
+    },
+    automatic: true,
+  },
+  responseOnRunnerDiscardEnds: {
+    Resolve: function () {
+      if (this.flipped) this._flipToFront();
+    },
+    automatic: true,
+  },
 };
 
 //Lotus Haze (36037)
@@ -2866,7 +3054,116 @@ cardSet[36037] = {
   subTypes: ["Security"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) AddCounters(this, "agenda", 3);
+    },
+    automatic: true,
+  },
+  _destinationChoices: function (upgrade) {
+    var source = GetServer(upgrade);
+    var choices = ChoicesExistingServers();
+    for (var i = choices.length - 1; i > -1; i--) {
+      var server = choices[i].server;
+      var legal = server != source;
+      if (legal && CheckSubType(upgrade, "Region")) {
+        for (var j = 0; j < server.root.length; j++) {
+          if (CheckSubType(server.root[j], "Region")) {
+            legal = false;
+            break;
+          }
+        }
+      }
+      if (!legal) choices.splice(i, 1);
+    }
+    return choices;
+  },
+  _upgradeChoices: function () {
+    var cardDef = this;
+    return ChoicesInstalledCards(corp, function (card) {
+      return (
+        card.rezzed &&
+        CheckCardType(card, ["upgrade"]) &&
+        cardDef._destinationChoices(card).length > 0
+      );
+    });
+  },
+  _aiDestinationScore: function (upgrade, server) {
+    var score = server.ice.length;
+    if (server.root) {
+      for (var i = 0; i < server.root.length; i++) {
+        if (CheckCardType(server.root[i], ["agenda"])) score += 4;
+      }
+    }
+    if (
+      corp.AI &&
+      typeof upgrade.AIDefensiveValue == "function"
+    )
+      score += upgrade.AIDefensiveValue.call(upgrade, server) || 0;
+    return score;
+  },
+  abilities: [
+    {
+      text: "Hosted agenda counter: Move 1 rezzed upgrade to another server.",
+      Enumerate: function () {
+        if (!CheckCounters(this, "agenda", 1)) return [];
+        var choices = this._upgradeChoices();
+        if (corp.AI && choices.length > 0) {
+          var bestChoice = choices[0];
+          var bestGain = -Infinity;
+          for (var i = 0; i < choices.length; i++) {
+            var source = GetServer(choices[i].card);
+            var sourceScore = this._aiDestinationScore(choices[i].card, source);
+            var destinations = this._destinationChoices(choices[i].card);
+            for (var j = 0; j < destinations.length; j++) {
+              var gain =
+                this._aiDestinationScore(choices[i].card, destinations[j].server) -
+                sourceScore;
+              if (gain > bestGain) {
+                bestGain = gain;
+                bestChoice = choices[i];
+              }
+            }
+          }
+          if (bestGain <= 0) return [];
+          return [bestChoice];
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        if (!params || !params.card) return;
+        var upgrade = params.card;
+        var choices = this._destinationChoices(upgrade);
+        if (choices.length < 1) return;
+        if (corp.AI) {
+          var best = choices[0];
+          var bestScore = this._aiDestinationScore(upgrade, best.server);
+          for (var i = 1; i < choices.length; i++) {
+            var score = this._aiDestinationScore(upgrade, choices[i].server);
+            if (score > bestScore) {
+              best = choices[i];
+              bestScore = score;
+            }
+          }
+          corp.AI.preferred = { title: this.title, option: best };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (serverParams) {
+            if (!serverParams || !serverParams.server) return;
+            RemoveCounters(this, "agenda", 1);
+            MoveCard(upgrade, serverParams.server.root);
+            Log(GetTitle(upgrade) + " moved to the root of " + ServerName(serverParams.server));
+          },
+          this.title,
+          "Choose another server",
+          this,
+        );
+      },
+    },
+  ],
+  AITriggerWhenCan: true,
 };
 
 //Esca (36038)
@@ -2883,7 +3180,43 @@ cardSet[36038] = {
   subTypes: ["Ambush"],
   rezCost: 0,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  storedFaceUp: false,
+  _resolveAccessEffect: function () {
+    LoseCredits(runner, 1);
+    if (CheckTags(1)) Damage("net", 1, true);
+  },
+  automaticOnAccess: {
+    Resolve: function (card) {
+      if (card != this) return;
+      this.storedFaceUp = this.faceUp;
+      if (this.cardLocation == corp.RnD.cards) {
+        this.faceUp = true;
+        this.knownToRunner = true;
+        Log(GetTitle(this) + " revealed");
+      }
+      this._resolveAccessEffect();
+    },
+  },
+  automaticOnAccessComplete: {
+    Resolve: function (card) {
+      if (
+        card == this &&
+        card.cardLocation != corp.archives.cards &&
+        !this.storedFaceUp
+      )
+        this.faceUp = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  AIPunishesAccess: function (server) {
+    if (!server) return 0;
+    var installedHere = server.root && server.root.includes(this);
+    var inCentral = server.cards && server.cards.includes(this);
+    if (!installedHere && !inCentral) return 0;
+    return CheckTags(1) ? 2 : 1;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //ezaM (36039)
@@ -2901,13 +3234,129 @@ cardSet[36039] = {
   subTypes: ["Code Gate"],
   rezCost: 1,
   strength: 3,
+  _swapWith: function (otherIce) {
+    var firstServer = GetServer(this);
+    var secondServer = GetServer(otherIce);
+    if (!firstServer || !secondServer || otherIce == this) return;
+    var firstIndex = firstServer.ice.indexOf(this);
+    var secondIndex = secondServer.ice.indexOf(otherIce);
+    var firstRemoteIndex = corp.remoteServers.indexOf(firstServer);
+    MoveCard(this, secondServer.ice, secondIndex);
+    if (
+      firstRemoteIndex > -1 &&
+      corp.remoteServers.indexOf(firstServer) < 0
+    )
+      corp.remoteServers.splice(firstRemoteIndex, 0, firstServer);
+    MoveCard(otherIce, firstServer.ice, firstIndex);
+    Log(GetTitle(this) + " swapped with " + GetTitle(otherIce));
+  },
+  abilities: [
+    {
+      text: "[click]: Swap this ice with another installed piece of ice.",
+      Enumerate: function () {
+        if (!CheckActionClicks(corp, 1)) return [];
+        var choices = ChoicesInstalledCards(corp, function (card) {
+          return CheckCardType(card, ["ice"]) && card != this;
+        }.bind(this));
+        if (corp.AI && choices.length > 0) {
+          var currentServer = GetServer(this);
+          var best = null;
+          var bestGain = 0;
+          for (var i = 0; i < choices.length; i++) {
+            var otherServer = GetServer(choices[i].card);
+            if (!currentServer || !otherServer) continue;
+            var gain = otherServer.ice.length - currentServer.ice.length;
+            if (gain > bestGain) {
+              bestGain = gain;
+              best = choices[i];
+            }
+          }
+          return best ? [best] : [];
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        if (!params || !params.card) return;
+        SpendClicks(corp, 1);
+        this._swapWith(params.card);
+      },
+    },
+  ],
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Look at the top card of R&D. You may add that card to the bottom of R&D.",
+      Resolve: function () {
+        if (corp.RnD.cards.length < 1) return;
+        var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
+        var bottomChoice = {
+          id: 1,
+          label: "Add " + GetTitle(topCard) + " to the bottom of R&D",
+          button: "Move to bottom",
+        };
+        var keepChoice = { id: 0, label: "Leave it on top", button: "Keep" };
+        var choices = [bottomChoice, keepChoice];
+        if (corp.AI) {
+          var moveToBottom = CheckCardType(topCard, ["agenda"]);
+          corp.AI.preferred = {
+            title: this.title,
+            option: moveToBottom ? bottomChoice : keepChoice,
+          };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (params) {
+            if (params && params.id === 1) {
+              MoveCard(topCard, corp.RnD.cards, 0);
+              Log("The top card of R&D was added to the bottom of R&D");
+            }
+          },
+          this.title,
+          "Look at the top card of R&D: " + GetTitle(topCard),
+          this,
+        );
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "Each piece of ice gets +1 strength for the remainder of this run.",
+      Resolve: function () {
+        var affectedIce = ChoicesInstalledCards(corp, function (card) {
+          return CheckCardType(card, ["ice"]);
+        }).map(function (choice) {
+          return choice.card;
+        });
+        var effect = {
+          affectedIce: affectedIce,
+          createdDuringRun: attackedServer != null,
+          modifyStrength: {
+            Resolve: function (card) {
+              return this.affectedIce.includes(card) ? 1 : 0;
+            },
+          },
+          responseOnRunEnds: {
+            Resolve: function () {
+              RemoveLingeringEffect(this);
+            },
+            automatic: true,
+          },
+          responseOnEncounterEnds: {
+            Resolve: function () {
+              if (!this.createdDuringRun) RemoveLingeringEffect(this);
+            },
+            automatic: true,
+          },
+        };
+        AddLingeringEffect(effect);
+      },
+      visual: { y: 105, h: 32 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_minor"]], [["strengthenAllIce"]]];
     return result;
   },
+  AITriggerWhenCan: true,
 };
 
 //Knowledge Seeker (36040)
@@ -2926,11 +3375,100 @@ cardSet[36040] = {
   subTypes: ["Code Gate"],
   rezCost: 5,
   strength: 5,
+  _cardValueForRnD: function (card) {
+    var value = card.elo || 1500;
+    if (CheckCardType(card, ["agenda"])) value += 300;
+    return value;
+  },
+  _applyRnDOrder: function (bottomToTop) {
+    for (var i = 0; i < bottomToTop.length; i++) {
+      bottomToTop[i].faceUp = false;
+      MoveCard(bottomToTop[i], corp.RnD.cards);
+    }
+    Log(bottomToTop.length + " cards on top of R&D were arranged");
+  },
+  _arrangeTopOfRnD: function () {
+    var count = Math.min(4, corp.RnD.cards.length);
+    if (count < 2) return;
+    var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count);
+    for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+    if (corp.AI) {
+      var cardDef = this;
+      cards.sort(function (a, b) {
+        return cardDef._cardValueForRnD(a) - cardDef._cardValueForRnD(b);
+      });
+      this._applyRnDOrder(cards);
+      return;
+    }
+    var ordered = [];
+    var remaining = cards.slice();
+    var chooseNext = function () {
+      if (remaining.length == 1) {
+        ordered.push(remaining[0]);
+        this._applyRnDOrder(ordered);
+        return;
+      }
+      var choices = ChoicesArrayCards(remaining);
+      DecisionPhase(
+        corp,
+        choices,
+        function (params) {
+          if (!params || !params.card || !remaining.includes(params.card)) return;
+          ordered.push(params.card);
+          remaining.splice(remaining.indexOf(params.card), 1);
+          chooseNext.call(this);
+        },
+        this.title,
+        "Choose the next card from the bottom of the arranged group",
+        this,
+      );
+    };
+    chooseNext.call(this);
+  },
+  responseOnEncounterEnds: {
+    Enumerate: function () {
+      if (CheckCounters(this, "virus", 3)) return [{}];
+      return [];
+    },
+    Resolve: function () {
+      Purge(
+        function () {
+          Derez(this);
+        },
+        this,
+      );
+    },
+    text: "Purge virus counters and derez Knowledge Seeker",
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Place 1 virus counter on this ice.",
+      Resolve: function () {
+        AddCounters(this, "virus", 1);
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "Look at the top 4 cards of R&D and arrange them in any order.",
+      Resolve: function () {
+        this._arrangeTopOfRnD();
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 105, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [[CheckCounters(this, "virus", 2) ? "misc_moderate" : "misc_minor"]],
+      [["misc_minor"]],
+      [["endTheRun"]],
+    ];
     return result;
   },
 };
