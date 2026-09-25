@@ -1996,6 +1996,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
 | `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
+| `AIGlobalETRUses(server)` | function | Number of active global end-the-run uses the Corp will spend defending this server |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |
@@ -2077,6 +2078,22 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Knowledge Seeker uses `AIImplementIce` for its counter/purge pressure, R&D
   arrangement and end-the-run subroutines. Its inline arrangement places the
   highest-valued card on top of R&D.
+
+### Vantage Point Batch 9 card hooks
+
+- Lionsmane and Vicsek use `AIImplementIce` to model their alternative payment,
+  jack-out, damage and tag branches without treating optional punishment as a
+  guaranteed end-the-run effect.
+- Cultivate uses `AIWouldPlay` and `AIPlayWhenCan`; its inline choices trash the
+  least valuable card, add the most valuable card to HQ and leave the strongest
+  remaining draw on top of R&D.
+- Unleash uses `AITagPunishment`, `AIWouldPlay` and `AIPlayWhenCan`; its inline
+  choices prioritize an expensive unrezzed ICE and its most threatening
+  subroutine.
+- The Red Room uses `AIDefensiveValue`, `AILimitPerServer` and
+  `AIGlobalETRUses`. The live ability and security-planning hook share the same
+  server-value policy, and installed active cards now participate in global
+  end-the-run capacity planning.
 
 ---
 

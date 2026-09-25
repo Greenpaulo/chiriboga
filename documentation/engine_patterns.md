@@ -160,6 +160,17 @@ abilities: [{
 canBeRezzed: function() { return currentPhase.identifier == "Corp 2.2"; }
 ```
 
+### Corp install destination restriction
+
+```js
+installOnlyIn: function(server) {
+  return server == corp.HQ || server == corp.RnD || server == corp.archives;
+}
+```
+
+`ChoicesCardInstall` and Corp upgrade planning both respect this hook. Runner
+card hosting restrictions continue to use `installOnlyOn(host)`.
+
 ---
 
 ## Engine Functions — Quick Reference
@@ -231,6 +242,7 @@ Trace(strength, callback); // callback(successful: bool)
 Break(subroutine);
 CheckUnbrokenSubroutines();
 ChoicesEncounteredSubroutines(); // unbroken + unlocked subs (respects _lockedFromBreak)
+Rez(card, ignoreAllCosts, onRezResolve, context, allowCancel, costReduction, afterRezResponses);
 ```
 
 ### Servers / Locations

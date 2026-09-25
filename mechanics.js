@@ -90,8 +90,9 @@ function PlaceAdvancement(card, num) {
  * @param {Object} [context] for onRezResolve
  * @param {Boolean} [allowCancel] whether to allow cancel rez when choosing additional costs
  * @param {int} [costReduction] credit reduction supplied by the effect initiating the rez
+ * @param {function} [afterRezResponses] fires after all on-rez triggers resolve
  */
-function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true, costReduction=0) {
+function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true, costReduction=0, afterRezResponses=null) {
    if (card.customRezSound) {
     PlaySound(card.customRezSound);
   } else if (card.cardType === 'ice') {
@@ -116,7 +117,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		card,
 		function () {
 		  //true here means ignore all costs (we have already paid them)
-		  Rez(card, true, onRezResolve, context);
+		  Rez(card, true, onRezResolve, context, allowCancel, costReduction, afterRezResponses);
 		},
 		this
 	  );
@@ -382,7 +383,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
     AutomaticTriggers("automaticOnRez", [card]);
     //then the Enumerate ones
     //currently giving whoever's turn it is priority...not sure this is always going to be right
-    TriggeredResponsePhase(playerTurn, "responseOnRez", [card], function() {
+	  TriggeredResponsePhase(playerTurn, "responseOnRez", [card], function() {
 	  //run recalculation has to be done AFTER all the rezzing effects in case they change ice/program states
 	  if (runner.AI != null) {
 		runner.AI.LoseInfoAboutHQCards(card);
@@ -396,6 +397,8 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		  runner.AI.RecalculateRunIfNeeded();		  
 		}
 	  }
+	  if (typeof afterRezResponses === "function")
+		afterRezResponses.call(context);
     }, "Rez");
   };
   //if unique, old one is immediately and unpreventably trashed (except if facedown, and facedown cards don't count for check)

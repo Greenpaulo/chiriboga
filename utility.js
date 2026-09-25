@@ -3885,39 +3885,44 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
         //add each valid server as an option { card:card, server:server, label:GetTitle(card,true)+" -> "+server.serverName }
 
         //all can be added to a new server (indicated as params.server = null)
-        ret.push({
-          card: card,
-          server: null,
-          label: GetTitle(card, true) + " -> new server",
-        });
+        if (CheckInstallDestination(card, null))
+          ret.push({
+            card: card,
+            server: null,
+            label: GetTitle(card, true) + " -> new server",
+          });
 
         //all can be added to remote servers (things can be trashed at install time if necessary)
         for (var j = 0; j < corp.remoteServers.length; j++) {
-          ret.push({
-            card: card,
-            server: corp.remoteServers[j],
-            label:
-              GetTitle(card, true) + " -> " + corp.remoteServers[j].serverName,
-          });
+          if (CheckInstallDestination(card, corp.remoteServers[j]))
+            ret.push({
+              card: card,
+              server: corp.remoteServers[j],
+              label:
+                GetTitle(card, true) + " -> " + corp.remoteServers[j].serverName,
+            });
         }
 
         //ice and upgrades can be installed in front of/root of centrals
         if (card.cardType == "ice" || card.cardType == "upgrade") {
-          ret.push({
-            card: card,
-            server: corp.HQ,
-            label: GetTitle(card, true) + " -> HQ",
-          });
-          ret.push({
-            card: card,
-            server: corp.RnD,
-            label: GetTitle(card, true) + " -> R&D",
-          });
-          ret.push({
-            card: card,
-            server: corp.archives,
-            label: GetTitle(card, true) + " -> Archives",
-          });
+          if (CheckInstallDestination(card, corp.HQ))
+            ret.push({
+              card: card,
+              server: corp.HQ,
+              label: GetTitle(card, true) + " -> HQ",
+            });
+          if (CheckInstallDestination(card, corp.RnD))
+            ret.push({
+              card: card,
+              server: corp.RnD,
+              label: GetTitle(card, true) + " -> R&D",
+            });
+          if (CheckInstallDestination(card, corp.archives))
+            ret.push({
+              card: card,
+              server: corp.archives,
+              label: GetTitle(card, true) + " -> Archives",
+            });
         }
       }
     } else if (card.player == runner) {

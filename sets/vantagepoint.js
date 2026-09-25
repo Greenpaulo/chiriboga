@@ -3489,10 +3489,69 @@ cardSet[36041] = {
   rezCost: 6,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Do 2 net damage.",
+      Resolve: function () {
+        Damage("net", 2, true);
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "Do 2 net damage unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({ id: 1, label: "Pay 3[c]", button: "Pay 3[c]" });
+        choices.push({ id: 0, label: "Take 2 net damage", button: "Take damage" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            if (params && params.id == 1)
+              SpendCredits(runner, 3, "using", this);
+            else Damage("net", 2, true);
+          },
+          this.title,
+          "Pay 3[c] to avoid 2 net damage?",
+          this,
+        );
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "Do 2 net damage unless the Runner jacks out.",
+      Resolve: function () {
+        if (!CheckRunning()) {
+          Damage("net", 2, true);
+          return;
+        }
+        DecisionPhase(
+          runner,
+          [
+            { id: 1, label: "Jack out", button: "Jack out" },
+            { id: 0, label: "Take 2 net damage", button: "Take damage" },
+          ],
+          function (params) {
+            if (params && params.id == 1) JackOut();
+            else Damage("net", 2, true);
+          },
+          this.title,
+          "Jack out to avoid 2 net damage?",
+          this,
+        );
+      },
+      visual: { y: 105, h: 32 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [["netDamage", "netDamage"]],
+      [
+        ["payCredits", "payCredits", "payCredits"],
+        ["netDamage", "netDamage"],
+      ],
+      [["endTheRun"], ["netDamage", "netDamage"]],
+    ];
     return result;
   },
 };
@@ -3512,10 +3571,42 @@ cardSet[36042] = {
   rezCost: 2,
   strength: 3,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Do X net damage and give the Runner X tags. X is equal to the number of tags the Runner has.",
+      Resolve: function () {
+        var tagCount = runner.tags;
+        if (tagCount < 1) return;
+        Damage(
+          "net",
+          tagCount,
+          true,
+          function () {
+            AddTags(tagCount);
+          },
+          this,
+        );
+      },
+      visual: { y: 57, h: 48 },
+    },
+    {
+      text: "Give the Runner 1 tag. Trash this ice.",
+      Resolve: function () {
+        AddTags(
+          1,
+          function () {
+            Trash(this, false);
+          },
+          this,
+        );
+      },
+      visual: { y: 105, h: 32 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var effects = [];
+    for (var i = 0; i < runner.tags; i++) effects.push("netDamage");
+    for (var j = 0; j < runner.tags; j++) effects.push("tag");
+    result.sr = [[effects], [["tag"]]];
     return result;
   },
 };
@@ -3532,9 +3623,125 @@ cardSet[36043] = {
   cardType: "operation",
   subTypes: [],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _cardValueForRnD: function (card) {
+    var value = card.elo || 1500;
+    if (CheckCardType(card, ["agenda"])) value += 300;
+    return value;
   },
+  _finishArrangement: function (bottomToTop) {
+    for (var i = 0; i < bottomToTop.length; i++) {
+      bottomToTop[i].faceUp = false;
+      MoveCard(bottomToTop[i], corp.RnD.cards);
+    }
+    Log(bottomToTop.length + " cards on top of R&D were arranged");
+  },
+  _arrangeRemaining: function (cards) {
+    if (cards.length < 2) {
+      if (cards.length == 1) this._finishArrangement(cards);
+      return;
+    }
+    if (corp.AI) {
+      var cardDef = this;
+      cards.sort(function (a, b) {
+        return cardDef._cardValueForRnD(a) - cardDef._cardValueForRnD(b);
+      });
+      this._finishArrangement(cards);
+      return;
+    }
+    var ordered = [];
+    var remaining = cards.slice();
+    var chooseNext = function () {
+      if (remaining.length == 1) {
+        ordered.push(remaining[0]);
+        this._finishArrangement(ordered);
+        return;
+      }
+      DecisionPhase(
+        corp,
+        ChoicesArrayCards(remaining),
+        function (params) {
+          if (!params || !params.card || !remaining.includes(params.card)) return;
+          ordered.push(params.card);
+          remaining.splice(remaining.indexOf(params.card), 1);
+          chooseNext.call(this);
+        },
+        this.title,
+        "Choose the next card from the bottom of the arranged group",
+        this,
+      );
+    };
+    chooseNext.call(this);
+  },
+  _chooseForHQ: function (cards) {
+    if (cards.length < 1) return;
+    var choices = ChoicesArrayCards(cards);
+    if (corp.AI) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        return cardDef._cardValueForRnD(b.card) - cardDef._cardValueForRnD(a.card);
+      });
+      choices = [choices[0]];
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || !params.card || !cards.includes(params.card)) return;
+        var remaining = cards.filter(function (card) {
+          return card != params.card;
+        });
+        params.card.faceUp = false;
+        MoveCard(params.card, corp.HQ.cards);
+        this._arrangeRemaining(remaining);
+      },
+      this.title,
+      "Choose 1 card to add to HQ",
+      this,
+    );
+  },
+  Enumerate: function () {
+    if (corp.RnD.cards.length < 1) return [];
+    return [{}];
+  },
+  Resolve: function () {
+    var count = Math.min(5, corp.RnD.cards.length);
+    var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count);
+    for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+    var choices = ChoicesArrayCards(cards);
+    if (corp.AI) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        return cardDef._cardValueForRnD(a.card) - cardDef._cardValueForRnD(b.card);
+      });
+      choices = [choices[0]];
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || !params.card || !cards.includes(params.card)) return;
+        var remaining = cards.filter(function (card) {
+          return card != params.card;
+        });
+        params.card.faceUp = false;
+        Trash(
+          params.card,
+          false,
+          function () {
+            this._chooseForHQ(remaining);
+          },
+          this,
+        );
+      },
+      this.title,
+      "Choose 1 card to trash",
+      this,
+    );
+  },
+  AIWouldPlay: function () {
+    return corp.RnD.cards.length > 1;
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Unleash (36044)
@@ -3550,9 +3757,123 @@ cardSet[36044] = {
   cardType: "operation",
   subTypes: ["Gray Ops"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _subroutineThreatScore: function (subroutine) {
+    var text = subroutine && subroutine.text ? subroutine.text : "";
+    var score = 1;
+    if (/end the run/i.test(text)) score += 100;
+    if (/net damage/i.test(text)) {
+      var match = text.match(/([0-9]+) net damage/i);
+      score += 20 * (match ? Number(match[1]) : 1);
+    }
+    if (/tag/i.test(text)) score += 15;
+    if (/trash/i.test(text)) score += 20;
+    return score;
   },
+  _offerSubroutine: function (ice) {
+    if (!ice || !ice.rezzed || !ice.subroutines || ice.subroutines.length < 1)
+      return;
+    var choices = ice.subroutines.map(function (subroutine) {
+      return { card: ice, subroutine: subroutine, label: subroutine.text };
+    });
+    if (corp.AI) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        return (
+          cardDef._subroutineThreatScore(b.subroutine) -
+          cardDef._subroutineThreatScore(a.subroutine)
+        );
+      });
+      choices = [choices[0]];
+    } else {
+      choices.push({ decline: true, label: "Decline", button: "Decline" });
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || params.decline || !params.subroutine) return;
+        var subroutineChoices = ChoicesSubroutine(params.card, params.subroutine);
+        if (!subroutineChoices || subroutineChoices.length < 1) return;
+        DecisionPhase(
+          corp,
+          subroutineChoices,
+          function (subParams) {
+            AutomaticTriggers("automaticOnSubroutineFiring", [
+              subParams.card,
+              subParams.ability,
+            ]);
+            Trigger(
+              subParams.card,
+              subParams.ability,
+              subParams.choice,
+              "Firing",
+            );
+          },
+          params.card.title,
+          "Choose option for: " + params.subroutine.text,
+          params.card,
+        );
+      },
+      this.title,
+      "Choose a subroutine to resolve",
+      this,
+    );
+  },
+  Enumerate: function () {
+    if (runner.tags < 1) return [];
+    var choices = ChoicesInstalledCards(corp, function (card) {
+      return (
+        CheckCardType(card, ["ice"]) &&
+        !card.rezzed
+      );
+    });
+    if (corp.AI && choices.length > 0) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        var aBest = 0;
+        var bBest = 0;
+        var aSubs = a.card.subroutines || [];
+        var bSubs = b.card.subroutines || [];
+        for (var i = 0; i < aSubs.length; i++)
+          aBest = Math.max(
+            aBest,
+            cardDef._subroutineThreatScore(aSubs[i]),
+          );
+        for (var j = 0; j < bSubs.length; j++)
+          bBest = Math.max(
+            bBest,
+            cardDef._subroutineThreatScore(bSubs[j]),
+          );
+        return (
+          (b.card.rezCost || 0) + bBest - ((a.card.rezCost || 0) + aBest)
+        );
+      });
+      return [choices[0]];
+    }
+    return choices;
+  },
+  Resolve: function (params) {
+    if (!params || !params.card || runner.tags < 1 || params.card.rezzed) return;
+    RemoveTags(1);
+    var source = this;
+    var target = params.card;
+    Rez(
+      target,
+      true,
+      null,
+      source,
+      true,
+      0,
+      function () {
+        this._offerSubroutine(target);
+      },
+    );
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AITagPunishment: 1,
+  AIPlayWhenCan: 2,
 };
 
 //The Red Room (36045)
@@ -3570,7 +3891,77 @@ cardSet[36045] = {
   subTypes: ["Facility"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  triggeredThisTurn: false,
+  installOnlyIn: function (server) {
+    return server == corp.HQ || server == corp.RnD || server == corp.archives;
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _placePowerCounter: function () {
+    if (this.triggeredThisTurn) return;
+    this.triggeredThisTurn = true;
+    AddCounters(this, "power", 1);
+  },
+  responseOnScored: {
+    Resolve: function () {
+      this._placePowerCounter();
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      this._placePowerCounter();
+    },
+    automatic: true,
+  },
+  _AIShouldEndRun: function (server) {
+    if (!corp.AI || !server || server == GetServer(this)) return false;
+    if (typeof corp.AI._runnerMayWinIfServerBreached == "function")
+      return corp.AI._runnerMayWinIfServerBreached(server);
+    return true;
+  },
+  abilities: [
+    {
+      text: "Hosted power counter: End the run.",
+      Enumerate: function () {
+        if (!attackedServer || attackedServer == GetServer(this)) return [];
+        if (!CheckCounters(this, "power", 1)) return [];
+        if (corp.AI && !this._AIShouldEndRun(attackedServer)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        RemoveCounters(this, "power", 1);
+        EndTheRun();
+      },
+    },
+  ],
+  AIDefensiveValue: function (server) {
+    if (!this.installOnlyIn(server)) return 0;
+    // This is an install-placement signal only: Red Room cannot defend the
+    // central where it is installed.
+    if (GetServer(this) == server) return 0;
+    return 2;
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  AIGlobalETRUses: function (server) {
+    if (!this._AIShouldEndRun(server)) return 0;
+    return Counters(this, "power");
+  },
 };
 
 //Editorial Division: Ad Nihilum (36046)

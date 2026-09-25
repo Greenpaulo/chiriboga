@@ -341,6 +341,26 @@ function CheckPlay(card) {
 }
 
 /**
+ * Checks whether a card may be installed in the proposed destination.
+ * Corp cards can declare installOnlyIn(server); Runner hosting restrictions
+ * continue to use installOnlyOn(host).
+ *
+ * @method CheckInstallDestination
+ * @param {Card} card card being installed
+ * @param {Server|Card} destination proposed server or host
+ * @returns {Boolean} true if the destination is legal
+ */
+function CheckInstallDestination(card, destination) {
+  if (
+    card &&
+    card.player == corp &&
+    typeof card.installOnlyIn === "function"
+  )
+    return !!card.installOnlyIn(destination);
+  return true;
+}
+
+/**
  * Checks whether currently encountered ice has any unbroken subroutines.
  *
  * @method CheckUnbrokenSubroutines

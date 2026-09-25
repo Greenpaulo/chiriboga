@@ -1847,4 +1847,194 @@ context.Purge(function (numPurged) {
 assert.deepStrictEqual(purgeOrder, ['responses', 'callback']);
 assert.strictEqual(purgedCard.virus, 0, 'Purge callback runs after counters are removed');
 
-console.log('Vantage Point integration and Batch 1-8 behavior checks passed.');
+// Batch 9: Jinteki cards 36041-36045.
+const batch9Damage = [];
+context.Damage = (type, amount, preventable, callback, callbackContext) => {
+  batch9Damage.push({type, amount, preventable});
+  if (callback) callback.call(callbackContext, []);
+};
+context.AddTags = (amount, callback, callbackContext) => {
+  context.runner.tags += amount;
+  if (callback) callback.call(callbackContext);
+};
+context.RemoveTags = (amount) => {
+  context.runner.tags = Math.max(0, context.runner.tags - amount);
+};
+context.runner.creditPool = 5;
+context.CheckCredits = (player, amount) => player.creditPool >= amount;
+context.SpendCredits = (player, amount, doing, card, callback, callbackContext) => {
+  player.creditPool -= amount;
+  if (callback) callback.call(callbackContext);
+};
+let jackOuts = 0;
+context.CheckRunning = () => true;
+context.JackOut = () => {
+  jackOuts++;
+};
+
+const lionsmane = context.cardSet[36041];
+lionsmane.subroutines[0].Resolve.call(lionsmane);
+assert.deepStrictEqual(batch9Damage.pop(), {type: 'net', amount: 2, preventable: true});
+decisions = [];
+lionsmane.subroutines[1].Resolve.call(lionsmane);
+assert.strictEqual(decisions[0].choices.length, 2);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
+assert.strictEqual(context.runner.creditPool, 2, '36041 accepts the 3-credit alternative');
+decisions = [];
+lionsmane.subroutines[2].Resolve.call(lionsmane);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
+assert.strictEqual(jackOuts, 1, '36041 lets the Runner jack out instead of taking damage');
+const lionsmaneAI = {sr: []};
+lionsmane.AIImplementIce.call(lionsmane, {}, lionsmaneAI, 0, false);
+assert.deepStrictEqual(JSON.parse(JSON.stringify(lionsmaneAI.sr)), [
+  [['netDamage', 'netDamage']],
+  [['payCredits', 'payCredits', 'payCredits'], ['netDamage', 'netDamage']],
+  [['endTheRun'], ['netDamage', 'netDamage']],
+]);
+
+const vicsek = context.cardSet[36042];
+context.runner.tags = 2;
+batch9Damage.length = 0;
+vicsek.subroutines[0].Resolve.call(vicsek);
+assert.deepStrictEqual(batch9Damage[0], {type: 'net', amount: 2, preventable: true});
+assert.strictEqual(context.runner.tags, 4, '36042 snapshots X before damage and adds X tags');
+let vicsekTrashed = false;
+context.Trash = (card, preventable, callback, callbackContext) => {
+  assert.strictEqual(preventable, false);
+  if (card === vicsek) vicsekTrashed = true;
+  if (callback) callback.call(callbackContext, [card]);
+};
+vicsek.subroutines[1].Resolve.call(vicsek);
+assert.strictEqual(context.runner.tags, 5);
+assert.strictEqual(vicsekTrashed, true);
+const vicsekAI = {sr: []};
+context.runner.tags = 2;
+vicsek.AIImplementIce.call(vicsek, {}, vicsekAI, 0, false);
+assert.deepStrictEqual(JSON.parse(JSON.stringify(vicsekAI.sr)), [
+  [['netDamage', 'netDamage', 'tag', 'tag']],
+  [['tag']],
+]);
+
+const cultivate = context.cardSet[36043];
+const cultivateLow = {title: 'Low', cardType: 'operation', subTypes: [], elo: 1000};
+const cultivateMid = {title: 'Mid', cardType: 'asset', subTypes: [], elo: 1400};
+const cultivateHigh = {title: 'High', cardType: 'ice', subTypes: [], elo: 1900};
+const cultivateAgenda = {
+  title: 'Agenda',
+  cardType: 'agenda',
+  subTypes: [],
+  elo: 1700,
+};
+const cultivateOther = {title: 'Other', cardType: 'operation', subTypes: [], elo: 1500};
+context.corp.RnD.cards = [
+  cultivateLow,
+  cultivateMid,
+  cultivateHigh,
+  cultivateAgenda,
+  cultivateOther,
+];
+context.corp.HQ.cards = [];
+context.corp.archives.cards = [];
+for (const card of context.corp.RnD.cards) card.cardLocation = context.corp.RnD.cards;
+context.Trash = (card, preventable, callback, callbackContext) => {
+  assert.strictEqual(preventable, false);
+  context.MoveCard(card, context.corp.archives.cards);
+  if (callback) callback.call(callbackContext, [card]);
+};
+context.corp.AI = {};
+decisions = [];
+cultivate.Resolve.call(cultivate);
+assert.strictEqual(decisions[0].choices[0].card, cultivateLow);
+decisions[0].choose(decisions[0].choices[0]);
+assert.strictEqual(decisions[1].choices[0].card, cultivateAgenda);
+decisions[1].choose(decisions[1].choices[0]);
+assert.strictEqual(context.corp.archives.cards[0], cultivateLow);
+assert.strictEqual(context.corp.HQ.cards[0], cultivateAgenda);
+assert.strictEqual(
+  context.corp.RnD.cards[context.corp.RnD.cards.length - 1],
+  cultivateHigh,
+  '36043 AI leaves the highest-value remaining card on top',
+);
+assert.strictEqual(cultivate.AIWouldPlay.call(cultivate), true);
+
+const unleash = context.cardSet[36044];
+let unleashedSubroutine = 0;
+const unleashIce = {
+  title: 'Expensive ice',
+  cardType: 'ice',
+  subTypes: ['Sentry'],
+  rezCost: 8,
+  rezzed: false,
+  subroutines: [
+    {
+      text: 'End the run.',
+      Resolve() {
+        unleashedSubroutine++;
+      },
+    },
+  ],
+};
+installed = {corp: [unleashIce], runner: []};
+context.runner.tags = 1;
+context.ChoicesSubroutine = (card, ability) => [{card, ability, choice: null}];
+context.AutomaticTriggers = () => {};
+context.Trigger = (card, ability, params) => ability.Resolve.call(card, params);
+context.Rez = (
+  card,
+  ignoreAllCosts,
+  onRezResolve,
+  callbackContext,
+  allowCancel,
+  costReduction,
+  afterRezResponses,
+) => {
+  assert.strictEqual(ignoreAllCosts, true);
+  card.rezzed = true;
+  if (afterRezResponses) afterRezResponses.call(callbackContext);
+};
+decisions = [];
+unleash.Resolve.call(unleash, {card: unleashIce});
+assert.strictEqual(context.runner.tags, 0, '36044 removes a tag as an additional cost');
+assert.strictEqual(unleashIce.rezzed, true);
+decisions[0].choose(decisions[0].choices[0]);
+decisions[1].choose(decisions[1].choices[0]);
+assert.strictEqual(unleashedSubroutine, 1);
+context.runner.tags = 0;
+unleashIce.rezzed = false;
+assert.strictEqual(unleash.Enumerate.call(unleash).length, 0);
+
+const redRoom = context.cardSet[36045];
+redRoom.server = context.corp.HQ;
+redRoom.power = 0;
+context.Counters = (card, type) => card[type] || 0;
+context.EndTheRun = () => {
+  endedRuns++;
+};
+redRoom.triggeredThisTurn = false;
+redRoom.responseOnScored.Resolve.call(redRoom);
+redRoom.responseOnStolen.Resolve.call(redRoom);
+assert.strictEqual(redRoom.power, 1, '36045 triggers only once per turn');
+redRoom.responseOnRunnerTurnBegins.Resolve.call(redRoom);
+redRoom.responseOnStolen.Resolve.call(redRoom);
+assert.strictEqual(redRoom.power, 2, '36045 resets on the next turn');
+context.attackedServer = context.corp.HQ;
+assert.strictEqual(redRoom.abilities[0].Enumerate.call(redRoom).length, 0);
+context.attackedServer = context.corp.RnD;
+context.corp.AI = null;
+assert.strictEqual(redRoom.abilities[0].Enumerate.call(redRoom).length, 1);
+redRoom.abilities[0].Resolve.call(redRoom);
+assert.strictEqual(redRoom.power, 1);
+assert.strictEqual(endedRuns, 4);
+context.corp.AI = {_runnerMayWinIfServerBreached: () => true};
+assert.strictEqual(redRoom.AIGlobalETRUses.call(redRoom, context.corp.RnD), 1);
+assert.strictEqual(redRoom.AIGlobalETRUses.call(redRoom, context.corp.HQ), 0);
+assert.strictEqual(redRoom.installOnlyIn.call(redRoom, context.corp.archives), true);
+assert.strictEqual(redRoom.installOnlyIn.call(redRoom, remote), false);
+assert.strictEqual(
+  redRoom.AIDefensiveValue.call(redRoom, context.corp.HQ),
+  0,
+  '36045 does not count as local protection for its own server',
+);
+assert.strictEqual(redRoom.AIDefensiveValue.call(redRoom, context.corp.RnD), 2);
+
+console.log('Vantage Point integration and Batch 1-9 behavior checks passed.');

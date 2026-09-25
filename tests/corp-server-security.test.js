@@ -23,12 +23,20 @@ context.AllottedClicks = player => player === runner ? 4 : 3;
 context.InstalledCards = player => player === runner ? runner.cards : servers.reduce((cards, server) => cards.concat(server.ice, server.root), []);
 context.ActiveCards = player => {
   const runnerCards = runner.cards.concat(runner.identityCard ? [runner.identityCard] : []);
-  const corpCards = corp.scoreArea;
+  const corpCards = corp.scoreArea.concat(
+    servers.reduce(
+      (cards, currentServer) =>
+        cards.concat(currentServer.root.filter(card => card.rezzed)),
+      [],
+    ),
+  );
   return player === runner ? runnerCards : player === corp ? corpCards : runnerCards.concat(corpCards);
 };
 context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
+context.CheckInstallDestination = (card, destination) =>
+  typeof card.installOnlyIn !== 'function' || card.installOnlyIn(destination);
 context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';
 context.CheckScore = (card, ignoreRequirement) => !runner.cards.some(active =>
   !active.disabled && (active.agendasInstalledThisTurn || []).includes(card));
@@ -46,7 +54,7 @@ context.ServerName = server => server.serverName || 'Regression server';
 vm.createContext(context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
-['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js'].forEach(file =>
+['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js', 'sets/vantagepoint.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
@@ -818,6 +826,51 @@ test('Nisei activation and security evaluation share the global ETR policy hook'
   const options = nisei.abilities[0].Enumerate.call(nisei);
   assert.strictEqual(options.length, 1);
   assert.deepStrictEqual(calls, [target, target]);
+});
+test('active installed upgrades contribute declared global ETR uses', () => {
+  const redRoom = card(36045);
+  redRoom.rezzed = true;
+  redRoom.power = 1;
+  const hq = {serverName: 'HQ', ice: [], root: [redRoom], cards: []};
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const target = {serverName: 'Remote 0', ice: [etr()], root: [agenda]};
+  corp.HQ = hq;
+  servers = [hq, target];
+  runner.agendaPoints = 5;
+  runner.creditPool = 10;
+  context.playerTurn = corp;
+  const oldCorpAI = corp.AI;
+  corp.AI = ai;
+  assert.strictEqual(ai._globalETRUses(target), 1);
+  assert.strictEqual(ai._globalETRUses(hq), 0, 'Red Room cannot defend its own server');
+  corp.AI = oldCorpAI;
+});
+test('upgrade planning redirects a central-only card away from a preferred remote', () => {
+  const redRoom = card(36045);
+  const hq = {serverName: 'HQ', ice: [], root: [], cards: []};
+  const rnd = {serverName: 'R&D', ice: [], root: [], cards: []};
+  const archives = {serverName: 'Archives', ice: [], root: [], cards: []};
+  const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const oldHQ = corp.HQ;
+  const oldRnD = corp.RnD;
+  const oldArchives = corp.archives;
+  const oldRemotes = corp.remoteServers;
+  const oldNonEmpty = ai._nonEmptyProtectedRemotes;
+  const oldProtectionScore = ai._protectionScore;
+  corp.HQ = hq;
+  corp.RnD = rnd;
+  corp.archives = archives;
+  corp.remoteServers = [remote];
+  ai._nonEmptyProtectedRemotes = () => [remote];
+  ai._protectionScore = target =>
+    target === remote ? 0 : target === archives ? 1 : target === hq ? 3 : 4;
+  assert.strictEqual(ai._bestServerToUpgrade(redRoom), archives);
+  ai._nonEmptyProtectedRemotes = oldNonEmpty;
+  ai._protectionScore = oldProtectionScore;
+  corp.HQ = oldHQ;
+  corp.RnD = oldRnD;
+  corp.archives = oldArchives;
+  corp.remoteServers = oldRemotes;
 });
 test('breaker-compatible hosted credits count but trash-only credits do not', () => {
   const wall = ice(['End the run.', 'End the run.'], [[['endTheRun']], [['endTheRun']]]);

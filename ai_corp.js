@@ -592,6 +592,26 @@ class CorpAI {
         else preferredServer = corp.HQ;
       } else preferredServer = corp.RnD;
     }
+    if (
+      upgrade &&
+      typeof upgrade.installOnlyIn == "function" &&
+      !CheckInstallDestination(upgrade, preferredServer)
+    ) {
+      var legalServers = [corp.HQ, corp.RnD, corp.archives].concat(
+        corp.remoteServers,
+      ).filter(function (server) {
+        return CheckInstallDestination(upgrade, server);
+      });
+      preferredServer = null;
+      var preferredScore = Infinity;
+      for (var i = 0; i < legalServers.length; i++) {
+        var score = this._protectionScore(legalServers[i], {});
+        if (score < preferredScore) {
+          preferredScore = score;
+          preferredServer = legalServers[i];
+        }
+      }
+    }
     return preferredServer;
   }
 
@@ -678,6 +698,7 @@ class CorpAI {
     if (CheckCardType(card, ["upgrade"])) {
       //although we could install more than one copy of a unique card, let's not
       if (this._uniqueCopyAlreadyInstalled(card)) return false;
+      if (!CheckInstallDestination(card, server)) return false;
       if (server) {
         //limit 1 region per server
         if (CheckSubType(card, "Region")) {
@@ -1739,10 +1760,11 @@ class CorpAI {
   //policies say it would actually spend to protect this server.
   _globalETRUses(server) {
     var ret = 0;
-    for (var i = 0; i < corp.scoreArea.length; i++) {
-      var scoredCard = corp.scoreArea[i];
-      if (typeof scoredCard.AIGlobalETRUses != "function") continue;
-      var uses = Number(scoredCard.AIGlobalETRUses.call(scoredCard, server));
+    var activeCards = ActiveCards(corp);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      if (typeof card.AIGlobalETRUses != "function") continue;
+      var uses = Number(card.AIGlobalETRUses.call(card, server));
       if (isFinite(uses)) ret += Math.max(0, Math.floor(uses));
     }
     return ret;

@@ -343,3 +343,41 @@ subroutine.
 matching-server effects, upgrade movement restrictions, tagged and untagged
 accesses, ICE swaps and lingering strength cleanup, R&D ordering, purge/derez
 sequencing and the meaningful Corp/Runner AI decisions.
+
+## Batch 9 engine support
+
+Corp cards can declare `installOnlyIn(server)` for destination restrictions.
+Normal install choices and Corp upgrade planning both respect the hook; The Red
+Room uses it to allow HQ, R&D and Archives while excluding remote servers.
+
+`Rez` now accepts an optional final continuation that fires after automatic and
+response-based on-rez effects finish. Unleash uses that continuation so its
+optional subroutine resolves only after the chosen ICE is fully rezzed.
+
+Corp security planning now collects `AIGlobalETRUses` from all active Corp
+cards, not only the score area. This lets an active Red Room contribute its
+finite cross-server end-the-run capacity without title-specific logic.
+
+## Batch 9 confirmed patterns
+
+Lionsmane gives the Runner explicit pay, damage and jack-out branches, and only
+offers jack out while a run exists. Its Run Calculator model preserves those
+alternatives rather than treating either conditional subroutine as guaranteed.
+Vicsek snapshots the Runner's tag count before resolving its damage and tag
+instructions, then trashes itself unpreventably after its second subroutine.
+
+Cultivate sequences the mandatory trash, HQ addition and remaining R&D order.
+Its Corp AI discards the lowest-valued card, keeps the highest-valued card and
+places the strongest remaining draw on top. Unleash validates the tag and ICE
+target before play, pays the tag cost, rezzes for free, and offers a real
+subroutine choice including a human decline option.
+
+The Red Room resets its first-score-or-steal state even while inactive, gains
+at most one counter per turn, and spends counters only during runs against a
+different server. Its live AI activation and declarative security-planning
+hook share the same game-saving policy.
+
+`tests/vantagepoint-integration.test.js` covers Batch 9 choices, costs,
+sequencing, first-time resets, cleanup and ICE models.
+`tests/corp-install-destination.test.js`, `tests/corp-server-security.test.js`
+and `tests/mycoweb-rez-discount.test.js` cover the three shared engine paths.
