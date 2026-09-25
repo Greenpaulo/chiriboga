@@ -32,7 +32,7 @@ function print(file, lines, start) {
 }
 
 function showCard(id) {
-  const pattern = new RegExp('^cardSet\\[' + id + '\\]\\s*=');
+  const pattern = new RegExp('^(?:cardSet|coreSet)\\[' + id + '\\]\\s*=');
   for (const file of fs.readdirSync(path.join(root, 'sets')).filter(f => f.endsWith('.js')).sort()) {
     const lines = fs.readFileSync(path.join(root, 'sets', file), 'utf8').split('\n');
     const start = lines.findIndex(line => pattern.test(line));

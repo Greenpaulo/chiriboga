@@ -1,27 +1,43 @@
-# Corp AI finding 10: Unguarded hypothetical in `Phase_Main`, plus an array `<` comparison
+# F2 Guarded hypothetical evaluation: remaining migrations
 
-**Source:** `documentation/backlog/corp_ai_review_findings.md`, item 10.
-**File:** `ai_corp.js` — `Phase_Main` (~5512); `_iceInstallScore()` (~121, currently unused). Line numbers drift; search by function name.
-**Belongs in:** Bug ticket for the `<` comparison, under `documentation/bugs/`. Shared infrastructure → Foundations doc F2: one guarded `_withHypothetical()` helper.
-**Suggested order:** Step 2 of 5 — quick fixes (the `<` comparison and the try/finally are cheap, local changes).
-**Depends on:** Finding 11 owns the shared helper; this finding is one of its first conversions.
+**Roadmap item:** F2 · **Depends on:** none · **Sets:** vantagepoint (Baker)
+**Read first:** `documentation/corp-ai/principles.md`
 
----
+## Goal
+Route every Corp planning probe that temporarily mutates game state through one exception-safe helper, so a throw during evaluation can never leave credits, run context or other state altered, and fix the accidental array `<` comparison found alongside it (review finding 10).
 
-## Problem
+## Current behaviour
+`_withHypothetical(apply, evaluate, restore)` exists and gives exception-safe restoration to migrated probes such as ordinary purge evaluation; `_icePreventsGameWinningBreach()` and `_criticalBreachDefenseAction()` already restore correctly. Three cases remain unmigrated: `Phase_Main`'s manual credit rollback, `_iceInstallScore()`, and Baker's card-local run-context probe in `sets/vantagepoint.js`. See [architecture: foundations](../corp-ai/architecture.md#foundations).
 
-- `corp.creditPool += this._clicksLeft() - 1` is rolled back manually, not in `try/finally`. If anything in between throws, the Corp's credits are left inflated. `_icePreventsGameWinningBreach()` and `_criticalBreachDefenseAction()` already do this correctly.
-- `_iceInstallScore()` (~121, currently unused) mutates without a guard too.
-- `rankedInstallOptions < this._rankedInstallOptions(...)` compares arrays with `<`. It works only because plain objects stringify to `"[object Object]"`. It is accidental, not intentional.
+## Design
+Search by function name; line numbers drift.
 
-## Proposed fix
+- **`Phase_Main` credit probe:** `corp.creditPool += this._clicksLeft() - 1` is rolled back manually, not in `try/finally`, so a throw in between leaves the Corp's credits inflated. Route it through `_withHypothetical()`.
+- **Array comparison:** `rankedInstallOptions < this._rankedInstallOptions(...)` compares arrays with `<`. It works only because plain objects stringify to `"[object Object]"`; it is accidental. Compare `.length` instead.
+- **`_iceInstallScore()`** (currently unused) mutates without a guard. Convert its mutation to `_withHypothetical()`, or delete the function with Install Phase 2 if it is still unused.
+- **Baker's prospective-run probe:** Baker's `AIRedirectsRun` must ask run-only credit sources (for example Touchstone's hosted credit) whether they would be usable in a prospective Archives run even though no run is active during Corp planning. Its card-local helper currently supplies `attackedServer` under `try/finally` and restores the live value; this is safe and regression-tested but duplicates the guarded-hypothetical pattern. Migrate this probe, and any other card hook that needs a prospective run context, to `_withHypothetical()` or a narrow shared run-context wrapper.
 
-- Compare `.length` instead of the arrays themselves.
-- Route all hypotheticals through one guarded `_withHypothetical()` helper (finding 11 / foundations F2).
-- Convert `_iceInstallScore()`'s mutation to the same helper, or delete it with Install Phase 2 if still unused.
+## Safety and information boundary
+- Migrated probes must remain read-only: no credits spent, counters changed, cards rezzed or state left different after evaluation.
+- Restoration must happen after exceptions as well as on normal return.
+- Results computed inside a hypothetical context must never populate F3's per-decision evaluation cache.
 
-## Tests / acceptance criteria
+## Test scenarios
+1. The install-option comparison reflects relative counts, not string coercion.
+2. Throwing inside the `Phase_Main` hypothetical leaves credits, and any other mutated state, exactly as they were.
+3. `_iceInstallScore()`'s mutation is guarded, or the function is gone.
+4. Baker's `AIRedirectsRun` still detects a redirect paid by a run-only credit source during Corp-turn planning, and the live `attackedServer` is unchanged afterwards, including when the probed credit source throws.
+5. The existing Baker/Touchstone Archives-backdoor regression still passes.
 
-- The install-option comparison reflects relative counts, not string coercion.
-- Throwing inside the hypothetical leaves credits (and any other mutated state) exactly as they were.
-- `_iceInstallScore()`'s mutation is guarded (or the function is gone).
+## Acceptance gate
+Every probe listed under Design uses `_withHypothetical()` or the shared run-context wrapper (or, for `_iceInstallScore()`, is deleted), and the scenarios above pass.
+
+## Things to consider
+- This finding and F3 were originally paired: F3 owns the cache that hypotheticals must bypass. Land F2 first so F3 can rely on a single guarded entry point to detect hypothetical context.
+- If a narrow run-context wrapper is added for card hooks, document it in `documentation/ai.md` as the supported way for a hook to evaluate prospective run-only costs.
+
+## Acceptance criteria
+- [ ] Every test scenario above is covered by a deterministic test.
+- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [ ] `node tests/run-all-tests.js` passes.

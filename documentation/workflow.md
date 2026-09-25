@@ -112,10 +112,21 @@ for setup, blocked batches and the final set-wide review.
 
 ## 🗺️ Roadmaps
 
-The main improvement plans are in `documentation/corp-ai/` and
-`documentation/runner_ai/`. They contain layers of implementation that can be
-worked on individually, and the guiding principles (imperfect information, no
-hardcoded card titles) that every AI change must follow.
+Corp AI planning lives in `documentation/corp-ai/` (start with its
+[README](corp-ai/README.md)):
+
+- `principles.md`: rules every AI change obeys;
+- `architecture.md`: how the implemented AI works today;
+- `roadmap.md`: one short entry per item, with a fixed status
+  (`proposed`, `ready`, `in-progress`, `done`, `parked`);
+- `specs/`: the full spec of each `proposed` item, until it becomes a ticket.
+
+To pick the next piece of work, run `node scripts/roadmap.js next`. To turn a
+proposed item into a ticket, run `node scripts/roadmap.js raise <ID>`, which
+moves its spec into `documentation/backlog/`; then use `implement-ticket` as
+usual. The previous roadmaps are kept in `documentation/corp-ai/legacy/` for
+comparison. The Runner AI roadmap (`documentation/runner_ai/`) still uses the
+old single-document format.
 
 ## 🧾 Helper scripts
 
@@ -128,6 +139,10 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/show.js fn <name>` | One engine or AI function |
 | `node scripts/ticket.js check <ticket>` | The mechanical review checks for a fixed ticket |
 | `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders |
+| `node scripts/roadmap.js next` | Corp AI roadmap items whose dependencies are all done |
+| `node scripts/roadmap.js list` | Every Corp AI roadmap item and its status |
+| `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket |
+| `node scripts/card-status.js` | Regenerates `documentation/card-status.md`: per-set card counts, missing and unfinished cards, config mismatches |
 
 ## 🛡️ Guardrails
 
@@ -144,6 +159,13 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 - **Hook documentation check** (`tests/ai-hook-docs.test.js`): fails when a card
   defines an `AI*` hook that `documentation/ai.md` does not mention. Hooks that
   predate the rule are listed in `LEGACY_UNDOCUMENTED`, which may only shrink.
+- **Roadmap check** (`tests/corp-ai-roadmap.test.js`): fails when a Corp AI
+  roadmap status disagrees with where its ticket lives, a spec or ticket is
+  unlinked, a dependency does not exist, or `architecture.md` names code that
+  does not exist.
+- **Card status check** (`tests/card-status.test.js`): fails when the generated
+  `documentation/card-status.md` is out of date, or a registered set has no
+  playability decision in `documentation/card-sets.md`.
 - **Skill check** (`tests/agent-skills.test.js`): every skill needs a
   `SKILL.md` whose name matches its folder and which has a description.
 

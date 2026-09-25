@@ -1,37 +1,41 @@
-# Backlog Ticket: Layer 6.1 — Payment-Constraint Allocation
+# L6.1 Payment-constraint allocation
 
-**Source:** `documentation\corp-ai\roadmaps\corp_ai_improvement_roadmap.md`
+**Roadmap item:** L6.1 · **Depends on:** none · **Sets:** playable sets (`documentation/card-sets.md`)
+**Read first:** `documentation/corp-ai/principles.md`
 
-## Scope
+## Goal
+Replace the scalar Runner credit ceiling with a payment allocator when a route combines restrictions such as stealth requirements, breaker-specific recurring credits and paid bypass abilities, so the Corp stops counting restricted credits as if they could pay for anything.
 
-Replace the scalar credit ceiling in `_effectiveRunnerCreditPool()` with a credit-source payment allocator in `ai_corp.js` when routes combine stealth requirements, breaker-specific recurring credits, and paid bypasses.
+## Current behaviour
+`_effectiveRunnerCreditPool(server)` returns a public-information breakdown (base pool, temporary run credits, eligible hosted/recurring credits, Bad Publicity credits, click-to-credit potential) that `_evaluateServerSecurity()` sums into one number for affordability lockouts. Hosted credits are included when `canUseCredits("using", card)` permits a public installed breaker or bypass tool, but they are not allocated against individual per-ICE payments. See [architecture: Runner effective credit ceiling](../corp-ai/architecture.md#runner-effective-credit-ceiling).
 
-## Requirements
+## Design
+- Return credit-source objects with an amount and an eligibility predicate.
+- Allocate each source against the actual per-ICE payments: spend the most restricted sources first (for example stealth or breaker-only) and preserve unrestricted pool credits for later encounters.
+- Keep the credit-source predicates declarative and the allocation greedy (most restrictive first) to avoid performance hits during multi-ICE route evaluation.
+- Document any schema changes for credit-eligibility predicates in `documentation/ai.md`.
 
-1. **Credit Source Allocation**:
-   - Return credit-source objects with an amount and an eligibility predicate.
-   - Allocate sources against actual per-ICE payments: spend restricted sources first (e.g., stealth, breaker-only) and preserve unrestricted pool credits for later encounters.
-2. **Safety & Information Constraints**:
-   - Use only active public cards and declared hooks; never infer economy events from Grip contents.
-   - Do NOT mutate counters or run state while planning.
-   - Never allocate one hosted credit twice.
+## Safety and information boundary
+- Use only active public cards and declared hooks; never infer economy events from Grip contents.
+- Do not mutate counters or run state while planning.
+- Never allocate one hosted credit twice.
 
-## Things to consider:
+## Test scenarios
+1. A breaker-only credit cannot pay a bypass.
+2. A stealth breaker receives its required stealth credit composition.
+3. One recurring credit cannot cover two encounters.
+4. Central-only credits apply only to centrals.
+5. Unrestricted credits fill any remaining payment.
 
-Layer 6.1 (Payment-Constraint Allocation Complexity):
+## Acceptance gate
+Adopt when constrained allocation never reports a cheaper route than the legal payment engine and existing Layer 6 ceiling cases remain stable.
 
-Combining stealth credits, central-only recurring credits, breaker-specific credits, and paid bypasses in a single route optimization can quickly become a miniature knapsack/matching problem.
+## Things to consider
+- Combining stealth credits, central-only recurring credits, breaker-specific credits and paid bypasses in one route optimization can become a miniature knapsack/matching problem. The greedy, declarative approach above is the mitigation; check it against the legal payment engine rather than assuming it is optimal.
+- Related open bug: [`documentation/bugs/corsair-stealth-offset-suppressed-by-lampades.md`](../bugs/corsair-stealth-offset-suppressed-by-lampades.md) (Corsair's stealth-credit offset is hidden from credit planning). Stealth credit composition is one of this item's scenarios, so resolve or account for that bug before relying on stealth sources here.
 
-Mitigation: Keep the credit-source predicates declarative and greedy (spending the most restrictive credits first) to avoid performance hits during multi-ICE route evaluations.
-
-## Required Card & Documentation Updates
-
-- Update `documentation/ai.md` with any schema changes for credit-eligibility predicates.
-- Update the status of Layer 6.1 in the main Corp AI roadmap doc.
-
-## Acceptance Criteria
-
-- [ ] Breaker-only credits cannot pay for bypass abilities.
-- [ ] Stealth breakers receive their required stealth credit composition.
-- [ ] Central-only credits apply strictly to central server encounters.
-- [ ] Single recurring credits cannot be double-counted across two separate encounters.
+## Acceptance criteria
+- [ ] Every test scenario above is covered by a deterministic test.
+- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [ ] `node tests/run-all-tests.js` passes.

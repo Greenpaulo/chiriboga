@@ -65,7 +65,8 @@ reproduction is confirmed later by `implement-ticket`.
   demonstrates it) or **[Inferred]** (from reading code). Whoever implements the
   fix must re-check [Inferred] claims before relying on them.
 - The proposed fix must be general: no card-title checks, no AI reads of hidden
-  information, no constants tuned to this one board (see `documentation/ai.md`).
+  information, no constants tuned to this one board (see
+  `documentation/corp-ai/principles.md` for Corp AI changes).
 - Line numbers drift. Reference functions by name and record the commit
   (`git rev-parse --short HEAD`).
 - Keep the ticket shorter than the investigation, ideally under 150 lines.

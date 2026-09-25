@@ -1,32 +1,45 @@
-# Backlog Ticket: Layer 8.4 — Bounded Posture Epochs
+# L8.4 Bounded posture epochs
 
-**Source:** `documentation\corp-ai\roadmaps\corp_ai_improvement_roadmap.md`
+**Roadmap item:** L8.4 · **Depends on:** none · **Sets:** none
+**Read first:** `documentation/corp-ai/principles.md`
 
-## Scope
+## Goal
+Preserve one stable bait or bluff decision during an AI planning window without permanently committing an installed card to a stale posture. Today a trap or agenda stays locked to the posture it rolled on install for the rest of the game.
 
-Replace lifetime posture booleans with epoch-bounded posture records in `ai_corp.js` so that installed trap/agenda cards are not permanently locked to a stale bait or bluff decision across the game.
+## Current behaviour
+`_shouldBaitServer()` makes one injectable random roll per installed trap/server and caches it, and `_remoteDeceptionProfile(card)` caches the shared agenda/trap profile; both are cached for the installed card's lifetime, and nothing reevaluates them. Match-winning safety guards already disable bait and agenda postures when a breach could win. See [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence).
 
-## Requirements
+## Design
+- Replace lifetime booleans with a posture record containing an epoch id, the selected public script, a commitment horizon, and reevaluation reasons (for example `epochId`, `selectedScript`, `commitmentHorizon`, `reevaluationReasons`).
+- Roll once on install or at the start of a Corp planning epoch.
+- Reevaluate only after a meaningful boundary: the Runner turn ends, the server is challenged, credits or public Runner pressure materially change, advancement changes the server's stakes, or either player reaches match point.
+- Repeated evaluator calls inside the same epoch reuse the existing result without consuming extra randomness.
+- A reevaluation may retain the old posture.
+- Document posture-epoch signatures and reevaluation boundaries in `documentation/ai.md` where they are card-facing.
 
-1. **Posture Record Architecture**:
-   - Maintain a posture record containing `epochId`, `selectedScript`, `commitmentHorizon`, and `reevaluationReasons`.
-   - Roll posture once on install or at the start of a Corp planning epoch.
-2. **Reevaluation Triggers**:
-   - Reevaluate posture ONLY after meaningful boundaries: Runner turn ends, server is challenged, credits/Runner pressure materially shift, advancement changes stakes, or either player reaches match point.
-   - Repeated evaluator calls inside the same epoch MUST reuse the cached result without consuming extra randomness.
-3. **Safety & Match Guards**:
-   - Keep `_random` injectable.
-   - Match-winning safety overrides remain authoritative (never bait/bluff if breach wins game).
-   - Do NOT inspect hidden Runner card identities.
+## Safety and information boundary
+- Keep `_random` injectable.
+- Never reroll because `_NoMoreProtectionForThisServer()` or another scorer happened to run again.
+- Match-winning safety overrides remain authoritative: never bait or bluff when a breach wins the game.
+- Hidden Runner card identities remain forbidden.
 
-## Required Card & Documentation Updates
+## Test scenarios
+1. Repeated calls in one epoch consume no extra randomness.
+2. A new Corp turn permits at most one reevaluation.
+3. A material threat change can abandon a bait.
+4. Irrelevant state changes do not reroll.
+5. Reaching match point immediately disables an unsafe agenda or trap posture.
+6. Seeded games reproduce the same epoch sequence.
+7. An installed card does not remain locked to a posture after its commitment horizon expires.
 
-- Update `documentation/ai.md` with posture epoch signatures and reevaluation boundaries.
-- Update Layer 8.4 status in the main Corp AI roadmap.
+## Acceptance gate
+No installed card remains locked to a posture after its commitment horizon, and instrumentation confirms exactly one posture decision per eligible card per epoch.
 
-## Acceptance Criteria
+## Things to consider
+- The F3 ticket notes that its per-decision evaluation cache pairs with posture epochs. Both define decision lifetimes, so decide explicitly how they interact rather than letting a cache clear trigger a posture reroll.
 
-- [ ] Repeated calls in a single epoch consume 0 additional randomness.
-- [ ] A new Corp turn permits at most 1 posture reevaluation.
-- [ ] Reaching match point immediately disables unsafe agenda/trap postures.
-- [ ] Installed cards do not remain locked to a posture after their commitment horizon expires.
+## Acceptance criteria
+- [ ] Every test scenario above is covered by a deterministic test.
+- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [ ] `node tests/run-all-tests.js` passes.

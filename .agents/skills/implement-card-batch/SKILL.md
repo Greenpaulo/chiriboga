@@ -100,8 +100,10 @@ Only after every card and test in the batch is complete:
 2. Append a completion-log row: date, agent name, focused test files, a concise
    implementation note. Remove the no-completions placeholder for the first
    entry.
-3. Update `documentation/new-sets/card-implementation-backlog.md` when
-   unfinished-card counts, TODO counts or accepted limitations change.
+3. Run `node scripts/card-status.js` to regenerate
+   `documentation/card-status.md` (the suite fails if it is stale), and update
+   `documentation/new-sets/card-implementation-backlog.md` when accepted
+   limitations change.
 4. Add consequential rulings, engine changes and AI decisions to the set's
    implementation-notes file named in the tracker.
 

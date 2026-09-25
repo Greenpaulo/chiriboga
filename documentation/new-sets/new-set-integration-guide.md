@@ -14,10 +14,10 @@ Use these companion references while implementing cards:
 - `documentation/new-sets/card-implementation-backlog.md` — known unfinished cards and
   the current ELO audit.
 
-The Corp AI roadmap and work-summary documents explain architecture and history,
-but they are not card-authoring API references. In particular, hooks proposed by
-`corp_ai_install_decision_roadmap.md` must not be used until its phase is marked
-implemented and the hook also appears in `engine_patterns.md` and `ai.md`.
+The Corp AI roadmap and specs (`documentation/corp-ai/`) describe plans, not
+card-authoring APIs. A hook proposed by a roadmap item must not be used until
+that item is `done` in `documentation/corp-ai/roadmap.md` and the hook also
+appears in `engine_patterns.md` and `ai.md`.
 
 ## 1. Decide the scope before adding the set
 

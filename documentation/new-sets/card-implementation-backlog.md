@@ -4,35 +4,16 @@ This is the living inventory of known unfinished card definitions and AI data.
 It distinguishes confirmed code gaps from areas that have not received a full
 rules audit. Update it when a card is implemented or a new gap is found.
 
-Snapshot: Vantage Point integration scaffold, 2026-09-18. Counts below cover
-the 510 card objects in registered set files, not every entry in the
-larger `carddata/carddata.json` database.
+Set-level counts and missing or unfinished cards are generated in
+`documentation/card-status.md`; this file records confirmed mechanic gaps and
+audit notes that a script cannot detect.
 
 ## 1. Missing card definitions
 
-Six Elevation cards have metadata but no object in `sets/elevation.js`:
-
-| ID    | Card                                   |
-| ----- | -------------------------------------- |
-| 35057 | Nebula Talent Management: Making Stars |
-| 35058 | Synapse Global: Faster than Thought    |
-| 35059 | Embedded Reporting                     |
-| 35060 | Next Big Thing                         |
-| 35065 | Bigger Picture                         |
-| 35066 | IP Enforcement                         |
-
-Several other registered set files deliberately contain only a small subset of
-their metadata pack. These are set-level implementation backlogs, not completed
-sets:
-
-| Set                         | Defined in engine | Cards in matching metadata pack | Status                              |
-| --------------------------- | ----------------: | ------------------------------: | ----------------------------------- |
-| Midnight Sun                |                12 |                              65 | Partial                             |
-| Parhelion                   |                 4 |                              63 | Partial                             |
-| The Automata Initiative     |                 3 |                              65 | Partial                             |
-| Uprising                    |                 6 |                              65 | Partial                             |
-| Rebellion Without Rehearsal |                 2 |                              65 | Partial                             |
-| Elevation                   |                76 |                              82 | Six specific omissions listed above |
+Missing definitions, unfinished scaffold placeholders and per-set counts are
+generated from the code in [card-status.md](../card-status.md) (run
+`node scripts/card-status.js`); they are no longer maintained by hand here.
+Which sets are playable is decided in [card-sets.md](../card-sets.md).
 
 Core Set is not compared this way because its file intentionally omits a number
 of cards duplicated by System Update 2021. Before expanding any partial set,

@@ -12,6 +12,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const {isScaffoldMarker} = require('./card-status.js');
+
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const tracker = read('documentation/new-sets/current-set-implementation.md');
@@ -34,15 +36,15 @@ const batch = requested !== null
 if (!batch) { console.log(requested !== null ? 'No batch ' + requested + ' in the tracker.' : 'No In progress or Pending batch.'); process.exit(1); }
 
 // Index every card definition in sets/*.js: file, line, and unfinished markers
-// (TODO comments or the scaffold's "..." placeholders).
+// (placeholders written by scripts/scaffold_set.py).
 const definitions = new Map();
 for (const file of fs.readdirSync(path.join(root, 'sets')).filter(f => f.endsWith('.js'))) {
   const lines = read('sets/' + file).split('\n');
   const starts = [];
-  lines.forEach((line, i) => { const m = line.match(/^cardSet\[(\d+)\]\s*=/); if (m) starts.push([m[1], i]); });
+  lines.forEach((line, i) => { const m = line.match(/^(?:cardSet|coreSet)\[(\d+)\]\s*=/); if (m) starts.push([m[1], i]); });
   starts.forEach(([id, start], k) => {
     const end = k + 1 < starts.length ? starts[k + 1][1] : lines.length;
-    const todos = lines.slice(start, end).filter(line => /TODO|"\.\.\."/.test(line)).length;
+    const todos = lines.slice(start, end).filter(isScaffoldMarker).length;
     definitions.set(id, {file: 'sets/' + file, line: start + 1, todos});
   });
 }

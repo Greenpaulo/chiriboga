@@ -1,39 +1,43 @@
-# Backlog Ticket: Layer 8.5 — Match-Local Public Outcome Feedback
+# L8.5 Match-local public outcome feedback
 
-**Source:** `documentation\corp-ai\roadmaps\corp_ai_improvement_roadmap.md`
+**Roadmap item:** L8.5 · **Depends on:** L8.4 · **Sets:** none
+**Read first:** `documentation/corp-ai/principles.md`
 
-## Scope
+## Goal
+Let the Corp adjust later mixed bait/bluff strategies when the human repeatedly challenges or ignores particular visible remote postures during the current game, so a human cannot exploit a fixed posture distribution within one match.
 
-Implement match-local adaptation in `ai_corp.js` so the Corp AI dynamically adjusts its mixed bluff/bait strategies when a human opponent repeatedly challenges or ignores specific remote server postures in the current match.
+## Current behaviour
+Bait and agenda postures are rolled from fixed distributions (`_calculateBaitFrequency()`, `_remoteDeceptionProfile()`), and the AI does not feed public outcomes back into later posture weights. See [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence).
 
-## Requirements
+## Design
+- Record public outcomes by posture class: turns ignored, runs initiated, ICE exposed, successful accesses, traps fired, agendas stolen and agendas scored.
+- Maintain bounded match-local weights or Beta-style priors for the shared scripts, and use those weights when selecting later profiles (at L8.4 epoch boundaries).
+- Reset all opponent-response memory when a new game begins.
+- Document the match-local feedback weight structures and public signals in `documentation/ai.md` where they are card-facing.
 
-1. **Public Outcome Tracking**:
-   - Track public outcomes per posture class: turns ignored, runs initiated, ICE exposed, successful accesses, traps fired, agendas stolen/scored.
-   - Maintain bounded match-local weights (e.g., Beta-distribution priors) for shared scripts.
-2. **Game-Local Lifecycle**:
-   - Reset ALL opponent-response memory completely when a new game begins. Never persist player fingerprints across sessions.
-3. **Safety & Bounds**:
-   - Learn ONLY from public actions and Corp-known outcomes.
-   - Every script must maintain a non-zero exploration floor (no single script weight can drop to 0%).
-   - Never inspect hidden Runner cards.
+## Safety and information boundary
+- Learn only from public actions and Corp-known outcomes.
+- Never inspect Runner Grip/Stack identities or persist a player fingerprint across games or sessions.
+- Never allow a small sample to collapse any script's probability to zero: every script keeps a non-zero exploration floor.
+- Agenda and trap cards must continue drawing from overlapping distributions.
 
-## Things to consider:
+## Test scenarios
+1. Ignored light postures modestly increase their later use during the current match.
+2. Repeated challenges shift some weight toward deeper or delayed scripts.
+3. One outcome cannot dominate the weights.
+4. Starting a new game resets all outcome memory to baseline priors.
+5. Changing hidden Runner cards changes nothing.
+6. Identical seeded public histories produce identical weights.
+7. Agenda and trap profile distributions remain overlapping after adaptation.
 
-Layer 8.5 Sample Size Drift in Match-Local Feedback:
+## Acceptance gate
+Public-history adaptation changes future script weights within configured bounds, while every script retains a non-zero exploration floor and agenda/trap trace distributions remain overlapping.
 
-In a typical Netrunner match, the Runner might only run a remote 3 to 6 times total. Beta-distribution priors can swing wildly on tiny sample sizes (e.g., guessing wrong twice in a row).
+## Things to consider
+- Sample size drift: in a typical match the Runner might run a remote only 3 to 6 times, and Beta-style priors can swing wildly on tiny samples (for example two wrong guesses in a row). Use strong, conservative prior weights so one or two runs adjust probabilities modestly rather than swinging posture selection.
 
-Mitigation: Ensure the adaptation weighting uses strong, conservative prior weights so that 1 or 2 runs modestly adjust probabilities rather than completely swinging the AI's posture selection.
-
-## Required Card & Documentation Updates
-
-- Document match-local feedback weight structures and public signals in `documentation/ai.md`.
-- Update Layer 8.5 status in the main Corp AI roadmap.
-
-## Acceptance Criteria
-
-- [ ] Ignored light postures modestly increase their future selection frequency during the current match.
-- [ ] Starting a new game completely resets all outcome memory to baseline priors.
-- [ ] Changing hidden Runner cards produces 0 change in feedback weights.
-- [ ] Agenda and trap profile distributions retain overlapping distributions.
+## Acceptance criteria
+- [ ] Every test scenario above is covered by a deterministic test.
+- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [ ] `node tests/run-all-tests.js` passes.

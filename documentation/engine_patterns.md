@@ -19,9 +19,9 @@
 > | Implemented Cards Quick-Reference | need a worked example from Downfall |
 >
 > AI hook audit: 2026-09-18. The implemented hooks from the Corp server-security
-> work are summarized below. Proposals in
-> `corp_ai_install_decision_roadmap.md` are not available card APIs until that
-> document explicitly marks their phase implemented.
+> work are summarized below. Hooks proposed by items in
+> `documentation/corp-ai/roadmap.md` are not available card APIs until the item
+> is `done`.
 
 ---
 
@@ -419,8 +419,8 @@ normal `modifySubTypes`, `canUseCredits`, `AIImplementBreaker`,
 (Corp assets) — return `-1` to decline installation, an index into the supplied
 protection-ranked remote list to use that server, or
 `emptyProtectedRemotes.length` to request a new remote. This is a current,
-legacy placement hook—not the unified candidate scorer proposed in
-`corp_ai_install_decision_roadmap.md`. Check affordability and whether the
+legacy placement hook—not the unified candidate scorer proposed by roadmap
+items I1 and I5 in `documentation/corp-ai/roadmap.md`. Check affordability and whether the
 effect has a plausible payoff inside the hook.
 
 **`AIWorthKeeping: function(installedRunnerCards, spareMU) { return true/false; }`** (runner side — events, resources, hardware, programs) — should the runner treat this as something to hold onto and use? Cards judged "worth keeping" get proactively played/installed by the generic AI loop; cards without it are just along for the ride.
