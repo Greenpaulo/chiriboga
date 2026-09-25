@@ -221,7 +221,15 @@ fails if any of these is skipped.
    single worst offender was a chatty test.
 5. **Keep humans on decisions, agents on execution.** Plan approval, playability
    and scope are yours; everything repeatable is scripted or delegated.
-6. **Build in small, reviewable steps.** Each change today was committed on its
+6. **Audit any restructure independently.** Converting the legacy roadmaps
+   looked complete, and every automated check passed, but a separate audit found
+   real losses. Completed layers had lost their purpose (the *why*). Layer 8
+   looked finished when it was only partly done. Legacy sequencing had been
+   dropped from the dependencies, and the full hook-documentation contract had
+   been cut down to one line. Tests prove structure, not that meaning survived.
+   When content moves, have a fresh agent compare old and new section by
+   section.
+7. **Build in small, reviewable steps.** Each change today was committed on its
    own with the suite green, which made it easy to see what each one did.
 
 ## Open items
