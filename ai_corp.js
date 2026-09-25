@@ -3077,12 +3077,15 @@ class CorpAI {
   }
 
   _serverToProtect(
-    ignoreArchives = false, //returns the server that most needs increased protection (does not return null, will be HQ by default or R&D against shapers)
+    ignoreArchives = false, //returns the server that most needs increased protection; null represents a new remote
     outputToLog = false,
+    targetIsEligible = null, //optional action-specific filter (for example, whether another ICE layer is affordable)
   ) {
     var ranked = this._rankedServersToProtect(ignoreArchives);
     var eligibleRanked = ranked.filter(
-      (entry) => !this._nothingWorthProtecting(entry.server, entry.security),
+      (entry) =>
+        !this._nothingWorthProtecting(entry.server, entry.security) &&
+        (targetIsEligible == null || targetIsEligible(entry.server)),
     );
     var unallocatedInsecure = eligibleRanked.filter(
       (entry) =>
@@ -3120,6 +3123,9 @@ class CorpAI {
         "Ranked server protection: " + JSON.stringify(protectionScores),
       );
     }
+    //An action-specific caller needs to distinguish "no viable target" from HQ.
+    //General protection queries retain the historical HQ fallback.
+    if (!selected && targetIsEligible != null) return undefined;
     return selected ? selected.server : corp.HQ;
   }
 
@@ -3721,7 +3727,13 @@ class CorpAI {
 
   _serverHasStakes(server) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
-    //R&D and Archives retain the existing economy behaviour here.
+    if (server == corp.archives) {
+      if (this._archivesIsBackdoorToHQ()) return true;
+      if (this._agendasInServer(corp.archives) > 0) return true;
+      return this._serverRunPressure(corp.archives).penalty > 0;
+    }
+    //Do not inspect hidden R&D contents to justify spending through the reserve.
+    //Other central threats affect ranking, while only remote HVTs fall through.
     if (server == null || typeof server.cards !== "undefined") return false;
     for (var i = 0; i < server.root.length; i++)
       if (this._isHVT(server.root[i])) return true;
@@ -3857,11 +3869,15 @@ class CorpAI {
     var iceInstallEconomyCheck = this._sufficientEconomy(false, 4);
 
     //Find out if any servers need protection. If so, we will choose an ice card if possible.
-    var serverToInstallTo = this._serverToProtect();
+    var serverToInstallTo = this._serverToProtect(
+      false,
+      false,
+      (server) => this._shouldInstallIceLayer(server, iceInstallEconomyCheck),
+    );
 
     //Too poor? Do not spend frivolously on new layers. A breachable server
     //with something to lose is not frivolous to reinforce.
-    if (this._shouldInstallIceLayer(serverToInstallTo, iceInstallEconomyCheck)) {
+    if (typeof serverToInstallTo !== "undefined") {
       //this is our worst-protected server. if the server already has unrezzed ice, let's not install ice unless we have economy
       //prioritise placing ice that I can afford to rez (for now we make no effort to sort them)
       var iceInstallOptions = this._iceInstallOptions(

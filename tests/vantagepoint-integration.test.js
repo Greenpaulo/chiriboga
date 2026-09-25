@@ -725,6 +725,20 @@ assert.strictEqual(
   false,
   '36015 cannot redirect without a current Stealth credit',
 );
+const planningTouchstone = context.cardSet[36021];
+planningTouchstone.credits = 1;
+installed = {corp: [], runner: [baker, planningTouchstone]};
+context.attackedServer = null;
+assert.strictEqual(
+  baker.AIRedirectsRun.call(baker, context.corp.archives, context.corp.HQ),
+  true,
+  '36015 models Touchstone credit in the prospective run context',
+);
+assert.strictEqual(
+  context.attackedServer,
+  null,
+  '36015 restores the real attacked server after planning',
+);
 assert(
   phaseSource.includes('"responseOnWouldApproachServer"'),
   '36015 uses a decision-safe response window before server approach',

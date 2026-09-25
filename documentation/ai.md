@@ -1084,6 +1084,11 @@ Base their answers on the supplied arguments and public persistent state; do
 not require `CheckEncounter()` or assume `attackedServer` and `approachIce`
 describe a real active run.
 
+Baker's `AIRedirectsRun` supplies its prospective Archives server while checking
+hosted stealth credits. This lets run-only sources such as Touchstone answer in
+the context where the redirect cost would actually be paid; the helper restores
+the real `attackedServer` immediately after the read-only planning query.
+
 ```js
 AIEffectiveIceSubtypes: function(iceCard, server, iceIndex) {
     if (iceCard != this.host) return {};

@@ -1222,16 +1222,23 @@ cardSet[36015] = {
   memoryCost: 1,
   usedThisTurn: false,
   runningWithThis: false,
-  _stealthCreditCards: function () {
+  _stealthCreditCards: function (planningServer) {
     var baker = this;
-    return InstalledCards(runner).filter(function (card) {
-      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
-        return false;
-      return (
-        typeof card.canUseCredits !== "function" ||
-        card.canUseCredits("using", baker)
-      );
-    });
+    var storedAttackedServer = attackedServer;
+    if (planningServer && attackedServer === null)
+      attackedServer = planningServer;
+    try {
+      return InstalledCards(runner).filter(function (card) {
+        if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
+          return false;
+        return (
+          typeof card.canUseCredits !== "function" ||
+          card.canUseCredits("using", baker)
+        );
+      });
+    } finally {
+      attackedServer = storedAttackedServer;
+    }
   },
   responseOnRunnerTurnBegins: {
     Resolve: function () {
@@ -1303,7 +1310,7 @@ cardSet[36015] = {
       !this.usedThisTurn &&
       fromServer == corp.archives &&
       (toServer == corp.HQ || toServer == corp.RnD) &&
-      this._stealthCreditCards().length > 0
+      this._stealthCreditCards(fromServer).length > 0
     );
   },
   AIRunAbilityExtraPotential: function (server, potential) {
