@@ -58,13 +58,13 @@ Create a fixture from the matching decision:
 node tests/extract-fixture.js documentation/debug-logs/example.txt 12 short-name --expect '!install'
 ```
 
-The extractor writes `tests/fixtures/corp-decisions/short-name.txt`. Decisions containing non-text options are labelled non-replayable and require a purpose-built test.
+The extractor writes `tests/fixtures/corp-decisions/short-name.txt`. Add `--pending` to write `tests/fixtures/corp-decisions-pending/short-name.txt` instead, which is what triage of an unfixed bug should do. Decisions containing non-text options are labelled non-replayable and require a purpose-built test; for an unfixed bug, put that test in `tests/pending/`, which `run-all-tests.js` does not run.
 
 For an older log without decision snapshots, reconstruct the state at the decision from its final `RunnerTestField(...)` and `CorpTestField(...)` dump. Record that reconstruction explicitly in `NOTE`; an end-of-game dump is not automatically the decision-time board.
 
 ## Required workflow
 
-1. Add the captured fixture and run it before changing the AI. It must fail for the reported reason.
+1. Add the captured fixture as pending (`--pending`) and run it before changing the AI. It must fail for the reported reason.
 2. Add a meaningful variation when the bug concerns a broad heuristic rather than one unique board.
 3. Fix the general behavior without board-specific card-title checks or magic values.
 4. Move a previously pending fixture into `corp-decisions/` only after the fix makes it pass.

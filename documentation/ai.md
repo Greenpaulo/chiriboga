@@ -2,6 +2,25 @@
 
 This document explains how the AI players in this Netrunner simulator work, and how to add AI support to new cards.
 
+## How to Use This Document
+
+This file is long. Read only the sections a task needs. To find one hook, search for its name (`rg -n "AIHookName" documentation/ai.md`): its contract is in the §4 or §5 subsection whose heading names it, and §7 lists every documented hook with a one-line purpose.
+
+| Task | Read |
+|---|---|
+| Add AI support to a new Runner card | §2, §3, the §4 subsection for the card's role, §7 Runner table |
+| Add AI support to a new Corp card | §2, §3, the §5 subsection for the card's type, §7 Corp table |
+| Icebreakers | §4.1–4.3, §6 |
+| ICE | §5.1–5.4, §6 |
+| Runner cards the Corp's server-security evaluator must see (type shifts, bypasses, redirects, credit sources, pressure) | §4.16–4.22 |
+| Corp protection and economy policy hooks | §5.9–5.11 |
+| Logic written directly in a card's `Enumerate`/`Resolve` | §4.15 (Runner), §5.8 (Corp) |
+| Add a new hook | §2 "The Hook Pattern", the nearest existing subsection as a template, then add a row to §7 |
+| Hook usage notes for recent Vantage Point cards | §7 "Vantage Point Batch N card hooks" |
+| First time adding AI support | §2, then §8 (worked examples) |
+
+`tests/ai-hook-docs.test.js` checks that every `AI*` hook defined in `sets/*.js` is mentioned here.
+
 ---
 
 ## Table of Contents

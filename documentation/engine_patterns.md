@@ -171,6 +171,8 @@ abilities: [{
 canBeRezzed: function() { return currentPhase.identifier == "Corp 2.2"; }
 ```
 
+Phase identifiers: `"Corp 2.2"` is `phases.corpActionMain` (the Corp's action phase) and `"Runner 1.3"` is `phases.runnerActionMain` (the Runner's action phase), both in `phase.js`.
+
 ### Corp install destination restriction
 
 ```js

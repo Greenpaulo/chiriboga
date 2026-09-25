@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/agent-hooks/verify-on-stop.js",
+            "timeout": 120,
+            "statusMessage": "Running regression suite"
+          }
+        ]
+      }
+    ]
+  }
+}
