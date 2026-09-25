@@ -103,11 +103,12 @@ without producing chronic Corp insolvency.
 - Once joint `(ICE, server)` candidates perform legality, affordability and
   marginal-value comparison here, retire `_serverToProtect(..., targetIsEligible)`
   from ordinary ICE-install generation (design note migration step 7).
-- Scenario 4 depends on the security evaluator's shared unrezzed-ICE budget
-  fix; check its status before raising.
+- Scenario 4 relies on the security evaluator's shared unrezzed-ICE budget
+  (L1.1, done); consume it rather than reimplementing it.
 
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

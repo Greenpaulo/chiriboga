@@ -14,6 +14,11 @@ Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md)
 
 How vulnerable, valuable or urgent is each server?
 
+Partly done layers: **Layer 7** (the tactical breach-loss interrupt is done;
+consequence calibration, L7.1, is open) and **Layer 8** (baiting, shared
+profiles and tag deterrence are done; L8.4 and L8.5 are required to complete
+it, L8.2 is open, L8.6 is optional).
+
 ### L3.5.1 Value-weighted protection debt
 - **Status:** ready
 - **Depends on:** F4
@@ -60,19 +65,19 @@ How vulnerable, valuable or urgent is each server?
 - **Status:** ready
 - **Depends on:** none
 - **Ticket:** [feature-layer-8-4-bounded-posture-epochs.md](../backlog/feature-layer-8-4-bounded-posture-epochs.md)
-- **Goal:** Replace lifetime bait/bluff postures with epoch-bounded ones that can be reconsidered at meaningful boundaries.
+- **Goal:** Replace lifetime bait/bluff postures with epoch-bounded ones that can be reconsidered at meaningful boundaries. Required to complete Layer 8.
 
 ### L8.5 Match-local public outcome feedback
 - **Status:** ready
-- **Depends on:** L8.4
+- **Depends on:** none
 - **Ticket:** [feature-layer-8-5-match-local-public-outcome-feedback.md](../backlog/feature-layer-8-5-match-local-public-outcome-feedback.md)
-- **Goal:** Adjust later posture weights from public outcomes within the current game.
+- **Goal:** Adjust later posture weights from public outcomes within the current game. Required to complete Layer 8.
 
 ### L8.6 Outcome-calibrated bluff telemetry
 - **Status:** parked
 - **Depends on:** L8.5
 - **Ticket:** [feature-layer-8-6-outcome-calibrated-bluff-telemetry.md](../backlog/feature-layer-8-6-outcome-calibrated-bluff-telemetry.md)
-- **Goal:** Opt-in telemetry to tune bluff frequencies against humans.
+- **Goal:** Opt-in telemetry to tune bluff frequencies against humans. Optional.
 - **Parked because:** it needs a meaningful sample of human games.
 
 ### L8.7 Layer 8 card hook audit
@@ -112,7 +117,7 @@ Shared infrastructure used by every area.
 
 ### F3 Per-decision evaluation cache
 - **Status:** ready
-- **Depends on:** F2
+- **Depends on:** F2, F4
 - **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/corp_ai_finding_11_evaluate_once_per_decision.md)
 - **Goal:** Evaluate each server once per decision without ever serving a stale or hypothetical result.
 
@@ -132,6 +137,9 @@ Shared infrastructure used by every area.
 
 What should the Corp install, where, and is that better than another action?
 Shared design: [specs/install-decisions-design.md](specs/install-decisions-design.md).
+The phases are deliberately sequential: I2 (ICE selection) is the first intentional
+policy change, then one decision class at a time (roles, agendas, assets,
+upgrades) before comparing installs with other actions.
 
 ### I0 Baseline capture and decision telemetry
 - **Status:** proposed
@@ -153,7 +161,7 @@ Shared design: [specs/install-decisions-design.md](specs/install-decisions-desig
 
 ### I3 Remote role and root suitability
 - **Status:** proposed
-- **Depends on:** I1
+- **Depends on:** I2
 - **Spec:** [I3-remote-role-and-root-suitability.md](specs/I3-remote-role-and-root-suitability.md)
 - **Goal:** Decide what each remote is for before comparing root cards.
 
@@ -165,19 +173,19 @@ Shared design: [specs/install-decisions-design.md](specs/install-decisions-desig
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed
-- **Depends on:** I3
+- **Depends on:** I4
 - **Spec:** [I5-asset-ambush-and-economy-value.md](specs/I5-asset-ambush-and-economy-value.md)
 - **Goal:** Compare root assets by expected board value instead of hook-chosen indices.
 
 ### I6 Upgrade selection by marginal effect
 - **Status:** proposed
-- **Depends on:** I1
+- **Depends on:** I5
 - **Spec:** [I6-upgrade-selection-by-marginal-effect.md](specs/I6-upgrade-selection-by-marginal-effect.md)
 - **Goal:** Place upgrades where they change the outcome on that server.
 
 ### I7 Install versus other Corp actions
 - **Status:** proposed
-- **Depends on:** I2, I3, I4, I5, I6
+- **Depends on:** I6
 - **Spec:** [I7-install-versus-other-corp-actions.md](specs/I7-install-versus-other-corp-actions.md)
 - **Goal:** Compare the best install with gaining credits, operations, advancing, rezzing and waiting.
 
@@ -201,7 +209,7 @@ can already see? Shared design:
 
 ### R1 Reserve and optionality model
 - **Status:** proposed
-- **Depends on:** none
+- **Depends on:** F4
 - **Spec:** [R1-reserve-and-optionality.md](specs/R1-reserve-and-optionality.md)
 - **Goal:** Hold a card, credits or an ability when its declared future use is worth more than spending it now.
 
@@ -217,6 +225,6 @@ Existing code that breaks a principle and must be migrated.
 
 ### P1 Retire legacy card-title special cases
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** F3, I2
 - **Ticket:** [corp_ai_finding_13_legacy_title_lists.md](../backlog/corp_ai_finding_13_legacy_title_lists.md)
 - **Goal:** Replace the remaining title comparisons in `ai_corp.js` with hooks, row by row.

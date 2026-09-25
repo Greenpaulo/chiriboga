@@ -27,8 +27,12 @@ or throws when a hidden property is read.
 - Text-pattern fallbacks are acceptable only for cards that declare no hook.
 - A hook describes one card's mechanics or suitability narrowly; it must not
   recreate a global planner.
-- Document every new or changed card-facing hook in `documentation/ai.md`, and
-  place AI hooks at the bottom of the card object.
+- Document every new or changed card-facing hook in `documentation/ai.md`: its
+  signature or schema, return semantics, valid information sources, out-of-run
+  safety constraints, at least one card-definition example, and its
+  quick-reference entry. Work that adds a hook is not complete until future card
+  implementations can discover and adopt it from that document. Place AI hooks
+  at the bottom of the card object.
 - Existing title special cases are tracked as principle-debt items in each
   side's roadmap. Do not add new ones.
 
@@ -64,9 +68,12 @@ current state.
 
 ## 6. No unsafe state mutation
 
-Evaluate hypotheticals through a guarded helper that restores every mutated
-field in `finally`, including when evaluation throws. Hypothetical results must
-never enter a cache used for the real board.
+Prefer an evaluation overlay or snapshot that leaves live state untouched. If
+temporary mutation is unavoidable, use a single guarded helper that restores
+every mutated field in `finally`, including when evaluation throws. Nothing may
+leak into live game state, card locations, counters, cached postures,
+protection debt or randomness, and hypothetical results must never enter a
+cache used for the real board.
 
 ## 7. Decisions are explainable
 
@@ -92,6 +99,8 @@ merely scored lower.
   [card-sets.md](card-sets.md) unless a ticket states otherwise. Measured
   status, including AI hook coverage, is in the generated
   [card-status.md](card-status.md).
+- When work adds or changes card hooks, record in the ticket's Resolution which
+  cards were updated in each set in scope, and confirm none were missed.
 - Record worthwhile out-of-scope findings as a `proposed` item in the side's
   `roadmap.md` with a spec in its `specs/` folder, not only in code comments or
   a work summary.

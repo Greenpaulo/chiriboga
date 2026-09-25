@@ -10,7 +10,9 @@ shared need, and give the remaining uncovered cards real hooks.
 ## Current behaviour
 Many cards declare an intent hook and also hand-write an `AIWorthKeeping` that
 repeats the same economy or draw check (for example
-`if (Credits(runner) < 5) return true;` in several economy cards). Lampades,
+`if (Credits(runner) < 5) return true;`, verbatim in Fermenter, Creative
+Commission and Telework Contract). The current list is generated in
+`documentation/card-status.md` ("Intent hook and `AIWorthKeeping`"). Lampades,
 Sell Out and Tailgate have no `AIWorthKeeping`. See
 [architecture: keep and discard decisions](../architecture.md#keep-and-discard-decisions).
 
@@ -18,7 +20,9 @@ Sell Out and Tailgate have no `AIWorthKeeping`. See
 - For each card whose hand-written `AIWorthKeeping` duplicates a need-matching
   pattern, confirm the new tier reproduces its behaviour, then simplify or
   remove the redundant check.
-- Add real `AIWorthKeeping` to Lampades (keep), Sell Out (keep when there is a
+- Add real `AIWorthKeeping` to Lampades, Sell Out and Tailgate. They fall
+  outside what the economy, draw and lockout needs cover, so each needs its own
+  hook: Lampades (keep), Sell Out (keep when there is a
   disposable resource to trash, mirroring its own `Enumerate` and
   `AIWouldPlay`) and Tailgate (keep; HQ is almost always protected).
 - Cards still only covered by the fallback tier remain visible in the generated
@@ -44,5 +48,6 @@ raised as its own small ticket now.
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] The side's `architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

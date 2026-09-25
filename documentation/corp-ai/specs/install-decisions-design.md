@@ -47,7 +47,11 @@ card-definition example.
 
 The general principles (imperfect information, hooks over titles, tactical
 safety, explainable and deterministic decisions, no unsafe state mutation) are
-in `documentation/ai-principles.md` and `documentation/corp-ai/principles.md`. Two principles are specific to
+in `documentation/ai-principles.md` and `documentation/corp-ai/principles.md`. Hypothetical installs must not leak into live game state, cached postures,
+protection debt, counters, card locations or randomness: prefer an evaluation
+overlay or snapshot/restore helper, and if temporary mutation is unavoidable,
+use a single guarded helper with `try/finally` restoration and a regression test
+for every mutated collection or field. Two principles are specific to
 install planning:
 
 ### Compare marginal outcomes

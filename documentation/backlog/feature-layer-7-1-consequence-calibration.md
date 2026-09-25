@@ -34,5 +34,6 @@ Adopt only after seeded games (F4) reduce agenda points lost from centrals witho
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

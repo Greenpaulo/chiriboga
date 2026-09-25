@@ -1,6 +1,6 @@
 # F3 Per-decision evaluation cache
 
-**Roadmap item:** F3 · **Depends on:** F2 · **Sets:** none
+**Roadmap item:** F3 · **Depends on:** F2, F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal

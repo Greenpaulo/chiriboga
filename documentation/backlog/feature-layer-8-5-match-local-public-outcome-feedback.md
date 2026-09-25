@@ -1,6 +1,6 @@
 # L8.5 Match-local public outcome feedback
 
-**Roadmap item:** L8.5 · **Depends on:** L8.4 · **Sets:** none
+**Roadmap item:** L8.5 · **Depends on:** none · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
@@ -11,7 +11,7 @@ Bait and agenda postures are rolled from fixed distributions (`_calculateBaitFre
 
 ## Design
 - Record public outcomes by posture class: turns ignored, runs initiated, ICE exposed, successful accesses, traps fired, agendas stolen and agendas scored.
-- Maintain bounded match-local weights or Beta-style priors for the shared scripts, and use those weights when selecting later profiles (at L8.4 epoch boundaries).
+- Maintain bounded match-local weights or Beta-style priors for the shared scripts, and use those weights when selecting later profiles (at L8.4 posture epoch boundaries once L8.4 exists; otherwise when new cards are profiled).
 - Reset all opponent-response memory when a new game begins.
 - Document the match-local feedback weight structures and public signals in `documentation/ai.md` where they are card-facing.
 

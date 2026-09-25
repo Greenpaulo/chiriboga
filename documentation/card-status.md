@@ -99,6 +99,26 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 31038 Prepaid VoicePAD
 - 36011 Sell Out
 
+**Intent hook and `AIWorthKeeping` (candidates for W5: the hand-written check may duplicate a shared need):**
+
+- 30007 Fermenter
+- 30022 DZMZ Optimizer
+- 30027 Telework Contract
+- 31010 Liberated Account
+- 31024 Security Testing
+- 31035 Aesop’s Pawnshop
+- 31036 Professional Contacts
+- 31039 Earthrise Hotel
+- 35010 Cacophony
+- 35011 Rent Rioters
+- 35022 Open Market
+- 35034 Side Hustle
+- 36003 The Tungsten Tailor
+- 36007 Nurse Hạnh
+- 36016 Underdome Irregulars
+- 36020 Methuselah
+- 36021 Touchstone
+
 **Neither hook nor subtype fallback (discarded first):**
 
 - 30002 Wildcat Strike

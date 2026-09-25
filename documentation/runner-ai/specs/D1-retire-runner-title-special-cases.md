@@ -41,5 +41,6 @@ listed cards is unchanged.
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] The side's `architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

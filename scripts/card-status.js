@@ -165,6 +165,8 @@ function generate() {
     .map(entry => entry.card.code + ' ' + entry.card.title));
   out.push('', '**Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**', '');
   out.push(...titled(entry => entry.keep.intent && entry.keep.tier !== 'hook').map(t => '- ' + t));
+  out.push('', '**Intent hook and `AIWorthKeeping` (candidates for W5: the hand-written check may duplicate a shared need):**', '');
+  out.push(...titled(entry => entry.keep.intent && entry.keep.tier === 'hook').map(t => '- ' + t));
   out.push('', '**Neither hook nor subtype fallback (discarded first):**', '');
   out.push(...titled(entry => entry.keep.tier === 'none').map(t => '- ' + t));
   return out.join('\n') + '\n';

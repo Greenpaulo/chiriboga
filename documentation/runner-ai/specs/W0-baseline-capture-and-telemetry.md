@@ -14,6 +14,10 @@ discards non-members early. Nothing records why a card was included or
 excluded. See [architecture: keep and discard decisions](../architecture.md#keep-and-discard-decisions).
 
 ## Design
+- First inspect every producer and consumer of `cardsWorthKeeping`
+  (`_cardsInHandWorthKeeping()`, the priority-economy scan, the mulligan check,
+  `_indexOfBestDiscardOption()`, install-priority sorting for breakers and
+  tutors, and the card hooks that read it).
 - Add opt-in structured logging around `_cardsWorthKeeping()` and
   `_indexOfBestDiscardOption()`: which cards were included or excluded and why
   (explicit hook result, subtype fallback, or neither).
@@ -38,5 +42,6 @@ sufficient to detect intended versus unintended changes in later items.
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] The side's `architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

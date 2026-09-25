@@ -1,6 +1,6 @@
 # I3 Remote role and root suitability
 
-**Roadmap item:** I3 · **Depends on:** I1 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Roadmap item:** I3 · **Depends on:** I2 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
@@ -75,5 +75,6 @@ safety rule is weakened.
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

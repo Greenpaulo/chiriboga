@@ -21,13 +21,14 @@ the Runner AI works today, so every agent had to rediscover it from a
 |---|---|
 | Guiding principles 1, 2, 4, 5 | `../../ai-principles.md` (shared with the Corp AI) and `../principles.md` (the Runner's information boundary) |
 | Guiding principles 3 and 6 (centralise needs; explicit beats general beats fallback) | `../specs/hand-keep-design.md`, as rules for the `W` items |
-| Findings 1–7 (measured coverage, dead hooks, the Vantage Point three) | Generated in `../../card-status.md#runner-keep-coverage-playable-sets`, so the numbers cannot go stale; code behaviour in `../architecture.md#keep-and-discard-decisions` |
+| Findings 2–7 (measured coverage, dead and duplicated intent hooks, the Vantage Point three) | Counts and lists generated in `../../card-status.md#runner-keep-coverage-playable-sets`, so they cannot go stale; code behaviour in `../architecture.md#keep-and-discard-decisions`; the three cards in W5 |
+| Finding 1 (the Corp's prior art) | `../specs/hand-keep-design.md` |
 | Proposed architecture, test plan, definition of done | `../specs/hand-keep-design.md` |
 | Phases 0–5 | `../specs/W0-…` to `../specs/W5-…`, one file each, listed in `../roadmap.md` |
 | Reference hooks and helpers | `../architecture.md#hook-reference` |
-| Suggested first implementation prompt | Folded into W0; the `implement-ticket` skill replaces hand-written prompts |
+| Suggested first implementation prompt | Split between W0 (inspect `cardsWorthKeeping` producers and consumers, fixtures, the test file) and W1 (`_runnerNeeds()`); the `implement-ticket` skill replaces hand-written prompts |
 | (new) How the Runner AI works | `../architecture.md`, drafted from the code |
-| (new) Title lists and direct `Math.random()` found while documenting | `../roadmap.md` items D1 and D2 |
+| (new) Title lists, direct `Math.random()` and information-boundary leaks found while documenting | `../roadmap.md` items D1, D2 and D3 (D3 is now a ticket) |
 
 ## Files
 

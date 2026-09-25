@@ -19,16 +19,18 @@ was free text (nine variants), so nothing could check it.
 
 | Legacy content | Now |
 |---|---|
-| Guiding principles in every roadmap, foundations F1 randomness rules | `../principles.md` (one copy, with the tests that enforce each rule) |
+| Guiding principles in every roadmap, foundations F1 randomness rules | Shared rules in `../../ai-principles.md`, Corp-specific rules in `../principles.md` (one copy each, with the tests that enforce each rule) |
+| "Card implementation" (hook documentation contract, recording cards updated) and "Follow-up documentation" | `../../ai-principles.md` §2 and §9, the template in `../../ai-planning.md` |
+| Layer goals and design reasoning of completed layers | The **Purpose** paragraph at the top of each `../architecture.md` section |
 | "Implemented notes" of completed layers; "Reference Engine Hooks & Helpers"; "Regression Validation and Current Limits" | `../architecture.md`, organised by component |
-| Install roadmap "Findings from the Current Implementation" | `../architecture.md#install-planning-today` |
+| Install roadmap "Findings from the Current Implementation" | Mostly `../architecture.md#install-planning-today`; finding 1 in "Protection allocation" and the install design note; parts of findings 4 and 8 in the I3 and I7 specs |
 | Reactive roadmap "Findings from the current implementation" | `../architecture.md#not-yet-modelled-holding-and-trigger-ordering` |
 | Layer, foundation, phase headings and their `[STATUS]` labels | `../roadmap.md`: one entry per item with a fixed status and dependencies |
 | Security follow-ups (3.5.1, 4.1, 5.1, 6.1, 7.1, 8.4, 8.5, 8.6) and foundations F2–F4 | Merged into their existing backlog tickets, which are now the only copy |
 | Install phases 0–9, reactive phases R1–R2 | `../specs/I0-…` to `../specs/I9-…`, `../specs/R1-…`, `../specs/R2-…` |
 | Install architecture, test plan, migration, non-goals, edge cases, definition of done | `../specs/install-decisions-design.md` |
 | Reactive relationship, non-goals, architecture, test plan, definition of done | `../specs/reactive-commitment-design.md` |
-| "Suggested First Implementation Prompt" | Folded into the I1 spec; the `implement-ticket` skill replaces hand-written prompts |
+| "Suggested First Implementation Prompt" | Its steps are in the I1 spec; its sequencing (I2 first, then one decision class at a time) is expressed as roadmap dependencies. The `implement-ticket` skill replaces hand-written prompts |
 | `corp-ai_improvement_prompts.md`, `corp_ai_improvement_work_summary.md` | Kept here as history only |
 | `corp_ai_review_findings.md` (from `documentation/backlog/`) | Kept here; findings 1–9 are done, 10–13 are roadmap items F2, F3, F4 and P1 |
 

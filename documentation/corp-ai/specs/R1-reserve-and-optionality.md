@@ -1,6 +1,6 @@
 # R1 Reserve and optionality
 
-**Roadmap item:** R1 · **Depends on:** none · **Sets:** elevation (Measured Response, LEO Construction, Mercia B4LL4RD, Bumi 1.0); Nebula Talent Management is not yet defined (see `documentation/card-status.md`)
+**Roadmap item:** R1 · **Depends on:** F4 · **Sets:** elevation (Measured Response, LEO Construction, Mercia B4LL4RD, Bumi 1.0); Nebula Talent Management is not yet defined (see `documentation/card-status.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/reactive-commitment-design.md`
 
 ## Goal
@@ -106,5 +106,6 @@ resources at game end.
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

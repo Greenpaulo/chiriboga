@@ -91,3 +91,5 @@ different hidden Corp cards.
 - New or changed card-facing hooks are documented in `documentation/ai.md`.
 - `documentation/runner-ai/architecture.md` describes the new behaviour.
 - Decisions stay explainable: which tier produced a keep or discard, and why.
+- The Resolution records the cards updated, remaining limitations and any
+  calibration follow-ups.

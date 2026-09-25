@@ -1,6 +1,6 @@
 # P1 Retire legacy card-title special cases
 
-**Roadmap item:** P1 · **Depends on:** none · **Sets:** the sets containing the listed cards
+**Roadmap item:** P1 · **Depends on:** F3, I2 · **Sets:** the sets containing the listed cards
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
@@ -54,6 +54,7 @@ Every inventory row is either migrated to a hook or marked deleted, and all exis
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.
 - [ ] Every row in the inventory is ticked as migrated or deleted.
