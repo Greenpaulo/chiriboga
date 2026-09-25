@@ -1,12 +1,11 @@
-// Run with: node tests/pending/corsair-stealth-offset-suppressed-by-lampades.test.js
-// Known-red reproduction for documentation/bugs/corsair-stealth-offset-suppressed-by-lampades.md.
-// Move to tests/ once the fix makes every case pass, with expectations unchanged.
+// Reproduction for ticket corsair-stealth-offset-suppressed-by-lampades.
+// Runs unchanged from tests/pending/ (known red) or tests/ (green) once fixed.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const root = path.resolve(__dirname, '..', '..');
+const root = path.resolve(__dirname, path.basename(__dirname) === 'pending' ? '../..' : '..');
 const runner = {creditPool: 0, temporaryCredits: 0, clickTracker: 0, rig: {programs: []}, AI: null};
 const corp = {creditPool: 5, badPublicity: 0, AI: null};
 const context = {console, runner, corp, playerTurn: runner, attackedServer: null,

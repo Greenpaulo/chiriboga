@@ -1,33 +1,72 @@
 # Process Workflows
 
-How to run Chiriboga work through coding agents. You do not need to remember
-commands: describe the task in plain English ("triage this log", "fix this
-ticket") and the agent loads the matching skill from its description. The short
-names below force a particular skill when you want to be explicit.
+How to run Chiriboga work through coding agents without wasting your limited
+Codex usage. The rule of thumb:
+
+- **Claude chat** (free, reads the repo on GitHub) does the reading and writing:
+  triage, plans and reviews.
+- **Codex** (limited) only runs and changes code.
+- **Scripts** (free) do the mechanical checks.
+
+You do not need to remember skill names: plain English ("fix this ticket")
+works in Codex. The prompts for Claude chat are below to copy.
 
 ## ⚡ Quick reference
 
-| I want to… | In Codex type | Or say | The agent will… | Then you… |
-|---|---|---|---|---|
-| Turn a debug log into a ticket | `$triage-log documentation/debug-logs/<file>` | "Triage this log: …" | Write a ticket in `bugs/` with a reproduction that fails today, and archive the log | Check the root-cause claims tagged [Verified]/[Inferred], and that the reproduction fails for the right reason |
-| Fix a bug or implement a backlog ticket | `$implement-ticket <ticket>` | "Fix `documentation/bugs/<file>`" | Reproduce and validate, then either stop with a plan in the ticket or implement, and move the ticket to `code-review/` | Approve or amend the plan if one was written; afterwards read the Resolution and the diff, then commit |
-| Review a fix | `$review-ticket <ticket in code-review/>` | "Review the fix for …" | Add a Code review section, move the ticket to `done/` or `remediation/` | Read the verdict and commit |
-| Redo a fix that failed review | `$implement-ticket <ticket in remediation/>` | "Address the review on …" | Answer each finding, move the ticket back to `code-review/` | Review again |
-| Implement the next card batch | `$implement-card-batch` | "Implement the next card batch" | Complete one batch and update the tracker | See the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
+| Step | Where | You do | You get |
+|---|---|---|---|
+| 1. Triage a log | Claude chat | Commit and push the log, then paste **prompt T** | A ticket and a drafted reproduction to save into the repo; commit and push them |
+| 2. Fix | Codex, new chat | `$implement-ticket <ticket>` | The reproduction confirmed, the fix, and the ticket in `code-review/` (or a plan to approve first) |
+| 3. Check | Terminal | `node scripts/ticket.js check <ticket>` | PASS/WARN/FAIL lines, the changed files and a review link |
+| 4. Review | Claude chat | Commit and push, then paste **prompt R** with the check output | A Code review section to paste into the ticket, and a move command |
+| 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`, or in `remediation/` for another step 2 |
+| Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
 
-- In Codex, `/skills` lists the available skills.
-- Start each ticket in a fresh chat. The ticket file carries the history, and a
-  smaller context gives better results.
-- Review in a different chat from the one that implemented the fix, ideally
-  with a different model, so the reviewer does not inherit the implementer's
-  assumptions.
+Codex can also do steps 1 and 4 itself (`$triage-log <log>`, `$review-ticket
+<ticket>`), but they are its most reading-heavy tasks.
 
-## 🧰 Where each tool fits
+### Prompts for Claude chat
 
-| Tool | Can run skills and tests | Notes |
-|---|---|---|
-| Codex (VS Code) | Yes | Main tool. Reads `AGENTS.md` and `.agents/skills/`, and runs the Stop hook. |
-| Claude web chat | No | Its GitHub access is read-only. Good for discussing a log, ticket or design, but it cannot run the reproduction tests the skills depend on. |
+**Prompt T: triage**
+
+```text
+In the chiriboga repo, read .agents/skills/triage-log/SKILL.md and follow its
+Draft mode for documentation/debug-logs/<file>.
+```
+
+**Prompt P: plan a risky ticket (optional, before step 2)**
+
+```text
+In the chiriboga repo, read .agents/skills/implement-ticket/SKILL.md and, for
+documentation/bugs/<file>, write only the "## Implementation plan" section its
+Plan gate step describes. Do not implement anything.
+```
+
+Save the plan into the ticket, change **Awaiting approval** to **Approved**
+when you agree with it, and Codex will follow it.
+
+**Prompt R: review**
+
+```text
+In the chiriboga repo, read .agents/skills/review-ticket/SKILL.md and review
+documentation/bugs/code-review/<file>. Output of scripts/ticket.js check:
+<paste it here>
+```
+
+Claude chat only sees what is pushed to GitHub. If it cannot find a file under
+`.agents/`, paste the skill file's contents into the chat instead.
+
+### Keeping Codex usage down
+
+- **One ticket per chat.** End the chat at hand-off. Every step re-sends the
+  whole conversation, so long sessions cost the most: the five longest used
+  31% of all tokens so far.
+- **Point at paths.** Name files instead of pasting logs or code into the chat.
+- **Approve plans in the same chat**, so Codex does not re-read everything.
+- **Leave the reasoning level alone.** Reasoning and output are under 0.5% of
+  usage; the cost is context, not thinking.
+- **Keep tests quiet.** They print only failures and a summary. Use
+  `VERBOSE=1` only when you need detail.
 
 ## 🎫 Ticket lifecycle
 
@@ -35,16 +74,17 @@ A ticket's folder is its status. There is no separate status line.
 
 ```text
 debug-logs/<log>
-   │  triage-log
+   │  triage (Claude chat draft, or Codex)
    ▼
-bugs/  ──implement-ticket──▶  bugs/code-review/  ──review-ticket──▶  bugs/done/
-                                    ▲                    │
-                                    │                    ▼
+bugs/  ──implement-ticket──▶  bugs/code-review/  ──review──▶  bugs/done/
+                                    ▲                   │
+                                    │                   ▼
                               implement-ticket ◀── bugs/remediation/
 ```
 
 Backlog tickets follow the same path under `documentation/backlog/`, starting
-from a ticket you write instead of a debug log.
+from a ticket you write instead of a debug log. Move tickets with
+`node scripts/ticket.js move <ticket> <open|code-review|remediation|done>`.
 
 ### Approving a plan
 
@@ -53,26 +93,15 @@ when a change is risky: it touches shared AI heuristics or widely used engine
 functions, changes a hook contract or an existing test expectation, spans more
 than three files, or the agent disagrees with the ticket. Read the plan, then
 reply "approved" to continue, or say what to change. Small, local fixes go
-straight through. Say "plan first" or "no plan" to override.
+straight through. Say "plan first" or "no plan" to override. A plan already in
+the ticket and marked **Approved** is followed without stopping.
 
-## 🐛 Bugs
+### Drafted reproductions
 
-1. **Spot it**: download the debug log as soon as the bug appears in game.
-2. **Save it** into `documentation/debug-logs/`, named after the bug.
-3. **Triage** with `triage-log`. The ticket lands in `documentation/bugs/` with
-   a pending reproduction (`tests/fixtures/corp-decisions-pending/` or
-   `tests/pending/`), and the log moves to `documentation/debug-logs/bug_raised/`.
-4. **Fix** with `implement-ticket`. The fix is complete when the pending
-   reproduction passes and has moved into the green suite with its expectation
-   unchanged. The ticket gains a Resolution section and moves to
-   `documentation/bugs/code-review/`.
-5. **Review** with `review-ticket`. The ticket moves to `done/`, or to
-   `remediation/` with numbered findings for another `implement-ticket` pass.
-
-## 📋 Backlog
-
-Improvements and features are raised as tickets in `documentation/backlog/`
-and follow steps 4–5 above.
+A reproduction drafted in Claude chat is marked *drafted, not yet run*.
+`implement-ticket` runs it before changing any code. If it does not fail for
+the stated reason, the diagnosis is wrong and the ticket goes back for
+triage.
 
 ## 🃏 Card sets
 
@@ -95,6 +124,11 @@ hardcoded card titles) that every AI change must follow.
   `node tests/run-all-tests.js` fails. It is sent back to fix the failure up to
   twice, then must report it. Codex asks you to trust the hook (or use `/hooks`)
   the first time and again whenever the hook file changes.
+- **Ticket check** (`scripts/ticket.js check`): fails when a fixed ticket has no
+  starting commit in its Resolution, its reproduction is still pending or had
+  its assertions or `EXPECT` lines changed, or any test fails.
+- **Quiet tests** (`tests/run-all-tests.js`): a passing test that prints more
+  than 5 lines fails the suite. Per-case output belongs behind `VERBOSE=1`.
 - **Hook documentation check** (`tests/ai-hook-docs.test.js`): fails when a card
   defines an `AI*` hook that `documentation/ai.md` does not mention. Hooks that
   predate the rule are listed in `LEGACY_UNDOCUMENTED`, which may only shrink.
@@ -103,9 +137,10 @@ hardcoded card titles) that every AI change must follow.
 
 ## ✏️ Adding or changing a skill
 
-Skills live in `.agents/skills/<name>/SKILL.md`. Edit that file to change
-a skill. The `description` line decides when agents load it automatically, so
-say both when to use it and when not to.
+Skills live in `.agents/skills/<name>/SKILL.md`. Edit that file to change a
+skill. The `description` line decides when Codex loads it automatically, so say
+both when to use it and when not to. Only the name and description are loaded
+until a skill is used, so detail in the body costs nothing on other tasks.
 
 To add a skill, create `.agents/skills/<name>/SKILL.md` with `name` and
-`description` frontmatter, and list it in the quick reference above.
+`description` frontmatter, and add it to the quick reference above.

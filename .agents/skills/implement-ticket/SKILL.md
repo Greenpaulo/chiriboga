@@ -24,6 +24,13 @@ written into it.
 - If the ticket names a pending reproduction, run it and confirm it fails for
   the stated reason. If it already passes, stop and report: the bug may be
   fixed already or the reproduction may be wrong.
+- If the reproduction is marked *drafted, not yet run* (written by a read-only
+  agent such as Claude chat), confirm it now: save it at the named path if the
+  file is missing, run it, and fix only harness problems (missing stubs, wrong
+  paths, setup errors) without changing what it asserts. If it passes, stop and
+  report that the diagnosis is wrong. If it fails for the stated reason, update
+  the **Reproduction** line to `fails at <sha>, <date>` and retag the claims it
+  demonstrates as [Verified].
 - If there is none (older tickets and backlog features), write it first. Bugs:
   a pending fixture or `tests/pending/<slug>.test.js`, using the options in
   step 4 of `.agents/skills/triage-log/SKILL.md`. Features: tests that encode
@@ -31,11 +38,17 @@ written into it.
 
 ## 3. Validate the ticket
 
-Follow the `AGENTS.md` rule that documentation may be wrong. Check every
-root-cause claim (always re-check claims tagged [Inferred]) and the proposed
-fix against the current code, card definitions, game rules and every consumer
-of a function you would change. Look for counterexamples. Note each point
-where you disagree with the ticket, with evidence.
+Follow the `AGENTS.md` rule that documentation may be wrong, but spend effort
+where it is uncertain:
+
+- A [Verified] claim whose reproduction still fails as described needs no
+  re-investigation.
+- Re-check every [Inferred] claim and the proposed fix against the current
+  code, card definitions and game rules.
+- Check every consumer of a function you would change, and look for
+  counterexamples.
+
+Note each point where you disagree with the ticket, with evidence.
 
 ## 4. Plan gate
 
@@ -56,6 +69,10 @@ Write a plan and stop for approval if **any** of these hold:
 Otherwise (a card definition, a typo, a helper with one caller, and the ticket
 held up under validation) skip the plan and say in your report why none was
 needed. The user can override either way with "plan first" or "no plan".
+
+If the ticket already contains an `## Implementation plan` marked
+**Approved**, or the user's request says its plan is approved, follow it
+instead of writing a new one. Stop only if validation contradicts it.
 
 Write the plan into the ticket, directly under its header:
 
@@ -95,12 +112,14 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 
 - Add a `## Resolution` section directly under the ticket's header (above any
   plan). Start it with `Implemented from <sha>` (the starting commit from
-  step 1) so the reviewer can find the exact diff, then give what changed and why, where and why you departed from the ticket or
-  plan, tests added or moved, and anything left open. Keep the original
+  step 1) so the reviewer can find the exact diff. Then give what changed and
+  why, where and why you departed from the ticket or plan, tests added or moved, and anything left open. Keep the original
   diagnosis below it so the reviewer can compare. Tick the acceptance criteria
   that are met. For a ticket in `remediation/`, add a dated remediation entry
   to the Resolution that answers each review finding by number.
-- `git mv` the ticket into the `code-review/` folder beside it
-  (`documentation/bugs/code-review/` or `documentation/backlog/code-review/`).
+- Move the ticket into the `code-review/` folder beside it with
+  `node scripts/ticket.js move <ticket> code-review`, then run
+  `node scripts/ticket.js check <ticket-in-its-new-folder>` and fix anything it reports
+  as FAIL.
 - Do not commit. Report the files changed, test results, deviations from the
   ticket or plan, and open questions.

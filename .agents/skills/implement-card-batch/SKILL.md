@@ -32,14 +32,16 @@ completion log and required verification commands.
 
 - Check `git status` and preserve unrelated and pre-existing changes.
 - Read §§5, 6 and 8 of `documentation/new-sets/new-set-integration-guide.md`.
-- Read `documentation/engine_patterns.md` completely.
+- Read the "Card Object Shape" section of `documentation/engine_patterns.md`,
+  then only the sections its table says the selected cards need.
 - Read only the `documentation/ai.md` sections the selected cards need, using
   the task table at its top and the §7 quick reference.
 - Read the selected definitions and their metadata/rules text using the paths
   and pack code in the tracker.
 - Find the closest implemented cards and the real engine call sites for unusual
-  mechanics with targeted `rg` searches. Do not invent engine APIs or copy
-  unfinished stubs.
+  mechanics with targeted `rg -n` searches, then read small windows around the
+  matches rather than whole files. Do not invent engine APIs or copy unfinished
+  stubs.
 - If local sources cannot settle a rule, check the Comprehensive Rules PDF in
   the repo root, then current NetrunnerDB or Null Signal Games material, and
   capture consequential rulings in a focused test or concise comment.

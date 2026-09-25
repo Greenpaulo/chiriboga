@@ -19,7 +19,11 @@ vm.createContext(context);
 vm.runInContext(source.slice(start, end) + '\nthis.DS = DecisionSnapshots;', context);
 const DS = context.DS;
 let tests = 0;
-const test = (name, body) => { body(); tests++; console.log('PASS ' + name); };
+const verbose = !!process.env.VERBOSE; // passing cases are silent by default to keep agent context small
+const test = (name, body) => {
+  try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
+  tests++; if (verbose) console.log('PASS ' + name);
+};
 
 test('CorpAI Choice wraps decisions with the snapshot recorder', () => {
   assert(aiSource.includes('DecisionSnapshots.Before(choiceType, optionList)'));

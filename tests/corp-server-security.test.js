@@ -67,6 +67,7 @@ const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', p
 const server = cards => {const result = {ice: cards, root: []}; servers = [result]; return result;};
 const etr = () => ice(['End the run.'], [[['endTheRun']]]);
 let tests = 0;
+const verbose = !!process.env.VERBOSE; // passing cases are silent by default to keep agent context small
 function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
@@ -80,7 +81,8 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
-  body(); tests++; console.log('PASS ' + name);
+  try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
+  tests++; if (verbose) console.log('PASS ' + name);
 }
 
 test('Corp classification never reads hidden grip properties or the Runner calculator', () => {

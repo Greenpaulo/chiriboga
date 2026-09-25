@@ -11,6 +11,11 @@ them. Earlier tickets needed "corrected diagnosis" sections because claims about
 runtime state made from reading alone were wrong (for example, whether Baker's
 redirect was detected during Corp-turn planning).
 
+**Two modes.** An agent that can run commands (Codex) follows every step
+below. A read-only agent (Claude chat with GitHub access) follows **Draft
+mode** at the end instead: it does the reading and writing for free, and the
+reproduction is confirmed later by `implement-ticket`.
+
 ## Steps
 
 1. **Check for an existing ticket.** Search every folder under
@@ -35,6 +40,11 @@ redirect was detected during Corp-turn planning).
    - Anything else (engine, rules, Runner AI, payment, UI logic): write
      `tests/pending/<slug>.test.js` in the style of the existing
      `tests/*.test.js` files. `run-all-tests.js` does not run `tests/pending/`.
+     Compute the repo root so the file runs unchanged after it moves to
+     `tests/`:
+     `path.resolve(__dirname, path.basename(__dirname) === 'pending' ? '../..' : '..')`.
+     Print only failures and a one-line summary unless `process.env.VERBOSE`
+     is set.
 
    Run it (`node tests/corp-decision-fixtures.test.js --pending <slug>.txt` or
    `node tests/pending/<slug>.test.js`) and confirm it fails *for the reported
@@ -100,3 +110,28 @@ decisions that could shift.>
 If no reproduction was possible, replace the **Reproduction** line with
 `**Reproduction:** none — <reason>` and make writing one the first acceptance
 criterion.
+
+## Draft mode (read-only agents)
+
+Use this when you can read the repository but cannot run commands or write
+files, such as Claude chat with GitHub access.
+
+1. Do steps 1–3 above. You can only see what has been pushed to GitHub; if the
+   log is missing, ask the user to commit and push it.
+2. Write the reproduction code from step 4 (a pending fixture or
+   `tests/pending/<slug>.test.js`) as completely as you can, modelled on an
+   existing test that exercises the same code. You cannot run it, so keep it
+   small and use only functions you have read.
+3. Write the ticket from the template with the **Reproduction** line
+   ``**Reproduction:** `<path>` — drafted, not yet run``. Tag every claim about
+   runtime behaviour [Inferred]; nothing can be [Verified] yet.
+4. If the fix meets any plan-gate condition in
+   `.agents/skills/implement-ticket/SKILL.md`, add a proposed
+   `## Implementation plan` marked **Awaiting approval**, so Codex can start
+   from it instead of investigating again.
+5. Output each file in full under a heading with its repository path (the
+   ticket, the reproduction, and the log's new path under
+   `documentation/debug-logs/bug_raised/`) so the user can save them.
+
+`implement-ticket` runs the drafted reproduction first. If it does not fail for
+the stated reason, the ticket goes no further.

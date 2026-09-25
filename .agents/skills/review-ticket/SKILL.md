@@ -10,32 +10,35 @@ You are the independent check between "the agent says it is fixed" and
 conversation. This should be a fresh session, ideally a different tool or
 model from the one that implemented the fix.
 
+The mechanical checks are done by `node scripts/ticket.js check <ticket>`,
+which costs no tokens. Your job is judgement. A read-only reviewer (Claude chat
+with GitHub access) asks the user for that script's output and reads the diff
+through the review link it prints; the branch must be pushed first.
+
 Do not modify code or tests. If something needs changing, it goes back through
 `remediation/` and the `implement-ticket` skill.
 
-## 1. Establish what changed
+## 1. Run the mechanical checks
 
-- Read the whole ticket: the original diagnosis, any `## Implementation plan`,
-  and the `## Resolution`.
-- Find the change set, in this order:
-  1. the `Implemented from <sha>` line in the Resolution: `git diff <sha>` plus
-     `git status` for uncommitted work;
-  2. commits mentioning the ticket: `git log --oneline --grep=<ticket-file-name>`;
-  3. otherwise ask the user which commits or changes to review.
-- List the files changed. Flag any that the ticket does not explain.
+Run `node scripts/ticket.js check <ticket>`, or ask the user for its output if
+you cannot run commands. It reports:
 
-## 2. Check the evidence
+- whether the Resolution records its starting commit;
+- whether the reproduction moved into the green suite with its expectations
+  unchanged (a FAIL here is Blocking unless the Resolution justifies it);
+- whether the reproduction and the full suite pass;
+- unticked acceptance criteria, the files changed and a GitHub review link.
 
-- **Reproduction.** The pending reproduction must now be in the green suite
-  (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation
-  unchanged. Compare it with its pending version, for example
-  `git diff <sha> -M --stat` and `git log --follow -p -- <new path>`. A changed
-  `EXPECT`, assertion or setup needs a justification recorded in the ticket.
-- **Tests.** Run the reproduction on its own, then
-  `node tests/run-all-tests.js`. Record the results. Check that tests named in
-  the Resolution exist and assert what it claims.
-- **Acceptance criteria.** Verify each ticked criterion yourself; do not trust
-  the tick.
+Any FAIL is a Blocking finding. Do not repeat these checks by hand.
+
+## 2. Read the change
+
+- Read the ticket: the diagnosis, any `## Implementation plan`, and the
+  `## Resolution`.
+- Read the diff of the files the script lists (`git diff <sha>`, or the review
+  link). Flag any changed file the ticket does not explain.
+- Check that tests named in the Resolution assert what it claims, and verify
+  each ticked acceptance criterion rather than trusting the tick.
 
 ## 3. Check the change
 
@@ -66,15 +69,16 @@ Append to the ticket:
    Evidence: <test, command or counterexample>. Required change: <what>.
 
 ### Checks performed
-- <reproduction command>: <result>
-- `node tests/run-all-tests.js`: <result>
-- <other checks>
+- `node scripts/ticket.js check`: <PASS/WARN/FAIL summary>
+- <other checks, such as counterexamples tried>
 ```
 
 Only **Blocking** or **Should fix** findings make the verdict "Changes
 required". Notes alone still pass.
 
-- **Pass:** `git mv` the ticket to the matching `done/` folder.
-- **Changes required:** `git mv` it to the matching `remediation/` folder.
+- **Pass:** `node scripts/ticket.js move <ticket> done`.
+- **Changes required:** `node scripts/ticket.js move <ticket> remediation`.
 
-Do not commit. Report the verdict, the findings and where the ticket moved.
+A read-only reviewer outputs the Code review section for the user to paste into
+the ticket, and the move command to run. Do not commit. Report the verdict, the
+findings and where the ticket moved.

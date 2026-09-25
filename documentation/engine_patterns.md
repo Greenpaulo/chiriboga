@@ -1,10 +1,22 @@
 # Chiriboga Engine — Pattern Reference
 
-> Read this file at the start of every card-implementation session. It is the
-> compact pattern index; follow its links into `ai.md` only for hooks relevant
-> to the current cards. For unusual mechanics, confirm the pattern against a
-> current implemented card and the engine call site rather than assuming this
-> reference replaces the source code.
+> This is the compact pattern index for card implementation. Read "Card Object
+> Shape", then only the sections the current cards need (table below); search
+> (`rg -n "Name" documentation/engine_patterns.md`) for a specific function or
+> hook rather than reading the whole file. Follow links into `ai.md` only for
+> hooks relevant to the current cards. For unusual mechanics, confirm the
+> pattern against a current implemented card and the engine call site rather
+> than assuming this reference replaces the source code.
+>
+> | Section | Read when the cards… |
+> |---|---|
+> | Card Object Shape | always |
+> | Trigger Hooks | react to turns, runs, encounters, breaches, installs, scoring or bad publicity, modify costs/strength, or have click abilities |
+> | Engine Functions — Quick Reference | need an engine call (credits, clicks, zones, damage, counters, servers, decisions); search it for the function |
+> | Subroutine Shape | are ICE |
+> | AI Decision-Making Hooks | need AI support; it summarises hooks, and `ai.md` holds the full contracts |
+> | Common Patterns | match a listed pattern (optional trigger, once per turn, self-weakening ICE, cost discount…) |
+> | Implemented Cards Quick-Reference | need a worked example from Downfall |
 >
 > AI hook audit: 2026-09-18. The implemented hooks from the Corp server-security
 > work are summarized below. Proposals in
