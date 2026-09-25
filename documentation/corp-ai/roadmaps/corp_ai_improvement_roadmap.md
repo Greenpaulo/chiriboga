@@ -16,6 +16,7 @@ The AI Corp **must operate under strict imperfect information**.
 
 - It **must never** inspect the Runner's hidden hand (`runner.grip` / `runner.hand`) to detect unplayed events or hidden threats unless revealed by an explicit game mechanism.
 - Threat evaluation of hidden cards must rely entirely on **Public Information**: Runner Faction, Heap/Discard contents, active board cards, and probabilistic threat estimation.
+- The Corp knows its own decklist, so it may reason about *which* cards remain in R&D (set membership, as mulligan expectations and bluff limits do). It **must never** use R&D's *order* — which card is on top, or how deep a given card sits — unless a game effect has revealed those positions to the Corp, and then only the revealed positions. For example, treating R&D as worth protecting because an agenda happens to be near the top was rejected during the Baker/Archives backdoor fix.
 
 ### 2. Card-Agnostic Engine Hooks (No Hardcoded Titles)
 
