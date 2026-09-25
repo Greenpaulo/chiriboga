@@ -66,7 +66,7 @@ Existing Runner AI code that breaks a shared principle.
 ### D2 Injectable randomness for the Runner AI
 - **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [D2-injectable-runner-randomness.md](../backlog/code-review/D2-injectable-runner-randomness.md)
+- **Ticket:** [D2-injectable-runner-randomness.md](../backlog/remediation/D2-injectable-runner-randomness.md)
 - **Goal:** Route Runner AI randomness through an injectable source so decisions are reproducible.
 
 ### D3 Close Runner AI information-boundary leaks

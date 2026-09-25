@@ -4,8 +4,6 @@
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 **Verified against code:** 376f32c (2026-09-25)
 
-
-
 ## Resolution
 
 Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
@@ -52,6 +50,7 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
   The existing call-count cases (scenario 7), the corp decision fixtures and
   the decision snapshots are unchanged (scenario 1). `node tests/run-all-tests.js`:
   35 test files passed.
+
 - **Not covered by a unit test:** the `_criticalBreachDefenseAction` and
   `Phase_Main` probes (scenario 4), and hypotheticals started from Baker or
   `runcalculator.js` (scenario 5). The first two carry the depth counter, and
@@ -59,7 +58,7 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
   running, where nested evaluations bypass the cache. The game comparison
   below covers all of them in real play.
 - **Interim gate evidence (F4 is not built).** Using `node scripts/ai-game.js
-  --seeds 1-20` with Duel PD vs Tao and a `--setup` file that toggles the
+--seeds 1-20` with Duel PD vs Tao and a `--setup` file that toggles the
   cache:
   - cache off against cache on with `_securityCacheVerify`: identical `logHash`
     on all 20 seeds, no engine errors, every game won, and verify never threw;
@@ -75,7 +74,7 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
     where each ICE is repriced once per rez plan. That is proposed as F6
     (`specs/F6-cheaper-security-evaluation.md`). With F3, a 2,400-game gate
     takes about 2¼ hours.
-- Docs: [architecture: foundations](../../corp-ai/architecture.md#foundations)
+- Docs: [architecture: foundations](../corp-ai/architecture.md#foundations)
   (cache and depth counter), the F2 ticket, and new roadmap item F6.
 
 ## Implementation plan
@@ -138,6 +137,7 @@ Proposed at `58f3a4d` (plus uncommitted D2 and F4 step 1), 2026-09-25. **Approve
   in-progress.
 
 ## Goal
+
 Evaluate server security once per Corp decision instead of again in each
 independent planning helper, and stop paying for debug-only evaluation in
 ordinary play (review finding 11). The evaluator scans public credit sources,
@@ -146,6 +146,7 @@ ICE. Its cost grows with board complexity and with planning sophistication.
 The cache must never change a decision.
 
 ## Current behaviour
+
 - `_withHypothetical()` exists but only `_ordinaryPurgeOutcome()` uses it.
   Most probes that change the board and then call the security evaluator do
   so by hand: `_icePreventsGameWinningBreach`, `_iceWouldSecureServer`,
@@ -170,14 +171,16 @@ The cache must never change a decision.
   `sets/systemupdate2021.js`, and `corp.AI._evaluateServerSecurity()` in
   `sets/elevation.js`.
 
-See [architecture: foundations](../../corp-ai/architecture.md#foundations).
+See [architecture: foundations](../corp-ai/architecture.md#foundations).
 
 ## Design
+
 Relevant functions (search by name): `_evaluateServerSecurity()`,
 `_rankedServersToProtect()`, `_protectionScore()`, `_rankedInstallOptions()`,
 `_withHypothetical()`, `Choice()`, and the `Phase_Main` debug call.
 
 Where the duplicate work comes from:
+
 - The source log for `bugs2.md` items 3 and 4 printed the same Remote 3
   security result 29 times during one Corp decision. That is repeated
   evaluation, not recursion or a gameplay loop.
@@ -190,6 +193,7 @@ Where the duplicate work comes from:
   protection and security information.
 
 Fix:
+
 - **Lifetime.** Put the cache in the per-`Choice()` decision state, beside
   `_decisionRandomState`: created on `Choice()` entry, restored in `finally`.
   Outside a `Choice()` there is no cache, so card hooks that call the
@@ -205,7 +209,7 @@ Fix:
   because the board cannot change inside one `Choice()` at depth 0. Add a
   debug assertion (on in tests) that recomputes a sample of hits and compares.
 - **Debug call.** Gate the `Phase_Main` debug-only `_serverToProtect(false,
-  true)` call behind a debug flag.
+true)` call behind a debug flag.
 - **Count calls.** Count evaluator calls per `Choice()` through F4's collector
   extension point (`evaluatorCallCount`).
 - **Precedents** for save and restore: `AIIceEncounterSaveState` /
@@ -213,6 +217,7 @@ Fix:
   `AIRestoreHypotheticalFromRC`.
 
 ## Safety and information boundary
+
 - No long-lived cache keyed only by server identity.
 - A result computed at hypothetical depth above zero never enters the cache,
   and a cached result is never served at depth above zero.
@@ -221,6 +226,7 @@ Fix:
   (see L8.4).
 
 ## Test scenarios
+
 1. Decisions are identical with the cache on and off across the green corp
    decision fixtures and `tests/decision-snapshots.test.js`.
 2. A cached result is never read across a board change: two `Choice()` calls
@@ -245,7 +251,9 @@ Fix:
    `Choice()` gets a fresh evaluation.
 
 ## Acceptance gate
+
 Behaviour-identical performance change, so it ships without an option.
+
 - Decision snapshots are identical to the recorded baseline, with no deltas.
 - An F4 run on the committed deck pool with the same seeds, cache off
   compared with cache on, shows:
@@ -256,6 +264,7 @@ Behaviour-identical performance change, so it ships without an option.
     the difference is at most 0).
 
 ## Things to consider
+
 - This is not expected to fix a noticeable pause on ordinary boards. The gate
   is call count and latency.
 - The cache pairs with L8.4 posture epochs, since both define decision
@@ -264,9 +273,30 @@ Behaviour-identical performance change, so it ships without an option.
   stores the corrected evaluator.
 
 ## Acceptance criteria
+
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [x] Decision snapshots are identical to the recorded baseline except for listed, justified deltas (none expected).
 - [ ] The `evaluatorCallCount` collector is added through F4's collector extension point, and the F4 cache-off versus cache-on comparison (command, deck pairs, seeds, results) is recorded in the Resolution.
 - [x] New or changed card-facing hooks are documented in `documentation/ai.md`. (None: no card-facing hook changed.)
 - [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [x] `node tests/run-all-tests.js` passes.
+
+## Code review — 2026-09-25
+
+**Verdict:** Pass
+**Reviewed:** `58f3a4d..cd95844` (commit `cd95844`, "F3: cache server-security results for one Corp decision")
+
+### Findings
+
+1. **Note** — `ai_corp.js`, sites #10 (Baker, `sets/vantagepoint.js`) and #11 (`RunCalculator.IceAI`): not bumping `_hypotheticalDepth` here relies on these mutations always happening nested inside an already-running `_evaluateServerSecurity()` call (protected instead by the `_securityEvaluating` nesting guard). That's plausible from the code shape but isn't traced by a unit test — matches the Resolution's own "not covered by a unit test" admission for scenario 5. The full-game verify-mode evidence (no throw across a real game, cache-off/on logHash identical) is reasonably strong indirect support, but it's still empirical rather than proven.
+2. **Note** — the ticket's header line `**Verified against code:** 376f32c` is stale — that commit predates F3 entirely and doesn't correspond to what was actually reviewed (HEAD `cd95844`, built from `58f3a4d`). Worth fixing so future readers aren't misled.
+
+### Checks performed
+
+- `node scripts/ticket.js check`: WARN/FAIL — 2 of 35 test files fail (`flipped-identity.test.js`, `vantagepoint-integration.test.js`) on a missing local card-art image asset. Confirmed both fail identically on the pre-F3 base commit `58f3a4d`, so this is a pre-existing environment issue (missing image file), not a regression from this change. All other files pass, including the expanded `tests/corp-server-security.test.js` (132 cases, run standalone: all pass).
+- Traced all 8 `_hypotheticalDepth` insertion points (`_withHypothetical`, `_effectiveIceSubtypes`, `_effectiveRunnerCreditPool`, both blocks in `_icePreventsGameWinningBreach`/`_iceWouldSecureServer`, `_criticalBreachDefenseAction`, `_potentialTagPunishment`, `Phase_Main`'s "gain then install" check) by function boundary — matches the Resolution's list exactly.
+- Confirmed `_bestInstallOption` and `_prepareProtectionPrioritiesForCorpTurn` are genuinely called outside `Choice()` (`phase.js` at turn start; `sets/systemgateway.js`, `sets/systemupdate2021.js`, `sets/vantagepoint.js` card hooks) — supports the "two more cache lifetimes" deviation.
+- Independently reran the interim gate evidence for seed 1 (`node scripts/ai-game.js --seed 1`, Duel PD vs Tao): identical `logHash` (`7fd342dbe6a8`) with the cache on (21.8s), off (46.9s), and on with `_securityCacheVerify` (48.7s, no throw) — a 2.15× speedup, consistent with the Resolution's claimed 2.16× mean across 20 seeds.
+- Confirmed `documentation/corp-ai/architecture.md` and the F2 ticket's update note accurately describe the shipped mechanism.
+- Confirmed the commit is scoped to F3 alone — the "Changed since 58f3a4d" diff mixes in D2 and F4-step-1 (separate, already-landed commits), which the Resolution correctly attributes to tree state rather than claiming as its own.
+- Verified `Counters()` helper used in `_securityBoardKey()` exists; verified `_evaluateServerSecurityUncached()` has no internal recursive call to `_evaluateServerSecurity()` (the `_securityEvaluating` nesting guard is defensive, not covering a known live recursion path).

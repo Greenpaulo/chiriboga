@@ -127,7 +127,7 @@ Shared infrastructure used by every area.
 ### F3 Per-decision evaluation cache
 - **Status:** in-progress
 - **Depends on:** F2, F4
-- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/code-review/corp_ai_finding_11_evaluate_once_per_decision.md)
+- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/corp_ai_finding_11_evaluate_once_per_decision.md)
 - **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
 
 ### F4 Seeded AI-vs-AI batch harness

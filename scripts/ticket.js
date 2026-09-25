@@ -23,7 +23,7 @@ const STAGES = ['open', 'code-review', 'remediation', 'done'];
 
 const run = (cmd, args) => spawnSync(cmd, args, {cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 const git = (...args) => run('git', args);
-const rel = file => path.relative(root, path.resolve(root, file));
+const rel = file => path.relative(root, path.resolve(root, file)).split(path.sep).join('/');
 
 function ticketFamily(ticket) {
   const match = rel(ticket).match(/^documentation\/(bugs|backlog)\//);

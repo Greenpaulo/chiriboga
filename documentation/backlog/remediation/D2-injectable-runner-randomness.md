@@ -4,8 +4,6 @@
 **Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`
 **Verified against code:** 58f3a4d (2026-09-25)
 
-
-
 ## Resolution
 
 Implemented from `58f3a4d`.
@@ -80,12 +78,15 @@ Proposed at `58f3a4d`, 2026-09-25. **Approved 2026-09-25.**
   roadmap D2 to `in-progress` (done), then to code-review.
 
 ## Goal
+
 Give the Runner AI an injectable, seedable randomness source, as the Corp AI
 has with `CorpAI._random`, so its decisions are reproducible in tests and
 seeded simulations.
 
 ## Current behaviour
+
 Runner AI policy draws from global randomness in four places:
+
 - Run selection adds jitter to each server's potential with `Math.random()`
   in `_internalChoiceDetermination()`. `serverList` and the potentials are
   rebuilt once per call, and `_computeChoice()` calls it once per decision, so
@@ -101,6 +102,7 @@ No test constructs a `RunnerAI` or runs one of its decisions.
 See [architecture: run selection and the run calculator](../../runner-ai/architecture.md#run-selection-and-the-run-calculator).
 
 ## Design
+
 - Add a `_random` property to the Runner AI, defaulting to `Math.random`.
 - Route all Runner AI policy randomness through it, including the two card
   AI hooks (through `runner.AI`), with a helper for random indices so no
@@ -110,9 +112,11 @@ See [architecture: run selection and the run calculator](../../runner-ai/archite
   adding a cache.
 
 ## Safety and information boundary
+
 Engine and gameplay randomness are unchanged.
 
 ## Test scenarios
+
 1. With a seeded `_random`, identical boards produce identical run choices.
 2. Global `Math.random` is not called by Runner AI policy after `_random` is
    injected.
@@ -120,11 +124,31 @@ Engine and gameplay randomness are unchanged.
    server.
 
 ## Acceptance gate
+
 Runner AI policy has no direct calls to global randomness, and seeded runs are
 reproducible.
 
 ## Acceptance criteria
+
 - [x] Every test scenario above is covered by a deterministic test.
 - [x] New or changed card-facing hooks are documented in `documentation/ai.md`. (None: no hook contract changed.)
 - [x] The side's `architecture.md` describes the new behaviour.
 - [x] `node tests/run-all-tests.js` passes.
+
+## Code review — 2026-09-25
+
+**Verdict:** Changes required
+**Reviewed:** `58f3a4d...97b0dd3`
+
+### Findings
+
+1. **Blocking** — `sets/systemupdate2021.js`, Punitive Counterstrike (31078) `runner.AI.preferred.IncreaseStrengthChoice`: calls `RandomRange(0, cwkCount + expectedDmg - runner.grip.length + 5)` directly instead of `runner.AI._randomIndex(...)`. This is Runner AI policy (invoked via `ai_runner.js:1335`), so it violates the ticket's acceptance gate ("no direct calls to global randomness") and the "same seed, same decision" test scenario. Evidence: `grep -n "RandomRange" sets/systemupdate2021.js` at line 6338; `ai_runner.js:1335` confirms it's on the Runner AI decision path. Required change: route through `runner.AI._randomIndex()`, and widen the new test's ratchet to catch dynamically-assigned `runner.AI.preferred.*` closures on non-Runner-owned cards, not just statically-named `AI*` keys on Runner-owned cards.
+2. **Note** — `documentation/runner-ai/architecture.md`: the removed "known limit" ("cannot be seeded") is not yet accurate given finding 1; restore or soften it once the missed site is fixed.
+3. **Note** — `sets/systemgateway.js:4661` (Ballista `AIWouldTrigger`) and `sets/elevation.js:8235` (Touch-ups) still call `Math.random()`/`RandomRange` directly in Corp AI hooks, bypassing `CorpAI._random`. Out of scope for D2, but worth a backlog ticket for Corp AI seeding parity.
+
+### Checks performed
+
+- `node scripts/ticket.js check`: WARN (no reproduction path noted) / FAIL (2 pre-existing, unrelated image-asset failures — confirmed present at base commit `58f3a4d` too)
+- `node tests/runner-ai-randomness.test.js`: 5/5 checks pass
+- Full-repo grep of `Math.random`/`RandomRange` across `sets/*.js`, cross-checked each hit's owning function and card `player` field
+- Traced `IncreaseStrengthChoice` call site in `ai_runner.js` to confirm it's on the Runner AI decision path
