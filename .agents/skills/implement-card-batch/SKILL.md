@@ -14,9 +14,10 @@ Never run this while another agent is editing the active set file or tracker.
 
 ## 1. Discover and claim the batch
 
-Read `documentation/new-sets/current-set-implementation.md` completely. It is
-the only source for the active set, file paths, card range, batch queue,
-completion log and required verification commands.
+`documentation/new-sets/current-set-implementation.md` is the only source for
+the active set, file paths, card range, batch queue, completion log and required
+verification commands. Read everything except the older completion-log rows,
+which you only append to.
 
 - If the tracker is `Inactive`, make no card edits and report that no set is
   selected.
@@ -31,20 +32,26 @@ completion log and required verification commands.
 ## 2. Establish context before editing
 
 - Check `git status` and preserve unrelated and pre-existing changes.
+- Run `node scripts/batch-brief.js` (or `node scripts/batch-brief.js <n>`). It
+  prints each selected card's stats and rules text, where its stub is, and the
+  most similar fully implemented cards in other sets. Do not read the metadata
+  file directly: it is over 2 MB.
 - Read §§5, 6 and 8 of `documentation/new-sets/new-set-integration-guide.md`.
 - Read the "Card Object Shape" section of `documentation/engine_patterns.md`,
   then only the sections its table says the selected cards need.
 - Read only the `documentation/ai.md` sections the selected cards need, using
   the task table at its top and the §7 quick reference.
-- Read the selected definitions and their metadata/rules text using the paths
-  and pack code in the tracker.
-- Find the closest implemented cards and the real engine call sites for unusual
-  mechanics with targeted `rg -n` searches, then read small windows around the
-  matches rather than whole files. Do not invent engine APIs or copy unfinished
-  stubs.
-- If local sources cannot settle a rule, check the Comprehensive Rules PDF in
-  the repo root, then current NetrunnerDB or Null Signal Games material, and
-  capture consequential rulings in a focused test or concise comment.
+- Read each example the brief suggests with `node scripts/show.js card <id>`,
+  and each engine function you need with `node scripts/show.js fn <name>`.
+  Use targeted `rg -n` searches only when those are not enough, and read small
+  windows around the matches rather than whole files. Do not invent engine
+  APIs or copy unfinished stubs.
+- Card text comes from the brief. Do not open card images, which cost tens of
+  thousands of tokens each.
+- If the brief's text and local code cannot settle a rule, check the
+  Comprehensive Rules PDF in the repo root. Use web sources (NetrunnerDB or Null
+  Signal Games) only for a genuine ruling question, and capture consequential
+  rulings in a focused test or concise comment.
 
 Roadmaps and work summaries are context, not implemented APIs. Use a hook only
 if current documentation and an engine call site show it exists.
@@ -70,14 +77,19 @@ behaviour and its AI support exist; never hide missing behaviour behind a
 silent approximation. Avoid unrelated refactors and formatting churn.
 
 Add focused tests for human mechanics and meaningful AI behaviour, including
-cleanup and negative cases.
+cleanup and negative cases. The set's focused integration test is large: read
+its setup (the first 60 or so lines) and the nearest similar test block found
+with `rg -n`, then append new blocks at the end. Do not read the whole file.
+
+Work card by card: implement one card, run the focused test, then move to the
+next. Small failures are cheaper to fix than a batch's worth at once.
 
 ## 4. Verify
 
 - Run the focused tests and every command under **Required shared
   verification** in the tracker, then `node tests/run-all-tests.js`.
-- Inspect the batch's range for TODOs, empty effects and empty subroutine
-  arrays.
+- Rerun `node scripts/batch-brief.js <n>`: every card must show "no unfinished
+  markers". Also check the range for empty effects and empty subroutine arrays.
 - Never remove or weaken assertions to make tests pass.
 
 ## 5. Update the tracker and hand off

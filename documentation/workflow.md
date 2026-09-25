@@ -117,6 +117,18 @@ The main improvement plans are in `documentation/corp-ai/` and
 worked on individually, and the guiding principles (imperfect information, no
 hardcoded card titles) that every AI change must follow.
 
+## 🧾 Helper scripts
+
+Free, deterministic steps that agents (and you) run instead of reading files:
+
+| Command | Prints |
+|---|---|
+| `node scripts/batch-brief.js [n]` | The next (or nth) card batch: each card's stats and text, where its stub is, unfinished markers, and similar implemented cards |
+| `node scripts/show.js card <id>` | One card definition |
+| `node scripts/show.js fn <name>` | One engine or AI function |
+| `node scripts/ticket.js check <ticket>` | The mechanical review checks for a fixed ticket |
+| `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders |
+
 ## 🛡️ Guardrails
 
 - **Stop hook** (`.codex/hooks.json` → `scripts/agent-hooks/verify-on-stop.js`):
