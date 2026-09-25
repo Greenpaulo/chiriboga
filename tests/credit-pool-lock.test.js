@@ -5,8 +5,8 @@ const path = require('path');
 const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
-const runner = {side: 'runner', creditPool: 6, temporaryCredits: 1};
-const corp = {side: 'corp', creditPool: 5};
+const runner = {side: 'runner', creditPool: 6, temporaryCredits: 1, AI: {}};
+const corp = {side: 'corp', creditPool: 5, AI: {}};
 const context = {
   console: {log() {}, warn() {}, error() {}},
   runner,
@@ -79,5 +79,78 @@ context.SpendCredits(runner, 2);
 assert.strictEqual(runner.creditPool, 4, 'ordinary pool spending is unchanged');
 assert.strictEqual(context.LoseCredits(runner, 2), 2);
 assert.strictEqual(runner.creditPool, 2, 'ordinary pool loss is unchanged');
+
+const touchstone = {
+  title: 'Touchstone',
+  credits: 1,
+  canUseCredits() {
+    return true;
+  },
+};
+const otherSource = {
+  title: 'Other source',
+  credits: 1,
+  spent: 0,
+  canUseCredits() {
+    return true;
+  },
+  onCreditsSpent(amount) {
+    this.spent += amount;
+  },
+};
+context.GetTitle = (card) => card.title;
+let paymentDecision = null;
+context.DecisionPhase = (player, choices, callback, title, instruction) => {
+  paymentDecision = {player, choices, callback, title, instruction};
+  return paymentDecision;
+};
+runner.AI = null;
+runner.temporaryCredits = 0;
+runner.creditPool = 2;
+context.ActiveCards = () => [touchstone];
+let paymentsCompleted = 0;
+context.SpendCredits(runner, 1, 'using', {}, () => paymentsCompleted++);
+assert.strictEqual(touchstone.credits, 1, 'Touchstone is not spent before the choice');
+assert.strictEqual(runner.creditPool, 2, 'the pool is not spent before the choice');
+assert.strictEqual(paymentDecision.choices.length, 2, 'Touchstone and the pool are both offered');
+paymentDecision.callback(paymentDecision.choices.find((choice) => choice.card === null));
+assert.strictEqual(runner.creditPool, 1, 'the Runner can choose the credit pool');
+assert.strictEqual(touchstone.credits, 1, 'choosing the pool preserves Touchstone');
+assert.strictEqual(paymentsCompleted, 1, 'payment continuation runs after allocation');
+
+runner.creditPool = 2;
+paymentsCompleted = 0;
+context.SpendCredits(runner, 1, 'using', {}, () => paymentsCompleted++);
+paymentDecision.callback(paymentDecision.choices.find((choice) => choice.card === touchstone));
+assert.strictEqual(touchstone.credits, 0, 'the Runner can choose Touchstone');
+assert.strictEqual(runner.creditPool, 2, 'choosing Touchstone preserves the pool');
+assert.strictEqual(paymentsCompleted, 1);
+
+touchstone.credits = 1;
+context.ActiveCards = () => [touchstone, otherSource];
+context.SpendCredits(runner, 2, 'using', {});
+assert(
+  paymentDecision.choices.some((choice) => choice.card === touchstone) &&
+    paymentDecision.choices.some((choice) => choice.card === otherSource) &&
+    paymentDecision.choices.some((choice) => choice.card === null),
+  'two hosted sources and the credit pool are separate initial options',
+);
+paymentDecision.callback(paymentDecision.choices.find((choice) => choice.card === touchstone));
+assert(
+  paymentDecision.choices.some((choice) => choice.card === otherSource) &&
+    paymentDecision.choices.some((choice) => choice.card === null),
+  'remaining payment can come from another hosted source or the pool',
+);
+paymentDecision.callback(paymentDecision.choices.find((choice) => choice.card === otherSource));
+assert.strictEqual(otherSource.spent, 1, 'chosen hosted sources fire their callback');
+
+touchstone.credits = 1;
+paymentDecision = null;
+context.ActiveCards = () => [touchstone, poolLock];
+runner.creditPool = 3;
+context.SpendCredits(runner, 1, 'using', {});
+assert.strictEqual(paymentDecision, null, 'a forced single-source payment needs no prompt');
+assert.strictEqual(runner.creditPool, 3, 'a locked pool is not used');
+assert.strictEqual(touchstone.credits, 0, 'the only legal source pays automatically');
 
 console.log('Credit-pool lock regression test passed.');

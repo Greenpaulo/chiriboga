@@ -3862,39 +3862,40 @@ cardSet[30050] = {
         "Anoetic Void",
         this,
         function () {
-          SpendCredits(corp, 2);
-          //new code (drag to Archives one at a time)
-          var choicesA = ChoicesHandCards(corp);
-          function decisionCallbackA(paramsA) {
-			//false here so that the trash isn't preventable (otherwise the ability shouldn't work)
-            Trash(paramsA.card, false, function(cardsTrashed) {
-              var choicesB = ChoicesHandCards(corp);
-              function decisionCallbackB(params) {
-			    //false here so that the trash isn't preventable (otherwise the ability shouldn't work)
-                Trash(params.card, false, function(cardsTrashed) {
-                  EndTheRun();
-			    }, this);
-              }
-              DecisionPhase(
-                corp,
-                choicesB,
-                decisionCallbackB,
-                "Anoetic Void",
-                "Discard",
-                this,
-                "discard"
-              );
-			},this);  
-          }
-          DecisionPhase(
-            corp,
-            choicesA,
-            decisionCallbackA,
-            "Anoetic Void",
-            "Discard",
-            this,
-            "discard"
-          );
+          SpendCredits(corp, 2, "", null, function () {
+            //new code (drag to Archives one at a time)
+            var choicesA = ChoicesHandCards(corp);
+            function decisionCallbackA(paramsA) {
+			  //false here so that the trash isn't preventable (otherwise the ability shouldn't work)
+              Trash(paramsA.card, false, function(cardsTrashed) {
+                var choicesB = ChoicesHandCards(corp);
+                function decisionCallbackB(params) {
+			      //false here so that the trash isn't preventable (otherwise the ability shouldn't work)
+                  Trash(params.card, false, function(cardsTrashed) {
+                    EndTheRun();
+			      }, this);
+                }
+                DecisionPhase(
+                  corp,
+                  choicesB,
+                  decisionCallbackB,
+                  "Anoetic Void",
+                  "Discard",
+                  this,
+                  "discard"
+                );
+              },this);
+            }
+            DecisionPhase(
+              corp,
+              choicesA,
+              decisionCallbackA,
+              "Anoetic Void",
+              "Discard",
+              this,
+              "discard"
+            );
+          }, this);
         }
       );
       //**AI code

@@ -1,9 +1,40 @@
 # Runner: any credit spent during a run silently drains Touchstone (or any hosted-credit source) first, with no choice given to the player
 
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
-**Source log:** `documentation/debug-logs/any_cred_spent_during_run_is_removed_from_touchstone_no_choice_given.txt`
-**File:** `mechanics.js` (root cause), `sets/vantagepoint.js` (Touchstone's over-broad `canUseCredits`). Line numbers are from `main` at `512a8f3`, 2026-09-24, and will drift; search by function name.
-**Status:** Diagnosed, not yet fixed.
+**Source log:** `documentation/debug-logs/bug_raised/any_cred_spent_during_run_is_removed_from_touchstone_no_choice_given.txt`
+**File:** `mechanics.js` (root cause), `sets/vantagepoint.js` (Touchstone eligibility, verified correct). Line numbers are from `main` at `512a8f3`, 2026-09-24, and will drift; search by function name.
+**Status:** Fixed locally on 2026-09-25; awaiting merge.
+
+## Resolution
+
+The diagnosis was confirmed. A payment-priority workaround was initially
+considered, but rejected because it would merely replace "always spend
+Touchstone first" with "always spend the pool first." Neither behavior matches
+a real game: the player chooses how to combine all legal credit sources whenever
+the allocation is not forced.
+
+`SpendCredits()` now opens a payment decision for a human player whenever an
+eligible hosted-credit source and the credit pool (or multiple eligible hosted
+sources) provide different legal allocations. The player may spend any legal
+amount from a hosted source, then choose again for the remaining cost, or pay
+the remainder from the pool. A forced payment with only one legal source stays
+automatic. Computer players retain deterministic automatic allocation.
+
+Because this makes `SpendCredits()` asynchronous when a real choice exists,
+callers that performed follow-up effects immediately after payment were audited.
+Networking, Corporate Troubleshooter, Anoetic Void, and Datapike now put those
+effects in the payment continuation, so they cannot resolve before the player
+finishes choosing credit sources.
+
+Touchstone itself needs no special payment-priority property. Its broad
+`canUseCredits()` is correct: during a run its hosted credit appears as an option
+alongside the credit pool and any other eligible sources. Choosing the pool
+preserves Touchstone for Baker; choosing Touchstone spends it immediately.
+Baker's separate stealth-only payment remains unchanged.
+
+Regression coverage in `tests/credit-pool-lock.test.js` verifies both choices,
+multi-source allocation, continuation timing, hosted-source callbacks, and
+forced payment while the pool is locked.
 
 ---
 
@@ -104,11 +135,11 @@ Contrast with Baker's redirect cost (`sets/vantagepoint.js`, `responseOnWouldApp
 
 ---
 
-## 4. Proposed fixes
+## 4. Fix options reviewed
 
-1. **Restore a choice step in `SpendCredits()` for hosted/recurring credit sources**, using the existing commented-out `DecisionPhase` implementation as a starting point rather than writing it from scratch. At minimum, when more than one eligible source (including the pool) could cover the cost, ask; when there's exactly one non-pool source and the pool, a single yes/no ("Use 1 credit from Touchstone, or pay from your credit pool?") is enough — full per-credit allocation like the old block is more control than most costs need.
-2. **Alternatively (lower-effort, if a prompt on every single credit is judged too noisy for costs like breaker pumps):** default to the credit pool first and only auto-spend hosted sources when the pool can't cover the cost, or when the source is specifically flagged as "prefer to auto-spend" (e.g., pure economy discards like a hypothetical always-use-me source) — reserving the explicit-choice prompt for sources like Touchstone that are stealth or otherwise strategically limited. This keeps common cases silent while not blowing through Baker's stealth-credit prerequisite as a side effect.
-3. Either way, **don't let `canUseCredits()` alone decide spend order** — it should keep gating legality, and a separate signal (an explicit choice, or a "spend order priority" the source declares) should decide which eligible source actually gets drained first.
+1. **Restore a choice step in `SpendCredits()` for hosted/recurring credit sources.** Implemented with a single-command `DecisionPhase` that can repeat until the full cost is allocated. Callers with immediate follow-up effects were converted to continuations.
+2. **Use a separate spend-order priority.** Rejected. It protects one intended future use of Touchstone but still denies the player the rules-correct choice to spend Touchstone now.
+3. **Don't let `canUseCredits()` alone decide spend order.** Implemented through explicit human choice; `canUseCredits()` now gates legality without selecting the source.
 4. No change needed to Baker's own redirect payment — it already does the right thing and should be used as the reference implementation for whatever prompt gets added to `SpendCredits()`.
 
 ---
@@ -117,10 +148,12 @@ Contrast with Baker's redirect cost (`sets/vantagepoint.js`, `responseOnWouldApp
 
 Follow `tests/fixtures/README.md` and whichever runner-side decision/mechanics test file already covers cost payment (e.g. `tests/mechanics-*.test.js` if one exists on this branch — otherwise this is a good candidate for a new `spend-credits-choice.test.js`).
 
-1. **Reproduce directly:** Runner with Touchstone holding 1 credit and a normal credit pool, paying a 1-credit ability cost (e.g. Marjanah's pump) mid-run. Before the fix: credit silently comes from Touchstone, no phase change. After the fix: a choice/prompt phase should appear (or the pool should be preferred per whichever fix direction is taken), and declining Touchstone should leave its credit untouched.
-2. **Baker interaction regression:** Touchstone with 1 credit, Baker installed, Runner pays an unrelated 1-credit run cost first, then reaches Baker's "approach Archives" decision. Before the fix, Baker's stealth-credit choices come back empty because Touchstone was already drained. After the fix, the player should have had the option to preserve that credit for Baker.
-3. **Multiple hosted sources:** two eligible non-pool credit sources plus the pool, cost of 1 — confirm the player is offered a genuine choice among all three (or whichever subset the chosen fix direction supports), not just the first one found by `ActiveCards()` order.
-4. Re-run existing fixtures that pay costs via `SpendCredits()` (trash costs, steal costs, ability costs) to confirm ordinary single-source-available cases still resolve without an unnecessary prompt when there's nothing to choose between.
+1. **Direct regression:** with Touchstone and an ordinary pool both able to pay, confirm neither is spent before the decision and both are offered.
+2. **Either allocation:** confirm choosing the pool preserves Touchstone and choosing Touchstone preserves the pool.
+3. **Multiple hosted sources:** after a partial payment, confirm another eligible hosted source and the pool remain available for the balance.
+4. **Continuation and callbacks:** confirm the payment continuation and `onCreditsSpent` fire only after the corresponding allocation completes.
+5. **Forced payment:** when the pool is locked and only one hosted source can pay, confirm payment resolves without a redundant prompt.
+6. Re-run the full suite, including the Corp decision fixtures and decision snapshots, because `SpendCredits()` is shared by Runner and Corp payment paths.
 
 ---
 

@@ -1226,8 +1226,8 @@ function SpendCredits(
   afterSpend,
   context
 ) {
-  //new version of this function just automatically uses extra credits sources when available
-  //first, temporary credits (e.g. from bad publicity)
+  //Temporary credits are still consumed first. Choosing between the credit
+  //pool and eligible card-hosted sources happens below.
   if (player == runner) {
     var spendCred_temporary = Math.min(num, runner.temporaryCredits);
     if (spendCred_temporary > 0) {
@@ -1245,134 +1245,125 @@ function SpendCredits(
         );
     }
   }
-  //second, card-hosted credits
-  if (num > 0) {
-    var oldNum = num;
-    var activeCards = ActiveCards(player);
-    var cardsSpentFrom = []; //track cards we spent from for callbacks
-    for (var i = 0; i < activeCards.length; i++) {
-      if (typeof activeCards[i].credits !== "undefined") {
-        if (typeof activeCards[i].canUseCredits === "function") {
-          if (activeCards[i].canUseCredits(doing, card)) {
-            var spendCred_card = Math.min(num, activeCards[i].credits);
-            activeCards[i].credits -= spendCred_card;
-            num -= spendCred_card;
-            if (spendCred_card == 1)
-              Log(
-                PlayerName(player) +
-                  " spent one credit from " +
-                  GetTitle(activeCards[i], true)
-              );
-            else if (spendCred_card > 0)
-              Log(
-                PlayerName(player) +
-                  " spent " +
-                  spendCred_card +
-                  " credits from " +
-                  GetTitle(activeCards[i], true)
-              );
-            //track this card for callback
-            if (spendCred_card > 0) {
-              cardsSpentFrom.push({ card: activeCards[i], amount: spendCred_card });
-            }
-          }
-        }
+  function eligibleHostedSources() {
+    return ActiveCards(player).filter(function (source) {
+      return source.credits > 0 &&
+        typeof source.canUseCredits === "function" &&
+        source.canUseCredits(doing, card);
+    });
+  }
+
+  function spendFromCard(source, amount) {
+    source.credits -= amount;
+    num -= amount;
+    if (amount == 1)
+      Log(PlayerName(player) + " spent one credit from " + GetTitle(source, true));
+    else
+      Log(
+        PlayerName(player) +
+          " spent " +
+          amount +
+          " credits from " +
+          GetTitle(source, true)
+      );
+    UpdateCounters();
+    if (typeof source.onCreditsSpent === "function")
+      source.onCreditsSpent.call(source, amount);
+  }
+
+  function spendFromPool(amount) {
+    player.creditPool -= amount;
+    num -= amount;
+    if (amount == 1) Log(PlayerName(player) + " spent one credit");
+    else Log(PlayerName(player) + " spent " + amount + " credits");
+  }
+
+  function finishPayment() {
+    if (typeof afterSpend === "function") afterSpend.call(context);
+  }
+
+  function choosePaymentSource() {
+    if (num < 1) {
+      finishPayment();
+      return;
+    }
+
+    var sources = eligibleHostedSources();
+    var canUsePool = CreditPoolCanBeUsed(player, "spend", doing, card);
+
+    //Keep computer-player payments deterministic and compatible with the
+    //existing strategy code. Human players choose every non-forced allocation.
+    if (player.AI) {
+      for (var i = 0; i < sources.length && num > 0; i++)
+        spendFromCard(sources[i], Math.min(num, sources[i].credits));
+      if (num > 0 && canUsePool) spendFromPool(num);
+      finishPayment();
+      return;
+    }
+
+    if (sources.length < 1) {
+      if (canUsePool) spendFromPool(num);
+      finishPayment();
+      return;
+    }
+
+    //When a single hosted source has only one legal contribution, no player
+    //decision is needed; spend it and then handle any pool remainder.
+    var usablePoolCredits = canUsePool ? player.creditPool : 0;
+    var minimumHostedSpend = Math.max(0, num - usablePoolCredits);
+    var maximumHostedSpend = Math.min(num, sources[0].credits);
+    if (
+      sources.length == 1 &&
+      minimumHostedSpend > 0 &&
+      minimumHostedSpend == maximumHostedSpend
+    ) {
+      spendFromCard(sources[0], minimumHostedSpend);
+      choosePaymentSource();
+      return;
+    }
+
+    var choices = [];
+    for (var i = 0; i < sources.length; i++) {
+      for (var amount = 1; amount <= Math.min(num, sources[i].credits); amount++) {
+        choices.push({
+          card: sources[i],
+          num: amount,
+          label:
+            "Use " +
+            amount +
+            (amount == 1 ? " credit" : " credits") +
+            " from " +
+            GetTitle(sources[i], true),
+        });
       }
     }
-    if (num != oldNum) UpdateCounters();
-    //fire onCreditsSpent callbacks for cards we spent from (e.g., for "when empty, trash it")
-    for (var i = 0; i < cardsSpentFrom.length; i++) {
-      var cardWithCredits = cardsSpentFrom[i].card;
-      if (typeof cardWithCredits.onCreditsSpent === "function") {
-        cardWithCredits.onCreditsSpent.call(cardWithCredits, cardsSpentFrom[i].amount);
-      }
+    if (canUsePool && player.creditPool >= num) {
+      choices.push({
+        card: null,
+        num: num,
+        label:
+          "Spend " +
+          num +
+          (num == 1 ? " credit" : " credits") +
+          " from the credit pool",
+      });
     }
-  }
-  //lastly, credit pool
-  if (num > 0 && CreditPoolCanBeUsed(player, "spend", doing, card)) {
-    player.creditPool -= num; //spend the rest from default pool
-    if (num == 1) Log(PlayerName(player) + " spent one credit");
-    else Log(PlayerName(player) + " spent " + num + " credits");
-  }
-  //done, do whatever needs to be done after
-  if (typeof afterSpend === "function") afterSpend.call(context);
 
-  //old version of this function below allows player to choose which sources to use and when:
+    DecisionPhase(
+      player,
+      choices,
+      function (params) {
+        if (params.card) spendFromCard(params.card, params.num);
+        else spendFromPool(params.num);
+        choosePaymentSource();
+      },
+      "Spend credits",
+      "Choose how to pay " + num + "[c]",
+      card
+    );
+  }
 
-  //allow player to use as many credits as desired from recurring sources (continue spends the rest using credit pool)
-  /*
-	var spendCreditsPhase = {
-	Enumerate: {
-		use: function() {
-			var ret = [];
-			//for each available recurring credit source, list from 1 to max(available,required)
-			var activeCards = ActiveCards(player);
-			for (var i=0; i<activeCards.length; i++)
-			{
-				if (typeof(activeCards[i].credits) !== 'undefined')
-		 		{
-					if (typeof(activeCards[i].canUseCredits) === 'function')
-					{
-						if (activeCards[i].canUseCredits(doing,card))
-						{
-							for (var j=1; (j<=activeCards[i].credits)&&(j<=num); j++)
-							{
-								ret.push({card:activeCards[i],num:j,label:"Use "+j+" credits from "+GetTitle(activeCards[i],true)});
-							}
-						}
-					}
-				}
-			}
-			return ret;
-		},
-		n: function() {
-			if (num>Credits(player)) return []; //need to spend more recurring credits
-			return [{}];
-		}
-	 },
-	 Resolve: {
-		 use: function(params) {
-			 params.card.credits-=params.num;
-			 num-=params.num;
-			 if (params.num == 1) Log(PlayerName(player)+" used one credit from "+GetTitle(params.card,true));
-		 	 else Log(PlayerName(player)+" used "+params.num+" credits from "+GetTitle(params.card,true));
-		 },
-		 n: function() {
-			 IncrementPhase(true); //return to original phase before callback in case the callback needs to change phase
-			 if (num>0)
-			 {
-				 var numberSpent = num;
-				 //automatically spend temporary credits first if possible
-				 if ((player==runner)&&(runner.temporaryCredits > 0))
-				 {
-					if (runner.temporaryCredits >= num)
-					{
-						runner.temporaryCredits-=num;
-						num=0;
-					}
-					else //can only partially cover the cost with temporary credits
-					{
-						num-=runner.temporaryCredits;
-						runner.temporaryCredits=0;
-					}
-			 	 }
-		 		 player.creditPool-=num; //spend the rest from default pool
- 		 	 	 if (numberSpent == 1) Log(PlayerName(player)+" spent one credit");
-		 	 	 else Log(PlayerName(player)+" spent "+numberSpent+" credits");
-			 }
-			 if (typeof(afterSpend) === 'function') afterSpend.call(context);
-		},
-		text: {
-			use: "Use recurring credits"
-		}
-	 }
-	};
-	spendCreditsPhase.player = player;
- 	spendCreditsPhase.title = "Spend recurring credits";
- 	spendCreditsPhase.identifier = currentPhase.identifier;
-	spendCreditsPhase.next = currentPhase;
-	ChangePhase(spendCreditsPhase);
-	*/
+  choosePaymentSource();
 }
 
 /**

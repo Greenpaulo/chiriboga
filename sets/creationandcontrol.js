@@ -1211,8 +1211,9 @@ cardSet[3027] = {
       text: "The Runner must pay 2[c], if able. If the Runner cannot pay 2[c], end the run.",
       Resolve: function () {
         if (CheckCredits(runner, 2)) {
-          SpendCredits(runner, 2, "subroutine", this);
-          Log("Runner pays 2[c] for Datapike subroutine.");
+          SpendCredits(runner, 2, "subroutine", this, function () {
+            Log("Runner pays 2[c] for Datapike subroutine.");
+          });
         } else {
           Log("Runner cannot pay 2[c] for Datapike. Run ended.");
           EndTheRun();

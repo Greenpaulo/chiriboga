@@ -1398,9 +1398,10 @@ cardSet[31020] = {
 			"Networking",
 			this,
 			function () {
-			  SpendCredits(runner,1);
-			  MoveCard(this,runner.grip);
-			  Log("Networking added to grip");
+			  SpendCredits(runner,1,"",null,function () {
+				MoveCard(this,runner.grip);
+				Log("Networking added to grip");
+			  },this);
 			}
 		);
 		//**AI code
@@ -4185,10 +4186,10 @@ cardSet[31049] = {
 			for (var i=0; i<rezzedIceProtectingThisServer.length; i++) {
 				if (rezzedIceProtectingThisServer[i].card == GetApproachEncounterIce()) rezzedIceProtectingThisServer = [rezzedIceProtectingThisServer[i]];
 			}
-		}
+        }
         var decisionCallback = function (paramsB) {
-			SpendCredits(corp, X);
-			Trash(this, false, function(cardsTrashed){ //false means it cannot be prevented (because it's a cost)
+			SpendCredits(corp, X, "", null, function () {
+			  Trash(this, false, function(cardsTrashed){ //false means it cannot be prevented (because it's a cost)
 				Log(GetTitle(paramsB.card)+" gets +"+X+" strength for the remainder of the turn");
 				AddLingeringEffect({
 				  chosenCard: paramsB.card,
@@ -4215,7 +4216,8 @@ cardSet[31049] = {
 				});
 				//if runner AI, need to recalculate run
 				if (runner.AI) runner.AI.RecalculateRunIfNeeded();
-			},this); 
+			  },this);
+			},this);
         };
         DecisionPhase(
             corp,
