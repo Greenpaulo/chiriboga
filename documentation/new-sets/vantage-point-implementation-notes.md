@@ -381,3 +381,39 @@ hook share the same game-saving policy.
 sequencing, first-time resets, cleanup and ICE models.
 `tests/corp-install-destination.test.js`, `tests/corp-server-security.test.js`
 and `tests/mycoweb-rez-discount.test.js` cover the three shared engine paths.
+
+## Batch 10 engine support
+
+`BadPublicity` now fires `responseOnTakeBadPublicity` after prevention resolves
+and only when the Corp actually takes at least 1 bad publicity. It accepts an
+optional continuation that runs after those responses. Editorial Division uses
+the response to distinguish the first successful bad-publicity event each turn;
+Nihilo Agent uses the continuation to keep its tag, bad-publicity and
+counter-removal instructions in printed order.
+
+## Batch 10 confirmed patterns
+
+Editorial Division resets its first-time state at both turn boundaries, filters
+R&D to non-agenda Black Ops, Gray Ops and Liability cards, and shuffles even
+after a failed or declined search. Its Corp choice takes the best legal tutor
+target unless R&D is critically low.
+
+Witch Hunt takes bad publicity on either score or steal, records only its own
+score, and at the end of that Corp action phase removes all existing tags before
+giving the Runner 3 new tags. Magistrate Revontulet is unique, contributes a
+three-credit additional steal cost while active, and removes up to 3 credits
+whenever the Corp scores any agenda.
+
+Nihilo Agent loads three power counters only when it is rezzed, removes a tag
+and bad publicity at turn start, then sequences its discard-phase tag, bad
+publicity and counter removal through prevention/response continuations. It
+trashes itself unpreventably when the last counter is removed.
+
+Grubber takes bad publicity only when rezzed protecting a central. Each
+subroutine gives the Runner a real pay-3-or-end-the-run choice and its Run
+Calculator model preserves those alternatives.
+
+`tests/vantagepoint-integration.test.js` covers Batch 10 filtering, failed
+searches, first-time resets, score/steal and phase timing, steal costs, counter
+cleanup, central-only rez behavior, Runner payment choices, AI policies and the
+post-prevention bad-publicity response/continuation path.

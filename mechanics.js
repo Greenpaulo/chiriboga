@@ -1510,18 +1510,38 @@ function AddTags(num, afterTags, context) {
  *
  * @method BadPublicity
  * @param {int} num number of bad publicity to add
+ * @param {function} [afterBadPublicity] called after bad-publicity responses
+ * @param {Object} [context] for calling afterBadPublicity
  */
-function BadPublicity(num) {
+function BadPublicity(num, afterBadPublicity, context) {
   if (num < 1) {
     Log("No bad publicity added");
+    if (typeof afterBadPublicity === "function")
+      afterBadPublicity.call(context, 0);
     return;
   }
   intended.badPublicity = num;
   OpportunityForAvoidPrevent(corp, "responsePreventableAddBadPublicity", [], function () {
-    corp.badPublicity += intended.badPublicity;
-    if (intended.badPublicity == 1) Log("1 bad publicity added");
-    else Log(intended.badPublicity + " bad publicity added");
+    var badPublicityTaken = intended.badPublicity;
+    corp.badPublicity += badPublicityTaken;
+    if (badPublicityTaken == 1) Log("1 bad publicity added");
+    else Log(badPublicityTaken + " bad publicity added");
     UpdateCounters();
+    if (badPublicityTaken < 1) {
+      if (typeof afterBadPublicity === "function")
+        afterBadPublicity.call(context, 0);
+      return;
+    }
+    TriggeredResponsePhase(
+      playerTurn,
+      "responseOnTakeBadPublicity",
+      [badPublicityTaken],
+      function () {
+        if (typeof afterBadPublicity === "function")
+          afterBadPublicity.call(context, badPublicityTaken);
+      },
+      "Bad Publicity Taken",
+    );
   }, "About to Add Bad Publicity");
 }
 

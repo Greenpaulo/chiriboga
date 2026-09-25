@@ -40,7 +40,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**9 complete, 4 outstanding** (`4 Pending`, `0 In progress`, `0 Blocked`).
+**10 complete, 3 outstanding** (`3 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -57,7 +57,7 @@ Agents must refresh these counts whenever a batch status changes.
 |     7 | 36031–36035 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
 |     8 | 36036–36040 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
 |     9 | 36041–36045 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
-|    10 | 36046–36050 | Pending  | —                        | —                                                                          |
+|    10 | 36046–36050 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    11 | 36051–36055 | Pending  | —                        | —                                                                          |
 |    12 | 36056–36060 | Pending  | —                        | —                                                                          |
 |    13 | 36061–36066 | Pending  | —                        | —                                                                          |
@@ -83,6 +83,7 @@ Do not remove an older entry if later work revisits one of its cards.
 |     7 | 36031–36035 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Vertigo, Caveat Emptor, realloc(), Retirement Plan and Perfect Recall; added Corp declarative operation priorities and click-aware ICE-specific run modelling |
 |     8 | 36036–36040 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Méliès U, Lotus Haze, Esca, ezaM and Knowledge Seeker; added purge continuations and persistent route-wide ICE-strength modelling |
 |     9 | 36041–36045 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `corp-install-destination.test.js`; `corp-server-security.test.js`; `mycoweb-rez-discount.test.js`; all `tests/*.test.js` | Implemented Lionsmane, Vicsek, Cultivate, Unleash and The Red Room; added Corp install-destination restrictions, post-rez continuations and installed global ETR planning |
+|    10 | 36046–36050 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `play-and-steal-cost.test.js`; all `tests/*.test.js` | Implemented Editorial Division, Witch Hunt, Magistrate Revontulet, Nihilo Agent and Grubber; added post-prevention bad-publicity responses and continuations |
 
 ## Required shared verification
 

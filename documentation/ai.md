@@ -2095,6 +2095,19 @@ if (!runner.AI || runner.AI.rc !== rc) {
   server-value policy, and installed active cards now participate in global
   end-the-run capacity planning.
 
+### Vantage Point Batch 10 card hooks
+
+- Editorial Division: Ad Nihilum makes its `responseOnTakeBadPublicity` choice
+  inline, tutoring the best legal card while declining when R&D is critically
+  low.
+- Witch Hunt uses normal agenda advancement policy; its score, steal and
+  action-phase effects are mandatory and need no discretionary hook.
+- Magistrate Revontulet and Nihilo Agent use `AIWorthInstalling` and
+  `AIAvoidInstallingOverThis` to choose an affordable protected remote and
+  preserve their ongoing effects.
+- Grubber uses `AIImplementIce` to model each subroutine as the Runner's choice
+  between paying 3 credits and ending the run.
+
 ---
 
 ## 8. Step-by-Step Worked Example

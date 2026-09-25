@@ -3976,6 +3976,58 @@ cardSet[36046] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
+  tookBadPublicityThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.tookBadPublicityThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.tookBadPublicityThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnTakeBadPublicity: {
+    Enumerate: function () {
+      if (this.tookBadPublicityThisTurn) return [];
+      var choices = ChoicesArrayCards(corp.RnD.cards, function (card) {
+        return (
+          !CheckCardType(card, ["agenda"]) &&
+          (CheckSubType(card, "Black Ops") ||
+            CheckSubType(card, "Gray Ops") ||
+            CheckSubType(card, "Liability"))
+        );
+      });
+      choices.push({ card: null, label: "Do not add a card", button: "Continue" });
+      if (corp.AI != null) {
+        if (corp.RnD.cards.length < 3) return [choices[choices.length - 1]];
+        var tutorChoices = choices.slice(0, choices.length - 1);
+        if (tutorChoices.length > 0)
+          return [corp.AI._bestNonAgendaTutorOption(tutorChoices)];
+        return [choices[choices.length - 1]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.tookBadPublicityThisTurn = true;
+      Shuffle(corp.RnD.cards);
+      Log("R&D shuffled");
+      if (!params || !params.card) return;
+      MoveCard(params.card, corp.RnD.cards);
+      Render();
+      Reveal(
+        params.card,
+        function () {
+          Log(GetTitle(params.card) + " added to HQ");
+          MoveCard(params.card, corp.HQ.cards);
+        },
+        this,
+      );
+    },
+    text: "Search R&D for a non-agenda Black Ops, Gray Ops, or Liability card",
+  },
 };
 
 //Witch Hunt (36047)
@@ -3992,7 +4044,41 @@ cardSet[36047] = {
   subTypes: ["Initiative", "Liability"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  scoredThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.scoredThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.scoredThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      this.scoredThisTurn = true;
+      BadPublicity(1);
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      if (intended.steal == this) BadPublicity(1);
+    },
+    automatic: true,
+  },
+  responseOnCorpActionPhaseEnds: {
+    Resolve: function () {
+      if (!this.scoredThisTurn) return;
+      RemoveTags(runner.tags);
+      AddTags(3);
+    },
+    automatic: true,
+  },
 };
 
 //Magistrate Revontulet (36048)
@@ -4009,7 +4095,23 @@ cardSet[36048] = {
   subTypes: ["Executive"],
   rezCost: 2,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  modifyStealCost: {
+    Resolve: function () {
+      return { credits: 3, clicks: 0 };
+    },
+  },
+  responseOnScored: {
+    Resolve: function () {
+      LoseCredits(runner, 3);
+    },
+    automatic: true,
+  },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.creditPool < this.rezCost) return -1;
+    return emptyProtectedRemotes.length > 0 ? 0 : emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //Nihilo Agent (36049)
@@ -4027,7 +4129,50 @@ cardSet[36049] = {
   subTypes: ["Enforcer", "Liability"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  responseOnRez: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 3);
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      RemoveTags(1);
+      if (corp.badPublicity > 0) {
+        corp.badPublicity -= 1;
+        Log("1 bad publicity removed");
+        UpdateCounters();
+      }
+    },
+    automatic: true,
+  },
+  responseOnCorpDiscardEnds: {
+    Resolve: function () {
+      AddTags(
+        1,
+        function () {
+          BadPublicity(
+            1,
+            function () {
+              RemoveCounters(this, "power", 1);
+              if (!CheckCounters(this, "power", 1)) Trash(this, false);
+            },
+            this,
+          );
+        },
+        this,
+      );
+    },
+    automatic: true,
+  },
+  RezUsability: function () {
+    return currentPhase.identifier == "Corp 3.2";
+  },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.creditPool < this.rezCost) return -1;
+    return emptyProtectedRemotes.length > 0 ? 0 : emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //Grubber (36050)
@@ -4045,11 +4190,66 @@ cardSet[36050] = {
   subTypes: ["Barrier", "Liability"],
   rezCost: 5,
   strength: 5,
+  responseOnRez: {
+    Resolve: function (card) {
+      if (card != this) return;
+      var server = GetServer(this);
+      if (server == corp.HQ || server == corp.RnD || server == corp.archives)
+        BadPublicity(1);
+    },
+    automatic: true,
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({ id: 1, label: "Pay 3[c]", button: "Pay 3[c]" });
+        choices.push({ id: 0, label: "End the run", button: "End the run" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            if (params && params.id == 1)
+              SpendCredits(runner, 3, "using", this);
+            else EndTheRun();
+          },
+          this.title,
+          "Pay 3[c] to avoid ending the run?",
+          this,
+        );
+      },
+      visual: { y: 74, h: 16 },
+    },
+    {
+      text: "End the run unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({ id: 1, label: "Pay 3[c]", button: "Pay 3[c]" });
+        choices.push({ id: 0, label: "End the run", button: "End the run" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            if (params && params.id == 1)
+              SpendCredits(runner, 3, "using", this);
+            else EndTheRun();
+          },
+          this.title,
+          "Pay 3[c] to avoid ending the run?",
+          this,
+        );
+      },
+      visual: { y: 90, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [["payCredits", "payCredits", "payCredits"], ["endTheRun"]],
+      [["payCredits", "payCredits", "payCredits"], ["endTheRun"]],
+    ];
     return result;
   },
 };

@@ -127,6 +127,17 @@ onSteal: {
 }
 ```
 
+### Bad publicity
+
+`BadPublicity` fires `responseOnTakeBadPublicity` only after prevention has
+resolved and the Corp actually takes at least 1 bad publicity. The response
+receives the amount taken. Its optional continuation runs after all responses.
+
+```js
+BadPublicity(1, afterBadPublicity, context);
+responseOnTakeBadPublicity: { Enumerate, Resolve, text? }
+```
+
 ### Modify Hooks (return a number, 0 = no change)
 
 ```js

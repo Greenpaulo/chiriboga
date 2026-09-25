@@ -2037,4 +2037,216 @@ assert.strictEqual(
 );
 assert.strictEqual(redRoom.AIDefensiveValue.call(redRoom, context.corp.RnD), 2);
 
-console.log('Vantage Point integration and Batch 1-9 behavior checks passed.');
+// Batch 10: NBN cards 36046-36050.
+const engineBadPublicity = context.BadPublicity;
+const badPublicityOrder = [];
+context.corp.badPublicity = 0;
+context.playerTurn = context.corp;
+context.intended.badPublicity = 0;
+context.OpportunityForAvoidPrevent = (player, hook, params, continuation) => {
+  assert.strictEqual(hook, 'responsePreventableAddBadPublicity');
+  continuation();
+};
+context.TriggeredResponsePhase = (player, hook, params, continuation) => {
+  assert.strictEqual(hook, 'responseOnTakeBadPublicity');
+  assert.deepStrictEqual(Array.from(params), [1]);
+  badPublicityOrder.push('responses');
+  continuation();
+};
+engineBadPublicity(1, function (amount) {
+  assert.strictEqual(amount, 1);
+  badPublicityOrder.push('callback');
+});
+assert.strictEqual(context.corp.badPublicity, 1);
+assert.deepStrictEqual(badPublicityOrder, ['responses', 'callback']);
+let preventedBadPublicityCallback = null;
+context.OpportunityForAvoidPrevent = (player, hook, params, continuation) => {
+  context.intended.badPublicity = 0;
+  continuation();
+};
+context.TriggeredResponsePhase = () => {
+  throw new Error('prevented bad publicity must not fire take responses');
+};
+engineBadPublicity(1, (amount) => {
+  preventedBadPublicityCallback = amount;
+});
+assert.strictEqual(preventedBadPublicityCallback, 0);
+assert.strictEqual(context.corp.badPublicity, 1);
+
+const editorialDivision = context.cardSet[36046];
+const blackOps = {
+  title: 'Black operation',
+  player: context.corp,
+  cardType: 'operation',
+  subTypes: ['Black Ops'],
+  elo: 1400,
+};
+const liability = {
+  title: 'Liability asset',
+  player: context.corp,
+  cardType: 'asset',
+  subTypes: ['Liability'],
+  elo: 1700,
+};
+const liabilityAgenda = {
+  title: 'Liability agenda',
+  player: context.corp,
+  cardType: 'agenda',
+  subTypes: ['Liability'],
+  elo: 1800,
+};
+const ordinaryOperation = {
+  title: 'Ordinary operation',
+  player: context.corp,
+  cardType: 'operation',
+  subTypes: ['Transaction'],
+  elo: 1600,
+};
+context.corp.RnD.cards = [blackOps, liability, liabilityAgenda, ordinaryOperation];
+for (const card of context.corp.RnD.cards) card.cardLocation = context.corp.RnD.cards;
+context.corp.HQ.cards = [];
+let batch10Shuffles = 0;
+context.Shuffle = () => {
+  batch10Shuffles++;
+};
+context.Render = () => {};
+context.Reveal = (card, callback, callbackContext) => callback.call(callbackContext);
+context.corp.AI = null;
+editorialDivision.tookBadPublicityThisTurn = false;
+let editorialChoices = editorialDivision.responseOnTakeBadPublicity.Enumerate.call(
+  editorialDivision,
+);
+assert.deepStrictEqual(
+  editorialChoices.filter((choice) => choice.card).map((choice) => choice.card),
+  [blackOps, liability],
+  '36046 offers only non-agenda Black Ops, Gray Ops, or Liability cards',
+);
+editorialDivision.responseOnTakeBadPublicity.Resolve.call(editorialDivision, {
+  card: liability,
+});
+assert.strictEqual(batch10Shuffles, 1);
+assert.strictEqual(context.corp.HQ.cards[0], liability);
+assert.strictEqual(
+  editorialDivision.responseOnTakeBadPublicity.Enumerate.call(editorialDivision).length,
+  0,
+  '36046 triggers only for the first bad publicity each turn',
+);
+editorialDivision.responseOnRunnerTurnBegins.Resolve.call(editorialDivision);
+assert.strictEqual(editorialDivision.tookBadPublicityThisTurn, false);
+editorialDivision.responseOnTakeBadPublicity.Resolve.call(editorialDivision, {card: null});
+assert.strictEqual(batch10Shuffles, 2, '36046 shuffles after a failed/declined search');
+editorialDivision.responseOnCorpTurnBegins.Resolve.call(editorialDivision);
+context.corp.RnD.cards = [blackOps, liability, liabilityAgenda, ordinaryOperation];
+context.corp.AI = {_bestNonAgendaTutorOption: (choices) => choices[1]};
+assert.strictEqual(
+  editorialDivision.responseOnTakeBadPublicity.Enumerate.call(editorialDivision)[0].card,
+  liability,
+  '36046 AI selects its preferred legal tutor target',
+);
+context.corp.RnD.cards = [blackOps, ordinaryOperation];
+context.corp.AI = {_bestNonAgendaTutorOption: (choices) => choices[0]};
+assert.strictEqual(
+  editorialDivision.responseOnTakeBadPublicity.Enumerate.call(editorialDivision)[0].card,
+  null,
+  '36046 AI declines when tutoring would critically deplete R&D',
+);
+context.corp.AI = null;
+
+let batch10BadPublicity = 0;
+context.BadPublicity = (amount, callback, callbackContext) => {
+  batch10BadPublicity += amount;
+  context.corp.badPublicity += amount;
+  if (callback) callback.call(callbackContext, amount);
+};
+const witchHunt = context.cardSet[36047];
+context.runner.tags = 5;
+context.intended.score = witchHunt;
+witchHunt.scoredThisTurn = false;
+witchHunt.responseOnScored.Resolve.call(witchHunt);
+assert.strictEqual(witchHunt.scoredThisTurn, true);
+assert.strictEqual(batch10BadPublicity, 1);
+witchHunt.responseOnCorpActionPhaseEnds.Resolve.call(witchHunt);
+assert.strictEqual(context.runner.tags, 3, '36047 removes all tags before giving 3');
+witchHunt.responseOnCorpTurnBegins.Resolve.call(witchHunt);
+assert.strictEqual(witchHunt.scoredThisTurn, false);
+context.runner.tags = 1;
+witchHunt.responseOnCorpActionPhaseEnds.Resolve.call(witchHunt);
+assert.strictEqual(context.runner.tags, 1, '36047 does nothing when it was not scored');
+context.intended.steal = witchHunt;
+witchHunt.responseOnStolen.Resolve.call(witchHunt);
+assert.strictEqual(batch10BadPublicity, 2, '36047 also takes bad publicity when stolen');
+
+const magistrate = context.cardSet[36048];
+assert.strictEqual(magistrate.unique, true, '36048 is unique');
+assert.deepStrictEqual(
+  JSON.parse(JSON.stringify(magistrate.modifyStealCost.Resolve.call(magistrate))),
+  {credits: 3, clicks: 0},
+);
+context.LoseCredits = (player, amount) => {
+  player.creditPool = Math.max(0, player.creditPool - amount);
+};
+context.runner.creditPool = 2;
+magistrate.responseOnScored.Resolve.call(magistrate);
+assert.strictEqual(context.runner.creditPool, 0, '36048 cannot make credits negative');
+context.corp.creditPool = 2;
+assert.strictEqual(magistrate.AIWorthInstalling.call(magistrate, [remote]), 0);
+context.corp.creditPool = 1;
+assert.strictEqual(magistrate.AIWorthInstalling.call(magistrate, [remote]), -1);
+
+const nihiloAgent = context.cardSet[36049];
+nihiloAgent.power = 0;
+nihiloAgent.responseOnRez.Resolve.call(nihiloAgent, magistrate);
+assert.strictEqual(nihiloAgent.power, 0, '36049 ignores other cards being rezzed');
+nihiloAgent.responseOnRez.Resolve.call(nihiloAgent, nihiloAgent);
+assert.strictEqual(nihiloAgent.power, 3);
+context.runner.tags = 2;
+context.corp.badPublicity = 2;
+nihiloAgent.responseOnCorpTurnBegins.Resolve.call(nihiloAgent);
+assert.strictEqual(context.runner.tags, 1);
+assert.strictEqual(context.corp.badPublicity, 1);
+let nihiloTrashed = false;
+context.Trash = (card, preventable) => {
+  if (card === nihiloAgent) {
+    assert.strictEqual(preventable, false);
+    nihiloTrashed = true;
+  }
+};
+for (let i = 0; i < 3; i++)
+  nihiloAgent.responseOnCorpDiscardEnds.Resolve.call(nihiloAgent);
+assert.strictEqual(nihiloAgent.power, 0);
+assert.strictEqual(nihiloTrashed, true, '36049 trashes itself when its power counters empty');
+assert.strictEqual(context.runner.tags, 4);
+assert.strictEqual(context.corp.badPublicity, 4);
+context.currentPhase = {identifier: 'Corp 3.2'};
+assert.strictEqual(nihiloAgent.RezUsability.call(nihiloAgent), true);
+context.corp.creditPool = 1;
+assert.strictEqual(nihiloAgent.AIWorthInstalling.call(nihiloAgent, [remote]), 0);
+context.corp.creditPool = 0;
+assert.strictEqual(nihiloAgent.AIWorthInstalling.call(nihiloAgent, [remote]), -1);
+
+const grubber = context.cardSet[36050];
+grubber.server = context.corp.HQ;
+grubber.responseOnRez.Resolve.call(grubber, grubber);
+assert.strictEqual(batch10BadPublicity, 6, '36050 takes bad publicity on a central');
+grubber.server = remote;
+grubber.responseOnRez.Resolve.call(grubber, grubber);
+assert.strictEqual(batch10BadPublicity, 6, '36050 does not take bad publicity on a remote');
+context.runner.creditPool = 4;
+decisions = [];
+grubber.subroutines[0].Resolve.call(grubber);
+assert.strictEqual(decisions[0].choices.length, 2);
+decisions[0].choose(decisions[0].choices.find((choice) => choice.id === 1));
+assert.strictEqual(context.runner.creditPool, 1);
+decisions = [];
+grubber.subroutines[1].Resolve.call(grubber);
+assert.strictEqual(decisions[0].choices.length, 1, '36050 omits unaffordable payment');
+decisions[0].choose(decisions[0].choices[0]);
+assert.strictEqual(endedRuns, 5);
+const grubberAI = {sr: []};
+grubber.AIImplementIce.call(grubber, {}, grubberAI, 0, false);
+assert.deepStrictEqual(JSON.parse(JSON.stringify(grubberAI.sr)), [
+  [['payCredits', 'payCredits', 'payCredits'], ['endTheRun']],
+  [['payCredits', 'payCredits', 'payCredits'], ['endTheRun']],
+]);
+
+console.log('Vantage Point integration and Batch 1-10 behavior checks passed.');
