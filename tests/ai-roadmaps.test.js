@@ -6,7 +6,8 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const {parseAll, itemPath, linkTargets, resolveFrom, STATUSES, AREAS, root} =
+const {spawnSync} = require('child_process');
+const {parseAll, itemPath, linkTargets, resolveFrom, VERIFIED, STATUSES, AREAS, root} =
   require('../scripts/roadmap.js');
 
 const problems = [];
@@ -39,6 +40,16 @@ function checkTemplate(file, id) {
   const listed = byId.get(id).depends;
   check(deps.join(',') === listed.join(','), rel(file) + ' depends on "' + deps.join(', ') +
     '" but roadmap.md says "' + (listed.join(', ') || 'none') + '"');
+  // Optional until every spec is re-grounded: when present, it sits directly
+  // under **Read first:** and names a real commit (ai-planning.md, "Re-grounding a spec").
+  const verified = text.match(/^\*\*Verified against code:\*\*.*$/m);
+  if (verified) {
+    const sha = (verified[0].match(VERIFIED) || [])[1];
+    check(sha && spawnSync('git', ['cat-file', '-e', sha + '^{commit}'], {cwd: root}).status === 0,
+      rel(file) + ' has "' + verified[0] + '"; use "**Verified against code:** <short sha> (<date>)" with a real commit');
+    check(/^\*\*Read first:\*\*.*\n\*\*Verified against code:\*\*/m.test(text),
+      rel(file) + ' must put its **Verified against code:** line directly under **Read first:**');
+  }
   let last = -1;
   for (const heading of TEMPLATE) {
     const at = text.indexOf('\n' + heading + '\n');

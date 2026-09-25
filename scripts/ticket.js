@@ -9,9 +9,14 @@
 // pending reproduction moved into the green suite without changing what it
 // asserts, the reproduction and the full suite pass, and acceptance criteria are
 // ticked. It also prints the changed files and a GitHub compare link for review.
+//
+// move rebases the ticket's relative links, rewrites roadmap links to it, and
+// keeps a linked roadmap item's status in step: code-review/ or remediation/
+// set it to in-progress, and done/ turns its entry into a Done-table row.
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
+const {parseRoadmap, itemPath, resolveFrom, rebaseLinks} = require('./roadmap.js');
 
 const root = path.resolve(__dirname, '..');
 const STAGES = ['open', 'code-review', 'remediation', 'done'];
@@ -45,20 +50,78 @@ function move(ticket, stage) {
   } else {
     fs.renameSync(path.join(root, from), path.join(root, to));
   }
+  const moved = path.join(root, to);
+  const text = fs.readFileSync(moved, 'utf8');
+  const rebased = rebaseLinks(text, path.dirname(path.join(root, from)), path.dirname(moved));
+  if (rebased !== text) fs.writeFileSync(moved, rebased);
   console.log('Moved to ' + to);
 
-  // Keep the AI roadmaps' links to this ticket pointing at its new folder.
+  // Keep the AI roadmaps' links to this ticket pointing at its new folder, and
+  // the linked item's status in step with it (documentation/ai-planning.md).
   for (const area of ['corp-ai', 'runner-ai']) {
     const roadmap = path.join(root, 'documentation', area, 'roadmap.md');
     if (!fs.existsSync(roadmap)) continue;
     const linkFrom = file => path.relative(path.dirname(roadmap), path.join(root, file)).split(path.sep).join('/');
     const text = fs.readFileSync(roadmap, 'utf8');
     const updated = text.split('](' + linkFrom(from) + ')').join('](' + linkFrom(to) + ')');
-    if (updated !== text) {
-      fs.writeFileSync(roadmap, updated);
-      console.log('Updated its link in documentation/' + area + '/roadmap.md');
-    }
+    if (updated === text) continue;
+    fs.writeFileSync(roadmap, updated);
+    console.log('Updated its link in documentation/' + area + '/roadmap.md');
+    const item = parseRoadmap(path.dirname(roadmap)).find(entry => entry.fields.Ticket && itemPath(entry) === path.join(root, to));
+    if (!item) continue;
+    if (stage === 'done') closeRoadmapItem(item, to);
+    else if (stage !== 'open') setRoadmapStatus(item, 'in-progress');
   }
+}
+
+// The open entry of a roadmap item: its ### heading up to the next heading.
+function entryRange(lines, item) {
+  let end = item.line;
+  while (end < lines.length && !/^#/.test(lines[end])) end++;
+  return [item.line - 1, end];
+}
+
+function setRoadmapStatus(item, status) {
+  const lines = fs.readFileSync(item.file, 'utf8').split('\n');
+  const [start, end] = entryRange(lines, item);
+  const at = lines.findIndex((line, i) => i > start && i < end && /^- \*\*Status:\*\*/.test(line));
+  if (at < 0 || lines[at] === '- **Status:** ' + status) return;
+  lines[at] = '- **Status:** ' + status;
+  fs.writeFileSync(item.file, lines.join('\n'));
+  console.log('Set ' + item.id + ' to ' + status + ' in ' + rel(item.file));
+}
+
+// Replace a finished item's entry with a row in its section's Done table.
+function closeRoadmapItem(item, ticket) {
+  const lines = fs.readFileSync(item.file, 'utf8').split('\n');
+  const [start, end] = entryRange(lines, item);
+  lines.splice(start, end - start);
+  const link = file => path.relative(item.dir, file).split(path.sep).join('/');
+  const ticketFile = path.resolve(root, ticket);
+  const architecture = path.join(item.dir, 'architecture.md');
+  const archLink = [...fs.readFileSync(ticketFile, 'utf8').matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)]
+    .find(m => /^[^#]+#./.test(m[2]) && resolveFrom(path.dirname(ticketFile), m[2]) === architecture);
+  const archCell = archLink ? '[' + archLink[1] + '](architecture.md#' + archLink[2].split('#')[1] + ')' : '';
+  const row = '| ' + item.id + ' | ' + item.title + ' | [' + path.basename(ticket, '.md') + '](' + link(ticketFile) + ') | ' +
+    archCell + ' |';
+
+  const sectionStart = lines.findIndex(line => line === '## ' + item.section);
+  let sectionEnd = lines.findIndex((line, i) => i > sectionStart && /^## /.test(line));
+  if (sectionEnd < 0) sectionEnd = lines.length;
+  const done = lines.findIndex((line, i) => i > sectionStart && i < sectionEnd && /^### Done\s*$/.test(line));
+  if (done < 0) {
+    while (sectionEnd > 0 && lines[sectionEnd - 1] === '') sectionEnd--;
+    lines.splice(sectionEnd, 0, '', '### Done', '', '| ID | Item | Delivered by | Architecture |', '|---|---|---|---|', row);
+  } else {
+    let last = done + 1;
+    while (lines[last] === '') last++;
+    while (last < lines.length && lines[last].startsWith('|')) last++;
+    lines.splice(last, 0, row);
+  }
+  fs.writeFileSync(item.file, lines.join('\n'));
+  console.log('Moved ' + item.id + ' to the Done table in ' + rel(item.file) +
+    (archCell ? '' : '\n     The ticket links no ' + path.basename(item.dir) + '/architecture.md section: fill the row\'s' +
+      ' Architecture cell, or tests/ai-roadmaps.test.js fails.'));
 }
 
 function section(text, heading) {
@@ -144,6 +207,22 @@ function check(ticket) {
   if (unticked.length) report('WARN', unticked.length + ' acceptance criteria not ticked:\n      ' +
     unticked.map(line => line.replace(/^\s*- \[ \]\s*/, '')).join('\n      '));
 
+  // Gated tickets (documentation/ai-planning.md, "Acceptance gates") ship behind
+  // a default-off AI option until F4 gate evidence is recorded.
+  if (criteria && /behind an AI option/.test(criteria)) {
+    const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
+    const option = gate && (gate.match(/`(\w+)`/) || [])[1];
+    const code = ['ai_corp.js', 'ai_runner.js'].map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
+    const setting = option && (code.match(new RegExp('\\b' + option + '\\s*:\\s*(true|false)\\b')) || [])[1];
+    const passed = gate && /^passed\b/i.test(gate);
+    if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending F4 | failed — `<option>` …" line.');
+    else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
+    else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
+    else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
+    else if (!passed) report('WARN', 'Gate not passed; ' + option + ' defaults to off: ' + gate);
+    else report(setting === 'true' ? 'PASS' : 'WARN', 'Gate: ' + gate + ' (' + option + ' defaults to ' + setting + ')');
+  }
+
   for (const [level, message] of results) console.log(level.padEnd(4) + ' ' + message);
 
   if (base) {
@@ -168,15 +247,19 @@ function check(ticket) {
   process.exitCode = failed ? 1 : 0;
 }
 
-const [command, ticket, stage] = process.argv.slice(2);
-try {
-  if (command === 'check' && ticket) check(ticket);
-  else if (command === 'move' && ticket && stage) move(ticket, stage);
-  else {
-    console.log('usage: node scripts/ticket.js check <ticket.md>\n       node scripts/ticket.js move <ticket.md> <' + STAGES.join('|') + '>');
+module.exports = {setRoadmapStatus, closeRoadmapItem};
+
+if (require.main === module) {
+  const [command, ticket, stage] = process.argv.slice(2);
+  try {
+    if (command === 'check' && ticket) check(ticket);
+    else if (command === 'move' && ticket && stage) move(ticket, stage);
+    else {
+      console.log('usage: node scripts/ticket.js check <ticket.md>\n       node scripts/ticket.js move <ticket.md> <' + STAGES.join('|') + '>');
+      process.exitCode = 1;
+    }
+  } catch (error) {
+    console.log(error.message);
     process.exitCode = 1;
   }
-} catch (error) {
-  console.log(error.message);
-  process.exitCode = 1;
 }

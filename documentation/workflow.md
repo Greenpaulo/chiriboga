@@ -127,8 +127,9 @@ AI planning is split by side, `documentation/corp-ai/` and
 - `specs/`: the full spec of each `proposed` item, until it becomes a ticket.
 
 To pick the next piece of work, run `node scripts/roadmap.js next`. To turn a
-proposed item into a ticket, run `node scripts/roadmap.js raise <ID>`, which
-moves its spec into `documentation/backlog/`; then use `implement-ticket` as
+proposed item into a ticket, re-verify its claims against the current code and
+run `node scripts/roadmap.js raise <ID>`, which moves its spec into
+`documentation/backlog/`; then use `implement-ticket` as
 usual. Previous versions are kept in each side's `legacy/` folder for
 comparison.
 
@@ -142,10 +143,10 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/show.js card <id>` | One card definition |
 | `node scripts/show.js fn <name>` | One engine or AI function |
 | `node scripts/ticket.js check <ticket>` | The mechanical review checks for a fixed ticket |
-| `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders |
-| `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done |
+| `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders, keeping a linked roadmap item's status and links in step |
+| `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done (including in-progress items whose ticket is open again) |
 | `node scripts/roadmap.js list` | Every AI roadmap item and its status |
-| `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket |
+| `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket; refuses one not re-verified against the current code |
 | `node scripts/card-status.js` | Regenerates `documentation/card-status.md`: per-set card counts, missing and unfinished cards, config disagreements, Runner keep coverage |
 
 ## 🛡️ Guardrails
@@ -157,7 +158,8 @@ Free, deterministic steps that agents (and you) run instead of reading files:
   the first time and again whenever the hook file changes.
 - **Ticket check** (`scripts/ticket.js check`): fails when a fixed ticket has no
   starting commit in its Resolution, its reproduction is still pending or had
-  its assertions or `EXPECT` lines changed, or any test fails.
+  its assertions or `EXPECT` lines changed, any test fails, or a gated ticket
+  has no `**Gate:**` line or turns its AI option on before the gate passed.
 - **Quiet tests** (`tests/run-all-tests.js`): a passing test that prints more
   than 5 lines fails the suite. Per-case output belongs behind `VERBOSE=1`.
 - **Hook documentation check** (`tests/ai-hook-docs.test.js`): fails when a card

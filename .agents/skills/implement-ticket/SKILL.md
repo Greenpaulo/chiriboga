@@ -12,17 +12,23 @@ written into it.
 ## 1. Orient
 
 - Read the ticket in full. Its folder is its status:
-  - `bugs/` or `backlog/`: ready to implement.
+  - `bugs/` or `backlog/`: ready to implement. If its Resolution already has
+    `**Gate:** pending F4`, the code was reviewed with its AI option off; once
+    F4 is `done`, only run the gate (step 6) and hand off again.
   - `remediation/`: review found problems. Address the review findings recorded
     in the ticket (and whatever they imply), not the whole ticket again.
   - `code-review/` or `done/`: stop and ask the user.
 - Record the starting commit (`git rev-parse --short HEAD`). If `git status`
   shows changes the user has not mentioned, ask before mixing work.
-- If the ticket declares a `**Roadmap item:**`, read
+- If the ticket declares a `**Roadmap item:**` (or a roadmap entry links it), read
   `documentation/ai-principles.md`, the side's `principles.md` and only the
   `architecture.md` sections the ticket links to, and set the item's status in
   the side's `roadmap.md` (`documentation/corp-ai/` or `documentation/runner-ai/`)
   to `in-progress`.
+- A ticket is **gated** when its acceptance criteria require an AI option or its
+  **Acceptance gate** needs seeded games (see "Acceptance gates" in
+  `documentation/ai-planning.md`). If a gated ticket lacks the two gate criteria
+  or its gate has no numbers, fix the ticket before planning.
 
 ## 2. Reproduce
 
@@ -52,6 +58,14 @@ where it is uncertain:
   code, card definitions and game rules.
 - Check every consumer of a function you would change, and look for
   counterexamples.
+
+- Roadmap tickets were written against older code. Re-ground them as
+  "Re-grounding a spec" in `documentation/ai-planning.md` describes: check
+  every **Current behaviour** claim and every function, hook or field the
+  ticket names (`node scripts/show.js fn <name>`, `rg -n`). Correct what is
+  stale in the ticket; if its premise no longer holds, stop and report. Then
+  set its `**Verified against code:**` line (add it under `**Read first:**` if
+  missing) to the starting commit and today's date.
 
 Note each point where you disagree with the ticket, with evidence.
 
@@ -107,6 +121,10 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   that follows the template in `documentation/ai-planning.md`.
 - Put new AI hooks with the existing AI hooks at the bottom of card objects and
   document them in `documentation/ai.md`.
+- Gated tickets: put the behaviour change behind an AI option that defaults to
+  off, following the "AI options" convention in `documentation/ai-planning.md`
+  (the first gated ticket creates the defaults object). Existing tests must pass
+  unchanged with the option off; the ticket's own tests turn it on.
 
 ## 6. Verify
 
@@ -114,6 +132,12 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged.
 - Add a variation or unit test when a broad heuristic changed.
 - `node tests/run-all-tests.js` passes.
+- Gated tickets: if F4 is `done`, run its gate as the ticket states it and F4's
+  comparison rule requires, and switch the option's default on only if the gate
+  passes. If F4 is not `done`, do not run a substitute: leave the option off and
+  hand off with the gate pending. If the gate fails, leave the option off, hand
+  off, and say in your report that the user must choose between retuning
+  (remediation) and parking the item.
 
 ## 7. Hand off
 
@@ -124,14 +148,28 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   diagnosis below it so the reviewer can compare. Tick the acceptance criteria
   that are met. For a ticket in `remediation/`, add a dated remediation entry
   to the Resolution that answers each review finding by number.
+- Gated tickets: add one of these lines to the Resolution, naming the option
+  in backticks:
+
+  ```markdown
+  **Gate:** passed — `<option>` now defaults to on. <F4 command, deck pairs, seed count, metrics, baseline vs candidate, threshold met>
+  **Gate:** pending F4 — `<option>` defaults to off.
+  **Gate:** failed — `<option>` defaults to off. <the evidence, as for passed>
+  ```
+
+  Leave the gate criteria unticked while the gate is pending or failed.
+  `ticket.js check` fails a gated ticket without this line, or whose option
+  defaults to on before the gate passed.
 - If the change alters AI behaviour described in
   `documentation/corp-ai/architecture.md` or
   `documentation/runner-ai/architecture.md` (bug fixes included, not only
   roadmap items), update that section so it describes the new behaviour. Every
-  backticked code name must exist; the suite checks this. A roadmap item stays
-  `in-progress`; the reviewer marks it `done`.
+  backticked code name must exist; the suite checks this. Link that section
+  from the ticket: when the reviewer moves the ticket to `done/`,
+  `ticket.js move` uses the link to fill the item's Done-table row.
 - Move the ticket into the `code-review/` folder beside it with
-  `node scripts/ticket.js move <ticket> code-review`, then run
+  `node scripts/ticket.js move <ticket> code-review` (this also sets a linked
+  roadmap item to `in-progress`), then run
   `node scripts/ticket.js check <ticket-in-its-new-folder>` and fix anything it reports
   as FAIL.
 - Do not commit. Report the files changed, test results, deviations from the

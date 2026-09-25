@@ -27,7 +27,10 @@ you cannot run commands. It reports:
 - whether the reproduction moved into the green suite with its expectations
   unchanged (a FAIL here is Blocking unless the Resolution justifies it);
 - whether the reproduction and the full suite pass;
-- unticked acceptance criteria, the files changed and a GitHub review link.
+- unticked acceptance criteria, the files changed and a GitHub review link;
+- for a gated ticket (its criteria require an AI option), whether the
+  Resolution has a `**Gate:**` line naming the option and whether the option's
+  default matches it (off unless the gate passed).
 
 Any FAIL is a Blocking finding. Do not repeat these checks by hand.
 
@@ -58,6 +61,16 @@ Any FAIL is a Blocking finding. Do not repeat these checks by hand.
   are recorded rather than silently fixed.
 - **Record.** The Resolution matches the diff, and departures from the ticket or
   plan are explained.
+- **Gate** (gated tickets; "Acceptance gates" in `documentation/ai-planning.md`).
+  With the option off, behaviour is unchanged: no existing test or fixture
+  expectation changed, and every changed decision path reads the option. With
+  it on, the ticket's own tests pass. If the gate passed, check the evidence
+  against the gate as written: the F4 command is recorded and runnable, it uses
+  paired seeds and deck pairs from the committed pool with at least the stated
+  number of games, it reports every metric the gate names against the
+  committed baseline, and each threshold is met under F4's comparison rule.
+  Missing or non-matching evidence is Blocking. A ticket whose gate needed F4
+  but whose criteria lack the gate criteria is Blocking too.
 
 ## 4. Record the verdict
 
@@ -81,11 +94,15 @@ Append to the ticket:
 Only **Blocking** or **Should fix** findings make the verdict "Changes
 required". Notes alone still pass.
 
-- **Pass:** `node scripts/ticket.js move <ticket> done`. If the ticket declares
-  a `**Roadmap item:**`, mark it done in the side's `roadmap.md`:
-  remove its open entry and add a row to that area's **Done** table linking the
-  ticket (now in `done/`) and its `architecture.md` section, then run
+- **Pass:** `node scripts/ticket.js move <ticket> done`. For a ticket a
+  roadmap entry links, this replaces the entry with a row in that area's
+  **Done** table; if the script says the ticket links no `architecture.md`
+  section, fill the row's Architecture cell. Then run
   `node tests/ai-roadmaps.test.js`.
+- **Pass with the gate pending F4:** the code may merge with its option off, but
+  the item is not done. `node scripts/ticket.js move <ticket> open`; the item
+  stays `in-progress` and `node scripts/roadmap.js next` lists it again once F4
+  is `done`, for `implement-ticket` to run the gate.
 - **Changes required:** `node scripts/ticket.js move <ticket> remediation`.
 
 A read-only reviewer outputs the Code review section for the user to paste into
