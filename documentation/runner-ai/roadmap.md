@@ -64,9 +64,9 @@ Existing Runner AI code that breaks a shared principle.
 - **Goal:** Replace the title lists and title comparisons in `ai_runner.js` with hooks.
 
 ### D2 Injectable randomness for the Runner AI
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** none
-- **Spec:** [D2-injectable-runner-randomness.md](specs/D2-injectable-runner-randomness.md)
+- **Ticket:** [D2-injectable-runner-randomness.md](../backlog/code-review/D2-injectable-runner-randomness.md)
 - **Goal:** Route Runner AI randomness through an injectable source so decisions are reproducible.
 
 ### D3 Close Runner AI information-boundary leaks

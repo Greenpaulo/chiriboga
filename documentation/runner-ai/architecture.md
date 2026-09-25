@@ -131,8 +131,16 @@ worth-keeping count when cached potential is below 2) and tags (min(clicks, half
 the pool) minus current tags). If a click would remain after the run, grip
 cards' `AIGripRunPotential(server)` add potential (after caching).
 
-**Choosing.** Each potential gets `0.2 * Math.random() - 0.1` of jitter (the
-only other randomness is the final `RandomRange` fallback). A server above
+**Choosing.** Each potential gets `0.2 * this._random() - 0.1` of jitter, one
+roll per server per decision (`serverList` is rebuilt once per
+`_internalChoiceDetermination()`). **Randomness (D2):** all Runner AI policy
+randomness goes through `RunnerAI._random`, which defaults to `Math.random`;
+tests and harnesses assign a seeded function. `_randomIndex(n)` picks an index
+through it, for the "no decision made" fallback and for card AI hooks (which
+call `runner.AI._random()` / `runner.AI._randomIndex()`).
+`tests/runner-ai-randomness.test.js` runs real Runner decisions headlessly with
+a seeded source and fails on any direct `Math.random`, `RandomRange` or
+`Shuffle` call in the `RunnerAI` class or a Runner card's AI hooks. A server above
 potential 2 with no complete path is recalculated with foresight; if that
 succeeds the AI does not run this click. `SortCardsWorthKeeping()` reorders
 `this.cardsWorthKeeping`. Servers below 0.5 or with infinite cost are dropped;
@@ -348,8 +356,7 @@ card while the debug flag `viewAllFronts` is on.
 
 ## Known limits
 
-- `Math.random()` and `RandomRange` are called directly, so decisions cannot be
-  seeded; jitter is added after caching and can cross any threshold.
+- Jitter is added after caching and can cross any threshold.
 - Server ranking ignores cost; its comparator never returns 0.
   `AIGripRunPotential` is not in `cachedPotentials`.
 - Bonus-breaker ranking reads `AISpecialBreaker` from the candidate wrapper, not

@@ -908,9 +908,9 @@ cardSet[31014] = {
 				  }
 			  }
 			  //random from ctcf
-			  var cardAIdx = RandomRange(0, ctcf.length - 1);
+			  var cardAIdx = runner.AI._randomIndex(ctcf.length);
 			  var cardA = ctcf.splice(cardAIdx,1)[0];
-			  var cardB = ctcf[RandomRange(0, ctcf.length - 1)];
+			  var cardB = ctcf[runner.AI._randomIndex(ctcf.length)];
 			  return [{ cards: [ cardA, cardB] }];
 			  //is there any reason not to proc Steve?
 			  //return continueChoice;
@@ -1213,7 +1213,7 @@ cardSet[31017] = {
 				}
 			}
 			//otherwise, the decision between pieces of ice is based on potential + random jitter
-			var thisScore = 0.1*Math.random() + runner.AI._getCachedPotential(server);
+			var thisScore = 0.1*runner.AI._random() + runner.AI._getCachedPotential(server);
 			if (thisScore > bestScore) {
 				bestScore = thisScore;
 				bestIndex = i;
