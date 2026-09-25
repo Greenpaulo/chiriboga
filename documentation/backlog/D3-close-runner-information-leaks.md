@@ -10,7 +10,7 @@ themselves instead of relying on every caller.
 
 ## Current behaviour
 Found while documenting the Runner AI (see
-[architecture: what the Runner AI knows](../architecture.md#what-the-runner-ai-knows)):
+[architecture: what the Runner AI knows](../runner-ai/architecture.md#what-the-runner-ai-knows)):
 
 - `Trash()` in `mechanics.js` calls `LoseInfoAboutHQCards(card)` with the real
   identity of any card trashed from HQ, even when it leaves face down, so the

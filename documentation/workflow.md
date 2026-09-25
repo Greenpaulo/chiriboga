@@ -11,6 +11,9 @@ Codex usage. The rule of thumb:
 You do not need to remember skill names: plain English ("fix this ticket")
 works in Codex. The prompts for Claude chat are below to copy.
 
+Why the workflow is set up this way is explained in
+[working-with-agents.md](working-with-agents.md).
+
 ## ⚡ Quick reference
 
 | Step | Where | You do | You get |

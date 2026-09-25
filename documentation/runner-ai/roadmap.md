@@ -70,7 +70,7 @@ Existing Runner AI code that breaks a shared principle.
 - **Goal:** Route Runner AI randomness through an injectable source so decisions are reproducible.
 
 ### D3 Close Runner AI information-boundary leaks
-- **Status:** proposed
+- **Status:** ready
 - **Depends on:** none
-- **Spec:** [D3-close-runner-information-leaks.md](specs/D3-close-runner-information-leaks.md)
+- **Ticket:** [D3-close-runner-information-leaks.md](../backlog/D3-close-runner-information-leaks.md)
 - **Goal:** Stop Runner decisions depending on hidden Corp cards or Stack order; make helpers enforce visibility.
