@@ -1,7 +1,7 @@
 # Vantage Point Implementation Notes
 
 Verified implementation notes for mechanics introduced or confirmed while
-completing Batch 1. The external-agent runbook remains authoritative; these
+completing Batch 1. The `implement-card-batch` skill remains authoritative; these
 notes supplement it rather than replacing its required repository reading.
 
 ## Batch 1 engine support

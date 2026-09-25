@@ -59,6 +59,8 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 
 # Developer Documentation
 
+Working with coding agents (Codex): see [documentation/workflow.md](documentation/workflow.md) for the commands, ticket lifecycle and guardrails.
+
 ## Missing Cards
 
 The following Elevation cards are not yet implemented (6 cards):

@@ -94,10 +94,12 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 ## 7. Hand off
 
 - Add a `## Resolution` section directly under the ticket's header (above any
-  plan): what changed and why, where and why you departed from the ticket or
+  plan). Start it with `Implemented from <sha>` (the starting commit from
+  step 1) so the reviewer can find the exact diff, then give what changed and why, where and why you departed from the ticket or
   plan, tests added or moved, and anything left open. Keep the original
   diagnosis below it so the reviewer can compare. Tick the acceptance criteria
-  that are met.
+  that are met. For a ticket in `remediation/`, add a dated remediation entry
+  to the Resolution that answers each review finding by number.
 - `git mv` the ticket into the `code-review/` folder beside it
   (`documentation/bugs/code-review/` or `documentation/backlog/code-review/`).
 - Do not commit. Report the files changed, test results, deviations from the

@@ -1,17 +1,16 @@
 # Running a Card-Set Implementation with Coding Agents
 
 This is the user-facing procedure for implementing a large card set through
-Codex, Claude Code, Cline or another repository-aware coding agent. The agent
-runbooks contain the technical instructions; this document explains exactly
-what the user should do and say.
+Codex, Claude Code, Cline or another repository-aware coding agent. The
+`implement-card-batch` skill contains the technical instructions; this document
+explains exactly what the user should do and say.
 
 ## Files and responsibilities
 
 | File                                       | Purpose                                                            | Normally edited by           |
 | ------------------------------------------ | ------------------------------------------------------------------ | ---------------------------- |
 | `current-set-implementation.md`            | Active set, batch queue, ownership, status and completion evidence | Setup agent and batch agents |
-| `card-set-codex-batch-runbook.md`          | Set-agnostic execution instructions for Codex                      | Maintainers only             |
-| `card-set-external-agent-batch-runbook.md` | Set-agnostic instructions for other repository-aware agents        | Maintainers only             |
+| `.agents/skills/implement-card-batch/SKILL.md` | Set-agnostic one-batch instructions for any coding agent       | Maintainers only             |
 | `card-implementation-backlog.md`           | Long-term unfinished work and archived set-level status            | Batch/final-review agents    |
 | `new-set-integration-guide.md`             | Definition of done for adding a complete set                       | Maintainers only             |
 
@@ -33,25 +32,27 @@ overwrite the shared set file even if their intended card ranges differ.
 
 ## Implement one batch with Codex
 
-Start a new Codex chat in the repository and paste exactly:
+Start a new Codex chat in the repository and type:
 
 ```text
-Read documentation/new-sets/card-set-codex-batch-runbook.md and follow it.
+$implement-card-batch
 ```
 
+Plain English such as "implement the next card batch" also triggers the skill.
 That instruction authorizes one batch only. Codex will read the current-set
 tracker, resume an interrupted batch or claim the next pending batch, implement
 and test it, and update the queue and completion log.
 
-## Implement one batch with another VS Code agent
+## Implement one batch with another agent
 
-Start a new agent chat in the same repository and paste exactly:
+Agents that do not load `.agents/skills/` automatically can be pointed at the
+skill file directly. Start a new agent chat in the same repository and paste:
 
 ```text
-Read documentation/new-sets/card-set-external-agent-batch-runbook.md and follow it.
+Read .agents/skills/implement-card-batch/SKILL.md and follow it.
 ```
 
-The external-agent runbook is tool-neutral. The extension must be able to read
+The skill is tool-neutral. The extension must be able to read
 and edit the workspace and run terminal commands. If it operates in a different
 clone, its tracker and prior batch edits will not be shared until Git changes
 are transferred.
@@ -74,8 +75,7 @@ fresh chat keeps context smaller; the tracker supplies continuity.
 ## Resume an interrupted batch
 
 If a session ends while a row remains `In progress`, do not reset it to
-`Pending`. Start a new chat—using either runbook—and paste its normal one-line
-prompt. The next agent is required to resume the first in-progress batch.
+`Pending`. Start a new chat and use the normal one-line prompt. The next agent is required to resume the first in-progress batch.
 
 If you know another agent is still actively working, wait for it instead of
 starting a second session.
@@ -83,11 +83,10 @@ starting a second session.
 ## Handle a blocked batch
 
 Read the blocker in the queue. If you can supply the missing ruling or approve
-the necessary scope, start a new chat with the appropriate normal runbook plus
-that one fact. For example:
+the necessary scope, start a new chat with the normal prompt plus that one fact. For example:
 
 ```text
-Read documentation/card-set-codex-batch-runbook.md and follow it.
+$implement-card-batch
 For the blocked card, use the ruling that <concise ruling or decision>.
 ```
 
@@ -109,7 +108,7 @@ only remove hidden/untested flags if every requirement passes. Do not silently
 accept limitations; report and record any blocker.
 ```
 
-This is deliberately not part of the one-batch runbooks. It checks interactions
+This is deliberately not part of the one-batch skill. It checks interactions
 between batches and decides whether the registry flags can safely change.
 
 ## Change to a different active set
@@ -170,7 +169,7 @@ summary, unresolved limitations and final review state in
 
 Set the tracker's `Status` to `Inactive`, preserve the current queue/log in the
 backlog or an archived tracker, and do not leave a different set implied by old
-paths. Both runbooks will stop safely when the tracker is inactive.
+paths. The skill will stop safely when the tracker is inactive.
 
 ## Minimal recurring workflow
 
@@ -178,7 +177,7 @@ For ordinary operation, the whole user loop is:
 
 1. Ensure no other agent is running.
 2. Open a new chat.
-3. Paste the one-line runbook prompt.
+3. Type `$implement-card-batch`.
 4. Review the diff, tracker entry and tests.
 5. Optionally commit.
 6. Repeat until all batches are complete.

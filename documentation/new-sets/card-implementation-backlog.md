@@ -110,7 +110,7 @@ and untested and must not yet be treated as a complete playable set.
 
 Vantage Point is the active batched implementation. Its live queue, ownership,
 status summary and append-only completion log are maintained in
-`documentation/new-sets/current-set-implementation.md`. The generic agent runbooks must
+`documentation/new-sets/current-set-implementation.md`. The `implement-card-batch` skill must
 update that tracker after every status transition and completed batch.
 
 No repository-wide rules-text comparison has yet been completed for the other

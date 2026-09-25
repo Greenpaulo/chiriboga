@@ -193,22 +193,21 @@ Include any known ruling or accepted limitation in that prompt. Do not paste
 the documentation or previous chat transcript; ask the session to inspect the
 current worktree and tests instead.
 
-For batched set implementation, the repository provides two set-agnostic,
-executable one-batch runbooks and one current-set tracker:
+For batched set implementation, the repository provides a set-agnostic,
+one-batch agent skill and one current-set tracker:
 
 - `documentation/new-sets/card-set-agent-operator-guide.md` — user instructions, exact
   prompts, review/recovery steps and the procedure for switching sets;
-- `documentation/new-sets/card-set-codex-batch-runbook.md` for Codex;
-- `documentation/new-sets/card-set-external-agent-batch-runbook.md` for Claude Code,
-  Cline and other repository-aware coding agents;
+- `.agents/skills/implement-card-batch/SKILL.md`, used by Codex automatically
+  and readable by any other repository-aware coding agent;
 - `documentation/new-sets/current-set-implementation.md` for the active set metadata,
   batch queue, ownership, verification commands and completion log.
 
-The user can simply ask the chosen agent to read and follow its runbook. Each
-runbook reads the tracker to discover the active set, selects the next unfinished
+The user can simply ask the agent to implement the next batch. The skill reads
+the tracker to discover the active set, selects the next unfinished
 batch, performs the work, updates status/ownership and appends test evidence.
 Switching sets changes only the tracker, so batch IDs and prior chat history do
-not need to be pasted and the runbooks do not drift between sets.
+not need to be pasted and the skill does not drift between sets.
 
 At minimum, check the structural fields relevant to the card type:
 

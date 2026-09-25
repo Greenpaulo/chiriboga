@@ -1,7 +1,7 @@
 # Current Card-Set Implementation
 
 This is the canonical handoff and progress log for the one card set currently
-being implemented in batches. The generic agent runbooks read this file to learn
+being implemented in batches. The `implement-card-batch` skill (`.agents/skills/implement-card-batch/SKILL.md`) reads this file to learn
 which set and batch to work on; they must not hardcode a set name themselves.
 
 User-facing prompts and operating instructions are in
@@ -23,6 +23,7 @@ same time.
 | Card range                    | `36001–36066`                            |
 | Registry state during batches | `hidden: true`, `untested: true`         |
 | Focused integration test      | `tests/vantagepoint-integration.test.js` |
+| Implementation notes          | `documentation/new-sets/vantage-point-implementation-notes.md` |
 
 If `Status` is `Inactive`, an agent must not infer or start a set. It should
 report that no current set has been selected.
@@ -33,7 +34,7 @@ report that no current set has been selected.
 2. Otherwise claim the first `Pending` batch.
 3. Never skip a `Blocked` batch silently. If it is the first outstanding batch,
    report its blocker unless the user explicitly authorizes another batch.
-4. Implement exactly one batch per runbook invocation.
+4. Implement exactly one batch per skill invocation.
 5. If all batches are `Complete`, report that the set-wide review is next.
 
 Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
@@ -113,4 +114,5 @@ Before replacing the active set:
    completion log and verification commands.
 3. Verify the new batches cover every intended card exactly once without gaps
    or overlaps.
-4. Leave the generic Codex and external-agent runbooks unchanged.
+4. Update the **Implementation notes** row to the new set's notes file.
+5. Leave the generic `implement-card-batch` skill unchanged.
