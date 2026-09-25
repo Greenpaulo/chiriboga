@@ -152,6 +152,7 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders, keeping a linked roadmap item's status and links in step |
 | `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done (including in-progress items whose ticket is open again) |
 | `node scripts/roadmap.js list` | Every AI roadmap item and its status |
+| `node scripts/ai-game.js [--seed s \| --seeds a-b]` | Plays seeded AI-vs-AI games headlessly (default Duel PD vs Tao) and prints one JSON line per game: winner, turns, time, points, a log fingerprint and any engine errors |
 | `node scripts/roadmap.js gates` | Every item with an acceptance gate, grouped by what is left to do (gates waiting to run, failed, not built); see [judging-ai-changes.md](judging-ai-changes.md) |
 | `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket; refuses one not re-verified against the current code |
 | `node scripts/card-status.js` | Regenerates `documentation/card-status.md`: per-set card counts, missing and unfinished cards, config disagreements, Runner keep coverage |

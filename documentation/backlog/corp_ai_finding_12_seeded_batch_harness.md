@@ -14,7 +14,29 @@ extension point, and baselines are committed so later items compare against
 the same numbers (review finding 12).
 
 ## Current behaviour
-There is no batch runner; `scripts/` has none. The pieces:
+**Step 1 is done (2026-09-25, at `58f3a4d` plus D2):** `scripts/ai-game.js`
+plays one full seeded AI-vs-AI game headlessly with the real engine files, the
+real `StartGame()` and `Main()` loop and both AIs, from two precons. Findings:
+- Only browser globals needed stubbing: jQuery (with a real `extend`), PIXI,
+  `document`, timers (`window.setTimeout` runs the next step with
+  `setImmediate`), `cardRenderer`, `particleSystems`, placeholder textures,
+  plus loading `sounds.js`. No engine change was needed, and the
+  end-of-game problem `decks.js` warns about did not appear.
+- Three streams per seed (engine `Math.random`, `corp.AI._random`,
+  `runner.AI._random`) make games reproducible: the same seed replays the same
+  610-line log (`logHash`), and different seeds play different games.
+- A missing stub (`particleSystems`) made an AI choice throw and fall back to
+  an arbitrary option without failing the game, so the script fails any game
+  that logs an engine error. The harness must keep that rule.
+- **Speed is the constraint.** Ten games of Duel PD vs Tao took 5 s to 6.4
+  min each, typically 30 to 40 s. A profile puts 85% of the time in the Corp
+  AI's `_evaluateServerSecurity()` (via `_icePlanOutcome`, `_protectionScore`,
+  `_rankedInstallOptions`), which F3 targets; the engine loop is cheap. At
+  that speed a 2,400-game gate takes about 3 hours on 8 parallel processes.
+
+The rest of this ticket builds the batch runner on `scripts/ai-game.js`.
+
+Before step 1 there was no batch runner. The pieces:
 - `decks.js` has a disabled (`if (false)`) test-field block that sets
   `mainLoopDelay = 50` "for speedy AI vs AI testing" in the browser.
 - `tests/corp-decision-fixtures.test.js` evaluates one Corp decision
@@ -57,9 +79,8 @@ See [architecture: foundations](../corp-ai/architecture.md#foundations).
   marked `playable` in `documentation/card-sets.md` and the precons into one
   `vm` context per game. Rendering, sound and DOM calls are stubbed, and the
   main loop is stepped synchronously with no delay.
-- The first task is to prove that one game runs to `PlayerWin` headlessly.
-  If rendering cannot be stubbed, stop and record why before choosing a
-  browser-driven fallback (`engine_text.html` under Playwright).
+- Step 1 (one game runs to `PlayerWin` headlessly) is done; see Current
+  behaviour. The browser-driven fallback is not needed.
 - Options:
   `--pool <file> --games <n per pair> --seeds <file|range> --start <fixture>
   --corp-option <name>=<value> --runner-option <name>=<value> --collector
@@ -203,6 +224,24 @@ and call them from `PlayerWin()`. They emit the `gameEnd` event.
 consumer's gate names the baseline file it compares against, and a consumer
 that changes default behaviour commits a new baseline.
 
+**Running gates: cost and who runs them.** Measured after F3: about 27 s per
+game on 8 parallel processes, so a full gate (200 games × 6 pairs × baseline
+and candidate = 2,400 games) takes about 2¼ hours. It costs no tokens, but it
+must not tie up an agent session. The runner therefore supports:
+- **Gates run from the terminal.** `implement-ticket` hands off with
+  `**Gate:** pending` and records the exact command; the owner runs it when
+  convenient and the result goes into the Resolution, as with
+  `ticket.js check`.
+- **Baseline reuse.** A baseline report is keyed by commit, pool hash, seed
+  list, `--start` fixtures, collectors and options. When a matching report
+  exists, `--compare` reuses it and plays only the candidate half.
+- **Quick check first.** `--quick` plays 50 games per pair and reports the
+  same intervals, marked "indicative". Only a full run can pass a gate.
+- **Early stopping (optional, later).** Check the intervals as games finish
+  and stop once every guarded metric is clearly inside or outside its
+  threshold. It needs a stopping rule that keeps the 95% level honest
+  (group-sequential bounds), so it is not part of the first version.
+
 ## Safety and information boundary
 - Corp AI policy is seeded only through `CorpAI._random`, and Runner AI
   policy only through D2's seam. New AI policy code must not call global
@@ -271,4 +310,6 @@ when:
 - [ ] The collector extension point, the AI-option flags and the telemetry mode are described in `documentation/corp-ai/architecture.md` (Foundations), including how a consumer adds a collector.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] I0 references this runner and its telemetry path.
+- [ ] Baseline reuse and `--quick` work as described under "Running gates", with tests.
+- [ ] Once the runner works, the same change updates the process to match: `implement-ticket` and `review-ticket` (the gate is a terminal step the owner runs, not the agent), `documentation/workflow.md` (the gate command in the quick reference and helper table), and `documentation/judging-ai-changes.md` (how to run a gate, how long it takes, reading the report).
 - [ ] `node tests/run-all-tests.js` passes.
