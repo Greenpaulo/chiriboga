@@ -87,6 +87,10 @@ premise no longer holds, then set the header line to the commit checked:
 
 ## Acceptance gates
 
+The owner's guide to gates (why, who does what, how to read results) is
+[judging-ai-changes.md](judging-ai-changes.md). `node scripts/roadmap.js gates`
+lists gated items by what is left to do.
+
 An item whose goal is to play better, rather than to reproduce a fixed
 decision, is **gated**: deterministic tests cannot show that the change helps,
 so its **Acceptance gate** decides adoption from seeded games run with the F4

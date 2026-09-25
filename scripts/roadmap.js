@@ -6,6 +6,9 @@
 //   node scripts/roadmap.js list          every item with its status
 //   node scripts/roadmap.js next          items whose dependencies are all done
 //                                         (ready, proposed, or in-progress with an open ticket)
+//   node scripts/roadmap.js gates         items with an acceptance gate, grouped by
+//                                         what is left to do (see
+//                                         documentation/judging-ai-changes.md)
 //   node scripts/roadmap.js raise <ID>    move a proposed item's spec into
 //                                         documentation/backlog/ and mark it ready;
 //                                         refuses a spec not re-verified against
@@ -95,6 +98,68 @@ function next(items) {
   }
 }
 
+// Acceptance gates (documentation/judging-ai-changes.md). An item is gated when
+// its spec or ticket says how adoption is judged beyond deterministic tests.
+const sectionOf = (text, heading) => {
+  const start = text.indexOf('\n' + heading + '\n');
+  if (start < 0) return '';
+  const rest = text.slice(start + heading.length + 2);
+  const end = rest.search(/^## /m);
+  return end < 0 ? rest : rest.slice(0, end);
+};
+
+function gateInfo(item) {
+  const file = itemPath(item);
+  if (item.id === 'F4' || !file || !fs.existsSync(file)) return null;
+  const text = fs.readFileSync(file, 'utf8');
+  const gate = sectionOf(text, '## Acceptance gate');
+  const criteria = sectionOf(text, '## Acceptance criteria');
+  let kind = null;
+  if (/behind an AI option/.test(criteria)) kind = 'on/off';
+  else if (/snapshots?\b[^.\n]*\bidentical/i.test(criteria + gate)) kind = 'no-change';
+  else if (/^\s*Human gate/.test(gate)) kind = 'human';
+  else if (/\bF4\b/.test(gate) || (/\bbaseline\b/.test(gate) && /\bF4\b/.test(text))) kind = 'other';
+  if (!kind) return null;
+  const option = ((text.match(/options\.(\w+)/) || text.match(/option\s+`(\w+)`/) || [])[1]) || '';
+  const result = ((sectionOf(text, '## Resolution').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1] || '').trim();
+  let state = 'not built';
+  if (/^passed\b/i.test(result)) state = 'passed';
+  else if (/^failed\b/i.test(result)) state = 'failed';
+  else if (result) state = 'waiting';
+  else if (item.status === 'in-progress') state = 'being built';
+  else if (item.status === 'done') state = 'passed';
+  return {item, file, kind, option, state, result};
+}
+
+const gatedItems = items => items.map(gateInfo).filter(Boolean);
+
+function gates(items) {
+  const f4 = items.find(item => item.id === 'F4');
+  const f4Done = f4 && f4.status === 'done';
+  console.log('F4 batch harness: ' + (f4 ? f4.status : 'missing') +
+    (f4Done ? '. Gates can be run.' : '. Not built yet, so no F4 gate can be run.'));
+  const all = gatedItems(items);
+  const kinds = {'on/off': 'switched on only if an on/off comparison passes',
+    'no-change': 'decisions must match the recorded snapshots, except changes the ticket lists', other: 'other seeded-game (F4) check', human: 'judged on human game data'};
+  const groups = [
+    ['Built, option off, gate waiting to be run' + (f4Done ? ' (run these now)' : ' (run when F4 is done)'),
+      g => g.state === 'waiting'],
+    ['Gate failed (option stays off; see the ticket)', g => g.state === 'failed'],
+    ['Being built', g => g.state === 'being built'],
+    ['Not built yet', g => g.state === 'not built'],
+    ['Gate passed', g => g.state === 'passed'],
+  ];
+  for (const [title, test] of groups) {
+    const group = all.filter(test);
+    console.log('\n' + title + ': ' + (group.length ? '' : 'none'));
+    for (const g of group) {
+      console.log('  ' + g.item.id.padEnd(7) + g.item.status.padEnd(12) + g.item.title +
+        '\n' + ' '.repeat(9) + kinds[g.kind] + (g.option ? '; option `' + g.option + '`' : '') +
+        (g.result ? '\n' + ' '.repeat(9) + 'Gate: ' + g.result : ''));
+    }
+  }
+}
+
 // Rewrite relative Markdown links in a moved file so they still resolve.
 function rebaseLinks(text, fromDir, toDir) {
   return text.replace(/\]\((?!https?:|#|\/)([^)]+)\)/g, (match, target) => {
@@ -149,7 +214,7 @@ function raise(items, id) {
     ' implement-ticket re-verifies them when it picks the ticket up.');
 }
 
-module.exports = {parseRoadmap, parseAll, itemPath, linkTargets, resolveFrom, rebaseLinks, VERIFIED,
+module.exports = {parseRoadmap, parseAll, itemPath, gatedItems, linkTargets, resolveFrom, rebaseLinks, VERIFIED,
   STATUSES, ID, AREAS, root};
 
 if (require.main === module) {
@@ -158,8 +223,9 @@ if (require.main === module) {
     const items = parseAll();
     if (command === 'list') list(items);
     else if (command === 'next') next(items);
+    else if (command === 'gates') gates(items);
     else if (command === 'raise' && id) raise(items, id);
-    else { console.log('usage: node scripts/roadmap.js list | next | raise <ID>'); process.exitCode = 1; }
+    else { console.log('usage: node scripts/roadmap.js list | next | gates | raise <ID>'); process.exitCode = 1; }
   } catch (error) {
     console.log(error.message);
     process.exitCode = 1;

@@ -133,6 +133,12 @@ run `node scripts/roadmap.js raise <ID>`, which moves its spec into
 usual. Previous versions are kept in each side's `legacy/` folder for
 comparison.
 
+Items meant to make an AI play better are **gated**: they ship switched off and
+are switched on only when seeded AI-vs-AI games (F4) show they meet numbers set
+in advance. What that means, what you do at each step and how to read the
+results is in [judging-ai-changes.md](judging-ai-changes.md);
+`node scripts/roadmap.js gates` lists which items need a gate run.
+
 ## 🧾 Helper scripts
 
 Free, deterministic steps that agents (and you) run instead of reading files:
@@ -146,6 +152,7 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders, keeping a linked roadmap item's status and links in step |
 | `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done (including in-progress items whose ticket is open again) |
 | `node scripts/roadmap.js list` | Every AI roadmap item and its status |
+| `node scripts/roadmap.js gates` | Every item with an acceptance gate, grouped by what is left to do (gates waiting to run, failed, not built); see [judging-ai-changes.md](judging-ai-changes.md) |
 | `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket; refuses one not re-verified against the current code |
 | `node scripts/card-status.js` | Regenerates `documentation/card-status.md`: per-set card counts, missing and unfinished cards, config disagreements, Runner keep coverage |
 

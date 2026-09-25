@@ -7,7 +7,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {parseAll, itemPath, linkTargets, resolveFrom, VERIFIED, STATUSES, AREAS, root} =
+const {parseAll, itemPath, gatedItems, linkTargets, resolveFrom, VERIFIED, STATUSES, AREAS, root} =
   require('../scripts/roadmap.js');
 
 const problems = [];
@@ -124,6 +124,16 @@ for (const file of walk(path.join(root, 'documentation', 'backlog')).filter(f =>
   check(referenced.has(file), rel(file) + ' declares ' + declared + ' but no roadmap links it');
   check(inDone(file) === (item.status === 'done'), rel(file) + ' is ' + (inDone(file) ? '' : 'not ') +
     'in done/ but ' + declared + ' is ' + item.status);
+}
+
+// An item judged by seeded games (an on/off comparison or another F4 check)
+// must depend on F4, directly or through its dependencies, so that
+// `roadmap.js next` never offers it before its gate can be run.
+const reachesF4 = (id, seen = new Set()) => (byId.get(id) || {depends: []}).depends.some(dep =>
+  dep === 'F4' || (!seen.has(dep) && seen.add(dep) && reachesF4(dep, seen)));
+for (const gated of gatedItems(items)) {
+  if (['on/off', 'other'].includes(gated.kind))
+    check(reachesF4(gated.item.id), gated.item.id + ' is judged by seeded games but does not depend on F4');
 }
 
 // Every code-like name in each architecture.md must exist in the code.

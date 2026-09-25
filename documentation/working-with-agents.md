@@ -244,9 +244,12 @@ fails if any of these is skipped.
   information leaks (D3), the special-breaker check, Kit's hook, and the Runner
   trash-cost behaviour. The Runner AI has not been worked on yet; D3 is the
   natural place to start.
-- Possible next guardrails: a check that fails when `ai_corp.js` or
-  `ai_runner.js` gains a new card-title comparison, and a Codex pre-command hook
-  that blocks raw reads of the card metadata or card images.
+- Possible next guardrail: a Codex pre-command hook that blocks raw reads of
+  the card metadata or card images. (The card-title check now exists for
+  `ai_corp.js`: `tests/corp-ai-card-titles.test.js`.)
+- Gates: "play better" items now ship switched off until seeded AI-vs-AI games
+  (F4) meet numbers set in advance; see `documentation/judging-ai-changes.md`.
+  No gate can run until D2 and then F4 are built.
 
 ## Where things are
 
@@ -255,6 +258,7 @@ fails if any of these is skipped.
 | Commands and the day-to-day flow | `documentation/workflow.md` |
 | Rules for both AIs | `documentation/ai-principles.md` |
 | How roadmaps, statuses and specs work | `documentation/ai-planning.md` |
+| What a gate is and how to judge whether an AI change plays better | `documentation/judging-ai-changes.md` |
 | Corp AI / Runner AI | `documentation/corp-ai/`, `documentation/runner-ai/` |
 | Which sets are playable / measured status | `documentation/card-sets.md`, `documentation/card-status.md` |
 | Instructions every agent reads | `AGENTS.md` |

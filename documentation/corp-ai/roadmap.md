@@ -7,6 +7,8 @@ Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md)
 
 - `node scripts/roadmap.js next` lists items whose dependencies are all `done`.
 - `node scripts/roadmap.js list` prints every item with its status.
+- `node scripts/roadmap.js gates` lists items with an acceptance gate by what is
+  left to do; see [../judging-ai-changes.md](../judging-ai-changes.md).
 - `tests/ai-roadmaps.test.js` fails if a status, link or dependency here
   disagrees with the tickets.
 
