@@ -107,6 +107,31 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 - **Simulation matrix:** Compare the current flat-debt baseline against candidate weightings for simultaneous naked centrals, HQ agenda flood, an advanced scoring remote, an HVT remote, an Archives backdoor, a poor Corp with one affordable ICE, and a Corp with no installable ICE. Run fixed seeds for reproducibility, then broader randomized batches to detect allocation bias.
 - **Acceptance gate:** Implement weighted debt only if it reduces high-consequence breaches without increasing any continuously insecure server's worst-case wait beyond the configured cap. Keep the present flat-debt behavior as the fallback until those measurements exist.
 
+#### Layer 3.5.2: Action-Feasible Protection Target Fallback — `[COMPLETED — INTERIM BRIDGE]`
+
+- **Gap found in the Baker/Archives regression:** The ranked allocation could
+  correctly put R&D slightly ahead of Archives, but ordinary ICE generation then
+  rejected another R&D layer under the low-economy policy and stopped. A naked,
+  backdoored Archives remained a viable next target but was never considered.
+- **Implemented behavior:** `_serverToProtect()` accepts an optional
+  action-specific eligibility predicate. ICE generation uses
+  `_shouldInstallIceLayer()` through that predicate, so an ineligible first target
+  no longer suppresses the next ranked viable server. General server-only callers
+  retain the existing ranking and fallback behavior.
+- **Archives stakes:** `_serverHasStakes()` now treats a visible agenda in
+  Archives, an active Archives backdoor, or current public/recent run pressure as
+  grounds to bypass the poor-economy reserve for a necessary additional layer.
+  R&D does not inspect hidden deck contents to obtain that exemption; its public
+  threat signals continue to affect ranking instead.
+- **Boundary:** This is a bounded repair to multi-server allocation, not the final
+  install architecture. Phases 1-2 of the
+  [install-decision roadmap](corp_ai_install_decision_roadmap.md) must enumerate
+  and compare concrete `(ICE, server)` candidates jointly, then retire the
+  eligibility-predicate bridge from ordinary ICE generation.
+- **Regression coverage:** Focused tests cover Archives stakes and fallback from
+  a higher-ranked server whose next layer is blocked. The reconstructed
+  Baker/Touchstone fixture verifies an affordable ICE install on Archives.
+
 ### Layer 4: Structural & Type Shifts (Mechanic Classes) — `[COMPLETED]`
 
 - **Goal:** Replace legacy title fast-paths with engine-hook evaluation and generic pattern matchers for type shifts, targeted bypasses, and layer-depth threats.
@@ -121,6 +146,18 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   - Evaluate threat from cards that redirect runs to a different server therefore bypasses all the ICE (e.g., _Sneakdoor Beta_).
 
 **Implemented notes:** `_effectiveIceSubtypes()` now combines the Corp-owned run calculator with active `modifySubTypes`/`AIModifyIceAI` hooks and a hosted-card wording fallback, including correct outermost-encounter handling for _Rielle "Kit" Peddler_. Targeted paid bypasses use `AIBypassesIce`; reusable single-encounter and outermost-only structural bypasses use `AIBypassesOneIce` and `AIBypassesOutermostIce`. Single-ICE agenda remotes receive a bounded protection penalty while one of those public bypasses is live, while multi-ICE servers retain their inner layer. Server redirects use `AIRedirectsRun` plus a generic wording fallback, removing the former _Sneakdoor Beta_ title check. Updated cards in the scoped sets: _Femme Fatale_ and _Sneakdoor Beta_ (`systemupdate2021.js`), plus _Fransofia Ward_ and _Maintenance Access_ (`elevation.js`). _Egret_, _Chromatophores_, and _Rielle "Kit" Peddler_ already exposed sufficient subtype engine hooks and required no card-definition changes. No relevant Layer 4 card in `systemgateway.js` required an update.
+
+**Out-of-run redirect correction:** The Baker/Touchstone regression showed that
+the generic hook existed but returned a false negative during Corp planning.
+Baker asked Touchstone whether its hosted credit was usable while no run was
+active; Touchstone correctly restricts that credit to runs. Baker's
+`AIRedirectsRun` now evaluates the credit source in the prospective Archives-run
+context and restores the real `attackedServer` under `try/finally`. This keeps the
+hook card-agnostic to Corp consumers and makes Archives receive backdoor urgency
+before a real run begins. `sets/vantagepoint.js` was updated for this bug fix even
+though Vantage Point was outside the roadmap's original three-set implementation
+scope. The shared hypothetical-state migration is tracked under F2 in the
+[foundations roadmap](corp_ai_foundations_roadmap.md).
 
 #### Layer 4.1: Unified Bypass Capability Allocation — `[FOLLOW-UP]`
 
@@ -142,6 +179,8 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
   4. A paid targeted bypass produces a soft credit lockout when unaffordable and is ignored when taking the subroutines costs less.
   5. A server redirect compares the complete source-server route with the direct destination route without counting destination ICE twice.
   6. Capability results do not change when hidden Runner grip contents change without a corresponding public-state change.
+  7. A redirect paid by a run-only public credit source is detected during
+     Corp-turn planning without requiring or leaking a live run state.
 - **Acceptance gate:** Adopt the unified allocator only if all existing Layer 4 regressions remain unchanged and combined bypass scenarios produce a traversal cost no higher than the current per-class heuristic. Keep the current hooks as the fallback during migration.
 
 ### Layer 5: Public Threat Memory (Imperfect Information Engine) — `[COMPLETED]`
@@ -314,6 +353,7 @@ holds an affordable `AITagPunishment`; it never changes deterministic security.
 | `_centralBreachLossRisk(server)` | Fair, order-agnostic probability that the next breach supplies the Runner's remaining winning agenda points. |
 | `_classifyRunnerMacroThreat()` | Classifies visible central focus and persistent non-access win conditions. |
 | `card.AIPunishesAccess(server)` | Corp-card hook returning current access-punishment severity for bait planning. |
+| `card.AIRedirectsRun(fromServer, toServer)` | Reports a public server redirect during Corp planning; implementations must evaluate prospective run-only costs without requiring live run state. |
 | `_calculateBaitFrequency(server)` | Returns the bounded severity-weighted probability for a trap server's cached posture roll. |
 | `_remoteDeceptionProfile(card)` | Selects shared agenda/trap ICE-depth and advancement-sequence signals. |
 | `_deceptionAdvancementTarget(card, server, normalTarget)` | Applies the posture's delayed/opening advancement cadence before returning to normal advancement. |
