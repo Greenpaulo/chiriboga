@@ -37,7 +37,10 @@ or throws when a hidden property is read.
   side's roadmap. Do not add new ones.
 
 Checked by: `tests/ai-hook-docs.test.js` (every `AI*` hook in `sets/*.js` is
-documented). New title checks are not yet detected automatically.
+documented, apart from the pre-rule hooks in its `LEGACY_UNDOCUMENTED` list,
+which may only shrink), and `tests/corp-ai-card-titles.test.js` (no new
+card-title literal in `ai_corp.js`; today's are allowlisted as Corp item P1).
+Title checks in `ai_runner.js` are not yet detected automatically.
 
 ## 3. Planning hooks are read-only and safe outside a run
 
@@ -70,10 +73,15 @@ current state.
 
 Prefer an evaluation overlay or snapshot that leaves live state untouched. If
 temporary mutation is unavoidable, use a single guarded helper that restores
-every mutated field in `finally`, including when evaluation throws. Nothing may
-leak into live game state, card locations, counters, cached postures,
-protection debt or randomness, and hypothetical results must never enter a
-cache used for the real board.
+every mutated field in `finally`, including when evaluation throws, with
+regression tests for every mutated collection or field. Nothing may leak into
+live game state, card locations, counters, cached postures, protection debt or
+randomness, and hypothetical results must never enter a cache used for the
+real board.
+
+Checked by: nothing yet. Most Corp probes still mutate by hand; Corp item F2
+migrates them and adds a ratchet test that fails on a new unguarded mutation
+site.
 
 ## 7. Decisions are explainable
 
@@ -86,10 +94,11 @@ merely scored lower.
 
 - Score components are bounded and named; avoid one unexplained aggregate
   formula. Prefer ranking to arbitrary thresholds.
-- Do not adopt uncalibrated coefficients. Changes that depend on tuning need
-  seeded simulation evidence (Corp item F4) before adoption, as each item's
-  acceptance gate states. Until then the existing behaviour remains the
-  fallback.
+- Do not adopt uncalibrated coefficients. Changes that depend on tuning ship
+  behind a default-off AI option and need seeded simulation evidence from the
+  Corp item F4 harness, judged by the comparison rule in
+  [ai-planning.md](ai-planning.md#acceptance-gates), before the option is
+  switched on. Until then the existing behaviour remains the fallback.
 - Keep a rejected design and the reason in the side's `architecture.md` so it
   is not retried by accident.
 

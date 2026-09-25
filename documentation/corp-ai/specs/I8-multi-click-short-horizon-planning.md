@@ -1,7 +1,8 @@
 # I8 Multi-click short-horizon planning
 
-**Roadmap item:** I8 · **Depends on:** I7 · **Sets:** none
+**Roadmap item:** I8 · **Depends on:** I7.1, I7.2, F2, F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
 Evaluate install decisions as parts of short plans rather than isolated clicks,
@@ -9,9 +10,11 @@ so that the Corp stops committing root cards to sequences its remaining clicks
 or credits cannot complete.
 
 ## Current behaviour
-Install and action choices are made one click at a time, with no plan
-representation carrying costs, reserved credits or terminal value between
-clicks.
+Install and action choices are made one click at a time. The only plan-like
+state is the agenda commitment: `_returnPreference()` marks an installed agenda
+`AIScoringPlanCommitted` and `_installedAgendaCanBeCompleted()` reads it (I4
+turns it into a plan record). Nothing carries costs, reserved credits or
+terminal value between clicks of different kinds.
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
@@ -28,7 +31,11 @@ protect HVT server -> reinforce another insecure central
 Work:
 
 - Add a shallow plan representation containing actions, costs, required state,
-  reserved credits, and terminal value.
+  reserved credits, and terminal value (the I7.1/I7.2 value of the resulting
+  board).
+- Evaluate each step through `_withHypothetical()` with a projected credit pool
+  (`projectedCredits`, design note edge case 2); F2's migration of the
+  remaining unguarded probes is required so no step can leak state.
 - Begin with deterministic two-action plans; expand to three actions only after
   performance and correctness are measured.
 - Replan after every resolved action or meaningful state change.
@@ -53,18 +60,27 @@ plans.
 5. Fixed seeds and identical public states produce identical plans.
 
 ## Acceptance gate
-Short planning reduces obviously incomplete install sequences without causing
-unacceptable main-phase latency or stale-plan behaviour.
+Improvement gate: candidate `this.options.shortHorizonPlans` on against I0's
+baseline (with I2 to I7.2 options on in both arms), with the standard guards
+(design note) and:
+
+- Improvement: root commitments that I0's `installOutcomes` collector records
+  as `abandoned` fall per game (candidate minus baseline upper bound below 0).
+- Guards: `decisionLatencyMs` mean upper bound at most +50% of the baseline
+  mean (planning is allowed more than the standard +25%), and the worst single
+  decision at most 500 ms; `stallTurns` upper bound at most +0.5 turns per
+  game.
 
 ## Things to consider
-- Hidden cost collisions (design note edge case 2): install cost depends on the
-  current ICE count, so each later step must budget against a projected credit
-  pool (`projectedCredits`) that subtracts earlier steps' immediate costs.
 - Plans must not grow into multi-turn planning on unknown draws, which is an
   explicit non-goal.
+- F3's per-decision cache would cut plan cost; it is a performance aid, not a
+  dependency, and must never cache a hypothetical step.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test.
+- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

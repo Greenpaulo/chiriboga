@@ -353,7 +353,6 @@ A handful of `AI*`-named properties are **written by the engine at runtime as ca
 
 - `AIIceInstallScore`, `AInumCompatibleIceInstalled`, `AIPreferredTarget`, `AIPlayedWithCost`, `AITurnsInstalled`, `AISuccessfulRuns` — engine-computed, read-only from a card-author's perspective.
 - `AIIceEncounterSaveState` / `AIIceEncounterModifyState` / `AIIceEncounterRestoreState` — these are global engine functions in `ai_runner.js`/`runcalculator.js`, not per-card hooks at all.
-- `AIEconomyCard` — not implemented. It only appears in a comment in `ai_corp.js` as an idea that was never built. Ignore it if you see it referenced anywhere.
 
 ---
 

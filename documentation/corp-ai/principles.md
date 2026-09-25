@@ -19,9 +19,11 @@ that first. Change this file only by explicit decision, and record why.
   how deep a given card sits, unless a game effect revealed those positions,
   and then only the revealed positions.
 
-Checked by: the hidden-information cases in `tests/corp-server-security.test.js`
-(for example "Corp classification never reads hidden grip properties or the
-Runner calculator").
+Checked by: the hidden-information cases in `tests/corp-server-security.test.js`,
+for example "Corp classification never reads hidden grip properties or the
+Runner calculator" (Grip and Runner AI state) and "central breach loss risk
+uses fair combinations rather than hidden order" (R&D order: agendas on top of
+R&D do not raise the loss probability above the fair-combination value).
 
 ## 2. Deterministic security is separate from soft signals
 
@@ -39,12 +41,22 @@ security" and related cases in `tests/corp-server-security.test.js`.
 - AI policy randomness comes only from `CorpAI._random`. Persistent postures
   cache their roll with the card or server; transient tie-breaks are cached for
   one `Choice`.
-- Hypotheticals go through `_withHypothetical(apply, evaluate, restore)`.
+- The rule for hypotheticals: a probe that temporarily changes state goes
+  through `_withHypothetical(apply, evaluate, restore)` (or a shared run or
+  encounter wrapper built on the same guard), which is the only place state is
+  changed by hand, and each mutated collection or field has a regression test
+  showing it is restored, including after a throw.
+- Known debt: today only `_ordinaryPurgeOutcome()` uses `_withHypothetical`.
+  The other probes mutate by hand, some without `finally`; item F2 in
+  [roadmap.md](roadmap.md) lists and migrates them, and F3's cache depends on
+  that migration.
 
-Checked by: "asset destination shuffle uses injected randomness without
-mutating its input", "asset destination tie-break is rolled once per Choice"
-and "bait posture rolls once per installed trap and can stop extra protection"
-in `tests/corp-server-security.test.js`.
+Checked by (randomness only): "asset destination shuffle uses injected
+randomness without mutating its input", "asset destination tie-break is rolled
+once per Choice" and "bait posture rolls once per installed trap and can stop
+extra protection" in `tests/corp-server-security.test.js`. The hypothetical
+rule is not yet checked mechanically; F2 adds
+`tests/corp-ai-hypothetical-mutation.test.js`.
 
 ## 4. Tactical safety examples
 
@@ -67,4 +79,6 @@ human, not by single decisions:
 ## 6. Corp principle debt
 
 Existing card-title special cases in `ai_corp.js` are tracked as item P1 in
-[roadmap.md](roadmap.md).
+[roadmap.md](roadmap.md); `tests/corp-ai-card-titles.test.js` allowlists them
+and fails on any new one. Hand-written hypothetical mutation is tracked as
+item F2.

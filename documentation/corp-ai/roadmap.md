@@ -17,11 +17,12 @@ How vulnerable, valuable or urgent is each server?
 Partly done layers: **Layer 7** (the tactical breach-loss interrupt is done;
 consequence calibration, L7.1, is open) and **Layer 8** (baiting, shared
 profiles and tag deterrence are done; L8.4 and L8.5 are required to complete
-it, L8.2 is open, L8.6 is optional).
+it, L8.2 is open, L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic
+cannot price yet.
 
 ### L3.5.1 Value-weighted protection debt
 - **Status:** ready
-- **Depends on:** F4
+- **Depends on:** F4, L7.1
 - **Ticket:** [feature-layer-3-5-1-value-weighted-protection-debt.md](../backlog/feature-layer-3-5-1-value-weighted-protection-debt.md)
 - **Goal:** Repeatedly skipped high-consequence servers gain urgency faster than empty ones, without new starvation.
 
@@ -33,7 +34,7 @@ it, L8.2 is open, L8.6 is optional).
 
 ### L4.1 Unified bypass capability allocation
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** F2
 - **Ticket:** [feature-layer-4-1-unified-bypass-capability-allocation.md](../backlog/feature-layer-4-1-unified-bypass-capability-allocation.md)
 - **Goal:** Allocate all public bypass tools across the whole run instead of per mechanic class.
 
@@ -45,7 +46,7 @@ it, L8.2 is open, L8.6 is optional).
 
 ### L6.1 Payment-constraint allocation
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** L4.1
 - **Ticket:** [feature-layer-6-1-payment-constraint-allocation.md](../backlog/feature-layer-6-1-payment-constraint-allocation.md)
 - **Goal:** Allocate restricted credit sources (stealth, breaker-only, central-only) against actual payments instead of one scalar ceiling.
 
@@ -53,29 +54,29 @@ it, L8.2 is open, L8.6 is optional).
 - **Status:** ready
 - **Depends on:** F4
 - **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/feature-layer-7-1-consequence-calibration.md)
-- **Goal:** Weight central pressure by the actual consequence of the next breach. The tactical loss interrupt is already done (part of L7).
+- **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
 
 ### L8.2 Deception legibility signals
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** F4, L8.5
 - **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/feature-layer-8-2-remote-deception-profiles.md)
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
 
 ### L8.4 Bounded posture epochs
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** F4
 - **Ticket:** [feature-layer-8-4-bounded-posture-epochs.md](../backlog/feature-layer-8-4-bounded-posture-epochs.md)
 - **Goal:** Replace lifetime bait/bluff postures with epoch-bounded ones that can be reconsidered at meaningful boundaries. Required to complete Layer 8.
 
 ### L8.5 Match-local public outcome feedback
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** F4
 - **Ticket:** [feature-layer-8-5-match-local-public-outcome-feedback.md](../backlog/feature-layer-8-5-match-local-public-outcome-feedback.md)
 - **Goal:** Adjust later posture weights from public outcomes within the current game. Required to complete Layer 8.
 
 ### L8.6 Outcome-calibrated bluff telemetry
 - **Status:** parked
-- **Depends on:** L8.5
+- **Depends on:** L8.4, L8.5
 - **Ticket:** [feature-layer-8-6-outcome-calibrated-bluff-telemetry.md](../backlog/feature-layer-8-6-outcome-calibrated-bluff-telemetry.md)
 - **Goal:** Opt-in telemetry to tune bluff frequencies against humans. Optional.
 - **Parked because:** it needs a meaningful sample of human games.
@@ -85,6 +86,12 @@ it, L8.2 is open, L8.6 is optional).
 - **Depends on:** none
 - **Ticket:** [feature-layer-8-card-set-audit-and-set-adoption.md](../backlog/feature-layer-8-card-set-audit-and-set-adoption.md)
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
+
+### L9 Run-simulation fidelity
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [L9-run-simulation-fidelity.md](specs/L9-run-simulation-fidelity.md)
+- **Goal:** Model what the per-ICE heuristic misses, starting with breakers it cannot price (they make servers look secure when they are not); then cumulative damage, optional effects that remove later breakers, and shared strength-reducer counters.
 
 ### Done
 
@@ -113,19 +120,25 @@ Shared infrastructure used by every area.
 - **Status:** ready
 - **Depends on:** none
 - **Ticket:** [corp_ai_finding_10_guarded_hypothetical.md](../backlog/corp_ai_finding_10_guarded_hypothetical.md)
-- **Goal:** Route every remaining planning probe, including Baker's prospective-run probe, through one guarded helper.
+- **Goal:** Route every hand-written planning probe (11 inventoried functions, including Baker and runcalculator.js) through one guarded helper with a shared depth count, and ratchet new unguarded mutation.
 
 ### F3 Per-decision evaluation cache
 - **Status:** ready
 - **Depends on:** F2, F4
 - **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/corp_ai_finding_11_evaluate_once_per_decision.md)
-- **Goal:** Evaluate each server once per decision without ever serving a stale or hypothetical result.
+- **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
 
 ### F4 Seeded AI-vs-AI batch harness
 - **Status:** ready
-- **Depends on:** none
+- **Depends on:** D2
 - **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/corp_ai_finding_12_seeded_batch_harness.md)
-- **Goal:** Repeatable seeded games with outcome and latency metrics; the evidence every calibration gate needs.
+- **Goal:** Headless seeded AI-vs-AI games on a committed deck pool with core metrics, collectors, AI-option flags, paired comparison and committed baselines.
+
+### F5 Mulligan weight calibration
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F5-mulligan-weight-calibration.md](specs/F5-mulligan-weight-calibration.md)
+- **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option.
 
 ### Done
 
@@ -137,9 +150,12 @@ Shared infrastructure used by every area.
 
 What should the Corp install, where, and is that better than another action?
 Shared design: [specs/install-decisions-design.md](specs/install-decisions-design.md).
-The phases are deliberately sequential: I2 (ICE selection) is the first intentional
-policy change, then one decision class at a time (roles, agendas, assets,
-upgrades) before comparing installs with other actions.
+I0 → I1 → I2 → I3 run in order: I2 (ICE selection) is the first intentional
+policy change and I3 decides what each remote is for. I4 (agendas) and I5
+(assets) then run in parallel; I6 (upgrades) follows I3 and I4. I7.1 compares
+ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
+installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
+I9 comes last.
 
 ### I0 Baseline capture and decision telemetry
 - **Status:** proposed
@@ -155,43 +171,49 @@ upgrades) before comparing installs with other actions.
 
 ### I2 ICE selection by marginal security
 - **Status:** proposed
-- **Depends on:** I1
+- **Depends on:** I1, F2, F4, L7.1
 - **Spec:** [I2-ice-selection-by-marginal-security.md](specs/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Choose the `(ICE, server)` pair that most improves security, using the existing evaluator.
 
 ### I3 Remote role and root suitability
 - **Status:** proposed
-- **Depends on:** I2
+- **Depends on:** I2, F4, L8.4
 - **Spec:** [I3-remote-role-and-root-suitability.md](specs/I3-remote-role-and-root-suitability.md)
 - **Goal:** Decide what each remote is for before comparing root cards.
 
 ### I4 Agenda installation and scoring commitment
 - **Status:** proposed
-- **Depends on:** I3
+- **Depends on:** I3, F4
 - **Spec:** [I4-agenda-installation-and-scoring-commitment.md](specs/I4-agenda-installation-and-scoring-commitment.md)
 - **Goal:** Commit an agenda only with a safe destination and a plausible scoring plan.
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed
-- **Depends on:** I4
+- **Depends on:** I3, F4
 - **Spec:** [I5-asset-ambush-and-economy-value.md](specs/I5-asset-ambush-and-economy-value.md)
 - **Goal:** Compare root assets by expected board value instead of hook-chosen indices.
 
 ### I6 Upgrade selection by marginal effect
 - **Status:** proposed
-- **Depends on:** I5
+- **Depends on:** I3, I4, F4
 - **Spec:** [I6-upgrade-selection-by-marginal-effect.md](specs/I6-upgrade-selection-by-marginal-effect.md)
 - **Goal:** Place upgrades where they change the outcome on that server.
 
-### I7 Install versus other Corp actions
+### I7.1 ICE install versus credit and draw
 - **Status:** proposed
-- **Depends on:** I6
-- **Spec:** [I7-install-versus-other-corp-actions.md](specs/I7-install-versus-other-corp-actions.md)
-- **Goal:** Compare the best install with gaining credits, operations, advancing, rezzing and waiting.
+- **Depends on:** I2, F2, F4
+- **Spec:** [I7.1-ice-versus-credit-and-draw.md](specs/I7.1-ice-versus-credit-and-draw.md)
+- **Goal:** Choose between the best executable ICE install, gaining credits and drawing on one scale.
+
+### I7.2 Root install, operation and advance versus other actions
+- **Status:** proposed
+- **Depends on:** I4, I5, I6, F4
+- **Spec:** [I7.2-root-operation-and-advance-versus-other-actions.md](specs/I7.2-root-operation-and-advance-versus-other-actions.md)
+- **Goal:** Compare root installs, operations, advancing, purge and waiting on the same scale.
 
 ### I8 Multi-click short-horizon planning
 - **Status:** proposed
-- **Depends on:** I7
+- **Depends on:** I7.1, I7.2, F2, F4
 - **Spec:** [I8-multi-click-short-horizon-planning.md](specs/I8-multi-click-short-horizon-planning.md)
 - **Goal:** Evaluate installs as parts of short two- or three-action plans.
 
@@ -207,17 +229,30 @@ Is it better to hold or reorder a legal action for a future condition the Corp
 can already see? Shared design:
 [specs/reactive-commitment-design.md](specs/reactive-commitment-design.md).
 
-### R1 Reserve and optionality model
+### R1.1 Reservation hook and threshold hold
 - **Status:** proposed
 - **Depends on:** F4
-- **Spec:** [R1-reserve-and-optionality.md](specs/R1-reserve-and-optionality.md)
-- **Goal:** Hold a card, credits or an ability when its declared future use is worth more than spending it now.
+- **Spec:** [R1.1-reservation-hook-and-threshold-hold.md](specs/R1.1-reservation-hook-and-threshold-hold.md)
+- **Goal:** Add the reservation hook and record; hold Measured Response and its play cost from threat level 4 through an extended AIReserveCredits.
+
+### R1.2 LEO sacrifice in the last paid-ability window
+- **Status:** proposed
+- **Depends on:** F4, R1.1
+- **Spec:** [R1.2-leo-paid-ability-window.md](specs/R1.2-leo-paid-ability-window.md)
+- **Goal:** Hold LEO's ability until the last Run 4.5 window and use it only when worth a bioroid, counting approach triggers still to come; starts with the LEO bug fix.
+
+### R1.3 Nebula turn-planning hold
+- **Status:** parked
+- **Depends on:** F4, R1.1
+- **Spec:** [R1.3-nebula-turn-planning-hold.md](specs/R1.3-nebula-turn-planning-hold.md)
+- **Goal:** Keep an operation in HQ so Nebula can re-flip after the Runner runs HQ or R&D.
+- **Parked because:** Nebula Talent Management: Making Stars (35057) has no card definition yet.
 
 ### R2 Cross-trigger resolution ordering
 - **Status:** proposed
-- **Depends on:** none
+- **Depends on:** F4
 - **Spec:** [R2-cross-trigger-resolution-ordering.md](specs/R2-cross-trigger-resolution-ordering.md)
-- **Goal:** Order the Corp's own simultaneous triggers for their combined value.
+- **Goal:** Order the Corp's own simultaneous triggers from their declared preferences.
 
 ## Principle debt (P)
 
@@ -225,6 +260,6 @@ Existing code that breaks a principle and must be migrated.
 
 ### P1 Retire legacy card-title special cases
 - **Status:** ready
-- **Depends on:** F3, I2
+- **Depends on:** none
 - **Ticket:** [corp_ai_finding_13_legacy_title_lists.md](../backlog/corp_ai_finding_13_legacy_title_lists.md)
-- **Goal:** Replace the remaining title comparisons in `ai_corp.js` with hooks, row by row.
+- **Goal:** Replace the 64 allowlisted title uses in `ai_corp.js` with hooks; I1/I2/I5-owned rows migrate inside those items; a ratchet test blocks new ones.

@@ -20,13 +20,13 @@ Read only the section you need:
 | [Type shifts, bypasses and redirects](#type-shifts-bypasses-and-redirects) | Mechanics that change which breaker matches or skip ICE | L4 |
 | [Public threat memory](#public-threat-memory) | Hidden-card threats estimated from public information | L5 |
 | [Runner effective credit ceiling](#runner-effective-credit-ceiling) | The Runner's usable credits for a route | L6 |
-| [Central pressure and breach-loss risk](#central-pressure-and-breach-loss-risk) | HQ/R&D urgency, game-losing breach interrupts, rez timing | L7, L7.1 (tactical part) |
+| [Central pressure and breach-loss risk](#central-pressure-and-breach-loss-risk) | HQ/R&D urgency, game-losing breach interrupts, rez timing | L7 (L7.1 open) |
 | [Emergency protection and purge](#emergency-protection-and-purge) | Recovery when HQ has no ICE; when to purge | L7.2, L7.3 |
 | [Baits, bluffs and deterrence](#baits-bluffs-and-deterrence) | Trap postures, agenda bluff profiles, tag deterrence | L8.1–L8.3 |
 | [Install planning today](#install-planning-today) | How install options are generated and chosen | I-items |
-| [Not yet modelled: holding and trigger ordering](#not-yet-modelled-holding-and-trigger-ordering) | Gaps the R-items address | R1, R2 |
-| [Foundations](#foundations) | Randomness, hypotheticals, caching, simulation | F1–F4 |
-| [Known limits](#known-limits) | What the security model does not cover | — |
+| [Not yet modelled: holding and trigger ordering](#not-yet-modelled-holding-and-trigger-ordering) | Gaps the R-items address | R1.1–R1.3, R2 |
+| [Foundations](#foundations) | Randomness, hypotheticals, caching, simulation | F1–F5 |
+| [Known limits](#known-limits) | What the security model does not cover | L9, L6.1 |
 | [Helper reference](#helper-reference) | Key methods at a glance | — |
 
 ## Decision flow
@@ -141,9 +141,11 @@ into one bounded urgency score.
 `_rankedServersToProtect()` keeps the full ordered target list and computes one
 security result per real server. Within a Corp turn, protection installs rotate
 through insecure servers not yet protected that turn before adding another
-layer to one already handled (`_protectionInstallsThisTurn`). At the end of the
-Runner's turn, skipped insecure servers gain a bounded, flat protection-debt
-adjustment (`_serverProtectionDebt`); protected or secure servers reset. The HVT
+layer to one already handled (`_protectionInstallsThisTurn`). At the start of
+each Corp turn after the first ("Corp 1.2", `_prepareProtectionPrioritiesForCorpTurn()`
+calling `_ageProtectionPriorities()`), skipped insecure servers gain a bounded,
+flat protection-debt adjustment (`_serverProtectionDebt`); protected or secure
+servers reset. The HVT
 guarantee stays authoritative: if a generic remote or new-server slot would win
 while an HVT is installed, protection is redirected to the HVT's server.
 
@@ -178,11 +180,13 @@ hosted-card wording fallback, including outermost-encounter handling (Rielle
 reads engine bypass flags.
 
 Targeted paid bypasses use `AIBypassesIce`; reusable single-encounter and
-outermost-only bypasses use `AIBypassesOneIce` and `AIBypassesOutermostIce`.
+outermost-only bypasses use `AIBypassesOneIce` and `AIBypassesOutermostIce`
+(the evaluator reads `AIBypassesOutermostIce`, but no card declares it yet).
 While one of those public bypasses is live, single-ICE agenda remotes take a
 bounded protection penalty; multi-ICE servers keep their inner layer. Server
 redirects use `AIRedirectsRun` plus a wording fallback (the former Sneakdoor
-Beta title check is gone). Cards updated: Femme Fatale and Sneakdoor Beta
+Beta title check is gone); the Corp asks only about Archives-to-HQ redirects
+(`_archivesIsBackdoorToHQ()`). Cards updated: Femme Fatale and Sneakdoor Beta
 (`systemupdate2021.js`), Fransofia Ward and Maintenance Access (`elevation.js`).
 Egret, Chromatophores and Rielle "Kit" Peddler already exposed enough subtype
 hooks and needed no change.
@@ -247,20 +251,26 @@ access, persistent non-access pressure (milling, burn) and bounded growth.
 `_centralServerThreat()` turns these into a server-specific penalty of at most
 eight points. `_classifyRunnerMacroThreat()` reports whether the visible board
 is balanced, HQ-focused, R&D-focused or split, and flags non-interactive
-pressure; its `focus` is diagnostic only, so it is not counted twice. Hidden run
+pressure; its `focus` is diagnostic only (only tests call it today), so it is
+not counted twice; I3 is planned to consume it. Hidden run
 events are excluded (they belong to public threat memory). Cards updated:
 Docklands Pass and Conduit (`systemgateway.js`), Devadatta Drone
 (`elevation.js`). Legwork and The Maker's Eye are hidden events, so treating
 them as board threats would break the information boundary.
 
-**Tactical breach-loss interrupt (the implemented part of L7.1).**
+**Tactical breach-loss interrupt (part of L7).**
 `_centralBreachLossRisk()` computes the fair, order-agnostic probability that
 the next breach gives the Runner enough agenda points to win. At 35% or more,
 `_criticalBreachDefenseAction()` may interrupt a non-winning advancement plan,
 preferring an affordable ICE that materially reduces the risk, then an
-effective purge, then guarded emergency ICE acquisition. A game-winning Corp
-score is exempt. `AICentralPressureAfterPurge(server)` lets scaling cards such
-as Conduit describe their post-purge pressure.
+effective purge, then guarded emergency ICE acquisition. A game-winning score
+of an installed agenda is exempt; a winning agenda still in HQ is not (bug
+ticket
+[winning-hq-agenda-preempted-by-critical-breach-interrupt.md](../bugs/winning-hq-agenda-preempted-by-critical-breach-interrupt.md)). `AICentralPressureAfterPurge(server)` lets scaling cards such
+as Conduit describe their post-purge pressure. Nothing yet weights central
+pressure by what a breach would expose; L7.1 adds that and owns the shared
+breach-consequence signal (a planned breachConsequence accessor) that L3.5.1
+and I2 consume.
 
 **Rez consistency.** `_icePreventsGameWinningBreach()` compares security with an
 approached ICE rezzed (after paying) and absent. If rezzing changes a possibly
@@ -295,7 +305,7 @@ priority. Ordinary scoring and advancement keep their normal priority unless
 the tactical breach-loss evaluator finds at least a 35% next-breach game-loss
 risk that no direct install or purge resolves; once invoked, emergency
 acquisition outranks optional economy and credit gain. It never inspects Corp
-R&D or hidden Runner cards. Future install planning (I7) must keep these
+R&D or hidden Runner cards. Future install planning (I7.1, I7.2) must keep these
 guards.
 
 **Ordinary purge (L7.3).** `_ordinaryPurgeOutcome()` purges only when a guarded
@@ -342,8 +352,9 @@ exposure-versus-punishment odds, so severe traps take a light-defence posture
 less often. `_shouldBaitServer()` rolls once per installed trap and server
 through `_random` and caches the result. No trap posture is allowed when
 breaching that root could win the game; the same winning-breach guard applies
-to agenda bluffs and tag deterrence. Cards updated: Urtica Cipher
-(`systemgateway.js`), Snare! (`systemupdate2021.js`).
+to agenda bluffs and tag deterrence. Cards declaring `AIPunishesAccess`
+include Urtica Cipher (`systemgateway.js`), Snare! (`systemupdate2021.js`) and
+Esca (`vantagepoint.js`).
 
 **Agenda and trap profiles (L8.2 base).** `_remoteDeceptionProfile(card)` gives
 each eligible hidden agenda or trap an independent profile: target ICE depth of
@@ -355,7 +366,8 @@ agenda servers and are disabled when a breach could win.
 
 **Tag deterrence (L8.3).** `_tagPunishmentDeterrence()` gives bounded
 protection relief when the Runner is tagged and the Corp holds an affordable
-card declaring `AITagPunishment`; it never changes deterministic security.
+card declaring `AITagPunishment` (for example Retribution in `systemgateway.js`
+and Unleash in `vantagepoint.js`); it never changes deterministic security.
 
 **Current gaps:** postures are cached for the card's lifetime (L8.4) and public
 outcomes do not feed back into later postures (L8.5).
@@ -376,8 +388,8 @@ does not yet compare concrete options by their outcome.
   are allowed, filtered by optional `AIWorthwhileIce(server, "install")` hooks.
   It does not compare each ICE's marginal effect on security. The older
   `_iceInstallScore()` (printed strength, rez cost, one title case, breaker
-  coverage) is reachable through `_bestIceToInstall()` but not used by the
-  current install path, and does not consult `_evaluateServerSecurity()`.
+  coverage) is used only by `_bestIceToInstall()`, which has no callers, and
+  does not consult `_evaluateServerSecurity()`.
 - **Root destinations** are influenced indirectly through shared protection
   scores: `_emptyProtectedRemotes()`, `_isAScoringServer()`,
   `_scoringServers()`, `_scoringWindow()`, `_bestProtectedRemote()` and
@@ -385,8 +397,10 @@ does not yet compare concrete options by their outcome.
 - **Agendas and HVTs.** `_isHVT(card)` covers agendas, Ambush and Hostile cards,
   offered to scoring servers and ranked by advancement requirement versus
   scoring window and by `_deceptionInstallDistance()`. `_isAScoringServer()`
-  compares a remote with HQ (or, under agenda pressure, Archives), so when HQ is
-  also weak a breachable remote can qualify.
+  first rejects any remote `_evaluateServerSecurity()` does not judge secure;
+  the relative test against HQ (or, under agenda pressure, Archives) only
+  narrows the secure remotes. What is still missing is the Runner's income over
+  the exposure turns and a completion plan before install (I4).
 - **Assets** choose a destination through `AIWorthInstalling(emptyProtectedRemotes)`
   (an index, a new remote, or rejection). Payback, lifetime and opportunity cost
   are not calculated; ordinary assets are steered away from the strongest empty
@@ -403,15 +417,19 @@ does not yet compare concrete options by their outcome.
 
 ## Not yet modelled: holding and trigger ordering
 
-- Every evaluator (`_sufficientEconomy()`, `_protectionScore()`,
-  `_rankedInstallOptions()` and each card's `AIWouldTrigger()`) asks whether an
-  action is good now. None represents "worth more held, for a future condition
-  visible in public state", which decks such as Nebula Talent Management, LEO
-  Construction and Zwicky Supermodernism rely on.
-- The engine already lets the active player order their simultaneous triggers
-  (`ValidateTriggerList` in `phase.js`), but each card's `AIWouldTrigger()`
-  reasons only about itself, so pairs such as Manegarm Skunkworks and Anoetic
-  Void are not ordered for combined value.
+- Credit holds exist only for installed cards: `_sufficientEconomy()` sums
+  `AIReserveCredits` through `_reserveCreditsForCard()`; `_iceWorthRezzing()`
+  saves credits for the attacked server's root and central-card declarations
+  and for a higher-value server's ICE. Nothing holds an HQ card, an identity
+  ability or credits for a card in hand (R1.1–R1.3).
+- `Phase_Approaching()` and `Phase_Movement()` choose LEO's paid ability
+  whenever `trigger` is offered, without calling its `AIWouldTrigger()`, and
+  the bioroid is picked by index (bug ticket
+  [leo-construction-ability-chosen-without-consulting-ai-hook.md](../bugs/leo-construction-ability-chosen-without-consulting-ai-hook.md); R1.2).
+- Each player orders their own simultaneous triggers (`ValidateTriggerList()`
+  is in `utility.js`, not `phase.js`). The Corp AI has no Run 4.6.2 handler, so
+  `_choiceInner()` falls back to index 0, which is `ActiveCards()` install
+  order (R2).
 
 ## Foundations
 
@@ -428,23 +446,28 @@ needs.
   `Choice` (`_decisionRandomState`); `_shuffleCopy()` shuffles a copy through the
   injected source.
 - **Guarded hypotheticals (F2, partial).** `_withHypothetical(apply, evaluate,
-  restore)` restores state in `finally`; ordinary purge evaluation uses it. Some
-  planning probes still mutate and restore manually (item F2).
+  restore)` restores state in `finally`; only `_ordinaryPurgeOutcome()` uses it
+  today. The other planning probes still mutate and restore manually (item F2).
 - **Per-decision cache (F3, not built).** Local duplication is removed (one
   security result per server per ranked pass; one protection score per
   candidate in `_bestProtectedRemote()`), but independent planners can still
   request overlapping evaluations.
-- **Batch harness (F4, not built).** `GameEnded(winner)` is an empty stub; the
-  pieces for seeded AI-vs-AI runs exist but are not joined up.
+- **Batch harness (F4, not built).** `GameEnded(winner)` is an empty stub and
+  nothing calls it; `DecisionSnapshots.totalMs` measures the recorder's own
+  cost, not decision latency. The pieces for seeded AI-vs-AI runs exist but are
+  not joined up. Mulligan weights are uncalibrated until F5.
 
 ## Known limits
 
 Security is a per-ICE heuristic, not a complete run simulation. It does not yet
 model cumulative damage across encounters, optional effects that disable later
-breakers, shared strength-reducer counters across several ICE, or exact
+breakers, or shared strength-reducer counters across several ICE (L9), or exact
 allocation of restricted credit sources across payments (L6.1).
 `AIImplementBreaker` pricing probes support the standard `ImplementIcebreaker`
-activation path; other breaker mechanisms need their own capability hooks.
+activation path; breakers using another mechanism are priced as unable to
+break, which makes servers look secure when they are not. That is L9's first
+priority (bug ticket
+[sang-kancil-and-principia-priced-as-unbreakable.md](../bugs/sang-kancil-and-principia-priced-as-unbreakable.md)).
 The security tests load the real AI classes and card definitions with
 deterministic engine helpers; they do not replace playing the game in the
 browser.

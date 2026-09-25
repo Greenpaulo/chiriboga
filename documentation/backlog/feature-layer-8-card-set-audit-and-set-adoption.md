@@ -2,15 +2,16 @@
 
 **Roadmap item:** L8.7 · **Depends on:** none · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
+**Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
 Make sure every relevant access-punishment trap and tag-punishment card in the scoped sets declares the Layer 8 AI hooks, so baiting and tag-and-bag deterrence work from hooks alone and never from card titles.
 
 ## Current behaviour
-Facedown access-punishing cards expose `AIPunishesAccess(server)`, which `_calculateBaitFrequency()` and `_shouldBaitServer()` consume; `_tagPunishmentDeterrence()` consumes `AITagPunishment` for a bounded protection-score benefit when the Runner is tagged. Urtica Cipher (`systemgateway.js`) and Snare! (`systemupdate2021.js`) declare `AIPunishesAccess`; no relevant access-punishing card in `elevation.js` was updated, and `vantagepoint.js` has not been audited. See [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence).
+Facedown access-punishing cards expose `AIPunishesAccess(server)`, which `_accessPunishmentSeverity()` reads for `_calculateBaitFrequency()` and `_shouldBaitServer()`; `_tagPunishmentDeterrence()` reads `AITagPunishment` (the number of tags required) for a bounded protection-score benefit when the Runner is tagged. Verified declarers in the playable sets: `AIPunishesAccess` on Urtica Cipher (`systemgateway.js`), Snare! (`systemupdate2021.js`) and Esca (`vantagepoint.js`); `AITagPunishment` on Retribution (`systemgateway.js`) and Unleash (`vantagepoint.js`). No `elevation.js` card declares either hook. What is not yet known is whether any other card in the playable sets should: that is this audit. See [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence).
 
 ## Design
-- **Access punishment (`AIPunishesAccess`):** verify facedown ambush cards (for example Urtica Cipher, Snare!, Project Junebug) declare `AIPunishesAccess(server)` with accurate severity values.
+- **Access punishment (`AIPunishesAccess`):** verify facedown ambush cards in the playable sets (for example Urtica Cipher, Snare!, Esca; Project Junebug exists only in the deprecated `coreset.js` and is out of scope) declare `AIPunishesAccess(server)` with accurate severity values.
 - **Tag punishment (`AITagPunishment`):** verify operations and assets that punish tags declare `AITagPunishment`.
 - **Documentation:** make sure signatures and return semantics for `AIPunishesAccess` and `AITagPunishment` are fully documented in `documentation/ai.md`.
 

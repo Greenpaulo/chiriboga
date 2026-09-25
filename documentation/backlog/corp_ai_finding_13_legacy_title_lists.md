@@ -1,62 +1,128 @@
 # P1 Retire legacy card-title special cases
 
-**Roadmap item:** P1 · **Depends on:** F3, I2 · **Sets:** the sets containing the listed cards
+**Roadmap item:** P1 · **Depends on:** none · **Sets:** systemgateway, systemupdate2021 (every title in the inventory is defined in one of these)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
+**Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
-Replace the card-title comparisons and `_copyOfCardExistsIn("...")` calls that remain in `ai_corp.js` with declarative card hooks, so a new-set card with the relevant hook needs no `ai_corp.js` edit (review finding 13). This ticket is the single checklist for the migration; tick rows off here as they are migrated or deleted.
+Replace the card-title literals left in `ai_corp.js` (title comparisons,
+title lists and `_copyOfCardExistsIn("…")` / `_copiesOfCardIn("…")` lookups)
+with declarative card hooks, so that a new-set card with the right hook needs
+no `ai_corp.js` edit (review finding 13). This ticket is the single checklist
+for the migration. Rows owned by an install item are migrated inside that
+item, and P1 migrates the rest.
 
 ## Current behaviour
-About 25 title comparisons and 14 `_copyOfCardExistsIn("...")` calls remain in `ai_corp.js`, covering economy and draw cards, rez timing, kill combos and fast-advance; new-set cards do nothing there unless someone edits `ai_corp.js`. The earlier ticket `hardcoded-card-titles-still-in-aI-corp-logic.md` (original kept in `documentation/corp-ai/legacy/backlog-tickets/`) is merged here: its examples (the `Phase_PostAction` rez list and the Neurospike/Punitive Counterstrike damage lookup) are already rows in the inventory below. See [architecture: foundations](../corp-ai/architecture.md#foundations).
+`tests/corp-ai-card-titles.test.js` measures the debt and ratchets it. It
+extracts every string literal in `ai_corp.js`, ignoring comments, that equals
+a card title. Titles come from `carddata/carddata.json` (the metadata
+`scripts/card-status.js` uses) plus the `title:` fields in `sets/*.js`. Each
+use is keyed as `<method>: <title>` and compared with the `LEGACY_TITLES`
+allowlist:
+- a key not on the allowlist fails the test;
+- a listed key that no longer occurs is named in the one-line summary, so the
+  entry can be deleted and the row ticked here.
+
+At `376f32c` there are **64 allowlisted method/title pairs**: 43 distinct
+titles in 19 methods, 72 literal occurrences (run
+`VERBOSE=1 node tests/corp-ai-card-titles.test.js` for the lines).
+
+Corrections to the inventory this ticket previously carried, which was copied
+from an older revision:
+- The `_sufficientEconomy` 13-title reserve table is gone (review finding 8
+  replaced it with `AIReserveCredits`). There is no Snare! check in
+  `_iceWorthRezzing` and no Clot check anywhere.
+- Snare! is checked in `_bestRecurToHQOption` and `_rankedInstallOptions`,
+  and in `_potentialDamageOnBreach`.
+- `_iceWorthRezzing` has no Snare! check; it still names Inside Job.
+- `Phase_Main` also names Tomorrow's Headline (the Biotic Labor
+  fast-advance combo check).
+- Economy hooks already exist, so a new `AIEconomyCard` hook is not needed:
+  - `AIEconomyCard` (boolean; Regolith Mining License in systemgateway,
+    Anthill Excavation Contract in elevation) is read only by
+    `_openingHandEconomyCard()` for the mulligan;
+  - `AIEconomyPlay` (number) already feeds `_economyCards()`, after its
+    title list, for Corp operations in HQ. It is declared by Caveat Emptor
+    and realloc() in vantagepoint; the Runner event Sell Out uses it on the
+    Runner side.
+
+See [architecture: foundations](../corp-ai/architecture.md#foundations).
 
 ## Design
-Migrate each row to the suggested hook, or delete it where the owning code is removed. Search by function name; line numbers are approximate.
+Each row is migrated to the listed hook, or deleted where its code goes. The
+**Owner** column says where the work happens:
+- **I1:** a special-case install band. I1's unified candidate model keeps it
+  as an explicitly legacy-marked band, and it is removed when a hook-driven
+  band replaces it.
+- **I2:** an ICE-selection title.
+- **I5:** an economy or asset-value title.
+- **P1:** everything else. These rows need nothing from F3 or any I item.
 
-| Done | Function | Titles | Suggested replacement |
-|---|---|---|---|
-| [ ] | `_economyCards` (~2909) | Celebrity Gift, Subliminal Messaging, Government Subsidy, Hedge Fund, Hansei Review, Marilyn Campaign, Regolith Mining License, Nico Campaign, PAD Campaign, Predictive Planogram | New `AIEconomyCard`, already mentioned in a code comment and in `documentation/backlog/deckbuilder-economy-draw-classification-backlog.md` |
-| [ ] | `_bestMainPhaseEconomyOption` (~2945, ~3092) | Oaktown Renovation; Spin Doctor, Sprint, Daily Business Show, Predictive Planogram (draw list) | New draw-card hook alongside `AIEmergencyDraw` |
-| [ ] | `_sufficientEconomy` (~3211) | 13-title reserve table | `AIReserveCredits` (review finding 8) |
-| [ ] | `_iceWorthRezzing` (~3713) | Snare! | `AIReserveCredits` (review finding 8) |
-| [ ] | `_potentialDamageOnBreach` (~857) | Jinteki: Personal Evolution, Urtica Cipher, House of Knives, Snare!, Hokusai Grid | New `AIAccessDamage(server)`, separate from `AIPunishesAccess`, which is documented as a planning weight and not expected damage |
-| [ ] | `Phase_Movement` / `Phase_EOT` (~3991-4047) | Spin Doctor; EOT rez list: Marilyn Campaign, Nico Campaign, PAD Campaign, Clearinghouse, Daily Business Show, Corporate Town | New `AIRezTiming` ("eot", "postAction", "ifDuplicate"), beside `AIWouldRezBeforeScore` |
-| [ ] | `Phase_PostAction` (~4078) | SanSan City Grid, Regolith Mining License, Ronin, Reversed Accounts | `AIRezTiming` |
-| [ ] | `_potentialOperationDamageDirections` / `ThisTurn` (~4284-4410) | Neurospike, Punitive Counterstrike, Biotic Labor, Archived Memories | Extend `AIDamageOperation` |
-| [ ] | `_potentialAdvancementDirections` (~4528-4648) | Weyland: Built to Last, Oaktown Renovation, Seamless Launch, Psychographics, Trick of Light, Biotic Labor | Extend `AIFastAdvance` |
-| [ ] | `_useWhenTaggedCard` (~5050) | Retribution, Predictive Planogram | Existing `AITagPunishment` for Retribution; a hook for Planogram |
-| [ ] | `Phase_Main` (~5198-5399) | Punitive Counterstrike, Neurospike, Public Trail, Archived Memories; Clot (review finding 3); Orbital Superiority, Haas-Bioroid: Precision Design, Offworld Office, Hostile Takeover, Biotic Labor | `AIWouldPlay` / `AIFastAdvance`, and review finding 3 for Clot |
-| [ ] | `_advancementLimit` (~638) | SanSan City Grid | Check whether the engine's `AdvancementRequirement(card)` already includes the modifier. If so, delete the case instead of migrating it. |
-| [ ] | `_cardProtectionValue` (~1380) | Ice Wall | Declarative value hook |
-| [ ] | `_emptyProtectedRemotes` (~2732) | Trick of Light | Hook on the operation |
-| [ ] | `_iceIsDisabled` (~16) | Femme Fatale | Runner-card hook |
-| [ ] | `_iceInstallScore` (~134) | Palisade | Delete with Install Phase 2. The function is unused. |
-| [ ] | `_iceWorthRezzing` (~3865) | Inside Job | Runner-event hook |
-| [ ] | `_iceWorthRezzing` (~3891-3899) | Cell Portal, Chum | Inside a commented-out block, so delete or migrate |
-| [ ] | `_iceInstallOptions` (~3501) and `_bestNonAgendaTutorOption` (~815) | Snare! | `AIPunishesAccess` / `AIReserveCredits` |
+When a row is done, delete its entries from `LEGACY_TITLES` and tick it here.
+
+| Done | Method | Titles | Owner | Replacement |
+|---|---|---|---|---|
+| [ ] | `_rankedInstallOptions` | Snare! | I1 | Legacy-marked "specific case" band in I1; later an ambush-install hook (I5) |
+| [ ] | `_emptyProtectedRemotes` | Trick of Light | I1 | Legacy-marked band in I1 (keep an advanced obsolete bluff's remote occupied); later a hook on the operation |
+| [ ] | `_iceInstallScore` | Palisade | I2 | Deleted with the function (F2 row 9 deletes it as dead code; I2 replaces ICE selection) |
+| [ ] | `_economyCards` | Celebrity Gift, Subliminal Messaging, Government Subsidy, Hedge Fund, Hansei Review, Predictive Planogram | I5 | Existing `AIEconomyPlay` (operations). Keep each card's condition, such as Subliminal Messaging's once per turn and Hansei Review's non-agenda requirement, in its own `AIWouldPlay` |
+| [ ] | `_economyCards` | Marilyn Campaign, Regolith Mining License, Nico Campaign, PAD Campaign | I5 | Asset economy value in I5 (not `AIEconomyPlay`, which is for operations) |
+| [ ] | `_bestMainPhaseEconomyOption` | Oaktown Renovation | I5 | Advance-for-credits hook on the agenda |
+| [ ] | `_bestMainPhaseEconomyOption` | Spin Doctor, Sprint, Daily Business Show, Predictive Planogram | I5 | Draw-for-economy hook alongside `AIEmergencyDraw` |
+| [ ] | `_iceIsDisabled` | Femme Fatale | P1 | Runner-card hook: this program disables the chosen ICE |
+| [ ] | `_advancementLimit` | SanSan City Grid | P1 | First check whether the engine's `AdvancementRequirement()` already applies SanSan. If so, delete the case |
+| [ ] | `_bestRecurToHQOption` | Snare! | P1 | `AIPunishesAccess` on the recursion target |
+| [ ] | `_potentialDamageOnBreach` | Jinteki: Personal Evolution, Urtica Cipher, House of Knives, Snare!, Hokusai Grid | P1 | New `AIAccessDamage(server)`, separate from `AIPunishesAccess`, which is a planning weight rather than expected damage |
+| [ ] | `_cardProtectionValue` | Ice Wall | P1 | Declarative protection-value hook (advancement-scaled strength) |
+| [ ] | `_iceWorthRezzing` | Inside Job | P1 | Runner-event hook (bypasses the first ICE) |
+| [ ] | `Phase_Movement` | Spin Doctor | P1 | New `AIRezTiming` (for example `"approach"`, `"eot"`, `"postAction"`, `"ifDuplicate"`), beside `AIWouldRezBeforeScore` |
+| [ ] | `Phase_EOT` | Marilyn Campaign, Nico Campaign, PAD Campaign, Clearinghouse, Daily Business Show, Corporate Town; Spin Doctor (rez if duplicate) | P1 | `AIRezTiming` |
+| [ ] | `Phase_PostAction` | SanSan City Grid, Regolith Mining License, Ronin, Reversed Accounts | P1 | `AIRezTiming` |
+| [ ] | `_potentialOperationDamageDirections`, `_potentialOperationDamageThisTurn` | Neurospike, Punitive Counterstrike, Biotic Labor, Archived Memories | P1 | Extend `AIDamageOperation` |
+| [ ] | `_potentialAdvancementDirections` | Weyland Consortium: Built to Last, Oaktown Renovation, Seamless Launch, Psychographics, Trick of Light, Biotic Labor | P1 | Extend `AIFastAdvance` |
+| [ ] | `_useWhenTaggedCard` | Retribution, Predictive Planogram | P1 | Existing `AITagPunishment` for Retribution; a when-tagged play hook for Planogram |
+| [ ] | `Phase_Main` | Punitive Counterstrike, Neurospike, Public Trail, Archived Memories (play-now list); Orbital Superiority, Haas-Bioroid: Precision Design, Offworld Office, Hostile Takeover, Tomorrow's Headline, Biotic Labor (fast-advance combo) | P1 | `AIWouldPlay` / `AIDamageOperation` for the play-now list; `AIFastAdvance` plus a score-combo hook for the fast-advance block |
+| [ ] | `_iceWorthRezzing` (commented-out block) | Cell Portal, Chum | P1 | Delete the dead comment. The test ignores comments, so it is not counted |
+
+Rows owned by I1, I2 and I5 are ticked when those items land. P1 is complete
+when its own rows are done. The remaining I-owned entries stay in the
+allowlist, and the ratchet keeps them visible.
 
 ## Safety and information boundary
-- A replacement hook must not widen what the Corp can see: hooks read public state and Corp-known information only.
-- `AIPunishesAccess` is a planning weight, not expected damage; access damage needs its own hook (`AIAccessDamage`).
+- A replacement hook must not widen what the Corp can see. Hooks read public
+  state and Corp-known information only.
+- `AIPunishesAccess` is a planning weight, not expected damage. Access damage
+  needs its own hook (`AIAccessDamage`).
 
 ## Test scenarios
-1. Each migrated row keeps the Corp's decision unchanged for the cards it previously named, now driven by the hook.
-2. A new-set card declaring the relevant hook is picked up with no `ai_corp.js` edit.
+1. Each migrated row leaves the Corp's decision unchanged for the cards it
+   previously named, now driven by the hook.
+2. A new-set card that declares the relevant hook is picked up with no
+   `ai_corp.js` edit.
+3. `tests/corp-ai-card-titles.test.js` fails when a new title literal is
+   added to `ai_corp.js`, and its summary names allowlisted pairs that are no
+   longer present.
 
 ## Acceptance gate
-Every inventory row is either migrated to a hook or marked deleted, and all existing decision fixtures and snapshots pass unchanged.
+Behaviour-identical migration. Decision snapshots are identical to the
+recorded baseline except for listed, justified deltas, and all green corp
+decision fixtures pass unchanged.
 
 ## Things to consider
-- Rows owned by an install phase are migrated inside that phase; the tail of this task is "delete rows, don't migrate them" where a phase already removes the code (for example `_iceInstallScore` with Install Phase 2).
-- Some rows depend on hooks introduced by other work: review findings 3 (Clot) and 8 (`AIReserveCredits`), and F3. Migrate those rows once the hooks exist.
-- `documentation/backlog/deckbuilder-economy-draw-classification-backlog.md` covers overlapping title/ID hardcoding in deckbuilder role classification. Keep it in sync when `AIEconomyCard` lands.
-- This is a big, cross-cutting migration; the original suggestion was to do it after Install Phase 2 and the evaluator fixes.
+- F3 is not a dependency: P1 adds hooks and removes titles, and the cache
+  neither provides nor needs a hook.
+- `documentation/backlog/deckbuilder-economy-draw-classification-backlog.md`
+  covers overlapping title and id hardcoding in deckbuilder role
+  classification. Keep it in step when the economy rows move to
+  `AIEconomyPlay`.
+- `ai_runner.js` has its own title special cases. They are Runner principle
+  debt, and this test does not scan them.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test.
+- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] Decision snapshots are identical to the recorded baseline except for listed, justified deltas.
+- [ ] Every P1-owned row is ticked as migrated or deleted, and its entries are removed from `LEGACY_TITLES` in `tests/corp-ai-card-titles.test.js`.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.
-- [ ] Every row in the inventory is ticked as migrated or deleted.
-- [ ] No new title comparisons are added to `ai_corp.js`.
-- [ ] A test or lint note flags new `_copyOfCardExistsIn("...")` usage where a hook exists.
