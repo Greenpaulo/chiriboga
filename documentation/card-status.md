@@ -14,25 +14,27 @@ which is why playability is a decision recorded in card-sets.md.
 |---|---|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | false / false | yes |
-| `downfall` | not-implemented | 65 | 65 | 0 | 34 | false / false | yes |
+| `downfall` | not-implemented | 65 | 65 | 0 | 34 | true / false | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | true / true | no |
-| `elevation` | playable | 82 | 76 | 6 | 0 | false / true | yes |
-| `vantagepoint` | playable | 66 | 66 | 0 | 16 | true / true | no |
+| `elevation` | playable | 82 | 76 | 6 | 0 | false / false | yes |
+| `vantagepoint` | playable | 66 | 66 | 0 | 16 | false / false | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | true / true | no |
-| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | false / true | yes |
+| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | true / true | no |
 
-## Mismatches to review
+## config.js disagreements
 
-- `downfall` is not-implemented, but config.js offers it to players (hidden: false, in decklauncherSets).
-- `elevation` is playable, but config.js marks it hidden: false, untested: true.
-- `elevation` is playable with 6 missing and 0 unfinished cards.
-- `vantagepoint` is playable, but config.js marks it hidden: true, untested: true.
-- `vantagepoint` is playable with 0 missing and 16 unfinished cards.
-- `creationandcontrol` is not-implemented, but config.js offers it to players (hidden: false, in decklauncherSets).
+config.js must follow card-sets.md; `tests/card-status.test.js` fails on any of these.
+
+None.
+
+## Incomplete playable sets
+
+- `elevation`: 6 missing and 0 unfinished cards (listed below).
+- `vantagepoint`: 0 missing and 16 unfinished cards (listed below).
 
 ## Missing and unfinished cards in playable and in-progress sets
 

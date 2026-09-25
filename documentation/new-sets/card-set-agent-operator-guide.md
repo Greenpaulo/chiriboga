@@ -104,7 +104,8 @@ documentation/new-set-integration-guide.md. All implementation batches should
 now be complete. Perform the full set-wide definition-of-done review: audit all
 card mechanics and AI hooks, search for unfinished stubs, run focused and shared
 tests, validate metadata/images/formats/random decks, update the backlog, and
-only remove hidden/untested flags if every requirement passes. Do not silently
+recommend whether the set can be marked playable in documentation/card-sets.md.
+Do not change card-sets.md or the config.js flags yourself. Do not silently
 accept limitations; report and record any blocker.
 ```
 

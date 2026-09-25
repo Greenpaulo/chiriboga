@@ -1,11 +1,12 @@
 // Run with: node tests/card-status.test.js
 // documentation/card-status.md is generated from the code and must match what
-// scripts/card-status.js produces now; card-sets.md must decide every set.
+// scripts/card-status.js produces now; card-sets.md must decide every set, and
+// config.js flags must follow those decisions.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const {generate, outFile} = require('../scripts/card-status.js');
+const {generate, configMismatches, outFile} = require('../scripts/card-status.js');
 
 const root = path.resolve(__dirname, '..');
 const context = {console};
@@ -15,6 +16,9 @@ const decisions = fs.readFileSync(path.join(root, 'documentation', 'card-sets.md
 const undecided = Object.keys(context.setRegistry.availableSets).filter(key =>
   !new RegExp('^\\|\\s*`?' + key + '`?\\s*\\|\\s*(playable|in-progress|not-implemented|deprecated)\\s*\\|', 'm').test(decisions));
 assert.deepStrictEqual(undecided, [], 'Add a decision for these sets to documentation/card-sets.md: ' + undecided.join(', '));
+
+const disagreements = configMismatches();
+assert.deepStrictEqual(disagreements, [], 'config.js disagrees with documentation/card-sets.md:\n  ' + disagreements.join('\n  '));
 
 const current = fs.existsSync(outFile) ? fs.readFileSync(outFile, 'utf8') : '';
 assert.strictEqual(current, generate(),

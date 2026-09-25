@@ -54,8 +54,7 @@ assert(registry, 'Vantage Point must be registered');
 assert.strictEqual(registry.file, 'vantagepoint');
 assert.strictEqual(registry.code, 'vp');
 assert.deepStrictEqual(Array.from(registry.idRange), [36000, 36999]);
-assert.strictEqual(registry.hidden, true, 'unfinished set must stay hidden');
-assert.strictEqual(registry.untested, true, 'unfinished set must stay untested');
+// hidden/untested follow documentation/card-sets.md; tests/card-status.test.js checks them.
 assert(context.setIdentifiers.includes('vp'), 'set identifier');
 
 const metadataCodes = new Set(metadata.map((card) => Number(card.code)));

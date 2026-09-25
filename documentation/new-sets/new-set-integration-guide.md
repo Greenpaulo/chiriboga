@@ -24,8 +24,11 @@ appears in `engine_patterns.md` and `ai.md`.
 Record the set's display name, short code, card list, legal formats and a fresh
 numeric ID range. A registered set may be loaded into the browser even while it
 is hidden, so `hidden: true` is not a substitute for safe card definitions.
-Keep an incomplete set `untested: true`, and normally `hidden: true`, until its
-mechanics and AI behaviour have been reviewed.
+Whether a set is playable is decided in `documentation/card-sets.md`, and the
+`hidden`/`untested` flags in `config.js` must follow that decision
+(`tests/card-status.test.js` enforces it). Normally a new set is recorded as
+`in-progress` and kept `hidden: true`, `untested: true` until its mechanics and
+AI behaviour have been reviewed.
 
 Existing ranges are defined by `setRegistry.availableSets` in `config.js`.
 Check that the new range does not overlap any of them. Do not infer the next
@@ -296,7 +299,9 @@ planned move to per-card role metadata is tracked in
 
 ## 8. Verify the integration
 
-Before removing `hidden` or `untested`:
+Before recommending that a set be marked `playable` in
+`documentation/card-sets.md` (which then requires `hidden: false` and
+`untested: false`):
 
 1. Confirm every intended metadata card has exactly one engine definition and
    every engine definition maps to the correct metadata and image.

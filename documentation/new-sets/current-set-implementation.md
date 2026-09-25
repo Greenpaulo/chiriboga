@@ -21,7 +21,7 @@ same time.
 | Definition file               | `sets/vantagepoint.js`                   |
 | Metadata file                 | `carddata/carddata.json`                 |
 | Card range                    | `36001–36066`                            |
-| Registry state during batches | `hidden: true`, `untested: true`         |
+| Registry state during batches | follows `documentation/card-sets.md` (Vantage Point: playable) |
 | Focused integration test      | `tests/vantagepoint-integration.test.js` |
 | Implementation notes          | `documentation/new-sets/vantage-point-implementation-notes.md` |
 

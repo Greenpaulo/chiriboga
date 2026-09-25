@@ -121,7 +121,7 @@ var setRegistry = {
       file: "downfall",
       code: "df",
       name: "Downfall",
-      hidden: false,
+      hidden: true,
       untested: false,
       idRange: [26001, 26065],
     },
@@ -154,15 +154,15 @@ var setRegistry = {
       code: "elev",
       name: "Elevation",
       hidden: false,
-      untested: true,
+      untested: false,
       idRange: [35000, 35999],
     },
     vantagepoint: {
       file: "vantagepoint",
       code: "vp",
       name: "Vantage Point",
-      hidden: true,
-      untested: true,
+      hidden: false,
+      untested: false,
       idRange: [36000, 36999],
     },
     uprising: {
@@ -193,7 +193,7 @@ var setRegistry = {
       file: "creationandcontrol",
       code: "cac",
       name: "Creation and Control",
-      hidden: false,
+      hidden: true,
       untested: true,
       idRange: [3001, 3055],
     },
@@ -223,9 +223,9 @@ var setRegistry = {
   decklauncherSets: [
     "systemgateway",
     "systemupdate2021",
-    "downfall",
-    "creationandcontrol",
     "elevation",
+    // Playable sets are decided in documentation/card-sets.md. Vantage Point is
+    // playable but not a default until its last batches are complete.
     // 'uprising',
     // 'midnightsun',
     // 'parhelion',

@@ -110,7 +110,8 @@ Only after every card and test in the batch is complete:
 If blocked, leave the row `In progress` or mark it `Blocked` with the exact,
 actionable reason, refresh the counts, and do not add a completion row.
 
-Do not change the set's hidden/untested registry flags during a batch. Do not
-commit, push or discard work. Report the batch and card IDs, important mechanics
+Do not change the set's `hidden`/`untested` registry flags or its row in
+`documentation/card-sets.md`; the user decides playability and the flags follow
+it. Do not commit, push or discard work. Report the batch and card IDs, important mechanics
 and AI decisions, tests and results, limitations, and the next outstanding
 batch.
