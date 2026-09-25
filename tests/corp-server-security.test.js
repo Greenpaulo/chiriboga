@@ -249,6 +249,116 @@ test('game-saving Brân rez overrides reservation for a higher-value remote', ()
   runner.agendaPoints = 0;
   assert.strictEqual(ai._iceWorthRezzing(rndBran, 6, rnd), false);
 });
+// ---- F3: per-decision security cache ----
+function branBoard() {
+  const rndBran = card(30039); rndBran.rezzed = false;
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const rnd = {serverName: 'R&D', cards: [agenda, {cardType: 'operation'}], ice: [rndBran], root: []};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const remoteBran = card(30039); remoteBran.rezzed = false;
+  const remote = {serverName: 'Remote 0', ice: [remoteBran], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 8});
+  servers = [hq, rnd, archives, remote];
+  runner.agendaPoints = 5; runner.clickTracker = 2;
+  return {rndBran, rnd};
+}
+// Run body with a decision-lifetime cache, as Choice() provides.
+function inDecision(body) {
+  ai._securityCache = new Map();
+  try { return body(); } finally { ai._securityCache = null; }
+}
+// Every cached entry must equal a fresh evaluation of the (restored) real board.
+function assertCacheMatchesBoard() {
+  for (const [srv, entries] of ai._securityCache)
+    for (const result of entries.values())
+      assert(ai._sameSecurityResult(result, ai._evaluateServerSecurityUncached(srv)),
+        'cache holds a result that differs from the real board for ' + srv.serverName);
+}
+
+test('F3: the Bran with-ICE probe still differs with a warm cache', () => {
+  const {rndBran, rnd} = branBoard();
+  assert.strictEqual(ai._icePreventsGameWinningBreach(rndBran, 6, rnd), true, 'without a cache');
+  inDecision(() => {
+    ai._evaluateServerSecurity(rnd); // warm with the real board (Bran unrezzed)
+    assert.strictEqual(ai._icePreventsGameWinningBreach(rndBran, 6, rnd), true, 'with a warm cache');
+    assert.strictEqual(ai._hypotheticalDepth, 0);
+    assertCacheMatchesBoard();
+  });
+});
+
+test('F3: _iceWouldSecureServer gives the same answer with and without the cache', () => {
+  const {rndBran, rnd} = branBoard();
+  const uncached = ai._iceWouldSecureServer(rndBran, 6, rnd);
+  inDecision(() => {
+    ai._evaluateServerSecurity(rnd);
+    assert.strictEqual(ai._iceWouldSecureServer(rndBran, 6, rnd), uncached);
+    assertCacheMatchesBoard();
+  });
+});
+
+test('F3: a board change gets a fresh result, within and across decisions', () => {
+  const {rndBran, rnd} = branBoard();
+  const before = inDecision(() => ai._evaluateServerSecurity(rnd));
+  rndBran.rezzed = true;
+  const after = inDecision(() => ai._evaluateServerSecurity(rnd));
+  assert(!ai._sameSecurityResult(before, after), 'rezzing Bran changes the result');
+  rndBran.rezzed = false;
+  inDecision(() => {
+    const first = ai._evaluateServerSecurity(rnd);
+    rndBran.rezzed = true; // an unguarded change: the board fingerprint still catches it
+    assert(ai._sameSecurityResult(ai._evaluateServerSecurity(rnd), after));
+    rndBran.rezzed = false;
+    assert.strictEqual(ai._evaluateServerSecurity(rnd), first, 'the real board is served from the cache');
+  });
+});
+
+test('F3: nested hypotheticals neither read nor write the cache', () => {
+  const {rndBran, rnd} = branBoard();
+  inDecision(() => {
+    const real = ai._evaluateServerSecurity(rnd);
+    const size = ai._securityCache.get(rnd).size;
+    const nested = ai._withHypothetical(() => { rndBran.rezzed = true; }, () =>
+      ai._withHypothetical(() => {}, () => ai._evaluateServerSecurity(rnd), () => {}),
+    () => { rndBran.rezzed = false; });
+    assert(!ai._sameSecurityResult(nested, real), 'the hypothetical sees the rezzed Bran');
+    assert.strictEqual(ai._securityCache.get(rnd).size, size, 'nothing stored at depth above 0');
+    assert.strictEqual(ai._hypotheticalDepth, 0);
+  });
+});
+
+test('F3: outside a decision every call evaluates afresh', () => {
+  const {rnd} = branBoard();
+  const original = ai._evaluateServerSecurityUncached;
+  let computed = 0;
+  ai._evaluateServerSecurityUncached = function(srv) { computed++; return original.call(this, srv); };
+  try {
+    ai._evaluateServerSecurity(rnd); ai._evaluateServerSecurity(rnd);
+    assert.strictEqual(computed, 2);
+    inDecision(() => { ai._evaluateServerSecurity(rnd); ai._evaluateServerSecurity(rnd); });
+    assert.strictEqual(computed, 3, 'inside a decision the repeat is served from the cache');
+  } finally { ai._evaluateServerSecurityUncached = original; }
+});
+
+test('F3: verify mode throws on a stale cached result', () => {
+  const {rnd} = branBoard();
+  ai._securityCacheVerify = true;
+  try {
+    inDecision(() => {
+      ai._evaluateServerSecurity(rnd);
+      const entries = ai._securityCache.get(rnd);
+      for (const key of entries.keys()) entries.set(key, {isSecure: 'stale'});
+      assert.throws(() => ai._evaluateServerSecurity(rnd), /Stale security cache result/);
+    });
+  } finally { ai._securityCacheVerify = false; }
+});
+
+test('F3: the main-phase protection ranking runs only with debugSecurityLog', () => {
+  const source = fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8');
+  assert(/if \(this\.debugSecurityLog\) this\._serverToProtect\(false, true\);/.test(source));
+  assert.strictEqual(ai.debugSecurityLog, false);
+});
+
 test('approached Flyswatter does not save credits for equal-value Archives Mycoweb', () => {
   const flyswatter = card(35079); flyswatter.rezzed = false;
   const mycoweb = card(35053); mycoweb.rezzed = false;

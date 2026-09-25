@@ -125,9 +125,9 @@ Shared infrastructure used by every area.
 - **Goal:** Route every hand-written planning probe (11 inventoried functions, including Baker and runcalculator.js) through one guarded helper with a shared depth count, and ratchet new unguarded mutation.
 
 ### F3 Per-decision evaluation cache
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F2, F4
-- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/corp_ai_finding_11_evaluate_once_per_decision.md)
+- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/code-review/corp_ai_finding_11_evaluate_once_per_decision.md)
 - **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
 
 ### F4 Seeded AI-vs-AI batch harness
@@ -141,6 +141,12 @@ Shared infrastructure used by every area.
 - **Depends on:** F4
 - **Spec:** [F5-mulligan-weight-calibration.md](specs/F5-mulligan-weight-calibration.md)
 - **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option.
+
+### F6 Cheaper security evaluation
+- **Status:** proposed
+- **Depends on:** F3
+- **Spec:** [F6-cheaper-security-evaluation.md](specs/F6-cheaper-security-evaluation.md)
+- **Goal:** Price each ICE once per security evaluation instead of once per rez plan, so seeded games and gates run faster with identical decisions.
 
 ### Done
 

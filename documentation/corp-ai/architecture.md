@@ -447,15 +447,30 @@ needs.
   injected source.
 - **Guarded hypotheticals (F2, partial).** `_withHypothetical(apply, evaluate,
   restore)` restores state in `finally`; only `_ordinaryPurgeOutcome()` uses it
-  today. The other planning probes still mutate and restore manually (item F2).
-- **Per-decision cache (F3, not built).** Local duplication is removed (one
-  security result per server per ranked pass; one protection score per
-  candidate in `_bestProtectedRemote()`), but independent planners can still
-  request overlapping evaluations.
-- **Batch harness (F4, not built).** `GameEnded(winner)` is an empty stub and
-  nothing calls it; `DecisionSnapshots.totalMs` measures the recorder's own
-  cost, not decision latency. The pieces for seeded AI-vs-AI runs exist but are
-  not joined up. Mulligan weights are uncalibrated until F5.
+  today. The other planning probes still mutate and restore manually (item F2),
+  but they, `_withHypothetical()` and the `Phase_Main` "gain then install" check
+  raise `_hypotheticalDepth` while the board is changed, so the security cache
+  can tell a probe from the real board.
+- **Per-decision security cache (F3).** `Choice()` gives each Corp decision a
+  fresh `_securityCache` and restores the previous one in `finally`;
+  `_withSecurityCache()` gives the same one-call lifetime to entry points the
+  engine or cards call outside `Choice()` (`_prepareProtectionPrioritiesForCorpTurn()`,
+  `_bestInstallOption()`). `_evaluateServerSecurity()` serves a repeat from the
+  cache only on the real board: `_hypotheticalDepth` is 0, it is not nested in
+  another evaluation, and the key is the server plus `_securityBoardKey()`, a
+  fingerprint of the public board, so a probe that changes the board without
+  raising the depth still gets a fresh result. The work itself is
+  `_evaluateServerSecurityUncached()`. `_securityCacheVerify` (tests)
+  recomputes every hit and throws on a difference; `_securityCacheEnabled`
+  turns the cache off for comparisons. The main-phase protection ranking that
+  only fed the log runs only when `debugSecurityLog` is on. Local duplication
+  guarantees remain (one security result per server per ranked pass; one
+  protection score per candidate in `_bestProtectedRemote()`).
+- **Batch harness (F4, step 1 done).** `scripts/ai-game.js` plays seeded
+  AI-vs-AI games headlessly with the real engine; the batch runner, metrics and
+  comparison are not built. `GameEnded(winner)` is an empty stub and nothing
+  calls it; `DecisionSnapshots.totalMs` measures the recorder's own cost, not
+  decision latency. Mulligan weights are uncalibrated until F5.
 
 ## Known limits
 

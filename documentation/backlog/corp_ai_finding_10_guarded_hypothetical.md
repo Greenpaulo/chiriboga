@@ -17,6 +17,9 @@ depth count. This ticket also fixes the accidental array `<` comparison in
 ([bug ticket](../bugs/potential-tag-punishment-never-restores-phase.md)).
 
 ## Current behaviour
+
+**Update 2026-09-25 (F3):** `CorpAI._hypotheticalDepth` now exists. `_withHypothetical()` and sites #2 to #8 raise it around their changed-board evaluation (restore logic unchanged), so the F3 security cache is bypassed there. Migrating those sites into guarded helpers, deleting #9 and adding the ratchet test is still this item's work; new guarded helpers must keep the depth count.
+
 `_withHypothetical(apply, evaluate, restore)` exists: `try { apply(); return
 evaluate(); } finally { restore(); }`. Only `_ordinaryPurgeOutcome()` uses it.
 Every other probe changes state by hand, some with a hand-written
