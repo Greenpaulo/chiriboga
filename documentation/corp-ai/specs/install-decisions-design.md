@@ -47,7 +47,7 @@ card-definition example.
 
 The general principles (imperfect information, hooks over titles, tactical
 safety, explainable and deterministic decisions, no unsafe state mutation) are
-in `documentation/corp-ai/principles.md`. Two principles are specific to
+in `documentation/ai-principles.md` and `documentation/corp-ai/principles.md`. Two principles are specific to
 install planning:
 
 ### Compare marginal outcomes

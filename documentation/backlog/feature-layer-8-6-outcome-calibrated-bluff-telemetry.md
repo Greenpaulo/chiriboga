@@ -1,7 +1,7 @@
 # L8.6 Outcome-calibrated bluff telemetry
 
 **Roadmap item:** L8.6 · **Depends on:** L8.5 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Validate and tune long-run bait/bluff frequencies against humans rather than inferring success from deterministic games, using opt-in, anonymous local telemetry for offline calibration.

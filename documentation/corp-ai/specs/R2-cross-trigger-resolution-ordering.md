@@ -1,7 +1,7 @@
 # R2 Cross-trigger resolution ordering
 
 **Roadmap item:** R2 · **Depends on:** none · **Sets:** systemgateway (Manegarm Skunkworks, Anoetic Void)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/reactive-commitment-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/reactive-commitment-design.md`
 
 ## Goal
 When the Corp controls more than one of its own simultaneously pending

@@ -73,3 +73,66 @@ None.
 - 36064 Flagship: 1 unfinished marker(s)
 - 36065 Shackleton Grid: 1 unfinished marker(s)
 - 36066 Let Them Dream: 1 unfinished marker(s)
+
+## Runner keep coverage (playable sets)
+
+How `_cardsWorthKeeping()` in `ai_runner.js` sees each Runner Grip card (event,
+hardware, program, resource): an explicit `AIWorthKeeping` hook, the subtype
+fallback (breakers, consoles, `AISpecialBreaker`), or neither, which means the card
+is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use these numbers.
+
+| Set | Grip cards | AIWorthKeeping | Subtype fallback only | Neither | Intent hook without AIWorthKeeping |
+|---|---:|---:|---:|---:|---:|
+| `systemgateway` | 31 | 12 | 12 | 7 | 5 |
+| `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
+| `elevation` | 28 | 14 | 5 | 9 | 0 |
+| `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
+| **Total** | 115 | 55 | 25 | 35 | 7 |
+
+**Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
+
+- 30014 Pennyshaver
+- 30018 Red Team
+- 30023 Pantograph
+- 30033 Smartware Distributor
+- 30034 Verbal Plasticity
+- 31038 Prepaid VoicePAD
+- 36011 Sell Out
+
+**Neither hook nor subtype fallback (discarded first):**
+
+- 30002 Wildcat Strike
+- 30012 Tread Lightly
+- 30018 Red Team
+- 30028 Jailbreak
+- 30029 Overclock
+- 30033 Smartware Distributor
+- 30034 Verbal Plasticity
+- 31003 En Passant
+- 31004 Retrieval Run
+- 31005 Clot
+- 31007 Imp
+- 31011 Scrubber
+- 31012 Xanadu
+- 31015 Career Fair
+- 31016 Emergency Shutdown
+- 31017 Forged Activation Orders
+- 31018 Inside Job
+- 31019 Legwork
+- 31020 Networking
+- 31029 The Maker’s Eye
+- 31034 Paricia
+- 31037 Dirty Laundry
+- 31038 Prepaid VoicePAD
+- 35003 Charm Offensive
+- 35005 Shred
+- 35007 Gourmand
+- 35014 Clean Getaway
+- 35015 Lie Low
+- 35016 Maintenance Access
+- 35017 Transfer of Wealth
+- 35025 Illumination
+- 35029 Azimat
+- 36005 Lampades
+- 36011 Sell Out
+- 36012 Tailgate

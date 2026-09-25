@@ -1,7 +1,7 @@
 # L8.7 Layer 8 card hook audit
 
 **Roadmap item:** L8.7 · **Depends on:** none · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Make sure every relevant access-punishment trap and tag-punishment card in the scoped sets declares the Layer 8 AI hooks, so baiting and tag-and-bag deterrence work from hooks alone and never from card titles.

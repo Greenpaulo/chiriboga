@@ -1,7 +1,7 @@
 # F4 Seeded AI-vs-AI batch harness
 
 **Roadmap item:** F4 · **Depends on:** none · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Provide a repeatable batch runner with fixed deck pairs, outcome metrics and per-decision latency, so every acceptance gate that says "seeded simulations" has something to run against, and a baseline exists before behaviour changes (review finding 12).

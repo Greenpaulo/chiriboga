@@ -1,7 +1,7 @@
 # I4 Agenda installation and scoring commitment
 
 **Roadmap item:** I4 · **Depends on:** I3 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Decide whether a specific agenda should be committed now, to which server, and

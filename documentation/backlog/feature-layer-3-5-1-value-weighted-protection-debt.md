@@ -1,7 +1,7 @@
 # L3.5.1 Value-weighted protection debt
 
 **Roadmap item:** L3.5.1 · **Depends on:** F4 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Let a repeatedly skipped high-consequence server gain protection urgency faster than an ordinary empty server, without recreating starvation in the opposite direction. Flat debt treats an agenda-rich HQ and an empty remote alike, so the server whose breach costs most waits as long as the one whose breach costs nothing.

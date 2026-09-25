@@ -1,7 +1,7 @@
 # I8 Multi-click short-horizon planning
 
 **Roadmap item:** I8 · **Depends on:** I7 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Evaluate install decisions as parts of short plans rather than isolated clicks,

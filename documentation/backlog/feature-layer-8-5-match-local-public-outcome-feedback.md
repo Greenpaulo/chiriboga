@@ -1,7 +1,7 @@
 # L8.5 Match-local public outcome feedback
 
 **Roadmap item:** L8.5 · **Depends on:** L8.4 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Let the Corp adjust later mixed bait/bluff strategies when the human repeatedly challenges or ignores particular visible remote postures during the current game, so a human cannot exploit a fixed posture distribution within one match.

@@ -1,7 +1,7 @@
 # I5 Asset, ambush and economy value
 
 **Roadmap item:** I5 · **Depends on:** I3 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Compare root assets by expected board value instead of relying primarily on

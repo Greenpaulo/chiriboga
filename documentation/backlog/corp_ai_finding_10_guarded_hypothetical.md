@@ -1,7 +1,7 @@
 # F2 Guarded hypothetical evaluation: remaining migrations
 
 **Roadmap item:** F2 · **Depends on:** none · **Sets:** vantagepoint (Baker)
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Route every Corp planning probe that temporarily mutates game state through one exception-safe helper, so a throw during evaluation can never leave credits, run context or other state altered, and fix the accidental array `<` comparison found alongside it (review finding 10).

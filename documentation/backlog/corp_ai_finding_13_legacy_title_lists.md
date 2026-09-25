@@ -1,7 +1,7 @@
 # P1 Retire legacy card-title special cases
 
 **Roadmap item:** P1 · **Depends on:** none · **Sets:** the sets containing the listed cards
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Replace the card-title comparisons and `_copyOfCardExistsIn("...")` calls that remain in `ai_corp.js` with declarative card hooks, so a new-set card with the relevant hook needs no `ai_corp.js` edit (review finding 13). This ticket is the single checklist for the migration; tick rows off here as they are migrated or deleted.

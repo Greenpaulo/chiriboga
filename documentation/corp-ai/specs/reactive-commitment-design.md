@@ -31,7 +31,7 @@ The two patterns are:
 ## Principles
 
 The inherited principles (imperfect information, hooks over title policy,
-tactical safety) are in `documentation/corp-ai/principles.md`. For this area in
+tactical safety) are in `documentation/ai-principles.md` and `documentation/corp-ai/principles.md`. For this area in
 particular, tactical safety covers game-winning scores, game-losing breach
 prevention and the security area's emergency interrupt (legacy Layer 7.1), all
 of which remain authoritative over reservations and ordering.

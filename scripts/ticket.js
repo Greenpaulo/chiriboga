@@ -47,15 +47,16 @@ function move(ticket, stage) {
   }
   console.log('Moved to ' + to);
 
-  // Keep the Corp AI roadmap's link to this ticket pointing at its new folder.
-  const roadmap = path.join(root, 'documentation', 'corp-ai', 'roadmap.md');
-  if (fs.existsSync(roadmap)) {
+  // Keep the AI roadmaps' links to this ticket pointing at its new folder.
+  for (const area of ['corp-ai', 'runner-ai']) {
+    const roadmap = path.join(root, 'documentation', area, 'roadmap.md');
+    if (!fs.existsSync(roadmap)) continue;
     const linkFrom = file => path.relative(path.dirname(roadmap), path.join(root, file)).split(path.sep).join('/');
     const text = fs.readFileSync(roadmap, 'utf8');
     const updated = text.split('](' + linkFrom(from) + ')').join('](' + linkFrom(to) + ')');
     if (updated !== text) {
       fs.writeFileSync(roadmap, updated);
-      console.log('Updated its link in documentation/corp-ai/roadmap.md');
+      console.log('Updated its link in documentation/' + area + '/roadmap.md');
     }
   }
 }

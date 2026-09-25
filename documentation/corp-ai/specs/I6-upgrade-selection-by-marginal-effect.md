@@ -1,7 +1,7 @@
 # I6 Upgrade selection by marginal effect
 
 **Roadmap item:** I6 · **Depends on:** I1 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Choose an upgrade and destination by measuring what it changes on that server,

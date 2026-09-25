@@ -49,8 +49,9 @@ Any FAIL is a Blocking finding. Do not repeat these checks by hand.
 - **Principles.** No card-title checks, no AI reads of hidden information
   (including R&D order), no constants tuned to one board, and new AI hooks
   placed at the bottom of card objects and documented in `documentation/ai.md`.
-  For Corp AI changes, check against `documentation/corp-ai/principles.md`, and
-  confirm `architecture.md` describes the new behaviour. A Corp AI behaviour
+  For AI changes, check against `documentation/ai-principles.md` and the side's
+  `principles.md`, and
+  confirm `architecture.md` describes the new behaviour. An AI behaviour
   change that leaves `architecture.md` describing the old behaviour is a
   Should fix finding.
 - **Scope.** No unrelated refactors or behaviour changes. Out-of-scope findings
@@ -81,10 +82,10 @@ Only **Blocking** or **Should fix** findings make the verdict "Changes
 required". Notes alone still pass.
 
 - **Pass:** `node scripts/ticket.js move <ticket> done`. If the ticket declares
-  a `**Roadmap item:**`, mark it done in `documentation/corp-ai/roadmap.md`:
+  a `**Roadmap item:**`, mark it done in the side's `roadmap.md`:
   remove its open entry and add a row to that area's **Done** table linking the
   ticket (now in `done/`) and its `architecture.md` section, then run
-  `node tests/corp-ai-roadmap.test.js`.
+  `node tests/ai-roadmaps.test.js`.
 - **Changes required:** `node scripts/ticket.js move <ticket> remediation`.
 
 A read-only reviewer outputs the Code review section for the user to paste into

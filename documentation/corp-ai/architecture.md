@@ -6,7 +6,7 @@ How the implemented Corp AI (`ai_corp.js`) works today. Plans live in
 and the code disagree, fix this file.
 
 Every backticked function, method or hook name here must exist in the code;
-`tests/corp-ai-roadmap.test.js` checks this. The behaviour descriptions were
+`tests/ai-roadmaps.test.js` checks this. The behaviour descriptions were
 carried over from the legacy roadmaps' implementation notes (2026-09-25) and
 are updated by `implement-ticket` whenever an item is completed.
 

@@ -1,7 +1,7 @@
 # L7.1 Consequence-calibrated central pressure
 
 **Roadmap item:** L7.1 · **Depends on:** F4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Scale the mechanic-level central-pressure penalty by the actual consequence of the next central breach, rather than treating every extra access as equally dangerous. This completes the non-lethal consequence weighting that remains after the tactical loss interrupt.

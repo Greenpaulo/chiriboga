@@ -1,7 +1,7 @@
 # I7 Install versus other Corp actions
 
 **Roadmap item:** I7 · **Depends on:** I2, I3, I4, I5, I6 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Compare the best install with gaining credits, playing operations, advancing,

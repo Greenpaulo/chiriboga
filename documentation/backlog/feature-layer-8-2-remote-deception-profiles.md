@@ -1,7 +1,7 @@
 # L8.2 Deception legibility signals
 
 **Roadmap item:** L8.2 · **Depends on:** none · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Make agenda bluffs read like traps to a human by basing bluff legibility on the generic public signals a human actually reads: server card count, remote-versus-central framing, and protection posture relative to the Corp's recent actions. There is no card-level hook to hang bluffing on the way `AIPunishesAccess` supports baiting, so the signals must be generic rather than specific to any trap card.

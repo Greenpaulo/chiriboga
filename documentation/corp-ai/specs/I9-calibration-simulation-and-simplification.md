@@ -1,7 +1,7 @@
 # I9 Calibration, simulation and simplification
 
 **Roadmap item:** I9 · **Depends on:** I8, F4 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Tune bounded weights using reproducible evidence and remove superseded legacy

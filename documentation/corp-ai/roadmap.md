@@ -3,11 +3,11 @@
 One entry per item. Full specs live in the linked ticket (`ready` and later) or
 spec file (`proposed`); how finished work behaves lives in
 [architecture.md](architecture.md); rules live in [principles.md](principles.md).
-Statuses and IDs are defined in [README.md](README.md).
+Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md).
 
 - `node scripts/roadmap.js next` lists items whose dependencies are all `done`.
 - `node scripts/roadmap.js list` prints every item with its status.
-- `tests/corp-ai-roadmap.test.js` fails if a status, link or dependency here
+- `tests/ai-roadmaps.test.js` fails if a status, link or dependency here
   disagrees with the tickets.
 
 ## Server security (L)

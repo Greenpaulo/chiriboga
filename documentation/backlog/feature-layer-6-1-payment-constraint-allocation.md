@@ -1,7 +1,7 @@
 # L6.1 Payment-constraint allocation
 
 **Roadmap item:** L6.1 · **Depends on:** none · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Replace the scalar Runner credit ceiling with a payment allocator when a route combines restrictions such as stealth requirements, breaker-specific recurring credits and paid bypass abilities, so the Corp stops counting restricted credits as if they could pay for anything.

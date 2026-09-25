@@ -1,7 +1,7 @@
 # I2 ICE selection by marginal security
 
 **Roadmap item:** I2 · **Depends on:** I1 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Use the completed server-security engine to decide which ICE provides the best

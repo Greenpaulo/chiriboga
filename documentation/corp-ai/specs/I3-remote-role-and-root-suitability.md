@@ -1,7 +1,7 @@
 # I3 Remote role and root suitability
 
 **Roadmap item:** I3 · **Depends on:** I1 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Decide what a remote is for before comparing root cards, so that every root

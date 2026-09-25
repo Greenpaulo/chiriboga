@@ -1,7 +1,7 @@
 # I0 Baseline capture and telemetry
 
 **Roadmap item:** I0 · **Depends on:** F4 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 
 ## Goal
 Establish current install behaviour and a measurable baseline before changing

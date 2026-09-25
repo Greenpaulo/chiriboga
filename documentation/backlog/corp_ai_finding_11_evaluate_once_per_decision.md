@@ -1,7 +1,7 @@
 # F3 Per-decision evaluation cache
 
 **Roadmap item:** F3 · **Depends on:** F2 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Evaluate server security once per Corp decision instead of repeatedly across independent planning helpers, and stop paying for debug-only evaluation in ordinary play (review finding 11). The evaluator scans public credit sources, bypass effects, breakers, hosted cards, defensive upgrades and every relevant ICE, so its cost grows with board complexity and planning sophistication.

@@ -1,7 +1,7 @@
 # L4.1 Unified bypass capability allocation
 
 **Roadmap item:** L4.1 · **Depends on:** none · **Sets:** playable sets (`documentation/card-sets.md`), including Baker
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Replace the separate targeted, outermost, one-shot and redirect checks with one normalized capability model, so the evaluator allocates all public bypass tools across the complete run instead of optimizing each mechanic class independently.

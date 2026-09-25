@@ -1,7 +1,7 @@
 # R1 Reserve and optionality
 
 **Roadmap item:** R1 · **Depends on:** none · **Sets:** elevation (Measured Response, LEO Construction, Mercia B4LL4RD, Bumi 1.0); Nebula Talent Management is not yet defined (see `documentation/card-status.md`)
-**Read first:** `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/reactive-commitment-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/reactive-commitment-design.md`
 
 ## Goal
 Let the Corp AI recognize when holding a resource now, for a specific future

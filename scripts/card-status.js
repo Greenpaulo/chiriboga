@@ -41,14 +41,33 @@ function decisions() {
   return rows;
 }
 
-function definitions(file) {
+// Map of card id -> number of scaffold markers; block text is kept in `texts`.
+function definitions(file, texts = new Map()) {
   const lines = read(file).split('\n');
   const starts = [];
   lines.forEach((line, i) => { const m = line.match(/^(?:cardSet|coreSet)\[(\d+)\]\s*=/); if (m) starts.push([m[1], i]); });
   return new Map(starts.map(([id, start], k) => {
     const end = k + 1 < starts.length ? starts[k + 1][1] : lines.length;
-    return [String(Number(id)), lines.slice(start, end).filter(isScaffoldMarker).length];
+    const block = lines.slice(start, end);
+    texts.set(String(Number(id)), block.join('\n'));
+    return [String(Number(id)), block.filter(isScaffoldMarker).length];
   }));
+}
+
+// How the Runner AI's keep/discard gate (_cardsWorthKeeping in ai_runner.js)
+// sees each Runner Grip card: an explicit AIWorthKeeping hook, the subtype
+// fallback (Console, Fracter, Decoder, Killer, AI, other Icebreaker, or
+// AISpecialBreaker), or neither (excluded, so discarded first).
+function runnerKeepTier(text) {
+  if (!/player:\s*runner/.test(text)) return null;
+  const type = (text.match(/cardType:\s*"(\w+)"/) || [])[1];
+  if (!['event', 'hardware', 'program', 'resource'].includes(type)) return null;
+  const subTypes = (text.match(/subTypes:\s*\[([^\]]*)\]/) || [, ''])[1];
+  const intent = /\b(AIEconomyInstall|AIEconomyPlay|AIDrawInstall|AIDrawTrigger)\s*:/.test(text);
+  if (/\bAIWorthKeeping\s*:/.test(text)) return {tier: 'hook', intent};
+  if (/"(Console|Fracter|Decoder|Killer|AI|Icebreaker)"/.test(subTypes) || /\bAISpecialBreaker\s*:/.test(text))
+    return {tier: 'fallback', intent};
+  return {tier: 'none', intent};
 }
 
 function collect() {
@@ -57,14 +76,17 @@ function collect() {
   const metadata = JSON.parse(read('carddata/carddata.json')).data;
   const sets = Object.entries(reg.availableSets).map(([key, set]) => {
     const file = 'sets/' + set.file + '.js';
-    const defs = fs.existsSync(path.join(root, file)) ? definitions(file) : new Map();
+    const texts = new Map();
+    const defs = fs.existsSync(path.join(root, file)) ? definitions(file, texts) : new Map();
     const [lo, hi] = set.idRange || [0, -1];
     const cards = metadata.filter(card => /^\d+$/.test(card.code) && +card.code >= lo && +card.code <= hi)
       .sort((a, b) => +a.code - +b.code);
     const id = card => String(Number(card.code));
     const missing = cards.filter(card => !defs.has(id(card)));
     const unfinished = cards.filter(card => defs.get(id(card)) > 0);
-    return {key, set, file, decision: decided.get(key) || '(none)', cards, defs, missing, unfinished,
+    const runnerKeep = cards.map(card => ({card, keep: texts.has(id(card)) ? runnerKeepTier(texts.get(id(card))) : null}))
+      .filter(entry => entry.keep);
+    return {key, set, file, decision: decided.get(key) || '(none)', cards, defs, missing, unfinished, runnerKeep,
       launcher: (reg.decklauncherSets || []).includes(key)};
   });
   return sets;
@@ -121,6 +143,30 @@ function generate() {
     for (const card of s.missing) out.push('- ' + card.code + ' ' + card.title + ': no definition');
     for (const card of s.unfinished) out.push('- ' + card.code + ' ' + card.title + ': ' + s.defs.get(String(Number(card.code))) + ' unfinished marker(s)');
   }
+
+  const playableSets = sets.filter(entry => entry.decision === 'playable');
+  out.push('', '## Runner keep coverage (playable sets)', '');
+  out.push('How `_cardsWorthKeeping()` in `ai_runner.js` sees each Runner Grip card (event,');
+  out.push('hardware, program, resource): an explicit `AIWorthKeeping` hook, the subtype');
+  out.push('fallback (breakers, consoles, `AISpecialBreaker`), or neither, which means the card');
+  out.push('is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use these numbers.', '');
+  out.push('| Set | Grip cards | AIWorthKeeping | Subtype fallback only | Neither | Intent hook without AIWorthKeeping |');
+  out.push('|---|---:|---:|---:|---:|---:|');
+  const total = {grip: 0, hook: 0, fallback: 0, none: 0, dead: 0};
+  for (const s of playableSets) {
+    const count = tier => s.runnerKeep.filter(entry => entry.keep.tier === tier).length;
+    const dead = s.runnerKeep.filter(entry => entry.keep.intent && entry.keep.tier !== 'hook').length;
+    const row = {grip: s.runnerKeep.length, hook: count('hook'), fallback: count('fallback'), none: count('none'), dead};
+    Object.keys(total).forEach(k => { total[k] += row[k]; });
+    out.push('| `' + s.key + '` | ' + row.grip + ' | ' + row.hook + ' | ' + row.fallback + ' | ' + row.none + ' | ' + row.dead + ' |');
+  }
+  out.push('| **Total** | ' + total.grip + ' | ' + total.hook + ' | ' + total.fallback + ' | ' + total.none + ' | ' + total.dead + ' |');
+  const titled = filter => playableSets.flatMap(s => s.runnerKeep.filter(filter)
+    .map(entry => entry.card.code + ' ' + entry.card.title));
+  out.push('', '**Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**', '');
+  out.push(...titled(entry => entry.keep.intent && entry.keep.tier !== 'hook').map(t => '- ' + t));
+  out.push('', '**Neither hook nor subtype fallback (discarded first):**', '');
+  out.push(...titled(entry => entry.keep.tier === 'none').map(t => '- ' + t));
   return out.join('\n') + '\n';
 }
 

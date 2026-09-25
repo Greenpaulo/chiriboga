@@ -1,7 +1,7 @@
 # L5.1 Observed-deck threat priors
 
 **Roadmap item:** L5.1 · **Depends on:** F4 · **Sets:** none
-**Read first:** `documentation/corp-ai/principles.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 
 ## Goal
 Replace the fixed faction/import weights in `_estimateRunnerBypassRisk()` with priors updated from public deck evidence, so the hidden-threat estimate reflects what the Runner has actually shown while preserving imperfect information.

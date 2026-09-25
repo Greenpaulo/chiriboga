@@ -1,11 +1,12 @@
-// Run with: node tests/corp-ai-roadmap.test.js
-// Keeps documentation/corp-ai consistent so agents can trust it: roadmap
-// statuses match where tickets live, every spec and ticket belongs to exactly
-// one item, dependencies exist, and architecture.md names only real code.
+// Run with: node tests/ai-roadmaps.test.js
+// Keeps the AI roadmaps (documentation/corp-ai, documentation/runner-ai)
+// consistent so agents can trust them: statuses match where tickets live,
+// every spec and ticket belongs to exactly one item, dependencies exist, and
+// each architecture.md names only real code. See documentation/ai-planning.md.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const {parseRoadmap, itemPath, linkTargets, resolveFromDocs, STATUSES, docDir, root} =
+const {parseAll, itemPath, linkTargets, resolveFrom, STATUSES, AREAS, root} =
   require('../scripts/roadmap.js');
 
 const problems = [];
@@ -13,16 +14,17 @@ const check = (ok, message) => { if (!ok) problems.push(message); };
 const rel = file => path.relative(root, file);
 const inDone = file => file.split(path.sep).includes('done');
 
-const items = parseRoadmap();
+const items = parseAll();
 const byId = new Map();
 for (const item of items) {
-  check(!byId.has(item.id), item.id + ' appears more than once in roadmap.md');
+  check(!byId.has(item.id), item.id + ' appears more than once across the roadmaps');
   byId.set(item.id, item);
 }
 
-// Headings in architecture.md, as GitHub anchors.
-const architecture = fs.readFileSync(path.join(docDir, 'architecture.md'), 'utf8');
-const anchors = new Set(architecture.split('\n').filter(line => /^#{1,6} /.test(line)).map(line =>
+// Headings in each area's architecture.md, as GitHub anchors.
+const architectures = new Map(AREAS.map(dir => [dir, fs.existsSync(path.join(dir, 'architecture.md')) ?
+  fs.readFileSync(path.join(dir, 'architecture.md'), 'utf8') : '']));
+const anchorsOf = dir => new Set(architectures.get(dir).split('\n').filter(line => /^#{1,6} /.test(line)).map(line =>
   line.replace(/^#+ /, '').trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s/g, '-')));
 
 const TEMPLATE = ['## Goal', '## Current behaviour', '## Design', '## Safety and information boundary',
@@ -47,7 +49,7 @@ function checkTemplate(file, id) {
 
 const referenced = new Set();
 for (const item of items) {
-  const where = 'roadmap.md ' + item.id;
+  const where = path.basename(item.dir) + '/roadmap.md ' + item.id;
   check(STATUSES.includes(item.status), where + ' has unknown status "' + item.status + '"');
   for (const dep of item.depends) check(byId.has(dep), where + ' depends on unknown item ' + dep);
 
@@ -55,7 +57,7 @@ for (const item of items) {
     // Done-table row: delivered-by links must point at closed tickets, and the
     // architecture link must resolve.
     for (const target of linkTargets(item.fields['Delivered by'])) {
-      const file = resolveFromDocs(target);
+      const file = resolveFrom(item.dir, target);
       check(fs.existsSync(file), where + ' links to missing ' + rel(file));
       check(!/documentation\/(backlog|bugs)\//.test(rel(file)) || inDone(file),
         where + ' is done but its ticket ' + rel(file) + ' is not in a done/ folder');
@@ -63,7 +65,7 @@ for (const item of items) {
     }
     const arch = linkTargets(item.fields.Architecture)[0] || '';
     const anchor = arch.split('#')[1];
-    check(arch.startsWith('architecture.md#') && anchors.has(anchor),
+    check(arch.startsWith('architecture.md#') && anchorsOf(item.dir).has(anchor),
       where + ' needs an Architecture link to an existing architecture.md section (got "' + arch + '")');
     continue;
   }
@@ -82,7 +84,7 @@ for (const item of items) {
   referenced.add(file);
   check(fs.existsSync(file), where + ' links to missing ' + rel(file));
   if (!fs.existsSync(file)) continue;
-  if (hasSpec) check(rel(file).startsWith('documentation/corp-ai/specs/'), where + ' spec must live in documentation/corp-ai/specs/');
+  if (hasSpec) check(path.dirname(file) === path.join(item.dir, 'specs'), where + ' spec must live in its area\'s specs/ folder');
   if (hasTicket) check(!inDone(file), where + ' is ' + item.status + ' but its ticket is in done/; mark it done');
   const inReview = ['code-review', 'remediation'].some(folder => file.split(path.sep).includes(folder));
   if (hasTicket && inReview) check(item.status === 'in-progress', where + ' has its ticket in ' +
@@ -91,9 +93,12 @@ for (const item of items) {
 }
 
 // Every spec file and every ticket that declares a roadmap item must be linked from that item.
-const specDir = path.join(docDir, 'specs');
-for (const name of fs.readdirSync(specDir).filter(f => /^[A-Z]\d/.test(f))) {
-  check(referenced.has(path.join(specDir, name)), 'specs/' + name + ' is not linked from any roadmap item');
+for (const dir of AREAS) {
+  const specDir = path.join(dir, 'specs');
+  if (!fs.existsSync(specDir)) continue;
+  for (const name of fs.readdirSync(specDir).filter(f => /^[A-Z]\d/.test(f))) {
+    check(referenced.has(path.join(specDir, name)), rel(path.join(specDir, name)) + ' is not linked from any roadmap item');
+  }
 }
 function walk(dir) {
   return fs.readdirSync(dir, {withFileTypes: true}).flatMap(entry =>
@@ -105,24 +110,27 @@ for (const file of walk(path.join(root, 'documentation', 'backlog')).filter(f =>
   const item = byId.get(declared);
   check(item, rel(file) + ' declares unknown roadmap item ' + declared);
   if (!item) continue;
-  check(referenced.has(file), rel(file) + ' declares ' + declared + ' but roadmap.md does not link it');
+  check(referenced.has(file), rel(file) + ' declares ' + declared + ' but no roadmap links it');
   check(inDone(file) === (item.status === 'done'), rel(file) + ' is ' + (inDone(file) ? '' : 'not ') +
     'in done/ but ' + declared + ' is ' + item.status);
 }
 
-// Every code-like name in architecture.md must exist in the code.
+// Every code-like name in each architecture.md must exist in the code.
 const code = ['ai_corp.js', 'ai_runner.js', 'runcalculator.js', 'utility.js', 'mechanics.js', 'phase.js', 'checks.js']
   .map(f => fs.readFileSync(path.join(root, f), 'utf8'))
   .concat(fs.readdirSync(path.join(root, 'sets')).map(f => fs.readFileSync(path.join(root, 'sets', f), 'utf8')))
   .join('\n');
-const prose = architecture.replace(/```[\s\S]*?```/g, '');
-const names = new Set();
-for (const match of prose.matchAll(/`([^`\n]+)`/g)) {
-  const id = match[1].trim().match(/^([A-Za-z_$][\w$]*)(\(.*\))?$/);
-  if (id) names.add(id[1]);
+let nameCount = 0;
+for (const [dir, architecture] of architectures) {
+  const names = new Set();
+  for (const match of architecture.replace(/```[\s\S]*?```/g, '').matchAll(/`([^`\n]+)`/g)) {
+    const id = match[1].trim().match(/^([A-Za-z_$][\w$]*)(\(.*\))?$/);
+    if (id) names.add(id[1]);
+  }
+  nameCount += names.size;
+  const missing = [...names].filter(name => !new RegExp('\\b' + name.replace(/\$/g, '\\$') + '\\b').test(code));
+  check(!missing.length, path.basename(dir) + '/architecture.md names code that does not exist: ' + missing.join(', '));
 }
-const missing = [...names].filter(name => !new RegExp('\\b' + name.replace(/\$/g, '\\$') + '\\b').test(code));
-check(!missing.length, 'architecture.md names code that does not exist: ' + missing.join(', '));
 
-assert.deepStrictEqual(problems, [], 'documentation/corp-ai is inconsistent:\n  ' + problems.join('\n  '));
-console.log('Corp AI roadmap: ' + items.length + ' items and ' + names.size + ' architecture names consistent.');
+assert.deepStrictEqual(problems, [], 'AI roadmaps are inconsistent:\n  ' + problems.join('\n  '));
+console.log('AI roadmaps: ' + items.length + ' items and ' + nameCount + ' architecture names consistent.');

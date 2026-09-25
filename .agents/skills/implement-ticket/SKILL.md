@@ -19,9 +19,10 @@ written into it.
 - Record the starting commit (`git rev-parse --short HEAD`). If `git status`
   shows changes the user has not mentioned, ask before mixing work.
 - If the ticket declares a `**Roadmap item:**`, read
-  `documentation/corp-ai/principles.md` and only the `architecture.md` sections
-  the ticket links to, and set the item's status in
-  `documentation/corp-ai/roadmap.md` to `in-progress`.
+  `documentation/ai-principles.md`, the side's `principles.md` and only the
+  `architecture.md` sections the ticket links to, and set the item's status in
+  the side's `roadmap.md` (`documentation/corp-ai/` or `documentation/runner-ai/`)
+  to `in-progress`.
 
 ## 2. Reproduce
 
@@ -101,9 +102,9 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 - Fix the general behaviour: no card-title checks, no AI reads of hidden
   information (including R&D order), no constants tuned to one board.
 - Stay within the ticket. Record worthwhile out-of-scope findings instead of
-  fixing them: in the ticket, and for Corp AI work also as a `proposed` item in
-  `documentation/corp-ai/roadmap.md` with a spec in `documentation/corp-ai/specs/`
-  that follows the template in `documentation/corp-ai/README.md`.
+  fixing them: in the ticket, and for AI work also as a `proposed` item in the side's
+  `roadmap.md` (`documentation/corp-ai/` or `documentation/runner-ai/`) with a spec in its `specs/`
+  that follows the template in `documentation/ai-planning.md`.
 - Put new AI hooks with the existing AI hooks at the bottom of card objects and
   document them in `documentation/ai.md`.
 
@@ -123,9 +124,10 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   diagnosis below it so the reviewer can compare. Tick the acceptance criteria
   that are met. For a ticket in `remediation/`, add a dated remediation entry
   to the Resolution that answers each review finding by number.
-- If the change alters Corp AI behaviour described in
-  `documentation/corp-ai/architecture.md` (bug fixes included, not only roadmap
-  items), update that section so it describes the new behaviour. Every
+- If the change alters AI behaviour described in
+  `documentation/corp-ai/architecture.md` or
+  `documentation/runner-ai/architecture.md` (bug fixes included, not only
+  roadmap items), update that section so it describes the new behaviour. Every
   backticked code name must exist; the suite checks this. A roadmap item stays
   `in-progress`; the reviewer marks it `done`.
 - Move the ticket into the `code-review/` folder beside it with

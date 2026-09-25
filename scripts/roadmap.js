@@ -1,38 +1,41 @@
 #!/usr/bin/env node
 'use strict';
-// Read and update documentation/corp-ai/roadmap.md.
+// Read and update the AI roadmaps (documentation/corp-ai/roadmap.md and
+// documentation/runner-ai/roadmap.md). See documentation/ai-planning.md.
 //
 //   node scripts/roadmap.js list          every item with its status
 //   node scripts/roadmap.js next          items whose dependencies are all done
 //   node scripts/roadmap.js raise <ID>    move a proposed item's spec into
 //                                         documentation/backlog/ and mark it ready
 //
-// tests/corp-ai-roadmap.test.js uses parseRoadmap() to keep the roadmap,
-// specs and tickets consistent.
+// tests/ai-roadmaps.test.js uses these parsers to keep the roadmaps, specs and
+// tickets consistent.
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
 
 const root = path.resolve(__dirname, '..');
-const docDir = path.join(root, 'documentation', 'corp-ai');
-const roadmapFile = path.join(docDir, 'roadmap.md');
+const AREAS = ['corp-ai', 'runner-ai'].map(name => path.join(root, 'documentation', name))
+  .filter(dir => fs.existsSync(path.join(dir, 'roadmap.md')));
 const STATUSES = ['proposed', 'ready', 'in-progress', 'done', 'parked'];
-const ID = /^[LFIRP]\d+(?:\.\d+)*$/;
+const ID = /^[A-Z]\d+(?:\.\d+)*$/;
 
 const linkTargets = text => [...String(text || '').matchAll(/\]\(([^)]+)\)/g)].map(m => m[1]);
-const resolveFromDocs = target => path.resolve(docDir, target.split('#')[0]);
+const resolveFrom = (dir, target) => path.resolve(dir, target.split('#')[0]);
 
-function parseRoadmap(text = fs.readFileSync(roadmapFile, 'utf8')) {
+function parseRoadmap(dir) {
+  const file = path.join(dir, 'roadmap.md');
   const items = [];
-  let area = null;
+  let section = null;
   let current = null;
   let inDoneTable = false;
-  text.split('\n').forEach((line, index) => {
-    const areaMatch = line.match(/^## (.+)$/);
-    if (areaMatch) { area = areaMatch[1]; current = null; inDoneTable = false; return; }
+  fs.readFileSync(file, 'utf8').split('\n').forEach((line, index) => {
+    const sectionMatch = line.match(/^## (.+)$/);
+    if (sectionMatch) { section = sectionMatch[1]; current = null; inDoneTable = false; return; }
     const heading = line.match(/^### (\S+) (.+)$/);
     if (heading && ID.test(heading[1])) {
-      current = {id: heading[1], title: heading[2].trim(), area, line: index + 1, fields: {}, status: null, depends: []};
+      current = {id: heading[1], title: heading[2].trim(), dir, file, section, line: index + 1,
+        fields: {}, status: null, depends: []};
       items.push(current);
       inDoneTable = false;
       return;
@@ -46,24 +49,31 @@ function parseRoadmap(text = fs.readFileSync(roadmapFile, 'utf8')) {
         field[2].split(',').map(s => s.trim()).filter(Boolean);
       return;
     }
-    const row = line.match(/^\|\s*([LFIRP]\d+(?:\.\d+)*)\s*\|(.*)\|\s*$/);
+    const row = line.match(/^\|\s*([A-Z]\d+(?:\.\d+)*)\s*\|(.*)\|\s*$/);
     if (row && inDoneTable) {
       const cells = row[2].split('|').map(s => s.trim());
-      items.push({id: row[1], title: cells[0], area, line: index + 1, status: 'done', depends: [],
+      items.push({id: row[1], title: cells[0], dir, file, section, line: index + 1, status: 'done', depends: [],
         fields: {'Delivered by': cells[1] || '', Architecture: cells[2] || ''}});
     }
   });
   return items;
 }
 
+const parseAll = () => AREAS.flatMap(parseRoadmap);
+
 function itemPath(item) {
   const target = linkTargets(item.fields.Ticket || item.fields.Spec)[0];
-  return target ? resolveFromDocs(target) : null;
+  return target ? resolveFrom(item.dir, target) : null;
 }
 
+const areaName = item => path.basename(item.dir);
+
 function list(items) {
-  for (const item of items)
-    console.log(item.id.padEnd(7) + item.status.padEnd(12) + item.title);
+  let area = null;
+  for (const item of items) {
+    if (areaName(item) !== area) { area = areaName(item); console.log('\n' + area); }
+    console.log('  ' + item.id.padEnd(7) + item.status.padEnd(12) + item.title);
+  }
 }
 
 function next(items) {
@@ -73,8 +83,8 @@ function next(items) {
   if (!ready.length) { console.log('No item has all its dependencies done.'); return; }
   for (const item of ready) {
     const file = itemPath(item);
-    console.log(item.id.padEnd(7) + item.status.padEnd(10) + item.title +
-      (file ? '\n       ' + path.relative(root, file) : ''));
+    console.log(areaName(item).padEnd(10) + item.id.padEnd(7) + item.status.padEnd(10) + item.title +
+      (file ? '\n' + ' '.repeat(27) + path.relative(root, file) : ''));
   }
 }
 
@@ -99,24 +109,22 @@ function raise(items, id) {
   if (moved.status !== 0) fs.renameSync(from, to);
   fs.writeFileSync(to, rebaseLinks(fs.readFileSync(to, 'utf8'), path.dirname(from), backlog));
 
-  const lines = fs.readFileSync(roadmapFile, 'utf8').split('\n');
-  const start = item.line - 1;
-  for (let i = start + 1; i < lines.length && !/^#/.test(lines[i]); i++) {
+  const lines = fs.readFileSync(item.file, 'utf8').split('\n');
+  const link = path.relative(item.dir, to).split(path.sep).join('/');
+  for (let i = item.line; i < lines.length && !/^#/.test(lines[i]); i++) {
     if (/^- \*\*Status:\*\*/.test(lines[i])) lines[i] = '- **Status:** ready';
-    if (/^- \*\*Spec:\*\*/.test(lines[i])) {
-      lines[i] = '- **Ticket:** [' + path.basename(to) + '](../backlog/' + path.basename(to) + ')';
-    }
+    if (/^- \*\*Spec:\*\*/.test(lines[i])) lines[i] = '- **Ticket:** [' + path.basename(to) + '](' + link + ')';
   }
-  fs.writeFileSync(roadmapFile, lines.join('\n'));
+  fs.writeFileSync(item.file, lines.join('\n'));
   console.log('Raised ' + id + ': ' + path.relative(root, to) + ' (status ready)');
 }
 
-module.exports = {parseRoadmap, itemPath, linkTargets, resolveFromDocs, STATUSES, ID, docDir, root};
+module.exports = {parseRoadmap, parseAll, itemPath, linkTargets, resolveFrom, STATUSES, ID, AREAS, root};
 
 if (require.main === module) {
   const [command, id] = process.argv.slice(2);
   try {
-    const items = parseRoadmap();
+    const items = parseAll();
     if (command === 'list') list(items);
     else if (command === 'next') next(items);
     else if (command === 'raise' && id) raise(items, id);
