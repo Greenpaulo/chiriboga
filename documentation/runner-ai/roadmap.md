@@ -7,8 +7,10 @@ spec file (`proposed`); how finished work behaves lives in
 Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md).
 
 - `node scripts/roadmap.js next` lists items (both AIs) whose dependencies are all `done`.
-- `tests/ai-roadmaps.test.js` fails if a status, link or dependency here
-  disagrees with the tickets.
+- `node scripts/roadmap.js blockers` lists tickets held by unfinished
+  dependencies; add `--fix` to refresh their generated headers.
+- `tests/ai-roadmaps.test.js` fails if a status, link, dependency or generated
+  blocker header disagrees with the tickets.
 
 ## Hand keep and discard (W)
 

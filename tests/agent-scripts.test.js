@@ -29,4 +29,22 @@ assert.strictEqual((brief.match(/Text: /g) || []).length, cardLines.length, 'eac
 assert.strictEqual((brief.match(/no unfinished markers/g) || []).length, cardLines.length,
   'a completed batch shows no unfinished markers');
 
-console.log('Agent helper scripts: show.js and batch-brief.js work.');
+const blockers = run('scripts/roadmap.js', 'blockers');
+assert(/corp_ai_finding_11_evaluate_once_per_decision\.md: F2, F4/.test(blockers),
+  'roadmap.js blockers lists unresolved dependencies');
+assert(/Generated blocker sections are in sync\./.test(blockers),
+  'roadmap.js blockers verifies the generated ticket headers');
+
+const nextBugs = run('scripts/ticket.js', 'next', 'bugs');
+assert(/documentation\/bugs\/ballista-central-servers-skip-agenda-check\.md/.test(nextBugs),
+  'ticket.js next bugs lists open actionable bugs');
+assert(!/documentation\/bugs\/code-review\//.test(nextBugs),
+  'ticket.js next bugs excludes tickets awaiting review');
+
+const ticketList = run('scripts/ticket.js', 'list');
+assert(/Actionable bugs:[\s\S]*Actionable backlog:[\s\S]*Blocked:[\s\S]*In code review:[\s\S]*In remediation:/.test(ticketList),
+  'ticket.js list groups tickets by actionable and workflow state');
+assert(/Blocked:[\s\S]*corp_ai_finding_11_evaluate_once_per_decision\.md/.test(ticketList),
+  'ticket.js list puts generated blockers in the blocked group');
+
+console.log('Agent helper scripts: show.js, batch-brief.js, roadmap blockers and ticket lists work.');

@@ -9,8 +9,10 @@ Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md)
 - `node scripts/roadmap.js list` prints every item with its status.
 - `node scripts/roadmap.js gates` lists items with an acceptance gate by what is
   left to do; see [../judging-ai-changes.md](../judging-ai-changes.md).
-- `tests/ai-roadmaps.test.js` fails if a status, link or dependency here
-  disagrees with the tickets.
+- `node scripts/roadmap.js blockers` lists tickets held by unfinished
+  dependencies; add `--fix` to refresh their generated headers.
+- `tests/ai-roadmaps.test.js` fails if a status, link, dependency or generated
+  blocker header disagrees with the tickets.
 
 ## Server security (L)
 

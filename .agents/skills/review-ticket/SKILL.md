@@ -101,8 +101,10 @@ required". Notes alone still pass.
   `node tests/ai-roadmaps.test.js`.
 - **Pass with the gate pending F4:** the code may merge with its option off, but
   the item is not done. `node scripts/ticket.js move <ticket> open`; the item
-  stays `in-progress` and `node scripts/roadmap.js next` lists it again once F4
-  is `done`, for `implement-ticket` to run the gate.
+  stays `in-progress`, and the move command adds or updates its generated
+  `## Blocker` section. Once F4 is `done`, the blocker refresh removes that
+  section and `node scripts/roadmap.js next` lists the ticket for
+  `implement-ticket` to run the gate.
 - **Changes required:** `node scripts/ticket.js move <ticket> remediation`.
 
 A read-only reviewer outputs the Code review section for the user to paste into

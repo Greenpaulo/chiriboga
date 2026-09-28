@@ -91,8 +91,10 @@ So you never flip the switch by hand, but nothing reaches players switched on
 unless the numbers say so and you accept the review.
 
 A change reviewed while F4 is missing can still be merged, **switched off**.
-Its ticket goes back to the open backlog with `**Gate:** pending F4` and stays
-`in-progress` on the roadmap. Once F4 is done, the gate is run and step 3
+Its ticket goes back to the open backlog with `**Gate:** pending F4`, stays
+`in-progress` on the roadmap, and receives the generated `## Blocker` header.
+Once F4 is done, `ticket.js move` (or `roadmap.js blockers --fix` after a
+manual roadmap edit) removes that header; the gate is then run and step 3
 onwards happens.
 
 ### Not every item is an on/off comparison
