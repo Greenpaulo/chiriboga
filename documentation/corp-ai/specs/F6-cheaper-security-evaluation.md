@@ -24,15 +24,33 @@ Duel PD vs Tao:
   `_securityRunCalculator()`. So a piece of ICE on a server with n unrezzed
   ICE is priced up to 2^n times in one evaluation, though its break and bypass
   cost does not depend on which other ICE the plan rezzes.
+- The three bypass helpers `_icePlanOutcome()` calls at the top of each plan
+  (`_outermostIceBypassAvailable()`, `_outermostRelevantIce()`,
+  `_oneShotIceBypassTarget()`) run once per plan too, so up to 2^n times per
+  evaluation. `_outermostIceBypassAvailable(server)` takes no plan
+  information at all, so its result cannot vary between plans, but it still
+  rescans `ActiveCards(runner)` every call. `_oneShotIceBypassTarget()` is
+  the most expensive of the three: a nested loop over every ICE times every
+  active Runner card, and it calls `_matchingBreakerForIce()` /
+  `_estimateBreakCost()` again internally for its own candidate search,
+  separately from the main loop's identical work for the same card.
 
 ## Design
 - Within one `_evaluateServerSecurityUncached()` call, compute each ICE's
   plan-independent inputs once: required subroutines, matching breaker, break
   cost (full and mandatory-only), and bypass cost at its route index. Then
   let `considerPlans` combine them per plan.
-- First confirm which inputs really are plan-independent. Anything that reads
-  the plan (outermost or one-shot bypass targets, shared rez budget,
-  credits spent earlier on the route) stays per plan.
+- First confirm which inputs really are plan-independent.
+  `_outermostIceBypassAvailable(server)` is one: its signature takes no plan
+  information, so it can be computed once per
+  `_evaluateServerSecurityUncached()` call (or once per cache miss) instead
+  of once per plan. `_outermostRelevantIce()` and `_oneShotIceBypassTarget()`
+  do read `eligibleIce` and so genuinely stay per plan — but
+  `_oneShotIceBypassTarget()`'s own per-card check (which active Runner card,
+  if any, can bypass this specific ICE) does not depend on the plan either,
+  only on the card, and could be memoized the same way as the main per-ICE
+  inputs. Shared rez budget and credits spent earlier on the route stay per
+  plan regardless.
 - Keep the memo local to the call. It must not outlive the evaluation or be
   shared with hypotheticals.
 
@@ -59,6 +77,26 @@ Behaviour-identical performance change, so it ships without an option.
   repricing may be the run calculator itself (`_securityRunCalculator()`).
 - F4 gate runtime is the reason for this item. If gates run fast enough
   without it, it can wait.
+- `_securityBoardKey()` builds a string from every card on the board (HQ,
+  R&D, Archives, every remote server) on every call to
+  `_evaluateServerSecurity()`, including cache hits — the cache has to
+  compute the key before it can check for one. F3 measured about 1,700 of
+  2,200 calls in one seed as hits; each of those still pays this cost, and it
+  isn't counted inside `_evaluateServerSecurityUncached()` in this ticket's
+  profile. Worth including in the next profile before assuming all the
+  non-`considerPlans` time is elsewhere. A cheaper version (a board-version
+  counter bumped at each mutation site instead of rebuilding the string)
+  would be O(1), but trades away a property the current approach gets for
+  free: a missed mutation site just changes the rebuilt string anyway, where
+  a forgotten counter bump would silently serve a stale hit — exactly the
+  failure `_securityCacheVerify` and the depth guard already exist to catch.
+  Treat as a real option, not a free one.
+- `_icePlanOutcome()`'s `.reasons.push(GetTitle(iceCard) + ...)` builds
+  strings unconditionally on every ICE, every plan — including the majority
+  of plans `_icePlanIsBetter()` immediately discards. Cheap to defer until a
+  plan is actually kept, or skip entirely when nothing downstream reads
+  `reasons` for that call, matching the existing pattern of gating
+  `debugSecurityLog`'s call in `Phase_Main`.
 
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
