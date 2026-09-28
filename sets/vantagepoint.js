@@ -1052,8 +1052,8 @@ cardSet[36012] = {
     MakeRun(corp.HQ);
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
-      if (server == corp.HQ) this.runWasSuccessful = true;
+    Resolve: function () {
+      this.runWasSuccessful = true;
     },
     automatic: true,
   },

@@ -24,12 +24,15 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const root = path.resolve(__dirname, '..', '..');
+const root = path.resolve(__dirname, '..');
 
 const context = {
   console,
   cardSet: [],
   setIdentifiers: [],
+  MakeRun: (server) => {
+    context.attackedServer = server;
+  },
   ChangeImageFileToJPG: (name) =>
     String(name).replace(/^(\d+)/, (digits) => digits.padStart(5, '0')).replace(/\.png$/i, '.jpg'),
   runner: {

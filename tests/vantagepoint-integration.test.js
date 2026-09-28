@@ -618,7 +618,7 @@ tailgate.Resolve.call(tailgate);
 assert.strictEqual(runTarget, context.corp.HQ);
 context.attackedServer = context.corp.HQ;
 assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 0);
-tailgate.responseOnRunSuccessful.Resolve.call(tailgate, context.corp.HQ);
+tailgate.responseOnRunSuccessful.Resolve.call(tailgate);
 assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 2);
 
 const borrowedGoods = context.cardSet[36013];
