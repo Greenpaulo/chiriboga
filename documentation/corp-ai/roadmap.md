@@ -271,3 +271,9 @@ Existing code that breaks a principle and must be migrated.
 - **Depends on:** none
 - **Ticket:** [corp_ai_finding_13_legacy_title_lists.md](../backlog/corp_ai_finding_13_legacy_title_lists.md)
 - **Goal:** Replace the 64 allowlisted title uses in `ai_corp.js` with hooks; I1/I2/I5-owned rows migrate inside those items; a ratchet test blocks new ones.
+
+### P2 Route Corp card-policy randomness through the injected source
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [P2-corp-card-policy-randomness.md](specs/P2-corp-card-policy-randomness.md)
+- **Goal:** Route every playable card's Corp AI policy randomness through `CorpAI._random` while leaving gameplay randomness unchanged.

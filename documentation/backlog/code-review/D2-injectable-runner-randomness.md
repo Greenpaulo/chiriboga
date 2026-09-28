@@ -2,22 +2,40 @@
 
 **Roadmap item:** D2 · **Depends on:** none · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`
-**Verified against code:** 58f3a4d (2026-09-25)
+**Verified against code:** 970eba6 (2026-09-28)
 
 ## Resolution
 
 Implemented from `58f3a4d`.
+
+**Remediation 2026-09-28 (from `970eba6`):**
+
+1. Routed Punitive Counterstrike's dynamically installed Runner trace-choice
+   callback through `runner.AI._randomIndex()`, preserving the inclusive range,
+   and widened the ratchet to inspect dynamic `runner.AI.preferred` callbacks
+   in every playable set regardless of card ownership.
+2. Kept the architecture's seeded-randomness claim and expanded its test
+   description: after finding 1, the claim now covers the previously missed
+   Corp-owned callback.
+3. Recorded the out-of-scope Corp sites as proposed roadmap item
+   [P2](../../corp-ai/specs/P2-corp-card-policy-randomness.md), including a
+   full playable-set audit rather than only the two examples from review.
+4. Verification: `node tests/runner-ai-randomness.test.js` passes all 5 checks;
+   `node tests/run-all-tests.js` passes all 35 test files, including the Corp
+   decision fixtures and decision snapshots.
 
 - `RunnerAI` gets `this._random = Math.random` (constructor) and
   `_randomIndex(n)` (floor of `_random() * n`, clamped to `0..n-1`). The
   potential jitter uses `this._random()`, the "no decision made" fallback
   uses `this._randomIndex(optionList.length)` instead of `RandomRange`, and
   the two Runner card AI hooks in `sets/systemupdate2021.js` (the random
-  card pair pick and the ICE-choice jitter) use `runner.AI._randomIndex()` /
+  card pair pick and the ICE-choice jitter), plus Punitive Counterstrike's
+  Runner trace callback, use `runner.AI._randomIndex()` /
   `runner.AI._random()`. With the default source, behaviour is unchanged.
-- Departures from the spec, as planned: four sites instead of one, and no
-  jitter cache, because the jitter already rolls once per server per decision
-  (the new test checks this).
+- Initial departure from the spec, as planned: four sites instead of one, and
+  no jitter cache, because the jitter already rolls once per server per
+  decision (the new test checks this). Review found and remediation covered a
+  fifth site, Punitive Counterstrike's Runner trace callback.
 - New `tests/runner-ai-randomness.test.js`. It loads the **real engine files
   headlessly** (browser globals stubbed: jQuery, PIXI, document, timers,
   `cardRenderer`), builds a board with the real `CorpTestField`/
@@ -27,7 +45,8 @@ Implemented from `58f3a4d`.
   seeds alone decide the HQ/R&D tie on that board (both targets occur across
   six seeds); one roll per server per decision; `_randomIndex` bounds; and a
   ratchet that fails on `Math.random`, `RandomRange` or `Shuffle` in the
-  `RunnerAI` class or in any Runner card's `AI*` hook. Without the fix the test
+  `RunnerAI` class, any Runner card's `AI*` hook, or any dynamic
+  `runner.AI.preferred` callback in playable sets. Without the fix the test
   fails at the jitter (`ai_runner.js`, `_internalChoiceDetermination`).
 - **For F4:** the real engine loads and runs AI decisions headlessly with
   only browser globals stubbed. The test's setup (about 40 lines) is a
@@ -85,7 +104,7 @@ seeded simulations.
 
 ## Current behaviour
 
-Runner AI policy draws from global randomness in four places:
+Before this change, Runner AI policy drew from global randomness in five places:
 
 - Run selection adds jitter to each server's potential with `Math.random()`
   in `_internalChoiceDetermination()`. `serverList` and the potentials are
@@ -97,6 +116,9 @@ Runner AI policy draws from global randomness in four places:
 - Two card AI hooks in `sets/systemupdate2021.js` also use it: one picks cards
   at random with `RandomRange` when no pair shares a title or cost, and one
   adds `0.1 * Math.random()` jitter when choosing between pieces of ICE.
+- Punitive Counterstrike, a Corp-owned card in `sets/systemupdate2021.js`,
+  dynamically installs a Runner trace-choice callback whose random threshold
+  uses `RandomRange`.
 
 No test constructs a `RunnerAI` or runs one of its decisions.
 See [architecture: run selection and the run calculator](../../runner-ai/architecture.md#run-selection-and-the-run-calculator).
@@ -105,8 +127,9 @@ See [architecture: run selection and the run calculator](../../runner-ai/archite
 
 - Add a `_random` property to the Runner AI, defaulting to `Math.random`.
 - Route all Runner AI policy randomness through it, including the two card
-  AI hooks (through `runner.AI`), with a helper for random indices so no
-  policy code calls `RandomRange`.
+  AI hooks and the dynamic Punitive Counterstrike callback (through
+  `runner.AI`), with a helper for random indices so no policy code calls
+  `RandomRange`.
 - The server-potential jitter already has a one-decision lifetime (see
   Current behaviour); keep it that way and cover it with a test rather than
   adding a cache.

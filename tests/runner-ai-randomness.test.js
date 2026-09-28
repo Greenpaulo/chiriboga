@@ -36,6 +36,7 @@ const context = {
 };
 context.window = context;
 vm.createContext(context);
+vm.runInContext('if (!String.prototype.replaceAll) String.prototype.replaceAll = function(a, b) { return this.split(a).join(b); };', context);
 const files = ['deck/seedrandom.min.js', 'config.js', 'init.js', 'phase.js', 'command.js', 'checks.js', 'mechanics.js',
   'utility.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js', 'sets/vantagepoint.js',
   'decks.js', 'runcalculator.js', 'ai_corp.js', 'ai_runner.js'];
@@ -132,6 +133,17 @@ async function test(name, fn) {
       for (const [key, value] of Object.entries(card))
         if (/^AI/.test(key) && typeof value === 'function' && global.test(value.toString()))
           offenders.push(id + ' ' + card.title + ' ' + key);
+    }
+    // Some Corp cards install Runner-policy callbacks dynamically instead of
+    // exposing a top-level AI* hook. Inspect those preference object literals
+    // in every loaded set, regardless of which side owns the card.
+    for (const file of files.filter(file => file.startsWith('sets/'))) {
+      const setSource = fs.readFileSync(path.join(root, file), 'utf8');
+      const preferences = setSource.match(/runner\.AI\.preferred\s*=\s*\{[\s\S]*?\}\s*;/g) || [];
+      for (const preference of preferences) {
+        if (global.test(preference))
+          offenders.push(file + ' dynamic runner.AI.preferred callback');
+      }
     }
     assert.deepStrictEqual(offenders, [], 'use this._random / runner.AI._random / runner.AI._randomIndex');
   });

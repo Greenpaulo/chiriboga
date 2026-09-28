@@ -46,7 +46,7 @@ CommandChoice / SelectChoice
        6. run offered → score servers, maybe prep, run
        7. not running → draw, hand size, economy, worth-keeping cards,
           generic installs/plays, click for credits
-       8. fallback: RandomRange over the options
+       8. fallback: `_randomIndex()` over the options
 ```
 
 **Preferences.** `_returnPreference(optionList, cmd, prefs)` stores `prefs` in
@@ -140,7 +140,8 @@ through it, for the "no decision made" fallback and for card AI hooks (which
 call `runner.AI._random()` / `runner.AI._randomIndex()`).
 `tests/runner-ai-randomness.test.js` runs real Runner decisions headlessly with
 a seeded source and fails on any direct `Math.random`, `RandomRange` or
-`Shuffle` call in the `RunnerAI` class or a Runner card's AI hooks. A server above
+`Shuffle` call in the `RunnerAI` class, a Runner card's AI hooks, or dynamic
+`runner.AI.preferred` callbacks installed by cards owned by either side. A server above
 potential 2 with no complete path is recalculated with foresight; if that
 succeeds the AI does not run this click. `SortCardsWorthKeeping()` reorders
 `this.cardsWorthKeeping`. Servers below 0.5 or with infinite cost are dropped;
