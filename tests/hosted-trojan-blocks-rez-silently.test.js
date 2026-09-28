@@ -1,9 +1,9 @@
 // Run with: node tests/pending/hosted-trojan-blocks-rez-silently.test.js
-// Drafted by a read-only agent from documentation/debug-logs/bug_raised/
-// corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt — not yet run.
+// Drafted from documentation/debug-logs/bug_raised/
+// corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt.
 // See documentation/bugs/corp-silently-declines-rez-of-ice-hosting-a-trojan.md
 //
-// Reproduces: _iceWorthRezzing() silently returns false (no logged reason)
+// Reproduces: _iceWorthRezzing() returns false without logging a reason
 // for unrezzed ice hosting a non-exempt Runner Trojan (here, Chromatophores,
 // id 35030) whenever Credits(corp) < currentRezCost * 5, even when nothing
 // else on the board would otherwise justify withholding the rez.
@@ -87,6 +87,7 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
+  ai.options.evidenceBasedHostedCardRez = false;
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
   tests++; if (verbose) console.log('PASS ' + name);
 }
@@ -96,14 +97,17 @@ function test(name, body) {
 // Chromatophores hosted on it. No other unrezzed ice exists anywhere, so
 // nothing else in the function could legitimately cause a reservation —
 // isolating the hosted-card branch as the only possible reason to decline.
-function buildBoard(hostedCard) {
+function buildBoard(hostedCard, options = {}) {
   const approachedIce = ice(['End the run.'], [[['endTheRun']]], {rezzed: false, rezCost: 3});
   approachedIce.hostedCards = [hostedCard];
+  hostedCard.host = approachedIce;
+  runner.cards.push(hostedCard);
   const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
   const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
-  const remote = {serverName: 'Remote 0', ice: [approachedIce], root: [agenda]};
+  const remoteIce = options.innerIce ? [options.innerIce, approachedIce] : [approachedIce];
+  const remote = {serverName: 'Remote 0', ice: remoteIce, root: [agenda]};
   Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote]});
   servers = [hq, rnd, archives, remote];
   runner.clickTracker = 0;
@@ -116,6 +120,7 @@ test('BUG: undefended remote with affordable ice hosting Chromatophores is not r
     'test assumption: Chromatophores has no AIHostedDoesNotPreventRez exception');
   const {approachedIce, remote} = buildBoard(chromatophores);
   corp.creditPool = 12; // 12 < rezCost(3) * 5 == 15, so the "super rich" gate is not met
+  ai.options.evidenceBasedHostedCardRez = true;
 
   const messages = [];
   const oldLog = ai._log;
@@ -152,4 +157,4 @@ test('GUARD: a "super rich" Corp already rezzes despite a non-exempt hosted card
   assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), true);
 });
 
-console.log(tests + ' pending test(s) run (see file header: not yet confirmed against a live run)');
+console.log(tests + ' hosted Trojan rez test(s) passed');

@@ -81,6 +81,7 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
+  ai.options.evidenceBasedHostedCardRez = false;
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
   tests++; if (verbose) console.log('PASS ' + name);
 }
@@ -248,6 +249,55 @@ test('game-saving Brân rez overrides reservation for a higher-value remote', ()
 
   runner.agendaPoints = 0;
   assert.strictEqual(ai._iceWorthRezzing(rndBran, 6, rnd), false);
+});
+function hostedTrojanRezBoard(hostedCard, redundantInner = false) {
+  const approachedIce = etr();
+  approachedIce.title = 'Regression ice';
+  approachedIce.rezzed = false;
+  approachedIce.rezCost = 3;
+  approachedIce.hostedCards = [hostedCard];
+  hostedCard.host = approachedIce;
+  runner.cards = [hostedCard];
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const remoteIce = redundantInner ? [etr(), approachedIce] : [approachedIce];
+  const remote = {serverName: 'Remote 0', ice: remoteIce, root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 12});
+  servers = [hq, rnd, archives, remote];
+  runner.clickTracker = 0;
+  return {approachedIce, remote};
+}
+test('hosted-card rez option off preserves the conservative choice and logs it', () => {
+  const {approachedIce, remote} = hostedTrojanRezBoard(card(35030));
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), false);
+  } finally { ai._log = oldLog; }
+  assert.deepStrictEqual(messages, [
+    'Not rezzing Regression ice: hosted Chromatophores requires 15 credits ' +
+    'under the hosted-card threshold (have 12)',
+  ]);
+});
+test('hosted-card rez option lets Tranquilizer ICE stop the current breach', () => {
+  const tranquilizer = card(30017); tranquilizer.virus = 2;
+  const {approachedIce, remote} = hostedTrojanRezBoard(tranquilizer);
+  ai.options.evidenceBasedHostedCardRez = true;
+  assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), true);
+});
+test('hosted-card rez option still declines redundant Tranquilizer ICE', () => {
+  const tranquilizer = card(30017); tranquilizer.virus = 2;
+  const {approachedIce, remote} = hostedTrojanRezBoard(tranquilizer, true);
+  ai.options.evidenceBasedHostedCardRez = true;
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), false);
+  } finally { ai._log = oldLog; }
+  assert.deepStrictEqual(messages, [
+    'Not rezzing Regression ice: hosted Tranquilizer requires 15 credits ' +
+    'under the hosted-card threshold (have 12)',
+  ]);
 });
 // ---- F3: per-decision security cache ----
 function branBoard() {

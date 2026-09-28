@@ -4608,14 +4608,31 @@ class CorpAI {
           Credits(corp) < currentRezCost * 5
         ) {
           //check if any hosted card is actually threatening
-          var hasThreateningHosted = false;
+          var threateningHosted = null;
           for (var h = 0; h < card.hostedCards.length; h++) {
             if (!card.hostedCards[h].AIHostedDoesNotPreventRez) {
-              hasThreateningHosted = true;
+              threateningHosted = card.hostedCards[h];
               break;
             }
           }
-          if (hasThreateningHosted) {
+          if (
+            threateningHosted &&
+            !(
+              this.options.evidenceBasedHostedCardRez &&
+              this._iceWouldSecureServer(card, currentRezCost, server)
+            )
+          ) {
+            this._log(
+              "Not rezzing " +
+                GetTitle(card) +
+                ": hosted " +
+                GetTitle(threateningHosted) +
+                " requires " +
+                currentRezCost * 5 +
+                " credits under the hosted-card threshold (have " +
+                Credits(corp) +
+                ")",
+            );
             rezIce = false;
           }
         }
@@ -6381,6 +6398,7 @@ class CorpAI {
   //***CLASS DEFINITION AND CORE AI CODE***
   constructor() {
     this.preferred = null;
+    this.options = Object.assign({}, CorpAI.DEFAULT_OPTIONS);
     this._protectionInstallsThisTurn = [];
     this._serverProtectionDebt = new Map();
     this._recentSuccessfulRunPressure = new WeakMap();
@@ -6646,3 +6664,7 @@ class CorpAI {
 
   GameEnded(winner) {}
 }
+
+CorpAI.DEFAULT_OPTIONS = Object.freeze({
+  evidenceBasedHostedCardRez: false,
+});

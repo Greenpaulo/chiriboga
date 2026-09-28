@@ -113,6 +113,15 @@ The owner's guide to gates (why, who does what, how to read results) is
 [judging-ai-changes.md](judging-ai-changes.md). `node scripts/roadmap.js gates`
 lists gated items by what is left to do.
 
+Every AI-behaviour spec and ticket must contain the exact, unnumbered headings
+`## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse them
+literally. Absence never means ungated. An objectively correct change records
+`N/A — deterministic fix (principle 4): <the rules, legality,
+information-boundary or invariant oracle>`. A strategic preference records a
+measurable gate as described below. Ticket/spec creation makes this decision,
+`reground-spec` rechecks it against current code, and `implement-ticket`
+normalizes older or manually created tickets before planning.
+
 An item whose goal is to play better, rather than to reproduce a fixed
 decision, is **gated**: deterministic tests cannot show that the change helps,
 so its **Acceptance gate** decides adoption from seeded games run with the F4
@@ -177,8 +186,9 @@ rewriting.
 1. <Deterministic scenario that must hold.>
 
 ## Acceptance gate
-<Measurable condition for adopting the change. Gated items: F4 metrics,
-direction and threshold for each (see Acceptance gates above).>
+<Objective items: `N/A — deterministic fix (principle 4): <the oracle>`.
+Gated items: measurable F4 or human-game metrics, direction and threshold for
+each (see Acceptance gates above). Never omit this section.>
 
 ## Things to consider
 <Optional: tensions with other items, performance, edge cases.>

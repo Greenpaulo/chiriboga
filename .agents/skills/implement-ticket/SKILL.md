@@ -28,10 +28,32 @@ written into it.
   `architecture.md` sections the ticket links to, and set the item's status in
   the side's `roadmap.md` (`documentation/corp-ai/` or `documentation/runner-ai/`)
   to `in-progress`.
-- A ticket is **gated** when its acceptance criteria require an AI option or its
-  **Acceptance gate** needs seeded games (see "Acceptance gates" in
-  `documentation/ai-planning.md`). If a gated ticket lacks the two gate criteria
-  or its gate has no numbers, fix the ticket before planning.
+- For every ticket that would change an AI choice, independently classify the
+  expected result before planning; do not rely on the ticket already calling
+  itself gated. Read "Acceptance gates" in `documentation/ai-planning.md` and
+  distinguish:
+  - an **objective oracle** fixed by game rules, legality, the information
+    boundary or another explicit invariant; from
+  - a **strategic preference** between legal choices, including heuristics,
+    tuning and claims that one play is better.
+  A deterministic fixture proves that a choice is reproducible, not that it is
+  strategically optimal. Strategic changes are gated even when the ticket
+  calls them bug fixes or gives one exact expected choice. Record the
+  classification and evidence in the ticket's plan (or Resolution when no plan
+  is required). If a ticket mixes an objective defect such as missing logging
+  with a strategic change, split or narrow the ungated fix and gate the
+  strategic part.
+- Normalize every AI-choice ticket before planning, including legacy or
+  manually created tickets. It must have the exact, unnumbered headings
+  `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
+  those headings literally. A missing gate section never means ungated. For an
+  objective change, add `N/A — deterministic fix (principle 4): <the oracle>`.
+  For a strategic change, add the numeric F4 or human-game gate and the two
+  gated criteria from `documentation/ai-planning.md`. This is a permanent
+  backstop even after ticket-creation workflows normally supply the sections.
+- A ticket is also **gated** when its acceptance criteria require an AI option
+  or its **Acceptance gate** needs seeded games. If a gated ticket lacks the two
+  gate criteria or its gate has no numbers, fix the ticket before planning.
 
 ## 2. Reproduce
 
@@ -61,6 +83,11 @@ where it is uncertain:
   code, card definitions and game rules.
 - Check every consumer of a function you would change, and look for
   counterexamples.
+- For an AI-choice reproduction, verify that its expected choice follows from
+  the classification in step 1. If it encodes an unsupported strategic
+  preference, it is not an ungated correctness oracle: record the disagreement
+  and use the plan gate to split, narrow or gate the behavior before changing
+  the reproduction.
 
 - Roadmap tickets were written against older code. Re-ground them as
   "Re-grounding a spec" in `documentation/ai-planning.md` describes: check
@@ -133,6 +160,10 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 
 - The reproduction passes. `git mv` it into the green suite
   (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged.
+  Keep the original pending path on the ticket's `**Reproduction:**` line and
+  also name the new green path and passing command. `ticket.js check` uses the
+  original path from Git history to verify that assertions or `EXPECT` lines
+  were not changed during the move.
 - Add a variation or unit test when a broad heuristic changed.
 - `node tests/run-all-tests.js` passes.
 - Gated tickets: if F4 is `done`, run its gate as the ticket states it and F4's
@@ -163,6 +194,13 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   Leave the gate criteria unticked while the gate is pending or failed.
   `ticket.js check` fails a gated ticket without this line, or whose option
   defaults to on before the gate passed.
+  A pending or failed gate must also have the generated `## Blocker` section
+  naming the unresolved gate dependency. After writing the Gate line and
+  moving the ticket, run `node scripts/roadmap.js blockers --fix`, then
+  `node scripts/roadmap.js blockers` to confirm the headers are in sync.
+  `ticket.js move` normally performs the refresh, but do these commands
+  explicitly if the move was manual, failed partway, or did not produce the
+  expected header. Never hand off a pending-gate ticket without its blocker.
 - If the change alters AI behaviour described in
   `documentation/corp-ai/architecture.md` or
   `documentation/runner-ai/architecture.md` (bug fixes included, not only
@@ -174,6 +212,9 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   `node scripts/ticket.js move <ticket> code-review` (this also sets a linked
   roadmap item to `in-progress` and refreshes generated blocker headers), then run
   `node scripts/ticket.js check <ticket-in-its-new-folder>` and fix anything it reports
-  as FAIL.
+  as FAIL. Also fix warnings that say the acceptance-gate or reproduction
+  comparison was skipped because a required heading or original pending path
+  could not be found; warnings that merely report an intentionally pending
+  gate or its unticked gate criteria are expected.
 - Do not commit. Report the files changed, test results, deviations from the
   ticket or plan, and open questions.

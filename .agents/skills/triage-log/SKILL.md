@@ -78,6 +78,10 @@ reproduction is confirmed later by `implement-ticket`.
   make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
   (principle 4)` for the common case; only name metrics, a direction and a
   threshold there when the fix genuinely has no single correct answer.
+  A deterministic reproduction proves that the decision is repeatable, not
+  that it is strategically correct. Always use the exact, unnumbered headings
+  `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
+  them literally, and a missing gate section never means ungated.
 
 ## Ticket template
 
