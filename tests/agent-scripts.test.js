@@ -61,6 +61,8 @@ const untrackedSet = path.join(root, 'sets', 'agent-script-untracked-test-' + fi
 const untrackedSetData = path.join(root, 'sets', 'agent-script-untracked-test-' + fixtureSuffix + '.txt');
 const untrackedRoot = path.join(root, 'agent-script-untracked-test-' + fixtureSuffix + '.js');
 const blockerFixture = path.join(root, 'documentation', 'bugs', 'agent-script-blocker-test-' + fixtureSuffix + '.md');
+const nonMarkdownBlockerFixture = path.join(root, 'documentation', 'bugs',
+  'agent-script-blocker-test-' + fixtureSuffix + '.txt');
 const movedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review', path.basename(blockerFixture));
 const alreadyMovedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review',
   'agent-script-already-moved-test-' + fixtureSuffix + '.md');
@@ -93,8 +95,16 @@ try {
   assert.throws(() => blockerState([
     {id: 'X1', status: 'ready', depends: ['X2'], dir: path.join(root, 'documentation', 'corp-ai'),
       fields: {Ticket: '[outside](../../README.md)'}},
-  ]), /Ticket link resolves outside documentation\/bugs\/ or documentation\/backlog\//,
+  ]), /Ticket link is not a regular Markdown file under documentation\/bugs\/ or documentation\/backlog\//,
   'roadmap blocker destinations are confined to the canonical ticket roots');
+
+  createFixture(nonMarkdownBlockerFixture);
+  assert.throws(() => blockerState([
+    {id: 'X1', status: 'ready', depends: ['X2'], dir: path.dirname(nonMarkdownBlockerFixture),
+      fields: {Ticket: '[' + path.basename(nonMarkdownBlockerFixture) + '](' +
+        path.basename(nonMarkdownBlockerFixture) + ')'}},
+  ]), /Ticket link is not a regular Markdown file/,
+  'roadmap blocker destinations must be regular Markdown files');
 
   fs.writeFileSync(blockerFixture, '# Blocker fixture\n\n<!-- roadmap-blocker:start -->\n');
   assert.throws(() => move(blockerFixture, 'code-review'), /unmatched generated blocker markers/,

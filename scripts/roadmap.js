@@ -109,6 +109,7 @@ const isWithin = (parent, child) => child === parent || child.startsWith(parent 
 function canonicalTicketPath(file) {
   if (!file || !fs.existsSync(file)) return null;
   const canonical = fs.realpathSync(file);
+  if (!fs.statSync(canonical).isFile() || path.extname(canonical) !== '.md') return null;
   return ticketRoots().some(dir => isWithin(fs.realpathSync(dir), canonical)) ? canonical : null;
 }
 
@@ -149,8 +150,8 @@ function blockerState(items) {
     const file = itemPath(item);
     if (!item.fields.Ticket || item.status === 'done' || !file || !fs.existsSync(file)) continue;
     const ticket = canonicalTicketPath(file);
-    if (!ticket) throw new Error(item.id + ' Ticket link resolves outside documentation/bugs/ or documentation/backlog/: ' +
-      path.relative(root, file));
+    if (!ticket) throw new Error(item.id + ' Ticket link is not a regular Markdown file under ' +
+      'documentation/bugs/ or documentation/backlog/: ' + path.relative(root, file));
     const blockers = item.depends.filter(id => !byId.has(id) || byId.get(id).status !== 'done');
     if (blockers.length) reasons.set(ticket, blockers);
   }

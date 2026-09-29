@@ -28,7 +28,16 @@ Weyland; hand `[Trick of Light, Gov. Subsidy x2, Hostile Takeover, Spin Doctor]`
 - [Inferred] The Archives-overflow branch (`_agendasInHand() > MaxHandSize - 1`) did not apply here (at most 2 agendas in hand).
 
 ## Proposed fix
-Once a candidate remote passes the `isSecure` floor, the Runner cannot currently breach it, so ranking it against another server's score adds no safety and can leave the agenda in hand indefinitely. Proposed: apply the HQ/Archives comparison only to candidates that are not secure, and keep choosing among secure empty remotes by the existing `emptyProtectedRemotes[0]` order. Change is confined to the `_isAScoringServer()` agenda-placement call path.
+When the evaluator currently classifies a candidate remote as `isSecure`, the
+additional comparison against another server's score can leave the agenda in
+hand indefinitely. Proposed: treat that classification as sufficient for the
+agenda-placement policy, apply the HQ/Archives comparison only to candidates
+that are not classified as secure, and keep choosing among secure empty
+remotes by the existing `emptyProtectedRemotes[0]` order. `isSecure` does not
+prove that the Runner cannot breach the remote: unrezzed ICE can cause the
+evaluator to overstate security, so exposing an agenda on that basis remains a
+risk for the gate to measure. Change is confined to the
+`_isAScoringServer()` agenda-placement call path.
 Rejected: removing the hand term (the reproduction still fails at one card); a tuned constant (violates `ai-principles.md`).
 Selected candidate policy: skip the relative bar for agenda-placement calls
 whenever the candidate remote is secure, behind the default-off
