@@ -268,14 +268,14 @@ function check(ticket) {
     unticked.map(line => line.replace(/^\s*- \[ \]\s*/, '')).join('\n      '));
 
   // Gated tickets (documentation/ai-planning.md, "Acceptance gates") ship behind
-  // a default-off AI option until F4 gate evidence is recorded.
+  // a default-off AI option until their applicable gate evidence is recorded.
   if (criteria && /behind an AI option/.test(criteria)) {
     const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
     const option = gate && (gate.match(/`(\w+)`/) || [])[1];
     const code = ['ai_corp.js', 'ai_runner.js'].map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
     const setting = option && (code.match(new RegExp('\\b' + option + '\\s*:\\s*(true|false)\\b')) || [])[1];
     const passed = gate && /^passed\b/i.test(gate);
-    if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending F4 | failed — `<option>` …" line.');
+    if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');
     else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
     else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);

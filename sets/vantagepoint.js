@@ -1318,7 +1318,7 @@ cardSet[36015] = {
   },
   AIRunAbilityExtraPotential: function (server, potential) {
     if (server != corp.archives || this.usedThisTurn) return 0;
-    if (this._stealthCreditCards().length < 1) return 0;
+    if (this._stealthCreditCards(server).length < 1) return 0;
     var redirectedPotential = Math.max(
       runner.AI._getCachedPotential(corp.HQ),
       runner.AI._getCachedPotential(corp.RnD),
@@ -1535,12 +1535,14 @@ cardSet[36018] = {
     text: "You may run a remote server",
   },
   automaticOnRunEndCleanup: {
-    Resolve: function () {
+    Resolve: function (postCleanupCallbacks) {
       if (!this.runningWithThis) return;
       if (this.pendingRunServer) {
         var nextServer = this.pendingRunServer;
         this.pendingRunServer = null;
-        MakeRun(nextServer);
+        postCleanupCallbacks.push(function () {
+          MakeRun(nextServer);
+        });
       } else {
         this.runningWithThis = false;
         this.primaryRun = false;
@@ -2738,8 +2740,8 @@ cardSet[36035] = {
   trashCost: 3,
   _scoringServer: null,
   responseOnRez: {
-    Resolve: function () {
-      AddCounters(this, "power", 1);
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 1);
     },
     automatic: true,
   },
@@ -3438,6 +3440,7 @@ cardSet[36040] = {
   },
   responseOnEncounterEnds: {
     Enumerate: function () {
+      if (GetApproachEncounterIce() != this) return [];
       if (CheckCounters(this, "virus", 3)) return [{}];
       return [];
     },
@@ -4120,7 +4123,10 @@ cardSet[36048] = {
   },
   AIWorthInstalling: function (emptyProtectedRemotes) {
     if (corp.creditPool < this.rezCost) return -1;
-    return emptyProtectedRemotes.length > 0 ? 0 : emptyProtectedRemotes.length;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
   },
   AIAvoidInstallingOverThis: true,
 };
@@ -4181,7 +4187,10 @@ cardSet[36049] = {
   },
   AIWorthInstalling: function (emptyProtectedRemotes) {
     if (corp.creditPool < this.rezCost) return -1;
-    return emptyProtectedRemotes.length > 0 ? 0 : emptyProtectedRemotes.length;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
   },
   AIAvoidInstallingOverThis: true,
 };

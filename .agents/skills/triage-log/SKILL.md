@@ -111,7 +111,9 @@ decisions that could shift.>
 If the fix's goal is instead to play better with no single correct answer,
 select an F4 seeded-game gate or a human-game gate and state its sample size,
 metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
-gate, also name the seed range and deck pairs. Depends on: F4 when selected.>
+gate, also name the committed deck pairs, paired seed range, bootstrap 95%
+confidence intervals, guarded-regression conditions and applicable pass
+conditions. Depends on: F4 when selected.>
 
 ## Acceptance criteria
 - [ ] The reproduction passes and has moved into the green suite
@@ -121,9 +123,13 @@ gate, also name the seed range and deck pairs. Depends on: F4 when selected.>
 - [ ] `node tests/run-all-tests.js` passes.
 - [ ] (Gated items) The behaviour change ships behind an AI option that
       defaults to off (named in the Resolution).
-- [ ] (Gated items) Gate evidence is recorded in the Resolution: F4 command,
-      deck pairs, seed count, metrics, baseline vs candidate, and the
-      threshold met. Only then is the option switched on by default.
+- [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
+      For F4: exact command, committed deck pairs, paired seeds, seed count,
+      every metric's baseline/candidate result and bootstrap 95% confidence
+      interval, guarded-regression result, pass conditions and thresholds; an
+      improvement interval's lower bound must be above zero. For a human-game
+      gate: sample size, metrics, observed results, pass conditions and
+      thresholds. Only then is the option switched on by default.
 
 ## Out of scope / related
 ```
