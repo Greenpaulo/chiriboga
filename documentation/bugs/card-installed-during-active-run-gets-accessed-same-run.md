@@ -1,4 +1,4 @@
-# Engine: a card the Corp installs into a server while a run against it is still open gets accessed by that same run
+# Engine: a root card installed during a breach becomes accessible without the Runner's required choice
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_installs_upgrade_using_identity_ability_into_server_that_is_being_accessed.txt`
 **Reproduction:** `tests/pending/card-installed-during-active-run-gets-accessed-same-run.test.js` — `node tests/pending/card-installed-during-active-run-gets-accessed-same-run.test.js` (fails at `8d6c70e`, 2026-09-26)
@@ -12,18 +12,18 @@ Proposed at `8d6c70e`, 2026-09-26. **Awaiting approval.**
   identity-specific trigger path (`elevation.js`) was read to confirm how the
   mid-run install happens, but the fix targets the general engine function,
   not that card.
-- **Approach:** snapshot the attacked server's accessible cards once (at
-  `phases.runBreachServer.Init` or the start of the access loop) into a new
-  run-scoped list; have `AccessCardList()` read from that snapshot instead of
-  live `attackedServer.root`/`.cards`, still subtracting `accessedCards`.
-  Rejected: special-casing individual install effects (see Proposed fix).
+- **Approach:** track root access candidates for the breach. Seed the list when
+  the breach begins, record the Runner's rule 7.4.6a choice for each card that
+  enters the root, and have `AccessCardList()` read that state while still
+  subtracting `accessedCards`. Rejected: special-casing individual install
+  effects (see Proposed fix).
 - **Tests:** move this ticket's reproduction into `tests/`; add a
-  central-server (HQ/R&D/Archives root) mid-run-install variation; confirm
-  existing HQ/R&D/Archives access unit coverage still passes unchanged.
+  central-server-root variation; cover both accepting and declining the new
+  candidate; confirm existing HQ/R&D/Archives access coverage still passes.
 - **Risk:** `AccessCardList()` is reached by every access in the game
-  (`ChoicesAccess()`'s four call sites); the R&D `reducedRet` branch and the
-  `modifyBreachAccess` additional-access count both need re-checking against
-  the snapshot, since they currently read `attackedServer.cards.length` live.
+  (`ChoicesAccess()`'s four call sites). HQ, R&D and Archives card zones have
+  separate behavior under rules 7.4.6b-d and must remain live as specified;
+  only root candidates use the Runner-choice state.
 - **Docs:** none — no AI hook is added or changed.
 
 ## Summary
@@ -32,11 +32,11 @@ While a run against a remote server is still open (`Run ends` has not fired), a
 Corp trigger resolves and installs a fresh card into the root of that same
 server. The engine immediately re-offers that freshly installed card as part
 of the run's ongoing access, and the Runner accesses and trashes it before the
-run is over. Only cards present in the attacked server when the Runner began
-accessing it should be accessible to that run; a card installed afterwards,
-mid-run, should sit there untouched until a future run targets the server.
-This wastes the Corp's install for nothing and is a rules violation, not just
-a bad AI trade.
+run is over. Comprehensive rule 7.4.6a requires the Runner to decide whether a
+card entering the breached server's root becomes an access candidate. The
+engine makes it a candidate automatically and never offers that choice. The
+observed access is legal only if the Runner accepts it; forcing that outcome is
+a rules violation, not just a bad AI trade.
 
 ## Evidence
 
@@ -69,17 +69,17 @@ it accessed, then trashed, inside the same run.
 
 `tests/pending/card-installed-during-active-run-gets-accessed-same-run.test.js`
 extracts the real `AccessCardList()` from `utility.js` and runs it against a
-minimal remote-server stub. It puts one card in the server's root, accesses it
-(mirroring what `phases.runAccessingCard.Init` does), then installs a second
-card into the same root while the run is still open and calls
-`AccessCardList()` again. It currently returns the newly installed card. `node
+minimal remote-server stub. It models run-scoped root candidates, then checks
+both rule 7.4.6a choices for a card installed while the breach is open. The
+accept case is already consistent with the live scan; the decline case still
+returns the newly installed card. `node
 tests/pending/card-installed-during-active-run-gets-accessed-same-run.test.js`
 fails today:
 
 ```
-ok   control: a card already in the root when the run breaches is accessed
-FAIL a card the Corp installs into the root mid-run must not join this run's access
-     AccessCardList() must not offer a card installed into the attacked server after this run already began accessing it, but it returned: ["Freshly installed asset"]
+FAIL the Runner may decline a root card installed during the breach
+     AccessCardList() must not offer a mid-breach root install the Runner declined, but returned: ["Freshly installed asset"]
+1 case(s) failed.
 ```
 
 `node tests/run-all-tests.js` was run for comparison; it reports 3 pre-existing
@@ -96,16 +96,15 @@ card-image assets / roadmap data in this environment), and does not run
   attackedServer.root.length; i++) { if
   (!accessedCards.root.includes(attackedServer.root[i]))
   ret.push(attackedServer.root[i]); }`. It has no notion of "cards present when
-  this run's access began" — any card sitting in `attackedServer.root` that
-  isn't already in `accessedCards.root` is offered, regardless of when it was
-  installed.
+  the breach began" or the Runner's choice for a new root card — any card in
+  `attackedServer.root` that is not already in `accessedCards.root` is offered.
 - [Verified] `phases.runAccessingCard.Resolve.n` (`phase.js`) calls
   `ResolveAccess()` after each access resolves and then calls `ChoicesAccess()`
   again to see if there are more cards to access — `ChoicesAccess()` calls
-  `AccessCardList()` directly with no snapshot of the server's root taken at
-  breach time (`phases.runBreachServer`, `phase.js`). So any card installed
-  into the attacked server between two accesses in the same run — via a
-  triggered ability window that opens before `Run ends` — is picked up.
+  `AccessCardList()` directly with no run-scoped root-candidate state
+  (`phases.runBreachServer`, `phase.js`). So any card installed into the
+  attacked server between two accesses is picked up without the checkpoint
+  choice required by rule 7.4.6a.
 - [Verified] `poetriInstallCard()` (`sets/elevation.js`, card 35036, "Poétrï
   Luxury Brands: All the Rage") offers the currently-attacked remote as an
   install destination for its `responseOnStolen` ability with no restriction;
@@ -122,19 +121,18 @@ card-image assets / roadmap data in this environment), and does not run
 
 ## Proposed fix
 
-Give the access flow a fixed list of "cards accessible to this run" captured
-once, instead of a live re-scan of the server on every `AccessCardList()`
-call. The natural place is `phases.runBreachServer.Init` (where breach
-triggers already fire) or the start of the access loop: snapshot
-`attackedServer.root.slice()` (and, for Archives, `attackedServer.cards.slice()`)
-into a new run-scoped variable, and have `AccessCardList()` build `ret` from
-that snapshot rather than the live `attackedServer.root`/`.cards` arrays,
-still excluding anything already in `accessedCards`. R&D and HQ's
-count-based access (`num`) is unaffected by this — they already access a fixed
-number, not a live list — but the snapshot should still be taken for
-consistency and to protect against a similar "install extra R&D/HQ card
-mid-access" edge case (e.g. Send a Message's own ice-rez trigger has no such
-effect today, but nothing rules it out for a future card).
+Track breach candidates explicitly instead of rebuilding them from the live
+server on every `AccessCardList()` call. Initialize the root candidates when
+the breach begins. Under comprehensive rule 7.4.6a, whenever a card enters the
+breached server's root, give the Runner the required choice at the next
+checkpoint and record that card as a candidate only when the Runner accepts
+it. `AccessCardList()` should read that recorded candidate state and continue
+excluding cards already in `accessedCards`.
+
+Do not apply a fixed snapshot to the central-server card zones. Rules 7.4.6b-d
+give cards entering HQ, R&D and Archives their own candidate behavior, so keep
+those rules separate from the root choice. The run-scoped candidate state must
+also be reset at the same lifecycle boundaries as `accessedCards`.
 
 Rejected alternative: special-casing `poetriInstallCard()` (and other
 mid-run-install effects) to refuse the currently-attacked server as a
@@ -154,9 +152,11 @@ modifier all still work unchanged when nothing is installed mid-run.
 
 - [ ] The reproduction passes and has moved into the green suite (`tests/`),
       expectation unchanged.
-- [ ] A card installed mid-run into the attacked central server (HQ/R&D/
-      Archives root) is likewise excluded from that run's access — add a
-      variation covering a central server's root, not just a remote's.
+- [ ] For a card installed mid-breach into the attacked remote's root, tests
+      cover both Runner choices: accepting adds it as a candidate and
+      declining does not.
+- [ ] The same two choices are covered for a card installed into the root of
+      a breached central server (HQ, R&D or Archives).
 - [ ] Existing access behavior for HQ (random single access), R&D (top-down
       with root cards), and Archives (access-all) is unchanged when no
       mid-run install occurs — add or confirm unit coverage.

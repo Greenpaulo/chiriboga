@@ -25,6 +25,7 @@ const path = require('path');
 const vm = require('vm');
 
 const root = path.resolve(__dirname, '..', '..');
+let requestedServer = null;
 
 const context = {
   console,
@@ -32,6 +33,7 @@ const context = {
   setIdentifiers: [],
   ChangeImageFileToJPG: (name) =>
     String(name).replace(/^(\d+)/, (digits) => digits.padStart(5, '0')).replace(/\.png$/i, '.jpg'),
+  MakeRun: server => { requestedServer = server; },
   runner: {
     side: 'runner',
     AI: null,
@@ -69,6 +71,7 @@ context.attackedServer = context.corp.HQ;
 
 // Runner plays Tailgate; its own Resolve always runs HQ.
 tailgate.Resolve.call(tailgate);
+assert.strictEqual(requestedServer, context.corp.HQ, 'Tailgate must initiate its run on HQ');
 
 // Run succeeds. Reproduce AddTriggersToTriggerList's exact automatic-branch
 // dispatch (phase.js:332): Resolve is called on the card with NO arguments.

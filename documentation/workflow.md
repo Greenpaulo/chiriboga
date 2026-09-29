@@ -24,6 +24,7 @@ Why the workflow is set up this way is explained in
 | 4. Review | Claude chat | Commit and push, then paste **prompt R** with the check output | A Code review section to paste into the ticket, and a move command |
 | 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`, or in `remediation/` for another step 2 |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
+| PR feedback | Codex, PR branch | `$address-pr-review <PR>` | Each review comment verified and accepted, adapted, rejected or marked obsolete; supported fixes applied and tested |
 
 Codex can also do steps 1 and 4 itself (`$triage-log <log>`, `$review-ticket
 <ticket>`), but they are its most reading-heavy tasks.

@@ -1,7 +1,7 @@
 # Corp AI: conditional end-the-run text receives the same coarse protection value as a reliable ETR
 
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
-**Source:** Follow-up from `documentation/bugs/code-review/agenda-scored-behind-ice-with-no-etr.md` §§6-7 and the review of commit `fa1182c` in `documentation/code-reviews/code-review-fa1182c-scoring-server.md`.
+**Source:** Follow-up from `documentation/bugs/code-review/agenda-scored-behind-ice-with-no-etr.md` §§6-7 and the review of commit `fa1182c` in `documentation/code-reviews/addressed/code-review-fa1182c-scoring-server.md`.
 **Files:** `ai_corp.js`, conditional-ETR card definitions such as Diviner (`sets/systemgateway.js`), and `tests/corp-server-security.test.js`.
 **Status:** Diagnosed, not yet fixed. This is separate from the completed scoring-server security-floor fix: the security evaluator already treats Diviner conservatively through its `AIImplementIce` policy, but the coarser `_cardProtectionValue()` path does not.
 
