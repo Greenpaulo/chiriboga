@@ -105,16 +105,21 @@ reviews:
       - name: "Ticket review evidence"
         mode: "error"
         instructions: |
-          Apply this check when the PR description contains a Chiriboga bug or
-          backlog ticket. Otherwise pass.
+          Determine whether this is a Chiriboga ticket PR from changed files under
+          `documentation/bugs/` or `documentation/backlog/`, or from a linked
+          ticket. Do not infer that it is not a ticket PR merely because the PR
+          description omits the ticket. Otherwise pass.
 
-          Fail if the description does not include the complete ticket Resolution
-          and the pasted output of `node scripts/ticket.js check <ticket>`, or if
-          that output contains an unexplained FAIL, an unticked acceptance
-          criterion, a changed reproduction expectation, or a failing required
-          test. A failure is acceptable only when the Resolution provides concrete
-          evidence that it is pre-existing and unrelated to this PR. Do not claim
-          to execute repository tests: assess the recorded output and visible CI.
+          Fail if a ticket PR's description does not include the complete ticket
+          body, including its diagnosis/current behaviour, applicable
+          implementation plan, acceptance criteria, and final Resolution. Also
+          fail if it omits the pasted output of
+          `node scripts/ticket.js check <ticket>`, or if that output contains an
+          unexplained FAIL, an unticked acceptance criterion, a changed
+          reproduction expectation, or a failing required test. A failure is
+          acceptable only when the Resolution provides concrete evidence that it
+          is pre-existing and unrelated to this PR. Do not claim to execute
+          repository tests: assess the recorded output and visible CI.
 
 chat:
   auto_reply: true
