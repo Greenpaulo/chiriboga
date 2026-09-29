@@ -28,9 +28,18 @@ Weyland; hand `[Trick of Light, Gov. Subsidy x2, Hostile Takeover, Spin Doctor]`
 - [Inferred] The Archives-overflow branch (`_agendasInHand() > MaxHandSize - 1`) did not apply here (at most 2 agendas in hand).
 
 ## Proposed fix
-Once a candidate remote passes the `isSecure` floor, the Runner cannot currently breach it, so ranking it against another server's score adds no safety and can leave the agenda in hand indefinitely. Proposed: apply the HQ/Archives comparison only to candidates that are not secure, and keep choosing among secure empty remotes by the existing `emptyProtectedRemotes[0]` order. Change is confined to `_isAScoringServer()`.
+Once a candidate remote passes the `isSecure` floor, the Runner cannot currently breach it, so ranking it against another server's score adds no safety and can leave the agenda in hand indefinitely. Proposed: apply the HQ/Archives comparison only to candidates that are not secure, and keep choosing among secure empty remotes by the existing `emptyProtectedRemotes[0]` order. Change is confined to the `_isAScoringServer()` agenda-placement call path.
 Rejected: removing the hand term (the reproduction still fails at one card); a tuned constant (violates `ai-principles.md`).
-Selected candidate policy: skip the relative bar whenever the candidate remote is secure, behind the default-off `secureRemoteAgendaCommitment` option. This deliberately reverses the existing security-test expectation added with `done/corp-installs-agendas-into-a-never-secure-remote.md`; the gate below, rather than that one captured board, decides whether to adopt it. Applying the exception only when HQ is insecure remains a possible remediation if this candidate fails its gate, but is not the policy tested by this ticket.
+Selected candidate policy: skip the relative bar for agenda-placement calls
+whenever the candidate remote is secure, behind the default-off
+`secureRemoteAgendaCommitment` option. Scoring upgrades also call
+`_isAScoringServer()`; they retain the relative-score requirement because this
+ticket and its gate measure agenda commitment only. This deliberately reverses
+the existing agenda-placement security-test expectation added with
+`done/corp-installs-agendas-into-a-never-secure-remote.md`; the gate below,
+rather than that one captured board, decides whether to adopt it. Applying the
+exception only when HQ is insecure remains a possible remediation if this
+candidate fails its gate, but is not the policy tested by this ticket.
 Other decisions that could shift: whether `_scoringWindow()` should stop using HQ's hand-inflated score; unrezzed ICE overstates security (finding A2), so trusting `isSecure` alone leans on that.
 
 ## Acceptance gate
@@ -56,6 +65,9 @@ deck pair and bootstrap 95% confidence intervals.
 - [ ] The test "a secure remote still uses the relative scoring-server comparison" is rewritten deliberately, with the reasoning recorded in review, not weakened to pass.
 - [ ] Variation: remote holding the same Ballista as HQ, and an 8-card hand, both still install.
 - [ ] Control: an insecure remote is still refused; `corp-no-agenda-into-insecure-remote` stays green.
+- [ ] Control: an `AIIsScoringUpgrade` install still requires the candidate
+      remote to meet the relative-score comparison, even when
+      `secureRemoteAgendaCommitment` is enabled.
 - [ ] The behaviour change ships behind the AI option
       `secureRemoteAgendaCommitment`, which defaults to off.
 - [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
@@ -73,8 +85,14 @@ deck pair and bootstrap 95% confidence intervals.
 ## Implementation plan
 **Awaiting approval.** Plan gate: shared scoring heuristic in `ai_corp.js`, and changes the expectation of an existing green test.
 1. Confirm the reproduction fails for the stated reason (done at triage).
-2. In `_isAScoringServer()`, guard the `protScore < minProt` return with `!security.isSecure`.
-3. Rewrite the conflicting security test to assert a secure remote is accepted regardless of relative score, keeping the insecure-remote test unchanged.
+2. Give `_isAScoringServer()` an agenda-placement flag. Let a secure candidate
+   bypass the `protScore < minProt` rejection only for agenda placement when
+   `secureRemoteAgendaCommitment` is enabled; otherwise retain the current
+   relative-score rejection. Keep the option off until the F4 gate passes.
+3. Rewrite the conflicting agenda-placement security test to assert a secure
+   remote is accepted regardless of relative score when the option is enabled,
+   keeping the insecure-remote test unchanged. Add a focused scoring-upgrade
+   regression proving the shared predicate still applies the relative bar.
 4. Add the variation fixtures; update `architecture.md`; run the full suite.
 
 ## Out of scope / related
