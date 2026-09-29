@@ -45,12 +45,17 @@ deck shuffles, random accesses, random card selection required by card text,
 or any other engine/gameplay randomness.
 
 ## Test scenarios
-1. With `Math.random`, `RandomRange`, and engine `Shuffle` made to throw, each
-   listed Corp policy decision uses an injected source and stays in bounds.
+1. While each listed Corp policy decision is evaluated, make `Math.random`,
+   `RandomRange`, and engine `Shuffle` throw; restore those stubs before any
+   resulting card effect resolves. Each policy choice uses an injected source
+   and stays in bounds.
 2. Equal seeds and equal public states produce equal choices for every listed
    policy site, with the same number of rolls.
-3. Representative gameplay randomness in the same card sets still uses the
-   engine source rather than `CorpAI._random`.
+3. Separately resolve representative gameplay randomness in the same card
+   sets after restoring the engine sources, and spy on those sources to verify
+   the effect still uses engine randomness rather than `CorpAI._random`. In
+   particular, Touch-ups' policy-only advance-target shuffle is isolated from
+   its later `Shuffle(runner.stack)` card effect.
 4. A source ratchet rejects any new direct global-randomness call in playable
    Corp card-policy code.
 

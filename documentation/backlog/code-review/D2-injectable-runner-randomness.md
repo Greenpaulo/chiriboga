@@ -12,8 +12,10 @@ Implemented from `58f3a4d`.
 
 1. Routed Punitive Counterstrike's dynamically installed Runner trace-choice
    callback through `runner.AI._randomIndex()`, preserving the inclusive range,
-   and widened the ratchet to inspect dynamic `runner.AI.preferred` callbacks
-   in every playable set regardless of card ownership.
+   and widened the ratchet to inspect complete, brace-balanced dynamic
+   `runner.AI.preferred` callbacks in every playable set regardless of card
+   ownership. A nested-callback regression assertion prevents the scanner from
+   stopping at an earlier nested `};`.
 2. Kept the architecture's seeded-randomness claim and expanded its test
    description: after finding 1, the claim now covers the previously missed
    Corp-owned callback.
@@ -21,7 +23,7 @@ Implemented from `58f3a4d`.
    [P2](../../corp-ai/specs/P2-corp-card-policy-randomness.md), including a
    full playable-set audit rather than only the two examples from review.
 4. Verification: `node tests/runner-ai-randomness.test.js` passes all 5 checks;
-   `node tests/run-all-tests.js` passes all 35 test files, including the Corp
+   `node tests/run-all-tests.js` passes all 36 test files, including the Corp
    decision fixtures and decision snapshots.
 
 - `RunnerAI` gets `this._random = Math.random` (constructor) and
@@ -56,7 +58,7 @@ Implemented from `58f3a4d`.
   ([run selection](../../runner-ai/architecture.md#run-selection-and-the-run-calculator))
   describes the seam and drops the "cannot be seeded" known limit. No hook
   contract changed, so `documentation/ai.md` is unchanged.
-- `node tests/run-all-tests.js`: 35 test files passed.
+- `node tests/run-all-tests.js`: 36 test files passed.
 
 ## Implementation plan
 

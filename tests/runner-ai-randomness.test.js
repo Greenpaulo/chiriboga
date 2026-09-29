@@ -68,6 +68,47 @@ function setUpBoard() {
 const seeded = seed => run(`(function() { var r = new Math.seedrandom(${JSON.stringify(String(seed))});
   return function() { return r(); }; })()`);
 
+// Return complete object literals assigned at each match. This small lexical
+// scanner balances nested objects and ignores braces in strings and comments,
+// unlike a non-greedy regular expression that stops at the first nested `};`.
+function assignedObjectLiterals(source, assignment) {
+  const objects = [];
+  assignment.lastIndex = 0;
+  for (let match; (match = assignment.exec(source));) {
+    const start = source.indexOf('{', match.index + match[0].length);
+    if (start < 0) continue;
+    let depth = 0, quote = null, lineComment = false, blockComment = false;
+    let escaped = false;
+    for (let i = start; i < source.length; i++) {
+      const char = source[i], next = source[i + 1];
+      if (lineComment) {
+        if (char === '\n') lineComment = false;
+        continue;
+      }
+      if (blockComment) {
+        if (char === '*' && next === '/') { blockComment = false; i++; }
+        continue;
+      }
+      if (quote) {
+        if (escaped) escaped = false;
+        else if (char === '\\') escaped = true;
+        else if (char === quote) quote = null;
+        continue;
+      }
+      if (char === '/' && next === '/') { lineComment = true; i++; continue; }
+      if (char === '/' && next === '*') { blockComment = true; i++; continue; }
+      if (char === '"' || char === "'" || char === '`') { quote = char; continue; }
+      if (char === '{') depth++;
+      else if (char === '}' && --depth === 0) {
+        objects.push(source.slice(start, i + 1));
+        assignment.lastIndex = i + 1;
+        break;
+      }
+    }
+  }
+  return objects;
+}
+
 // One Runner command decision from a fresh RunnerAI with a seeded _random,
 // while global Math.random throws.
 async function decide(seed) {
@@ -124,6 +165,12 @@ async function test(name, fn) {
 
   await test('no Runner AI policy code calls global randomness', async () => {
     const global = /Math\.random\s*\(|RandomRange\s*\(|Shuffle\s*\(/;
+    const preferenceAssignment = /runner\.AI\.preferred\s*=\s*/g;
+    const nestedFixture = 'runner.AI.preferred = { early: function() { return {}; }, ' +
+      'late: function() { return Math.random(); } };';
+    assert.strictEqual(assignedObjectLiterals(nestedFixture, preferenceAssignment).length, 1);
+    assert(global.test(assignedObjectLiterals(nestedFixture, preferenceAssignment)[0]),
+      'preference scanner must include callbacks after nested object literals');
     const source = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
     const classSource = source.slice(source.indexOf('class RunnerAI'));
     const offenders = classSource.split(/\r?\n/).filter(line => global.test(line));
@@ -139,7 +186,7 @@ async function test(name, fn) {
     // in every loaded set, regardless of which side owns the card.
     for (const file of files.filter(file => file.startsWith('sets/'))) {
       const setSource = fs.readFileSync(path.join(root, file), 'utf8');
-      const preferences = setSource.match(/runner\.AI\.preferred\s*=\s*\{[\s\S]*?\}\s*;/g) || [];
+      const preferences = assignedObjectLiterals(setSource, preferenceAssignment);
       for (const preference of preferences) {
         if (global.test(preference))
           offenders.push(file + ' dynamic runner.AI.preferred callback');
