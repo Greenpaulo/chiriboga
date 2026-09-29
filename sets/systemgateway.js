@@ -3862,6 +3862,7 @@ cardSet[30050] = {
         "Anoetic Void",
         this,
         function () {
+          if (corp.HQ.cards.length < 2) return;
           SpendCredits(corp, 2, "", null, function () {
             //new code (drag to Archives one at a time)
             var choicesA = ChoicesHandCards(corp);

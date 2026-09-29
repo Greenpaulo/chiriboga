@@ -7,6 +7,15 @@ const {spawnSync} = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chiriboga-subvis-'));
+const auditSource = fs.readFileSync(
+  path.join(root, 'scripts', 'subvis', 'audit.js'),
+  'utf8',
+);
+
+assert(
+  auditSource.includes('fs.statSync(bmp).mtimeMs >= fs.statSync(jpg).mtimeMs'),
+  'audit refreshes a cached BMP when its source JPG is newer',
+);
 
 function bmpHeader(bitDepth, compression) {
   const buffer = Buffer.alloc(54);

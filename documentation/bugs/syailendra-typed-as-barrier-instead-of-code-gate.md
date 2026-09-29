@@ -1,7 +1,7 @@
 # Syailendra is implemented as a Barrier, so the game looks for a Fracter to break it instead of the Decoder it actually needs
 
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
-**Source log:** `documentation/debug-logs/code_gate_is_looking_for_a_fracter_to_break_it.txt`
+**Source log:** `documentation/debug-logs/bug_raised/code_gate_is_looking_for_a_fracter_to_break_it.txt`
 **File:** `sets/elevation.js` — Syailendra's card definition (`cardSet[35076]`).
 **Confirmed against:** `carddata/carddata.json` (`code: 35076`, `keywords: "Code Gate - AP"`).
 **Status:** Diagnosed, not yet fixed. One-line fix.
@@ -100,7 +100,7 @@ cardSet[35076] = {
 
 That's the whole change. No other field on this card needs to move, and no code outside `sets/elevation.js` needs to change — the Fracter/Decoder/Killer matching logic already does the right thing once it's given the right subtype.
 
-Given the likely copy-paste origin (§1), it's worth a quick pass over any other ice implemented near a same-faction neighbour with a different real subtype, in case the same slip happened elsewhere in `sets/elevation.js` or the other set files — a short script comparing each `cardSet[N].subTypes` against `carddata/carddata.json`'s `keywords` for that `code` would catch this whole class of bug at once (see §5.3).
+Given the likely copy-paste origin (§1), it's worth a quick pass over any other ice implemented near a same-faction neighbour with a different real subtype, in case the same slip happened elsewhere in `sets/elevation.js` or the other set files — a short script comparing each `cardSet[N].subTypes` against `carddata/carddata.json`'s `keywords` for that `code` would catch this whole class of bug at once (see test item 4 under §5).
 
 ---
 

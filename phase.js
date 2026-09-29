@@ -1612,7 +1612,8 @@ phases.runAccessingCard = {
 		  //card no longer being accessed, move on
 		  return [{}];
 	  }
-      if (CheckSteal()) return [];
+      var cost = StealCost(accessingCard);
+      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1) return [];
       return [{}];
     },
   },
@@ -1733,9 +1734,12 @@ phases.runEnds.Resolve.n = function () {
     if (watermark) {
       watermark.textContent = '';
     }
-    //Some effects schedule another run only after the completed run and all of
-    //its response windows have finished (for example, Aircheck).
-    AutomaticTriggers("automaticOnRunEndCleanup", []);
+    //Automatic cleanup hooks must not change phase while they are being
+    //iterated. Effects such as Aircheck queue phase-changing follow-ups here.
+    var postCleanupCallbacks = [];
+    AutomaticTriggers("automaticOnRunEndCleanup", [postCleanupCallbacks]);
+    for (var i = 0; i < postCleanupCallbacks.length; i++)
+      postCleanupCallbacks[i]();
   });
 };
 

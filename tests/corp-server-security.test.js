@@ -1549,52 +1549,85 @@ test('poor Corp does not treat a generic remote asset as emergency stakes', () =
 });
 test('Archives stakes reflect visible cards, backdoors, and observed pressure', () => {
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const oldArchivesIsBackdoorToHQ = ai._archivesIsBackdoorToHQ;
+  const oldServerRunPressure = ai._serverRunPressure;
   Object.assign(corp, {
     HQ: {serverName: 'HQ', cards: [], ice: [], root: []},
     RnD: {serverName: 'R&D', cards: [{cardType: 'agenda'}], ice: [], root: []},
     archives,
   });
-  ai._archivesIsBackdoorToHQ = () => false;
-  ai._serverRunPressure = () => ({penalty: 0});
-  assert.strictEqual(ai._serverHasStakes(archives), false);
-  archives.cards.push({cardType: 'agenda'});
-  assert.strictEqual(ai._serverHasStakes(archives), true);
-  archives.cards = [];
-  ai._archivesIsBackdoorToHQ = () => true;
-  assert.strictEqual(ai._serverHasStakes(archives), true);
-  ai._archivesIsBackdoorToHQ = () => false;
-  ai._serverRunPressure = () => ({penalty: 1});
-  assert.strictEqual(ai._serverHasStakes(archives), true);
-  assert.strictEqual(
-    ai._serverHasStakes(corp.RnD),
-    false,
-    'hidden R&D contents must not bypass the economy reserve',
-  );
+  try {
+    ai._archivesIsBackdoorToHQ = () => false;
+    ai._serverRunPressure = () => ({penalty: 0});
+    assert.strictEqual(ai._serverHasStakes(archives), false);
+    archives.cards.push({cardType: 'agenda'});
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    archives.cards = [];
+    ai._archivesIsBackdoorToHQ = () => true;
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    ai._archivesIsBackdoorToHQ = () => false;
+    ai._serverRunPressure = () => ({penalty: 1});
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    assert.strictEqual(
+      ai._serverHasStakes(corp.RnD),
+      false,
+      'hidden R&D contents must not bypass the economy reserve',
+    );
+  } finally {
+    ai._archivesIsBackdoorToHQ = oldArchivesIsBackdoorToHQ;
+    ai._serverRunPressure = oldServerRunPressure;
+  }
 });
 test('ice protection skips a higher-ranked server whose next layer is blocked', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 5};
   const rndIce = etr(); rndIce.rezzed = false;
   const rnd = {serverName: 'R&D', cards: [], ice: [rndIce], root: [], score: 0};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 1};
+  const oldProtectionScore = ai._protectionScore;
+  const oldEvaluateServerSecurity = ai._evaluateServerSecurity;
+  const oldEmptyProtectedRemotes = ai._emptyProtectedRemotes;
+  const oldHVTsInstalled = ai._HVTsInstalled;
+  const oldArchivesIsBackdoorToHQ = ai._archivesIsBackdoorToHQ;
   Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
   runner.identityCard = {faction: 'Criminal'};
-  ai._protectionScore = target => target ? target.score : 4;
-  ai._evaluateServerSecurity = () => ({isSecure: false});
-  ai._emptyProtectedRemotes = () => [{}];
-  ai._HVTsInstalled = () => 0;
-  ai._archivesIsBackdoorToHQ = () => true;
-  ai._protectionInstallsThisTurn = [];
-  ai._serverProtectionDebt = new Map();
-  assert.strictEqual(ai._shouldInstallIceLayer(rnd, false), false);
-  assert.strictEqual(ai._shouldInstallIceLayer(archives, false), true);
-  assert.strictEqual(
-    ai._serverToProtect(
-      false,
-      false,
-      server => ai._shouldInstallIceLayer(server, false),
-    ),
-    archives,
-  );
+  try {
+    ai._protectionScore = target => target ? target.score : 4;
+    ai._evaluateServerSecurity = () => ({isSecure: false});
+    ai._emptyProtectedRemotes = () => [{}];
+    ai._HVTsInstalled = () => 0;
+    ai._archivesIsBackdoorToHQ = () => true;
+    ai._protectionInstallsThisTurn = [];
+    ai._serverProtectionDebt = new Map();
+    assert.strictEqual(ai._shouldInstallIceLayer(rnd, false), false);
+    assert.strictEqual(ai._shouldInstallIceLayer(archives, false), true);
+    const eligibilityChecks = [];
+    assert.strictEqual(
+      ai._serverToProtect(
+        false,
+        false,
+        (server, security) => {
+          eligibilityChecks.push({server, security});
+          return ai._shouldInstallIceLayer(server, false, security);
+        },
+      ),
+      archives,
+    );
+    assert(
+      eligibilityChecks.every((entry) => entry.security),
+      'layer eligibility receives each ranked server security result',
+    );
+    assert.deepStrictEqual(
+      eligibilityChecks.map((entry) => entry.server),
+      [rnd, archives],
+      'layer eligibility stops after finding the first viable ranked server',
+    );
+  } finally {
+    ai._protectionScore = oldProtectionScore;
+    ai._evaluateServerSecurity = oldEvaluateServerSecurity;
+    ai._emptyProtectedRemotes = oldEmptyProtectedRemotes;
+    ai._HVTsInstalled = oldHVTsInstalled;
+    ai._archivesIsBackdoorToHQ = oldArchivesIsBackdoorToHQ;
+  }
 });
 test('Corp turn-start protection aging skips the opening turn and then runs once', () => {
   let calls = 0;
