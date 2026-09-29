@@ -15,9 +15,12 @@ runs it too, by name, rather than restating it.
 ## When to use
 
 - Before `node scripts/roadmap.js raise <ID>` — it refuses when anything
-  under the root `*.js` files or `sets/` changed since the spec's
+  under the tracked root `*.js` files or JavaScript files under `sets/`
+  changed since the spec's
   `**Verified against code:**` commit, which is true for almost every spec on
-  an active repo.
+  an active repo. Untracked `sets/*.js` files count too, including the
+  registry-loaded sets and the engine-only `gauntlet.js` and `tutorial.js`;
+  arbitrary untracked root JavaScript files do not.
 - When `raise` already refused, quoting the changed files.
 - When asked to re-ground, re-verify or refresh a spec or ticket.
 - At the start of `implement-ticket`, for the ticket it just picked up — even

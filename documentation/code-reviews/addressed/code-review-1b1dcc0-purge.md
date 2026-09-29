@@ -39,7 +39,7 @@ This matters when two purge-trash cards share the same `cardLocation` array: spl
 
 ## `AIPreventsPurgeTrash` / Sacrificial Construct
 
-Checked the real card definition rather than trusting the ticket's paraphrase: Sacrificial Construct's existing `responsePreventableTrash` hook is exactly the "save an installed card from being trashed" ability the new `AIPreventsPurgeTrash: true` flag is meant to represent conservatively. The `purgeTrashCanBePrevented` gate also runs the candidate through `CheckHasAbilities(card)`, so a Sacrificial Construct that's itself been silenced by some other effect won't incorrectly suppress the purge-trash modeling. Virus counters still clear unconditionally regardless of this flag, matching the stated intent that "a purge justified independently of the trash remains visible."
+Checked the real card definition rather than trusting the ticket's paraphrase. `AIPreventsPurgeTrash: true` deliberately makes the AI preserve every purge-trash card when public prevention is available; that is a conservative approximation, not an exact statement of what the engine guarantees. Sacrificial Construct's `responsePreventableTrash` can splice the selected entry and every later entry from `intended.trash`, while entries before it remain to be trashed. The `purgeTrashCanBePrevented` gate also runs the candidate through `CheckHasAbilities(card)`, so a Sacrificial Construct that's itself been silenced by some other effect won't incorrectly suppress the purge-trash modeling. Virus counters still clear unconditionally regardless of this flag, matching the stated intent that "a purge justified independently of the trash remains visible."
 
 ## `_purgeServerHasStakes` narrowing
 

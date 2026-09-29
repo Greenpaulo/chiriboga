@@ -4,8 +4,8 @@
 
 Implemented from `64bcf17`.
 
-- Tailgate's automatic `responseOnRunSuccessful` now marks its HQ run successful without expecting an argument that the phase dispatcher does not supply.
-- Updated the Vantage Point integration assertion to invoke the response the same way as the engine. Fixed the drafted reproduction's missing `MakeRun` stub and post-move root path, then moved it into the green suite with its behavioral expectation unchanged.
+- Tailgate now tracks whether it initiated the active run. Its automatic `responseOnRunSuccessful` marks only that run successful, without expecting an argument that the phase dispatcher does not supply, and `responseOnRunEnds` clears both flags.
+- Updated the Vantage Point integration assertion to invoke the response the same way as the engine and verify unrelated successful runs do not activate Tailgate. Fixed the drafted reproduction's missing `MakeRun` stub and post-move root path, then moved it into the green suite with its original behavioral expectation plus ownership and cleanup coverage.
 - Validation found two separate Vantage Point cards whose automatic successful-run responses also expect a server argument: Chain Reaction and Stowaway. They are not needed for the Tailgate fix and remain out of scope, but merit separate investigation.
 
 **Source log:** `documentation/debug-logs/bug_raised/tailgate_access_2_additional_hq_cards_didnt_fire.txt`
@@ -69,10 +69,11 @@ and `modifyBreachAccess` (`vantagepoint.js:1060-1065`) always returns 0.
   dispatch path never provides.
 
 ## Proposed fix
-Change Tailgate's `responseOnRunSuccessful.Resolve` to match the working
-Legwork/archives-event pattern: drop the `server` parameter and the
-conditional, and unconditionally set `this.runWasSuccessful = true`, since
-Tailgate's own `Resolve` already only ever calls `MakeRun(corp.HQ)`.
+Track the run initiated by Tailgate with card-owned `runningWithThis` state,
+matching the existing Kompromat pattern. Set the flag before `MakeRun`, drop
+the unavailable `server` parameter, mark the run successful only while that
+flag is set, and clear both flags when the run ends. This avoids both the
+original false negative and a false positive from an unrelated successful run.
 This is a single-file, single-card fix with no engine or AI-hook changes, so
 no implementation plan is needed per the plan gate in
 `.agents/skills/implement-ticket/SKILL.md`.
@@ -93,7 +94,9 @@ parameter.
 - [x] `tests/vantagepoint-integration.test.js`'s existing Tailgate assertions
       are updated to call `responseOnRunSuccessful.Resolve` the way the real
       engine does (no arguments), not with a manually supplied `server`.
-- [x] `node tests/run-all-tests.js` passes (36 test files under Node v23.4.0).
+- [x] Successful runs not initiated by Tailgate do not enable its access bonus,
+      and Tailgate clears its run ownership and success state at run end.
+- [x] `node tests/run-all-tests.js` passes (37 test files under Node v23.4.0).
 
 ## Out of scope / related
 - Whether other cards using `responseOnRunSuccessful` (or other

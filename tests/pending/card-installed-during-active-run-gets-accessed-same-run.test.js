@@ -21,51 +21,68 @@ function extractFunction(source, name) {
   throw new Error('Could not extract ' + name);
 }
 
-// AccessCardList() only touches corp.archives/HQ/RnD when attackedServer has a
-// .cards property (i.e. it is a central server). A remote server object has
-// only .root and .ice, so the central-server branch is never entered below
-// and corp/ModifyingTriggers/Shuffle do not need to be stubbed.
-const remoteServer = { root: [], ice: [] };
-const accessedCards = { cards: [], root: [] };
-const context = { attackedServer: remoteServer, accessedCards };
-vm.createContext(context);
-vm.runInContext(extractFunction(utilitySource, 'AccessCardList'), context);
-
-function card(title) {
-  return { title: title, cardLocation: remoteServer.root, renderer: { zoomed: false } };
+// Proposed contract: breachAccessCandidates records the Runner's rule 7.4.6a
+// choice for root cards that enter during the breach. AccessCardList must read
+// this run-scoped state rather than treating every card in the live root as a
+// candidate. The exact production wiring may change, but both choices below
+// must remain observable.
+function breach() {
+  const remoteServer = { root: [], ice: [] };
+  const accessedCards = { cards: [], root: [] };
+  const breachAccessCandidates = { cards: [], root: [] };
+  const context = { attackedServer: remoteServer, accessedCards, breachAccessCandidates };
+  vm.createContext(context);
+  vm.runInContext(extractFunction(utilitySource, 'AccessCardList'), context);
+  const card = title => ({title, cardLocation: remoteServer.root, renderer: {zoomed: false}});
+  return {remoteServer, accessedCards, breachAccessCandidates, context, card};
 }
 
 let failures = 0;
 function test(name, fn) {
-  try { fn(); console.log('ok   ' + name); } catch (e) { failures++; console.log('FAIL ' + name + '\n     ' + e.message); }
+  try { fn(); if (process.env.VERBOSE) console.log('ok   ' + name); }
+  catch (e) { failures++; console.log('FAIL ' + name + '\n     ' + e.message); }
 }
 
 test('control: a card already in the root when the run breaches is accessed', () => {
+  const {remoteServer, breachAccessCandidates, context, card} = breach();
   const preExisting = card('Pre-existing upgrade');
   remoteServer.root.push(preExisting);
+  breachAccessCandidates.root.push(preExisting);
   const list = vm.runInContext('AccessCardList()', context);
   assert.strictEqual(list.length, 1);
   assert.strictEqual(list[0], preExisting);
-  // simulate the runner accessing it, as phases.runAccessingCard.Init does
-  accessedCards.root.push(preExisting);
 });
 
-test('a card the Corp installs into the root mid-run must not join this run\'s access', () => {
-  // The run above is still open (Run ends has not fired). A Corp trigger that
-  // resolves during the access window - e.g. Poetri Luxury Brands' "Whenever
-  // an agenda is stolen, you may install 1 non-agenda card from HQ" - installs
-  // a fresh card into the very server currently under attack.
+test('the Runner may decline a root card installed during the breach', () => {
+  const {remoteServer, accessedCards, breachAccessCandidates, context, card} = breach();
+  const preExisting = card('Pre-existing upgrade');
+  remoteServer.root.push(preExisting);
+  breachAccessCandidates.root.push(preExisting);
+  accessedCards.root.push(preExisting);
+
   const midRunInstall = card('Freshly installed asset');
   remoteServer.root.push(midRunInstall);
+  // Rule 7.4.6a choice: decline, so do not add it to breachAccessCandidates.
 
   const list = vm.runInContext('AccessCardList()', context);
   assert.strictEqual(
     list.length,
     0,
-    'AccessCardList() must not offer a card installed into the attacked server ' +
-      'after this run already began accessing it, but it returned: ' +
+    'AccessCardList() must not offer a mid-breach root install the Runner declined, but returned: ' +
       JSON.stringify(list.map(c => c.title))
   );
+});
+
+test('the Runner may accept a root card installed during the breach', () => {
+  const {remoteServer, breachAccessCandidates, context, card} = breach();
+  const midRunInstall = card('Freshly installed asset');
+  remoteServer.root.push(midRunInstall);
+  // Rule 7.4.6a choice: accept it as a candidate.
+  breachAccessCandidates.root.push(midRunInstall);
+
+  const list = vm.runInContext('AccessCardList()', context);
+  assert.strictEqual(list.length, 1);
+  assert.strictEqual(list[0], midRunInstall);
 });
 
 if (failures) {

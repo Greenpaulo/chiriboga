@@ -73,11 +73,12 @@ reproduction is confirmed later by `implement-ticket`.
   Quote short log excerpts rather than pasting long runs of the log.
 - A ticket is gated exactly when `documentation/ai-planning.md`'s Acceptance
   gates test says so: the fix's goal is to play better, not to reproduce one
-  fixed, correct decision (`ai-principles.md` principle 4 vs principle 8).
+  fixed, correct decision.
   This applies to bug tickets as much as backlog items — being a bug does not
   make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
-  (principle 4)` for the common case; only name metrics, a direction and a
-  threshold there when the fix genuinely has no single correct answer.
+  with a single correct outcome` for the common case. When the fix genuinely
+  has no single correct answer, select either an F4 seeded-game gate or a
+  human-game gate and specify its sample size, metrics and numeric thresholds.
 
 ## Ticket template
 
@@ -106,10 +107,11 @@ why it matters. Three to five sentences.>
 decisions that could shift.>
 
 ## Acceptance gate
-<N/A — deterministic fix (principle 4) for the common case. If the fix's goal
-is instead to play better with no single correct answer (principle 8), this
-needs F4 seeded-game evidence: name the metrics, the direction, and a
-threshold for each — "better"/"reduce" need a number. Depends on: F4.>
+<N/A — deterministic fix with a single correct outcome, for the common case.
+If the fix's goal is instead to play better with no single correct answer,
+select an F4 seeded-game gate or a human-game gate and state its sample size,
+metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
+gate, also name the seed range and deck pairs. Depends on: F4 when selected.>
 
 ## Acceptance criteria
 - [ ] The reproduction passes and has moved into the green suite

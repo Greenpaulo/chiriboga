@@ -55,6 +55,18 @@ assert(
   widget.includes('MutationObserver'),
   'option list rebuilds must be observed to re-render the panel',
 );
+assert(
+  widget.includes('.attr("id", selectId + "-option-" + i)'),
+  'each generated listbox option needs a stable unique id',
+);
+assert(
+  widget.includes('$list.attr("aria-activedescendant", $opt.attr("id"))'),
+  'keyboard navigation must expose the active option to assistive technology',
+);
+assert(
+  widget.includes('$list.removeAttr("aria-activedescendant")'),
+  'the listbox must clear aria-activedescendant when no option is active',
+);
 
 // --- Precon dropdown uses the same widget ---
 assert(

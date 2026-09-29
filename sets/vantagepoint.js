@@ -1039,6 +1039,7 @@ cardSet[36012] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  runningWithThis: false,
   runWasSuccessful: false,
   modifyPlayCost: {
     Resolve: function (card) {
@@ -1048,12 +1049,13 @@ cardSet[36012] = {
     availableWhenInactive: true,
   },
   Resolve: function (params) {
+    this.runningWithThis = true;
     this.runWasSuccessful = false;
     MakeRun(corp.HQ);
   },
   responseOnRunSuccessful: {
     Resolve: function () {
-      this.runWasSuccessful = true;
+      if (this.runningWithThis) this.runWasSuccessful = true;
     },
     automatic: true,
   },
@@ -1065,6 +1067,7 @@ cardSet[36012] = {
   },
   responseOnRunEnds: {
     Resolve: function () {
+      this.runningWithThis = false;
       this.runWasSuccessful = false;
     },
     automatic: true,
@@ -1606,15 +1609,16 @@ cardSet[36019] = {
       true,
       null,
       true,
+      null,
+      this,
+      null,
+      null,
+      false,
       function () {
         betaBuild.lingeringEffectTarget = params.card;
         betaBuild.runningWithThis = true;
         MakeRun(params.server);
       },
-      this,
-      null,
-      null,
-      false,
     );
   },
   automaticOnUninstall: {
