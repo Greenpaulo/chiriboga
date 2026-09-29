@@ -1,4 +1,4 @@
-# Corp AI: `_iceWorthRezzing()` silently refuses to rez ice hosting a Runner Trojan, with no logged reason, even when affordable and undefended
+# Corp AI: `_iceWorthRezzing()` may silently refuse to rez ice hosting a Runner Trojan, with no logged reason, even when affordable and undefended
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt`
 **Reproduction:** `tests/pending/hosted-trojan-blocks-rez-silently.test.js` — drafted, not yet run
@@ -17,8 +17,9 @@ logs something like `"Rez cost not worth it, need to save it for X"`; this
 one leaves no trace, which is what made it hard to diagnose from the log
 alone.
 
-Reading `_iceWorthRezzing()` finds an unconditional, unlogged branch: if the
-approached ice hosts any card without `AIHostedDoesNotPreventRez`, and
+One possible cause in `_iceWorthRezzing()` is an unconditional, unlogged
+branch: if the approached ice hosts any card without
+`AIHostedDoesNotPreventRez`, and
 `Credits(corp) < currentRezCost * 5`, the function sets `rezIce = false` with
 no `_log()` call. The end-of-game reproduction dump in the log confirms the
 approached ice hosts Runner card `35030` — **Chromatophores**, a Shaper
@@ -93,7 +94,7 @@ property.
 
 ---
 
-## 3. Root cause
+## 3. Root cause analysis
 
 ### 3.1 The hosted-card guard is unconditional and unlogged
 
@@ -127,7 +128,9 @@ every other `rezIce = false` assignment in the function (the cross-server
 reservation branch, the same-server defensive-upgrade branch), which always
 log why. Two further branches later in the function (`_iceToLeaveUnrezzed`
 at ~4625 and the Inside Job exception at ~4629-4654) are also silent, but
-this ticket's evidence is specific to the hosted-card branch.
+the live log cannot distinguish among them. The hosted-card branch is the
+leading hypothesis and is reproduced independently in section 4, not a
+confirmed explanation of the logged decision.
 
 ### 3.2 Only one card in this decklist would escape the block
 
@@ -142,10 +145,11 @@ all but the 2-cost Kessleroid (`rezCost: 2`, threshold 10) satisfy this
 inequality (Bumi 1.0 and Scatter Field: `rezCost: 3`, threshold 15; Ansel
 1.0 / Brân 1.0: `rezCost: 6`, threshold 30; Mycoweb: `rezCost: 8`, threshold
 40). The exact identity of the Remote 0 ice is hidden information (it was
-never rezzed, so the log never reveals it), but the block would fire for any
-candidate except Kessleroid — this is why the reproduction below uses a
-representative rez cost of 3 rather than asserting the card's exact
-identity.
+never rezzed, so the log never reveals it). The block would fire for any
+candidate except Kessleroid, but the log cannot rule Kessleroid out. The
+reproduction below therefore uses a representative rez cost of 3 to
+demonstrate the branch without claiming it proves the logged ice's identity
+or decision path.
 
 ### 3.3 The heuristic ignores what refusing to rez actually costs
 
@@ -207,8 +211,8 @@ Two guard cases are included so a fix does not overcorrect:
   logged between the last known total and the decision).
 - [Inferred] Given the decklist's ice rez costs, the `Credits(corp) 
   currentRezCost * 5` condition holds for every candidate ice except the
-  2-cost Kessleroid, so the block is very likely what fired, independent of
-  the ice's exact hidden identity.
+  2-cost Kessleroid. Because the ice's identity is hidden and other silent
+  branches exist, the log alone cannot confirm that this block fired.
 - [Inferred] The hostedCards branch (`ai_corp.js` ~4602-4621) contains no
   `_log()` call, unlike every other `rezIce = false` branch in the function.
 
