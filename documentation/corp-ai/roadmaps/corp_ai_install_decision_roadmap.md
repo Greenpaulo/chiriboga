@@ -53,6 +53,28 @@ The completed security roadmap materially improves server selection:
 
 This answers **where another layer is needed** much better than the legacy AI did.
 
+#### Interim hardening: do not stop at an ineligible first target
+
+The Baker/Touchstone Archives regression exposed a boundary between protection
+ranking and install feasibility. The legacy path selected one server first and
+only then applied `_shouldInstallIceLayer()`. When R&D ranked slightly ahead of
+Archives but already had unrezzed ICE, the low-economy layer policy rejected R&D
+and install generation stopped without considering the next ranked server.
+
+As a tactical repair, `_serverToProtect()` now accepts an optional
+action-specific eligibility predicate. ICE-install generation uses it to skip a
+server that cannot currently accept another layer and continue to the next
+ranked viable target. This is compatibility hardening, not completion of any
+phase below: it still chooses a server before comparing the marginal value of
+specific `(ICE, server)` pairs.
+
+The permanent architecture must not reduce install planning to one globally
+chosen server. A server can be the most urgent in the abstract while every ICE
+available for it is illegal, unaffordable, redundant, or strategically weaker
+than a concrete install on the next server. Candidate generation and ranking
+must therefore preserve both dimensions until feasibility and marginal outcome
+have been evaluated.
+
 ### 2. The security result does not yet select the best ICE
 
 `_iceInstallOptions(serverToInstallTo, cards, priorityOnly)` currently enumerates:
@@ -296,6 +318,11 @@ Phase 0 should reuse the seeded batch harness specified by F4 in the [Corp AI fo
 
 - Add opt-in structured logging around `_rankedInstallOptions()` and `_bestInstallOption()`.
 - Record candidate card, destination, generated category/reason, affordability, chosen option, current server protection score, and deterministic security result.
+- Record higher-ranked servers skipped during install generation and the exact
+  feasibility reason: illegal destination, layer-policy rejection, install cost,
+  projected rez shortfall, existing unrezzed obligations, or no materially useful
+  candidate. This must distinguish “the server is urgent” from “the current hand
+  contains an executable response.”
 - Record the immediate outcome of important root commitments: agenda scored/stolen, trap fired, asset used/trash-before-payoff, upgrade used, or server abandoned.
 - Create deterministic fixtures for representative hands and boards across the scoped sets.
 
@@ -310,6 +337,9 @@ Phase 0 should reuse the seeded batch harness specified by F4 in the [Corp AI fo
 **Work:**
 
 - Normalize all legal ICE and root install choices into one candidate structure.
+- Enumerate card and destination jointly. Do not select one protection server and
+  discard other destinations before candidate-level legality and affordability
+  have been evaluated.
 - Preserve present priority groups through temporary compatibility score bands.
 - Add structured reasons and rejection reasons.
 - Make `_bestInstallOption()` consume the ranked candidate list.
@@ -323,6 +353,8 @@ Phase 0 should reuse the seeded batch harness specified by F4 in the [Corp AI fo
 3. The same legal option is not emitted twice because two legacy categories selected it.
 4. Candidate ranking is stable when unrelated cards are reordered outside the relevant option group.
 5. No hypothetical evaluation changes card locations, server contents, counters, protection debt, or cached deception decisions.
+6. A higher-ranked server with no viable install candidate does not suppress a
+   lower-ranked server with an affordable, useful candidate.
 
 **Acceptance gate:** Existing focused AI tests pass, baseline fixtures retain intended selections, and every returned install preference has a score breakdown and reason.
 
@@ -332,11 +364,13 @@ Phase 0 should reuse the seeded batch harness specified by F4 in the [Corp AI fo
 
 **Proposed evaluation:**
 
-1. Evaluate the target server before installation.
-2. Evaluate a hypothetical server with the candidate ICE as the new outermost layer.
-3. Compare deterministic security, hard lockout, mandatory break cost, total break/avoidance cost, bypass exposure, structural risk, and protection value.
-4. Account for install cost, rez affordability, existing unrezzed ICE obligations, and credits that must be reserved for other critical servers.
-5. Weight the improvement by server value and the consequence of a breach, while keeping same-turn multi-server allocation authoritative.
+1. Begin with every bounded, strategically relevant `(ICE, server)` candidate
+   produced by Phase 1, rather than one server selected in advance.
+2. Evaluate each candidate's target server before installation.
+3. Evaluate a hypothetical server with the candidate ICE as the new outermost layer.
+4. Compare deterministic security, hard lockout, mandatory break cost, total break/avoidance cost, bypass exposure, structural risk, and protection value.
+5. Account for install cost, rez affordability, existing unrezzed ICE obligations, and credits that must be reserved for other critical servers.
+6. Weight the improvement by server value and the consequence of a breach, while keeping same-turn multi-server allocation authoritative.
 
 **Important distinctions:**
 
@@ -358,6 +392,11 @@ Phase 0 should reuse the seeded batch harness specified by F4 in the [Corp AI fo
 6. Effective subtype changes and targeted bypass hooks affect hypothetical results exactly as they affect installed ICE.
 7. Candidate evaluation is unchanged when hidden Runner Grip cards are substituted.
 8. A bait-postured remote receives an ICE choice consistent with its bounded light-defense script, while the same candidates are ranked purely by marginal security after the posture ends.
+9. A higher-urgency R&D with an existing unrezzed layer does not suppress an
+   affordable ICE on a Baker-backdoored, naked Archives when the R&D candidate is
+   rejected by the projected defense budget.
+10. If the highest-urgency server has no ICE in hand that materially improves its
+    outcome, a useful candidate on another insecure server remains eligible.
 
 **Acceptance gate:** In deterministic fixtures, the selected ICE maximizes the intended bounded marginal-security value, and seeded simulations reduce preventable breaches without producing chronic Corp insolvency.
 
@@ -494,6 +533,12 @@ rather than replaced by an unrelated install-score bonus.
 3. A guaranteed score outranks speculative protection or economy.
 4. Installing unaffordable ICE does not outrank funding already installed critical defense without explicit future value.
 5. Hand-size pressure affects opportunity cost but does not erase tactical safety.
+6. Gaining a credit is compared against the best executable `(ICE, server)`
+   candidate, not against an abstract need to protect a server for which the hand
+   has no viable response.
+7. Protecting the second-ranked server can outrank gaining a credit when the
+   first-ranked server is currently infeasible and the second install has
+   material defensive value.
 
 **Acceptance gate:** Main-phase decisions can explain why installation beats the best non-install alternative in representative tactical fixtures.
 
@@ -581,6 +626,16 @@ Minimum fixture matrix:
 | Game state      | opening, agenda flood, normal midgame, Corp match point, Runner match point, last click, multiple insecure servers |
 | Runner pressure | balanced, HQ pressure, R&D pressure, non-interactive pressure, compatible breaker, missing breaker subtype         |
 
+The server/economy cross-product must specifically include:
+
+- a Baker-backdoored Archives competing with R&D that has existing unrezzed ICE;
+- multiple insecure servers where only the lower-ranked server has an affordable
+  and materially effective ICE candidate;
+- a highest-ranked server with legal but strategically ineffective ICE choices;
+- a state where gaining one credit unlocks decisive protection for the first
+  server, contrasted with a state where protecting the second server now is
+  better than waiting.
+
 All fixtures that purport to test imperfect information should run at least twice with different hidden Runner Grip/Stack contents and assert identical choices.
 
 ---
@@ -593,6 +648,11 @@ All fixtures that purport to test imperfect information should run at least twic
 4. Migrate one decision class at a time: ICE, roles, agendas, assets, upgrades, then action sequencing.
 5. Keep legacy selection available as a fallback during calibration.
 6. Remove obsolete branches only when deterministic fixtures and seeded simulations show that the replacement covers their purpose.
+7. Treat `_serverToProtect(..., targetIsEligible)` as an interim compatibility
+   bridge. Retire its use in ordinary ICE-install generation once joint
+   `(ICE, server)` candidates perform legality, affordability, and marginal-value
+   comparison directly; retain the underlying server ranking for diagnostics and
+   consumers that genuinely need a server-only answer.
 
 Card hooks should remain narrow descriptions of card mechanics or tactical suitability. They should not each recreate the global server-selection algorithm.
 

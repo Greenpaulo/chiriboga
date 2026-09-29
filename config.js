@@ -595,7 +595,7 @@ var formatRegistry = {
   startup: {
     name: "Startup",
     sets: ['sg', 'elev', 'vp'],
-    enabled: false
+    enabled: true
   },
   standard: {
     name: "Standard",

@@ -1,0 +1,13 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, advance, n
+// EXPECT: install
+// EXPECT_SERVER: Archives
+// SETUP: corp.creditPool=7; corp.clickTracker=3; runner.creditPool=10; runner.rig.hardware[0].credits=1; reviewAI._serverProtectionDebt.set(corp.RnD,5); reviewAI._serverProtectionDebt.set(corp.archives,3)
+// SOURCE: corp_not_protecting_archives_when_i_have_baker_to_redirect_to_hq.txt, reconstructed from the final state and the logged R&D/Archives protection debt
+// NOTE: Variation on the logged 7-credit state, with advancement omitted from the offered actions to isolate install planning. Touchstone's credit is usable only during a run; Corp-turn planning must still recognize that it enables Baker's Archives backdoor and install affordable Empiricist there.
+RunnerTestField(36009, [30030,35022,35017,30030], [35017,36021,30018,36011,36011,35015,30030,30026,35015,35017,30026,35022,36024,35034,36024,36014,36010,36016,36012,36014,36010,30018,30011,30026,30006,30013,30011,36012,30013,30015,30016,36013,30016,30015,36012], [36013,36015], [30018,35034,36021,36015,30015], [30067], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [30045,35051,30045], [35055,35081,35053,30072,30040,30044,30067,35055,30046,35050,35081,35081,35051,30072,30049,30040,30061,35052,35052,30069,35054,30069,35050,30053,30048,35049,35050,30072,35049,35055,30067,30048,30040,30048,30053], [35053,35052,35053,35049,30049], [], [30046], [35054], [[30061,30046,35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.rig.resources[0].credits=6;
+runner.rig.resources[1].credits=3;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;

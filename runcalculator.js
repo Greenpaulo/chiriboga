@@ -31,10 +31,12 @@ class RunCalculator {
   // tag
   // endTheRun
   // loseCredits (runner) from main credit pool, not from extra credits. Will not reduce credits remaining to below zero
+  // loseClicks (runner), capped at the number of remaining clicks
   // payCredits will be an ignored path if cannot be afforded (i.e. only use it for sr that has an option e.g. Funhouse or if there is no alternative e.g. Tollbooth)
   // misc_minor e.g. corp gains credit
   // misc_moderate e.g. trash 1 program
   // misc_serious e.g. install another ice inward (like endTheRun, paths that fire these will be avoided)
+  // strengthenAllIce gives every ice on the route +1 strength for the remainder of the run
   //encounterEffects is an array of OR arrays of effects
   IceAI(ice, maxCorpCred, assumeWeakerUnknown = false, incomplete = false, startIceIdx = -1, knowledgePlayer = runner) {
     var result = {
@@ -335,7 +337,12 @@ class RunCalculator {
 
 		  //apply special per-ice unique conditional effects (from current ice, not encountering new one)
 		  if (iceAI && eff == "iceSpecificEffect") {
-			  var new_effs = iceAI.ice.AIIceSpecificEffect.call(iceAI.ice, poolCreditsLeft, otherCreditsLeft);
+			  var new_effs = iceAI.ice.AIIceSpecificEffect.call(
+				iceAI.ice,
+				poolCreditsLeft,
+				otherCreditsLeft,
+				clicksLeft,
+			  );
 			  //remove from encounter_effects and insert instead any effects that are returned
 			  encounter_effects.splice(j, 1, ...new_effs); //remove 1 item at position j and insert all returned items (not compatible with older browsers)
 			  j--; //step back so next item isn't skipped
@@ -384,6 +391,24 @@ class RunCalculator {
 			  encounter_effects.splice(j, 1); //remove 1 item at position j
 			  j--; //step back so next item isn't skipped
 			  if (clicksLeft > 0) clickLoss++;
+		  }
+
+		  //Persist a +1 strength modifier on every piece of ice in this route.
+		  //This models subroutines such as ezaM's which strengthen all ice for
+		  //the remainder of the run, including ice encountered later.
+		  else if (eff == "strengthenAllIce") {
+			  encounter_effects.splice(j, 1);
+			  j--;
+			  card_str_mods = card_str_mods.concat([]);
+			  for (var k = 0; k < this.precalculated.iceAIs.length; k++) {
+				  card_str_mods.push({
+					  iceIdx: point.iceIdx,
+					  card: this.precalculated.iceAIs[k].ice,
+					  use: iceAI.ice,
+					  amt: 1,
+					  persist: true,
+				  });
+			  }
 		  }
 	  }
 	  

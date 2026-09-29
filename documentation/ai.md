@@ -670,6 +670,12 @@ AIRunEventRestore: function(server) {
 },
 ```
 
+Aircheck uses the same paired-hook pattern to model its inaccessible Runner
+credit pool. It temporarily sets `runner.creditPool` to its play cost, which is
+then subtracted by the normal run-event calculation, leaving zero pool credits
+for the hypothetical run. `AIRunEventExtraCredits` supplies its hosted credits
+separately, and `AIRunEventRestore` restores the exact stored pool value.
+
 **`AIRunEventExtraCredits`** (a plain number)
 
 If the run event gives the runner extra credits to spend during the run (like Overclock), declare the amount here. The AI will subtract the play cost to determine net gain:
@@ -839,12 +845,18 @@ Cards that search for and fetch another card (tutors) need to tell the AI what t
 
 **`AIIcebreakerTutor(installedRunnerCards)`**
 
-Return the icebreaker card object (from the stack) that this tutor would likely fetch, or `null` if nothing useful:
+Return an array of eligible icebreaker card objects from the stack. The route
+planner ranks those candidates for the ice protecting each proposed server;
+return an empty array if nothing useful is available:
 
 ```js
 // Mutual Favor: fetch the most-needed icebreaker that's in the stack but not installed
 AIIcebreakerTutor: function(installedRunnerCards) {
-    return runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
+    var preferred = runner.AI._icebreakerInPileNotInHandOrArray(
+        runner.stack,
+        installedRunnerCards,
+    );
+    return preferred ? [preferred] : [];
 },
 ```
 
@@ -1064,6 +1076,12 @@ These hooks are called during Corp-turn planning as well as run simulation.
 Base their answers on the supplied arguments and public persistent state; do
 not require `CheckEncounter()` or assume `attackedServer` and `approachIce`
 describe a real active run.
+
+Baker's `AIRedirectsRun` and `AIRunAbilityExtraPotential` supply their
+prospective Archives server while checking hosted stealth credits. This lets
+run-only sources such as Touchstone answer in the context where the redirect
+cost would actually be paid; the helper restores the real `attackedServer`
+immediately after the read-only planning query.
 
 ```js
 AIEffectiveIceSubtypes: function(iceCard, server, iceIndex) {
@@ -1387,11 +1405,21 @@ These are the effect strings you can use inside `result.sr` arrays:
 | `"misc_minor"` | A minor Corp-side benefit (e.g. corp gains 1 credit). |
 | `"misc_moderate"` | A moderate threat (e.g. trash 1 program). Paths with this are avoided if possible. |
 | `"misc_serious"` | A serious threat (e.g. install another ice inward, runner cannot steal). Treated similarly to `endTheRun`. |
+| `"strengthenAllIce"` | Give every ICE on the calculated route +1 strength for the remainder of the run. Multiple entries stack. |
 
 **Tips:**
 - For subroutines with optional choices (e.g. "pay 4[c] or take a tag"), represent each option as a separate branch in the OR array.
 - For unknown or partially-known effects, default to `misc_moderate`.
 - Use `incomplete: true` guards when a subroutine list might be partial to avoid over-punishing the runner AI.
+
+**`AIIceSpecificEffect(poolCreditsLeft, otherCreditsLeft, clicksLeft)`**
+
+Use `"iceSpecificEffect"` in a subroutine branch when its consequence depends
+on the resources remaining after earlier effects in that branch. The hook
+returns replacement effect strings. `clicksLeft` includes earlier
+`"loseClicks"` effects in the same branch; Vertigo uses this to make reaching
+zero clicks a serious access restriction without treating every click loss as
+the same threat.
 
 ---
 
@@ -1574,6 +1602,19 @@ Set to `true` for recursion or tutor operations. These are given lower priority 
 ```js
 AIIsRecurOrTutor: true,
 ```
+
+**`AIEconomyPlay`** (number)
+
+Marks a Corp economy operation for the main-phase economy policy. Higher
+values are considered first among card-declared economy plays; normal play
+legality, `Enumerate()` and `AIWouldPlay()` still decide whether it can be used.
+
+**`AIPlayWhenCan`** (number)
+
+Marks a Corp operation whose current opportunity should be used proactively.
+Higher values are checked first after the built-in urgent operation list.
+Pair it with `AIWouldPlay()` or a target-validating `Enumerate()` so the Corp
+does not play it without a useful effect.
 
 ---
 
@@ -1943,7 +1984,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIReducesTrashCost(card)` | function | Return how much this reduces the trash cost of card |
 | `AIPlayToDraw` | number | Priority for playing this card to draw |
 | `AIDrawInstall()` | function | Priority for installing this draw-enabling card |
-| `AIIcebreakerTutor(installed)` | function | Return the icebreaker this tutor would fetch |
+| `AIIcebreakerTutor(installed)` | function | Return eligible icebreakers, or `[]` when none are available |
 | `AIPermitMoreLeeches(installed)` | function | Card-specific install limit check |
 
 ### Corp AI Hooks
@@ -1951,6 +1992,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | Hook | Type | Purpose |
 |---|---|---|
 | `AIImplementIce(rc, result, maxCred, incomplete)` | function | Describe what subroutines do in the run calculator |
+| `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
 | `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
@@ -1961,17 +2003,119 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
 | `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
+| `AIGlobalETRUses(server)` | function | Number of active global end-the-run uses the Corp will spend defending this server |
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |
 | `AITagPunishment` | number | Min tags needed for this punishment op to fire |
 | `AIWouldPlay()` | function | Return true to play this operation |
+| `AIEconomyPlay` | number | Priority for treating a Corp operation as a main-phase economy play |
+| `AIPlayWhenCan` | number | Priority for proactively using a currently valid Corp operation opportunity |
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
+
+### Vantage Point Batch 5 card hooks
+
+- Touchstone uses `AIEconomyInstall`, `AIWorthKeeping` and
+  `AIRunPoolCreditOffset`; the offset reports only its currently hosted credits.
+- Read-Write Share uses `AIWorthKeeping`, and its optional hosting choices keep
+  the AI from hiding a card when its grip is already low.
+- Sipa uses `AIWorthKeeping`; its inline trigger preference swaps a passed ICE
+  only for a lower-valued installed ICE. There is no route-planning hook that
+  safely models future ICE swaps.
+- Stowaway uses `AIPreferredInstallChoice`, `AIRunExtraPotential`,
+  `AIBreachNotRequired` and `AIWorthKeeping` to favor protected servers and
+  value its successful-run payout without requiring a breach.
+- Word on the Street uses `AIWorthKeeping`; its scoring effects are mandatory
+  once installed and therefore need no activation hook.
+
+### Vantage Point Batch 6 card hooks
+
+- Synchrocyclotron uses `AIWorthInstalling` to seek a non-scoring remote only
+  when HQ contains a Double operation and the Corp can afford to rez it, plus
+  `AIAvoidInstallingOverThis` because its ongoing click discount is valuable.
+- Ansel 2.0 uses `AIImplementIce` for its trash, heap-removal, install and
+  end-the-run subroutines. `AIImplementBreaker` models its exact exchange of 2
+  Runner clicks for up to 2 broken subroutines; inline Corp preferences choose
+  high-ELO trash/removal targets and use the established install-option scorer.
+- Reverb uses `AIImplementIce` for its two end-the-run subroutines. Its dynamic
+  rez discount flows through the normal `RezCost` calculation, so it needs no
+  separate valuation hook.
+- Sleipnir uses `AIImplementIce` for its draw, recursion and end-the-run
+  subroutines. Inline preferences draw only from nonempty R&D and preferentially
+  shuffle a public Archives card rather than blindly cycling HQ.
+- Méliès City Luxury Line has no activation decision. Its steal-click cost is
+  enforced by the access engine, and its mandatory on-score click gain uses no
+  AI hook.
+
+### Vantage Point Batch 7 card hooks
+
+- Vertigo uses `AIImplementIce` with `loseClicks`, then
+  `AIIceSpecificEffect` to classify the no-click steal/trash lock as serious
+  only when the subroutine actually leaves the Runner on zero clicks.
+- Caveat Emptor uses `AIEconomyPlay`. Its inline mode choice normally takes
+  the larger credit gain, but denies a click when the Runner is at match point.
+- `realloc()` uses `AIEconomyPlay` and `AIWouldPlay`; its inline pair scorer
+  balances printed rez-cost income against the ICE protection being given up.
+- Retirement Plan uses `AIPlayWhenCan`, `AIWouldPlay` and
+  `AIIsRecurOrTutor`, with the normal install scorer choosing a legal Archives
+  target and destination.
+- Perfect Recall uses `AIIsScoringUpgrade`, `AIDefensiveValue`,
+  `AILimitPerServer` and `AIWouldRezBeforeScore`. Its inline ability choice
+  favors titles actually at risk in the attacked server, then agendas and
+  high-trash-cost cards.
+
+### Vantage Point Batch 8 card hooks
+
+- Méliès U uses inline Corp preferences to set the department corresponding to
+  the least-protected central, and only trades the top card of R&D for an
+  Archives card when the recursion improves card quality.
+- Lotus Haze uses `AITriggerWhenCan`; its enumeration suppresses moves that do
+  not improve the destination score, and its inline destination preference
+  favors protected agenda servers and an upgrade's existing
+  `AIDefensiveValue` declaration.
+- Esca uses `AIPunishesAccess` to report its mandatory credit loss plus its
+  tagged-only net damage, and `AIAvoidInstallingOverThis` preserves the ambush.
+- ezaM uses `AIImplementIce` for its R&D filtering and run-long ICE-strength
+  boost, plus `AITriggerWhenCan`; inline choices move agendas away from the top
+  of R&D and avoid ICE swaps without a protection gain.
+- Knowledge Seeker uses `AIImplementIce` for its counter/purge pressure, R&D
+  arrangement and end-the-run subroutines. Its inline arrangement places the
+  highest-valued card on top of R&D.
+
+### Vantage Point Batch 9 card hooks
+
+- Lionsmane and Vicsek use `AIImplementIce` to model their alternative payment,
+  jack-out, damage and tag branches without treating optional punishment as a
+  guaranteed end-the-run effect.
+- Cultivate uses `AIWouldPlay` and `AIPlayWhenCan`; its inline choices trash the
+  least valuable card, add the most valuable card to HQ and leave the strongest
+  remaining draw on top of R&D.
+- Unleash uses `AITagPunishment`, `AIWouldPlay` and `AIPlayWhenCan`; its inline
+  choices prioritize an expensive unrezzed ICE and its most threatening
+  subroutine.
+- The Red Room uses `AIDefensiveValue`, `AILimitPerServer` and
+  `AIGlobalETRUses`. The live ability and security-planning hook share the same
+  server-value policy, and installed active cards now participate in global
+  end-the-run capacity planning.
+
+### Vantage Point Batch 10 card hooks
+
+- Editorial Division: Ad Nihilum makes its `responseOnTakeBadPublicity` choice
+  inline, tutoring the best legal card while declining when R&D is critically
+  low.
+- Witch Hunt uses normal agenda advancement policy; its score, steal and
+  action-phase effects are mandatory and need no discretionary hook.
+- Magistrate Revontulet and Nihilo Agent use `AIWorthInstalling` and
+  `AIAvoidInstallingOverThis` to choose the first affordable protected
+  non-scoring remote, creating a new one when every candidate is a scoring
+  server, and preserve their ongoing effects.
+- Grubber uses `AIImplementIce` to model each subroutine as the Runner's choice
+  between paying 3 credits and ending the run.
 
 ---
 

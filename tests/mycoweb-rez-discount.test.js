@@ -60,4 +60,34 @@ assert(
   elevationSource.includes('Rez(iceParams.card, false, null, null, true, 2);'),
   'Mycoweb must pass its reduction into the central Rez path',
 );
-console.log('4 Mycoweb discounted-rez regression cases passed.');
+
+const order = [];
+context.AutomaticTriggers = () => order.push('automatic');
+context.TriggeredResponsePhase = (player, trigger, params, callback) => {
+  order.push('responses');
+  callback();
+};
+const callbackContext = {name: 'callback context'};
+context.callbackIce = {
+  title: 'Callback ice',
+  player: corp,
+  cardType: 'ice',
+  rezzed: false,
+  renderer: {FaceUp() {}},
+};
+context.callbackContext = callbackContext;
+context.beforeResponses = function () {
+  assert.strictEqual(this, callbackContext);
+  order.push('before');
+};
+context.afterResponses = function () {
+  assert.strictEqual(this, callbackContext);
+  order.push('after');
+};
+vm.runInContext(
+  'Rez(callbackIce, true, beforeResponses, callbackContext, true, 0, afterResponses)',
+  context,
+);
+assert.deepStrictEqual(order, ['before', 'automatic', 'responses', 'after']);
+
+console.log('5 Mycoweb and rez-callback regression cases passed.');

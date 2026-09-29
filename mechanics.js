@@ -90,8 +90,9 @@ function PlaceAdvancement(card, num) {
  * @param {Object} [context] for onRezResolve
  * @param {Boolean} [allowCancel] whether to allow cancel rez when choosing additional costs
  * @param {int} [costReduction] credit reduction supplied by the effect initiating the rez
+ * @param {function} [afterRezResponses] fires after all on-rez triggers resolve
  */
-function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true, costReduction=0) {
+function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowCancel=true, costReduction=0, afterRezResponses=null) {
    if (card.customRezSound) {
     PlaySound(card.customRezSound);
   } else if (card.cardType === 'ice') {
@@ -116,7 +117,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		card,
 		function () {
 		  //true here means ignore all costs (we have already paid them)
-		  Rez(card, true, onRezResolve, context);
+		  Rez(card, true, onRezResolve, context, allowCancel, costReduction, afterRezResponses);
 		},
 		this
 	  );
@@ -128,12 +129,12 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 	};
 	if (!allowCancel) cancelCallback = undefined;
 	//Optional forfeit to reduce rez cost (e.g. Biawak)
-	if (typeof card.optionalForfeitRezReduction === 'number' && corp.scoreArea.length > 0) {
+	if (typeof card.optionalForfeitRezReduction === 'number' && ChoicesForfeitableAgendas(corp).length > 0) {
 		var oldPhase = currentPhase;
 		var oldActivePlayer = activePlayer;
 		var rezReduction = card.optionalForfeitRezReduction;
 		var fullRezCost = RezCost(card);
-		var choices = ChoicesArrayCards(corp.scoreArea);
+		var choices = ChoicesForfeitableAgendas(corp);
 		//Add decline option only if player can afford full rez cost
 		if (CheckCredits(corp, fullRezCost, "rezzing", card)) {
 			choices.push({
@@ -148,8 +149,9 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 			var shouldForfeit = false;
 			var lowestPointAgenda = null;
 			var lowestPoints = 999;
-			for (var i = 0; i < corp.scoreArea.length; i++) {
-				var pts = corp.scoreArea[i].agendaPoints || 0;
+			for (var i = 0; i < choices.length; i++) {
+				if (!choices[i].card) continue;
+				var pts = choices[i].card.agendaPoints || 0;
 				if (pts < lowestPoints) {
 					lowestPoints = pts;
 					lowestPointAgenda = choices[i];
@@ -192,7 +194,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		var oldActivePlayer = activePlayer; //also for cancel
 		var forfdec = DecisionPhase(
 		  corp,
-		  ChoicesArrayCards(corp.scoreArea),
+		  ChoicesForfeitableAgendas(corp),
 		  function(fparams) {
 			  Forfeit(fparams.card, function() {
 				  payCreditsAndRez();
@@ -214,7 +216,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		var choices = [];
 		
 		//Option 1: Forfeit any scored agenda
-		var agendaChoices = ChoicesArrayCards(corp.scoreArea);
+		var agendaChoices = ChoicesForfeitableAgendas(corp);
 		for (var i = 0; i < agendaChoices.length; i++) {
 			agendaChoices[i].action = "forfeit";
 			agendaChoices[i].label = "Forfeit " + agendaChoices[i].card.title;
@@ -382,7 +384,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
     AutomaticTriggers("automaticOnRez", [card]);
     //then the Enumerate ones
     //currently giving whoever's turn it is priority...not sure this is always going to be right
-    TriggeredResponsePhase(playerTurn, "responseOnRez", [card], function() {
+	  TriggeredResponsePhase(playerTurn, "responseOnRez", [card], function() {
 	  //run recalculation has to be done AFTER all the rezzing effects in case they change ice/program states
 	  if (runner.AI != null) {
 		runner.AI.LoseInfoAboutHQCards(card);
@@ -396,6 +398,8 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		  runner.AI.RecalculateRunIfNeeded();		  
 		}
 	  }
+	  if (typeof afterRezResponses === "function")
+		afterRezResponses.call(context);
     }, "Rez");
   };
   //if unique, old one is immediately and unpreventably trashed (except if facedown, and facedown cards don't count for check)
@@ -443,6 +447,10 @@ function RemoveFromGame(card) {
  * @param {function} [afterForfeit] callback to run after forfeit completes
  */
 function Forfeit(card, afterForfeit) {
+  if (!card || card.cannotForfeit) {
+    if (card) Log(GetTitle(card, true) + " cannot be forfeited");
+    return false;
+  }
   //Trigger responseOnForfeit BEFORE moving the card (so it's still in scoreArea and active)
   //This allows cards like Greenmail to gain credits when forfeited
   //Uses TriggeredResponsePhase because the trigger may cause phase changes (e.g. Greenmail + Zwicky)
@@ -452,9 +460,10 @@ function Forfeit(card, afterForfeit) {
     MoveCard(forfeitedCard, removedFromGame);
     Log(GetTitle(forfeitedCard, true) + " forfeited");
     if (typeof afterForfeit === "function") {
-      afterForfeit();
+      afterForfeit(true);
     }
   }, "Forfeited");
+  return true;
 }
 
 /**
@@ -571,6 +580,8 @@ function TrashAccessedCard(canBePrevented) {
  * @param {Object} [context] for onInstallResolve (and onCancelResolve, if relevant)
  * @param {function} [onCancelResolve] fires if the install is cancelled
  * @param {function} [onPaymentComplete] fires once the credits (if any) are paid
+ * @param {Boolean} [allowCancel] whether to allow cancelling the install
+ * @param {function} [onInstallComplete] fires after the card is installed and all install responses finish
  */
 function Install(
   installingCard,
@@ -582,7 +593,8 @@ function Install(
   context,
   onCancelResolve,
   onPaymentComplete,
-  allowCancel=true
+  allowCancel=true,
+  onInstallComplete
 ) {
   if (installingCard.player === corp) {
     PlaySound('installCorp');
@@ -802,6 +814,8 @@ function Install(
 				  //currently giving whoever's turn it is priority...not sure this is always going to be right
 				  TriggeredResponsePhase(playerTurn, "responseOnInstall", [installingCard], function() {
 					IncrementPhase(returnToPhase);
+					if (typeof onInstallComplete === "function")
+					  onInstallComplete.call(context);
 				  }, "Installed");
 				};
 				if (cardToReplace) {
@@ -1086,8 +1100,10 @@ function Damage(damageType, num, canBePrevented, afterTrashing, context) {
  * Purges all virus counters from all cards.</br>Makes no checks or payments.<br/>Logs the result.
  *
  * @method Purge
+ * @param {function()} [afterPurge] called after purge responses resolve
+ * @param {Object} [context] context for afterPurge
  */
-function Purge() {
+function Purge(afterPurge, context) {
   var numPurged = 0;
   ApplyToAllCards(function (card) {
     if (typeof (card.virus !== "undefined")) {
@@ -1097,7 +1113,15 @@ function Purge() {
   });
   if (numPurged > 0) PlaySound('purge');
   Log("Virus counters purged");
-  TriggeredResponsePhase(playerTurn, "responseOnPurge", [numPurged], function () {}, "Purged");
+  TriggeredResponsePhase(
+    playerTurn,
+    "responseOnPurge",
+    [numPurged],
+    function () {
+      if (typeof afterPurge === "function") afterPurge.call(context, numPurged);
+    },
+    "Purged",
+  );
 }
 
 /**
@@ -1208,8 +1232,8 @@ function SpendCredits(
   afterSpend,
   context
 ) {
-  //new version of this function just automatically uses extra credits sources when available
-  //first, temporary credits (e.g. from bad publicity)
+  //Temporary credits are still consumed first. Choosing between the credit
+  //pool and eligible card-hosted sources happens below.
   if (player == runner) {
     var spendCred_temporary = Math.min(num, runner.temporaryCredits);
     if (spendCred_temporary > 0) {
@@ -1227,134 +1251,137 @@ function SpendCredits(
         );
     }
   }
-  //second, card-hosted credits
-  if (num > 0) {
-    var oldNum = num;
-    var activeCards = ActiveCards(player);
-    var cardsSpentFrom = []; //track cards we spent from for callbacks
-    for (var i = 0; i < activeCards.length; i++) {
-      if (typeof activeCards[i].credits !== "undefined") {
-        if (typeof activeCards[i].canUseCredits === "function") {
-          if (activeCards[i].canUseCredits(doing, card)) {
-            var spendCred_card = Math.min(num, activeCards[i].credits);
-            activeCards[i].credits -= spendCred_card;
-            num -= spendCred_card;
-            if (spendCred_card == 1)
-              Log(
-                PlayerName(player) +
-                  " spent one credit from " +
-                  GetTitle(activeCards[i], true)
-              );
-            else if (spendCred_card > 0)
-              Log(
-                PlayerName(player) +
-                  " spent " +
-                  spendCred_card +
-                  " credits from " +
-                  GetTitle(activeCards[i], true)
-              );
-            //track this card for callback
-            if (spendCred_card > 0) {
-              cardsSpentFrom.push({ card: activeCards[i], amount: spendCred_card });
-            }
-          }
-        }
+  function eligibleHostedSources() {
+    return ActiveCards(player).filter(function (source) {
+      return source.credits > 0 &&
+        typeof source.canUseCredits === "function" &&
+        source.canUseCredits(doing, card);
+    });
+  }
+
+  function spendFromCard(source, amount) {
+    source.credits -= amount;
+    num -= amount;
+    if (amount == 1)
+      Log(PlayerName(player) + " spent one credit from " + GetTitle(source, true));
+    else
+      Log(
+        PlayerName(player) +
+          " spent " +
+          amount +
+          " credits from " +
+          GetTitle(source, true)
+      );
+    UpdateCounters();
+    if (typeof source.onCreditsSpent === "function")
+      source.onCreditsSpent.call(source, amount);
+  }
+
+  function spendFromPool(amount) {
+    amount = Math.min(amount, Math.max(0, player.creditPool));
+    if (amount < 1) return;
+    player.creditPool -= amount;
+    num -= amount;
+    if (amount == 1) Log(PlayerName(player) + " spent one credit");
+    else Log(PlayerName(player) + " spent " + amount + " credits");
+  }
+
+  function finishPayment() {
+    if (num > 0) {
+      LogError(
+        PlayerName(player) +
+          " could not pay " +
+          num +
+          (num == 1 ? " remaining credit" : " remaining credits")
+      );
+      return;
+    }
+    if (typeof afterSpend === "function") afterSpend.call(context);
+  }
+
+  function choosePaymentSource() {
+    if (num < 1) {
+      finishPayment();
+      return;
+    }
+
+    var sources = eligibleHostedSources();
+    var canUsePool = CreditPoolCanBeUsed(player, "spend", doing, card);
+
+    //Keep computer-player payments deterministic and compatible with the
+    //existing strategy code. Human players choose every non-forced allocation.
+    if (player.AI) {
+      for (var i = 0; i < sources.length && num > 0; i++)
+        spendFromCard(sources[i], Math.min(num, sources[i].credits));
+      if (num > 0 && canUsePool) spendFromPool(num);
+      finishPayment();
+      return;
+    }
+
+    if (sources.length < 1) {
+      if (canUsePool) spendFromPool(num);
+      finishPayment();
+      return;
+    }
+
+    //When a single hosted source has only one legal contribution, no player
+    //decision is needed; spend it and then handle any pool remainder.
+    var usablePoolCredits = canUsePool ? player.creditPool : 0;
+    var minimumHostedSpend = Math.max(0, num - usablePoolCredits);
+    var maximumHostedSpend = Math.min(num, sources[0].credits);
+    if (
+      sources.length == 1 &&
+      minimumHostedSpend > 0 &&
+      minimumHostedSpend == maximumHostedSpend
+    ) {
+      spendFromCard(sources[0], minimumHostedSpend);
+      choosePaymentSource();
+      return;
+    }
+
+    var choices = [];
+    for (var i = 0; i < sources.length; i++) {
+      for (var amount = 1; amount <= Math.min(num, sources[i].credits); amount++) {
+        choices.push({
+          card: sources[i],
+          num: amount,
+          label:
+            "Use " +
+            amount +
+            (amount == 1 ? " credit" : " credits") +
+            " from " +
+            GetTitle(sources[i], true),
+        });
       }
     }
-    if (num != oldNum) UpdateCounters();
-    //fire onCreditsSpent callbacks for cards we spent from (e.g., for "when empty, trash it")
-    for (var i = 0; i < cardsSpentFrom.length; i++) {
-      var cardWithCredits = cardsSpentFrom[i].card;
-      if (typeof cardWithCredits.onCreditsSpent === "function") {
-        cardWithCredits.onCreditsSpent.call(cardWithCredits, cardsSpentFrom[i].amount);
-      }
+    if (canUsePool && player.creditPool > 0) {
+      var poolSpend = Math.min(num, player.creditPool);
+      choices.push({
+        card: null,
+        num: poolSpend,
+        label:
+          "Spend " +
+          poolSpend +
+          (poolSpend == 1 ? " credit" : " credits") +
+          " from the credit pool",
+      });
     }
-  }
-  //lastly, credit pool
-  if (num > 0) {
-    player.creditPool -= num; //spend the rest from default pool
-    if (num == 1) Log(PlayerName(player) + " spent one credit");
-    else Log(PlayerName(player) + " spent " + num + " credits");
-  }
-  //done, do whatever needs to be done after
-  if (typeof afterSpend === "function") afterSpend.call(context);
 
-  //old version of this function below allows player to choose which sources to use and when:
+    DecisionPhase(
+      player,
+      choices,
+      function (params) {
+        if (params.card) spendFromCard(params.card, params.num);
+        else spendFromPool(params.num);
+        choosePaymentSource();
+      },
+      "Spend credits",
+      "Choose how to pay " + num + "[c]",
+      card
+    );
+  }
 
-  //allow player to use as many credits as desired from recurring sources (continue spends the rest using credit pool)
-  /*
-	var spendCreditsPhase = {
-	Enumerate: {
-		use: function() {
-			var ret = [];
-			//for each available recurring credit source, list from 1 to max(available,required)
-			var activeCards = ActiveCards(player);
-			for (var i=0; i<activeCards.length; i++)
-			{
-				if (typeof(activeCards[i].credits) !== 'undefined')
-		 		{
-					if (typeof(activeCards[i].canUseCredits) === 'function')
-					{
-						if (activeCards[i].canUseCredits(doing,card))
-						{
-							for (var j=1; (j<=activeCards[i].credits)&&(j<=num); j++)
-							{
-								ret.push({card:activeCards[i],num:j,label:"Use "+j+" credits from "+GetTitle(activeCards[i],true)});
-							}
-						}
-					}
-				}
-			}
-			return ret;
-		},
-		n: function() {
-			if (num>Credits(player)) return []; //need to spend more recurring credits
-			return [{}];
-		}
-	 },
-	 Resolve: {
-		 use: function(params) {
-			 params.card.credits-=params.num;
-			 num-=params.num;
-			 if (params.num == 1) Log(PlayerName(player)+" used one credit from "+GetTitle(params.card,true));
-		 	 else Log(PlayerName(player)+" used "+params.num+" credits from "+GetTitle(params.card,true));
-		 },
-		 n: function() {
-			 IncrementPhase(true); //return to original phase before callback in case the callback needs to change phase
-			 if (num>0)
-			 {
-				 var numberSpent = num;
-				 //automatically spend temporary credits first if possible
-				 if ((player==runner)&&(runner.temporaryCredits > 0))
-				 {
-					if (runner.temporaryCredits >= num)
-					{
-						runner.temporaryCredits-=num;
-						num=0;
-					}
-					else //can only partially cover the cost with temporary credits
-					{
-						num-=runner.temporaryCredits;
-						runner.temporaryCredits=0;
-					}
-			 	 }
-		 		 player.creditPool-=num; //spend the rest from default pool
- 		 	 	 if (numberSpent == 1) Log(PlayerName(player)+" spent one credit");
-		 	 	 else Log(PlayerName(player)+" spent "+numberSpent+" credits");
-			 }
-			 if (typeof(afterSpend) === 'function') afterSpend.call(context);
-		},
-		text: {
-			use: "Use recurring credits"
-		}
-	 }
-	};
-	spendCreditsPhase.player = player;
- 	spendCreditsPhase.title = "Spend recurring credits";
- 	spendCreditsPhase.identifier = currentPhase.identifier;
-	spendCreditsPhase.next = currentPhase;
-	ChangePhase(spendCreditsPhase);
-	*/
+  choosePaymentSource();
 }
 
 /**
@@ -1492,18 +1519,38 @@ function AddTags(num, afterTags, context) {
  *
  * @method BadPublicity
  * @param {int} num number of bad publicity to add
+ * @param {function} [afterBadPublicity] called after bad-publicity responses
+ * @param {Object} [context] for calling afterBadPublicity
  */
-function BadPublicity(num) {
+function BadPublicity(num, afterBadPublicity, context) {
   if (num < 1) {
     Log("No bad publicity added");
+    if (typeof afterBadPublicity === "function")
+      afterBadPublicity.call(context, 0);
     return;
   }
   intended.badPublicity = num;
   OpportunityForAvoidPrevent(corp, "responsePreventableAddBadPublicity", [], function () {
-    corp.badPublicity += intended.badPublicity;
-    if (intended.badPublicity == 1) Log("1 bad publicity added");
-    else Log(intended.badPublicity + " bad publicity added");
+    var badPublicityTaken = intended.badPublicity;
+    corp.badPublicity += badPublicityTaken;
+    if (badPublicityTaken == 1) Log("1 bad publicity added");
+    else Log(badPublicityTaken + " bad publicity added");
     UpdateCounters();
+    if (badPublicityTaken < 1) {
+      if (typeof afterBadPublicity === "function")
+        afterBadPublicity.call(context, 0);
+      return;
+    }
+    TriggeredResponsePhase(
+      playerTurn,
+      "responseOnTakeBadPublicity",
+      [badPublicityTaken],
+      function () {
+        if (typeof afterBadPublicity === "function")
+          afterBadPublicity.call(context, badPublicityTaken);
+      },
+      "Bad Publicity Taken",
+    );
   }, "About to Add Bad Publicity");
 }
 
@@ -1586,7 +1633,8 @@ function LoseCredits(player, num) {
     }
   }
   //lose the rest from default pool
-  if (player.creditPool < num) num = player.creditPool;
+  if (!CreditPoolCanBeUsed(player, "lose")) num = 0;
+  else if (player.creditPool < num) num = player.creditPool;
   numberLost += num;
   player.creditPool -= num;
   if (numberLost == 1) Log(PlayerName(player) + " lost 1 credit");

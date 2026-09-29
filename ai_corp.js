@@ -592,6 +592,26 @@ class CorpAI {
         else preferredServer = corp.HQ;
       } else preferredServer = corp.RnD;
     }
+    if (
+      upgrade &&
+      typeof upgrade.installOnlyIn == "function" &&
+      !CheckInstallDestination(upgrade, preferredServer)
+    ) {
+      var legalServers = [corp.HQ, corp.RnD, corp.archives].concat(
+        corp.remoteServers,
+      ).filter(function (server) {
+        return CheckInstallDestination(upgrade, server);
+      });
+      preferredServer = null;
+      var preferredScore = Infinity;
+      for (var i = 0; i < legalServers.length; i++) {
+        var score = this._protectionScore(legalServers[i], {});
+        if (score < preferredScore) {
+          preferredScore = score;
+          preferredServer = legalServers[i];
+        }
+      }
+    }
     return preferredServer;
   }
 
@@ -678,6 +698,7 @@ class CorpAI {
     if (CheckCardType(card, ["upgrade"])) {
       //although we could install more than one copy of a unique card, let's not
       if (this._uniqueCopyAlreadyInstalled(card)) return false;
+      if (!CheckInstallDestination(card, server)) return false;
       if (server) {
         //limit 1 region per server
         if (CheckSubType(card, "Region")) {
@@ -819,19 +840,20 @@ class CorpAI {
     this._log("considering forfeit options...");
     var ret = 0;
     var forfAg = null;
-    for (var i = 0; i < corp.scoreArea.length; i++) {
+    for (var i = 0; i < optionList.length; i++) {
+      if (!optionList[i].card) continue;
       if (!forfAg) {
         ret = i;
-        forfAg = corp.scoreArea[i];
-      } else if (corp.scoreArea[i].agendaPoints < forfAg.agendaPoints) {
+        forfAg = optionList[i].card;
+      } else if (optionList[i].card.agendaPoints < forfAg.agendaPoints) {
         ret = i;
-        forfAg = corp.scoreArea[i];
+        forfAg = optionList[i].card;
       } else if (
-        corp.scoreArea[i].agendaPoints == forfAg.agendaPoints &&
-        Counters(corp.scoreArea[i], "agenda") < Counters(forfAg, "agenda")
+        optionList[i].card.agendaPoints == forfAg.agendaPoints &&
+        Counters(optionList[i].card, "agenda") < Counters(forfAg, "agenda")
       ) {
         ret = i;
-        forfAg = corp.scoreArea[i];
+        forfAg = optionList[i].card;
       }
     }
     return ret;
@@ -1739,10 +1761,11 @@ class CorpAI {
   //policies say it would actually spend to protect this server.
   _globalETRUses(server) {
     var ret = 0;
-    for (var i = 0; i < corp.scoreArea.length; i++) {
-      var scoredCard = corp.scoreArea[i];
-      if (typeof scoredCard.AIGlobalETRUses != "function") continue;
-      var uses = Number(scoredCard.AIGlobalETRUses.call(scoredCard, server));
+    var activeCards = ActiveCards(corp);
+    for (var i = 0; i < activeCards.length; i++) {
+      var card = activeCards[i];
+      if (typeof card.AIGlobalETRUses != "function") continue;
+      var uses = Number(card.AIGlobalETRUses.call(card, server));
       if (isFinite(uses)) ret += Math.max(0, Math.floor(uses));
     }
     return ret;
@@ -3055,28 +3078,39 @@ class CorpAI {
   }
 
   _serverToProtect(
-    ignoreArchives = false, //returns the server that most needs increased protection (does not return null, will be HQ by default or R&D against shapers)
+    ignoreArchives = false, //returns the server that most needs increased protection; null represents a new remote
     outputToLog = false,
+    targetIsEligible = null, //optional action-specific filter (for example, whether another ICE layer is affordable)
   ) {
     var ranked = this._rankedServersToProtect(ignoreArchives);
-    var eligibleRanked = ranked.filter(
+    var protectableRanked = ranked.filter(
       (entry) => !this._nothingWorthProtecting(entry.server, entry.security),
     );
-    var unallocatedInsecure = eligibleRanked.filter(
+    var eligibility = new Map();
+    var entryIsEligible = (entry) => {
+      if (targetIsEligible == null) return true;
+      if (!eligibility.has(entry.server))
+        eligibility.set(
+          entry.server,
+          targetIsEligible(entry.server, entry.security),
+        );
+      return eligibility.get(entry.server);
+    };
+    var selected = protectableRanked.find(
       (entry) =>
         !entry.isSecure &&
-        !this._protectionInstallsThisTurn.includes(entry.server),
+        !this._protectionInstallsThisTurn.includes(entry.server) &&
+        entryIsEligible(entry),
     );
-    var selected =
-      unallocatedInsecure.length > 0
-        ? unallocatedInsecure[0]
-        : eligibleRanked[0];
+    if (!selected) selected = protectableRanked.find(entryIsEligible);
     //Run rewards can make an empty Archives a legitimate target, but allocation
     //rotation must not promote it over a naturally more urgent insecure server.
     //This preserves rotation among ordinary protection targets while requiring
     //Archives to win the actual state-based comparison before receiving ICE.
     if (selected && selected.server == corp.archives) {
-      var naturalInsecure = eligibleRanked.find((entry) => !entry.isSecure);
+      var naturalInsecure = protectableRanked.find(
+        (entry) => !entry.isSecure && entryIsEligible(entry),
+      );
       if (naturalInsecure && naturalInsecure.server != corp.archives)
         selected = naturalInsecure;
     }
@@ -3098,6 +3132,9 @@ class CorpAI {
         "Ranked server protection: " + JSON.stringify(protectionScores),
       );
     }
+    //An action-specific caller needs to distinguish "no viable target" from HQ.
+    //General protection queries retain the historical HQ fallback.
+    if (!selected && targetIsEligible != null) return undefined;
     return selected ? selected.server : corp.HQ;
   }
 
@@ -3349,6 +3386,22 @@ class CorpAI {
       economyCards.push("PAD Campaign");
     if (corp.creditPool < corp.HQ.cards.length)
       economyCards.push("Predictive Planogram"); //simple check whether to use for econ or save for draw
+    // Card-defined Corp economy plays. This mirrors the Runner's existing
+    // AIEconomyPlay priority without requiring every new economy operation to
+    // be added to the title list above.
+    var declaredEconomy = corp.HQ.cards.filter(function (card) {
+      if (!CheckCardType(card, ["operation"])) return false;
+      if (typeof card.AIEconomyPlay != "number" || card.AIEconomyPlay <= 0)
+        return false;
+      return !affordableOnly || corp.creditPool >= PlayCost(card);
+    });
+    declaredEconomy.sort(function (a, b) {
+      return b.AIEconomyPlay - a.AIEconomyPlay;
+    });
+    for (var i = 0; i < declaredEconomy.length; i++) {
+      if (!economyCards.includes(GetTitle(declaredEconomy[i])))
+        economyCards.push(GetTitle(declaredEconomy[i]));
+    }
     return economyCards;
   }
 
@@ -3681,21 +3734,30 @@ class CorpAI {
     return ret;
   }
 
-  _serverHasStakes(server) {
+  _serverHasStakes(server, securityEvaluation) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
-    //R&D and Archives retain the existing economy behaviour here.
+    if (server == corp.archives) {
+      if (this._archivesIsBackdoorToHQ()) return true;
+      if (this._agendasInServer(corp.archives) > 0) return true;
+      return this._serverRunPressure(corp.archives, securityEvaluation).penalty > 0;
+    }
+    //Do not inspect hidden R&D contents to justify spending through the reserve.
+    //Other central threats affect ranking, while only remote HVTs fall through.
     if (server == null || typeof server.cards !== "undefined") return false;
     for (var i = 0; i < server.root.length; i++)
       if (this._isHVT(server.root[i])) return true;
     return false;
   }
 
-  _shouldInstallIceLayer(server, economyIsSufficient) {
+  _shouldInstallIceLayer(server, economyIsSufficient, securityEvaluation) {
     var shouldInstall = this._unrezzedIce(server).length == 0;
+    var security = securityEvaluation;
+    if (server != null && typeof security == "undefined")
+      security = this._evaluateServerSecurity(server);
     var serverAtRisk =
       server != null &&
-      !this._evaluateServerSecurity(server).isSecure &&
-      this._serverHasStakes(server);
+      !security.isSecure &&
+      this._serverHasStakes(server, security);
     if (
       !economyIsSufficient &&
       this._rezzedIce(server).length > 0 &&
@@ -3819,11 +3881,20 @@ class CorpAI {
     var iceInstallEconomyCheck = this._sufficientEconomy(false, 4);
 
     //Find out if any servers need protection. If so, we will choose an ice card if possible.
-    var serverToInstallTo = this._serverToProtect();
+    var serverToInstallTo = this._serverToProtect(
+      false,
+      false,
+      (server, security) =>
+        this._shouldInstallIceLayer(
+          server,
+          iceInstallEconomyCheck,
+          security,
+        ),
+    );
 
     //Too poor? Do not spend frivolously on new layers. A breachable server
     //with something to lose is not frivolous to reinforce.
-    if (this._shouldInstallIceLayer(serverToInstallTo, iceInstallEconomyCheck)) {
+    if (typeof serverToInstallTo !== "undefined") {
       //this is our worst-protected server. if the server already has unrezzed ice, let's not install ice unless we have economy
       //prioritise placing ice that I can afford to rez (for now we make no effort to sort them)
       var iceInstallOptions = this._iceInstallOptions(
@@ -5859,6 +5930,30 @@ class CorpAI {
             this._commonCardToPlayChecks(
               cardToPlay,
               "if opportunity arises",
+              true,
+            )
+          ) {
+            return this._returnPreference(optionList, "play", {
+              cardToPlay: cardToPlay,
+            });
+          }
+        }
+        var declaredPriorityPlays = corp.HQ.cards.filter(function (card) {
+          return (
+            CheckCardType(card, ["operation"]) &&
+            typeof card.AIPlayWhenCan == "number" &&
+            card.AIPlayWhenCan > 0
+          );
+        });
+        declaredPriorityPlays.sort(function (a, b) {
+          return b.AIPlayWhenCan - a.AIPlayWhenCan;
+        });
+        for (var i = 0; i < declaredPriorityPlays.length; i++) {
+          cardToPlay = declaredPriorityPlays[i];
+          if (
+            this._commonCardToPlayChecks(
+              cardToPlay,
+              "because its declared opportunity is available",
               true,
             )
           ) {
