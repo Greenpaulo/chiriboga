@@ -79,6 +79,9 @@ test('the Runner may accept a root card installed during the breach', () => {
   remoteServer.root.push(midRunInstall);
   // Rule 7.4.6a choice: accept it as a candidate.
   breachAccessCandidates.root.push(midRunInstall);
+  // Prove the result comes from the recorded choice, rather than the live
+  // server root that AccessCardList() reads today.
+  remoteServer.root.splice(remoteServer.root.indexOf(midRunInstall), 1);
 
   const list = vm.runInContext('AccessCardList()', context);
   assert.strictEqual(list.length, 1);

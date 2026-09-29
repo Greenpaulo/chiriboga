@@ -30,14 +30,43 @@ Weyland; hand `[Trick of Light, Gov. Subsidy x2, Hostile Takeover, Spin Doctor]`
 ## Proposed fix
 Once a candidate remote passes the `isSecure` floor, the Runner cannot currently breach it, so ranking it against another server's score adds no safety and can leave the agenda in hand indefinitely. Proposed: apply the HQ/Archives comparison only to candidates that are not secure, and keep choosing among secure empty remotes by the existing `emptyProtectedRemotes[0]` order. Change is confined to `_isAScoringServer()`.
 Rejected: removing the hand term (the reproduction still fails at one card); a tuned constant (violates `ai-principles.md`).
-Decision needed: this reverses the deliberate expectation in the existing security test above, added with the earlier ticket `done/corp-installs-agendas-into-a-never-secure-remote.md`. If the owner wants the relative bar kept for some secure cases, an alternative is to apply it only when HQ is itself insecure; that needs its own reproduction.
+Selected candidate policy: skip the relative bar whenever the candidate remote is secure, behind the default-off `secureRemoteAgendaCommitment` option. This deliberately reverses the existing security-test expectation added with `done/corp-installs-agendas-into-a-never-secure-remote.md`; the gate below, rather than that one captured board, decides whether to adopt it. Applying the exception only when HQ is insecure remains a possible remediation if this candidate fails its gate, but is not the policy tested by this ticket.
 Other decisions that could shift: whether `_scoringWindow()` should stop using HQ's hand-inflated score; unrezzed ICE overstates security (finding A2), so trusting `isSecure` alone leans on that.
+
+## Acceptance gate
+
+Gated under `documentation/ai-planning.md`; depends on F4. The reproduction
+defines the candidate policy, but reversing the existing relative-security
+heuristic has no rules oracle and can expose agendas in states not covered by
+the captured board. Compare baseline option `secureRemoteAgendaCommitment` off
+with candidate on using paired seeds, the committed deck pool, 200 games per
+deck pair and bootstrap 95% confidence intervals.
+
+- Improvement: `secureRemoteAgendaHoldTurns` per game decreases; the interval
+  for baseline minus candidate has a lower bound above zero.
+- Guard: `pointsStolen` per game does not rise by more than 0.10; the interval
+  upper bound for candidate minus baseline is at most +0.10.
+- Guard: `pointsScored` per game does not fall by more than 0.10; the interval
+  lower bound for candidate minus baseline is at least -0.10.
+- Guard: Corp `winRate` does not fall by more than 0.02; the interval lower
+  bound for candidate minus baseline is at least -0.02.
 
 ## Acceptance criteria
 - [ ] The reproduction passes and moves to `tests/fixtures/corp-decisions/`, expectation unchanged.
 - [ ] The test "a secure remote still uses the relative scoring-server comparison" is rewritten deliberately, with the reasoning recorded in review, not weakened to pass.
 - [ ] Variation: remote holding the same Ballista as HQ, and an 8-card hand, both still install.
 - [ ] Control: an insecure remote is still refused; `corp-no-agenda-into-insecure-remote` stays green.
+- [ ] The behaviour change ships behind the AI option
+      `secureRemoteAgendaCommitment`, which defaults to off.
+- [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
+      deck pairs, paired seeds, seed count, every metric's baseline/candidate
+      result and bootstrap 95% confidence interval, guarded-regression results,
+      pass conditions and thresholds. Only then is the option switched on by
+      default.
+- [ ] The F4 collector `secureRemoteAgendaHoldTurns` is added through the
+      harness collector extension point. It counts Corp turns ending with an
+      agenda in HQ while an empty remote is judged secure and is legally
+      available for that agenda.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md`; the "relative test" sentence in `documentation/corp-ai/architecture.md` (Install planning) is updated.
 - [ ] `node tests/run-all-tests.js` passes (baseline: 3 unrelated failures: `ai-roadmaps`, `flipped-identity`, `vantagepoint-integration`).
 

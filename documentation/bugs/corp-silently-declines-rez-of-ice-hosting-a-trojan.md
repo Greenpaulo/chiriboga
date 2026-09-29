@@ -240,7 +240,28 @@ Two guard cases are included so a fix does not overcorrect:
 
 ---
 
-## 7. Acceptance criteria
+## Acceptance gate
+
+Gated under `documentation/ai-planning.md`: baseline
+`evidenceBasedHostedCardRez` off, candidate on, using F4 paired seeds and 200
+games per pair. Run the committed deck pool plus committed mid-game starts
+covering Chromatophores and Tranquilizer.
+
+- Improvement on Chromatophores starts: the bootstrap interval for the
+  reduction in `pointsStolen` has a lower bound above zero.
+- Guards across all starts and pool pairs: `winRate` does not drop by more than
+  2 percentage points; `pointsScored` does not drop by more than 0.1 per game;
+  `pointsStolen` does not increase by more than 0.1 per game; and
+  `decisionLatencyMs` does not increase by more than 10%.
+- Tranquilizer guard: `hostedThreatRezCredits`, a collector totaling credits
+  spent rezzing ICE with a non-exempt hosted card and split by hosted-card
+  title, does not increase by more than 0.5 credits per game on Tranquilizer
+  starts unless the `pointsStolen` reduction on those starts also has a lower
+  confidence bound above zero.
+
+---
+
+## Acceptance criteria
 
 - [ ] The reproduction in section 4 fails before the fix and passes after,
       moved into the green suite, with its assertions unchanged.
@@ -253,6 +274,15 @@ Two guard cases are included so a fix does not overcorrect:
       effect.
 - [ ] A separate case where the hosted card is exploitable may return `false`,
       but verifies that the refusal reason is logged.
+- [ ] The behavior change ships behind an AI option that defaults to off,
+      named `evidenceBasedHostedCardRez` in the Resolution.
+- [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
+      deck pairs and mid-game starts, paired seeds, seed count, every metric's
+      baseline/candidate result and bootstrap 95% confidence interval,
+      guarded-regression results, pass conditions and thresholds. Only then is
+      `evidenceBasedHostedCardRez` switched on by default.
+- [ ] The F4 collector `hostedThreatRezCredits` is added through the harness's
+      collector extension point before the gate is run.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md` (none
       expected — no card-facing hook changes, only internal AI logic).
 - [ ] `node tests/run-all-tests.js` passes.
