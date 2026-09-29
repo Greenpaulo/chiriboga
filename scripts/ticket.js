@@ -108,7 +108,12 @@ function move(ticket, stage) {
   const from = rel(ticket);
   const dir = stage === 'open' ? ticketFamily(from) : ticketFamily(from) + '/' + stage;
   const to = path.join(dir, path.basename(from));
-  if (from === to) { console.log('Already in ' + dir + '/'); return; }
+  if (from === to) {
+    validateBlockerMarkers(parseAll());
+    blockers(parseAll(), true, true);
+    console.log('Already in ' + dir + '/; reconciled generated blocker sections.');
+    return;
+  }
   // A failed blocker refresh must not leave the ticket or its roadmap entry
   // half-moved. Validate every generated marker before the first write.
   validateBlockerMarkers(parseAll());
