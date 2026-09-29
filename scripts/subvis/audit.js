@@ -27,13 +27,16 @@ let forcePreset = null;
 const onlyCodes = new Set();
 for (let ai = 0; ai < args.length; ai++) {
   const a = args[ai];
-  if (a === '--preset') forcePreset = args[++ai];
+  if (a === '--preset') {
+    const value = args[++ai];
+    if (value === undefined || value.startsWith('-') || !PRESETS[value]) {
+      console.error('--preset requires one of: ' + Object.keys(PRESETS).join(', '));
+      process.exit(1);
+    }
+    forcePreset = value;
+  }
   else if (a === 'modern' || a === 'ffg') forcePreset = a;
   else if (/^\d+$/.test(a)) onlyCodes.add(String(+a));
-}
-if (forcePreset && !PRESETS[forcePreset]) {
-  console.error('unknown preset ' + forcePreset);
-  process.exit(1);
 }
 // 1. inventory: every ice card with real subroutines + authored visuals.
 // Parsed from source (comments stripped) so coreset.js (coreSet[]) works too.

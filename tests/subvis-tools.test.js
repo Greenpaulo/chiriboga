@@ -52,6 +52,19 @@ try {
   ], {encoding: 'utf8'});
   assert.notStrictEqual(missingCode.status, 0, 'audit rejects an unmatched requested code');
   assert((missingCode.stdout || '').includes('no matching card'));
+
+  for (const presetArgs of [
+    ['--preset'],
+    ['--preset', '--unknown'],
+    ['--preset', 'unknown'],
+  ]) {
+    const invalidPreset = spawnSync(process.execPath, [
+      path.join(root, 'scripts', 'subvis', 'audit.js'),
+      ...presetArgs,
+    ], {encoding: 'utf8'});
+    assert.notStrictEqual(invalidPreset.status, 0, 'audit rejects invalid --preset usage');
+    assert((invalidPreset.stderr || '').includes('--preset requires one of'));
+  }
 } finally {
   for (const file of fs.readdirSync(tempDir)) fs.unlinkSync(path.join(tempDir, file));
   fs.rmdirSync(tempDir);

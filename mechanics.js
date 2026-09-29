@@ -1278,6 +1278,8 @@ function SpendCredits(
   }
 
   function spendFromPool(amount) {
+    amount = Math.min(amount, Math.max(0, player.creditPool));
+    if (amount < 1) return;
     player.creditPool -= amount;
     num -= amount;
     if (amount == 1) Log(PlayerName(player) + " spent one credit");
@@ -1285,6 +1287,15 @@ function SpendCredits(
   }
 
   function finishPayment() {
+    if (num > 0) {
+      LogError(
+        PlayerName(player) +
+          " could not pay " +
+          num +
+          (num == 1 ? " remaining credit" : " remaining credits")
+      );
+      return;
+    }
     if (typeof afterSpend === "function") afterSpend.call(context);
   }
 
@@ -1343,14 +1354,15 @@ function SpendCredits(
         });
       }
     }
-    if (canUsePool && player.creditPool >= num) {
+    if (canUsePool && player.creditPool > 0) {
+      var poolSpend = Math.min(num, player.creditPool);
       choices.push({
         card: null,
-        num: num,
+        num: poolSpend,
         label:
           "Spend " +
-          num +
-          (num == 1 ? " credit" : " credits") +
+          poolSpend +
+          (poolSpend == 1 ? " credit" : " credits") +
           " from the credit pool",
       });
     }
