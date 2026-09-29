@@ -148,6 +148,10 @@ R&D's top-down access with root cards mixed in (the `reducedRet` branch),
 Archives' access-all behavior, and the `modifyBreachAccess` additional-access
 modifier all still work unchanged when nothing is installed mid-run.
 
+## Acceptance gate
+
+N/A — deterministic fix with a single correct outcome
+
 ## Acceptance criteria
 
 - [ ] The reproduction passes and has moved into the green suite (`tests/`),

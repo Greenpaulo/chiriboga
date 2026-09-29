@@ -79,6 +79,8 @@ test('the Runner may accept a root card installed during the breach', () => {
   remoteServer.root.push(midRunInstall);
   // Rule 7.4.6a choice: accept it as a candidate.
   breachAccessCandidates.root.push(midRunInstall);
+  // The card remains in the breached server; the recorded choice makes it a
+  // candidate. The preceding decline case uses the same live root state.
 
   const list = vm.runInContext('AccessCardList()', context);
   assert.strictEqual(list.length, 1);
