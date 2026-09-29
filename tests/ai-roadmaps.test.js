@@ -7,12 +7,10 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {parseAll, itemPath, gatedItems, linkTargets, resolveFrom, blockerMismatches, VERIFIED, STATUSES, AREAS, root} =
-  require('../scripts/roadmap.js');
+  const {parseAll, itemPath, gatedItems, linkTargets, resolveFrom, blockerMismatches, readText, rel, VERIFIED, STATUSES, AREAS, root} = require('../scripts/roadmap.js');
 
 const problems = [];
 const check = (ok, message) => { if (!ok) problems.push(message); };
-const rel = file => path.relative(root, file);
 const inDone = file => file.split(path.sep).includes('done');
 
 const items = parseAll();
@@ -24,14 +22,14 @@ for (const item of items) {
 
 // Headings in each area's architecture.md, as GitHub anchors.
 const architectures = new Map(AREAS.map(dir => [dir, fs.existsSync(path.join(dir, 'architecture.md')) ?
-  fs.readFileSync(path.join(dir, 'architecture.md'), 'utf8') : '']));
+  readText(path.join(dir, 'architecture.md')) : '']));
 const anchorsOf = dir => new Set(architectures.get(dir).split('\n').filter(line => /^#{1,6} /.test(line)).map(line =>
   line.replace(/^#+ /, '').trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s/g, '-')));
 
 const TEMPLATE = ['## Goal', '## Current behaviour', '## Design', '## Safety and information boundary',
   '## Test scenarios', '## Acceptance gate', '## Acceptance criteria'];
 function checkTemplate(file, id) {
-  const text = fs.readFileSync(file, 'utf8');
+  const text = readText(file)
   const header = text.match(/^\*\*Roadmap item:\*\* (\S+) · \*\*Depends on:\*\* (.+?) · \*\*Sets:\*\* .+$/m);
   check(header, rel(file) + ' lacks the "**Roadmap item:** … · **Depends on:** … · **Sets:** …" header');
   if (!header) return;
@@ -99,8 +97,8 @@ for (const item of items) {
   if (hasTicket) check(!inDone(file), where + ' is ' + item.status + ' but its ticket is in done/; mark it done');
   const inReview = ['code-review', 'remediation'].some(folder => file.split(path.sep).includes(folder));
   if (hasTicket && inReview) check(item.status === 'in-progress', where + ' has its ticket in ' +
-    path.basename(path.dirname(file)) + '/ but status ' + item.status + '; set it to in-progress');
-  if (hasSpec || /\*\*Roadmap item:\*\*/.test(fs.readFileSync(file, 'utf8'))) checkTemplate(file, item.id);
+    path.basename(path.dirname(file)) + '/ but status ' + item.status + '; set it to in-progress'); 
+  if (hasSpec || /\*\*Roadmap item:\*\*/.test(readText(file))) checkTemplate(file, item.id);
 }
 
 // Every spec file and every ticket that declares a roadmap item must be linked from that item.
@@ -118,7 +116,7 @@ function walk(dir) {
   }));
 }
 for (const file of walk(path.join(root, 'documentation', 'backlog')).filter(f => f.endsWith('.md'))) {
-  const declared = (fs.readFileSync(file, 'utf8').match(/^\*\*Roadmap item:\*\* (\S+)/m) || [])[1];
+  const declared = (readText(file).match(/^\*\*Roadmap item:\*\* (\S+)/m) || [])[1];
   if (!declared) continue;
   const item = byId.get(declared);
   check(item, rel(file) + ' declares unknown roadmap item ' + declared);
@@ -145,9 +143,8 @@ for (const mismatch of blockerMismatches(items))
 
 // Every code-like name in each architecture.md must exist in the code.
 const code = ['ai_corp.js', 'ai_runner.js', 'runcalculator.js', 'utility.js', 'mechanics.js', 'phase.js', 'checks.js']
-  .map(f => fs.readFileSync(path.join(root, f), 'utf8'))
-  .concat(fs.readdirSync(path.join(root, 'sets')).map(f => fs.readFileSync(path.join(root, 'sets', f), 'utf8')))
-  .join('\n');
+  .map(f => readText(path.join(root, f)))
+  .concat(fs.readdirSync(path.join(root, 'sets')).map(f => readText(path.join(root, 'sets', f))))
 let nameCount = 0;
 for (const [dir, architecture] of architectures) {
   const names = new Set();

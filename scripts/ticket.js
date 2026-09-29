@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
 const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
-  blockerMismatches, blockers} = require('./roadmap.js');
+  blockerMismatches, blockers, readText} = require('./roadmap.js');
 
 const root = path.resolve(__dirname, '..');
 const STAGES = ['open', 'code-review', 'remediation', 'done'];
@@ -48,7 +48,7 @@ function filesAt(stage, family) {
 }
 
 function ticketSummary(file, currentBlockers = new Map()) {
-  const text = fs.readFileSync(file, 'utf8');
+  const text = readText(file);
   const title = (text.match(/^#\s+(.+)$/m) || [])[1] || path.basename(file, '.md');
   const hasGeneratedMarker = /<!-- roadmap-blocker:start -->/.test(text);
   const hasManualBlocker = /^## Additional blocker\s*$/m.test(text) ||
@@ -107,7 +107,7 @@ function move(ticket, stage) {
   if (!STAGES.includes(stage)) throw new Error('Stage must be one of: ' + STAGES.join(', '));
   const from = rel(ticket);
   const dir = stage === 'open' ? ticketFamily(from) : ticketFamily(from) + '/' + stage;
-  const to = path.join(dir, path.basename(from));
+  const to = path.posix.join(dir, path.basename(from));
   if (from === to) {
     validateBlockerMarkers(parseAll());
     blockers(parseAll(), true, true);
@@ -158,7 +158,7 @@ function entryRange(lines, item) {
 }
 
 function setRoadmapStatus(item, status) {
-  const lines = fs.readFileSync(item.file, 'utf8').split('\n');
+  const lines = readText(item.file).split('\n');
   const [start, end] = entryRange(lines, item);
   const at = lines.findIndex((line, i) => i > start && i < end && /^- \*\*Status:\*\*/.test(line));
   if (at < 0 || lines[at] === '- **Status:** ' + status) return;
@@ -169,13 +169,13 @@ function setRoadmapStatus(item, status) {
 
 // Replace a finished item's entry with a row in its section's Done table.
 function closeRoadmapItem(item, ticket) {
-  const lines = fs.readFileSync(item.file, 'utf8').split('\n');
+  const lines = readText(item.file).split('\n');
   const [start, end] = entryRange(lines, item);
   lines.splice(start, end - start);
   const link = file => path.relative(item.dir, file).split(path.sep).join('/');
   const ticketFile = path.resolve(root, ticket);
   const architecture = path.join(item.dir, 'architecture.md');
-  const ticketText = fs.readFileSync(ticketFile, 'utf8');
+  const ticketText = readText(ticketFile);
   const links = [];
   const linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
   let match;
@@ -224,7 +224,7 @@ function check(ticket) {
   const report = (level, message) => results.push([level, message]);
   const file = rel(ticket);
   if (!fs.existsSync(path.join(root, file))) throw new Error('No such ticket: ' + file);
-  const text = fs.readFileSync(path.join(root, file), 'utf8');
+  const text = readText(path.join(root, file));
 
   if (stageOf(file) !== 'code-review') report('WARN', 'Ticket is in ' + stageOf(file) + '/, not code-review/.');
 
@@ -249,14 +249,14 @@ function check(ticket) {
     } else {
       let original = base ? git('show', base + ':' + pending) : {status: 1};
       if (original.status !== 0) {
-        const added = git('log', '--diff-filter=A', '--format=%H', '--', pending).stdout.trim().split('\n').pop();
+        const added = git('log', '--diff-filter=A', '--format=%H', '--', pending).stdout.trim().split(/\r?\n/).pop();
         if (added) original = git('show', added + ':' + pending);
       }
       if (original.status !== 0) {
         report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
       } else {
-        const before = original.stdout.split('\n');
-        const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
+        const before = original.stdout.split(/\r?\n/);
+        const after = readText(path.join(root, green)).split('\n');
         const removed = before.filter(line => !after.includes(line));
         const addedLines = after.filter(line => !before.includes(line));
         const isExpectation = line => green.endsWith('.txt') ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line) : /assert/.test(line);
@@ -292,7 +292,7 @@ function check(ticket) {
   if (criteria && /behind an AI option/.test(criteria)) {
     const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
     const option = gate && (gate.match(/`(\w+)`/) || [])[1];
-    const code = ['ai_corp.js', 'ai_runner.js'].map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
+    const code = ['ai_corp.js', 'ai_runner.js'].map(f => readText(path.join(root, f))).join('\n');
     const setting = option && (code.match(new RegExp('\\b' + option + '\\s*:\\s*(true|false)\\b')) || [])[1];
     const passed = gate && /^passed\b/i.test(gate);
     if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');

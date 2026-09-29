@@ -10,6 +10,7 @@ const {pendingGate, codeChangesSince, blockerState} = require('../scripts/roadma
 const {ticketSummary, move} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
+const rel = file => path.relative(root, file).split(path.sep).join('/');
 const run = (...args) => {
   const result = spawnSync(process.execPath, args, {cwd: root, encoding: 'utf8'});
   assert.strictEqual(result.status, 0, args.join(' ') + ' failed:\n' + result.stdout + result.stderr);
@@ -79,12 +80,12 @@ try {
   createFixture(untrackedRoot);
   const head = spawnSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).stdout.trim();
   const changes = codeChangesSince(head);
-  assert(changes.includes(path.relative(root, untrackedSet)),
-    'raise verification includes untracked JavaScript under sets/');
-  assert(!changes.includes(path.relative(root, untrackedSetData)),
-    'raise verification ignores non-JavaScript files under sets/');
-  assert(!changes.includes(path.relative(root, untrackedRoot)),
-    'raise verification ignores arbitrary untracked root JavaScript');
+  assert(changes.includes(rel(untrackedSet)),
+     'raise verification includes untracked JavaScript under sets/');
+  assert(!changes.includes(rel(untrackedSetData)),
+     'raise verification ignores non-JavaScript files under sets/');
+  assert(!changes.includes(rel(untrackedRoot)),
+     'raise verification ignores arbitrary untracked root JavaScript');
 
   createFixture(blockerFixture);
   fs.writeFileSync(blockerFixture, '# Blocker fixture\n');

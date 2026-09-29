@@ -14,7 +14,7 @@ assert(skills.length > 0, 'No skills found in .agents/skills/');
 for (const name of skills) {
   const file = path.join(skillsDir, name, 'SKILL.md');
   assert(fs.existsSync(file), '.agents/skills/' + name + ' has no SKILL.md');
-  const frontmatter = fs.readFileSync(file, 'utf8').match(/^---\n([\s\S]*?)\n---\n/);
+  const frontmatter = fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n').match(/^---\n([\s\S]*?)\n---\n/);
   assert(frontmatter, name + '/SKILL.md must start with --- frontmatter ---');
   const field = key => (frontmatter[1].match(new RegExp('^' + key + ':\\s*(.+)$', 'm')) || [])[1];
   assert.strictEqual(field('name'), name, name + '/SKILL.md frontmatter name must match its folder');
