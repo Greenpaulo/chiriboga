@@ -101,8 +101,17 @@ const pendingGate = text =>
 const ticketRoots = () => ['backlog', 'bugs'].map(name => path.join(root, 'documentation', name));
 const markdownFiles = dir => fs.existsSync(dir) ? [].concat(...fs.readdirSync(dir).map(name => {
   const file = path.join(dir, name);
-  return fs.statSync(file).isDirectory() ? markdownFiles(file) : (name.endsWith('.md') ? [file] : []);
+  const stat = fs.lstatSync(file);
+  return stat.isDirectory() ? markdownFiles(file) : (stat.isFile() && name.endsWith('.md') ? [file] : []);
 })) : [];
+
+const isWithin = (parent, child) => child === parent || child.startsWith(parent + path.sep);
+function canonicalTicketPath(file) {
+  if (!file || !fs.existsSync(file)) return null;
+  const canonical = fs.realpathSync(file);
+  if (!fs.statSync(canonical).isFile() || path.extname(canonical) !== '.md') return null;
+  return ticketRoots().some(dir => isWithin(fs.realpathSync(dir), canonical)) ? canonical : null;
+}
 
 function generatedBlockerRange(text) {
   const starts = text.split(BLOCKER_START).length - 1;
@@ -140,8 +149,11 @@ function blockerState(items) {
   for (const item of items) {
     const file = itemPath(item);
     if (!item.fields.Ticket || item.status === 'done' || !file || !fs.existsSync(file)) continue;
+    const ticket = canonicalTicketPath(file);
+    if (!ticket) throw new Error(item.id + ' Ticket link is not a regular Markdown file under ' +
+      'documentation/bugs/ or documentation/backlog/: ' + path.relative(root, file));
     const blockers = item.depends.filter(id => !byId.has(id) || byId.get(id).status !== 'done');
-    if (blockers.length) reasons.set(file, blockers);
+    if (blockers.length) reasons.set(ticket, blockers);
   }
 
   // A reviewed gated bug need not have a roadmap item. Its Resolution line is

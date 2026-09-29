@@ -210,10 +210,10 @@ Two guard cases are included so a fix does not overcorrect:
   card by `_iceWorthRezzing()`.
 - [Inferred] Corp had 12 credits at the decision point (no spend or gain
   logged between the last known total and the decision).
-- [Inferred] Given the decklist's ice rez costs, the `Credits(corp) 
-  currentRezCost * 5` condition holds for every candidate ice except the
-  2-cost Kessleroid. Because the ice's identity is hidden and other silent
-  branches exist, the log alone cannot confirm that this block fired.
+- [Inferred] Given the decklist's ice rez costs, the
+  `Credits(corp) < currentRezCost * 5` condition holds for every candidate ice
+  except the 2-cost Kessleroid. Because the ice's identity is hidden and other
+  silent branches exist, the log alone cannot confirm that this block fired.
 - [Inferred] The hostedCards branch (`ai_corp.js` ~4602-4621) contains no
   `_log()` call. The later `_iceToLeaveUnrezzed` and Inside Job branches are
   also silent, so the missing log line does not prove which branch fired.
