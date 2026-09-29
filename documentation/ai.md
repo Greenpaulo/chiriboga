@@ -544,13 +544,6 @@ AIWorthKeeping: function(installedRunnerCards, spareMU) {
 
 Economy cards generate credits. The AI needs to know when to install them and when to fire their abilities.
 
-**`AIEconomyCard`** (a boolean)
-
-Set this to `true` on Corp economy cards which are neither Transactions nor
-Advertisements. The Corp opening-hand evaluator uses it to recognize economy
-without card-title checks. Transactions and Advertisements are recognized
-automatically.
-
 **`AIEconomyInstall()`**
 
 Return a priority number (higher = more urgent) for installing this card. Return `0` or don't define this hook if the card is not an economy card.
@@ -1824,6 +1817,15 @@ conditional, optional-cost, or click-ability draw
 should not use this hook unless the declared number is guaranteed in the
 planner's install-and-rez sequence.
 
+### 5.12 Opening-Hand Economy — `AIEconomyCard`
+
+**`AIEconomyCard`** (a boolean)
+
+Set this to `true` on Corp economy cards which are neither Transactions nor
+Advertisements. The Corp opening-hand evaluator uses it to recognize economy
+without card-title checks. Transactions and Advertisements are recognized
+automatically.
+
 ---
 
 ## 6. The Run Calculator (`rc`)
@@ -1921,7 +1923,6 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPublicRunPressure(server)` | function | Describe visible economy, growth, or persistent value from a successful run |
 | `AIPrepareHypotheticalForRC(host)` | function | Pre-run: set up fake state for run calculation |
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
-| `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |
 | `AIEconomyTrigger` | number | Priority for triggering economy ability |
 | `AIWouldTrigger()` | function | Return true to allow ability trigger |
@@ -1960,6 +1961,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
 | `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
+| `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |

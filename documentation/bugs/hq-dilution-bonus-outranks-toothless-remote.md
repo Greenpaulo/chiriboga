@@ -58,7 +58,7 @@ The Corp spent its last click and its last spare credits of turn 3 thickening th
 
 Both `pointless-archives-ice-install.md` (Problems A/B/C, all fixed) and `ice-install-remote-over-hq-stale-allocation.md` (stale per-turn allocation list from a rewind, fixed) describe the Corp reinforcing the wrong server because of bookkeeping bugs in *which servers count as already handled this turn*, not because of the underlying protection-score arithmetic. Two things distinguish this log:
 
-1. **The allocation-list mechanism isn't what drives the outcome here.** Even under Problem A's *un*fixed, never-cleared-list behavior, HQ, R&D, and Remote 0 would all have been "allocated" by turns 1-2, which — per `_serverToProtect()`'s own fallback (§3.1 below) — pushes the choice to `eligibleRanked[0]`: the single lowest-scoring server across the *entire* ranked list, allocation status notwithstanding. That fallback still picks Remote 0, because Remote 0's raw `_protectionScore()` (1.28) is lower than HQ's (3.78) on its own merits. Fixing the allocation list (as `main` now does) changes *which branch* of `_serverToProtect()` is taken, but not the comparison that decides the winner within either branch — both branches ultimately sort by the same `_protectionScore()`, and that score is what this document's fix targets.
+1. **The allocation-list mechanism isn't what drives the captured outcome, but current selection is not a raw-score comparison.** `_rankedServersToProtect()` now sorts by `adjustedScore`: `_protectionScore()` plus any remote scoring adjustment, minus bounded protection debt. `_serverToProtect()` normally takes the first unallocated insecure entry, falling back to the first eligible ranked entry; an installed HVT can additionally override a generic remote or new-server winner. In the captured replay, Remote 0's base score (1.28) was far below HQ's (3.78), so it remains the likely winner when those other adjustments are equal, but a current-code fixture must record debt, scoring adjustment, allocation state, and any HVT before claiming that the lowest raw `_protectionScore()` necessarily wins.
 2. **Problem C (the "too poor for new layers" gate, fixed) governs a different moment.** In this log, `I am feeling poor` / `No obvious install options` start appearing *after* line 188 — once credits ran low. The turn 3 misallocation at line 183 happened while the Corp still had spare credits and was willing to install; Problem C explains why no *further* HQ reinforcement happened later that turn, not why Remote 0 was chosen over HQ in the first place.
 
 A fixture built against current `main` (§5) is the way to confirm this conclusively rather than by inference; this document's analysis (§3) does not depend on the allocation-list state.
@@ -67,11 +67,24 @@ A fixture built against current `main` (§5) is the way to confirm this conclusi
 
 ## 3. Root cause
 
-### 3.1 `_serverToProtect()` always compares by raw `_protectionScore()`
+### 3.1 `_serverToProtect()` selects from an adjusted ranking
 
 **Where:** `_serverToProtect()` (~3009), `_rankedServersToProtect()` (~2897).
 
-`_rankedServersToProtect()` builds one entry per server, each carrying `score = this._protectionScore(server, {}, security) + scoreAdjustment` (only remotes get a nonzero `scoreAdjustment`, and only when `_isAScoringServer()` says so — not relevant to this log, see §2.2 item 1). Entries are sorted ascending by `adjustedScore` (line 2956-2961: `a.adjustedScore - b.adjustedScore`), and `_serverToProtect()` (§3009-3053) takes the first unallocated-and-insecure entry, or the overall lowest-scoring entry if every insecure server is already allocated. Either way, the server with the numerically lowest `_protectionScore()` wins the next ICE install. Nothing in this path treats "a server with an agenda in it" specially relative to "a server with nothing in it" beyond what's baked into the score itself.
+`_rankedServersToProtect()` builds one entry per server. Its `score` is
+`_protectionScore(server, {}, security) + scoreAdjustment`; a remote that is
+already a scoring server receives a negative agenda-in-hand adjustment. Its
+`adjustedScore` then subtracts the server's bounded protection debt. Entries
+sort ascending by `adjustedScore`, while the legacy HVT rule can move the HVT
+server ahead of a generic remote/new-server winner. `_serverToProtect()` takes
+the first unallocated insecure entry, or the first eligible entry if all such
+servers were already handled this turn.
+
+Consequently the raw 1.28-vs-3.78 replay numbers explain the base-score pressure
+but do not alone prove the current winner. Nothing in the ordinary adjusted
+ranking directly values an agenda in HQ over an empty remote; protection debt,
+remote scoring adjustment, and the HVT override can nevertheless change the
+selection and must be represented in the reproduction.
 
 ### 3.2 HQ's score includes a hand-size term no other server gets
 
@@ -91,9 +104,11 @@ Dilution against random access matters when the Runner is drawing one random car
 
 ## 4. Proposed fix
 
-### 4.1 Gate the dilution bonus on whether HQ's ICE can end the run
+### 4.1 Gate the dilution bonus on whether HQ's ICE can end the run (partial correction)
 
-Reuse the `_iceHasETR()` helper already identified as dead code in `agenda-scored-behind-ice-with-no-etr.md` (~line 1617, still unused anywhere in the file as of this writing):
+Reuse the `_iceHasETR()` helper that the completed
+`agenda-scored-behind-ice-with-no-etr.md` fix now calls from
+`_cardProtectionValue()`:
 
 ```js
 } else {
@@ -110,15 +125,26 @@ Reuse the `_iceHasETR()` helper already identified as dead code in `agenda-score
 }
 ```
 
-The `Math.min(0, ...)` keeps the term from ever *penalizing* HQ relative to today's behavior when it has no ETR-capable ICE (a large hand is never worse than a small one) while removing its ability to make an un-ETR'd HQ look safer than it is. This is a minimal, targeted change; a maintainer may prefer to drop the bonus to 0 outright rather than keep the `Math.min` clamp — see §4.2.
+The `Math.min(0, ...)` keeps the term from ever *penalizing* HQ relative to today's behavior when it has no ETR-capable ICE (a large hand is never worse than a small one) while removing its ability to make an un-ETR'd HQ look safer than it is. This corrects the misleading dilution component, but it is not sufficient to reverse the captured selection: removing roughly 0.5 from HQ's reported 3.78 still leaves it above Remote 0's 1.28, and lower `adjustedScore` wins when debt and overrides do not intervene.
 
 ### 4.2 Decision for the maintainer: clamp vs. zero
 
 The `Math.min(0, ...)` clamp above still allows a *negative* dilution term (a small, agenda-heavy hand making HQ look worse) to apply even without ETR ICE, which seems directionally correct (a nearly-all-agenda hand behind toothless ICE genuinely is worse than a padded one) but hasn't been checked against other decisions that read `_protectionScore()`. Flattening the whole term to 0 when there's no ETR ICE is simpler and safer if that interaction is a concern; this document doesn't have a strong reason to prefer one over the other and defers to the maintainer.
 
+Neither choice closes the replay by itself. A complete fix also needs a
+separately justified ranking correction that represents the relative stakes of
+an insecure agenda-holding central and an empty remote, while composing with
+protection debt, the remote scoring adjustment, and the HVT override. The
+reproduction should be grounded first; this ticket does not prescribe an
+uncalibrated constant for that correction.
+
 ### 4.3 This composes with the sibling ETR-scoring fix
 
-`agenda-scored-behind-ice-with-no-etr.md` §4.2 proposes making `_cardProtectionValue()` ETR-aware for the *ice-itself* scoring term (`_iceAndRootProtection()`). This document's fix is for the separate, HQ-only dilution term layered on top. Both read from the same underlying `_iceHasETR()` helper and can land together or independently; landing 4.1 here without the sibling fix still helps, because it stops the dilution bonus from *compounding* an already-generous ETR-blind ICE score, but the full picture needs both.
+`agenda-scored-behind-ice-with-no-etr.md` §4.2 made
+`_cardProtectionValue()` ETR-aware for the *ice-itself* scoring term
+(`_iceAndRootProtection()`). This ticket concerns the separate, HQ-only dilution
+term layered on top. Both use `_iceHasETR()`; the sibling correction is already
+present, but it does not remove this dilution-specific issue.
 
 ---
 
@@ -136,7 +162,7 @@ Fixture to add under `tests/fixtures/corp-decisions/`:
 
 | Fixture | Setup | Expected |
 |---|---|---|
-| `corp-protects-hq-not-toothless-remote` | HQ: 1 agenda + non-agenda cards behind a no-ETR Tithe; Remote 0: two no-ETR ICE (Tithe, Diviner), empty root, no agenda in hand for it | `// EXPECT: install` with `EXPECT_SERVER: HQ` (reproduces this log's board; fails before the fix, passes after) |
+| `corp-protects-hq-not-toothless-remote` | HQ: 1 agenda + non-agenda cards behind a no-ETR Tithe; Remote 0: two no-ETR ICE (Tithe, Diviner), empty root, no agenda in hand for it; explicitly initialize protection debt/allocation and exclude an HVT override | First confirm current code chooses Remote 0. The dilution clamp alone is expected to keep choosing Remote 0; `EXPECT_SERVER: HQ` becomes the target only for the complete ranking correction described in §4.2. |
 | `corp-still-pads-hq-hand-with-real-etr-ice` | Same shape, but HQ's ICE includes something that genuinely ends the run (e.g. Flyswatter) | Either server may be chosen by score, but confirm the dilution term is still applied (i.e. this fixture should *not* regress to always picking HQ regardless of its actual ICE) |
 
 **Important, per §2.2:** run these against current `main`, not a pre-fix checkout, since the whole point of this document is that the misallocation survives the Problems A/B/C fixes. If `corp-protects-hq-not-toothless-remote` unexpectedly already passes on `main` before this change, that means some other, undocumented fix already covers this path — stop and re-diagnose rather than assuming this document's analysis is wrong.
@@ -162,8 +188,9 @@ Also run: `node tests/corp-server-security.test.js`, `node tests/decision-snapsh
 
 ## 8. Acceptance criteria
 
+- [ ] A current-code reproduction records protection debt, allocation state, remote scoring adjustment, and HVT state, and confirms which `adjustedScore` entry `_serverToProtect()` selects.
 - [ ] `_protectionScore()`'s HQ-specific `else` branch no longer grants the full hand-size dilution bonus when none of HQ's installed ICE can end the run (`_iceHasETR()` returns false for all of `server.ice`).
-- [ ] `corp-protects-hq-not-toothless-remote` fails before the change and passes after, run against current `main`.
+- [ ] The reproduction demonstrates that the dilution clamp alone still selects Remote 0; a separately justified ranking correction then makes the agenda-holding insecure HQ win without bypassing debt or HVT behavior.
 - [ ] `corp-still-pads-hq-hand-with-real-etr-ice` confirms the dilution bonus still applies normally when HQ has genuine ETR-capable ICE.
 - [ ] `node -c ai_corp.js` passes and `node tests/run-all-tests.js` still passes.
 - [ ] The maintainer has picked between the clamp and zero-out options in §4.2, and the choice is reflected in both the code and this document's implementation record.
