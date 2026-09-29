@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 
-language: "en-GB"
-tone_instructions: "Be direct and evidence-led. Prioritise correctness over style; do not report speculative or pre-existing issues."
+language: 'en-GB'
+tone_instructions: 'Be direct and evidence-led. Prioritise correctness over style; do not report speculative or pre-existing issues.'
 
 reviews:
-  profile: "assertive"
+  profile: 'assertive'
   request_changes_workflow: true
   # Keep the ticket text in the PR description untouched. CodeRabbit's
   # walkthrough and inline comments are the review record.
@@ -17,13 +17,13 @@ reviews:
     drafts: false
 
   path_filters:
-    - "!**/node_modules/**"
-    - "!**/package-lock.json"
-    - "!**/dist/**"
-    - "!**/build/**"
+    - '!**/node_modules/**'
+    - '!**/package-lock.json'
+    - '!**/dist/**'
+    - '!**/build/**'
 
   path_instructions:
-    - path: "**/*"
+    - path: '**/*'
       instructions: |
         Review ticket PRs as an independent maintainer. Treat
         `.agents/skills/review-ticket/SKILL.md` as the authoritative rubric and
@@ -67,7 +67,7 @@ reviews:
         Should fix are actionable and require changes; Notes do not. Do not make
         code changes as part of review.
 
-    - path: "sets/*.js"
+    - path: 'sets/*.js'
       instructions: |
         For every changed card object, compare the implementation with the card
         text and analogous cards. Verify costs, restrictions, timing, choices,
@@ -75,18 +75,18 @@ reviews:
         existing AI hooks at the bottom of the object and require matching
         documentation in `documentation/ai.md`.
 
-    - path: "ai_*.js"
+    - path: 'ai_*.js'
       instructions: |
         Check all callers and decision paths, not only the reproduced board.
         Verify hidden information is not read and every hypothetical mutation is
         restored, including on early returns and asynchronous continuations.
 
-    - path: "runcalculator.js"
+    - path: 'runcalculator.js'
       instructions: |
         Check run and out-of-run contexts, encounter and subroutine ordering,
         hypothetical state restoration, and callers on both Corp and Runner AI.
 
-    - path: "tests/**"
+    - path: 'tests/**'
       instructions: |
         Verify tests assert the behaviour claimed by the Resolution and would fail
         without the fix. For bug tickets, the original reproduction must move from
@@ -94,7 +94,7 @@ reviews:
         suite with its expectation unchanged. Flag weakened, deleted, tautological,
         or implementation-coupled assertions.
 
-    - path: "documentation/**"
+    - path: 'documentation/**'
       instructions: |
         Verify the ticket Resolution accurately describes the diff and test
         evidence. For AI changes, require `architecture.md` to describe the new
@@ -102,15 +102,15 @@ reviews:
 
   pre_merge_checks:
     custom_checks:
-      - name: "Ticket review evidence"
-        mode: "error"
+      - name: 'Ticket review evidence'
+        mode: 'error'
         instructions: |
           Determine whether this is a Chiriboga ticket PR from changed files under
           `documentation/bugs/` or `documentation/backlog/`, or from a linked
           ticket. Do not infer that it is not a ticket PR merely because the PR
           description omits the ticket. Otherwise pass.
 
-          Fail if a ticket PR's description does not include the complete ticket
+          Fail if a PR's description does not include the complete ticket
           body, including its diagnosis/current behaviour, applicable
           implementation plan, acceptance criteria, and final Resolution. Also
           fail if it omits the pasted output of
