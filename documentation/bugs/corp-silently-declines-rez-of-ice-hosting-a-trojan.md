@@ -10,12 +10,12 @@
 The Corp approaches unrezzed ice guarding a remote server that holds an agenda
 (Project Ingatan) and a grid (Mahkota Langit Grid) — clearly not an empty
 server. The Corp has 12 credits, comfortably enough to rez the ice, and the
-engine prints `Corp did not rez ice`. Unlike every other place in
-`ai_corp.js` where the AI declines a rez, **no `AI:` reasoning line precedes
-this one at all.** Every comparable decline elsewhere in `_iceWorthRezzing()`
-logs something like `"Rez cost not worth it, need to save it for X"`; this
-one leaves no trace, which is what made it hard to diagnose from the log
-alone.
+engine prints `Corp did not rez ice`, with **no `AI:` reasoning line before
+it.** The credit-reservation and defensive-upgrade declines in
+`_iceWorthRezzing()` log reasons such as `"Rez cost not worth it, need to save
+it for X"`, but the hosted-card, `_iceToLeaveUnrezzed` and Inside Job branches
+are silent. The log therefore does not identify which branch declined the rez;
+that ambiguity is what made it hard to diagnose from the log alone.
 
 One possible cause in `_iceWorthRezzing()` is an unconditional, unlogged
 branch: if the approached ice hosts any card without
@@ -30,7 +30,8 @@ cost) before rezzing, with no check on whether refusing to rez actually
 protects anything the Corp cares about.
 
 **Proposed fix:** at minimum, log a reason whenever this branch withholds the
-rez, matching every other exit of the function. More substantively, this
+rez, matching the logged reservation and defensive-upgrade exits. More
+substantively, this
 branch should be evidence-based like the sibling cross-server
 credit-reservation logic in the same function (which checks
 `_iceWouldSecureServer` / `_icePreventsGameWinningBreach` before reserving),
@@ -214,7 +215,8 @@ Two guard cases are included so a fix does not overcorrect:
   2-cost Kessleroid. Because the ice's identity is hidden and other silent
   branches exist, the log alone cannot confirm that this block fired.
 - [Inferred] The hostedCards branch (`ai_corp.js` ~4602-4621) contains no
-  `_log()` call, unlike every other `rezIce = false` branch in the function.
+  `_log()` call. The later `_iceToLeaveUnrezzed` and Inside Job branches are
+  also silent, so the missing log line does not prove which branch fired.
 
 ---
 

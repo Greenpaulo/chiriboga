@@ -18,7 +18,8 @@
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockers} = require('./roadmap.js');
+const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
+  blockerMismatches, blockers} = require('./roadmap.js');
 
 const root = path.resolve(__dirname, '..');
 const STAGES = ['open', 'code-review', 'remediation', 'done'];
@@ -46,17 +47,22 @@ function filesAt(stage, family) {
     fs.statSync(path.join(dir, name)).isFile()).sort().map(name => path.join(dir, name));
 }
 
-function ticketSummary(file) {
+function ticketSummary(file, currentBlockers = new Map()) {
   const text = fs.readFileSync(file, 'utf8');
   const title = (text.match(/^#\s+(.+)$/m) || [])[1] || path.basename(file, '.md');
-  const blocked = /<!-- roadmap-blocker:start -->/.test(text) || /^## (?:Additional blocker|Blocker)\s*$/m.test(text);
+  const hasGeneratedMarker = /<!-- roadmap-blocker:start -->/.test(text);
+  const hasManualBlocker = /^## Additional blocker\s*$/m.test(text) ||
+    (!hasGeneratedMarker && /^## Blocker\s*$/m.test(text));
+  const blocked = currentBlockers.has(path.resolve(file)) || hasManualBlocker;
   return {file, title, blocked};
 }
 
 function ticketInventory() {
+  const currentBlockers = blockerState(parseAll()).reasons;
   const inventory = [];
   for (const family of FAMILIES) for (const stage of STAGES)
-    for (const file of filesAt(stage, family)) inventory.push(Object.assign({family, stage}, ticketSummary(file)));
+    for (const file of filesAt(stage, family))
+      inventory.push(Object.assign({family, stage}, ticketSummary(file, currentBlockers)));
   return inventory;
 }
 
@@ -91,12 +97,21 @@ function listTickets() {
   }
 }
 
+function validateBlockerMarkers(items) {
+  const malformed = blockerMismatches(items).filter(mismatch => !mismatch.expected);
+  if (malformed.length) throw new Error(malformed.map(mismatch =>
+    rel(mismatch.file) + ' ' + mismatch.reason).join('\n'));
+}
+
 function move(ticket, stage) {
   if (!STAGES.includes(stage)) throw new Error('Stage must be one of: ' + STAGES.join(', '));
   const from = rel(ticket);
   const dir = stage === 'open' ? ticketFamily(from) : ticketFamily(from) + '/' + stage;
   const to = path.join(dir, path.basename(from));
   if (from === to) { console.log('Already in ' + dir + '/'); return; }
+  // A failed blocker refresh must not leave the ticket or its roadmap entry
+  // half-moved. Validate every generated marker before the first write.
+  validateBlockerMarkers(parseAll());
   fs.mkdirSync(path.join(root, dir), {recursive: true});
   const tracked = git('ls-files', '--error-unmatch', from).status === 0;
   if (tracked) {
@@ -307,7 +322,7 @@ function check(ticket) {
   process.exitCode = failed ? 1 : 0;
 }
 
-module.exports = {setRoadmapStatus, closeRoadmapItem};
+module.exports = {ticketSummary, validateBlockerMarkers, move, setRoadmapStatus, closeRoadmapItem};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
