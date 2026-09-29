@@ -4,10 +4,14 @@
 const fs = require('fs');
 function readBMP(path){
   const b = fs.readFileSync(path);
+  if (b.length < 54 || b.toString('ascii', 0, 2) !== 'BM') throw new Error('invalid BMP file');
   const off = b.readInt32LE(10);
   const w = b.readInt32LE(18);
   const h = b.readInt32LE(22);
   const bpp = b.readUInt16LE(28);
+  const compression = b.readUInt32LE(30);
+  if (bpp !== 24 && bpp !== 32) throw new Error('unsupported BMP bit depth: ' + bpp);
+  if (compression !== 0) throw new Error('unsupported BMP compression: ' + compression);
   const bottomUp = h > 0; const H = Math.abs(h);
   const rowSize = Math.floor((bpp*w+31)/32)*4;
   const px = (x,y)=>{

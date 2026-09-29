@@ -12,7 +12,10 @@ written into it.
 ## 1. Orient
 
 - Read the ticket in full. Its folder is its status:
-  - `bugs/` or `backlog/`: ready to implement. If its Resolution already has
+  - `bugs/` or `backlog/`: open. A generated `## Blocker` section means its
+    next required step cannot proceed; run `node scripts/roadmap.js blockers`
+    to confirm the current dependencies, then stop and report them. Otherwise
+    it is ready to implement. If its Resolution already has
     `**Gate:** pending F4`, the code was reviewed with its AI option off; once
     F4 is `done`, only run the gate (step 6) and hand off again.
   - `remediation/`: review found problems. Address the review findings recorded
@@ -169,7 +172,7 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   `ticket.js move` uses the link to fill the item's Done-table row.
 - Move the ticket into the `code-review/` folder beside it with
   `node scripts/ticket.js move <ticket> code-review` (this also sets a linked
-  roadmap item to `in-progress`), then run
+  roadmap item to `in-progress` and refreshes generated blocker headers), then run
   `node scripts/ticket.js check <ticket-in-its-new-folder>` and fix anything it reports
   as FAIL.
 - Do not commit. Report the files changed, test results, deviations from the

@@ -220,13 +220,13 @@ Two guard cases are included so a fix does not overcorrect:
    hostedCards branch sets `rezIce = false`, naming the hosted card and the
    "super rich" threshold that was not met, so a future log shows why.
 2. **Behavioral:** replace the flat `Credits(corp) < currentRezCost * 5`
-   multiplier with an evidence-based check in the same style as the
-   cross-server reservation logic — e.g., only withhold the rez when *not*
-   rezzing lets a decisive or otherwise-unstoppable access through
-   (`_iceWouldSecureServer` / `_icePreventsGameWinningBreach`-style
-   reasoning), or when the hosted card's ability is actually exploitable
-   given the Runner's current rig (e.g. Chromatophores only matters if the
-   Runner has an `AISpecialBreaker` installed that would benefit).
+   multiplier with an evidence-based comparison. Decisive access that this
+   rez would prevent (`_iceWouldSecureServer` /
+   `_icePreventsGameWinningBreach`-style reasoning) favors rezzing, not
+   withholding. A hosted card justifies withholding only when its public
+   effect makes the ice ineffective or exploitable given the Runner's current
+   rig (for example, an active `AISpecialBreaker` that benefits), and that loss
+   must be weighed against the access the ice would prevent.
 3. Do not special-case Chromatophores or Tranquilizer by title; keep the
    general `AIHostedDoesNotPreventRez` opt-out, but make the *default* path
    evidence-based rather than an unconditional block.
@@ -246,7 +246,9 @@ Two guard cases are included so a fix does not overcorrect:
 - [ ] A new case demonstrates the fixed behavior: a hosted, non-exempt Trojan
       no longer blocks the rez when refusing would leave the server otherwise
       undefended and the Runner cannot exploit the hosted card's actual
-      effect (or, at minimum, that the decision is now logged either way).
+      effect.
+- [ ] A separate case where the hosted card is exploitable may return `false`,
+      but verifies that the refusal reason is logged.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md` (none
       expected — no card-facing hook changes, only internal AI logic).
 - [ ] `node tests/run-all-tests.js` passes.

@@ -197,9 +197,10 @@ Card batches:  $implement-card-batch (starts from batch-brief.js)
 ```
 
 Every step updates the documents it touches: the ticket's folder is its
-status, `ticket.js move` keeps roadmap links valid, `implement-ticket` updates
-`architecture.md`, and `review-ticket` marks the roadmap item done. The suite
-fails if any of these is skipped.
+workflow status, generated `## Blocker` sections show unresolved dependencies,
+`ticket.js move` keeps roadmap links and blockers valid, `implement-ticket`
+updates `architecture.md`, and `review-ticket` marks the roadmap item done. The
+suite fails if any of these is skipped.
 
 ## Lessons worth carrying to other projects
 

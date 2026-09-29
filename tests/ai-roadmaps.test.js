@@ -7,7 +7,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {parseAll, itemPath, gatedItems, linkTargets, resolveFrom, VERIFIED, STATUSES, AREAS, root} =
+const {parseAll, itemPath, gatedItems, linkTargets, resolveFrom, blockerMismatches, VERIFIED, STATUSES, AREAS, root} =
   require('../scripts/roadmap.js');
 
 const problems = [];
@@ -112,8 +112,10 @@ for (const dir of AREAS) {
   }
 }
 function walk(dir) {
-  return fs.readdirSync(dir, {withFileTypes: true}).flatMap(entry =>
-    entry.isDirectory() ? walk(path.join(dir, entry.name)) : [path.join(dir, entry.name)]);
+  return [].concat(...fs.readdirSync(dir).map(name => {
+    const file = path.join(dir, name);
+    return fs.statSync(file).isDirectory() ? walk(file) : [file];
+  }));
 }
 for (const file of walk(path.join(root, 'documentation', 'backlog')).filter(f => f.endsWith('.md'))) {
   const declared = (fs.readFileSync(file, 'utf8').match(/^\*\*Roadmap item:\*\* (\S+)/m) || [])[1];
@@ -136,6 +138,11 @@ for (const gated of gatedItems(items)) {
     check(reachesF4(gated.item.id), gated.item.id + ' is judged by seeded games but does not depend on F4');
 }
 
+// Blockers are derived from this same graph. Keep the prominent ticket header
+// synchronized without making agents inspect every dependent ticket by hand.
+for (const mismatch of blockerMismatches(items))
+  check(false, rel(mismatch.file) + ' ' + mismatch.reason + '; run `node scripts/roadmap.js blockers --fix`');
+
 // Every code-like name in each architecture.md must exist in the code.
 const code = ['ai_corp.js', 'ai_runner.js', 'runcalculator.js', 'utility.js', 'mechanics.js', 'phase.js', 'checks.js']
   .map(f => fs.readFileSync(path.join(root, f), 'utf8'))
@@ -144,7 +151,10 @@ const code = ['ai_corp.js', 'ai_runner.js', 'runcalculator.js', 'utility.js', 'm
 let nameCount = 0;
 for (const [dir, architecture] of architectures) {
   const names = new Set();
-  for (const match of architecture.replace(/```[\s\S]*?```/g, '').matchAll(/`([^`\n]+)`/g)) {
+  const withoutCodeBlocks = architecture.replace(/```[\s\S]*?```/g, '');
+  const codeNamePattern = /`([^`\n]+)`/g;
+  let match;
+  while ((match = codeNamePattern.exec(withoutCodeBlocks))) {
     const id = match[1].trim().match(/^([A-Za-z_$][\w$]*)(\(.*\))?$/);
     if (id) names.add(id[1]);
   }

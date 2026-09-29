@@ -1,7 +1,7 @@
 # Corp AI finding 9: Randomness bypasses the injectable `_random`
 
 **Source:** `documentation/backlog/corp_ai_review_findings.md`, item 9.
-**File:** `ai_corp.js` — `Shuffle(assetDestinations)` (~3383) and the purge `RandomRange` (~5250); `this._random = Math.random` is set at ~5562. Line numbers drift; search by function name.
+**File:** `ai_corp.js` — historical `Shuffle(assetDestinations)` call in `_rankedInstallOptions()`; `this._random = Math.random` is the injectable Corp-policy RNG seam. Line numbers drift; search by function name.
 **Belongs in:** Bug ticket for the in-place mutation, under `documentation/bugs/`. Shared infrastructure → Foundations doc F1: injectable, seedable randomness (`documentation/corp-ai/roadmaps/corp_ai_foundations_roadmap.md`).
 **Suggested order:** Step 1 of 5 (F1 rides with the harness, finding 12) for the seeding half; Step 2 of 5 for the in-place mutation bug.
 **Depends on:** Nothing. Enables findings 3, 11 and 12 (reproducible seeded runs).
@@ -29,13 +29,14 @@ Regression coverage in `tests/corp-server-security.test.js` verifies equal seede
 
 ## Problem
 
-- Both `Shuffle(assetDestinations)` and the purge `RandomRange` use global `Math.random`, so seeded runs are not reproducible.
+- `_rankedInstallOptions()` used the engine's global-`Math.random` `Shuffle(assetDestinations)`, so seeded destination ordering was not reproducible.
 - `Shuffle` mutates in place. `assetDestinations` can be the same array as `emptyProtectedRemotes`, which is documented as strongest-first. Only its length is used afterwards, so this is latent.
 - `_rankedInstallOptions()` runs several times per click, and each run reshuffles, so the same decision can see different tie-breaks.
+- **Resolved before this ticket:** the former purge `RandomRange` claim no longer applied once finding 3 replaced that heuristic with deterministic `_ordinaryPurgeOutcome()` modeling.
 
 ## Proposed fix
 
-- Use `this._random` (the injectable RNG) instead of global `Math.random` in both places.
+- Use `this._random` (the injectable RNG) for asset-destination ordering. No purge RNG change is needed because `_ordinaryPurgeOutcome()` is deterministic.
 - Shuffle a copy rather than mutating the input array.
 - Roll the asset-destination tie-break once per decision, not once per `_rankedInstallOptions()` call.
 

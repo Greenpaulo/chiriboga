@@ -24,6 +24,7 @@ Why the workflow is set up this way is explained in
 | 4. Review | Claude chat | Commit and push, then paste **prompt R** with the check output | A Code review section to paste into the ticket, and a move command |
 | 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`, or in `remediation/` for another step 2 |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
+| PR feedback | Codex, PR branch | `$address-pr-review <PR>` | Each review comment verified and accepted, adapted, rejected or marked obsolete; supported fixes applied and tested |
 
 Codex can also do steps 1 and 4 itself (`$triage-log <log>`, `$review-ticket
 <ticket>`), but they are its most reading-heavy tasks.
@@ -73,7 +74,9 @@ Claude chat only sees what is pushed to GitHub. If it cannot find a file under
 
 ## 🎫 Ticket lifecycle
 
-A ticket's folder is its status. There is no separate status line.
+A ticket's folder is its workflow status. There is no separate status line.
+Whether work can proceed is separate: a prominent generated `## Blocker`
+section means a roadmap dependency or recorded gate is unresolved.
 
 ```text
 debug-logs/<log>
@@ -88,6 +91,10 @@ bugs/  ──implement-ticket──▶  bugs/code-review/  ──review──▶
 Backlog tickets follow the same path under `documentation/backlog/`, starting
 from a ticket you write instead of a debug log. Move tickets with
 `node scripts/ticket.js move <ticket> <open|code-review|remediation|done>`.
+The move command refreshes generated blocker headers. To inspect or repair
+them directly, run `node scripts/roadmap.js blockers` or
+`node scripts/roadmap.js blockers --fix`; the roadmap regression test prevents
+stale headers from being committed.
 
 ### Approving a plan
 
@@ -150,8 +157,11 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/show.js fn <name>` | One engine or AI function |
 | `node scripts/ticket.js check <ticket>` | The mechanical review checks for a fixed ticket |
 | `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders, keeping a linked roadmap item's status and links in step |
+| `node scripts/ticket.js next bugs` | Open bug tickets that have no generated or manually recorded blocker |
+| `node scripts/ticket.js list` | Actionable bugs and backlog tickets, blocked tickets, code review, and remediation grouped in one view |
 | `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done (including in-progress items whose ticket is open again) |
 | `node scripts/roadmap.js list` | Every AI roadmap item and its status |
+| `node scripts/roadmap.js blockers [--fix]` | Blocked tickets and stale generated headers; `--fix` adds, updates or removes the headers |
 | `node scripts/ai-game.js [--seed s \| --seeds a-b]` | Plays seeded AI-vs-AI games headlessly (default Duel PD vs Tao) and prints one JSON line per game: winner, turns, time, points, a log fingerprint and any engine errors |
 | `node scripts/roadmap.js gates` | Every item with an acceptance gate, grouped by what is left to do (gates waiting to run, failed, not built); see [judging-ai-changes.md](judging-ai-changes.md) |
 | `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket; refuses one not re-verified against the current code |

@@ -99,6 +99,8 @@ const otherSource = {
   },
 };
 context.GetTitle = (card) => card.title;
+const paymentErrors = [];
+context.LogError = (message) => paymentErrors.push(message);
 let paymentDecision = null;
 context.DecisionPhase = (player, choices, callback, title, instruction) => {
   paymentDecision = {player, choices, callback, title, instruction};
@@ -152,5 +154,45 @@ context.SpendCredits(runner, 1, 'using', {});
 assert.strictEqual(paymentDecision, null, 'a forced single-source payment needs no prompt');
 assert.strictEqual(runner.creditPool, 3, 'a locked pool is not used');
 assert.strictEqual(touchstone.credits, 0, 'the only legal source pays automatically');
+
+context.ActiveCards = () => [];
+runner.AI = {};
+runner.creditPool = 1;
+paymentsCompleted = 0;
+paymentErrors.length = 0;
+context.SpendCredits(runner, 2, 'using', {}, () => paymentsCompleted++);
+assert.strictEqual(runner.creditPool, 0, 'an insufficient pool is not overdrawn');
+assert.strictEqual(paymentsCompleted, 0, 'an incomplete AI payment does not continue');
+assert.strictEqual(paymentErrors.length, 1, 'an incomplete AI payment logs an error');
+
+runner.AI = null;
+runner.creditPool = 1;
+touchstone.credits = 1;
+otherSource.credits = 1;
+otherSource.spent = 0;
+paymentsCompleted = 0;
+paymentDecision = null;
+paymentErrors.length = 0;
+context.ActiveCards = () => [touchstone, otherSource];
+context.SpendCredits(runner, 3, 'using', {}, () => paymentsCompleted++);
+const partialPoolChoice = paymentDecision.choices.find((choice) => choice.card === null);
+assert(partialPoolChoice, 'a partially funded credit pool is offered');
+assert.strictEqual(partialPoolChoice.num, 1, 'the pool choice is capped at available credits');
+paymentDecision.callback(partialPoolChoice);
+assert.strictEqual(runner.creditPool, 0, 'the partial pool contribution is spent');
+paymentDecision.callback(paymentDecision.choices.find((choice) => choice.card === touchstone));
+assert.strictEqual(touchstone.credits, 0, 'the remaining cost uses the hosted source');
+assert.strictEqual(otherSource.credits, 0, 'the final hosted contribution is spent');
+assert.strictEqual(paymentsCompleted, 1, 'a combined payment continues after full payment');
+assert.strictEqual(paymentErrors.length, 0, 'a completed combined payment logs no error');
+
+context.ActiveCards = () => [poolLock];
+runner.creditPool = 2;
+paymentsCompleted = 0;
+paymentErrors.length = 0;
+context.SpendCredits(runner, 1, 'using', {}, () => paymentsCompleted++);
+assert.strictEqual(runner.creditPool, 2, 'an unavailable pool is not spent');
+assert.strictEqual(paymentsCompleted, 0, 'an unpaid locked-pool payment does not continue');
+assert.strictEqual(paymentErrors.length, 1, 'an unpaid locked-pool payment logs an error');
 
 console.log('Credit-pool lock regression test passed.');

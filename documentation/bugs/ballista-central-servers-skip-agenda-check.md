@@ -82,10 +82,10 @@ FAIL bug: HQ holding the accessed agenda still trashes a program instead of endi
 central-server branch (thisServer.cards defined) returns true before ever calling _agendasInServer(), so an agenda sitting in HQ, R&D or Archives is never weighed against trashing the program
 
 
-`node tests/run-all-tests.js` passes on top of this addition (three
-pre-existing, unrelated failures — `ai-roadmaps.test.js`,
-`flipped-identity.test.js`, `vantagepoint-integration.test.js` — are present
-on `8d6c70e` before this change too and are outside this ticket's scope).
+`node tests/run-all-tests.js` still has three pre-existing, unrelated failures
+on top of this addition: `ai-roadmaps.test.js`, `flipped-identity.test.js`, and
+`vantagepoint-integration.test.js`. They are present on `8d6c70e` before this
+change too and are outside this ticket's scope.
 
 ## Root cause
 

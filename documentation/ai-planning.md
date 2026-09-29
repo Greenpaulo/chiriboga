@@ -37,7 +37,7 @@ IDs are unique across both areas.
 | Status | Meaning | Spec lives in |
 |---|---|---|
 | `proposed` | Worth doing, not yet refined into a ticket | `<area>/specs/<ID>-<slug>.md` |
-| `ready` | A ticket exists and can be implemented once its dependencies are `done` | `documentation/backlog/` |
+| `ready` | A ticket exists; it is actionable when neither a generated `## Blocker` nor an unmarked `## Additional blocker` section is present | `documentation/backlog/` |
 | `in-progress` | `implement-ticket` has started it, or its reviewed change waits behind a default-off option for its gate | `documentation/backlog/` (or `code-review/`, `remediation/`) |
 | `done` | Reviewed and merged; described in `architecture.md` | `documentation/backlog/done/` (when it had a ticket) |
 | `parked` | Deliberately deferred; the entry says why | Either |
@@ -50,15 +50,18 @@ Run from the repository root:
 node scripts/roadmap.js next          # items (both areas) whose dependencies are all done,
                                       # including in-progress items whose ticket is open again
 node scripts/roadmap.js list          # every item and its status
+node scripts/roadmap.js blockers      # blocked tickets and stale/missing blocker headers
+node scripts/roadmap.js blockers --fix # mechanically refresh those headers
 node scripts/roadmap.js raise <ID>    # move a proposed item's spec into the backlog as a ticket
 ```
 
 Raising a ticket moves the spec file rather than copying it, rewrites its
 relative links and sets the item to `ready`. It refuses a spec without a
 `**Verified against code:**` line, or one whose recorded commit predates a
-change to the game or AI code (the root `*.js` files and `sets/`, committed or
-not): it lists the changed files; re-verify the spec (below) and update the
-line first.
+change to tracked root `*.js` files or JavaScript under `sets/`. Untracked
+JavaScript under `sets/` also counts, while arbitrary untracked root files do
+not. It lists the changed files; re-verify the spec (below) and update the line
+first.
 
 `node scripts/ticket.js move` keeps roadmap links pointing at a ticket as it
 moves between folders, and keeps the linked item's status in step: moving to
@@ -71,6 +74,26 @@ fails until the cell is filled.
 `tests/ai-roadmaps.test.js` fails when a status disagrees with where its ticket
 lives, a spec or ticket is unlinked or out of template, a dependency does not
 exist, or an `architecture.md` names code that does not exist.
+
+## Blocked tickets
+
+A ticket is blocked when its next required step cannot proceed because a
+declared roadmap dependency is not `done`. A `**Gate:** pending <ID>` line in a
+ticket's Resolution creates the same relationship for gated bugs that do not
+have their own roadmap item.
+
+Blocked tickets stay in `documentation/backlog/` or `documentation/bugs/`;
+folders record workflow stage, while blocking is derived from dependencies.
+`roadmap.js blockers --fix` puts a generated `## Blocker` section immediately
+below the ticket metadata and removes it when the dependencies are done. Do
+not edit that marked section by hand. `ticket.js move` and `roadmap.js raise`
+refresh all generated blocker sections automatically, and
+`tests/ai-roadmaps.test.js` rejects stale, missing or obsolete sections.
+
+Use an ordinary, unmarked `## Additional blocker` section for a condition that
+cannot be derived from the roadmaps or a pending gate, such as an owner
+decision. Its author is responsible for removing it when that condition
+changes.
 
 ## Re-grounding a spec
 
