@@ -299,9 +299,10 @@ const VERIFIED = /^\*\*Verified against code:\*\* `?([0-9a-f]{7,40})`?/m;
 const git = (...args) => spawnSync('git', args, {cwd: root, encoding: 'utf8'});
 
 function codeChangesSince(sha) {
-  const changed = git('diff', '--name-only', sha, '--', ':(glob)*.js', 'sets').stdout.trim().split('\n').filter(Boolean);
-  const untrackedSets = git('ls-files', '--others', '--exclude-standard', '--', 'sets').stdout.trim().split('\n')
-    .filter(file => file.endsWith('.js'));
+  const changed = git('diff', '--name-only', sha, '--', ':(glob)*.js', ':(glob)sets/**/*.js')
+    .stdout.trim().split('\n').filter(Boolean);
+  const untrackedSets = git('ls-files', '--others', '--exclude-standard', '--', ':(glob)sets/**/*.js')
+    .stdout.trim().split('\n').filter(Boolean);
   return [...new Set(changed.concat(untrackedSets))];
 }
 

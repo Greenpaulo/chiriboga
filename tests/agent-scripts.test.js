@@ -2,6 +2,7 @@
 // The helper scripts agents rely on to keep context small must keep working as
 // the tracker, set files and engine change.
 const assert = require('assert');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
@@ -54,20 +55,31 @@ assert.strictEqual(pendingGate('# Ticket\n\n**Gate:** pending F4\n\n## Resolutio
 assert.strictEqual(pendingGate('# Ticket\n\n## Resolution\n\n**Gate:** pending F4\n'), 'F4',
   'roadmap blocker discovery reads pending gates from Resolution');
 
-const untrackedSet = path.join(root, 'sets', 'agent-script-untracked-test.js');
-const untrackedRoot = path.join(root, 'agent-script-untracked-test.js');
+const fixtureSuffix = process.pid + '-' + crypto.randomBytes(8).toString('hex');
+const untrackedSet = path.join(root, 'sets', 'agent-script-untracked-test-' + fixtureSuffix + '.js');
+const untrackedSetData = path.join(root, 'sets', 'agent-script-untracked-test-' + fixtureSuffix + '.txt');
+const untrackedRoot = path.join(root, 'agent-script-untracked-test-' + fixtureSuffix + '.js');
+const createdFixtures = [];
+const createFixture = file => {
+  const descriptor = fs.openSync(file, 'wx');
+  createdFixtures.push(file);
+  try { fs.writeFileSync(descriptor, '// created by tests/agent-scripts.test.js\n'); }
+  finally { fs.closeSync(descriptor); }
+};
 try {
-  fs.writeFileSync(untrackedSet, '// created by tests/agent-scripts.test.js\n');
-  fs.writeFileSync(untrackedRoot, '// created by tests/agent-scripts.test.js\n');
+  createFixture(untrackedSet);
+  createFixture(untrackedSetData);
+  createFixture(untrackedRoot);
   const head = spawnSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).stdout.trim();
   const changes = codeChangesSince(head);
-  assert(changes.includes('sets/agent-script-untracked-test.js'),
+  assert(changes.includes(path.relative(root, untrackedSet)),
     'raise verification includes untracked JavaScript under sets/');
-  assert(!changes.includes('agent-script-untracked-test.js'),
+  assert(!changes.includes(path.relative(root, untrackedSetData)),
+    'raise verification ignores non-JavaScript files under sets/');
+  assert(!changes.includes(path.relative(root, untrackedRoot)),
     'raise verification ignores arbitrary untracked root JavaScript');
 } finally {
-  if (fs.existsSync(untrackedSet)) fs.unlinkSync(untrackedSet);
-  if (fs.existsSync(untrackedRoot)) fs.unlinkSync(untrackedRoot);
+  for (const file of createdFixtures) fs.unlinkSync(file);
 }
 
 console.log('Agent helper scripts: show.js, batch-brief.js, roadmap blockers and ticket lists work.');

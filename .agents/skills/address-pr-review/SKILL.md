@@ -10,8 +10,10 @@ on the PR's head branch and leave it in a tested state with every actionable
 comment either addressed or rejected with evidence.
 
 This skill remediates feedback on an existing PR. It does not replace
-`review-ticket`, reopen the original implementation, or move tickets between
-workflow folders.
+`review-ticket` or reopen the original implementation. Keep ticket workflow
+folders unchanged unless the PR-comment work completes a ticket fix that has
+not yet reached `code-review/`; in that case use
+`node scripts/ticket.js move <ticket> code-review` as required by `AGENTS.md`.
 
 ## 1. Collect the review
 
@@ -56,8 +58,10 @@ scope.
   behavior or a weak test. Ensure the test fails for the relevant regression,
   not merely that it executes the path.
 - Correct documentation comments against current behavior and workflow state.
-  Keep ticket folders/statuses unchanged unless the user separately requests a
-  lifecycle action.
+  Keep ticket folders/statuses unchanged while the fix remains incomplete. If
+  this work completes the fix and its ticket has not reached `code-review/`,
+  move it with `node scripts/ticket.js move <ticket> code-review`; do not move
+  tickets already at that stage or later.
 - Preserve the repository rules for pending reproductions, AI hooks, generated
   documentation and large-file access.
 
