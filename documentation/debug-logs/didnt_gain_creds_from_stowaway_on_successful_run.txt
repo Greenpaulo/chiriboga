@@ -1,0 +1,253 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Virtual Intelligence, P.I.: “You Can Call Me Vic”,1 Cleaver,2 Mutual Favor,2 Docklands Pass,3 Carmen,2 Marjanah,3 Red Team,3 Unity,3 Sure Gamble,2 Lie Low,3 Transfer of Wealth,2 Maglectric Rapid (748 Mod),2 Kompromat,2 Sell Out,3 Tailgate,3 Borrowed Goods,3 Rotary,2 Baker,1 Underdome Irregulars,2 Touchstone,2 Stowaway]
+[Haas-Bioroid: Precision Design,1 Luminal Transubstantiation,1 Ansel 1.0,2 Brân 1.0,3 Seamless Launch,3 Manegarm Skunkworks,2 Anoetic Void,3 Spin Doctor,1 Predictive Planogram,3 Offworld Office,2 Send a Message,2 Regolith Mining License,3 Hedge Fund,2 Project Ingatan,2 Humanoid Resources,3 Bumi 1.0,2 Scatter Field,2 Mercia B4LL4RD,3 Kessleroid,2 Flyswatter,2 Mahkota Langit Grid]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 7.25; fresh-hand expectation 4.17
+AI: Opening hand meets fresh-hand expectation
+Corp chose to keep
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Spin Doctor,Hedge Fund,Kessleroid,Humanoid Resources,Scatter Field]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Carmen,Mutual Favor,Sure Gamble,Touchstone,Stowaway]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Anoetic Void,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Carmen,Mutual Favor,Sure Gamble,Touchstone,Stowaway]
+Runner spent one click
+Runner spent 2 credits
+Runner installed Touchstone
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+1 credit placed on Touchstone
+Runner gained 9 credits
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Anoetic Void,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Carmen,Mutual Favor,Stowaway]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Offworld Office,Humanoid Resources,Kessleroid,Anoetic Void,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Carmen,Mutual Favor,Stowaway]
+Runner spent one click
+Runner installed Stowaway
+Runner spent one click
+Runner spent 5 credits
+Runner installed Carmen
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+Approaching HQ
+Run successful
+Spin Doctor accessed
+Run ends
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching HQ
+Run successful
+Kessleroid accessed
+Run ends
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Kessleroid,Spin Doctor,Anoetic Void,Offworld Office,Humanoid Resources]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Mutual Favor]
+Corp drew a card
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [10.2]
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 4 card(s) in hand: [Anoetic Void,Offworld Office,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 1 card(s) in hand: [Mutual Favor]
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Offworld Office,Humanoid Resources,Kessleroid,Anoetic Void,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Carmen,Mutual Favor,Stowaway]
+Runner spent one click
+Runner installed Stowaway
+Runner spent one click
+Runner spent 5 credits
+Runner installed Carmen
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching HQ
+Run successful
+Anoetic Void accessed
+
+SPOILER: Contents of remote servers:
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(36009, [30030], [35017,35019,30015,36010,30018,30030,36012,30018,30018,36011,36015,30011,36024,30030,35015,30013,35017,30026,35017,35015,36014,36010,36014,36014,30026,36021,30006,36011,36012,36012,36013,36016,30013,36015,36013,30016,35019,36013,30015,30026,30016], [30011], [36021,30015], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [30075,30075], [35041,30071,35045,35082,30050,35082,35041,30042,30038,35045,30036,35039,30040,30069,35042,30071,35075,30039,30040,30069,30067,30040,35038,30042,30042,30067,35079,30056,30053,35041,30053,30039,35079,30075,35038], [30050,35039,30053,30067,35075], [], [35075], [35042], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.grip[0].madeSuccessfulRunThisTurn=true;
+runner.stack[2].madeSuccessfulRunThisTurn=true;
+runner.stack[4].runHQ=true;
+runner.stack[7].runHQ=true;
+runner.stack[8].runHQ=true;
+runner.stack[11].madeSuccessfulRunThisTurn=true;
+runner.stack[15].firstHQBreachThisTurn=true;
+runner.stack[20].corpAbilities=[];
+runner.stack[22].corpAbilities=[];
+runner.stack[23].corpAbilities=[];
+runner.stack[32].firstHQBreachThisTurn=true;
+runner.stack[35].madeSuccessfulRunThisTurn=true;
+runner.stack[38].madeSuccessfulRunThisTurn=true;
+runner.stack[40].madeSuccessfulRunThisTurn=true;
+runner.rig.hardware[0].credits=1;
+runner.rig.programs[0].madeSuccessfulRunThisTurn=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.RnD.cards[12].cardsInstalledThisTurn=[corp.HQ.ice[0].hostedCards[0],runner.rig.programs[0],];
+corp.RnD.cards[18].cardsInstalledThisTurn=[corp.HQ.ice[0].hostedCards[0],runner.rig.programs[0],];
+corp.RnD.cards[21].cardsInstalledThisTurn=[corp.HQ.ice[0].hostedCards[0],runner.rig.programs[0],];
+corp.HQ.ice[0].hostedCards = [];
+InstanceCardsPush(36024,corp.HQ.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.HQ.ice[0];
+corp.HQ.ice[0].hostedCards[0].faceUp=true;
+corp.HQ.ice[0].hostedCards[0].host=corp.HQ.ice[0];
+corp.HQ.AISuccessfulRuns=3;
+
+Version reference: Tue Sep 29 2026 12:11:01 GMT+0100 (British Summer Time)
