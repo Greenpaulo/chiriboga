@@ -85,9 +85,12 @@ removal, exact restoration, and exception safety.
 
 Finally, purge-triggered trash is preventable. _Sacrificial Construct_ now
 declares `AIPreventsPurgeTrash`. While public prevention is active, the
-hypothetical conservatively keeps purge-trash cards installed but still clears
-virus counters. This prevents the Corp from spending its turn for a security or
-scoring transition the Runner can publicly stop.
+hypothetical conservatively keeps every purge-trash card installed but still
+clears virus counters. This is an AI approximation, not the engine's guaranteed
+prevention scope: _Sacrificial Construct_ may remove the selected entry and all
+later entries from an `intended.trash` list while the preceding entries are
+still trashed. The approximation prevents the Corp from spending its turn for a
+security or scoring transition the Runner can publicly stop.
 
 ## Verification
 

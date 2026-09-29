@@ -1606,15 +1606,16 @@ cardSet[36019] = {
       true,
       null,
       true,
+      null,
+      this,
+      null,
+      null,
+      false,
       function () {
         betaBuild.lingeringEffectTarget = params.card;
         betaBuild.runningWithThis = true;
         MakeRun(params.server);
       },
-      this,
-      null,
-      null,
-      false,
     );
   },
   automaticOnUninstall: {

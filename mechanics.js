@@ -149,8 +149,9 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 			var shouldForfeit = false;
 			var lowestPointAgenda = null;
 			var lowestPoints = 999;
-			for (var i = 0; i < corp.scoreArea.length; i++) {
-				var pts = corp.scoreArea[i].agendaPoints || 0;
+			for (var i = 0; i < choices.length; i++) {
+				if (!choices[i].card) continue;
+				var pts = choices[i].card.agendaPoints || 0;
 				if (pts < lowestPoints) {
 					lowestPoints = pts;
 					lowestPointAgenda = choices[i];
@@ -579,6 +580,8 @@ function TrashAccessedCard(canBePrevented) {
  * @param {Object} [context] for onInstallResolve (and onCancelResolve, if relevant)
  * @param {function} [onCancelResolve] fires if the install is cancelled
  * @param {function} [onPaymentComplete] fires once the credits (if any) are paid
+ * @param {Boolean} [allowCancel] whether to allow cancelling the install
+ * @param {function} [onInstallComplete] fires after the card is installed and all install responses finish
  */
 function Install(
   installingCard,
@@ -590,7 +593,8 @@ function Install(
   context,
   onCancelResolve,
   onPaymentComplete,
-  allowCancel=true
+  allowCancel=true,
+  onInstallComplete
 ) {
   if (installingCard.player === corp) {
     PlaySound('installCorp');
@@ -810,6 +814,8 @@ function Install(
 				  //currently giving whoever's turn it is priority...not sure this is always going to be right
 				  TriggeredResponsePhase(playerTurn, "responseOnInstall", [installingCard], function() {
 					IncrementPhase(returnToPhase);
+					if (typeof onInstallComplete === "function")
+					  onInstallComplete.call(context);
 				  }, "Installed");
 				};
 				if (cardToReplace) {
@@ -1272,6 +1278,8 @@ function SpendCredits(
   }
 
   function spendFromPool(amount) {
+    amount = Math.min(amount, Math.max(0, player.creditPool));
+    if (amount < 1) return;
     player.creditPool -= amount;
     num -= amount;
     if (amount == 1) Log(PlayerName(player) + " spent one credit");
@@ -1279,6 +1287,15 @@ function SpendCredits(
   }
 
   function finishPayment() {
+    if (num > 0) {
+      LogError(
+        PlayerName(player) +
+          " could not pay " +
+          num +
+          (num == 1 ? " remaining credit" : " remaining credits")
+      );
+      return;
+    }
     if (typeof afterSpend === "function") afterSpend.call(context);
   }
 
@@ -1337,14 +1354,15 @@ function SpendCredits(
         });
       }
     }
-    if (canUsePool && player.creditPool >= num) {
+    if (canUsePool && player.creditPool > 0) {
+      var poolSpend = Math.min(num, player.creditPool);
       choices.push({
         card: null,
-        num: num,
+        num: poolSpend,
         label:
           "Spend " +
-          num +
-          (num == 1 ? " credit" : " credits") +
+          poolSpend +
+          (poolSpend == 1 ? " credit" : " credits") +
           " from the credit pool",
       });
     }

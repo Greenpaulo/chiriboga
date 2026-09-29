@@ -399,6 +399,7 @@ class RunCalculator {
 		  else if (eff == "strengthenAllIce") {
 			  encounter_effects.splice(j, 1);
 			  j--;
+			  card_str_mods = card_str_mods.concat([]);
 			  for (var k = 0; k < this.precalculated.iceAIs.length; k++) {
 				  card_str_mods.push({
 					  iceIdx: point.iceIdx,

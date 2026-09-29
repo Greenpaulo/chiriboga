@@ -84,6 +84,50 @@ assert.deepStrictEqual(
   'forfeit choices exclude cards that cannot be forfeited',
 );
 
+const twoPointAgenda = {
+  title: 'Two-point agenda',
+  agendaPoints: 2,
+  cardLocation: corp.scoreArea,
+};
+corp.scoreArea.splice(1, 0, twoPointAgenda);
+corp.AI = {preferred: null};
+context.PlaySound = () => {};
+context.RezCost = () => 10;
+context.CheckCredits = () => true;
+context.currentPhase = {};
+let rezChoices = null;
+context.DecisionPhase = (player, choices) => {
+  rezChoices = choices;
+  return {};
+};
+context.Rez({
+  title: 'Biawak',
+  cardType: 'ice',
+  optionalForfeitRezReduction: 6,
+});
+assert.strictEqual(rezChoices.length, 3, 'optional forfeit includes two legal agendas and full payment');
+assert.strictEqual(
+  corp.AI.preferred.option.card,
+  agenda,
+  'optional forfeit AI chooses the lowest-point legal agenda',
+);
+
+context.Counters = (card) => card.agenda || 0;
+vm.runInContext(
+  fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8') + '\nthis.TestCorpAI = CorpAI;',
+  context,
+  {filename: 'ai_corp.js'},
+);
+const corpAI = new context.TestCorpAI();
+corpAI._log = () => {};
+assert.strictEqual(
+  corpAI._bestForfeitOption(context.ChoicesForfeitableAgendas(corp)),
+  1,
+  'generic forfeit AI returns the option-list index of the lowest-point legal agenda',
+);
+corp.AI = null;
+corp.scoreArea.splice(corp.scoreArea.indexOf(twoPointAgenda), 1);
+
 let result = null;
 assert.strictEqual(
   context.Forfeit(penalty, (wasForfeited) => {
