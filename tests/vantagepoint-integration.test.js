@@ -854,13 +854,28 @@ context.ChoicesArrayInstall = (cards, ignoreCost, check) =>
   cards
     .filter((card) => !check || check(card))
     .map((card) => ({card, host: null, label: 'Install ' + card.title}));
-context.Install = (card, host, ignoreCosts, position, returnToPhase, callback, callbackContext) => {
+let betaInstallFinished = false;
+context.Install = (
+  card,
+  host,
+  ignoreCosts,
+  position,
+  returnToPhase,
+  callback,
+  callbackContext,
+  onCancel,
+  onPaymentComplete,
+  allowCancel,
+  onInstallComplete,
+) => {
   assert.strictEqual(ignoreCosts, true);
+  if (callback) callback.call(callbackContext);
   const stackIndex = context.runner.stack.indexOf(card);
   if (stackIndex > -1) context.runner.stack.splice(stackIndex, 1);
   installed.runner.push(card);
   card.cardLocation = installed.runner;
-  callback.call(callbackContext);
+  betaInstallFinished = true;
+  if (onInstallComplete) onInstallComplete.call(callbackContext);
 };
 context.MoveCard = (card, destination, position) => {
   if (card.cardLocation) {
@@ -877,7 +892,14 @@ const betaChoice = betaChoices.find(
   (choice) => choice.card === nonVirusBreaker && choice.server === context.corp.HQ,
 );
 installed = {corp: [], runner: []};
+const makeRun = context.MakeRun;
+context.MakeRun = (server) => {
+  assert.strictEqual(betaInstallFinished, true, '36019 waits for installation to finish before its run');
+  assert(installed.runner.includes(nonVirusBreaker), '36019 starts its run with the program installed');
+  makeRun(server);
+};
 betaBuild.Resolve.call(betaBuild, betaChoice);
+context.MakeRun = makeRun;
 assert.strictEqual(shuffled, true);
 assert.strictEqual(runTarget, context.corp.HQ);
 assert.strictEqual(betaBuild.lingeringEffectTarget, nonVirusBreaker);
@@ -1798,6 +1820,30 @@ assert.deepStrictEqual(
   ],
   '36039 run model carries the strength gain to later ICE',
 );
+const existingStrengthModifier = {
+  iceIdx: 1,
+  card: routeOuterIce,
+  use: routeInnerIce,
+  amt: 2,
+  persist: true,
+};
+const sharedStrengthModifiers = [existingStrengthModifier];
+const strengthenedSibling = routeCalculator.ValidateEncounterPoint(
+  0,
+  routeCalculator.EmptyPoint(1),
+  false,
+  ['strengthenAllIce'],
+  [],
+  {ice: routeOuterIce},
+  sharedStrengthModifiers,
+  [],
+);
+assert.deepStrictEqual(
+  sharedStrengthModifiers,
+  [existingStrengthModifier],
+  '36039 run-model branch does not mutate strength modifiers shared by sibling options',
+);
+assert.strictEqual(strengthenedSibling.card_str_mods.length, 3);
 
 const knowledgeSeeker = context.cardSet[36040];
 knowledgeSeeker.virus = 0;

@@ -38,6 +38,7 @@ if (forcePreset && !PRESETS[forcePreset]) {
 // 1. inventory: every ice card with real subroutines + authored visuals.
 // Parsed from source (comments stripped) so coreset.js (coreSet[]) works too.
 const cards = [];
+const matchedCodes = new Set();
 for (const f of fs.readdirSync(setsDir)) {
   if (!f.endsWith('.js')) continue;
   const src = fs.readFileSync(path.join(setsDir, f), 'utf8');
@@ -65,13 +66,20 @@ for (const f of fs.readdirSync(setsDir)) {
       if (nSub === 0) authored = null;
       else if (authored.length !== nSub) authored = { incomplete: true, nSub, list: authored };
     }
-    if (onlyCodes.size && !onlyCodes.has(m[1]) && !onlyCodes.has(String(+m[1]))) continue;
+    const normalizedCode = String(+m[1]);
+    if (onlyCodes.size && !onlyCodes.has(m[1]) && !onlyCodes.has(normalizedCode)) continue;
+    if (onlyCodes.size) matchedCodes.add(normalizedCode);
     cards.push({ file: f, code: m[1], title, img, authored });
   }
 }
 // 2+3. convert image, detect, compare. Old-FFG-frame sets use FFG tuning.
 const FFG_FILES = new Set(['coreset.js', 'creationandcontrol.js']);
 const flags = [];
+for (const code of onlyCodes) {
+  if (!matchedCodes.has(code)) {
+    flags.push({ file: 'requested code', code, title: '?', reason: 'no matching card' });
+  }
+}
 let checked = 0, noImage = 0;
 for (const c of cards) {
   if (c.authored === null) continue;
@@ -126,3 +134,4 @@ for (const fl of flags) {
   if (fl.measured) console.log('    measured: ' + JSON.stringify(fl.measured.map((m) => ({ y: m.y, h: m.h }))));
 }
 console.log('\nVerify each flag with zoom.js before editing sets/*.js, then run tests/subroutine-visual.test.js.');
+if (flags.length > 0) process.exitCode = 1;

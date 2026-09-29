@@ -1060,9 +1060,25 @@ test('ordinary purge is deterministic and closes a staked route opened by Botulu
   });
   servers = [corp.HQ, corp.RnD, corp.archives];
   const first = ai._ordinaryPurgeOutcome();
-  const oldRandom = Math.random; Math.random = () => {throw Error('random purge');};
+  const oldRandom = Math.random;
+  const oldAIRandom = ai._random;
+  const failRandom = () => {throw Error('random purge');};
+  context.failRandom = failRandom;
+  vm.runInContext('savedPurgeMathRandom = Math.random;', context);
   let second;
-  try { second = ai._ordinaryPurgeOutcome(); } finally { Math.random = oldRandom; }
+  try {
+    Math.random = failRandom;
+    ai._random = failRandom;
+    vm.runInContext('Math.random = failRandom;', context);
+    second = ai._ordinaryPurgeOutcome();
+  } finally {
+    Math.random = oldRandom;
+    ai._random = oldAIRandom;
+    vm.runInContext(
+      'Math.random = savedPurgeMathRandom; delete savedPurgeMathRandom; delete failRandom;',
+      context,
+    );
+  }
   assert(first && first.reason.includes('secures'));
   assert.deepStrictEqual(second, first);
   assert.strictEqual(botulus.virus, 1);
@@ -1187,7 +1203,9 @@ test('ranked asset installs preserve remote ranking and share one destination or
     .map(option => option.serverToInstallTo);
   assert.deepStrictEqual(destinations, originalOrder);
   assert.deepStrictEqual(secondOrder, firstOrder);
-  assert(!firstOrder.includes(strongest));
+  assert.strictEqual(firstOrder.length, 2);
+  assert.strictEqual(firstOrder[0], second);
+  assert.strictEqual(firstOrder[1], third);
   assert.strictEqual(rolls, 2);
 });
 test('purge models cards trashed by purge even when they have no counters', () => {

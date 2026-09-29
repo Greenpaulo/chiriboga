@@ -225,9 +225,17 @@ Install(
   position,
   returnToPhase,
   onInstallResolve,
-  context
+  context,
+  onCancelResolve,
+  onPaymentComplete,
+  allowCancel,
+  onInstallComplete
 );
 ```
+
+Use `onInstallComplete` when a follow-up effect must wait until the card has
+moved to its install destination and all `responseOnInstall` triggers have
+finished. `onInstallResolve` runs earlier, before payment and card movement.
 
 ### Damage / Tags
 

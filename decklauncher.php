@@ -1631,7 +1631,12 @@
 
       function MarkActive($opt) {
         $list.find(".custom-select-option.active").removeClass("active");
-        if ($opt && $opt.length) $opt.addClass("active");
+        if ($opt && $opt.length) {
+          $opt.addClass("active");
+          $list.attr("aria-activedescendant", $opt.attr("id"));
+        } else {
+          $list.removeAttr("aria-activedescendant");
+        }
       }
 
       function ActiveAsOption() {
@@ -1654,9 +1659,11 @@
         lastSyncedValue = select.value;
         lastSyncedCount = select.options.length;
         $list.empty();
+        $list.removeAttr("aria-activedescendant");
         for (var i = 0; i < select.options.length; i++) {
           var opt = select.options[i];
           var $opt = $('<div class="custom-select-option" role="option"></div>')
+            .attr("id", selectId + "-option-" + i)
             .attr("data-value", opt.value)
             .text(opt.textContent)
             .toggleClass("selected", opt.selected)

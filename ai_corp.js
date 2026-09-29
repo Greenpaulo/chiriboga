@@ -840,19 +840,20 @@ class CorpAI {
     this._log("considering forfeit options...");
     var ret = 0;
     var forfAg = null;
-    for (var i = 0; i < corp.scoreArea.length; i++) {
+    for (var i = 0; i < optionList.length; i++) {
+      if (!optionList[i].card) continue;
       if (!forfAg) {
         ret = i;
-        forfAg = corp.scoreArea[i];
-      } else if (corp.scoreArea[i].agendaPoints < forfAg.agendaPoints) {
+        forfAg = optionList[i].card;
+      } else if (optionList[i].card.agendaPoints < forfAg.agendaPoints) {
         ret = i;
-        forfAg = corp.scoreArea[i];
+        forfAg = optionList[i].card;
       } else if (
-        corp.scoreArea[i].agendaPoints == forfAg.agendaPoints &&
-        Counters(corp.scoreArea[i], "agenda") < Counters(forfAg, "agenda")
+        optionList[i].card.agendaPoints == forfAg.agendaPoints &&
+        Counters(optionList[i].card, "agenda") < Counters(forfAg, "agenda")
       ) {
         ret = i;
-        forfAg = corp.scoreArea[i];
+        forfAg = optionList[i].card;
       }
     }
     return ret;
