@@ -5,6 +5,7 @@
 **Belongs in:** Security roadmap (`documentation/corp-ai/roadmaps/corp_ai_improvement_roadmap.md`), new `#### Layer 1.1 ... [FOLLOW-UP]`, placed before `### Layer 2`.
 **Suggested order:** Step 3 of 5 — pairs with finding 1; the two evaluator fixes come before everything that consumes the evaluator.
 **Depends on:** Nothing hard. Validate with the harness (finding 12).
+**Status:** Fixed, regression-tested, and code-review validated. See the resolution and validation records below.
 
 ---
 
@@ -45,3 +46,12 @@ Implemented in `_evaluateServerSecurity()`.
 - The calculation remains side-effect free: it does not spend credits, change rez state, or reorder ICE.
 - Added deterministic regression coverage for the original 5-credit and 8-credit cases, state preservation, skipping a weak outer layer for a decisive inner layer, and compatible versus incompatible hosted rez credits.
 - Added the completed Layer 1.1 roadmap entry, the Install Phase 2 cross-reference, and the evaluator behavior note in `documentation/ai.md`.
+
+## Code-review validation — 23 September 2026
+
+- Revalidated the implementation against the live credit-spending model, bypass allocation, evaluator consumers, roadmap cross-reference, and acceptance criteria above.
+- Confirmed that selecting the strongest affordable subset is the better-supported correction to the original outer-to-inner budget proposal: the Corp may decline a weak outer rez and preserve funds for decisive inner ICE.
+- Confirmed target-restricted hosted credits are allocated without double-spending and evaluation leaves credits, rez state, hosted credits, and ICE order unchanged.
+- `node tests/corp-server-security.test.js`: **109 regression cases passed**.
+- `node tests/run-all-tests.js`: **19 test files passed**, including the Corp decision-fixture and decision-snapshot suites.
+- No corrective code change was required; the ticket is ready for the completed backlog.

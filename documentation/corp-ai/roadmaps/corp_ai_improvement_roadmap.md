@@ -215,11 +215,11 @@ Future AI prompts should implement the remaining macro-threat capabilities liste
 
 #### Layer 7.3: Outcome-Based Ordinary Purge — `[COMPLETED]`
 
-- **Decision boundary:** Because a basic purge consumes the Corp's turn, `_ordinaryPurgeOutcome()` acts only when a guarded post-purge comparison opens an immediate agenda score or changes a staked server from breachable to secure. The critical-central path continues to handle a material reduction in immediate game-loss probability.
-- **Complete purge model:** Virus counters are cleared and cards declaring `AIDisabledByPurge` are treated as inactive. This covers purge-triggered trash such as _Clot_ and _Physarum Entangler_, not merely cards with counters.
-- **State safety:** `_withHypothetical()` restores counter values, disabled state, and property ownership through `finally`, including when evaluation throws.
+- **Decision boundary:** Because a basic purge consumes the Corp's turn, `_ordinaryPurgeOutcome()` acts only when a guarded post-purge comparison opens an immediate agenda score or changes a server containing an agenda or remote HVT from breachable to secure. A merely nonempty R&D or Archives is not sufficient. The critical-central path continues to handle a material reduction in immediate game-loss probability.
+- **Complete purge model:** Virus counters are cleared and cards declaring `AIDisabledByPurge` are temporarily removed from their installed locations. This covers purge-triggered trash such as _Clot_ and _Physarum Entangler_, not merely cards with counters, and matches production `InstalledCards()`/`ActiveCards()` semantics. If a public card declares `AIPreventsPurgeTrash`, the hypothetical conservatively preserves every purge-trash card; this is an AI approximation, not a guarantee of the engine's exact prevention scope. _Sacrificial Construct_ may remove the selected entry and every later entry from an `intended.trash` list while the preceding entries are still trashed.
+- **State safety:** `_withHypothetical()` restores counter values, exact installed-array positions, `notInstalled` property ownership/value, and card ordering through `finally`, including when evaluation throws.
 - **Rejected design:** The earlier weighted server-value threshold was not retained because its coefficients were uncalibrated and could hide the three-click opportunity cost behind an arbitrary score.
-- **Regression coverage:** Botulus route security, zero-counter purge-trash effects, Clot score windows, deterministic repeated evaluation, and exception-safe restoration.
+- **Regression coverage:** Botulus route security, irrelevant counter totals, a central without agendas, zero-counter purge-trash effects and public trash prevention, Clot score windows, deterministic evaluation without RNG, and exception-safe restoration of exact installed state.
 
 ---
 
@@ -325,6 +325,8 @@ holds an affordable `AITagPunishment`; it never changes deterministic security.
 | `_matchingBreakerForIce(ice)`     | Resolves matching breaker via active card hooks, hosted cards, or subtype fallbacks.                                        |
 
 ## Regression Validation and Current Limits
+
+Shared deterministic-RNG, hypothetical-evaluation, decision-cache, and batch-harness infrastructure is tracked in the [Corp AI foundations roadmap](corp_ai_foundations_roadmap.md).
 
 Run `node tests/corp-server-security.test.js` for focused checks of calculator ownership, actual unrezzed ice classification, breaker activation costs, mandatory versus optional punishment, hosted coverage, lethality, human/AI identity matching, and effective Runner credit sources. These tests load the real AI classes and priority card definitions with deterministic engine helpers; they do not replace browser gameplay testing.
 

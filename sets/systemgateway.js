@@ -3913,6 +3913,11 @@ cardSet[30050] = {
     }
     return false;
   },
+  AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!this.AIWouldTrigger()) return 0;
+    return 2;
+  },
 };
 cardSet[30051] = {
   title: "NBN: Reality Plus",
@@ -5192,6 +5197,7 @@ cardSet[30071] = {
     }
     return -1; //don't install
   },
+  AIEconomyCard: true,
 };
 cardSet[30072] = {
   title: "Palisade",

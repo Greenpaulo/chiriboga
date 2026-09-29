@@ -1,0 +1,467 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Tāo Salonga: Telepresence Magician,2 Cleaver,2 Leech,3 Creative Commission,2 DZMZ Optimizer,3 Conduit,2 Echelon,2 Unity,2 Telework Contract,3 Sure Gamble,2 T400 Memory Diamond,2 Smartware Distributor,1 Verbal Plasticity,2 Ice Carver,1 Liberated Account,1 Scrubber,2 Diesel,2 Test Run,2 Paricia,2 Professional Contacts,2 Earthrise Hotel]
+[Weyland Consortium: Built to Last,3 Spin Doctor,1 Above the Law,3 Ballista,3 Pharos,3 Government Subsidy,2 Malapert Data Vault,1 Superconducting Hub,3 Hedge Fund,1 Marilyn Campaign,2 Trick of Light,1 Tollbooth,1 SanSan City Grid,3 Hostile Takeover,3 Oaktown Renovation,3 Project Atlas,2 Archer,3 Hortum,3 Ice Wall,3 PAD Campaign]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 2.25; fresh-hand expectation 4.02
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Ballista,Ice Wall,Spin Doctor,Government Subsidy,PAD Campaign]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Leech,Telework Contract,Liberated Account,Scrubber,Paricia]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.5,debt:0,adjusted:3.5,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {HQ:{score:-5,debt:0,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:7.525036580688596,debt:0,adjusted:7.525036580688596,secure:true}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 6 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:7.525036580688596,debt:0,adjusted:7.525036580688596,secure:true},HQ:{score:9.025036580688596,debt:0,adjusted:9.025036580688596,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Spin Doctor,Ice Wall,Government Subsidy]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Leech,Telework Contract,Liberated Account,Scrubber,Paricia]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 6 credits
+Runner installed Liberated Account
+16 credits loaded onto Liberated Account
+Using Liberated Account:
+Runner spent one click
+4 credits taken from Liberated Account
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching Remote 0
+Run successful
+PAD Campaign accessed
+Runner spent 4 credits
+PAD Campaign trashed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Spin Doctor,Ice Wall,Government Subsidy]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Telework Contract,Scrubber,Paricia]
+Corp drew a card
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:7.611502247835513,debt:0,adjusted:7.611502247835513,secure:true},HQ:{score:9.111502247835514,debt:0,adjusted:9.111502247835514,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:3.1115022478355128,debt:0,adjusted:3.1115022478355128,secure:true},R&D:{score:7.611502247835513,debt:0,adjusted:7.611502247835513,secure:true},HQ:{score:8.111502247835514,debt:0,adjusted:8.111502247835514,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:3.1115022478355128,debt:0,adjusted:3.1115022478355128,secure:true},R&D:{score:7.611502247835513,debt:0,adjusted:7.611502247835513,secure:true},HQ:{score:8.111502247835514,debt:0,adjusted:8.111502247835514,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Hostile Takeover,Government Subsidy,Government Subsidy,Trick of Light,Spin Doctor]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Telework Contract,Scrubber,Paricia]
+Using Liberated Account:
+Runner spent one click
+4 credits taken from Liberated Account
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Runner spent one click
+Runner drew a card
+Using Liberated Account:
+Runner spent one click
+4 credits taken from Liberated Account
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Hostile Takeover,Government Subsidy,Government Subsidy,Trick of Light,Spin Doctor]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Scrubber,Paricia,Professional Contacts]
+Corp drew a card
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:3.1011683492409223,debt:0,adjusted:3.1011683492409223,secure:true},R&D:{score:7.601168349240922,debt:0,adjusted:7.601168349240922,secure:true},HQ:{score:10.101168349240922,debt:0,adjusted:10.101168349240922,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:3.1011683492409223,debt:0,adjusted:3.1011683492409223,secure:true},R&D:{score:7.601168349240922,debt:0,adjusted:7.601168349240922,secure:true},HQ:{score:10.101168349240922,debt:0,adjusted:10.101168349240922,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 10
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:6.800000000000001,debt:0,adjusted:6.800000000000001,secure:true},R&D:{score:7.601168349240922,debt:0,adjusted:7.601168349240922,secure:true},HQ:{score:9.101168349240922,debt:0,adjusted:9.101168349240922,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Trick of Light,Government Subsidy,Hostile Takeover,Government Subsidy,Spin Doctor]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Scrubber,Paricia,Professional Contacts]
+Runner spent one click
+Runner spent 5 credits
+Runner installed Professional Contacts
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Using Professional Contacts:
+Runner spent one click
+Runner gained one credit
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Trick of Light,Government Subsidy,Hostile Takeover,Government Subsidy,Spin Doctor]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Leech,Scrubber,Paricia]
+Corp drew a card
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:6.800000000000001,debt:0,adjusted:6.800000000000001,secure:true},R&D:{score:7.685240502450981,debt:0,adjusted:7.685240502450981,secure:true},HQ:{score:9.18524050245098,debt:0,adjusted:9.18524050245098,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:6.800000000000001,debt:0,adjusted:6.800000000000001,secure:true},R&D:{score:7.685240502450981,debt:0,adjusted:7.685240502450981,secure:true},HQ:{score:9.18524050245098,debt:0,adjusted:9.18524050245098,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 7
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: HQ appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 7
+AI: Ranked server protection: {archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:6.800000000000001,debt:0,adjusted:6.800000000000001,secure:true},R&D:{score:7.685240502450981,debt:0,adjusted:7.685240502450981,secure:true},HQ:{score:9.18524050245098,debt:0,adjusted:9.18524050245098,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Government Subsidy,Hostile Takeover,Hostile Takeover,Trick of Light,Government Subsidy]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 3 card(s) in hand: [Leech,Scrubber,Paricia]
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Using Liberated Account:
+Runner spent one click
+4 credits taken from Liberated Account
+Liberated Account trashed
+Runner spent one click
+Runner installed Paricia
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: Rez this is better than Ballista in R&D
+AI: I will rez the approached ice
+Corp spent 5 credits
+Corp rezzed Ballista
+Encountering Ballista
+Firing Trash 1 installed program or end the run. on Ballista:
+AI: I know this one
+Paricia trashed
+Approaching HQ
+Run successful
+Hostile Takeover accessed
+Hostile Takeover stolen
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+[hidden card] in R&D swapped with Ballista in HQ
+Run ends
+Using Professional Contacts:
+Runner spent one click
+Runner gained one credit
+Runner drew a card
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 4 card(s) in hand: [Government Subsidy,Hostile Takeover,Government Subsidy,Trick of Light]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Leech,Scrubber,Paricia]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 12
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {HQ:{score:-8.32382185828877,debt:1,adjusted:-9.32382185828877,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:5.800000000000001,debt:0,adjusted:5.800000000000001,secure:true},R&D:{score:5.805706885026738,debt:0,adjusted:5.805706885026738,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [15.423821858288768]
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 12
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {HQ:{score:-8.32382185828877,debt:1,adjusted:-9.32382185828877,secure:false},Remote 2:{score:0,debt:0,adjusted:0,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:5.800000000000001,debt:0,adjusted:5.800000000000001,secure:true},R&D:{score:5.805706885026738,debt:0,adjusted:5.805706885026738,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [15.123821858288771]
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 1 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 0 vs 4 with 0 agenda(s) - protection score penalized
+AI: R&D appears secure: Ballista has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 12
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 12
+AI: Ranked server protection: {HQ:{score:-6.32382185828877,debt:1,adjusted:-7.32382185828877,secure:false},Remote 2:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:5.805706885026738,debt:0,adjusted:5.805706885026738,secure:true},Remote 1:{score:6.800000000000001,debt:0,adjusted:6.800000000000001,secure:true}}
+AI: I could advance a card by 1 with these cards: [null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp gained 2 credits
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Government Subsidy,Trick of Light,Government Subsidy]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Leech,Scrubber,Paricia]
+Using Professional Contacts:
+Runner spent one click
+Runner gained one credit
+Runner drew a card
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Using Professional Contacts:
+Runner spent one click
+Runner gained one credit
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Runner installed Echelon
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Government Subsidy,Trick of Light,Government Subsidy]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Scrubber,Paricia,Telework Contract]
+Corp drew a card
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 15
+AI: Ranked server protection: {Remote 1:{score:5.800000000000001,debt:0,adjusted:5.800000000000001,secure:true},Remote 2:{score:0,debt:1,adjusted:-1,secure:false},HQ:{score:1.0536772349753916,debt:2,adjusted:-0.9463227650246084,secure:false},R&D:{score:1.732206340985235,debt:1,adjusted:0.7322063409852351,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: Rez might help draw
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 15
+AI: Ranked server protection: {Remote 1:{score:4.800000000000001,debt:0,adjusted:4.800000000000001,secure:true},Remote 2:{score:0,debt:1,adjusted:-1,secure:false},HQ:{score:2.0536772349753916,debt:2,adjusted:0.05367723497539156,secure:false},R&D:{score:1.732206340985235,debt:1,adjusted:0.7322063409852351,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: there is an active card I would use ability of
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+PAD Campaign shuffled into R&D from Archives
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 15
+AI: Ranked server protection: {HQ:{score:2.0536772349753916,debt:2,adjusted:0.05367723497539156,secure:false},R&D:{score:1.732206340985235,debt:1,adjusted:0.7322063409852351,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:4.800000000000001,debt:0,adjusted:4.800000000000001,secure:true}}
+AI: I could get an agenda done this turn
+AI: I could advance a card by 1 with these cards: [null]
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent one credit
+Card advanced
+Hostile Takeover scored
+Corp gained 7 credits
+1 bad publicity added
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+Ballista in R&D swapped with [hidden card] in HQ
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {HQ:{score:-8.267793659014764,debt:2,adjusted:-10.267793659014764,secure:false},R&D:{score:2.5536772349753916,debt:1,adjusted:1.5536772349753916,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},Remote 1:{score:4.800000000000001,debt:0,adjusted:4.800000000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [15.513947505168609]
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2 vs 3 with 2 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: Remote 1 appears secure: Ice Wall has mandatory breaks with no capable breaker; Hortum omitted from best affordable rez plan; break cost Infinity > Runner credits 16
+AI: Ranked server protection: {R&D:{score:2.5536772349753916,debt:1,adjusted:1.5536772349753916,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.625,debt:0,adjusted:3.625,secure:false},Remote 1:{score:4.800000000000001,debt:0,adjusted:4.800000000000001,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [3.2442307692307697]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Government Subsidy,Government Subsidy,Trick of Light,Superconducting Hub]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Scrubber,Paricia,Telework Contract]
+Runner spent one click
+Runner installed Leech
+Runner spent one click
+Runner installed Paricia
+Runner spent one click
+Run initiated attacking HQ
+Runner gained one credit from bad publicity
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Hostile Takeover forfeited
+Corp spent 4 credits
+Corp rezzed Archer
+Encountering Archer
+Using Echelon:
+Runner spent one temporary credit
+Runner spent 2 credits
+Echelon gets +2 strength
+Using Echelon:
+Runner spent 3 credits
+Echelon gets +2 strength
+Using Echelon:
+Runner spent 3 credits
+Echelon gets +2 strength
+Using Echelon:
+Runner spent one credit
+Subroutine End the run. broken
+Using Echelon:
+Runner spent one credit
+Subroutine Trash 1 installed program. broken
+Using Echelon:
+Runner spent one credit
+Subroutine Trash 1 installed program. broken
+Firing Gain 2[c]. on Archer:
+Corp gained 2 credits
+Approaching next piece of ice protecting HQ
+Encountering Ballista
+Firing Trash 1 installed program or end the run. on Ballista:
+AI: I know this one
+Echelon trashed
+Approaching HQ
+Run successful
+1 virus counter placed on Leech
+Superconducting Hub accessed
+Superconducting Hub stolen
+Tāo Salonga: Swap 2 installed pieces of ice triggered
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 1: [Oaktown Renovation]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(30019, [31010,31034,30025], [30020,31009,31009,30006,30034,30020,30024,31039,30022,31027,30030,31028,30030,30031,30024,30031,31036,30026,30008,30026,31028,31027,30025,30033,30024,30006,30033,31039,30030,30020], [31011,30027], [30027,31036,30022,30008,31034], [31071,30070], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30059, [], [30066,30075,30075,31080,30062,31075,31071,31058,30075,31042,30063,31066,30064,31080,31073,30063,31077,30063,30053,31076,31072,31073,31072,31077,31073,30066,30060,31076,31080,30053,31069], [30064,31058,30064], [], [30062], [30062,31075], [[31072,31077,31076]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[1].rezzed=false;
+runner.stack[8].installedProgramThisTurn=true;
+runner.heap[0].host=null;
+runner.heap[1].host=null;
+runner.heap[2].AInumCompatibleIceInstalled=3;
+runner.heap[2].host=null;
+runner.rig.resources[0].credits=3;
+runner.rig.hardware[0].installedProgramThisTurn=true;
+runner.rig.programs[0].virus=1;
+runner.rig.programs[1].credits=2;
+corp.RnD.cards[28].host=null;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.remoteServers[0].root[0].faceUp=true;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.remoteServers[0].root[0].AIScoringPlanCommitted=true;
+corp.HQ.AISuccessfulRuns=2;
+corp.badPublicity = 1;
+
+Version reference: Wed Sep 23 2026 12:02:31 GMT+0100 (British Summer Time)

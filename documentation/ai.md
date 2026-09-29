@@ -42,7 +42,8 @@ This document explains how the AI players in this Netrunner simulator work, and 
    - [5.7 Agendas — `AIAdvancementLimit`, `AIOverAdvance`](#57-agendas)
    - [5.8 Inline AI Code for Corp](#58-inline-ai-code-for-corp)
    - [5.9 Access Punishment — `AIPunishesAccess`](#59-access-punishment--aipunishesaccess)
-   - [5.10 Emergency Protection Draw — `AIEmergencyDraw`](#510-emergency-protection-draw--aiemergencydraw)
+   - [5.10 Reserved Credits — `AIReserveCredits`](#510-reserved-credits--aireservecredits)
+   - [5.11 Emergency Protection Draw — `AIEmergencyDraw`](#511-emergency-protection-draw--aiemergencydraw)
 6. [The Run Calculator (`rc`)](#6-the-run-calculator-rc)
 7. [Quick Reference Table](#7-quick-reference-table)
 8. [Step-by-Step Worked Example](#8-step-by-step-worked-example)
@@ -1224,12 +1225,16 @@ when adjusting them.
 
 The ordinary three-click purge uses `corp.AI._ordinaryPurgeOutcome()`. It does
 not assign an arbitrary value to raw virus-counter totals. A guarded
-hypothetical clears counters and disables installed Runner cards whose
-`AIDisabledByPurge` hook is `true`, then chooses purge only if this opens an
-immediate agenda score or makes a staked server secure. The helper restores all
-temporary values in `finally`. Cards trashed by purge, including _Clot_ and
-_Physarum Entangler_, must declare `AIDisabledByPurge` at the bottom of their
-card object so counterless purge effects are represented.
+hypothetical clears counters and temporarily removes installed Runner cards
+whose `AIDisabledByPurge` hook is `true`, then chooses purge only if this opens
+an immediate agenda score or makes a server containing an agenda or remote HVT
+secure. The helper restores exact card locations, ordering, counters, and
+install-state properties in `finally`. Cards trashed by purge, including _Clot_
+and _Physarum Entangler_, must declare `AIDisabledByPurge` at the bottom of
+their card object so counterless purge effects are represented. Public trash
+prevention such as _Sacrificial Construct_ declares `AIPreventsPurgeTrash`; the
+ordinary purge evaluation then conservatively keeps purge-trash cards active
+while still clearing their virus counters.
 
 ### 4.22 Public Successful-Run Pressure — `AIPublicRunPressure`
 
@@ -1585,12 +1590,15 @@ AIAdvancementLimit: function() {
 },
 ```
 
-**`AIOverAdvance`** (boolean)
+**`AIOverAdvance`** (boolean, agendas only)
 
-Set to `true` if the AI should place extra counters on an already-scoreable agenda (e.g. for point bonuses from over-advancement):
+Set to `true` to keep the advance action available for an already-scoreable agenda. Pair it with `AIAdvancementLimit()` to define the total advancement-counter target; the flag itself never supplies or overrides that target. The AI may score before that limit when doing so wins the game.
 
 ```js
 AIOverAdvance: true,
+AIAdvancementLimit: function() {
+    return AdvancementRequirement(this) + 2;
+},
 ```
 
 ---
@@ -1676,7 +1684,8 @@ if (corp.AI != null) {
 - `corp.AI._bestInstallOption(optionList, inhibit)` — returns best index to install, or `-1` if none desirable
 - `corp.AI._cardShouldBeFastAdvanced(card)` — returns true if the given card should be fast advanced
 - `corp.AI._iceWorthRezzing(ice, cost, server)` — returns true if the ice is worth rezzing
-- `corp.AI._isAScoringServer(server)` — true if the server can be used for scoring
+- `corp.AI._isAScoringServer(server)` — true only if `_evaluateServerSecurity(server).isSecure` establishes an absolute safety floor and the server also passes the existing relative protection comparison against HQ (or Archives during hand overflow). An insecure remote is never offered as an agenda destination merely because another server has a lower protection score.
+- `corp.AI._cardProtectionValue(card)` — coarse ranking value for ICE and defensive upgrades. Affordable ETR-capable ICE receives the normal baseline and high-cost/strength bonus; non-ETR ICE receives only a small deterrence baseline before the existing server, visibility, breaker, and hosted-card adjustments.
 - `corp.AI._potentialDamageOnBreach(server)` — estimated damage runner would take
 - `corp.AI._evaluateServerSecurity(server)` — estimates server safety (accounting for Runner ID abilities such as Quetzal, hosted virus breakers such as Botulus and strength reductions such as Leech/Ice Carver); returns `{isSecure, hasHardLockout, totalBreakCost, totalMandatoryBreakCost, runnerCredits, runnerCreditPool, structuralRisk, publicThreatRisk, reasons}`. It compares affordable rez plans for unrezzed ICE, including target-compatible hosted rez credits, and may omit a weak outer layer to fund a decisive inner layer; already-rezzed ICE consume no plan budget and omitted layers are listed in `reasons`. `runnerCredits` is the effective ceiling and `runnerCreditPool` is its component breakdown. `totalBreakCost` estimates punishment avoidance, while `totalMandatoryBreakCost` determines affordability lockouts. `structuralRisk` reports known public bypass pressure and `publicThreatRisk` reports probabilistic hidden-event pressure; neither turns a probabilistic threat into a deterministic lockout result.
 - `corp.AI._effectiveRunnerCreditPool(server)` — returns the public, server-specific effective credit ceiling, including compatible hosted credits, Bad Publicity, and available click-to-credit conversion while preserving the run click.
@@ -1730,6 +1739,36 @@ pay for such a card in HQ, the Corp protection score receives bounded
 deterrence. `_evaluateServerSecurity()` exposes that value as `deterrence`, but
 it never changes `isSecure`.
 
+### 5.10 Reserved Credits — `AIReserveCredits`
+
+Corp cards whose abilities expect to spend credits after installation can
+declare that amount to economy and ICE-rez planning:
+
+```js
+AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCounters(this, "advancement", 1)) return 0;
+    return 1;
+},
+```
+
+**Signature:** `AIReserveCredits(server) -> number`
+
+Return the non-negative number of credits this card would currently expect to
+spend if its ability fires in `server`, or `0` when the ability is unavailable
+or the AI would decline it. The hook must be deterministic, read-only, and safe
+outside a run. It may also recognize a card in a central server's `cards`
+array when its ability can fire from that location, as Snare! does in R&D and
+HQ.
+
+Do not include a card's rez cost. `_sufficientEconomy()` already gathers
+unrezzed asset and upgrade costs from every central and remote root, and the
+rez-decision code separately compares defensive upgrade costs. The hook is for
+additional spending such as an access trigger or a paid defensive ability.
+`_sufficientEconomy()` sums declared reserves for installed cards, while
+`_iceWorthRezzing()` uses declarations from the attacked server's root and
+central cards to avoid spending those credits on ICE first.
+
 #### Shared agenda/trap remote postures
 
 `corp.AI._remoteDeceptionProfile(card)` gives agendas and declared access traps
@@ -1754,7 +1793,7 @@ repeated evaluator calls, but is intentionally documented as an incomplete
 policy. The roadmap's required Layer 8.4 replaces lifetime caching with bounded
 decision epochs, and Layer 8.5 adds match-local feedback from public outcomes.
 
-### 5.10 Emergency Protection Draw — `AIEmergencyDraw`
+### 5.11 Emergency Protection Draw — `AIEmergencyDraw`
 
 Corp assets and upgrades that can draw cards immediately after being installed
 and rezzed may declare the number of cards drawn:
@@ -1777,6 +1816,15 @@ agenda-flood policy, or inspect hidden Runner information. Delayed,
 conditional, optional-cost, or click-ability draw
 should not use this hook unless the declared number is guaranteed in the
 planner's install-and-rez sequence.
+
+### 5.12 Opening-Hand Economy — `AIEconomyCard`
+
+**`AIEconomyCard`** (a boolean)
+
+Set this to `true` on Corp economy cards which are neither Transactions nor
+Advertisements. The Corp opening-hand evaluator uses it to recognize economy
+without card-title checks. Transactions and Advertisements are recognized
+automatically.
 
 ---
 
@@ -1867,6 +1915,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
+| `AIPreventsPurgeTrash` | boolean | Conservatively keep purge-trashed Runner cards active in an ordinary-purge hypothetical while this public prevention is available |
 | `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
 | `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
 | `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |
@@ -1910,7 +1959,9 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
+| `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
+| `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |
@@ -1919,7 +1970,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
-| `AIOverAdvance` | bool | True if AI should over-advance this agenda |
+| `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
 
 ---

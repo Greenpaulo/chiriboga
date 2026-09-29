@@ -5,6 +5,7 @@
 **Belongs in:** Bug ticket under `documentation/bugs/` (the findings' `documentation/backlog/bugs.md` path does not exist).
 **Suggested order:** Step 2 of 5 — quick fixes.
 **Depends on:** Nothing.
+**Status:** Resolved with a different fix on 23 September 2026; the proposed property substitution was rejected after validating the hook contract.
 
 ---
 
@@ -24,3 +25,9 @@
 ## Related
 
 Findings 5 and 7 concern the same hook; confirm the hook's shape (finding 7) before/with this fix.
+
+## Resolution — 23 September 2026
+
+The dead property access was confirmed, but changing it to `installedCards[i].AIOverAdvance` would not be correct. `AIOverAdvance` is an agenda-only boolean that keeps the advance action available after an agenda is scoreable; it is not an alternate advancement target and should not override `AIAdvancementLimit()` for ICE.
+
+The invalid ICE clause was removed. Advancement selection now uses the computed advancement limit consistently for agendas, ICE, and generic advance choices, so a card at its limit is skipped even if it has an extraneous truthy `AIOverAdvance` property. Regression coverage verifies that a capped card is skipped in favour of an eligible target.
