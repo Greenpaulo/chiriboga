@@ -1,4 +1,4 @@
-# Corp AI: `_iceWorthRezzing()` silently refuses to rez ice hosting a Runner Trojan, with no logged reason, even when affordable and undefended
+# Corp AI: `_iceWorthRezzing()` may silently refuse to rez ice hosting a Runner Trojan, with no logged reason, even when affordable and undefended
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt`
 **Reproduction:** `tests/pending/hosted-trojan-blocks-rez-silently.test.js` — drafted, not yet run
@@ -10,15 +10,16 @@
 The Corp approaches unrezzed ice guarding a remote server that holds an agenda
 (Project Ingatan) and a grid (Mahkota Langit Grid) — clearly not an empty
 server. The Corp has 12 credits, comfortably enough to rez the ice, and the
-engine prints `Corp did not rez ice`. Unlike every other place in
-`ai_corp.js` where the AI declines a rez, **no `AI:` reasoning line precedes
-this one at all.** Every comparable decline elsewhere in `_iceWorthRezzing()`
-logs something like `"Rez cost not worth it, need to save it for X"`; this
-one leaves no trace, which is what made it hard to diagnose from the log
-alone.
+engine prints `Corp did not rez ice`, with **no `AI:` reasoning line before
+it.** The credit-reservation and defensive-upgrade declines in
+`_iceWorthRezzing()` log reasons such as `"Rez cost not worth it, need to save
+it for X"`, but the hosted-card, `_iceToLeaveUnrezzed` and Inside Job branches
+are silent. The log therefore does not identify which branch declined the rez;
+that ambiguity is what made it hard to diagnose from the log alone.
 
-Reading `_iceWorthRezzing()` finds an unconditional, unlogged branch: if the
-approached ice hosts any card without `AIHostedDoesNotPreventRez`, and
+One possible cause in `_iceWorthRezzing()` is an unconditional, unlogged
+branch: if the approached ice hosts any card without
+`AIHostedDoesNotPreventRez`, and
 `Credits(corp) < currentRezCost * 5`, the function sets `rezIce = false` with
 no `_log()` call. The end-of-game reproduction dump in the log confirms the
 approached ice hosts Runner card `35030` — **Chromatophores**, a Shaper
@@ -29,7 +30,8 @@ cost) before rezzing, with no check on whether refusing to rez actually
 protects anything the Corp cares about.
 
 **Proposed fix:** at minimum, log a reason whenever this branch withholds the
-rez, matching every other exit of the function. More substantively, this
+rez, matching the logged reservation and defensive-upgrade exits. More
+substantively, this
 branch should be evidence-based like the sibling cross-server
 credit-reservation logic in the same function (which checks
 `_iceWouldSecureServer` / `_icePreventsGameWinningBreach` before reserving),
@@ -93,7 +95,7 @@ property.
 
 ---
 
-## 3. Root cause
+## 3. Root cause analysis
 
 ### 3.1 The hosted-card guard is unconditional and unlogged
 
@@ -127,7 +129,9 @@ every other `rezIce = false` assignment in the function (the cross-server
 reservation branch, the same-server defensive-upgrade branch), which always
 log why. Two further branches later in the function (`_iceToLeaveUnrezzed`
 at ~4625 and the Inside Job exception at ~4629-4654) are also silent, but
-this ticket's evidence is specific to the hosted-card branch.
+the live log cannot distinguish among them. The hosted-card branch is the
+leading hypothesis and is reproduced independently in section 4, not a
+confirmed explanation of the logged decision.
 
 ### 3.2 Only one card in this decklist would escape the block
 
@@ -142,10 +146,11 @@ all but the 2-cost Kessleroid (`rezCost: 2`, threshold 10) satisfy this
 inequality (Bumi 1.0 and Scatter Field: `rezCost: 3`, threshold 15; Ansel
 1.0 / Brân 1.0: `rezCost: 6`, threshold 30; Mycoweb: `rezCost: 8`, threshold
 40). The exact identity of the Remote 0 ice is hidden information (it was
-never rezzed, so the log never reveals it), but the block would fire for any
-candidate except Kessleroid — this is why the reproduction below uses a
-representative rez cost of 3 rather than asserting the card's exact
-identity.
+never rezzed, so the log never reveals it). The block would fire for any
+candidate except Kessleroid, but the log cannot rule Kessleroid out. The
+reproduction below therefore uses a representative rez cost of 3 to
+demonstrate the branch without claiming it proves the logged ice's identity
+or decision path.
 
 ### 3.3 The heuristic ignores what refusing to rez actually costs
 
@@ -207,10 +212,11 @@ Two guard cases are included so a fix does not overcorrect:
   logged between the last known total and the decision).
 - [Inferred] Given the decklist's ice rez costs, the `Credits(corp) 
   currentRezCost * 5` condition holds for every candidate ice except the
-  2-cost Kessleroid, so the block is very likely what fired, independent of
-  the ice's exact hidden identity.
+  2-cost Kessleroid. Because the ice's identity is hidden and other silent
+  branches exist, the log alone cannot confirm that this block fired.
 - [Inferred] The hostedCards branch (`ai_corp.js` ~4602-4621) contains no
-  `_log()` call, unlike every other `rezIce = false` branch in the function.
+  `_log()` call. The later `_iceToLeaveUnrezzed` and Inside Job branches are
+  also silent, so the missing log line does not prove which branch fired.
 
 ---
 
@@ -236,7 +242,28 @@ Two guard cases are included so a fix does not overcorrect:
 
 ---
 
-## 7. Acceptance criteria
+## Acceptance gate
+
+Gated under `documentation/ai-planning.md`: baseline
+`evidenceBasedHostedCardRez` off, candidate on, using F4 paired seeds and 200
+games per pair. Run the committed deck pool plus committed mid-game starts
+covering Chromatophores and Tranquilizer.
+
+- Improvement on Chromatophores starts: the bootstrap interval for the
+  reduction in `pointsStolen` has a lower bound above zero.
+- Guards across all starts and pool pairs: `winRate` does not drop by more than
+  2 percentage points; `pointsScored` does not drop by more than 0.1 per game;
+  `pointsStolen` does not increase by more than 0.1 per game; and
+  `decisionLatencyMs` does not increase by more than 10%.
+- Tranquilizer guard: `hostedThreatRezCredits`, a collector totaling credits
+  spent rezzing ICE with a non-exempt hosted card and split by hosted-card
+  title, does not increase by more than 0.5 credits per game on Tranquilizer
+  starts unless the `pointsStolen` reduction on those starts also has a lower
+  confidence bound above zero.
+
+---
+
+## Acceptance criteria
 
 - [ ] The reproduction in section 4 fails before the fix and passes after,
       moved into the green suite, with its assertions unchanged.
@@ -249,6 +276,15 @@ Two guard cases are included so a fix does not overcorrect:
       effect.
 - [ ] A separate case where the hosted card is exploitable may return `false`,
       but verifies that the refusal reason is logged.
+- [ ] The behavior change ships behind an AI option that defaults to off,
+      named `evidenceBasedHostedCardRez` in the Resolution.
+- [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
+      deck pairs and mid-game starts, paired seeds, seed count, every metric's
+      baseline/candidate result and bootstrap 95% confidence interval,
+      guarded-regression results, pass conditions and thresholds. Only then is
+      `evidenceBasedHostedCardRez` switched on by default.
+- [ ] The F4 collector `hostedThreatRezCredits` is added through the harness's
+      collector extension point before the gate is run.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md` (none
       expected — no card-facing hook changes, only internal AI logic).
 - [ ] `node tests/run-all-tests.js` passes.

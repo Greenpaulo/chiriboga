@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
 const {pendingGate, codeChangesSince} = require('../scripts/roadmap.js');
+const {ticketSummary, move} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -59,6 +60,8 @@ const fixtureSuffix = process.pid + '-' + crypto.randomBytes(8).toString('hex');
 const untrackedSet = path.join(root, 'sets', 'agent-script-untracked-test-' + fixtureSuffix + '.js');
 const untrackedSetData = path.join(root, 'sets', 'agent-script-untracked-test-' + fixtureSuffix + '.txt');
 const untrackedRoot = path.join(root, 'agent-script-untracked-test-' + fixtureSuffix + '.js');
+const blockerFixture = path.join(root, 'documentation', 'bugs', 'agent-script-blocker-test-' + fixtureSuffix + '.md');
+const movedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review', path.basename(blockerFixture));
 const createdFixtures = [];
 const createFixture = file => {
   const descriptor = fs.openSync(file, 'wx');
@@ -78,8 +81,21 @@ try {
     'raise verification ignores non-JavaScript files under sets/');
   assert(!changes.includes(path.relative(root, untrackedRoot)),
     'raise verification ignores arbitrary untracked root JavaScript');
+
+  createFixture(blockerFixture);
+  fs.writeFileSync(blockerFixture, '# Blocker fixture\n');
+  const currentBlockers = new Map([[blockerFixture, ['F4']]]);
+  assert(ticketSummary(blockerFixture, currentBlockers).blocked,
+    'ticket discovery uses current roadmap blockers even when the generated header is missing');
+
+  fs.writeFileSync(blockerFixture, '# Blocker fixture\n\n<!-- roadmap-blocker:start -->\n');
+  assert.throws(() => move(blockerFixture, 'code-review'), /unmatched generated blocker markers/,
+    'ticket move rejects malformed blocker markers');
+  assert(fs.existsSync(blockerFixture) && !fs.existsSync(movedBlockerFixture),
+    'ticket move validates blocker markers before relocating the ticket');
 } finally {
-  for (const file of createdFixtures) fs.unlinkSync(file);
+  for (const file of createdFixtures) if (fs.existsSync(file)) fs.unlinkSync(file);
+  if (fs.existsSync(movedBlockerFixture)) fs.unlinkSync(movedBlockerFixture);
 }
 
 console.log('Agent helper scripts: show.js, batch-brief.js, roadmap blockers and ticket lists work.');

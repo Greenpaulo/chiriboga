@@ -93,7 +93,9 @@ for (const c of cards) {
   const jpg = path.join(root, 'images', base + '.jpg');
   if (!fs.existsSync(jpg)) { noImage++; flags.push({ file: c.file, code: c.code, title: c.title, reason: 'image missing: ' + jpg }); continue; }
   const bmp = path.join(workDir, base + '.bmp');
-  if (!fs.existsSync(bmp)) {
+  const bmpIsCurrent = fs.existsSync(bmp) &&
+    fs.statSync(bmp).mtimeMs >= fs.statSync(jpg).mtimeMs;
+  if (!bmpIsCurrent) {
     const r = spawnSync('sips', ['-s', 'format', 'bmp', jpg, '--out', bmp], { stdio: 'ignore' });
     if (r.status !== 0) { flags.push({ file: c.file, code: c.code, title: c.title, reason: 'sips failed' }); continue; }
   }

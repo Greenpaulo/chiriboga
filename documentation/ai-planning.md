@@ -187,7 +187,13 @@ direction and threshold for each (see Acceptance gates above).>
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] (Gated items) The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] (Gated items) Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
+- [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
+      For F4: exact command, committed deck pairs, paired seeds, seed count,
+      every metric's baseline/candidate result and bootstrap 95% confidence
+      interval, guarded-regression result, pass conditions and thresholds; an
+      improvement interval's lower bound must be above zero. For a human-game
+      gate: sample size, metrics, observed results, pass conditions and
+      thresholds. Only then is the option switched on by default.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed (omit when Sets is "none").
 - [ ] The side's `architecture.md` describes the new behaviour.

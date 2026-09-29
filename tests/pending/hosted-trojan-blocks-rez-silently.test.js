@@ -40,7 +40,16 @@ context.ActiveCards = player => {
   return player === runner ? runnerCards : player === corp ? corpCards : runnerCards.concat(corpCards);
 };
 context.CheckHasAbilities = card => !card.disabled;
-context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
+context.CheckSubType = (card, type) => {
+  if ((card.subTypes || []).includes(type)) return true;
+  // Active subtype modifiers matter here: Chromatophores gives its host all
+  // three ice subtypes, which can turn any matching breaker into a usable one.
+  return runner.cards.some(activeCard => {
+    if (!activeCard.modifySubTypes || typeof activeCard.modifySubTypes.Resolve !== 'function') return false;
+    const modification = activeCard.modifySubTypes.Resolve.call(activeCard, card) || {};
+    return (modification.add || []).includes(type);
+  });
+};
 context.CheckCardType = (card, types) => types.includes(card.cardType);
 context.CheckInstallDestination = (card, destination) =>
   typeof card.installOnlyIn !== 'function' || card.installOnlyIn(destination);
@@ -117,6 +126,8 @@ test('BUG: undefended remote with affordable ice hosting Chromatophores is not r
   assert.strictEqual(typeof chromatophores.AIHostedDoesNotPreventRez, 'undefined',
     'test assumption: Chromatophores has no AIHostedDoesNotPreventRez exception');
   const {approachedIce, remote} = buildBoard(chromatophores);
+  chromatophores.host = approachedIce;
+  runner.cards = [chromatophores];
   corp.creditPool = 12; // 12 < rezCost(3) * 5 == 15, so the "super rich" gate is not met
 
   const messages = [];
@@ -144,7 +155,21 @@ test('a justified hosted-card refusal returns false and logs its reason', () => 
   const chromatophores = card(35030);
   const {approachedIce, remote} = buildBoard(chromatophores);
   chromatophores.host = approachedIce;
-  runner.cards = [chromatophores]; // its public AISpecialBreaker effect is active and exploitable
+  const killer = {
+    title: 'Usable Killer', player: runner, cardType: 'program',
+    subTypes: ['Icebreaker', 'Killer'], strength: 3,
+  };
+  runner.cards = [chromatophores, killer];
+  runner.creditPool = 10;
+  runner.AI = {
+    _matchingBreakerInstalled: iceCard =>
+      runner.cards.find(candidate =>
+        context.CheckSubType(candidate, 'Icebreaker') && context.BreakerMatchesIce(candidate, iceCard)) || null,
+  };
+  assert.strictEqual(context.CheckSubType(approachedIce, 'Sentry'), true,
+    'active Chromatophores gives its host the subtype matched by the Killer');
+  assert.strictEqual(runner.AI._matchingBreakerInstalled(approachedIce), killer,
+    'test assumption: the Runner can exploit the hosted Trojan with a usable breaker');
   corp.creditPool = 12;
 
   const messages = [];
