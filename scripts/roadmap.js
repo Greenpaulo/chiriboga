@@ -87,6 +87,17 @@ function itemPath(item) {
 
 const areaName = item => path.basename(item.dir);
 
+const sectionOf = (text, heading) => {
+  const start = text.indexOf('\n' + heading + '\n');
+  if (start < 0) return '';
+  const rest = text.slice(start + heading.length + 2);
+  const end = rest.search(/^## /m);
+  return end < 0 ? rest : rest.slice(0, end);
+};
+
+const pendingGate = text =>
+  (sectionOf(text, '## Resolution').match(/^\*\*Gate:\*\*\s*pending\s+([A-Z]\d+(?:\.\d+)*)\b/im) || [])[1];
+
 const ticketRoots = () => ['backlog', 'bugs'].map(name => path.join(root, 'documentation', name));
 const markdownFiles = dir => fs.existsSync(dir) ? [].concat(...fs.readdirSync(dir).map(name => {
   const file = path.join(dir, name);
@@ -138,7 +149,7 @@ function blockerState(items) {
   // dependency is done.
   for (const file of [].concat(...ticketRoots().map(markdownFiles))) {
     const text = fs.readFileSync(file, 'utf8');
-    const pending = (text.match(/^\*\*Gate:\*\*\s*pending\s+([A-Z]\d+(?:\.\d+)*)\b/im) || [])[1];
+    const pending = pendingGate(text);
     if (pending && (!byId.has(pending) || byId.get(pending).status !== 'done')) {
       const current = reasons.get(file) || [];
       if (!current.includes(pending)) reasons.set(file, current.concat(pending));
@@ -223,14 +234,6 @@ function next(items) {
 
 // Acceptance gates (documentation/judging-ai-changes.md). An item is gated when
 // its spec or ticket says how adoption is judged beyond deterministic tests.
-const sectionOf = (text, heading) => {
-  const start = text.indexOf('\n' + heading + '\n');
-  if (start < 0) return '';
-  const rest = text.slice(start + heading.length + 2);
-  const end = rest.search(/^## /m);
-  return end < 0 ? rest : rest.slice(0, end);
-};
-
 function gateInfo(item) {
   const file = itemPath(item);
   if (item.id === 'F4' || !file || !fs.existsSync(file)) return null;
@@ -295,6 +298,13 @@ function rebaseLinks(text, fromDir, toDir) {
 const VERIFIED = /^\*\*Verified against code:\*\* `?([0-9a-f]{7,40})`?/m;
 const git = (...args) => spawnSync('git', args, {cwd: root, encoding: 'utf8'});
 
+function codeChangesSince(sha) {
+  const changed = git('diff', '--name-only', sha, '--', ':(glob)*.js', 'sets').stdout.trim().split('\n').filter(Boolean);
+  const untrackedSets = git('ls-files', '--others', '--exclude-standard', '--', 'sets').stdout.trim().split('\n')
+    .filter(file => file.endsWith('.js'));
+  return [...new Set(changed.concat(untrackedSets))];
+}
+
 // A spec may be raised only when its claims were checked against the current
 // game and AI code (documentation/ai-planning.md, "Re-grounding a spec").
 function checkVerified(file) {
@@ -306,9 +316,9 @@ function checkVerified(file) {
     '\ndirectly under its **Read first:** line.';
   if (!sha) throw new Error(where + ' has no **Verified against code:** line.' + redo);
   if (git('cat-file', '-e', sha + '^{commit}').status !== 0) throw new Error(where + ' was verified at unknown commit ' + sha + '.' + redo);
-  const changed = git('diff', '--name-only', sha, '--', ':(glob)*.js', 'sets').stdout.trim();
-  if (changed) throw new Error(where + ' was verified at ' + sha + ', but the code has changed since:\n  ' +
-    changed.split('\n').join('\n  ') + redo);
+  const changed = codeChangesSince(sha);
+  if (changed.length) throw new Error(where + ' was verified at ' + sha + ', but the code has changed since:\n  ' +
+    changed.join('\n  ') + redo);
   return sha;
 }
 
@@ -339,7 +349,7 @@ function raise(items, id) {
 }
 
 module.exports = {parseRoadmap, parseAll, itemPath, gatedItems, linkTargets, resolveFrom, rebaseLinks, blockerState,
-  blockerMismatches, blockers, VERIFIED, STATUSES, ID, AREAS, root};
+  blockerMismatches, blockers, pendingGate, codeChangesSince, VERIFIED, STATUSES, ID, AREAS, root};
 
 if (require.main === module) {
   const [command, argument] = process.argv.slice(2);

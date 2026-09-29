@@ -73,6 +73,7 @@ const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', p
 }, extra);
 const etr = () => ice(['End the run.'], [[['endTheRun']]]);
 let tests = 0;
+let failures = 0;
 const verbose = !!process.env.VERBOSE; // passing cases are silent by default to keep agent context small
 function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
@@ -87,8 +88,9 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
-  try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
-  tests++; if (verbose) console.log('PASS ' + name);
+  try { body(); if (verbose) console.log('PASS ' + name); }
+  catch (error) { failures++; console.log('FAIL ' + name + '\n     ' + error.message); }
+  tests++;
 }
 
 // Shared board: a remote holding an agenda, guarded by one unrezzed ice
@@ -138,6 +140,27 @@ test('BUG: undefended remote with affordable ice hosting Chromatophores is not r
     'branch currently declines silently');
 });
 
+test('a justified hosted-card refusal returns false and logs its reason', () => {
+  const chromatophores = card(35030);
+  const {approachedIce, remote} = buildBoard(chromatophores);
+  chromatophores.host = approachedIce;
+  runner.cards = [chromatophores]; // its public AISpecialBreaker effect is active and exploitable
+  corp.creditPool = 12;
+
+  const messages = [];
+  const oldLog = ai._log;
+  ai._log = message => messages.push(message);
+  let result;
+  try {
+    result = ai._iceWorthRezzing(approachedIce, 3, remote);
+  } finally {
+    ai._log = oldLog;
+  }
+
+  assert.strictEqual(result, false, 'an exploitable hosted Trojan may justify withholding the rez');
+  assert(messages.length > 0, 'a hosted-card refusal must log its reason');
+});
+
 test('GUARD: a hosted card with AIHostedDoesNotPreventRez (Saci-style) does not block the rez', () => {
   const exemptHostedCard = Object.assign(card(35030), {AIHostedDoesNotPreventRez: true});
   const {approachedIce, remote} = buildBoard(exemptHostedCard);
@@ -152,4 +175,8 @@ test('GUARD: a "super rich" Corp already rezzes despite a non-exempt hosted card
   assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), true);
 });
 
+if (failures) {
+  console.log(failures + ' of ' + tests + ' pending test(s) failed.');
+  process.exit(1);
+}
 console.log(tests + ' pending test(s) run (see file header: not yet confirmed against a live run)');
