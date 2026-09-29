@@ -12,10 +12,11 @@ written into it.
 ## 1. Orient
 
 - Read the ticket in full. Its folder is its status:
-  - `bugs/` or `backlog/`: open. A generated `## Blocker` section means its
-    next required step cannot proceed; run `node scripts/roadmap.js blockers`
-    to confirm the current dependencies, then stop and report them. Otherwise
-    it is ready to implement. If its Resolution already has
+  - `bugs/` or `backlog/`: open. A generated `## Blocker` section or an
+    unmarked `## Additional blocker` section means its next required step
+    cannot proceed. Run `node scripts/roadmap.js blockers` to confirm the
+    generated dependency state, report every generated and additional blocker,
+    then stop. Otherwise it is ready to implement. If its Resolution already has
     `**Gate:** pending F4`, the code was reviewed with its AI option off; once
     F4 is `done`, only run the gate (step 6) and hand off again.
   - `remediation/`: review found problems. Address the review findings recorded
@@ -29,7 +30,7 @@ written into it.
   the side's `roadmap.md` (`documentation/corp-ai/` or `documentation/runner-ai/`)
   to `in-progress`.
 - A ticket is **gated** when its acceptance criteria require an AI option or its
-  **Acceptance gate** needs seeded games (see "Acceptance gates" in
+  **Acceptance gate** needs seeded or human-game evidence (see "Acceptance gates" in
   `documentation/ai-planning.md`). If a gated ticket lacks the two gate criteria
   or its gate has no numbers, fix the ticket before planning.
 
@@ -135,12 +136,15 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged.
 - Add a variation or unit test when a broad heuristic changed.
 - `node tests/run-all-tests.js` passes.
-- Gated tickets: if F4 is `done`, run its gate as the ticket states it and F4's
-  comparison rule requires, and switch the option's default on only if the gate
-  passes. If F4 is not `done`, do not run a substitute: leave the option off and
-  hand off with the gate pending. If the gate fails, leave the option off, hand
-  off, and say in your report that the user must choose between retuning
-  (remediation) and parking the item.
+- Gated tickets: run the selected gate exactly as the ticket defines it and
+  switch the option's default on only if that gate passes. For an F4 gate, wait
+  until F4 is `done` and use its comparison rule; do not substitute a smaller
+  or unpaired run. For a human-game gate, use the stated human sample, metrics
+  and thresholds; do not substitute F4. If the required harness or data is not
+  available, leave the option off and hand off with the applicable gate
+  pending. If the gate fails, leave the option off, hand off, and say in your
+  report that the user must choose between retuning (remediation) and parking
+  the item.
 
 ## 7. Hand off
 
@@ -155,10 +159,18 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   in backticks:
 
   ```markdown
-  **Gate:** passed — `<option>` now defaults to on. <F4 command, deck pairs, seed count, metrics, baseline vs candidate, threshold met>
+  **Gate:** passed — `<option>` now defaults to on. <gate type and applicable evidence below>
   **Gate:** pending F4 — `<option>` defaults to off.
-  **Gate:** failed — `<option>` defaults to off. <the evidence, as for passed>
+  **Gate:** pending human-game data — `<option>` defaults to off.
+  **Gate:** failed — `<option>` defaults to off. <gate type and applicable evidence below>
   ```
+
+  For an F4 gate, record the exact command, committed deck pairs, paired seeds,
+  seed count, every metric's baseline/candidate result and bootstrap 95%
+  confidence interval, guarded-regression result, applicable pass conditions
+  and thresholds; an improvement passes only when its interval lower bound is
+  above zero. For a human-game gate, record the sample size, metrics, observed
+  results, applicable pass conditions and thresholds.
 
   Leave the gate criteria unticked while the gate is pending or failed.
   `ticket.js check` fails a gated ticket without this line, or whose option
