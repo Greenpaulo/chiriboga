@@ -50,13 +50,16 @@ See [architecture: type shifts, bypasses and redirects](../corp-ai/architecture.
 5. A server redirect compares the complete source-server route with the direct destination route without counting destination ICE twice.
 6. Capability results do not change when hidden Runner Grip contents change without a corresponding public-state change.
 7. A redirect paid by a run-only public credit source is detected during Corp-turn planning through F2's wrapper, without requiring or leaking a live run state.
-8. In every scenario above, the allocated route cost is never lower than the cheapest legal assignment found by exhaustive enumeration in the test (each finite use at most once, scope rules respected).
+8. In every scenario above, the allocated route cost equals the cheapest legal assignment found by exhaustive enumeration in the test (each finite use at most once, scope rules respected).
 
 ## Acceptance gate
 Not F4-gated: the allocator has a deterministic oracle, so correctness is shown by tests rather than seeded games. Adopt the unified allocator only when all of these hold:
 
 - every existing Layer 4 regression in `tests/corp-server-security.test.js` passes unchanged;
-- in each combined-bypass scenario, the route cost is no higher than the current per-class heuristic's and never cheaper than the legal traversal (scenario 8);
+- in each combined-bypass scenario, the route cost equals the legal exhaustive
+  oracle (scenario 8); differences from the old per-class heuristic are listed
+  as justified deltas, including cases where correcting a duplicate-card claim
+  makes the legal route more expensive;
 - decision snapshots (`tests/decision-snapshots.test.js`, `tests/corp-decision-fixtures.test.js`) are identical to the recorded baseline except for listed deltas, each justified by a combined or finite-use bypass the old heuristic mis-allocated.
 
 The current hooks remain as compatibility shims during migration.
