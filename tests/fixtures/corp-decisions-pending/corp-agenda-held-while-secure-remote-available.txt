@@ -1,0 +1,10 @@
+// PHASE: Phase_Main
+// OPTIONS: install, gain, draw
+// EXPECT: install
+// EXPECT_SERVER: Remote 0
+// EXPECT_CARD: Hostile Takeover
+// SETUP: corp.creditPool=5; corp.clickTracker=2; runner.creditPool=0
+// SOURCE: documentation/debug-logs/bug_raised/corp_didnt_play_agendas_into_remote_when_it_was_secure.txt (around L149)
+// NOTE: Reconstruction, not a snapshot. The log's end-of-game dump is not the decision board. Assumed: hand from L158 (5 cards); one unrezzed Ballista on HQ and R&D and one unrezzed Ice Wall on the remote, as in L24-L41 and L145; Runner has no programs so every server is secure. The log's Runner economy (Liberated Account etc.) is omitted because "no capable breaker" already makes all three secure. Remote is named Remote 0 here; the log calls it Remote 1.
+RunnerTestField(30001, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30059, [], [], [31058,30064,31071,30064,30053], [], [30062], [30062], [[31077]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

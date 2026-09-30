@@ -1685,6 +1685,10 @@ function RunUnsuccessful() {
  * @param {boolean} [canBePrevented=true] whether this can be prevented
  */
 function EndTheRun(canBePrevented = true) {
+  //End-the-run effects have no effect when there is no active run. In
+  //particular, subroutines resolved by Unleash during the Corp action phase
+  //must not enter run cleanup or the Runner post-action phase.
+  if (attackedServer === null) return;
   intended.endRun = true;
   
   function applyEndRun() {

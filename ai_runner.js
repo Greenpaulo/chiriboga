@@ -33,6 +33,12 @@ class RunnerAI {
     console.log("AI: " + message);
   }
 
+  //All Runner AI randomness must use the injectable _random seam
+  //(tests and harnesses assign a seeded function). Returns 0..n-1.
+  _randomIndex(n) {
+    return Math.max(0, Math.min(n - 1, Math.floor(this._random() * n)));
+  }
+
   _cardsOkToTrashOnInstall(installedRunnerCards) {
 	var okToTrash = [];
     for (var i = 0; i < installedRunnerCards.length; i++) {
@@ -422,6 +428,7 @@ class RunnerAI {
 	this.maxHandIncreasers = ["T400 Memory Diamond"];
 
     this._temporaryValueModifications = []; //set during choice-making to consider hypotheticals (normal conditions restored after choosing)
+    this._random = Math.random;
   }
 
   //functions to use/gain/lose info about cards in HQ
@@ -2190,7 +2197,7 @@ console.log(this.preferred);
       //check for inaccessible high-potential servers that might become accessible with some prep
       for (var i = 0; i < this.serverList.length; i++) {
         //add a bit of jitter to make the runner less predictable
-        this.serverList[i].potential += 0.2 * Math.random() - 0.1;
+        this.serverList[i].potential += 0.2 * this._random() - 0.1;
 
         //now check (the 2 is arbitrary but basically 'high potential')
         if (
@@ -2817,7 +2824,7 @@ console.log(this.preferred);
     this._log("Current phase identifier: " + currentPhase.identifier);
     this._log("Current phase title: " + currentPhase.title);
     this._log("Executing command: " + executingCommand);
-    return RandomRange(0, optionList.length - 1);
+    return this._randomIndex(optionList.length);
   }
 
   _computeChoice(optionList, choiceType) {

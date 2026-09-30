@@ -908,9 +908,9 @@ cardSet[31014] = {
 				  }
 			  }
 			  //random from ctcf
-			  var cardAIdx = RandomRange(0, ctcf.length - 1);
+			  var cardAIdx = runner.AI._randomIndex(ctcf.length);
 			  var cardA = ctcf.splice(cardAIdx,1)[0];
-			  var cardB = ctcf[RandomRange(0, ctcf.length - 1)];
+			  var cardB = ctcf[runner.AI._randomIndex(ctcf.length)];
 			  return [{ cards: [ cardA, cardB] }];
 			  //is there any reason not to proc Steve?
 			  //return continueChoice;
@@ -1213,7 +1213,7 @@ cardSet[31017] = {
 				}
 			}
 			//otherwise, the decision between pieces of ice is based on potential + random jitter
-			var thisScore = 0.1*Math.random() + runner.AI._getCachedPotential(server);
+			var thisScore = 0.1*runner.AI._random() + runner.AI._getCachedPotential(server);
 			if (thisScore > bestScore) {
 				bestScore = thisScore;
 				bestIndex = i;
@@ -6335,7 +6335,7 @@ cardSet[31078] = {
 			var cwkCount = runner.AI._cardsInHandWorthKeeping().length;
 			runner.AI._log("Not sure it is worth the cost (but I like "+cwkCount+" cards)");
 			//the constant is arbitrary
-			var randNum = RandomRange(0, cwkCount + expectedDmg - runner.grip.length + 5);
+			var randNum = runner.AI._randomIndex(cwkCount + expectedDmg - runner.grip.length + 6);
 			if (randNum >= costForFullLink) return costForFullLink; //index in choices
 			return 0; //index in choices
 		}};

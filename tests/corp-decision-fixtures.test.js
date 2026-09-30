@@ -9,6 +9,7 @@
 //         node tests/corp-decision-fixtures.test.js FILE...  run selected green fixtures
 //         node tests/corp-decision-fixtures.test.js --pending run known-red fixtures
 //         AI_LOG=1 node tests/corp-decision-fixtures.test.js  also print the AI's own reasoning
+//         VERBOSE=1 node tests/corp-decision-fixtures.test.js list passing fixtures too
 //         node tests/corp-decision-fixtures.test.js --ids     list card ids to help write fixtures
 //         node tests/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
 //                                                    (returns false; results are NOT trustworthy until real stubs are written)
@@ -171,6 +172,8 @@ const dir = path.join(
   pending ? 'corp-decisions-pending' : 'corp-decisions',
 );
 const requestedFixtures = process.argv.slice(2).filter(arg => arg.endsWith('.txt'));
+// Passing fixtures are listed only when asked for, to keep agent context small.
+const showPasses = !!process.env.VERBOSE || pending || requestedFixtures.length > 0;
 const files = requestedFixtures.length ? requestedFixtures :
   (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort() : []);
 let passed = 0, failed = 0;
@@ -217,7 +220,7 @@ files.forEach(file => {
       const ok = commandOK && serverOK && cardOK;
       const replayPath = identifier ? 'Choice ' + identifier : phase;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
-      if (ok) { passed++; console.log('PASS ' + file + '  (' + replayPath + ' -> ' + chosen + ')' + note); }
+      if (ok) { passed++; if (showPasses) console.log('PASS ' + file + '  (' + replayPath + ' -> ' + chosen + ')' + note); }
       else {
         const serverNote = expectedServer ? ', server ' + (chosenServer || 'none') + ', expected ' + expectedServer : '';
         const cardNote = expectedCard ? ', card ' + (chosenCard || 'none') + ', expected ' + expectedCard : '';
