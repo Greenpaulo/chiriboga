@@ -184,6 +184,12 @@ Gates are evidence, not a verdict you must obey. Be sceptical when:
 
 ## Where things stand
 
+The AI and fix stack that predates these gates has a separate, one-time
+[retrospective validation runbook](legacy-ai-stack-validation.md). Its branch
+boundaries stay unmerged until F4 can compare the behavior-bearing historical
+layers; the project owner runs the long commands and an agent prepares and
+checks the reports. That audit does not replace I0 or any option's normal gate.
+
 As of 2026-09-25:
 
 - **No gate can be run yet.** F4 is `ready` but not built, and it depends on
