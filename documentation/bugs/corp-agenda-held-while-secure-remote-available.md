@@ -1,4 +1,4 @@
-# Corp AI: never installs an agenda into an empty, secure remote because `_isAScoringServer()` requires it to outscore HQ
+# Corp AI: never installs an agenda into an empty, secure remote because `_isAScoringServer()` requires it to meet or exceed HQ's score
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_didnt_play_agendas_into_remote_when_it_was_secure.txt` (`Version reference: Wed Sep 23 2026 12:02:31`)
 **Reproduction:** `tests/fixtures/corp-decisions-pending/corp-agenda-held-while-secure-remote-available.txt` — `node tests/corp-decision-fixtures.test.js --pending corp-agenda-held-while-secure-remote-available.txt` (fails at branch `25Sept-fixes` tarball, 2026-09-28; short SHA not recorded)

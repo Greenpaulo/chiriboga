@@ -18,7 +18,13 @@ written into it.
     generated dependency state, report every generated and additional blocker,
     then stop. Otherwise it is ready to implement. If its Resolution already has
     `**Gate:** pending F4`, the code was reviewed with its AI option off; once
-    F4 is `done`, only run the gate (step 6) and hand off again.
+    F4 is `done`, only run the gate (step 6) and hand off again. If its
+    Resolution has `**Gate:** pending human-game data`, the reviewed code also
+    stays off and the ticket carries an `## Additional blocker` naming the
+    missing sample. Stop while that blocker remains. Once the user supplies or
+    identifies data that meets the ticket's stated sample, metrics and
+    thresholds, remove that additional blocker, run only the human-game gate
+    in step 6, and hand off again.
   - `remediation/`: review found problems. Address the review findings recorded
     in the ticket (and whatever they imply), not the whole ticket again.
   - `code-review/` or `done/`: stop and ask the user.

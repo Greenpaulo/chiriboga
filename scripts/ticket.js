@@ -58,7 +58,9 @@ function ticketSummary(file, currentBlockers = new Map()) {
 }
 
 function ticketInventory() {
-  const currentBlockers = blockerState(parseAll()).reasons;
+  const items = parseAll();
+  validateBlockerMarkers(items);
+  const currentBlockers = blockerState(items).reasons;
   const inventory = [];
   for (const family of FAMILIES) for (const stage of STAGES)
     for (const file of filesAt(stage, family))
@@ -327,7 +329,7 @@ function check(ticket) {
   process.exitCode = failed ? 1 : 0;
 }
 
-module.exports = {ticketSummary, validateBlockerMarkers, move, setRoadmapStatus, closeRoadmapItem};
+module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus, closeRoadmapItem};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
