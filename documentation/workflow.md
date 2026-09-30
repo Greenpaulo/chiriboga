@@ -146,6 +146,14 @@ in advance. What that means, what you do at each step and how to read the
 results is in [judging-ai-changes.md](judging-ai-changes.md);
 `node scripts/roadmap.js gates` lists which items need a gate run.
 
+Every AI-behaviour spec or ticket carries the exact, unnumbered
+`## Acceptance gate` and `## Acceptance criteria` headings. Objective changes
+say `N/A` and name their rules or invariant oracle; strategic preferences name
+a measurable gate. `triage-log` and spec creation classify new work,
+`reground-spec` rechecks that classification, and `implement-ticket` adds or
+corrects the sections on older and manually created tickets before planning.
+A missing section is never shorthand for ungated.
+
 ## 🧾 Helper scripts
 
 Free, deterministic steps that agents (and you) run instead of reading files:
@@ -178,6 +186,9 @@ Free, deterministic steps that agents (and you) run instead of reading files:
   starting commit in its Resolution, its reproduction is still pending or had
   its assertions or `EXPECT` lines changed, any test fails, or a gated ticket
   has no `**Gate:**` line or turns its AI option on before the gate passed.
+  When a pending reproduction moves into the green suite, its ticket keeps the
+  original pending path on `**Reproduction:**` and also records the green path,
+  so the check can compare the original assertions through Git history.
 - **Quiet tests** (`tests/run-all-tests.js`): a passing test that prints more
   than 5 lines fails the suite. Per-case output belongs behind `VERBOSE=1`.
 - **Hook documentation check** (`tests/ai-hook-docs.test.js`): fails when a card

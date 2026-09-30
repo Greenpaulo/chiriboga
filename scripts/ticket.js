@@ -221,6 +221,16 @@ function greenPathFor(pending) {
   return null;
 }
 
+function reproductionExpectationsMatch(file, before, after) {
+  const isExpectation = line => file.endsWith('.txt')
+    ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line)
+    : /assert/.test(line);
+  const beforeExpectations = before.filter(isExpectation);
+  const afterExpectations = after.filter(isExpectation);
+  return beforeExpectations.length === afterExpectations.length &&
+    beforeExpectations.every((line, index) => line === afterExpectations[index]);
+}
+
 function check(ticket) {
   const results = [];
   const report = (level, message) => results.push([level, message]);
@@ -263,8 +273,11 @@ function check(ticket) {
         const addedLines = after.filter(line => !before.includes(line));
         const isExpectation = line => green.endsWith('.txt') ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line) : /assert/.test(line);
         const changedExpectations = removed.concat(addedLines).filter(isExpectation);
-        if (changedExpectations.length) {
-          report('FAIL', 'Reproduction expectations changed:\n      ' + changedExpectations.map(l => l.trim()).join('\n      '));
+        if (changedExpectations.length || !reproductionExpectationsMatch(green, before, after)) {
+          const detail = changedExpectations.length
+            ? ':\n      ' + changedExpectations.map(l => l.trim()).join('\n      ')
+            : ' order.';
+          report('FAIL', 'Reproduction expectations changed' + detail);
         } else if (removed.length || addedLines.length) {
           report('WARN', 'Reproduction changed outside its expectations (' + removed.length + ' lines removed, ' +
             addedLines.length + ' added); the Resolution should explain why.');
@@ -329,7 +342,8 @@ function check(ticket) {
   process.exitCode = failed ? 1 : 0;
 }
 
-module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus, closeRoadmapItem};
+module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
+  closeRoadmapItem, reproductionExpectationsMatch};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
