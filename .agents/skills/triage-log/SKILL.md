@@ -75,6 +75,18 @@ reproduction is confirmed later by `implement-ticket`.
   (`git rev-parse --short HEAD`).
 - Keep the ticket shorter than the investigation, ideally under 150 lines.
   Quote short log excerpts rather than pasting long runs of the log.
+- A ticket is gated exactly when `documentation/ai-planning.md`'s Acceptance
+  gates test says so: the fix's goal is to play better, not to reproduce one
+  fixed, correct decision.
+  This applies to bug tickets as much as backlog items — being a bug does not
+  make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
+  (principle 4): <the oracle>` for the common case. When the fix genuinely has
+  no single correct answer, select either an F4 seeded-game gate or a human-game
+  gate and specify its sample size, metrics and numeric thresholds.
+  A deterministic reproduction proves that the decision is repeatable, not
+  that it is strategically correct. Always use the exact, unnumbered headings
+  `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
+  them literally, and a missing gate section never means ungated.
 
 ## Ticket template
 
@@ -102,15 +114,42 @@ why it matters. Three to five sentences.>
 <General approach, functions involved, rejected alternatives and why, and other
 decisions that could shift.>
 
+## Acceptance gate
+<N/A — deterministic fix (principle 4): <the oracle>, for the common case.
+If the fix's goal is instead to play better with no single correct answer,
+select an F4 seeded-game gate or a human-game gate and state its sample size,
+metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
+gate, also name the committed deck pairs, paired seed range, bootstrap 95%
+confidence intervals, guarded-regression conditions and applicable pass
+conditions. Depends on: F4 when selected.>
+
 ## Acceptance criteria
 - [ ] The reproduction passes and has moved into the green suite
       (`tests/fixtures/corp-decisions/` or `tests/`), expectation unchanged.
 - [ ] <Extra variation or unit test when the fix changes a broad heuristic.>
 - [ ] New or changed AI hooks are documented in `documentation/ai.md`.
 - [ ] `node tests/run-all-tests.js` passes.
+- [ ] (Gated items) The behaviour change ships behind an AI option that
+      defaults to off (named in the Resolution).
+- [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
+      For F4: exact command, committed deck pairs, paired seeds, seed count,
+      every metric's baseline/candidate result and bootstrap 95% confidence
+      interval, guarded-regression result, pass conditions and thresholds; an
+      improvement interval's lower bound must be above zero. For a human-game
+      gate: sample size, metrics, observed results, pass conditions and
+      thresholds. Only then is the option switched on by default.
 
 ## Out of scope / related
 ```
+
+Ungated (the common case): write `## Acceptance gate` as shown and delete both
+`(Gated items)` bullets. Gated: fill in `## Acceptance gate` with real numbers
+and keep both bullets, dropping their `(Gated items)` prefix — matching
+`ai-planning.md`'s own template convention, so `implement-ticket`'s Orient
+step ("A ticket is gated when its acceptance criteria require an AI option or
+its Acceptance gate needs seeded games... If a gated ticket lacks the two gate
+criteria or its gate has no numbers, fix the ticket before planning") finds
+exactly what it expects either way.
 
 If no reproduction was possible, replace the **Reproduction** line with
 `**Reproduction:** none — <reason>` and make writing one the first acceptance

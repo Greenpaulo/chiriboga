@@ -7,8 +7,10 @@ spec file (`proposed`); how finished work behaves lives in
 Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md).
 
 - `node scripts/roadmap.js next` lists items (both AIs) whose dependencies are all `done`.
-- `tests/ai-roadmaps.test.js` fails if a status, link or dependency here
-  disagrees with the tickets.
+- `node scripts/roadmap.js blockers` lists tickets held by unfinished
+  dependencies; add `--fix` to refresh their generated headers.
+- `tests/ai-roadmaps.test.js` fails if a status, link, dependency or generated
+  blocker header disagrees with the tickets.
 
 ## Hand keep and discard (W)
 
@@ -63,14 +65,14 @@ Existing Runner AI code that breaks a shared principle.
 - **Spec:** [D1-retire-runner-title-special-cases.md](specs/D1-retire-runner-title-special-cases.md)
 - **Goal:** Replace the title lists and title comparisons in `ai_runner.js` with hooks.
 
-### D2 Injectable randomness for the Runner AI
-- **Status:** in-progress
-- **Depends on:** none
-- **Ticket:** [D2-injectable-runner-randomness.md](../backlog/remediation/D2-injectable-runner-randomness.md)
-- **Goal:** Route Runner AI randomness through an injectable source so decisions are reproducible.
-
 ### D3 Close Runner AI information-boundary leaks
 - **Status:** ready
 - **Depends on:** none
 - **Ticket:** [D3-close-runner-information-leaks.md](../backlog/D3-close-runner-information-leaks.md)
 - **Goal:** Stop Runner decisions depending on hidden Corp cards or Stack order; make helpers enforce visibility.
+
+### Done
+
+| ID | Item | Delivered by | Architecture |
+|---|---|---|---|
+| D2 | Injectable randomness for the Runner AI | [D2-injectable-runner-randomness](../backlog/done/D2-injectable-runner-randomness.md) | [run selection](architecture.md#run-selection-and-the-run-calculator) |

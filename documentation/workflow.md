@@ -22,8 +22,9 @@ Why the workflow is set up this way is explained in
 | 2. Fix | Codex, new chat | `$implement-ticket <ticket>` | The reproduction confirmed, the fix, and the ticket in `code-review/` (or a plan to approve first) |
 | 3. Check | Terminal | `node scripts/ticket.js check <ticket>` | PASS/WARN/FAIL lines, the changed files and a review link |
 | 4. Review | Claude chat | Commit and push, then paste **prompt R** with the check output | A Code review section to paste into the ticket, and a move command |
-| 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`, or in `remediation/` for another step 2 |
+| 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`; in `remediation/` for another step 2; or back in the open ticket root with a generated blocker when review passes but its gate is pending |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
+| PR feedback | Codex, PR branch | `$address-pr-review <PR>` | Each review comment verified and accepted, adapted, rejected or marked obsolete; supported fixes applied and tested |
 
 Codex can also do steps 1 and 4 itself (`$triage-log <log>`, `$review-ticket
 <ticket>`), but they are its most reading-heavy tasks.
@@ -73,21 +74,35 @@ Claude chat only sees what is pushed to GitHub. If it cannot find a file under
 
 ## 🎫 Ticket lifecycle
 
-A ticket's folder is its status. There is no separate status line.
+A ticket's folder is its workflow status. There is no separate status line.
+Whether work can proceed is separate: a prominent generated `## Blocker`
+section means a roadmap dependency or recorded gate is unresolved.
 
 ```text
 debug-logs/<log>
    │  triage (Claude chat draft, or Codex)
    ▼
 bugs/  ──implement-ticket──▶  bugs/code-review/  ──review──▶  bugs/done/
-                                    ▲                   │
-                                    │                   ▼
-                              implement-ticket ◀── bugs/remediation/
+                                    │ changes required
+                                    ▼
+                              bugs/remediation/
+                                    │ implement-ticket
+                                    └────────────────────▶ bugs/code-review/
+
+bugs/code-review/ ──pass, gate pending──▶ bugs/ (generated blocker)
 ```
 
 Backlog tickets follow the same path under `documentation/backlog/`, starting
 from a ticket you write instead of a debug log. Move tickets with
 `node scripts/ticket.js move <ticket> <open|code-review|remediation|done>`.
+Here `open` means the root `documentation/bugs/` or `documentation/backlog/`
+folder, not a folder named `open`. A review that passes while its F4 or human
+gate is still pending moves the ticket to `open`, not `done`; the move command
+uses its `**Gate:** pending ...` line to add or refresh the generated blocker.
+The move command refreshes generated blocker headers. To inspect or repair
+them directly, run `node scripts/roadmap.js blockers` or
+`node scripts/roadmap.js blockers --fix`; the roadmap regression test prevents
+stale headers from being committed.
 
 ### Approving a plan
 
@@ -139,6 +154,14 @@ in advance. What that means, what you do at each step and how to read the
 results is in [judging-ai-changes.md](judging-ai-changes.md);
 `node scripts/roadmap.js gates` lists which items need a gate run.
 
+Every AI-behaviour spec or ticket carries the exact, unnumbered
+`## Acceptance gate` and `## Acceptance criteria` headings. Objective changes
+say `N/A` and name their rules or invariant oracle; strategic preferences name
+a measurable gate. `triage-log` and spec creation classify new work,
+`reground-spec` rechecks that classification, and `implement-ticket` adds or
+corrects the sections on older and manually created tickets before planning.
+A missing section is never shorthand for ungated.
+
 ## 🧾 Helper scripts
 
 Free, deterministic steps that agents (and you) run instead of reading files:
@@ -149,9 +172,12 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/show.js card <id>` | One card definition |
 | `node scripts/show.js fn <name>` | One engine or AI function |
 | `node scripts/ticket.js check <ticket>` | The mechanical review checks for a fixed ticket |
-| `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders, keeping a linked roadmap item's status and links in step |
+| `node scripts/ticket.js move <ticket> <open\|code-review\|remediation\|done>` | Moves a ticket to the open family root, review, rework, or completed stage respectively, keeping linked roadmap state, links and generated blockers in step |
+| `node scripts/ticket.js next bugs` | Open bug tickets that have no generated or manually recorded blocker |
+| `node scripts/ticket.js list` | Actionable bugs and backlog tickets, blocked tickets, code review, and remediation grouped in one view |
 | `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done (including in-progress items whose ticket is open again) |
 | `node scripts/roadmap.js list` | Every AI roadmap item and its status |
+| `node scripts/roadmap.js blockers [--fix]` | Blocked tickets and stale generated headers; `--fix` adds, updates or removes the headers |
 | `node scripts/ai-game.js [--seed s \| --seeds a-b]` | Plays seeded AI-vs-AI games headlessly (default Duel PD vs Tao) and prints one JSON line per game: winner, turns, time, points, a log fingerprint and any engine errors |
 | `node scripts/roadmap.js gates` | Every item with an acceptance gate, grouped by what is left to do (gates waiting to run, failed, not built); see [judging-ai-changes.md](judging-ai-changes.md) |
 | `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket; refuses one not re-verified against the current code |
@@ -168,6 +194,9 @@ Free, deterministic steps that agents (and you) run instead of reading files:
   starting commit in its Resolution, its reproduction is still pending or had
   its assertions or `EXPECT` lines changed, any test fails, or a gated ticket
   has no `**Gate:**` line or turns its AI option on before the gate passed.
+  When a pending reproduction moves into the green suite, its ticket keeps the
+  original pending path on `**Reproduction:**` and also records the green path,
+  so the check can compare the original assertions through Git history.
 - **Quiet tests** (`tests/run-all-tests.js`): a passing test that prints more
   than 5 lines fails the suite. Per-case output belongs behind `VERBOSE=1`.
 - **Hook documentation check** (`tests/ai-hook-docs.test.js`): fails when a card

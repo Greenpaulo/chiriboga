@@ -4,6 +4,8 @@
 //
 //   node scripts/ticket.js check <ticket.md>
 //   node scripts/ticket.js move <ticket.md> <open|code-review|remediation|done>
+//   node scripts/ticket.js next [bugs|backlog|all]
+//   node scripts/ticket.js list
 //
 // check verifies a fixed ticket: Resolution records its starting commit, the
 // pending reproduction moved into the green suite without changing what it
@@ -16,10 +18,12 @@
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {parseRoadmap, itemPath, resolveFrom, rebaseLinks} = require('./roadmap.js');
+const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
+  blockerMismatches, blockers} = require('./roadmap.js');
 
 const root = path.resolve(__dirname, '..');
 const STAGES = ['open', 'code-review', 'remediation', 'done'];
+const FAMILIES = ['bugs', 'backlog'];
 
 const run = (cmd, args) => spawnSync(cmd, args, {cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 const git = (...args) => run('git', args);
@@ -36,12 +40,85 @@ function stageOf(ticket) {
   return parts.length > 3 && STAGES.includes(parts[2]) ? parts[2] : 'open';
 }
 
+function filesAt(stage, family) {
+  const dir = path.join(root, 'documentation', family, stage === 'open' ? '' : stage);
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter(name => name.endsWith('.md') &&
+    fs.statSync(path.join(dir, name)).isFile()).sort().map(name => path.join(dir, name));
+}
+
+function ticketSummary(file, currentBlockers = new Map()) {
+  const text = fs.readFileSync(file, 'utf8');
+  const title = (text.match(/^#\s+(.+)$/m) || [])[1] || path.basename(file, '.md');
+  const hasGeneratedMarker = /<!-- roadmap-blocker:start -->/.test(text);
+  const hasManualBlocker = /^## Additional blocker\s*$/m.test(text) ||
+    (!hasGeneratedMarker && /^## Blocker\s*$/m.test(text));
+  const blocked = currentBlockers.has(path.resolve(file)) || hasManualBlocker;
+  return {file, title, blocked};
+}
+
+function ticketInventory() {
+  const items = parseAll();
+  validateBlockerMarkers(items);
+  const currentBlockers = blockerState(items).reasons;
+  const inventory = [];
+  for (const family of FAMILIES) for (const stage of STAGES)
+    for (const file of filesAt(stage, family))
+      inventory.push(Object.assign({family, stage}, ticketSummary(file, currentBlockers)));
+  return inventory;
+}
+
+function printTickets(tickets) {
+  if (!tickets.length) { console.log('  (none)'); return; }
+  for (const ticket of tickets)
+    console.log('  ' + rel(ticket.file) + ' — ' + ticket.title);
+}
+
+function nextTickets(family = 'all') {
+  if (family !== 'all' && !FAMILIES.includes(family))
+    throw new Error('Ticket family must be one of: bugs, backlog, all');
+  const tickets = ticketInventory().filter(ticket => ticket.stage === 'open' && !ticket.blocked &&
+    (family === 'all' || ticket.family === family));
+  console.log('Actionable ' + (family === 'all' ? 'tickets' : family) + ':');
+  printTickets(tickets);
+}
+
+function listTickets() {
+  const tickets = ticketInventory();
+  const groups = [
+    ['Actionable bugs', ticket => ticket.family === 'bugs' && ticket.stage === 'open' && !ticket.blocked],
+    ['Actionable backlog', ticket => ticket.family === 'backlog' && ticket.stage === 'open' && !ticket.blocked],
+    ['Blocked', ticket => ticket.stage === 'open' && ticket.blocked],
+    ['In code review', ticket => ticket.stage === 'code-review'],
+    ['In remediation', ticket => ticket.stage === 'remediation'],
+  ];
+  for (const [heading, include] of groups) {
+    console.log(heading + ':');
+    printTickets(tickets.filter(include));
+    console.log('');
+  }
+}
+
+function validateBlockerMarkers(items) {
+  const malformed = blockerMismatches(items).filter(mismatch => !mismatch.expected);
+  if (malformed.length) throw new Error(malformed.map(mismatch =>
+    rel(mismatch.file) + ' ' + mismatch.reason).join('\n'));
+}
+
 function move(ticket, stage) {
   if (!STAGES.includes(stage)) throw new Error('Stage must be one of: ' + STAGES.join(', '));
   const from = rel(ticket);
   const dir = stage === 'open' ? ticketFamily(from) : ticketFamily(from) + '/' + stage;
   const to = path.join(dir, path.basename(from));
-  if (from === to) { console.log('Already in ' + dir + '/'); return; }
+  if (from === to) {
+    validateBlockerMarkers(parseAll());
+    blockers(parseAll(), true, true);
+    console.log('Already in ' + dir + '/; reconciled generated blocker sections.');
+    return;
+  }
+  // A failed blocker refresh must not leave the ticket or its roadmap entry
+  // half-moved. Validate every generated marker before the first write.
+  validateBlockerMarkers(parseAll());
   fs.mkdirSync(path.join(root, dir), {recursive: true});
   const tracked = git('ls-files', '--error-unmatch', from).status === 0;
   if (tracked) {
@@ -72,6 +149,7 @@ function move(ticket, stage) {
     if (stage === 'done') closeRoadmapItem(item, to);
     else if (stage !== 'open') setRoadmapStatus(item, 'in-progress');
   }
+  blockers(parseAll(), true, true);
 }
 
 // The open entry of a roadmap item: its ### heading up to the next heading.
@@ -99,8 +177,12 @@ function closeRoadmapItem(item, ticket) {
   const link = file => path.relative(item.dir, file).split(path.sep).join('/');
   const ticketFile = path.resolve(root, ticket);
   const architecture = path.join(item.dir, 'architecture.md');
-  const archLink = [...fs.readFileSync(ticketFile, 'utf8').matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)]
-    .find(m => /^[^#]+#./.test(m[2]) && resolveFrom(path.dirname(ticketFile), m[2]) === architecture);
+  const ticketText = fs.readFileSync(ticketFile, 'utf8');
+  const links = [];
+  const linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let match;
+  while ((match = linkPattern.exec(ticketText))) links.push(match);
+  const archLink = links.find(m => /^[^#]+#./.test(m[2]) && resolveFrom(path.dirname(ticketFile), m[2]) === architecture);
   const archCell = archLink ? '[' + archLink[1] + '](architecture.md#' + archLink[2].split('#')[1] + ')' : '';
   const row = '| ' + item.id + ' | ' + item.title + ' | [' + path.basename(ticket, '.md') + '](' + link(ticketFile) + ') | ' +
     archCell + ' |';
@@ -137,6 +219,16 @@ function greenPathFor(pending) {
   if (pending.startsWith('tests/fixtures/corp-decisions-pending/'))
     return 'tests/fixtures/corp-decisions/' + pending.slice('tests/fixtures/corp-decisions-pending/'.length);
   return null;
+}
+
+function reproductionExpectationsMatch(file, before, after) {
+  const isExpectation = line => file.endsWith('.txt')
+    ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line)
+    : /assert/.test(line);
+  const beforeExpectations = before.filter(isExpectation);
+  const afterExpectations = after.filter(isExpectation);
+  return beforeExpectations.length === afterExpectations.length &&
+    beforeExpectations.every((line, index) => line === afterExpectations[index]);
 }
 
 function check(ticket) {
@@ -181,8 +273,11 @@ function check(ticket) {
         const addedLines = after.filter(line => !before.includes(line));
         const isExpectation = line => green.endsWith('.txt') ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line) : /assert/.test(line);
         const changedExpectations = removed.concat(addedLines).filter(isExpectation);
-        if (changedExpectations.length) {
-          report('FAIL', 'Reproduction expectations changed:\n      ' + changedExpectations.map(l => l.trim()).join('\n      '));
+        if (changedExpectations.length || !reproductionExpectationsMatch(green, before, after)) {
+          const detail = changedExpectations.length
+            ? ':\n      ' + changedExpectations.map(l => l.trim()).join('\n      ')
+            : ' order.';
+          report('FAIL', 'Reproduction expectations changed' + detail);
         } else if (removed.length || addedLines.length) {
           report('WARN', 'Reproduction changed outside its expectations (' + removed.length + ' lines removed, ' +
             addedLines.length + ' added); the Resolution should explain why.');
@@ -208,14 +303,14 @@ function check(ticket) {
     unticked.map(line => line.replace(/^\s*- \[ \]\s*/, '')).join('\n      '));
 
   // Gated tickets (documentation/ai-planning.md, "Acceptance gates") ship behind
-  // a default-off AI option until F4 gate evidence is recorded.
+  // a default-off AI option until their applicable gate evidence is recorded.
   if (criteria && /behind an AI option/.test(criteria)) {
     const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
     const option = gate && (gate.match(/`(\w+)`/) || [])[1];
     const code = ['ai_corp.js', 'ai_runner.js'].map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
     const setting = option && (code.match(new RegExp('\\b' + option + '\\s*:\\s*(true|false)\\b')) || [])[1];
     const passed = gate && /^passed\b/i.test(gate);
-    if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending F4 | failed — `<option>` …" line.');
+    if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');
     else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
     else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
@@ -247,15 +342,21 @@ function check(ticket) {
   process.exitCode = failed ? 1 : 0;
 }
 
-module.exports = {setRoadmapStatus, closeRoadmapItem};
+module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
+  closeRoadmapItem, reproductionExpectationsMatch};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
   try {
     if (command === 'check' && ticket) check(ticket);
     else if (command === 'move' && ticket && stage) move(ticket, stage);
+    else if (command === 'next' && !stage) nextTickets(ticket || 'all');
+    else if (command === 'list' && !ticket) listTickets();
     else {
-      console.log('usage: node scripts/ticket.js check <ticket.md>\n       node scripts/ticket.js move <ticket.md> <' + STAGES.join('|') + '>');
+      console.log('usage: node scripts/ticket.js check <ticket.md>\n' +
+        '       node scripts/ticket.js move <ticket.md> <' + STAGES.join('|') + '>\n' +
+        '       node scripts/ticket.js next [bugs|backlog|all]\n' +
+        '       node scripts/ticket.js list');
       process.exitCode = 1;
     }
   } catch (error) {

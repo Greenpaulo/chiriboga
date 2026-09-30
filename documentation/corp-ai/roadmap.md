@@ -9,8 +9,10 @@ Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md)
 - `node scripts/roadmap.js list` prints every item with its status.
 - `node scripts/roadmap.js gates` lists items with an acceptance gate by what is
   left to do; see [../judging-ai-changes.md](../judging-ai-changes.md).
-- `tests/ai-roadmaps.test.js` fails if a status, link or dependency here
-  disagrees with the tickets.
+- `node scripts/roadmap.js blockers` lists tickets held by unfinished
+  dependencies; add `--fix` to refresh their generated headers.
+- `tests/ai-roadmaps.test.js` fails if a status, link, dependency or generated
+  blocker header disagrees with the tickets.
 
 ## Server security (L)
 
@@ -271,3 +273,9 @@ Existing code that breaks a principle and must be migrated.
 - **Depends on:** none
 - **Ticket:** [corp_ai_finding_13_legacy_title_lists.md](../backlog/corp_ai_finding_13_legacy_title_lists.md)
 - **Goal:** Replace the 64 allowlisted title uses in `ai_corp.js` with hooks; I1/I2/I5-owned rows migrate inside those items; a ratchet test blocks new ones.
+
+### P2 Route Corp card-policy randomness through the injected source
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [P2-corp-card-policy-randomness.md](specs/P2-corp-card-policy-randomness.md)
+- **Goal:** Route every playable card's Corp AI policy randomness through `CorpAI._random` while leaving gameplay randomness unchanged.

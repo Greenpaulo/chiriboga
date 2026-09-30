@@ -614,12 +614,20 @@ assert.strictEqual(
   '36012 discounts itself for every HQ ice',
 );
 assert.strictEqual(tailgate.modifyPlayCost.Resolve.call(tailgate, sellOut), 0);
+context.attackedServer = context.corp.HQ;
+tailgate.responseOnRunSuccessful.Resolve.call(tailgate);
+assert.strictEqual(
+  tailgate.modifyBreachAccess.Resolve.call(tailgate),
+  0,
+  '36012 ignores successful runs it did not initiate',
+);
 tailgate.Resolve.call(tailgate);
 assert.strictEqual(runTarget, context.corp.HQ);
-context.attackedServer = context.corp.HQ;
 assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 0);
-tailgate.responseOnRunSuccessful.Resolve.call(tailgate, context.corp.HQ);
+tailgate.responseOnRunSuccessful.Resolve.call(tailgate);
 assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 2);
+tailgate.responseOnRunEnds.Resolve.call(tailgate);
+assert.strictEqual(tailgate.modifyBreachAccess.Resolve.call(tailgate), 0);
 
 const borrowedGoods = context.cardSet[36013];
 assert.strictEqual(borrowedGoods.memoryUnits, 1);
