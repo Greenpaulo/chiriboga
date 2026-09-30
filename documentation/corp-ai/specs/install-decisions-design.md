@@ -263,7 +263,7 @@ legacy relative order.
 | `economyValue` | -4 to 8 | I5: expected return over expected lifetime minus install, rez and activation costs (clicks at `CLICK_VALUE`) |
 | `trapValue` | 0 to 4 | I5: punishment severity times the probability of attracting a run; never feeds `securityGain` |
 | `deceptionValue` | 0 to 1 | bounded input from the existing deception profiles (`_deceptionInstallDistance()`, `_remoteDeceptionProfile()`) |
-| `installCost` | minus credits | the install cost actually paid |
+| `installCost` | -8 to 0 | `-min(8, actualInstallCost)`; `actualInstallCost` is also recorded separately in `scoreBreakdown` for diagnostics, but only this bounded component enters the score |
 | `reserveCost` | -6 to 0 | credits that must stay available for existing rez obligations (the L1.1 shared unrezzed-ICE budget) and for post-rez spending that cards declare with `AIReserveCredits` (read through `_reserveCreditsForCard()`), counted only when spending now pushes the Corp below them |
 | `opportunityCost` | -4 to 0 | clicks beyond the first at `CLICK_VALUE`, plus I3's value of a role the install displaces (for example the only scoring remote) |
 

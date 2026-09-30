@@ -17,14 +17,14 @@ See [architecture: known limits](../architecture.md#known-limits) and [server se
 5. **Restricted credits.** Owned by L6.1 (payment-constraint allocation); listed here only so the limits section has one owner per row.
 
 ## Design
-- **Priority: unpriceable breakers.** Separate "no matching breaker" from "matching breaker, price unknown". `_breakerActivationCost()` reports whether it priced the breaker. An unpriced matching breaker never produces a hard lockout: it is priced by a deliberately optimistic fallback (one credit per subroutine plus one credit per strength point of gap), and `reasons` records "unpriced breaker <title>" so the gap is visible in logs. Add a declarative hook, `AIBreakCost(iceCard, subroutineCount, server)`, returning `{credits, clicks, counters}`, for breakers whose mechanism does not go through `ImplementIcebreaker` (click-to-break, counter-spending, conditional costs), consulted before the probe. This slice can be raised on its own (as L9.1) ahead of the rest.
+- **Priority: unpriceable breakers.** Separate "no matching breaker" from "matching breaker, price unknown". `_breakerActivationCost()` reports whether it priced the breaker. An unpriced matching breaker is conservatively treated as reachable: while its price remains unknown it cannot make the server secure, contribute a hard lockout or add a finite mandatory break cost. `reasons` records "unpriced breaker <title>" so the gap is visible in logs. Add a declarative hook, `AIBreakCost(iceCard, subroutineCount, server)`, returning `{credits, clicks, counters}`, for breakers whose mechanism does not go through `ImplementIcebreaker` (click-to-break, counter-spending, conditional costs), consulted before the probe. A future numeric fallback may replace the reachable treatment only after tests prove it is a lower bound on actual cost for every breaker to which it applies. This slice can be raised on its own (as L9.1) ahead of the rest.
 - **Route state.** Carry a small route state through `_evaluateServerSecurity()`'s per-ICE loop: Grip size after damage taken so far (limit 2), breakers still installed (limit 3), and reducer counters still unspent (limit 4). For limits 3 and 4 the Runner chooses the cheaper option (pay to break the trash subroutine, or run the inner ICE without that breaker; spend counters where they save most), using the same finite-use allocation idea as L4.1.
 - Keep the evaluation read-only (no counters, credits or run state changed) and inside the existing hypothetical guards.
 - Document `AIBreakCost` in `documentation/ai.md`.
 
 ## Safety and information boundary
 - Only public, installed Runner cards and public pile sizes; never Grip identities.
-- The optimistic fallback in limit 1 must never make a server look *more* secure than today.
+- An unpriced matching breaker must never make a server secure or create a hard lockout; any future optimistic numeric fallback must have a tested lower-bound invariant.
 - Limits 2–4 make the Corp more confident, so each must be proved against an oracle before it is adopted.
 
 ## Test scenarios

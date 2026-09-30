@@ -166,12 +166,13 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 
 ## 6. Verify
 
-- The reproduction passes. `git mv` it into the green suite
-  (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged.
-  Keep the original pending path on the ticket's `**Reproduction:**` line and
-  also name the new green path and passing command. `ticket.js check` uses the
-  original path from Git history to verify that assertions or `EXPECT` lines
-  were not changed during the move.
+- The reproduction passes. Move it into the green suite
+  (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged:
+  use `git mv` for a tracked reproduction and `mv` for a newly created,
+  untracked reproduction. Keep the original pending path on the ticket's
+  `**Reproduction:**` line and also name the new green path and passing command.
+  `ticket.js check` uses the original path from Git history to verify that
+  assertions or `EXPECT` lines were not changed during the move.
 - Add a variation or unit test when a broad heuristic changed.
 - `node tests/run-all-tests.js` passes.
 - Gated tickets: run the selected gate exactly as the ticket defines it and

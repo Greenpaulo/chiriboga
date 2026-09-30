@@ -23,8 +23,10 @@ depth count. This ticket also fixes the accidental array `<` comparison in
 `_withHypothetical(apply, evaluate, restore)` exists: `try { apply(); return
 evaluate(); } finally { restore(); }`. Only `_ordinaryPurgeOutcome()` uses it.
 Every other probe changes state by hand, some with a hand-written
-`try/finally` and some with none. None of them is visible to a cache that
-looks for `_withHypothetical()`. See
+`try/finally` and some with none. Sites 2–8 now raise `_hypotheticalDepth`
+around their changed-board evaluations, so F3 bypasses its cache there, but
+they still need guarded restoration and one consistent mechanism. Sites 9–11
+remain outside that partial Corp-side protection. See
 [architecture: foundations](../corp-ai/architecture.md#foundations).
 
 Inventory, from `rg -n` over `ai_corp.js`, `runcalculator.js` and the `AI*`
@@ -54,12 +56,12 @@ AI's paired hooks `AIPrepareHypotheticalForRC`/`AIRestoreHypotheticalFromRC`
 Aircheck). `ai_runner.js` calls both pairs without `finally`. They belong to
 the Runner's principle debt.
 
-Correction to the earlier version of this ticket: it said
-`_icePreventsGameWinningBreach()` and `_criticalBreachDefenseAction()`
-"already restore correctly". They restore on a throw, but by hand. A cache
-keyed on `_withHypothetical()` would not see them and would serve the
-real-board result to both the with-ICE and the without-ICE probe (rows 2 to
-4), which silently turns those checks off.
+Correction to the earlier version of this ticket: sites 2–8 already raise
+`_hypotheticalDepth`, and `_evaluateServerSecurity()` bypasses F3's cache at
+that depth. Their remaining migration is about guaranteed restoration and a
+single guarded mechanism, not a current risk of cached real-board security
+results. Rows 9–11 still lack the shared depth protection and must either be
+deleted or migrated as specified.
 
 ## Design
 - **One guarded mechanism.** `_withHypothetical(apply, evaluate, restore)`
@@ -145,16 +147,19 @@ latent path in the bug ticket, and the `.length` comparison gives the same
 result as the string comparison for arrays of plain objects.
 
 ## Things to consider
-- F3 depends on this ticket being complete, not partly done. Any row still
-  changing state by hand is a place where the cache can serve a real-board
-  result inside a hypothetical.
+- F3's cache is already protected at sites 2–8 by their explicit depth bumps.
+  Completing this ticket removes the fragile hand-written restoration and
+  closes the unprotected rows 9–11 without leaving two mechanisms to maintain.
 - The Runner-side hook pairs listed above need the same treatment under the
   Runner's principle debt. The ratchet keeps them visible.
 - Rows 2 to 4 each run the full security evaluator twice per candidate. F3
   must not try to cache them. The depth count ensures it does not.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] Every test scenario above is covered by a deterministic test. Assert the
+  logged reason and selected choice only for scenarios that make a decision;
+  restoration-after-throw and function-removal scenarios instead assert their
+  state and structural outcomes directly.
 - [ ] Every row in the inventory is migrated (or, for row 9, deleted), and `tests/corp-ai-hypothetical-mutation.test.js` exists and passes with only the out-of-scope Runner entries left in its allowlist.
 - [ ] Every mutated collection or field has a regression test showing it is restored after a throw (scenario 2).
 - [ ] Decision snapshots are identical to the recorded baseline except for listed, justified deltas.

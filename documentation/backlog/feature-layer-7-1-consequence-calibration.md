@@ -30,6 +30,10 @@ See [architecture: central pressure and breach-loss risk](../corp-ai/architectur
   - `weight` in `[0, 1]`: `max(winProbability, min(1, pointsExposed / max(1, AgendaPointsToWin() - AgendaPoints(runner))))`, the single scalar that I2's `consequenceWeight` (`0.25 + 0.75 × weight`, in `specs/install-decisions-design.md`) reads.
   L3.5.1 (debt rate) and I2 (marginal-security weighting) consume this function; neither re-derives these values.
 - **Central penalty.** Behind `this.options.consequenceWeightedCentralPressure` (default `false`), scale `_centralServerThreat()`'s access component by `_breachConsequence(server).pointsExposed` and `winProbability`, keeping the eight-point bound. Inputs: agenda points needed to win, HQ size and Corp-known agenda density, R&D size, top cards only where a game effect revealed them to the Corp, and remaining uses/counters reported by the hook.
+  Compute the public access count used by `_breachConsequence()` and
+  `_centralBreachLossRisk()` from a raw pressure summary that does not apply
+  consequence weighting. Apply `_centralServerThreat()`'s consequence
+  weighting only after that summary exists, so the calculation cannot recurse.
 - Keep the hook mechanical; consequence weighting belongs in the evaluator.
 - A zero-counter scaling engine (for example Conduit) may contribute bounded growth pressure but must not claim current multi-access.
 - Tactical threshold: candidate values of `CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD` are compared under the same gate; the constant changes only for a value that passes it.
@@ -63,7 +67,12 @@ F4 comparison (paired seeds, committed deck pool, 200 games per deck pair, boots
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
-- [ ] The F4 collector `exhaustedPressureProtectionInstalls` (ICE installed on HQ or R&D in a Corp turn when every public central-pressure source on that server reports zero current `additionalAccess` because its uses or counters are spent) is added through F4's collector extension point.
+- [ ] The F4 collector `exhaustedPressureProtectionInstalls` is added through
+  F4's collector extension point. It counts an ICE install on HQ or R&D only
+  when at least one public central-pressure source for that server has spent
+  uses or counters and no source reports positive current `additionalAccess`;
+  a server with no pressure sources, or only active non-access pressure, does
+  not qualify.
 - [ ] `_breachConsequence(server)` exists and is the only breach-consequence calculation; L3.5.1 and I2 are told to consume it.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.

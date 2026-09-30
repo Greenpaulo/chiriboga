@@ -138,8 +138,11 @@ A gated item:
 - is judged by F4's comparison rule: paired seeds, deck pairs from the committed
   deck pool, 200 games per deck pair unless the gate says more, and a bootstrap
   95% confidence interval per metric. The gate passes when no guarded metric's
-  interval admits a regression beyond its tolerance and, for an improvement,
-  the interval's lower bound is above zero;
+  interval admits a regression beyond its tolerance. For an improvement,
+  first orient the paired difference so positive always means better
+  (`candidate - baseline` for higher-is-better metrics, `baseline - candidate`
+  for lower-is-better metrics), then require the interval's lower bound to be
+  above zero;
 - carries the two gate criteria shown in the template below, without their
   "(Gated items)" prefix. Ungated items delete them.
 

@@ -32,6 +32,10 @@ reproduction is confirmed later by `implement-ticket`.
    - Corp AI decision, log has decision snapshots:
      `node tests/extract-fixture.js <log> --list`, then
      `node tests/extract-fixture.js <log> <n> <slug> --expect <correct> --pending`.
+   - Corp AI decision, log has snapshots but the relevant snapshot contains
+     non-text options that `tests/extract-fixture.js` cannot replay: write a
+     purpose-built `tests/pending/<slug>.test.js` that reconstructs that
+     decision and asserts the correct choice.
    - Corp AI decision, no snapshots: hand-write
      `tests/fixtures/corp-decisions-pending/<slug>.txt` from the
      `RunnerTestField(...)`/`CorpTestField(...)` dump nearest the decision

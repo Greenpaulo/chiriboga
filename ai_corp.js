@@ -2792,9 +2792,33 @@ class CorpAI {
   //Public board state a security result depends on. A second guard behind
   //_hypotheticalDepth: a probe that changes any of this gets a fresh result.
   _securityBoardKey() {
+    var referencedCards = new Map();
+    var remember = (cards) =>
+      (cards || []).forEach((card) => {
+        if (card && !referencedCards.has(card))
+          referencedCards.set(card, referencedCards.size);
+      });
+    var allServers = [corp.HQ, corp.RnD, corp.archives].concat(
+      corp.remoteServers || [],
+    );
+    allServers.forEach((server) => {
+      if (!server) return;
+      remember(server.ice);
+      remember(server.root);
+    });
+    var rig = runner.rig || {};
+    remember(rig.programs);
+    remember(rig.hardware);
+    remember(rig.resources);
+    remember(runner.cards);
+    var referenceKey = (card) =>
+      !card ? "-" : referencedCards.has(card) ? referencedCards.get(card) : "?";
     var cardKey = (card) =>
       card.setNumber +
       (card.rezzed ? "r" : "") +
+      (card.bypassed ? "b" : "") +
+      (card.usedThisTurn ? "u" : "") +
+      ":" + referenceKey(card.chosenCard) +
       ":" + Counters(card, "advancement") +
       ":" + Counters(card, "power") +
       ":" + Counters(card, "virus") +
@@ -2802,17 +2826,18 @@ class CorpAI {
       ":" + (card.hostedCards ? card.hostedCards.length : 0);
     var list = (cards) => (cards || []).map(cardKey).join(",");
     var serverKey = (server) => (server ? list(server.ice) + "|" + list(server.root) : "-");
-    var rig = runner.rig || {};
     return [
       corp.creditPool, corp.clickTracker, corp.badPublicity, (corp.scoreArea || []).length,
-      runner.creditPool, runner.clickTracker, runner.tags, (runner.scoreArea || []).length,
+      runner.creditPool, runner.temporaryCredits, runner.clickTracker,
+      runner.tempBonusClicks, runner.tags, (runner.scoreArea || []).length,
+      typeof playerTurn == "undefined" ? "" : playerTurn == corp ? "corp" : playerTurn == runner ? "runner" : "other",
       (runner.grip || []).length, corp.HQ && corp.HQ.cards ? corp.HQ.cards.length : 0,
       list(rig.programs), list(rig.hardware), list(rig.resources), list(runner.cards),
       typeof attackedServer == "undefined" || !attackedServer ? "" : attackedServer.serverName,
       typeof approachIce == "undefined" ? "" : approachIce,
       typeof encountering == "undefined" ? "" : encountering,
       typeof currentPhase == "undefined" || !currentPhase ? "" : currentPhase.identifier,
-      [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers || []).map(serverKey).join(";"),
+      allServers.map(serverKey).join(";"),
     ].join("#");
   }
 
@@ -4138,7 +4163,16 @@ class CorpAI {
     //otherwise just add ice to whatever server needs it most
     serverToInstallTo = null;
     if (emptyProtectedRemotes.length > 0)
-      serverToInstallTo = this._serverToProtect();
+      serverToInstallTo = this._serverToProtect(
+        false,
+        false,
+        (server, security) =>
+          this._shouldInstallIceLayer(
+            server,
+            iceInstallEconomyCheck,
+            security,
+          ),
+      );
     //but don't create a new server if the above economy check failed
     //because we might be saving to afford better ice in critical server
     if (serverToInstallTo != null || iceInstallEconomyCheck) {
