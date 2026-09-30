@@ -2,6 +2,7 @@
 // The helper scripts agents rely on to keep context small must keep working as
 // the tracker, set files and engine change.
 const assert = require('assert');
+const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
 
@@ -28,5 +29,10 @@ assert(cardLines.length >= 1, 'batch-brief.js lists the batch cards');
 assert.strictEqual((brief.match(/Text: /g) || []).length, cardLines.length, 'each card has rules text');
 assert.strictEqual((brief.match(/no unfinished markers/g) || []).length, cardLines.length,
   'a completed batch shows no unfinished markers');
+
+const hooks = JSON.parse(fs.readFileSync(path.join(root, '.codex', 'hooks.json'), 'utf8'));
+const stopCommand = hooks.hooks.Stop[0].hooks[0].command;
+assert(/git rev-parse --show-toplevel/.test(stopCommand),
+  'the Stop hook resolves its script from the Git root');
 
 console.log('Agent helper scripts: show.js and batch-brief.js work.');

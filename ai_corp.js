@@ -4138,7 +4138,16 @@ class CorpAI {
     //otherwise just add ice to whatever server needs it most
     serverToInstallTo = null;
     if (emptyProtectedRemotes.length > 0)
-      serverToInstallTo = this._serverToProtect();
+      serverToInstallTo = this._serverToProtect(
+        false,
+        false,
+        (server, security) =>
+          this._shouldInstallIceLayer(
+            server,
+            iceInstallEconomyCheck,
+            security,
+          ),
+      );
     //but don't create a new server if the above economy check failed
     //because we might be saving to afford better ice in critical server
     if (serverToInstallTo != null || iceInstallEconomyCheck) {

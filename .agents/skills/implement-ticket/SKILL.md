@@ -128,8 +128,10 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 
 ## 6. Verify
 
-- The reproduction passes. `git mv` it into the green suite
-  (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged.
+- The reproduction passes. Move it into the green suite
+  (`tests/fixtures/corp-decisions/` or `tests/`) with its expectation unchanged:
+  use `git mv` for a tracked reproduction and `mv` for a newly created,
+  untracked reproduction.
 - Add a variation or unit test when a broad heuristic changed.
 - `node tests/run-all-tests.js` passes.
 - Gated tickets: if F4 is `done`, run its gate as the ticket states it and F4's

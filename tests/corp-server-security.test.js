@@ -1320,6 +1320,43 @@ test('ranked asset installs preserve remote ranking and share one destination or
   assert.strictEqual(firstOrder[1], third);
   assert.strictEqual(rolls, 2);
 });
+test('ranked ICE installs apply layer eligibility on the fallback path', () => {
+  const remote = {serverName: 'Remote 0', ice: [{}], root: []};
+  const iceCard = {player: corp, cardType: 'ice', rezCost: 3};
+  corp.HQ.cards = [];
+  const predicateCalls = [];
+  let iceOptionCalls = 0;
+  const replacements = {
+    _emptyProtectedRemotes: () => [remote],
+    _potentialAdvancement: () => 0,
+    _uniqueCopyAlreadyInstalled: () => false,
+    _sufficientEconomy: () => false,
+    _serverToProtect: (includeArchives, returnDetails, eligible) => {
+      predicateCalls.push(typeof eligible === 'function');
+      return eligible ? undefined : remote;
+    },
+    _shouldInstallIceLayer: () => false,
+    _scoringServers: () => [],
+    _isHVT: () => false,
+    _bestProtectedRemote: () => null,
+    _agendasInHand: () => 0,
+    _upgradeInstallPreferences: () => [],
+    _iceInstallOptions: () => { iceOptionCalls++; return []; },
+    _copyOfCardExistsIn: () => null,
+  };
+  const originals = {};
+  Object.keys(replacements).forEach(name => {
+    originals[name] = ai[name];
+    ai[name] = replacements[name];
+  });
+  try {
+    ai._rankedInstallOptions([iceCard]);
+  } finally {
+    Object.keys(originals).forEach(name => {ai[name] = originals[name];});
+  }
+  assert.deepStrictEqual(predicateCalls, [true, false, true]);
+  assert.strictEqual(iceOptionCalls, 0, 'an ineligible server receives no ICE options');
+});
 test('purge models cards trashed by purge even when they have no counters', () => {
   const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});
   const bypass = {

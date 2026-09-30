@@ -11,7 +11,13 @@ Validate and tune long-run bait/bluff frequencies against humans rather than inf
 See [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence). Bait frequency (`_calculateBaitFrequency()`), agenda-bluff probability (`_shouldBluffAgendaServer()`) and profile bounds (`_remoteDeceptionProfile()`) are fixed in code and have never been measured against human play. The only recording mechanism is the opt-in `DecisionSnapshots` record in `utility.js`, which captures choice points for reproduction, not posture decisions or their outcomes.
 
 ## Design
-- Add opt-in, anonymous local telemetry recording: posture probability, roll bucket, epoch id (L8.4), visible server shape, current match-local feedback weights (L8.5), whether the server was run, and the resulting agenda/punishment outcome.
+- Add opt-in, anonymous local telemetry recording: posture probability, roll
+  bucket, epoch id (L8.4), visible server shape, current match-local feedback
+  weights (L8.5), whether the server was run, and the resulting
+  agenda/punishment outcome. At decision time also record the public variables
+  required by L8.4's correlation gate: turn number, both players' credits and
+  agenda points, Runner Grip size, HQ size, the server's root/ICE counts and
+  the deepest central's ICE count.
 - Compare policy versions before changing the present bounds.
 - Telemetry must not itself alter decisions or game state; any match-local adaptation belongs to L8.5.
 - Document the telemetry flags and record schema in `documentation/ai.md` where they are card-facing.
@@ -35,7 +41,11 @@ Regression guard (owned by other items, not acceptance for this one): match-winn
 Human gate, not F4. Frequencies or bounds change only when opt-in human telemetry holds at least 500 postured-server records from at least 100 games, and a bootstrap 95% CI over games shows:
 
 - `runRateSingleVariableCorrelation` (largest absolute Spearman correlation between whether the human ran a postured server and any one public variable listed for `bluffSingleVariableCorrelation` in the L8.4 ticket): CI upper bound at most 0.10;
-- `bluffNetAgendaPoints` (agenda points gained by scored bluffed agendas plus trap outcomes, minus agenda points lost from bluffed servers, per game): CI lower bound at or above 0 for the proposed coefficients.
+- `bluffAgendaPointDelta` (agenda points gained by scored bluffed agendas minus
+  agenda points lost from bluffed servers, per game): CI lower bound at or
+  above 0 for the proposed coefficients. Report trap outcomes separately by
+  defined units (trigger count, net damage, tags and credits lost); do not add
+  unlike trap events to agenda points.
 
 ## Things to consider
 - Parked until human play data exists: the gate cannot be evaluated without a human sample, so do not start this item before there is a way to collect one.

@@ -56,8 +56,11 @@ Extend the exemption to a winning install-and-advance line from HQ: before the
 interrupt, find an HQ agenda that `_rankedInstallOptions()` would offer as
 "could be installed and fast-advanced to win" (factor that check into a helper
 both call) and pass it to `_criticalBreachDefenseAction()` so the early return
-covers it. No title checks. Longer term, I7.2's forced/winning band replaces
-this ordering.
+covers it. When that priority install is actually selected, the shared path
+must call `_log()` with the selected agenda and the reason "could be installed
+and fast-advanced to win"; returning the reason in an option object alone is
+not enough for the acceptance assertion. No title checks. Longer term, I7.2's
+forced/winning band replaces this ordering.
 
 ## Acceptance criteria
 - [ ] Writing the reproduction above is the first step; it fails before the fix.

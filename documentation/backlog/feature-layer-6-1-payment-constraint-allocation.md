@@ -17,6 +17,11 @@ See [architecture: Runner effective credit ceiling](../corp-ai/architecture.md#r
 
 ## Design
 - Return credit-source objects with an amount and an eligibility predicate (from `canUseCredits` and declared hooks).
+- Model Corsair's aggregate `AIRunPoolCreditOffset` as a Corsair-only source
+  eligible for the route costs Corsair represents. Cloak currently has no
+  `canUseCredits` hook, so do not silently drop the offset or pretend it is a
+  generic per-demand source. Scenario 7 must exercise this same contract; a
+  future alternative may add an explicit hook to Cloak and retire the offset.
 - Build payment demands per route: breaker costs from the security evaluator and bypass costs from L4.1's allocator, each tagged with the card that pays it.
 - **Bypass payment is owned here.** L4.1 decides which bypass is used where and emits its cost as a demand; this item decides which sources may pay it. That is why this item depends on L4.1.
 - Allocate sources to demands with the same bipartite max-flow approach as `_canFundRezPlan()` (generalise it into one shared helper rather than writing a second allocator). The previous proposal, a greedy "most restricted source first", can fail when two restricted sources overlap; the max-flow is exact for this shape and is already fast enough for multi-ICE routes.

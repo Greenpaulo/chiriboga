@@ -86,8 +86,10 @@ next. Small failures are cheaper to fix than a batch's worth at once.
 
 ## 4. Verify
 
-- Run the focused tests and every command under **Required shared
-  verification** in the tracker, then `node tests/run-all-tests.js`.
+- Run `node scripts/card-status.js` to regenerate
+  `documentation/card-status.md`, then run the focused tests, every command
+  under **Required shared verification** in the tracker, and
+  `node tests/run-all-tests.js`.
 - Rerun `node scripts/batch-brief.js <n>`: every card must show "no unfinished
   markers". Also check the range for empty effects and empty subroutine arrays.
 - Never remove or weaken assertions to make tests pass.
@@ -100,10 +102,8 @@ Only after every card and test in the batch is complete:
 2. Append a completion-log row: date, agent name, focused test files, a concise
    implementation note. Remove the no-completions placeholder for the first
    entry.
-3. Run `node scripts/card-status.js` to regenerate
-   `documentation/card-status.md` (the suite fails if it is stale), and update
-   `documentation/new-sets/card-implementation-backlog.md` when accepted
-   limitations change.
+3. Update `documentation/new-sets/card-implementation-backlog.md` when
+   accepted limitations change.
 4. Add consequential rulings, engine changes and AI decisions to the set's
    implementation-notes file named in the tracker.
 

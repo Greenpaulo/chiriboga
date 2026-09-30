@@ -32,7 +32,7 @@ const stealthPool = () => ai._effectiveRunnerCreditPool(remote).recurringCredits
 
 let failures = 0;
 function test(name, fn) {
-  try { fn(); console.log('ok   ' + name); } catch (e) { failures++; console.log('FAIL ' + name + '\n     ' + e.message); }
+  try { fn(); if (process.env.VERBOSE) console.log('ok   ' + name); } catch (e) { failures++; console.log('FAIL ' + name + '\n     ' + e.message); }
 }
 
 test('control: Corsair installed before Lampades counts Cloak\'s stealth credit', () => {

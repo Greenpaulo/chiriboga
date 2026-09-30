@@ -12,7 +12,10 @@ Facedown access-punishing cards expose `AIPunishesAccess(server)`, which `_acces
 
 ## Design
 - **Access punishment (`AIPunishesAccess`):** verify facedown ambush cards in the playable sets (for example Urtica Cipher, Snare!, Esca; Project Junebug exists only in the deprecated `coreset.js` and is out of scope) declare `AIPunishesAccess(server)` with accurate severity values.
-- **Tag punishment (`AITagPunishment`):** verify operations and assets that punish tags declare `AITagPunishment`.
+- **Tag punishment (`AITagPunishment`):** audit supported operations that
+  punish tags. The current consumer reads playable cards in HQ and evaluates
+  operation play costs; assets are out of scope unless this ticket is expanded
+  to change that consumer and add asset-specific tests.
 - **Documentation:** make sure signatures and return semantics for `AIPunishesAccess` and `AITagPunishment` are fully documented in `documentation/ai.md`.
 
 ## Safety and information boundary

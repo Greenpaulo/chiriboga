@@ -19,15 +19,17 @@ See [architecture: protection allocation](../corp-ai/architecture.md#protection-
 
 ## Design
 - **AI option.** `this.options.weightedProtectionDebt` (default `false`, per the AI options convention in `documentation/ai-planning.md`). Off: today's flat `+1`/cap `6` behaviour, unchanged; this is the fallback until the gate is met. On: the weighted increment and the wait bound below. Deterministic tests for scenarios 2, 3, 5 and 9 set the option on the instance under test.
-- **Weighted increment.** Add `_protectionDebtIncrement(entry)` and use it in `_ageProtectionPriorities()` when the option is on. It returns `1 + bonus`, with `bonus` in `[0, 1]` taken only from L7.1's `_breachConsequence(entry.server)` (for example `min(1, pointsExposed / 3)`, and `1` when `winProbability >= CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD`). The total cap stays `6`. The increment changes only how fast debt grows; it adds nothing to the score, so the existing score inputs above are not counted again. This item must not derive agenda points, win risk or backdoor state itself.
-- **Maximum wait.** Keep a second map, `_serverProtectionWait`, counting consecutive Corp-turn agings in which a server was in the ranking, insecure, not `_nothingWorthProtecting()`, received no protection, **and** `_protectionInstallsThisTurn` was non-empty (another server was protected). A turn with no protection install anywhere does not count, because allocation did not starve the server. It resets and is deleted exactly as debt is. When `wait >= this.options.maxProtectionWait` (default `3`), the entry is marked `waitOverride` and sorts after `hvtOverride` and before `adjustedScore` (longest wait first, then `adjustedScore`). The override yields when another eligible server has `_runnerMayWinIfServerBreached()` true, and it does not bypass the L3.5.2 eligibility predicate: an overridden server that cannot accept a layer passes the install to the next entry. This, not the debt cap, is what enforces the waiting bound.
+- **Weighted increment.** Add `_protectionDebtIncrement(entry)` and use it in `_ageProtectionPriorities()` when the option is on. It returns `1 + bonus`, with `bonus` in `[0, 1]` taken only from L7.1's `_breachConsequence(entry.server)` (for example `min(1, pointsExposed / 2)`, and `1` when `winProbability >= CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD`). The total cap stays `6`. The increment changes only how fast debt grows; it adds nothing to the score, so the existing score inputs above are not counted again. This item must not derive agenda points, win risk or backdoor state itself.
+- **Wait priority.** Keep a second map, `_serverProtectionWait`, counting consecutive Corp-turn agings in which a server was in the ranking, insecure, not `_nothingWorthProtecting()`, received no protection, **and** `_protectionInstallsThisTurn` was non-empty (another server was protected). A turn with no protection install anywhere does not count, because allocation did not starve the server. It resets and is deleted exactly as debt is. When `wait >= this.options.maxProtectionWait` (default `3`), the entry is marked `waitOverride` and sorts after `hvtOverride` and before `adjustedScore` (longest wait first, then `adjustedScore`). The override yields when another eligible server has `_runnerMayWinIfServerBreached()` true, and it does not bypass the L3.5.2 eligibility predicate: an overridden server that cannot accept a layer passes the install to the next entry. This is a priority threshold, not an unconditional wall-clock guarantee: when `N` eligible insecure servers compete for `C` protection installs per counted turn, the capacity-aware bound is `maxProtectionWait + ceil((N - 1) / C)` counted turns.
 - **Deception.** No new exemption. The "active deception posture" this item respects is exactly the existing `_NoMoreProtectionForThisServer()` exclusion: an excluded server gains neither debt nor wait, and a postured server below its target ages like any other, because the Corp still intends to add ICE up to the target. How long a posture stays active is L8.4's concern; this item therefore does not depend on L8.4.
 - **Telemetry.** No item-specific logging. Extend the existing "Ranked server protection" entry with `increment`, `wait` and `waitOverride`, and add F4 collectors (listed in the criteria) that read `_rankedServersToProtect()` entries at each protection install through F4's collector extension point, alongside the shared DecisionSnapshots record.
 
 ## Safety and information boundary
 - Same-turn rotation remains authoritative; weighting affects only cross-turn debt.
 - Per-turn increment in `[1, 2]`; total debt capped at `6`.
-- With the option on, no eligible, continuously insecure server waits more than `maxProtectionWait` counted turns.
+- With the option on, an eligible, continuously insecure server becomes an
+  override at `maxProtectionWait`; its maximum wait is the capacity-aware
+  bound above, because simultaneous overrides still require separate installs.
 - Secure, protected, removed, repurposed or excluded servers clear their debt and wait.
 - Use public Corp knowledge only (through `_breachConsequence()`); never inspect hidden Runner cards.
 
@@ -49,7 +51,11 @@ F4 comparison (paired seeds, committed deck pool, 200 games per deck pair, boots
 - Improvement: `highConsequenceBreaches` per game decreases: the CI of (baseline − candidate) has a lower bound above 0.
 - Guard: `pointsStolen` per game: CI upper bound of (candidate − baseline) at most +0.2.
 - Guard: `winRate`: CI lower bound of (candidate − baseline) at least −0.02.
-- Hard check: `protectionWaitTurns` never exceeds `maxProtectionWait` in any candidate game.
+- Hard check: `protectionWaitTurns` never exceeds
+  `maxProtectionWait + ceil((N - 1) / C)` in any candidate game, where `N` is
+  the number of eligible insecure servers competing when the server reaches
+  the threshold and `C` is the available protection-install capacity per
+  counted turn (at least 1 by the definition of a counted turn).
 
 ## Things to consider
 - The consequence signal has one owner, L7.1's `_breachConsequence(server)`; this item and I2 consume it. Do not add a second agenda-points-exposed calculation here.

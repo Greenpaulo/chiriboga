@@ -63,10 +63,11 @@ Randomness today:
 - **Corp AI:** F1 is done. Policy randomness comes from `CorpAI._random`. The
   constructor assigns `this._random = Math.random`, so it captures the
   function that exists at construction time.
-- **Runner AI:** not injectable. `ai_runner.js` calls `Math.random`
-  (server-potential jitter) and `RandomRange` (a random-option fallback)
-  directly. Runner item D2 (`documentation/runner-ai/roadmap.md`, proposed)
-  adds the seam.
+- **Runner AI:** Runner item D2 adds the injectable `_random` seam and routes
+  Runner policy, card hooks and dynamically assigned Runner preference
+  callbacks through it. The default still captures `Math.random` at
+  construction time; the harness must assign its dedicated stream after
+  constructing `RunnerAI`.
 - `deck/seedrandom.min.js` (which provides `Math.seedrandom`) is loaded by
   the engine pages. `gauntlet.php` and `sets/tutorial.js` use it.
 
@@ -93,14 +94,15 @@ side must not shift another side's random stream. The earlier text asked to
 Those conflict, so the rule is three independent streams per game, each
 derived from `(seed, deckPairId)`:
 - **Engine stream:** in the harness's own `vm` context only, `Math.random` is
-  replaced by `new Math.seedrandom(seed + ':engine')`. This covers
+  replaced by `new Math.seedrandom(seed + ':' + deckPairId + ':engine')`. This covers
   `RandomRange`, `Shuffle` and every card effect. Replacing the global is safe
   here because the context belongs to the harness.
 - **Corp AI stream:** after `CorpAI` is constructed, the harness assigns
-  `corp.AI._random = new Math.seedrandom(seed + ':corp')`. Replacing the
+  `corp.AI._random = new Math.seedrandom(seed + ':' + deckPairId + ':corp')`. Replacing the
   global alone would not reach it, because the constructor has already
   captured `Math.random`.
-- **Runner AI stream:** assigned the same way through D2's seam. Until D2 is
+- **Runner AI stream:** assigned through D2's seam from
+  `new Math.seedrandom(seed + ':' + deckPairId + ':runner')`. Until D2 is
   done, Runner AI draws come from the engine stream, so a Runner-side policy
   change shifts the deck shuffles. Hence the dependency.
 
@@ -211,13 +213,16 @@ and call them from `PlayerWin()`. They emit the `gameEnd` event.
 (ai-planning.md, Acceptance gates):
 - It refuses to compare reports whose pool hash, seed list, `--start`
   fixtures or collectors differ. Only the options may differ.
-- It pairs games by `(deckPairId, seed)`, 200 games per deck pair by default.
+- It pairs games by `(fixtureId, deckPairId, seed)`, 200 games per deck pair
+  and starting fixture by default.
 - Per metric it prints the mean difference and a bootstrap 95% confidence
   interval, from 10,000 resamples of the paired differences drawn with a
   fixed bootstrap seed so the comparison itself is reproducible.
 - A gate passes when each guarded metric's interval excludes a regression
-  larger than its stated tolerance, and, for an improvement gate, the
-  interval's lower bound is above zero.
+  larger than its stated tolerance. For an improvement gate, each metric
+  declares whether higher or lower is better; the paired difference is
+  oriented so positive means improvement before requiring its interval's
+  lower bound to be above zero (so lower latency is handled correctly).
 
 **Baselines.** Committed under `tests/fixtures/ai-batch/baselines/`, named
 `<pool id>-<sha>.json`, with all options off. F4 commits the first one. A
@@ -300,9 +305,10 @@ when:
 - **Dependency:** F4 depends on Runner item D2 (injectable Runner
   randomness). `scripts/roadmap.js` and `tests/ai-roadmaps.test.js` resolve
   dependencies across both roadmaps, so this Corp-to-Runner dependency is
-  valid. The harness can be built before D2 lands, but no baseline is
-  committed and no gate is judged until D2 is done. Until then, Runner draws
-  share the engine stream and paired runs diverge.
+  valid. D2's seam is implemented and awaiting independent review; no baseline
+  is committed and no gate is judged until D2 is done. The harness must keep a
+  regression check that Runner policy draws use the dedicated stream rather
+  than silently falling back to the engine stream.
 
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
