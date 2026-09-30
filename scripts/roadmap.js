@@ -87,11 +87,31 @@ function itemPath(item) {
 
 const areaName = item => path.basename(item.dir);
 
+const sectionOf = (text, heading) => {
+  const start = text.indexOf('\n' + heading + '\n');
+  if (start < 0) return '';
+  const rest = text.slice(start + heading.length + 2);
+  const end = rest.search(/^## /m);
+  return end < 0 ? rest : rest.slice(0, end);
+};
+
+const pendingGate = text =>
+  (sectionOf(text, '## Resolution').match(/^\*\*Gate:\*\*\s*pending\s+([A-Z]\d+(?:\.\d+)*)\b/im) || [])[1];
+
 const ticketRoots = () => ['backlog', 'bugs'].map(name => path.join(root, 'documentation', name));
 const markdownFiles = dir => fs.existsSync(dir) ? [].concat(...fs.readdirSync(dir).map(name => {
   const file = path.join(dir, name);
-  return fs.statSync(file).isDirectory() ? markdownFiles(file) : (name.endsWith('.md') ? [file] : []);
+  const stat = fs.lstatSync(file);
+  return stat.isDirectory() ? markdownFiles(file) : (stat.isFile() && name.endsWith('.md') ? [file] : []);
 })) : [];
+
+const isWithin = (parent, child) => child === parent || child.startsWith(parent + path.sep);
+function canonicalTicketPath(file) {
+  if (!file || !fs.existsSync(file)) return null;
+  const canonical = fs.realpathSync(file);
+  if (!fs.statSync(canonical).isFile() || path.extname(canonical) !== '.md') return null;
+  return ticketRoots().some(dir => isWithin(fs.realpathSync(dir), canonical)) ? canonical : null;
+}
 
 function generatedBlockerRange(text) {
   const starts = text.split(BLOCKER_START).length - 1;
@@ -104,6 +124,14 @@ function generatedBlockerRange(text) {
   const after = end + BLOCKER_END.length;
   return {start, end: after + (text.slice(after).startsWith('\n\n') ? 2 : text.slice(after).startsWith('\n') ? 1 : 0),
     count: starts};
+}
+
+function validateBlockerMarkers(files) {
+  for (const file of files) {
+    const range = generatedBlockerRange(fs.readFileSync(file, 'utf8'));
+    if (range && range.invalid)
+      throw new Error(path.relative(root, file) + ' has unmatched generated blocker markers');
+  }
 }
 
 function withGeneratedBlocker(text, section) {
@@ -129,8 +157,11 @@ function blockerState(items) {
   for (const item of items) {
     const file = itemPath(item);
     if (!item.fields.Ticket || item.status === 'done' || !file || !fs.existsSync(file)) continue;
+    const ticket = canonicalTicketPath(file);
+    if (!ticket) throw new Error(item.id + ' Ticket link is not a regular Markdown file under ' +
+      'documentation/bugs/ or documentation/backlog/: ' + path.relative(root, file));
     const blockers = item.depends.filter(id => !byId.has(id) || byId.get(id).status !== 'done');
-    if (blockers.length) reasons.set(file, blockers);
+    if (blockers.length) reasons.set(ticket, blockers);
   }
 
   // A reviewed gated bug need not have a roadmap item. Its Resolution line is
@@ -138,7 +169,7 @@ function blockerState(items) {
   // dependency is done.
   for (const file of [].concat(...ticketRoots().map(markdownFiles))) {
     const text = fs.readFileSync(file, 'utf8');
-    const pending = (text.match(/^\*\*Gate:\*\*\s*pending\s+([A-Z]\d+(?:\.\d+)*)\b/im) || [])[1];
+    const pending = pendingGate(text);
     if (pending && (!byId.has(pending) || byId.get(pending).status !== 'done')) {
       const current = reasons.get(file) || [];
       if (!current.includes(pending)) reasons.set(file, current.concat(pending));
@@ -197,6 +228,14 @@ function blockers(items, fix = false, quiet = false) {
   return mismatches;
 }
 
+function hasManualBlocker(file) {
+  if (!file || !fs.existsSync(file)) return false;
+  const text = fs.readFileSync(file, 'utf8');
+  const hasGeneratedMarker = text.includes(BLOCKER_START);
+  return /^## Additional blocker\s*$/m.test(text) ||
+    (!hasGeneratedMarker && /^## Blocker\s*$/m.test(text));
+}
+
 function list(items) {
   let area = null;
   for (const item of items) {
@@ -207,12 +246,18 @@ function list(items) {
 
 function next(items) {
   const byId = new Map(items.map(item => [item.id, item]));
+  const currentBlockers = blockerState(items).reasons;
   // In-progress items whose ticket is back in the open backlog (a gate waiting
   // for F4, or unfinished work) are listed too.
   const resumable = item => item.status === 'in-progress' && itemPath(item) &&
     !['code-review', 'remediation'].some(folder => itemPath(item).split(path.sep).includes(folder));
+  const ticketIsActionable = item => {
+    if (!item.fields.Ticket) return true; // proposed items still live in specs
+    const ticket = canonicalTicketPath(itemPath(item));
+    return !!ticket && !currentBlockers.has(ticket) && !hasManualBlocker(ticket);
+  };
   const ready = items.filter(item => (['ready', 'proposed'].includes(item.status) || resumable(item)) &&
-    item.depends.every(dep => byId.has(dep) && byId.get(dep).status === 'done'));
+    item.depends.every(dep => byId.has(dep) && byId.get(dep).status === 'done') && ticketIsActionable(item));
   if (!ready.length) { console.log('No item has all its dependencies done.'); return; }
   for (const item of ready) {
     const file = itemPath(item);
@@ -223,14 +268,6 @@ function next(items) {
 
 // Acceptance gates (documentation/judging-ai-changes.md). An item is gated when
 // its spec or ticket says how adoption is judged beyond deterministic tests.
-const sectionOf = (text, heading) => {
-  const start = text.indexOf('\n' + heading + '\n');
-  if (start < 0) return '';
-  const rest = text.slice(start + heading.length + 2);
-  const end = rest.search(/^## /m);
-  return end < 0 ? rest : rest.slice(0, end);
-};
-
 function gateInfo(item) {
   const file = itemPath(item);
   if (item.id === 'F4' || !file || !fs.existsSync(file)) return null;
@@ -295,6 +332,14 @@ function rebaseLinks(text, fromDir, toDir) {
 const VERIFIED = /^\*\*Verified against code:\*\* `?([0-9a-f]{7,40})`?/m;
 const git = (...args) => spawnSync('git', args, {cwd: root, encoding: 'utf8'});
 
+function codeChangesSince(sha) {
+  const changed = git('diff', '--name-only', sha, '--', ':(glob)*.js', ':(glob)sets/**/*.js')
+    .stdout.trim().split('\n').filter(Boolean);
+  const untrackedSets = git('ls-files', '--others', '--exclude-standard', '--', ':(glob)sets/**/*.js')
+    .stdout.trim().split('\n').filter(Boolean);
+  return [...new Set(changed.concat(untrackedSets))];
+}
+
 // A spec may be raised only when its claims were checked against the current
 // game and AI code (documentation/ai-planning.md, "Re-grounding a spec").
 function checkVerified(file) {
@@ -306,9 +351,9 @@ function checkVerified(file) {
     '\ndirectly under its **Read first:** line.';
   if (!sha) throw new Error(where + ' has no **Verified against code:** line.' + redo);
   if (git('cat-file', '-e', sha + '^{commit}').status !== 0) throw new Error(where + ' was verified at unknown commit ' + sha + '.' + redo);
-  const changed = git('diff', '--name-only', sha, '--', ':(glob)*.js', 'sets').stdout.trim();
-  if (changed) throw new Error(where + ' was verified at ' + sha + ', but the code has changed since:\n  ' +
-    changed.split('\n').join('\n  ') + redo);
+  const changed = codeChangesSince(sha);
+  if (changed.length) throw new Error(where + ' was verified at ' + sha + ', but the code has changed since:\n  ' +
+    changed.join('\n  ') + redo);
   return sha;
 }
 
@@ -318,6 +363,10 @@ function raise(items, id) {
   if (item.status !== 'proposed' || !item.fields.Spec) throw new Error(id + ' is ' + item.status + ', not a proposed item with a spec');
   const from = itemPath(item);
   const verified = checkVerified(from);
+  // `blockers --fix` runs after the move. Validate every file it will scan,
+  // including the source spec once it becomes a ticket, before mutating
+  // either the filesystem or the roadmap entry.
+  validateBlockerMarkers([from].concat(...ticketRoots().map(markdownFiles)));
   const backlog = path.join(root, 'documentation', 'backlog');
   const to = path.join(backlog, path.basename(from));
   if (fs.existsSync(to)) throw new Error(path.relative(root, to) + ' already exists');
@@ -339,7 +388,8 @@ function raise(items, id) {
 }
 
 module.exports = {parseRoadmap, parseAll, itemPath, gatedItems, linkTargets, resolveFrom, rebaseLinks, blockerState,
-  blockerMismatches, blockers, VERIFIED, STATUSES, ID, AREAS, root};
+  blockerMismatches, blockers, next, pendingGate, codeChangesSince, validateBlockerMarkers, hasManualBlocker,
+  VERIFIED, STATUSES, ID, AREAS, root};
 
 if (require.main === module) {
   const [command, argument] = process.argv.slice(2);

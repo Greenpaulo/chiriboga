@@ -82,10 +82,10 @@ FAIL bug: HQ holding the accessed agenda still trashes a program instead of endi
 central-server branch (thisServer.cards defined) returns true before ever calling _agendasInServer(), so an agenda sitting in HQ, R&D or Archives is never weighed against trashing the program
 
 
-`node tests/run-all-tests.js` passes on top of this addition (three
-pre-existing, unrelated failures — `ai-roadmaps.test.js`,
-`flipped-identity.test.js`, `vantagepoint-integration.test.js` — are present
-on `8d6c70e` before this change too and are outside this ticket's scope).
+`node tests/run-all-tests.js` still has three pre-existing, unrelated failures
+on top of this addition: `ai-roadmaps.test.js`, `flipped-identity.test.js`, and
+`vantagepoint-integration.test.js`. They are present on `8d6c70e` before this
+change too and are outside this ticket's scope.
 
 ## Root cause
 
@@ -97,23 +97,48 @@ on `8d6c70e` before this change too and are outside this ticket's scope).
 
 ## Proposed fix
 
-Not designed here (Draft mode). At minimum, the central-server branch needs
-to consult `corp.AI._agendasInServer(thisServer)` before deciding, using the
-same general shape the remote-server branch already has, rather than a
-card-specific or server-title special case. Whoever picks this up should
-also decide, with the side's `architecture.md`/`roadmap.md` in mind:
-- whether "no agenda in a central server" should keep today's unconditional
-  trash-a-program default (only the "has an agenda" case needs to change), and
-- whether the existing 50/50 `Math.random()` roll (once agenda-gated) is the
-  intended calibration for central servers too, or whether HQ/R&D/Archives
-  warrant different weighting than a remote server — and if a new
-  coefficient is introduced, principle 8 requires it ship default-off with
-  seeded simulation evidence rather than being hand-tuned.
+Selected candidate policy: behind `ballistaAgendaAwareSubroutine`, remove the
+unconditional central-server return and use the existing agenda-aware branch
+for every server. A central with no agenda keeps the current
+trash-a-program choice; a central with an agenda uses the same existing 50/50
+choice as a remote. This avoids a new coefficient and any card-title or
+server-title special case. Because choosing between program destruction and
+ending the run is still strategic rather than rules-determined, the option
+remains default-off until the gate below passes. Routing the roll through
+injectable randomness remains the separately tracked D2 work.
+
+## Acceptance gate
+
+Gated under `documentation/ai-planning.md`; depends on F4. The deterministic
+reproduction fixes the candidate policy, but it cannot establish that ending
+the run is strategically better than trashing a program. Compare baseline
+option `ballistaAgendaAwareSubroutine` off with candidate on using paired seeds,
+the committed deck pool, 200 games per deck pair and bootstrap 95% confidence
+intervals. Include committed mid-game starts for Ballista protecting HQ, R&D
+and Archives while that central contains an agenda the Runner can access.
+
+- Improvement: `agendaPointsStolenAfterBallistaChoice` per game decreases; the
+  interval for baseline minus candidate has a lower bound above zero.
+- Guard: `pointsStolen` per game does not rise by more than 0.10; the interval
+  upper bound for candidate minus baseline is at most +0.10.
+- Guard: Corp `winRate` does not fall by more than 0.02; the interval lower
+  bound for candidate minus baseline is at least -0.02.
 
 ## Acceptance criteria
 
 - [ ] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged.
 - [ ] A variation covering R&D and/or Archives with an agenda (not just HQ), since the current bug affects all three central servers identically.
+- [ ] The behaviour change ships behind the AI option
+      `ballistaAgendaAwareSubroutine`, which defaults to off.
+- [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
+      deck pairs and mid-game starts, paired seeds, seed count, every metric's
+      baseline/candidate result and bootstrap 95% confidence interval, guarded
+      regression results, pass conditions and thresholds. Only then is the
+      option switched on by default.
+- [ ] The F4 collector `agendaPointsStolenAfterBallistaChoice` is added through
+      the harness collector extension point. It records agenda points stolen
+      on the same run after Ballista chose to trash a program instead of ending
+      that run.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md` (note: `AIWouldTrigger()` as used here for a live subroutine choice on ice is a third, currently undocumented usage of that hook name, distinct from the two documented in sections 4.6 and 5.5 — worth reconciling or cross-referencing while this is touched).
 - [ ] `node tests/run-all-tests.js` passes.
 

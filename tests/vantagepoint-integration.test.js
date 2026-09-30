@@ -738,6 +738,16 @@ assert.strictEqual(
   null,
   '36015 restores the real attacked server after planning',
 );
+context.runner.AI = {
+  _getCachedPotential: (server) => server === context.corp.HQ ? 4 : 2,
+};
+assert.strictEqual(
+  baker.AIRunAbilityExtraPotential.call(baker, context.corp.archives, 1),
+  3,
+  '36015 evaluates run-only Stealth credits in its run-ability planning context',
+);
+assert.strictEqual(context.attackedServer, null, '36015 run-ability planning restores attackedServer');
+context.runner.AI = null;
 assert(
   phaseSource.includes('"responseOnWouldApproachServer"'),
   '36015 uses a decision-safe response window before server approach',
@@ -815,13 +825,17 @@ assert.deepStrictEqual(
   '36018 offers only remote servers after its successful central run',
 );
 aircheck.responseOnRunEnds.Resolve.call(aircheck, aircheckRunChoices[0]);
-aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck);
+const aircheckFollowUps = [];
+aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck, aircheckFollowUps);
+assert.strictEqual(runTarget, context.corp.HQ, '36018 does not change phase inside cleanup triggers');
+assert.strictEqual(aircheckFollowUps.length, 1, '36018 queues its follow-up run');
+aircheckFollowUps[0]();
 assert.strictEqual(runTarget, remote, '36018 launches the chosen run after cleanup');
 assert.strictEqual(aircheck.runningWithThis, true);
-aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck);
+aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck, []);
 assert.strictEqual(aircheck.runningWithThis, false, '36018 unlocks the pool after its final run');
 aircheck.Resolve.call(aircheck, {server: context.corp.RnD});
-aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck);
+aircheck.automaticOnRunEndCleanup.Resolve.call(aircheck, []);
 assert.strictEqual(aircheck.runningWithThis, false, '36018 cleans up after an unsuccessful run');
 context.runner.creditPool = 8;
 aircheck.AIRunEventModify.call(aircheck);
@@ -853,13 +867,28 @@ context.ChoicesArrayInstall = (cards, ignoreCost, check) =>
   cards
     .filter((card) => !check || check(card))
     .map((card) => ({card, host: null, label: 'Install ' + card.title}));
-context.Install = (card, host, ignoreCosts, position, returnToPhase, callback, callbackContext) => {
+let betaInstallFinished = false;
+context.Install = (
+  card,
+  host,
+  ignoreCosts,
+  position,
+  returnToPhase,
+  callback,
+  callbackContext,
+  onCancel,
+  onPaymentComplete,
+  allowCancel,
+  onInstallComplete,
+) => {
   assert.strictEqual(ignoreCosts, true);
+  if (callback) callback.call(callbackContext);
   const stackIndex = context.runner.stack.indexOf(card);
   if (stackIndex > -1) context.runner.stack.splice(stackIndex, 1);
   installed.runner.push(card);
   card.cardLocation = installed.runner;
-  callback.call(callbackContext);
+  betaInstallFinished = true;
+  if (onInstallComplete) onInstallComplete.call(callbackContext);
 };
 context.MoveCard = (card, destination, position) => {
   if (card.cardLocation) {
@@ -876,7 +905,14 @@ const betaChoice = betaChoices.find(
   (choice) => choice.card === nonVirusBreaker && choice.server === context.corp.HQ,
 );
 installed = {corp: [], runner: []};
+const makeRun = context.MakeRun;
+context.MakeRun = (server) => {
+  assert.strictEqual(betaInstallFinished, true, '36019 waits for installation to finish before its run');
+  assert(installed.runner.includes(nonVirusBreaker), '36019 starts its run with the program installed');
+  makeRun(server);
+};
 betaBuild.Resolve.call(betaBuild, betaChoice);
+context.MakeRun = makeRun;
 assert.strictEqual(shuffled, true);
 assert.strictEqual(runTarget, context.corp.HQ);
 assert.strictEqual(betaBuild.lingeringEffectTarget, nonVirusBreaker);
@@ -927,7 +963,9 @@ assert.strictEqual(methuselah.unique, true);
 assert.strictEqual(methuselah.memoryUnits, 1);
 
 assert(
-  phaseSource.includes('AutomaticTriggers("automaticOnRunEndCleanup"'),
+  phaseSource.includes(
+    'AutomaticTriggers("automaticOnRunEndCleanup", [postCleanupCallbacks])',
+  ) && phaseSource.includes('postCleanupCallbacks[i]()'),
   '36018 has a post-cleanup hook for safely starting its optional second run',
 );
 
@@ -1475,7 +1513,9 @@ const perfectRecall = context.cardSet[36035];
 const recallServer = {serverName: 'Remote', root: [perfectRecall], cards: [], ice: []};
 perfectRecall.server = recallServer;
 perfectRecall.power = 0;
-perfectRecall.responseOnRez.Resolve.call(perfectRecall);
+perfectRecall.responseOnRez.Resolve.call(perfectRecall, retirementPlan);
+assert.strictEqual(perfectRecall.power, 0, '36035 ignores other cards being rezzed');
+perfectRecall.responseOnRez.Resolve.call(perfectRecall, perfectRecall);
 assert.strictEqual(perfectRecall.power, 1);
 const scoredFromRecall = {title: 'Scored agenda', cardType: 'agenda', server: recallServer};
 context.intended.score = scoredFromRecall;
@@ -1797,6 +1837,30 @@ assert.deepStrictEqual(
   ],
   '36039 run model carries the strength gain to later ICE',
 );
+const existingStrengthModifier = {
+  iceIdx: 1,
+  card: routeOuterIce,
+  use: routeInnerIce,
+  amt: 2,
+  persist: true,
+};
+const sharedStrengthModifiers = [existingStrengthModifier];
+const strengthenedSibling = routeCalculator.ValidateEncounterPoint(
+  0,
+  routeCalculator.EmptyPoint(1),
+  false,
+  ['strengthenAllIce'],
+  [],
+  {ice: routeOuterIce},
+  sharedStrengthModifiers,
+  [],
+);
+assert.deepStrictEqual(
+  sharedStrengthModifiers,
+  [existingStrengthModifier],
+  '36039 run-model branch does not mutate strength modifiers shared by sibling options',
+);
+assert.strictEqual(strengthenedSibling.card_str_mods.length, 3);
 
 const knowledgeSeeker = context.cardSet[36040];
 knowledgeSeeker.virus = 0;
@@ -1826,6 +1890,18 @@ context.Derez = (card) => {
   card.rezzed = false;
 };
 knowledgeSeeker.virus = 3;
+context.GetApproachEncounterIce = () => ansel;
+assert.strictEqual(
+  knowledgeSeeker.responseOnEncounterEnds.Enumerate.call(knowledgeSeeker).length,
+  0,
+  '36040 ignores another ice encounter ending',
+);
+context.GetApproachEncounterIce = () => knowledgeSeeker;
+assert.strictEqual(
+  knowledgeSeeker.responseOnEncounterEnds.Enumerate.call(knowledgeSeeker).length,
+  1,
+  '36040 triggers for its own encounter',
+);
 knowledgeSeeker.responseOnEncounterEnds.Resolve.call(knowledgeSeeker);
 assert.strictEqual(purges, 1);
 assert.strictEqual(knowledgeSeeker.rezzed, false);
@@ -2202,7 +2278,21 @@ context.runner.creditPool = 2;
 magistrate.responseOnScored.Resolve.call(magistrate);
 assert.strictEqual(context.runner.creditPool, 0, '36048 cannot make credits negative');
 context.corp.creditPool = 2;
-assert.strictEqual(magistrate.AIWorthInstalling.call(magistrate, [remote]), 0);
+const scoringRemote = {serverName: 'Scoring remote'};
+const nonScoringRemote = {serverName: 'Non-scoring remote'};
+context.corp.AI = {
+  _isAScoringServer: (server) => server === scoringRemote,
+};
+assert.strictEqual(
+  magistrate.AIWorthInstalling.call(magistrate, [scoringRemote, nonScoringRemote]),
+  1,
+  '36048 skips scoring remotes',
+);
+assert.strictEqual(
+  magistrate.AIWorthInstalling.call(magistrate, [scoringRemote]),
+  1,
+  '36048 requests a new remote when every candidate is scoring',
+);
 context.corp.creditPool = 1;
 assert.strictEqual(magistrate.AIWorthInstalling.call(magistrate, [remote]), -1);
 
@@ -2233,7 +2323,16 @@ assert.strictEqual(context.corp.badPublicity, 4);
 context.currentPhase = {identifier: 'Corp 3.2'};
 assert.strictEqual(nihiloAgent.RezUsability.call(nihiloAgent), true);
 context.corp.creditPool = 1;
-assert.strictEqual(nihiloAgent.AIWorthInstalling.call(nihiloAgent, [remote]), 0);
+assert.strictEqual(
+  nihiloAgent.AIWorthInstalling.call(nihiloAgent, [scoringRemote, nonScoringRemote]),
+  1,
+  '36049 skips scoring remotes',
+);
+assert.strictEqual(
+  nihiloAgent.AIWorthInstalling.call(nihiloAgent, [scoringRemote]),
+  1,
+  '36049 requests a new remote when every candidate is scoring',
+);
 context.corp.creditPool = 0;
 assert.strictEqual(nihiloAgent.AIWorthInstalling.call(nihiloAgent, [remote]), -1);
 

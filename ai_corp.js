@@ -842,19 +842,20 @@ class CorpAI {
     this._log("considering forfeit options...");
     var ret = 0;
     var forfAg = null;
-    for (var i = 0; i < corp.scoreArea.length; i++) {
+    for (var i = 0; i < optionList.length; i++) {
+      if (!optionList[i].card) continue;
       if (!forfAg) {
         ret = i;
-        forfAg = corp.scoreArea[i];
-      } else if (corp.scoreArea[i].agendaPoints < forfAg.agendaPoints) {
+        forfAg = optionList[i].card;
+      } else if (optionList[i].card.agendaPoints < forfAg.agendaPoints) {
         ret = i;
-        forfAg = corp.scoreArea[i];
+        forfAg = optionList[i].card;
       } else if (
-        corp.scoreArea[i].agendaPoints == forfAg.agendaPoints &&
-        Counters(corp.scoreArea[i], "agenda") < Counters(forfAg, "agenda")
+        optionList[i].card.agendaPoints == forfAg.agendaPoints &&
+        Counters(optionList[i].card, "agenda") < Counters(forfAg, "agenda")
       ) {
         ret = i;
-        forfAg = corp.scoreArea[i];
+        forfAg = optionList[i].card;
       }
     }
     return ret;
@@ -3175,26 +3176,34 @@ class CorpAI {
     targetIsEligible = null, //optional action-specific filter (for example, whether another ICE layer is affordable)
   ) {
     var ranked = this._rankedServersToProtect(ignoreArchives);
-    var eligibleRanked = ranked.filter(
-      (entry) =>
-        !this._nothingWorthProtecting(entry.server, entry.security) &&
-        (targetIsEligible == null || targetIsEligible(entry.server)),
+    var protectableRanked = ranked.filter(
+      (entry) => !this._nothingWorthProtecting(entry.server, entry.security),
     );
-    var unallocatedInsecure = eligibleRanked.filter(
+    var eligibility = new Map();
+    var entryIsEligible = (entry) => {
+      if (targetIsEligible == null) return true;
+      if (!eligibility.has(entry.server))
+        eligibility.set(
+          entry.server,
+          targetIsEligible(entry.server, entry.security),
+        );
+      return eligibility.get(entry.server);
+    };
+    var selected = protectableRanked.find(
       (entry) =>
         !entry.isSecure &&
-        !this._protectionInstallsThisTurn.includes(entry.server),
+        !this._protectionInstallsThisTurn.includes(entry.server) &&
+        entryIsEligible(entry),
     );
-    var selected =
-      unallocatedInsecure.length > 0
-        ? unallocatedInsecure[0]
-        : eligibleRanked[0];
+    if (!selected) selected = protectableRanked.find(entryIsEligible);
     //Run rewards can make an empty Archives a legitimate target, but allocation
     //rotation must not promote it over a naturally more urgent insecure server.
     //This preserves rotation among ordinary protection targets while requiring
     //Archives to win the actual state-based comparison before receiving ICE.
     if (selected && selected.server == corp.archives) {
-      var naturalInsecure = eligibleRanked.find((entry) => !entry.isSecure);
+      var naturalInsecure = protectableRanked.find(
+        (entry) => !entry.isSecure && entryIsEligible(entry),
+      );
       if (naturalInsecure && naturalInsecure.server != corp.archives)
         selected = naturalInsecure;
     }
@@ -3820,12 +3829,12 @@ class CorpAI {
     return ret;
   }
 
-  _serverHasStakes(server) {
+  _serverHasStakes(server, securityEvaluation) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
     if (server == corp.archives) {
       if (this._archivesIsBackdoorToHQ()) return true;
       if (this._agendasInServer(corp.archives) > 0) return true;
-      return this._serverRunPressure(corp.archives).penalty > 0;
+      return this._serverRunPressure(corp.archives, securityEvaluation).penalty > 0;
     }
     //Do not inspect hidden R&D contents to justify spending through the reserve.
     //Other central threats affect ranking, while only remote HVTs fall through.
@@ -3835,12 +3844,15 @@ class CorpAI {
     return false;
   }
 
-  _shouldInstallIceLayer(server, economyIsSufficient) {
+  _shouldInstallIceLayer(server, economyIsSufficient, securityEvaluation) {
     var shouldInstall = this._unrezzedIce(server).length == 0;
+    var security = securityEvaluation;
+    if (server != null && typeof security == "undefined")
+      security = this._evaluateServerSecurity(server);
     var serverAtRisk =
       server != null &&
-      !this._evaluateServerSecurity(server).isSecure &&
-      this._serverHasStakes(server);
+      !security.isSecure &&
+      this._serverHasStakes(server, security);
     if (
       !economyIsSufficient &&
       this._rezzedIce(server).length > 0 &&
@@ -3967,7 +3979,12 @@ class CorpAI {
     var serverToInstallTo = this._serverToProtect(
       false,
       false,
-      (server) => this._shouldInstallIceLayer(server, iceInstallEconomyCheck),
+      (server, security) =>
+        this._shouldInstallIceLayer(
+          server,
+          iceInstallEconomyCheck,
+          security,
+        ),
     );
 
     //Too poor? Do not spend frivolously on new layers. A breachable server

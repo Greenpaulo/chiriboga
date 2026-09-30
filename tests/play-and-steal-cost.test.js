@@ -80,5 +80,11 @@ assert(
     phaseSource.includes('SpendClicks(runner, cost.clicks)'),
   'access resolution pays additional steal costs',
 );
+assert(
+  phaseSource.includes(
+    'if (CheckSteal() && cost.credits < 1 && cost.clicks < 1) return [];',
+  ),
+  'access resolution keeps a decline option when stealing has an additional cost',
+);
 
 console.log('Play-click and steal-cost regression checks passed.');

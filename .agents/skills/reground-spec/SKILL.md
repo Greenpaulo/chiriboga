@@ -15,9 +15,12 @@ runs it too, by name, rather than restating it.
 ## When to use
 
 - Before `node scripts/roadmap.js raise <ID>` — it refuses when anything
-  under the root `*.js` files or `sets/` changed since the spec's
+  under the tracked root `*.js` files or JavaScript files under `sets/`
+  changed since the spec's
   `**Verified against code:**` commit, which is true for almost every spec on
-  an active repo.
+  an active repo. Untracked `sets/*.js` files count too, including the
+  registry-loaded sets and the engine-only `gauntlet.js` and `tutorial.js`;
+  arbitrary untracked root JavaScript files do not.
 - When `raise` already refused, quoting the changed files.
 - When asked to re-ground, re-verify or refresh a spec or ticket.
 - At the start of `implement-ticket`, for the ticket it just picked up — even
@@ -29,9 +32,11 @@ runs it too, by name, rather than restating it.
 1. **Read the file** and note its current `**Verified against code:**` line
    (or its absence), plus anything it names under `**Read first:**`.
 2. **List every claim to check:** every sentence in `## Current behaviour`,
-   and every function, hook or field named anywhere in the document — Design,
-   Test scenarios and Acceptance gate included. Naming a function in a Design
-   section is still asserting it exists today and does what the spec says.
+   and every function, hook or field that the document says exists today —
+   including current-behaviour claims repeated in Design, Test scenarios or
+   Acceptance gate. A proposed Design may name a new function, hook or field;
+   verify that it does not already exist or conflict with current code, but do
+   not misclassify its planned absence as drift.
 3. **Check each one against the code, not memory.** `node scripts/show.js fn
    <name>` gives a function's current body and line range; `rg -n <name>`
    finds every remaining call site. Read the whole function, not just the

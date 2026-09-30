@@ -94,7 +94,7 @@ responseOnRunSuccessful: { Resolve, automatic: true }
 responseOnRunEnds:       { Resolve, automatic: true }
 responseOnPassesIce:     { Resolve, automatic: true }
 responseOnWouldApproachServer: { Enumerate?, Resolve } // optional pre-approach redirect window
-automaticOnRunEndCleanup: { Resolve } // after responses and run state cleanup
+automaticOnRunEndCleanup: { Resolve } // receives a callback queue after responses and run state cleanup
 ```
 
 ### Encounter
@@ -239,9 +239,17 @@ Install(
   position,
   returnToPhase,
   onInstallResolve,
-  context
+  context,
+  onCancelResolve,
+  onPaymentComplete,
+  allowCancel,
+  onInstallComplete
 );
 ```
+
+Use `onInstallComplete` when a follow-up effect must wait until the card has
+moved to its install destination and all `responseOnInstall` triggers have
+finished. `onInstallResolve` runs earlier, before payment and card movement.
 
 ### Damage / Tags
 

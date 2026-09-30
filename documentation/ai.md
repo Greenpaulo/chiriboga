@@ -563,13 +563,6 @@ AIWorthKeeping: function(installedRunnerCards, spareMU) {
 
 Economy cards generate credits. The AI needs to know when to install them and when to fire their abilities.
 
-**`AIEconomyCard`** (a boolean)
-
-Set this to `true` on Corp economy cards which are neither Transactions nor
-Advertisements. The Corp opening-hand evaluator uses it to recognize economy
-without card-title checks. Transactions and Advertisements are recognized
-automatically.
-
 **`AIEconomyInstall()`**
 
 Return a priority number (higher = more urgent) for installing this card. Return `0` or don't define this hook if the card is not an economy card.
@@ -1103,10 +1096,11 @@ Base their answers on the supplied arguments and public persistent state; do
 not require `CheckEncounter()` or assume `attackedServer` and `approachIce`
 describe a real active run.
 
-Baker's `AIRedirectsRun` supplies its prospective Archives server while checking
-hosted stealth credits. This lets run-only sources such as Touchstone answer in
-the context where the redirect cost would actually be paid; the helper restores
-the real `attackedServer` immediately after the read-only planning query.
+Baker's `AIRedirectsRun` and `AIRunAbilityExtraPotential` supply their
+prospective Archives server while checking hosted stealth credits. This lets
+run-only sources such as Touchstone answer in the context where the redirect
+cost would actually be paid; the helper restores the real `attackedServer`
+immediately after the read-only planning query.
 
 ```js
 AIEffectiveIceSubtypes: function(iceCard, server, iceIndex) {
@@ -1883,6 +1877,15 @@ conditional, optional-cost, or click-ability draw
 should not use this hook unless the declared number is guaranteed in the
 planner's install-and-rez sequence.
 
+### 5.12 Opening-Hand Economy — `AIEconomyCard`
+
+**`AIEconomyCard`** (a boolean)
+
+Set this to `true` on Corp economy cards which are neither Transactions nor
+Advertisements. The Corp opening-hand evaluator uses it to recognize economy
+without card-title checks. Transactions and Advertisements are recognized
+automatically.
+
 ---
 
 ## 6. The Run Calculator (`rc`)
@@ -1980,7 +1983,6 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPublicRunPressure(server)` | function | Describe visible economy, growth, or persistent value from a successful run |
 | `AIPrepareHypotheticalForRC(host)` | function | Pre-run: set up fake state for run calculation |
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
-| `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |
 | `AIEconomyTrigger` | number | Priority for triggering economy ability |
 | `AIWouldTrigger()` | function | Return true to allow ability trigger |
@@ -2001,7 +2003,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIReducesTrashCost(card)` | function | Return how much this reduces the trash cost of card |
 | `AIPlayToDraw` | number | Priority for playing this card to draw |
 | `AIDrawInstall()` | function | Priority for installing this draw-enabling card |
-| `AIIcebreakerTutor(installed)` | function | Return the icebreaker this tutor would fetch |
+| `AIIcebreakerTutor(installed)` | function | Return eligible icebreakers, or `[]` when none are available |
 | `AIPermitMoreLeeches(installed)` | function | Card-specific install limit check |
 
 ### Corp AI Hooks
@@ -2021,6 +2023,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
 | `AIGlobalETRUses(server)` | function | Number of active global end-the-run uses the Corp will spend defending this server |
+| `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIDamageOperation` | bool | True if this operation deals damage |
@@ -2127,8 +2130,9 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Witch Hunt uses normal agenda advancement policy; its score, steal and
   action-phase effects are mandatory and need no discretionary hook.
 - Magistrate Revontulet and Nihilo Agent use `AIWorthInstalling` and
-  `AIAvoidInstallingOverThis` to choose an affordable protected remote and
-  preserve their ongoing effects.
+  `AIAvoidInstallingOverThis` to choose the first affordable protected
+  non-scoring remote, creating a new one when every candidate is a scoring
+  server, and preserve their ongoing effects.
 - Grubber uses `AIImplementIce` to model each subroutine as the Runner's choice
   between paying 3 credits and ending the run.
 

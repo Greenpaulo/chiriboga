@@ -147,10 +147,11 @@ uses `SpendCredits`, so it consumes eligible hosted credits and cannot bypass
 the lock with a direct pool deduction.
 
 The run-end phase fires `automaticOnRunEndCleanup` after all run-end responses
-and after clearing the completed run's global state. Aircheck records the
-optional remote target in its response, then starts that run from the cleanup
-hook so no run-end responses are skipped and the new run is not overwritten by
-the old phase transition.
+and after clearing the completed run's global state. The hook receives a queue
+for work that must change phase after all automatic cleanup hooks return.
+Aircheck records the optional remote target in its response and queues the new
+run during cleanup, so no run-end responses are skipped and the automatic
+trigger loop itself never changes phase.
 
 Runner tutor planning now consistently reads the local array returned by
 `AIIcebreakerTutor`; the previous `this.tutorableIcebreakers` typo was dormant

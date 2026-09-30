@@ -87,9 +87,10 @@ Behaviour-identical performance change, so it ships without an option.
   non-`considerPlans` time is elsewhere. A cheaper version (a board-version
   counter bumped at each mutation site instead of rebuilding the string)
   would be O(1), but trades away a property the current approach gets for
-  free: a missed mutation site just changes the rebuilt string anyway, where
-  a forgotten counter bump would silently serve a stale hit — exactly the
-  failure `_securityCacheVerify` and the depth guard already exist to catch.
+  free only for mutations represented in `_securityBoardKey()`: those change
+  the rebuilt string, but an unrepresented mutation can still serve a stale
+  hit. A forgotten counter bump has the same risk. `_securityCacheVerify` and
+  the depth guard are safeguards against that failure, not complete coverage.
   Treat as a real option, not a free one.
 - `_icePlanOutcome()`'s `.reasons.push(GetTitle(iceCard) + ...)` builds
   strings unconditionally on every ICE, every plan — including the majority

@@ -73,11 +73,12 @@ reproduction is confirmed later by `implement-ticket`.
   Quote short log excerpts rather than pasting long runs of the log.
 - A ticket is gated exactly when `documentation/ai-planning.md`'s Acceptance
   gates test says so: the fix's goal is to play better, not to reproduce one
-  fixed, correct decision (`ai-principles.md` principle 4 vs principle 8).
+  fixed, correct decision.
   This applies to bug tickets as much as backlog items — being a bug does not
   make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
-  (principle 4)` for the common case; only name metrics, a direction and a
-  threshold there when the fix genuinely has no single correct answer.
+  (principle 4): <the oracle>` for the common case. When the fix genuinely has
+  no single correct answer, select either an F4 seeded-game gate or a human-game
+  gate and specify its sample size, metrics and numeric thresholds.
   A deterministic reproduction proves that the decision is repeatable, not
   that it is strategically correct. Always use the exact, unnumbered headings
   `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
@@ -110,10 +111,13 @@ why it matters. Three to five sentences.>
 decisions that could shift.>
 
 ## Acceptance gate
-<N/A — deterministic fix (principle 4) for the common case. If the fix's goal
-is instead to play better with no single correct answer (principle 8), this
-needs F4 seeded-game evidence: name the metrics, the direction, and a
-threshold for each — "better"/"reduce" need a number. Depends on: F4.>
+<N/A — deterministic fix with a single correct outcome, for the common case.
+If the fix's goal is instead to play better with no single correct answer,
+select an F4 seeded-game gate or a human-game gate and state its sample size,
+metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
+gate, also name the committed deck pairs, paired seed range, bootstrap 95%
+confidence intervals, guarded-regression conditions and applicable pass
+conditions. Depends on: F4 when selected.>
 
 ## Acceptance criteria
 - [ ] The reproduction passes and has moved into the green suite
@@ -123,9 +127,13 @@ threshold for each — "better"/"reduce" need a number. Depends on: F4.>
 - [ ] `node tests/run-all-tests.js` passes.
 - [ ] (Gated items) The behaviour change ships behind an AI option that
       defaults to off (named in the Resolution).
-- [ ] (Gated items) Gate evidence is recorded in the Resolution: F4 command,
-      deck pairs, seed count, metrics, baseline vs candidate, and the
-      threshold met. Only then is the option switched on by default.
+- [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
+      For F4: exact command, committed deck pairs, paired seeds, seed count,
+      every metric's baseline/candidate result and bootstrap 95% confidence
+      interval, guarded-regression result, pass conditions and thresholds; an
+      improvement interval's lower bound must be above zero. For a human-game
+      gate: sample size, metrics, observed results, pass conditions and
+      thresholds. Only then is the option switched on by default.
 
 ## Out of scope / related
 ```

@@ -93,9 +93,9 @@ unless the numbers say so and you accept the review.
 A change reviewed while F4 is missing can still be merged, **switched off**.
 Its ticket goes back to the open backlog with `**Gate:** pending F4`, stays
 `in-progress` on the roadmap, and receives the generated `## Blocker` header.
-Once F4 is done, `ticket.js move` (or `roadmap.js blockers --fix` after a
-manual roadmap edit) removes that header; the gate is then run and step 3
-onwards happens.
+Once F4 is marked done on the roadmap, run
+`node scripts/roadmap.js blockers --fix` to remove that header; the gate is
+then run and step 3 onwards happens.
 
 ### Not every item is an on/off comparison
 

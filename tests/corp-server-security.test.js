@@ -299,6 +299,22 @@ test('hosted-card rez option still declines redundant Tranquilizer ICE', () => {
     'under the hosted-card threshold (have 12)',
   ]);
 });
+test('hosted-card rez option logs a refusal when the Runner can break the ICE', () => {
+  const chromatophores = card(35030);
+  const {approachedIce, remote} = hostedTrojanRezBoard(chromatophores);
+  approachedIce.subTypes = ['Sentry'];
+  const killer = card(30015); // Carmen: a real Killer with AIImplementBreaker
+  runner.cards = [chromatophores, killer];
+  runner.creditPool = 10;
+  assert(Number.isFinite(ai._estimateBreakCost(approachedIce, killer)),
+    'test assumption: the installed Killer can break the approached ICE');
+  ai.options.evidenceBasedHostedCardRez = true;
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), false);
+  } finally { ai._log = oldLog; }
+  assert(messages.length > 0, 'an exploitable hosted-card refusal must log its reason');
+});
 // ---- F3: per-decision security cache ----
 function branBoard() {
   const rndBran = card(30039); rndBran.rezzed = false;
@@ -1222,9 +1238,25 @@ test('ordinary purge is deterministic and closes a staked route opened by Botulu
   });
   servers = [corp.HQ, corp.RnD, corp.archives];
   const first = ai._ordinaryPurgeOutcome();
-  const oldRandom = Math.random; Math.random = () => {throw Error('random purge');};
+  const oldRandom = Math.random;
+  const oldAIRandom = ai._random;
+  const failRandom = () => {throw Error('random purge');};
+  context.failRandom = failRandom;
+  vm.runInContext('savedPurgeMathRandom = Math.random;', context);
   let second;
-  try { second = ai._ordinaryPurgeOutcome(); } finally { Math.random = oldRandom; }
+  try {
+    Math.random = failRandom;
+    ai._random = failRandom;
+    vm.runInContext('Math.random = failRandom;', context);
+    second = ai._ordinaryPurgeOutcome();
+  } finally {
+    Math.random = oldRandom;
+    ai._random = oldAIRandom;
+    vm.runInContext(
+      'Math.random = savedPurgeMathRandom; delete savedPurgeMathRandom; delete failRandom;',
+      context,
+    );
+  }
   assert(first && first.reason.includes('secures'));
   assert.deepStrictEqual(second, first);
   assert.strictEqual(botulus.virus, 1);
@@ -1349,7 +1381,9 @@ test('ranked asset installs preserve remote ranking and share one destination or
     .map(option => option.serverToInstallTo);
   assert.deepStrictEqual(destinations, originalOrder);
   assert.deepStrictEqual(secondOrder, firstOrder);
-  assert(!firstOrder.includes(strongest));
+  assert.strictEqual(firstOrder.length, 2);
+  assert.strictEqual(firstOrder[0], second);
+  assert.strictEqual(firstOrder[1], third);
   assert.strictEqual(rolls, 2);
 });
 test('purge models cards trashed by purge even when they have no counters', () => {
@@ -1693,52 +1727,85 @@ test('poor Corp does not treat a generic remote asset as emergency stakes', () =
 });
 test('Archives stakes reflect visible cards, backdoors, and observed pressure', () => {
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const oldArchivesIsBackdoorToHQ = ai._archivesIsBackdoorToHQ;
+  const oldServerRunPressure = ai._serverRunPressure;
   Object.assign(corp, {
     HQ: {serverName: 'HQ', cards: [], ice: [], root: []},
     RnD: {serverName: 'R&D', cards: [{cardType: 'agenda'}], ice: [], root: []},
     archives,
   });
-  ai._archivesIsBackdoorToHQ = () => false;
-  ai._serverRunPressure = () => ({penalty: 0});
-  assert.strictEqual(ai._serverHasStakes(archives), false);
-  archives.cards.push({cardType: 'agenda'});
-  assert.strictEqual(ai._serverHasStakes(archives), true);
-  archives.cards = [];
-  ai._archivesIsBackdoorToHQ = () => true;
-  assert.strictEqual(ai._serverHasStakes(archives), true);
-  ai._archivesIsBackdoorToHQ = () => false;
-  ai._serverRunPressure = () => ({penalty: 1});
-  assert.strictEqual(ai._serverHasStakes(archives), true);
-  assert.strictEqual(
-    ai._serverHasStakes(corp.RnD),
-    false,
-    'hidden R&D contents must not bypass the economy reserve',
-  );
+  try {
+    ai._archivesIsBackdoorToHQ = () => false;
+    ai._serverRunPressure = () => ({penalty: 0});
+    assert.strictEqual(ai._serverHasStakes(archives), false);
+    archives.cards.push({cardType: 'agenda'});
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    archives.cards = [];
+    ai._archivesIsBackdoorToHQ = () => true;
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    ai._archivesIsBackdoorToHQ = () => false;
+    ai._serverRunPressure = () => ({penalty: 1});
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    assert.strictEqual(
+      ai._serverHasStakes(corp.RnD),
+      false,
+      'hidden R&D contents must not bypass the economy reserve',
+    );
+  } finally {
+    ai._archivesIsBackdoorToHQ = oldArchivesIsBackdoorToHQ;
+    ai._serverRunPressure = oldServerRunPressure;
+  }
 });
 test('ice protection skips a higher-ranked server whose next layer is blocked', () => {
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 5};
   const rndIce = etr(); rndIce.rezzed = false;
   const rnd = {serverName: 'R&D', cards: [], ice: [rndIce], root: [], score: 0};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 1};
+  const oldProtectionScore = ai._protectionScore;
+  const oldEvaluateServerSecurity = ai._evaluateServerSecurity;
+  const oldEmptyProtectedRemotes = ai._emptyProtectedRemotes;
+  const oldHVTsInstalled = ai._HVTsInstalled;
+  const oldArchivesIsBackdoorToHQ = ai._archivesIsBackdoorToHQ;
   Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
   runner.identityCard = {faction: 'Criminal'};
-  ai._protectionScore = target => target ? target.score : 4;
-  ai._evaluateServerSecurity = () => ({isSecure: false});
-  ai._emptyProtectedRemotes = () => [{}];
-  ai._HVTsInstalled = () => 0;
-  ai._archivesIsBackdoorToHQ = () => true;
-  ai._protectionInstallsThisTurn = [];
-  ai._serverProtectionDebt = new Map();
-  assert.strictEqual(ai._shouldInstallIceLayer(rnd, false), false);
-  assert.strictEqual(ai._shouldInstallIceLayer(archives, false), true);
-  assert.strictEqual(
-    ai._serverToProtect(
-      false,
-      false,
-      server => ai._shouldInstallIceLayer(server, false),
-    ),
-    archives,
-  );
+  try {
+    ai._protectionScore = target => target ? target.score : 4;
+    ai._evaluateServerSecurity = () => ({isSecure: false});
+    ai._emptyProtectedRemotes = () => [{}];
+    ai._HVTsInstalled = () => 0;
+    ai._archivesIsBackdoorToHQ = () => true;
+    ai._protectionInstallsThisTurn = [];
+    ai._serverProtectionDebt = new Map();
+    assert.strictEqual(ai._shouldInstallIceLayer(rnd, false), false);
+    assert.strictEqual(ai._shouldInstallIceLayer(archives, false), true);
+    const eligibilityChecks = [];
+    assert.strictEqual(
+      ai._serverToProtect(
+        false,
+        false,
+        (server, security) => {
+          eligibilityChecks.push({server, security});
+          return ai._shouldInstallIceLayer(server, false, security);
+        },
+      ),
+      archives,
+    );
+    assert(
+      eligibilityChecks.every((entry) => entry.security),
+      'layer eligibility receives each ranked server security result',
+    );
+    assert.deepStrictEqual(
+      eligibilityChecks.map((entry) => entry.server),
+      [rnd, archives],
+      'layer eligibility stops after finding the first viable ranked server',
+    );
+  } finally {
+    ai._protectionScore = oldProtectionScore;
+    ai._evaluateServerSecurity = oldEvaluateServerSecurity;
+    ai._emptyProtectedRemotes = oldEmptyProtectedRemotes;
+    ai._HVTsInstalled = oldHVTsInstalled;
+    ai._archivesIsBackdoorToHQ = oldArchivesIsBackdoorToHQ;
+  }
 });
 test('Corp turn-start protection aging skips the opening turn and then runs once', () => {
   let calls = 0;

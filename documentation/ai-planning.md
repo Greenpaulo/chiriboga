@@ -37,7 +37,7 @@ IDs are unique across both areas.
 | Status | Meaning | Spec lives in |
 |---|---|---|
 | `proposed` | Worth doing, not yet refined into a ticket | `<area>/specs/<ID>-<slug>.md` |
-| `ready` | A ticket exists; it is actionable when its generated `## Blocker` section is absent | `documentation/backlog/` |
+| `ready` | A ticket exists; it is actionable when neither a generated `## Blocker` nor an unmarked `## Additional blocker` section is present | `documentation/backlog/` |
 | `in-progress` | `implement-ticket` has started it, or its reviewed change waits behind a default-off option for its gate | `documentation/backlog/` (or `code-review/`, `remediation/`) |
 | `done` | Reviewed and merged; described in `architecture.md` | `documentation/backlog/done/` (when it had a ticket) |
 | `parked` | Deliberately deferred; the entry says why | Either |
@@ -58,9 +58,10 @@ node scripts/roadmap.js raise <ID>    # move a proposed item's spec into the bac
 Raising a ticket moves the spec file rather than copying it, rewrites its
 relative links and sets the item to `ready`. It refuses a spec without a
 `**Verified against code:**` line, or one whose recorded commit predates a
-change to the game or AI code (the root `*.js` files and `sets/`, committed or
-not): it lists the changed files; re-verify the spec (below) and update the
-line first.
+change to tracked root `*.js` files or JavaScript under `sets/`. Untracked
+JavaScript under `sets/` also counts, while arbitrary untracked root files do
+not. It lists the changed files; re-verify the spec (below) and update the line
+first.
 
 `node scripts/ticket.js move` keeps roadmap links pointing at a ticket as it
 moves between folders, and keeps the linked item's status in step: moving to
@@ -196,7 +197,13 @@ each (see Acceptance gates above). Never omit this section.>
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] (Gated items) The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] (Gated items) Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
+- [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
+      For F4: exact command, committed deck pairs, paired seeds, seed count,
+      every metric's baseline/candidate result and bootstrap 95% confidence
+      interval, guarded-regression result, pass conditions and thresholds; an
+      improvement interval's lower bound must be above zero. For a human-game
+      gate: sample size, metrics, observed results, pass conditions and
+      thresholds. Only then is the option switched on by default.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed (omit when Sets is "none").
 - [ ] The side's `architecture.md` describes the new behaviour.
