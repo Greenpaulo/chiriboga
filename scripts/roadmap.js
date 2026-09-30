@@ -22,10 +22,12 @@
 // tests/ai-roadmaps.test.js uses these parsers to keep the roadmaps, specs and
 // tickets consistent.
 const fs = require('fs');
-const path = require('path');
+const path = require('path'); 
 const {spawnSync} = require('child_process');
 
 const root = path.resolve(__dirname, '..');
+const readText = file => fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
+const rel = file => path.relative(root, file).split(path.sep).join('/');
 const AREAS = ['corp-ai', 'runner-ai'].map(name => path.join(root, 'documentation', name))
   .filter(dir => fs.existsSync(path.join(dir, 'roadmap.md')));
 const STATUSES = ['proposed', 'ready', 'in-progress', 'done', 'parked'];
@@ -48,7 +50,7 @@ function parseRoadmap(dir) {
   let section = null;
   let current = null;
   let inDoneTable = false;
-  fs.readFileSync(file, 'utf8').split('\n').forEach((line, index) => {
+  readText(file).split('\n').forEach((line, index) => {
     const sectionMatch = line.match(/^## (.+)$/);
     if (sectionMatch) { section = sectionMatch[1]; current = null; inDoneTable = false; return; }
     const heading = line.match(/^### (\S+) (.+)$/);
@@ -168,7 +170,7 @@ function blockerState(items) {
   // still machine-readable, so keep its blocker visible until that roadmap
   // dependency is done.
   for (const file of [].concat(...ticketRoots().map(markdownFiles))) {
-    const text = fs.readFileSync(file, 'utf8');
+    const text = readText(file);
     const pending = pendingGate(text);
     if (pending && (!byId.has(pending) || byId.get(pending).status !== 'done')) {
       const current = reasons.get(file) || [];
@@ -194,7 +196,7 @@ function blockerMismatches(items) {
   for (const file of desired.keys()) files.add(file);
   const mismatches = [];
   for (const file of files) {
-    const text = fs.readFileSync(file, 'utf8');
+    const text = readText(file);
     const expected = withGeneratedBlocker(text, desired.get(file) || '');
     if (expected === null) mismatches.push({file, reason: 'has unmatched generated blocker markers'});
     else if (expected !== text) mismatches.push({file, expected,
@@ -208,7 +210,7 @@ function blockers(items, fix = false, quiet = false) {
   if (!quiet) {
     if (!reasons.size) console.log('No tickets are blocked.');
     else for (const [file, ids] of reasons)
-      console.log(path.relative(root, file) + ': ' + ids.join(', '));
+      console.log(rel(file) + ': ' + ids.join(', '));
   }
 
   const mismatches = blockerMismatches(items);
@@ -221,7 +223,7 @@ function blockers(items, fix = false, quiet = false) {
       console.log('Updated ' + mismatches.length + ' generated blocker section' + (mismatches.length === 1 ? '.' : 's.'));
   } else if (mismatches.length) {
     console.log('\nGenerated blocker sections are out of sync:');
-    for (const mismatch of mismatches) console.log('  ' + path.relative(root, mismatch.file) + ': ' + mismatch.reason);
+    for (const mismatch of mismatches) console.log('  ' + rel(mismatch.file) + ': ' + mismatch.reason);
     console.log('Run `node scripts/roadmap.js blockers --fix`.');
     process.exitCode = 1;
   } else console.log('\nGenerated blocker sections are in sync.');
@@ -271,7 +273,7 @@ function next(items) {
 function gateInfo(item) {
   const file = itemPath(item);
   if (item.id === 'F4' || !file || !fs.existsSync(file)) return null;
-  const text = fs.readFileSync(file, 'utf8');
+  const text = readText(file);
   const gate = sectionOf(text, '## Acceptance gate');
   const criteria = sectionOf(text, '## Acceptance criteria');
   let kind = null;
@@ -344,7 +346,7 @@ function codeChangesSince(sha) {
 // game and AI code (documentation/ai-planning.md, "Re-grounding a spec").
 function checkVerified(file) {
   const where = path.relative(root, file);
-  const sha = (fs.readFileSync(file, 'utf8').match(VERIFIED) || [])[1];
+  const sha = (readText(file).match(VERIFIED) || [])[1];
   const redo = '\nRe-verify its Current behaviour and every function or hook it names against the code' +
     ' (node scripts/show.js fn <name>, rg -n), fix what is stale, then set\n  **Verified against code:** ' +
     git('rev-parse', '--short', 'HEAD').stdout.trim() + ' (' + new Date().toISOString().slice(0, 10) + ')' +
@@ -372,9 +374,9 @@ function raise(items, id) {
   if (fs.existsSync(to)) throw new Error(path.relative(root, to) + ' already exists');
   const moved = spawnSync('git', ['mv', from, to], {cwd: root, encoding: 'utf8'});
   if (moved.status !== 0) fs.renameSync(from, to);
-  fs.writeFileSync(to, rebaseLinks(fs.readFileSync(to, 'utf8'), path.dirname(from), backlog));
+  fs.writeFileSync(to, rebaseLinks(readText(to), path.dirname(from), backlog));
 
-  const lines = fs.readFileSync(item.file, 'utf8').split('\n');
+  const lines = readText(item.file).split('\n');
   const link = path.relative(item.dir, to).split(path.sep).join('/');
   for (let i = item.line; i < lines.length && !/^#/.test(lines[i]); i++) {
     if (/^- \*\*Status:\*\*/.test(lines[i])) lines[i] = '- **Status:** ready';
@@ -389,7 +391,7 @@ function raise(items, id) {
 
 module.exports = {parseRoadmap, parseAll, itemPath, gatedItems, linkTargets, resolveFrom, rebaseLinks, blockerState,
   blockerMismatches, blockers, next, pendingGate, codeChangesSince, validateBlockerMarkers, hasManualBlocker,
-  VERIFIED, STATUSES, ID, AREAS, root};
+  readText, rel, VERIFIED, STATUSES, ID, AREAS, root};
 
 if (require.main === module) {
   const [command, argument] = process.argv.slice(2);

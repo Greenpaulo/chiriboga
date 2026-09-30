@@ -9,10 +9,11 @@ const vm = require('vm');
 const {generate, configMismatches, outFile} = require('../scripts/card-status.js');
 
 const root = path.resolve(__dirname, '..');
+const readText = file => fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
 const context = {console};
 vm.createContext(context);
-vm.runInContext(fs.readFileSync(path.join(root, 'config.js'), 'utf8'), context);
-const decisions = fs.readFileSync(path.join(root, 'documentation', 'card-sets.md'), 'utf8');
+vm.runInContext(readText(path.join(root, 'config.js')), context);
+const decisions = readText(path.join(root, 'documentation', 'card-sets.md'));
 const undecided = Object.keys(context.setRegistry.availableSets).filter(key =>
   !new RegExp('^\\|\\s*`?' + key + '`?\\s*\\|\\s*(playable|in-progress|not-implemented|deprecated)\\s*\\|', 'm').test(decisions));
 assert.deepStrictEqual(undecided, [], 'Add a decision for these sets to documentation/card-sets.md: ' + undecided.join(', '));
@@ -20,7 +21,7 @@ assert.deepStrictEqual(undecided, [], 'Add a decision for these sets to document
 const disagreements = configMismatches();
 assert.deepStrictEqual(disagreements, [], 'config.js disagrees with documentation/card-sets.md:\n  ' + disagreements.join('\n  '));
 
-const current = fs.existsSync(outFile) ? fs.readFileSync(outFile, 'utf8') : '';
+const current = fs.existsSync(outFile) ? readText(outFile) : '';
 assert.strictEqual(current, generate(),
   'documentation/card-status.md is out of date. Run: node scripts/card-status.js');
 console.log('Card status: documentation/card-status.md is current.');
