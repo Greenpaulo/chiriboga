@@ -6,8 +6,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {pendingGate, codeChangesSince, blockerState} = require('../scripts/roadmap.js');
-const {ticketSummary, move} = require('../scripts/ticket.js');
+const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
+  hasManualBlocker} = require('../scripts/roadmap.js');
+const {ticketSummary, ticketInventory, move} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const rel = file => path.relative(root, file).split(path.sep).join('/');
@@ -92,6 +93,21 @@ try {
   const currentBlockers = new Map([[blockerFixture, ['F4']]]);
   assert(ticketSummary(blockerFixture, currentBlockers).blocked,
     'ticket discovery uses current roadmap blockers even when the generated header is missing');
+  fs.writeFileSync(blockerFixture, '# Blocker fixture\n\n## Additional blocker\n\nWaiting for evidence.\n');
+  assert(hasManualBlocker(blockerFixture),
+    'roadmap next excludes ticket-backed items with an additional blocker');
+  const roadmapOutput = [];
+  const originalLog = console.log;
+  try {
+    console.log = message => roadmapOutput.push(message);
+    nextRoadmap([{id: 'X1', status: 'ready', depends: [], title: 'Blocked fixture',
+      dir: path.join(root, 'documentation', 'corp-ai'),
+      fields: {Ticket: '[fixture](../bugs/' + path.basename(blockerFixture) + ')'}}]);
+  } finally {
+    console.log = originalLog;
+  }
+  assert(!roadmapOutput.join('\n').includes('X1'),
+    'roadmap next does not advertise a ticket with an additional blocker');
 
   assert.throws(() => blockerState([
     {id: 'X1', status: 'ready', depends: ['X2'], dir: path.join(root, 'documentation', 'corp-ai'),
@@ -108,6 +124,10 @@ try {
   'roadmap blocker destinations must be regular Markdown files');
 
   fs.writeFileSync(blockerFixture, '# Blocker fixture\n\n<!-- roadmap-blocker:start -->\n');
+  assert.throws(() => validateBlockerMarkers([blockerFixture]), /unmatched generated blocker markers/,
+    'roadmap raise preflight rejects malformed blocker markers before mutation');
+  assert.throws(() => ticketInventory(), /unmatched generated blocker markers/,
+    'ticket list and next reject malformed blocker markers before building inventory');
   assert.throws(() => move(blockerFixture, 'code-review'), /unmatched generated blocker markers/,
     'ticket move rejects malformed blocker markers');
   assert(fs.existsSync(blockerFixture) && !fs.existsSync(movedBlockerFixture),

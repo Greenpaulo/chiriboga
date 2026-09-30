@@ -20,6 +20,16 @@ not yet reached `code-review/`; in that case use
 - Resolve the PR's base branch, head branch and reviewed commit. Check the
   worktree before switching; preserve unrelated local changes and untracked
   files.
+- For GitHub reads and writes in this repository, prefer the repository-local
+  CLI configuration when `.git/gh-config` exists:
+  `GH_CONFIG_DIR="$PWD/.git/gh-config" gh ...`. Do not rely on a shell alias
+  such as `ghchiri`, because aliases may not exist in non-interactive shells.
+  Before any authenticated PR operation, run
+  `GH_CONFIG_DIR="$PWD/.git/gh-config" gh api user --jq .login` and require the
+  exact result `Greenpaulo`. If the directory is missing, the command fails, or
+  it returns any other login, stop without interacting with the PR and ask the
+  user to restore the repository-local authentication. Never fall back to
+  another logged-in GitHub account or the global `gh` configuration.
 - Fetch the current conversation, submitted reviews and inline comments. Do
   not rely only on the review summary: summaries can omit inline findings, and
   comments can be outdated after later commits or file moves.
@@ -73,5 +83,30 @@ scope.
 - Summarize accepted, adapted, rejected and obsolete comments, including the
   evidence for anything not implemented. Report validation commands and any
   residual risk.
-- Do not commit, push, reply to comments, resolve conversations, request a new
-  review, or merge the PR unless the user asks for that external action.
+- Do not commit, push, request a new review, dismiss a submitted review, or
+  merge the PR unless the user asks for that external action.
+
+## 5. Update review conversations
+
+Treat GitHub replies and thread resolution as external actions. Perform this
+step when the user asked to address PR review comments and repository-local
+GitHub authentication is available; otherwise report what remains to do.
+
+- Re-fetch the PR head and review threads after verification. Never resolve a
+  thread for a fix that exists only in the local working tree: the fix must be
+  present on the PR head commit so the reviewer can inspect it.
+- For an **Accept** or **Adapt** whose fix is on the PR head, reply with the
+  implemented outcome and relevant validation, then resolve that review
+  thread.
+- For an **Obsolete** finding, reply with the current code or commit that
+  already addresses it, then resolve the thread.
+- For a **Reject**, a premature request, a deliberate deferral, or any other
+  finding that needs no code change, reply with concise evidence and leave the
+  thread unresolved. Let the reviewer acknowledge or withdraw it; if the
+  reviewer then resolves the thread, do nothing further.
+- Do not duplicate an equivalent existing reply, and do not act on threads
+  already resolved.
+- Resolve only individual review threads. An old overall
+  `CHANGES_REQUESTED` review can remain visible after all conversations are
+  resolved; dismissing that review is a separate maintainer action and
+  requires an explicit user request.

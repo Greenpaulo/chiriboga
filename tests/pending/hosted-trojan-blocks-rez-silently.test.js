@@ -155,9 +155,12 @@ test('a justified hosted-card refusal returns false and logs its reason', () => 
   const chromatophores = card(35030);
   const {approachedIce, remote} = buildBoard(chromatophores);
   chromatophores.host = approachedIce;
-  const killer = {
-    title: 'Usable Killer', player: runner, cardType: 'program',
-    subTypes: ['Icebreaker', 'Killer'], strength: 3,
+  const killer = card(30015); // Carmen: a real Killer with AIImplementBreaker
+  let breakerEvaluations = 0;
+  const implementBreaker = killer.AIImplementBreaker;
+  killer.AIImplementBreaker = function(...args) {
+    breakerEvaluations++;
+    return implementBreaker.apply(this, args);
   };
   runner.cards = [chromatophores, killer];
   runner.creditPool = 10;
@@ -170,6 +173,11 @@ test('a justified hosted-card refusal returns false and logs its reason', () => 
     'active Chromatophores gives its host the subtype matched by the Killer');
   assert.strictEqual(runner.AI._matchingBreakerInstalled(approachedIce), killer,
     'test assumption: the Runner can exploit the hosted Trojan with a usable breaker');
+  const breakCost = ai._estimateBreakCost(approachedIce, killer);
+  assert(breakerEvaluations > 0,
+    'test assumption: the run calculator evaluates the real breaker implementation');
+  assert(Number.isFinite(breakCost),
+    'test assumption: the real breaker can break the Chromatophores-created Sentry');
   corp.creditPool = 12;
 
   const messages = [];
