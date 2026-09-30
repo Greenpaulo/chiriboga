@@ -34,9 +34,13 @@ reviews:
         plus the pasted output of `node scripts/ticket.js check <ticket>`. Read
         all of it before reviewing the diff. If the ticket or check output is
         missing, say that the review is incomplete. Treat every unexplained
-        changed file, unticked or unverified acceptance criterion, or FAIL from
-        `ticket.js check` as Blocking unless the Resolution gives valid evidence
-        that the failure is pre-existing and unrelated.
+        changed file, acceptance criterion ticked without supporting evidence,
+        or FAIL from `ticket.js check` as Blocking unless the Resolution gives
+        valid evidence that the failure is pre-existing and unrelated. Assess
+        unticked criteria under the review skill rather than rejecting them
+        automatically: a pending F4 gate is permitted when the implementation
+        passes review and its option defaults off, but missing required
+        implementation or test work remains Blocking.
 
         Independently verify the claimed root cause and Resolution against the
         current code, tests, game rules, related mechanics, hooks, callers, and
@@ -110,15 +114,20 @@ reviews:
           ticket. Do not infer that it is not a ticket PR merely because the PR
           description omits the ticket. Otherwise pass.
 
-          Fail if a PR's description does not include the complete ticket
+          Fail if a ticket PR's description does not include the complete ticket
           body, including its diagnosis/current behaviour, applicable
           implementation plan, acceptance criteria, and final Resolution. Also
           fail if it omits the pasted output of
           `node scripts/ticket.js check <ticket>`, or if that output contains an
-          unexplained FAIL, an unticked acceptance criterion, a changed
-          reproduction expectation, or a failing required test. A failure is
-          acceptable only when the Resolution provides concrete evidence that it
-          is pre-existing and unrelated to this PR. Do not claim to execute
+          unexplained FAIL, a changed reproduction expectation, or a failing
+          required test, or if a ticked acceptance criterion lacks supporting
+          evidence. Assess unticked criteria under
+          `.agents/skills/review-ticket/SKILL.md`; do not fail solely because a
+          criterion is unticked. In particular, a pending F4 gate is permitted
+          when the reviewed implementation's option defaults off, while missing
+          required implementation or test work still fails the check. A failure
+          is acceptable only when the Resolution provides concrete evidence that
+          it is pre-existing and unrelated to this PR. Do not claim to execute
           repository tests: assess the recorded output and visible CI.
 
 chat:
