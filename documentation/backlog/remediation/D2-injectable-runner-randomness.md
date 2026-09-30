@@ -14,8 +14,10 @@ Implemented from `58f3a4d`.
   uses `this._randomIndex(optionList.length)` instead of `RandomRange`, and
   the two Runner card AI hooks in `sets/systemupdate2021.js` (the random
   card pair pick and the ICE-choice jitter) use `runner.AI._randomIndex()` /
-  `runner.AI._random()`. With the default source, behaviour is unchanged.
-- Departures from the spec, as planned: four sites instead of one, and no
+  `runner.AI._random()`. The dynamically assigned Punitive Counterstrike
+  `IncreaseStrengthChoice` callback also uses `_randomIndex()`, preserving its
+  former inclusive upper bound. With the default source, behaviour is unchanged.
+- Departures from the spec, as planned: five sites instead of one, and no
   jitter cache, because the jitter already rolls once per server per decision
   (the new test checks this).
 - New `tests/runner-ai-randomness.test.js`. It loads the **real engine files
@@ -27,8 +29,10 @@ Implemented from `58f3a4d`.
   seeds alone decide the HQ/R&D tie on that board (both targets occur across
   six seeds); one roll per server per decision; `_randomIndex` bounds; and a
   ratchet that fails on `Math.random`, `RandomRange` or `Shuffle` in the
-  `RunnerAI` class or in any Runner card's `AI*` hook. Without the fix the test
-  fails at the jitter (`ai_runner.js`, `_internalChoiceDetermination`).
+  `RunnerAI` class, any Runner card's `AI*` hook, or dynamically assigned
+  `runner.AI.preferred.*` callbacks on cards from either side. Without the
+  remediation it catches Punitive Counterstrike's trace preference as well as
+  the original jitter (`ai_runner.js`, `_internalChoiceDetermination`).
 - **For F4:** the real engine loads and runs AI decisions headlessly with
   only browser globals stubbed. The test's setup (about 40 lines) is a
   starting point for `scripts/ai-batch.js`; the main loop (`Main()` in
@@ -37,7 +41,7 @@ Implemented from `58f3a4d`.
   ([run selection](../../runner-ai/architecture.md#run-selection-and-the-run-calculator))
   describes the seam and drops the "cannot be seeded" known limit. No hook
   contract changed, so `documentation/ai.md` is unchanged.
-- `node tests/run-all-tests.js`: 35 test files passed.
+- `node tests/run-all-tests.js`: 37 test files passed.
 
 ## Implementation plan
 
@@ -85,7 +89,9 @@ seeded simulations.
 
 ## Current behaviour
 
-Runner AI policy draws from global randomness in four places:
+**Historical: behaviour before D2.**
+
+Runner AI policy drew from global randomness in five places:
 
 - Run selection adds jitter to each server's potential with `Math.random()`
   in `_internalChoiceDetermination()`. `serverList` and the potentials are
@@ -97,6 +103,8 @@ Runner AI policy draws from global randomness in four places:
 - Two card AI hooks in `sets/systemupdate2021.js` also use it: one picks cards
   at random with `RandomRange` when no pair shares a title or cost, and one
   adds `0.1 * Math.random()` jitter when choosing between pieces of ICE.
+- Punitive Counterstrike dynamically assigns a Runner trace-choice callback
+  from a Corp-owned card; that callback used `RandomRange` as well.
 
 No test constructs a `RunnerAI` or runs one of its decisions.
 See [architecture: run selection and the run calculator](../../runner-ai/architecture.md#run-selection-and-the-run-calculator).
@@ -152,3 +160,14 @@ reproducible.
 - `node tests/runner-ai-randomness.test.js`: 5/5 checks pass
 - Full-repo grep of `Math.random`/`RandomRange` across `sets/*.js`, cross-checked each hit's owning function and card `player` field
 - Traced `IncreaseStrengthChoice` call site in `ai_runner.js` to confirm it's on the Runner AI decision path
+
+## Review remediation — 2026-09-30
+
+Finding 1 is addressed: Punitive Counterstrike now uses
+`runner.AI._randomIndex()` with the former inclusive range size, and the
+cross-realm-safe ratchet inspects dynamically assigned Runner preference
+callbacks without treating unrelated engine or Corp randomness in the same
+outer card method as Runner policy. `node tests/runner-ai-randomness.test.js`
+passes all five checks. Finding 2 is therefore obsolete; the architecture's
+injectable-randomness claim is accurate. Finding 3 remains explicitly out of
+scope for D2.

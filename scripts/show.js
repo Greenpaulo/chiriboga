@@ -8,25 +8,31 @@
 //                                        from the root engine/AI files
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
 const ENGINE_FILES = ['mechanics.js', 'utility.js', 'phase.js', 'checks.js', 'command.js', 'init.js',
   'decks.js', 'config.js', 'runcalculator.js', 'ai_corp.js', 'ai_runner.js', 'sounds.js'];
 
-function blockFrom(lines, start) {
-  let depth = 0;
+function blockFrom(lines, start, mode = 'script') {
   let opened = false;
   for (let i = start; i < lines.length; i++) {
-    for (const ch of lines[i]) {
-      if (ch === '{') { depth++; opened = true; } else if (ch === '}') depth--;
+    if (lines[i].includes('{')) opened = true;
+    if (!opened || !lines[i].includes('}')) continue;
+    const candidate = lines.slice(start, i + 1).join('\n');
+    const source = mode === 'method' ? `class ShowBlock {\n${candidate}\n}` : candidate;
+    try {
+      new vm.Script(source);
+      return lines.slice(start, i + 1);
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
     }
-    if (opened && depth <= 0) return lines.slice(start, i + 1);
   }
   return lines.slice(start);
 }
 
-function print(file, lines, start) {
-  const block = blockFrom(lines, start);
+function print(file, lines, start, mode) {
+  const block = blockFrom(lines, start, mode);
   console.log('// ' + file + ':' + (start + 1) + '-' + (start + block.length));
   console.log(block.join('\n'));
 }
@@ -48,25 +54,32 @@ function showCard(id) {
 
 function showFunction(name) {
   const patterns = [
-    new RegExp('^\\s*(async\\s+)?function\\s+' + name + '\\s*\\('),
-    new RegExp('^\\s+(async\\s+)?' + name + '\\s*\\([^)]*\\)\\s*\\{'),
-    new RegExp('^\\s*(var|let|const)\\s+' + name + '\\s*=\\s*function'),
+    {pattern: new RegExp('^\\s*(async\\s+)?function\\s+' + name + '\\s*\\('), mode: 'script'},
+    {pattern: new RegExp('^\\s+(async\\s+)?' + name + '\\s*\\([^)]*\\)\\s*\\{'), mode: 'method'},
+    {pattern: new RegExp('^\\s*(var|let|const)\\s+' + name + '\\s*=\\s*function'), mode: 'script'},
   ];
   const found = [];
   for (const file of ENGINE_FILES.filter(f => fs.existsSync(path.join(root, f)))) {
     const lines = fs.readFileSync(path.join(root, file), 'utf8').split('\n');
-    lines.forEach((line, i) => { if (patterns.some(p => p.test(line))) found.push([file, lines, i]); });
+    lines.forEach((line, i) => {
+      const match = patterns.find(({pattern}) => pattern.test(line));
+      if (match) found.push([file, lines, i, match.mode]);
+    });
   }
   if (!found.length) throw new Error('No function or method named ' + name + ' in ' + ENGINE_FILES.join(', '));
-  found.forEach(([file, lines, i]) => print(file, lines, i));
+  found.forEach(([file, lines, i, mode]) => print(file, lines, i, mode));
 }
 
-const [kind, name] = process.argv.slice(2);
-try {
-  if (kind === 'card' && /^\d+$/.test(name || '')) showCard(name);
-  else if (kind === 'fn' && /^[\w$]+$/.test(name || '')) showFunction(name);
-  else { console.log('usage: node scripts/show.js card <id> | fn <name>'); process.exitCode = 1; }
-} catch (error) {
-  console.log(error.message);
-  process.exitCode = 1;
+if (require.main === module) {
+  const [kind, name] = process.argv.slice(2);
+  try {
+    if (kind === 'card' && /^\d+$/.test(name || '')) showCard(name);
+    else if (kind === 'fn' && /^[\w$]+$/.test(name || '')) showFunction(name);
+    else { console.log('usage: node scripts/show.js card <id> | fn <name>'); process.exitCode = 1; }
+  } catch (error) {
+    console.log(error.message);
+    process.exitCode = 1;
+  }
 }
+
+module.exports = {blockFrom};
