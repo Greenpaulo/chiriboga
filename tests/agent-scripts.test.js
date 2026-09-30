@@ -8,7 +8,7 @@ const path = require('path');
 const {spawnSync} = require('child_process');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move} = require('../scripts/ticket.js');
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -51,6 +51,18 @@ assert(/Actionable bugs:[\s\S]*Actionable backlog:[\s\S]*Blocked:[\s\S]*In code 
   'ticket.js list groups tickets by actionable and workflow state');
 assert(/Blocked:\n(?:  \(none\)|  documentation\/(?:bugs|backlog)\/)/.test(ticketList),
   'ticket.js list prints the blocked group without depending on live roadmap state');
+
+const reproductionBefore = [
+  "assert.strictEqual(firstChoice, 'install');",
+  "assert.strictEqual(secondChoice, 'advance');",
+];
+assert(reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice()),
+  'ticket.js accepts reproduction expectations that remain in sequence');
+assert(!reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice().reverse()),
+  'ticket.js rejects reordered reproduction expectations');
+const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund'];
+assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
+  fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
 
 assert.strictEqual(pendingGate('# Ticket\n\n**Gate:** pending F4\n\n## Resolution\n\nNot decided.\n'), undefined,
   'roadmap blocker discovery ignores pending-gate examples outside Resolution');

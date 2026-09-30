@@ -111,7 +111,7 @@ why it matters. Three to five sentences.>
 decisions that could shift.>
 
 ## Acceptance gate
-<N/A — deterministic fix with a single correct outcome, for the common case.
+<N/A — deterministic fix (principle 4): <the oracle>, for the common case.
 If the fix's goal is instead to play better with no single correct answer,
 select an F4 seeded-game gate or a human-game gate and state its sample size,
 metrics and numeric thresholds — "better"/"reduce" need a number. For an F4

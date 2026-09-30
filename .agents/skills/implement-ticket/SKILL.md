@@ -213,8 +213,10 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   Leave the gate criteria unticked while the gate is pending or failed.
   `ticket.js check` fails a gated ticket without this line, or whose option
   defaults to on before the gate passed.
-  A pending gate must also have the generated `## Blocker` section
-  naming the unresolved gate dependency. After writing the Gate line and
+  A pending gate that names an unresolved roadmap dependency ID must also have
+  the generated `## Blocker` section naming that dependency. A pending
+  human-game gate instead uses an unmarked `## Additional blocker` section to
+  name the missing game data. After writing the Gate line and
   moving the ticket, run `node scripts/roadmap.js blockers --fix`, then
   `node scripts/roadmap.js blockers` to confirm the headers are in sync.
   `ticket.js move` normally performs the refresh, but do these commands
@@ -231,9 +233,9 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   `node scripts/ticket.js move <ticket> code-review` (this also sets a linked
   roadmap item to `in-progress` and refreshes generated blocker headers), then run
   `node scripts/ticket.js check <ticket-in-its-new-folder>` and fix anything it reports
-  as FAIL. Also fix warnings that say the acceptance-gate or reproduction
-  comparison was skipped because a required heading or original pending path
-  could not be found; warnings that merely report an intentionally pending
-  gate or its unticked gate criteria are expected.
+  as FAIL. Also fix warnings that say the reproduction comparison was skipped
+  because the original pending path could not be found; warnings that merely
+  report an intentionally pending gate or its unticked gate criteria are
+  expected.
 - Do not commit. Report the files changed, test results, deviations from the
   ticket or plan, and open questions.
