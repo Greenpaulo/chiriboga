@@ -3774,7 +3774,7 @@ cardSet[36044] = {
   _subroutineThreatScore: function (subroutine) {
     var text = subroutine && subroutine.text ? subroutine.text : "";
     var score = 1;
-    if (/end the run/i.test(text)) score += 100;
+    if (attackedServer !== null && /end the run/i.test(text)) score += 100;
     if (/net damage/i.test(text)) {
       var match = text.match(/([0-9]+) net damage/i);
       score += 20 * (match ? Number(match[1]) : 1);

@@ -6335,7 +6335,7 @@ cardSet[31078] = {
 			var cwkCount = runner.AI._cardsInHandWorthKeeping().length;
 			runner.AI._log("Not sure it is worth the cost (but I like "+cwkCount+" cards)");
 			//the constant is arbitrary
-			var randNum = RandomRange(0, cwkCount + expectedDmg - runner.grip.length + 5);
+			var randNum = runner.AI._randomIndex(cwkCount + expectedDmg - runner.grip.length + 6);
 			if (randNum >= costForFullLink) return costForFullLink; //index in choices
 			return 0; //index in choices
 		}};

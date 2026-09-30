@@ -32,7 +32,12 @@ See [architecture: Runner effective credit ceiling](../corp-ai/architecture.md#r
 
 ## Design
 - Return credit-source objects with an amount and an eligibility predicate (from `canUseCredits` and declared hooks).
-- Build payment demands per route: breaker costs from the security evaluator and bypass costs from L4.1's allocator, each tagged with the card that pays it.
+- Model Corsair's aggregate `AIRunPoolCreditOffset` as a Corsair-only source
+  eligible for the route costs Corsair represents. Cloak currently has no
+  `canUseCredits` hook, so do not silently drop the offset or pretend it is a
+  generic per-demand source. Scenario 7 must exercise this same contract; a
+  future alternative may add an explicit hook to Cloak and retire the offset.
+- Build payment demands per route: breaker costs from the security evaluator and bypass costs from L4.1's allocator, each tagged with the card that pays it and a `requiredStealth` amount. Represent a stealth requirement as a stealth-only demand for `requiredStealth` plus an unrestricted remainder demand; source eligibility is checked independently for both, so unrestricted credits cannot fill the stealth-only portion.
 - **Bypass payment is owned here.** L4.1 decides which bypass is used where and emits its cost as a demand; this item decides which sources may pay it. That is why this item depends on L4.1.
 - Allocate sources to demands with the same bipartite max-flow approach as `_canFundRezPlan()` (generalise it into one shared helper rather than writing a second allocator). The previous proposal, a greedy "most restricted source first", can fail when two restricted sources overlap; the max-flow is exact for this shape and is already fast enough for multi-ICE routes.
 - Document any schema changes for credit-eligibility predicates in `documentation/ai.md`.
@@ -49,7 +54,7 @@ See [architecture: Runner effective credit ceiling](../corp-ai/architecture.md#r
 4. Central-only credits apply only to centrals.
 5. Unrestricted credits fill any remaining payment.
 6. Two restricted sources with overlapping eligibility fund two demands that a most-restricted-first greedy order would fail to fund.
-7. For every scenario above, the allocator reports a route payable exactly when an exhaustive legal assignment (each source's `canUseCredits` checked against each demand) can pay it.
+7. For every scenario above, the allocator reports a route payable exactly when an exhaustive legal assignment can pay it. The oracle checks each source's `canUseCredits` against each demand and independently enforces every demand's `requiredStealth` composition; it must not reuse the production demand-splitting result as its expected value.
 
 ## Acceptance gate
 Not F4-gated: correctness has a deterministic oracle (scenario 7). Adopt when:

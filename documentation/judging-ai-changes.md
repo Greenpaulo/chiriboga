@@ -187,10 +187,12 @@ Gates are evidence, not a verdict you must obey. Be sceptical when:
 As of 2026-09-25:
 
 - **No gate can be run yet.** F4 is `ready` but not built, and it depends on
-  **D2** (seedable randomness for the Runner AI), which is `proposed`.
-- **D2 is small.** The Runner AI draws random numbers in two places, and D2
-  routes both through one injectable source, as F1 already did for the Corp.
-  Raise it with `node scripts/roadmap.js raise D2`, then implement it as usual.
+  **D2** (seedable randomness for the Runner AI), which is `in-progress`.
+- **D2 remediation is owned by the existing approved PR #1.** On this branch
+  its ticket remains in `documentation/backlog/remediation/` and the roadmap
+  remains `in-progress` until that dedicated change lands. Do not promote the
+  ticket independently here; `node scripts/roadmap.js raise` applies only to
+  proposed items and is not the next action for D2.
 - **F4 is real work, and its first step decides feasibility.** It must first
   prove that one full game can run to a winner headlessly (the engine's main
   loop uses browser timers and page elements, which have to be stubbed). If

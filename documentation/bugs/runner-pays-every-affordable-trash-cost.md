@@ -5,10 +5,13 @@
 
 ## Summary
 When accessing a card, the Runner AI chooses "trash" whenever the engine offers
-it, except for installed, non-advanceable ambushes. It never compares the trash
-cost with the card's value to the Corp or with the Runner's own economy, so it
-can spend its credits trashing low-value cards and then be unable to afford
-runs or breakers.
+it unless a card trigger with `highestPriorityTriggerValue > 2` takes
+precedence. It skips an installed, non-advanceable ambush only when the "n"
+option is also available. On the remaining trash branch it never compares the
+trash cost with the card's value to the Corp or with the Runner's own economy,
+so it can spend its credits trashing low-value cards and then be unable to
+afford runs or breakers. The reproduction must exercise that branch without a
+higher-priority trigger.
 
 ## Evidence
 `ai_runner.js`, `_internalChoiceDetermination`, "Run Accessing" branch:

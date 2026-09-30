@@ -2056,6 +2056,19 @@ assert.strictEqual(cultivate.AIWouldPlay.call(cultivate), true);
 
 const unleash = context.cardSet[36044];
 let unleashedSubroutine = 0;
+context.attackedServer = null;
+assert(
+  unleash._subroutineThreatScore({text: 'Do 1 net damage.'}) >
+    unleash._subroutineThreatScore({text: 'End the run.'}),
+  '36044 does not value end-the-run text outside a run',
+);
+context.attackedServer = context.corp.HQ;
+assert(
+  unleash._subroutineThreatScore({text: 'End the run.'}) >
+    unleash._subroutineThreatScore({text: 'Do 1 net damage.'}),
+  '36044 still values end-the-run text during a run',
+);
+context.attackedServer = null;
 const unleashIce = {
   title: 'Expensive ice',
   cardType: 'ice',
@@ -2064,8 +2077,9 @@ const unleashIce = {
   rezzed: false,
   subroutines: [
     {
-      text: 'End the run.',
+      text: 'End the run. Do 1 net damage.',
       Resolve() {
+        context.EndTheRun();
         unleashedSubroutine++;
       },
     },
@@ -2095,7 +2109,8 @@ assert.strictEqual(context.runner.tags, 0, '36044 removes a tag as an additional
 assert.strictEqual(unleashIce.rezzed, true);
 decisions[0].choose(decisions[0].choices[0]);
 decisions[1].choose(decisions[1].choices[0]);
-assert.strictEqual(unleashedSubroutine, 1);
+assert.strictEqual(unleashedSubroutine, 1, '36044 retains non-ETR effects outside a run');
+assert.strictEqual(context.attackedServer, null, '36044 ETR text does not start run cleanup');
 context.runner.tags = 0;
 unleashIce.rezzed = false;
 assert.strictEqual(unleash.Enumerate.call(unleash).length, 0);
