@@ -22,11 +22,13 @@ cards bypass them for Corp policy:
 - Touch-ups (35067) calls engine `Shuffle` for its advance target and
   `RandomRange` for its card-type choice.
 
-Other direct random calls in playable card definitions implement game rules,
-such as random HQ access or shuffling R&D/Stack, and must remain engine
-randomness. The two sites first noticed during D2 review were Ballista and
-Touch-ups; the list above is the result of checking every direct
-`Math.random`, `RandomRange`, and `Shuffle` call in the four playable sets.
+Other direct random calls in playable card definitions either implement game
+rules, such as random HQ access or shuffling R&D/Stack, or belong to Runner AI
+policy. Gameplay randomness must remain engine randomness; Runner policy
+randomness is outside this Corp-specific item. The two sites first noticed
+during D2 review were Ballista and Touch-ups; the list above is the result of
+checking every direct `Math.random`, `RandomRange`, and `Shuffle` call in the
+four playable sets.
 
 ## Design
 - Add a bounded `CorpAI._randomIndex(n)` alongside `_shuffleCopy()` and route
