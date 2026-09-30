@@ -71,7 +71,8 @@ const verbose = !!process.env.VERBOSE; // passing cases are silent by default to
 function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
-  runner.temporaryCredits = 0; runner.clickTracker = 0; context.playerTurn = runner; context.attackedServer = null;
+  runner.temporaryCredits = 0; runner.tempBonusClicks = 0; runner.clickTracker = 0;
+  context.playerTurn = runner; context.attackedServer = null;
   runner.resolvingCards = [];
   corp.creditPool = 20; corp.badPublicity = 0; corp.scoreArea = []; servers = [];
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
@@ -311,6 +312,28 @@ test('F3: a board change gets a fresh result, within and across decisions', () =
     rndBran.rezzed = false;
     assert.strictEqual(ai._evaluateServerSecurity(rnd), first, 'the real board is served from the cache');
   });
+});
+
+test('F3: every mutable security input changes the board fingerprint', () => {
+  const {rndBran, rnd} = branBoard();
+  const femme = card(31022);
+  const otherIce = etr();
+  const quetzal = {player: runner, usedThisTurn: false};
+  rnd.ice.push(otherIce);
+  femme.chosenCard = rndBran;
+  runner.cards = [femme, quetzal];
+  const expectChange = mutate => {
+    const before = ai._securityBoardKey();
+    mutate();
+    assert.notStrictEqual(ai._securityBoardKey(), before);
+  };
+
+  expectChange(() => { runner.temporaryCredits = 1; });
+  expectChange(() => { runner.tempBonusClicks = 1; });
+  expectChange(() => { context.playerTurn = corp; });
+  expectChange(() => { rndBran.bypassed = true; });
+  expectChange(() => { femme.chosenCard = otherIce; });
+  expectChange(() => { quetzal.usedThisTurn = true; });
 });
 
 test('F3: nested hypotheticals neither read nor write the cache', () => {

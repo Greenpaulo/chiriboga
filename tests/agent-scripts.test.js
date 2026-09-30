@@ -5,6 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
+const {blockFrom} = require('../scripts/show.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -21,6 +22,30 @@ const fn = run('scripts/show.js', 'fn', 'InstalledCards');
 assert(/^function InstalledCards\(/m.test(fn) && /^\}$/m.test(fn), 'show.js fn prints one whole function');
 assert(/_effectiveRunnerCreditPool\(server\) \{/.test(run('scripts/show.js', 'fn', '_effectiveRunnerCreditPool')),
   'show.js fn finds class methods');
+
+const syntaxHeavyCard = [
+  'cardSet[1] = {',
+  '  text: "}",',
+  '  pattern: /[{}]/,',
+  '  template: `raw } ${value ? {nested: 1}.nested : "{"}`,',
+  '  // } ignored',
+  '  /* { ignored */',
+  '};',
+  'cardSet[2] = {};',
+];
+assert.deepStrictEqual(blockFrom(syntaxHeavyCard, 0), syntaxHeavyCard.slice(0, 7),
+  'show.js card boundary ignores braces in JavaScript text and comments');
+
+const syntaxHeavyMethod = [
+  '  sample() {',
+  '    const close = "}";',
+  '    const pattern = /}/;',
+  '    return `${close} {`; // } ignored',
+  '  }',
+  '  next() {}',
+];
+assert.deepStrictEqual(blockFrom(syntaxHeavyMethod, 0, 'method'), syntaxHeavyMethod.slice(0, 5),
+  'show.js method boundary uses JavaScript syntax');
 
 const brief = run('scripts/batch-brief.js', '3');
 assert(/^Batch 3 \(/.test(brief), 'batch-brief.js reads the tracker batch queue');
