@@ -1,4 +1,4 @@
-# Corp AI: never installs an agenda into an empty, secure remote because `_isAScoringServer()` requires it to outscore HQ
+# Corp AI: never installs an agenda into an empty, secure remote because `_isAScoringServer()` requires it to meet or exceed HQ's score
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_didnt_play_agendas_into_remote_when_it_was_secure.txt` (`Version reference: Wed Sep 23 2026 12:02:31`)
 **Reproduction:** `tests/fixtures/corp-decisions-pending/corp-agenda-held-while-secure-remote-available.txt` — `node tests/corp-decision-fixtures.test.js --pending corp-agenda-held-while-secure-remote-available.txt` (fails at branch `25Sept-fixes` tarball, 2026-09-28; short SHA not recorded)
@@ -28,24 +28,80 @@ Weyland; hand `[Trick of Light, Gov. Subsidy x2, Hostile Takeover, Spin Doctor]`
 - [Inferred] The Archives-overflow branch (`_agendasInHand() > MaxHandSize - 1`) did not apply here (at most 2 agendas in hand).
 
 ## Proposed fix
-Once a candidate remote passes the `isSecure` floor, the Runner cannot currently breach it, so ranking it against another server's score adds no safety and can leave the agenda in hand indefinitely. Proposed: apply the HQ/Archives comparison only to candidates that are not secure, and keep choosing among secure empty remotes by the existing `emptyProtectedRemotes[0]` order. Change is confined to `_isAScoringServer()`.
+When the evaluator currently classifies a candidate remote as `isSecure`, the
+additional comparison against another server's score can leave the agenda in
+hand indefinitely. Proposed: treat that classification as sufficient for the
+agenda-placement policy, apply the HQ/Archives comparison only to candidates
+that are not classified as secure, and keep choosing among secure empty
+remotes by the existing `emptyProtectedRemotes[0]` order. `isSecure` does not
+prove that the Runner cannot breach the remote: unrezzed ICE can cause the
+evaluator to overstate security, so exposing an agenda on that basis remains a
+risk for the gate to measure. Change is confined to the
+`_isAScoringServer()` agenda-placement call path.
 Rejected: removing the hand term (the reproduction still fails at one card); a tuned constant (violates `ai-principles.md`).
-Decision needed: this reverses the deliberate expectation in the existing security test above, added with the earlier ticket `done/corp-installs-agendas-into-a-never-secure-remote.md`. If the owner wants the relative bar kept for some secure cases, an alternative is to apply it only when HQ is itself insecure; that needs its own reproduction.
+Selected candidate policy: skip the relative bar for agenda-placement calls
+whenever the candidate remote is secure, behind the default-off
+`secureRemoteAgendaCommitment` option. Scoring upgrades also call
+`_isAScoringServer()`; they retain the relative-score requirement because this
+ticket and its gate measure agenda commitment only. This deliberately reverses
+the existing agenda-placement security-test expectation added with
+`done/corp-installs-agendas-into-a-never-secure-remote.md`; the gate below,
+rather than that one captured board, decides whether to adopt it. Applying the
+exception only when HQ is insecure remains a possible remediation if this
+candidate fails its gate, but is not the policy tested by this ticket.
 Other decisions that could shift: whether `_scoringWindow()` should stop using HQ's hand-inflated score; unrezzed ICE overstates security (finding A2), so trusting `isSecure` alone leans on that.
+
+## Acceptance gate
+
+Gated under `documentation/ai-planning.md`; depends on F4. The reproduction
+defines the candidate policy, but reversing the existing relative-security
+heuristic has no rules oracle and can expose agendas in states not covered by
+the captured board. Compare baseline option `secureRemoteAgendaCommitment` off
+with candidate on using paired seeds, the committed deck pool, 200 games per
+deck pair and bootstrap 95% confidence intervals.
+
+- Improvement: `secureRemoteAgendaHoldTurns` per game decreases; the interval
+  for baseline minus candidate has a lower bound above zero.
+- Guard: `pointsStolen` per game does not rise by more than 0.10; the interval
+  upper bound for candidate minus baseline is at most +0.10.
+- Guard: `pointsScored` per game does not fall by more than 0.10; the interval
+  lower bound for candidate minus baseline is at least -0.10.
+- Guard: Corp `winRate` does not fall by more than 0.02; the interval lower
+  bound for candidate minus baseline is at least -0.02.
 
 ## Acceptance criteria
 - [ ] The reproduction passes and moves to `tests/fixtures/corp-decisions/`, expectation unchanged.
 - [ ] The test "a secure remote still uses the relative scoring-server comparison" is rewritten deliberately, with the reasoning recorded in review, not weakened to pass.
 - [ ] Variation: remote holding the same Ballista as HQ, and an 8-card hand, both still install.
 - [ ] Control: an insecure remote is still refused; `corp-no-agenda-into-insecure-remote` stays green.
+- [ ] Control: an `AIIsScoringUpgrade` install still requires the candidate
+      remote to meet the relative-score comparison, even when
+      `secureRemoteAgendaCommitment` is enabled.
+- [ ] The behaviour change ships behind the AI option
+      `secureRemoteAgendaCommitment`, which defaults to off.
+- [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
+      deck pairs, paired seeds, seed count, every metric's baseline/candidate
+      result and bootstrap 95% confidence interval, guarded-regression results,
+      pass conditions and thresholds. Only then is the option switched on by
+      default.
+- [ ] The F4 collector `secureRemoteAgendaHoldTurns` is added through the
+      harness collector extension point. It counts Corp turns ending with an
+      agenda in HQ while an empty remote is judged secure and is legally
+      available for that agenda.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md`; the "relative test" sentence in `documentation/corp-ai/architecture.md` (Install planning) is updated.
 - [ ] `node tests/run-all-tests.js` passes (baseline: 3 unrelated failures: `ai-roadmaps`, `flipped-identity`, `vantagepoint-integration`).
 
 ## Implementation plan
 **Awaiting approval.** Plan gate: shared scoring heuristic in `ai_corp.js`, and changes the expectation of an existing green test.
 1. Confirm the reproduction fails for the stated reason (done at triage).
-2. In `_isAScoringServer()`, guard the `protScore < minProt` return with `!security.isSecure`.
-3. Rewrite the conflicting security test to assert a secure remote is accepted regardless of relative score, keeping the insecure-remote test unchanged.
+2. Give `_isAScoringServer()` an agenda-placement flag. Let a secure candidate
+   bypass the `protScore < minProt` rejection only for agenda placement when
+   `secureRemoteAgendaCommitment` is enabled; otherwise retain the current
+   relative-score rejection. Keep the option off until the F4 gate passes.
+3. Rewrite the conflicting agenda-placement security test to assert a secure
+   remote is accepted regardless of relative score when the option is enabled,
+   keeping the insecure-remote test unchanged. Add a focused scoring-upgrade
+   regression proving the shared predicate still applies the relative bar.
 4. Add the variation fixtures; update `architecture.md`; run the full suite.
 
 ## Out of scope / related

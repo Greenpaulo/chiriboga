@@ -127,7 +127,9 @@ the breach begins. Under comprehensive rule 7.4.6a, whenever a card enters the
 breached server's root, give the Runner the required choice at the next
 checkpoint and record that card as a candidate only when the Runner accepts
 it. `AccessCardList()` should read that recorded candidate state and continue
-excluding cards already in `accessedCards`.
+excluding cards already in `accessedCards` and recorded root candidates that
+are no longer in the breached server's live root. Rule 7.4.5 removes a card's
+candidate status when it leaves the breached server.
 
 Do not apply a fixed snapshot to the central-server card zones. Rules 7.4.6b-d
 give cards entering HQ, R&D and Archives their own candidate behavior, so keep
@@ -148,6 +150,10 @@ R&D's top-down access with root cards mixed in (the `reducedRet` branch),
 Archives' access-all behavior, and the `modifyBreachAccess` additional-access
 modifier all still work unchanged when nothing is installed mid-run.
 
+## Acceptance gate
+
+N/A — deterministic fix with a single correct outcome
+
 ## Acceptance criteria
 
 - [ ] The reproduction passes and has moved into the green suite (`tests/`),
@@ -155,6 +161,8 @@ modifier all still work unchanged when nothing is installed mid-run.
 - [ ] For a card installed mid-breach into the attacked remote's root, tests
       cover both Runner choices: accepting adds it as a candidate and
       declining does not.
+- [ ] A recorded root candidate that leaves the breached server before access
+      is no longer offered for access.
 - [ ] The same two choices are covered for a card installed into the root of
       a breached central server (HQ, R&D or Archives).
 - [ ] Existing access behavior for HQ (random single access), R&D (top-down

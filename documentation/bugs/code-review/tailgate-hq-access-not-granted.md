@@ -87,6 +87,10 @@ scope here per the plan gate; worth a separate ticket/backlog item if other
 `responseOnRunSuccessful`/similar hooks are ever found relying on an unpassed
 parameter.
 
+## Acceptance gate
+
+N/A — deterministic fix with a single correct outcome
+
 ## Acceptance criteria
 - [x] The reproduction passes and has moved into the green suite (`tests/`),
       expectation unchanged (2 additional accesses after a successful HQ
