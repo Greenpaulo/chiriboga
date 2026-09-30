@@ -29,7 +29,7 @@ Implemented from `64bcf17`.
   coverage plus decisive and redundant Tranquilizer cases to the shared Corp
   security suite, while retaining the reproduction's Saci-style and rich-Corp
   guards.
-- Updated [Corp AI architecture](../../corp-ai/architecture.md#central-pressure-and-breach-loss-risk)
+- Updated [Corp AI architecture](../corp-ai/architecture.md#central-pressure-and-breach-loss-risk)
   with the legacy default, candidate behavior and adoption boundary. No
   card-facing AI hook changed.
 - Verification: focused hosted-Trojan reproduction (3 cases), Corp

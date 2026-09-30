@@ -22,7 +22,7 @@ Why the workflow is set up this way is explained in
 | 2. Fix | Codex, new chat | `$implement-ticket <ticket>` | The reproduction confirmed, the fix, and the ticket in `code-review/` (or a plan to approve first) |
 | 3. Check | Terminal | `node scripts/ticket.js check <ticket>` | PASS/WARN/FAIL lines, the changed files and a review link |
 | 4. Review | Claude chat | Commit and push, then paste **prompt R** with the check output | A Code review section to paste into the ticket, and a move command |
-| 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`, or in `remediation/` for another step 2 |
+| 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`; in `remediation/` for another step 2; or back in the open ticket root with a generated blocker when review passes but its gate is pending |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
 | PR feedback | Codex, PR branch | `$address-pr-review <PR>` | Each review comment verified and accepted, adapted, rejected or marked obsolete; supported fixes applied and tested |
 
@@ -83,14 +83,22 @@ debug-logs/<log>
    │  triage (Claude chat draft, or Codex)
    ▼
 bugs/  ──implement-ticket──▶  bugs/code-review/  ──review──▶  bugs/done/
-                                    ▲                   │
-                                    │                   ▼
-                              implement-ticket ◀── bugs/remediation/
+                                    │ changes required
+                                    ▼
+                              bugs/remediation/
+                                    │ implement-ticket
+                                    └────────────────────▶ bugs/code-review/
+
+bugs/code-review/ ──pass, gate pending──▶ bugs/ (generated blocker)
 ```
 
 Backlog tickets follow the same path under `documentation/backlog/`, starting
 from a ticket you write instead of a debug log. Move tickets with
 `node scripts/ticket.js move <ticket> <open|code-review|remediation|done>`.
+Here `open` means the root `documentation/bugs/` or `documentation/backlog/`
+folder, not a folder named `open`. A review that passes while its F4 or human
+gate is still pending moves the ticket to `open`, not `done`; the move command
+uses its `**Gate:** pending ...` line to add or refresh the generated blocker.
 The move command refreshes generated blocker headers. To inspect or repair
 them directly, run `node scripts/roadmap.js blockers` or
 `node scripts/roadmap.js blockers --fix`; the roadmap regression test prevents
@@ -164,7 +172,7 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/show.js card <id>` | One card definition |
 | `node scripts/show.js fn <name>` | One engine or AI function |
 | `node scripts/ticket.js check <ticket>` | The mechanical review checks for a fixed ticket |
-| `node scripts/ticket.js move <ticket> <stage>` | Moves a ticket between status folders, keeping a linked roadmap item's status and links in step |
+| `node scripts/ticket.js move <ticket> <open\|code-review\|remediation\|done>` | Moves a ticket to the open family root, review, rework, or completed stage respectively, keeping linked roadmap state, links and generated blockers in step |
 | `node scripts/ticket.js next bugs` | Open bug tickets that have no generated or manually recorded blocker |
 | `node scripts/ticket.js list` | Actionable bugs and backlog tickets, blocked tickets, code review, and remediation grouped in one view |
 | `node scripts/roadmap.js next` | Corp and Runner AI roadmap items whose dependencies are all done (including in-progress items whose ticket is open again) |
