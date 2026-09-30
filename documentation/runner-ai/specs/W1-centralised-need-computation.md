@@ -16,8 +16,11 @@ checks using `_getCachedCost(server)` live inside individual cards'
 ## Design
 - Generalise the existing `prioritiseEconomy` and overdraw checks into reusable
   `needEconomy` and `needDraw` values.
-- Add `lockedOutServers` using `_getCachedCost(server) == Infinity` per server,
-  the signal already used inside individual cards' `AIWorthKeeping`.
+- Add `lockedOutServers` through a read-only cost helper. It may read an
+  existing `_getCachedCost` result, but when a cost is missing it must evaluate
+  on isolated/snapshotted run-calculator state and restore `runsEverCalculated`,
+  `cachedCosts` and the current path caches before returning; calling the
+  mutating `_getCachedCost(server)` directly is not allowed.
 - Wire no consumer yet: this item only proves the computation is correct and
   side-effect-free.
 

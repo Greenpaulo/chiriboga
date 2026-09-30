@@ -66,7 +66,15 @@ The same mistyping shows up throughout the Corp AI's own turn planning, for the 
 AI: HQ appears secure: Flyswatter has mandatory breaks with no capable breaker; Syailendra omitted from best affordable rez plan; break cost Infinity > Runner credits 6
 ```
 
-Because Syailendra is (wrongly) treated as needing a Fracter the Runner never installs, `_matchingBreakerForIce` returns `null` for it every single turn regardless of what the Runner actually has installed, so it always contributes `hasHardLockout` on its own and the Corp's rez-plan search (`_evaluateServerSecurity` → `_icePlanOutcome`, `ai_corp.js` lines ~2716-2803) always finds that rezzing Flyswatter alone already achieves the same hard lockout for less money, correctly per its own logic (see §3) — and so correctly, but for the wrong underlying reason, "omits" Syailendra from the plan every turn. Once Unity is installed and Flyswatter stops being a lockout, this same mistyping is what leaves Syailendra as the Runner's sole remaining obstacle with **no correct breaker path at all** — not even a legitimate one requiring more credits or clicks, just a card with a real Decoder answer that the engine can never find because it's asking for the wrong kind of breaker.
+Because Syailendra is (wrongly) treated as needing a Fracter the Runner never
+installs, `_matchingBreakerForIce` returns `null` regardless of the installed
+Decoder. This inflates its optional break cost. It does **not** always create
+`hasHardLockout`: while the Runner has at least one card in Grip, Syailendra's
+three subroutines can continue without a break, so
+`_estimateBreakCost(..., true)` returns zero; its net-damage subroutine can
+become mandatory when Grip is empty. The subtype error still makes the Corp's
+rez-plan and total-cost estimates ignore the real Decoder path, but the exact
+lockout result depends on Grip and the other ICE in the route.
 
 ---
 
@@ -110,7 +118,7 @@ Follow `tests/fixtures/README.md` and whichever ice/breaker test file already ex
 
 1. **Direct regression:** Runner with only a Decoder (e.g. Unity) installed, encountering a rezzed Syailendra — after the fix, the Decoder's break ability should be offered and should successfully break Syailendra's subroutines; before the fix, no break option is offered at all.
 2. **Negative check:** Runner with only a Fracter (e.g. Marjanah) installed and no Decoder, encountering Syailendra — after the fix, Marjanah should **not** be offered as a valid breaker for it (confirming the fix didn't just add Decoder support alongside the wrong Fracter support, but actually corrected the subtype).
-3. **Corp-side regression, reusing this log's shape:** Corp with Flyswatter + Syailendra unrezzed in HQ, Runner with a Decoder installed and enough credits to break both. `_evaluateServerSecurity(corp.HQ)` should now find a real (non-Infinity) mandatory break cost that includes Syailendra, and `isSecure` should reflect the Runner's actual ability to get through both pieces — not treat Syailendra as an unconditional lockout regardless of what the Runner has installed.
+3. **Corp-side regression, reusing this log's shape:** Corp with Flyswatter + Syailendra unrezzed in HQ, Runner with a Decoder installed and enough credits to break both. `_evaluateServerSecurity(corp.HQ)` should include Syailendra's finite optional break cost and reflect the Runner's actual route. Test mandatory cost separately with a nonempty Grip (its optional subroutines require no break) and an empty Grip (the net damage can become mandatory); do not require Syailendra to contribute a mandatory break cost in every state.
 4. **Cardpool-wide sanity check (see §4):** a small script or test that loads `carddata/carddata.json` and, for every `cardSet[N]` with `cardType == "ice"`, compares its `subTypes` against the `Barrier`/`Code Gate`/`Sentry` keyword(s) in the matching carddata entry's `keywords` field, flagging mismatches. This would have caught Syailendra immediately and is cheap to keep running.
 
 ---
@@ -125,5 +133,8 @@ Follow `tests/fixtures/README.md` and whichever ice/breaker test file already ex
 
 ## 7. Related observations (not part of this fix)
 
-1. The log ends abruptly right after Syailendra's first (optional) subroutine fires, with no further Corp AI decision output — consistent with the Runner having no legal way to interact with Syailendra's remaining subroutines once Unity is (wrongly) ruled out and Marjanah was never installed, rather than any separate crash or hang.
+1. The excerpt reaches all three Syailendra subroutines and its last line records
+   the third subroutine firing. It does not establish why output stops after
+   that point; the cause remains unresolved until the full log or execution
+   path can confirm or rule out a crash, hang, or ordinary termination.
 2. `_icePlanOutcome`'s tie-break rule — prefer the cheaper of two plans that tie on lockout status and mandatory/total break cost (`ai_corp.js`, `_icePlanIsBetter`, final `return candidate.rezCost < current.rezCost;`) — is a reasonable, deliberate piece of design (don't pay to rez redundant ice) and is flagged here only because it's what made this particular bug's symptom read as "Syailendra omitted" turn after turn rather than something more obviously wrong.

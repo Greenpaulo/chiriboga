@@ -130,8 +130,10 @@ hold.
   the hook and drop records that come back `null`.
 - **Overrides.** Game-winning scores, critical breach defence, the emergency
   recovery plan, rezzes that prevent a game-winning breach and forced
-  single-option decisions ignore every record. A record never stops its own
-  card being played.
+  single-option decisions ignore every record. In an ordinary `play` decision,
+  every held card is blocked, including the card that declared the record;
+  declaring a reservation is not self-permission to consume it. Forced and
+  game-winning overrides may play that card and must record the override reason.
 
 ### Trigger-ordering hook
 
@@ -164,7 +166,7 @@ Minimum fixture matrix:
 | Dimension | Required cases |
 | --- | --- |
 | Reservation timing | persistent-threshold (R1.1), mid-run reactive (R1.2), turn-planning (R1.3) |
-| Reservation vs. tactical safety | reservation held, reservation overridden by a game-winning or game-losing tactical need |
+| Reservation vs. tactical safety | ordinary `play` blocks the declaring held card, a forced single-option decision overrides it, and a game-winning or game-losing tactical need overrides it; assert each path separately |
 | Reservation expiry | record dropped when its card leaves, and when its `expiryCondition` becomes true |
 | Trigger pair | order-dependent pair in both install orders, a pair a hardcoded order gets wrong, order-independent pair, single pending trigger |
 | Imperfect information | identical decisions across at least two different hidden Runner Grip/Stack substitutions, for every scenario above |

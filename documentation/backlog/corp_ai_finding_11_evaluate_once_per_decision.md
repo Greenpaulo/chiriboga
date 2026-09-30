@@ -213,9 +213,12 @@ Fix:
   nested or not, and wherever it was started, is bypassed. Do not detect
   hypotheticals by listing functions or by looking for `_withHypothetical()`
   on the stack.
-- **Key.** The server object plus the evaluator's options. This is safe only
-  because the board cannot change inside one `Choice()` at depth 0. Add a
-  debug assertion (on in tests) that recomputes a sample of hits and compares.
+- **Key.** The server object, evaluator options and the cheap public-board
+  fingerprint described in the Resolution (credits, clicks, tags,
+  run/encounter state, server ICE/root state and the Runner rig). The
+  fingerprint forces a miss if public state changes within one `Choice()`;
+  do not assume the board is immutable. Add a debug assertion (on in tests)
+  that recomputes a sample of hits and compares.
 - **Debug call.** Gate the `Phase_Main` debug-only `_serverToProtect(false,
 true)` call behind a debug flag.
 - **Count calls.** Count evaluator calls per `Choice()` through F4's collector

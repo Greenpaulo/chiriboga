@@ -21,7 +21,9 @@ See [architecture: public threat memory](../corp-ai/architecture.md#public-threa
 ## Design
 - Behind `this.options.observedDeckThreatPriors` (default `false`), adjust mechanic-class expectations from revealed Heap cards, installed cards, influence already observed, deck size, and optionally an offline archetype table.
 - Keep `AIHiddenThreat` as the card-level contract.
-- Return both probability and evidence, for telemetry.
+- Keep `_estimateRunnerBypassRisk(server)` numeric so `_protectionScore()` can
+  subtract it. Add a separate detail API that returns probability and evidence
+  for telemetry, and derive the numeric risk from that detail result.
 - Fall back to the current fixed prior when evidence is sparse or no calibrated archetype data exists.
 - Document the posterior calculation rules and valid public sources in `documentation/ai.md`.
 
@@ -49,7 +51,12 @@ F4 comparison (paired seeds, committed deck pool, 200 games per deck pair, boots
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
-- [ ] The F4 collector `threatPredictionError` is added through F4's collector extension point: at each Corp-turn evaluation of a one-ICE server, for each threat kind, the squared difference between the predicted probability that at least one copy is in the Grip and whether one actually is (read by the harness, not the AI), averaged per game.
+- [ ] The F4 collector `threatPredictionError` is added through F4's collector
+  extension point: at one fixed checkpoint per eligible one-ICE server per
+  Corp turn, independent of evaluator call count and option-driven evaluation
+  order, record for each threat kind the squared difference between the
+  predicted probability that at least one copy is in the Grip and whether one
+  actually is (read by the harness, not the AI), averaged per game.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

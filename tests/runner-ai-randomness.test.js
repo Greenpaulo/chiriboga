@@ -166,6 +166,79 @@ async function test(name, fn) {
   catch (error) { failures.push(name + ': ' + error.message); }
 }
 
+// Return complete object literals assigned at each match. This small lexical
+// scanner balances nested objects and ignores braces in strings, regular
+// expression literals, and comments, unlike a non-greedy regular expression
+// that stops at the first nested `};`.
+function assignedObjectLiterals(source, assignment) {
+  const objects = [];
+  assignment.lastIndex = 0;
+  for (let match; (match = assignment.exec(source));) {
+    const start = source.indexOf('{', match.index + match[0].length);
+    if (start < 0) continue;
+    let depth = 0, quote = null, lineComment = false, blockComment = false;
+    let regex = false, regexClass = false, escaped = false, canStartRegex = true;
+    for (let i = start; i < source.length; i++) {
+      const char = source[i], next = source[i + 1];
+      if (lineComment) {
+        if (char === '\n') lineComment = false;
+        continue;
+      }
+      if (blockComment) {
+        if (char === '*' && next === '/') { blockComment = false; i++; }
+        continue;
+      }
+      if (quote) {
+        if (escaped) escaped = false;
+        else if (char === '\\') escaped = true;
+        else if (char === quote) quote = null;
+        continue;
+      }
+      if (regex) {
+        if (escaped) escaped = false;
+        else if (char === '\\') escaped = true;
+        else if (char === '[') regexClass = true;
+        else if (char === ']' && regexClass) regexClass = false;
+        else if (char === '/' && !regexClass) { regex = false; canStartRegex = false; }
+        continue;
+      }
+      if (char === '/' && next === '/') { lineComment = true; i++; continue; }
+      if (char === '/' && next === '*') { blockComment = true; i++; continue; }
+      if (char === '/' && canStartRegex) {
+        regex = true; regexClass = false; escaped = false; continue;
+      }
+      if (char === '"' || char === "'" || char === '`') {
+        quote = char; canStartRegex = false; continue;
+      }
+      if (/\s/.test(char)) continue;
+      if (/[A-Za-z_$]/.test(char)) {
+        let end = i + 1;
+        while (end < source.length && /[\w$]/.test(source[end])) end++;
+        const word = source.slice(i, end);
+        canStartRegex = /^(?:await|case|delete|do|else|in|instanceof|new|of|return|throw|typeof|void|yield)$/.test(word);
+        i = end - 1;
+        continue;
+      }
+      if (/[0-9]/.test(char)) {
+        while (i + 1 < source.length && /[\w.]/.test(source[i + 1])) i++;
+        canStartRegex = false;
+        continue;
+      }
+      if (char === '{') { depth++; canStartRegex = true; }
+      else if (char === '}' && --depth === 0) {
+        objects.push(source.slice(start, i + 1));
+        assignment.lastIndex = i + 1;
+        break;
+      }
+      else if (char === ')' || char === ']') canStartRegex = false;
+      else if (char === '}' || char === '.' || char === '+' && next === '+' || char === '-' && next === '-')
+        canStartRegex = false;
+      else canStartRegex = true;
+    }
+  }
+  return objects;
+}
+
 (async () => {
   setUpBoard();
   const serverCount = run('corp.remoteServers.length + 3');

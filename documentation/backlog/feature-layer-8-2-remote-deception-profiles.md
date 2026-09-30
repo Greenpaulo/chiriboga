@@ -37,7 +37,12 @@ All three signals sit behind `this.options.deceptionLegibility` (default `false`
 ## Safety and information boundary
 - Bluffing acts against the Corp's otherwise-optimal install/protection pattern purely to create a false signal, which risks measurably worse average play if the bluff does not land (unlike baiting, which is contained to a server that is already a trap).
 - Deception profiles must never create naked agenda servers and must be disabled when a breach of that server could give the Runner enough agenda points to win. No legibility adjustment may reactivate a posture the guard disabled.
-- Unpredictability: whether a posture is active, and whether a postured card is an agenda or a trap, must never observably correlate with any single game-state variable a human could learn over repeated games (checked by `bluffSingleVariableCorrelation`).
+- Unpredictability: among eligible bait and agenda-bluff decisions that reach a
+  random roll, whether a posture is active, and whether a postured card is an
+  agenda or a trap, must not observably correlate with any single game-state
+  variable a human could learn over repeated games (checked by
+  `bluffSingleVariableCorrelation`). Safety-guarded remotes are outside this
+  metric; the guards remain unconditional.
 - Use only public signals and Corp-known information; never inspect hidden Runner cards.
 - Keep `_random` injectable.
 

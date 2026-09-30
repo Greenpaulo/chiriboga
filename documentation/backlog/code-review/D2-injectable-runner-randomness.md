@@ -23,7 +23,7 @@ Implemented from `58f3a4d`.
    [P2](../../corp-ai/specs/P2-corp-card-policy-randomness.md), including a
    full playable-set audit rather than only the two examples from review.
 4. Verification: `node tests/runner-ai-randomness.test.js` passes all 5 checks;
-   `node tests/run-all-tests.js` passes all 36 test files, including the Corp
+   `node tests/run-all-tests.js` passes all 37 test files, including the Corp
    decision fixtures and decision snapshots.
 
 - `RunnerAI` gets `this._random = Math.random` (constructor) and
@@ -47,9 +47,10 @@ Implemented from `58f3a4d`.
   seeds alone decide the HQ/R&D tie on that board (both targets occur across
   six seeds); one roll per server per decision; `_randomIndex` bounds; and a
   ratchet that fails on `Math.random`, `RandomRange` or `Shuffle` in the
-  `RunnerAI` class, any Runner card's `AI*` hook, or any dynamic
-  `runner.AI.preferred` callback in playable sets. Without the fix the test
-  fails at the jitter (`ai_runner.js`, `_internalChoiceDetermination`).
+  `RunnerAI` class, any Runner card's `AI*` hook, or dynamically assigned
+  `runner.AI.preferred.*` callbacks on cards from either side. Without the
+  remediation it catches Punitive Counterstrike's trace preference as well as
+  the original jitter (`ai_runner.js`, `_internalChoiceDetermination`).
 - **For F4:** the real engine loads and runs AI decisions headlessly with
   only browser globals stubbed. The test's setup (about 40 lines) is a
   starting point for `scripts/ai-batch.js`; the main loop (`Main()` in
@@ -58,7 +59,7 @@ Implemented from `58f3a4d`.
   ([run selection](../../runner-ai/architecture.md#run-selection-and-the-run-calculator))
   describes the seam and drops the "cannot be seeded" known limit. No hook
   contract changed, so `documentation/ai.md` is unchanged.
-- `node tests/run-all-tests.js`: 36 test files passed.
+- `node tests/run-all-tests.js`: 37 test files passed.
 
 ## Implementation plan
 
@@ -106,7 +107,9 @@ seeded simulations.
 
 ## Current behaviour
 
-Before this change, Runner AI policy drew from global randomness in five places:
+**Historical: behaviour before D2.**
+
+Runner AI policy drew from global randomness in five places:
 
 - Run selection adds jitter to each server's potential with `Math.random()`
   in `_internalChoiceDetermination()`. `serverList` and the potentials are
@@ -177,3 +180,14 @@ reproducible.
 - `node tests/runner-ai-randomness.test.js`: 5/5 checks pass
 - Full-repo grep of `Math.random`/`RandomRange` across `sets/*.js`, cross-checked each hit's owning function and card `player` field
 - Traced `IncreaseStrengthChoice` call site in `ai_runner.js` to confirm it's on the Runner AI decision path
+
+## Review remediation — 2026-09-30
+
+Finding 1 is addressed: Punitive Counterstrike now uses
+`runner.AI._randomIndex()` with the former inclusive range size, and the
+cross-realm-safe ratchet inspects dynamically assigned Runner preference
+callbacks without treating unrelated engine or Corp randomness in the same
+outer card method as Runner policy. `node tests/runner-ai-randomness.test.js`
+passes all five checks. Finding 2 is therefore obsolete; the architecture's
+injectable-randomness claim is accurate. Finding 3 remains explicitly out of
+scope for D2.
