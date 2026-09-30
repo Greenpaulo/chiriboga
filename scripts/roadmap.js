@@ -126,6 +126,14 @@ function generatedBlockerRange(text) {
     count: starts};
 }
 
+function validateBlockerMarkers(files) {
+  for (const file of files) {
+    const range = generatedBlockerRange(fs.readFileSync(file, 'utf8'));
+    if (range && range.invalid)
+      throw new Error(path.relative(root, file) + ' has unmatched generated blocker markers');
+  }
+}
+
 function withGeneratedBlocker(text, section) {
   let range = generatedBlockerRange(text);
   if (range && range.invalid) return null;
@@ -220,6 +228,14 @@ function blockers(items, fix = false, quiet = false) {
   return mismatches;
 }
 
+function hasManualBlocker(file) {
+  if (!file || !fs.existsSync(file)) return false;
+  const text = fs.readFileSync(file, 'utf8');
+  const hasGeneratedMarker = text.includes(BLOCKER_START);
+  return /^## Additional blocker\s*$/m.test(text) ||
+    (!hasGeneratedMarker && /^## Blocker\s*$/m.test(text));
+}
+
 function list(items) {
   let area = null;
   for (const item of items) {
@@ -230,12 +246,18 @@ function list(items) {
 
 function next(items) {
   const byId = new Map(items.map(item => [item.id, item]));
+  const currentBlockers = blockerState(items).reasons;
   // In-progress items whose ticket is back in the open backlog (a gate waiting
   // for F4, or unfinished work) are listed too.
   const resumable = item => item.status === 'in-progress' && itemPath(item) &&
     !['code-review', 'remediation'].some(folder => itemPath(item).split(path.sep).includes(folder));
+  const ticketIsActionable = item => {
+    if (!item.fields.Ticket) return true; // proposed items still live in specs
+    const ticket = canonicalTicketPath(itemPath(item));
+    return !!ticket && !currentBlockers.has(ticket) && !hasManualBlocker(ticket);
+  };
   const ready = items.filter(item => (['ready', 'proposed'].includes(item.status) || resumable(item)) &&
-    item.depends.every(dep => byId.has(dep) && byId.get(dep).status === 'done'));
+    item.depends.every(dep => byId.has(dep) && byId.get(dep).status === 'done') && ticketIsActionable(item));
   if (!ready.length) { console.log('No item has all its dependencies done.'); return; }
   for (const item of ready) {
     const file = itemPath(item);
@@ -341,6 +363,10 @@ function raise(items, id) {
   if (item.status !== 'proposed' || !item.fields.Spec) throw new Error(id + ' is ' + item.status + ', not a proposed item with a spec');
   const from = itemPath(item);
   const verified = checkVerified(from);
+  // `blockers --fix` runs after the move. Validate every file it will scan,
+  // including the source spec once it becomes a ticket, before mutating
+  // either the filesystem or the roadmap entry.
+  validateBlockerMarkers([from].concat(...ticketRoots().map(markdownFiles)));
   const backlog = path.join(root, 'documentation', 'backlog');
   const to = path.join(backlog, path.basename(from));
   if (fs.existsSync(to)) throw new Error(path.relative(root, to) + ' already exists');
@@ -362,7 +388,8 @@ function raise(items, id) {
 }
 
 module.exports = {parseRoadmap, parseAll, itemPath, gatedItems, linkTargets, resolveFrom, rebaseLinks, blockerState,
-  blockerMismatches, blockers, pendingGate, codeChangesSince, VERIFIED, STATUSES, ID, AREAS, root};
+  blockerMismatches, blockers, next, pendingGate, codeChangesSince, validateBlockerMarkers, hasManualBlocker,
+  VERIFIED, STATUSES, ID, AREAS, root};
 
 if (require.main === module) {
   const [command, argument] = process.argv.slice(2);

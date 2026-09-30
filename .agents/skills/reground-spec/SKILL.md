@@ -32,9 +32,11 @@ runs it too, by name, rather than restating it.
 1. **Read the file** and note its current `**Verified against code:**` line
    (or its absence), plus anything it names under `**Read first:**`.
 2. **List every claim to check:** every sentence in `## Current behaviour`,
-   and every function, hook or field named anywhere in the document — Design,
-   Test scenarios and Acceptance gate included. Naming a function in a Design
-   section is still asserting it exists today and does what the spec says.
+   and every function, hook or field that the document says exists today —
+   including current-behaviour claims repeated in Design, Test scenarios or
+   Acceptance gate. A proposed Design may name a new function, hook or field;
+   verify that it does not already exist or conflict with current code, but do
+   not misclassify its planned absence as drift.
 3. **Check each one against the code, not memory.** `node scripts/show.js fn
    <name>` gives a function's current body and line range; `rg -n <name>`
    finds every remaining call site. Read the whole function, not just the
