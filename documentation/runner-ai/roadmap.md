@@ -65,14 +65,14 @@ Existing Runner AI code that breaks a shared principle.
 - **Spec:** [D1-retire-runner-title-special-cases.md](specs/D1-retire-runner-title-special-cases.md)
 - **Goal:** Replace the title lists and title comparisons in `ai_runner.js` with hooks.
 
-### D2 Injectable randomness for the Runner AI
-- **Status:** in-progress
-- **Depends on:** none
-- **Ticket:** [D2-injectable-runner-randomness.md](../backlog/code-review/D2-injectable-runner-randomness.md)
-- **Goal:** Route Runner AI randomness through an injectable source so decisions are reproducible.
-
 ### D3 Close Runner AI information-boundary leaks
 - **Status:** ready
 - **Depends on:** none
 - **Ticket:** [D3-close-runner-information-leaks.md](../backlog/D3-close-runner-information-leaks.md)
 - **Goal:** Stop Runner decisions depending on hidden Corp cards or Stack order; make helpers enforce visibility.
+
+### Done
+
+| ID | Item | Delivered by | Architecture |
+|---|---|---|---|
+| D2 | Injectable randomness for the Runner AI | [D2-injectable-runner-randomness](../backlog/done/D2-injectable-runner-randomness.md) | [run selection](architecture.md#run-selection-and-the-run-calculator) |
