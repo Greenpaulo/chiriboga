@@ -33,9 +33,10 @@ reviews:
         implementation plan when present, acceptance criteria, and Resolution)
         plus the pasted output of `node scripts/ticket.js check <ticket>`. Read
         all of it before reviewing the diff. If the ticket or check output is
-        missing, say that the review is incomplete. Treat every unexplained
-        changed file, acceptance criterion ticked without supporting evidence,
-        or FAIL from `ticket.js check` as Blocking unless the Resolution gives
+        missing, say that the review is incomplete. NOTE: Failing due to missing 
+        the check output does not apply to the ticket itself, just the PR description. 
+        Treat every unexplained changed file, acceptance criterion ticked without supporting 
+        evidence, or FAIL from `ticket.js check` as Blocking unless the Resolution gives
         valid evidence that the failure is pre-existing and unrelated. Assess
         unticked criteria under the review skill rather than rejecting them
         automatically: a pending F4 gate is permitted when the implementation
