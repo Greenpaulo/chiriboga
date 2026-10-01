@@ -13,12 +13,15 @@ Touchstone first" with "always spend the pool first." Neither behavior matches
 a real game: the player chooses how to combine all legal credit sources whenever
 the allocation is not forced.
 
-`SpendCredits()` now opens a payment decision for a human player whenever an
-eligible hosted-credit source and the credit pool (or multiple eligible hosted
-sources) provide different legal allocations. The player may spend any legal
-amount from a hosted source, then choose again for the remaining cost, or pay
-the remainder from the pool. A forced payment with only one legal source stays
-automatic. Computer players retain deterministic automatic allocation.
+`SpendCredits()` now constructs a payment decision for a human player whenever
+an eligible hosted-credit source and the credit pool (or multiple eligible
+hosted sources) provide different legal allocations. Its decision data permits
+spending any legal amount from a hosted source, choosing again for the
+remaining cost, or paying the remainder from the pool. Live play-testing,
+however, found that the rendered UI does not expose the pool choice, so the
+player-facing payment flow remains incomplete. A forced payment with only one
+legal source stays automatic. Computer players retain deterministic automatic
+allocation.
 
 Because this makes `SpendCredits()` asynchronous when a real choice exists,
 callers that performed follow-up effects immediately after payment were audited.
@@ -27,14 +30,16 @@ effects in the payment continuation, so they cannot resolve before the player
 finishes choosing credit sources.
 
 Touchstone itself needs no special payment-priority property. Its broad
-`canUseCredits()` is correct: during a run its hosted credit appears as an option
-alongside the credit pool and any other eligible sources. Choosing the pool
-preserves Touchstone for Baker; choosing Touchstone spends it immediately.
-Baker's separate stealth-only payment remains unchanged.
+`canUseCredits()` is correct, and live play-testing confirms that Touchstone can
+be selected during a run. The same test found no player-visible credit-pool
+option, and selection of every other kind of eligible hosted source has not yet
+been verified. Baker's separate stealth-only payment remains unchanged.
 
-Regression coverage in `tests/credit-pool-lock.test.js` verifies both choices,
-multi-source allocation, continuation timing, hosted-source callbacks, and
-forced payment while the pool is locked.
+Engine-level coverage in `tests/credit-pool-lock.test.js` verifies the hosted
+source and credit-pool allocations, multi-source allocation, continuation
+timing, hosted-source callbacks, and forced payment while the pool is locked.
+It does not verify that the rendered UI exposes the pool choice or that every
+eligible hosted source is player-selectable.
 
 ---
 
