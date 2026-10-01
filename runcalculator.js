@@ -11,6 +11,7 @@ class RunCalculator {
       runnerInstalledIcebreakersLength: 0,
       activeCards: [],
       iceAIs: [],
+      cardStrengths: new Map(),
     };
     this.reason = "error"; //for reporting
 	
@@ -21,6 +22,14 @@ class RunCalculator {
 	//used by corp for hypothetical runs
 	this.suppressOutput = false; 
 	this.avoidETR = false;
+  }
+
+  //Printed/global-modified strength is stable during one calculation. Path
+  //specific changes remain in point.card_str_mods and are applied separately.
+  _baseStrength(card) {
+    if (!this.precalculated.cardStrengths.has(card))
+      this.precalculated.cardStrengths.set(card, Strength(card));
+    return this.precalculated.cardStrengths.get(card);
   }
 
   //known ice list
@@ -99,7 +108,7 @@ class RunCalculator {
 	  //we need to pretend it's an encounter
 	  var stored = AIIceEncounterSaveState();
 	  AIIceEncounterModifyState(ice);
-      result.strength = Strength(ice);
+      result.strength = this._baseStrength(ice);
 	  //then restore reality
 	  AIIceEncounterRestoreState(stored);
       result.sr = [];
@@ -273,7 +282,7 @@ class RunCalculator {
       if (point.card_str_mods[i].card == iceAI.ice)
         iceStrength += point.card_str_mods[i].amt;
     }
-    var cardStrength = Strength(card);
+    var cardStrength = this._baseStrength(card);
     for (var i = 0; i < point.card_str_mods.length; i++) {
       if (point.card_str_mods[i].card == card)
         cardStrength += point.card_str_mods[i].amt;
@@ -849,6 +858,7 @@ class RunCalculator {
   //***Calculate has two version (Async and normal i.e. synchronous). These are the three pieces shared (begin, middle, end).
   //Begin returns data, Middle and End do not have return values
   CalculatePieceBegin(data) {
+	this.precalculated.cardStrengths = new Map();
 	if (typeof data.rcOptions != 'undefined') {
 		if (typeof data.rcOptions.suppressOutput != 'undefined') this.suppressOutput = data.rcOptions.suppressOutput;
 		if (typeof data.rcOptions.avoidETR != 'undefined') this.avoidETR = data.rcOptions.avoidETR;

@@ -134,7 +134,7 @@ Shared infrastructure used by every area.
 
 ### F4 Seeded AI-vs-AI batch harness
 - **Status:** ready
-- **Depends on:** D2
+- **Depends on:** D2, F6
 - **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/corp_ai_finding_12_seeded_batch_harness.md)
 - **Goal:** Headless seeded AI-vs-AI games on a committed deck pool with core metrics, collectors, AI-option flags, paired comparison and committed baselines.
 
@@ -144,11 +144,11 @@ Shared infrastructure used by every area.
 - **Spec:** [F5-mulligan-weight-calibration.md](specs/F5-mulligan-weight-calibration.md)
 - **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option.
 
-### F6 Cheaper security evaluation
-- **Status:** proposed
-- **Depends on:** F3
-- **Spec:** [F6-cheaper-security-evaluation.md](specs/F6-cheaper-security-evaluation.md)
-- **Goal:** Price each ICE once per security evaluation instead of once per rez plan, so seeded games and gates run faster with identical decisions.
+### F6 Headless AI performance
+- **Status:** in-progress
+- **Depends on:** none
+- **Ticket:** [F6-headless-ai-performance.md](../backlog/code-review/F6-headless-ai-performance.md)
+- **Goal:** Minimize the fixed 20-seed, eight-job headless runtime with identical decisions and hashes, following measured hotspots until further safe changes stop producing material batch gains.
 
 ### Done
 
