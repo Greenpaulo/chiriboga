@@ -13,6 +13,7 @@ class RunCalculator {
       iceAIs: [],
       cardStrengths: new Map(),
     };
+    this._calculationActive = false;
     this.reason = "error"; //for reporting
 	
 	this.bonusBreaker = null; //for hypothetical calculations
@@ -24,9 +25,10 @@ class RunCalculator {
 	this.avoidETR = false;
   }
 
-  //Printed/global-modified strength is stable during one calculation. Path
-  //specific changes remain in point.card_str_mods and are applied separately.
+  //Printed/global-modified strength is stable during one active calculation.
+  //Path-specific changes remain in point.card_str_mods and are applied separately.
   _baseStrength(card) {
+    if (!this._calculationActive) return Strength(card);
     if (!this.precalculated.cardStrengths.has(card))
       this.precalculated.cardStrengths.set(card, Strength(card));
     return this.precalculated.cardStrengths.get(card);
@@ -859,6 +861,7 @@ class RunCalculator {
   //Begin returns data, Middle and End do not have return values
   CalculatePieceBegin(data) {
 	this.precalculated.cardStrengths = new Map();
+	this._calculationActive = true;
 	if (typeof data.rcOptions != 'undefined') {
 		if (typeof data.rcOptions.suppressOutput != 'undefined') this.suppressOutput = data.rcOptions.suppressOutput;
 		if (typeof data.rcOptions.avoidETR != 'undefined') this.avoidETR = data.rcOptions.avoidETR;
@@ -1216,6 +1219,7 @@ class RunCalculator {
 	  }
 	}
 	this.paths = finalpaths;
+    this._calculationActive = false;
   }
 
   async CalculateAsync(

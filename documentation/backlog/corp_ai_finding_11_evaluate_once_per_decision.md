@@ -80,7 +80,7 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
   - The F4 comparison and the `evaluatorCallCount` collector wait for F4.
   - About half the remaining time is still in the evaluations that must run,
     where each ICE is repriced once per rez plan. That is proposed as F6
-    ([F6-headless-ai-performance.md](F6-headless-ai-performance.md)). With F3, a 2,400-game gate
+    ([F6-headless-ai-performance.md](code-review/F6-headless-ai-performance.md)). With F3, a 2,400-game gate
     takes about 2¼ hours.
 - Docs: [architecture: foundations](../corp-ai/architecture.md#foundations)
   (cache and depth counter), the F2 ticket, and new roadmap item F6.

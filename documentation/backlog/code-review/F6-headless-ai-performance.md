@@ -11,8 +11,10 @@ Implemented from `f2054ee`.
   now makes 3 pricing calls instead of 9 without changing its selected plan or
   logged omission reason.
 - Added `RunCalculator._baseStrength()`: base/global-modified card strength is
-  computed once per calculation, while `point.card_str_mods` continues to add
-  path-specific changes. `CalculatePieceBegin()` resets the cache.
+  computed once per active calculation, while `point.card_str_mods` continues
+  to add path-specific changes. Direct `IceAI()` and `IceAct()` calls outside
+  a calculation read current strength instead of reusing the completed
+  calculation's cache.
 - `_securityBoardKey()` now obtains each counter-modifier trigger list once per
   fingerprint instead of rediscovering it for every card and counter type.
   `ChoicesActiveTriggers()` similarly caches the structural candidates for
@@ -53,8 +55,10 @@ Implemented from `f2054ee`.
   `InstalledCards()` calls, and 27,658,420 to 550,880 `CheckCallback()` calls.
   A direct installed-zone shortcut regressed the 20-seed mean and was reverted;
   deeper gains now require a separately designed state/indexing change.
-- The pending reproduction moved unchanged to
-  `tests/f6-headless-ai-performance.test.js`; focused security tests, corp
+- The pending reproduction's selected-plan, logged-reason and pricing-count
+  assertions moved unchanged to `tests/f6-headless-ai-performance.test.js`.
+  Promotion changed only the wrapper's test-directory resolution so it works
+  from both `tests/pending/` and `tests/`. Focused security tests, corp
   decision fixtures, decision snapshots and all 41 test files pass. Current
   behaviour is documented in [Server security evaluation](../../corp-ai/architecture.md#server-security-evaluation)
   and [Foundations](../../corp-ai/architecture.md#foundations).
@@ -139,8 +143,9 @@ to minimize headless-game runtime, with no arbitrary stopping target.**
 **Verified against code:** f2054ee (2026-10-01)
 **Reproduction:** `tests/pending/f6-headless-ai-performance.test.js` — fails
 at `f2054ee`, 2026-10-01: 9 pricing passes instead of 3, after the expected
-choice and logged reason pass; moved unchanged to
-`tests/f6-headless-ai-performance.test.js`, passing with
+choice and logged reason pass. Its assertions moved unchanged to
+`tests/f6-headless-ai-performance.test.js`; the wrapper's path resolution was
+adapted for its promoted location. It passes with
 `node tests/f6-headless-ai-performance.test.js`.
 
 ## Goal

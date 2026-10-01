@@ -175,3 +175,16 @@ Follow `tests/fixtures/README.md` and whichever runner-side decision/mechanics t
 1. **Touchstone's `canUseCredits` ignoring `doing`/`card` is arguably correct per the card's actual text** ("You can spend hosted credits during runs" — no restriction to specific cost types), so no change is proposed there. It's `SpendCredits()`'s decision to auto-spend on any `canUseCredits() == true` source, rather than Touchstone's own eligibility check, that turns "optional and broad" into "mandatory and first."
 2. Baker's redirect implementation (`_stealthCreditCards()` + its own `DecisionPhase`) is a good model for "give the player a real choice among qualifying credit sources" and is unaffected by this report — it's flagged only as the piece of the deck that makes this bug worth fixing rather than cosmetic.
 3. The repeated `ERROR: Value above (.corpAbilities) is unsupported in ValueToString.` lines at nearly every phase boundary are present in this log too (as in the Archives/Baker log) and still look unrelated to this report.
+
+
+## REMEDIATION - in game testing
+
+With the new fix, the game correctly pauses to ask whether to spend credits instead of automatically removing them from touchstone, and you can now click on the touchstone itself to spend the credit, which is the correct behaviour.
+
+However, the UI displays "Spend Credits" in the top right, but nothing in the bottom left box which look strange. The biggest issue is that there is no way of spending credits from the normal credit pool. We need a "Spend 1 credit from pool" type button in the bottom left, using the cred symbol instead of the word "credits", and also we need to make sure that ALL other cards hosting credits that are eligible to be spent are also highlighted and clickable in the same way that baker is, e.g. all other card types including events in flight (I've not tested this yet, so the code needs verifying that this is the case).
+
+The above is also the case any time a credit can be spent during a run, not just breaking ICE, e.g. trashing an accessed card, or paying a "tax" on a subroutine.
+
+Moving to remediation until this is fixed.
+
+Original fix - commit `Addressed documentation/bugs/touchstone-credits-auto-spent-no-choice.md` on branch `24Sept-fixes`

@@ -80,3 +80,15 @@ The generic hook contract and Baker's prospective-run handling are documented in
 - The overall economy reserve arithmetic is unchanged.
 - The Corp still avoids adding frivolous layers when poor, and affordable-install checks include existing unrezzed ICE rez costs.
 - R&D contents remain hidden from AI heuristics that should use only public information.
+
+## REMEDIATION - in game testing
+
+Corp still isn't protect archives from Baker. I ran archives 3 times  using credits from Touchstone and accessed 6 cards, stealing 1 agenda, and still corp AI didn't ICE archives. Moving the ticket to remediation. The commit for the original fix was `42fa53e` `Addressed documentation/bugs/code-review/corp-not-protecting-archives-with-baker-backdoor.md` on branch `24Sept-fixes`
+
+A recent debug-log captures the behaviour still existing - `documentation/debug-logs/corp_still_not_protecting_archives_from_baker.txt`
+
+Once the bug is actually fixed, please move this debug-log to `documentation/debug-logs/bug_raised`
+
+Possible issues still remaining:
+
+- Touchstone was empty at both Corp planning points. In the log, Sure Gamble put a credit on Touchstone, and the first Baker run paid it. Lie Low put a credit on it later, and the second Baker run paid it. By each Corp turn it was empty. The fix recognises Baker only if a hosted stealth credit is sitting there during the Corp's turn. It can't see that you'll refill it next turn.

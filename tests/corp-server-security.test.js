@@ -102,7 +102,7 @@ test('Mayfly Corp pricing never reads hidden titles or private Runner cache', ()
   const wall = etr(); server([wall]);
   assert.strictEqual(ai._estimateBreakCost(wall, mayfly), 3);
 });
-test('run calculator reuses base strength while retaining path modifiers', () => {
+test('run calculator reuses base strength within one calculation while retaining path modifiers', () => {
   const breaker = {
     player: runner,
     strength: 2,
@@ -130,14 +130,47 @@ test('run calculator reuses base strength while retaining path modifiers', () =>
     return originalStrength(card);
   };
   context.runnerRC.precalculated.cardStrengths = new Map();
+  context.runnerRC._calculationActive = true;
   try {
     context.runnerRC.IceAct(breaker, iceAI, basePoint, {});
     context.runnerRC.IceAct(breaker, iceAI, modifiedPoint, {});
   } finally {
+    context.runnerRC._calculationActive = false;
     context.Strength = originalStrength;
   }
   assert.deepStrictEqual(observed, [2, 3]);
   assert.strictEqual(calls, 1);
+});
+test('direct run calculator calls refresh strength after a calculation ends', () => {
+  vm.runInContext('strengthScopeRC = new RunCalculator()', context);
+  const rc = context.strengthScopeRC;
+  const observed = [];
+  const breaker = {
+    player: runner,
+    strength: 2,
+    AIImplementBreaker(rc, result, point, target, cardStrength) {
+      observed.push(cardStrength);
+      return result;
+    },
+  };
+  const targetIce = etr();
+  const basePoint = {
+    card_str_mods: [],
+    runner_clicks_spent: 0,
+    runner_credits_spent: 0,
+    runner_credits_lost: 0,
+  };
+  rc.precalculated.cardStrengths = new Map();
+  rc._calculationActive = true;
+  rc._baseStrength(breaker);
+  rc._baseStrength(targetIce);
+  rc._calculationActive = false;
+  breaker.strength = 4;
+  targetIce.strength = 5;
+  const refreshedIceAI = rc.IceAI(targetIce, 20);
+  rc.IceAct(breaker, refreshedIceAI, basePoint, {});
+  assert.strictEqual(refreshedIceAI.strength, 5);
+  assert.deepStrictEqual(observed, [4]);
 });
 test('unrezzed minor ice uses actual hook, while Runner calculator still guesses', () => {
   const minor = ice(['Gain 1 credit.'], [[['misc_minor']]], {rezzed: false}); server([minor]);

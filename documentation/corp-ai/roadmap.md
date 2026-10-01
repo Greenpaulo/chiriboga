@@ -33,7 +33,7 @@ cannot price yet.
 ### L3.5.2 Action-feasible protection target fallback
 - **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [corp-not-protecting-archives-with-baker-backdoor.md](../bugs/code-review/corp-not-protecting-archives-with-baker-backdoor.md)
+- **Ticket:** [corp-not-protecting-archives-with-baker-backdoor.md](../bugs/remediation/corp-not-protecting-archives-with-baker-backdoor.md)
 - **Goal:** An ineligible top-ranked server no longer blocks protection of the next viable one. Implemented; awaiting review. Interim until I1–I2.
 
 ### L4.1 Unified bypass capability allocation
@@ -149,6 +149,12 @@ Shared infrastructure used by every area.
 - **Depends on:** none
 - **Ticket:** [F6-headless-ai-performance.md](../backlog/code-review/F6-headless-ai-performance.md)
 - **Goal:** Minimize the fixed 20-seed, eight-job headless runtime with identical decisions and hashes, following measured hotspots until further safe changes stop producing material batch gains.
+
+### F7 Indexed card-state and trigger discovery
+- **Status:** proposed
+- **Depends on:** F2, F4
+- **Spec:** [F7-indexed-card-state-and-trigger-discovery.md](specs/F7-indexed-card-state-and-trigger-discovery.md)
+- **Goal:** Replace repeated whole-board installed, active and trigger-provider scans with verified engine-owned indexes while preserving exact query results, ordering and seeded behaviour.
 
 ### Done
 
