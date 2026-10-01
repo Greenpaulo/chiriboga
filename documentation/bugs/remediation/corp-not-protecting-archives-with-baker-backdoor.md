@@ -1,14 +1,14 @@
 # Corp AI did not protect Archives with the Baker backdoor active
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_not_protecting_archives_when_i_have_baker_to_redirect_to_hq.txt`  
-**Status:** Fixed, with the original diagnosis corrected after review against the current code, card definitions, game rules, and tests.  
+**Status:** Remediation. The original fix covers a hosted stealth credit that is present during Corp planning, but a later play-test shows the Corp still misses a Baker threat when Touchstone is empty between runs.
 **Roadmap:** delivers Corp AI item L3.5.2, described in [Protection allocation](../../corp-ai/architecture.md#protection-allocation).
 
 ## Outcome
 
-The report correctly identified that Archives protection was ineffective, but its proposed primary cause was not sufficient and several supporting claims were wrong.
+The original report correctly identified that Archives protection was ineffective, but its proposed primary cause was not sufficient and several supporting claims were wrong. The implemented changes fix and test the captured planning state; they do not yet predict that the Runner can refill an empty Touchstone before the next run. A later play-test reproduced that remaining limitation, so this ticket is back in remediation.
 
-The implemented fix has three parts:
+The original fix has three parts:
 
 1. Baker's public `AIRedirectsRun` model now checks hosted stealth credits in the prospective Archives-run context. This allows Corp-turn planning to recognize a credit on Touchstone even though Touchstone can spend credits only during a run.
 2. ICE-install planning can skip a higher-ranked server whose next layer is disallowed by the economy/layer policy and try the next ranked viable target instead of abandoning ICE installation entirely.

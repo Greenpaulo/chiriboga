@@ -3,7 +3,7 @@
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
 **Source log:** `documentation/debug-logs/bug_raised/any_cred_spent_during_run_is_removed_from_touchstone_no_choice_given.txt`
 **File:** `mechanics.js` (root cause), `sets/vantagepoint.js` (Touchstone eligibility, verified correct). Line numbers are from `main` at `512a8f3`, 2026-09-24, and will drift; search by function name.
-**Status:** Fixed locally on 2026-09-25; awaiting merge.
+**Status:** Remediation. The original fix remains incomplete: live play-testing found no selectable credit-pool option in mixed hosted-credit payments, and other eligible hosted sources still require verification.
 
 ## Resolution
 
