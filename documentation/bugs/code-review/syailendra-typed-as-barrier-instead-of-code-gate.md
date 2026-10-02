@@ -6,7 +6,7 @@ Implemented from `f2054ee`.
 
 Corrected Syailendra's card header and `subTypes` declaration from `Barrier` to `Code Gate`, matching canonical card code 35076. The shared runner and Corp breaker-matching consumers were inspected and already map Decoder to Code Gate and Fracter to Barrier, so no AI or engine change was needed.
 
-The reproduction was added at `tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js`, where it failed at the starting commit with actual `Barrier` versus expected `Code Gate`. It was moved unchanged in substance to `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` now passes. Its directory-relative repository-root lookup was adjusted after the move, without changing the subtype expectation.
+The regression was added directly at `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` now passes. No pending version exists in reachable history, so this PR does not claim a recorded before-fix test run and leaves that acceptance item incomplete.
 
 No approval-gated implementation plan was required: this is an objective printed-card-data correction confined to one card definition, with no shared heuristic, engine function, AI hook contract, green expectation, or multi-file source change. The ticket's broader suggested encounter and Corp-security scenarios were not added because the focused canonical-data regression directly covers the defective field while the existing security suite already covers generic subtype matching. The proposed cardpool-wide audit was also left out of scope because it could surface unrelated card-data discrepancies requiring separate validation.
 
@@ -17,7 +17,7 @@ Validation completed with the focused regression, `tests/corp-server-security.te
 **File:** `sets/elevation.js` — Syailendra's card definition (`cardSet[35076]`).
 **Confirmed against:** `carddata/carddata.json` (`code: 35076`, `keywords: "Code Gate - AP"`).
 **Status:** Implemented; awaiting independent review.
-**Reproduction:** `tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js` fails at `f2054ee`, 2026-10-02: implemented `Barrier` does not match canonical `Code Gate`. Moved to `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` passes after the fix.
+**Reproduction:** `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` verifies the implemented subtype against canonical card data and passes after the fix. No pending version was committed before the implementation.
 
 ## Acceptance gate
 
@@ -26,7 +26,7 @@ N/A — deterministic fix (principle 4): the implemented primary ice subtype mus
 ## Acceptance criteria
 
 - [x] Syailendra is implemented with `subTypes: ["Code Gate"]`, matching the canonical card data.
-- [x] The regression test fails before the fix and passes afterward without changing its expectation.
+- [ ] A pending regression test fails before the fix and is preserved in reachable history before moving unchanged in substance to the green suite. The green regression passes, but no pending version was committed.
 - [x] The full green test suite passes.
 
 ---

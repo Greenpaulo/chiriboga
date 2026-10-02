@@ -1,4 +1,4 @@
-// Run with: node tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js
+// Run with: node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js
 'use strict';
 
 const assert = require('assert');
