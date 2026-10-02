@@ -1,0 +1,19 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, advance, n
+// EXPECT: install
+// EXPECT_SERVER: Archives
+// SETUP: corp.creditPool=11; corp.clickTracker=3; runner.creditPool=2; corp.HQ.AISuccessfulRuns=3; reviewAI.options.observedDormantRedirectPressure=true; reviewAI._recordSuccessfulRunForProtection(corp.HQ,corp.archives); reviewAI._rollRecentSuccessfulRunPressure()
+// SOURCE: documentation/debug-logs/bug_raised/corp_still_not_protecting_archives_from_baker.txt, final recorded board after two observed Baker redirects while Touchstone is empty
+// NOTE: Touchstone is the captured Stealth source, not a title-specific policy target. This is a strategic expected choice, not a rules oracle. It remains pending and must run only with the default-off candidate option enabled after plan approval.
+RunnerTestField(36009, [30030,35015,30011,36024,36024], [30013,36010,36012,30018,36011,30016,30030,30006,30026,35019,36014,30018,35019,36021,36013,36011,36016,35017,30015,36012,35015,30026,36012,36014,36015,36013,30015,30030,30016,36010,30011,30018], [36013,36014,30015,35017,35017], [36021,30013,36015,30026], [35038], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [30075,30042,35045,35082], [30075,35081,35045,30053,30075,35041,35038,30067,30069,35081,30053,35040,35076,35045,35042,35054,35076,35038,35054,30038,30053,30036,30039,35082,30071,30067,30042,30067,30039,30038,30069,35054,35081,30041], [30042,35040,35043,35040,30040], [], [35041,35041], [35076,30039], [[35079]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.grip[1].corpAbilities=[];
+runner.stack[10].corpAbilities=[];
+runner.stack[23].corpAbilities=[];
+runner.heap[3].host=null;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[1].host=null;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[0].advancement=3;
+corp.HQ.cards[4].cardsInstalledThisTurn=[corp.HQ.ice[1],];

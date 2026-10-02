@@ -57,6 +57,8 @@ context.ActiveCards = player => {
 context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
+context.CheckInstallDestination = (card, destination) =>
+  typeof card.installOnlyIn !== 'function' || card.installOnlyIn(destination);
 context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';
 context.AgendaPoints = player => player.agendaPoints || 0;
 context.AgendaPointsToWin = () => 7;
