@@ -204,7 +204,8 @@ Rules for form 2:
 - **Hard checks** are conditions that must hold in every game, not on average.
   Express them as a collector metric counting violations, checked with
   `--max <metric>=<n>`.
-- **Latency is not a standard guard.** `gate` may reuse a cached baseline
+- **Latency is not a standard guard** (F9 proposes a deterministic work guard
+  in its place). `gate` may reuse a cached baseline
   timed on a differently loaded machine, so a latency guard is only meaningful
   for a performance item that plays both halves fresh in one run.
 - **Gate setup is part of the item.** Every collector and start board the
@@ -215,6 +216,18 @@ Rules for form 2:
   gate whose option changed no game (`FAIL changed option effect`), because
   every guard passes trivially then. When the option only matters on boards
   the deck pool rarely reaches, the item adds `Starts:` boards that reach it.
+- **Start boards come from real games where possible.** A board invented to
+  trigger the option measures the option on a situation that may never
+  occur. Extract it from the ticket's source log or another debug log
+  (`node tests/extract-fixture.js <log> --list`), or reuse a corp-decision
+  fixture already extracted from one. If no log has the situation, adapt the
+  closest real board and keep the change minimal. A start board may use only
+  cards from the pool's trusted sets (`sets` in the pool file); `--start`
+  rejects any other card. A real board with an untrusted card is adapted by
+  swapping it for a trusted card with the same role, and if that is not
+  possible it cannot be used. Every start board's `NOTE` names the log it came
+  from, or says what was changed or invented and why the result is a
+  realistic position.
 - **One command per game set.** Starts replace the opening, so a gate that
   guards the pool and measures an improvement on start boards has one gate
   command per set, each with its own rows. It passes only when every command

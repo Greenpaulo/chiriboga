@@ -199,7 +199,9 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   time. So do not run it in the background and poll, and do not read the
   report file: the printed output is the evidence.
   Before running it, the gate setup must be ready: build and test every
-  collector (`scripts/ai-batch/collectors/`) and start board the gate names,
+  collector (`scripts/ai-batch/collectors/`) and start board the gate names
+  (start boards from real logs where possible, using only cards from the
+  pool's trusted sets, with a `NOTE` naming the source; see "Writing a gate"),
   then run each gate command once with `--quick`. Its first line must report
   at least one game changed by the options; if none changed, the games never
   reach the option, so add or fix `Starts:` boards rather than running the

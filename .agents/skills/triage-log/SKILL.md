@@ -134,7 +134,8 @@ regression guards and the gate command. Depends on: F4 when selected.>
       board it names exists and is tested, and a `--quick` run of each gate
       command completes and reports at least one game changed by the options.
 - [ ] (Gated items, one per piece) <Collector `name` / start board `path`>
-      is built and tested.
+      is built and tested. A start board is extracted from this ticket's
+      source log where possible, since the log already shows the situation.
 - [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
       For F4: exact command, committed deck pairs, paired seeds, seed count,
       every metric's baseline/candidate result and bootstrap 95% confidence

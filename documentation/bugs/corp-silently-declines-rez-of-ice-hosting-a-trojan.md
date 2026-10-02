@@ -59,6 +59,20 @@ pool game. Keep every other metric and threshold as written. The gate becomes
 two commands: the improvement and the Tranquilizer check on the start boards,
 and the regression guards on the deck pool. Re-run the pool command, because
 the run above predates the changed-games check and the current code key.
+(3) Build the start boards from real games ("Writing a gate": start boards
+come from real games where possible). The source log has no decision
+snapshots, so `tests/extract-fixture.js` cannot extract from it; build the
+Chromatophores board by hand from its end-of-log `CorpTestField` /
+`RunnerTestField` dump (format in `tests/fixtures/README.md`). Three other
+logs in `documentation/debug-logs/bug_raised/` show Chromatophores and
+Tranquilizer (`same_again_install_agenda_into_insecure_server`,
+`corp_installs_upgrade_using_identity_ability_into_server_that_is_being_accessed`,
+`corp_played_agenda_into_unsecure_server_after_agenda_was_stolen_from_that_server_last_turn`),
+also without snapshots; use one of them for the Tranquilizer board if it
+reaches the rez decision, or else adapt the closest real board and say what
+changed in its `NOTE`. Checked 2026-10-02: all four logs play the same two
+decks, and every card in their board dumps is from System Gateway or
+Elevation, which are both trusted pool sets, so none needs substitutes.
 
 ## Implementation plan
 
