@@ -545,7 +545,9 @@ needs.
     deckPairId, seed)` and give each metric's paired mean difference with a
     10,000-resample bootstrap 95% interval from a fixed seed. `--guard
     metric=tolerance` and `--improve metric` apply the gate rule to the
-    oriented difference. `gate` reuses a cached or committed report whose key
+    oriented difference. Any gate also requires that at least one paired
+    game's `logHash` differs from the baseline (`changed option effect`),
+    since an option that changes nothing passes every guard. `gate` reuses a cached or committed report whose key
     (code hash of every loaded file, pool, seeds, fixtures, collectors and
     options) matches.
   - *Failed games.* A game fails when it logs an engine error, times out, or

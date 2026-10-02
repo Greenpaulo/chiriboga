@@ -9,7 +9,7 @@ const {spawnSync} = require('child_process');
 const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch} = require('../scripts/ticket.js');
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -81,6 +81,11 @@ const reproductionBefore = [
   "assert.strictEqual(firstChoice, 'install');",
   "assert.strictEqual(secondChoice, 'advance');",
 ];
+assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --corp-option x=true\n' +
+  '--collector runs --start tests/fixtures/corp-decisions --collector <name> --guard winRate=0.02`'), [],
+  'gate setup check accepts existing collectors, start boards and template placeholders');
+assert.deepStrictEqual(gateSetupProblems('**Gate command:** `node scripts/ai-batch.js gate --collector noSuch --start tests/fixtures/missing.txt`').length, 2,
+  'gate setup check reports a missing collector and a missing start board');
 assert(reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice()),
   'ticket.js accepts reproduction expectations that remain in sequence');
 assert(!reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice().reverse()),

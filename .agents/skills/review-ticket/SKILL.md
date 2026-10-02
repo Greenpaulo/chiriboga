@@ -75,7 +75,12 @@ Any FAIL is a Blocking finding. Do not repeat these checks by hand.
   every metric the gate names and ends `Gate: passed`, and it is not a
   `--quick` run.
   Missing or non-matching evidence is Blocking. A ticket whose gate needed F4
-  but whose criteria lack the gate criteria is Blocking too.
+  but whose criteria lack the gate criteria is Blocking too. Whether the gate
+  passed or is pending, its setup must be ready: every `--collector` and
+  `--start` in its gate command exists and is tested, and the Resolution
+  records a `--quick` run reporting at least one game changed by the options.
+  A missing piece, or gate output reporting 0 changed games or
+  `FAIL changed option effect`, is Blocking.
 
 ## 4. Record the verdict
 

@@ -163,6 +163,15 @@ function compareReports(baseline, candidate, gate = {}) {
   // Gate: a guarded metric must not admit a regression beyond its tolerance;
   // an improved metric needs its oriented interval above zero.
   const checks = [];
+  // An option that changes no game passes every guard without evidence (a
+  // broken wire or an unreachable branch), so a gate also requires that the
+  // candidate played differently. Reports without log hashes skip the check.
+  const hashed = pairs.filter(([b, c]) => b.logHash && c.logHash);
+  const changedGames = hashed.filter(([b, c]) => b.logHash !== c.logHash).length;
+  const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length;
+  if (gated && hashed.length)
+    checks.push({name: 'option effect', kind: 'changed', pass: changedGames > 0,
+      why: changedGames ? undefined : 'no game differs from the baseline'});
   for (const [name, tolerance] of Object.entries(gate.guard || {})) {
     const m = metrics[name];
     if (!m || !m.improvement) { checks.push({name, kind: 'guard', pass: false, why: m ? 'no direction declared' : 'unknown metric'}); continue; }
@@ -173,7 +182,7 @@ function compareReports(baseline, candidate, gate = {}) {
     if (!m || !m.improvement) { checks.push({name, kind: 'improve', pass: false, why: m ? 'no direction declared' : 'unknown metric'}); continue; }
     checks.push({name, kind: 'improve', pass: m.improvement.low > 0});
   }
-  return {pairedGames: pairs.length, droppedGames: dropped, metrics, checks,
+  return {pairedGames: pairs.length, droppedGames: dropped, changedGames: hashed.length ? changedGames : null, metrics, checks,
     pass: checks.length ? checks.every(c => c.pass) : null};
 }
 

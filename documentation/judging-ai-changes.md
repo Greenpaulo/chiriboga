@@ -89,7 +89,7 @@ How to run it, change the decks and read a report is in the
 
 | Step | Who | What happens | What you see |
 |---|---|---|---|
-| 1. Build | Codex (`implement-ticket`) | The change is written behind an **AI option**, a named switch such as `weightedProtectionDebt`, which defaults to **off**. With it off, the game plays exactly as before; the ticket's own tests switch it on. | A normal fix hand-off |
+| 1. Build | Codex (`implement-ticket`) | The change is written behind an **AI option**, a named switch such as `weightedProtectionDebt`, which defaults to **off**. With it off, the game plays exactly as before; the ticket's own tests switch it on. Codex also builds what the gate measures with (any collectors and start boards it names), each an acceptance criterion, and proves the gate is ready: a `--quick` run of the gate command reports at least one game changed by the option. | A normal fix hand-off, with the gate-ready criterion ticked |
 | 2. Run the gate | Codex, in the same session | Codex builds the exact `**Gate command:**` from the ticket's gate and runs it as one blocking command (about 15–20 minutes; the games cost no tokens, and the output is a few lines). If it cannot finish in the session, Codex hands off with `**Gate:** pending F4` and you run the command in a terminal; see the [harness guide](ai-batch-harness.md#running-a-gate). | A `**Gate:**` line in the ticket's Resolution: `passed`, `pending F4` or `failed`, with the command used |
 | 3. Switch on | Codex | Only if the gate **passed**: the option's default is changed to on. | The option's default in `ai_corp.js` or `ai_runner.js` |
 | 4. Review | Claude chat (`review-ticket`) | Checks that the option is off unless the gate passed, and that the recorded evidence matches the gate as written: same metrics, same thresholds, enough games. Missing or mismatched evidence blocks the review. | The review section |
@@ -157,11 +157,12 @@ The comparison output lists every metric, then one PASS/FAIL line for each
 metric the gate names (numbers here are made up):
 
 ```
-2800 paired games
+2800 paired games, 412 changed by the options
   metric                               baseline  candidate  difference  95% interval
   highConsequenceBreaches.count           1.840      1.520      -0.320  [-0.410, -0.230] (lower is better)
   pointsStolen                            4.100      4.160      +0.060  [-0.050, +0.170] (lower is better)
   winRate                                 0.460      0.470      +0.010  [-0.010, +0.030] (higher is better)
+  PASS changed option effect
   PASS improve highConsequenceBreaches.count
   PASS guard pointsStolen tolerance 0.2
   PASS guard winRate tolerance 0.02
@@ -177,6 +178,9 @@ the metric's direction for you. To read it yourself, look at the interval:
   Here the steals range tops out at +0.17, under the +0.2 allowed.
 
 If any line fails, the gate fails, even if the average looks fine.
+`FAIL changed option effect` means the option changed no game at all, so the
+run says nothing about it; the ticket needs start boards that reach the
+situation it changes.
 
 ## When to use your own judgement
 
@@ -212,7 +216,8 @@ As of 2026-10-02:
   `tests/fixtures/ai-batch/baselines/`.
 - **Gated items pending F4** can now have their gates run. `node
   scripts/roadmap.js gates` lists them under "Built, option off, gate waiting
-  to be run".
+  to be run". An item reviewed before F4 existed could not build its
+  collectors or start boards, so `implement-ticket` builds those first.
 - **Thresholds are still first guesses.** The committed baseline shows how much
   each metric varies naturally between deck pairs. Check a gate's numbers
   against it before running that gate.

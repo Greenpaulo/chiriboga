@@ -18,7 +18,10 @@ written into it.
     generated dependency state, report every generated and additional blocker,
     then stop. Otherwise it is ready to implement. If its Resolution already has
     `**Gate:** pending F4`, the code was reviewed with its AI option off; once
-    F4 is `done`, only run the gate (step 6), or record the output the user
+    F4 is `done`, check the gate setup first: rewrite the gate into the form of
+    "Writing a gate" if needed, and build and test any collector or start board
+    it names that does not exist yet (a ticket reviewed before F4 existed could
+    not build them). Then run the gate (step 6), or record the output the user
     supplies from running its `**Gate command:**`, and hand off again. If its
     Resolution has `**Gate:** pending human-game data`, the reviewed code also
     stays off and the ticket carries an `## Additional blocker` naming the
@@ -57,15 +60,15 @@ written into it.
   those headings literally. A missing gate section never means ungated. For an
   objective change, add `N/A — deterministic fix (principle 4): <the oracle>`.
   For a strategic change, write the F4 or human-game gate in the exact form of
-  "Writing a gate" in `documentation/ai-planning.md` and add the two gated
-  criteria. Rewrite an older gate in another layout into that form before
+  "Writing a gate" in `documentation/ai-planning.md` and add the three gated
+  criteria, plus one criterion per collector or start board the gate names. Rewrite an older gate in another layout into that form before
   planning, keeping its metrics and thresholds, and report any standard guard
   you had to add, since it changes what the gate demands. This is a permanent
   backstop even after ticket-creation workflows normally supply the sections.
 - A ticket is also **gated** when its acceptance criteria require an AI option
   or its **Acceptance gate** needs seeded or human-game evidence. If a gated
-  ticket lacks the two gate criteria or its gate has no numbers, fix the ticket
-  before planning.
+  ticket lacks the three gate criteria, a criterion for each collector or start
+  board its gate names, or numbers in its gate, fix the ticket before planning.
 
 ## 2. Reproduce
 
@@ -193,10 +196,19 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   blocking command costs nothing; checking on a running one costs a step each
   time. So do not run it in the background and poll, and do not read the
   report file: the printed output is the evidence.
+  Before running it, the gate setup must be ready: build and test every
+  collector (`scripts/ai-batch/collectors/`) and start board the gate names,
+  then run each gate command once with `--quick`. Its first line must report
+  at least one game changed by the options; if none changed, the games never
+  reach the option, so add or fix `Starts:` boards rather than running the
+  full gate. The quick run exits non-zero by design and is not evidence;
+  record its first line in the Resolution and tick the gate-ready criterion
+  only after it. Never move a gated ticket to code-review with its setup not
+  ready.
   Switch the default on only if the output ends `Gate: passed`. Never use
   `--quick` or a smaller or unpaired run as evidence. If the gate cannot
-  finish in the session, hand off with `**Gate:** pending F4` and the command,
-  and the owner runs it. For a human-game gate, use the stated human sample, metrics
+  finish in the session, hand off with `**Gate:** pending F4` and the ready
+  command, and the owner runs it. For a human-game gate, use the stated human sample, metrics
   and thresholds; do not substitute F4. If the required harness, the owner's gate
   output or the data is not available, leave the option off and hand off
   with the applicable gate pending. If the gate fails, leave the option off, hand off, and say in your

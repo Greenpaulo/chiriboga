@@ -143,8 +143,9 @@ A gated item:
   (`candidate - baseline` for higher-is-better metrics, `baseline - candidate`
   for lower-is-better metrics), then require the interval's lower bound to be
   above zero;
-- carries the two gate criteria shown in the template below, without their
-  "(Gated items)" prefix. Ungated items delete them.
+- carries the three gate criteria shown in the template below, without their
+  "(Gated items)" prefix, plus one criterion per collector or start board it
+  builds. Ungated items delete them.
 
 A gate that needs human games instead of F4 (for example L8.6) states its
 sample size, metrics and thresholds the same way.
@@ -171,6 +172,7 @@ F4 gate. Option `<camelCaseName>` (<Corp | Runner> AI), off in the baseline
 and on in the candidate. Committed deck pool, paired seeds, 200 games per deck
 pair <or more: say how many and why>, bootstrap 95% intervals.
 Collectors: <`name` (adds `name.metric`, defined in this ticket) | none>.
+Starts: <fixture paths the games begin from, built in this ticket | none>.
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
@@ -181,7 +183,7 @@ Collectors: <`name` (adds `name.metric`, defined in this ticket) | none>.
 | Hard check | `<collector metric counting violations>` | — | at most <n> in every candidate game |
 
 Gate command: `node scripts/ai-batch.js gate --corp-option <name>=true
---collector <name> --improve <metric> --guard winRate=0.02
+--collector <name> --start <fixture> --improve <metric> --guard winRate=0.02
 --guard <metric>=<n> --max <metric>=<n>`
 ```
 
@@ -205,6 +207,18 @@ Rules for form 2:
 - **Latency is not a standard guard.** `gate` may reuse a cached baseline
   timed on a differently loaded machine, so a latency guard is only meaningful
   for a performance item that plays both halves fresh in one run.
+- **Gate setup is part of the item.** Every collector and start board the
+  gate names is built and tested by the item itself, and gets its own
+  acceptance criterion, before the item moves to code-review. The setup is
+  ready when a `--quick` run of the gate command completes and its first
+  line reports at least one game changed by the options. `gate` fails any
+  gate whose option changed no game (`FAIL changed option effect`), because
+  every guard passes trivially then. When the option only matters on boards
+  the deck pool rarely reaches, the item adds `Starts:` boards that reach it.
+- **One command per game set.** Starts replace the opening, so a gate that
+  guards the pool and measures an improvement on start boards has one gate
+  command per set, each with its own rows. It passes only when every command
+  passes.
 - **Gate command** is the exact command the table implies; one flag per row.
   `implement-ticket` runs it and records its output; see
   [ai-batch-harness.md](ai-batch-harness.md#running-a-gate).
@@ -279,6 +293,7 @@ section.>
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] (Gated items) The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [ ] (Gated items) The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
 - [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
       For F4: exact command, committed deck pairs, paired seeds, seed count,
       every metric's baseline/candidate result and bootstrap 95% confidence

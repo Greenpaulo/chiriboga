@@ -121,15 +121,22 @@ compares them game by game. It prints only the metrics the gate names (`--all`
 prints every metric):
 
 ```
-2800 paired games
+2800 paired games, 412 changed by the options
   metric                               baseline  candidate  difference  95% interval
   pointsStolen                            5.920      5.880      -0.040  [-0.150, +0.070] (lower is better)
   winRate                                 0.314      0.318      +0.004  [-0.010, +0.018] (higher is better)
+  PASS changed option effect
   PASS guard pointsStolen tolerance 0.2
   PASS guard winRate tolerance 0.02
 Gate: passed
 ```
 
+- **Changed games.** The first line counts the paired games whose log differs
+  from the baseline's. If the option changed no game, the gate fails with
+  `FAIL changed option effect`, even when every guard passes: the option never
+  came into play, so the run is no evidence for or against it. Either the
+  option is not wired up, or the deck pool rarely reaches the board it is
+  about. Add start boards that reach it (`--start`), rather than more seeds.
 - `--improve <metric>` passes only if the whole 95% interval is on the better
   side of zero.
 - `--guard <metric>=<tolerance>` passes if the interval rules out a regression
@@ -153,8 +160,9 @@ records the result and switches the option on only if the output says
 `Gate: passed`.
 
 `--quick` plays 50 seeds per pair (about 5 minutes) and marks the result
-"indicative only". It is useful for a smoke test, but it can never pass a
-gate. The command exits non-zero so it cannot be mistaken for a pass.
+"indicative only". It can never pass a gate, but it is how a ticket proves its
+gate is ready to run: the quick run completes, and its first line reports at
+least one game changed by the options. The command exits non-zero so it cannot be mistaken for a pass.
 
 ### Comparing two reports by hand
 

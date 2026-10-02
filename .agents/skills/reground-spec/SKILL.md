@@ -53,8 +53,10 @@ runs it too, by name, rather than restating it.
      change; or
    - an F4 or human-game gate in the exact form of "Writing a gate" in
      `documentation/ai-planning.md` (table, standard regression guards and,
-     for F4, the gate command), plus the two gated acceptance criteria from
-     the planning template, for a strategic change. Rewrite an older gate
+     for F4, the gate command), plus the three gated acceptance criteria from
+     the planning template and one per collector or start board the gate
+     names, for a strategic change. A gate that would measure an option the
+     deck pool rarely reaches needs `Starts:` boards. Rewrite an older gate
      into that form without changing its metrics or thresholds; if a
      standard guard is missing, add it and report the addition.
    Report any classification change explicitly because it changes how the

@@ -344,6 +344,7 @@ function printSummary(report) {
 // kept short); --compare, or gate --all, prints every metric.
 function printComparison(result, quick, only = null) {
   const lines = [`${result.pairedGames} paired games${result.droppedGames ? `, ${result.droppedGames} unpaired or failed dropped` : ''}` +
+    `${result.changedGames !== null ? `, ${result.changedGames} changed by the options` : ''}` +
     `${quick ? ' [quick: indicative only, cannot pass a gate]' : ''}`,
   '  metric                               baseline  candidate  difference  95% interval'];
   for (const [name, m] of Object.entries(result.metrics)) {

@@ -20,7 +20,7 @@ Implemented from `f795a63`.
   pairs over the trusted sets System Gateway, System Update 2021 and
   Elevation.
 - The first baseline is
-  `tests/fixtures/ai-batch/baselines/core-v1-da7c925b39d1e76d.json`.
+  `tests/fixtures/ai-batch/baselines/core-v1-a0ab675e420ce8b0.json`.
 
 **Engine and AI changes**, all off unless the harness enables them or
 behaviour-neutral:
@@ -51,9 +51,21 @@ behaviour-neutral:
   1,205 s; with it, 344 s.
 - A gate template was added ("Writing a gate" in `ai-planning.md`), with
   `--side runner` and `--max` so every row maps to one flag.
+- Added after the first real use (owner request, 2026-10-02): every gate also
+  checks that the option changed at least one paired game's `logHash`
+  (`changed option effect`), and the first output line counts them. The
+  hosted-Trojan option's pool run had changed none of 1,397 paired games yet
+  printed `Gate: passed`, because zero differences pass every guard. With
+  the same run, it now fails. Gate setup (collectors and start boards) is now an
+  acceptance criterion of the gated item itself, proven by a `--quick` run
+  that changes at least one game, and `ticket.js check` fails a gate command
+  naming a missing collector or start board. The template, skills and owner
+  guides were updated to match.
+  Because `metrics.js` is in the code hash, the baseline was regenerated
+  under its new key; all 1,400 games have the same `logHash` as before.
 
 **Baseline.** Produced with `node scripts/ai-batch.js --jobs 8 --out
-tests/fixtures/ai-batch/baselines/core-v1-da7c925b39d1e76d.json` (all options
+tests/fixtures/ai-batch/baselines/core-v1-a0ab675e420ce8b0.json` (all options
 off; seeds 1–200 per pair; 1,400 games in 344 s).
 - Pooled Corp win rate: 25.0% [22.8, 27.3].
 - Per pair: pd-tao 51.5%, zwicky-magdalene 43.4%, btl-kit 34.0%, pe-steve

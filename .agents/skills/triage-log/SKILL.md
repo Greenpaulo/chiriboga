@@ -130,6 +130,11 @@ regression guards and the gate command. Depends on: F4 when selected.>
 - [ ] `node tests/run-all-tests.js` passes.
 - [ ] (Gated items) The behaviour change ships behind an AI option that
       defaults to off (named in the Resolution).
+- [ ] (Gated items) The gate is ready to run: every collector and start
+      board it names exists and is tested, and a `--quick` run of each gate
+      command completes and reports at least one game changed by the options.
+- [ ] (Gated items, one per piece) <Collector `name` / start board `path`>
+      is built and tested.
 - [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
       For F4: exact command, committed deck pairs, paired seeds, seed count,
       every metric's baseline/candidate result and bootstrap 95% confidence
@@ -141,13 +146,14 @@ regression guards and the gate command. Depends on: F4 when selected.>
 ## Out of scope / related
 ```
 
-Ungated (the common case): write `## Acceptance gate` as shown and delete both
-`(Gated items)` bullets. Gated: fill in `## Acceptance gate` with real numbers
-and keep both bullets, dropping their `(Gated items)` prefix — matching
+Ungated (the common case): write `## Acceptance gate` as shown and delete every
+`(Gated items)` bullet. Gated: fill in `## Acceptance gate` with real numbers,
+list its `Collectors:` and `Starts:`, and keep the bullets (one per collector
+or start board), dropping their `(Gated items)` prefix — matching
 `ai-planning.md`'s own template convention, so `implement-ticket`'s Orient
 step ("A ticket is gated when its acceptance criteria require an AI option or
-its Acceptance gate needs seeded games... If a gated ticket lacks the two gate
-criteria or its gate has no numbers, fix the ticket before planning") finds
+its Acceptance gate needs seeded games... If a gated ticket lacks the three gate
+criteria, a criterion for each collector or start board its gate names, or numbers in its gate, fix the ticket before planning") finds
 exactly what it expects either way.
 
 If no reproduction was possible, replace the **Reproduction** line with

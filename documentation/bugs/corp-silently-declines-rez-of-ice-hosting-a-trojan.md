@@ -38,6 +38,19 @@ Implemented from `64bcf17`.
 
 **Gate:** pending F4 — `evidenceBasedHostedCardRez` defaults to off.
 
+**Gate setup, 2026-10-02 (not gate evidence).** A pool-only run on the F4
+branch, `node scripts/ai-batch.js gate --corp-option
+evidenceBasedHostedCardRez=true --guard winRate=0.02 --guard pointsScored=0.1
+--guard pointsStolen=0.1`, reused the committed baseline and played 1,400
+candidate games. All 1,397 paired games had the same `logHash` as the
+baseline (3 known stalls dropped), so the option never comes into play on the
+deck pool. The improvement therefore needs the Chromatophores and Tranquilizer
+start boards, which do not exist yet, as does the `hostedThreatRezCredits`
+collector. The gate's `decisionLatencyMs` guard conflicts with the current
+rule that latency is not a gate guard (the same run moved every latency metric
+by about 3% with identical games); resolve it when the gate is rewritten into
+the "Writing a gate" form.
+
 ## Implementation plan
 
 Proposed at `64bcf17`, 2026-09-28; revised 2026-09-28. **Approved 2026-09-28.**
@@ -366,6 +379,11 @@ covering Chromatophores and Tranquilizer.
       `evidenceBasedHostedCardRez` switched on by default.
 - [ ] The F4 collector `hostedThreatRezCredits` is added through the harness's
       collector extension point before the gate is run.
+- [ ] Chromatophores and Tranquilizer start boards are committed, with the
+      option able to change the Corp's rez decision on each, and are tested.
+- [ ] The gate is ready to run: every collector and start board it names
+      exists and is tested, and a `--quick` run of each gate command
+      completes and reports at least one game changed by the options.
 - [x] New or changed AI hooks are documented in `documentation/ai.md` (none
       expected — no card-facing hook changes, only internal AI logic).
 - [x] `node tests/run-all-tests.js` passes.

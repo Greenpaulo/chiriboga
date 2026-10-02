@@ -148,6 +148,17 @@ const EXTRA_DRAW = side => `
       {metrics: Object.assign({}, g.metrics, {pointsStolen: g.metrics.pointsStolen + 1})}))), {guard: {pointsStolen: 0.5}});
     assert.strictEqual(worse.metrics.pointsStolen.improvement.mean, -1);
     assert.strictEqual(worse.pass, false);
+    // A gate fails when the option changed no game, even if every guard holds.
+    const hashed = g => g.map(x => Object.assign({}, x, {logHash: 'h' + x.seed}));
+    const inert = metrics.compareReports(report(hashed(games(0))), report(hashed(games(0))), {guard: {pointsStolen: 0.5}});
+    assert.strictEqual(inert.changedGames, 0);
+    assert.strictEqual(inert.pass, false, 'an option that changed nothing cannot pass');
+    assert.ok(inert.checks.some(c => c.kind === 'changed' && !c.pass && /no game differs/.test(c.why)));
+    const changed = hashed(games(0)).map((x, i) => i === 3 ? Object.assign({}, x, {logHash: 'other'}) : x);
+    const live = metrics.compareReports(report(hashed(games(0))), report(changed), {guard: {pointsStolen: 0.5}});
+    assert.strictEqual(live.changedGames, 1);
+    assert.strictEqual(live.pass, true);
+    assert.strictEqual(metrics.compareReports(report(hashed(games(0))), report(hashed(games(0)))).pass, null, 'no gate, no check');
   });
 
   await scenario('5b. --side runner flips outcome directions; --max is a hard check on every game', async () => {
@@ -260,9 +271,12 @@ const EXTRA_DRAW = side => `
     const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', 'evidenceBasedHostedCardRez=true',
       '--guard', 'winRate=1'];
     const first = cli(args);
-    assert.strictEqual(first.status, 0, first.out);
     assert.ok(/baseline: playing 2 games/.test(first.out) && /candidate: playing 2 games/.test(first.out), first.out);
-    assert.ok(/PASS guard winRate/.test(first.out) && /Gate: passed/.test(first.out), first.out);
+    // The option never comes into play in these two games: the guard holds,
+    // but a gate whose option changed nothing fails.
+    assert.ok(/0 changed by the options/.test(first.out) && /PASS guard winRate/.test(first.out), first.out);
+    assert.ok(/FAIL changed option effect/.test(first.out) && /Gate: failed/.test(first.out), first.out);
+    assert.notStrictEqual(first.status, 0, first.out);
     const second = cli(args);
     assert.ok(/baseline: reusing/.test(second.out) && /candidate: reusing/.test(second.out), second.out);
     const quick = cli(['gate', '--pairs', 'gateway', '--quick', '--seeds', '1-2', '--jobs', '2', '--guard', 'winRate=1']);
