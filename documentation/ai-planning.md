@@ -174,7 +174,7 @@ F4 gate. Option `<camelCaseName>` (<Corp | Runner> AI), off in the baseline
 and on in the candidate. Committed deck pool, paired seeds, 200 games per deck
 pair <or more: say how many and why>, bootstrap 95% intervals.
 Collectors: <`name` (adds `name.metric`, defined in this ticket) | none>.
-Starts: <fixture paths the games begin from, built in this ticket | none>.
+Starts: <`--start-tag` tags selecting boards in `tests/fixtures/ai-batch/starts/`, plus boards this ticket builds with `scripts/start-board.js` | none>.
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
@@ -223,16 +223,19 @@ Rules for form 2:
   passes. Metrics pool across every `--start` board in one command, so a row
   that must hold on one board (an improvement on one card's boards, or a
   per-game threshold) needs a command of its own. Each command costs a full
-  baseline and candidate run (about 2 × 8 minutes), so name only the boards
-  the gate needs. A command over a set the
+  baseline and candidate run (about 2 × 8 minutes with `--budget 1400`), so
+  use as few commands as the rows need. A command over a set the
   option never changes (often the deck pool, for a board-specific option)
   fails `changed option effect`. Record that no game changed instead of
   running it.
-- **Start boards come from real boards.** Build a start board from a log's
-  reproduction dump, or another real game state. Change only what is needed
-  for the game to run (a crashing card, a card outside the pool's sets) or
-  to restore the moment before the decision, and list each change in its
-  `NOTE`. Never change the cards that decide whether the candidate is right,
+- **Start boards come from real boards.** Build them with
+  `scripts/start-board.js` from a log's decision snapshot or dump
+  ([ai-batch-harness.md](ai-batch-harness.md#building-a-start-board)). It
+  allows only the changes needed for the game to run (a crashing card, a
+  card outside the pool's sets) or to restore the moment before the
+  decision, records each one, and tags the board. A board gate selects
+  boards with `--start-tag` and runs with `--budget 1400`, so it costs one
+  baseline and one candidate run however many boards match. Never change the cards that decide whether the candidate is right,
   such as the Runner's breakers or the ICE involved. If the real board does
   not reach the option, that is evidence about the option's design: report
   it rather than editing the board until the option fires.

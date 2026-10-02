@@ -95,6 +95,10 @@ const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund']
 assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
   fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
 
+assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --start-tag hosted-card-on-ice --budget 1400`'), [],
+  'ticket.js accepts --start-tag naming tags a committed board has');
+assert.strictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --start-tag no-such-tag`').length, 1,
+  'ticket.js rejects --start-tag naming tags no board has');
 // A failed gate: the option must be gone, and the Outcome line is read.
 assert.strictEqual(outcomeLine('# T\n\n**Outcome:** not adopted — gate failed\n'), 'not adopted — gate failed');
 assert.strictEqual(outcomeLine('# T\n'), undefined, 'a ticket without an Outcome line has none');

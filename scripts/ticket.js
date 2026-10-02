@@ -245,8 +245,22 @@ function gateSetupProblems(text) {
       if (token === '--start' && !fs.existsSync(path.join(root, value)))
         problems.push('Gate command names start board ' + value + ', which does not exist.');
     });
+    const tags = tokens.filter((t, i) => tokens[i - 1] === '--start-tag' && !t.includes('<'));
+    if (tags.length && !startBoardsTagged(tags).length)
+      problems.push('Gate command selects start boards tagged ' + tags.join(', ') + ', but no board in tests/fixtures/ai-batch/starts/ has them.');
   }
   return problems;
+}
+
+// Start boards whose TAGS line (scripts/start-board.js) has every given tag.
+function startBoardsTagged(tags) {
+  const dir = path.join(root, 'tests/fixtures/ai-batch/starts');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter(f => f.endsWith('.txt')).filter(f => {
+    const line = (fs.readFileSync(path.join(dir, f), 'utf8').match(/^\/\/ TAGS:(.*)$/m) || [])[1] || '';
+    const has = line.split(',').map(t => t.trim());
+    return tags.every(t => has.includes(t));
+  });
 }
 
 // The ticket's state in one line (ai-planning.md, "When a gate fails").
@@ -351,7 +365,8 @@ function check(ticket) {
     else report(setting === 'true' ? 'PASS' : 'WARN', 'Gate: ' + gate + ' (' + option + ' defaults to ' + setting + ')');
     // The gate's setup is part of the ticket: every collector and start board
     // its gate commands name must exist before review.
-    for (const problem of gateSetupProblems(text)) report('FAIL', problem);
+    // A not-adopted ticket's gate is history; its boards may have been rebuilt or dropped since.
+    if (!notAdopted) for (const problem of gateSetupProblems(text)) report('FAIL', problem);
   }
 
   for (const [level, message] of results) console.log(level.padEnd(4) + ' ' + message);

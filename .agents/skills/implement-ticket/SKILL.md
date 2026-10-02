@@ -104,13 +104,14 @@ where it is uncertain:
   and use the plan gate to split, narrow or gate the behavior before changing
   the reproduction.
 - For a gated ticket with a **Source log**, check the design against the real
-  board before planning or building any gate setup. Turn the log's
-  reproduction dump into a start-board fixture, with only the changes "Start
-  boards come from real boards" in `documentation/ai-planning.md` allows.
-  Replay the logged decision in the headless engine with the candidate off,
-  then on: call `playGame()` from `scripts/ai-batch/headless.js` with
-  `start: <fixture>` and a `setupFile` that calls the decision function
-  directly and returns its result through `__report`. The candidate must
+  board before planning or building any gate setup. Build a start board from
+  the log with `scripts/start-board.js` (allowed edits only; see
+  `documentation/ai-batch-harness.md`). Replay the logged decision in the
+  headless engine with the candidate off, then on: call `playGame()` from
+  `scripts/ai-batch/headless.js` with `start: <board>` and a `setupFile` that
+  calls the decision function directly and returns its result through
+  `__report`. Probe variables must not reuse the harness's `__` hook names
+  (such as `__rez`). The candidate must
   change the logged decision in the direction the ticket wants. If it does
   not, the design does not fix the reported case: stop, record the replay
   in the ticket, and re-plan. Do not build collectors or start boards

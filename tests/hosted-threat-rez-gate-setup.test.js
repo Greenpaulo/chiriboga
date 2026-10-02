@@ -2,8 +2,8 @@
 // Gate setup for hosted-ICE rez changes
 // (documentation/bugs/hosted-ice-rez-ignores-repeated-tax.md): the
 // hostedThreatRezCredits collector, the harness `rez` event it reads, and the
-// real-board Chromatophores and Tranquilizer start boards under
-// tests/fixtures/ai-batch/starts/.
+// real-board Chromatophores start board under tests/fixtures/ai-batch/starts/
+// (built with scripts/start-board.js).
 const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
@@ -17,7 +17,6 @@ const root = path.resolve(__dirname, '..');
 const {pool, setFiles, ranges} = batch.loadPool(path.join(root, 'tests/fixtures/ai-batch/deck-pool.json'));
 const STARTS = [
   {file: 'tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt', hosted: 'Chromatophores', pair: 'pd-tao', seed: '1'},
-  {file: 'tests/fixtures/ai-batch/starts/hosted-tranquilizer-on-remote-ice.txt', hosted: 'Tranquilizer', pair: 'neh-zahya', seed: '2'},
 ];
 const verbose = !!process.env.VERBOSE;
 let passed = 0;

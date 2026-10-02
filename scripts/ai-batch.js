@@ -16,6 +16,9 @@
 //   --seeds <from>-<to> | <file>  explicit seeds instead (file: JSON array or one per line)
 //   --pairs <id,id>               only these deck pairs from the pool
 //   --start <fixture.txt|dir>     begin every game from a saved board (repeatable)
+//   --start-tag <tag>             every board under tests/fixtures/ai-batch/starts/ whose
+//                                 TAGS include all given tags (repeatable; scripts/start-board.js)
+//   --budget <games>              seeds per board and pair = max(10, floor(games / (boards x pairs)))
 //   --corp-option <name>=<value>  set corp.AI.options.<name> (repeatable; unknown names fail)
 //   --runner-option <name>=<value>
 //   --collector <name>            scripts/ai-batch/collectors/<name>.js (repeatable)
@@ -44,8 +47,8 @@ const CODE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js
 const sha1 = text => crypto.createHash('sha1').update(text).digest('hex');
 
 function parseArgs(argv) {
-  const out = {_: [], start: [], corpOption: [], runnerOption: [], collector: [], guard: [], improve: [], better: [], max: []};
-  const repeatable = {'--start': 'start', '--corp-option': 'corpOption', '--runner-option': 'runnerOption',
+  const out = {_: [], start: [], startTag: [], corpOption: [], runnerOption: [], collector: [], guard: [], improve: [], better: [], max: []};
+  const repeatable = {'--start': 'start', '--start-tag': 'startTag', '--corp-option': 'corpOption', '--runner-option': 'runnerOption',
     '--collector': 'collector', '--guard': 'guard', '--improve': 'improve', '--better': 'better', '--max': 'max'};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -249,14 +252,42 @@ function buildConfig(args, overrides = {}) {
   }
   const collectorNames = args.collector.slice().sort();
   const collectors = loadCollectors(collectorNames);
+  const starts = resolveStarts([...new Set([...args.start, ...taggedStarts(args.startTag || [])])], poolInfo.ranges);
   return Object.assign({
-    poolInfo, pairs, setFiles: poolInfo.setFiles, seeds: resolveSeeds(args), starts: resolveStarts(args.start, poolInfo.ranges),
+    poolInfo, pairs, setFiles: poolInfo.setFiles, seeds: budgetSeeds(args, starts, pairs) || resolveSeeds(args), starts,
+    budget: args.budget ? Number(args.budget) : null,
     corpOptions: parseAssignments(args.corpOption, '--corp-option'),
     runnerOptions: parseAssignments(args.runnerOption, '--runner-option'),
     collectorNames, directions: Object.assign({}, ...collectors.map(c => c.directions || {})),
     jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
     quick: Boolean(args.quick),
   }, overrides);
+}
+
+const STARTS_DIR = path.join(root, 'tests', 'fixtures', 'ai-batch', 'starts');
+
+// Boards whose TAGS line (scripts/start-board.js) includes every given tag.
+function taggedStarts(tags) {
+  if (!tags.length) return [];
+  const files = fs.existsSync(STARTS_DIR) ? fs.readdirSync(STARTS_DIR).filter(f => f.endsWith('.txt')).sort() : [];
+  const matches = files.filter(f => {
+    const line = (fs.readFileSync(path.join(STARTS_DIR, f), 'utf8').match(/^\/\/ TAGS:(.*)$/m) || [])[1] || '';
+    const has = line.split(',').map(t => t.trim()).filter(Boolean);
+    return tags.every(t => has.includes(t));
+  }).map(f => path.join(STARTS_DIR, f));
+  if (!matches.length) throw new Error('No start board has the tags: ' + tags.join(', '));
+  return matches;
+}
+
+// --budget: the same seeds 1..k for every board and pair, so a board gate's
+// cost does not grow with the number of boards and pairing is unchanged.
+function budgetSeeds(args, starts, pairs) {
+  if (!args.budget) return null;
+  if (args.seeds || args.games || args.quick) throw new Error('--budget cannot be combined with --seeds, --games or --quick');
+  const games = Number(args.budget);
+  if (!(games > 0)) throw new Error('--budget needs a number of games');
+  const k = Math.max(10, Math.floor(games / (Math.max(1, starts.length) * pairs.length)));
+  return Array.from({length: k}, (_, i) => String(i + 1));
 }
 
 // Everything that decides a report's games except wall time.
@@ -297,7 +328,7 @@ async function batch(config, command) {
     pool: {file: config.poolInfo.file, id: config.poolInfo.pool.id, sets: config.poolInfo.pool.sets},
     poolHash: config.poolInfo.hash, pairs: config.pairs.map(p => p.id), seeds: config.seeds,
     starts: config.starts.map(s => ({id: s.id, hash: s.hash})), collectors: config.collectorNames,
-    directions: config.directions, quick: config.quick,
+    directions: config.directions, quick: config.quick, budget: config.budget,
     options: effective || {corp: config.corpOptions, runner: config.runnerOptions},
     failures: games.filter(g => !g.ok).map(g => ({fixtureId: g.fixtureId, deckPairId: g.deckPairId, seed: g.seed,
       reason: g.reason, errors: g.errors})),
@@ -474,5 +505,5 @@ async function main() {
   process.exitCode = report.failures.length ? 1 : 0;
 }
 
-module.exports = {parseArgs, resolveSeeds, loadPool, resolveStarts, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
+module.exports = {parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 2; });

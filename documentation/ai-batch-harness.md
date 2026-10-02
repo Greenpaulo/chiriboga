@@ -228,6 +228,54 @@ when it comes from a directory.
 Many fixtures use small hand-made decks, so their games can end quickly when
 R&D runs out. That is expected.
 
+### Building a start board
+
+Gate start boards live in `tests/fixtures/ai-batch/starts/` and are built
+from real logs, never by hand:
+
+```sh
+node scripts/start-board.js <log> --list
+node scripts/start-board.js <log> --dump --out <name> \
+  --unsteal 35038=0 \
+  --replace 35042=30072 --reason "Scatter Field's subroutine crashes the Corp AI" \
+  --setup "corp.creditPool=12; runner.creditPool=0" \
+  --note "what the board is for"
+```
+
+- **Source:** `--snapshot <n>` (a decision snapshot from `--list`, the board
+  at the decision) or `--dump` (the end-of-log dump). One is required; use a
+  snapshot when the log has one.
+- **Edits:** only these, each recorded as a `NOTE` line ending in its flag:
+  - `--replace`, with a `--reason`: only for a card that crashes the engine
+    or is outside the pool's sets. Never the Runner's rig or a hosted card.
+    Replaced installed ICE is named in the note.
+  - `--unsteal` / `--unscore`: restore an agenda taken at the decision.
+  - `--setup`: credits and clicks only.
+  - `--note`: a description.
+- **Tags:** the builder loads the board and writes `// TAGS:`
+  (`hosted-card-on-ice`, `unrezzed-ice`, `breaker-installed`,
+  `agenda-in-remote`, `tagged-runner`). A new tag goes into
+  `scripts/start-board.js` in the change that first needs it.
+- **No hand edits:** `tests/start-board.test.js` rebuilds every committed
+  board from its recorded flags and fails if it differs.
+
+To check that a board reaches the decision an option changes, replay one game
+with `replay --diff` (see "Reading why a result moved"); the first differing
+hunk should be that decision.
+
+### Selecting boards and fixing the cost
+
+```sh
+node scripts/ai-batch.js gate --corp-option <name>=true \
+  --start-tag hosted-card-on-ice --start-tag agenda-in-remote --budget 1400 ...
+```
+
+`--start-tag` (repeatable) selects every board whose tags include all those
+given. `--budget <games>` gives every board and pair the same seeds 1 to
+`max(10, floor(games / (boards × pairs)))`. So a board gate always plays
+about 1,400 games per half, about 8 minutes each, however many boards match.
+Without `--budget`, each board gets the full 200 seeds per pair.
+
 ## Changing the decks
 
 The pool is [tests/fixtures/ai-batch/deck-pool.json](../tests/fixtures/ai-batch/deck-pool.json):

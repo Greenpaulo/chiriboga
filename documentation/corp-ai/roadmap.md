@@ -157,9 +157,9 @@ Shared infrastructure used by every area.
 - **Goal:** Choose the F4 deck pool by screening candidate pairs for Corp win rates near even, with a stated selection rule and re-screening policy.
 
 ### F10 Real-board start library for gates
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** F4
-- **Spec:** [F10-real-board-start-library.md](specs/F10-real-board-start-library.md)
+- **Ticket:** [F10-real-board-start-library.md](../backlog/code-review/F10-real-board-start-library.md)
 - **Goal:** Build gate start boards from real logs with a checked builder, keep them in one tagged library, and run board-based gates under a fixed game budget.
 
 ### Done

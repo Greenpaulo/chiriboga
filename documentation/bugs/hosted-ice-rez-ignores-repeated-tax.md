@@ -67,8 +67,10 @@ F4 gate. Option `taxAwareHostedIceRez` (Corp AI), off in the baseline and on
 in the candidate. Committed deck pool, paired seeds, 200 games per deck pair,
 bootstrap 95% intervals.
 Collectors: none.
-Starts: `tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt`
-(the log's own board, built in the previous ticket).
+Starts: boards tagged `hosted-card-on-ice` and `agenda-in-remote`
+(`--start-tag`; today
+`tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt`, the
+log's own board), with a fixed budget of 1,400 games per half.
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
@@ -77,9 +79,9 @@ Starts: `tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt`
 | Guard | `pointsScored` | higher | regression at most 0.1 |
 
 Gate command: `node scripts/ai-batch.js gate --corp-option
-taxAwareHostedIceRez=true --start
-tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt
---improve pointsStolen --guard winRate=0.02 --guard pointsScored=0.1`
+taxAwareHostedIceRez=true --start-tag hosted-card-on-ice --start-tag
+agenda-in-remote --budget 1400 --improve pointsStolen --guard winRate=0.02
+--guard pointsScored=0.1`
 
 No deck-pool command: the hosted-card veto changed no deck-pool game in the
 previous ticket's runs, so a pool command would fail `changed option effect`.
@@ -93,7 +95,7 @@ Depends on: F4.
 - [ ] A deterministic test covers the tax case: breakable ICE is rezzed when the Runner's cost to pass times the expected runs exceeds the rez cost, and is vetoed (with a logged reason) when it does not.
 - [ ] Before planning, the log's board is replayed with the candidate off and on (implement-ticket step 3), and the candidate changes the logged decision.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] The gate is ready to run: the start board it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the options.
+- [ ] The gate is ready to run: at least one start board has its tags and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the options.
 - [ ] Applicable gate evidence is recorded in the Resolution: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% interval, guarded-regression result, pass conditions and thresholds. Only then is the option switched on by default.
 - [ ] New or changed AI hooks are documented in `documentation/ai.md`.
 - [ ] `node tests/run-all-tests.js` passes.
