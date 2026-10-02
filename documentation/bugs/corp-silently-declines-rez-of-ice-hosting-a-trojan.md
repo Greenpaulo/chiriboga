@@ -48,8 +48,17 @@ deck pool. The improvement therefore needs the Chromatophores and Tranquilizer
 start boards, which do not exist yet, as does the `hostedThreatRezCredits`
 collector. The gate's `decisionLatencyMs` guard conflicts with the current
 rule that latency is not a gate guard (the same run moved every latency metric
-by about 3% with identical games); resolve it when the gate is rewritten into
-the "Writing a gate" form.
+by about 3% with identical games).
+
+**Owner decisions, 2026-10-02.** (1) Proceed on the F4 branch although F4 is
+still in code-review; ignore the F4 blocker for this pickup. (2) Drop the
+`decisionLatencyMs` guard when rewriting the gate: latency is not a gate
+guard under "Writing a gate" because a cached baseline is timed on a
+differently loaded machine, and the changed branch did not change a single
+pool game. Keep every other metric and threshold as written. The gate becomes
+two commands: the improvement and the Tranquilizer check on the start boards,
+and the regression guards on the deck pool. Re-run the pool command, because
+the run above predates the changed-games check and the current code key.
 
 ## Implementation plan
 

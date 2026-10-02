@@ -187,10 +187,12 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   command from the ticket's gate and record it in the Resolution as a
   `**Gate command:**` line: `node scripts/ai-batch.js gate --corp-option
   <option>=true` (or `--runner-option`), plus `--collector` for each collector
-  the gate needs, `--improve <metric>` or `--guard <metric>=<tolerance>` for
+  the gate needs, `--start` for each start board, `--improve <metric>` or `--guard <metric>=<tolerance>` for
   each metric it names, `--better` for any metric without a default direction,
   and `--games` if it needs more than 200 (see
-  `documentation/ai-batch-harness.md`). Run it yourself, after the full test
+  `documentation/ai-batch-harness.md`). A gate that measures start boards and
+  the deck pool separately has one command per game set ("Writing a gate");
+  record and run each, and the gate passes only if every one passes. Run it yourself, after the full test
   suite passes, as one blocking command with a timeout of at least 30 minutes
   (it takes about 15 to 20 and prints only the gated metrics). Waiting on a
   blocking command costs nothing; checking on a running one costs a step each
