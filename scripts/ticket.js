@@ -231,6 +231,24 @@ function reproductionExpectationsMatch(file, before, after) {
     beforeExpectations.every((line, index) => line === afterExpectations[index]);
 }
 
+// Collectors and start boards named by a ticket's `Gate command:` lines that
+// do not exist. Template placeholders (`<name>`) are ignored.
+function gateSetupProblems(text) {
+  const problems = [];
+  for (const [, command] of text.matchAll(/Gate command:\**\s*`([^`]+)`/g)) {
+    const tokens = command.split(/\s+/);
+    tokens.forEach((token, i) => {
+      const value = tokens[i + 1];
+      if (!value || value.includes('<')) return;
+      if (token === '--collector' && !fs.existsSync(path.join(root, 'scripts/ai-batch/collectors', value + '.js')))
+        problems.push('Gate command names collector ' + value + ', but scripts/ai-batch/collectors/' + value + '.js does not exist.');
+      if (token === '--start' && !fs.existsSync(path.join(root, value)))
+        problems.push('Gate command names start board ' + value + ', which does not exist.');
+    });
+  }
+  return problems;
+}
+
 function check(ticket) {
   const results = [];
   const report = (level, message) => results.push([level, message]);
@@ -316,6 +334,9 @@ function check(ticket) {
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
     else if (!passed) report('WARN', 'Gate not passed; ' + option + ' defaults to off: ' + gate);
     else report(setting === 'true' ? 'PASS' : 'WARN', 'Gate: ' + gate + ' (' + option + ' defaults to ' + setting + ')');
+    // The gate's setup is part of the ticket: every collector and start board
+    // its gate commands name must exist before review.
+    for (const problem of gateSetupProblems(text)) report('FAIL', problem);
   }
 
   for (const [level, message] of results) console.log(level.padEnd(4) + ' ' + message);
@@ -343,7 +364,7 @@ function check(ticket) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch};
+  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);

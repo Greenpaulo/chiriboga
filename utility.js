@@ -667,6 +667,27 @@ var DecisionSnapshots = {
   totalMs: 0,
   worstMs: 0,
   list: [],
+  //Telemetry mode (F4 batch harness): when set to {sink: function(entry)},
+  //every Choice() of both AIs is streamed to the sink, unfiltered and without
+  //ReproductionCode(). It only observes: no state changes and no randomness.
+  telemetry: null,
+  telemetryCount: 0,
+  Now: function () {
+    return typeof performance !== "undefined" ? performance.now() : Date.now();
+  },
+  Record: function (side, choiceType, optionList, chosen, latencyMs) {
+    try {
+      this.telemetry.sink({
+        n: ++this.telemetryCount,
+        side: side,
+        identifier: currentPhase ? currentPhase.identifier : "",
+        choiceType: choiceType || "",
+        options: optionList.map(this.Label),
+        chosen: chosen,
+        latencyMs: latencyMs,
+      });
+    } catch (e) {}
+  },
   Label: function (option) {
     var label = "[object]";
     if (typeof option === "string") label = option;
@@ -1961,6 +1982,17 @@ function ShowGauntletLostModal(gauntletState) {
 }
 
 /**
+ * Tell each AI player that the game has ended.<br/>Called by PlayerWin; headless harnesses that replace PlayerWin call it too.
+ *
+ * @method AIGameEnded
+ * @param {Player} winner either corp or runner
+ */
+function AIGameEnded(winner) {
+  if (corp.AI != null) corp.AI.GameEnded(winner);
+  if (runner.AI != null) runner.AI.GameEnded(winner);
+}
+
+/**
  * Player wins the game (the game ends).<br/>Logs a message and disables command prompt.
  *
  * @method PlayerWin
@@ -1975,6 +2007,7 @@ function PlayerWin(player, msgstr) {
   */
   PlaySound('gameEnd');
   var winner = player;
+  AIGameEnded(winner);
 
   // Track game end in Google Analytics
   if (typeof gtag !== "undefined" && window.location.hostname !== "localhost") {

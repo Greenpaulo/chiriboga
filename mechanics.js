@@ -1776,9 +1776,9 @@ function Steal() {
     if (intended.steal == null) return;
     PlaySound('agendaSteal');
 	var stolenFromString = "remote";
-	if (attackedServer == corp.HQ.cards) stolenFromString = "HQ";
-	else if (attackedServer == corp.RnD.cards) stolenFromString = "R&D";
-	else if (attackedServer == corp.archives.cards) stolenFromString = "Archives";
+	if (attackedServer == corp.HQ) stolenFromString = "HQ";
+	else if (attackedServer == corp.RnD) stolenFromString = "R&D";
+	else if (attackedServer == corp.archives) stolenFromString = "Archives";
 	agendaStolenLocations.push(stolenFromString); //for testing/balancing AIs
 	
     MoveCard(intended.steal, runner.scoreArea);

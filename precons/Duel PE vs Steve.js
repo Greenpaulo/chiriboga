@@ -1,7 +1,7 @@
 // Exported preconstructed deck
 registerPrecon({
     // name: Display name of the precon deck
-    name: "Duel: PD vs Steve",
+    name: "Duel: PE vs Steve",
     // identity: Card ID of the identity/commander for this deck
     identity: "31050",
     // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting
