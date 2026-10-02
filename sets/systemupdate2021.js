@@ -2460,10 +2460,10 @@ cardSet[31030] = {
 	if (htsi) {
 		//for Atman the strength match is important so we need to take into account potential encounter effects
 		//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
-		var stored = AIIceEncounterSaveState();
-		AIIceEncounterModifyState(htsi);
-		var X = Strength(htsi) - Strength(this);
-		AIIceEncounterRestoreState(stored);
+		var atman = this;
+		var X = AIWithIceEncounter(htsi, function () {
+			return Strength(htsi) - Strength(atman);
+		});
 	} else {
 		//ice are unknown, choose the strength needed for RC to consider it valid
 		var outermostUnknownIceInHighestPotentialServer = null;
@@ -2602,13 +2602,12 @@ cardSet[31030] = {
 	//returns a matching breaker installed, or null
 	//for Atman the strength match is important so we need to take into account potential encounter effects
 	//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
-	var strengthMatches = false;
-	var stored = AIIceEncounterSaveState();
+	var atman = this;
 	//state will not be modified if there is an issue (e.g. server not found)
 	//in which case can't continue with strength check because can't pretend encounter with no server yet
-	if (!AIIceEncounterModifyState(iceCard)) return null;
-	strengthMatches = CheckStrength(this);
-	AIIceEncounterRestoreState(stored);
+	var strengthMatches = AIWithIceEncounter(iceCard, function (entered) {
+		return entered && CheckStrength(atman);
+	});
 	if (strengthMatches) return this;
 	return null;
   },
@@ -2767,11 +2766,10 @@ cardSet[31031] = {
 	if ((effectiveSubTypes || iceCard.subTypes || []).includes(this.chosenWord)) {
 		//for Chameleon the strength check is important so we need to take into account potential encounter effects
 		//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
-		var sufficientStrength = false;
-		var stored = AIIceEncounterSaveState();
-		AIIceEncounterModifyState(iceCard);
-		sufficientStrength = CheckStrength(this);
-		AIIceEncounterRestoreState(stored);
+		var chameleon = this;
+		var sufficientStrength = AIWithIceEncounter(iceCard, function () {
+			return CheckStrength(chameleon);
+		});
 		if (sufficientStrength) return this;
 	}
 	return null;
