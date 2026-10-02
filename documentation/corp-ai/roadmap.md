@@ -144,12 +144,6 @@ Shared infrastructure used by every area.
 - **Spec:** [F5-mulligan-weight-calibration.md](specs/F5-mulligan-weight-calibration.md)
 - **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option.
 
-### F6 Headless AI performance
-- **Status:** in-progress
-- **Depends on:** none
-- **Ticket:** [F6-headless-ai-performance.md](../backlog/code-review/F6-headless-ai-performance.md)
-- **Goal:** Minimize the fixed 20-seed, eight-job headless runtime with identical decisions and hashes, following measured hotspots until further safe changes stop producing material batch gains.
-
 ### F7 Indexed card-state and trigger discovery
 - **Status:** proposed
 - **Depends on:** F2, F4
@@ -161,6 +155,7 @@ Shared infrastructure used by every area.
 | ID | Item | Delivered by | Architecture |
 |---|---|---|---|
 | F1 | Injectable, seedable randomness | [finding 09](../backlog/done/corp_ai_finding_09_seeded_randomness.md) | [Foundations](architecture.md#foundations) |
+| F6 | Headless AI performance | [F6-headless-ai-performance](../backlog/done/F6-headless-ai-performance.md) | [Server security evaluation](architecture.md#server-security-evaluation) |
 
 ## Install decisions (I)
 
