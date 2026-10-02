@@ -492,8 +492,12 @@ needs.
   fingerprint of the public board, so a probe that changes the board without
   raising the depth still gets a fresh result. The work itself is
   `_evaluateServerSecurityUncached()`. `_securityCacheVerify` (tests)
-  recomputes every hit and throws on a difference; `_securityCacheEnabled`
-  turns the cache off for comparisons. The main-phase protection ranking that
+  recomputes every hit and throws on a difference. The AI option
+  `disableSecurityCache` (default off) turns the cache off, only for the F3
+  gate's cache-off half. Each `Choice()` adds the number of computed
+  evaluations (`_securityEvaluationCount`, cache hits excluded) to its
+  telemetry entry as `evaluatorCalls`, which the `evaluatorCalls` collector
+  reports. The main-phase protection ranking that
   only fed the log runs only when `debugSecurityLog` is on. Local duplication
   guarantees remain (one security result per server per ranked pass; one
   protection score per candidate in `_bestProtectedRemote()`).

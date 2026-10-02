@@ -1,1 +1,1 @@
-corp.AI._securityCacheEnabled = false;
+corp.AI.options.disableSecurityCache = true;

@@ -2978,6 +2978,7 @@ class CorpAI {
   }
 
   _evaluateServerSecurityCounted(server) {
+    this._securityEvaluationCount++; //computed (not cached) evaluations, for F4 telemetry
     this._securityEvaluating++;
     try {
       return this._evaluateServerSecurityUncached(server);
@@ -3419,7 +3420,7 @@ class CorpAI {
   }
 
   _prepareProtectionPrioritiesForCorpTurn() {
-    if (!this._securityCache && this._securityCacheEnabled)
+    if (!this._securityCache && !this.options.disableSecurityCache)
       return this._withSecurityCache(() => this._prepareProtectionPrioritiesForCorpTurn());
     this._rollRecentSuccessfulRunPressure();
     //The first Corp turn has no previous allocation round to age.
@@ -3677,7 +3678,7 @@ class CorpAI {
   //this will return index of best option, or -1 if none of them are acceptable
   //if inhibit is false, more willing installs are permitted (use this for free install&rez)
   _bestInstallOption(optionList, inhibit = true) {
-    if (!this._securityCache && this._securityCacheEnabled)
+    if (!this._securityCache && !this.options.disableSecurityCache)
       return this._withSecurityCache(() => this._bestInstallOption(optionList, inhibit));
     //make a cards list from optionList (since this could be hand, archives, card-generated list, etc)
     var cards = [];
@@ -6683,7 +6684,7 @@ class CorpAI {
     //_hypotheticalDepth > 0 while a planning probe has changed the board.
     this._securityCache = null;
     this._securityEvaluating = 0;
-    this._securityCacheEnabled = true;
+    this._securityEvaluationCount = 0;
     this._securityCacheVerify = false; //tests: recompute every hit and compare
     this.debugSecurityLog = false; //log the protection ranking at each main phase
   }
@@ -6693,7 +6694,7 @@ class CorpAI {
     var previousDecisionRandomState = this._decisionRandomState;
     var previousSecurityCache = this._securityCache;
     this._decisionRandomState = { assetDestinationOrders: [] };
-    this._securityCache = this._securityCacheEnabled ? new Map() : null;
+    this._securityCache = this.options.disableSecurityCache ? null : new Map();
     try {
       var snapshot =
         typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
@@ -6702,9 +6703,12 @@ class CorpAI {
       var telemetry =
         typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
       var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
+      var evaluationsBefore = this._securityEvaluationCount;
       var ret = this._choiceInner(optionList, choiceType);
       if (telemetry)
-        DecisionSnapshots.Record("corp", choiceType, optionList, ret, DecisionSnapshots.Now() - startedAt);
+        DecisionSnapshots.Record("corp", choiceType, optionList, ret, DecisionSnapshots.Now() - startedAt, {
+          evaluatorCalls: this._securityEvaluationCount - evaluationsBefore,
+        });
       if (snapshot) DecisionSnapshots.After(snapshot, ret);
       return ret;
     } finally {
@@ -6941,4 +6945,7 @@ class CorpAI {
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
   evidenceBasedHostedCardRez: false,
+  //F3: true turns the per-decision security cache off. It exists only so the
+  //F3 gate can compare cache off with cache on; it is never meant to be on.
+  disableSecurityCache: false,
 });

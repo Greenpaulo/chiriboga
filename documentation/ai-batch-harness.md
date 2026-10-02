@@ -147,6 +147,11 @@ Gate: passed
   (a higher `winRate` is better), and this flips them for the outcome metrics.
 - `--max <metric>=<n>` is a hard check: it fails if any single candidate game
   exceeds `n`, for conditions that must always hold rather than on average.
+- `--identical` is for a behaviour-identical performance item (F3). It
+  replaces the changed-games check with its opposite: every paired game must
+  replay the baseline's log exactly (`PASS identical identical games`). Such an
+  item compares two fresh batches with `--compare` rather than `gate`; see
+  [ai-planning.md: Writing a gate](ai-planning.md#writing-a-gate).
 
 Every ticket's gate is written in one fixed form with exactly one flag per
 row; see [ai-planning.md: Writing a gate](ai-planning.md#writing-a-gate).

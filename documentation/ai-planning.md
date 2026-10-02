@@ -258,6 +258,37 @@ A change that must be behaviour-identical (a pure refactor) is not flagged.
 Its gate criterion is instead: decision snapshots are identical to the recorded
 baseline except for listed, justified deltas.
 
+A behaviour-identical **performance** item that also has to show its saving
+in seeded games (F3) adds an identity gate. It needs a switch that turns the
+new mechanism off: an AI option that defaults to `false` and is named
+`disable<Mechanism>`, because the mechanism ships on. `gate` cannot be used,
+since its baseline always uses the default options, so the item plays two
+fresh batches on the same machine and compares them with `--identical`.
+`--identical` replaces the "option effect" check with "every paired game
+replays the baseline's log":
+
+```markdown
+## Acceptance gate
+F4 identity gate. Option `disable<Mechanism>` (<Corp | Runner> AI) is on in
+the baseline (mechanism off) and off in the candidate. Committed deck pool,
+paired seeds, 200 games per deck pair, bootstrap 95% intervals.
+Collectors: `<name>` (adds `<name>.metric`, defined in this ticket).
+Starts: none.
+
+| Check | Metric | Better | Threshold |
+|---|---|---|---|
+| Identical | every paired game's log hash | — | no game differs |
+| Improve | `<work metric>` | lower | interval of the improvement above 0 |
+| Guard | `decisionLatencyMs.<side>.mean` | lower | regression at most 0 |
+
+Gate command: `node scripts/ai-batch.js --corp-option disable<Mechanism>=true --collector <name> --out off.json`
+Gate command: `node scripts/ai-batch.js --collector <name> --out on.json`
+Gate command: `node scripts/ai-batch.js --compare off.json on.json --identical --improve <work metric> --guard decisionLatencyMs.<side>.mean=0`
+```
+
+A size threshold beyond "above 0" (for example "at least 50% lower") is read
+from the printed baseline and candidate means and recorded in the Resolution.
+
 **AI options.** Each AI class has a frozen defaults object
 (`CorpAI.DEFAULT_OPTIONS` in `ai_corp.js`, `RunnerAI.DEFAULT_OPTIONS` in
 `ai_runner.js`) that the constructor copies into `this.options`. A gated item

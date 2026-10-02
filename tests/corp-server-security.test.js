@@ -435,6 +435,123 @@ test('F3: _iceWouldSecureServer gives the same answer with and without the cache
   });
 });
 
+// Counts computed (uncached) evaluations while body runs.
+function countComputed(body) {
+  const original = ai._evaluateServerSecurityUncached;
+  let computed = 0;
+  ai._evaluateServerSecurityUncached = function(srv) { computed++; return original.call(this, srv); };
+  try { body(); } finally { ai._evaluateServerSecurityUncached = original; }
+  return computed;
+}
+function cacheSize() {
+  let n = 0;
+  for (const entries of ai._securityCache.values()) n += entries.size;
+  return n;
+}
+
+test('F3 scenario 4: the critical-defence ICE-install probe decides and logs the same with a warm cache', () => {
+  const agenda = () => ({player: corp, cardType: 'agenda', agendaPoints: 2});
+  const operation = () => ({player: corp, cardType: 'operation'});
+  const wall = etr(); wall.cardType = 'ice'; wall.rezzed = false; wall.rezCost = 1;
+  Object.assign(corp, {
+    HQ: {serverName: 'HQ', cards: [wall], ice: [], root: []},
+    RnD: {serverName: 'R&D', cards: [agenda(), agenda(), operation(), operation()], ice: [], root: []},
+    archives: {serverName: 'Archives', cards: [], ice: [], root: []},
+    remoteServers: [], clickTracker: 3, creditPool: 5,
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  runner.identityCard = {faction: 'Shaper'};
+  runner.agendaPoints = 5;
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.RnD ? {additionalAccess: 1} : {}}];
+  const oldRankedInstallOptions = ai._rankedInstallOptions, oldLog = ai._log;
+  ai._rankedInstallOptions = () => [{cardToInstall: wall, serverToInstallTo: corp.RnD}];
+  const decide = () => {
+    const logged = [];
+    ai._log = message => logged.push(message);
+    ai.preferred = null;
+    const choice = ai._criticalBreachDefenseAction(['install', 'purge']);
+    return {choice, preferred: ai.preferred && ai.preferred.cardToInstall, logged};
+  };
+  try {
+    const uncached = decide();
+    assert.strictEqual(uncached.choice, 0);
+    assert.strictEqual(uncached.preferred, wall);
+    assert(uncached.logged.length > 0, 'the defence logs its reason');
+    ai._securityCacheVerify = true;
+    inDecision(() => {
+      for (const server of servers) ai._evaluateServerSecurity(server); // warm: R&D has no ICE yet
+      ai._centralBreachLossRisk(corp.RnD);
+      assert.deepStrictEqual(decide(), uncached, 'same choice, install and logged reason');
+      assert.deepStrictEqual(corp.RnD.ice, [], 'the probe install was undone');
+      assert.strictEqual(ai._hypotheticalDepth, 0);
+      assertCacheMatchesBoard();
+    });
+  } finally {
+    ai._securityCacheVerify = false;
+    ai._rankedInstallOptions = oldRankedInstallOptions;
+    ai._log = oldLog;
+    runner.cards = []; runner.identityCard = undefined;
+  }
+});
+
+test('F3 scenario 4: the "gain then install" credit probe sees the extra credits with a warm cache', () => {
+  const {rnd} = branBoard();
+  corp.creditPool = 0; // Bran cannot be rezzed on the real board
+  // The Phase_Main probe: credits raised inside _withHypothetical.
+  const probe = () => ai._withHypothetical(() => { corp.creditPool = 8; },
+    () => ai._evaluateServerSecurity(rnd), () => { corp.creditPool = 0; });
+  const uncached = probe();
+  inDecision(() => {
+    const real = ai._evaluateServerSecurity(rnd);
+    assert(!ai._sameSecurityResult(real, uncached), 'the extra credits change the result');
+    const size = cacheSize();
+    assert(ai._sameSecurityResult(probe(), uncached), 'the probe is not served the cached real-board result');
+    assert.strictEqual(cacheSize(), size, 'nothing stored at depth above 0');
+    assert.strictEqual(corp.creditPool, 0);
+    assertCacheMatchesBoard();
+  });
+});
+
+test('F3 scenario 5: evaluations inside the shared run and encounter wrappers bypass the cache', () => {
+  const {rndBran, rnd} = branBoard();
+  inDecision(() => {
+    ai._evaluateServerSecurity(rnd);
+    const size = cacheSize();
+    for (const [name, wrap] of [
+      ['AIWithRunContext', evaluate => context.AIWithRunContext(rnd, evaluate)],
+      ['AIWithIceEncounter', evaluate => context.AIWithIceEncounter(rndBran, evaluate)],
+      ['nested', evaluate => context.AIWithRunContext(rnd, () => context.AIWithIceEncounter(rndBran, evaluate))],
+    ]) {
+      const computed = countComputed(() => wrap(() => {
+        assert(ai._hypotheticalDepth > 0, name + ' raises the depth');
+        ai._evaluateServerSecurity(rnd);
+      }));
+      assert.strictEqual(computed, 1, name + ': not served from the cache');
+      assert.strictEqual(cacheSize(), size, name + ': nothing stored');
+      assert.strictEqual(ai._hypotheticalDepth, 0);
+    }
+    assert.strictEqual(countComputed(() => ai._evaluateServerSecurity(rnd)), 0, 'the real board is still cached');
+  });
+});
+
+test('F3: the decision telemetry counts computed evaluations only', () => {
+  const {rnd} = branBoard();
+  const before = ai._securityEvaluationCount;
+  inDecision(() => { ai._evaluateServerSecurity(rnd); ai._evaluateServerSecurity(rnd); });
+  assert.strictEqual(ai._securityEvaluationCount - before, 1, 'a cache hit is not counted');
+  // disableSecurityCache (F3 gate's cache-off half) opens no cache lifetime.
+  const oldWith = ai._withSecurityCache;
+  let opened = 0;
+  ai._withSecurityCache = function(evaluate) { opened++; return oldWith.call(this, evaluate); };
+  try {
+    ai._prepareProtectionPrioritiesForCorpTurn();
+    assert.strictEqual(opened, 1, 'the cache is on by default');
+    ai.options.disableSecurityCache = true;
+    ai._prepareProtectionPrioritiesForCorpTurn();
+    assert.strictEqual(opened, 1, 'no cache with disableSecurityCache');
+  } finally { ai.options.disableSecurityCache = false; ai._withSecurityCache = oldWith; }
+});
+
 test('F3: a board change gets a fresh result, within and across decisions', () => {
   const {rndBran, rnd} = branBoard();
   const before = inDecision(() => ai._evaluateServerSecurity(rnd));

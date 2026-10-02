@@ -23,6 +23,8 @@
 //   --better <metric>=higher|lower  direction for a metric without a default
 //   --side runner                 a Runner item: flip the outcome metrics' directions
 //   --max <metric>=<n>            hard check: fail if any candidate game exceeds n
+//   --identical                   behaviour-identical item: every paired game must replay the
+//                                 baseline's log (replaces the "option effect" check)
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -46,7 +48,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--compare') { out.compare = [argv[++i], argv[++i]]; }
-    else if (arg === '--quick' || arg === '--worker' || arg === '--all') out[arg.slice(2)] = true;
+    else if (arg === '--quick' || arg === '--worker' || arg === '--all' || arg === '--identical') out[arg.slice(2)] = true;
     else if (repeatable[arg]) out[repeatable[arg]].push(argv[++i]);
     else if (arg.startsWith('--')) out[arg.slice(2)] = argv[++i];
     else out._.push(arg);
@@ -370,7 +372,7 @@ function gateSpec(args) {
     for (const name of OUTCOME_METRICS)
       better[name] = metricsLib.CORE_DIRECTIONS[name] === 'higher' ? 'lower' : 'higher';
   Object.assign(better, parseAssignments(args.better, '--better'));
-  return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max')};
+  return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max'), identical: Boolean(args.identical)};
 }
 
 // Hard checks: a condition that must hold in every candidate game, not on average.

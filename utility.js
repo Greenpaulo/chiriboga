@@ -675,9 +675,9 @@ var DecisionSnapshots = {
   Now: function () {
     return typeof performance !== "undefined" ? performance.now() : Date.now();
   },
-  Record: function (side, choiceType, optionList, chosen, latencyMs) {
+  Record: function (side, choiceType, optionList, chosen, latencyMs, extra) {
     try {
-      this.telemetry.sink({
+      this.telemetry.sink(Object.assign({
         n: ++this.telemetryCount,
         side: side,
         identifier: currentPhase ? currentPhase.identifier : "",
@@ -685,7 +685,7 @@ var DecisionSnapshots = {
         options: optionList.map(this.Label),
         chosen: chosen,
         latencyMs: latencyMs,
-      });
+      }, extra));
     } catch (e) {}
   },
   Label: function (option) {

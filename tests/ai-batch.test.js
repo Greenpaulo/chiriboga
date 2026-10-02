@@ -178,6 +178,45 @@ const EXTRA_DRAW = side => `
     assert.strictEqual(ok.pass, true);
   });
 
+  await scenario('5c. --identical requires every paired game to replay the baseline', async () => {
+    const games = (hash, n = 20) => Array.from({length: n}, (_, i) => ({deckPairId: 'a', seed: String(i + 1), fixtureId: null, ok: true,
+      logHash: hash(i), metrics: {'evaluatorCalls.mainPhaseMean': 10}}));
+    const report = g => ({poolHash: 'p', seeds: [], starts: [], collectors: [], games: g});
+    const spec = batch.gateSpec(batch.parseArgs(['--identical']));
+    assert.strictEqual(spec.identical, true);
+    const same = metrics.compareReports(report(games(i => 'h' + i)), report(games(i => 'h' + i)), spec);
+    assert.strictEqual(same.pass, true, 'identical games pass');
+    assert.ok(!same.checks.some(c => c.kind === 'changed'), 'no option-effect check in identical mode');
+    const one = metrics.compareReports(report(games(i => 'h' + i)), report(games(i => i === 4 ? 'x' : 'h' + i)), spec);
+    assert.strictEqual(one.pass, false);
+    assert.ok(/1 games differ/.test(one.checks[0].why), one.checks[0].why);
+    const unhashed = metrics.compareReports(report(games(() => undefined)), report(games(() => undefined)), spec);
+    assert.strictEqual(unhashed.pass, false, 'games without log hashes cannot prove identity');
+    assert.strictEqual(batch.gateSpec(batch.parseArgs([])).identical, false);
+  });
+
+  await scenario('5d. evaluatorCalls collector: scripted events, and the security cache on a real game', async () => {
+    const collector = require('../scripts/ai-batch/collectors/evaluatorCalls');
+    const state = {};
+    const events = [{type: 'gameStart'},
+      {type: 'decision', side: 'corp', identifier: 'Corp 2.2', evaluatorCalls: 6},
+      {type: 'decision', side: 'corp', identifier: 'Corp 2.1', evaluatorCalls: 2},
+      {type: 'decision', side: 'corp', identifier: 'Corp 1.3', evaluatorCalls: 5},
+      {type: 'decision', side: 'runner', identifier: 'Runner 1.3', latencyMs: 1}];
+    for (const e of events) collector.onEvent(e, state);
+    assert.deepStrictEqual(collector.finish(state), {total: 13, mainPhaseMean: 4});
+    const calls = [];
+    const record = e => { if (e.type === 'decision' && e.side === 'corp') calls.push(e.evaluatorCalls); };
+    const on = await game({onEvent: record});
+    assert.ok(calls.length && calls.every(n => Number.isInteger(n) && n >= 0), 'each Corp decision reports its own count');
+    const onTotal = calls.splice(0).reduce((a, b) => a + b, 0);
+    assert.ok(onTotal > 0, 'Corp decisions report computed evaluations');
+    const off = await game({onEvent: record, corpOptions: {disableSecurityCache: true}});
+    const offTotal = calls.reduce((a, b) => a + b, 0);
+    assert.strictEqual(off.logHash, on.logHash, 'the cache changes no decision');
+    assert.ok(offTotal > onTotal, `cache off computes more evaluations (${offTotal} vs ${onTotal})`);
+  });
+
   await scenario('6. a collector receives the events and its metric reaches the report and comparison', async () => {
     const seen = new Set();
     const g = await game({onEvent: e => seen.add(e.type)});

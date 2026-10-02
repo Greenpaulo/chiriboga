@@ -169,7 +169,13 @@ function compareReports(baseline, candidate, gate = {}) {
   const hashed = pairs.filter(([b, c]) => b.logHash && c.logHash);
   const changedGames = hashed.filter(([b, c]) => b.logHash !== c.logHash).length;
   const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length;
-  if (gated && hashed.length)
+  // A behaviour-identical item (a performance change) is the reverse: every
+  // paired game must replay the baseline exactly, and every pair must be hashed.
+  if (gate.identical)
+    checks.push({name: 'identical games', kind: 'identical', pass: pairs.length > 0 && hashed.length === pairs.length && changedGames === 0,
+      why: !pairs.length ? 'no paired games' : hashed.length < pairs.length ? 'some games have no log hash'
+        : changedGames ? changedGames + ' games differ from the baseline' : undefined});
+  else if (gated && hashed.length)
     checks.push({name: 'option effect', kind: 'changed', pass: changedGames > 0,
       why: changedGames ? undefined : 'no game differs from the baseline'});
   for (const [name, tolerance] of Object.entries(gate.guard || {})) {
