@@ -176,7 +176,10 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   ICE are guessed from advancement and Corp credits (Pharos, Hortum, Ice Wall,
   or a Sentry with net damage plus pay-or-ETR); ICE behind the first unseen one
   are assumed weaker. Active cards' `AIModifyIceAI(iceAI, startIceIdx)` adjust
-  the result.
+  the result. Rielle "Kit" Peddler shares `_AIFirstIceToEncounter` between that
+  modifier and `AIMatchingBreakerInstalled`, so an installed Decoder covers the
+  first ICE that would actually be encountered, including a rezzed inner ICE
+  behind an unrezzed outer one.
 - Search is a depth-first stack with best-cost pruning, capped at 1000 loops.
   `Directions()` collects `IceAct()` moves (`AIImplementBreaker`) from active
   cards and the bonus breaker, rejects unused pumps and expands subroutine
