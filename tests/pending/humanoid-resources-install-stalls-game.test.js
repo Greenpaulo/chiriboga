@@ -6,7 +6,8 @@
 // this test isolates the card; the patch is a no-op once that bug is fixed.
 const assert = require('assert');
 const path = require('path');
-const {playBoard, OPENING} = require(path.join(__dirname, '_headless-board.js'));
+// The shared board helper lives in tests/; this works from tests/pending/ and after a move to tests/.
+const {playBoard, OPENING} = require(path.join(__dirname, path.basename(__dirname) === 'pending' ? '..' : '.', '_headless-board.js'));
 
 const setupCode = `
   var __reproRank = CorpAI.prototype._rankedInstallOptions;
