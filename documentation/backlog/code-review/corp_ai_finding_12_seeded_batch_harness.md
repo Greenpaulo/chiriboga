@@ -1,8 +1,231 @@
 # F4 Seeded AI-vs-AI batch harness
 
+## Resolution
+
+Implemented from `f795a63`.
+
+**What was built.**
+- `scripts/ai-batch/headless.js` is the shared headless game module,
+  extracted from `scripts/ai-game.js`; `ai-game.js` now uses it with its old
+  set list and seed naming, so F6's hashes still hold.
+- `scripts/ai-batch.js` runs batches, `--compare` and `gate`. It sets AI
+  options (an unknown name is an error), loads collectors from
+  `scripts/ai-batch/collectors/` (`runs` is the example), starts from
+  fixtures with `--start`, and offers `--quick`, `--side runner` and
+  `--max`. It reuses a cached or committed baseline by code-hash key and
+  writes reports with one game per line.
+- `scripts/ai-batch/metrics.js` holds the core metrics from the event
+  stream, the aggregation and the paired, fixed-seed bootstrap rule.
+- The pool is `tests/fixtures/ai-batch/deck-pool.json` (`core-v1`): seven
+  pairs over the trusted sets System Gateway, System Update 2021 and
+  Elevation.
+- The first baseline is
+  `tests/fixtures/ai-batch/baselines/core-v1-da7c925b39d1e76d.json`.
+
+**Engine and AI changes**, all off unless the harness enables them or
+behaviour-neutral:
+- `AIGameEnded()` is called from `PlayerWin()`.
+- Telemetry mode on `DecisionSnapshots` (`telemetry`, `Record()`), timed
+  around `_choiceInner()` and the Runner's `_computeChoice()`.
+- `RunnerAI.DEFAULT_OPTIONS`.
+- `Steal()` now records the real stolen-from server. It compared
+  `attackedServer` with the servers' `.cards` arrays, so it always said
+  "remote". Its only consumer is the debug log.
+- Out of scope, but it blocked a required pool deck: Off the Books (35071,
+  Elevation) called an undefined `ShuffleArray()`, so it threw instead of
+  shuffling R&D. It now calls `Shuffle()`.
+
+**Departures from the ticket, all agreed with the owner unless noted:**
+- The trusted sets live in the pool file, not "playable" in `card-sets.md`.
+- Seven pairs, adding Duel PE vs Steve. `Duel PD vs Steve.js` was renamed to
+  `Duel PE vs Steve.js` because it misnamed its identity; the duplicate
+  imports were removed.
+- Gates are run by the implementing agent as one blocking command, with the
+  owner running them only as a fallback (cheapest in tokens).
+- `gameEnd` is emitted by the harness; `GameEnded()` stays an empty AI hook.
+- Baselines are named `<pool id>-<code hash>`, not `<sha>`, because the reuse
+  key is a hash of every loaded file (line endings ignored). The sha and a
+  dirty flag are recorded inside.
+- Not agreed in advance: a stall watchdog fails a game whose main loop stops
+  for 10 s instead of waiting 900 s. Without it, the first baseline took
+  1,205 s; with it, 344 s.
+- A gate template was added ("Writing a gate" in `ai-planning.md`), with
+  `--side runner` and `--max` so every row maps to one flag.
+
+**Baseline.** Produced with `node scripts/ai-batch.js --jobs 8 --out
+tests/fixtures/ai-batch/baselines/core-v1-da7c925b39d1e76d.json` (all options
+off; seeds 1–200 per pair; 1,400 games in 344 s).
+- Pooled Corp win rate: 25.0% [22.8, 27.3].
+- Per pair: pd-tao 51.5%, zwicky-magdalene 43.4%, btl-kit 34.0%, pe-steve
+  22.0%, gateway 9.5%, neh-zahya 9.5%, leo-topan 5.0%.
+- 3 games failed. These are real engine bugs, now ticketed (out of scope):
+[corp-install-choice-crashes-on-null-skip-option.md](../../bugs/corp-install-choice-crashes-on-null-skip-option.md),
+[humanoid-resources-install-stalls-game.md](../../bugs/humanoid-resources-install-stalls-game.md)
+and [scrounge-unaffordable-program-stalls-game.md](../../bugs/scrounge-unaffordable-program-stalls-game.md),
+each with a failing pending reproduction:
+  - `leo-topan` seed 101: `TypeError: Cannot read properties of null
+    (reading 'unique')` during a Corp select choice. The AI falls back to an
+    arbitrary option, then "No valid commands available". The same error
+    appeared in one fixture-start game.
+  - `zwicky-magdalene` seeds 68 and 139: the main loop stops on "No valid
+    commands available" / "Null command" (seed 68 right after the Runner
+    plays Scrounge).
+  - Replay any of them with, for example, `node scripts/ai-game.js --seed
+    68:zwicky-magdalene --corp "Zwicky Supermodernism.js" --runner
+    "Magdalene CBB.js" --tail 30`.
+
+**Tests.** `tests/ai-batch.test.js` covers scenarios 1–10, plus baseline
+reuse, `--quick`, `--side` and `--max`.
+- `tests/ai-roadmaps.test.js` now scans the harness scripts for
+  architecture names.
+- `tests/agent-scripts.test.js` now creates empty status folders it needs
+  (`bugs/code-review/` vanished from the checkout when it emptied; this
+  failure was pre-existing).
+- Behaviour checks on the final code:
+  - F6's hashes are unchanged: PD/Tao seeds 1–3 `7fd342dbe6a8`,
+    `56b2c48622d9`, `4f89d7cde989`; BTL/Kit seed 1 `5f85d9269838`;
+    NEH/Zahya seed 1 `03b8c00f468a`.
+  - Telemetry on vs off gives identical hashes and AI-stream draw counts.
+  - Over 42 games, scored and stolen points match the final score areas.
+- `node tests/run-all-tests.js` passes.
+
+**Other documentation.**
+- The owner's guide, `documentation/ai-batch-harness.md`.
+- Foundations in [architecture.md](../../corp-ai/architecture.md#foundations).
+- `ai-planning.md`: AI options and the gate template.
+- `judging-ai-changes.md`, `workflow.md`, the `implement-ticket`,
+  `review-ticket`, `triage-log` and `reground-spec` skills, and the I0 spec.
+- New proposed item F8 (balanced deck-pool screening, owner request).
+- F7 spec: two further local speed ideas measured and rejected.
+
+## Implementation plan
+
+Proposed at `f795a63`, 2026-10-02. **Approved 2026-10-02** (amended: trusted pool sets, Duel PE/Steve pair, owner guide, F8 screening follow-up).
+
+- **Validation:** Not an AI-choice change: F4 adds infrastructure, and its
+  oracle is objective (same seeds give identical reports; telemetry and
+  collectors change no decision or `logHash`). The ticket is ungated, as it
+  says. D2 and F6 are `done`, so F4 is unblocked. Where the ticket is stale or
+  wrong:
+  1. **Runtime.** After F6 a Duel PD vs Tao game averages about 2.3 s on 8
+     jobs, not 27 s. A 2,400-game gate takes about 15–20 minutes, not 2¼
+     hours. "Running gates" is corrected below. Running gates from the terminal
+     and reusing baselines are still worth having; `--quick` matters less.
+  2. **Stolen-from server is always "remote".** `Steal()` (`mechanics.js`)
+     compares `attackedServer` with `corp.HQ.cards`/`corp.RnD.cards`/
+     `corp.archives.cards`, but `attackedServer` is a server object
+     (`mechanics.js:14`; `phase.js` compares it with `corp.HQ`). So
+     `agendaStolenLocations` always records `"remote"`. Its only consumer is
+     the debug log text (`utility.js`). `pointsStolenByServer` needs the real
+     server, so fix the comparison. This is an objective fix with no gameplay
+     or AI effect.
+  3. **AI options.** `CorpAI.DEFAULT_OPTIONS` already exists
+     (`evidenceBasedHostedCardRez`). `RunnerAI` has none, and
+     `ai-planning.md` still says neither has one. F4 adds an empty frozen
+     `RunnerAI.DEFAULT_OPTIONS`, copies it in the constructor and corrects
+     that paragraph.
+  4. **Runner choices are asynchronous.** `RunnerAI` has no `Choice()`. Its
+     single funnel is `_computeChoice()` (a Promise over the async
+     `_internalChoiceDetermination()`, which uses only microtasks, no timers).
+     Telemetry wraps it there; latency is measured from call to resolve.
+  5. **Fixture boards are partial.** Corp-decision fixtures list only some
+     cards (often an empty R&D and Stack) and start at `Phase_Main`. A game
+     from one alone would end on the first empty-deck draw. `--start`
+     therefore builds the deck pair as normal, overlays the fixture with the
+     real `CorpTestField`/`RunnerTestField` (which replace R&D/Stack only when
+     the fixture lists them), applies its `// SETUP:` line, skips the opening
+     shuffle and draw, and enters `corpActionMain`. The report records this.
+  6. **`gameEnd` source.** The ticket has `CorpAI.GameEnded()` emit the
+     harness event. That couples the AI to the harness. Instead `PlayerWin()`
+     calls both `GameEnded(winner)` hooks, which stay empty and available to
+     later AI items such as L8.5, and the harness emits `gameEnd` from its own
+     observation of `PlayerWin`.
+  7. **Stream names.** `scripts/ai-game.js` seeds `<seed>:engine` with no
+     deck-pair id. The batch uses `<seed>:<deckPairId>:<stream>` as the ticket
+     requires. `ai-game.js` keeps its naming, so F6's recorded hashes remain a
+     valid regression oracle.
+- **Approach:**
+  - **Shared headless module** `scripts/ai-batch/headless.js`, extracted from
+    `ai-game.js`. It takes the set files to load as a parameter. The batch
+    loads exactly the pool's own `sets` list. `ai-game.js` keeps its current
+    four files so F6's hashes stay valid. It plays one game and exposes
+    an event bus. Events come from harness-local wrappers in the `vm` context:
+    `MakeRun`/run end, `Score`/`Steal` (detected from score-area growth),
+    `Mulligan`, turn change and `PlayerWin`. There is no engine change for
+    observation apart from fix 2.
+  - **Telemetry mode** on `DecisionSnapshots` (`telemetry: null | {sink}`),
+    separate from the bounded `interesting` recorder. It records `{n, side,
+    identifier, choiceType, options, chosen, latencyMs}` for every
+    `CorpAI.Choice()` (timing `_choiceInner()`) and every
+    `RunnerAI._computeChoice()`. It uses no randomness and no
+    `ReproductionCode()`.
+  - **`scripts/ai-batch.js`.** It plays the pool × seeds (× `--start`
+    fixtures) in child processes (`--jobs`), applies `--corp-option`/
+    `--runner-option` (an unknown name exits with an error), runs collectors
+    from `scripts/ai-batch/collectors/<name>.js`, and writes the report. The
+    report holds the sha, a dirty flag, the command, the pool hash, seeds,
+    fixtures, effective options, collectors, per-game metrics, and per-pair
+    and pooled aggregates.
+  - **Metrics** are computed from the event stream by a pure function, so they
+    can be tested on scripted events.
+  - **`--compare a b`** uses the shared rule: refuse mismatched keys, pair by
+    `(fixtureId, deckPairId, seed)`, and compute a 10,000-resample bootstrap
+    from a fixed-seed PRNG. Metric direction is declared per metric.
+  - **`gate` subcommand** (`--corp-option x=true [--quick]`). It plays the
+    all-off baseline, or reuses a cached report with a matching key in
+    git-ignored `.ai-batch-cache/` (clean tree only), plays the candidate and
+    compares.
+  - **Pool (amended with the owner, 2026-10-02):** `deck-pool.json` declares
+    its own trusted `sets`: `systemgateway`, `systemupdate2021` and
+    `elevation`. Being marked `playable` in `card-sets.md` means only "usable
+    in the UI for testing" and is not the harness criterion. The pool test
+    checks every card against that list and checks that each card is defined.
+    The pairs are Duel PD/Tao, Duel BTL/Kit, Duel NEH/Zahya, Duel PE/Steve
+    (`Duel PE vs Steve.js`/`Duel Steve vs PE.js`; the Corp file was renamed
+    from `Duel PD vs Steve.js`, which misnamed its Personal Evolution
+    identity), Gateway Corp/Runner, Zwicky vs
+    Magdalene CBB and LEO Glacier vs Topan CBB. The CBB decks use only System
+    Gateway and Elevation cards, none of them undefined. Each pair is confirmed
+    to play without engine errors; if one fails, I'll swap in another
+    candidate and record why. Adding a set or deck later means: extend
+    `sets`, edit the pool, run the pool test and commit a new baseline.
+  - **First baseline:** 200 seeds × 7 pairs, committed.
+  - **Deck screening (owner request).** `--pool` accepts any pool file, so
+    candidate pairs can be screened outside the committed pool. The report's
+    per-pair `winRate` carries a bootstrap 95% interval. Balance selection
+    itself is recorded as a proposed follow-up, F8, with a spec, not built
+    here: AI-vs-AI win rate mixes deck balance with the two AIs' relative
+    strength, and changing the pool resets baselines, so the selection rule
+    and how often to re-screen need their own design.
+  - Rejected alternatives: a separate logger for telemetry (the ticket forbids
+    it); replacing `PlayerWin` with no `GameEnded` call (F4 requires the
+    hooks); deriving steal location from log text (fragile).
+- **Tests:** a new `tests/ai-batch.test.js` covers scenarios 1–10. Real games
+  use the fastest pair and few seeds to keep the suite short. Scenarios 5 and 8
+  use synthetic reports and scripted event streams, plus one real game
+  cross-check (`pointsStolen` equals the Runner's final agenda points, and so
+  on). It prints only failures and a summary. `ai-game.js` seeds 1–3 must keep
+  F6's hashes.
+- **Risk:** The engine and AI edits are small: the `Steal()` comparison,
+  `GameEnded` calls in `PlayerWin()`, the telemetry wraps in both AIs and
+  `RunnerAI.DEFAULT_OPTIONS`. Telemetry is off unless the harness enables it,
+  and scenario 9 proves it changes no decision. Decision snapshots, fixtures,
+  and F6 hashes (PD/Tao seeds 1–3, plus seed 1 of BTL/Kit and NEH/Zahya)
+  guard against drift. The full suite runs after the change.
+- **Docs:** a new owner's guide, `documentation/ai-batch-harness.md`, on
+  running the harness from the terminal: single games, batches, options,
+  gates, reading a report, changing decks, adding a set to the pool,
+  re-baselining and screening candidate pairs. Also architecture.md
+  Foundations (runner, options, collectors,
+  telemetry, how to add a collector); `ai-planning.md` AI options; I0 spec
+  references this runner and its telemetry; `implement-ticket`,
+  `review-ticket`, `workflow.md`, and `judging-ai-changes.md` (gate command,
+  real runtime, reading the report). `ai.md` is unchanged because no card hook
+  changes.
+
 **Roadmap item:** F4 · **Depends on:** D2, F6 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/ai-planning.md` (Acceptance gates, AI options)
-**Verified against code:** 376f32c (2026-09-25)
+**Verified against code:** f795a63 (2026-10-02)
 
 ## Goal
 A repeatable, headless batch runner, after F6 meets the headless-performance
@@ -72,7 +295,7 @@ Randomness today:
 - `deck/seedrandom.min.js` (which provides `Math.seedrandom`) is loaded by
   the engine pages. `gauntlet.php` and `sets/tutorial.js` use it.
 
-See [architecture: foundations](../corp-ai/architecture.md#foundations).
+See [architecture: foundations](../../corp-ai/architecture.md#foundations).
 
 ## Design
 
@@ -133,7 +356,7 @@ Candidates found in `precons/` whose card ids are all in playable sets:
   `Thorny Grid.js` and `Wintermute.js` against `Open Gateway.js`,
   `The Long Con.js` and `Trash King.js`.
 
-Start with about six pairs, covering at least one duel and the tutorial pair.
+Start with about six pairs (seven were chosen; see the plan), covering at least one duel and the tutorial pair.
 The pool must include two Core Battle Box Corp decks, because the reactive
 items (R1.1, R1.2, R2) are judged on them:
 - `Zwicky Supermodernism.js` (The Zwicky Group: Invisible Hands);
@@ -230,17 +453,21 @@ and call them from `PlayerWin()`. They emit the `gameEnd` event.
 consumer's gate names the baseline file it compares against, and a consumer
 that changes default behaviour commits a new baseline.
 
-**Running gates: cost and who runs them.** Measured after F3: about 27 s per
-game on 8 parallel processes, so a full gate (200 games × 6 pairs × baseline
-and candidate = 2,400 games) takes about 2¼ hours. It costs no tokens, but it
-must not tie up an agent session. The runner therefore supports:
-- **Gates run from the terminal.** `implement-ticket` hands off with
-  `**Gate:** pending` and records the exact command; the owner runs it when
-  convenient and the result goes into the Resolution, as with
-  `ticket.js check`.
-- **Baseline reuse.** A baseline report is keyed by commit, pool hash, seed
-  list, `--start` fixtures, collectors and options. When a matching report
-  exists, `--compare` reuses it and plays only the candidate half.
+**Running gates: cost and who runs them.** *(Corrected 2026-10-02.)* The
+historical F3 figure was about 27 s per game, which made a gate about 2¼ hours.
+After F6 a game takes about 2 s, so a full gate (200 games × 7 pairs ×
+baseline and candidate = 2,800 games) takes about 15–20 minutes on 8
+processes. The games cost no tokens. The runner therefore supports:
+- **Agent-run gates, owner fallback.** `implement-ticket` records the exact
+  `**Gate command:**` and runs it as one blocking command in the same session; the
+  compact output is the evidence. Only if it cannot finish does it hand off
+  with `**Gate:** pending F4` for the owner to run. The owner chose this as the
+  cheapest route in tokens: a second session to record an owner-run result
+  costs more than the agent waiting.
+- **Baseline reuse.** A report is keyed by a hash of every loaded code file,
+  the pool hash, pairs, seeds, `--start` fixtures, collectors and options.
+  `gate` reuses a matching cached or committed report and plays only the
+  missing half.
 - **Quick check first.** `--quick` plays 50 games per pair and reports the
   same intervals, marked "indicative". Only a full run can pass a gate.
 - **Early stopping (optional, later).** Check the intervals as games finish
@@ -299,10 +526,9 @@ when:
 - **Consumers:** I0, I2, I4, I5, I9, R1.x, R2, L3.5.1, L5.1, L7.1, L8.2,
   L8.4, L8.5, F3 (evaluator call counts) and F5, mulligan weight calibration
   (`mulliganRate`).
-- **Runtime:** 200 games for each of six pairs, for both baseline and
-  candidate, is 2,400 games per gate. Measure games per minute early. The
-  runner should be able to shard seeds across processes and merge the
-  per-game results.
+- **Runtime:** 200 games for each of seven pairs, for both baseline and
+  candidate, is 2,800 games per gate (about 15–20 minutes after F6). The
+  runner shards games across processes (`--jobs`).
 - **Dependency:** F4 depends on Runner item D2 (injectable Runner
   randomness). `scripts/roadmap.js` and `tests/ai-roadmaps.test.js` resolve
   dependencies across both roadmaps, so this Corp-to-Runner dependency is
@@ -312,11 +538,11 @@ when:
   than silently falling back to the engine stream.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test.
-- [ ] `tests/fixtures/ai-batch/deck-pool.json` and the first baseline report under `tests/fixtures/ai-batch/baselines/` are committed, and the Resolution records the command that produced the baseline.
-- [ ] The collector extension point, the AI-option flags and the telemetry mode are described in `documentation/corp-ai/architecture.md` (Foundations), including how a consumer adds a collector.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] I0 references this runner and its telemetry path.
-- [ ] Baseline reuse and `--quick` work as described under "Running gates", with tests.
-- [ ] Once the runner works, the same change updates the process to match: `implement-ticket` and `review-ticket` (the gate is a terminal step the owner runs, not the agent), `documentation/workflow.md` (the gate command in the quick reference and helper table), and `documentation/judging-ai-changes.md` (how to run a gate, how long it takes, reading the report).
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] Every test scenario above is covered by a deterministic test.
+- [x] `tests/fixtures/ai-batch/deck-pool.json` and the first baseline report under `tests/fixtures/ai-batch/baselines/` are committed, and the Resolution records the command that produced the baseline.
+- [x] The collector extension point, the AI-option flags and the telemetry mode are described in `documentation/corp-ai/architecture.md` (Foundations), including how a consumer adds a collector.
+- [x] New or changed card-facing hooks are documented in `documentation/ai.md`. (None: no card hook changed.)
+- [x] I0 references this runner and its telemetry path.
+- [x] Baseline reuse and `--quick` work as described under "Running gates", with tests.
+- [x] Once the runner works, the same change updates the process to match: `implement-ticket` and `review-ticket` (amended with the owner, 2026-10-02: after F6 a gate takes 15–20 minutes, so the implementing agent runs it as one blocking command and the owner runs it only as a fallback, which is cheaper in tokens than a second session), `documentation/workflow.md` (the gate command in the quick reference and helper table), and `documentation/judging-ai-changes.md` (how to run a gate, how long it takes, reading the report).
+- [x] `node tests/run-all-tests.js` passes.

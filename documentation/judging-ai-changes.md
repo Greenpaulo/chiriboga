@@ -38,7 +38,11 @@ says:
 - **how much**: a number, for example "points stolen must not rise by more
   than 0.2 per game".
 
-Here is L3.5.1's gate, slightly simplified:
+Every gate is written in one fixed form, described in
+[ai-planning.md: Writing a gate](ai-planning.md#writing-a-gate): a table of
+improvement rows, standard regression guards (win rate and points) and any
+hard checks, plus the exact command that runs it. Here is L3.5.1's gate,
+slightly simplified:
 
 > - Improvement: high-consequence breaches per game go down.
 > - Guard: points stolen per game rise by at most 0.2.
@@ -66,8 +70,11 @@ with no screen and writes a report.
   **candidate**). The two games differ only by your change, so a difference in
   the result is caused by the change, not by luck of the draw.
 - **It plays a lot of games.** By default that is 200 games for each deck pair
-  in a fixed, committed **deck pool** (about six Corp-vs-Runner precon pairs).
-  With that many games, the luck averages out.
+  in a fixed, committed **deck pool** (seven Corp-vs-Runner precon pairs, all
+  from System Gateway, System Update 2021 and Elevation). With that many
+  games, the luck averages out.
+- **It is quick.** A game takes about 2 seconds, so a full gate (baseline and
+  candidate, 2,800 games) takes roughly 15 to 20 minutes on 8 processes.
 - **It reports a range, not just an average.** For each metric it prints the
   average difference between candidate and baseline, and a **95% confidence
   range**: the span the true difference very probably lies in. A gate uses the
@@ -75,15 +82,16 @@ with no screen and writes a report.
   worst end of the range must be no lower than −2 points. That protects you
   from a lucky run that looks good but isn't.
 
-F4 is not built yet (see [Where things stand](#where-things-stand)).
+How to run it, change the decks and read a report is in the
+[harness guide](ai-batch-harness.md).
 
 ## The life of a gated change
 
 | Step | Who | What happens | What you see |
 |---|---|---|---|
 | 1. Build | Codex (`implement-ticket`) | The change is written behind an **AI option**, a named switch such as `weightedProtectionDebt`, which defaults to **off**. With it off, the game plays exactly as before; the ticket's own tests switch it on. | A normal fix hand-off |
-| 2. Run the gate | Codex, or you in a terminal | If F4 exists, the gate is run exactly as the ticket states. If F4 doesn't exist yet, nothing is run and the option stays off. | A `**Gate:**` line in the ticket's Resolution: `passed`, `pending F4` or `failed`, with the command used |
-| 3. Switch on | Codex | Only if the gate **passed**: the option's default is changed to on. | The option's default in `ai_corp.js` |
+| 2. Run the gate | Codex, in the same session | Codex builds the exact `**Gate command:**` from the ticket's gate and runs it as one blocking command (about 15–20 minutes; the games cost no tokens, and the output is a few lines). If it cannot finish in the session, Codex hands off with `**Gate:** pending F4` and you run the command in a terminal; see the [harness guide](ai-batch-harness.md#running-a-gate). | A `**Gate:**` line in the ticket's Resolution: `passed`, `pending F4` or `failed`, with the command used |
+| 3. Switch on | Codex | Only if the gate **passed**: the option's default is changed to on. | The option's default in `ai_corp.js` or `ai_runner.js` |
 | 4. Review | Claude chat (`review-ticket`) | Checks that the option is off unless the gate passed, and that the recorded evidence matches the gate as written: same metrics, same thresholds, enough games. Missing or mismatched evidence blocks the review. | The review section |
 | 5. Decide | **You** | Read the `**Gate:**` line and the comparison output, then accept the review or send it back. | — |
 
@@ -141,21 +149,27 @@ A `**Gate:**` line in a ticket's Resolution looks like one of these:
 
 ```
 **Gate:** pending F4 — `weightedProtectionDebt` defaults to false
-**Gate:** passed — `weightedProtectionDebt`; node scripts/ai-batch.js --compare baselines/i0.json runs/l351.json
+**Gate:** passed — `weightedProtectionDebt`; node scripts/ai-batch.js gate --corp-option weightedProtectionDebt=true --improve highConsequenceBreaches --guard pointsStolen=0.2 --guard winRate=0.02
 **Gate:** failed — `weightedProtectionDebt`; pointsStolen guard exceeded
 ```
 
-The comparison output lists each metric the gate names. The format below is
-**illustrative**, since F4 doesn't exist yet:
+The comparison output lists every metric, then one PASS/FAIL line for each
+metric the gate names (numbers here are made up):
 
 ```
-metric                     baseline  candidate  difference  95% range       gate
-highConsequenceBreaches      1.84      1.52       -0.32     -0.41 .. -0.23  improvement: PASS
-pointsStolen                 4.10      4.16       +0.06     -0.05 .. +0.17  at most +0.2: PASS
-winRate                      0.46      0.47       +0.01     -0.01 .. +0.03  at least -0.02: PASS
+2800 paired games
+  metric                               baseline  candidate  difference  95% interval
+  highConsequenceBreaches.count           1.840      1.520      -0.320  [-0.410, -0.230] (lower is better)
+  pointsStolen                            4.100      4.160      +0.060  [-0.050, +0.170] (lower is better)
+  winRate                                 0.460      0.470      +0.010  [-0.010, +0.030] (higher is better)
+  PASS improve highConsequenceBreaches.count
+  PASS guard pointsStolen tolerance 0.2
+  PASS guard winRate tolerance 0.02
+Gate: passed
 ```
 
-To read it, look at the **95% range** column against the **gate** column:
+The difference is always candidate minus baseline. The PASS/FAIL lines apply
+the metric's direction for you. To read it yourself, look at the interval:
 
 - For an improvement, the whole range must sit on the better side of zero.
   Here the breach range is entirely negative, so breaches went down.
@@ -190,33 +204,29 @@ boundaries stay unmerged until F4 can compare the behavior-bearing historical
 layers; the project owner runs the long commands and an agent prepares and
 checks the reports. That audit does not replace I0 or any option's normal gate.
 
-As of 2026-09-25:
+As of 2026-10-02:
 
-- **No gate can be run yet.** F4 is `ready` but not built, and it depends on
-  **D2** (seedable randomness for the Runner AI), which is `in-progress`.
-- **D2 remediation is owned by the existing approved PR #1.** On this branch
-  its ticket remains in `documentation/backlog/remediation/` and the roadmap
-  remains `in-progress` until that dedicated change lands. Do not promote the
-  ticket independently here; `node scripts/roadmap.js raise` applies only to
-  proposed items and is not the next action for D2.
-- **F4 is real work, and its first step decides feasibility.** It must first
-  prove that one full game can run to a winner headlessly (the engine's main
-  loop uses browser timers and page elements, which have to be stubbed). If
-  that fails, the ticket falls back to a real browser under Playwright, which
-  works but is much slower.
-- **Until F4 exists**, gated items can be built and merged with their options
-  off. `roadmap.js gates` keeps the list, so nothing is forgotten.
+- **F4 is built.** `node scripts/ai-batch.js gate ...` runs any gate from the
+  terminal; see the [harness guide](ai-batch-harness.md). The first
+  all-options-off baseline is committed under
+  `tests/fixtures/ai-batch/baselines/`.
+- **Gated items pending F4** can now have their gates run. `node
+  scripts/roadmap.js gates` lists them under "Built, option off, gate waiting
+  to be run".
+- **Thresholds are still first guesses.** The committed baseline shows how much
+  each metric varies naturally between deck pairs. Check a gate's numbers
+  against it before running that gate.
 
 ## Words used here
 
 | Word | Meaning |
 |---|---|
 | Gate | The ticket's pass/fail rule for switching a change on |
-| AI option | A named on/off switch for one change, off by default (`CorpAI.DEFAULT_OPTIONS`, created by the first gated ticket) |
+| AI option | A named on/off switch for one change, off by default (`CorpAI.DEFAULT_OPTIONS`, `RunnerAI.DEFAULT_OPTIONS`) |
 | Baseline | Games played with the option off |
 | Candidate | The same games played with the option on |
 | Seed | A number that fixes every shuffle and random choice in a game, so it can be replayed exactly |
-| Deck pool | The committed list of Corp-vs-Runner deck pairs every gate uses (`tests/fixtures/ai-batch/deck-pool.json`, created by F4) |
+| Deck pool | The committed list of Corp-vs-Runner deck pairs every gate uses (`tests/fixtures/ai-batch/deck-pool.json`) |
 | Metric / collector | A number recorded per game; F4 has core metrics, and items add their own collectors |
 | 95% range | The span the true difference very probably lies in, given the games played |
 | Improvement / guard | What the change must make better / what it must not make worse beyond a tolerance |

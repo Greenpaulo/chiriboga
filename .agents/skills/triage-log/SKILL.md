@@ -82,7 +82,8 @@ reproduction is confirmed later by `implement-ticket`.
   make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
   (principle 4): <the oracle>` for the common case. When the fix genuinely has
   no single correct answer, select either an F4 seeded-game gate or a human-game
-  gate and specify its sample size, metrics and numeric thresholds.
+  gate, written in the exact form given in "Writing a gate" in
+  `documentation/ai-planning.md`.
   A deterministic reproduction proves that the decision is repeatable, not
   that it is strategically correct. Always use the exact, unnumbered headings
   `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
@@ -117,11 +118,9 @@ decisions that could shift.>
 ## Acceptance gate
 <N/A — deterministic fix (principle 4): <the oracle>, for the common case.
 If the fix's goal is instead to play better with no single correct answer,
-select an F4 seeded-game gate or a human-game gate and state its sample size,
-metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
-gate, also name the committed deck pairs, paired seed range, bootstrap 95%
-confidence intervals, guarded-regression conditions and applicable pass
-conditions. Depends on: F4 when selected.>
+copy the F4 or human gate form from "Writing a gate" in
+documentation/ai-planning.md and fill in every row, including the standard
+regression guards and the gate command. Depends on: F4 when selected.>
 
 ## Acceptance criteria
 - [ ] The reproduction passes and has moved into the green suite

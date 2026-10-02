@@ -51,8 +51,12 @@ runs it too, by name, rather than restating it.
    literally, and a missing section never means ungated. Add or correct:
    - `N/A — deterministic fix (principle 4): <the oracle>` for an objective
      change; or
-   - a measurable numeric F4 or human-game gate plus the two gated acceptance
-     criteria from the planning template for a strategic change.
+   - an F4 or human-game gate in the exact form of "Writing a gate" in
+     `documentation/ai-planning.md` (table, standard regression guards and,
+     for F4, the gate command), plus the two gated acceptance criteria from
+     the planning template, for a strategic change. Rewrite an older gate
+     into that form without changing its metrics or thresholds; if a
+     standard guard is missing, add it and report the addition.
    Report any classification change explicitly because it changes how the
    item can be adopted.
 5. **Fix what drifted, in place:**

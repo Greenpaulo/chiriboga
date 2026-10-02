@@ -105,7 +105,13 @@ const movedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-revie
 const alreadyMovedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review',
   'agent-script-already-moved-test-' + fixtureSuffix + '.md');
 const createdFixtures = [];
+// Status folders such as bugs/code-review/ vanish from a checkout when they are
+// empty (Git keeps no empty directories); create them for the test and remove
+// them afterwards if they were missing.
+const createdDirs = [];
 const createFixture = file => {
+  const dir = path.dirname(file);
+  if (!fs.existsSync(dir)) { fs.mkdirSync(dir, {recursive: true}); createdDirs.push(dir); }
   const descriptor = fs.openSync(file, 'wx');
   createdFixtures.push(file);
   try { fs.writeFileSync(descriptor, '// created by tests/agent-scripts.test.js\n'); }
@@ -176,6 +182,7 @@ try {
 } finally {
   for (const file of createdFixtures) if (fs.existsSync(file)) fs.unlinkSync(file);
   if (fs.existsSync(movedBlockerFixture)) fs.unlinkSync(movedBlockerFixture);
+  for (const dir of createdDirs) if (fs.existsSync(dir) && !fs.readdirSync(dir).length) fs.rmdirSync(dir);
 }
 
 const hooks = JSON.parse(fs.readFileSync(path.join(root, '.codex', 'hooks.json'), 'utf8'));

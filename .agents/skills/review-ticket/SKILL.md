@@ -64,11 +64,16 @@ Any FAIL is a Blocking finding. Do not repeat these checks by hand.
 - **Gate** (gated tickets; "Acceptance gates" in `documentation/ai-planning.md`).
   With the option off, behaviour is unchanged: no existing test or fixture
   expectation changed, and every changed decision path reads the option. With
-  it on, the ticket's own tests pass. If the gate passed, check the evidence
+  it on, the ticket's own tests pass. The gate is written in the form of
+  "Writing a gate" in `documentation/ai-planning.md`, including the standard
+  regression guards, and its gate command has one flag per table row; a
+  mismatch is Should fix. If the gate passed, check the evidence
   against the gate as written: the F4 command is recorded and runnable, it uses
   paired seeds and deck pairs from the committed pool with at least the stated
-  number of games, it reports every metric the gate names against the
-  committed baseline, and each threshold is met under F4's comparison rule.
+  number of games, it compares against the all-options-off baseline at the
+  same code (which `gate` plays or reuses), its output has a PASS line for
+  every metric the gate names and ends `Gate: passed`, and it is not a
+  `--quick` run.
   Missing or non-matching evidence is Blocking. A ticket whose gate needed F4
   but whose criteria lack the gate criteria is Blocking too.
 
@@ -103,8 +108,10 @@ required". Notes alone still pass.
   the item is not done. `node scripts/ticket.js move <ticket> open`; the item
   stays `in-progress`, and the move command adds or updates its generated
   `## Blocker` section. Once F4 is `done`, the blocker refresh removes that
-  section and `node scripts/roadmap.js next` lists the ticket for
-  `implement-ticket` to run the gate.
+  section and `node scripts/roadmap.js gates` lists the ticket for
+  `implement-ticket` to run its recorded `**Gate command:**` (or for the owner
+  to run it and supply the output). If the ticket has no runnable gate command matching its
+  gate, that is a Blocking finding.
 - **Pass with the gate pending human-game data:** the code may merge with its
   option off, but the item is not done. Before moving it, add an unmarked
   `## Additional blocker` section that names the unavailable sample and the

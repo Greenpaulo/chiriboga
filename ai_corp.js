@@ -6776,7 +6776,12 @@ class CorpAI {
         typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
           ? DecisionSnapshots.Before(choiceType, optionList)
           : null;
+      var telemetry =
+        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
+      var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
       var ret = this._choiceInner(optionList, choiceType);
+      if (telemetry)
+        DecisionSnapshots.Record("corp", choiceType, optionList, ret, DecisionSnapshots.Now() - startedAt);
       if (snapshot) DecisionSnapshots.After(snapshot, ret);
       return ret;
     } finally {

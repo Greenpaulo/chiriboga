@@ -4,26 +4,38 @@
 > metadata and [card-sets.md](card-sets.md). Do not edit by hand:
 > `tests/card-status.test.js` fails when this file is out of date.
 
-"Unfinished" means the definition still contains a placeholder written by
-`scripts/scaffold_set.py`. A set with no unfinished markers can still be incomplete,
-which is why playability is a decision recorded in card-sets.md.
+What the columns measure, mechanically from the source:
+
+- **Missing**: cards in the set with no `cardSet` definition.
+- **Scaffold markers**: defined cards that still contain a placeholder written by
+  `scripts/scaffold_set.py`.
+- **Missing required AI hook**: ICE without `AIImplementIce`, or icebreakers without
+  `AIImplementBreaker`/`AISpecialBreaker`. The run calculator cannot price these cards,
+  so the AIs misjudge every run through them.
+- **Any AI hook**: defined non-identity cards with at least one `AI*` hook. This is a
+  count, not a pass/fail: many cards need no hook, and it cannot show whether a hook
+  is correct.
+
+None of these show that a card's rules or AI behaviour are right. A set with zeros in
+every gap column can still be unfinished, which is why playability is a decision recorded
+in card-sets.md.
 
 ## Sets
 
-| Set | Decision | Cards | Defined | Missing | Unfinished | config.js hidden / untested | Deck launcher |
-|---|---|---:|---:|---:|---:|---|---|
-| `systemgateway` | playable | 77 | 77 | 0 | 0 | false / false | yes |
-| `systemupdate2021` | playable | 82 | 82 | 0 | 0 | false / false | yes |
-| `downfall` | not-implemented | 65 | 65 | 0 | 34 | true / false | no |
-| `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | true / true | no |
-| `parhelion` | not-implemented | 63 | 4 | 59 | 0 | true / true | no |
-| `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | true / true | no |
-| `elevation` | playable | 82 | 76 | 6 | 0 | false / false | yes |
-| `vantagepoint` | playable | 66 | 66 | 0 | 16 | false / false | no |
-| `uprising` | not-implemented | 65 | 6 | 59 | 0 | true / true | no |
-| `rebellion` | not-implemented | 65 | 2 | 63 | 0 | true / true | no |
-| `coreset` | deprecated | 113 | 62 | 51 | 0 | true / true | no |
-| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | true / true | no |
+| Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
+|---|---|---:|---:|---:|---:|---:|---:|---|---|
+| `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
+| `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
+| `downfall` | not-implemented | 65 | 65 | 0 | 34 | 1 | 12 / 61 | true / false | no |
+| `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
+| `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
+| `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
+| `elevation` | playable | 82 | 76 | 6 | 0 | 2 | 55 / 64 | false / false | yes |
+| `vantagepoint` | playable | 66 | 66 | 0 | 16 | 0 | 49 / 62 | false / false | no |
+| `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
+| `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
+| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 15 / 57 | true / true | no |
+| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 
 ## config.js disagreements
 
@@ -33,10 +45,10 @@ None.
 
 ## Incomplete playable sets
 
-- `elevation`: 6 missing and 0 unfinished cards (listed below).
-- `vantagepoint`: 0 missing and 16 unfinished cards (listed below).
+- `elevation`: 6 missing, 0 with scaffold markers and 2 missing a required AI hook (listed below).
+- `vantagepoint`: 0 missing, 16 with scaffold markers and 0 missing a required AI hook (listed below).
 
-## Missing and unfinished cards in playable and in-progress sets
+## Gaps in playable and in-progress sets
 
 ### `systemgateway` (sets/systemgateway.js)
 
@@ -54,25 +66,27 @@ None.
 - 35060 Next Big Thing: no definition
 - 35065 Bigger Picture: no definition
 - 35066 IP Enforcement: no definition
+- 35020 Sang Kancil: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
+- 35032 Principia: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
 ### `vantagepoint` (sets/vantagepoint.js)
 
-- 36051 Lethe: 2 unfinished marker(s)
-- 36052 Paywall: 2 unfinished marker(s)
-- 36053 Flood the Market: 1 unfinished marker(s)
-- 36054 Scapegoat: 1 unfinished marker(s)
-- 36055 Hype Machine: 1 unfinished marker(s)
-- 36056 Sacrifice Zone Expansion: 1 unfinished marker(s)
-- 36057 Luana Campos: 1 unfinished marker(s)
-- 36058 Event Horizon: 2 unfinished marker(s)
-- 36059 Flywheel: 2 unfinished marker(s)
-- 36060 Tocsin: 2 unfinished marker(s)
-- 36061 Myōshu: 1 unfinished marker(s)
-- 36062 Reanimation Protocol: 1 unfinished marker(s)
-- 36063 Vulture Fund: 1 unfinished marker(s)
-- 36064 Flagship: 1 unfinished marker(s)
-- 36065 Shackleton Grid: 1 unfinished marker(s)
-- 36066 Let Them Dream: 1 unfinished marker(s)
+- 36051 Lethe: 2 scaffold marker(s)
+- 36052 Paywall: 2 scaffold marker(s)
+- 36053 Flood the Market: 1 scaffold marker(s)
+- 36054 Scapegoat: 1 scaffold marker(s)
+- 36055 Hype Machine: 1 scaffold marker(s)
+- 36056 Sacrifice Zone Expansion: 1 scaffold marker(s)
+- 36057 Luana Campos: 1 scaffold marker(s)
+- 36058 Event Horizon: 2 scaffold marker(s)
+- 36059 Flywheel: 2 scaffold marker(s)
+- 36060 Tocsin: 2 scaffold marker(s)
+- 36061 Myōshu: 1 scaffold marker(s)
+- 36062 Reanimation Protocol: 1 scaffold marker(s)
+- 36063 Vulture Fund: 1 scaffold marker(s)
+- 36064 Flagship: 1 scaffold marker(s)
+- 36065 Shackleton Grid: 1 scaffold marker(s)
+- 36066 Let Them Dream: 1 scaffold marker(s)
 
 ## Runner keep coverage (playable sets)
 

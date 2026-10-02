@@ -133,9 +133,9 @@ Shared infrastructure used by every area.
 - **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
 
 ### F4 Seeded AI-vs-AI batch harness
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** D2, F6
-- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/corp_ai_finding_12_seeded_batch_harness.md)
+- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/code-review/corp_ai_finding_12_seeded_batch_harness.md)
 - **Goal:** Headless seeded AI-vs-AI games on a committed deck pool with core metrics, collectors, AI-option flags, paired comparison and committed baselines.
 
 ### F5 Mulligan weight calibration
@@ -149,6 +149,12 @@ Shared infrastructure used by every area.
 - **Depends on:** F2, F4
 - **Spec:** [F7-indexed-card-state-and-trigger-discovery.md](specs/F7-indexed-card-state-and-trigger-discovery.md)
 - **Goal:** Replace repeated whole-board installed, active and trigger-provider scans with verified engine-owned indexes while preserving exact query results, ordering and seeded behaviour.
+
+### F8 Balanced deck-pool screening
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F8-balanced-deck-pool-screening.md](specs/F8-balanced-deck-pool-screening.md)
+- **Goal:** Choose the F4 deck pool by screening candidate pairs for Corp win rates near even, with a stated selection rule and re-screening policy.
 
 ### Done
 

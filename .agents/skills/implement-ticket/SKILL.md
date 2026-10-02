@@ -18,7 +18,8 @@ written into it.
     generated dependency state, report every generated and additional blocker,
     then stop. Otherwise it is ready to implement. If its Resolution already has
     `**Gate:** pending F4`, the code was reviewed with its AI option off; once
-    F4 is `done`, only run the gate (step 6) and hand off again. If its
+    F4 is `done`, only run the gate (step 6), or record the output the user
+    supplies from running its `**Gate command:**`, and hand off again. If its
     Resolution has `**Gate:** pending human-game data`, the reviewed code also
     stays off and the ticket carries an `## Additional blocker` naming the
     missing sample. Stop while that blocker remains. Once the user supplies or
@@ -55,8 +56,11 @@ written into it.
   `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
   those headings literally. A missing gate section never means ungated. For an
   objective change, add `N/A — deterministic fix (principle 4): <the oracle>`.
-  For a strategic change, add the numeric F4 or human-game gate and the two
-  gated criteria from `documentation/ai-planning.md`. This is a permanent
+  For a strategic change, write the F4 or human-game gate in the exact form of
+  "Writing a gate" in `documentation/ai-planning.md` and add the two gated
+  criteria. Rewrite an older gate in another layout into that form before
+  planning, keeping its metrics and thresholds, and report any standard guard
+  you had to add, since it changes what the gate demands. This is a permanent
   backstop even after ticket-creation workflows normally supply the sections.
 - A ticket is also **gated** when its acceptance criteria require an AI option
   or its **Acceptance gate** needs seeded or human-game evidence. If a gated
@@ -175,13 +179,27 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   assertions or `EXPECT` lines were not changed during the move.
 - Add a variation or unit test when a broad heuristic changed.
 - `node tests/run-all-tests.js` passes.
-- Gated tickets: run the selected gate exactly as the ticket defines it and
-  switch the option's default on only if that gate passes. For an F4 gate, wait
-  until F4 is `done` and use its comparison rule; do not substitute a smaller
-  or unpaired run. For a human-game gate, use the stated human sample, metrics
-  and thresholds; do not substitute F4. If the required harness or data is not
-  available, leave the option off and hand off with the applicable gate
-  pending. If the gate fails, leave the option off, hand off, and say in your
+- Gated tickets: switch the option's default on only if the selected gate,
+  run exactly as the ticket defines it, passes. For an F4 gate, build the
+  command from the ticket's gate and record it in the Resolution as a
+  `**Gate command:**` line: `node scripts/ai-batch.js gate --corp-option
+  <option>=true` (or `--runner-option`), plus `--collector` for each collector
+  the gate needs, `--improve <metric>` or `--guard <metric>=<tolerance>` for
+  each metric it names, `--better` for any metric without a default direction,
+  and `--games` if it needs more than 200 (see
+  `documentation/ai-batch-harness.md`). Run it yourself, after the full test
+  suite passes, as one blocking command with a timeout of at least 30 minutes
+  (it takes about 15 to 20 and prints only the gated metrics). Waiting on a
+  blocking command costs nothing; checking on a running one costs a step each
+  time. So do not run it in the background and poll, and do not read the
+  report file: the printed output is the evidence.
+  Switch the default on only if the output ends `Gate: passed`. Never use
+  `--quick` or a smaller or unpaired run as evidence. If the gate cannot
+  finish in the session, hand off with `**Gate:** pending F4` and the command,
+  and the owner runs it. For a human-game gate, use the stated human sample, metrics
+  and thresholds; do not substitute F4. If the required harness, the owner's gate
+  output or the data is not available, leave the option off and hand off
+  with the applicable gate pending. If the gate fails, leave the option off, hand off, and say in your
   report that the user must choose between retuning (remediation) and parking
   the item.
 

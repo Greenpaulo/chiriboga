@@ -1,135 +1,172 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit is the ticket reviewer for this repository, standing in for the
+# review-ticket skill. The skill and the principle files are loaded through the
+# knowledge base below, so the instructions here only add what CodeRabbit needs
+# to apply them to a pull request. Owner's notes: documentation/workflow.md.
 
 language: 'en-GB'
-tone_instructions: 'Be direct and evidence-led. Prioritise correctness over style; do not report speculative or pre-existing issues.'
+tone_instructions: 'Be direct and evidence-led. Prioritise correctness over style. Report only problems this PR introduces, each with evidence; no speculation and no pre-existing issues.'
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    # Listing patterns may replace CodeRabbit's defaults, so AGENTS.md is
+    # included explicitly.
+    filePatterns:
+      - '**/AGENTS.md'
+      - '.agents/skills/review-ticket/SKILL.md'
+      - 'documentation/ai-principles.md'
+      - 'documentation/corp-ai/principles.md'
+      - 'documentation/runner-ai/principles.md'
 
 reviews:
   profile: 'assertive'
   request_changes_workflow: true
-  # Keep the ticket text in the PR description untouched. CodeRabbit's
-  # walkthrough and inline comments are the review record.
+  # The ticket files in the diff are the record; no generated summary is needed.
   high_level_summary: false
   review_details: true
-  enable_prompt_for_ai_agents: false
+  # Codex addresses comments with .agents/skills/address-pr-review; the
+  # ready-made fix prompts save it reading time.
+  enable_prompt_for_ai_agents: true
 
   auto_review:
     enabled: true
     drafts: false
 
+  # Generated, bulky or vendored files. Their own tests check them; reviewing
+  # them wastes the review and invites hand edits to generated output.
   path_filters:
     - '!**/node_modules/**'
     - '!**/package-lock.json'
     - '!**/dist/**'
     - '!**/build/**'
+    - '!documentation/card-status.md'
+    - '!documentation/**/legacy/**'
+    - '!tests/fixtures/ai-batch/baselines/**'
+    - '!carddata/**'
+    - '!precons/**'
+    - '!images/**'
+    - '!**/*.min.js'
+    - '!**/*.png'
+    - '!**/*.jpg'
 
   path_instructions:
     - path: '**/*'
       instructions: |
-        Review ticket PRs as an independent maintainer. Treat
-        `.agents/skills/review-ticket/SKILL.md` as the authoritative rubric and
-        `AGENTS.md` as repository policy.
+        Apply the review rubric in `.agents/skills/review-ticket/SKILL.md`
+        (steps 2 to 4) and the repository policy in `AGENTS.md`. You cannot run
+        commands, so the skill's step 1 is replaced by the `ticket.js check`
+        output pasted in the PR description.
 
-        The PR description should contain the complete ticket (diagnosis,
-        implementation plan when present, acceptance criteria, and Resolution)
-        plus the pasted output of `node scripts/ticket.js check <ticket>`. Read
-        all of it before reviewing the diff. If the ticket or check output is
-        missing, say that the review is incomplete. NOTE: Failing due to missing 
-        the check output does not apply to the ticket itself, just the PR description. 
-        Treat every unexplained changed file, acceptance criterion ticked without supporting 
-        evidence, or FAIL from `ticket.js check` as Blocking unless the Resolution gives
-        valid evidence that the failure is pre-existing and unrelated. Assess
-        unticked criteria under the review skill rather than rejecting them
-        automatically: a pending F4 gate is permitted when the implementation
-        passes review and its option defaults off, but missing required
-        implementation or test work remains Blocking.
+        A PR may contain several tickets. A ticket is under review when this PR
+        adds it to, or moves it into, `documentation/bugs/code-review/` or
+        `documentation/backlog/code-review/`. Read each such ticket file in full
+        from the diff: its diagnosis, any `## Implementation plan` and its
+        `## Resolution`. Changes to other tickets that only touch the generated
+        `<!-- roadmap-blocker -->` header, made by `roadmap.js blockers --fix`,
+        are expected and need no explanation.
 
-        Independently verify the claimed root cause and Resolution against the
-        current code, tests, game rules, related mechanics, hooks, callers, and
-        consumers. Do not trust checked boxes or the Resolution without checking
-        the diff. Look for counterexamples involving other board states, other
-        callers, asynchronous or continuation ordering, run versus out-of-run
-        context, and state restoration after hypothetical evaluation.
+        For each ticket under review, verify the Resolution against the diff and
+        the current code; do not trust ticked boxes. Look for counterexamples:
+        other board states, other callers, asynchronous or continuation
+        ordering, run versus out-of-run context, and state restoration after
+        hypothetical evaluation. Flag every changed file that no ticket
+        explains.
 
-        Enforce these principles:
-        - no card-title checks in engine or AI logic;
-        - no AI access to hidden information, including R&D/Stack order;
-        - no constants tuned to one board state;
-        - no unrelated refactors or behaviour changes;
-        - new AI hooks belong at the bottom of card objects and must be documented
-          in `documentation/ai.md`;
-        - AI behaviour changes must agree with `documentation/ai-principles.md`,
-          the relevant side's `principles.md`, and its `architecture.md`.
+        Gated tickets: with the option off, behaviour must be unchanged and
+        every changed decision path must read the option. A pending gate
+        (`**Gate:** pending F4` with the option off) is acceptable. The gate
+        must follow "Writing a gate" in `documentation/ai-planning.md`
+        (standard regression guards included), and its gate command must have
+        one flag per table row; a mismatch is Should fix. If a gate
+        claims to have passed, require: the exact
+        `node scripts/ai-batch.js gate ...` command recorded; deck pairs from
+        the committed pool and paired seeds, with at least the stated number
+        of games; an all-options-off baseline at the same code; a PASS line
+        for every metric the gate names; output ending `Gate: passed`; and
+        not a `--quick` run. Missing or non-matching evidence is Blocking.
 
-        For gated AI tickets, verify the option-off path is unchanged, every
-        changed decision path reads the option, and the option defaults off until
-        the gate passes. If a gate claims to have passed, require the exact F4
-        command, paired seeds and committed deck pairs, all named metrics against
-        the committed baseline, and satisfaction of every stated threshold.
-
-        Report only findings introduced by this PR and support each with a file,
-        function or line, concrete evidence or counterexample, and the required
-        change. Classify findings as Blocking, Should fix, or Note. Blocking and
-        Should fix are actionable and require changes; Notes do not. Do not make
-        code changes as part of review.
+        Classify every finding as Blocking, Should fix or Note, with a file,
+        function or line, the evidence or counterexample, and the required
+        change. Do not make code changes.
 
     - path: 'sets/*.js'
       instructions: |
         For every changed card object, compare the implementation with the card
         text and analogous cards. Verify costs, restrictions, timing, choices,
-        prevention, cleanup, and once-per-window state. Place AI hooks with the
-        existing AI hooks at the bottom of the object and require matching
-        documentation in `documentation/ai.md`.
+        prevention, cleanup and once-per-window state. AI hooks go with the
+        existing AI hooks at the bottom of the object, and each new or changed
+        hook must be documented in `documentation/ai.md`. ICE needs
+        `AIImplementIce` and icebreakers need `AIImplementBreaker` or
+        `AISpecialBreaker`; check that hook names are spelled exactly.
 
     - path: 'ai_*.js'
       instructions: |
         Check all callers and decision paths, not only the reproduced board.
-        Verify hidden information is not read and every hypothetical mutation is
+        Verify hidden information (HQ contents, R&D and Stack order) is not
+        read, no card titles are checked, and every hypothetical mutation is
         restored, including on early returns and asynchronous continuations.
+        New AI policy randomness must use `this._random`, never `Math.random`.
 
     - path: 'runcalculator.js'
       instructions: |
         Check run and out-of-run contexts, encounter and subroutine ordering,
         hypothetical state restoration, and callers on both Corp and Runner AI.
 
+    - path: 'scripts/ai-batch/**'
+      instructions: |
+        This is the F4 harness. Telemetry, event wrappers and collectors must
+        only observe: no game-state changes, no AI or engine random draws, and
+        no information passed to either AI. A seed must still reproduce the
+        same game, and a change must not invalidate the recorded `logHash`
+        values unless the Resolution says why.
+
     - path: 'tests/**'
       instructions: |
-        Verify tests assert the behaviour claimed by the Resolution and would fail
-        without the fix. For bug tickets, the original reproduction must move from
-        `tests/pending/` or `tests/fixtures/corp-decisions-pending/` into the green
-        suite with its expectation unchanged. Flag weakened, deleted, tautological,
-        or implementation-coupled assertions.
+        Verify tests assert the behaviour the Resolution claims and would fail
+        without the fix. For bug tickets, the original reproduction must move
+        from `tests/pending/` or `tests/fixtures/corp-decisions-pending/` into
+        the green suite with its expectation unchanged. Flag weakened, deleted,
+        tautological or implementation-coupled assertions. Passing tests must
+        stay quiet (see `tests/run-all-tests.js`).
 
     - path: 'documentation/**'
       instructions: |
-        Verify the ticket Resolution accurately describes the diff and test
-        evidence. For AI changes, require `architecture.md` to describe the new
-        behaviour; stale architecture documentation is a Should fix finding.
+        For AI behaviour changes, `architecture.md` must describe the new
+        behaviour; stale architecture text is Should fix. Generated files
+        (`card-status.md`, roadmap blocker headers) must not be hand-edited.
 
   pre_merge_checks:
     custom_checks:
-      - name: 'Ticket review evidence'
+      - name: 'Ticket review evidence and move'
         mode: 'error'
         instructions: |
-          Determine whether this is a Chiriboga ticket PR from changed files under
-          `documentation/bugs/` or `documentation/backlog/`, or from a linked
-          ticket. Do not infer that it is not a ticket PR merely because the PR
-          description omits the ticket. Otherwise pass.
+          Find the tickets under review: ticket files this PR adds to, or
+          moves into, `documentation/bugs/code-review/` or
+          `documentation/backlog/code-review/`. If there are none, pass.
 
-          Fail if a ticket PR's description does not include the complete ticket
-          body, including its diagnosis/current behaviour, applicable
-          implementation plan, acceptance criteria, and final Resolution. Also
-          fail if it omits the pasted output of
-          `node scripts/ticket.js check <ticket>`, or if that output contains an
-          unexplained FAIL, a changed reproduction expectation, or a failing
-          required test, or if a ticked acceptance criterion lacks supporting
-          evidence. Assess unticked criteria under
-          `.agents/skills/review-ticket/SKILL.md`; do not fail solely because a
-          criterion is unticked. In particular, a pending F4 gate is permitted
-          when the reviewed implementation's option defaults off, while missing
-          required implementation or test work still fails the check. A failure
-          is acceptable only when the Resolution provides concrete evidence that
-          it is pre-existing and unrelated to this PR. Do not claim to execute
-          repository tests: assess the recorded output and visible CI.
+          For each ticket under review, fail if:
+          - the PR description does not name the ticket's path and include
+            the pasted output of `node scripts/ticket.js check <ticket>`;
+          - that output contains a FAIL, unless the ticket's Resolution gives
+            concrete evidence that it is pre-existing and unrelated;
+          - the reproduction's expectation was changed when it was moved;
+          - a ticked acceptance criterion has no supporting evidence in the
+            diff or Resolution; or
+          - a gated ticket's option defaults on without passing gate evidence.
+          Assess unticked criteria under the review skill instead of failing on
+          them: a pending F4 gate with the option off is allowed, but missing
+          implementation or test work fails. Do not claim to have run tests.
+
+          Whether it passes or fails, end the explanation with one line per
+          ticket under review giving the verdict and the command the owner
+          runs after merging:
+          - Pass: `node scripts/ticket.js move <ticket> done`
+          - Pass with the gate pending: `node scripts/ticket.js move <ticket> open`
+          - Changes required: no move; the findings are addressed on this PR
+            with Codex's `address-pr-review` skill, and the ticket stays in
+            `code-review/`
 
 chat:
   auto_reply: true

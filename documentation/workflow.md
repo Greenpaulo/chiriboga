@@ -3,13 +3,16 @@
 How to run Chiriboga work through coding agents without wasting your limited
 Codex usage. The rule of thumb:
 
-- **Claude chat** (free, reads the repo on GitHub) does the reading and writing:
-  triage, plans and reviews.
-- **Codex** (limited) only runs and changes code.
+- **Claude chat** (free, reads the repo on GitHub) does triage only: it turns
+  a debug log into a ticket and a drafted reproduction.
+- **CodeRabbit** (on GitHub) reviews every pull request against the
+  `review-ticket` rubric; its rules are in `.coderabbit.yaml`.
+- **Codex** (limited) implements tickets, writes plans and addresses review
+  comments.
 - **Scripts** (free) do the mechanical checks.
 
 You do not need to remember skill names: plain English ("fix this ticket")
-works in Codex. The prompts for Claude chat are below to copy.
+works in Codex. The triage prompt for Claude chat is below to copy.
 
 Why the workflow is set up this way is explained in
 [working-with-agents.md](working-with-agents.md).
@@ -21,15 +24,24 @@ Why the workflow is set up this way is explained in
 | 1. Triage a log | Claude chat | Commit and push the log, then paste **prompt T** | A ticket and a drafted reproduction to save into the repo; commit and push them |
 | 2. Fix | Codex, new chat | `$implement-ticket <ticket>` | The reproduction confirmed, the fix, and the ticket in `code-review/` (or a plan to approve first) |
 | 3. Check | Terminal | `node scripts/ticket.js check <ticket>` | PASS/WARN/FAIL lines, the changed files and a review link |
-| 4. Review | Claude chat | Commit and push, then paste **prompt R** with the check output | A Code review section to paste into the ticket, and a move command |
-| 5. Finish | Terminal | Run the move command, then commit | The ticket in `done/`; in `remediation/` for another step 2; or back in the open ticket root with a generated blocker when review passes but its gate is pending |
+| 4. Review | GitHub (CodeRabbit) | Commit, push and open a PR whose description names each ticket under review and pastes its check output | Inline findings, and a "Ticket review evidence and move" pre-merge check giving each ticket's verdict and move command (rules in `.coderabbit.yaml`) |
+| 5. Finish | Codex, then terminal | `$address-pr-review <PR>` for any findings, on the same PR; once CodeRabbit approves, run each ticket's move command and commit | The ticket in `done/`, or back in the open ticket root with a generated blocker when review passes but its gate is pending |
+| Gate (fallback) | Terminal | Only if Codex handed off with `**Gate:** pending F4` because the gate could not finish in its session: run the `**Gate command:**` from the ticket's Resolution (about 15–20 min), then `$implement-ticket <ticket>` with the output | The result recorded and the option switched on if it passed |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
 | PR feedback | Codex, PR branch | `$address-pr-review <PR>` | Each review comment verified and accepted, adapted, rejected or marked obsolete; supported fixes applied and tested |
 
 Codex can also do steps 1 and 4 itself (`$triage-log <log>`, `$review-ticket
-<ticket>`), but they are its most reading-heavy tasks.
+<ticket>`), but they are its most reading-heavy tasks. `$review-ticket` is the
+fallback when a ticket needs a deeper look than CodeRabbit gave it.
 
-### Prompts for Claude chat
+The review record is the pull request: CodeRabbit's comments and its "Ticket
+review evidence and move" check. No Code review section is added to the
+ticket. A ticket goes to `remediation/` only when you decide the approach
+itself must be redone rather than fixed on the PR. Then add the reasons to the
+ticket before moving it, because `implement-ticket` works from what the
+ticket records.
+
+### Prompt for Claude chat
 
 **Prompt T: triage**
 
@@ -48,17 +60,6 @@ Plan gate step describes. Do not implement anything.
 
 Save the plan into the ticket, change **Awaiting approval** to **Approved**
 when you agree with it, and Codex will follow it.
-
-**Prompt R: review**
-
-```text
-In the chiriboga repo, read .agents/skills/review-ticket/SKILL.md and review
-documentation/bugs/code-review/<file>. Output of scripts/ticket.js check:
-<paste it here>
-```
-
-Claude chat only sees what is pushed to GitHub. If it cannot find a file under
-`.agents/`, paste the skill file's contents into the chat instead.
 
 ### Keeping Codex usage down
 
@@ -82,12 +83,13 @@ section means a roadmap dependency or recorded gate is unresolved.
 debug-logs/<log>
    │  triage (Claude chat draft, or Codex)
    ▼
-bugs/  ──implement-ticket──▶  bugs/code-review/  ──review──▶  bugs/done/
-                                    │ changes required
-                                    ▼
-                              bugs/remediation/
-                                    │ implement-ticket
-                                    └────────────────────▶ bugs/code-review/
+bugs/  ──implement-ticket──▶  bugs/code-review/  ──PR approved──▶  bugs/done/
+                                    │  ▲
+                 CodeRabbit findings│  │address-pr-review (same PR)
+                                    ▼  │
+                                  PR comments
+
+bugs/code-review/ ──approach rejected by you──▶ bugs/remediation/ ──implement-ticket──▶ bugs/code-review/
 
 bugs/code-review/ ──pass, gate pending──▶ bugs/ (generated blocker)
 ```
@@ -179,9 +181,11 @@ Free, deterministic steps that agents (and you) run instead of reading files:
 | `node scripts/roadmap.js list` | Every AI roadmap item and its status |
 | `node scripts/roadmap.js blockers [--fix]` | Blocked tickets and stale generated headers; `--fix` adds, updates or removes the headers |
 | `node scripts/ai-game.js [--seed s \| --seeds a-b]` | Plays seeded AI-vs-AI games headlessly (default Duel PD vs Tao) and prints one JSON line per game: winner, turns, time, points, a log fingerprint and any engine errors |
+| `node scripts/ai-batch.js [--pairs ids] [--games n]` | Plays the committed deck pool (200 seeds per pair by default) and writes a JSON report; prints each pair's Corp win rate with its 95% range. See [ai-batch-harness.md](ai-batch-harness.md) |
+| `node scripts/ai-batch.js gate --corp-option <name>=true ...` | Runs a gate: the all-off baseline (reused when cached) against the candidate, then a PASS/FAIL line per gated metric and `Gate: passed` or `failed` |
 | `node scripts/roadmap.js gates` | Every item with an acceptance gate, grouped by what is left to do (gates waiting to run, failed, not built); see [judging-ai-changes.md](judging-ai-changes.md) |
 | `node scripts/roadmap.js raise <ID>` | Moves a proposed item's spec into the backlog as a ticket; refuses one not re-verified against the current code |
-| `node scripts/card-status.js` | Regenerates `documentation/card-status.md`: per-set card counts, missing and unfinished cards, config disagreements, Runner keep coverage |
+| `node scripts/card-status.js` | Regenerates `documentation/card-status.md`: per-set card counts, missing definitions, scaffold markers, missing required AI hooks, AI hook counts, config disagreements, Runner keep coverage |
 
 ## 🛡️ Guardrails
 
