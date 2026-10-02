@@ -766,8 +766,8 @@ class CorpAI {
       i < optionList.length && optionList.length > minCount;
       i++
     ) {
-      if (typeof optionList[i].card !== "undefined") {
-        //in case there are non-card options present
+      if (optionList[i].card != null) {
+        //in case there are non-card options present (including a null-card "Skip"/"Decline")
         if (CheckCardType(optionList[i].card, ["agenda"])) {
           optionList.splice(i, 1);
           i--;
@@ -3745,7 +3745,8 @@ class CorpAI {
     //make a cards list from optionList (since this could be hand, archives, card-generated list, etc)
     var cards = [];
     for (var i = 0; i < optionList.length; i++) {
-      if (typeof optionList[i].card !== "undefined") {
+      //a null card is a "Skip"/"Decline" option, not a card to rank
+      if (optionList[i].card != null) {
         if (!cards.includes(optionList[i].card)) {
           cards.push(optionList[i].card);
         }
