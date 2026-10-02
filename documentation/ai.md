@@ -326,6 +326,15 @@ You still implement `AIImplementBreaker` to explain how they break ice, and `AIM
 
 **`AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)`** — Called on every installed program to find a match for a given ice. Return `this` if this card can handle that ice, or `null` if not. `effectiveSubTypes` is an optional array used by Corp security planning for public subtype shifts; use it instead of mutating or retaining `iceCard.subTypes`. Runner-AI callers may omit it, so fall back to the ice's current subtypes.
 
+Identity effects that temporarily add a subtype must also restrict the match to
+the ICE that would receive that subtype. Rielle "Kit" Peddler uses
+`_AIFirstIceToEncounter` for both `AIModifyIceAI` and
+`AIMatchingBreakerInstalled`: it skips unrezzed outer ICE when a rezzed inner
+ICE would be encountered first, and restores any temporary subtype mutation
+before returning. When Corp security supplies `effectiveSubTypes`, Kit defers
+to that evaluator's ordinary breaker matching instead of requiring a live
+Runner AI.
+
 ```js
 // Botulus: only matches the ice it is hosted on
 AIMatchingBreakerInstalled: function(iceCard) {
