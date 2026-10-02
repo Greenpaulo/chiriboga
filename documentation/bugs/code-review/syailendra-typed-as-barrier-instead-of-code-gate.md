@@ -1,16 +1,39 @@
 # Syailendra is implemented as a Barrier, so the game looks for a Fracter to break it instead of the Decoder it actually needs
 
+## Resolution
+
+Implemented from `f2054ee`.
+
+Corrected Syailendra's card header and `subTypes` declaration from `Barrier` to `Code Gate`, matching canonical card code 35076. The shared runner and Corp breaker-matching consumers were inspected and already map Decoder to Code Gate and Fracter to Barrier, so no AI or engine change was needed.
+
+The reproduction was added at `tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js`, where it failed at the starting commit with actual `Barrier` versus expected `Code Gate`. It was moved unchanged in substance to `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` now passes. Its directory-relative repository-root lookup was adjusted after the move, without changing the subtype expectation.
+
+No approval-gated implementation plan was required: this is an objective printed-card-data correction confined to one card definition, with no shared heuristic, engine function, AI hook contract, green expectation, or multi-file source change. The ticket's broader suggested encounter and Corp-security scenarios were not added because the focused canonical-data regression directly covers the defective field while the existing security suite already covers generic subtype matching. The proposed cardpool-wide audit was also left out of scope because it could surface unrelated card-data discrepancies requiring separate validation.
+
+Validation completed with the focused regression, `tests/corp-server-security.test.js`, `tests/corp-decision-fixtures.test.js`, `tests/decision-snapshots.test.js`, and the full `node tests/run-all-tests.js` suite (40 test files passed). No open implementation issues remain.
+
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
 **Source log:** `documentation/debug-logs/bug_raised/code_gate_is_looking_for_a_fracter_to_break_it.txt`
 **File:** `sets/elevation.js` — Syailendra's card definition (`cardSet[35076]`).
 **Confirmed against:** `carddata/carddata.json` (`code: 35076`, `keywords: "Code Gate - AP"`).
-**Status:** Diagnosed, not yet fixed. One-line fix.
+**Status:** Implemented; awaiting independent review.
+**Reproduction:** `tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js` fails at `f2054ee`, 2026-10-02: implemented `Barrier` does not match canonical `Code Gate`. Moved to `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` passes after the fix.
+
+## Acceptance gate
+
+N/A — deterministic fix (principle 4): the implemented primary ice subtype must match the printed card data for card code 35076.
+
+## Acceptance criteria
+
+- [x] Syailendra is implemented with `subTypes: ["Code Gate"]`, matching the canonical card data.
+- [x] The regression test fails before the fix and passes afterward without changing its expectation.
+- [x] The full green test suite passes.
 
 ---
 
 ## 1. Summary
 
-Syailendra is a Weyland Code Gate in the real card pool (`carddata/carddata.json` lists it as `keywords: "Code Gate - AP"`, matching `code: 35076`, the same ID used for this card's implementation). But its implementation is typed as a **Barrier**:
+[Verified] Syailendra is a Weyland Code Gate in the real card pool (`carddata/carddata.json` lists it as `keywords: "Code Gate - AP"`, matching `code: 35076`, the same ID used for this card's implementation). But its implementation is typed as a **Barrier**:
 
 ```js
 //Syailendra
@@ -82,7 +105,7 @@ lockout result depends on Grip and the other ICE in the route.
 
 **Where:** `sets/elevation.js`, `cardSet[35076]` (Syailendra), specifically the `subTypes: ["Barrier"]` line and the `//Weyland Ice: Barrier` header comment directly above it.
 
-This is a plain data-entry error, not a logic bug. Every consumer of ice subtypes handles `Code Gate` correctly elsewhere in the codebase:
+[Verified] This is a plain data-entry error, not a logic bug. Every inspected consumer of ice subtypes handles `Code Gate` correctly elsewhere in the codebase:
 
 - `ai_corp.js` `_matchingBreakerForIce` (line ~1842-1852): `CheckSubType(card, "Decoder") && this._iceHasEffectiveSubtype(iceCard, "Code Gate", ...)` is right; it's just never true for Syailendra because `_effectiveIceSubtypes` reads its subtype from `subTypes`, which says `Barrier`.
 - `ai_corp.js` `_aCompatibleBreakerIsInstalled` / `_numCompatibleIceInstalled` (lines ~1521-1582): same correct Decoder↔Code Gate pairing, same dependency on the card's own `subTypes`.
