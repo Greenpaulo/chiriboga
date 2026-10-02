@@ -5,6 +5,10 @@
 //   node scripts/ai-batch.js [batch options] [--out <report.json>]
 //   node scripts/ai-batch.js --compare <baseline.json> <candidate.json> [gate options]
 //   node scripts/ai-batch.js gate [batch options] [gate options]
+//   node scripts/ai-batch.js replay --pairs <id> --seeds <n> [--start <fixture>] [options] [--diff]
+//     plays one game exactly as a batch does and prints its full log; --diff
+//     plays it with every option off and as given, and prints only the
+//     differing log lines (use this to read why a gate result moved)
 //
 // Batch options:
 //   --pool <file>                 deck pool (default tests/fixtures/ai-batch/deck-pool.json)
@@ -46,7 +50,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--compare') { out.compare = [argv[++i], argv[++i]]; }
-    else if (arg === '--quick' || arg === '--worker' || arg === '--all') out[arg.slice(2)] = true;
+    else if (arg === '--quick' || arg === '--worker' || arg === '--all' || arg === '--diff') out[arg.slice(2)] = true;
     else if (repeatable[arg]) out[repeatable[arg]].push(argv[++i]);
     else if (arg.startsWith('--')) out[arg.slice(2)] = argv[++i];
     else out._.push(arg);
@@ -169,7 +173,7 @@ async function playJob(job) {
   const game = await playGame({
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
-    runnerOptions: job.runnerOptions, telemetry: true, observe: true, onEvent,
+    runnerOptions: job.runnerOptions, telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
   const record = {fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed, ok,
@@ -271,6 +275,9 @@ function checkOptions(config) {
   vm.createContext(context);
   const defaults = {corp: vm.runInContext('(' + corpDefaults[1] + ')', context),
     runner: vm.runInContext('(' + runnerDefaults[1] + ')', context)};
+  // AI_BATCH_TEST_OPTION adds a no-op Corp option, so the harness's own tests
+  // need no real (gated) option.
+  if (process.env.AI_BATCH_TEST_OPTION) defaults.corp[process.env.AI_BATCH_TEST_OPTION] = false;
   for (const [side, values] of [['corp', config.corpOptions], ['runner', config.runnerOptions]])
     for (const name in values)
       if (!Object.prototype.hasOwnProperty.call(defaults[side], name)) throw new Error(`Unknown ${side} AI option: ${name}`);
@@ -386,8 +393,46 @@ function applyMaxChecks(result, candidate, max) {
   return result;
 }
 
+// One game, played as playJob() plays it, with its full log.
+function replayGame(config, options) {
+  const pair = config.pairs[0], seed = config.seeds[0], start = config.starts[0];
+  return playGame({streamPrefix: `${seed}:${pair.id}`, corpFile: pair.corp, runnerFile: pair.runner,
+    setFiles: config.setFiles, timeoutMs: config.timeoutMs, start: start ? start.file : null,
+    corpOptions: options.corp, runnerOptions: options.runner, telemetry: true, observe: true, fullLog: true,
+    testOption: process.env.AI_BATCH_TEST_OPTION});
+}
+
+async function replay(args) {
+  if (/^\d+$/.test(args.seeds || '')) args.seeds = args.seeds + '-' + args.seeds;
+  const config = buildConfig(args);
+  if (config.pairs.length !== 1 || config.seeds.length !== 1 || config.starts.length > 1)
+    throw new Error('replay needs exactly one --pairs id, one --seeds value and at most one --start');
+  checkOptions(config);
+  const describe = (label, g) => `${label}: ${g.winner || 'no winner'} (${g.reason}), Corp ${g.corpPoints}-${g.runnerPoints} Runner, ` +
+    `${g.turns} turns, ${g.logLines} log lines, logHash ${g.logHash}${g.errors.length ? ', errors: ' + g.errors.join('; ') : ''}`;
+  const candidate = await replayGame(config, {corp: config.corpOptions, runner: config.runnerOptions});
+  if (!args.diff) {
+    console.log(describe('game', candidate));
+    console.log(candidate.log.join('\n'));
+    return;
+  }
+  const baseline = await replayGame(config, {corp: {}, runner: {}});
+  console.log(describe('baseline (options off)', baseline));
+  console.log(describe('candidate', candidate));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-replay-'));
+  try {
+    fs.writeFileSync(path.join(dir, 'baseline.log'), baseline.log.join('\n') + '\n');
+    fs.writeFileSync(path.join(dir, 'candidate.log'), candidate.log.join('\n') + '\n');
+    const result = require('child_process').spawnSync('diff', ['-U2', 'baseline.log', 'candidate.log'], {cwd: dir, encoding: 'utf8'});
+    console.log(result.stdout || 'Logs are identical.');
+  } finally {
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args._[0] === 'replay') return replay(args);
   const command = 'node scripts/ai-batch.js ' + process.argv.slice(2).join(' ');
   if (args.compare) {
     const [a, b] = args.compare.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));

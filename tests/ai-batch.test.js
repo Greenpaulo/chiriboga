@@ -32,12 +32,14 @@ async function scenario(name, fn) {
 }
 
 const gateway = pool.pairs.find(p => p.id === 'gateway');
+// A no-op Corp option the harness adds for its own tests (AI_BATCH_TEST_OPTION).
+const TEST_OPTION = 'harnessTestOption';
 const game = (extra = {}) => playGame(Object.assign({streamPrefix: '1:gateway', corpFile: gateway.corp,
-  runnerFile: gateway.runner, setFiles, timeoutMs: 120000, observe: true, telemetry: true}, extra));
+  runnerFile: gateway.runner, setFiles, timeoutMs: 120000, observe: true, telemetry: true, testOption: TEST_OPTION}, extra));
 
 function cli(args, env = {}) {
   const result = spawnSync(process.execPath, [script, ...args], {encoding: 'utf8',
-    env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache')}, env)});
+    env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache'), AI_BATCH_TEST_OPTION: TEST_OPTION}, env)});
   return {status: result.status, out: (result.stdout || '') + (result.stderr || '')};
 }
 
@@ -113,12 +115,12 @@ const EXTRA_DRAW = side => `
 
   await scenario('4. AI options: set per run, recorded, unknown names fail, comparison keys', async () => {
     const out = path.join(tmp, 'option.json');
-    const r = cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--corp-option', 'evidenceBasedHostedCardRez=true', '--out', out]);
+    const r = cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--corp-option', TEST_OPTION + '=true', '--out', out]);
     assert.strictEqual(r.status, 0, r.out);
     const report = JSON.parse(fs.readFileSync(out, 'utf8'));
-    assert.strictEqual(report.options.corp.evidenceBasedHostedCardRez, true);
+    assert.strictEqual(report.options.corp[TEST_OPTION], true);
     const defaults = await game();
-    assert.strictEqual(defaults.options.corp.evidenceBasedHostedCardRez, false, 'the option is off in other runs');
+    assert.strictEqual(defaults.options.corp[TEST_OPTION], false, 'the option is off in other runs');
     const unknown = cli(['--pairs', 'gateway', '--seeds', '1-1', '--corp-option', 'noSuchOption=true', '--out', path.join(tmp, 'x.json')]);
     assert.notStrictEqual(unknown.status, 0);
     assert.ok(/Unknown corp AI option: noSuchOption/.test(unknown.out), unknown.out);
@@ -268,7 +270,7 @@ const EXTRA_DRAW = side => `
   await scenario('gate: baseline reuse and --quick', async () => {
     assert.strictEqual(batch.resolveSeeds(batch.parseArgs(['--quick'])).length, 50);
     assert.strictEqual(batch.resolveSeeds(batch.parseArgs([])).length, 200);
-    const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', 'evidenceBasedHostedCardRez=true',
+    const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', TEST_OPTION + '=true',
       '--guard', 'winRate=1'];
     const first = cli(args);
     assert.ok(/baseline: playing 2 games/.test(first.out) && /candidate: playing 2 games/.test(first.out), first.out);
@@ -282,6 +284,20 @@ const EXTRA_DRAW = side => `
     const quick = cli(['gate', '--pairs', 'gateway', '--quick', '--seeds', '1-2', '--jobs', '2', '--guard', 'winRate=1']);
     assert.ok(/indicative only/.test(quick.out), quick.out);
     assert.notStrictEqual(quick.status, 0, 'a quick run cannot pass a gate');
+  });
+
+  await scenario('replay plays the batch game with its full log, and --diff shows only differing lines', async () => {
+    const out = path.join(tmp, 'replay-batch.json');
+    assert.strictEqual(cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--out', out]).status, 0);
+    const batchGame = JSON.parse(fs.readFileSync(out, 'utf8')).games[0];
+    const one = cli(['replay', '--pairs', 'gateway', '--seeds', '1']);
+    assert.strictEqual(one.status, 0, one.out);
+    assert.ok(one.out.includes('logHash ' + batchGame.logHash), 'replay reproduces the batch game: ' + one.out.split('\n')[0]);
+    assert.ok(one.out.split('\n').length > 50, 'the full log is printed');
+    const same = cli(['replay', '--pairs', 'gateway', '--seeds', '1', '--diff']);
+    assert.ok(/Logs are identical/.test(same.out), same.out.slice(0, 300));
+    const bad = cli(['replay', '--pairs', 'gateway', '--seeds', '1-2']);
+    assert.notStrictEqual(bad.status, 0);
   });
 
   fs.rmSync(tmp, {recursive: true, force: true});

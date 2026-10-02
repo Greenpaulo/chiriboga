@@ -96,8 +96,8 @@ The core metrics are:
 latencies when lower. `gameLength` and `mulliganRate` have no better
 direction.
 
-To replay one game from a report in detail, run `ai-game.js` with the same
-decks. That uses different random streams, so compare outcomes, not hashes.
+To replay one game from a report in detail, use `ai-batch.js replay` (see
+"Reading why a result moved"); it reproduces the report's game exactly.
 
 ## Running a gate
 
@@ -164,10 +164,34 @@ records the result and switches the option on only if the output says
 gate is ready to run: the quick run completes, and its first line reports at
 least one game changed by the options. The command exits non-zero so it cannot be mistaken for a pass.
 
+### Reading why a result moved
+
+Averages say whether an option helps; single games show how. To read one,
+pick a pair and seed from the report and replay it:
+
+```sh
+node scripts/ai-batch.js replay --pairs pd-tao --seeds 2 \
+  --start tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt \
+  --corp-option <option>=true --diff
+```
+
+`replay` plays exactly the batch's game (same seed streams, sets and start;
+its `logHash` matches the report) and prints the full log, which the report
+does not keep. `--diff` plays it with every option off and as given and
+prints only the differing lines, so the first hunk is the decision the
+option changed. It takes a few seconds. Later hunks usually diverge into a
+different game, so read the first hunk for the cause, and the report's
+averages for the effect.
+
+For more than one game, use a batch (`--seeds 1-2 --out`), which runs in
+parallel with the stall watchdog. Do not write scripts that call
+`playGame()` in a loop: they run one game at a time, keep only the last 200
+log lines, and print nothing until they finish.
+
 ### Comparing two reports by hand
 
 ```sh
-node scripts/ai-batch.js --corp-option evidenceBasedHostedCardRez=true --out on.json
+node scripts/ai-batch.js --corp-option <option>=true --out on.json
 node scripts/ai-batch.js --out off.json
 node scripts/ai-batch.js --compare off.json on.json --guard winRate=0.02
 ```

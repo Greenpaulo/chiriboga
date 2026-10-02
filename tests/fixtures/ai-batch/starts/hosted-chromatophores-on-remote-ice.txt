@@ -1,0 +1,21 @@
+// SETUP: corp.creditPool=12; runner.creditPool=0
+// SOURCE: documentation/debug-logs/bug_raised/corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt (end-of-log reproduction dump)
+// NOTE: F4 start board for the evidenceBasedHostedCardRez gate (documentation/bugs/corp-silently-declines-rez-of-ice-hosting-a-trojan.md). Not a decision fixture: no EXPECT; used only with ai-batch --start.
+// NOTE: The log's board at the start of the Corp turn before the decision: Remote 0 holds Project Ingatan and Mahkota Langit Grid behind unrezzed Kessleroid; the Runner has Rising Tide installed, which breaks Kessleroid for 2 credits, so rezzing taxes the run rather than stopping it.
+// NOTE: Changed from the dump: Project Ingatan is back in the remote and the Runner's score area is empty (it was stolen at the decision); Palisade replaces every Scatter Field, whose install subroutine crashes the Corp AI (documentation/bugs/corp-install-choice-crashes-on-null-skip-option.md); Chromatophores on the remote ICE and Tranquilizer (2 virus counters) on the HQ ICE, as in the dump.
+RunnerTestField(35012, [30029,35015,35022,30016,35019,35034], [35021,35020,35034,30029,35014,30017,30016,30011,30018,30015,35034,30013,30030,35028,35030,35022,30018,35014,30030,35020,30008,35019,35028,35022,30016,30022,30015,35015,30011,30029,35014], [35019,35015,30030], [30018,35021,35009], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35036, [30037,30075,30037,35072], [35039,35041,30042,35039,35045,30075,35075,35037,35038,30037,30069,35075,35038,30069,30056,35072,35045,30038,35040,30053,35040,35072,30053,35041,30039,35040,30072,35053,30072,30036,35044,35082,30053,35043,35039], [30040,35037,35043,35037,30069], [], [35041], [30072], [[35082,35038,35075]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.rig.resources[0].credits=6;
+corp.remoteServers[0].root[0].AITurnsInstalled=3;
+corp.remoteServers[0].root[1].AITurnsInstalled=3;
+corp.remoteServers[0].root[0].serverThisWasInstalledIn=corp.remoteServers[0];
+corp.remoteServers[0].root[1].serverThisWasInstalledIn=corp.remoteServers[0];
+corp.HQ.ice[0].hostedCards = [];
+InstanceCardsPush(30017,corp.HQ.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.HQ.ice[0];
+corp.HQ.ice[0].hostedCards[0].faceUp=true;
+corp.HQ.ice[0].hostedCards[0].virus=2;
+corp.remoteServers[0].ice[0].hostedCards = [];
+InstanceCardsPush(35030,corp.remoteServers[0].ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.remoteServers[0].ice[0];
+corp.remoteServers[0].ice[0].hostedCards[0].faceUp=true;
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.archives.AISuccessfulRuns=3;

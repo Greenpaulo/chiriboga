@@ -249,6 +249,13 @@ function gateSetupProblems(text) {
   return problems;
 }
 
+// The ticket's state in one line (ai-planning.md, "When a gate fails").
+const outcomeLine = text => (text.match(/^\*\*Outcome:\*\*\s*(.+)$/m) || [])[1];
+// A failed idea is removed, not left switched off.
+const failedGateResult = (option, setting) => setting ?
+  ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
+  ['PASS', 'Gate failed and ' + option + ' has been removed.'];
+
 function check(ticket) {
   const results = [];
   const report = (level, message) => results.push([level, message]);
@@ -265,10 +272,16 @@ function check(ticket) {
   else if (!base) report('FAIL', 'Resolution does not start with "Implemented from <sha>".');
   else if (git('cat-file', '-e', base + '^{commit}').status !== 0) report('FAIL', 'Unknown commit ' + base + '.');
 
+  const outcome = outcomeLine(text);
+  if (!outcome) report('WARN', 'No **Outcome:** line under the title (adopted | not adopted — <why> | blocked — <what>).');
+  const notAdopted = outcome && /^not adopted\b/i.test(outcome);
+
   const reproLine = (text.match(/^\*\*Reproduction:\*\*(.*)$/m) || [])[1] || '';
   const pending = (reproLine.match(/`(tests\/[^`]+)`/) || [])[1];
   const green = pending && greenPathFor(pending);
-  if (!pending) {
+  if (notAdopted) {
+    report('PASS', 'Not adopted: its reproduction stays pending under the follow-up ticket; reproduction checks skipped.');
+  } else if (!pending) {
     report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
   } else if (!green) {
     report('WARN', 'Reproduction ' + pending + ' is not a pending path; reproduction checks skipped.');
@@ -328,8 +341,10 @@ function check(ticket) {
     const code = ['ai_corp.js', 'ai_runner.js'].map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
     const setting = option && (code.match(new RegExp('\\b' + option + '\\s*:\\s*(true|false)\\b')) || [])[1];
     const passed = gate && /^passed\b/i.test(gate);
+    const failed = gate && /^failed\b/i.test(gate);
     if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');
     else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
+    else if (failed) report(...failedGateResult(option, setting));
     else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
     else if (!passed) report('WARN', 'Gate not passed; ' + option + ' defaults to off: ' + gate);
@@ -364,7 +379,7 @@ function check(ticket) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems};
+  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);

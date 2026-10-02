@@ -9,7 +9,8 @@ const {spawnSync} = require('child_process');
 const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems} = require('../scripts/ticket.js');
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
+  outcomeLine, failedGateResult} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -94,6 +95,11 @@ const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund']
 assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
   fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
 
+// A failed gate: the option must be gone, and the Outcome line is read.
+assert.strictEqual(outcomeLine('# T\n\n**Outcome:** not adopted — gate failed\n'), 'not adopted — gate failed');
+assert.strictEqual(outcomeLine('# T\n'), undefined, 'a ticket without an Outcome line has none');
+assert.strictEqual(failedGateResult('x', 'false')[0], 'FAIL', 'a failed option still in the code fails the check');
+assert.strictEqual(failedGateResult('x', undefined)[0], 'PASS', 'a removed failed option passes');
 assert.strictEqual(pendingGate('# Ticket\n\n**Gate:** pending F4\n\n## Resolution\n\nNot decided.\n'), undefined,
   'roadmap blocker discovery ignores pending-gate examples outside Resolution');
 assert.strictEqual(pendingGate('# Ticket\n\n## Resolution\n\n**Gate:** pending F4\n'), 'F4',

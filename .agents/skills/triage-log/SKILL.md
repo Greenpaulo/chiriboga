@@ -27,7 +27,9 @@ reproduction is confirmed later by `implement-ticket`.
    show it, and identify who acted: Corp AI, Runner AI, or the engine/rules.
 3. **Investigate the code path** as `AGENTS.md` requires: current code, card
    definitions, related hooks and consumers, and the Comprehensive Rules PDF
-   when a ruling matters.
+   when a ruling matters. Then classify the fix: objective (a rules,
+   legality or information-boundary oracle) or strategic (a better choice
+   among legal ones), as **Rules** describes. A strategic fix is gated.
 4. **Build a reproduction that fails now.** Use the first option that applies:
    - Corp AI decision, log has decision snapshots:
      `node tests/extract-fixture.js <log> --list`, then
