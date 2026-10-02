@@ -64,7 +64,7 @@ When a row is done, delete its entries from `LEGACY_TITLES` and tick it here.
 |---|---|---|---|---|
 | [ ] | `_rankedInstallOptions` | Snare! | I1 | Legacy-marked "specific case" band in I1; later an ambush-install hook (I5) |
 | [ ] | `_emptyProtectedRemotes` | Trick of Light | I1 | Legacy-marked band in I1 (keep an advanced obsolete bluff's remote occupied); later a hook on the operation |
-| [ ] | `_iceInstallScore` | Palisade | I2 | Deleted with the function (F2 row 9 deletes it as dead code; I2 replaces ICE selection) |
+| [x] | `_iceInstallScore` | Palisade | I2 | Deleted with the function by F2 row 9 (dead code); I2 replaces ICE selection |
 | [ ] | `_economyCards` | Celebrity Gift, Subliminal Messaging, Government Subsidy, Hedge Fund, Hansei Review, Predictive Planogram | I5 | Existing `AIEconomyPlay` (operations). Keep each card's condition, such as Subliminal Messaging's once per turn and Hansei Review's non-agenda requirement, in its own `AIWouldPlay` |
 | [ ] | `_economyCards` | Marilyn Campaign, Regolith Mining License, Nico Campaign, PAD Campaign | I5 | Asset economy value in I5 (not `AIEconomyPlay`, which is for operations) |
 | [ ] | `_bestMainPhaseEconomyOption` | Oaktown Renovation | I5 | Advance-for-credits hook on the agenda |

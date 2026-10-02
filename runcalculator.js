@@ -107,12 +107,8 @@ class RunCalculator {
     if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
       //ice is known, calculate specifics
       //start with basic details
-	  //we need to pretend it's an encounter
-	  var stored = AIIceEncounterSaveState();
-	  AIIceEncounterModifyState(ice);
-      result.strength = this._baseStrength(ice);
-	  //then restore reality
-	  AIIceEncounterRestoreState(stored);
+	  //we need to pretend it's an encounter (reality is restored afterwards)
+      result.strength = AIWithIceEncounter(ice, () => this._baseStrength(ice));
       result.sr = [];
       result.subTypes = [].concat(ice.subTypes);
 

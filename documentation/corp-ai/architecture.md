@@ -402,10 +402,7 @@ does not yet compare concrete options by their outcome.
 - **ICE.** `_iceInstallOptions(serverToInstallTo, cards, priorityOnly)` lists
   affordable ICE in input order, then unaffordable ICE when low-priority options
   are allowed, filtered by optional `AIWorthwhileIce(server, "install")` hooks.
-  It does not compare each ICE's marginal effect on security. The older
-  `_iceInstallScore()` (printed strength, rez cost, one title case, breaker
-  coverage) is used only by `_bestIceToInstall()`, which has no callers, and
-  does not consult `_evaluateServerSecurity()`.
+  It does not compare each ICE's marginal effect on security.
 - **Root destinations** are influenced indirectly through shared protection
   scores: `_emptyProtectedRemotes()`, `_isAScoringServer()`,
   `_scoringServers()`, `_scoringWindow()`, `_bestProtectedRemote()` and
@@ -461,12 +458,30 @@ needs.
   roll with the card or server; transient tie-breaks are cached for one
   `Choice` (`_decisionRandomState`); `_shuffleCopy()` shuffles a copy through the
   injected source.
-- **Guarded hypotheticals (F2, partial).** `_withHypothetical(apply, evaluate,
-  restore)` restores state in `finally`; only `_ordinaryPurgeOutcome()` uses it
-  today. The other planning probes still mutate and restore manually (item F2),
-  but they, `_withHypothetical()` and the `Phase_Main` "gain then install" check
-  raise `_hypotheticalDepth` while the board is changed, so the security cache
-  can tell a probe from the real board.
+- **Guarded hypotheticals (F2).** Every planning probe that temporarily
+  changes game state does so in the `apply`/`restore` closures of
+  `_withHypothetical(apply, evaluate, restore)` or one of the shared wrappers in
+  the utility prefix of `ai_runner.js`: `AIWithHypothetical()` (which
+  `_withHypothetical()` delegates to), `AIWithRunContext(server, evaluate)`
+  (sets `attackedServer` for a prospective run) and
+  `AIWithIceEncounter(iceCard, evaluate)` (a pretend encounter, built on
+  `AIIceEncounterSaveState()`). Each restores in `finally`, so a throw cannot
+  leave credits, clicks, tags, ICE arrays, rez state, run or encounter context
+  or the phase changed, and each raises the one shared count
+  `AIHypothetical.depth` while the changed board is evaluated;
+  `_hypotheticalDepth` reads it, so the security cache tells a probe from the
+  real board even when the probe is in a card hook or `runcalculator.js`.
+  Users: `_ordinaryPurgeOutcome()`; `_iceSecurityWithAndWithout()` (this ICE
+  rezzed and paid for, then removed) behind `_icePreventsGameWinningBreach()`
+  and `_iceWouldSecureServer()`; `_criticalBreachDefenseAction()`;
+  `_potentialTagPunishment()`; the `Phase_Main` "gain then install" check,
+  which compares install-option counts; `_effectiveRunnerCreditPool()` and
+  Baker's `_stealthCreditCards()` (run context); `_effectiveIceSubtypes()`,
+  `RunCalculator.IceAI()` and the Atman and Chameleon strength checks
+  (encounter). `tests/corp-ai-hypothetical-mutation.test.js` fails on any new
+  unguarded state change in `ai_corp.js`, `runcalculator.js` or a card's AI
+  or helper function; it lists the Runner-side paired hooks (Botulus, Tread
+  Lightly, Aircheck) as Runner debt and three real-effect card helpers.
 - **Per-decision security cache (F3).** `Choice()` gives each Corp decision a
   fresh `_securityCache` and restores the previous one in `finally`;
   `_withSecurityCache()` gives the same one-call lifetime to entry points the
@@ -598,4 +613,4 @@ Card-facing hook contracts are in `documentation/ai.md`. Key Corp AI methods:
 | `_calculateBaitFrequency(server)` | Severity-weighted bait probability |
 | `_remoteDeceptionProfile(card)` | Shared agenda/trap depth and advancement profile |
 | `_tagPunishmentDeterrence(server)` | Bounded relief from a live tag punishment |
-| `_withHypothetical(apply, evaluate, restore)` | Exception-safe hypothetical evaluation |
+| `_withHypothetical(apply, evaluate, restore)` | Exception-safe hypothetical evaluation (shared depth count) |
