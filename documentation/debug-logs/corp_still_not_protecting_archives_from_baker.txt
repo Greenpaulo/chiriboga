@@ -1,0 +1,610 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Virtual Intelligence, P.I.: “You Can Call Me Vic”,1 Cleaver,2 Mutual Favor,2 Docklands Pass,3 Carmen,2 Marjanah,3 Red Team,3 Unity,3 Sure Gamble,2 Lie Low,3 Transfer of Wealth,2 Maglectric Rapid (748 Mod),2 Kompromat,2 Sell Out,3 Tailgate,3 Borrowed Goods,3 Rotary,2 Baker,1 Underdome Irregulars,2 Touchstone,2 Stowaway]
+[LEO Construction: Labor Solutions,1 Luminal Transubstantiation,2 Ansel 1.0,3 Brân 1.0,1 Seamless Launch,1 Sprint,3 Manegarm Skunkworks,3 Spin Doctor,3 Offworld Office,2 Send a Message,1 Regolith Mining License,3 Hedge Fund,3 Project Ingatan,3 Otto Campaign,3 Bumi 1.0,1 Scatter Field,1 Nanomanagement,3 Mercia B4LL4RD,3 Semak-samun,3 Syailendra,1 Flyswatter,3 Petty Cash,2 Mahkota Langit Grid]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 6.25; fresh-hand expectation 4.26
+AI: Opening hand meets fresh-hand expectation
+Corp chose to keep
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Project Ingatan,Syailendra,Bumi 1.0,Manegarm Skunkworks,Hedge Fund]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Sure Gamble,Unity,Baker,Docklands Pass,Touchstone]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 3.375 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Otto Campaign,Manegarm Skunkworks,Project Ingatan]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Sure Gamble,Unity,Baker,Docklands Pass,Touchstone]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Otto Campaign,Manegarm Skunkworks,Project Ingatan]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Sure Gamble,Unity,Baker,Docklands Pass,Touchstone]
+Runner spent one click
+Runner spent 2 credits
+Runner installed Touchstone
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+1 credit placed on Touchstone
+Runner gained 9 credits
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Otto Campaign,Manegarm Skunkworks,Project Ingatan]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Unity,Baker,Docklands Pass]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Project Ingatan,Mercia B4LL4RD,Mahkota Langit Grid,Otto Campaign,Manegarm Skunkworks]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [Unity,Baker,Docklands Pass]
+Runner spent one click
+Runner spent 2 credits
+Runner installed Docklands Pass
+Runner spent one click
+Runner spent 3 credits
+Runner installed Baker
+Using Baker:
+Runner spent one click
+Run initiated attacking Archives
+Pay 1 stealth credit to change the attacked server? triggered
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+Manegarm Skunkworks accessed
+Runner spent 3 credits
+Manegarm Skunkworks trashed
+Project Ingatan accessed
+Project Ingatan stolen
+Run ends
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 3 card(s) in hand: [Otto Campaign,Mercia B4LL4RD,Mahkota Langit Grid]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 2 card(s) in hand: [Unity,Lie Low]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [5.725]
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Otto Campaign,Bumi 1.0,Nanomanagement,Mahkota Langit Grid,Mercia B4LL4RD]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 2 card(s) in hand: [Unity,Lie Low]
+Runner spent 2 clicks
+Runner spent one credit
+Played Lie Low
+1 credit placed on Touchstone
+Runner drew 4 cards
+Using Baker:
+Runner spent one click
+Run initiated attacking Archives
+Pay 1 stealth credit to change the attacked server? triggered
+Attacked server changed to HQ
+Approaching HQ
+Run successful
+Mercia B4LL4RD accessed
+Nanomanagement accessed
+Run ends
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Nanomanagement,Bumi 1.0,Mercia B4LL4RD,Otto Campaign]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 5 card(s) in hand: [Unity,Borrowed Goods,Rotary,Carmen,Stowaway]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting R&D
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Otto Campaign,Nanomanagement,Seamless Launch,Mercia B4LL4RD,Mahkota Langit Grid]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 5 card(s) in hand: [Unity,Borrowed Goods,Rotary,Carmen,Stowaway]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner discarded Mutual Favor
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Otto Campaign,Nanomanagement,Seamless Launch,Mercia B4LL4RD,Mahkota Langit Grid]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Unity,Borrowed Goods,Rotary,Carmen,Stowaway]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.925]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.925]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [10.325]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.825]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.825]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [10.024999999999999]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.725]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.725]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [9.725]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Nanomanagement,Otto Campaign,Seamless Launch,Brân 1.0]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Unity,Borrowed Goods,Rotary,Carmen,Stowaway]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Syailendra
+Encountering Syailendra
+Firing You may place 1 advancement counter on an installed card you can advance. on Syailendra:
+1 advancement counter placed on Syailendra
+Syailendra places 1 advancement counter on Syailendra
+Firing The Runner loses 2[credit]. on Syailendra:
+Runner lost 2 credits
+Firing Do 1 net damage. on Syailendra:
+Runner takes 1 net damage
+Stowaway trashed
+Approaching HQ
+Run successful
+Nanomanagement accessed
+Mahkota Langit Grid accessed
+Run ends
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 3 credits
+Runner installed Unity
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Seamless Launch,Nanomanagement,Brân 1.0,Mahkota Langit Grid,Otto Campaign]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Borrowed Goods,Rotary,Carmen,Transfer of Wealth]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: I intend to advance ice
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I could do 0 damage with these cards: []
+AI: I intend to advance ice
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Nanomanagement,Seamless Launch,Otto Campaign,Manegarm Skunkworks,Brân 1.0]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Borrowed Goods,Rotary,Carmen,Transfer of Wealth]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner drew a card
+Runner discarded Stowaway
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Nanomanagement,Seamless Launch,Otto Campaign,Manegarm Skunkworks,Brân 1.0]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Rotary,Carmen,Transfer of Wealth,Transfer of Wealth]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 2.25 vs 7.050000000000001 with 0 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Manegarm Skunkworks,Otto Campaign,Nanomanagement,Otto Campaign,Seamless Launch]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Rotary,Carmen,Transfer of Wealth,Transfer of Wealth]
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: []
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(36009, [30030,35015,30011,36024,36024], [30013,36010,36012,30018,36011,30016,30030,30006,30026,35019,36014,30018,35019,36021,36013,36011,36016,35017,30015,36012,35015,30026,36012,36014,36015,36013,30015,30030,30016,36010,30011,30018], [36013,36014,30015,35017,35017], [36021,30013,36015,30026], [35038], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [30075,30042,35045,35082], [30075,35081,35045,30053,30075,35041,35038,30067,30069,35081,30053,35040,35076,35045,35042,35054,35076,35038,35054,30038,30053,30036,30039,35082,30071,30067,30042,30067,30039,30038,30069,35054,35081,30041], [30042,35040,35043,35040,30040], [], [35041,35041], [35076,30039], [[35079]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.grip[1].corpAbilities=[];
+runner.stack[10].corpAbilities=[];
+runner.stack[23].corpAbilities=[];
+runner.heap[3].host=null;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[1].host=null;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[0].advancement=3;
+corp.HQ.cards[4].cardsInstalledThisTurn=[corp.HQ.ice[1],];
+corp.HQ.AISuccessfulRuns=3;
+
+Version reference: Thu Oct 01 2026 10:53:20 GMT+0100 (British Summer Time)

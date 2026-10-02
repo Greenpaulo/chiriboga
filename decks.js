@@ -90,6 +90,8 @@ function InstanceCard(
   card.cardDefinition = cardDefinition; //save in case we need to compare against defaults later
   card.player = player;
   card.setNumber = setNumber;
+  if (typeof InvalidateActiveTriggerCandidateCache === "function")
+    InvalidateActiveTriggerCandidateCache();
   //Do some special initialisations
   if (card.cardType == "agenda" && typeof card.canBeAdvanced === "undefined")
     card.canBeAdvanced = true; //agendas can be advanced by default
