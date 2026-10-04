@@ -5,7 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-const root = path.resolve(__dirname, '../..');
+const root = path.resolve(__dirname, '..');
 const elevation = fs.readFileSync(path.join(root, 'sets', 'elevation.js'), 'utf8');
 const cardData = JSON.parse(
   fs.readFileSync(path.join(root, 'carddata', 'carddata.json'), 'utf8'),
