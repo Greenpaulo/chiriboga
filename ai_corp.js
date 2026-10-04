@@ -1,131 +1,10 @@
 //AI decisionmaking
 
-const CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD = 0.35;
-const CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT = 0.15;
-const CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE = 1;
-
 class CorpAI {
   //**CORP UTILITY FUNCTIONS**
   _log(message) {
     //just comment this line to suppress AI log
     console.log("AI: " + message);
-  }
-
-  _withHypothetical(apply, evaluate, restore) {
-    this._hypotheticalDepth++;
-    try {
-      apply();
-      return evaluate();
-    } finally {
-      restore();
-      this._hypotheticalDepth--;
-    }
-  }
-
-  //A basic purge costs the whole turn, so use it only for a concrete change in
-  //what the Corp can accomplish: opening a score window or closing a route to
-  //a server with something at stake. Critical central multi-access remains in
-  //_criticalBreachDefenseAction(), where the loss probability is available.
-  _ordinaryPurgeOutcome() {
-    var runnerCards = InstalledCards(runner);
-    var purgeable = runnerCards.filter(
-      (card) =>
-        Counters(card, "virus") > 0 || card.AIDisabledByPurge === true,
-    );
-    if (purgeable.length < 1) return null;
-
-    var servers = [corp.HQ, corp.RnD, corp.archives]
-      .concat(corp.remoteServers || [])
-      .filter((server) => server);
-    var beforeCanScore = this._fullyAdvanceableAgendaInstalled();
-    var beforeSecurity = servers.map((server) => ({
-      server: server,
-      secure: this._evaluateServerSecurity(server).isSecure,
-    }));
-    //Trash caused by purge can be preventable. If public prevention is live,
-    //conservatively keep purge-trash cards installed; counters are still
-    //cleared, so a purge justified independently of the trash remains visible.
-    var purgeTrashCanBePrevented = ActiveCards(runner).some(
-      (card) =>
-        card &&
-        CheckHasAbilities(card) &&
-        card.AIPreventsPurgeTrash === true,
-    );
-    var saved = purgeable.map((card) => ({
-      card: card,
-      virusOwn: Object.prototype.hasOwnProperty.call(card, "virus"),
-      virus: card.virus,
-      notInstalledOwn: Object.prototype.hasOwnProperty.call(
-        card,
-        "notInstalled",
-      ),
-      notInstalled: card.notInstalled,
-      location: Array.isArray(card.cardLocation) ? card.cardLocation : null,
-      locationIndex: Array.isArray(card.cardLocation)
-        ? card.cardLocation.indexOf(card)
-        : -1,
-    }));
-
-    return this._withHypothetical(
-      () => {
-        for (var i = 0; i < purgeable.length; i++) {
-          if (Counters(purgeable[i], "virus") > 0) purgeable[i].virus = 0;
-        }
-        //A purge-trash card must be absent, not merely marked with an ad-hoc
-        //property: the production CheckHasAbilities() does not read .disabled.
-        //Remove in reverse installed order so saved indices remain valid.
-        for (var i = saved.length - 1; i >= 0; i--) {
-          var state = saved[i];
-          if (
-            state.card.AIDisabledByPurge !== true ||
-            purgeTrashCanBePrevented
-          )
-            continue;
-          state.card.notInstalled = true;
-          if (state.location && state.locationIndex > -1)
-            state.location.splice(state.locationIndex, 1);
-        }
-      },
-      () => {
-        if (!beforeCanScore && this._fullyAdvanceableAgendaInstalled())
-          return { reason: "purge opens an immediate agenda score" };
-        for (var i = 0; i < beforeSecurity.length; i++) {
-          var state = beforeSecurity[i];
-          if (
-            !state.secure &&
-            this._purgeServerHasStakes(state.server) &&
-            this._evaluateServerSecurity(state.server).isSecure
-          )
-            return { reason: "purge secures " + ServerName(state.server) };
-        }
-        return null;
-      },
-      () => {
-        for (var i = 0; i < saved.length; i++) {
-          var state = saved[i];
-          if (
-            state.card.AIDisabledByPurge === true &&
-            !purgeTrashCanBePrevented &&
-            state.location &&
-            state.locationIndex > -1 &&
-            state.location.indexOf(state.card) < 0
-          )
-            state.location.splice(state.locationIndex, 0, state.card);
-          if (state.virusOwn) state.card.virus = state.virus;
-          else delete state.card.virus;
-          if (state.notInstalledOwn)
-            state.card.notInstalled = state.notInstalled;
-          else delete state.card.notInstalled;
-        }
-      },
-    );
-  }
-
-  _purgeServerHasStakes(server) {
-    if (server == corp.HQ) return this._agendasInHand() > 0;
-    if (server == corp.RnD || server == corp.archives)
-      return this._agendaPointsInServer(server) > 0;
-    return this._HVTsInServer(server) > 0;
   }
 
   _iceIsDisabled(iceCard) {
@@ -284,289 +163,24 @@ class CorpAI {
     return iceToChooseFrom[0]; //just random for now
   }
 
-  //Public, active cards can expose a generic server-redirection hook. The
-  //wording fallback keeps older implementations useful without title checks.
+  //special case e.g Sneakdoor Beta
   _archivesIsBackdoorToHQ() {
-    var activeCards = ActiveCards(runner);
-    for (var i = 0; i < activeCards.length; i++) {
-      var card = activeCards[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (
-        typeof card.AIRedirectsRun == "function" &&
-        card.AIRedirectsRun.call(card, corp.archives, corp.HQ)
-      )
-        return true;
-      var text = (card.cardText || "").toString().toLowerCase();
-      if (
-        text.indexOf("run archives") > -1 &&
-        text.indexOf("attacked server to hq") > -1
-      )
-        return true;
+    if (this._copyOfCardExistsIn("Sneakdoor Beta", runner.rig.programs)) {
+      return true;
     }
     return false;
   }
 
-  //Read a declarative, public-board description of the value a Runner card
-  //gets from completing a run. Unlike Runner run planning, this must never
-  //inspect Grip or call hooks whose implementation assumes Runner-private state.
-  _publicRunPressureFromCard(card, server) {
-    var ret = { economy: 0, growth: 0, persistentPressure: 0 };
-    if (!card || card.player != runner || !CheckHasAbilities(card)) return ret;
-    if (typeof card.AIPublicRunPressure != "function") return ret;
-    var pressure = card.AIPublicRunPressure.call(card, server);
-    if (typeof pressure == "number") pressure = { persistentPressure: pressure };
-    if (!pressure || typeof pressure != "object") return ret;
-    ["economy", "growth", "persistentPressure"].forEach((key) => {
-      var value = Number(pressure[key]);
-      if (isFinite(value) && value > 0) ret[key] = value;
-    });
-    return ret;
-  }
-
-  //Public installed rewards and observed recent behaviour describe why a run
-  //matters; server security describes whether the Runner can currently collect
-  //that value. This is intentionally server-generic even though Archives is the
-  //first protection decision to consume it.
-  _serverRunPressure(server, securityEvaluation) {
-    var ret = {
-      economy: 0,
-      growth: 0,
-      persistentPressure: 0,
-      recentRuns: 0,
-      sources: 0,
-      rawPenalty: 0,
-      penalty: 0,
-      isReachable: false,
-    };
-    if (!server) return ret;
-    var activeCards = ActiveCards(runner);
-    for (var i = 0; i < activeCards.length; i++) {
-      var contribution = this._publicRunPressureFromCard(activeCards[i], server);
-      if (
-        contribution.economy > 0 ||
-        contribution.growth > 0 ||
-        contribution.persistentPressure > 0
-      )
-        ret.sources++;
-      ret.economy += contribution.economy;
-      ret.growth += contribution.growth;
-      ret.persistentPressure += contribution.persistentPressure;
+  //special case e.g Sneakdoor Beta
+  //returns a protection value to be subtracted
+  _extraThreatOnRnD() {
+    var conduit = this._copyOfCardExistsIn("Conduit", runner.rig.programs);
+    if (conduit) {
+      //the numbers are arbitrary but basically a bit for each counter and some for existing at all
+      //multiplier was 0.5 and constant was 2.5. AI still seemed to underappreciate it so I increased these.
+      return 1.0 * Counters(conduit, "virus") + 3.0;
     }
-    var history = this._recentSuccessfulRunPressure.get(server);
-    if (history)
-      ret.recentRuns = history.lastTurn + history.previousTurn * 0.5;
-
-    //These heterogeneous declarations are evidence that the server matters,
-    //not a calibrated exchange rate between credits, counters, and protection.
-    //Use one bounded ranking nudge and let ordinary server stakes decide the
-    //ordering; the component totals remain available for logs and diagnostics.
-    if (ret.sources > 0 || ret.recentRuns > 0)
-      ret.rawPenalty = CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE;
-    var security = securityEvaluation;
-    if (typeof security == "undefined")
-      security = this._evaluateServerSecurity(server);
-    ret.isReachable = !security.isSecure;
-    if (ret.isReachable) ret.penalty = ret.rawPenalty;
-    return ret;
-  }
-
-  _recordSuccessfulRunForProtection(server) {
-    if (!server) return;
-    var history = this._recentSuccessfulRunPressure.get(server) || {
-      currentTurn: 0,
-      lastTurn: 0,
-      previousTurn: 0,
-    };
-    history.currentTurn++;
-    this._recentSuccessfulRunPressure.set(server, history);
-  }
-
-  _rollRecentSuccessfulRunPressure() {
-    var liveServers = [corp.HQ, corp.RnD, corp.archives].concat(
-      corp.remoteServers || [],
-    );
-    for (var i = 0; i < liveServers.length; i++) {
-      var server = liveServers[i];
-      var history = this._recentSuccessfulRunPressure.get(server);
-      if (!history) continue;
-      history.previousTurn = history.lastTurn;
-      history.lastTurn = history.currentTurn;
-      history.currentTurn = 0;
-      if (history.lastTurn == 0 && history.previousTurn == 0)
-        this._recentSuccessfulRunPressure.delete(server);
-      else this._recentSuccessfulRunPressure.set(server, history);
-    }
-  }
-
-  //Normalize public, installed central-pressure hooks. The hook deliberately
-  //describes mechanics rather than card names, and must be safe outside a run.
-  _centralPressureFromCard(card, server) {
-    var ret = { additionalAccess: 0, persistentPressure: 0, growth: 0 };
-    if (!card || card.player != runner || !CheckHasAbilities(card)) return ret;
-    var pressure = null;
-    if (typeof card.AICentralPressure == "function")
-      pressure = card.AICentralPressure.call(card, server);
-    if (typeof pressure == "number") pressure = { additionalAccess: pressure };
-    if (!pressure || typeof pressure != "object") return ret;
-    ["additionalAccess", "persistentPressure", "growth"].forEach((key) => {
-      var value = Number(pressure[key]);
-      if (isFinite(value) && value > 0) ret[key] = value;
-    });
-    return ret;
-  }
-
-  //Returns a diagnostic summary and a bounded protection-score penalty for a
-  //central server. Hidden run events remain Layer 5's responsibility.
-  _centralServerThreat(server, options = {}) {
-    var ret = {
-      additionalAccess: 0,
-      persistentPressure: 0,
-      growth: 0,
-      penalty: 0,
-      sources: 0,
-    };
-    if (server != corp.HQ && server != corp.RnD) return ret;
-    var installed = InstalledCards(runner);
-    for (var i = 0; i < installed.length; i++) {
-      var contribution = null;
-      if (
-        options.afterPurge &&
-        installed[i].player == runner &&
-        CheckHasAbilities(installed[i]) &&
-        typeof installed[i].AICentralPressureAfterPurge == "function"
-      ) {
-        contribution = installed[i].AICentralPressureAfterPurge.call(
-          installed[i],
-          server,
-        );
-        if (typeof contribution == "number")
-          contribution = { additionalAccess: contribution };
-        contribution = contribution || {};
-        contribution = {
-          additionalAccess: Math.max(
-            0,
-            Number(contribution.additionalAccess) || 0,
-          ),
-          persistentPressure: Math.max(
-            0,
-            Number(contribution.persistentPressure) || 0,
-          ),
-          growth: Math.max(0, Number(contribution.growth) || 0),
-        };
-      } else {
-        contribution = this._centralPressureFromCard(installed[i], server);
-      }
-      if (
-        contribution.additionalAccess > 0 ||
-        contribution.persistentPressure > 0 ||
-        contribution.growth > 0
-      )
-        ret.sources++;
-      ret.additionalAccess += contribution.additionalAccess;
-      ret.persistentPressure += contribution.persistentPressure;
-      ret.growth += contribution.growth;
-    }
-    ret.penalty = Math.min(
-      8,
-      ret.additionalAccess * 1.5 +
-        ret.persistentPressure * 2 +
-        Math.min(2, ret.growth),
-    );
-    return ret;
-  }
-
-  //Estimate the fair, order-agnostic chance that one immediately available
-  //central breach supplies enough agenda points to win. The Corp may count the
-  //contents of its own server, but must not use the engine's hidden card order.
-  _centralBreachLossRisk(server, options = {}) {
-    var ret = {
-      server: server,
-      canBreach: false,
-      accessCount: 0,
-      pointsNeeded: Math.max(
-        0,
-        AgendaPointsToWin() - AgendaPoints(runner),
-      ),
-      probability: 0,
-    };
-    if (
-      (server != corp.HQ && server != corp.RnD) ||
-      !server ||
-      !server.cards ||
-      server.cards.length < 1
-    )
-      return ret;
-    if (this._evaluateServerSecurity(server).isSecure) return ret;
-
-    ret.canBreach = true;
-    var threat = this._centralServerThreat(server, options);
-    ret.accessCount = Math.min(
-      server.cards.length,
-      Math.max(1, 1 + Math.floor(threat.additionalAccess)),
-    );
-    if (ret.pointsNeeded < 1) {
-      ret.probability = 1;
-      return ret;
-    }
-
-    //Dynamic programming counts equally likely combinations without relying
-    //on the actual order of HQ or R&D. Scores at/above the target are collapsed
-    //into one bucket because only a game-winning breach matters here.
-    var ways = [];
-    for (var chosen = 0; chosen <= ret.accessCount; chosen++) {
-      ways.push(new Array(ret.pointsNeeded + 1).fill(0));
-    }
-    ways[0][0] = 1;
-    var seen = 0;
-    for (var i = 0; i < server.cards.length; i++) {
-      var card = server.cards[i];
-      var points = CheckCardType(card, ["agenda"])
-        ? Math.max(0, Number(card.agendaPoints) || 0)
-        : 0;
-      var maximumChosen = Math.min(ret.accessCount - 1, seen);
-      for (var chosen = maximumChosen; chosen >= 0; chosen--) {
-        for (var score = 0; score <= ret.pointsNeeded; score++) {
-          if (ways[chosen][score] <= 0) continue;
-          var nextScore = Math.min(ret.pointsNeeded, score + points);
-          ways[chosen + 1][nextScore] += ways[chosen][score];
-        }
-      }
-      seen++;
-    }
-    var totalWays = ways[ret.accessCount].reduce(
-      (total, count) => total + count,
-      0,
-    );
-    if (totalWays > 0)
-      ret.probability =
-        ways[ret.accessCount][ret.pointsNeeded] / totalWays;
-    return ret;
-  }
-
-  //Classify the visible Runner board's macro plan without hidden-card access.
-  //`focus` is diagnostic groundwork for install planning; protection scoring
-  //uses the server-specific penalties below rather than applying it twice.
-  _classifyRunnerMacroThreat() {
-    var hq = this._centralServerThreat(corp.HQ);
-    var rnd = this._centralServerThreat(corp.RnD);
-    var centralFocused =
-      hq.penalty + rnd.penalty >= 3 ||
-      hq.growth + rnd.growth >= 2 ||
-      hq.persistentPressure + rnd.persistentPressure > 0;
-    var focus = "balanced";
-    if (centralFocused) {
-      if (hq.penalty > rnd.penalty + 0.5) focus = "hq";
-      else if (rnd.penalty > hq.penalty + 0.5) focus = "rd";
-      else focus = "centrals";
-    }
-    return {
-      centralFocused: centralFocused,
-      nonInteractive:
-        hq.persistentPressure + rnd.persistentPressure >= 2,
-      focus: focus,
-      hq: hq,
-      rnd: rnd,
-    };
+    return 0;
   }
 
   //returns the preferred server. input is the upgrade to install
@@ -594,26 +208,6 @@ class CorpAI {
         else preferredServer = corp.HQ;
       } else preferredServer = corp.RnD;
     }
-    if (
-      upgrade &&
-      typeof upgrade.installOnlyIn == "function" &&
-      !CheckInstallDestination(upgrade, preferredServer)
-    ) {
-      var legalServers = [corp.HQ, corp.RnD, corp.archives].concat(
-        corp.remoteServers,
-      ).filter(function (server) {
-        return CheckInstallDestination(upgrade, server);
-      });
-      preferredServer = null;
-      var preferredScore = Infinity;
-      for (var i = 0; i < legalServers.length; i++) {
-        var score = this._protectionScore(legalServers[i], {});
-        if (score < preferredScore) {
-          preferredScore = score;
-          preferredServer = legalServers[i];
-        }
-      }
-    }
     return preferredServer;
   }
 
@@ -623,12 +217,6 @@ class CorpAI {
     if (server == null) return false; //protection is too weak
     if (typeof server.cards == "undefined") {
       //is remote
-      //A relative protection score cannot establish that the Runner is unable
-      //to breach this server. Never offer an insecure remote for scoring,
-      //regardless of how poorly HQ or Archives currently score.
-      var security = this._evaluateServerSecurity(server);
-      if (!security.isSecure) return false;
-
       //yes if it has a scoring upgrade, an agenda or an ambush installed
       //this code was originally after the protection check but this lead to AI installing random assets in scoring servers
       for (var j = 0; j < server.root.length; j++) {
@@ -638,7 +226,7 @@ class CorpAI {
       }
 
       //no if its protection is too weak
-      var protScore = this._protectionScore(server, {}, security);
+      var protScore = this._protectionScore(server, {});
       var minProt = this._protectionScore(corp.HQ, {
         returnArchivesLowerScoreForHQIfBackdoor: true,
       }); //new method: just needs to be at least as strong as HQ
@@ -700,7 +288,6 @@ class CorpAI {
     if (CheckCardType(card, ["upgrade"])) {
       //although we could install more than one copy of a unique card, let's not
       if (this._uniqueCopyAlreadyInstalled(card)) return false;
-      if (!CheckInstallDestination(card, server)) return false;
       if (server) {
         //limit 1 region per server
         if (CheckSubType(card, "Region")) {
@@ -842,20 +429,19 @@ class CorpAI {
     this._log("considering forfeit options...");
     var ret = 0;
     var forfAg = null;
-    for (var i = 0; i < optionList.length; i++) {
-      if (!optionList[i].card) continue;
+    for (var i = 0; i < corp.scoreArea.length; i++) {
       if (!forfAg) {
         ret = i;
-        forfAg = optionList[i].card;
-      } else if (optionList[i].card.agendaPoints < forfAg.agendaPoints) {
+        forfAg = corp.scoreArea[i];
+      } else if (corp.scoreArea[i].agendaPoints < forfAg.agendaPoints) {
         ret = i;
-        forfAg = optionList[i].card;
+        forfAg = corp.scoreArea[i];
       } else if (
-        optionList[i].card.agendaPoints == forfAg.agendaPoints &&
-        Counters(optionList[i].card, "agenda") < Counters(forfAg, "agenda")
+        corp.scoreArea[i].agendaPoints == forfAg.agendaPoints &&
+        Counters(corp.scoreArea[i], "agenda") < Counters(forfAg, "agenda")
       ) {
         ret = i;
-        forfAg = optionList[i].card;
+        forfAg = corp.scoreArea[i];
       }
     }
     return ret;
@@ -897,15 +483,16 @@ class CorpAI {
     return this._advancementLimit(card) - Counters(card, "advancement");
   }
 
-  _cardNeedsAdvancement(card, server) {
-    return Counters(card, "advancement") < this._advancementLimit(card, server);
-  }
-
   _bestAdvanceOption(optionList) {
     //currently just chooses first reasonable option (TODO need to do more work here to include/exclude/rank them)
     //e.g. using _cardShouldBeFastAdvanced and/or _isFullyAdvanceableAgenda or similar
     for (var i = 0; i < optionList.length; i++) {
-      if (this._cardNeedsAdvancement(optionList[i].card))
+      if (
+        typeof optionList[i].card.advancement === "undefined" ||
+        optionList[i].card.advancement <
+          this._advancementLimit(optionList[i].card) ||
+        optionList[i].card.AIOverAdvance
+      )
         return i;
     }
     return 0; //just arbitrary
@@ -1361,187 +948,6 @@ class CorpAI {
     return false;
   }
 
-  //Return the strongest access punishment declared by a facedown card in this
-  //remote. Future ambushes can join the policy without title-specific logic.
-  _accessPunishmentSeverity(server) {
-    if (!server || typeof server.cards !== "undefined") return 0;
-    var severity = 0;
-    for (var i = 0; i < server.root.length; i++) {
-      var card = server.root[i];
-      if (
-        !card ||
-        card.player != corp ||
-        PlayerCanLook(runner, card) ||
-        typeof card.AIPunishesAccess != "function"
-      )
-        continue;
-      var value = Number(card.AIPunishesAccess.call(card, server));
-      if (isFinite(value)) severity = Math.max(severity, Math.max(0, value));
-    }
-    return severity;
-  }
-
-  //A severe trap needs fewer deliberately light defenses to keep the choice
-  //credible. Server exposure is the "bet" and access punishment is the "pot".
-  _calculateBaitFrequency(server) {
-    var punishment = this._accessPunishmentSeverity(server);
-    if (punishment <= 0) return 0;
-    var exposure = 1 + Math.min(3, (server.root || []).length);
-    var frequency = exposure / (exposure + punishment * 2);
-    return Math.max(0.08, Math.min(0.35, frequency));
-  }
-
-  //Agendas and access traps draw from the same visible posture distribution.
-  //This describes public action shape, not card identity or tactical value.
-  _remoteDeceptionProfile(card) {
-    if (!card) return null;
-    var eligible =
-      CheckCardType(card, ["agenda"]) ||
-      CheckSubType(card, "Ambush") ||
-      typeof card.AIPunishesAccess == "function";
-    if (!eligible) return null;
-    var stored = this._cardDeceptionProfiles.get(card);
-    if (stored) return stored;
-    var depthRoll = this._random();
-    var advanceRoll = this._random();
-    var delayRoll = this._random();
-    var profile = {
-      targetIce: depthRoll < 0.3 ? 1 : depthRoll < 0.78 ? 2 : 3,
-      openingAdvances: advanceRoll < 0.55 ? 1 : 2,
-      delayTurns: delayRoll < 0.3 ? 1 : 0,
-    };
-    this._cardDeceptionProfiles.set(card, profile);
-    return profile;
-  }
-
-  //Prefer an empty protected remote whose current shape is close to this
-  //card's shared agenda/trap posture. This is only one component of the normal
-  //scoring-window sort, so deception does not override tactical viability.
-  _deceptionInstallDistance(card, server) {
-    var profile = this._remoteDeceptionProfile(card);
-    if (!profile || !server || !server.ice) return 0;
-    return Math.abs(server.ice.length - profile.targetIce);
-  }
-
-  _deceptionPostureActive(card, server) {
-    if (!card || !server) return false;
-    if (CheckCardType(card, ["agenda"]))
-      return this._shouldBluffAgendaServer(server);
-    if (typeof card.AIPunishesAccess == "function")
-      return this._shouldBaitServer(server);
-    return false;
-  }
-
-  //During an active posture, agendas and advanceable traps expose the same
-  //opening cadence: optionally wait a turn, then place one or two counters,
-  //then resume their ordinary target on a later turn.
-  _deceptionAdvancementTarget(card, server, normalTarget) {
-    if (!this._deceptionPostureActive(card, server)) return normalTarget;
-    var profile = this._remoteDeceptionProfile(card);
-    if (!profile) return normalTarget;
-    var age = Math.max(0, card.AITurnsInstalled || 0);
-    var current = Math.max(0, Counters(card, "advancement"));
-    if (age < profile.delayTurns) return current;
-    if (age == profile.delayTurns)
-      return Math.min(normalTarget, profile.openingAdvances);
-    return normalTarget;
-  }
-
-  _deceptionProtectionTarget(server) {
-    if (!server || !server.root || server.root.length != 1) return null;
-    var card = server.root[0];
-    if (!this._deceptionPostureActive(card, server)) return null;
-    var profile = this._remoteDeceptionProfile(card);
-    return profile ? profile.targetIce : null;
-  }
-
-  //Roll once for this installed trap, then retain the posture. Re-evaluating a
-  //server must not offer repeated chances to hit the threshold.
-  _shouldBaitServer(server) {
-    var punishment = this._accessPunishmentSeverity(server);
-    if (punishment <= 0) return false;
-    //Normally an access-punishing root cannot also expose agenda points, but
-    //keep the same authoritative safety boundary as every deception path for
-    //mixed/future root configurations.
-    if (this._runnerMayWinIfServerBreached(server)) return false;
-    var trap = server.root.find(
-      (card) =>
-        card &&
-        card.player == corp &&
-        !PlayerCanLook(runner, card) &&
-        typeof card.AIPunishesAccess == "function",
-    );
-    if (!trap) return false;
-    var stored = this._serverBaitDecisions.get(server);
-    if (stored && stored.card == trap) return stored.bait;
-    var probability = this._calculateBaitFrequency(server);
-    var roll = this._random();
-    var bait = roll < probability;
-    this._serverBaitDecisions.set(server, {
-      card: trap,
-      probability: probability,
-      roll: roll,
-      bait: bait,
-    });
-    return bait;
-  }
-
-  //Occasionally apply a shared variable-depth agenda/trap posture to a facedown
-  //advanceable agenda. Never risk a game-winning steal this way.
-  _shouldBluffAgendaServer(server) {
-    if (
-      !server ||
-      typeof server.cards !== "undefined" ||
-      server.root.length != 1
-    )
-      return false;
-    var card = server.root[0];
-    if (
-      !CheckCardType(card, ["agenda"]) ||
-      PlayerCanLook(runner, card) ||
-      !CheckAdvance(card) ||
-      AgendaPoints(corp) + (card.agendaPoints || 0) >= AgendaPointsToWin() ||
-      this._runnerMayWinIfServerBreached(server)
-    )
-      return false;
-    var stored = this._agendaBluffDecisions.get(server);
-    if (stored && stored.card == card) return stored.bluff;
-    var points = Math.max(1, card.agendaPoints || 1);
-    var runnerPressure = Math.min(4, (runner.grip || []).length * 0.25);
-    var probability = Math.max(
-      0.05,
-      Math.min(0.18, 0.22 / points + 0.02 - runnerPressure * 0.01),
-    );
-    var roll = this._random();
-    var bluff = roll < probability;
-    this._agendaBluffDecisions.set(server, {
-      card: card,
-      probability: probability,
-      roll: roll,
-      bluff: bluff,
-    });
-    return bluff;
-  }
-
-  //A playable punishment in HQ is a real consequence once the Runner is
-  //tagged. It reduces, but never replaces, the need for actual protection.
-  _tagPunishmentDeterrence(server) {
-    if (!server || Math.max(0, runner.tags || 0) < 1) return 0;
-    if (this._runnerMayWinIfServerBreached(server)) return 0;
-    var best = 0;
-    var hand = corp.HQ && corp.HQ.cards ? corp.HQ.cards : [];
-    for (var i = 0; i < hand.length; i++) {
-      var card = hand[i];
-      var requiredTags = Number(card && card.AITagPunishment);
-      if (!isFinite(requiredTags) || requiredTags < 1) continue;
-      if ((runner.tags || 0) < requiredTags) continue;
-      var cost = typeof PlayCost == "function" ? PlayCost(card) : card.playCost || 0;
-      if (!CheckCredits(corp, cost, "playing", card)) continue;
-      best = Math.max(best, 1 + Math.min(2, requiredTags));
-    }
-    return best;
-  }
-
   _aCompatibleBreakerIsInstalled(
     iceCard, //ignores strength and credit requirements
   ) {
@@ -1612,15 +1018,9 @@ class CorpAI {
     if (CheckCardType(card, ["ice"])) {
       //if unrezzed and can't afford to rez, consider to be no protection (just a simple check ignoring cost of other ice in server)
       if (card.rezzed || Credits(corp) >= RezCost(card)) {
-        if (this._iceHasETR(card)) {
-          ret++; //1 point for ice that can actually stop the run
-          if (card.rezCost > 4 || Strength(card) > 3) {
-            ret++; //plus bonus point for high rez cost (based on printed value) or strong
-          }
-        } else {
-          //Damage, taxes and other encounter effects still deter a run, but
-          //they must not rank like access-denying ice.
-          ret += 0.25;
+        ret++; //1 point for any ice
+        if (card.rezCost > 4 || Strength(card) > 3) {
+          ret++; //plus bonus point for high rez cost (based on printed value) or strong
         }
         //special case: ice wall gets extra strength for advancement tokens (constant is arbitrary)
         if (card.title == "Ice Wall") ret += 0.5 * card.advancement;
@@ -1671,6 +1071,54 @@ class CorpAI {
     return ret;
   }
 
+  // Evaluate HQ danger state - returns danger level string and logs analysis
+  // Returns: "HQ_CRITICAL_HAZARD", "HQ_MODERATE_HAZARD", or "HQ_SAFE"
+  _evaluateHQDanger() {
+    var hqIce = corp.HQ.ice ? corp.HQ.ice.length : 0;
+    var agendaCount = this._agendasInHand();
+    var nonAgendaCount = corp.HQ.cards.length - agendaCount;
+
+    this._log(
+      "HQ Danger Evaluation - ICE: " +
+        hqIce +
+        ", Agendas: " +
+        agendaCount +
+        ", Non-Agendas: " +
+        nonAgendaCount,
+    );
+
+    // Critical hazard: HQ has 0 ICE and multiple agendas (agenda flood risk)
+    if (hqIce === 0 && agendaCount >= 2) {
+      this._log(
+        "HQ_CRITICAL_HAZARD: Naked HQ with " +
+          agendaCount +
+          " agendas - drawing increases agenda density!",
+      );
+      return "HQ_CRITICAL_HAZARD";
+    }
+
+    // Moderate hazard: HQ has 0 ICE with 1 agenda, or 1+ ICE with many agendas
+    if (hqIce === 0 && agendaCount === 1) {
+      this._log("HQ_MODERATE_HAZARD: Naked HQ with 1 agenda");
+      return "HQ_MODERATE_HAZARD";
+    }
+
+    if (hqIce > 0 && agendaCount >= 3) {
+      this._log(
+        "HQ_MODERATE_HAZARD: HQ has " +
+          hqIce +
+          " ICE but " +
+          agendaCount +
+          " agendas (potential flood)",
+      );
+      return "HQ_MODERATE_HAZARD";
+    }
+
+    // Safe: HQ has ICE or no agendas to worry about
+    this._log("HQ_SAFE: HQ is adequately protected or no agenda flood risk");
+    return "HQ_SAFE";
+  }
+
   //**SERVER SECURITY EVALUATION**
   //Heuristic estimates of whether a server is genuinely safe from the Runner
   //this turn: either the Runner has no way through ('hard lockout') or they
@@ -1717,6 +1165,7 @@ class CorpAI {
     if (!iceCard) return false;
     if (typeof runnerHandSize == "undefined")
       runnerHandSize = runner.grip.length;
+    if (runnerHandSize < 1) return true;
     //printed subroutines are the usual source of damage
     var subDamage = 0;
     if (typeof iceCard.subroutines !== "undefined") {
@@ -1726,7 +1175,7 @@ class CorpAI {
     }
     //take the highest rather than the sum so printed card text isn't double counted
     var damage = Math.max(subDamage, this._damageInText(iceCard.cardText));
-    if (damage > runnerHandSize) {
+    if (damage >= runnerHandSize) {
       this._log(
         iceCard.title +
           " could do " +
@@ -1759,225 +1208,81 @@ class CorpAI {
     return this._breachWouldBePrevented(ActiveCards(corp), server);
   }
 
-  //Returns the number of global end-the-run effects the Corp's declared card
-  //policies say it would actually spend to protect this server.
-  _globalETRUses(server) {
-    var ret = 0;
-    var activeCards = ActiveCards(corp);
-    for (var i = 0; i < activeCards.length; i++) {
-      var card = activeCards[i];
-      if (typeof card.AIGlobalETRUses != "function") continue;
-      var uses = Number(card.AIGlobalETRUses.call(card, server));
-      if (isFinite(uses)) ret += Math.max(0, Math.floor(uses));
-    }
-    return ret;
-  }
-
-  //Use the same public matching hooks for human and AI Runners. Hosted
-  //counter breakers are handled separately so insufficient counters never hide ice.
-  //Returns the subtypes that matter for the next hypothetical run, including
-  //hosted modifiers and identity effects that only apply during an encounter.
-  _effectiveIceSubtypes(iceCard, server, iceIndex, evaluationContext) {
-    if (!iceCard) return [];
-    if (
-      evaluationContext &&
-      evaluationContext.effectiveIceSubtypes.has(iceCard)
-    )
-      return evaluationContext.effectiveIceSubtypes.get(iceCard).concat([]);
-    if (!server) server = GetServer(iceCard);
-    if (typeof iceIndex == "undefined" || iceIndex < 0)
-      iceIndex = server && server.ice ? server.ice.indexOf(iceCard) : -1;
-    var iceAI = this._securityIceAI(
-      iceCard,
-      null,
-      server,
-      iceIndex,
-      evaluationContext,
-    );
-    var ret = iceAI
-      ? [].concat(iceAI.subTypes || [])
-      : [].concat(iceCard.subTypes || []);
-    var activeCards = evaluationContext
-      ? evaluationContext.runnerActiveCards
-      : ActiveCards(runner);
-    for (var i = 0; i < activeCards.length; i++) {
-      var card = activeCards[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
-      var mod = null;
-      var storedEncounter =
-        typeof AIIceEncounterSaveState == "function"
-          ? AIIceEncounterSaveState()
-          : null;
-      if (storedEncounter && typeof AIIceEncounterModifyState == "function")
-        AIIceEncounterModifyState(iceCard);
-      this._hypotheticalDepth++;
-      try {
-        if (typeof card.AIEffectiveIceSubtypes == "function")
-          mod = card.AIEffectiveIceSubtypes.call(card, iceCard, server, iceIndex);
-        else if (
-          card.modifySubTypes &&
-          typeof card.modifySubTypes.Resolve == "function"
-        )
-          mod = card.modifySubTypes.Resolve.call(card, iceCard);
-      } finally {
-        this._hypotheticalDepth--;
-        if (storedEncounter && typeof AIIceEncounterRestoreState == "function")
-          AIIceEncounterRestoreState(storedEncounter);
-      }
-      if (mod && Array.isArray(mod.add)) {
-        for (var j = 0; j < mod.add.length; j++)
-          if (!ret.includes(mod.add[j])) ret.push(mod.add[j]);
-      }
-      if (mod && Array.isArray(mod.remove))
-        ret = ret.filter((type) => !mod.remove.includes(type));
-
-      //Fallback for conventional "gains [subtype]" / "treat as [subtype]"
-      //wording. First-encounter effects apply to the outermost relevant ice.
-      var text = (card.cardText || "").toString();
-      var hostedShift =
-        card.host == iceCard && /host(?:ed)? ice gains/i.test(text);
-      var encounterShift =
-        /encounter[^.]*ice[^.]*(?:gains|treat[^.]*\bas\b)/i.test(text) &&
-        (!/first time/i.test(text) ||
-          (!card.usedThisTurn && this._outermostRelevantIce(server) == iceCard));
-      if (hostedShift || encounterShift) {
-        ["Barrier", "Code Gate", "Sentry"].forEach((type) => {
-          var pattern = new RegExp("\\b" + type.replace(" ", "\\s+") + "\\b", "i");
-          if (pattern.test(text) && !ret.includes(type)) ret.push(type);
-        });
+  //returns true if the Corp has a scored card with a counter that can end the run
+  //(e.g. a scored Nisei MK II) - this is not tied to a particular server
+  _hasGlobalETR() {
+    for (var i = 0; i < corp.scoreArea.length; i++) {
+      var scoredCard = corp.scoreArea[i];
+      if (Counters(scoredCard, "agenda") < 1) continue;
+      if (typeof scoredCard.abilities == "undefined") continue;
+      for (var j = 0; j < scoredCard.abilities.length; j++) {
+        if (this._textEndsTheRun(scoredCard.abilities[j].text)) return true;
       }
     }
-    if (evaluationContext)
-      evaluationContext.effectiveIceSubtypes.set(iceCard, ret.concat([]));
-    return ret;
+    return false;
   }
 
-  _iceHasEffectiveSubtype(
-    iceCard,
-    subtype,
-    server,
-    iceIndex,
-    evaluationContext,
-  ) {
-    return this._effectiveIceSubtypes(
-      iceCard,
-      server,
-      iceIndex,
-      evaluationContext,
-    ).includes(subtype);
-  }
-
-  _matchingBreakerForIce(iceCard, server, iceIndex, evaluationContext) {
+  //returns the Runner's installed breaker that matches this ice (using the
+  //Runner AI's own matching logic where possible, so special cases still work)
+  _matchingBreakerForIce(iceCard) {
     if (!iceCard) return null;
+    //a hosted virus breaker (e.g. Botulus) can break subroutines on its host ice
+    var hostedBreaker = this._hostedBreakerForIce(iceCard);
+    if (hostedBreaker) return hostedBreaker;
     if (
-      evaluationContext &&
-      evaluationContext.matchingBreakers.has(iceCard)
-    )
-      return evaluationContext.matchingBreakers.get(iceCard);
-    var hosted = this._hostedBreakerForIce(iceCard, evaluationContext);
-    if (hosted) return hosted;
-    var installed = evaluationContext
-      ? evaluationContext.runnerActiveCards
-      : ActiveCards(runner);
-    var best = null;
-    var bestCost = Infinity;
+      runner.AI != null &&
+      typeof runner.AI._matchingBreakerInstalled == "function"
+    ) {
+      return runner.AI._matchingBreakerInstalled(iceCard);
+    }
+    //fallback for a human Runner (no AI to ask)
+    var installed = ActiveCards(runner);
     for (var i = 0; i < installed.length; i++) {
-      var card = installed[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (
-        typeof card.AIHostedBreakContribution == "function" ||
-        card.host == iceCard
-      )
-        continue;
-      var match = null;
-      if (typeof card.AIMatchingBreakerInstalled == "function") {
-        //Pass the effective list separately so hooks can retain the real ice
-        //object for identity/server checks without mutating shared game state.
-        match = card.AIMatchingBreakerInstalled.call(
-          card,
-          iceCard,
-          this._effectiveIceSubtypes(
-            iceCard,
-            server,
-            iceIndex,
-            evaluationContext,
-          ),
-        );
-      } else if (
-        CheckSubType(card, "Icebreaker") &&
-        ((CheckSubType(card, "Fracter") &&
-          this._iceHasEffectiveSubtype(
-            iceCard,
-            "Barrier",
-            server,
-            iceIndex,
-            evaluationContext,
-          )) ||
-          (CheckSubType(card, "Decoder") &&
-            this._iceHasEffectiveSubtype(
-              iceCard,
-              "Code Gate",
-              server,
-              iceIndex,
-              evaluationContext,
-            )) ||
-          (CheckSubType(card, "Killer") &&
-            this._iceHasEffectiveSubtype(
-              iceCard,
-              "Sentry",
-              server,
-              iceIndex,
-              evaluationContext,
-            )))
-      ) {
-        match = card;
-      }
-      if (match && typeof match == "object") {
-        var cost = this._estimateBreakCost(
-          iceCard,
-          match,
-          false,
-          server,
-          iceIndex,
-          evaluationContext,
-        );
-        if (best == null || cost < bestCost) {
-          best = match;
-          bestCost = cost;
-        }
+      if (CheckSubType(installed[i], "Icebreaker")) {
+        if (BreakerMatchesIce(installed[i], iceCard)) return installed[i];
       }
     }
-    if (evaluationContext)
-      evaluationContext.matchingBreakers.set(iceCard, best);
-    return best;
+    return null;
   }
 
-  _hostedBreakContribution(iceCard) {
-    if (!iceCard || iceCard.canOnlyBreakUsingFracter) return 0;
-    var contribution = 0;
-    var hosted = iceCard.hostedCards || [];
-    for (var i = 0; i < hosted.length; i++) {
-      var card = hosted[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (!this._isHostedVirusBreaker(card, iceCard)) continue;
-      contribution +=
-        typeof card.AIHostedBreakContribution == "function"
-          ? card.AIHostedBreakContribution.call(card, iceCard)
-          : Counters(card, "virus");
+  //returns a synthetic breaker if a hosted virus breaker (e.g. Botulus) on this
+  //ice has enough counters to break the subroutines that matter, otherwise null
+  _hostedBreakerForIce(iceCard) {
+    if (!iceCard || typeof iceCard.hostedCards == "undefined") return null;
+    var requiredSubroutines = 0;
+    if (typeof iceCard.subroutines !== "undefined") {
+      for (var i = 0; i < iceCard.subroutines.length; i++) {
+        var subText = iceCard.subroutines[i].text;
+        if (this._textEndsTheRun(subText) || this._damageInText(subText) > 0)
+          requiredSubroutines++;
+      }
     }
-    return Math.max(0, contribution);
-  }
-
-  //Only synthesize a complete free breaker when it covers the shared severity list.
-  _hostedBreakerForIce(iceCard, evaluationContext) {
-    if (!iceCard) return null;
-    var required = this._requiredSubroutineIndices(
-      iceCard,
-      false,
-      evaluationContext,
-    ).length;
-    if (required > 0 && this._hostedBreakContribution(iceCard) >= required)
-      return { AIBotulus: true, AIFixedStrength: true };
+    if (requiredSubroutines < 1) return null;
+    for (var i = 0; i < iceCard.hostedCards.length; i++) {
+      var hosted = iceCard.hostedCards[i];
+      if (!this._isHostedVirusBreaker(hosted, iceCard)) continue;
+      //declarative hook: the hosted card reports how many subroutines it can break
+      var contribution =
+        typeof hosted.AIHostedBreakContribution == "function"
+          ? hosted.AIHostedBreakContribution(iceCard)
+          : Counters(hosted, "virus");
+      if (contribution >= requiredSubroutines) {
+        this._log(
+          GetTitle(hosted) +
+            " can break " +
+            requiredSubroutines +
+            " subroutine(s) on " +
+            GetTitle(iceCard) +
+            " for free",
+        );
+        //zero break/boost cost - the counters do all the work
+        return {
+          cardText: "0 credit: break 1 subroutine",
+          AIFixedStrength: true,
+          AIBotulus: true,
+        };
+      }
+    }
     return null;
   }
 
@@ -1988,6 +1293,7 @@ class CorpAI {
     //declarative hook: the hosted card reports how many subroutines it can break
     if (typeof hosted.AIHostedBreakContribution == "function")
       return hosted.AIHostedBreakContribution(iceCard) > 0;
+    if (GetTitle(hosted) == "Botulus") return true;
     //set-agnostic fallback: the standard 'hosted virus counter ... break ... subroutine' wording
     if (typeof hosted.cardText == "undefined" || hosted.cardText == null)
       return false;
@@ -2004,31 +1310,27 @@ class CorpAI {
   //set-agnostic: cards that declare the AIReducesIceStrength hook report their own
   //current reduction, while cards without the hook fall back to the Ice Carver
   //title check or to counting virus counters spent for -1 strength (Leech, Datasucker).
-  _effectiveIceStrength(iceCard, evaluationContext) {
+  _effectiveIceStrength(iceCard) {
     if (!iceCard) return 0;
-    if (
-      evaluationContext &&
-      evaluationContext.effectiveIceStrengths.has(iceCard)
-    )
-      return evaluationContext.effectiveIceStrengths.get(iceCard);
     var printedStrength = Strength(iceCard);
     //some ice cannot be weakened at all (e.g. by Ice Carver or Datasucker)
-    if (iceCard.strengthCannotBeLowered) {
-      if (evaluationContext)
-        evaluationContext.effectiveIceStrengths.set(iceCard, printedStrength);
-      return printedStrength;
-    }
+    if (iceCard.strengthCannotBeLowered) return printedStrength;
     var reduction = 0;
-    var activeCards = evaluationContext
-      ? evaluationContext.runnerActiveCards
-      : ActiveCards(runner);
+    var activeCards = ActiveCards(runner);
     for (var i = 0; i < activeCards.length; i++) {
       var card = activeCards[i];
       //only the Runner's own cards can weaken ice
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      if (card.player != runner) continue;
       //declarative hook: the card reports how much strength it currently reduces
       if (typeof card.AIReducesIceStrength == "function") {
         reduction += card.AIReducesIceStrength(iceCard);
+        continue;
+      }
+      var title = GetTitle(card);
+      if (typeof title != "string") continue; //guard against pseudo-cards
+      //Ice Carver fallback: while you are encountering a piece of ice, it gets -1 strength
+      if (title.indexOf("Ice Carver") > -1) {
+        reduction += 1;
         continue;
       }
       //virus cards that spend their counters for -1 strength each
@@ -2038,16 +1340,7 @@ class CorpAI {
     }
     var ret = printedStrength - reduction;
     if (ret < 0) ret = 0; //strength can never drop below zero
-    if (evaluationContext)
-      evaluationContext.effectiveIceStrengths.set(iceCard, ret);
     return ret;
-  }
-
-  _securityCardStrength(card, evaluationContext) {
-    if (!evaluationContext) return Strength(card);
-    if (!evaluationContext.cardStrengths.has(card))
-      evaluationContext.cardStrengths.set(card, Strength(card));
-    return evaluationContext.cardStrengths.get(card);
   }
 
   //returns true if the card spends its virus counters to reduce the strength of
@@ -2058,6 +1351,8 @@ class CorpAI {
     if (typeof card.AIReducesIceStrength == "function")
       return card.AIReducesIceStrength(iceCard) > 0;
     if (Counters(card, "virus") < 1) return false;
+    var title = GetTitle(card);
+    if (title == "Leech" || title == "Datasucker") return true;
     //set-agnostic fallback: the standard 'hosted virus counter ... strength' wording
     if (typeof card.cardText == "undefined" || card.cardText == null)
       return false;
@@ -2112,887 +1407,41 @@ class CorpAI {
     return Infinity; //no printed boost ability
   }
 
-  //A fresh Corp-owned calculator uses public rig counts and the Corp's
-  //knowledge of its own ice. Never reuse the Runner calculator: some hooks
-  //use its ownership to decide whether hidden grip contents may be inspected.
-  _securityRunCalculator() {
-    if (typeof RunCalculator == "undefined") return null;
-    var rc = new RunCalculator();
-    rc.suppressOutput = true;
-    var installed = InstalledCards(runner);
-    rc.precalculated.runnerInstalledCardsLength = installed.length;
-    rc.precalculated.runnerInstalledIcebreakersLength = installed.filter(
-      (card) => CheckSubType(card, "Icebreaker") && CheckHasAbilities(card),
-    ).length;
-    rc.precalculated.activeCards = ActiveCards(null).filter((card) =>
-      CheckHasAbilities(card),
-    );
-    return rc;
-  }
-
-  _securityIceAI(iceCard, rc, server, iceIndex, evaluationContext) {
-    if (!iceCard) return null;
-    if (evaluationContext && evaluationContext.iceAIs.has(iceCard))
-      return evaluationContext.iceAIs.get(iceCard);
-    if (!rc && evaluationContext) {
-      if (!evaluationContext.runCalculatorInitialized) {
-        evaluationContext.runCalculator = this._securityRunCalculator();
-        evaluationContext.runCalculatorInitialized = true;
-      }
-      rc = evaluationContext.runCalculator;
-    }
-    if (!rc) return null;
-    if (!server) server = GetServer(iceCard);
-    var startIceIdx = server && server.ice ? server.ice.length - 1 : iceIndex;
-    //Affordability is evaluated by the rez-plan allocator. Once a card is in
-    //that plan, let the calculator inspect the Corp-known ICE even when part
-    //of its rez cost would be paid by a target-restricted hosted source.
-    var analysisCredits = Math.max(AvailableCredits(corp), RezCost(iceCard));
-    var result = rc.IceAI(
-      iceCard,
-      analysisCredits,
-      false,
-      false,
-      typeof startIceIdx == "number" ? startIceIdx : -1,
-      corp,
-    );
-    if (evaluationContext) evaluationContext.iceAIs.set(iceCard, result);
-    return result;
-  }
-
-  _iceSubroutineEffects(iceCard, evaluationContext) {
-    var iceAI = this._securityIceAI(
-      iceCard,
-      evaluationContext ? null : this._securityRunCalculator(),
-      evaluationContext ? evaluationContext.server : undefined,
-      undefined,
-      evaluationContext,
-    );
-    return iceAI ? iceAI.sr : null;
-  }
-
-  //returns true if the given sr "OR" branch contains an effect worth spending
-  //credits to avoid. The negligible effects (corp gains a credit, minor credit
-  //swings) are not worth breaking; anything else (endTheRun, netDamage, tag,
-  //misc_moderate, misc_serious, ...) counts as requiring a break.
-  _branchRequiresBreak(branch) {
-    if (typeof branch == "undefined" || branch == null) return false;
-    for (var i = 0; i < branch.length; i++) {
-      var effect = branch[i];
-      if (
-        effect != "misc_minor" &&
-        effect != "loseCredits" &&
-        effect != "payCredits"
-      )
-        return true;
-    }
-    return false;
-  }
-
-  //Keep indices shared by regular and hosted breakers. The mandatory list
-  //excludes optional punishment; damage is broken only enough to avoid flatlining.
-  _requiredSubroutineIndices(
-    iceCard,
-    mandatoryOnly = false,
-    evaluationContext,
-  ) {
-    var cache = evaluationContext
-      ? mandatoryOnly
-        ? evaluationContext.mandatorySubroutineIndices
-        : evaluationContext.requiredSubroutineIndices
-      : null;
-    if (cache && cache.has(iceCard)) return cache.get(iceCard).concat([]);
-    var sr = this._iceSubroutineEffects(iceCard, evaluationContext);
-    var subs = iceCard.subroutines || [];
-    var indices = [];
-    var damageSubs = [];
-    var damage = 0;
-    for (var i = 0; i < subs.length; i++) {
-      if (subs[i].broken) continue;
-      var branches = sr ? sr[i] || [[]] : null;
-      if (!mandatoryOnly) {
-        if (
-          branches
-            ? branches.some((branch) => this._branchRequiresBreak(branch))
-            : this._textEndsTheRun(subs[i].text) ||
-              this._damageInText(subs[i].text) > 0
-        )
-          indices.push(i);
-        continue;
-      }
-      var etr =
-        branches && typeof iceCard.AIImplementIce == "function"
-          ? branches.length > 0 &&
-            branches.every((branch) => branch.includes("endTheRun"))
-          : this._textEndsTheRun(subs[i].text);
-      if (etr) indices.push(i);
-      else {
-        var amount =
-          branches && typeof iceCard.AIImplementIce == "function"
-            ? Math.min(
-                ...branches.map(
-                  (branch) =>
-                    branch.filter(
-                      (effect) =>
-                        effect == "netDamage" ||
-                        effect == "meatDamage" ||
-                        effect == "coreDamage",
-                    ).length,
-                ),
-              )
-            : this._damageInText(subs[i].text);
-        damage += amount;
-        if (amount > 0) damageSubs.push({ index: i, damage: amount });
-      }
-    }
-    if (mandatoryOnly) {
-      damageSubs.sort((a, b) => b.damage - a.damage);
-      for (
-        var j = 0;
-        j < damageSubs.length && damage > runner.grip.length;
-        j++
-      ) {
-        indices.push(damageSubs[j].index);
-        damage -= damageSubs[j].damage;
-      }
-    }
-    if (cache) cache.set(iceCard, indices.concat([]));
-    return indices;
-  }
-
-  _requiredSubroutines(iceCard, evaluationContext) {
-    return this._requiredSubroutineIndices(
-      iceCard,
-      false,
-      evaluationContext,
-    ).length;
-  }
-
-  //Read activation sizes/prices from existing breaker hooks, including cards
-  //without cardText. The probe is local and never changes card or game state.
-  _breakerActivationCost(
-    iceCard,
-    breaker,
-    count,
-    server,
-    iceIndex,
-    evaluationContext,
-  ) {
-    var rc = evaluationContext ? null : this._securityRunCalculator();
-    var baseIceAI = this._securityIceAI(
-      iceCard,
-      rc,
-      server,
-      iceIndex,
-      evaluationContext,
-    );
-    if (evaluationContext) rc = evaluationContext.runCalculator;
-    //Breaker hooks may retain or alter the supplied analysis object. Keep the
-    //evaluation cache immutable by giving each probe its own shallow shell.
-    var iceAI = baseIceAI ? Object.assign({}, baseIceAI) : null;
-    if (iceAI)
-      iceAI.subTypes = this._effectiveIceSubtypes(
-        iceCard,
-        server,
-        iceIndex,
-        evaluationContext,
-      );
-    if (rc && iceAI && typeof breaker.AIImplementBreaker == "function") {
-      var best = Infinity;
-      rc.ImplementIcebreaker = function (
-        point,
-        card,
-        cardStrength,
-        ice,
-        iceStrength,
-        subTypes,
-        pumpCost,
-        pumpAmount,
-        breakCost,
-        breakAmount,
-      ) {
-        if (
-          subTypes.length &&
-          !subTypes.some((type) => iceAI.subTypes.includes(type))
-        )
-          return [];
-        if (breakAmount <= 0) return [];
-        var gap = Math.max(0, iceStrength - cardStrength);
-        var pump =
-          gap > 0
-            ? pumpAmount > 0
-              ? Math.ceil(gap / pumpAmount) * pumpCost
-              : Infinity
-            : 0;
-        best = Math.min(
-          best,
-          pump + Math.ceil(count / breakAmount) * breakCost,
-        );
-        return [];
-      };
-      var point = {
-        iceIdx: 0,
-        runner_credits_spent: 0,
-        runner_credits_lost: 0,
-        runner_clicks_spent: 0,
-        virus_counters_spent: 0,
-        card_str_mods: [],
-        persistents: [],
-        sr_broken: [],
-        effects: [],
-      };
-      breaker.AIImplementBreaker.call(
-        breaker,
-        rc,
-        [],
-        point,
-        GetServer(iceCard),
-        this._securityCardStrength(breaker, evaluationContext),
-        iceAI,
-        this._effectiveIceStrength(iceCard, evaluationContext),
-        0,
-        Infinity,
-      );
-      return best;
-    }
-    var text = (breaker.cardText || "").replace(/<[^>]*>/g, "");
-    var breakMatch =
-      /(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s*:[^.]*?break\s+(?:up to\s+)?(\d+)/i.exec(
-        text,
-      );
-    var ret = breakMatch
-      ? Math.ceil(count / Number(breakMatch[2])) * Number(breakMatch[1])
-      : count * 2;
-    if (breaker.AIBreaksRegardlessOfStrength) return ret;
-    var gap =
-      this._effectiveIceStrength(iceCard, evaluationContext) -
-      this._securityCardStrength(breaker, evaluationContext);
-    if (gap > 0) {
-      var pumpMatch =
-        /(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s*:[^.]*?\+(\d+)\s*strength/i.exec(
-          text,
-        );
-      if (breaker.AIFixedStrength || !pumpMatch || Number(pumpMatch[2]) <= 0)
-        return Infinity;
-      ret += Math.ceil(gap / Number(pumpMatch[2])) * Number(pumpMatch[1]);
-    }
-    return ret;
-  }
-
-  //Avoidance cost by default; mandatoryOnly estimates just the breaks needed
-  //to continue. Partial hosted contributions reduce the remaining paid breaks.
-  _estimateBreakCost(
-    iceCard,
-    breaker,
-    mandatoryOnly = false,
-    server,
-    iceIndex,
-    evaluationContext,
-  ) {
+  //crude estimate of the credits needed to break this ice
+  //returns Infinity if it cannot be broken (no matching breaker / strength too high for its type)
+  _estimateBreakCost(iceCard, breaker) {
     if (!iceCard) return 0;
-    var count = this._requiredSubroutineIndices(
-      iceCard,
-      mandatoryOnly,
-      evaluationContext,
-    ).length;
-    count = Math.max(0, count - this._hostedBreakContribution(iceCard));
-    if (count == 0) return 0;
     if (typeof breaker == "undefined")
-      breaker = this._matchingBreakerForIce(
-        iceCard,
-        server,
-        iceIndex,
-        evaluationContext,
-      );
-    if (!breaker || breaker.AIBotulus) return Infinity;
-    return this._breakerActivationCost(
-      iceCard,
-      breaker,
-      count,
-      server,
-      iceIndex,
-      evaluationContext,
-    );
-  }
-
-  //Credit cost of a public targeted bypass, or Infinity if none is available.
-  //AIBypassesIce returns false when unavailable, true for free, or a number.
-  _iceBypassCost(iceCard, server, iceIndex, evaluationContext) {
-    if (!iceCard) return Infinity;
-    if (iceCard.bypassed) return 0;
-    var best = Infinity;
-    var activeCards = evaluationContext
-      ? evaluationContext.runnerActiveCards
-      : ActiveCards(runner);
-    for (var i = 0; i < activeCards.length; i++) {
-      var card = activeCards[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
-      var cost = false;
-      if (typeof card.AIBypassesIce == "function")
-        cost = card.AIBypassesIce.call(card, iceCard, server, iceIndex);
-      else if (typeof card.AIBypassCost == "function")
-        cost = card.AIBypassCost.call(card, iceCard, server, iceIndex);
-      else {
-        var text = (card.cardText || "").toString().toLowerCase();
-        var targetsIce = card.chosenCard == iceCard || card.host == iceCard;
-        if (targetsIce && text.indexOf("bypass") > -1) {
-          var perSub = /pay\s+(\d+)\s*(?:\[c\]|\[credit\]|credits?)\s+for each subroutine/i.exec(text);
-          cost = perSub
-            ? Number(perSub[1]) * (iceCard.subroutines || []).length
-            : 0;
-        }
-      }
-      if (cost === true) cost = 0;
-      if (typeof cost == "number" && cost >= 0) best = Math.min(best, cost);
-    }
-    return best;
-  }
-
-  _iceIsBypassed(iceCard, server, iceIndex) {
-    return (
-      this._iceBypassCost(iceCard, server, iceIndex) <=
-      this._effectiveRunnerCreditPool(server).total
-    );
-  }
-
-  _outermostIceBypassAvailable(server, activeCards) {
-    if (!server || !server.ice || server.ice.length < 1) return false;
-    if (!activeCards) activeCards = ActiveCards(runner);
-    for (var i = 0; i < activeCards.length; i++) {
-      var card = activeCards[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (
-        typeof card.AIBypassesOutermostIce == "function" &&
-        card.AIBypassesOutermostIce.call(card, server)
-      )
-        return true;
-    }
-    return false;
-  }
-
-  _outermostRelevantIce(server, eligibleIce) {
-    if (!server || !server.ice) return null;
-    for (var i = server.ice.length - 1; i >= 0; i--) {
-      var iceCard = server.ice[i];
-      if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
-      if (
-        eligibleIce ||
-        iceCard.rezzed ||
-        CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
-      )
-        return iceCard;
-    }
-    return null;
-  }
-
-  //Choose the most important ice covered by a public, once-per-run bypass.
-  //This is separate from an outermost-only bypass because some installed cards
-  //can wait and spend themselves on any one encounter.
-  _oneShotIceBypassTarget(server, eligibleIce, evaluationContext) {
-    if (!server || !server.ice) return null;
-    var activeCards = evaluationContext
-      ? evaluationContext.runnerActiveCards
-      : ActiveCards(runner);
-    var best = null;
-    var bestCost = -1;
-    for (var iceIndex = 0; iceIndex < server.ice.length; iceIndex++) {
-      var iceCard = server.ice[iceIndex];
-      if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
-      if (
-        !eligibleIce &&
-        !iceCard.rezzed &&
-        !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
-      )
-        continue;
-      var available;
-      if (
-        evaluationContext &&
-        evaluationContext.oneShotBypassAvailable.has(iceCard)
-      ) {
-        available = evaluationContext.oneShotBypassAvailable.get(iceCard);
-      } else {
-        available = false;
-        for (var i = 0; i < activeCards.length; i++) {
-          var card = activeCards[i];
-          if (card.player != runner || !CheckHasAbilities(card)) continue;
-          if (
-            typeof card.AIBypassesOneIce == "function" &&
-            card.AIBypassesOneIce.call(card, iceCard, server, iceIndex)
-          ) {
-            available = true;
-            break;
-          }
-        }
-        if (evaluationContext)
-          evaluationContext.oneShotBypassAvailable.set(iceCard, available);
-      }
-      if (!available) continue;
-      var cost = evaluationContext
-        ? this._securityIcePlanInputs(
-            iceCard,
-            server,
-            iceIndex,
-            evaluationContext,
-          ).mandatoryCost
-        : this._estimateBreakCost(
-            iceCard,
-            this._matchingBreakerForIce(iceCard, server, iceIndex),
-            true,
-          );
-      if (best == null || cost > bestCost) {
-        best = iceCard;
-        bestCost = cost;
-      }
-    }
-    return best;
-  }
-
-  //Single-ice agenda remotes are structurally fragile against one-shot bypass.
-  _serverStructuralRisk(server, evaluationContext) {
+      breaker = this._matchingBreakerForIce(iceCard);
+    if (!breaker) return Infinity;
+    //a hosted virus breaker with enough counters (e.g. Botulus) breaks for free
+    if (breaker.AIBotulus) return 0;
     if (
-      !server ||
-      typeof server.cards !== "undefined" ||
-      server.ice.length != 1 ||
-      (!(evaluationContext
-        ? evaluationContext.outermostIceBypassAvailable
-        : this._outermostIceBypassAvailable(server)) &&
-        !this._oneShotIceBypassTarget(server, undefined, evaluationContext))
+      typeof iceCard.subroutines == "undefined" ||
+      iceCard.subroutines.length < 1
     )
       return 0;
-    var agendaPoints = this._agendaPointsInServer(server);
-    var advancedAgenda = server.root.some(
-      (card) =>
-        CheckCardType(card, ["agenda"]) &&
-        Counters(card, "advancement") > 0,
-    );
-    if (agendaPoints < 1 && !advancedAgenda) return 0;
-    return Math.min(5, 2 + agendaPoints + (advancedAgenda ? 1 : 0));
-  }
-
-  //Estimate hidden single-ice threats from public information only. Relevant
-  //card definitions declare an AIHiddenThreat profile; cards with the same
-  //mechanical kind share a copy pool, so revealed Heap copies reduce the prior
-  //without requiring title checks or inspecting any card in the Runner's grip.
-  _hiddenThreatProfiles(runnerFaction) {
-    var cacheKey = runnerFaction || "__unknown__";
-    if (this._hiddenThreatProfilesByFaction.has(cacheKey))
-      return this._hiddenThreatProfilesByFaction.get(cacheKey);
-    var profiles = [];
-    for (var cardId in cardSet) {
-      var definition = cardSet[cardId];
-      var threat = definition && definition.AIHiddenThreat;
-      if (!threat || !threat.kind) continue;
-      //Faction is a public deckbuilding prior, not knowledge of the decklist.
-      //Out-of-faction copies remain possible, but are deliberately discounted.
-      var factionWeight = 0.25;
-      if (!runnerFaction || definition.faction == runnerFaction)
-        factionWeight = 1;
-      else if (definition.faction == "Neutral") factionWeight = 0.5;
-
-      profiles.push({
-        definition: definition,
-        threat: threat,
-        expectedCopies:
-          Math.max(0, threat.expectedCopies || 0) * factionWeight,
-        severity: Math.max(0, threat.severity || 1),
-      });
+    //only count the subroutines the Runner actually has to break - the ones that
+    //end the run or deal damage. Other subroutines can simply be allowed to fire,
+    //so breaking them would just waste credits (this matters for multi-subroutine ice)
+    var requiredSubroutines = 0;
+    for (var i = 0; i < iceCard.subroutines.length; i++) {
+      var subText = iceCard.subroutines[i].text;
+      if (this._textEndsTheRun(subText) || this._damageInText(subText) > 0)
+        requiredSubroutines++;
     }
-    this._hiddenThreatProfilesByFaction.set(cacheKey, profiles);
-    return profiles;
-  }
-
-  _estimateRunnerBypassRisk(server) {
-    if (!server || !server.ice || server.ice.length != 1) return 0;
-    var identity = runner.identityCard || runner.identity;
-    var runnerFaction = identity ? identity.faction : null;
-    var definitions = this._hiddenThreatProfiles(runnerFaction);
-    var profiles = {};
-    for (var profileIndex = 0; profileIndex < definitions.length; profileIndex++) {
-      var profile = definitions[profileIndex];
-      if (
-        typeof profile.threat.AppliesToServer == "function" &&
-        !profile.threat.AppliesToServer.call(profile.definition, server)
-      )
-        continue;
-      if (!profiles[profile.threat.kind])
-        profiles[profile.threat.kind] = {expectedCopies: 0, severity: 0};
-      profiles[profile.threat.kind].expectedCopies += profile.expectedCopies;
-      profiles[profile.threat.kind].severity = Math.max(
-        profiles[profile.threat.kind].severity,
-        profile.severity,
-      );
+    if (requiredSubroutines < 1) return 0;
+    var ret = requiredSubroutines * this._breakerBreakCost(breaker);
+    //a breaker that is not limited by ice strength (e.g. Quetzal's identity
+    //ability) breaks the required subroutines regardless of how strong the ice is
+    if (breaker.AIBreaksRegardlessOfStrength) return ret;
+    var strengthGap = this._effectiveIceStrength(iceCard) - Strength(breaker);
+    if (strengthGap > 0) {
+      var boostCost = this._breakerBoostCost(breaker);
+      if (boostCost == Infinity) return Infinity;
+      ret += Math.ceil(strengthGap) * boostCost;
     }
-
-    var heap = runner.heap || [];
-    var gripSize = runner.grip ? runner.grip.length : 0;
-    var unknownPoolSize = gripSize;
-    if (runner.stack) unknownPoolSize += runner.stack.length;
-    //The normal game state always exposes Stack size. Keep isolated callers
-    //conservative when it is unavailable rather than treating the entire prior
-    //as certain to be in a five-card grip.
-    if (unknownPoolSize < gripSize + 1) unknownPoolSize = gripSize + 40;
-    var totalRisk = 0;
-
-    for (var kind in profiles) {
-      var revealedCopies = 0;
-      for (var i = 0; i < heap.length; i++) {
-        var heapThreat = heap[i] && heap[i].AIHiddenThreat;
-        if (heapThreat && heapThreat.kind == kind) revealedCopies++;
-      }
-      var remainingCopies = Math.max(
-        0,
-        profiles[kind].expectedCopies - revealedCopies,
-      );
-      if (remainingCopies <= 0 || gripSize <= 0) continue;
-
-      //Hypergeometric-style probability that at least one remaining copy is in
-      //the public-size grip. Fractional expected copies are allowed because the
-      //faction prior discounts imported cards.
-      var missProbability = 1;
-      var copies = Math.min(remainingCopies, unknownPoolSize);
-      for (var draw = 0; draw < gripSize; draw++) {
-        missProbability *= Math.max(
-          0,
-          (unknownPoolSize - copies - draw) / (unknownPoolSize - draw),
-        );
-      }
-      totalRisk += profiles[kind].severity * (1 - missProbability);
-    }
-    return Math.min(4, totalRisk);
-  }
-
-  //Return the Runner's public click allotment relevant to the next run. During
-  //the Corp turn, the exhausted tracker belongs to the previous Runner turn.
-  _projectedRunnerClicks() {
-    var clicks = Math.max(0, runner.clickTracker || 0);
-    if (
-      typeof playerTurn != "undefined" &&
-      playerTurn == corp &&
-      typeof AllottedClicks == "function"
-    ) {
-      clicks = AllottedClicks(runner) + Math.max(0, runner.tempBonusClicks || 0);
-    }
-    return Math.max(0, clicks);
-  }
-
-  //Each available click can initiate an ordinary run. If this server is
-  //already being attacked, include the current run as well as future reruns.
-  _projectedRunnerRuns(server) {
-    var runs = this._projectedRunnerClicks();
-    if (
-      !!server &&
-      typeof attackedServer != "undefined" &&
-      attackedServer == server
-    )
-      runs++;
-    return runs;
-  }
-
-  //Return a conservative upper bound on the credits the Runner can bring to a
-  //run on this server. Unlike Credits(runner), this includes public run-only
-  //money and clicks that can be converted before initiating the run.
-  _effectiveRunnerCreditPool(server) {
-    var evaluatingActiveRun =
-      !!server &&
-      typeof attackedServer != "undefined" &&
-      attackedServer == server;
-    var baseCredits = Math.max(0, runner.creditPool || 0);
-    var temporaryCredits = evaluatingActiveRun
-      ? Math.max(0, runner.temporaryCredits || 0)
-      : 0;
-    var badPublicityCredits = evaluatingActiveRun
-      ? 0
-      : Math.max(0, corp.badPublicity || 0);
-    var recurringCredits = 0;
-    var activeCards = ActiveCards(runner);
-    var spendTargets = activeCards.filter(
-      (card) =>
-        card &&
-        card.player == runner &&
-        CheckHasAbilities(card) &&
-        (CheckSubType(card, "Icebreaker") ||
-          typeof card.AIImplementBreaker == "function" ||
-          typeof card.AIBypassesIce == "function" ||
-          typeof card.AIBypassesOneIce == "function" ||
-          typeof card.AIBypassesOutermostIce == "function"),
-    );
-
-    //Some canUseCredits hooks are route-sensitive and consult attackedServer.
-    //Provide that public hypothetical context, then restore the real run state.
-    var previousAttackedServer =
-      typeof attackedServer == "undefined" ? null : attackedServer;
-    if (typeof attackedServer != "undefined") attackedServer = server;
-    this._hypotheticalDepth++;
-    try {
-      for (var i = 0; i < activeCards.length; i++) {
-        var source = activeCards[i];
-        if (
-          !source ||
-          source.player != runner ||
-          !CheckHasAbilities(source)
-        )
-          continue;
-        var sourceCredits = 0;
-        if (
-          typeof source.credits == "number" &&
-          source.credits > 0 &&
-          typeof source.canUseCredits == "function"
-        ) {
-          for (var j = 0; j < spendTargets.length; j++) {
-            if (source.canUseCredits.call(source, "using", spendTargets[j])) {
-              sourceCredits = source.credits;
-              break;
-            }
-          }
-        }
-        //AIRunPoolCreditOffset covers public server-specific run credits that
-        //cannot be discovered reliably through canUseCredits alone. Taking the
-        //larger value prevents cards which expose both interfaces being counted
-        //twice (for example, a server-restricted recurring-credit source).
-        if (typeof source.AIRunPoolCreditOffset == "function") {
-          var offset = Number(
-            source.AIRunPoolCreditOffset.call(source, server, null),
-          );
-          if (isFinite(offset)) sourceCredits = Math.max(sourceCredits, offset);
-        }
-        recurringCredits += Math.max(0, sourceCredits);
-      }
-    } finally {
-      this._hypotheticalDepth--;
-      if (typeof attackedServer != "undefined")
-        attackedServer = previousAttackedServer;
-    }
-
-    var clicks = this._projectedRunnerClicks();
-    //One click must remain to initiate an ordinary run. Once a run has begun,
-    //click-for-credit is no longer available.
-    var clickCredits = evaluatingActiveRun ? 0 : Math.max(0, clicks - 1);
-    return {
-      baseCredits: baseCredits,
-      temporaryCredits: temporaryCredits,
-      recurringCredits: recurringCredits,
-      badPublicityCredits: badPublicityCredits,
-      clickCredits: clickCredits,
-      total:
-        baseCredits +
-        temporaryCredits +
-        recurringCredits +
-        badPublicityCredits +
-        clickCredits,
-    };
-  }
-
-  //Return whether the Corp can pay all of these rez costs from its base pool
-  //and the currently active, target-restricted hosted credit sources. This is
-  //a small max-flow calculation: each hosted source can fund only the ICE for
-  //which its canUseCredits hook permits payment, while base credits fund any.
-  _canFundRezPlan(iceCards) {
-    var demands = iceCards.map((card) => Math.max(0, RezCost(card)));
-    var totalDemand = demands.reduce((total, cost) => total + cost, 0);
-    var baseCredits = Math.max(0, Credits(corp));
-    if (totalDemand <= baseCredits) return true;
-
-    var sources = [];
-    var activeCards = ActiveCards(corp);
-    for (var i = 0; i < activeCards.length; i++) {
-      var source = activeCards[i];
-      if (
-        typeof source.credits != "number" ||
-        source.credits <= 0 ||
-        typeof source.canUseCredits != "function"
-      )
-        continue;
-      var eligible = [];
-      for (var j = 0; j < iceCards.length; j++) {
-        eligible.push(
-          !!source.canUseCredits.call(source, "rezzing", iceCards[j]),
-        );
-      }
-      if (eligible.some((value) => value))
-        sources.push({ credits: source.credits, eligible: eligible });
-    }
-
-    var requiredHosted = totalDemand - baseCredits;
-    if (
-      sources.reduce((total, source) => total + source.credits, 0) <
-      requiredHosted
-    )
-      return false;
-
-    //Edmonds-Karp over source -> hosted-credit nodes -> ICE demand nodes -> sink.
-    var sourceNode = 0;
-    var creditOffset = 1;
-    var iceOffset = creditOffset + sources.length;
-    var sinkNode = iceOffset + iceCards.length;
-    var size = sinkNode + 1;
-    var capacity = Array.from({ length: size }, () =>
-      new Array(size).fill(0),
-    );
-    for (var i = 0; i < sources.length; i++) {
-      capacity[sourceNode][creditOffset + i] = sources[i].credits;
-      for (var j = 0; j < iceCards.length; j++) {
-        if (sources[i].eligible[j])
-          capacity[creditOffset + i][iceOffset + j] = sources[i].credits;
-      }
-    }
-    for (var j = 0; j < demands.length; j++)
-      capacity[iceOffset + j][sinkNode] = demands[j];
-
-    var flow = 0;
-    while (flow < requiredHosted) {
-      var parent = new Array(size).fill(-1);
-      parent[sourceNode] = sourceNode;
-      var queue = [sourceNode];
-      while (queue.length > 0 && parent[sinkNode] < 0) {
-        var from = queue.shift();
-        for (var to = 0; to < size; to++) {
-          if (parent[to] < 0 && capacity[from][to] > 0) {
-            parent[to] = from;
-            queue.push(to);
-          }
-        }
-      }
-      if (parent[sinkNode] < 0) break;
-      var amount = Infinity;
-      for (var node = sinkNode; node != sourceNode; node = parent[node])
-        amount = Math.min(amount, capacity[parent[node]][node]);
-      for (var node = sinkNode; node != sourceNode; node = parent[node]) {
-        capacity[parent[node]][node] -= amount;
-        capacity[node][parent[node]] += amount;
-      }
-      flow += amount;
-    }
-    return flow >= requiredHosted;
-  }
-
-  _securityEvaluationContext(server) {
-    var runnerActiveCards = ActiveCards(runner);
-    return {
-      server: server,
-      runnerActiveCards: runnerActiveCards,
-      outermostIceBypassAvailable: this._outermostIceBypassAvailable(
-        server,
-        runnerActiveCards,
-      ),
-      runCalculator: null,
-      runCalculatorInitialized: false,
-      iceAIs: new Map(),
-      effectiveIceSubtypes: new Map(),
-      effectiveIceStrengths: new Map(),
-      cardStrengths: new Map(),
-      requiredSubroutineIndices: new Map(),
-      mandatorySubroutineIndices: new Map(),
-      matchingBreakers: new Map(),
-      oneShotBypassAvailable: new Map(),
-      icePlanInputs: new Map(),
-    };
-  }
-
-  _securityIcePlanInputs(iceCard, server, iceIndex, evaluationContext) {
-    if (evaluationContext.icePlanInputs.has(iceCard))
-      return evaluationContext.icePlanInputs.get(iceCard);
-    var breaker = this._matchingBreakerForIce(
-      iceCard,
-      server,
-      iceIndex,
-      evaluationContext,
-    );
-    var inputs = {
-      bypassCost: this._iceBypassCost(
-        iceCard,
-        server,
-        iceIndex,
-        evaluationContext,
-      ),
-      breaker: breaker,
-      avoidanceCost: this._estimateBreakCost(
-        iceCard,
-        breaker,
-        false,
-        server,
-        iceIndex,
-        evaluationContext,
-      ),
-      mandatoryCost: this._estimateBreakCost(
-        iceCard,
-        breaker,
-        true,
-        server,
-        iceIndex,
-        evaluationContext,
-      ),
-    };
-    evaluationContext.icePlanInputs.set(iceCard, inputs);
-    return inputs;
-  }
-
-  _icePlanOutcome(server, eligibleIce, evaluationContext) {
-    if (!evaluationContext)
-      evaluationContext = this._securityEvaluationContext(server);
-    var outcome = {
-      hasHardLockout: false,
-      totalBreakCost: 0,
-      totalMandatoryBreakCost: 0,
-      reasons: [],
-      rezCost: 0,
-    };
-    for (var i = 0; i < eligibleIce.length; i++) {
-      if (!eligibleIce[i].rezzed)
-        outcome.rezCost += Math.max(0, RezCost(eligibleIce[i]));
-    }
-    var outermostBypassTarget = evaluationContext.outermostIceBypassAvailable
-      ? this._outermostRelevantIce(server, eligibleIce)
-      : null;
-    var oneShotBypassTarget = this._oneShotIceBypassTarget(
-      server,
-      eligibleIce,
-      evaluationContext,
-    );
-    for (var routeIndex = 0; routeIndex < server.ice.length; routeIndex++) {
-      var iceCard = server.ice[routeIndex];
-      if (eligibleIce.indexOf(iceCard) < 0) continue;
-      var inputs = this._securityIcePlanInputs(
-        iceCard,
-        server,
-        routeIndex,
-        evaluationContext,
-      );
-      var bypassCost = inputs.bypassCost;
-      if (
-        iceCard == outermostBypassTarget ||
-        iceCard == oneShotBypassTarget
-      ) {
-        outcome.reasons.push(GetTitle(iceCard) + " can be bypassed");
-        continue;
-      }
-      var avoidanceCost = inputs.avoidanceCost;
-      if (bypassCost < avoidanceCost) {
-        avoidanceCost = bypassCost;
-        outcome.reasons.push(GetTitle(iceCard) + " has a targeted bypass");
-      }
-      outcome.totalBreakCost += avoidanceCost;
-      var mandatoryCost = inputs.mandatoryCost;
-      if (bypassCost < mandatoryCost) mandatoryCost = bypassCost;
-      if (mandatoryCost == Infinity) {
-        outcome.hasHardLockout = true;
-        outcome.reasons.push(
-          GetTitle(iceCard) + " has mandatory breaks with no capable breaker",
-        );
-      }
-      outcome.totalMandatoryBreakCost += mandatoryCost;
-    }
-    return outcome;
-  }
-
-  _icePlanIsBetter(candidate, current) {
-    if (!current) return true;
-    if (candidate.hasHardLockout != current.hasHardLockout)
-      return candidate.hasHardLockout;
-    if (candidate.totalMandatoryBreakCost != current.totalMandatoryBreakCost)
-      return candidate.totalMandatoryBreakCost > current.totalMandatoryBreakCost;
-    if (candidate.totalBreakCost != current.totalBreakCost)
-      return candidate.totalBreakCost > current.totalBreakCost;
-    return candidate.rezCost < current.rezCost;
+    return ret;
   }
 
   //Estimates whether the Runner could breach this server this turn.
@@ -3000,260 +1449,103 @@ class CorpAI {
   //or must spend more credits than they have to break the ice that would stop them.
   //Takes into account Runner identity abilities (e.g. Quetzal), hosted virus
   //breakers (e.g. Botulus) and strength-reduction cards (e.g. Leech, Ice Carver).
-  //Returns security, break costs, the effective runnerCredits ceiling and its
-  //runnerCreditPool component breakdown, structural/public risks, and reasons.
-  //Repeated evaluations of one server within a Choice() are served from a
-  //cache, but only on the real board: never while a planning probe has changed
-  //it (_hypotheticalDepth), never for an evaluation nested inside another, and
-  //keyed by a fingerprint of the public board as well as the server.
+  //Returns {isSecure, hasHardLockout, totalBreakCost, runnerCredits, reasons}
   _evaluateServerSecurity(server) {
-    var cache = this._securityCache;
-    var cacheable =
-      cache && server && this._hypotheticalDepth === 0 && this._securityEvaluating === 0;
-    var key = cacheable ? this._securityBoardKey() : null;
-    var entries = cacheable ? cache.get(server) : null;
-    if (entries && entries.has(key)) {
-      var hit = entries.get(key);
-      if (this._securityCacheVerify) {
-        var fresh = this._evaluateServerSecurityCounted(server);
-        if (!this._sameSecurityResult(hit, fresh))
-          throw new Error("Stale security cache result for " + server.serverName);
-      }
-      return hit;
-    }
-    var result = this._evaluateServerSecurityCounted(server);
-    if (cacheable && this._hypotheticalDepth === 0) {
-      if (!entries) cache.set(server, (entries = new Map()));
-      entries.set(key, result);
-    }
-    return result;
-  }
-
-  //Give a synchronous entry point called outside Choice() (by the engine or a
-  //card) the same one-call cache lifetime.
-  _withSecurityCache(evaluate) {
-    this._securityCache = new Map();
-    try {
-      return evaluate();
-    } finally {
-      this._securityCache = null;
-    }
-  }
-
-  _evaluateServerSecurityCounted(server) {
-    this._securityEvaluating++;
-    try {
-      return this._evaluateServerSecurityUncached(server);
-    } finally {
-      this._securityEvaluating--;
-    }
-  }
-
-  //Public board state a security result depends on. A second guard behind
-  //_hypotheticalDepth: a probe that changes any of this gets a fresh result.
-  _securityBoardKey() {
-    var referencedCards = new Map();
-    var remember = (cards) =>
-      (cards || []).forEach((card) => {
-        if (card && !referencedCards.has(card))
-          referencedCards.set(card, referencedCards.size);
-      });
-    var allServers = [corp.HQ, corp.RnD, corp.archives].concat(
-      corp.remoteServers || [],
-    );
-    allServers.forEach((server) => {
-      if (!server) return;
-      remember(server.ice);
-      remember(server.root);
-    });
-    var rig = runner.rig || {};
-    remember(rig.programs);
-    remember(rig.hardware);
-    remember(rig.resources);
-    remember(runner.cards);
-    var referenceKey = (card) =>
-      !card ? "-" : referencedCards.has(card) ? referencedCards.get(card) : "?";
-    //Counters() discovers the same active modifier list afresh for every
-    //card/property pair. A board fingerprint is one synchronous snapshot, so
-    //discover each list once and apply it to every referenced card.
-    var counterTypes = ["advancement", "power", "virus", "credits"];
-    var counterTriggers = {};
-    counterTypes.forEach((type) => {
-      var callbackName =
-        "modify" + type.charAt(0).toUpperCase() + type.slice(1);
-      counterTriggers[type] = {
-        callbackName: callbackName,
-        choices: ChoicesActiveTriggers(callbackName),
-      };
-    });
-    var effectiveCounter = (card, type) => {
-      var value = typeof card[type] == "undefined" ? 0 : card[type];
-      var entry = counterTriggers[type];
-      for (var i = 0; i < entry.choices.length; i++) {
-        var modifier = entry.choices[i].card;
-        value += modifier[entry.callbackName].Resolve.call(modifier, card);
-      }
-      return Math.max(0, value);
-    };
-    var cardKey = (card) =>
-      card.setNumber +
-      (card.rezzed ? "r" : "") +
-      (card.bypassed ? "b" : "") +
-      (card.usedThisTurn ? "u" : "") +
-      ":" + referenceKey(card.chosenCard) +
-      ":" + effectiveCounter(card, "advancement") +
-      ":" + effectiveCounter(card, "power") +
-      ":" + effectiveCounter(card, "virus") +
-      ":" + effectiveCounter(card, "credits") +
-      ":" + (card.hostedCards ? card.hostedCards.length : 0);
-    var list = (cards) => (cards || []).map(cardKey).join(",");
-    var serverKey = (server) => (server ? list(server.ice) + "|" + list(server.root) : "-");
-    return [
-      corp.creditPool, corp.clickTracker, corp.badPublicity, (corp.scoreArea || []).length,
-      runner.creditPool, runner.temporaryCredits, runner.clickTracker,
-      runner.tempBonusClicks, runner.tags, (runner.scoreArea || []).length,
-      typeof playerTurn == "undefined" ? "" : playerTurn == corp ? "corp" : playerTurn == runner ? "runner" : "other",
-      (runner.grip || []).length, corp.HQ && corp.HQ.cards ? corp.HQ.cards.length : 0,
-      list(rig.programs), list(rig.hardware), list(rig.resources), list(runner.cards),
-      typeof attackedServer == "undefined" || !attackedServer ? "" : attackedServer.serverName,
-      typeof approachIce == "undefined" ? "" : approachIce,
-      typeof encountering == "undefined" ? "" : encountering,
-      typeof currentPhase == "undefined" || !currentPhase ? "" : currentPhase.identifier,
-      allServers.map(serverKey).join(";"),
-    ].join("#");
-  }
-
-  //For _securityCacheVerify: results match when their values match (cards and
-  //other game objects by identity).
-  _sameSecurityResult(a, b, depth = 0) {
-    if (a === b) return true;
-    if (!a || !b || typeof a != "object" || typeof b != "object") return false;
-    if (a.isCard || b.isCard || depth > 4) return false;
-    var keys = Object.keys(a);
-    if (keys.length != Object.keys(b).length) return false;
-    return keys.every((k) => this._sameSecurityResult(a[k], b[k], depth + 1));
-  }
-
-  _evaluateServerSecurityUncached(server) {
-    var effectiveCredits = this._effectiveRunnerCreditPool(server);
     var result = {
       isSecure: false,
       hasHardLockout: false,
       totalBreakCost: 0,
-      totalMandatoryBreakCost: 0,
-      runnerCredits: effectiveCredits.total,
-      runnerCreditPool: effectiveCredits,
-      structuralRisk: 0,
-      publicThreatRisk: 0,
-      deterrence: 0,
+      runnerCredits: Credits(runner),
       reasons: [],
     };
     if (!server) return result;
-    var evaluationContext = this._securityEvaluationContext(server);
-    result.structuralRisk = this._serverStructuralRisk(
-      server,
-      evaluationContext,
-    );
-    result.publicThreatRisk = this._estimateRunnerBypassRisk(server);
-    result.deterrence = this._tagPunishmentDeterrence(server);
+    //a global way to end the run (e.g. a scored Nisei MK II counter) can save any server
+    if (this._hasGlobalETR()) {
+      result.hasHardLockout = true;
+      result.reasons.push("global end the run available");
+    }
     //defensive upgrades can prevent the breach outright
     if (this._hasDefensiveUpgrade(server)) {
       result.hasHardLockout = true;
       result.reasons.push("defensive upgrade prevents breach");
     }
-    //Choose the strongest server-local rez plan the Corp can actually fund.
-    //The Corp may decline a weak outer rez to preserve credits for a decisive
-    //inner layer, and target-restricted hosted credits are allocated only to
-    //ICE they can legally pay for.
-    var rezzedIce = server.ice.filter((card) => card.rezzed);
-    var unrezzedIce = server.ice.filter((card) => !card.rezzed);
-    var bestPlan = null;
-    var bestCards = rezzedIce.concat([]);
-    var considerPlans = (index, selected) => {
-      if (index >= unrezzedIce.length) {
-        var eligible = server.ice.filter(
-          (card) => card.rezzed || selected.indexOf(card) > -1,
-        );
-        var outcome = this._icePlanOutcome(
-          server,
-          eligible,
-          evaluationContext,
-        );
-        if (this._icePlanIsBetter(outcome, bestPlan)) {
-          bestPlan = outcome;
-          bestCards = eligible;
-        }
-        return;
-      }
-      considerPlans(index + 1, selected);
-      var withCard = selected.concat([unrezzedIce[index]]);
-      if (this._canFundRezPlan(withCard))
-        considerPlans(index + 1, withCard);
-    };
-    considerPlans(0, []);
-    if (!bestPlan)
-      bestPlan = this._icePlanOutcome(
-        server,
-        rezzedIce,
-        evaluationContext,
-      );
-    result.hasHardLockout = result.hasHardLockout || bestPlan.hasHardLockout;
-    result.totalBreakCost = bestPlan.totalBreakCost;
-    result.totalMandatoryBreakCost = bestPlan.totalMandatoryBreakCost;
-    result.reasons = result.reasons.concat(bestPlan.reasons);
-    for (var i = 0; i < unrezzedIce.length; i++) {
-      if (bestCards.indexOf(unrezzedIce[i]) < 0)
+    var runnerHandSize = runner.grip.length;
+    for (var i = 0; i < server.ice.length; i++) {
+      var iceCard = server.ice[i];
+      //unrezzed ice we can't afford is effectively not there
+      if (
+        !iceCard.rezzed &&
+        !CheckCredits(corp, RezCost(iceCard), "rezzing", iceCard)
+      )
+        continue;
+      var breaker = this._matchingBreakerForIce(iceCard);
+      var botulus = breaker && breaker.AIBotulus;
+      //disabled ice (hosted cards / Femme Fatale) provides no protection, unless
+      //a hosted virus breaker (e.g. Botulus) is breaking subroutines for the Runner
+      if (this._iceIsDisabled(iceCard) && !botulus) continue;
+      var endsTheRun = this._iceHasETR(iceCard);
+      var lethal = this._iceIsLethal(iceCard, runnerHandSize);
+      //note the ways the Runner can reduce the cost/effectiveness of this ice
+      //(Botulus is only returned as a breaker when it can cover the required subroutines)
+      if (botulus) {
         result.reasons.push(
-          GetTitle(unrezzedIce[i]) + " omitted from best affordable rez plan",
+          "Botulus breaks subroutines on " + GetTitle(iceCard) + " for free",
         );
+      }
+      var effectiveStrength = this._effectiveIceStrength(iceCard);
+      if (Strength(iceCard) != effectiveStrength) {
+        result.reasons.push(
+          GetTitle(iceCard) +
+            " is effectively strength " +
+            effectiveStrength +
+            " for the Runner",
+        );
+      }
+      if (!breaker) {
+        //nothing the Runner has can avoid this ice
+        if (endsTheRun) {
+          result.hasHardLockout = true;
+          result.reasons.push(
+            GetTitle(iceCard) + " ends the run with no matching breaker",
+          );
+        } else if (lethal) {
+          result.hasHardLockout = true;
+          result.reasons.push(
+            GetTitle(iceCard) + " is lethal with no matching breaker",
+          );
+        }
+        continue;
+      }
+      //only ice the Runner *must* break contributes to the cost of getting in
+      //(non-ETR, non-lethal subroutines can simply be allowed to fire)
+      if (!endsTheRun && !lethal) continue;
+      result.totalBreakCost += this._estimateBreakCost(iceCard, breaker);
     }
-    var globalETRUses = this._globalETRUses(server);
-    var projectedRuns = this._projectedRunnerRuns(server);
-    if (globalETRUses > 0 && globalETRUses >= projectedRuns) {
-      result.hasHardLockout = true;
-      result.reasons.push(
-        "global end the run covers " + projectedRuns + " projected runs",
-      );
-    } else if (globalETRUses > 0) {
-      //A finite supply makes the Runner pay this route again after each ETR.
-      result.totalMandatoryBreakCost +=
-        globalETRUses * result.totalMandatoryBreakCost;
-      result.reasons.push(
-        "global end the run adds " + globalETRUses + " repeated route cost",
-      );
-    }
-    if (result.totalMandatoryBreakCost > result.runnerCredits) {
+    if (result.totalBreakCost > result.runnerCredits) {
       result.reasons.push(
         "break cost " +
-          result.totalMandatoryBreakCost +
+          result.totalBreakCost +
           " > Runner credits " +
           result.runnerCredits,
       );
     }
     result.isSecure =
-      result.hasHardLockout ||
-      result.totalMandatoryBreakCost > result.runnerCredits;
+      result.hasHardLockout || result.totalBreakCost > result.runnerCredits;
+    if (result.isSecure) {
+      this._log(
+        ServerName(server) +
+          " appears secure: " +
+          (result.reasons.length > 0
+            ? result.reasons.join("; ")
+            : "unaffordable"),
+      );
+    }
     return result;
-  }
-
-  //Security evaluation is used repeatedly while scoring possible actions. Keep
-  //that calculation side-effect free, and emit its diagnostic only from the
-  //single ranked-protection report for the current Corp decision.
-  _logServerSecurityEvaluation(server, result) {
-    if (!server || !result || !result.isSecure) return;
-    this._log(
-      ServerName(server) +
-        " appears secure: " +
-        (result.reasons.length > 0
-          ? result.reasons.join("; ")
-          : "unaffordable"),
-    );
   }
 
   _protectionScore(
     server, //higher number = more protected
     options, //ignoreSuccessfulRuns, ignoreBackdoorFromArchives, returnArchivesLowerScoreForHQIfBackdoor
-    securityEvaluation, //optional result already calculated for this exact server state
   ) {
     if (typeof options == "undefined") {
       console.error("options not defined for call to corp.AI._protectionScore");
@@ -3267,34 +1559,17 @@ class CorpAI {
     var ret = 0;
     //servers with obsolete bluffs get bonus protection score (they don't really need protecting)
     if (this._obsoleteBluffInstalledInServer(server)) ret += 5; //the value is arbitrary, test and tweak
-    //A live tag punishment is real deterrence, but does not alter deterministic
-    //security or claim that the Runner is physically unable to breach.
-    ret += this._tagPunishmentDeterrence(server);
     //protection score depends on ice and upgrades protecting
     ret += this._iceAndRootProtection(server);
-    //A valuable one-ice remote is still brittle when the public board exposes
-    //an outermost-ice bypass; make adding a second layer more urgent.
-    ret -= this._serverStructuralRisk(server);
-    //Hidden events never change deterministic security or run-cost math. They
-    //only make a brittle one-ice server somewhat more urgent to reinforce.
-    ret -= this._estimateRunnerBypassRisk(server);
     //a server the Runner cannot get into needs no further protection
     //(the 2 is arbitrary, test and tweak - bounded so it doesn't swamp other factors)
     if (server.ice.length > 0 || server.root.length > 0) {
-      var security = securityEvaluation;
-      if (typeof security == "undefined")
-        security = this._evaluateServerSecurity(server);
-      if (security.isSecure) ret += 2;
+      if (this._evaluateServerSecurity(server).isSecure) ret += 2;
     }
     if (!options.ignoreSuccessfulRuns) {
       //if it is being run successfully a lot, need extra protection
       var successfulRuns = 0;
-      //Archives uses the recent, state-aware pressure model below instead of a
-      //permanent lifetime counter. Backdoor runs retain HQ's historical signal.
-      if (
-        (server != corp.archives || archivesIsBackdoorToHQ) &&
-        typeof server.AISuccessfulRuns !== "undefined"
-      )
+      if (typeof server.AISuccessfulRuns !== "undefined")
         successfulRuns = server.AISuccessfulRuns;
       //if archives is a backdoor to HQ, consider successful runs on HQ
       if (
@@ -3308,41 +1583,34 @@ class CorpAI {
       if (successfulRuns > 0) ret -= Math.round(Math.sqrt(successfulRuns));
     }
     //if it is archives we will deprioritise protection (if it is not a backdoor into HQ)
-    if (server == corp.archives && !archivesIsBackdoorToHQ) {
-      ret += 3; //archives (the 3 is arbitrary)
-      ret -= this._serverRunPressure(server, securityEvaluation).penalty;
-    }
+    if (server == corp.archives && !archivesIsBackdoorToHQ) ret += 3; //archives (the 3 is arbitrary)
     //if it is HQ (or backdoor), evaluate danger based on ICE protection and agenda count
     if (
       server == corp.HQ ||
       (server == corp.archives && archivesIsBackdoorToHQ)
     ) {
-      var hqRealProtection = this._iceAndRootProtection(server);
-      var rndRealProtection = this._iceAndRootProtection(corp.RnD);
+      var hqIce = server.ice.length;
       var agendaCount = this._agendasInServer(server);
-      if (hqRealProtection < rndRealProtection) {
-        // R&D is currently the safer home for agendas — HQ shouldn't be
-        // treated as safe just because it has *some* ice, only because
-        // it's genuinely at least as well-defended as the alternative.
+      // When HQ has 0 ICE, hand size does NOT equal safety - drawing agendas increases density
+      if (hqIce === 0) {
+        // Severely penalize protection score when HQ is naked - it's a critical hazard
         ret -= 5;
+        // Additional penalty for each agenda in HQ when unprotected
         ret -= agendaCount * 2;
         this._log(
-          "HQ WEAKER THAN R&D: protection " +
-            hqRealProtection +
-            " vs " +
-            rndRealProtection +
-            " with " +
+          "HQ CRITICAL: 0 ICE protecting HQ with " +
             agendaCount +
             " agenda(s) - protection score penalized",
         );
       } else {
+        // Normal evaluation when HQ has ICE
         ret += corp.HQ.cards.length - this._agendaPointsInServer(corp.HQ) - 2.5;
       }
     }
-    //Central multi-access and alternative central win conditions make the
-    //relevant central more urgent than an equivalently defended remote.
-    if (server == corp.HQ || server == corp.RnD)
-      ret -= this._centralServerThreat(server).penalty;
+    //if it is R&D and there is extra threat e.g. a Conduit, need more protection
+    if (server == corp.RnD) {
+      ret -= this._extraThreatOnRnD();
+    }
     if (options.returnArchivesLowerScoreForHQIfBackdoor) {
       //if it is HQ we will return the lowest protection of either HQ or Archives
       if (server == corp.HQ && archivesIsBackdoorToHQ) {
@@ -3356,15 +1624,11 @@ class CorpAI {
   //returns true if we don't want to add more protection to this server
   _NoMoreProtectionForThisServer(server) {
     if (!server) return false;
-    var deceptionTarget = this._deceptionProtectionTarget(server);
-    if (deceptionTarget !== null && server.ice.length >= deceptionTarget)
-      return true;
     //for now we'll just use this check to limit AIAvoidInstallingOverThis asset protection to 1 ice
     for (var i = 0; i < server.root.length; i++) {
       if (
         server.root[i].cardType == "asset" &&
         server.root[i].AIAvoidInstallingOverThis &&
-        typeof server.root[i].AIPunishesAccess != "function" &&
         server.ice.length > 0
       ) {
         return true;
@@ -3373,195 +1637,72 @@ class CorpAI {
     return false; //usually we are ok with adding more ice
   }
 
-  //Returns every eligible protection target, weakest first. Keeping the full
-  //ranking lets consecutive install actions protect different insecure servers
-  //instead of repeatedly throwing away all but the weakest result.
-  _rankedServersToProtect(ignoreArchives = false) {
-    var entries = [];
-    var order = 0;
-    var addServer = (server, name, scoreAdjustment = 0) => {
-      if (server && this._NoMoreProtectionForThisServer(server)) return;
-      var debt = server ? this._serverProtectionDebt.get(server) || 0 : 0;
-      var security = server ? this._evaluateServerSecurity(server) : null;
-      var score = this._protectionScore(server, {}, security) + scoreAdjustment;
-      entries.push({
-        server: server,
-        name: name,
-        score: score,
-        adjustedScore: score - debt,
-        debt: debt,
-        security: security,
-        isSecure: security ? security.isSecure : false,
-        order: order++,
-      });
-    };
-
-    //Preserve the old faction-based tie break while making all scores visible.
-    if (runner.identityCard.faction == "Shaper") {
-      addServer(corp.RnD, "R&D");
-      addServer(corp.HQ, "HQ");
-    } else {
-      addServer(corp.HQ, "HQ");
-      addServer(corp.RnD, "R&D");
-    }
-
-    for (var i = 0; i < corp.remoteServers.length; i++) {
-      var remote = corp.remoteServers[i];
-      var scoringAdjustment = this._isAScoringServer(remote)
-        ? -this._agendasInHand()
-        : 0;
-      addServer(remote, remote.serverName, scoringAdjustment);
-    }
-
-    if (this._emptyProtectedRemotes().length == 0)
-      addServer(null, "null");
-
-    if (!ignoreArchives) addServer(corp.archives, "archives");
-
-    //Preserve the legacy HVT guarantee: when the natural winner is a generic
-    //remote/new server, redirect that protection action to the HVT's server.
-    if (this._HVTsInstalled() > 0) {
-      var hvtServer = this._HVTserver();
-      var hvtEntry = entries.find((entry) => entry.server == hvtServer);
-      var naturalWinner = entries.slice().sort(
-        (a, b) => a.adjustedScore - b.adjustedScore || a.order - b.order,
-      );
-      naturalWinner = naturalWinner.length > 0 ? naturalWinner[0] : null;
-      var genericRemoteWon =
-        naturalWinner &&
-        naturalWinner.server != hvtServer &&
-        (naturalWinner.server == null ||
-          typeof naturalWinner.server.cards == "undefined");
-      if (hvtEntry && genericRemoteWon) hvtEntry.hvtOverride = true;
-    }
-
-    entries.sort(
-      (a, b) =>
-        (b.hvtOverride ? 1 : 0) - (a.hvtOverride ? 1 : 0) ||
-        a.adjustedScore - b.adjustedScore ||
-        a.order - b.order,
-    );
-    return entries;
-  }
-
-  _recordProtectionInstall(server) {
-    if (!this._protectionInstallsThisTurn.includes(server))
-      this._protectionInstallsThisTurn.push(server);
-    if (server) this._serverProtectionDebt.set(server, 0);
-  }
-
-  //At the end of each Runner turn, servers that remained insecure and received
-  //no protection gain bounded urgency. Six points is enough to break sustained
-  //ties/starvation without permanently overwhelming current board evaluation.
-  _ageProtectionPriorities() {
-    var entries = this._rankedServersToProtect(false);
-    var liveServers = entries
-      .filter((entry) => entry.server)
-      .map((entry) => entry.server);
-    for (var i = 0; i < entries.length; i++) {
-      var entry = entries[i];
-      if (
-        !entry.server ||
-        entry.isSecure ||
-        this._nothingWorthProtecting(entry.server, entry.security)
-      ) {
-        if (entry.server) this._serverProtectionDebt.set(entry.server, 0);
-      } else if (this._protectionInstallsThisTurn.includes(entry.server)) {
-        this._serverProtectionDebt.set(entry.server, 0);
-      } else {
-        this._serverProtectionDebt.set(
-          entry.server,
-          Math.min(6, (this._serverProtectionDebt.get(entry.server) || 0) + 1),
-        );
-      }
-    }
-    for (var server of this._serverProtectionDebt.keys()) {
-      if (!liveServers.includes(server)) this._serverProtectionDebt.delete(server);
-    }
-    this._protectionInstallsThisTurn = [];
-  }
-
-  _prepareProtectionPrioritiesForCorpTurn() {
-    if (!this._securityCache && this._securityCacheEnabled)
-      return this._withSecurityCache(() => this._prepareProtectionPrioritiesForCorpTurn());
-    this._rollRecentSuccessfulRunPressure();
-    //The first Corp turn has no previous allocation round to age.
-    if (!this._hasReachedCorpMainPhase) return;
-    this._ageProtectionPriorities();
-  }
-
   _serverToProtect(
-    ignoreArchives = false, //returns the server that most needs increased protection; null represents a new remote
+    ignoreArchives = false, //returns the server that most needs increased protection (does not return null, will be HQ by default or R&D against shapers)
     outputToLog = false,
-    targetIsEligible = null, //optional action-specific filter (for example, whether another ICE layer is affordable)
   ) {
-    var ranked = this._rankedServersToProtect(ignoreArchives);
-    var protectableRanked = ranked.filter(
-      (entry) => !this._nothingWorthProtecting(entry.server, entry.security),
-    );
-    var eligibility = new Map();
-    var entryIsEligible = (entry) => {
-      if (targetIsEligible == null) return true;
-      if (!eligibility.has(entry.server))
-        eligibility.set(
-          entry.server,
-          targetIsEligible(entry.server, entry.security),
-        );
-      return eligibility.get(entry.server);
-    };
-    var selected = protectableRanked.find(
-      (entry) =>
-        !entry.isSecure &&
-        !this._protectionInstallsThisTurn.includes(entry.server) &&
-        entryIsEligible(entry),
-    );
-    if (!selected) selected = protectableRanked.find(entryIsEligible);
-    //Run rewards can make an empty Archives a legitimate target, but allocation
-    //rotation must not promote it over a naturally more urgent insecure server.
-    //This preserves rotation among ordinary protection targets while requiring
-    //Archives to win the actual state-based comparison before receiving ICE.
-    if (selected && selected.server == corp.archives) {
-      var naturalInsecure = protectableRanked.find(
-        (entry) => !entry.isSecure && entryIsEligible(entry),
-      );
-      if (naturalInsecure && naturalInsecure.server != corp.archives)
-        selected = naturalInsecure;
-    }
-    if (outputToLog) {
-      var protectionScores = {};
-      for (var i = 0; i < ranked.length; i++) {
-        this._logServerSecurityEvaluation(
-          ranked[i].server,
-          ranked[i].security,
-        );
-        protectionScores[ranked[i].name] = {
-          score: ranked[i].score,
-          debt: ranked[i].debt,
-          adjusted: ranked[i].adjustedScore,
-          secure: ranked[i].isSecure,
-        };
-      }
-      this._log(
-        "Ranked server protection: " + JSON.stringify(protectionScores),
-      );
-    }
-    //An action-specific caller needs to distinguish "no viable target" from HQ.
-    //General protection queries retain the historical HQ fallback.
-    if (!selected && targetIsEligible != null) return undefined;
-    return selected ? selected.server : corp.HQ;
-  }
+    var protectionScores = {};
 
-  _nothingWorthProtecting(server, securityEvaluation) {
-    //An empty Archives is valueless only when there is no direct access stake,
-    //route into HQ, public successful-run reward, or recent observed pressure.
-    if (server !== corp.archives) return false;
-    if (this._archivesIsBackdoorToHQ()) return false;
-    for (var i = 0; i < corp.archives.cards.length; i++) {
-      if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
+    var serverToProtect = corp.HQ;
+    if (runner.identityCard.faction == "Shaper") serverToProtect = corp.RnD;
+    var protectionScore = this._protectionScore(serverToProtect, {});
+
+    protectionScores.HQ = this._protectionScore(corp.HQ, {});
+    if (protectionScores.HQ < protectionScore) {
+      serverToProtect = corp.HQ;
+      protectionScore = protectionScores.HQ;
     }
-    return (
-      this._serverRunPressure(corp.archives, securityEvaluation).penalty <= 0
-    );
+
+    protectionScores.RnD = this._protectionScore(corp.RnD, {});
+    if (protectionScores.RnD < protectionScore) {
+      serverToProtect = corp.RnD;
+      protectionScore = protectionScores.RnD;
+    }
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      protectionScores[corp.remoteServers[i].serverName] =
+        this._protectionScore(corp.remoteServers[i], {});
+      if (this._isAScoringServer(corp.remoteServers[i]))
+        protectionScores[corp.remoteServers[i].serverName] -=
+          this._agendasInHand(); //scoring servers need more protection than other remotes (and the more agendas in hand, the more need to strengthen them
+      if (
+        protectionScores[corp.remoteServers[i].serverName] < protectionScore &&
+        !this._NoMoreProtectionForThisServer(corp.remoteServers[i])
+      ) {
+        serverToProtect = corp.remoteServers[i];
+        protectionScore = protectionScores[corp.remoteServers[i].serverName];
+      }
+    }
+    if (this._emptyProtectedRemotes().length == 0) {
+      protectionScores["null"] = this._protectionScore(null, {});
+      if (protectionScores["null"] < protectionScore) {
+        serverToProtect = null;
+        protectionScore = protectionScores["null"];
+      }
+    }
+    if (
+      (serverToProtect == null ||
+        typeof serverToProtect.cards == "undefined") &&
+      this._HVTsInstalled() > 0
+    ) {
+      //protect a HVT server instead of other remotes
+      if (!this._HVTsInServer(serverToProtect)) {
+        //this server is fine if it has a HVT
+        //don't update the protection score - don't compare archives to the HVT server
+        serverToProtect = this._HVTserver();
+      }
+    }
+    if (!ignoreArchives) {
+      protectionScores.archives = this._protectionScore(corp.archives, {});
+      if (protectionScores.archives < protectionScore) {
+        serverToProtect = corp.archives;
+        protectionScore = protectionScores.archives;
+      }
+    }
+    if (outputToLog)
+      this._log(
+        "Server protection scores: " + JSON.stringify(protectionScores),
+      );
+    return serverToProtect;
   }
 
   _bestProtectedRemote() {
@@ -3569,13 +1710,9 @@ class CorpAI {
     var bestProtectedRemote = null;
     var protectionScore = 0;
     for (var i = 0; i < corp.remoteServers.length; i++) {
-      var thisProtectionScore = this._protectionScore(
-        corp.remoteServers[i],
-        {},
-      );
-      if (thisProtectionScore > protectionScore) {
+      if (this._protectionScore(corp.remoteServers[i], {}) > protectionScore) {
         bestProtectedRemote = corp.remoteServers[i];
-        protectionScore = thisProtectionScore;
+        protectionScore = this._protectionScore(bestProtectedRemote, {});
       }
     }
     return bestProtectedRemote;
@@ -3740,8 +1877,6 @@ class CorpAI {
   //this will return index of best option, or -1 if none of them are acceptable
   //if inhibit is false, more willing installs are permitted (use this for free install&rez)
   _bestInstallOption(optionList, inhibit = true) {
-    if (!this._securityCache && this._securityCacheEnabled)
-      return this._withSecurityCache(() => this._bestInstallOption(optionList, inhibit));
     //make a cards list from optionList (since this could be hand, archives, card-generated list, etc)
     var cards = [];
     for (var i = 0; i < optionList.length; i++) {
@@ -3801,22 +1936,6 @@ class CorpAI {
       economyCards.push("PAD Campaign");
     if (corp.creditPool < corp.HQ.cards.length)
       economyCards.push("Predictive Planogram"); //simple check whether to use for econ or save for draw
-    // Card-defined Corp economy plays. This mirrors the Runner's existing
-    // AIEconomyPlay priority without requiring every new economy operation to
-    // be added to the title list above.
-    var declaredEconomy = corp.HQ.cards.filter(function (card) {
-      if (!CheckCardType(card, ["operation"])) return false;
-      if (typeof card.AIEconomyPlay != "number" || card.AIEconomyPlay <= 0)
-        return false;
-      return !affordableOnly || corp.creditPool >= PlayCost(card);
-    });
-    declaredEconomy.sort(function (a, b) {
-      return b.AIEconomyPlay - a.AIEconomyPlay;
-    });
-    for (var i = 0; i < declaredEconomy.length; i++) {
-      if (!economyCards.includes(GetTitle(declaredEconomy[i])))
-        economyCards.push(GetTitle(declaredEconomy[i]));
-    }
     return economyCards;
   }
 
@@ -4016,30 +2135,26 @@ class CorpAI {
         }
       }
 
-      // Drawing raises agenda density in HQ. That only matters if the Runner
-      // can actually get into HQ.
-      var hqSecure = this._evaluateServerSecurity(corp.HQ).isSecure;
-      var agendasInHand = this._agendasInHand();
+      // Check HQ danger state before drawing - avoid increasing agenda density when HQ is naked
+      var hqDanger = this._evaluateHQDanger();
       var drawIsOK = true;
 
-      if (hqSecure) {
-        // Runner cannot breach HQ this turn: drawing is safe.
-      } else if (agendasInHand >= 2) {
+      if (hqDanger === "HQ_CRITICAL_HAZARD") {
+        // Severely penalize drawing when HQ is naked with multiple agendas
+        // Drawing increases agenda density, giving runner easy points
         drawIsOK = false;
         this._log(
-          "HQ is breachable with " +
-            agendasInHand +
-            " agendas in hand: not drawing",
+          "HQ_CRITICAL_HAZARD: Deprioritizing draw to avoid increasing agenda density",
         );
         // Don't return early - let the standard decision loop handle priorities
         // This allows the AI to still score agendas, play economy cards, or install ICE
         // through the normal action selection process
-      } else if (agendasInHand === 1 && this._clicksLeft() < 2) {
+      } else if (hqDanger === "HQ_MODERATE_HAZARD" && this._clicksLeft() < 2) {
+        // Moderate hazard on last click - be cautious about drawing
         drawIsOK = false;
-        this._log(
-          "HQ is breachable with 1 agenda in hand on last click: not drawing",
-        );
+        this._log("HQ_MODERATE_HAZARD on last click: Deprioritizing draw");
       } else if (this._clicksLeft() < 2) {
+        // Original protection score check for non-hazard situations
         if (
           this._protectionScore(corp.HQ, {
             returnArchivesLowerScoreForHQIfBackdoor: true,
@@ -4095,13 +2210,29 @@ class CorpAI {
       totalCost += rezCosts[i];
     }
 
-    //Rez costs above already cover unrezzed cards in both central and remote
-    //roots. Add only the credits a card declares it expects to spend after rez.
-    for (var i = 0; i < installedCards.length; i++) {
-      totalCost += this._reserveCreditsForCard(
-        installedCards[i],
-        GetServer(installedCards[i]),
-      );
+    //can I afford to rez/use all my ambushes, upgrades and hostiles?
+    var rootUseCosts = [
+      { title: "Aggressive Secretary", cost: 2 },
+      { title: "Ghost Branch", cost: 0 },
+      { title: "Project Junebug", cost: 1 },
+      { title: "Snare!", cost: 4 },
+      { title: "Urtica Cipher", cost: 0 },
+      { title: "Manegarm Skunkworks", cost: 2 },
+      { title: "Anoetic Void", cost: 0 },
+      { title: "Clearinghouse", cost: 0 },
+      { title: "Ronin", cost: 0 },
+      { title: "Hokusai Grid", cost: 2 },
+      { title: "Reversed Accounts", cost: 0 },
+      { title: "SanSan City Grid", cost: 6 },
+      { title: "Crisium Grid", cost: 3 },
+    ];
+    for (var i = 0; i < corp.remoteServers.length; i++) {
+      for (var j = 0; j < corp.remoteServers[i].root.length; j++) {
+        for (var k = 0; k < rootUseCosts.length; k++) {
+          if (GetTitle(corp.remoteServers[i].root[j]) == rootUseCosts[k].title)
+            totalCost += rootUseCosts[k].cost;
+        }
+      }
     }
 
     if (totalCost > 12 && Credits(corp) > Credits(runner)) totalCost = 12; //reduce chance Corp will get stuck
@@ -4110,15 +2241,6 @@ class CorpAI {
 
     //economy looking good
     return true;
-  }
-
-  //Cards declare state-sensitive post-rez spending with AIReserveCredits.
-  //Keep malformed third-party hooks from poisoning economy comparisons.
-  _reserveCreditsForCard(card, server) {
-    if (!card || typeof card.AIReserveCredits != "function") return 0;
-    var reserve = Number(card.AIReserveCredits.call(card, server));
-    if (!isFinite(reserve)) return 0;
-    return Math.max(0, reserve);
   }
 
   //used in _rankedInstallOptions
@@ -4147,88 +2269,6 @@ class CorpAI {
       }
     }
     return ret;
-  }
-
-  _serverHasStakes(server, securityEvaluation) {
-    if (server == corp.HQ) return this._agendasInHand() > 0;
-    if (server == corp.archives) {
-      if (this._archivesIsBackdoorToHQ()) return true;
-      if (this._agendasInServer(corp.archives) > 0) return true;
-      return this._serverRunPressure(corp.archives, securityEvaluation).penalty > 0;
-    }
-    //Do not inspect hidden R&D contents to justify spending through the reserve.
-    //Other central threats affect ranking, while only remote HVTs fall through.
-    if (server == null || typeof server.cards !== "undefined") return false;
-    for (var i = 0; i < server.root.length; i++)
-      if (this._isHVT(server.root[i])) return true;
-    return false;
-  }
-
-  _shouldInstallIceLayer(server, economyIsSufficient, securityEvaluation) {
-    var shouldInstall = this._unrezzedIce(server).length == 0;
-    var security = securityEvaluation;
-    if (server != null && typeof security == "undefined")
-      security = this._evaluateServerSecurity(server);
-    var serverAtRisk =
-      server != null &&
-      !security.isSecure &&
-      this._serverHasStakes(server, security);
-    if (
-      !economyIsSufficient &&
-      this._rezzedIce(server).length > 0 &&
-      !serverAtRisk
-    ) {
-      shouldInstall = false;
-    }
-    //An existing unrezzed ICE is not protection if the evaluator already
-    //knows the Runner can breach the server. Allow another affordable layer
-    //when an agenda or asset is actually at stake; _iceInstallOptions still
-    //filters out ICE the Corp cannot afford to install and rez.
-    return shouldInstall || economyIsSufficient || serverAtRisk;
-  }
-
-  //Return a shuffled copy so planning never changes a caller-owned ranking.
-  //All Corp AI randomness must use the injectable _random seam.
-  _shuffleCopy(array) {
-    var ret = array.slice();
-    for (var currentIndex = ret.length - 1; currentIndex > 0; currentIndex--) {
-      var roll = this._random();
-      var randomIndex = Math.max(
-        0,
-        Math.min(currentIndex, Math.floor(roll * (currentIndex + 1))),
-      );
-      var temporaryValue = ret[currentIndex];
-      ret[currentIndex] = ret[randomIndex];
-      ret[randomIndex] = temporaryValue;
-    }
-    return ret;
-  }
-
-  //Repeated install evaluation within one Choice must reuse its tie-break.
-  //Keep separate orders when the candidate set differs (for example, when an
-  //Archives install is also allowed to create a new remote).
-  _assetDestinationOrder(destinations) {
-    var cache = this._decisionRandomState
-      ? this._decisionRandomState.assetDestinationOrders
-      : null;
-    if (cache) {
-      for (var i = 0; i < cache.length; i++) {
-        if (
-          cache[i].destinations.length == destinations.length &&
-          cache[i].destinations.every(function (destination, index) {
-            return destination == destinations[index];
-          })
-        )
-          return cache[i].order.slice();
-      }
-    }
-    var order = this._shuffleCopy(destinations);
-    if (cache)
-      cache.push({
-        destinations: destinations.slice(),
-        order: order.slice(),
-      });
-    return order;
   }
 
   _rankedInstallOptions(
@@ -4296,20 +2336,20 @@ class CorpAI {
     var iceInstallEconomyCheck = this._sufficientEconomy(false, 4);
 
     //Find out if any servers need protection. If so, we will choose an ice card if possible.
-    var serverToInstallTo = this._serverToProtect(
-      false,
-      false,
-      (server, security) =>
-        this._shouldInstallIceLayer(
-          server,
-          iceInstallEconomyCheck,
-          security,
-        ),
-    );
+    var serverToInstallTo = this._serverToProtect();
 
-    //Too poor? Do not spend frivolously on new layers. A breachable server
-    //with something to lose is not frivolous to reinforce.
-    if (typeof serverToInstallTo !== "undefined") {
+    //Simple situational checks
+    //ice is all rezzed? need to install another layer (or any at all)
+    var iceInstallSituationCheck =
+      this._unrezzedIce(serverToInstallTo).length == 0;
+    //too poor? don't spend frivolously on new layers
+    if (
+      !iceInstallEconomyCheck &&
+      this._rezzedIce(serverToInstallTo).length > 0
+    )
+      iceInstallSituationCheck = false;
+
+    if (iceInstallSituationCheck || iceInstallEconomyCheck) {
       //this is our worst-protected server. if the server already has unrezzed ice, let's not install ice unless we have economy
       //prioritise placing ice that I can afford to rez (for now we make no effort to sort them)
       var iceInstallOptions = this._iceInstallOptions(
@@ -4320,7 +2360,6 @@ class CorpAI {
       for (var i = 0; i < iceInstallOptions.length; i++) {
         iceInstallOptions[i].reason =
           "returned by _iceInstallOptions for server that needs protection";
-        iceInstallOptions[i].AIProtectionInstall = true;
       }
       ret = ret.concat(iceInstallOptions);
     }
@@ -4328,8 +2367,6 @@ class CorpAI {
     //choose an card and server to install to
     var scoringServers = this._scoringServers(emptyProtectedRemotes);
     var intoServerOptions = [];
-    var standardAssetDestinations = null;
-    var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
         //loop through scoring servers
@@ -4343,28 +2380,16 @@ class CorpAI {
         }
       } else if (CheckCardType(cards[i], ["asset"])) {
         //if installing from archives, creating a new server is fine (what's to lose? uh except: when needed, add an exception for 'trashed while being accessed' cards)
-        var canCreateRemote = false;
-        if (emptyProtectedRemotes.length < 2) {
+        var assetDestinations = emptyProtectedRemotes;
+        if (assetDestinations.length < 2) {
           if (
             cards[i].cardLocation == corp.archives.cards ||
             cards[i].cardLocation == corp.resolvingCards
           )
-            canCreateRemote = true;
+            assetDestinations = assetDestinations.concat([null]);
         }
         //loop through empty remotes in random order (skip strongest empty remote)
-        var assetDestinations = null;
-        if (canCreateRemote) {
-          if (extendedAssetDestinations == null)
-            extendedAssetDestinations = this._assetDestinationOrder(
-              emptyProtectedRemotes.concat([null]),
-            );
-          assetDestinations = extendedAssetDestinations;
-        } else {
-          if (standardAssetDestinations == null)
-            standardAssetDestinations =
-              this._assetDestinationOrder(emptyProtectedRemotes);
-          assetDestinations = standardAssetDestinations;
-        }
+        Shuffle(assetDestinations);
         for (var j = 0; j < assetDestinations.length; j++) {
           serverToInstallTo = assetDestinations[j];
           if (serverToInstallTo != strongestEmptyRemote) {
@@ -4421,20 +2446,8 @@ class CorpAI {
         if (scoringServers[i] == b.serverToInstallTo)
           bWindow = scoringWindows[i];
       }
-      var aDiff =
-        Math.abs(aAdvReq - aWindow) +
-        0.75 *
-          corp.AI._deceptionInstallDistance(
-            a.cardToInstall,
-            a.serverToInstallTo,
-          );
-      var bDiff =
-        Math.abs(bAdvReq - bWindow) +
-        0.75 *
-          corp.AI._deceptionInstallDistance(
-            b.cardToInstall,
-            b.serverToInstallTo,
-          );
+      var aDiff = Math.abs(aAdvReq - aWindow);
+      var bDiff = Math.abs(bAdvReq - bWindow);
       return aDiff - bDiff;
     });
     //this._log(JSON.stringify(intoServerOptions));
@@ -4458,16 +2471,7 @@ class CorpAI {
     //otherwise just add ice to whatever server needs it most
     serverToInstallTo = null;
     if (emptyProtectedRemotes.length > 0)
-      serverToInstallTo = this._serverToProtect(
-        false,
-        false,
-        (server, security) =>
-          this._shouldInstallIceLayer(
-            server,
-            iceInstallEconomyCheck,
-            security,
-          ),
-      );
+      serverToInstallTo = this._serverToProtect();
     //but don't create a new server if the above economy check failed
     //because we might be saving to afford better ice in critical server
     if (serverToInstallTo != null || iceInstallEconomyCheck) {
@@ -4479,7 +2483,6 @@ class CorpAI {
       for (var i = 0; i < iceInstallOptions.length; i++) {
         iceInstallOptions[i].reason =
           "returned by _iceInstallOptions for new server";
-        iceInstallOptions[i].AIProtectionInstall = true;
       }
       ret = ret.concat(iceInstallOptions);
     }
@@ -4517,123 +2520,56 @@ class CorpAI {
 
   //**CORP PHASE RESPONSES**
   //(these take optionList as input, and return index of choice)
-  _openingHandEconomyCard(card) {
-    if (!card) return false;
-    //Transactions and Advertisements cover the standard economy categories;
-    //other economy cards can opt in without adding title checks here.
-    if (CheckSubType(card, "Transaction")) return true;
-    if (CheckSubType(card, "Advertisement")) return true;
-    return card.AIEconomyCard === true;
-  }
-
-  _openingHandSummary(cards) {
-    var ret = { iceCount: 0, iceValue: 0, economyCount: 0, agendaCount: 0 };
-    for (var i = 0; i < cards.length; i++) {
-      var card = cards[i];
-      if (card.cardType == "ice") {
-        ret.iceCount++;
-        //Cheap ICE is more useful in an opening hand because two centrals need
-        //cover and both installs and rezzes must come from the initial credits.
-        var iceValue = Math.max(0.5, 3 - 0.5 * RezCost(card));
-        if (RezCost(card) > corp.creditPool) iceValue *= 0.5;
-        ret.iceValue += iceValue;
-      } else if (card.cardType == "agenda") ret.agendaCount++;
-      if (this._openingHandEconomyCard(card)) ret.economyCount++;
-    }
-    return ret;
-  }
-
-  _openingHandCountValue(kind, count) {
-    if (kind == "ice") return [0, 1.5, 2.5][Math.min(2, count)];
-    if (kind == "economy")
-      return [0, 1.25, 2.25, 2.75][Math.min(3, count)];
-    //One agenda is normal. Further agendas compound HQ exposure and reduce the
-    //number of cards available to establish defense and economy.
-    if (kind == "agenda")
-      return -[0, 0, 1.5, 4.5, 8, 12][Math.min(5, count)];
-    return 0;
-  }
-
-  _openingHandScore(cards) {
-    var summary = this._openingHandSummary(cards);
-    return (
-      summary.iceValue +
-      this._openingHandCountValue("ice", summary.iceCount) +
-      this._openingHandCountValue("economy", summary.economyCount) +
-      this._openingHandCountValue("agenda", summary.agendaCount)
-    );
-  }
-
-  _combinationCount(n, k) {
-    if (k < 0 || k > n) return 0;
-    k = Math.min(k, n - k);
-    var ret = 1;
-    for (var i = 1; i <= k; i++) ret = (ret * (n - k + i)) / i;
-    return ret;
-  }
-
-  _expectedOpeningHandCountValue(kind, population, matches, draws) {
-    var denominator = this._combinationCount(population, draws);
-    if (denominator <= 0) return 0;
-    var ret = 0;
-    var minimum = Math.max(0, draws - (population - matches));
-    var maximum = Math.min(draws, matches);
-    for (var count = minimum; count <= maximum; count++) {
-      var ways =
-        this._combinationCount(matches, count) *
-        this._combinationCount(population - matches, draws - count);
-      ret +=
-        (ways / denominator) * this._openingHandCountValue(kind, count);
-    }
-    return ret;
-  }
-
-  _expectedOpeningHandScore(cards, handSize) {
-    var draws = Math.min(handSize, cards.length);
-    if (draws < 1) return 0;
-    var summary = this._openingHandSummary(cards);
-    return (
-      (summary.iceValue * draws) / cards.length +
-      this._expectedOpeningHandCountValue(
-        "ice",
-        cards.length,
-        summary.iceCount,
-        draws,
-      ) +
-      this._expectedOpeningHandCountValue(
-        "economy",
-        cards.length,
-        summary.economyCount,
-        draws,
-      ) +
-      this._expectedOpeningHandCountValue(
-        "agenda",
-        cards.length,
-        summary.agendaCount,
-        draws,
-      )
-    );
-  }
-
   Phase_Mulligan(optionList) {
+    //check if total playable ICE count in the opening hand equals 0
+    var playableIceCount = 0;
     var handCards = corp.HQ.cards || [];
-    var redrawPool = handCards.concat((corp.RnD && corp.RnD.cards) || []);
-    var handScore = this._openingHandScore(handCards);
-    var redrawScore = this._expectedOpeningHandScore(
-      redrawPool,
-      handCards.length,
-    );
-    this._log(
-      "Opening hand score " +
-        handScore.toFixed(2) +
-        "; fresh-hand expectation " +
-        redrawScore.toFixed(2),
-    );
-    if (handScore < redrawScore) {
-      this._log("Fresh hand has better expected value - mulligan");
+    for (var i = 0; i < handCards.length; i++) {
+      if (handCards[i].cardType == "ice") {
+        playableIceCount++;
+      }
+    }
+    if (playableIceCount === 0) {
+      this._log("0 ICE in hand - mulligan");
       return optionList.indexOf("m");
     }
-    this._log("Opening hand meets fresh-hand expectation");
+    var handCards = corp.HQ.cards || [];
+    var playableIceCount = this._affordableIce(null).length;
+    var agendaCount = handCards.filter((c) => c.cardType === "agenda").length;
+
+    // Condition 1: Absolutely no playable ICE to defend HQ/R&D on Turn 1
+    if (playableIceCount === 0) {
+      this._log("0 playable ICE in hand - mulligan");
+      return optionList.indexOf("m");
+    }
+
+    // Condition 2: Flooded with Agendas without sufficient early defense
+    if (agendaCount >= 2 && playableIceCount < 2) {
+      this._log("Agenda flood with weak ICE defense - mulligan");
+      return optionList.indexOf("m");
+    }
+
+    // Condition 3: Baseline ICE density check
+    if (playableIceCount < 2) {
+      this._log("Didn't draw enough playable ICE");
+      return optionList.indexOf("m");
+    }
+
+    //check there is enough ice
+    if (this._affordableIce(null).length < 2) {
+      this._log("Didn't draw enough ice");
+      return optionList.indexOf("m");
+    }
+    //check there aren't too many agendas in hand
+    var agendasInHand = 0;
+    for (var i = 0; i < corp.HQ.cards.length; i++) {
+      if (corp.HQ.cards[i].cardType == "agenda") agendasInHand++;
+    }
+    if (agendasInHand > 2) {
+      this._log("Drew too many agendas");
+      return optionList.indexOf("m");
+    }
+    this._log("This hand will do");
     return optionList.indexOf("n"); //not mulligan
   }
 
@@ -4688,78 +2624,6 @@ class CorpAI {
     return server.ice.length;
   }
 
-  //Return true when paying for this approached ICE changes a potentially
-  //game-winning breach from possible to deterministically prevented. Evaluate
-  //the post-rez credit state so other unrezzed ICE is not assumed affordable
-  //with credits that have already been spent, and compare it with the best
-  //security available if this ICE is left unrezzed.
-  _icePreventsGameWinningBreach(card, currentRezCost, server) {
-    if (
-      !card ||
-      !server ||
-      !server.ice.includes(card) ||
-      !this._runnerMayWinIfServerBreached(server)
-    )
-      return false;
-
-    var iceIndex = server.ice.indexOf(card);
-    var originalRezzed = card.rezzed;
-    var withIce = null;
-    var withoutIce = null;
-
-    card.rezzed = true;
-    corp.creditPool -= currentRezCost;
-    this._hypotheticalDepth++;
-    try {
-      withIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      corp.creditPool += currentRezCost;
-      card.rezzed = originalRezzed;
-    }
-
-    server.ice.splice(iceIndex, 1);
-    this._hypotheticalDepth++;
-    try {
-      withoutIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      server.ice.splice(iceIndex, 0, card);
-    }
-
-    return withIce.isSecure && !withoutIce.isSecure;
-  }
-
-  //Whether reserving this ICE would change its server from breachable to
-  //secure. Cross-server reservations must buy this concrete outcome; a high
-  //value root alone is not evidence that an arbitrary unrezzed layer matters.
-  _iceWouldSecureServer(card, rezCost, server) {
-    if (!card || !server || !server.ice.includes(card)) return false;
-    var iceIndex = server.ice.indexOf(card);
-    var originalRezzed = card.rezzed;
-    var withIce = null;
-    var withoutIce = null;
-    card.rezzed = true;
-    corp.creditPool -= rezCost;
-    this._hypotheticalDepth++;
-    try {
-      withIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      corp.creditPool += rezCost;
-      card.rezzed = originalRezzed;
-    }
-    server.ice.splice(iceIndex, 1);
-    this._hypotheticalDepth++;
-    try {
-      withoutIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      server.ice.splice(iceIndex, 0, card);
-    }
-    return withIce.isSecure && !withoutIce.isSecure;
-  }
-
   //returns true to rez, false not to
   //passing the rez cost is an optimisation
   //input server to hypothesise if the ice isn't installed yet
@@ -4768,17 +2632,6 @@ class CorpAI {
     if (typeof server == "undefined") server = GetServer(card);
     if (typeof currentRezCost == "undefined") {
       currentRezCost = RezCost(card);
-    }
-    //Do not reserve credits for another server when this affordable ICE is the
-    //difference between a breach and a deterministic lockout at game point.
-    if (this._icePreventsGameWinningBreach(card, currentRezCost, server)) {
-      this._log(
-        "Rezzing " +
-          GetTitle(card) +
-          " prevents a game-winning breach on " +
-          ServerName(server),
-      );
-      return true;
     }
     //make sure there isn't better ice behind or in another server this will prevent us from rezzing
     //for optimisation, we'll make a list of unrezzed ice with {card, server, cost, value} where value is the server value
@@ -4797,20 +2650,22 @@ class CorpAI {
           });
         }
       }
-      //Access and defensive abilities can be more important than this ICE.
-      //Central cards are included because hooks such as Snare! can fire there.
-      var cardsToCheck = server.root.slice();
-      if (typeof server.cards != "undefined")
-        cardsToCheck = cardsToCheck.concat(server.cards);
-      for (var i = 0; i < cardsToCheck.length; i++) {
-        var reserveCost = this._reserveCreditsForCard(cardsToCheck[i], server);
-        if (reserveCost > 0)
+      //include ambushes with costs as pretend ice of infinite value in this server
+      var costyAmbushes = [{ title: "Snare!", cost: 4 }];
+      for (var i = 0; i < costyAmbushes.length; i++) {
+        var arrayToCheck = server.root;
+        if (typeof server.cards != "undefined")
+          arrayToCheck = arrayToCheck.concat(server.cards);
+        var cocin = this._copyOfCardExistsIn(
+          costyAmbushes[i].title,
+          arrayToCheck,
+        );
+        if (cocin)
           iceToCompareList.push({
-            card: cardsToCheck[i],
+            card: cocin,
             server: server,
-            cost: reserveCost,
+            cost: costyAmbushes[i].cost,
             value: Infinity,
-            isCreditReserve: true,
           });
       }
     }
@@ -4849,40 +2704,14 @@ class CorpAI {
       var serverToCompare = iceToCompareList[i].server;
       var rezCostToCompare = iceToCompareList[i].cost;
       var valueToCompare = iceToCompareList[i].value;
-      var isCreditReserve = iceToCompareList[i].isCreditReserve;
       //only check ice that could be rezzed if we don't rez this
-      if (
-        CheckCredits(
-          corp,
-          rezCostToCompare,
-          isCreditReserve ? "using" : "rezzing",
-          iceToCompare,
-        )
-      ) {
+      if (CheckCredits(corp, rezCostToCompare, "rezzing")) {
         //but couldn't be rezzed if we do rez this
-        if (
-          !CheckCredits(
-            corp,
-            currentRezCost + rezCostToCompare,
-            isCreditReserve ? "using" : "rezzing",
-            iceToCompare,
-          )
-        ) {
-          //Within this server, keep the protection-value ordering. Elsewhere,
-          //reserve only for a higher-value server when this specific rez is the
-          //difference between a breachable route and a secure one.
-          var sameServer = serverToCompare === server;
+        if (!CheckCredits(corp, currentRezCost + rezCostToCompare, "rezzing")) {
+          //save credits for that ice if the server value is greater, or if server value equal and ice value greater
           if (
-            isCreditReserve ||
-            (!sameServer &&
-              valueToCompare > thisServerValue &&
-              this._iceWouldSecureServer(
-                iceToCompare,
-                rezCostToCompare,
-                serverToCompare,
-              )) ||
-            (sameServer &&
-              valueToCompare == thisServerValue &&
+            valueToCompare > thisServerValue ||
+            (valueToCompare == thisServerValue &&
               this._cardProtectionValue(iceToCompare) > thisIceProtectionValue)
           ) {
             this._log(
@@ -4954,31 +2783,14 @@ class CorpAI {
           Credits(corp) < currentRezCost * 5
         ) {
           //check if any hosted card is actually threatening
-          var threateningHosted = null;
+          var hasThreateningHosted = false;
           for (var h = 0; h < card.hostedCards.length; h++) {
             if (!card.hostedCards[h].AIHostedDoesNotPreventRez) {
-              threateningHosted = card.hostedCards[h];
+              hasThreateningHosted = true;
               break;
             }
           }
-          if (
-            threateningHosted &&
-            !(
-              this.options.evidenceBasedHostedCardRez &&
-              this._iceWouldSecureServer(card, currentRezCost, server)
-            )
-          ) {
-            this._log(
-              "Not rezzing " +
-                GetTitle(card) +
-                ": hosted " +
-                GetTitle(threateningHosted) +
-                " requires " +
-                currentRezCost * 5 +
-                " credits under the hosted-card threshold (have " +
-                Credits(corp) +
-                ")",
-            );
+          if (hasThreateningHosted) {
             rezIce = false;
           }
         }
@@ -5236,14 +3048,6 @@ class CorpAI {
   _returnPreference(optionList, cmd, prefs) {
     this.preferred = prefs;
     this.preferred.command = cmd;
-    if (
-      cmd == "install" &&
-      prefs.cardToInstall &&
-      CheckCardType(prefs.cardToInstall, ["agenda"])
-    )
-      prefs.cardToInstall.AIScoringPlanCommitted = true;
-    if (cmd == "install" && prefs.AIProtectionInstall)
-      this._recordProtectionInstall(prefs.serverToInstallTo);
     if (optionList.indexOf(cmd) > -1) return optionList.indexOf(cmd);
     else if (optionList.indexOf("n") > -1) return optionList.indexOf("n"); //cmd might be coming up next phase
     LogError(
@@ -5307,13 +3111,10 @@ class CorpAI {
   Phase_Score(optionList) {
     var cardToScore =
       phaseTemplates.corpScorableResponse.Enumerate.score()[0].card; //just use the first available score option (there's unlikely to be more than one)
-    var scoreWinsGame =
-      AgendaPoints(corp) + (cardToScore.agendaPoints || 0) >=
-      AgendaPointsToWin();
-    if (cardToScore.AIOverAdvance && !scoreWinsGame) {
+    if (cardToScore.AIOverAdvance) {
       if (typeof cardToScore.AIAdvancementLimit == "function") {
         var advLim = cardToScore.AIAdvancementLimit.call(cardToScore);
-        if (Counters(cardToScore, "advancement") < advLim) return -1; //don't score yet
+        if (cardToScore.advancement < advLim) return -1; //don't score yet
       }
     }
     var serverToScoreIn = GetServer(cardToScore);
@@ -5938,217 +3739,11 @@ class CorpAI {
     return ret;
   }
 
-  //When the security planner has identified a critically exposed server but
-  //HQ contains no ICE, credits alone cannot improve the position. Return a
-  //narrow recovery plan that can find ICE while preserving a click to install
-  //it. This intentionally does not inspect Corp R&D or hidden Runner cards.
-  _emergencyProtectionRecovery() {
-    if (this._clicksLeft() < 2 || !this._sufficientEconomy()) return null;
-    if (corp.HQ.cards.some((card) => CheckCardType(card, ["ice"])))
-      return null;
-
-    var ranked = this._rankedServersToProtect(false);
-    if (ranked.length < 1) return null;
-    var target = ranked[0];
-    if (
-      !target.server ||
-      target.isSecure ||
-      target.adjustedScore > -3 ||
-      this._unrezzedIce(target.server).length > 0
-    )
-      return null;
-
-    //Do not worsen an agenda-flooded, breachable HQ merely to solve a
-    //different server. If HQ itself is the emergency, drawing remains the
-    //only route to finding protection and is allowed.
-    if (
-      target.server != corp.HQ &&
-      this._agendasInHand() >= 2 &&
-      !this._evaluateServerSecurity(corp.HQ).isSecure
-    )
-      return null;
-
-    var installedDraw = InstalledCards(corp)
-      .filter(
-        (card) =>
-          Number(card.AIEmergencyDraw) > 0 &&
-          CheckRez(card, ["asset", "upgrade"]) &&
-          RezCost(card) <= AvailableCredits(corp, "rezzing", card),
-      )
-      .sort((a, b) => Number(b.AIEmergencyDraw) - Number(a.AIEmergencyDraw));
-    var handDraw = corp.HQ.cards
-      .filter(
-        (card) =>
-          Number(card.AIEmergencyDraw) > 0 &&
-          CheckCardType(card, ["asset", "upgrade"]) &&
-          !this._uniqueCopyAlreadyInstalled(card) &&
-          RezCost(card) <= AvailableCredits(corp, "rezzing", card),
-      )
-      .sort((a, b) => Number(b.AIEmergencyDraw) - Number(a.AIEmergencyDraw));
-
-    return {
-      server: target.server,
-      score: target.adjustedScore,
-      installedDrawCard: installedDraw.length > 0 ? installedDraw[0] : null,
-      handDrawCard: handDraw.length > 0 ? handDraw[0] : null,
-    };
-  }
-
-  _emergencyProtectionRecoveryAction(optionList) {
-    var recovery = this._emergencyProtectionRecovery();
-    if (!recovery) return -1;
-    this._log(
-      "Critical server has no available ICE; seeking protection for " +
-        ServerName(recovery.server),
-    );
-    if (recovery.installedDrawCard && optionList.includes("rez")) {
-      this._log("Rezzing emergency draw to find ICE");
-      return this._returnPreference(optionList, "rez", {
-        cardToRez: recovery.installedDrawCard,
-      });
-    }
-    if (recovery.handDrawCard && optionList.includes("install")) {
-      this._log("Installing emergency draw to find ICE");
-      return this._returnPreference(optionList, "install", {
-        cardToInstall: recovery.handDrawCard,
-        serverToInstallTo: null,
-      });
-    }
-    if (optionList.includes("draw")) {
-      this._log("Drawing for ICE to protect the critical server");
-      return optionList.indexOf("draw");
-    }
-    return -1;
-  }
-
-  //Interrupt an ordinary scoring/economy plan only when a realistically
-  //breachable central has a high chance to give the Runner the game next turn.
-  //Winning Corp scores are intentionally exempt: this is a tactical guardrail,
-  //not a general bias against advancing agendas.
-  _criticalBreachDefenseAction(optionList, almostDoneAgenda = null) {
-    if (
-      almostDoneAgenda &&
-      AgendaPoints(corp) + (almostDoneAgenda.agendaPoints || 0) >=
-        AgendaPointsToWin()
-    )
-      return -1;
-
-    var risks = [corp.RnD, corp.HQ]
-      .filter((server) => server)
-      .map((server) => this._centralBreachLossRisk(server))
-      .filter(
-        (risk) =>
-          risk.probability >= CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD,
-      )
-      .sort((a, b) => b.probability - a.probability);
-    if (risks.length < 1) return -1;
-    var risk = risks[0];
-
-    //Prefer an affordable ICE install when the actual public-board security
-    //model says that layer materially lowers the immediate loss chance.
-    if (optionList.includes("install")) {
-      var installOptions = this._rankedInstallOptions(corp.HQ.cards, true);
-      var bestInstall = null;
-      var bestPostInstallRisk = risk.probability;
-      for (var i = 0; i < installOptions.length; i++) {
-        var option = installOptions[i];
-        if (
-          option.serverToInstallTo != risk.server ||
-          !CheckCardType(option.cardToInstall, ["ice"])
-        )
-          continue;
-        var installCost = risk.server.ice.length;
-        var postInstallRisk = null;
-        corp.creditPool -= installCost;
-        risk.server.ice.push(option.cardToInstall);
-        this._hypotheticalDepth++;
-        try {
-          postInstallRisk = this._centralBreachLossRisk(risk.server);
-        } finally {
-          this._hypotheticalDepth--;
-          risk.server.ice.pop();
-          corp.creditPool += installCost;
-        }
-        if (postInstallRisk.probability < bestPostInstallRisk) {
-          bestInstall = option;
-          bestPostInstallRisk = postInstallRisk.probability;
-        }
-      }
-      if (
-        bestInstall &&
-        risk.probability - bestPostInstallRisk >=
-          CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT
-      ) {
-        this._log(
-          "Critical breach risk on " +
-            ServerName(risk.server) +
-            "; installing effective ICE",
-        );
-        return this._returnPreference(optionList, "install", bestInstall);
-      }
-    }
-
-    //Purge only when public, purgeable pressure is a material part of the
-    //danger. This replaces a coin-flip response with a deterministic tactical
-    //answer while leaving the ordinary low-stakes purge heuristic intact.
-    if (optionList.includes("purge")) {
-      var postPurgeRisk = this._centralBreachLossRisk(risk.server, {
-        afterPurge: true,
-      });
-      if (
-        postPurgeRisk.accessCount < risk.accessCount &&
-        risk.probability - postPurgeRisk.probability >=
-          CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT
-      ) {
-        this._log(
-          "Critical breach risk on " +
-            ServerName(risk.server) +
-            "; purging reduces access from " +
-            risk.accessCount +
-            " to " +
-            postPurgeRisk.accessCount,
-        );
-        return optionList.indexOf("purge");
-      }
-    }
-
-    //If no immediate install or purge solves the threat, seek ICE using the
-    //existing guarded recovery path before committing clicks to advancement.
-    return this._emergencyProtectionRecoveryAction(optionList);
-  }
-
   //check if a card should be fast advanced (true or false)
   _cardShouldBeFastAdvanced(card) {
     if (this._isFullyAdvanceableAgenda(card)) return true;
     else if (typeof card.AIRushToFinish == "function") {
       if (card.AIRushToFinish.call(card)) return true;
-    }
-    return false;
-  }
-
-  //Once an agenda has been committed to a remote, the global rez reserve must
-  //not indefinitely freeze a scoring plan that the Corp can actually afford.
-  //The normal per-card protection check still decides whether it is safe to
-  //start revealing the agenda by advancing it.
-  _installedAgendaCanBeCompleted() {
-    for (var i = 0; i < corp.remoteServers.length; i++) {
-      var server = corp.remoteServers[i];
-      for (var j = 0; j < server.root.length; j++) {
-        var card = server.root[j];
-        if (
-          !CheckCardType(card, ["agenda"]) ||
-          !CheckAdvance(card) ||
-          !card.AIScoringPlanCommitted
-        )
-          continue;
-        var limit = this._advancementLimit(card, server);
-        var remaining = Math.max(0, limit - Counters(card, "advancement"));
-        if (
-          remaining > 0 &&
-          this._potentialAdvancement(card, limit, false) >= remaining
-        )
-          return true;
-      }
     }
     return false;
   }
@@ -6245,12 +3840,7 @@ class CorpAI {
     corp.clickTracker = clicks;
     corp.creditPool = credits;
     currentPhase.identifier = "Corp 2.2"; //for CheckActionClicks
-    this._hypotheticalDepth++;
-    try {
-      var useWhenTaggedCard = this._useWhenTaggedCard();
-    } finally {
-      this._hypotheticalDepth--;
-    }
+    var useWhenTaggedCard = this._useWhenTaggedCard();
     //restore actual values
     runner.tags = storedTags;
     corp.creditPool = storedCredits;
@@ -6261,11 +3851,8 @@ class CorpAI {
   }
 
   Phase_Main(optionList) {
-    //The next Corp turn-start hook may now age the protection priorities.
-    this._hasReachedCorpMainPhase = true;
-
     //for debugging, list server protection including archives
-    if (this.debugSecurityLog) this._serverToProtect(false, true);
+    this._serverToProtect(false, true);
 
     var cardToPlay = null; //used for checks
 
@@ -6360,13 +3947,6 @@ class CorpAI {
         }
       }
     }
-
-    var criticalDefense = this._criticalBreachDefenseAction(
-      optionList,
-      almostDoneAgenda,
-    );
-    if (criticalDefense > -1) return criticalDefense;
-
     if (!almostDoneAgenda && !almostDoneHostileAsset) {
       //take advantage of a temporary window of opportunity (i.e., play right away)
       if (optionList.includes("play")) {
@@ -6386,30 +3966,6 @@ class CorpAI {
             this._commonCardToPlayChecks(
               cardToPlay,
               "if opportunity arises",
-              true,
-            )
-          ) {
-            return this._returnPreference(optionList, "play", {
-              cardToPlay: cardToPlay,
-            });
-          }
-        }
-        var declaredPriorityPlays = corp.HQ.cards.filter(function (card) {
-          return (
-            CheckCardType(card, ["operation"]) &&
-            typeof card.AIPlayWhenCan == "number" &&
-            card.AIPlayWhenCan > 0
-          );
-        });
-        declaredPriorityPlays.sort(function (a, b) {
-          return b.AIPlayWhenCan - a.AIPlayWhenCan;
-        });
-        for (var i = 0; i < declaredPriorityPlays.length; i++) {
-          cardToPlay = declaredPriorityPlays[i];
-          if (
-            this._commonCardToPlayChecks(
-              cardToPlay,
-              "because its declared opportunity is available",
               true,
             )
           ) {
@@ -6438,20 +3994,26 @@ class CorpAI {
 
       //would it be worth purging?
       if (optionList.indexOf("purge") > -1) {
-        var purgeOutcome = this._ordinaryPurgeOutcome();
-        if (purgeOutcome) {
-          this._log(purgeOutcome.reason);
-          return optionList.indexOf("purge");
+        //this logic is very basic for now...
+        //each card with virus counters over 2 has a chance of provoking a purge
+        var virus_max = 10; //the higher this number, the less chance of a purge
+        var virus_min = 2;
+        var installedRunnerCards = InstalledCards(runner);
+        if (this._copyOfCardExistsIn("Clot", installedRunnerCards)) {
+          //if a Clot is in play, increased chance to purge
+          virus_min -= 2;
+        }
+        for (var i = 0; i < installedRunnerCards.length; i++) {
+          var randomNum = RandomRange(virus_min, virus_max);
+          if (Counters(installedRunnerCards[i], "virus") > randomNum)
+            return optionList.indexOf("purge");
         }
       }
     }
 
     //is there something I could advance?
     if (
-      (almostDoneAgenda ||
-        almostDoneHostileAsset ||
-        sufficientEconomy ||
-        this._installedAgendaCanBeCompleted()) &&
+      (almostDoneAgenda || almostDoneHostileAsset || sufficientEconomy) &&
       optionList.indexOf("advance") > -1
     ) {
       //agendas and assets
@@ -6468,11 +4030,6 @@ class CorpAI {
               var blufflim = this._bluffAdvanceLimit(card);
               if (blufflim > advancementLimit) advancementLimit = blufflim;
             }
-            advancementLimit = this._deceptionAdvancementTarget(
-              card,
-              corp.remoteServers[i],
-              advancementLimit,
-            );
             //check if agenda is well-protected or HQ is weak (in which case we need to start moving agendas into servers)
             var thisRemoteProtectionScore = this._protectionScore(
               corp.remoteServers[i],
@@ -6501,7 +4058,11 @@ class CorpAI {
                 startOrContinueAdvancement = true;
             }
             if (startOrContinueAdvancement) {
-              if (Counters(card, "advancement") < advancementLimit) {
+              if (
+                typeof card.advancement === "undefined" ||
+                card.advancement < advancementLimit ||
+                card.AIOverAdvance
+              ) {
                 //if there is an economy or fast advance card in hand, consider using it
                 var potentialAdvCards = [];
                 var potentialAdvancement = this._potentialAdvancement(
@@ -6638,7 +4199,9 @@ class CorpAI {
               );
             if (advancementLimit > 0) {
               if (
-                Counters(installedCards[i], "advancement") < advancementLimit
+                typeof installedCards[i].advancement === "undefined" ||
+                installedCards[i].advancement < advancementLimit ||
+                installedCards[i].advancement.AIOverAdvance
               ) {
                 this._log("I intend to advance ice");
                 return this._returnPreference(optionList, "advance", {
@@ -6668,13 +4231,6 @@ class CorpAI {
     }
     this._log("No obvious install options");
 
-    //This lower-bar recovery is intentionally separate from the immediate
-    //central-loss interrupt: it catches any severely exposed server after the
-    //normal install plan has found no useful option. Use immediate draw tools
-    //or basic draws before accumulating credits that cannot protect it.
-    var emergencyRecovery = this._emergencyProtectionRecoveryAction(optionList);
-    if (emergencyRecovery > -1) return emergencyRecovery;
-
     //how bad is the economy? it may be necessary even to click for credits
     if (!this._sufficientEconomy()) {
       this._log("I am feeling poor");
@@ -6700,10 +4256,8 @@ class CorpAI {
         //check if options would be expanded by slightly more credits
         if (optionList.indexOf("gain") > -1) {
           corp.creditPool += this._clicksLeft() - 1; //temporary (hypothetical)
-          this._hypotheticalDepth++;
           var optionsExpanded =
             rankedInstallOptions < this._rankedInstallOptions(corp.HQ.cards);
-          this._hypotheticalDepth--;
           corp.creditPool -= this._clicksLeft() - 1; //roll back the change
           if (optionsExpanded) {
             this._log("Just need a tiny bit more cash");
@@ -6743,51 +4297,18 @@ class CorpAI {
 
   //***CLASS DEFINITION AND CORE AI CODE***
   constructor() {
-    this.preferred = null;
     this.options = Object.assign({}, CorpAI.DEFAULT_OPTIONS);
-    this._protectionInstallsThisTurn = [];
-    this._serverProtectionDebt = new Map();
-    this._recentSuccessfulRunPressure = new WeakMap();
-    this._hasReachedCorpMainPhase = false;
-    this._serverBaitDecisions = new WeakMap();
-    this._agendaBluffDecisions = new WeakMap();
-    this._cardDeceptionProfiles = new WeakMap();
-    this._hiddenThreatProfilesByFaction = new Map();
-    this._random = Math.random;
-    this._decisionRandomState = null;
-    //F3: security results are cached for one Choice() on the real board.
-    //_hypotheticalDepth > 0 while a planning probe has changed the board.
-    this._hypotheticalDepth = 0;
-    this._securityCache = null;
-    this._securityEvaluating = 0;
-    this._securityCacheEnabled = true;
-    this._securityCacheVerify = false; //tests: recompute every hit and compare
-    this.debugSecurityLog = false; //log the protection ranking at each main phase
+    this.preferred = null;
   }
 
   //returns index of choice
   Choice(optionList, choiceType) {
-    var previousDecisionRandomState = this._decisionRandomState;
-    var previousSecurityCache = this._securityCache;
-    this._decisionRandomState = { assetDestinationOrders: [] };
-    this._securityCache = this._securityCacheEnabled ? new Map() : null;
-    try {
-      var snapshot =
-        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
-          ? DecisionSnapshots.Before(choiceType, optionList)
-          : null;
-      var telemetry =
-        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
-      var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
-      var ret = this._choiceInner(optionList, choiceType);
-      if (telemetry)
-        DecisionSnapshots.Record("corp", choiceType, optionList, ret, DecisionSnapshots.Now() - startedAt);
-      if (snapshot) DecisionSnapshots.After(snapshot, ret);
-      return ret;
-    } finally {
-      this._decisionRandomState = previousDecisionRandomState;
-      this._securityCache = previousSecurityCache;
-    }
+    var telemetry = typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
+    var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
+    var ret = this._choiceInner(optionList, choiceType);
+    if (telemetry)
+      DecisionSnapshots.Record("corp", choiceType, optionList, ret, DecisionSnapshots.Now() - startedAt);
+    return ret;
   }
 
   _choiceInner(optionList, choiceType) {
@@ -7017,5 +4538,4 @@ class CorpAI {
 }
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
-  evidenceBasedHostedCardRez: false,
 });
