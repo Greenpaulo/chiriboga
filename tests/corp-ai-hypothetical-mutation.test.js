@@ -109,14 +109,86 @@ function argumentRanges(code, open) {
   return ranges;
 }
 
+function matchingDelimiter(code, open, opening, closing) {
+  let depth = 0;
+  for (let i = open; i < code.length; i++) {
+    if (code[i] === opening) depth++;
+    else if (code[i] === closing && --depth === 0) return i;
+  }
+  return code.length;
+}
+
+function trimRange(code, range) {
+  let [start, end] = range;
+  while (start < end && /\s/.test(code[start])) start++;
+  while (end > start && /\s/.test(code[end - 1])) end--;
+  return [start, end];
+}
+
+function callbackBodyRange(code, argument) {
+  let [start, end] = trimRange(code, argument);
+  while (code[start] === '(' && matchingDelimiter(code, start, '(', ')') === end - 1)
+    [start, end] = trimRange(code, [start + 1, end - 1]);
+
+  // A parenthesized comma expression evaluates to its final operand. Earlier
+  // operands run before the wrapper starts and must remain visible to the scan.
+  let parens = 0;
+  let braces = 0;
+  let brackets = 0;
+  for (let i = start; i < end; i++) {
+    if (code[i] === '(') parens++;
+    else if (code[i] === ')') parens--;
+    else if (code[i] === '{') braces++;
+    else if (code[i] === '}') braces--;
+    else if (code[i] === '[') brackets++;
+    else if (code[i] === ']') brackets--;
+    else if (code[i] === ',' && parens === 0 && braces === 0 && brackets === 0)
+      [start] = trimRange(code, [i + 1, end]);
+  }
+
+  const expression = code.slice(start, end);
+  if (/^(?:async\s+)?function\b/.test(expression)) {
+    let parameterDepth = 0;
+    for (let i = start; i < end; i++) {
+      if (code[i] === '(') parameterDepth++;
+      else if (code[i] === ')') parameterDepth--;
+      else if (code[i] === '{' && parameterDepth === 0)
+        return [i + 1, matchingDelimiter(code, i, '{', '}')];
+    }
+    return null;
+  }
+
+  parens = 0;
+  braces = 0;
+  brackets = 0;
+  for (let i = start; i < end - 1; i++) {
+    if (code[i] === '(') parens++;
+    else if (code[i] === ')') parens--;
+    else if (code[i] === '{') braces++;
+    else if (code[i] === '}') braces--;
+    else if (code[i] === '[') brackets++;
+    else if (code[i] === ']') brackets--;
+    else if (code[i] === '=' && code[i + 1] === '>' &&
+      parens === 0 && braces === 0 && brackets === 0) {
+      const parameters = code.slice(start, i).trim();
+      if (!/^(?:async\s+)?(?:[A-Za-z_$][\w$]*|\([^]*\))$/.test(parameters)) return null;
+      const body = trimRange(code, [i + 2, end]);
+      if (code[body[0]] === '{')
+        return [body[0] + 1, matchingDelimiter(code, body[0], '{', '}')];
+      return body;
+    }
+  }
+  return null;
+}
+
 function guardedMutationRanges(code) {
   const guarded = [];
   for (const match of code.matchAll(HYPOTHETICAL_GUARD)) {
     const open = match.index + match[0].length - 1;
     const args = argumentRanges(code, open);
     for (const index of [0, 2]) {
-      if (args[index] && /(?:=>|\bfunction\b)/.test(code.slice(args[index][0], args[index][1])))
-        guarded.push(args[index]);
+      const body = args[index] && callbackBodyRange(code, args[index]);
+      if (body) guarded.push(body);
     }
   }
   return guarded;
@@ -217,10 +289,11 @@ const counterexample = scanSource('counterexample.js', false, [
   '  AIWithRunContext(server, () => {',
   '    corp.creditPool -= 3;',
   '  });',
+  '  AIWithHypothetical((corp.creditPool -= 4, () => {}), () => {}, () => {});',
   '}',
 ].join('\n'));
-assert.deepStrictEqual(counterexample.map(match => match.line), [4, 8],
-  'mutations in evaluate must not be exempted with guarded apply and restore callbacks');
+assert.deepStrictEqual(counterexample.map(match => match.line), [4, 8, 10],
+  'only mutations inside apply and restore callback bodies may be exempted');
 
 const files = [['ai_corp.js', false], ['runcalculator.js', false]].concat(
   fs.readdirSync(path.join(root, 'sets')).filter(f => f.endsWith('.js')).sort().map(f => ['sets/' + f, true]));
