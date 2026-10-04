@@ -43,7 +43,7 @@ const MUTATION = new RegExp([
   String.raw`\bremoteServers\.(?:push|splice|pop)\(`,
   String.raw`\bAIIceEncounterModifyState\(`,
 ].join('|'), 'g');
-const GUARD = /\b(?:_withHypothetical|AIWithHypothetical|AIWithRunContext|AIWithIceEncounter)\s*\(/g;
+const HYPOTHETICAL_GUARD = /\b(?:_withHypothetical|AIWithHypothetical)\s*\(/g;
 
 // Blank comments, strings and regular-expression literals (newlines kept), so
 // brackets and patterns are matched in code only.
@@ -83,13 +83,43 @@ function mask(source) {
   return out.join('');
 }
 
-function matchingClose(code, open) {
-  let depth = 0;
-  for (let i = open; i < code.length; i++) {
-    if (code[i] === '(') depth++;
-    else if (code[i] === ')' && --depth === 0) return i;
+function argumentRanges(code, open) {
+  const ranges = [];
+  let start = open + 1;
+  let parens = 1;
+  let braces = 0;
+  let brackets = 0;
+  for (let i = start; i < code.length; i++) {
+    if (code[i] === '(') parens++;
+    else if (code[i] === ')') {
+      parens--;
+      if (parens === 0) {
+        ranges.push([start, i]);
+        break;
+      }
+    } else if (code[i] === '{') braces++;
+    else if (code[i] === '}') braces--;
+    else if (code[i] === '[') brackets++;
+    else if (code[i] === ']') brackets--;
+    else if (code[i] === ',' && parens === 1 && braces === 0 && brackets === 0) {
+      ranges.push([start, i]);
+      start = i + 1;
+    }
   }
-  return code.length;
+  return ranges;
+}
+
+function guardedMutationRanges(code) {
+  const guarded = [];
+  for (const match of code.matchAll(HYPOTHETICAL_GUARD)) {
+    const open = match.index + match[0].length - 1;
+    const args = argumentRanges(code, open);
+    for (const index of [0, 2]) {
+      if (args[index] && /(?:=>|\bfunction\b)/.test(code.slice(args[index][0], args[index][1])))
+        guarded.push(args[index]);
+    }
+  }
+  return guarded;
 }
 
 // Every enclosing named function at each line: method shorthand, "name: function",
@@ -142,14 +172,9 @@ function cardTitles(source, code) {
   return titles;
 }
 
-function scan(file, isSet) {
-  const source = fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
+function scanSource(file, isSet, source) {
   const code = mask(source);
-  const guarded = [];
-  for (const m of code.matchAll(GUARD)) {
-    const open = m.index + m[0].length - 1;
-    guarded.push([open, matchingClose(code, open)]);
-  }
+  const guarded = guardedMutationRanges(code);
   const lineStarts = [0];
   for (let i = 0; i < code.length; i++) if (code[i] === '\n') lineStarts.push(i + 1);
   const lineOf = index => {
@@ -176,6 +201,26 @@ function scan(file, isSet) {
   }
   return found;
 }
+
+function scan(file, isSet) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
+  return scanSource(file, isSet, source);
+}
+
+const counterexample = scanSource('counterexample.js', false, [
+  'function hypotheticalCounterexample() {',
+  '  AIWithHypothetical(',
+  '    () => { corp.creditPool -= 1; },',
+  '    () => { corp.creditPool -= 2; },',
+  '    () => { corp.creditPool += 1; },',
+  '  );',
+  '  AIWithRunContext(server, () => {',
+  '    corp.creditPool -= 3;',
+  '  });',
+  '}',
+].join('\n'));
+assert.deepStrictEqual(counterexample.map(match => match.line), [4, 8],
+  'mutations in evaluate must not be exempted with guarded apply and restore callbacks');
 
 const files = [['ai_corp.js', false], ['runcalculator.js', false]].concat(
   fs.readdirSync(path.join(root, 'sets')).filter(f => f.endsWith('.js')).sort().map(f => ['sets/' + f, true]));
