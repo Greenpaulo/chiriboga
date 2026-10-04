@@ -1,4 +1,4 @@
-// Run with: node tests/pending/touchstone-credit-pool-choice-ui.test.js
+// Run with: node tests/touchstone-credit-pool-choice-ui.test.js
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
