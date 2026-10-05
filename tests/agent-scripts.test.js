@@ -94,6 +94,58 @@ const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund']
 assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
   fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
 
+for (const [before, after] of [
+  ["expect(choice).toBe('install');", "expect(choice).toBe('gain');"],
+  ["t.equal(choice, 'install');", "t.equal(choice, 'gain');"],
+  ["throws(action, /original/);", "throws(action, /changed/);"],
+  ["fail('original');", "fail('changed');"],
+  ["assert.throws(action, /original/);", "assert.throws(action, /changed/);"],
+]) {
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [before], [after]),
+    'ticket.js rejects changed expectations: ' + before);
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [before], []),
+    'ticket.js rejects removed expectations: ' + before);
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [], [after]),
+    'ticket.js rejects added expectations: ' + after);
+}
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['// assert original behaviour'], ['// assert current behaviour']),
+  'comment-only edits are not changed expectations');
+
+for (const [before, after] of [
+  ['assert.strictEqual(\n  result,\n  1\n);', 'assert.strictEqual(\n  result,\n  2\n);'],
+  ['assert.strictEqual(\n  result,\n  1\n);', 'assert.strictEqual(\n  other,\n  1\n);'],
+  ['expect(result)\n  .toEqual({value: 1});', 'expect(result)\n  .toEqual({value: 2});'],
+  ['t.equal(\n  result,\n  1\n);', 't.equal(\n  result,\n  2\n);'],
+  ['assert.throws(() => {\n  action(1);\n}, /[()]/);',
+    'assert.throws(() => {\n  action(2);\n}, /[()]/);'],
+  ['assert.strictEqual(value, ")");', 'assert.strictEqual(value, "]");'],
+  ['assert["strictEqual"](result, 1);', 'assert["strictEqual"](result, 2);'],
+  ['expect(result)?.toBe?.(1);', 'expect(result)?.toBe?.(2);'],
+  ['assert?.(result === 1);', 'assert?.(result === 2);'],
+  ['assert.strictEqual(value, `outer${`inner)`} tail1`);',
+    'assert.strictEqual(value, `outer${`inner)`} tail2`);'],
+]) {
+  assert(!reproductionExpectationsMatch('tests/example.test.js', before.split('\n'), after.split('\n')),
+    'reject changed complete assertion arguments: ' + before);
+}
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['setup(1);', 'assert.strictEqual(result, 1);'],
+  ['setup(2);', 'assert.strictEqual(', '  result, // comment containing )', '  1', ');']),
+  'setup, whitespace and comment changes do not change assertion arguments');
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['assert.match(value, /[()]/);', 'assert.strictEqual(other, 1);'],
+  ['assert.match(', '  value,', '  /[()]/', ');', 'assert.strictEqual(other, 1);']),
+  'regex parentheses do not truncate an assertion or swallow the next one');
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['const note = "assert.strictEqual(result, 1)";'],
+  ['const note = "assert.strictEqual(result, 2)";']),
+  'assertion-like strings in setup are not assertion calls');
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['assert.strictEqual(result.constructor, Object);', 'setup(1);'],
+  ['assert.strictEqual(result.constructor, Object);', 'setup(2);']),
+  'object prototype names inside assertions do not prevent finding the closing parenthesis');
+
 assert.strictEqual(pendingGate('# Ticket\n\n**Gate:** pending F4\n\n## Resolution\n\nNot decided.\n'), undefined,
   'roadmap blocker discovery ignores pending-gate examples outside Resolution');
 assert.strictEqual(pendingGate('# Ticket\n\n## Resolution\n\n**Gate:** pending F4\n'), 'F4',

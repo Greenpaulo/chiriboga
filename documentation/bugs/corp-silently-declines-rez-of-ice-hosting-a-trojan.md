@@ -22,9 +22,13 @@ Implemented from `64bcf17`.
   This diagnostic is active with the option off as well as on.
 - Moved the original reproduction to
   `tests/hosted-trojan-blocks-rez-silently.test.js` with its `true` decision
-  assertion unchanged. Its harness now resets the option per case, enables the
-  candidate for the reproduction, and puts the hosted card in the public
-  installed-card list with its real `host`; these setup-only changes account
+  assertion and zero-message-count expectation unchanged (both are present
+  in the pending test at `64bcf17`). The historical assertion message incorrectly
+  asks for a decline log while asserting zero messages. It is retained verbatim
+  so the complete original assertion calls remain comparable; explanatory
+  comments clarify that the candidate's successful rez needs no decline log.
+  Its harness now resets the option per case, enables the candidate for the
+  reproduction, and puts the hosted card in the public installed-card list with its real `host`; these setup-only changes account
   for the ticket checker's non-expectation diff warning. Added option-off
   coverage plus decisive and redundant Tranquilizer cases to the shared Corp
   security suite, while retaining the reproduction's Saci-style and rich-Corp
@@ -50,8 +54,8 @@ collector. The gate's `decisionLatencyMs` guard conflicts with the current
 rule that latency is not a gate guard (the same run moved every latency metric
 by about 3% with identical games).
 
-**Owner decisions, 2026-10-02.** (1) Proceed on the F4 branch although F4 is
-still in code-review; ignore the F4 blocker for this pickup. (2) Drop the
+**Owner decisions, 2026-10-02.** (1) Pending-F4 gate setup must wait
+until F4 is `done`; the generated blocker remains authoritative. (2) Drop the
 `decisionLatencyMs` guard when rewriting the gate: latency is not a gate
 guard under "Writing a gate" because a cached baseline is timed on a
 differently loaded machine, and the changed branch did not change a single
@@ -370,8 +374,7 @@ covering Chromatophores and Tranquilizer.
   reduction in `pointsStolen` has a lower bound above zero.
 - Guards across all starts and pool pairs: `winRate` does not drop by more than
   2 percentage points; `pointsScored` does not drop by more than 0.1 per game;
-  `pointsStolen` does not increase by more than 0.1 per game; and
-  `decisionLatencyMs` does not increase by more than 10%.
+  `pointsStolen` does not increase by more than 0.1 per game.
 - Tranquilizer guard: `hostedThreatRezCredits`, a collector totaling credits
   spent rezzing ICE with a non-exempt hosted card and split by hosted-card
   title, does not increase by more than 0.5 credits per game on Tranquilizer
@@ -402,8 +405,10 @@ covering Chromatophores and Tranquilizer.
       `evidenceBasedHostedCardRez` switched on by default.
 - [ ] The F4 collector `hostedThreatRezCredits` is added through the harness's
       collector extension point before the gate is run.
-- [ ] Chromatophores and Tranquilizer start boards are committed, with the
-      option able to change the Corp's rez decision on each, and are tested.
+- [ ] The Chromatophores start board is committed, with the option able to
+      change the Corp's rez decision on that board, and is tested.
+- [ ] The Tranquilizer start board is committed, with the option able to
+      change the Corp's rez decision on that board, and is tested.
 - [ ] The gate is ready to run: every collector and start board it names
       exists and is tested, and a `--quick` run of each gate command
       completes and reports at least one game changed by the options.
