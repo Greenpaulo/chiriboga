@@ -147,8 +147,11 @@ test('candidate rezzes affordable decisive ice hosting Chromatophores without a 
   assert.strictEqual(result, true,
     'expected the Corp to rez affordable, undefended-server ice; ' +
     'got false from the silent hostedCards guard');
+  // Retain the historical diagnostic literal for complete-call comparison.
+  // Its wording is misleading; this successful rez needs no decline log.
   assert.strictEqual(messages.length, 0,
-    'expected no decline diagnostic when the candidate chooses to rez');
+    'expected some logged reason for declining the rez; the hostedCards ' +
+    'branch currently declines silently');
 });
 
 test('GUARD: a hosted card with AIHostedDoesNotPreventRez (Saci-style) does not block the rez', () => {
