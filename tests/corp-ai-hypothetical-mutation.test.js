@@ -24,18 +24,22 @@ const root = path.resolve(__dirname, '..');
 const verbose = !!process.env.VERBOSE;
 
 const RUNNER_DEBT = [
-  'sets/systemgateway.js: Botulus AIPrepareHypotheticalForRC',
-  'sets/systemgateway.js: Botulus AIRestoreHypotheticalFromRC',
-  'sets/systemgateway.js: Tread Lightly AIRunEventModify',
-  'sets/systemgateway.js: Tread Lightly AIRunEventRestore',
-  'sets/vantagepoint.js: Aircheck AIRunEventModify',
-  'sets/vantagepoint.js: Aircheck AIRunEventRestore',
+  ['sets/systemgateway.js: Botulus AIPrepareHypotheticalForRC', 1],
+  ['sets/systemgateway.js: Botulus AIRestoreHypotheticalFromRC', 1],
+  ['sets/systemgateway.js: Tread Lightly AIRunEventModify', 1],
+  ['sets/systemgateway.js: Tread Lightly AIRunEventRestore', 1],
+  ['sets/vantagepoint.js: Aircheck AIRunEventModify', 1],
+  ['sets/vantagepoint.js: Aircheck AIRunEventRestore', 1],
 ];
 const REAL_EFFECTS = [
-  'sets/elevation.js: Mitra Aman _performSwap', // swaps ICE when its ability resolves
-  'sets/vantagepoint.js: Read-Write Share _hostFromGripResolve', // hosts a card from the grip
-  'sets/vantagepoint.js: ezaM _swapWith', // swaps ICE positions as the ability resolves
+  ['sets/elevation.js: Mitra Aman _performSwap', 2], // swaps ICE when its ability resolves
+  ['sets/vantagepoint.js: Read-Write Share _hostFromGripResolve', 1], // hosts a card from the grip
+  ['sets/vantagepoint.js: ezaM _swapWith', 1], // swaps ICE positions as the ability resolves
 ];
+const ALLOWLIST = RUNNER_DEBT.concat(REAL_EFFECTS);
+const listed = ALLOWLIST.map(([key]) => key);
+assert.strictEqual(new Set(listed).size, listed.length, 'duplicate allowlist entries');
+const expectedAllowlistMatchCounts = new Map(ALLOWLIST);
 
 const MUTATION = new RegExp([
   String.raw`(?:\bcreditPool|\bclickTracker|\.rezzed|\.tags|\.virus|\.notInstalled|\battackedServer|\bapproachIce|\bencountering|\bcurrentPhase\.identifier)\s*(?:[-+*/]?=(?!=)|\+\+|--)`,
@@ -295,6 +299,16 @@ const counterexample = scanSource('counterexample.js', false, [
 assert.deepStrictEqual(counterexample.map(match => match.line), [4, 8, 10],
   'only mutations inside apply and restore callback bodies may be exempted');
 
+function increasedAllowlistMatches(matches, expectedCounts) {
+  return [...matches].filter(([key, lines]) =>
+    expectedCounts.has(key) && lines.length > expectedCounts.get(key));
+}
+
+const extraRealEffect = new Map([[REAL_EFFECTS[0][0], [1, 2, 3]]]);
+assert.deepStrictEqual(increasedAllowlistMatches(extraRealEffect, expectedAllowlistMatchCounts)
+  .map(([key]) => key), [REAL_EFFECTS[0][0]],
+  'an added mutation under an allowlisted function key must fail the ratchet');
+
 const files = [['ai_corp.js', false], ['runcalculator.js', false]].concat(
   fs.readdirSync(path.join(root, 'sets')).filter(f => f.endsWith('.js')).sort().map(f => ['sets/' + f, true]));
 const found = new Map();
@@ -306,13 +320,16 @@ for (const [file, isSet] of files) {
   }
 }
 
-const listed = RUNNER_DEBT.concat(REAL_EFFECTS);
-assert.strictEqual(new Set(listed).size, listed.length, 'duplicate allowlist entries');
 const added = [...found.keys()].filter(key => !listed.includes(key));
 assert.deepStrictEqual(added, [],
   'Unguarded state changes. Wrap a planning probe in _withHypothetical(), AIWithRunContext() ' +
   'or AIWithIceEncounter() so it is restored in finally and counted as hypothetical:\n  ' +
   added.map(key => key + ' (lines ' + found.get(key).join(',') + ')').join('\n  '));
+
+const increased = increasedAllowlistMatches(found, expectedAllowlistMatchCounts);
+assert.deepStrictEqual(increased, [],
+  'New mutation matches under allowlisted function keys:\n  ' +
+  increased.map(([key, lines]) => key + ' (lines ' + lines.join(',') + ')').join('\n  '));
 
 const gone = listed.filter(key => !found.has(key));
 console.log('corp-ai-hypothetical-mutation: ' + found.size + ' listed unguarded mutation sites (' +
