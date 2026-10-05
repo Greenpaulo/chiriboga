@@ -2013,6 +2013,24 @@ assert.deepStrictEqual(JSON.parse(JSON.stringify(vicsekAI.sr)), [
 ]);
 
 const cultivate = context.cardSet[36043];
+// Use the renderer's visibility rules at each deferred decision boundary.
+const visibilityStart = utilitySource.indexOf('function PlayerCanLook(');
+const visibilityEnd = utilitySource.indexOf('function ResetClicks(', visibilityStart);
+assert(visibilityStart >= 0 && visibilityEnd > visibilityStart);
+vm.runInContext(utilitySource.slice(visibilityStart, visibilityEnd), context);
+context.viewAllFronts = false;
+context.accessingCard = null;
+context.runner.identityCard = {};
+context.PlayerHand = (player) => player === context.runner ? player.grip : player.HQ.cards;
+const assertCultivateHidden = () => {
+  for (const card of context.corp.RnD.cards) {
+    assert.strictEqual(
+      context.PlayerCanLook(context.runner, card),
+      false,
+      '36043 must keep ' + card.title + ' hidden from the Runner between AI decisions',
+    );
+  }
+};
 const cultivateLow = {title: 'Low', cardType: 'operation', subTypes: [], elo: 1000};
 const cultivateMid = {title: 'Mid', cardType: 'asset', subTypes: [], elo: 1400};
 const cultivateHigh = {title: 'High', cardType: 'ice', subTypes: [], elo: 1900};
@@ -2041,10 +2059,14 @@ context.Trash = (card, preventable, callback, callbackContext) => {
 context.corp.AI = {};
 decisions = [];
 cultivate.Resolve.call(cultivate);
+assertCultivateHidden();
 assert.strictEqual(decisions[0].choices[0].card, cultivateLow);
 decisions[0].choose(decisions[0].choices[0]);
+assertCultivateHidden();
 assert.strictEqual(decisions[1].choices[0].card, cultivateAgenda);
 decisions[1].choose(decisions[1].choices[0]);
+assertCultivateHidden();
+assert.strictEqual(context.PlayerCanLook(context.runner, cultivateAgenda), false);
 assert.strictEqual(context.corp.archives.cards[0], cultivateLow);
 assert.strictEqual(context.corp.HQ.cards[0], cultivateAgenda);
 assert.strictEqual(
@@ -2053,6 +2075,34 @@ assert.strictEqual(
   '36043 AI leaves the highest-value remaining card on top',
 );
 assert.strictEqual(cultivate.AIWouldPlay.call(cultivate), true);
+
+// Human Corp players still see the cards to choose, and the survivors are
+// turned face down after moving to HQ or finishing the arrangement.
+context.corp.AI = null;
+context.corp.RnD.cards = Array.from({length: 5}, (_, i) => ({
+  title: 'Human Cultivate ' + i,
+  player: context.corp,
+  faceUp: false,
+}));
+for (const card of context.corp.RnD.cards) card.cardLocation = context.corp.RnD.cards;
+decisions = [];
+cultivate.Resolve.call(cultivate);
+assert.strictEqual(decisions[0].choices.length, 5);
+assert(context.corp.RnD.cards.every(card => context.PlayerCanLook(context.corp, card)));
+decisions[0].choose(decisions[0].choices[0]);
+assert.strictEqual(decisions[1].choices.length, 4);
+const humanHQCard = decisions[1].choices[0].card;
+decisions[1].choose(decisions[1].choices[0]);
+assert.strictEqual(humanHQCard.faceUp, false);
+assert.strictEqual(humanHQCard.cardLocation, context.corp.HQ.cards);
+assert.strictEqual(decisions[2].choices.length, 3);
+const humanBottom = decisions[2].choices[0].card;
+decisions[2].choose(decisions[2].choices[0]);
+assert.strictEqual(decisions[3].choices.length, 2);
+decisions[3].choose(decisions[3].choices[0]);
+assert.strictEqual(context.corp.RnD.cards[0], humanBottom);
+assertCultivateHidden();
+context.corp.AI = {};
 
 const unleash = context.cardSet[36044];
 let unleashedSubroutine = 0;
