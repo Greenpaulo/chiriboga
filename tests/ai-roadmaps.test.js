@@ -147,6 +147,9 @@ for (const mismatch of blockerMismatches(items))
 const code = ['ai_corp.js', 'ai_runner.js', 'runcalculator.js', 'utility.js', 'mechanics.js', 'phase.js', 'checks.js']
   .map(f => fs.readFileSync(path.join(root, f), 'utf8'))
   .concat(fs.readdirSync(path.join(root, 'sets')).map(f => fs.readFileSync(path.join(root, 'sets', f), 'utf8')))
+  // The F4 harness is described in Foundations.
+  .concat(['scripts/ai-game.js', 'scripts/ai-batch.js', 'scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js']
+    .map(f => fs.readFileSync(path.join(root, f), 'utf8')))
   .join('\n');
 let nameCount = 0;
 for (const [dir, architecture] of architectures) {

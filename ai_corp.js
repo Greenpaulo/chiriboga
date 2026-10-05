@@ -6781,7 +6781,17 @@ class CorpAI {
         typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
           ? DecisionSnapshots.Before(choiceType, optionList)
           : null;
+      var telemetry =
+        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
+      //Discard/sabotage filtering may mutate the array and its option objects.
+      var telemetryOptions = telemetry ? optionList.slice() : null;
+      var telemetryLabels = telemetry ? optionList.map(DecisionSnapshots.Label) : null;
+      var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
       var ret = this._choiceInner(optionList, choiceType);
+      if (telemetry) {
+        var recordedChoice = ret >= 0 ? telemetryOptions.indexOf(optionList[ret]) : ret;
+        DecisionSnapshots.Record("corp", choiceType, telemetryLabels, recordedChoice, DecisionSnapshots.Now() - startedAt);
+      }
       if (snapshot) DecisionSnapshots.After(snapshot, ret);
       return ret;
     } finally {

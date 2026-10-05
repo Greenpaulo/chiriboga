@@ -280,7 +280,7 @@ function gateInfo(item) {
   else if (/^\s*Human gate/.test(gate)) kind = 'human';
   else if (/\bF4\b/.test(gate) || (/\bbaseline\b/.test(gate) && /\bF4\b/.test(text))) kind = 'other';
   if (!kind) return null;
-  const option = ((text.match(/options\.(\w+)/) || text.match(/option\s+`(\w+)`/) || [])[1]) || '';
+  const option = ((text.match(/options\.(\w+)/) || text.match(/option\s+`(\w+)`/i) || [])[1]) || '';
   const result = ((sectionOf(text, '## Resolution').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1] || '').trim();
   let state = 'not built';
   if (/^passed\b/i.test(result)) state = 'passed';
