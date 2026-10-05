@@ -173,6 +173,11 @@ Shared infrastructure used by every area.
 
 What should the Corp install, where, and is that better than another action?
 Shared design: [specs/install-decisions-design.md](specs/install-decisions-design.md).
+The [regression ownership table](specs/install-decisions-design.md#corrected-regression-baseline-and-ownership)
+maps the five default-off recovery gates to these layers and L3.5.1/L7.1,
+including the remaining empty-Archives reward-valuation gap. Future I-layer
+baselines must capture the corrected policy rather than the old unconditional
+behaviors.
 I0 → I1 → I2 → I3 run in order: I2 (ICE selection) is the first intentional
 policy change and I3 decides what each remote is for. I4 (agendas) and I5
 (assets) then run in parallel; I6 (upgrades) follows I3 and I4. I7.1 compares
