@@ -14,18 +14,21 @@ Use these companion references while implementing cards:
 - `documentation/new-sets/card-implementation-backlog.md` — known unfinished cards and
   the current ELO audit.
 
-The Corp AI roadmap and work-summary documents explain architecture and history,
-but they are not card-authoring API references. In particular, hooks proposed by
-`corp_ai_install_decision_roadmap.md` must not be used until its phase is marked
-implemented and the hook also appears in `engine_patterns.md` and `ai.md`.
+The Corp AI roadmap and specs (`documentation/corp-ai/`) describe plans, not
+card-authoring APIs. A hook proposed by a roadmap item must not be used until
+that item is `done` in `documentation/corp-ai/roadmap.md` and the hook also
+appears in `engine_patterns.md` and `ai.md`.
 
 ## 1. Decide the scope before adding the set
 
 Record the set's display name, short code, card list, legal formats and a fresh
 numeric ID range. A registered set may be loaded into the browser even while it
 is hidden, so `hidden: true` is not a substitute for safe card definitions.
-Keep an incomplete set `untested: true`, and normally `hidden: true`, until its
-mechanics and AI behaviour have been reviewed.
+Whether a set is playable is decided in `documentation/card-sets.md`, and the
+`hidden`/`untested` flags in `config.js` must follow that decision
+(`tests/card-status.test.js` enforces it). Normally a new set is recorded as
+`in-progress` and kept `hidden: true`, `untested: true` until its mechanics and
+AI behaviour have been reviewed.
 
 Existing ranges are defined by `setRegistry.availableSets` in `config.js`.
 Check that the new range does not overlap any of them. Do not infer the next
@@ -193,22 +196,21 @@ Include any known ruling or accepted limitation in that prompt. Do not paste
 the documentation or previous chat transcript; ask the session to inspect the
 current worktree and tests instead.
 
-For batched set implementation, the repository provides two set-agnostic,
-executable one-batch runbooks and one current-set tracker:
+For batched set implementation, the repository provides a set-agnostic,
+one-batch agent skill and one current-set tracker:
 
 - `documentation/new-sets/card-set-agent-operator-guide.md` — user instructions, exact
   prompts, review/recovery steps and the procedure for switching sets;
-- `documentation/new-sets/card-set-codex-batch-runbook.md` for Codex;
-- `documentation/new-sets/card-set-external-agent-batch-runbook.md` for Claude Code,
-  Cline and other repository-aware coding agents;
+- `.agents/skills/implement-card-batch/SKILL.md`, used by Codex automatically
+  and readable by any other repository-aware coding agent;
 - `documentation/new-sets/current-set-implementation.md` for the active set metadata,
   batch queue, ownership, verification commands and completion log.
 
-The user can simply ask the chosen agent to read and follow its runbook. Each
-runbook reads the tracker to discover the active set, selects the next unfinished
+The user can simply ask the agent to implement the next batch. The skill reads
+the tracker to discover the active set, selects the next unfinished
 batch, performs the work, updates status/ownership and appends test evidence.
 Switching sets changes only the tracker, so batch IDs and prior chat history do
-not need to be pasted and the runbooks do not drift between sets.
+not need to be pasted and the skill does not drift between sets.
 
 At minimum, check the structural fields relevant to the card type:
 
@@ -297,7 +299,9 @@ planned move to per-card role metadata is tracked in
 
 ## 8. Verify the integration
 
-Before removing `hidden` or `untested`:
+Before recommending that a set be marked `playable` in
+`documentation/card-sets.md` (which then requires `hidden: false` and
+`untested: false`):
 
 1. Confirm every intended metadata card has exactly one engine definition and
    every engine definition maps to the correct metadata and image.

@@ -2,7 +2,8 @@
 'use strict';
 // Turn one decision snapshot from a downloaded debug log into a Corp AI fixture.
 //   node tests/extract-fixture.js <log> --list
-//   node tests/extract-fixture.js <log> <n|last> <fixture-name> [--expect "!install"]
+//   node tests/extract-fixture.js <log> <n|last> <fixture-name> [--expect "!install"] [--pending]
+//   --pending writes to corp-decisions-pending/ (a known-red reproduction for an open ticket).
 // Snapshots are written by DecisionSnapshots (utility.js) into every downloaded log.
 const fs = require('fs');
 const path = require('path');
@@ -33,7 +34,7 @@ if (require.main === module) {
   const args = process.argv.slice(2);
   const expectAt = args.indexOf('--expect');
   const expect = expectAt > -1 ? args[expectAt + 1] : '';
-  if (!logPath) { console.log('usage: extract-fixture.js <log> --list | <n|last> <name> [--expect X]'); process.exit(1); }
+  if (!logPath) { console.log('usage: extract-fixture.js <log> --list | <n|last> <name> [--expect X] [--pending]'); process.exit(1); }
   const snapshots = parseSnapshots(fs.readFileSync(logPath, 'utf8'));
   if (!snapshots.length) { console.log('No decision snapshots in this log (it predates the recorder, or no Corp decisions were made).'); process.exit(1); }
   if (pick === '--list') {
@@ -51,7 +52,7 @@ if (require.main === module) {
     console.log('This decision used non-text options and cannot be replayed exactly by the fixture runner. Write a purpose-built test instead.');
     process.exit(1);
   }
-  const dir = path.join(__dirname, 'fixtures', 'corp-decisions');
+  const dir = path.join(__dirname, 'fixtures', args.includes('--pending') ? 'corp-decisions-pending' : 'corp-decisions');
   fs.mkdirSync(dir, {recursive: true});
   const file = path.join(dir, path.basename(name).replace(/\.txt$/, '') + '.txt');
   if (fs.existsSync(file)) {

@@ -1,7 +1,8 @@
 # Corp AI did not protect Archives with the Baker backdoor active
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_not_protecting_archives_when_i_have_baker_to_redirect_to_hq.txt`  
-**Status:** Fixed, with the original diagnosis corrected after review against the current code, card definitions, game rules, and tests.
+**Status:** Fixed, with the original diagnosis corrected after review against the current code, card definitions, game rules, and tests.  
+**Roadmap:** delivers Corp AI item L3.5.2, described in [Protection allocation](../../corp-ai/architecture.md#protection-allocation).
 
 ## Outcome
 

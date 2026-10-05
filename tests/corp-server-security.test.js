@@ -67,10 +67,12 @@ const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', p
 const server = cards => {const result = {ice: cards, root: []}; servers = [result]; return result;};
 const etr = () => ice(['End the run.'], [[['endTheRun']]]);
 let tests = 0;
+const verbose = !!process.env.VERBOSE; // passing cases are silent by default to keep agent context small
 function test(name, body) {
   runner.cards = []; runner.identityCard = null; runner.AI = null;
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
-  runner.temporaryCredits = 0; runner.clickTracker = 0; context.playerTurn = runner; context.attackedServer = null;
+  runner.temporaryCredits = 0; runner.tempBonusClicks = 0; runner.clickTracker = 0;
+  context.playerTurn = runner; context.attackedServer = null;
   runner.resolvingCards = [];
   corp.creditPool = 20; corp.badPublicity = 0; corp.scoreArea = []; servers = [];
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
@@ -80,8 +82,59 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
-  body(); tests++; console.log('PASS ' + name);
+  ai.options.evidenceBasedHostedCardRez = false;
+  try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
+  tests++; if (verbose) console.log('PASS ' + name);
 }
+
+test('main-phase credit probe restores credits and hypothetical depth on return or throw', () => {
+  const original = {};
+  for (const name of ['_sufficientEconomy', '_criticalBreachDefenseAction',
+    '_emergencyProtectionRecoveryAction', '_bestMainPhaseEconomyOption',
+    '_rankedInstallOptions', '_clicksLeft']) original[name] = ai[name];
+  const oldPlayerHand = context.PlayerHand;
+  const oldCheckTags = context.CheckTags;
+  const oldDepth = ai._hypotheticalDepth;
+  context.PlayerHand = player => player.HQ.cards;
+  context.CheckTags = () => false;
+  ai._sufficientEconomy = () => true;
+  ai._criticalBreachDefenseAction = () => -1;
+  ai._emergencyProtectionRecoveryAction = () => -1;
+  ai._bestMainPhaseEconomyOption = choices => choices.indexOf('gain');
+  ai._clicksLeft = () => corp.clickTracker;
+  corp.HQ.cards = Array.from({length: 5}, () => ({}));
+  const probeError = new Error('ranked install probe failed');
+  try {
+    for (const startingDepth of [0, 2]) {
+      for (const shouldThrow of [false, true]) {
+        ai._hypotheticalDepth = startingDepth;
+        corp.creditPool = 20;
+        corp.clickTracker = 3;
+        let probes = 0;
+        ai._rankedInstallOptions = (cards, priorityOnly) => {
+          if (priorityOnly || ai._hypotheticalDepth === startingDepth) return [];
+          probes++;
+          assert.strictEqual(corp.creditPool, 22, 'probe sees hypothetical click credits');
+          assert.strictEqual(ai._hypotheticalDepth, startingDepth + 1);
+          // Restore the saved pool, even if a failed dependency changed clicks.
+          if (shouldThrow) { corp.clickTracker = 1; throw probeError; }
+          return [];
+        };
+        if (shouldThrow) assert.throws(() => ai.Phase_Main(['install', 'gain']),
+          error => error === probeError);
+        else assert.strictEqual(ai.Phase_Main(['install', 'gain']), 1);
+        assert.strictEqual(probes, 1, 'the actual main-phase hypothetical path ran');
+        assert.strictEqual(corp.creditPool, 20);
+        assert.strictEqual(ai._hypotheticalDepth, startingDepth);
+      }
+    }
+  } finally {
+    Object.assign(ai, original);
+    ai._hypotheticalDepth = oldDepth;
+    context.PlayerHand = oldPlayerHand;
+    context.CheckTags = oldCheckTags;
+  }
+});
 
 test('Corp classification never reads hidden grip properties or the Runner calculator', () => {
   runner.AI = {rc: context.runnerRC};
@@ -247,6 +300,203 @@ test('game-saving Brân rez overrides reservation for a higher-value remote', ()
   runner.agendaPoints = 0;
   assert.strictEqual(ai._iceWorthRezzing(rndBran, 6, rnd), false);
 });
+function hostedTrojanRezBoard(hostedCard, redundantInner = false) {
+  const approachedIce = etr();
+  approachedIce.title = 'Regression ice';
+  approachedIce.rezzed = false;
+  approachedIce.rezCost = 3;
+  approachedIce.hostedCards = [hostedCard];
+  hostedCard.host = approachedIce;
+  runner.cards = [hostedCard];
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const remoteIce = redundantInner ? [etr(), approachedIce] : [approachedIce];
+  const remote = {serverName: 'Remote 0', ice: remoteIce, root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 12});
+  servers = [hq, rnd, archives, remote];
+  runner.clickTracker = 0;
+  return {approachedIce, remote};
+}
+test('hosted-card rez option off preserves the conservative choice and logs it', () => {
+  const {approachedIce, remote} = hostedTrojanRezBoard(card(35030));
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), false);
+  } finally { ai._log = oldLog; }
+  assert.deepStrictEqual(messages, [
+    'Not rezzing Regression ice: hosted Chromatophores requires 15 credits ' +
+    'under the hosted-card threshold (have 12)',
+  ]);
+});
+test('hosted-card rez option lets Tranquilizer ICE stop the current breach', () => {
+  const tranquilizer = card(30017); tranquilizer.virus = 2;
+  const {approachedIce, remote} = hostedTrojanRezBoard(tranquilizer);
+  ai.options.evidenceBasedHostedCardRez = true;
+  assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), true);
+});
+test('hosted-card rez option still declines redundant Tranquilizer ICE', () => {
+  const tranquilizer = card(30017); tranquilizer.virus = 2;
+  const {approachedIce, remote} = hostedTrojanRezBoard(tranquilizer, true);
+  ai.options.evidenceBasedHostedCardRez = true;
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), false);
+  } finally { ai._log = oldLog; }
+  assert.deepStrictEqual(messages, [
+    'Not rezzing Regression ice: hosted Tranquilizer requires 15 credits ' +
+    'under the hosted-card threshold (have 12)',
+  ]);
+});
+test('hosted-card rez option logs a refusal when the Runner can break the ICE', () => {
+  const chromatophores = card(35030);
+  const {approachedIce, remote} = hostedTrojanRezBoard(chromatophores);
+  approachedIce.subTypes = ['Sentry'];
+  const killer = card(30015); // Carmen: a real Killer with AIImplementBreaker
+  runner.cards = [chromatophores, killer];
+  runner.creditPool = 10;
+  assert(Number.isFinite(ai._estimateBreakCost(approachedIce, killer)),
+    'test assumption: the installed Killer can break the approached ICE');
+  ai.options.evidenceBasedHostedCardRez = true;
+  const messages = []; const oldLog = ai._log; ai._log = message => messages.push(message);
+  try {
+    assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), false);
+  } finally { ai._log = oldLog; }
+  assert(messages.length > 0, 'an exploitable hosted-card refusal must log its reason');
+});
+// ---- F3: per-decision security cache ----
+function branBoard() {
+  const rndBran = card(30039); rndBran.rezzed = false;
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const rnd = {serverName: 'R&D', cards: [agenda, {cardType: 'operation'}], ice: [rndBran], root: []};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const remoteBran = card(30039); remoteBran.rezzed = false;
+  const remote = {serverName: 'Remote 0', ice: [remoteBran], root: [agenda]};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote], creditPool: 8});
+  servers = [hq, rnd, archives, remote];
+  runner.agendaPoints = 5; runner.clickTracker = 2;
+  return {rndBran, rnd};
+}
+// Run body with a decision-lifetime cache, as Choice() provides.
+function inDecision(body) {
+  ai._securityCache = new Map();
+  try { return body(); } finally { ai._securityCache = null; }
+}
+// Every cached entry must equal a fresh evaluation of the (restored) real board.
+function assertCacheMatchesBoard() {
+  for (const [srv, entries] of ai._securityCache)
+    for (const result of entries.values())
+      assert(ai._sameSecurityResult(result, ai._evaluateServerSecurityUncached(srv)),
+        'cache holds a result that differs from the real board for ' + srv.serverName);
+}
+
+test('F3: the Bran with-ICE probe still differs with a warm cache', () => {
+  const {rndBran, rnd} = branBoard();
+  assert.strictEqual(ai._icePreventsGameWinningBreach(rndBran, 6, rnd), true, 'without a cache');
+  inDecision(() => {
+    ai._evaluateServerSecurity(rnd); // warm with the real board (Bran unrezzed)
+    assert.strictEqual(ai._icePreventsGameWinningBreach(rndBran, 6, rnd), true, 'with a warm cache');
+    assert.strictEqual(ai._hypotheticalDepth, 0);
+    assertCacheMatchesBoard();
+  });
+});
+
+test('F3: _iceWouldSecureServer gives the same answer with and without the cache', () => {
+  const {rndBran, rnd} = branBoard();
+  const uncached = ai._iceWouldSecureServer(rndBran, 6, rnd);
+  inDecision(() => {
+    ai._evaluateServerSecurity(rnd);
+    assert.strictEqual(ai._iceWouldSecureServer(rndBran, 6, rnd), uncached);
+    assertCacheMatchesBoard();
+  });
+});
+
+test('F3: a board change gets a fresh result, within and across decisions', () => {
+  const {rndBran, rnd} = branBoard();
+  const before = inDecision(() => ai._evaluateServerSecurity(rnd));
+  rndBran.rezzed = true;
+  const after = inDecision(() => ai._evaluateServerSecurity(rnd));
+  assert(!ai._sameSecurityResult(before, after), 'rezzing Bran changes the result');
+  rndBran.rezzed = false;
+  inDecision(() => {
+    const first = ai._evaluateServerSecurity(rnd);
+    rndBran.rezzed = true; // an unguarded change: the board fingerprint still catches it
+    assert(ai._sameSecurityResult(ai._evaluateServerSecurity(rnd), after));
+    rndBran.rezzed = false;
+    assert.strictEqual(ai._evaluateServerSecurity(rnd), first, 'the real board is served from the cache');
+  });
+});
+
+test('F3: every mutable security input changes the board fingerprint', () => {
+  const {rndBran, rnd} = branBoard();
+  const femme = card(31022);
+  const otherIce = etr();
+  const quetzal = {player: runner, usedThisTurn: false};
+  rnd.ice.push(otherIce);
+  femme.chosenCard = rndBran;
+  runner.cards = [femme, quetzal];
+  const expectChange = mutate => {
+    const before = ai._securityBoardKey();
+    mutate();
+    assert.notStrictEqual(ai._securityBoardKey(), before);
+  };
+
+  expectChange(() => { runner.temporaryCredits = 1; });
+  expectChange(() => { runner.tempBonusClicks = 1; });
+  expectChange(() => { context.playerTurn = corp; });
+  expectChange(() => { rndBran.bypassed = true; });
+  expectChange(() => { femme.chosenCard = otherIce; });
+  expectChange(() => { quetzal.usedThisTurn = true; });
+});
+
+test('F3: nested hypotheticals neither read nor write the cache', () => {
+  const {rndBran, rnd} = branBoard();
+  inDecision(() => {
+    const real = ai._evaluateServerSecurity(rnd);
+    const size = ai._securityCache.get(rnd).size;
+    const nested = ai._withHypothetical(() => { rndBran.rezzed = true; }, () =>
+      ai._withHypothetical(() => {}, () => ai._evaluateServerSecurity(rnd), () => {}),
+    () => { rndBran.rezzed = false; });
+    assert(!ai._sameSecurityResult(nested, real), 'the hypothetical sees the rezzed Bran');
+    assert.strictEqual(ai._securityCache.get(rnd).size, size, 'nothing stored at depth above 0');
+    assert.strictEqual(ai._hypotheticalDepth, 0);
+  });
+});
+
+test('F3: outside a decision every call evaluates afresh', () => {
+  const {rnd} = branBoard();
+  const original = ai._evaluateServerSecurityUncached;
+  let computed = 0;
+  ai._evaluateServerSecurityUncached = function(srv) { computed++; return original.call(this, srv); };
+  try {
+    ai._evaluateServerSecurity(rnd); ai._evaluateServerSecurity(rnd);
+    assert.strictEqual(computed, 2);
+    inDecision(() => { ai._evaluateServerSecurity(rnd); ai._evaluateServerSecurity(rnd); });
+    assert.strictEqual(computed, 3, 'inside a decision the repeat is served from the cache');
+  } finally { ai._evaluateServerSecurityUncached = original; }
+});
+
+test('F3: verify mode throws on a stale cached result', () => {
+  const {rnd} = branBoard();
+  ai._securityCacheVerify = true;
+  try {
+    inDecision(() => {
+      ai._evaluateServerSecurity(rnd);
+      const entries = ai._securityCache.get(rnd);
+      for (const key of entries.keys()) entries.set(key, {isSecure: 'stale'});
+      assert.throws(() => ai._evaluateServerSecurity(rnd), /Stale security cache result/);
+    });
+  } finally { ai._securityCacheVerify = false; }
+});
+
+test('F3: the main-phase protection ranking runs only with debugSecurityLog', () => {
+  const source = fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8');
+  assert(/if \(this\.debugSecurityLog\) this\._serverToProtect\(false, true\);/.test(source));
+  assert.strictEqual(ai.debugSecurityLog, false);
+});
+
 test('approached Flyswatter does not save credits for equal-value Archives Mycoweb', () => {
   const flyswatter = card(35079); flyswatter.rezzed = false;
   const mycoweb = card(35053); mycoweb.rezzed = false;
@@ -1207,6 +1457,43 @@ test('ranked asset installs preserve remote ranking and share one destination or
   assert.strictEqual(firstOrder[0], second);
   assert.strictEqual(firstOrder[1], third);
   assert.strictEqual(rolls, 2);
+});
+test('ranked ICE installs apply layer eligibility on the fallback path', () => {
+  const remote = {serverName: 'Remote 0', ice: [{}], root: []};
+  const iceCard = {player: corp, cardType: 'ice', rezCost: 3};
+  corp.HQ.cards = [];
+  const predicateCalls = [];
+  let iceOptionCalls = 0;
+  const replacements = {
+    _emptyProtectedRemotes: () => [remote],
+    _potentialAdvancement: () => 0,
+    _uniqueCopyAlreadyInstalled: () => false,
+    _sufficientEconomy: () => false,
+    _serverToProtect: (includeArchives, returnDetails, eligible) => {
+      predicateCalls.push(typeof eligible === 'function');
+      return eligible ? undefined : remote;
+    },
+    _shouldInstallIceLayer: () => false,
+    _scoringServers: () => [],
+    _isHVT: () => false,
+    _bestProtectedRemote: () => null,
+    _agendasInHand: () => 0,
+    _upgradeInstallPreferences: () => [],
+    _iceInstallOptions: () => { iceOptionCalls++; return []; },
+    _copyOfCardExistsIn: () => null,
+  };
+  const originals = {};
+  Object.keys(replacements).forEach(name => {
+    originals[name] = ai[name];
+    ai[name] = replacements[name];
+  });
+  try {
+    ai._rankedInstallOptions([iceCard]);
+  } finally {
+    Object.keys(originals).forEach(name => {ai[name] = originals[name];});
+  }
+  assert.deepStrictEqual(predicateCalls, [true, false, true]);
+  assert.strictEqual(iceOptionCalls, 0, 'an ineligible server receives no ICE options');
 });
 test('purge models cards trashed by purge even when they have no counters', () => {
   const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});

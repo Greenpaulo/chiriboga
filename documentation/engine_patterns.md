@@ -1,15 +1,27 @@
 # Chiriboga Engine — Pattern Reference
 
-> Read this file at the start of every card-implementation session. It is the
-> compact pattern index; follow its links into `ai.md` only for hooks relevant
-> to the current cards. For unusual mechanics, confirm the pattern against a
-> current implemented card and the engine call site rather than assuming this
-> reference replaces the source code.
+> This is the compact pattern index for card implementation. Read "Card Object
+> Shape", then only the sections the current cards need (table below); search
+> (`rg -n "Name" documentation/engine_patterns.md`) for a specific function or
+> hook rather than reading the whole file. Follow links into `ai.md` only for
+> hooks relevant to the current cards. For unusual mechanics, confirm the
+> pattern against a current implemented card and the engine call site rather
+> than assuming this reference replaces the source code.
+>
+> | Section | Read when the cards… |
+> |---|---|
+> | Card Object Shape | always |
+> | Trigger Hooks | react to turns, runs, encounters, breaches, installs, scoring or bad publicity, modify costs/strength, or have click abilities |
+> | Engine Functions — Quick Reference | need an engine call (credits, clicks, zones, damage, counters, servers, decisions); search it for the function |
+> | Subroutine Shape | are ICE |
+> | AI Decision-Making Hooks | need AI support; it summarises hooks, and `ai.md` holds the full contracts |
+> | Common Patterns | match a listed pattern (optional trigger, once per turn, self-weakening ICE, cost discount…) |
+> | Implemented Cards Quick-Reference | need a worked example from Downfall |
 >
 > AI hook audit: 2026-09-18. The implemented hooks from the Corp server-security
-> work are summarized below. Proposals in
-> `corp_ai_install_decision_roadmap.md` are not available card APIs until that
-> document explicitly marks their phase implemented.
+> work are summarized below. Hooks proposed by items in
+> `documentation/corp-ai/roadmap.md` are not available card APIs until the item
+> is `done`.
 
 ---
 
@@ -170,6 +182,8 @@ abilities: [{
 ```js
 canBeRezzed: function() { return currentPhase.identifier == "Corp 2.2"; }
 ```
+
+Phase identifiers: `"Corp 2.2"` is `phases.corpActionMain` (the Corp's action phase) and `"Runner 1.3"` is `phases.runnerActionMain` (the Runner's action phase), both in `phase.js`.
 
 ### Corp install destination restriction
 
@@ -347,7 +361,6 @@ A handful of `AI*`-named properties are **written by the engine at runtime as ca
 
 - `AIIceInstallScore`, `AInumCompatibleIceInstalled`, `AIPreferredTarget`, `AIPlayedWithCost`, `AITurnsInstalled`, `AISuccessfulRuns` — engine-computed, read-only from a card-author's perspective.
 - `AIIceEncounterSaveState` / `AIIceEncounterModifyState` / `AIIceEncounterRestoreState` — these are global engine functions in `ai_runner.js`/`runcalculator.js`, not per-card hooks at all.
-- `AIEconomyCard` — not implemented. It only appears in a comment in `ai_corp.js` as an idea that was never built. Ignore it if you see it referenced anywhere.
 
 ---
 
@@ -413,8 +426,8 @@ normal `modifySubTypes`, `canUseCredits`, `AIImplementBreaker`,
 (Corp assets) — return `-1` to decline installation, an index into the supplied
 protection-ranked remote list to use that server, or
 `emptyProtectedRemotes.length` to request a new remote. This is a current,
-legacy placement hook—not the unified candidate scorer proposed in
-`corp_ai_install_decision_roadmap.md`. Check affordability and whether the
+legacy placement hook—not the unified candidate scorer proposed by roadmap
+items I1 and I5 in `documentation/corp-ai/roadmap.md`. Check affordability and whether the
 effect has a plausible payoff inside the hook.
 
 **`AIWorthKeeping: function(installedRunnerCards, spareMU) { return true/false; }`** (runner side — events, resources, hardware, programs) — should the runner treat this as something to hold onto and use? Cards judged "worth keeping" get proactively played/installed by the generic AI loop; cards without it are just along for the ride.

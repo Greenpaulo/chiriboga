@@ -1039,6 +1039,7 @@ cardSet[36012] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  runningWithThis: false,
   runWasSuccessful: false,
   modifyPlayCost: {
     Resolve: function (card) {
@@ -1048,12 +1049,13 @@ cardSet[36012] = {
     availableWhenInactive: true,
   },
   Resolve: function (params) {
+    this.runningWithThis = true;
     this.runWasSuccessful = false;
     MakeRun(corp.HQ);
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
-      if (server == corp.HQ) this.runWasSuccessful = true;
+    Resolve: function () {
+      if (this.runningWithThis) this.runWasSuccessful = true;
     },
     automatic: true,
   },
@@ -1065,6 +1067,7 @@ cardSet[36012] = {
   },
   responseOnRunEnds: {
     Resolve: function () {
+      this.runningWithThis = false;
       this.runWasSuccessful = false;
     },
     automatic: true,
@@ -3774,7 +3777,7 @@ cardSet[36044] = {
   _subroutineThreatScore: function (subroutine) {
     var text = subroutine && subroutine.text ? subroutine.text : "";
     var score = 1;
-    if (/end the run/i.test(text)) score += 100;
+    if (attackedServer !== null && /end the run/i.test(text)) score += 100;
     if (/net damage/i.test(text)) {
       var match = text.match(/([0-9]+) net damage/i);
       score += 20 * (match ? Number(match[1]) : 1);

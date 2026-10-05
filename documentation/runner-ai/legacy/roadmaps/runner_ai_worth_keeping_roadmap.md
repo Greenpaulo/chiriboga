@@ -2,7 +2,7 @@
 
 ## Status
 
-This is a proposed sibling to `documentation/corp-ai/corp_ai_improvement_roadmap.md` and `documentation/corp-ai/corp_ai_install_decision_roadmap.md`, extending the same architecture work to the Runner side, which has not yet received an equivalent pass. None of the phases in this document are implemented unless their status is changed explicitly after code, documentation, and regression tests have been completed.
+This is a proposed sibling to the Corp AI server-security and install-decision work (`documentation/corp-ai/roadmap.md`, items L and I), extending the same architecture work to the Runner side, which has not yet received an equivalent pass. None of the phases in this document are implemented unless their status is changed explicitly after code, documentation, and regression tests have been completed.
 
 The corp roadmaps answer, in sequence:
 
