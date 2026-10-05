@@ -29,6 +29,7 @@ snapshots, not permission to restart a completed queue.
 ## What is preserved, and what still needs backup
 
 Documents, scripts, overlays and frozen inputs were preserved in `7b28f2a`.
+The raw evidence archive and its checksum manifest were committed in `a8c7215`.
 The status table below reflects the current preservation state.
 
 | Item | Location | Preservation status |
