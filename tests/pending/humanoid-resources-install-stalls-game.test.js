@@ -9,6 +9,13 @@ const path = require('path');
 const {playBoard, OPENING} = require(path.join(__dirname, '_headless-board.js'));
 
 const setupCode = `
+  var __reproActivated = false;
+  var __reproLog = Log;
+  Log = function(message) {
+    if (/Humanoid Resources gains/.test(message)) __reproActivated = true;
+    return __reproLog.apply(this, arguments);
+  };
+  __report = function() { return {activated: __reproActivated}; };
   var __reproRank = CorpAI.prototype._rankedInstallOptions;
   CorpAI.prototype._rankedInstallOptions = function(cards) {
     arguments[0] = cards.filter(function(c) { return c !== null; });
@@ -25,7 +32,7 @@ const setupCode = `
   };`;
 
 playBoard({corp: 'LEO Glacier.js', runner: 'Topan CBB.js', setupCode}).then(game => {
-  assert.ok(game.tail.some(l => /Humanoid Resources gains/.test(l)) || game.winner, 'the ability was used');
+  assert.ok(game.report.activated, 'the ability was used');
   assert.ok(!game.errors.some(e => /^stalled/.test(e)), 'the game stalled after Humanoid Resources: ' +
     game.errors.join('; ') + (process.env.VERBOSE ? '\n' + game.tail.join('\n') : ''));
   assert.ok(game.winner, 'the game finished');

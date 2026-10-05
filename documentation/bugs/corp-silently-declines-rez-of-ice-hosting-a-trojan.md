@@ -50,8 +50,8 @@ collector. The gate's `decisionLatencyMs` guard conflicts with the current
 rule that latency is not a gate guard (the same run moved every latency metric
 by about 3% with identical games).
 
-**Owner decisions, 2026-10-02.** (1) Proceed on the F4 branch although F4 is
-still in code-review; ignore the F4 blocker for this pickup. (2) Drop the
+**Owner decisions, 2026-10-02.** (1) Pending-F4 gate setup must wait
+until F4 is `done`; the generated blocker remains authoritative. (2) Drop the
 `decisionLatencyMs` guard when rewriting the gate: latency is not a gate
 guard under "Writing a gate" because a cached baseline is timed on a
 differently loaded machine, and the changed branch did not change a single
@@ -402,8 +402,10 @@ covering Chromatophores and Tranquilizer.
       `evidenceBasedHostedCardRez` switched on by default.
 - [ ] The F4 collector `hostedThreatRezCredits` is added through the harness's
       collector extension point before the gate is run.
-- [ ] Chromatophores and Tranquilizer start boards are committed, with the
-      option able to change the Corp's rez decision on each, and are tested.
+- [ ] The Chromatophores start board is committed, with the option able to
+      change the Corp's rez decision on that board, and is tested.
+- [ ] The Tranquilizer start board is committed, with the option able to
+      change the Corp's rez decision on that board, and is tested.
 - [ ] The gate is ready to run: every collector and start board it names
       exists and is tested, and a `--quick` run of each gate command
       completes and reports at least one game changed by the options.
