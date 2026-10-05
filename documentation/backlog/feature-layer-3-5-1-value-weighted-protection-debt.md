@@ -2,7 +2,7 @@
 
 **Roadmap item:** L3.5.1 · **Depends on:** F4, L7.1 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
-**Verified against code:** 376f32c (2026-09-25)
+**Verified against code:** c9d80d2 (2026-10-05)
 
 <!-- roadmap-blocker:start -->
 ## Blocker
@@ -13,68 +13,158 @@ This ticket cannot proceed until those items are `done`. This section is generat
 <!-- roadmap-blocker:end -->
 
 ## Goal
-Let a repeatedly skipped high-consequence server gain protection urgency faster than an ordinary insecure server, and give every continuously insecure server a real maximum wait, without recreating starvation in the opposite direction. Flat debt treats an agenda-rich HQ and a low-value remote alike, so the server whose breach costs most waits as long as the one whose breach costs little. Today no maximum wait exists at all (see below).
+
+Let a repeatedly skipped high-consequence server gain protection urgency faster than an ordinary insecure server, and bound ordinary allocation waiting for continuously insecure servers, subject to mandatory safety-priority deferrals, without recreating starvation in the opposite direction. Flat debt treats an agenda-rich HQ and a low-value remote alike, so the server whose breach costs most waits as long as the one whose breach costs little. Today no allocation-wait bound exists at all (see below).
 
 ## Current behaviour
+
 See [architecture: protection allocation](../corp-ai/architecture.md#protection-allocation). Verified details:
 
 - `_rankedServersToProtect()` builds one entry per server with `score` (from `_protectionScore()`, lower is more urgent), `debt` and `adjustedScore = score - debt`, sorted by `hvtOverride`, then `adjustedScore`, then insertion order. Within a Corp turn `_serverToProtect()` prefers insecure entries not yet in `_protectionInstallsThisTurn` (rotation).
-- Debt ages in `_ageProtectionPriorities()`, called once per Corp turn by `_prepareProtectionPrioritiesForCorpTurn()` (from `phase.js` at "Corp 1.2", from the second Corp turn on), so it ages after each Runner turn. An insecure server that received no protection gains a flat `+1`, capped at `6` (`_serverProtectionDebt`); secure, protected or `_nothingWorthProtecting()` servers reset to `0`; servers no longer in the ranking are deleted.
+- Debt ages in `_ageProtectionPriorities()`, called once per Corp turn by `_prepareProtectionPrioritiesForCorpTurn()` (from `phase.js` at "Corp 1.2", from the second Corp turn on), so it ages after each Runner turn. An insecure server that received no protection gains a flat `+1`, capped at `6` (`_serverProtectionDebt`); secure or protected servers reset to `0`; servers no longer in the ranking are deleted. `_nothingWorthProtecting()` resets debt only with `valuelessServerDebtReset=true`, now default `false`. An excluded empty Archives can therefore retain and accrue debt while it remains ranked, even though `_serverToProtect()` cannot select it.
 - The cap bounds the score adjustment, not the waiting time. If only one protection install happens per turn and a low-value server's score is more than 6 points behind the top-ranked server, debt alone never selects it. There is no maximum wait today.
 - Consequence signals already inside `_protectionScore()`, which must not be counted twice: the HQ agenda count and `_agendaPointsInServer(corp.HQ)` terms, `_serverStructuralRisk()` (agenda points and an advanced agenda in a one-ICE remote), the `_centralServerThreat()` penalty, successful-run history, `_serverRunPressure()` for Archives, and `_archivesIsBackdoorToHQ()`.
-- Deception: once an active bait or bluff posture reaches its target ICE depth, `_NoMoreProtectionForThisServer()` (through `_deceptionProtectionTarget()`) removes the server from the ranking, so it gains no debt and its debt is deleted. A postured server still below its target ranks and ages normally. Because the bait and bluff rolls are cached for the card's lifetime (`_serverBaitDecisions`, `_agendaBluffDecisions`), the exclusion lasts until the card leaves or `_runnerMayWinIfServerBreached()` turns the posture off.
+- Deception: once an active bait or bluff posture reaches its target ICE depth, `_NoMoreProtectionForThisServer()` (through `_deceptionProtectionTarget()`) removes the server from the ranking, so it gains no debt and its debt is deleted. A postured server still below its target ranks and ages normally. Because the bait and bluff rolls are cached for the card's lifetime (`_serverBaitDecisions`, `_agendaBluffDecisions`), there is no timed expiry, but card/root eligibility checks, a revealed card or a winning-score/breach check can end the exclusion.
 - Diagnostics: `Phase_Main` calls `_serverToProtect(false, true)`, which logs "Ranked server protection" with score, debt, adjusted score and security per server.
 
+`emptyArchivesRunPressure` also defaults to `false`: `_nothingWorthProtecting()`
+treats empty Archives without an HQ backdoor as valueless regardless of public
+run rewards/recent pressure. Agendas and backdoors remain stakes, and
+`_serverRunPressure()` still adjusts its ranking. These two gates interact
+through the shared predicate. The [regression handoff](../corp-ai-regression/gated-fix-handoff.md)
+reports inconclusive individual debt-reset effects; the reset was gated for
+combined-build fidelity, not because it is independently proven harmful.
+
 ## Design
+
 - **AI option.** `this.options.weightedProtectionDebt` (default `false`, per the AI options convention in `documentation/ai-planning.md`). Off: today's flat `+1`/cap `6` behaviour, unchanged; this is the fallback until the gate is met. On: the weighted increment and the wait bound below. Deterministic tests for scenarios 2, 3, 5 and 9 set the option on the instance under test.
 - **Weighted increment.** Add `_protectionDebtIncrement(entry)` and use it in `_ageProtectionPriorities()` when the option is on. It returns `1 + bonus`, with `bonus` in `[0, 1]` taken only from L7.1's `_breachConsequence(entry.server)` (for example `min(1, pointsExposed / 2)`, and `1` when `winProbability >= CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD`). The total cap stays `6`. The increment changes only how fast debt grows; it adds nothing to the score, so the existing score inputs above are not counted again. This item must not derive agenda points, win risk or backdoor state itself.
-- **Wait priority.** Keep a second map, `_serverProtectionWait`, counting consecutive Corp-turn agings in which a server was in the ranking, insecure, not `_nothingWorthProtecting()`, received no protection, **and** `_protectionInstallsThisTurn` was non-empty (another server was protected). A turn with no protection install anywhere does not count, because allocation did not starve the server. It resets and is deleted exactly as debt is. When `wait >= this.options.maxProtectionWait` (default `3`), the entry is marked `waitOverride` and sorts after `hvtOverride` and before `adjustedScore` (longest wait first, then `adjustedScore`). The override yields when another eligible server has `_runnerMayWinIfServerBreached()` true, and it does not bypass the L3.5.2 eligibility predicate: an overridden server that cannot accept a layer passes the install to the next entry. This is a priority threshold, not an unconditional wall-clock guarantee: when `N` eligible insecure servers compete for `C` protection installs per counted turn, the capacity-aware bound is `maxProtectionWait + ceil((N - 1) / C)` counted turns.
+- **Admission and reset boundaries.** Off preserves the recovered flat aging,
+  including disabled valueless-server resets. On must define how an ineligible
+  but ranked Archives is handled by debt versus wait: the proposed wait map
+  excludes valueless servers, while today's debt may still accrue. Do not
+  claim the maps reset identically without implementing and measuring that
+  change. Never enable `valuelessServerDebtReset` or `emptyArchivesRunPressure`
+  as an incidental prerequisite. Any new reset policy belongs explicitly to
+  this item's on arm and its evidence; non-agenda Archives reward valuation is
+  a separate design gap.
+- **Wait priority.** Keep a second map, `_serverProtectionWait`, counting consecutive Corp-turn agings in which a server was in the ranking, insecure, not `_nothingWorthProtecting()`, received no protection, **and** `_protectionInstallsThisTurn` was non-empty (another server was protected). A turn with no protection install anywhere does not count, because allocation did not starve the server. Wait clears on security, protection, removal or loss of eligibility. If the on arm also clears debt for loss of eligibility, make that an explicit measured reset change; it is not the recovered off-arm behavior. When `wait >= this.options.maxProtectionWait` (default `3`), the entry is marked `waitOverride` and sorts after `hvtOverride` and before `adjustedScore` (longest wait first, then `adjustedScore`). The override yields to a documented mandatory safety-priority protection action for another eligible server whose breach could win (`_runnerMayWinIfServerBreached()` identifies the consequence; the chosen action must address the actual breach risk), and it does not bypass the L3.5.2 eligibility predicate: an overridden server that cannot accept a layer passes the install to the next entry. This is a priority threshold, not an unconditional wall-clock guarantee: when `N` eligible insecure servers compete for `C` protection installs per counted turn, the capacity-aware bound is `maxProtectionWait + ceil((N - 1) / C)` ordinary allocation turns, excluding documented mandatory safety deferrals as defined below.
+- **Safety deferrals and measurement.** Keep raw `_serverProtectionWait`
+  unchanged for override activation and ordering. For each continuous wait
+  episode, also record `safetyDeferralTurns`: counted turns when this server
+  remained eligible but all available protection-install capacity was consumed
+  by mandatory higher-priority protection of another eligible server whose
+  breach could win. The chosen action and its breach-risk/eligibility evidence
+  must be recorded at selection; an agenda-point flag alone, an ineffective
+  install, or a turn with capacity left for the waiting server earns no exemption.
+  Count a deferral at most once per counted turn and clear it with that server's
+  wait episode. Bound checks use `allocationWait = rawWait - safetyDeferralTurns`
+  (never negative). This preserves safety priority without allowing ordinary
+  starvation to hide behind an unrelated dangerous server. Raw wait and
+  justified deferrals remain visible in telemetry; repeated mandatory threats
+  can delay wall-clock protection without a finite guarantee.
 - **Deception.** No new exemption. The "active deception posture" this item respects is exactly the existing `_NoMoreProtectionForThisServer()` exclusion: an excluded server gains neither debt nor wait, and a postured server below its target ages like any other, because the Corp still intends to add ICE up to the target. How long a posture stays active is L8.4's concern; this item therefore does not depend on L8.4.
 - **Telemetry.** No item-specific logging. Extend the existing "Ranked server protection" entry with `increment`, `wait` and `waitOverride`, and add F4 collectors (listed in the criteria) that read `_rankedServersToProtect()` entries at each protection install through F4's collector extension point, alongside the shared DecisionSnapshots record.
 
 ## Safety and information boundary
+
 - Same-turn rotation remains authoritative; weighting affects only cross-turn debt.
 - Per-turn increment in `[1, 2]`; total debt capped at `6`.
 - With the option on, an eligible, continuously insecure server becomes an
-  override at `maxProtectionWait`; its maximum wait is the capacity-aware
-  bound above, because simultaneous overrides still require separate installs.
-- Secure, protected, removed, repurposed or excluded servers clear their debt and wait.
+  override at `maxProtectionWait`; its ordinary allocation wait is bounded by
+  the capacity-aware limit above. Mandatory safety deferrals are recorded
+  separately; raw elapsed wait may exceed that limit.
+- With the option off, preserve current reset/exclusion semantics. With it on,
+  explicitly define and test any additional reset for repurposed, valueless or
+  excluded servers; secure, protected and removed servers keep their existing
+  reset/removal behavior.
 - Use public Corp knowledge only (through `_breachConsequence()`); never inspect hidden Runner cards.
 
 ## Test scenarios
+
 1. Equal-risk insecure servers still rotate within the same turn, with the option on and off.
 2. With the option on and `_breachConsequence()` reporting 2+ exposed points for HQ and 0 for a remote, a repeatedly skipped HQ gains a larger increment than the remote each aging and reaches the cap in at most 3 agings; the remote gains `+1` per aging.
 3. With the option on, a low-value insecure server whose score is more than 6 behind a high-value insecure server, while the single protection install each turn goes to the high-value server, receives the next protection install once its wait reaches `maxProtectionWait`; its wait then resets.
 4. Installing protection or becoming secure resets debt and wait; destroying a remote removes both.
-5. Archives gains extra urgency only while `_archivesIsBackdoorToHQ()` is true (through `_breachConsequence()`).
+5. Empty Archives inherits HQ consequence only while `_archivesIsBackdoorToHQ()` is true (through `_breachConsequence()`). Agendas in Archives retain their own consequence; public run rewards alone do not become agenda-exposure value.
 6. Results are unchanged when hidden Runner Grip contents change without any public-information change.
 7. A server excluded by `_NoMoreProtectionForThisServer()` because its active posture reached its target depth gains neither debt nor wait; when the posture ends (for example the winning-breach guard trips) it rejoins the ranking with zero debt and zero wait.
 8. With the option off, scenarios 2–4 produce exactly today's flat `+1`/cap `6` debt and no `waitOverride`.
-9. A `waitOverride` yields to an eligible server whose breach would win the game.
+9. A `waitOverride` yields to mandatory higher-priority protection of another eligible server whose breach would win the game. Only a documented deferral that consumes all available capacity is excluded from allocation wait.
 10. A Corp with no installable ICE accrues no wait (no protection install happened) and no override fires; a poor Corp with one affordable ICE gives it to the override target only if that target passes the eligibility predicate.
+11. Cover all four combinations of the two Archives/debt gates: pressure-only
+    empty Archives is valueless with admission off, valuable with admission on,
+    and reset depends independently on the reset gate and that predicate.
+    The weighted-debt off arm preserves each combination; the main acceptance
+    comparison keeps both legacy gates off. Do not change admission via wait
+    priority or clear debt merely because allocation excluded a server.
+
+12. Repeated mandatory safety deferrals can push raw wait above the bound while
+    `allocationWait` remains within it, producing zero `boundViolations` and
+    nonzero recorded deferrals. With bound 4, raw wait 7 and 3 justified deferral
+    turns passes; raw wait 8 with those same 3 deferrals violates it. An
+    unrelated winning-agenda flag, an ineffective safety install or spare
+    capacity cannot exempt a turn. Reset/re-entry starts a fresh deferral count.
 
 ## Acceptance gate
-F4 comparison (paired seeds, committed deck pool, 200 games per deck pair, bootstrap 95% CI): baseline option off, candidate option on. The deck pool must include at least one Runner deck with a live Archives backdoor (Baker) and one with central multi-access.
 
-- Improvement: `highConsequenceBreaches` per game decreases: the CI of (baseline − candidate) has a lower bound above 0.
-- Guard: `pointsStolen` per game: CI upper bound of (candidate − baseline) at most +0.2.
-- Guard: `winRate`: CI lower bound of (candidate − baseline) at least −0.02.
-- Hard check: `protectionWaitTurns` never exceeds
-  `maxProtectionWait + ceil((N - 1) / C)` in any candidate game, where `N` is
-  the number of eligible insecure servers competing when the server reaches
-  the threshold and `C` is the available protection-install capacity per
-  counted turn (at least 1 by the definition of a counted turn).
+F4 gate. Option `weightedProtectionDebt` (Corp AI), off in the baseline and on
+in the candidate. Committed deck pool, paired seeds, 200 games per deck
+pair, bootstrap 95% intervals. Both arms keep all five legacy regression
+gates off and prerequisite options identical; capture a matching corrected
+control and back-fill observation-only collectors.
+The pool must include a live Archives backdoor (Baker) and central multi-access;
+if the opening pool rarely reaches these, add corresponding start boards.
+Collectors: `highConsequenceBreaches`, `protectionWaitTurns`
+(planned, not implemented today). Proposed exported metric paths below
+must be verified when these collectors land; each declares its better
+direction.
+Starts: none initially. If `--quick` changes no game, build real-game-derived
+start boards, record their provenance and add a separate gate command before
+hand-off; all commands must pass.
+
+`highConsequenceBreaches.count` counts successful runs on a server whose
+preceding-Corp-turn consequence exposed at least 2 points or win probability
+at least 0.35, as already specified below. `protectionWaitTurns.maximum`
+records the largest raw wait reached; `safetyDeferralTurns` records justified
+deferrals per game for diagnosis. Its `boundViolations` field counts
+`allocationWait` values exceeding `maxProtectionWait + ceil((N - 1) / C)`, where `N` counts eligible
+insecure competitors when the server reaches the threshold and `C` is available
+protection-install capacity per counted turn (at least 1); test that calculation
+directly.
+The zero-violation hard check enforces that capacity-aware bound on ordinary
+allocation wait; it does not penalize required safety deferrals or hide them
+from the raw-wait metrics.
+The existing win/theft guards are unchanged; a +0.2 scoring guard is added
+under current AI-planning policy because extra protection can hurt scoring.
+This remains strategic and gated; disabling the legacy reset is not evidence
+that weighted debt or a new reset policy improves outcomes.
+
+| Check | Metric | Better | Threshold |
+|---|---|---|---|
+| Improve | `highConsequenceBreaches.count` | lower | interval of the improvement above 0 |
+| Guard | `pointsStolen` | lower | regression at most 0.2 |
+| Guard | `winRate` | higher | regression at most 0.02 |
+| Guard | `pointsScored` | higher | regression at most 0.2 |
+| Hard check | `protectionWaitTurns.boundViolations` | — | 0 in every candidate game |
+
+Gate command (after the collector setup exists):
+`node scripts/ai-batch.js gate --corp-option weightedProtectionDebt=true --collector highConsequenceBreaches --collector protectionWaitTurns --improve highConsequenceBreaches.count --guard pointsStolen=0.2 --guard winRate=0.02 --guard pointsScored=0.2 --max protectionWaitTurns.boundViolations=0`
 
 ## Things to consider
+
 - The consequence signal has one owner, L7.1's `_breachConsequence(server)`; this item and I2 consume it. Do not add a second agenda-points-exposed calculation here.
 - The legacy ticket put the deception exemption in L8.2 and described it as lasting "while the bluff is active". Under lifetime posture caches that would be permanent; relying on the existing exclusion keeps the lifetime question with L8.4.
 - The former "simulation matrix" (simultaneous naked centrals, HQ agenda flood, advanced scoring remote, HVT remote, Archives backdoor, poor Corp with one affordable ICE, no installable ICE) is now covered by scenarios 1–5, 9 and 10 plus the deck-pool requirement above.
 
 ## Acceptance criteria
+
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
 - [ ] The F4 collectors `highConsequenceBreaches` (successful runs on a server whose `_breachConsequence()` at the preceding Corp turn had `pointsExposed >= 2` or `winProbability >= 0.35`) and `protectionWaitTurns` (largest `_serverProtectionWait` value reached per game) are added through F4's collector extension point.
+- [ ] Both collectors are individually verified, including justified safety deferrals, rejection of spurious exemptions, episode resets and the allocation-wait bound calculation, and back-filled without changing baseline decisions.
+- [ ] The gate's `--quick` run changes at least one game; any required starts have recorded provenance, focused coverage and a separate passing gate command.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

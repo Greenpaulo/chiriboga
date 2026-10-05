@@ -67,6 +67,82 @@ The terminal shows a summary for each deck pair:
 `stolen` are the average agenda points per game, and `turns` is the average
 game length.
 
+### Five-pair regression benchmark (including N/A tickets)
+
+Use the frozen `beginner-v1` pool from the Corp AI regression investigation
+to screen gameplay changes, including tickets whose acceptance gate is
+`N/A`. It contains PD–Tao, BTL–Kit, NEH–Zahya, PE–Steve and Gateway, using
+System Gateway, System Update 2021 and Elevation. Seeds 1–200 give 1,000 games.
+Run on a clean, committed candidate branch, using a new output filename for
+each PR/revision so earlier evidence is preserved:
+
+```sh
+node scripts/ai-batch.js \
+  --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --seeds 1-200 \
+  --out bench/pr-12-candidate.json
+
+node scripts/ai-batch.js \
+  --compare bench/corp-options-default.json bench/pr-12-candidate.json
+```
+
+Replace `pr-12-candidate.json` with the ticket/PR and revision being tested.
+Keep reports in the ignored `bench/` evidence folder. The saved benchmark
+JSON is local evidence; it is not included in a fresh clone. Preserve/back up
+that file rather than overwriting it with a new run.
+
+The latest corrected-default benchmark was run on **2026-10-05**, at clean
+commit **`28cc665`**, with **1,000 games and zero failures**, pool hash
+`fe8cb821d04c9dd7` and code hash `83dee8ba06045827`. Its report is
+`bench/corp-options-default.json`. This is the corrected default intended for
+integration into main, rather than the investigation's old tip `b52d451`
+(`bench/current.json`, 25.3% Corp wins).
+
+| Pooled metric | Corrected-default benchmark |
+|---|---:|
+| Corp win rate | **39.8%** |
+| Corp points scored per game | 3.920 |
+| Runner points stolen per game | 5.767 |
+| Points stolen from HQ per game | 1.756 |
+| Points stolen from R&D per game | 2.044 |
+| Points stolen from Archives per game | 0.008 |
+| Points stolen from remotes per game | 1.959 |
+| Game length (turns) | 14.931 |
+
+The report used no start fixtures or collectors, Runner options `{}`, and
+all six Corp options false: `evidenceBasedHostedCardRez`,
+`secureScoringServerGate`, `serverAtRiskInstallOverride`,
+`committedAgendaReserveBypass`, `emptyArchivesRunPressure` and
+`valuelessServerDebtReset`. The command above uses the candidate's defaults;
+check its report's effective options against these settings and explain any
+intentional difference. Keep the pool, decks, seeds, fixtures and collectors
+identical; the comparator rejects mismatches in pool hash, seeds, starts or
+collectors. Different source commits/code hashes are allowed.
+
+Read both reports' failure counts before interpreting the paired comparison:
+failed games are dropped from paired metrics and must be investigated, not
+treated as ordinary losses. Inspect pooled and per-pair results, win rate,
+scoring, total and per-server theft, and game length together. The plain
+comparison reports differences and paired 95% intervals; it does not award a
+regression pass/fail. Its phrase "changed by the options" counts differing
+game log hashes even when comparing code revisions.
+
+For a behaviour-preserving refactor, require zero changed games and unchanged
+decision snapshots. For an objective bug fix, changed games are expected when
+the fixed path is reached: investigate adverse outcome differences and record
+their explanation alongside the deterministic reproduction. A correctness
+fix is not rejected solely because one side's win rate falls. Pure documentation
+and human-only UI changes need not run this gameplay screen.
+
+This frozen benchmark tracks cumulative changes. To attribute a difference
+to one PR, also run the same command on its target main commit with a distinct
+output such as `bench/pr-12-main.json`, then compare that report with the
+candidate. After main integration, verify the merged build against the saved
+benchmark rather than assuming it reproduces the recorded result. This screen
+supplements the full regression suite and any ticket-specific strategic gate.
+See the [completed investigation handoff](corp-ai-regression/gated-fix-handoff.md)
+for the evidence and remaining scoring deficit against the historical H0 build.
+
 ### What a report contains
 
 The JSON report has one line per game, plus:

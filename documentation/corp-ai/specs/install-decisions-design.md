@@ -48,6 +48,59 @@ Whenever an item introduces or changes a card-facing AI hook, update
 information sources, out-of-run safety constraints, and at least one
 card-definition example.
 
+## Corrected regression baseline and ownership
+
+The [2026-10-05 recovery](../../corp-ai-regression/gated-fix-handoff.md)
+gates five existing policies, all default-off. Future install work must start
+from this corrected policy, not assume the old strict behaviors remain
+unconditional. Preserve all five settings in baseline/candidate comparisons
+unless a named experiment explicitly tests a gate. Hold prerequisite I-layer
+options identical in both arms and capture/back-fill the corresponding control;
+an old I0 report with different effective options is not a matching control.
+
+The current F4 `gate` command clears all explicit option overrides in its
+baseline arm; it does not retain prerequisite override flags there. A single
+gate command is therefore valid only when the pinned build's defaults already
+provide the required common configuration, with the tested option default-off.
+Verify both reports' effective settings. Otherwise prepare two owner-run
+reports with identical prerequisite settings and compare them with the same
+metric checks, or add an explicitly designed harness capability before using
+the gate. Do not pass prerequisite `--corp-option` flags and assume both arms
+receive them.
+
+| Disabled policy | Roadmap owner / coverage |
+|---|---|
+| `secureScoringServerGate` | I4 owns safe agenda destinations and scoring plans; I3/I6 consume scoring-server suitability. The PR 19 winning-steal concern is tracked in I4. |
+| `serverAtRiskInstallOverride` | I2 owns whether another ICE layer buys useful security; I7.1 compares that install with credits/draw, and I7.2/I8 account for competing scoring plans. |
+| `committedAgendaReserveBypass` | I4 owns completion/commitment; I7.2 compares advancement with defense/economy; I8 sequences costs across clicks. |
+| `emptyArchivesRunPressure` | I2 owns protection-install admission, and L3.5.1 consumes the same valueless predicate for aging. L7.1 supplies agenda/backdoor breach consequences, but does not yet design valuation of non-agenda rewards from empty Archives runs. That reward/admission calibration remains an explicit gap. |
+| `valuelessServerDebtReset` | L3.5.1 owns aging/reset semantics. Its individual regression evidence is inconclusive; it was gated to reproduce the combined recovered build. |
+
+I0 must record the corrected default and effective options before collecting
+the install-series baseline; I1's compatibility path must preserve that policy.
+I9 must compare its combined policy against the corrected baseline, not inherit
+old-tip strength claims. Do not turn a legacy gate on just to satisfy an old
+fixture: those fixtures now explicitly request the historical policy.
+
+**Archives gap status: open. Accountable item: I2.** During I2 planning,
+first trace the spending and the public reward prevented,
+then decide whether I2 can cover the valuation or needs a separately scoped
+policy. Before I2 moves to code-review, its Resolution must either link the
+implemented valuation and validation evidence, or link a filed follow-up
+ticket stating the remaining scope, roadmap ownership and acceptance gate.
+An unlinked note saying "investigate later" does not meet this requirement.
+I9 must audit that disposition before retiring the legacy install fallback;
+a still-open follow-up remains visible and the unvalidated policy stays off.
+A successful run or a reward hook alone is not a demonstrated reason to spend
+on defense. Do not silently expand L7.1's agenda-consequence signal into a
+reward valuation or treat I2's enumeration of ranked servers as permission to
+bypass the recovered empty-Archives exclusion.
+
+This is an audit of the gated policies and their consumers, not a fresh
+verification stamp for every install spec. Re-ground each dependent spec in
+full before raising or implementing it; targeted branch corrections below do
+not certify unrelated design assumptions or acceptance gates.
+
 ## Item order
 
 | Item | Depends on |
@@ -190,10 +243,11 @@ starting):
 - `_iceInstallScore()` pushes a fake `{ice: [ice], root: []}` remote onto
   `corp.remoteServers` with no guard; it is reachable only through
   `_bestIceToInstall()`, which nothing calls. I2 deletes both.
-- `Phase_Main`'s "just need a tiny bit more cash" probe adds credits, compares
-  two `_rankedInstallOptions()` arrays with `<` (string coercion, works only by
-  accident) and rolls back without a guard. F2 fixes the mechanics; I7.1
-  replaces the decision.
+- `Phase_Main`'s "just need a tiny bit more cash" probe adds credits and compares
+  two `_rankedInstallOptions()` arrays with `<` (string coercion). It now
+  restores credits and hypothetical depth in `finally`; it still uses a manual
+  probe rather than `_withHypothetical()`. F2 owns that migration; I7.1 replaces
+  the decision.
 - `_ordinaryPurgeOutcome()` already uses `_withHypothetical()` and is the model
   to follow.
 

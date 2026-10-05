@@ -624,10 +624,10 @@ class CorpAI {
     if (typeof server.cards == "undefined") {
       //is remote
       //A relative protection score cannot establish that the Runner is unable
-      //to breach this server. Never offer an insecure remote for scoring,
-      //regardless of how poorly HQ or Archives currently score.
+      //to breach this server. With the strict gate enabled, reject insecure
+      //remotes regardless of how poorly HQ or Archives currently score.
       var security = this._evaluateServerSecurity(server);
-      if (!security.isSecure) return false;
+      if (this.options.secureScoringServerGate && !security.isSecure) return false;
 
       //yes if it has a scoring upgrade, an agenda or an ambush installed
       //this code was originally after the protection check but this lead to AI installing random assets in scoring servers
@@ -3463,7 +3463,8 @@ class CorpAI {
       if (
         !entry.server ||
         entry.isSecure ||
-        this._nothingWorthProtecting(entry.server, entry.security)
+        (this.options.valuelessServerDebtReset &&
+          this._nothingWorthProtecting(entry.server, entry.security))
       ) {
         if (entry.server) this._serverProtectionDebt.set(entry.server, 0);
       } else if (this._protectionInstallsThisTurn.includes(entry.server)) {
@@ -3560,6 +3561,7 @@ class CorpAI {
       if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
     }
     return (
+      !this.options.emptyArchivesRunPressure ||
       this._serverRunPressure(corp.archives, securityEvaluation).penalty <= 0
     );
   }
@@ -4182,10 +4184,11 @@ class CorpAI {
       shouldInstall = false;
     }
     //An existing unrezzed ICE is not protection if the evaluator already
-    //knows the Runner can breach the server. Allow another affordable layer
-    //when an agenda or asset is actually at stake; _iceInstallOptions still
+    //knows the Runner can breach the server. The optional final override allows
+    //another layer when an agenda or asset is actually at stake; _iceInstallOptions still
     //filters out ICE the Corp cannot afford to install and rez.
-    return shouldInstall || economyIsSufficient || serverAtRisk;
+    return shouldInstall || economyIsSufficient ||
+      (this.options.serverAtRiskInstallOverride && serverAtRisk);
   }
 
   //Return a shuffled copy so planning never changes a caller-owned ranking.
@@ -6452,7 +6455,8 @@ class CorpAI {
       (almostDoneAgenda ||
         almostDoneHostileAsset ||
         sufficientEconomy ||
-        this._installedAgendaCanBeCompleted()) &&
+        (this.options.committedAgendaReserveBypass &&
+          this._installedAgendaCanBeCompleted())) &&
       optionList.indexOf("advance") > -1
     ) {
       //agendas and assets
@@ -7029,4 +7033,9 @@ class CorpAI {
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
   evidenceBasedHostedCardRez: false,
+  secureScoringServerGate: false,
+  serverAtRiskInstallOverride: false,
+  committedAgendaReserveBypass: false,
+  emptyArchivesRunPressure: false,
+  valuelessServerDebtReset: false,
 });
