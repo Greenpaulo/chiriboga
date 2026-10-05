@@ -221,17 +221,121 @@ function greenPathFor(pending) {
   return null;
 }
 
-function isReproductionExpectation(file, line) {
-  if (file.endsWith('.txt')) return /^\/\/\s*(EXPECT|OPTIONS)/.test(line);
-  if (/^\s*\/\//.test(line)) return false;
-  return /\b(?:assert|expect|throws|doesNotThrow|rejects|doesNotReject|equal|notEqual|deepEqual|notDeepEqual|strictEqual|notStrictEqual|deepStrictEqual|notDeepStrictEqual|ok|fail)\s*[.(]/.test(line);
+// Tokenize assertions so multiline arguments and chained expect(...).toBe(...)
+// calls are compared in full. Ignore comments/formatting, but preserve literal
+// contents. Strings and regexes are opaque so their parentheses cannot end a call.
+function reproductionTokens(source) {
+  const tokens = [];
+  let canStartRegex = true;
+  let i = 0;
+  const readToken = () => {
+    while (i < source.length) {
+      const start = i;
+      const char = source[i], next = source[i + 1];
+      if (/\s/.test(char)) { i++; continue; }
+      if (char === '/' && next === '/') {
+        while (i < source.length && source[i] !== '\n') i++;
+        continue;
+      }
+      if (char === '/' && next === '*') {
+        const end = source.indexOf('*/', i + 2);
+        i = end < 0 ? source.length : end + 2;
+        continue;
+      }
+      if (char === '"' || char === "'" || char === '`') {
+        i++;
+        while (i < source.length) {
+          if (source[i] === '\\') { i += 2; continue; }
+          if (char === '`' && source[i] === '$' && source[i + 1] === '{') {
+            i += 2;
+            let depth = 1;
+            canStartRegex = true;
+            while (depth && i < source.length) {
+              const token = readToken();
+              if (token === '{') depth++;
+              else if (token === '}') depth--;
+            }
+            continue;
+          }
+          if (source[i++] === char) break;
+        }
+        canStartRegex = false;
+      } else if (char === '/' && canStartRegex) {
+        i++;
+        let inClass = false;
+        while (i < source.length) {
+          if (source[i] === '\\') { i += 2; continue; }
+          if (source[i] === '[') inClass = true;
+          else if (source[i] === ']') inClass = false;
+          else if (source[i] === '/' && !inClass) { i++; break; }
+          i++;
+        }
+        while (/[a-z]/i.test(source[i] || '') && i < source.length) i++;
+        canStartRegex = false;
+      } else if (/[\w$]/.test(char)) {
+        while (i < source.length && /[\w$]/.test(source[i])) i++;
+        canStartRegex = /^(?:return|throw|case|delete|void|typeof|new|yield|await|in|instanceof)$/.test(source.slice(start, i));
+      } else {
+        i += ['?.', '++', '--', '=>'].includes(source.slice(i, i + 2)) ? 2 : 1;
+        canStartRegex = ![')', ']', '}', '.', '?.', '++', '--'].includes(source.slice(start, i));
+      }
+      return source.slice(start, i);
+    }
+    return null;
+  };
+  for (let token; (token = readToken()) !== null;) tokens.push(token);
+  return tokens;
+}
+
+function reproductionExpectations(file, lines) {
+  if (file.endsWith('.txt')) return lines.filter(line => /^\/\/\s*(EXPECT|OPTIONS)/.test(line));
+  const tokens = reproductionTokens(lines.join('\n'));
+  const names = /^(?:assert|expect|throws|doesNotThrow|rejects|doesNotReject|equal|notEqual|deepEqual|notDeepEqual|strictEqual|notStrictEqual|deepStrictEqual|notDeepStrictEqual|ok|fail)$/;
+  const identifier = token => /^[A-Za-z_$][\w$]*$/.test(token || '');
+  const groups = new Map([['(', ')'], ['[', ']'], ['{', '}']]);
+  const groupEnd = start => {
+    const stack = [];
+    for (let i = start; i < tokens.length; i++) {
+      if (groups.has(tokens[i])) stack.push(groups.get(tokens[i]));
+      else if (tokens[i] === stack[stack.length - 1]) {
+        stack.pop();
+        if (!stack.length) return i + 1;
+      }
+    }
+    return tokens.length; // A malformed call is conservatively compared to EOF.
+  };
+  const calls = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (!names.test(tokens[i])) continue;
+    let call = i + 1;
+    while (true) {
+      if (['.', '?.'].includes(tokens[call]) && identifier(tokens[call + 1])) call += 2;
+      else if (tokens[call] === '[') call = groupEnd(call);
+      else break;
+    }
+    if (tokens[call] === '?.' && tokens[call + 1] === '(') call++;
+    if (tokens[call] !== '(') continue;
+    let start = i;
+    while (start >= 2 && ['.', '?.'].includes(tokens[start - 1]) && identifier(tokens[start - 2])) start -= 2;
+    let end = groupEnd(call);
+    // Include chained matchers, including computed members and optional calls.
+    while (end < tokens.length) {
+      if (['.', '?.'].includes(tokens[end]) && identifier(tokens[end + 1])) end += 2;
+      else if (tokens[end] === '?.' && tokens[end + 1] === '(') end = groupEnd(end + 1);
+      else if (tokens[end] === '(' || tokens[end] === '[') end = groupEnd(end);
+      else break;
+    }
+    calls.push(JSON.stringify(tokens.slice(start, end)));
+    i = end - 1;
+  }
+  return calls;
 }
 
 function reproductionExpectationsMatch(file, before, after) {
-  const beforeExpectations = before.filter(line => isReproductionExpectation(file, line));
-  const afterExpectations = after.filter(line => isReproductionExpectation(file, line));
+  const beforeExpectations = reproductionExpectations(file, before);
+  const afterExpectations = reproductionExpectations(file, after);
   return beforeExpectations.length === afterExpectations.length &&
-    beforeExpectations.every((line, index) => line === afterExpectations[index]);
+    beforeExpectations.every((call, index) => call === afterExpectations[index]);
 }
 
 function check(ticket) {
@@ -274,13 +378,8 @@ function check(ticket) {
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
         const removed = before.filter(line => !after.includes(line));
         const addedLines = after.filter(line => !before.includes(line));
-        const changedExpectations = removed.concat(addedLines)
-          .filter(line => isReproductionExpectation(green, line));
-        if (changedExpectations.length || !reproductionExpectationsMatch(green, before, after)) {
-          const detail = changedExpectations.length
-            ? ':\n      ' + changedExpectations.map(l => l.trim()).join('\n      ')
-            : ' order.';
-          report('FAIL', 'Reproduction expectations changed' + detail);
+        if (!reproductionExpectationsMatch(green, before, after)) {
+          report('FAIL', 'Reproduction expectations changed (complete assertion calls or their order).');
         } else if (removed.length || addedLines.length) {
           report('WARN', 'Reproduction changed outside its expectations (' + removed.length + ' lines removed, ' +
             addedLines.length + ' added); the Resolution should explain why.');
