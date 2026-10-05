@@ -49,7 +49,8 @@ the loss risk of leaving the agenda in HQ. `_rankedInstallOptions` already
 prioritizes installs that can fast-advance to win, and the existing
 `_icePreventsGameWinningBreach` rez guard remains enabled.
 
-Follow-up: reproduce a losing install with a decision trace, compare viable
+Follow-up is owned by [I4: agenda installation and scoring commitment](../corp-ai/specs/I4-agenda-installation-and-scoring-commitment.md).
+Reproduce a losing install with a decision trace, compare viable
 actions and HQ retention risk, preserve this-turn winning scores, and test
 point-sensitive admission separately against the corrected baseline. Include
 focused cases for both genuine avoidable losses and useful installs rejected
