@@ -23,11 +23,12 @@ Implemented from `64bcf17`.
 - Moved the original reproduction to
   `tests/hosted-trojan-blocks-rez-silently.test.js` with its `true` decision
   assertion and zero-message-count expectation unchanged (both are present
-  in the pending test at `64bcf17`). The old message text incorrectly asked
-  for a decline log while asserting zero messages; it now describes the
-  candidate's successful rez, which requires no decline diagnostic. Its harness
-  now resets the option per case, enables the candidate for the reproduction, and puts the hosted card in the public
-  installed-card list with its real `host`; these setup-only changes account
+  in the pending test at `64bcf17`). The historical assertion message incorrectly
+  asks for a decline log while asserting zero messages. It is retained verbatim
+  so the complete original assertion calls remain comparable; explanatory
+  comments clarify that the candidate's successful rez needs no decline log.
+  Its harness now resets the option per case, enables the candidate for the
+  reproduction, and puts the hosted card in the public installed-card list with its real `host`; these setup-only changes account
   for the ticket checker's non-expectation diff warning. Added option-off
   coverage plus decisive and redundant Tranquilizer cases to the shared Corp
   security suite, while retaining the reproduction's Saci-style and rich-Corp

@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const source = fs.readFileSync(path.join(__dirname, '../scripts/agent-hooks/verify-on-stop.js'), 'utf8');
+const hookRoot = path.resolve(__dirname, '..');
 const counts = new Map();
 const exit = {};
 let relevant = true;
@@ -34,8 +35,12 @@ function invoke(session = 'review-regression') {
         unlinkSync(file) { counts.delete(file); },
       };
       if (name === 'child_process') return {
-        spawnSync(command) {
+        spawnSync(command, args, options) {
           if (command === 'git') return {status: 0, stdout: relevant ? ' M ai_corp.js\n' : ''};
+          assert.strictEqual(command, process.execPath, 'run the suite with Node');
+          assert.deepStrictEqual(Array.from(args), [path.join(hookRoot, 'tests/run-all-tests.js')],
+            'run the complete regression suite');
+          assert.strictEqual(options.cwd, hookRoot, 'run from the repository root');
           suiteRuns++;
           return {status: suitePasses ? 0 : 1, stdout: 'suite result', stderr: ''};
         },
