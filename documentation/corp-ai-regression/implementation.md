@@ -12,8 +12,8 @@ targets `b52d451`.
 | Option | Source / expression |
 |---|---|
 | `secureScoringServerGate` | `fa1182c`, `_isAScoringServer`: reject when `!security.isSecure`. |
-| `serverAtRiskInstallOverride` | #21 `5e6af68`, `_shouldInstallIceLayer`: final `|| serverAtRisk`. |
-| `committedAgendaReserveBypass` | #21 `5e6af68`, `Phase_Main`: `|| this._installedAgendaCanBeCompleted()`. |
+| `serverAtRiskInstallOverride` | #21 `5e6af68`, `_shouldInstallIceLayer`: final `\|\| serverAtRisk`. |
+| `committedAgendaReserveBypass` | #21 `5e6af68`, `Phase_Main`: `\|\| this._installedAgendaCanBeCompleted()`. |
 | `emptyArchivesRunPressure` | #25 `a3d57d3`, `_nothingWorthProtecting`: empty Archives pressure admission. |
 | `valuelessServerDebtReset` | #25 `a3d57d3`, `_ageProtectionPriorities`: reset for `_nothingWorthProtecting`. |
 
@@ -29,6 +29,32 @@ old behavior explicitly enable its option, retaining their expectations.
 `node tests/run-all-tests.js --unit-only` includes the decision fixture and
 snapshot suites and excludes `ai-batch.test.js`, which launches batches.
 The full runner without this flag still includes that integration test.
+
+## PR 19 review: proposed winning-steal install guard
+
+The review correctly identifies a remaining risk: with the strict gate off,
+an agenda can be offered to a breachable remote even when its points would
+let the Runner win. No separate agenda-point install guard was removed:
+`fa1182c` added the blanket `_isAScoringServer` rejection that this PR gates.
+The proposed point-sensitive destination filter would be a new policy, not
+restoration of an independent tactical guard.
+
+That proposal is deliberately deferred from this recovery PR. The recorded
+1,000-pair fidelity and recovered win rate apply to the tested all-off policy;
+neither the blanket gate's regression nor its removal demonstrates the effect
+of a narrower guard. `!security.isSecure` identifies a possible breach under
+the current security model, not a forced immediate loss. An install decision
+must also account for scoring or reinforcing before the Runner's turn and
+the loss risk of leaving the agenda in HQ. `_rankedInstallOptions` already
+prioritizes installs that can fast-advance to win, and the existing
+`_icePreventsGameWinningBreach` rez guard remains enabled.
+
+Follow-up: reproduce a losing install with a decision trace, compare viable
+actions and HQ retention risk, preserve this-turn winning scores, and test
+point-sensitive admission separately against the corrected baseline. Include
+focused cases for both genuine avoidable losses and useful installs rejected
+by a simplistic breachability check, followed by an owner-run paired benchmark.
+This PR leaves the identified install risk present; it does not claim to fix it.
 
 ## Owner-run validation
 
