@@ -59,12 +59,17 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
   the decision snapshots are unchanged (scenario 1). `node tests/run-all-tests.js`:
   35 test files passed.
 
-- **Not covered by a unit test:** the `_criticalBreachDefenseAction` and
-  `Phase_Main` probes (scenario 4), and hypotheticals started from Baker or
-  `runcalculator.js` (scenario 5). The first two carry the depth counter, and
-  the other two change state only inside an evaluation that is already
-  running, where nested evaluations bypass the cache. The game comparison
-  below covers all of them in real play.
+- **Review follow-up (2026-10-05):** the `Phase_Main` credit probe now restores
+  `_hypotheticalDepth` and the saved credit pool in `finally`. A regression
+  exercises successful and throwing probes at depth 0 and inside an existing
+  hypothetical; it fails against the previous implementation. This covers the
+  `Phase_Main` probe in scenario 4.
+- **Not covered by a unit test:** the `_criticalBreachDefenseAction` probe
+  (scenario 4), and hypotheticals started from Baker or `runcalculator.js`
+  (scenario 5). The first carries the depth counter, and the other two change
+  state only inside an evaluation that is already running, where nested
+  evaluations bypass the cache. The game comparison below covers all of them
+  in real play.
 - **Interim gate evidence (F4 is not built).** Using `node scripts/ai-game.js
 --seeds 1-20` with Duel PD vs Tao and a `--setup` file that toggles the
   cache:

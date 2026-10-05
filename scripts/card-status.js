@@ -26,6 +26,12 @@ const SCAFFOLD_MARKER = new RegExp([
 ].join('|'));
 const isScaffoldMarker = line => SCAFFOLD_MARKER.test(line);
 
+// The six missing Elevation definitions are an existing, explicit decision in
+// card-sets.md. Exempt identities, not a count, so new gaps still fail the check.
+const ACCEPTED_MISSING_DEFINITIONS = {
+  elevation: new Set(['35057', '35058', '35059', '35060', '35065', '35066']),
+};
+
 function registry() {
   const context = {console};
   vm.createContext(context);
@@ -120,9 +126,26 @@ function configMismatches(sets = collect()) {
     if (s.decision === '(none)') found.push('`' + s.key + '` has no decision in card-sets.md.');
     if (s.decision === 'playable' && (s.set.hidden || s.set.untested))
       found.push('`' + s.key + '` is playable, but config.js marks it hidden: ' + s.set.hidden + ', untested: ' + s.set.untested + '.');
+    if (s.decision === 'in-progress' && (!s.set.hidden || !s.set.untested || s.launcher))
+      found.push('`' + s.key + '` is in-progress, but config.js must mark it hidden and untested and exclude it from decklauncherSets.');
     if (['not-implemented', 'deprecated'].includes(s.decision) && offered)
       found.push('`' + s.key + '` is ' + s.decision + ', but config.js offers it to players (hidden: ' + s.set.hidden +
         (s.launcher ? ', in decklauncherSets' : '') + ').');
+  }
+  return found;
+}
+
+function playabilityMismatches(sets = collect()) {
+  const found = [];
+  for (const s of sets.filter(entry => entry.decision === 'playable')) {
+    if (s.unfinished.length)
+      found.push('`' + s.key + '` is playable but has unfinished cards: ' +
+        s.unfinished.map(card => card.code + ' ' + card.title).join(', ') + '.');
+    const accepted = ACCEPTED_MISSING_DEFINITIONS[s.key] || new Set();
+    const unexpected = s.missing.filter(card => !accepted.has(String(Number(card.code))));
+    if (unexpected.length)
+      found.push('`' + s.key + '` is playable but has unaccepted missing definitions: ' +
+        unexpected.map(card => card.code + ' ' + card.title).join(', ') + '.');
   }
   return found;
 }
@@ -161,6 +184,12 @@ function generate() {
   out.push('', '## config.js disagreements', '');
   out.push('config.js must follow card-sets.md; `tests/card-status.test.js` fails on any of these.', '');
   out.push(...(mismatches.length ? mismatches.map(m => '- ' + m) : ['None.']));
+
+  const playability = playabilityMismatches(sets);
+  out.push('', '## Playability disagreements', '');
+  out.push('Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.', '');
+  out.push('Only the six explicitly recorded missing Elevation definitions are exempt.', '');
+  out.push(...(playability.length ? playability.map(m => '- ' + m) : ['None.']));
 
   const gaps = s => s.missing.length || s.unfinished.length || s.hookGaps.length;
   const incomplete = sets.filter(s => s.decision === 'playable' && gaps(s));
@@ -206,7 +235,7 @@ function generate() {
   return out.join('\n') + '\n';
 }
 
-module.exports = {generate, configMismatches, outFile, isScaffoldMarker};
+module.exports = {generate, configMismatches, playabilityMismatches, outFile, isScaffoldMarker};
 
 if (require.main === module) {
   const text = generate();

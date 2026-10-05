@@ -209,16 +209,19 @@ boundaries stay unmerged until F4 can compare the behavior-bearing historical
 layers; the project owner runs the long commands and an agent prepares and
 checks the reports. That audit does not replace I0 or any option's normal gate.
 
-As of 2026-10-02:
+As of 2026-10-05:
 
-- **F4 is built.** `node scripts/ai-batch.js gate ...` runs any gate from the
-  terminal; see the [harness guide](ai-batch-harness.md). The first
-  all-options-off baseline is committed under
+- **F4 is built and awaiting review.** `node scripts/ai-batch.js gate ...`
+  runs gates from the terminal; see the [harness guide](ai-batch-harness.md).
+  The first all-options-off baseline is committed under
   `tests/fixtures/ai-batch/baselines/`.
-- **Gated items pending F4** can now have their gates run. `node
-  scripts/roadmap.js gates` lists them under "Built, option off, gate waiting
-  to be run". An item reviewed before F4 existed could not build its
-  collectors or start boards, so `implement-ticket` builds those first.
+- **D2 is done.** The injectable Runner policy stream and its regression
+  tests are recorded in
+  [D2's completed ticket](backlog/done/D2-injectable-runner-randomness.md).
+- **Gated items pending F4** wait until F4 is `done`, as required by their
+  generated blockers. Once unblocked, `implement-ticket` builds any missing
+  collectors or start boards before running the gate. `roadmap.js gates`
+  lists the items whose gates are still pending.
 - **Thresholds are still first guesses.** The committed baseline shows how much
   each metric varies naturally between deck pairs. Check a gate's numbers
   against it before running that gate.
