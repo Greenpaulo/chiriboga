@@ -77,4 +77,39 @@ test('output round-trips through the extractor into a fixture', () => {
   const fixture = buildFixture(parsed[0], 'some-log.txt', '!install');
   assert(fixture.startsWith('// EXPECT: !install\n// SOURCE: some-log.txt decision ') && fixture.includes('RunnerTestField('));
 });
+test('Corp telemetry retains pre-filter discard options and the chosen original index', () => {
+  const events = [];
+  DS.telemetry = {sink: entry => events.push(entry)};
+  DS.enabled = false;
+  const aiContext = vm.createContext({console, corp: context.corp, runner: {},
+    DecisionSnapshots: DS, CheckCardType: (card, types) => types.includes(card.cardType)});
+  vm.runInContext(aiSource + '\nthis.CorpAI = CorpAI;', aiContext);
+  const ai = new aiContext.CorpAI();
+  ai._log = () => {};
+  ai._bestNonAgendaTutorOption = options => options[0];
+  ai._choiceInner = function(options) { return this._bestDiscardOption(options); };
+  const options = [
+    {card: {title: 'Keep agenda', cardType: 'agenda'}},
+    {card: {title: 'Keep asset', cardType: 'asset'}},
+    {card: {title: 'Discard asset', cardType: 'asset'}},
+  ];
+  assert.strictEqual(ai.Choice(options, 'select'), 0, 'engine index still refers to the filtered list');
+  assert.strictEqual(options.length, 1, 'the actual discard helper removed alternatives');
+  assert.strictEqual(options[0].card.title, 'Discard asset');
+  assert.deepStrictEqual(Array.from(events[0].options), ['Keep agenda', 'Keep asset', 'Discard asset']);
+  assert.strictEqual(events[0].chosen, 2, 'telemetry index refers to the original alternatives');
+  DS.telemetry = null;
+});
+test('Corp telemetry snapshots labels before an option object changes', () => {
+  const events = [];
+  DS.telemetry = {sink: entry => events.push(entry)};
+  const aiContext = vm.createContext({console, corp: context.corp, runner: {}, DecisionSnapshots: DS});
+  vm.runInContext(aiSource + '\nthis.CorpAI = CorpAI;', aiContext);
+  const ai = new aiContext.CorpAI();
+  ai._choiceInner = options => { options[1].label = 'Changed after selection'; return 1; };
+  assert.strictEqual(ai.Choice([{label: 'First'}, {label: 'Second'}], 'select'), 1);
+  assert.deepStrictEqual(Array.from(events[0].options), ['First', 'Second']);
+  assert.strictEqual(events[0].chosen, 1);
+  DS.telemetry = null;
+});
 console.log(tests + ' snapshot tests passed.');

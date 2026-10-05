@@ -532,7 +532,9 @@ processes. The games cost no tokens. The runner therefore supports:
     `Zwicky Supermodernism.js` and `LEO Glacier.js`.
 
 ## Acceptance gate
-Not gated: F4 adds infrastructure and changes no AI decision. It is adopted
+
+N/A — deterministic fix (principle 4): the acceptance criteria below are the
+oracle for this infrastructure change. F4 changes no AI decision. It is adopted
 when:
 - scenarios 1 to 10 pass;
 - the first all-options-off baseline report is committed under

@@ -268,13 +268,19 @@ inputs before using it as the same measured candidate.
 
 ## Follow-up evidence after the original asset snapshot
 
-The early checkpoint/causal and combined-build reports now exist in `~/bench/`;
-see [the updated findings](../findings.md#updated-early-localization-and-gating-assessment-2026-10-05)
-for exact arms, comparisons and gating classifications. The original checksum
-manifest and archived state above are historical snapshots and do not cover
-these newer reports, logs or queue scripts. Extend the external backup before
-relying on those artifacts for recovery. No tags, manifest, raw evidence or
-archive copies were changed by this documentation update.
+The early checkpoint/causal and combined-build reports and comparison logs are
+preserved in [evidence.tar.gz](evidence.tar.gz), with checksums in
+[evidence-manifest.json](evidence-manifest.json). See
+[the updated findings](../findings.md#updated-early-localization-and-gating-assessment-2026-10-05)
+for exact arms, comparisons and gating classifications. Only the original
+110-file `artifact-manifest.json` and archived state are historical snapshots
+that predate these follow-ups.
+
+Additional local working-copy experiments outside the 142-file archive,
+temporary smoke/hash artifacts and local-only Git arms still need separate
+backup. Later queue scripts that are absent from this directory also remain
+local-only; the early follow-up reports and comparison logs are already
+preserved. No archived evidence was modified by this documentation correction.
 
 The investigation docs are grouped in `documentation/corp-ai-regression/`, with
 these preserved assets in `assets/`. Archived tools and narratives retain their

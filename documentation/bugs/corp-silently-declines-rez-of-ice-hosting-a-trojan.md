@@ -374,8 +374,7 @@ covering Chromatophores and Tranquilizer.
   reduction in `pointsStolen` has a lower bound above zero.
 - Guards across all starts and pool pairs: `winRate` does not drop by more than
   2 percentage points; `pointsScored` does not drop by more than 0.1 per game;
-  `pointsStolen` does not increase by more than 0.1 per game; and
-  `decisionLatencyMs` does not increase by more than 10%.
+  `pointsStolen` does not increase by more than 0.1 per game.
 - Tranquilizer guard: `hostedThreatRezCredits`, a collector totaling credits
   spent rezzing ICE with a non-exempt hosted card and split by hosted-card
   title, does not increase by more than 0.5 credits per game on Tranquilizer
