@@ -1,0 +1,1182 @@
+{
+  "asOf": "2026-10-05",
+  "artifactRoot": "/Users/paulbingham/bench/",
+  "entries": [
+    {
+      "name": "a2-1b1dcc0.json",
+      "bytes": 675692,
+      "sha256": "5ab0cfe82f79bf0d70e64d2aa98be12538e16d418b2d2d4e67841f7518c4aaae",
+      "sha": "a0208cf",
+      "fullSha": "a0208cfb74bd47d566ba2201a2eb81c482943d91",
+      "codeHash": "135d3aef62f17a65",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-1b1dcc0.log",
+      "bytes": 707,
+      "sha256": "fa39bb405411b8518006366a326a8d283e71b087501ebde424245ff59ea8b789"
+    },
+    {
+      "name": "a2-41a10b0.json",
+      "bytes": 675675,
+      "sha256": "21bc2eb14c6382d09567f551b5739e49c8331fea813a009cd38fd36108b6f24e",
+      "sha": "3bcd804",
+      "fullSha": "3bcd804ff48ce3d036dbd22218ae9b75aac87018",
+      "codeHash": "0f79f945d9c06e56",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-41a10b0.log",
+      "bytes": 707,
+      "sha256": "00ac0c3d4318b92647b6c623d467016a462c86a5e42dbf9233afacf0e00b48e7"
+    },
+    {
+      "name": "a2-4556eff.json",
+      "bytes": 675648,
+      "sha256": "78e985d692d6dfa695c21dde1c8a1bf82a1d5a6c7f88df90c87532a74721028e",
+      "sha": "72f5da0",
+      "fullSha": "72f5da020ed9106a321bcf46304c00587173313c",
+      "codeHash": "2c57ccdde56fb845",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-4556eff.log",
+      "bytes": 707,
+      "sha256": "6265ee448e9f01a8166eff426e6e314225dabc03ffdcd452e9d4c41275c37add"
+    },
+    {
+      "name": "a2-72accd2.json",
+      "bytes": 675654,
+      "sha256": "5274921a344f8ba43ef8490bbb7004e02c0cc85a6562f01781aa8f63e833567f",
+      "sha": "2dff323",
+      "fullSha": "2dff323bf351cb727a074ecb274704a81c31d1ab",
+      "codeHash": "fa26e97912aa70c1",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-72accd2.log",
+      "bytes": 707,
+      "sha256": "39b824615616a538c02de57a6c372a50e20a5b85fc6f5521fc80f7e5d7441ef1"
+    },
+    {
+      "name": "a2-early-10.json",
+      "bytes": 692053,
+      "sha256": "3c187f5a6c46b7af8e40bb3d5b8ab33b586265e45e42a36183e0c18ee2827bf8",
+      "sha": "907f4c7",
+      "fullSha": "907f4c7c51ccbe6f4d9aa072b60c7f5f797d0cd2",
+      "codeHash": "a73b5e5d22feba69",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-early-10.log",
+      "bytes": 722,
+      "sha256": "4f02b867216519a925c203053e448a94f6d14c3cae1a1eccd43d96af72abd9d0"
+    },
+    {
+      "name": "a2-early-2.json",
+      "bytes": 687935,
+      "sha256": "c369294ef1b373f628ff5fd2a8f994a37af67d3301824f8825ce5979c4a8a69d",
+      "sha": "8c0d8d7",
+      "fullSha": "8c0d8d7ff771248f63c006f18419b41195bd1292",
+      "codeHash": "7bd99bd1dd0b105c",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-early-2.log",
+      "bytes": 721,
+      "sha256": "6d2fc7a7d195eb8cf4a94c96610339b6aae9f80a3a00dd1d0072ec4d7c9b0559"
+    },
+    {
+      "name": "a2-early-6.json",
+      "bytes": 691146,
+      "sha256": "a03eedc0620f02f8b30dc05a8f46c12df71f19d2868091d41363568b6e69bdfc",
+      "sha": "caa66f2",
+      "fullSha": "caa66f2c5feea99227130a2a8d6ec1012fceaca2",
+      "codeHash": "42f991265137b484",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-early-6.log",
+      "bytes": 721,
+      "sha256": "973d888e7d63440dde832a204d611f08e5ff4bffd1595404efa81f75357e6ea9"
+    },
+    {
+      "name": "a2-fa1182c.json",
+      "bytes": 676526,
+      "sha256": "4cad41b4cc0e2c962dcf611407d1614541709650cf6356edc01858e8cbf1a26c",
+      "sha": "81d354d",
+      "fullSha": "81d354d15802612e3df772e6201daf94505bc727",
+      "codeHash": "571c904829601904",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-fa1182c.log",
+      "bytes": 704,
+      "sha256": "6920e19cfdeb2cc157c250b1a637e084d1f95b4c818ec0c788fec7b3c2a164f4"
+    },
+    {
+      "name": "a2-fbe132e.json",
+      "bytes": 675740,
+      "sha256": "3c35fb1c366b47b9f944849626e7ed72088e4ba3223fcf00c84bebe627928133",
+      "sha": "a0e2579",
+      "fullSha": "a0e2579aaeb27c258388e4fe78caada2730adc9a",
+      "codeHash": "c5949aa3a501e3a0",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "a2-fbe132e.log",
+      "bytes": 706,
+      "sha256": "79f5a7ea33d9701d7a36c44de37aabf65cdf3d0f95c9fcd886f11888d89d0c8e"
+    },
+    {
+      "name": "beginner-pool.json",
+      "bytes": 532,
+      "sha256": "bc8892e833ed07e7861478a369cd040ee498196c74184af01441958ebd4fbfba"
+    },
+    {
+      "name": "causal-a-no-is-secure-gate.json",
+      "bytes": 689603,
+      "sha256": "c39c826689d45f198466925f1fc269b340d87cc0cd0ee1bb178a2cb1dad839e4",
+      "sha": "7f3b634",
+      "fullSha": "7f3b63484ddbb64386578a717bf7f93c05eec7bd",
+      "codeHash": "e37950473517ad90",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-a-no-is-secure-gate.log",
+      "bytes": 722,
+      "sha256": "0719f691ee40a989aa5951561d37fcf622a997473c9494cb6e8ac3e623bdc506"
+    },
+    {
+      "name": "causal-b-legacy-ice-weighting.json",
+      "bytes": 690275,
+      "sha256": "db4ea6f097ec1772f5e87f8d4299d6924bc636f39b8d8b577fec2cfdb8dbff13",
+      "sha": "18cff86",
+      "fullSha": "18cff8669115fbd59ad0844f33b9a9b7a3dd76f9",
+      "codeHash": "2ddb6194f7c11c3d",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 999,
+      "failures": [
+        {
+          "fixtureId": null,
+          "deckPairId": "pd-tao",
+          "seed": "117",
+          "reason": "timeout after 900 s",
+          "errors": []
+        }
+      ],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-b-legacy-ice-weighting.log",
+      "bytes": 767,
+      "sha256": "8025a9694124baea2d2ab3233240a8d41a0cc3d97240421193da3e39642f2364"
+    },
+    {
+      "name": "causal-gate-and-four-off.json",
+      "bytes": 689714,
+      "sha256": "45615c9d946a749a3e22148d7bf65714089892e56fcc81c63227c5427384820f",
+      "sha": "edc177a",
+      "fullSha": "edc177aa865522103d8ab5d7347065142f19a525",
+      "codeHash": "87710e06cb4e7cf9",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-gate-and-four-off.log",
+      "bytes": 721,
+      "sha256": "a6f7d22c9593bfba73ef0d913285fbdea125ea31267dd0bcfa59228a933a00a0"
+    },
+    {
+      "name": "causal-h0h1-legacy-debt-aging.json",
+      "bytes": 690870,
+      "sha256": "76183961861d5968fd54b781e3f8c44a081b181829a373fc3de7121736440c10",
+      "sha": "ad597a0",
+      "fullSha": "ad597a06f2e583dd1fb3e40814246e3022b88b71",
+      "codeHash": "c74a47144bf804c3",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 999,
+      "failures": [
+        {
+          "fixtureId": null,
+          "deckPairId": "pd-tao",
+          "seed": "67",
+          "reason": "timeout after 900 s",
+          "errors": []
+        }
+      ],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-h0h1-legacy-debt-aging.log",
+      "bytes": 767,
+      "sha256": "05f3cb915f452b4300a692731e97d6e637cca7c842ebb15af41c1a9dfc3d7611"
+    },
+    {
+      "name": "causal-h0h1-no-archives-pressure-allocation.json",
+      "bytes": 691208,
+      "sha256": "3ad56bbbe53affd5a9ca2876f601f8054323fc914758c95918477ebd959398c3",
+      "sha": "8396407",
+      "fullSha": "839640734103e22a93d63d67e6e9caa359e7e8b9",
+      "codeHash": "a4dadc9e56557910",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-h0h1-no-archives-pressure-allocation.log",
+      "bytes": 738,
+      "sha256": "ea56a2b7c90e60b60dbd29a69cf44399decdc691b1602bf28370f35e6bc3588a"
+    },
+    {
+      "name": "causal-h0h1-no-scoring-reserve-bypass.json",
+      "bytes": 691019,
+      "sha256": "17778b40d2775ffc13e73fa44924d5220412f2a147dabedc51c095e1c6ad5822",
+      "sha": "a7b3236",
+      "fullSha": "a7b3236df12b99d54520739ae0632d45d102507f",
+      "codeHash": "d9be10e743b64ed7",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-h0h1-no-scoring-reserve-bypass.log",
+      "bytes": 730,
+      "sha256": "668cda3b8b12f21def3a95666a287f96e158d3b2de82dc302d6a34c80a549b24"
+    },
+    {
+      "name": "causal-h0h1-no-server-at-risk.json",
+      "bytes": 690938,
+      "sha256": "5baeeb6afde826b9d187f0a7e84147a117f078eaaf896e7172ca6dbf2a510c5b",
+      "sha": "188a96a",
+      "fullSha": "188a96aa233c198b80c8244b329e83e87158c0b0",
+      "codeHash": "532aec8447bafd11",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "causal-h0h1-no-server-at-risk.log",
+      "bytes": 724,
+      "sha256": "615fc56a30eecbf1d2c1eb784024aac06086aa9c3e7d6b99b02c15d9716d1b50"
+    },
+    {
+      "name": "compare-1b1dcc0-41a10b0.log",
+      "bytes": 1791,
+      "sha256": "2891e1ba5a3279ccb4701d7e6c7762507e3e85a838ed1c807437b27671d52b54"
+    },
+    {
+      "name": "compare-41a10b0-72accd2.log",
+      "bytes": 1790,
+      "sha256": "2041f46f239e88cedb84f154fffddb2e2d5156b3d0802c632a7390d8c7ba3f4b"
+    },
+    {
+      "name": "compare-4556eff-fbe132e.log",
+      "bytes": 1791,
+      "sha256": "f19dcc4e2044d436850725ddfb35eddd3381ad44753f04a154360fbfbb374a9e"
+    },
+    {
+      "name": "compare-72accd2-4556eff.log",
+      "bytes": 1791,
+      "sha256": "02a0f105c7c371a88432eb3e4c0d844135859998647cac5e1f3a9817e17dc871"
+    },
+    {
+      "name": "compare-a2-early-10-12.log",
+      "bytes": 2438,
+      "sha256": "5f046137022b8e25f5a34eb69ca3363ffa5de1db3262531c7de3248357f08a1b"
+    },
+    {
+      "name": "compare-a2-early-2-4.log",
+      "bytes": 2455,
+      "sha256": "0df4e619b3cc8c491cfc466387e2edb605c75b497aa83665ad9f68d79677d620"
+    },
+    {
+      "name": "compare-a2-early-4-6.log",
+      "bytes": 2478,
+      "sha256": "6b9436972789199d4def8afc6af80e68c6255cc9f58ea08a7face9f5b7d3e356"
+    },
+    {
+      "name": "compare-a2-early-6-8.log",
+      "bytes": 2514,
+      "sha256": "62653789b41d50d903aa7e0d9b66222525d7101e8fc6e9bd914737002047dd52"
+    },
+    {
+      "name": "compare-a2-early-8-10.log",
+      "bytes": 2443,
+      "sha256": "7564361d5240330d79e70d0f9e8def281a22143351acb3e896df6491733e9160"
+    },
+    {
+      "name": "compare-a2-early-H0-2.log",
+      "bytes": 2526,
+      "sha256": "8ea805c24ae2190006fd5c0bccc0b4254c99cfb029573a30994f118d20610146"
+    },
+    {
+      "name": "compare-current-gate-and-four-off.log",
+      "bytes": 1792,
+      "sha256": "de2c1fcbe5657a94d337e33b2fd8bec360724e9e5e829d0dc47b5e901a775ac4"
+    },
+    {
+      "name": "compare-current-h0h1-legacy-debt-aging.log",
+      "bytes": 1820,
+      "sha256": "838603f96f0c660b8fa4d67f31ad1cf2bcdd20769f19cf1858e178c74571630a"
+    },
+    {
+      "name": "compare-current-h0h1-no-archives-pressure-allocation.log",
+      "bytes": 1792,
+      "sha256": "ebbad3ae277bebe7cf07e26ed82abb63326630ed6a6acec911d1a9b6cd6d49ba"
+    },
+    {
+      "name": "compare-current-h0h1-no-scoring-reserve-bypass.log",
+      "bytes": 1791,
+      "sha256": "c2d8e8749ef11fad0266b617d24f6f7189c89e9d489b9f01b0fb78897c93580b"
+    },
+    {
+      "name": "compare-current-h0h1-no-server-at-risk.log",
+      "bytes": 1792,
+      "sha256": "c6f041810999c1e672be072eb2440ae764da7b5db0cccd780858745541fcff76"
+    },
+    {
+      "name": "compare-fa1182c-h2.log",
+      "bytes": 1789,
+      "sha256": "d745940eedb815749cad737062d02bdd45224769cd989d830d172d77fab6f700"
+    },
+    {
+      "name": "compare-fbe132e-fa1182c.log",
+      "bytes": 1791,
+      "sha256": "66b5377f4cd585f675be6055f40c9603833a1abf8a41d3f306b8f10f5786d84c"
+    },
+    {
+      "name": "compare-h0-h1.log",
+      "bytes": 1793,
+      "sha256": "14f44d379d0cbda751b579c9be70e1bd7ae24238ba3554d334cc4d29c9fbd807"
+    },
+    {
+      "name": "compare-h0h1-04-08.log",
+      "bytes": 1799,
+      "sha256": "7ea89959ce8cce138eb8e4be5ced6bfc01e746a9750d10d374ab1f2bb7257b08"
+    },
+    {
+      "name": "compare-h0h1-08-12.log",
+      "bytes": 1801,
+      "sha256": "7ee4be9d05fcaadd4aecb93bb95ec46bac9423393ab659f5d39f31401f10aa64"
+    },
+    {
+      "name": "compare-h0h1-12-16.log",
+      "bytes": 1794,
+      "sha256": "5cefc5dc9f905333595450efd7b9c26c3e8aa5272ffcc9382043b4e08b36e760"
+    },
+    {
+      "name": "compare-h0h1-16-20.log",
+      "bytes": 1797,
+      "sha256": "f907f84d9871d321b73b9caaa9202715276536c5bc5f5975578d8e9fafb635ef"
+    },
+    {
+      "name": "compare-h0h1-20-24.log",
+      "bytes": 1801,
+      "sha256": "e800647befff6473b4b0601352b2ef5b9134e1cbb9c8f4e00d32352dca69a586"
+    },
+    {
+      "name": "compare-h0h1-24-h1.log",
+      "bytes": 1793,
+      "sha256": "24842c261710fe9a1f36efb96c5c6113f4d811e0da5beaefff83944499eb8f8a"
+    },
+    {
+      "name": "compare-h0h1-h0-04.log",
+      "bytes": 1795,
+      "sha256": "a7afc5baf84a1cfbe3e75546ec7feb3c5a8a9cfa7b438dbcc32b9d49d64acd0c"
+    },
+    {
+      "name": "compare-h0h1-r2-20-21.log",
+      "bytes": 1795,
+      "sha256": "d89e8456d0c2251006d57e184a8542e6695d09b447f31ca4f50be57ed7b25afa"
+    },
+    {
+      "name": "compare-h0h1-r2-21-22.log",
+      "bytes": 1797,
+      "sha256": "c396bca52dec9594e82aa8b448f13f4c8d8ede7a483b733629406d91e20a6d67"
+    },
+    {
+      "name": "compare-h0h1-r2-22-23.log",
+      "bytes": 1791,
+      "sha256": "804b25d92f098bdfdc66be14a3e734e47cc5b5c971e7de0850149161f2bc1536"
+    },
+    {
+      "name": "compare-h0h1-r2-23-24.log",
+      "bytes": 1799,
+      "sha256": "aca1ddeac433ccb8cd817b4e321d6d68e32287f7af8be7189e912a93baa9e607"
+    },
+    {
+      "name": "compare-h0h1-r2-24-25.log",
+      "bytes": 1791,
+      "sha256": "85617058b3c97417188e5388f2380a9c7963b3062c4598dd2c0121b14c88661f"
+    },
+    {
+      "name": "compare-h0h1-r2-25-26.log",
+      "bytes": 1789,
+      "sha256": "3fa99355ddac643f0b24745798d506fd72bd157468a8cfe5c7840a6280960568"
+    },
+    {
+      "name": "compare-h0h1-r2-26-27.log",
+      "bytes": 1790,
+      "sha256": "39402868f78221fc83ce685091c46e33179f7915d454d05dfd7ef89a97bfd871"
+    },
+    {
+      "name": "compare-h0h1-r2-27-h1.log",
+      "bytes": 1793,
+      "sha256": "7590555480e0c6722fe6a982db7d9fe691c7f5a4aff187574eba4a268a907261"
+    },
+    {
+      "name": "compare-h1-1b1dcc0.log",
+      "bytes": 1790,
+      "sha256": "d8ef4a47ea79575bfa5262be2749d342a5a4da3c301a4e99662e8592014c62a9"
+    },
+    {
+      "name": "compare-h1-h2.log",
+      "bytes": 1791,
+      "sha256": "42bdae168ed928f79ec9cf3428bdafb6cd517823812bec13f1a820c13ee270da"
+    },
+    {
+      "name": "compare-h2-current-2026-10-05T08-59-08-498Z.log",
+      "bytes": 1795,
+      "sha256": "22276de3e00e7a3f4cff43ed306897c334a7e1ba0e51ee3920cc6b20e6debb96"
+    },
+    {
+      "name": "compare-h2-h3-2026-10-05T08-59-08-498Z.log",
+      "bytes": 1791,
+      "sha256": "fa23926c8d020a3f4688dc745a35dce4a05ddfeec6fab15171fefe47ec6998b5"
+    },
+    {
+      "name": "compare-h2-h3.log",
+      "bytes": 1791,
+      "sha256": "fa23926c8d020a3f4688dc745a35dce4a05ddfeec6fab15171fefe47ec6998b5"
+    },
+    {
+      "name": "compare-h3-current-2026-10-05T08-59-08-498Z.log",
+      "bytes": 1795,
+      "sha256": "ad99ed33ce5965bcb7fc1de82e0baba9d97f95adacf6b43c9d54b10b435d8011"
+    },
+    {
+      "name": "compare-h3-tip.log",
+      "bytes": 1795,
+      "sha256": "ad99ed33ce5965bcb7fc1de82e0baba9d97f95adacf6b43c9d54b10b435d8011"
+    },
+    {
+      "name": "compare-orig-gate-and-four-off.log",
+      "bytes": 1795,
+      "sha256": "7797e7e76214849f2aabbbf8e25afbe608a2af4d04aa2b6daba3154a24f11026"
+    },
+    {
+      "name": "comparison.log",
+      "bytes": 1995,
+      "sha256": "6f201e9979acb34b69ea0af281117c986f3df0312ab17e9c5f0e8d1f73be13b9"
+    },
+    {
+      "name": "current.json",
+      "bytes": 690854,
+      "sha256": "b53a7254bba976c91dbbcb440334b33382d69f4594bf1322b0cf4e5f62e2838d",
+      "sha": "b52d451",
+      "fullSha": "b52d45123c10201572aaf837714dd019bd9bdfcc",
+      "codeHash": "a0ab675e420ce8b0",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {
+          "evidenceBasedHostedCardRez": false
+        },
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "current.log",
+      "bytes": 700,
+      "sha256": "70ea00b566c3c0829196750c7325a7e8e3b6719e6deae7255f863cfae500df72"
+    },
+    {
+      "name": "h0h1-04-b28b7bf.json",
+      "bytes": 689340,
+      "sha256": "9b4538370f6a620cd1f891cff083ac7b06435598ccfcb070da230b5b877e7bb6",
+      "sha": "ac4ed79",
+      "fullSha": "ac4ed792889c80b9ca2d0ea401d847dda469894b",
+      "codeHash": "02c5a6af4109e655",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-04-b28b7bf.log",
+      "bytes": 712,
+      "sha256": "e02099a6d176fd2e562146391a119ac41ad1b0a9bdf8b53cab4324bab8803055"
+    },
+    {
+      "name": "h0h1-08-752dbf0.json",
+      "bytes": 691416,
+      "sha256": "4beee5025b9f2a34308c7daf403dd725ac8b7bb5257e70809c1f5869f2679e01",
+      "sha": "5d05f45",
+      "fullSha": "5d05f451c8b02e6beb42404ba6ba1f380fa775f0",
+      "codeHash": "9368f2d07b009a45",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-08-752dbf0.log",
+      "bytes": 712,
+      "sha256": "cd11b77ffbfdffae0941d017bc6b1c72588862ceb2f16239555e4262c272cd03"
+    },
+    {
+      "name": "h0h1-12-5de59ce.json",
+      "bytes": 692305,
+      "sha256": "d481b0900957b31960a1eddfc2f9ecdd5ec4f4bda114b2564a93b57c5cf85521",
+      "sha": "270abd9",
+      "fullSha": "270abd96642ad73ddc01db4e801481c884cf8b31",
+      "codeHash": "d89ae053bb3b5254",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-12-5de59ce.log",
+      "bytes": 712,
+      "sha256": "224906bc77e5008ca3c80474bfab1d028287855fec892f1c3d3b40c1145fa340"
+    },
+    {
+      "name": "h0h1-16-159a8d6.json",
+      "bytes": 692412,
+      "sha256": "872166053498723f963d223f252681bc7252017bd87eac5ecac6c773b05147f7",
+      "sha": "2121431",
+      "fullSha": "21214314a8001e7907eae1f4ea080bf0f5969a58",
+      "codeHash": "ddbad4ea387ef30c",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-16-159a8d6.log",
+      "bytes": 712,
+      "sha256": "fefdac3d57e964ea74962ad86dcd58283dcb4930ce404e30a827100e3361180f"
+    },
+    {
+      "name": "h0h1-20-bd9bd79.json",
+      "bytes": 693159,
+      "sha256": "afc1c3001327f17afabd86dae6bab1ba055144deedbcfa436b0183255fb0d3a2",
+      "sha": "d2d9160",
+      "fullSha": "d2d9160dd710d085234e6c6fe07bb127fb124278",
+      "codeHash": "92cdd1c764696216",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-20-bd9bd79.log",
+      "bytes": 712,
+      "sha256": "a4bc7b7765b21b66d6e84ad17e6a1cba179c119dce11784dbfc514af118255f3"
+    },
+    {
+      "name": "h0h1-24-3c59ec1.json",
+      "bytes": 676448,
+      "sha256": "145432bca72967bd1998aec37b5e00f4ee6826fc1b0ed67316595595e7dcd10a",
+      "sha": "5988b40",
+      "fullSha": "5988b40957dea8195f83a47498fc805841aac3bf",
+      "codeHash": "e8c61e260b618013",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-24-3c59ec1.log",
+      "bytes": 712,
+      "sha256": "91fce57e60129605e13faf31e5dd4f4ce3a303365595a1632aa77d9e6f7123a6"
+    },
+    {
+      "name": "h0h1-r2-21-5e6af68.json",
+      "bytes": 693322,
+      "sha256": "49c2efca4f47abad5b9d5bdfabaca123e5876e7e9639cf410ed957ce69d310a4",
+      "sha": "56ed6e9",
+      "fullSha": "56ed6e9f1062951d8a3e7886804a2c2f498dab11",
+      "codeHash": "398139511aa05168",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-r2-21-5e6af68.log",
+      "bytes": 715,
+      "sha256": "d9fe795d9fddab8ef70cf91f4f481cd23b673959dfd0a7e7bef95725db0d3bb5"
+    },
+    {
+      "name": "h0h1-r2-22-87243c0.json",
+      "bytes": 692829,
+      "sha256": "976c6ddf53229ae5ea852fed4ff419b811c46191eff766e54677a1d6ce09cf75",
+      "sha": "a120eae",
+      "fullSha": "a120eae60ffa5b451fe29a3e884b095125679a0e",
+      "codeHash": "4a7c822f1f65a052",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-r2-22-87243c0.log",
+      "bytes": 715,
+      "sha256": "833ea397d6f85a363c3892a2b4450a2fe3645f1879180cc75e0618effb8696d2"
+    },
+    {
+      "name": "h0h1-r2-23-c143116.json",
+      "bytes": 692710,
+      "sha256": "f1578d93f438a326fb70dee980e34e10daa23292afe5817aec67356c744aa8cf",
+      "sha": "4d7be88",
+      "fullSha": "4d7be88622bbc071c5ea7928b1d8bd4b113389a1",
+      "codeHash": "c04896756eea696f",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-r2-23-c143116.log",
+      "bytes": 715,
+      "sha256": "cbb9568e4d7b362efb3a2cbd5cdc2015841225834805fa3cea124695f9f9eed2"
+    },
+    {
+      "name": "h0h1-r2-25-a3d57d3.json",
+      "bytes": 676866,
+      "sha256": "e0006cefdfc9ad34d557152f627cb79ecf52e33788090bd0de38e170206c7a9e",
+      "sha": "f498fdd",
+      "fullSha": "f498fdd6969e009127cb42d7f6db0bca96100700",
+      "codeHash": "b6d5dec0233d85fe",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-r2-25-a3d57d3.log",
+      "bytes": 715,
+      "sha256": "be0fbcb19260d9cc5a19982b413b9c4a8852748b6942e7adec12d3ab81115dfc"
+    },
+    {
+      "name": "h0h1-r2-26-f234aa5.json",
+      "bytes": 676807,
+      "sha256": "2c3aa660193fb5b6192723a778f8b7eb2e8e6b1faa6102c353ff801e4daa2773",
+      "sha": "ecadeb0",
+      "fullSha": "ecadeb0d9134179fa1f56255187048bc8cbbc822",
+      "codeHash": "0141bfeb45afed5b",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-r2-26-f234aa5.log",
+      "bytes": 715,
+      "sha256": "af42b4f24cdf402f9e7da0310a5e45c20cb7c9545b520be7a91a180eec342bbe"
+    },
+    {
+      "name": "h0h1-r2-27-35ca729.json",
+      "bytes": 676756,
+      "sha256": "03b1a917ec17f1fb77c27063aa47db630530e38126c0f8b8f4072c7c7e4a672f",
+      "sha": "fb6b7f9",
+      "fullSha": "fb6b7f974c206ef4d5bc37001c4348b53b4294d9",
+      "codeHash": "61a7aedbd09b65bf",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h0h1-r2-27-35ca729.log",
+      "bytes": 715,
+      "sha256": "f5291140cb53a27d162d590d4bc14389caf26c684106dea3b9ed4f6be9a1669e"
+    },
+    {
+      "name": "h1.json",
+      "bytes": 676391,
+      "sha256": "68519700c9a43ab39a31c3131275084b57b97d4b2e82a413c63abfc5ae3c6392",
+      "sha": "f3b0d76",
+      "fullSha": "f3b0d7672ee56fed776e9c14af7520e3758ea28b",
+      "codeHash": "ebe75fc44363f948",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h1.log",
+      "bytes": 700,
+      "sha256": "fcf8cd2b8db9288051a1528ebd1de7ed9303b8659f9d9eaf583cba9610ce67a4"
+    },
+    {
+      "name": "h2.json",
+      "bytes": 677413,
+      "sha256": "ea36115cc1fbd54f05beaaa2be11e6faf1a6c0ec1f9b9f5530555d8be66d9cbb",
+      "sha": "2b0a0a3",
+      "fullSha": "2b0a0a3585d0f41cacf00977184a68cfb314dbdd",
+      "codeHash": "eb3eab95807fc3ac",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h2.log",
+      "bytes": 697,
+      "sha256": "9985e73d7319df1d0e04dec90aa6fff1539bc27452b0bf5e53112b9fb886ffb4"
+    },
+    {
+      "name": "h3.json",
+      "bytes": 677344,
+      "sha256": "26e6321fe35579c23336f4fbe4443c103dff0289c0785a016607b2179ce11867",
+      "sha": "ef4ef09",
+      "fullSha": "ef4ef090aa1a500a66512a97e837c9b6bdb5ab0d",
+      "codeHash": "8dc60517987330a9",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "h3.log",
+      "bytes": 697,
+      "sha256": "a013b1ea1e5e4c12b29a507405f63501c2d3fd776b241829592a24fec3ad6544"
+    },
+    {
+      "name": "orig.json",
+      "bytes": 687346,
+      "sha256": "b782bcddd981bc7d072fabd85958fcaadf764c73b47eef89ec1294b8674c9f58",
+      "sha": "4cd91d1",
+      "fullSha": "4cd91d1b1d101404123bd5d6fbb1aa8c1284e9f3",
+      "codeHash": "47fba9d60eeaabca",
+      "poolHash": "fe8cb821d04c9dd7",
+      "games": 1000,
+      "completed": 1000,
+      "failures": [],
+      "options": {
+        "corp": {},
+        "runner": {}
+      },
+      "seeds": {
+        "count": 200,
+        "first": "1",
+        "last": "200"
+      },
+      "starts": [],
+      "collectors": []
+    },
+    {
+      "name": "orig.log",
+      "bytes": 701,
+      "sha256": "5cff2e6727d3955ab2abc60804c039886dc92b4b460f39bf1e591e6618e0ff3d"
+    },
+    {
+      "name": "queue.log",
+      "bytes": 545,
+      "sha256": "0a204eb2d761d49a74ceff0c12df071971d48c7470a36bc6c81ea006ddcf6bf7"
+    }
+  ]
+}
