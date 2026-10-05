@@ -627,7 +627,6 @@ class CorpAI {
       //to breach this server. Never offer an insecure remote for scoring,
       //regardless of how poorly HQ or Archives currently score.
       var security = this._evaluateServerSecurity(server);
-      if (!security.isSecure) return false;
 
       //yes if it has a scoring upgrade, an agenda or an ambush installed
       //this code was originally after the protection check but this lead to AI installing random assets in scoring servers
@@ -3462,8 +3461,7 @@ class CorpAI {
       var entry = entries[i];
       if (
         !entry.server ||
-        entry.isSecure ||
-        this._nothingWorthProtecting(entry.server, entry.security)
+        entry.isSecure
       ) {
         if (entry.server) this._serverProtectionDebt.set(entry.server, 0);
       } else if (this._protectionInstallsThisTurn.includes(entry.server)) {
@@ -3559,9 +3557,7 @@ class CorpAI {
     for (var i = 0; i < corp.archives.cards.length; i++) {
       if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
     }
-    return (
-      this._serverRunPressure(corp.archives, securityEvaluation).penalty <= 0
-    );
+    return true;
   }
 
   _bestProtectedRemote() {
@@ -4184,7 +4180,7 @@ class CorpAI {
     //knows the Runner can breach the server. Allow another affordable layer
     //when an agenda or asset is actually at stake; _iceInstallOptions still
     //filters out ICE the Corp cannot afford to install and rez.
-    return shouldInstall || economyIsSufficient || serverAtRisk;
+    return shouldInstall || economyIsSufficient;
   }
 
   //Return a shuffled copy so planning never changes a caller-owned ranking.
@@ -6450,8 +6446,7 @@ class CorpAI {
     if (
       (almostDoneAgenda ||
         almostDoneHostileAsset ||
-        sufficientEconomy ||
-        this._installedAgendaCanBeCompleted()) &&
+        sufficientEconomy) &&
       optionList.indexOf("advance") > -1
     ) {
       //agendas and assets
