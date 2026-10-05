@@ -14,7 +14,10 @@ Upgrade installation uses `_bestServerToUpgrade()`,
 `_shouldUpgradeServerWithCard()` and `_upgradeInstallPreferences()` with
 hooks and flags including `AIIsScoringUpgrade`, `AIDefensiveValue(server)`,
 `AILimitPerServer(server)`, uniqueness and Region restrictions. A scoring
-upgrade requires `_isAScoringServer()`, which now includes the security floor.
+upgrade, when `inhibit=true`, requires `_isAScoringServer()`. Its strict
+security floor is now optional via default-off `secureScoringServerGate`;
+the legacy scoring designation does not prove security. With `inhibit=false`,
+the scoring/defensive-value policy checks are bypassed after legality checks.
 These filter invalid or low-value placements and can direct an upgrade to a
 comparatively weak server, but do not compare the server before and after the
 upgrade.

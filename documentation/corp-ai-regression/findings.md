@@ -236,7 +236,12 @@ and #10 `cc2777e`; neither has a separate historical midpoint report.
 | #10 `cc2777e`: single-ICE structural-risk penalty | `_protectionScore`: `ret -= this._serverStructuralRisk(server)` | Removal changes zero hashes on this pool. No measured outcome support for gating this penalty. |
 | `fa1182c`: non-ETR ICE weighting; #25 debt-reset change | `_cardProtectionValue`; `_ageProtectionPriorities` | Individual ablations have inconclusive scoring/win-rate effects; do not classify as demonstrated harmful sub-changes. |
 
-These are diagnostic candidates, not production options or accepted defaults.
+The historical results below identify diagnostic candidates, not accepted
+production defaults. A [gated implementation](implementation.md) now adds
+the five options needed to reproduce the combined arm. Owner-run validation
+has confirmed exact default/combined and all-on/tip fidelity on 1,000 completed
+pairs each. The [completed handoff](gated-fix-handoff.md) records the new
+single-option comparisons, the remaining H0 gap and how to configure playtests.
 The combined build `edc177a` disables the security gate and four #21/#25
 behaviours together, recovering scoring +1.379 [1.194, 1.559] against the tip.
 It still scores -0.344 [-0.564, -0.124] below H0. Effects must not be added
