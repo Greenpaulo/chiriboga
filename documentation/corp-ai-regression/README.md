@@ -17,4 +17,5 @@ original `~/bench/` is also preserved. Those local evidence files require a
 separate backup. Root `.gitignore` controls their exclusion from Git.
 
 The owner runs batches. These documents and archived scripts do not authorize
-an agent to start or poll a batch. No production fix has been implemented here.
+an agent to start or poll a batch. The option implementation and its pending
+fidelity checks are described in [implementation.md](implementation.md).
