@@ -34,6 +34,7 @@ let ai = null;
 // ---- engine stubs (keep in sync with tests/corp-server-security.test.js) ----
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
+context.ChoicesActiveTriggers = () => [];
 context.CheckCounters = (card, type, amount) => context.Counters(card, type) >= amount;
 context.Strength = card => card.strength || 0;
 context.Credits = player => player.creditPool;

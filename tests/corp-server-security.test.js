@@ -11,6 +11,7 @@ const context = {console, corp, runner, playerTurn: runner, cardSet: {}, setIden
 let servers = [];
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
+context.ChoicesActiveTriggers = () => [];
 context.CheckCounters = (card, type, amount) => context.Counters(card, type) >= amount;
 context.Strength = card => card.strength || 0;
 context.Credits = player => player.creditPool;
@@ -149,6 +150,76 @@ test('Mayfly Corp pricing never reads hidden titles or private Runner cache', ()
   runner.grip = [{get title() {throw Error('Hidden title read');}}];
   const wall = etr(); server([wall]);
   assert.strictEqual(ai._estimateBreakCost(wall, mayfly), 3);
+});
+test('run calculator reuses base strength within one calculation while retaining path modifiers', () => {
+  const breaker = {
+    player: runner,
+    strength: 2,
+    AIImplementBreaker(rc, result, point, target, cardStrength) {
+      observed.push(cardStrength);
+      return result;
+    },
+  };
+  const targetIce = etr();
+  const iceAI = {ice: targetIce, strength: 3};
+  const basePoint = {
+    card_str_mods: [],
+    runner_clicks_spent: 0,
+    runner_credits_spent: 0,
+    runner_credits_lost: 0,
+  };
+  const modifiedPoint = Object.assign({}, basePoint, {
+    card_str_mods: [{card: breaker, amt: 1}],
+  });
+  const observed = [];
+  const originalStrength = context.Strength;
+  let calls = 0;
+  context.Strength = card => {
+    calls++;
+    return originalStrength(card);
+  };
+  context.runnerRC.precalculated.cardStrengths = new Map();
+  context.runnerRC._calculationActive = true;
+  try {
+    context.runnerRC.IceAct(breaker, iceAI, basePoint, {});
+    context.runnerRC.IceAct(breaker, iceAI, modifiedPoint, {});
+  } finally {
+    context.runnerRC._calculationActive = false;
+    context.Strength = originalStrength;
+  }
+  assert.deepStrictEqual(observed, [2, 3]);
+  assert.strictEqual(calls, 1);
+});
+test('direct run calculator calls refresh strength after a calculation ends', () => {
+  vm.runInContext('strengthScopeRC = new RunCalculator()', context);
+  const rc = context.strengthScopeRC;
+  const observed = [];
+  const breaker = {
+    player: runner,
+    strength: 2,
+    AIImplementBreaker(rc, result, point, target, cardStrength) {
+      observed.push(cardStrength);
+      return result;
+    },
+  };
+  const targetIce = etr();
+  const basePoint = {
+    card_str_mods: [],
+    runner_clicks_spent: 0,
+    runner_credits_spent: 0,
+    runner_credits_lost: 0,
+  };
+  rc.precalculated.cardStrengths = new Map();
+  rc._calculationActive = true;
+  rc._baseStrength(breaker);
+  rc._baseStrength(targetIce);
+  rc._calculationActive = false;
+  breaker.strength = 4;
+  targetIce.strength = 5;
+  const refreshedIceAI = rc.IceAI(targetIce, 20);
+  rc.IceAct(breaker, refreshedIceAI, basePoint, {});
+  assert.strictEqual(refreshedIceAI.strength, 5);
+  assert.deepStrictEqual(observed, [4]);
 });
 test('unrezzed minor ice uses actual hook, while Runner calculator still guesses', () => {
   const minor = ice(['Gain 1 credit.'], [[['misc_minor']]], {rezzed: false}); server([minor]);
@@ -636,6 +707,31 @@ test('unrezzed ice share one affordable rez plan without mutating state', () => 
   assert.strictEqual(inner.rezzed, true);
   assert.strictEqual(outer.rezzed, false);
   assert.deepStrictEqual(target.ice, originalIce);
+});
+if (process.env.F6_PENDING) test('three unrezzed ice are priced once each across affordable rez plans', () => {
+  const breaker = {player: runner, title: 'Text fracter', strength: 3,
+    subTypes: ['Icebreaker', 'Fracter'], cardText: '1 credit: Break 1 barrier subroutine.'};
+  runner.cards = [breaker]; runner.creditPool = 10;
+  const inner = etr(), middle = etr(), outer = etr();
+  inner.title = 'Inner wall'; middle.title = 'Middle wall'; outer.title = 'Outer wall';
+  [inner, middle, outer].forEach(card => {card.rezzed = false; card.rezCost = 1;});
+  const target = server([inner, middle, outer]);
+  corp.creditPool = 2;
+  const originalMatchingBreaker = ai._matchingBreakerForIce;
+  let pricedIce = 0;
+  ai._matchingBreakerForIce = function(...args) {
+    pricedIce++;
+    return originalMatchingBreaker.apply(this, args);
+  };
+  let result;
+  try {
+    result = ai._evaluateServerSecurityUncached(target);
+  } finally {
+    ai._matchingBreakerForIce = originalMatchingBreaker;
+  }
+  assert.strictEqual(result.totalMandatoryBreakCost, 2);
+  assert(result.reasons.includes('Inner wall omitted from best affordable rez plan'));
+  assert.strictEqual(pricedIce, 3);
 });
 test('rez planning may skip a weak outer layer to fund decisive inner ice', () => {
   const inner = etr();

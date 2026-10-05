@@ -99,6 +99,16 @@ credit sources, using `canUseCredits("rezzing", ice)` and a max-flow allocation
 so restricted credits are never spent on an ineligible layer or counted twice.
 Evaluation spends nothing and leaves all state unchanged.
 
+Each uncached evaluation creates one `_securityEvaluationContext()`. Its
+maps are local to that call: `_securityIcePlanInputs()` prices each ICE at
+most once across all affordable rez plans and reuses the matching breaker,
+full and mandatory break costs, targeted-bypass cost, effective subtypes and
+strength. It also reuses the Runner active-card view, a Corp-owned run
+calculator, and plan-independent outermost/one-shot bypass checks. Plan
+membership, rez affordability, restricted-credit allocation and the selected
+outermost relevant ICE remain per plan. The context never enters the
+per-decision cache or crosses into another real or hypothetical evaluation.
+
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent
 prevention (for example Ash or Caprice Nisei, neither currently implemented)
@@ -472,6 +482,18 @@ needs.
   only fed the log runs only when `debugSecurityLog` is on. Local duplication
   guarantees remain (one security result per server per ranked pass; one
   protection score per candidate in `_bestProtectedRemote()`).
+- **Headless performance (F6).** Security cache misses use the evaluation-local
+  context described above instead of rebuilding ICE analysis for every rez
+  plan. `RunCalculator._baseStrength()` separately caches each card's
+  global/printed strength for one calculation; `point.card_str_mods` still
+  applies path-specific strength changes on top, and the base cache is reset by
+  `CalculatePieceBegin()`. `_securityBoardKey()` discovers each counter
+  modifier once per fingerprint. Shared `modify*` trigger discovery caches only
+  the cards that structurally provide the callback; creation or movement of a
+  modifier card invalidates that list, while activity is checked live and
+  response hooks remain uncached. On fixed Duel PD vs Tao seeds 1–20 with eight
+  jobs, these behaviour-identical changes reduced mean game time from 42.188 s
+  to 2.255 s while preserving every recorded log hash.
 - **Batch harness (F4, step 1 done).** `scripts/ai-game.js` plays seeded
   AI-vs-AI games headlessly with the real engine; the batch runner, metrics and
   comparison are not built. `GameEnded(winner)` is an empty stub and nothing
@@ -506,6 +528,8 @@ Card-facing hook contracts are in `documentation/ai.md`. Key Corp AI methods:
 | `_effectiveRunnerCreditPool(server)` | Public, route-specific Runner credit ceiling |
 | `_effectiveIceStrength(iceCard)` | ICE strength after active reducers and virus counters |
 | `_matchingBreakerForIce(ice)` | Matching breaker via hooks, hosted cards or subtype fallback |
+| `_securityEvaluationContext(server)` | One-call cache of plan-independent security inputs |
+| `_securityIcePlanInputs(ice, server, index, context)` | Per-ICE pricing bundle shared by rez plans |
 | `_centralServerThreat(server)` | Bounded central-pressure penalty |
 | `_centralBreachLossRisk(server)` | Probability the next breach wins the game for the Runner |
 | `_classifyRunnerMacroThreat()` | Visible central focus and non-interactive pressure |

@@ -1,11 +1,12 @@
 # F4 Seeded AI-vs-AI batch harness
 
-**Roadmap item:** F4 · **Depends on:** D2 · **Sets:** none
+**Roadmap item:** F4 · **Depends on:** D2, F6 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/ai-planning.md` (Acceptance gates, AI options)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
-A repeatable, headless batch runner that plays the Corp AI against the Runner
+A repeatable, headless batch runner, after F6 meets the headless-performance
+prerequisite, that plays the Corp AI against the Runner
 AI from fixed seeds, on a committed pool of deck pairs, and writes a JSON
 report of core outcome metrics. Every gated item uses it to compare a
 baseline (its AI option off) with a candidate (option on) under one

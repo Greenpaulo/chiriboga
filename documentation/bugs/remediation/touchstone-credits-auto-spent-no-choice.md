@@ -3,7 +3,7 @@
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
 **Source log:** `documentation/debug-logs/bug_raised/any_cred_spent_during_run_is_removed_from_touchstone_no_choice_given.txt`
 **File:** `mechanics.js` (root cause), `sets/vantagepoint.js` (Touchstone eligibility, verified correct). Line numbers are from `main` at `512a8f3`, 2026-09-24, and will drift; search by function name.
-**Status:** Fixed locally on 2026-09-25; awaiting merge.
+**Status:** Remediation. The original fix remains incomplete: live play-testing found no selectable credit-pool option in mixed hosted-credit payments, and other eligible hosted sources still require verification.
 
 ## Resolution
 
@@ -13,12 +13,15 @@ Touchstone first" with "always spend the pool first." Neither behavior matches
 a real game: the player chooses how to combine all legal credit sources whenever
 the allocation is not forced.
 
-`SpendCredits()` now opens a payment decision for a human player whenever an
-eligible hosted-credit source and the credit pool (or multiple eligible hosted
-sources) provide different legal allocations. The player may spend any legal
-amount from a hosted source, then choose again for the remaining cost, or pay
-the remainder from the pool. A forced payment with only one legal source stays
-automatic. Computer players retain deterministic automatic allocation.
+`SpendCredits()` now constructs a payment decision for a human player whenever
+an eligible hosted-credit source and the credit pool (or multiple eligible
+hosted sources) provide different legal allocations. Its decision data permits
+spending any legal amount from a hosted source, choosing again for the
+remaining cost, or paying the remainder from the pool. Live play-testing,
+however, found that the rendered UI does not expose the pool choice, so the
+player-facing payment flow remains incomplete. A forced payment with only one
+legal source stays automatic. Computer players retain deterministic automatic
+allocation.
 
 Because this makes `SpendCredits()` asynchronous when a real choice exists,
 callers that performed follow-up effects immediately after payment were audited.
@@ -27,14 +30,16 @@ effects in the payment continuation, so they cannot resolve before the player
 finishes choosing credit sources.
 
 Touchstone itself needs no special payment-priority property. Its broad
-`canUseCredits()` is correct: during a run its hosted credit appears as an option
-alongside the credit pool and any other eligible sources. Choosing the pool
-preserves Touchstone for Baker; choosing Touchstone spends it immediately.
-Baker's separate stealth-only payment remains unchanged.
+`canUseCredits()` is correct, and live play-testing confirms that Touchstone can
+be selected during a run. The same test found no player-visible credit-pool
+option, and selection of every other kind of eligible hosted source has not yet
+been verified. Baker's separate stealth-only payment remains unchanged.
 
-Regression coverage in `tests/credit-pool-lock.test.js` verifies both choices,
-multi-source allocation, continuation timing, hosted-source callbacks, and
-forced payment while the pool is locked.
+Engine-level coverage in `tests/credit-pool-lock.test.js` verifies the hosted
+source and credit-pool allocations, multi-source allocation, continuation
+timing, hosted-source callbacks, and forced payment while the pool is locked.
+It does not verify that the rendered UI exposes the pool choice or that every
+eligible hosted source is player-selectable.
 
 ---
 
@@ -171,3 +176,16 @@ Follow `tests/fixtures/README.md` and whichever runner-side decision/mechanics t
 1. **Touchstone's `canUseCredits` ignoring `doing`/`card` is arguably correct per the card's actual text** ("You can spend hosted credits during runs" — no restriction to specific cost types), so no change is proposed there. It's `SpendCredits()`'s decision to auto-spend on any `canUseCredits() == true` source, rather than Touchstone's own eligibility check, that turns "optional and broad" into "mandatory and first."
 2. Baker's redirect implementation (`_stealthCreditCards()` + its own `DecisionPhase`) is a good model for "give the player a real choice among qualifying credit sources" and is unaffected by this report — it's flagged only as the piece of the deck that makes this bug worth fixing rather than cosmetic.
 3. The repeated `ERROR: Value above (.corpAbilities) is unsupported in ValueToString.` lines at nearly every phase boundary are present in this log too (as in the Archives/Baker log) and still look unrelated to this report.
+
+
+## REMEDIATION - in game testing
+
+With the new fix, the game correctly pauses to ask whether to spend credits instead of automatically removing them from touchstone, and you can now click on the touchstone itself to spend the credit, which is the correct behaviour.
+
+However, the UI displays "Spend Credits" in the top right, but nothing in the bottom left box which look strange. The biggest issue is that there is no way of spending credits from the normal credit pool. We need a "Spend 1 credit from pool" type button in the bottom left, using the cred symbol instead of the word "credits", and also we need to make sure that ALL other cards hosting credits that are eligible to be spent are also highlighted and clickable in the same way that baker is, e.g. all other card types including events in flight (I've not tested this yet, so the code needs verifying that this is the case).
+
+The above is also the case any time a credit can be spent during a run, not just breaking ICE, e.g. trashing an accessed card, or paying a "tax" on a subroutine.
+
+Moving to remediation until this is fixed.
+
+Original fix - commit `Addressed documentation/bugs/touchstone-credits-auto-spent-no-choice.md` on branch `24Sept-fixes`

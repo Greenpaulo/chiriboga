@@ -2884,6 +2884,7 @@ function ResetProperties(card) {
  * @param {Card[]} locationto destination array
  */
 function MoveCardTriggers(card, locationfrom, locationto) {
+  if (CardHasModifierCallback(card)) InvalidateActiveTriggerCandidateCache();
   card.renderer.sprite.visible = true; //all card moves are visible
   if (locationto !== null) {
     if (
@@ -3655,10 +3656,45 @@ function ChoicesExistingServers() {
  * @param {Player} [player] only include this player's cards (null for both)
  * @returns {Params[]} array of {card,label} where card[callbackName] is defined
  */
+var activeTriggerCandidateCache = {};
+
+function InvalidateActiveTriggerCandidateCache() {
+  activeTriggerCandidateCache = {};
+}
+
+function CardHasModifierCallback(card) {
+  for (var propertyName in card) {
+    if (
+      propertyName.indexOf("modify") == 0 &&
+      typeof card[propertyName] === "object"
+    )
+      return true;
+  }
+  return false;
+}
+
+function ActiveTriggerCandidates(callbackName, player) {
+  if (
+    typeof callbackName != "string" ||
+    callbackName.indexOf("modify") != 0
+  )
+    return AllCards(player);
+
+  var playerKey = player == corp ? "corp" : "runner";
+  var cacheKey = playerKey + ":" + callbackName;
+  if (typeof activeTriggerCandidateCache[cacheKey] === "undefined") {
+    var allCards = AllCards(player);
+    activeTriggerCandidateCache[cacheKey] = allCards.filter(function (card) {
+      return typeof card[callbackName] !== "undefined";
+    });
+  }
+  return activeTriggerCandidateCache[cacheKey];
+}
+
 function ChoicesActiveTriggers(callbackName, player = null) {
   var ret = [];
   if (player !== runner) {
-    var corpAllCards = AllCards(corp); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
+    var corpAllCards = ActiveTriggerCandidates(callbackName, corp); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
     for (var i = 0; i < corpAllCards.length; i++) {
       if (CheckCallback(corpAllCards[i], callbackName)) {
         var choice = { card: corpAllCards[i] };
@@ -3669,7 +3705,7 @@ function ChoicesActiveTriggers(callbackName, player = null) {
     }
   }
   if (player !== corp) {
-    var runnerAllCards = AllCards(runner); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
+    var runnerAllCards = ActiveTriggerCandidates(callbackName, runner); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
     for (var i = 0; i < runnerAllCards.length; i++) {
       if (CheckCallback(runnerAllCards[i], callbackName)) {
         var choice = { card: runnerAllCards[i] };
