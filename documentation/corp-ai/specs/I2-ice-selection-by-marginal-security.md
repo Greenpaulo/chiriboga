@@ -182,6 +182,12 @@ Gate command (after the collector setup exists):
 `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns.mean=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
 
 ## Things to consider
+- **Owned open gap: empty-Archives reward valuation.** I2 planning must decide
+  whether its marginal-value comparison can cover the public reward prevented
+  by protection. Before hand-off, implement and validate that scoped policy,
+  or file and link a separate follow-up ticket with a roadmap owner and an
+  acceptance gate. Merely retaining the shared-design note is insufficient.
+  Keep the recovered exclusion while the policy remains unvalidated.
 - L4.1 (unified bypass allocation) changes the evaluator results that
   scenarios 3 and 6 rest on. Assert orderings, not numbers, and if L4.1 lands
   first build those fixtures on its hook format.
@@ -192,6 +198,7 @@ Gate command (after the collector setup exists):
   it is not a dependency, and the fresh-run latency check applies now.
 
 ## Acceptance criteria
+- [ ] The Resolution explicitly disposes of the empty-Archives reward-valuation gap: either it links implemented behavior, focused counterexamples and gate evidence, or it links a filed follow-up ticket with remaining scope, roadmap ownership and an acceptance gate. Update the shared design's gap status and reference; "investigate later" without a ticket does not satisfy this criterion.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`; the L3.5.2 regressions (scenarios 9 and 10) pass without it.
 - [ ] `_criticalBreachDefenseAction()` consumes I2's candidate evaluation; `_iceInstallScore()` and `_bestIceToInstall()` are deleted.

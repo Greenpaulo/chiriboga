@@ -82,9 +82,16 @@ I9 must compare its combined policy against the corrected baseline, not inherit
 old-tip strength claims. Do not turn a legacy gate on just to satisfy an old
 fixture: those fixtures now explicitly request the historical policy.
 
-For the Archives gap, first trace the spending and the public reward prevented,
-then decide whether to extend L7.1 or create a separate calibrated policy. A
-successful run or a reward hook alone is not a demonstrated reason to spend
+**Archives gap status: open. Accountable item: I2.** During I2 planning,
+first trace the spending and the public reward prevented,
+then decide whether I2 can cover the valuation or needs a separately scoped
+policy. Before I2 moves to code-review, its Resolution must either link the
+implemented valuation and validation evidence, or link a filed follow-up
+ticket stating the remaining scope, roadmap ownership and acceptance gate.
+An unlinked note saying "investigate later" does not meet this requirement.
+I9 must audit that disposition before retiring the legacy install fallback;
+a still-open follow-up remains visible and the unvalidated policy stays off.
+A successful run or a reward hook alone is not a demonstrated reason to spend
 on defense. Do not silently expand L7.1's agenda-consequence signal into a
 reward valuation or treat I2's enumeration of ranked servers as permission to
 bypass the recovered empty-Archives exclusion.
