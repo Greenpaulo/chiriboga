@@ -1,9 +1,10 @@
 # Corp AI: installs agendas into a remote server its own security evaluator has never marked secure, because the "scoring server" gate compares protection to HQ instead of checking `_evaluateServerSecurity()`
 
-**Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
-**Source:** `documentation/debug-logs/corp_installed_agenda_in_an_unsecure_server.txt` (`Version reference: Sat Sep 19 2026 22:23:18 GMT+0100`).
+**Review location:** `documentation/bugs/code-review/`.
+**Original source:** `documentation/debug-logs/bug_raised/corp_installed_agenda_in_an_unsecure_server.txt` (`Version reference: Sat Sep 19 2026 22:23:18 GMT+0100`).
+**Additional verified logs:** [`corp_played_agenda_into_unsecure_server_after_agenda_was_stolen_from_that_server_last_turn.txt`](../../debug-logs/bug_raised/corp_played_agenda_into_unsecure_server_after_agenda_was_stolen_from_that_server_last_turn.txt) and [`same_again_install_agenda_into_insecure_server.txt`](../../debug-logs/bug_raised/same_again_install_agenda_into_insecure_server.txt). The latter is an extended continuation/replay of the former rather than an independent game; both show the same insecure Kessleroid remote being admitted because HQ's heuristic score was lower.
 **File:** `ai_corp.js` (line numbers are from `main` as of this writing and will drift; search by function name).
-**Status:** Diagnosed, not yet fixed. Flagged by name only in `documentation/bugs/done/hq-ice-install-blocked-by-economy-reserve.md` (section 7, item 1) and `documentation/bugs/done/hq-draw-gate-ignores-server-security.md` (section 7, item 4). This document is the full read of that log.
+**Status:** Fixed on `23Sept-fixes`, awaiting code review. `_isAScoringServer()` now requires `_evaluateServerSecurity(server).isSecure` before any installed-HVT shortcut or relative protection comparison. The already-computed result is passed into `_protectionScore()` to avoid immediately evaluating the candidate twice.
 
 ---
 
@@ -23,7 +24,7 @@ if (protScore < minProt) return false;
 
 HQ's own protection score was mediocre-to-negative for almost the entire game (it swings from 6.0 down to -10.3 as the log goes on, because HQ never receives a second ICE layer). Since `minProt` is pinned to whatever HQ happens to be doing, a barely-defended remote easily clears the bar the moment HQ is having a bad turn — which, in this log, is most of the game. `_evaluateServerSecurity()` is never consulted, even though it is already being called (and logged) constantly elsewhere in the same decision cycle to describe the exact same remote as insecure.
 
-**Proposed fix:** add an absolute floor to `_isAScoringServer()` — a remote cannot become a scoring server while `_evaluateServerSecurity(server).isSecure` is `false`, regardless of how it compares to HQ. Keep the relative HQ comparison as a secondary tiebreaker once the absolute check passes.
+**Implemented fix:** `_isAScoringServer()` now has an absolute floor—a remote cannot become a scoring server while `_evaluateServerSecurity(server).isSecure` is `false`, regardless of how it compares to HQ. The relative HQ comparison remains as a secondary tiebreaker once the absolute check passes.
 
 ---
 
@@ -144,18 +145,19 @@ for (var i = 0; i < cards.length; i++) {
 
 ---
 
-## 4. Proposed fix
+## 4. Implemented fix
 
-### 4.1 Add an absolute security floor to `_isAScoringServer()`
+### 4.1 Added an absolute security floor to `_isAScoringServer()`
 
-Before the relative HQ comparison, require the server to actually be secure:
+Before the installed-card shortcuts and relative HQ comparison, the server must actually be secure:
 
 ```js
 //no if the Runner can currently get in, however it compares to HQ
-if (!this._evaluateServerSecurity(server).isSecure) return false;
+var security = this._evaluateServerSecurity(server);
+if (!security.isSecure) return false;
 
 //no if its protection is too weak relative to what else is defended
-var protScore = this._protectionScore(server, {});
+var protScore = this._protectionScore(server, {}, security);
 var minProt = this._protectionScore(corp.HQ, {
   returnArchivesLowerScoreForHQIfBackdoor: true,
 });
@@ -167,11 +169,11 @@ if (this._agendasInHand() > MaxHandSize(corp) - 1) {
 if (protScore < minProt) return false;
 ```
 
-This preserves the existing relative comparison (still useful for choosing *among* multiple genuinely secure remotes, and for the hand-overflow exception) but stops an insecure remote from ever being offered as a scoring destination, independent of how bad HQ looks.
+This preserves the existing relative comparison (still useful for choosing *among* genuinely secure remotes, and for the hand-overflow exception) but stops an insecure remote from ever being offered as a scoring destination, independent of how bad HQ looks. Applying the floor before the installed agenda/ambush/scoring-upgrade shortcuts also keeps the helper's meaning consistent for all callers.
 
-### 4.2 Decision for the maintainer: the hand-overflow exception
+### 4.2 Hand-overflow behavior
 
-`_isAScoringServer()` already has a fallback: if the hand is about to overflow (`_agendasInHand() > MaxHandSize(corp) - 1`), the bar drops to Archives' protection instead of HQ's, on the logic that a discarded agenda is worse than a stolen one. That fallback should probably still go through the same absolute floor — an agenda that is about to be discarded gains nothing from being placed somewhere guaranteed to be run and stolen instead of just trashed, since a discard denies the Runner the points entirely. This document assumes the floor applies in both branches; flag if the maintainer wants the overflow case exempted so the AI has *somewhere* to put an about-to-be-discarded agenda even when nothing is secure.
+The existing overflow comparison against Archives remains, but it is subject to the same absolute security floor. An insecure remote is not made acceptable merely because HQ is full.
 
 ### 4.3 Behaviour change
 
@@ -199,12 +201,12 @@ The reproduction block at the end of the log is the end-of-game state, well afte
 - An agenda in HQ (Above the Law or Send a Message).
 - `// SETUP:` matching credits/clicks from the log at that decision point.
 
-Fixtures to add under `tests/fixtures/corp-decisions/`:
+Fixtures added under `tests/fixtures/corp-decisions/`:
 
 | Fixture | Setup | Expected |
 |---|---|---|
-| `corp-no-agenda-into-insecure-remote` | as above: insecure Remote 0 scores higher than a worse-off HQ, agenda in hand | `// EXPECT: !install` with `EXPECT_SERVER: Remote 0` / `EXPECT_CARD:` the agenda (this reproduces the bug: fails before the fix, passes after) |
-| `corp-agenda-into-secure-remote-still-ok` | same shape but Remote 0's ICE gives it a hard lockout (mandatory breaks, no capable breaker, as with Ballista on HQ earlier in this same log) | `// EXPECT: install` with `EXPECT_SERVER: Remote 0` |
+| `corp-no-agenda-into-insecure-remote` | Kessleroid is affordable but breachable by an installed Cleaver; the remote otherwise outranks HQ | `// EXPECT: !install`; failed before the fix by choosing `install`, now passes by choosing `draw` |
+| `corp-agenda-into-secure-remote-still-ok` | same shape but no capable breaker, so Kessleroid provides a hard lockout | `// EXPECT: install`, Remote 0, Send a Message |
 
 Note `tests/fixtures/corp-decisions/corp-layers-breachable-agenda-remote.txt` already exists and covers a related-but-different situation (installing *ICE* onto a remote that already holds an exposed agenda, from `semak-samun-held-and-send-a-message-delay.md`). It is not a duplicate of the fixtures above, which are about the *initial choice to install the agenda* into an insecure remote in the first place.
 
@@ -233,10 +235,10 @@ These came up while tracing the log. They are unverified beyond what is noted.
 
 ## 8. Acceptance criteria
 
-- [ ] `_isAScoringServer()` calls `this._evaluateServerSecurity(server).isSecure` and returns `false` immediately when it is `false`, before the relative-to-HQ comparison runs.
-- [ ] A remote with `secure:false` never appears in `_scoringServers()`'s return value, regardless of its protection score relative to HQ or Archives.
-- [ ] A remote with `secure:true` is unaffected — the existing relative comparison still applies to choose among secure candidates.
-- [ ] New fixture(s) from §5 fail before the change and pass after.
-- [ ] `node -c ai_corp.js` passes and the existing regression collection (`node tests/run-all-tests.js`) still passes.
-- [ ] The hand-overflow exception (§3, §4.2) is either subjected to the same floor or explicitly exempted with a comment explaining why, per the maintainer's decision in §4.2.
-- [ ] No other Corp AI decision logic is changed.
+- [x] `_isAScoringServer()` calls `this._evaluateServerSecurity(server)` and returns `false` immediately when `isSecure` is false, before shortcuts or the relative comparison.
+- [x] A remote with `secure:false` never appears in `_scoringServers()`'s return value, regardless of its protection score relative to HQ or Archives.
+- [x] A remote with `secure:true` still uses the existing relative comparison.
+- [x] The insecure fixture failed before the change and passes after; the secure control continues to install.
+- [x] `node -c ai_corp.js` and the complete regression collection pass (`21 test files passed`).
+- [x] The hand-overflow exception is subject to the same floor.
+- [x] No unrelated Corp AI decision path was changed by this ticket.

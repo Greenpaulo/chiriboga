@@ -2073,6 +2073,9 @@ coreSet[1048] = {
       );
     },
   },
+  //Conservatively assume the Runner preserves a purge-trashed program or
+  //hardware when evaluating whether the Corp should spend its turn purging.
+  AIPreventsPurgeTrash: true,
 };
 coreSet[1049] = {
   title: "Infiltration",
@@ -2317,6 +2320,11 @@ coreSet[1057] = {
         );
       }
     },
+  },
+  AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCounters(this, "advancement", 1)) return 0;
+    return 2;
   },
 };
 coreSet[1060] = {
@@ -2619,6 +2627,11 @@ coreSet[1069] = {
         );
       }
     },
+  },
+  AIReserveCredits: function(server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (!CheckCounters(this, "advancement", 1)) return 0;
+    return 1;
   },
 };
 // coreSet[1070] = {

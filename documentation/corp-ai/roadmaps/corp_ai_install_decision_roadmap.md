@@ -4,6 +4,8 @@
 
 This is a proposed successor to `documentation/corp-ai/roadmaps/corp_ai_improvement_roadmap.md`. None of the phases in this document are implemented unless their status is changed explicitly after code, documentation, and regression tests have been completed.
 
+Shared deterministic-RNG, hypothetical-evaluation, decision-cache, and batch-harness infrastructure is tracked in the [Corp AI foundations roadmap](corp_ai_foundations_roadmap.md).
+
 The server-security roadmap answers:
 
 > How vulnerable, valuable, or urgent is each server?
@@ -287,6 +289,8 @@ Hard rejection rules should remain separate from soft score penalties. An illega
 ### Phase 0: Baseline Capture and Decision Telemetry — `[PROPOSED]`
 
 **Goal:** Establish current behavior and a measurable baseline before changing priorities.
+
+Phase 0 should reuse the seeded batch harness specified by F4 in the [Corp AI foundations roadmap](corp_ai_foundations_roadmap.md), rather than create a second simulation path.
 
 **Work:**
 

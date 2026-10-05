@@ -5,6 +5,7 @@
 **Belongs in:** Bug ticket under `documentation/bugs/` (the findings' `documentation/backlog/bugs.md` path does not exist).
 **Suggested order:** Step 2 of 5 — quick fixes.
 **Depends on:** Nothing, but fixes the contract that findings 5 and 6 rely on.
+**Status:** Fixed, documented, and regression-tested on 23 September 2026.
 
 ---
 
@@ -24,3 +25,11 @@
 - Both cards are advanced to the intended counter count.
 - `ai.md`'s stated schema matches what the cards declare and what the AI reads.
 - A test asserts the cap actually stops advancement (guards the "nothing caps them" case).
+
+## Resolution — 23 September 2026
+
+The boolean contract was retained because it matches every consumer: `phase.js` uses the flag to keep the advance action available after an agenda is scoreable, while `AIAdvancementLimit()` is the existing target API.
+
+_Project Ingatan_ and _Sericulture Expansion_ now declare `AIOverAdvance: true` and return `AdvancementRequirement(this) + 2` from `AIAdvancementLimit()`. That preserves their stated intent of up to two excess counters and adapts to advancement-requirement modifiers. `documentation/ai.md` now states that the flag is agenda-only, must be paired with a limit, and can be bypassed for a winning score.
+
+Regression coverage checks both real card definitions, their five-counter targets, and the target-selection cap.

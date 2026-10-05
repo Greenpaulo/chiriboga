@@ -1,0 +1,546 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Barry Baz Wong: Tri-Maf Veteran,1 Leech,2 Mutual Favor,1 Docklands Pass,2 Carmen,3 Marjanah,2 Tranquilizer,3 Red Team,1 DZMZ Optimizer,3 Overclock,3 Sure Gamble,1 Rising Tide,3 Clean Getaway,3 Lie Low,3 Maglectric Rapid (748 Mod),2 Sang Kancil,2 Fransofia Ward,3 Open Market,2 Madani,2 Chromatophores,3 Side Hustle]
+[Poétrï Luxury Brands: All the Rage,1 Luminal Transubstantiation,3 Nico Campaign,1 Ansel 1.0,1 Brân 1.0,1 Seamless Launch,1 Manegarm Skunkworks,3 Spin Doctor,1 Predictive Planogram,3 Send a Message,2 Hedge Fund,3 Aggressive Trendsetting,3 Project Ingatan,3 Humanoid Resources,3 Otto Campaign,3 Bumi 1.0,3 Scatter Field,2 Nanomanagement,1 Top-Down Solutions,2 Mercia B4LL4RD,1 Mycoweb,3 Anthill Excavation Contract,3 Kessleroid,2 Mahkota Langit Grid]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 3.25; fresh-hand expectation 3.91
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Scatter Field,Seamless Launch,Bumi 1.0,Nico Campaign,Mahkota Langit Grid]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Marjanah,Red Team,Overclock,Side Hustle,Tranquilizer]
+Corp drew a card
+AI: Ranked server protection: {R&D:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.5,debt:0,adjusted:3.5,secure:false}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Ranked server protection: {HQ:{score:-5,debt:0,adjusted:-5,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.9813248766737144,debt:0,adjusted:2.9813248766737144,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false}}
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 8
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:2.9813248766737144,debt:0,adjusted:2.9813248766737144,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:6.481324876673714,debt:0,adjusted:6.481324876673714,secure:true}}
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nico Campaign might be good economy install?
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Seamless Launch,Nico Campaign,Mahkota Langit Grid]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Marjanah,Red Team,Overclock,Side Hustle,Tranquilizer]
+Runner spent one click
+Runner spent 2 credits
+Runner installed Side Hustle
+1 credit placed on Side Hustle
+Runner spent one click
+Run initiated attacking Remote 0
+1 credit placed on Side Hustle
+Approaching Remote 0
+Run successful
+Nico Campaign accessed
+Runner spent 2 credits
+Nico Campaign trashed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Seamless Launch,Nico Campaign,Mahkota Langit Grid]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Marjanah,Red Team,Overclock,Tranquilizer]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.20269832266429,debt:0,adjusted:3.20269832266429,secure:false},HQ:{score:6.70269832266429,debt:0,adjusted:6.70269832266429,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.20269832266429,debt:0,adjusted:3.20269832266429,secure:false},HQ:{score:5.70269832266429,debt:0,adjusted:5.70269832266429,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nico Campaign might be good economy install?
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 1:{score:0,debt:0,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},R&D:{score:3.20269832266429,debt:0,adjusted:3.20269832266429,secure:false},HQ:{score:4.70269832266429,debt:0,adjusted:4.70269832266429,secure:true}}
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Mahkota Langit Grid,Seamless Launch,Project Ingatan]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Marjanah,Red Team,Overclock,Tranquilizer]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent one credit
+Played Overclock
+5 credits placed on Overclock
+Run initiated attacking Remote 1
+1 credit placed on Side Hustle
+Approaching Remote 1
+Run successful
+Nico Campaign accessed
+Runner spent 2 credits from Overclock
+Nico Campaign trashed
+Run ends
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Mahkota Langit Grid,Seamless Launch,Project Ingatan]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Marjanah,Red Team,Tranquilizer,Open Market]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.1742160278745652,debt:1,adjusted:2.1742160278745652,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.674216027874565,debt:0,adjusted:4.674216027874565,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Ranked server protection: {null:{score:1,debt:0,adjusted:1,secure:false},R&D:{score:3.1742160278745652,debt:1,adjusted:2.1742160278745652,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:5.674216027874565,debt:0,adjusted:5.674216027874565,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 4
+AI: Ranked server protection: {Remote 2:{score:-0.575783972125435,debt:0,adjusted:-0.575783972125435,secure:false},R&D:{score:3.1742160278745652,debt:1,adjusted:2.1742160278745652,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:4.674216027874565,debt:0,adjusted:4.674216027874565,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Seamless Launch,Anthill Excavation Contract,Project Ingatan,Mahkota Langit Grid,Nanomanagement]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Marjanah,Red Team,Tranquilizer,Open Market]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 2 credits
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Seamless Launch,Anthill Excavation Contract,Project Ingatan,Mahkota Langit Grid,Nanomanagement]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 5 card(s) in hand: [Marjanah,Red Team,Tranquilizer,Fransofia Ward,Lie Low]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 2:{score:-0.9010318949343334,debt:1,adjusted:-1.9010318949343334,secure:false},R&D:{score:2.8489681050656666,debt:2,adjusted:0.8489681050656666,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3489681050656666,debt:0,adjusted:3.3489681050656666,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 2:{score:-0.9010318949343334,debt:1,adjusted:-1.9010318949343334,secure:false},R&D:{score:2.8489681050656666,debt:2,adjusted:0.8489681050656666,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3489681050656666,debt:0,adjusted:3.3489681050656666,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {Remote 2:{score:-0.9010318949343334,debt:1,adjusted:-1.9010318949343334,secure:false},R&D:{score:2.8489681050656666,debt:2,adjusted:0.8489681050656666,secure:false},archives:{score:3,debt:0,adjusted:3,secure:false},HQ:{score:3.3489681050656666,debt:0,adjusted:3.3489681050656666,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Nanomanagement,Seamless Launch,Project Ingatan,Send a Message]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 5 card(s) in hand: [Marjanah,Red Team,Tranquilizer,Fransofia Ward,Lie Low]
+1 credit taken from Open Market
+Runner spent 2 clicks
+Runner spent one credit
+Played Lie Low
+Runner drew 4 cards
+Runner spent one click
+Runner spent 5 credits from Open Market
+Open Market trashed (empty)
+Runner installed Red Team
+12 credits loaded onto Red Team
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+Anthill Excavation Contract accessed
+Nico Campaign accessed
+Hedge Fund accessed
+Nico Campaign accessed
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Nanomanagement,Seamless Launch,Project Ingatan,Send a Message]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 5 card(s) in hand: [Marjanah,Red Team,Tranquilizer,Fransofia Ward,Lie Low]
+1 credit taken from Open Market
+Runner spent 2 clicks
+Runner spent one credit
+Played Lie Low
+Runner drew 4 cards
+Runner spent one click
+Runner spent 5 credits from Open Market
+Open Market trashed (empty)
+Runner installed Red Team
+12 credits loaded onto Red Team
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Anthill Excavation Contract accessed
+Nico Campaign accessed
+Hedge Fund accessed
+Nico Campaign accessed
+Run ends
+Runner discarded Marjanah
+Runner discarded Maglectric Rapid (748 Mod)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Mahkota Langit Grid,Nanomanagement,Seamless Launch,Project Ingatan,Send a Message]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Tranquilizer,Fransofia Ward,Maglectric Rapid (748 Mod),Chromatophores,Lie Low]
+Corp drew a card
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {Remote 0:{score:-1.0582368082368083,debt:1,adjusted:-2.058236808236808,secure:false},R&D:{score:2.691763191763192,debt:3,adjusted:-0.3082368082368081,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},HQ:{score:2.191763191763192,debt:0,adjusted:2.191763191763192,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {Remote 0:{score:-1.0582368082368083,debt:1,adjusted:-2.058236808236808,secure:false},R&D:{score:2.691763191763192,debt:3,adjusted:-0.3082368082368081,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},HQ:{score:1.191763191763192,debt:0,adjusted:1.191763191763192,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 6
+AI: Ranked server protection: {Remote 0:{score:-1.0582368082368083,debt:1,adjusted:-2.058236808236808,secure:false},R&D:{score:2.691763191763192,debt:3,adjusted:-0.3082368082368081,secure:false},archives:{score:2,debt:1,adjusted:1,secure:false},HQ:{score:1.191763191763192,debt:0,adjusted:1.191763191763192,secure:true}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Project Ingatan,Seamless Launch,Nanomanagement,Aggressive Trendsetting,Send a Message]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Tranquilizer,Fransofia Ward,Maglectric Rapid (748 Mod),Chromatophores,Lie Low]
+Runner spent one click
+Runner spent one credit
+Runner installed Chromatophores
+Runner spent one click
+Runner spent 2 credits
+Runner installed Tranquilizer
+1 virus counter placed on Tranquilizer
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+1 credit placed on Side Hustle
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Anthill Excavation Contract accessed
+Nico Campaign accessed
+Hedge Fund accessed
+Nico Campaign accessed
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Runner installed Fransofia Ward
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Project Ingatan,Seamless Launch,Nanomanagement,Aggressive Trendsetting,Send a Message]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 2 card(s) in hand: [Maglectric Rapid (748 Mod),Lie Low]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {HQ:{score:-8.355614973262032,debt:0,adjusted:-8.355614973262032,secure:true},Remote 0:{score:-5.105614973262032,debt:2,adjusted:-7.105614973262032,secure:false},R&D:{score:3.644385026737968,debt:4,adjusted:-0.35561497326203195,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false}}
+AI: Nothing to advance
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {HQ:{score:-8.355614973262032,debt:0,adjusted:-8.355614973262032,secure:true},Remote 0:{score:-5.105614973262032,debt:2,adjusted:-7.105614973262032,secure:false},R&D:{score:3.644385026737968,debt:4,adjusted:-0.35561497326203195,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [21.15]
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 4 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {HQ:{score:-6.355614973262032,debt:0,adjusted:-6.355614973262032,secure:true},Remote 0:{score:-4.105614973262032,debt:2,adjusted:-6.105614973262032,secure:false},R&D:{score:3.644385026737968,debt:4,adjusted:-0.35561497326203195,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 3
+AI: Ranked server protection: {HQ:{score:-6.355614973262032,debt:0,adjusted:-6.355614973262032,secure:true},Remote 0:{score:-4.105614973262032,debt:2,adjusted:-6.105614973262032,secure:false},R&D:{score:3.644385026737968,debt:4,adjusted:-0.35561497326203195,secure:false},archives:{score:2,debt:2,adjusted:0,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Seamless Launch,Aggressive Trendsetting,Nanomanagement,Aggressive Trendsetting,Send a Message]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 2 card(s) in hand: [Maglectric Rapid (748 Mod),Lie Low]
+1 virus counter placed on Tranquilizer
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Run initiated attacking Remote 0
+1 credit placed on Side Hustle
+Side Hustle pays out 6 credits
+6 credits taken from Side Hustle
+Side Hustle trashed
+Runner drew a card
+Approaching outermost piece of ice protecting Remote 0
+Corp did not rez ice
+Approaching Remote 0
+Run successful
+Project Ingatan accessed
+Project Ingatan stolen
+Mahkota Langit Grid accessed
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+Runner spent 2 credits
+Mahkota Langit Grid trashed
+Run ends
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Seamless Launch,Aggressive Trendsetting,Nanomanagement,Aggressive Trendsetting,Send a Message]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 3 card(s) in hand: [Maglectric Rapid (748 Mod),Lie Low,Sure Gamble]
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: Ranked server protection: {Remote 0:{score:-5.494151069518717,debt:3,adjusted:-8.494151069518717,secure:false},HQ:{score:-6.744151069518717,debt:0,adjusted:-6.744151069518717,secure:true},R&D:{score:3.255848930481283,debt:5,adjusted:-1.744151069518717,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [5.65]
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 3 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: Ranked server protection: {Remote 0:{score:-4.494151069518717,debt:3,adjusted:-7.494151069518717,secure:false},HQ:{score:-4.744151069518717,debt:0,adjusted:-4.744151069518717,secure:true},R&D:{score:3.255848930481283,debt:5,adjusted:-1.744151069518717,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ appears secure: Scatter Field has mandatory breaks with no capable breaker; break cost Infinity > Runner credits 10
+AI: Ranked server protection: {Remote 0:{score:-4.494151069518717,debt:3,adjusted:-7.494151069518717,secure:false},HQ:{score:-4.744151069518717,debt:0,adjusted:-4.744151069518717,secure:true},R&D:{score:3.255848930481283,debt:5,adjusted:-1.744151069518717,secure:false},archives:{score:2,debt:3,adjusted:-1,secure:false},null:{score:1,debt:0,adjusted:1,secure:false}}
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 3.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Aggressive Trendsetting,Humanoid Resources,Nanomanagement,Aggressive Trendsetting,Seamless Launch]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 3 card(s) in hand: [Maglectric Rapid (748 Mod),Lie Low,Sure Gamble]
+1 virus counter placed on Tranquilizer
+Scatter Field derezzed
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+Corp did not rez ice
+Approaching Remote 0
+Run successful
+Send a Message accessed
+Send a Message stolen
+AI: HQ WEAKER THAN R&D: protection 2.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 2.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: I don't have code to handle this situation: [Stolen,Stolen,trigger,[{card:Send a Message,label:You may rez 1 installed piece of ice, ignoring all costs,id:0,callbackName:responseOnStolen,enumerateParams:[],choices:[{card:Bumi 1.0,label:[hidden card]}],command:trigger},{card:Poétrï Luxury Brands: All the Rage,label:Install 1 non-agenda card from HQ,id:1,callbackName:responseOnStolen,enumerateParams:[],choices:[{}],command:trigger}]]
+You may rez 1 installed piece of ice, ignoring all costs triggered
+AI: HQ WEAKER THAN R&D: protection 2.5 vs 4.5 with 2 agenda(s) - protection score penalized
+AI: I know this one
+Corp rezzed Bumi 1.0
+Install 1 resource or hardware from grip triggered
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Aggressive Trendsetting,Humanoid Resources,Nanomanagement,Aggressive Trendsetting,Seamless Launch]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 3 card(s) in hand: [Maglectric Rapid (748 Mod),Lie Low,Sure Gamble]
+1 virus counter placed on Tranquilizer
+[hidden card] derezzed
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Send a Message]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(35012, [30029,35015,35022,30016,35019,35034], [35021,35020,35034,30029,35014,30017,30016,30011,30018,30015,35034,30013,30030,35028,35030,35022,30018,35014,30030,35020,30008,35019,35028,35022,30016,30022,30015,35015,30011,30029,35014], [35019,35015,30030], [30018,35021,35009], [35038], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35036, [30037,30075,30037,35072,35082], [35039,35041,30042,35039,35045,30075,35075,35037,35038,30037,30069,35075,35038,30069,30056,35072,35045,30038,35040,30053,35040,35072,30053,35041,30039,35040,35042,35053,35042,30036,35044,35082,30053,35043], [35037,35039,35043,35037,30040], [], [35041], [35042], [[30069,35075]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].AITurnsInstalled=1;
+runner.scoreArea[0].AIScoringPlanCommitted=true;
+runner.rig.resources[0].credits=6;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[0].host=null;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[2].host=null;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[4].serverThisWasInstalledIn=corp.remoteServers[0];
+corp.archives.cards[4].host=null;
+corp.HQ.ice[0].hostedCards = [];
+InstanceCardsPush(30017,corp.HQ.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.HQ.ice[0];
+corp.HQ.ice[0].hostedCards[0].faceUp=true;
+corp.HQ.ice[0].hostedCards[0].virus=3;
+corp.HQ.ice[0].hostedCards[0].host=corp.HQ.ice[0];
+corp.HQ.cards[4].cardsInstalledThisTurn=[corp.remoteServers[0].root[0],];
+corp.remoteServers[0].root[0].advancement=2;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.remoteServers[0].root[0].AIScoringPlanCommitted=true;
+corp.remoteServers[0].ice[0].hostedCards = [];
+InstanceCardsPush(35030,corp.remoteServers[0].ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.remoteServers[0].ice[0];
+corp.remoteServers[0].ice[0].hostedCards[0].faceUp=true;
+corp.remoteServers[0].ice[0].hostedCards[0].host=corp.remoteServers[0].ice[0];
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.archives.AISuccessfulRuns=3;
+
+Version reference: Wed Sep 23 2026 11:10:40 GMT+0100 (British Summer Time)

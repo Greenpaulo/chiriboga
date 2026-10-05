@@ -83,6 +83,7 @@ Only after all selected cards and tests are complete:
    when adding the first entry.
 4. Update `documentation/new-sets/card-implementation-backlog.md` when unfinished-card
    or TODO counts and accepted limitations change.
+5. Update `documentation/new-sets/vantage-point-implementation-notes.md`
 
 If blocked, leave the batch `In progress` or mark it `Blocked`, record the exact
 actionable reason, refresh the summary and do not append a completion row.

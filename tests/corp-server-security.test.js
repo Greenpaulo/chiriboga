@@ -34,13 +34,14 @@ context.CheckScore = (card, ignoreRequirement) => !runner.cards.some(active =>
   !active.disabled && (active.agendasInstalledThisTurn || []).includes(card));
 context.AgendaPoints = player => player.agendaPoints || 0;
 context.AgendaPointsToWin = () => 7;
+context.MaxHandSize = () => 5;
 context.ChoicesInstalledCards = (player, predicate) => context.InstalledCards(player).filter(predicate).map(card => ({card}));
 context.BreakerMatchesIce = (breaker, ice) => (
   [['Fracter', 'Barrier'], ['Decoder', 'Code Gate'], ['Killer', 'Sentry']].some(types =>
     context.CheckSubType(breaker, types[0]) && context.CheckSubType(ice, types[1]))
 );
 context.PlayerCanLook = (player, card) => player === corp || !!card.rezzed;
-context.GetServer = card => servers.find(server => server.ice.includes(card));
+context.GetServer = card => servers.find(server => server.ice.includes(card) || server.root.includes(card));
 context.ServerName = server => server.serverName || 'Regression server';
 vm.createContext(context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
@@ -67,6 +68,7 @@ function test(name, body) {
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
   ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
   ai._cardDeceptionProfiles = new WeakMap(); ai._random = Math.random;
+  ai._decisionRandomState = null;
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
@@ -96,6 +98,55 @@ test('unrezzed minor ice uses actual hook, while Runner calculator still guesses
 test('no-hook ice uses actual printed subroutine count', () => {
   const unknown = ice(['Trash 1 program.', 'End the run.'], null, {rezzed: false}); server([unknown]);
   assert.strictEqual(ai._requiredSubroutines(unknown), 2);
+});
+test('non-ETR ice has less protection value than equivalent ETR ice', () => {
+  const harmless = ice(['Gain 1 credit.'], [[['misc_minor']]], {title: 'Harmless ice', cardType: 'ice', strength: 1});
+  const stopping = ice(['End the run.'], [[['endTheRun']]], {title: 'Stopping ice', cardType: 'ice', strength: 1});
+  server([harmless, stopping]);
+  assert.strictEqual(ai._iceHasETR(harmless), false);
+  assert.strictEqual(ai._iceHasETR(stopping), true);
+  const harmlessValue = ai._cardProtectionValue(harmless);
+  const stoppingValue = ai._cardProtectionValue(stopping);
+  assert.ok(harmlessValue < stoppingValue, harmlessValue + ' should be less than ' + stoppingValue);
+});
+test('an insecure remote is never a scoring server even when it outranks HQ', () => {
+  const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const hq = {serverName: 'HQ', cards: [{player: corp, cardType: 'agenda'}], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}, remoteServers: [remote]});
+  const oldEvaluate = ai._evaluateServerSecurity;
+  const oldProtection = ai._protectionScore;
+  const oldEmpty = ai._emptyProtectedRemotes;
+  ai._evaluateServerSecurity = target => ({isSecure: target !== remote});
+  ai._protectionScore = target => target === remote ? 10 : 0;
+  ai._emptyProtectedRemotes = () => [remote];
+  try {
+    assert.strictEqual(ai._isAScoringServer(remote), false);
+    assert.strictEqual(ai._scoringServers([remote]).length, 0);
+  } finally {
+    ai._evaluateServerSecurity = oldEvaluate;
+    ai._protectionScore = oldProtection;
+    ai._emptyProtectedRemotes = oldEmpty;
+  }
+});
+test('a secure remote still uses the relative scoring-server comparison', () => {
+  const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const hq = {serverName: 'HQ', cards: [{player: corp, cardType: 'agenda'}], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}, remoteServers: [remote]});
+  const oldEvaluate = ai._evaluateServerSecurity;
+  const oldProtection = ai._protectionScore;
+  const oldEmpty = ai._emptyProtectedRemotes;
+  ai._evaluateServerSecurity = () => ({isSecure: true});
+  ai._protectionScore = target => target === remote ? 2 : 1;
+  ai._emptyProtectedRemotes = () => [remote];
+  try {
+    assert.strictEqual(ai._isAScoringServer(remote), true);
+    ai._protectionScore = target => target === remote ? 0 : 1;
+    assert.strictEqual(ai._isAScoringServer(remote), false);
+  } finally {
+    ai._evaluateServerSecurity = oldEvaluate;
+    ai._protectionScore = oldProtection;
+    ai._emptyProtectedRemotes = oldEmpty;
+  }
 });
 [30006, 30005].forEach(id => test('Gateway breaker ' + id + ' pumps and rounds whole break batches without cardText', () => {
   const breaker = card(id); runner.cards = [breaker]; runner.creditPool = 10;
@@ -245,8 +296,8 @@ test('approached Flyswatter does not reserve for redundant ICE on an agenda remo
 });
 test('same-server ICE ordering retains the protection-value tie-break', () => {
   const flyswatter = card(35079); flyswatter.rezzed = false;
-  const mycoweb = card(35053); mycoweb.rezzed = false;
-  const hq = {serverName: 'HQ', cards: [], ice: [mycoweb, flyswatter], root: []};
+  const tollbooth = card(31066); tollbooth.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [tollbooth, flyswatter], root: []};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
   Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [], creditPool: 9});
@@ -950,17 +1001,159 @@ test('ordinary purge is deterministic and closes a staked route opened by Botulu
   wall.hostedCards = [botulus]; runner.cards = [botulus];
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
-    RnD: {cards: [{}], ice: [wall], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [wall], root: []},
     archives: {cards: [], ice: [], root: []},
     remoteServers: [],
   });
   servers = [corp.HQ, corp.RnD, corp.archives];
   const first = ai._ordinaryPurgeOutcome();
-  const second = ai._ordinaryPurgeOutcome();
+  const oldRandom = Math.random;
+  const oldAIRandom = ai._random;
+  const failRandom = () => {throw Error('random purge');};
+  context.failRandom = failRandom;
+  vm.runInContext('savedPurgeMathRandom = Math.random;', context);
+  let second;
+  try {
+    Math.random = failRandom;
+    ai._random = failRandom;
+    vm.runInContext('Math.random = failRandom;', context);
+    second = ai._ordinaryPurgeOutcome();
+  } finally {
+    Math.random = oldRandom;
+    ai._random = oldAIRandom;
+    vm.runInContext(
+      'Math.random = savedPurgeMathRandom; delete savedPurgeMathRandom; delete failRandom;',
+      context,
+    );
+  }
   assert(first && first.reason.includes('secures'));
   assert.deepStrictEqual(second, first);
   assert.strictEqual(botulus.virus, 1);
   assert.strictEqual(botulus.disabled, undefined);
+});
+test('ordinary purge ignores modeled route pressure when the central has no agenda', () => {
+  const wall = etr();
+  const botulus = card(30004); botulus.host = wall; botulus.virus = 1;
+  wall.hostedCards = [botulus]; runner.cards = [botulus];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{player: corp, cardType: 'operation'}], ice: [wall], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
+  assert.strictEqual(botulus.virus, 1);
+});
+test('ordinary purge ignores virus counters with no modeled outcome', () => {
+  const irrelevant = {player: runner, virus: 20}; runner.cards = [irrelevant];
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
+  assert.strictEqual(irrelevant.virus, 20);
+});
+test('asset destination shuffle uses injected randomness without mutating its input', () => {
+  const destinations = [{name: 'strongest'}, {name: 'second'}, {name: 'third'}];
+  const originalOrder = destinations.slice();
+  const seededRandom = seed => () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 0x100000000;
+  };
+  ai._random = seededRandom(42);
+  const firstOrder = ai._shuffleCopy(destinations);
+  ai._random = seededRandom(42);
+  const secondOrder = ai._shuffleCopy(destinations);
+  assert.deepStrictEqual(destinations, originalOrder);
+  assert.deepStrictEqual(secondOrder, firstOrder);
+
+  context.failGlobalRandom = () => {throw Error('global Math.random used');};
+  vm.runInContext('savedMathRandom = Math.random; Math.random = failGlobalRandom;', context);
+  try {
+    let rolls = 0;
+    ai._random = () => {rolls++; return 0;};
+    assert.deepStrictEqual(ai._shuffleCopy(destinations), [destinations[1], destinations[2], destinations[0]]);
+    assert.strictEqual(rolls, 2);
+  } finally {
+    vm.runInContext('Math.random = savedMathRandom; delete savedMathRandom;', context);
+    delete context.failGlobalRandom;
+  }
+});
+test('asset destination tie-break is rolled once per Choice', () => {
+  const destinations = [{name: 'strongest'}, {name: 'second'}, {name: 'third'}];
+  const oldChoiceInner = ai._choiceInner;
+  let firstOrder = null;
+  let secondOrder = null;
+  let rolls = 0;
+  ai._random = () => {rolls++; return rolls % 2 ? 0.1 : 0.9;};
+  ai._choiceInner = () => {
+    firstOrder = ai._assetDestinationOrder(destinations);
+    secondOrder = ai._assetDestinationOrder(destinations);
+    return 0;
+  };
+  try {
+    assert.strictEqual(ai.Choice(['install'], 'command'), 0);
+  } finally {
+    ai._choiceInner = oldChoiceInner;
+  }
+  assert.deepStrictEqual(secondOrder, firstOrder);
+  assert.strictEqual(rolls, 2);
+  assert.strictEqual(ai._decisionRandomState, null);
+});
+test('ranked asset installs preserve remote ranking and share one destination order', () => {
+  const strongest = {name: 'strongest', ice: [{}], root: []};
+  const second = {name: 'second', ice: [{}], root: []};
+  const third = {name: 'third', ice: [{}], root: []};
+  const destinations = [strongest, second, third];
+  const originalOrder = destinations.slice();
+  const firstAsset = {player: corp, cardType: 'asset'};
+  const secondAsset = {player: corp, cardType: 'asset'};
+  const cards = [firstAsset, secondAsset];
+  corp.HQ.cards = cards;
+  firstAsset.cardLocation = cards;
+  secondAsset.cardLocation = cards;
+  const replacements = {
+    _emptyProtectedRemotes: () => destinations,
+    _potentialAdvancement: () => 0,
+    _uniqueCopyAlreadyInstalled: () => false,
+    _sufficientEconomy: () => false,
+    _serverToProtect: () => null,
+    _shouldInstallIceLayer: () => false,
+    _scoringServers: () => [],
+    _isHVT: () => false,
+    _bestProtectedRemote: () => null,
+    _agendasInHand: () => 0,
+    _upgradeInstallPreferences: () => [],
+    _iceInstallOptions: () => [],
+    _copyOfCardExistsIn: () => null,
+    _advancementLimit: () => 0,
+    _deceptionInstallDistance: () => 0,
+  };
+  const originals = {};
+  Object.keys(replacements).forEach(name => {
+    originals[name] = ai[name];
+    ai[name] = replacements[name];
+  });
+  let rolls = 0;
+  ai._random = () => {rolls++; return 0;};
+  let options;
+  try {
+    options = ai._rankedInstallOptions(cards);
+  } finally {
+    Object.keys(originals).forEach(name => {ai[name] = originals[name];});
+  }
+  const firstOrder = options.filter(option => option.cardToInstall === firstAsset)
+    .map(option => option.serverToInstallTo);
+  const secondOrder = options.filter(option => option.cardToInstall === secondAsset)
+    .map(option => option.serverToInstallTo);
+  assert.deepStrictEqual(destinations, originalOrder);
+  assert.deepStrictEqual(secondOrder, firstOrder);
+  assert.strictEqual(firstOrder.length, 2);
+  assert.strictEqual(firstOrder[0], second);
+  assert.strictEqual(firstOrder[1], third);
+  assert.strictEqual(rolls, 2);
 });
 test('purge models cards trashed by purge even when they have no counters', () => {
   const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});
@@ -968,21 +1161,39 @@ test('purge models cards trashed by purge even when they have no counters', () =
     player: runner, host: wall, AIDisabledByPurge: true,
     AIBypassCost(target) { return target === wall ? 0 : Infinity; },
   };
-  runner.cards = [bypass]; runner.creditPool = 5;
+  runner.cards = [bypass]; bypass.cardLocation = runner.cards; runner.creditPool = 5;
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
-    RnD: {cards: [{}], ice: [wall], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [wall], root: []},
     archives: {cards: [], ice: [], root: []},
     remoteServers: [],
   });
   servers = [corp.HQ, corp.RnD, corp.archives];
   assert(ai._ordinaryPurgeOutcome().reason.includes('secures'));
-  assert.strictEqual(bypass.disabled, undefined);
+  assert.deepStrictEqual(runner.cards, [bypass]);
+  assert.strictEqual(bypass.notInstalled, undefined);
+});
+test('ordinary purge does not assume preventable purge-trash cards leave play', () => {
+  const wall = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Code Gate']});
+  const bypass = {
+    player: runner, host: wall, AIDisabledByPurge: true,
+    AIBypassCost(target) { return target === wall ? 0 : Infinity; },
+  };
+  const prevention = {player: runner, AIPreventsPurgeTrash: true};
+  runner.cards = [bypass, prevention]; bypass.cardLocation = runner.cards;
+  Object.assign(corp, {
+    HQ: {cards: [], ice: [], root: []},
+    RnD: {cards: [{player: corp, cardType: 'agenda', agendaPoints: 1}], ice: [wall], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+  assert.strictEqual(ai._ordinaryPurgeOutcome(), null);
+  assert.deepStrictEqual(runner.cards, [bypass, prevention]);
 });
 test('purge models Clot leaving play when that opens an immediate score', () => {
   const agenda = {player: corp, cardType: 'agenda'};
   const clot = card(31005); clot.agendasInstalledThisTurn = [agenda];
-  runner.cards = [clot];
+  runner.cards = [clot]; clot.cardLocation = runner.cards;
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
     RnD: {cards: [], ice: [], root: []},
@@ -991,18 +1202,19 @@ test('purge models Clot leaving play when that opens an immediate score', () => 
   });
   servers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers);
   const original = ai._fullyAdvanceableAgendaInstalled;
-  ai._fullyAdvanceableAgendaInstalled = () => clot.disabled === true;
+  ai._fullyAdvanceableAgendaInstalled = () => !runner.cards.includes(clot);
   try {
     assert.strictEqual(clot.AIDisabledByPurge, true);
     assert(ai._ordinaryPurgeOutcome().reason.includes('score'));
-    assert.strictEqual(clot.disabled, undefined);
+    assert.deepStrictEqual(runner.cards, [clot]);
+    assert.strictEqual(clot.notInstalled, undefined);
   } finally {
     ai._fullyAdvanceableAgendaInstalled = original;
   }
 });
-test('purge hypothetical restores counters and disabled state after an exception', () => {
+test('purge hypothetical restores counters, location and install state after an exception', () => {
   const virus = {player: runner, virus: 4, AIDisabledByPurge: true};
-  runner.cards = [virus];
+  runner.cards = [virus]; virus.cardLocation = runner.cards;
   Object.assign(corp, {
     HQ: {cards: [], ice: [], root: []},
     RnD: {cards: [{}], ice: [], root: []},
@@ -1012,13 +1224,14 @@ test('purge hypothetical restores counters and disabled state after an exception
   servers = [corp.HQ, corp.RnD, corp.archives];
   const original = ai._fullyAdvanceableAgendaInstalled;
   ai._fullyAdvanceableAgendaInstalled = () => {
-    if (virus.disabled) throw Error('hypothetical failure');
+    if (!runner.cards.includes(virus)) throw Error('hypothetical failure');
     return false;
   };
   try {
     assert.throws(() => ai._ordinaryPurgeOutcome(), /hypothetical failure/);
     assert.strictEqual(virus.virus, 4);
-    assert.strictEqual(virus.disabled, undefined);
+    assert.deepStrictEqual(runner.cards, [virus]);
+    assert.strictEqual(virus.notInstalled, undefined);
   } finally {
     ai._fullyAdvanceableAgendaInstalled = original;
   }
@@ -1039,6 +1252,55 @@ test('Snare access punishment is live only while its trigger is affordable', () 
   assert.strictEqual(snare.AIPunishesAccess(remote), 4);
   corp.creditPool = 3;
   assert.strictEqual(snare.AIPunishesAccess(remote), 0);
+});
+test('central-root rez costs are reserved once without card-title tables', () => {
+  const hokusai = card(31059); hokusai.rezzed = false;
+  const crisium = card(31079); crisium.rezzed = false;
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [hokusai]};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: [crisium]};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  servers = [hq, rnd, archives];
+  corp.creditPool = 4;
+  assert.strictEqual(ai._sufficientEconomy(), false);
+  corp.creditPool = 5;
+  assert.strictEqual(ai._sufficientEconomy(), true);
+
+  const remote = {serverName: 'Remote 0', ice: [], root: [crisium]};
+  Object.assign(corp, {remoteServers: [remote]});
+  rnd.root = [];
+  servers = [hq, rnd, archives, remote];
+  corp.creditPool = 5;
+  assert.strictEqual(ai._sufficientEconomy(), true);
+});
+test('AIReserveCredits drives economy and ICE-rez planning without a title check', () => {
+  const reserveCard = {
+    title: 'Future paid ambush', player: corp, cardType: 'asset', rezCost: 0,
+    rezzed: true,
+    AIReserveCredits(server) {return server && server.root.includes(this) ? 3 : 0;},
+  };
+  const outer = etr(); outer.rezzed = false; outer.rezCost = 2;
+  const remote = {serverName: 'Remote 0', ice: [], root: [reserveCard]};
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  const rnd = {serverName: 'R&D', cards: [], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: [remote]});
+  servers = [hq, rnd, archives, remote];
+
+  corp.creditPool = 2;
+  assert.strictEqual(ai._sufficientEconomy(), false);
+  corp.creditPool = 3;
+  assert.strictEqual(ai._sufficientEconomy(), true);
+  remote.ice.push(outer);
+  assert.strictEqual(ai._iceWorthRezzing(outer, 2, remote), false);
+});
+test('Snare reserves its actual access cost except from Archives', () => {
+  const snare = card(31054);
+  const rnd = {serverName: 'R&D', cards: [snare], ice: [], root: []};
+  const archives = {serverName: 'Archives', cards: [snare], ice: [], root: []};
+  Object.assign(corp, {RnD: rnd, archives});
+  assert.strictEqual(snare.AIReserveCredits(rnd), 4);
+  assert.strictEqual(snare.AIReserveCredits(archives), 0);
 });
 test('bait posture rolls once per installed trap and can stop extra protection', () => {
   const trap = card(30045);

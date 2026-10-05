@@ -3336,9 +3336,9 @@ cardSet[35038] = {
   },
   
   //**AI code
-  AIOverAdvance: function() {
-    //Worth over-advancing for the dividend counters
-    return 2; //up to 2 extra advancements
+  AIOverAdvance: true,
+  AIAdvancementLimit: function() {
+    return AdvancementRequirement(this) + 2;
   },
 };
 
@@ -3900,6 +3900,7 @@ cardSet[35072] = {
     if (currentPhase.identifier === "Runner 2.2") return true;
     return false;
   },
+  AIEconomyCard: true,
 };
 
 //Card 29: Otto Campaign
@@ -8812,9 +8813,9 @@ cardSet[35049] = {
   },
   
   //**AI code
-  AIOverAdvance: function() {
-    //Worth over-advancing for the dividend counters
-    return 2; //up to 2 extra advancements
+  AIOverAdvance: true,
+  AIAdvancementLimit: function() {
+    return AdvancementRequirement(this) + 2;
   },
 };
 
