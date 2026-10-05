@@ -1039,6 +1039,7 @@ cardSet[36012] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  runningWithThis: false,
   runWasSuccessful: false,
   modifyPlayCost: {
     Resolve: function (card) {
@@ -1048,12 +1049,13 @@ cardSet[36012] = {
     availableWhenInactive: true,
   },
   Resolve: function (params) {
+    this.runningWithThis = true;
     this.runWasSuccessful = false;
     MakeRun(corp.HQ);
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
-      if (server == corp.HQ) this.runWasSuccessful = true;
+    Resolve: function () {
+      if (this.runningWithThis) this.runWasSuccessful = true;
     },
     automatic: true,
   },
@@ -1065,6 +1067,7 @@ cardSet[36012] = {
   },
   responseOnRunEnds: {
     Resolve: function () {
+      this.runningWithThis = false;
       this.runWasSuccessful = false;
     },
     automatic: true,
@@ -3717,7 +3720,10 @@ cardSet[36043] = {
   Resolve: function () {
     var count = Math.min(5, corp.RnD.cards.length);
     var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count);
-    for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+    //Only the human Corp needs visible cards for these decisions. AI choices
+    //resolve later, so revealing now would expose R&D during the next render.
+    if (!corp.AI)
+      for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
     var choices = ChoicesArrayCards(cards);
     if (corp.AI) {
       var cardDef = this;

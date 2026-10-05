@@ -282,7 +282,13 @@ ICE elsewhere only when that server has higher stakes and a with/without
 comparison shows the saved rez changes it from breachable to secure. Higher
 server value alone is not enough, and same-server ICE ordering keeps its
 protection-value tie-break. Breach-loss risks below the 35% threshold leave
-ordinary advancement unchanged.
+ordinary advancement unchanged. ICE hosting a non-exempt Runner card keeps the
+legacy five-times-rez-cost veto by default and logs the hosted card and credit
+threshold when it declines. The default-off
+`evidenceBasedHostedCardRez` option instead lets an affordable approached ICE
+bypass that veto when `_iceWouldSecureServer()` shows that rezzing it changes
+the current server from breachable to secure; F4 gate evidence is required
+before that option can become the default.
 
 ## Emergency protection and purge
 

@@ -80,9 +80,13 @@ reproduction is confirmed later by `implement-ticket`.
   fixed, correct decision.
   This applies to bug tickets as much as backlog items — being a bug does not
   make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
-  with a single correct outcome` for the common case. When the fix genuinely
-  has no single correct answer, select either an F4 seeded-game gate or a
-  human-game gate and specify its sample size, metrics and numeric thresholds.
+  (principle 4): <the oracle>` for the common case. When the fix genuinely has
+  no single correct answer, select either an F4 seeded-game gate or a human-game
+  gate and specify its sample size, metrics and numeric thresholds.
+  A deterministic reproduction proves that the decision is repeatable, not
+  that it is strategically correct. Always use the exact, unnumbered headings
+  `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
+  them literally, and a missing gate section never means ungated.
 
 ## Ticket template
 
@@ -111,7 +115,7 @@ why it matters. Three to five sentences.>
 decisions that could shift.>
 
 ## Acceptance gate
-<N/A — deterministic fix with a single correct outcome, for the common case.
+<N/A — deterministic fix (principle 4): <the oracle>, for the common case.
 If the fix's goal is instead to play better with no single correct answer,
 select an F4 seeded-game gate or a human-game gate and state its sample size,
 metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
