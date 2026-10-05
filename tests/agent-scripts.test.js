@@ -89,6 +89,24 @@ const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund']
 assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
   fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
 
+for (const [before, after] of [
+  ["expect(choice).toBe('install');", "expect(choice).toBe('gain');"],
+  ["t.equal(choice, 'install');", "t.equal(choice, 'gain');"],
+  ["throws(action, /original/);", "throws(action, /changed/);"],
+  ["fail('original');", "fail('changed');"],
+  ["assert.throws(action, /original/);", "assert.throws(action, /changed/);"],
+]) {
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [before], [after]),
+    'ticket.js rejects changed expectations: ' + before);
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [before], []),
+    'ticket.js rejects removed expectations: ' + before);
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [], [after]),
+    'ticket.js rejects added expectations: ' + after);
+}
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['// assert original behaviour'], ['// assert current behaviour']),
+  'comment-only edits are not changed expectations');
+
 assert.strictEqual(pendingGate('# Ticket\n\n**Gate:** pending F4\n\n## Resolution\n\nNot decided.\n'), undefined,
   'roadmap blocker discovery ignores pending-gate examples outside Resolution');
 assert.strictEqual(pendingGate('# Ticket\n\n## Resolution\n\n**Gate:** pending F4\n'), 'F4',

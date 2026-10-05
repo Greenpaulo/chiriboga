@@ -87,6 +87,55 @@ function test(name, body) {
   tests++; if (verbose) console.log('PASS ' + name);
 }
 
+test('main-phase credit probe restores credits and hypothetical depth on return or throw', () => {
+  const original = {};
+  for (const name of ['_sufficientEconomy', '_criticalBreachDefenseAction',
+    '_emergencyProtectionRecoveryAction', '_bestMainPhaseEconomyOption',
+    '_rankedInstallOptions', '_clicksLeft']) original[name] = ai[name];
+  const oldPlayerHand = context.PlayerHand;
+  const oldCheckTags = context.CheckTags;
+  const oldDepth = ai._hypotheticalDepth;
+  context.PlayerHand = player => player.HQ.cards;
+  context.CheckTags = () => false;
+  ai._sufficientEconomy = () => true;
+  ai._criticalBreachDefenseAction = () => -1;
+  ai._emergencyProtectionRecoveryAction = () => -1;
+  ai._bestMainPhaseEconomyOption = choices => choices.indexOf('gain');
+  ai._clicksLeft = () => corp.clickTracker;
+  corp.HQ.cards = Array.from({length: 5}, () => ({}));
+  const probeError = new Error('ranked install probe failed');
+  try {
+    for (const startingDepth of [0, 2]) {
+      for (const shouldThrow of [false, true]) {
+        ai._hypotheticalDepth = startingDepth;
+        corp.creditPool = 20;
+        corp.clickTracker = 3;
+        let probes = 0;
+        ai._rankedInstallOptions = (cards, priorityOnly) => {
+          if (priorityOnly || ai._hypotheticalDepth === startingDepth) return [];
+          probes++;
+          assert.strictEqual(corp.creditPool, 22, 'probe sees hypothetical click credits');
+          assert.strictEqual(ai._hypotheticalDepth, startingDepth + 1);
+          // Restore the saved pool, even if a failed dependency changed clicks.
+          if (shouldThrow) { corp.clickTracker = 1; throw probeError; }
+          return [];
+        };
+        if (shouldThrow) assert.throws(() => ai.Phase_Main(['install', 'gain']),
+          error => error === probeError);
+        else assert.strictEqual(ai.Phase_Main(['install', 'gain']), 1);
+        assert.strictEqual(probes, 1, 'the actual main-phase hypothetical path ran');
+        assert.strictEqual(corp.creditPool, 20);
+        assert.strictEqual(ai._hypotheticalDepth, startingDepth);
+      }
+    }
+  } finally {
+    Object.assign(ai, original);
+    ai._hypotheticalDepth = oldDepth;
+    context.PlayerHand = oldPlayerHand;
+    context.CheckTags = oldCheckTags;
+  }
+});
+
 test('Corp classification never reads hidden grip properties or the Runner calculator', () => {
   runner.AI = {rc: context.runnerRC};
   runner.AI.rc.IceAI = () => {throw Error('Runner calculator used');};

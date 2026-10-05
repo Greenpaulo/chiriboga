@@ -305,10 +305,10 @@ when:
 - **Dependency:** F4 depends on Runner item D2 (injectable Runner
   randomness). `scripts/roadmap.js` and `tests/ai-roadmaps.test.js` resolve
   dependencies across both roadmaps, so this Corp-to-Runner dependency is
-  valid. D2's seam is implemented and awaiting independent review; no baseline
-  is committed and no gate is judged until D2 is done. The harness must keep a
-  regression check that Runner policy draws use the dedicated stream rather
-  than silently falling back to the engine stream.
+  valid. D2 is done, with its ticket in `documentation/backlog/done/`. F4's
+  committed baseline and complete gate workflow are still outstanding. The
+  harness must keep a regression check that Runner policy draws use the
+  dedicated stream rather than silently falling back to the engine stream.
 
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test.
