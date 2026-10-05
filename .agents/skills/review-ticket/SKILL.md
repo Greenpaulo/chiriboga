@@ -80,7 +80,10 @@ Any FAIL is a Blocking finding. Do not repeat these checks by hand.
   `--start` in its gate command exists and is tested, and the Resolution
   records a `--quick` run reporting at least one game changed by the options.
   A missing piece, or gate output reporting 0 changed games or
-  `FAIL changed option effect`, is Blocking.
+  `FAIL changed option effect`, is Blocking. Each start board's `NOTE` names
+  the real log it came from or explains why an adapted or invented board is
+  realistic; a board with neither is Should fix, and one that is unrealistic
+  in a way that favours the option is Blocking.
 
 ## 4. Record the verdict
 

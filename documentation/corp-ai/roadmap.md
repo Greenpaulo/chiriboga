@@ -156,6 +156,12 @@ Shared infrastructure used by every area.
 - **Spec:** [F8-balanced-deck-pool-screening.md](specs/F8-balanced-deck-pool-screening.md)
 - **Goal:** Choose the F4 deck pool by screening candidate pairs for Corp win rates near even, with a stated selection rule and re-screening policy.
 
+### F9 AI work budget and fair timing
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
+- **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
+
 ### F10 Real-board start library for gates
 - **Status:** in-progress
 - **Depends on:** F4

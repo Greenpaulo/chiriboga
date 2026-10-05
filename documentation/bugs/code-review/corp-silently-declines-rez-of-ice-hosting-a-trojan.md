@@ -6,6 +6,18 @@
 
 Implemented from `64bcf17`.
 
+**PR review validation, 2026-10-05 (Node v23.4.0).** In the isolated
+worktree, `node tests/run-all-tests.js` passed all 44 test files, including
+`corp-decision-fixtures.test.js` and `decision-snapshots.test.js`. The first
+run failed only `flipped-identity.test.js` (missing `images/35023-0.jpg`)
+and `vantagepoint-integration.test.js` (missing `images/36001.jpg`). These
+files are excluded by the existing `images/` rule in `.gitignore`, so a fresh
+worktree lacks them. Neither failing test nor its game code was changed by
+this remediation. Copying the existing reverse-side image and 66 Vantage
+Point images from the main checkout made both focused tests and the full
+suite pass; no expectation was changed and no art was committed.
+
+
 - Added the first Corp AI options object and the default-off
   `evidenceBasedHostedCardRez` option. With it off, the existing five-times-cost
   rez policy is unchanged. With it on, a non-exempt hosted card no longer vetoes
@@ -605,8 +617,10 @@ thresholds, with these changes:
       `evidenceBasedHostedCardRez` switched on by default.
 - [x] The F4 collector `hostedThreatRezCredits` is added through the harness's
       collector extension point before the gate is run.
-- [x] Chromatophores and Tranquilizer start boards are committed, with the
-      option able to change the Corp's rez decision on each, and are tested.
+- [x] The Chromatophores start board is committed and tested to reach the
+      hosted-card veto. The Tranquilizer board was dropped because moving a
+      hosted card is not an allowed builder edit; see the
+      [F10 Resolution](../../backlog/code-review/F10-real-board-start-library.md#resolution).
 - [x] The gate is ready to run: every collector and start board it names
       exists and is tested, and a `--quick` run of each gate command
       completes and reports at least one game changed by the options.

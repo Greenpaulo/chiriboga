@@ -50,6 +50,22 @@ const LOG = [
   fs.writeFileSync(path.join(root, log), LOG);
   const tagsOf = text => text.match(/^\/\/ TAGS: (.*)$/m)[1].split(', ').filter(Boolean);
   try {
+    await scenario('CLI value options reject missing and flag-shaped operands', () => {
+      for (const option of ['--snapshot', '--out', '--replace', '--unsteal', '--unscore', '--setup', '--note', '--reason']) {
+        const prefix = option === '--reason' ? ['--replace', '35042=30072'] : [];
+        for (const suffix of [[], ['--dump']]) {
+          assert.throws(() => sb.parseCli([...prefix, option, ...suffix]),
+            new RegExp(option + ' needs an operand'));
+        }
+      }
+      const parsed = sb.parseCli(['log.txt', '--snapshot', '1', '--out', 'board',
+        '--replace', '35042=30072', '--reason', 'compatible ICE', '--note', 'source board']);
+      assert.strictEqual(parsed.snapshot, '1');
+      assert.strictEqual(parsed.out, 'board');
+      assert.strictEqual(parsed.edits[0].reason, 'compatible ICE');
+      assert.strictEqual(parsed.edits[1].value, 'source board');
+    });
+
     await scenario('1. snapshot and dump sources build boards that load; card lists match the source', async () => {
       const snap = await sb.build({log, source: {snapshot: '1'}, edits: []});
       assert.ok(snap.includes('// SOURCE: ' + log + ' snapshot 1'));

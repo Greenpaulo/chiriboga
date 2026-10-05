@@ -14,6 +14,18 @@ This ticket cannot proceed until that item is `done`. This section is generated 
 
 Implemented from `358572a` (branch `roadmap/F10-real-board-start-library`).
 
+**PR review validation, 2026-10-05 (Node v23.4.0).** In the isolated
+worktree, `node tests/run-all-tests.js` passed all 44 test files, including
+`corp-decision-fixtures.test.js` and `decision-snapshots.test.js`. The first
+run failed only `flipped-identity.test.js` (missing `images/35023-0.jpg`)
+and `vantagepoint-integration.test.js` (missing `images/36001.jpg`). These
+files are excluded by the existing `images/` rule in `.gitignore`, so a fresh
+worktree lacks them. Neither failing test nor its game code was changed by
+this remediation. Copying the existing reverse-side image and 66 Vantage
+Point images from the main checkout made both focused tests and the full
+suite pass; no expectation was changed and no art was committed.
+
+
 - `scripts/start-board.js` builds a board from `--snapshot <n>` or `--dump`
   with only the allowed edits. It records each edit as a `NOTE` ending in
   its flag, and writes `TAGS` computed by loading the board headlessly.

@@ -84,6 +84,58 @@ const EXTRA_DRAW = side => `
 `;
 
 (async () => {
+  await scenario('CLI value options require operands, including both comparison reports', () => {
+    for (const option of ['--budget', '--pool', '--games', '--seeds', '--pairs', '--jobs', '--timeout', '--out',
+      '--side', '--start', '--start-tag', '--corp-option', '--runner-option', '--collector', '--guard',
+      '--improve', '--better', '--max', '--compare']) {
+      for (const suffix of [[], ['--quick']]) {
+        assert.throws(() => batch.parseArgs([option, ...suffix]), new RegExp(option + ' needs an operand'));
+      }
+    }
+    for (const suffix of [[], ['--quick']]) {
+      assert.throws(() => batch.parseArgs(['--compare', 'baseline.json', ...suffix]), /--compare needs an operand/);
+    }
+    const parsed = batch.parseArgs(['--compare', 'baseline.json', 'candidate.json', '--budget', '1400',
+      '--start-tag', 'hosted-card-on-ice', '--start-tag', 'unrezzed-ice']);
+    assert.deepStrictEqual(parsed.compare, ['baseline.json', 'candidate.json']);
+    assert.strictEqual(parsed.budget, '1400');
+    assert.deepStrictEqual(parsed.startTag, ['hosted-card-on-ice', 'unrezzed-ice']);
+    const invalid = cli(['--budget']);
+    assert.strictEqual(invalid.status, 2, invalid.out);
+    assert.match(invalid.out, /--budget needs an operand/);
+  });
+
+  await scenario('replay diff distinguishes equal, changed and failed comparisons and cleans up', () => {
+    const childProcess = require('child_process');
+    const original = childProcess.spawnSync;
+    let dir;
+    try {
+      for (const result of [
+        {status: 0, stdout: ''}, {status: 1, stdout: '-baseline\n+candidate\n'},
+        {status: null, error: new Error('spawn diff ENOENT')},
+        {status: 2, stderr: 'cannot read file'}, {status: null, signal: 'SIGTERM'},
+      ]) {
+        childProcess.spawnSync = (command, args, options) => {
+          assert.strictEqual(command, 'diff');
+          assert.deepStrictEqual(args, ['-U2', 'baseline.log', 'candidate.log']);
+          dir = options.cwd;
+          assert.strictEqual(fs.readFileSync(path.join(dir, 'baseline.log'), 'utf8'), 'baseline\n');
+          assert.strictEqual(fs.readFileSync(path.join(dir, 'candidate.log'), 'utf8'), 'candidate\n');
+          return result;
+        };
+        if (result.status === 0 || result.status === 1) {
+          assert.strictEqual(batch.diffLogs(['baseline'], ['candidate']),
+            result.status === 0 ? 'Logs are identical.' : result.stdout);
+        } else {
+          assert.throws(() => batch.diffLogs(['baseline'], ['candidate']), /diff failed: (spawn diff ENOENT|cannot read file|signal SIGTERM)/);
+        }
+        assert.ok(!fs.existsSync(dir), 'temporary logs are removed even on failure');
+      }
+    } finally {
+      childProcess.spawnSync = original;
+    }
+  });
+
   await scenario('1. identical runs give identical reports (ignoring timing)', async () => {
     const outs = [1, 2].map(i => path.join(tmp, `repro-${i}.json`));
     for (const out of outs) {

@@ -52,10 +52,16 @@ function parseArgs(argv) {
     '--collector': 'collector', '--guard': 'guard', '--improve': 'improve', '--better': 'better', '--max': 'max'};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === '--compare') { out.compare = [argv[++i], argv[++i]]; }
+    const take = option => {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith('-')) throw new Error(option + ' needs an operand');
+      i++;
+      return value;
+    };
+    if (arg === '--compare') { out.compare = [take(arg), take(arg)]; }
     else if (arg === '--quick' || arg === '--worker' || arg === '--all' || arg === '--diff') out[arg.slice(2)] = true;
-    else if (repeatable[arg]) out[repeatable[arg]].push(argv[++i]);
-    else if (arg.startsWith('--')) out[arg.slice(2)] = argv[++i];
+    else if (repeatable[arg]) out[repeatable[arg]].push(take(arg));
+    else if (arg.startsWith('--')) out[arg.slice(2)] = take(arg);
     else out._.push(arg);
   }
   return out;
@@ -450,12 +456,21 @@ async function replay(args) {
   const baseline = await replayGame(config, {corp: {}, runner: {}});
   console.log(describe('baseline (options off)', baseline));
   console.log(describe('candidate', candidate));
+  console.log(diffLogs(baseline.log, candidate.log));
+}
+
+// Compare replay logs; only diff's normal exit codes produce a verdict.
+function diffLogs(baseline, candidate) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-replay-'));
   try {
-    fs.writeFileSync(path.join(dir, 'baseline.log'), baseline.log.join('\n') + '\n');
-    fs.writeFileSync(path.join(dir, 'candidate.log'), candidate.log.join('\n') + '\n');
+    fs.writeFileSync(path.join(dir, 'baseline.log'), baseline.join('\n') + '\n');
+    fs.writeFileSync(path.join(dir, 'candidate.log'), candidate.join('\n') + '\n');
     const result = require('child_process').spawnSync('diff', ['-U2', 'baseline.log', 'candidate.log'], {cwd: dir, encoding: 'utf8'});
-    console.log(result.stdout || 'Logs are identical.');
+    if (result.error || (result.status !== 0 && result.status !== 1)) {
+      throw new Error('diff failed: ' + (result.error ? result.error.message :
+        result.stderr || (result.signal ? 'signal ' + result.signal : 'exit status ' + result.status)));
+    }
+    return result.status === 0 ? 'Logs are identical.' : result.stdout;
   } finally {
     fs.rmSync(dir, {recursive: true, force: true});
   }
@@ -505,5 +520,5 @@ async function main() {
   process.exitCode = report.failures.length ? 1 : 0;
 }
 
-module.exports = {parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
+module.exports = {diffLogs, parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 2; });

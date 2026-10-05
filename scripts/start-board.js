@@ -225,13 +225,19 @@ function parseCli(argv) {
   const out = {edits: []};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
+    const take = option => {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith('-')) throw new Error(option + ' needs an operand');
+      i++;
+      return value;
+    };
     if (arg === '--list' || arg === '--dump' || arg === '--force') out[arg.slice(2)] = true;
-    else if (arg === '--snapshot' || arg === '--out') out[arg.slice(2)] = argv[++i];
+    else if (arg === '--snapshot' || arg === '--out') out[arg.slice(2)] = take(arg);
     else if (arg === '--reason') {
       const last = out.edits[out.edits.length - 1];
       if (!last || last.flag !== '--replace') throw new Error('--reason must follow a --replace');
-      last.reason = argv[++i];
-    } else if (['--replace', '--unsteal', '--unscore', '--setup', '--note'].includes(arg)) out.edits.push({flag: arg, value: argv[++i]});
+      last.reason = take(arg);
+    } else if (['--replace', '--unsteal', '--unscore', '--setup', '--note'].includes(arg)) out.edits.push({flag: arg, value: take(arg)});
     else if (arg.startsWith('--')) throw new Error('Unknown option ' + arg);
     else out.log = arg;
   }
