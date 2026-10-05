@@ -4,6 +4,12 @@
 
 Implemented from `f795a63`.
 
+**Separate investigation.** The `documentation/corp-ai-regression/` tree was
+added in `7b28f2a` after the harness was used. It preserves historical benchmark
+findings, runbooks and evidence; it is tracked in
+[corp_ai_regression_investigation.md](corp_ai_regression_investigation.md),
+not claimed as F4 implementation or a production AI fix.
+
 **What was built.**
 - `scripts/ai-batch/headless.js` is the shared headless game module,
   extracted from `scripts/ai-game.js`; `ai-game.js` now uses it with its old

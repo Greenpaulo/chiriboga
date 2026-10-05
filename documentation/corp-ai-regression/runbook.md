@@ -250,9 +250,11 @@ data, not shown directly.
 - Annotated tags with prefix `corp-ai-` on H0, H1, H2, H3, tip, #4, #8, #12, #16,
   #20, #21, #24, #25, `fa1182c` and `edc177a`.
 - Repository copies now live in `documentation/corp-ai-regression/assets/`.
-  They are uncommitted at this audit; commit them and the investigation docs
-  before relying on a merge to preserve them. Raw JSON/logs remain disk-only.
-  Consult the inventory for local-only arm branches and tag-push guidance.
+  Documents, scripts and overlays were committed in `7b28f2a`; the
+  [evidence archive](assets/evidence.tar.gz) also preserves the 142 original
+  JSON/log artifacts. Keep separate backups for additional disk-only reports,
+  logs and temporary artifacts. Consult the inventory for archive verification,
+  local-only arm branches and tag-push guidance.
 
 ## Caveats
 

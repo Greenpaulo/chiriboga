@@ -17,12 +17,12 @@ Read `documentation/ai-batch-harness.md` first, and `documentation/legacy-ai-sta
 
 ## Known facts (verified against the repo)
 
-- `HARNESS_BRANCH` = `roadmap/corp_ai_finding_12_seeded_batch_harness` (tip `b52d451`). It contains the harness and is the chassis for BOTH arms, so the engine, Runner AI and harness are identical and only `ai_corp.js` differs. Do NOT use the top of the stack for now. The "current" Corp AI is whatever `ai_corp.js` is on this branch.
+- `HARNESS_BRANCH` = `roadmap/corp_ai_finding_12_seeded_batch_harness` (tip `b52d451`). It contains the harness and is the chassis for BOTH arms, so the engine, Runner AI and harness are identical and only `ai_corp.js` differs. Do NOT use the top of the stack for now. The "current" arm is pinned to `b52d451:ai_corp.js`, even if the branch advances.
 - The harness loads `decks.js`, `runcalculator.js`, `ai_corp.js`, `ai_runner.js` from the repo root (`AI_FILES` in `scripts/ai-batch/headless.js`). Swapping the Corp AI means overwriting root `ai_corp.js`.
 - Current `ai_corp.js` is about 7,000 lines. The historical control is
   `625b008:ai_corp.js`. The owner's gitignored `ai_corp_original.js` differs and
   was not used; it is not needed in a fresh worktree.
-- The first-commit version of `ai_corp.js` is `625b008` ("initial commit", H0, 3,410 lines, CRLF line endings). It is byte-identical to `ai_corp.js` on the default branch of upstream `github.com/drbo6/chiriboga` (checked; upstream last commit 2026-04-08). So H0's file IS the original upstream Corp AI, and the owner's `ai_corp_original.js` should match it (step 1).
+- The first-commit version of `ai_corp.js` is `625b008` ("initial commit", H0, 3,410 lines, CRLF line endings). It is byte-identical to `ai_corp.js` on the default branch of upstream `github.com/drbo6/chiriboga` (checked; upstream last commit 2026-04-08). H0 is the original upstream Corp AI. The owner's `ai_corp_original.js` differs and is not used as the control.
 - `--compare` requires only `poolHash`, `seeds`, `starts` and `collectors` to match. Differing code, `codeHash` and AI options are allowed, so `--compare` works directly.
 
 ### Deck pairs
@@ -39,11 +39,11 @@ Only decks that existed upstream, so the original is never asked about mechanics
 
 `pe-steve` note: H0 has this Corp deck under the misnamed file `Duel PD vs Steve.js`. Its decklist is identical to today's `Duel PE vs Steve.js` (only the `name:` line differs; verified), so it is included. Excluded: `zwicky-magdalene` and `leo-topan` (none of their decks are in H0). Optional extra pair `my-first` (`My First Corp.js` / `My First Runner.js`, in H0 unchanged) only if the owner approves. Sets: keep `["systemgateway", "systemupdate2021", "elevation"]` unless `node tests/ai-batch.test.js` complains.
 
-## Inputs to confirm with the owner (ask, do not guess)
+## Recorded owner choices
 
 1. `HARNESS_BRANCH` as the chassis for both arms (see above). Only ask the owner if that branch is missing locally and on `origin`.
-2. Whether the current Corp AI runs with its default options (currently `evidenceBasedHostedCardRez: false`) or with any gated option switched on.
-3. Only if `ai_corp_original.js` differs from H0 (step 1): which to use. Default to H0, since it matches upstream.
+2. The fixed current arm is `b52d451` with default options (`evidenceBasedHostedCardRez: false`).
+3. Use H0 `625b008:ai_corp.js`; the differently sized owner file is excluded.
 
 ## Rules
 
@@ -60,19 +60,17 @@ Only decks that existed upstream, so the original is never asked about mechanics
 
 ## Steps
 
-**1. Back up and verify the original.**
+**1. Extract the pinned H0 control.**
 
 ```sh
 mkdir -p ~/bench
-cp <owner-clone>/ai_corp_original.js ~/bench/ai_corp_original.js   # never edit this copy
 git show 625b008:ai_corp.js > ~/bench/ai_corp_H0.js
-wc -l ~/bench/ai_corp_original.js ~/bench/ai_corp_H0.js
-diff -q ~/bench/ai_corp_original.js ~/bench/ai_corp_H0.js
+wc -l ~/bench/ai_corp_H0.js
 ```
 
-The original comparison found that they differ. The owner selected H0 after
-upstream identity verification; use `git show 625b008:ai_corp.js`. The optional
-owner-copy backup above records provenance and is not a dependency for a rerun.
+The original comparison found that H0 and the owner file differ. The owner selected H0 after
+upstream identity verification; use `git show 625b008:ai_corp.js`. An optional
+backup of the owner file records provenance only and is not a rerun dependency.
 
 **2. Freeze the experiment, then create the shared pool.** Write `~/bench/benchmark-plan.md` containing: both SHAs, pool path, seeds (1-200 per pair), the metrics and tolerances below, and the exact commands. Get owner approval before the first run if the owner has not already approved the defaults below.
 
@@ -94,10 +92,10 @@ Create `~/bench/beginner-pool.json` outside both worktrees, in the format of `te
 **3. Create worktrees.**
 
 ```sh
-git worktree add ../bench-current -b bench-current roadmap/corp_ai_finding_12_seeded_batch_harness
-git worktree add ../bench-orig -b bench-orig roadmap/corp_ai_finding_12_seeded_batch_harness
+git worktree add ../bench-current -b bench-current b52d451
+git worktree add ../bench-orig -b bench-orig b52d451
 cd ../bench-orig
-cp ~/bench/ai_corp_original.js ai_corp.js     # (or ai_corp_H0.js, per step 1)
+git show 625b008:ai_corp.js > ai_corp.js
 ```
 
 **4. Add the minimal harness shim to the original `ai_corp.js`.** Preserve CRLF line endings. The harness needs exactly:

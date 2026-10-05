@@ -28,16 +28,19 @@ snapshots, not permission to restart a completed queue.
 
 ## What is preserved, and what still needs backup
 
-| Item | Location | Git status at audit |
+Documents, scripts, overlays and frozen inputs were preserved in `7b28f2a`.
+The status table below reflects the current preservation state.
+
+| Item | Location | Preservation status |
 |---|---|---|
 | Harness and comparison library | `scripts/ai-batch.js`, `scripts/ai-game.js`, `scripts/ai-batch/` | Already committed at b52d451 |
 | Current infrastructure docs | `documentation/ai-batch-harness.md`, `documentation/legacy-ai-stack-validation.md` | Already committed |
-| Investigation/benchmark docs | `documentation/corp-ai-regression/` | Untracked/uncommitted at audit |
-| Historical harness shim helper | Original `~/bench/make-arm.sh`; copy here | Copy prepared in repo, not yet committed |
-| Accepted F3/F6 overlays | Both `f3-f6-ai_corp-overlay*.patch` here and in `~/bench` | Copies prepared, not yet committed; overlay changes also committed on arm branches |
-| Queue scripts | Five `run-queue*.sh` copies here and in `~/bench` | Copies prepared, not yet committed |
-| Frozen pool/plans, report narrative, saved state | JSON/Markdown files here and in `~/bench` | Copies prepared, not yet committed |
-| Raw batch JSON, batch/comparison logs | Original `~/bench/`; verified local copy in repository `bench/` | Disk only; `/bench/` is gitignored; checksum/metadata manifest here |
+| Investigation/benchmark docs | `documentation/corp-ai-regression/` | Committed in 7b28f2a |
+| Historical harness shim helper | Original `~/bench/make-arm.sh`; copy here | Committed in 7b28f2a |
+| Accepted F3/F6 overlays | Both `f3-f6-ai_corp-overlay*.patch` here and in `~/bench` | Committed in 7b28f2a; overlay changes also committed on arm branches |
+| Queue scripts | Five `run-queue*.sh` copies here and in `~/bench` | Committed in 7b28f2a |
+| Frozen pool/plans, report narrative, saved state | JSON/Markdown files here and in `~/bench` | Committed in 7b28f2a |
+| Raw batch JSON, batch/comparison logs | Original `~/bench/`; verified local copy in repository `bench/` | 142 original JSON/log files archived here; `/bench/` remains gitignored |
 | Smoke/hash acceptance artifacts | `/tmp/chiriboga-*` | Temporary disk only; may already be absent |
 | First-divergence helper/agenda collector | Proposed in v1 | Not implemented or run in this investigation |
 | Annotated `corp-ai-*` tags | Local Git refs | Created locally; not pushed |
@@ -60,11 +63,45 @@ then reverified unchanged; six working shell scripts received path-only edits
 and passed `bash -n`. All 19 queued worktree HEADs were checked read-only.
 The copied state file subsequently records this preservation step. Original
 `~/bench/` remains untouched. The ignored copy is not a Git backup and will not
-arrive in a fresh clone; retain the original and make a separate backup.
+arrive in a fresh clone. The evidence archive below preserves the original
+142 JSON/log files; additional working-copy artifacts still need separate backup.
 [artifact-manifest.json](artifact-manifest.json) records checksums, full source
 SHAs and report metadata for 110 JSON/log artifacts present at this audit.
 It detects changed/lost evidence but cannot reconstruct a missing report.
-Tags preserve code, not reports, filesystem worktrees or these uncommitted docs.
+Tags preserve code, not filesystem worktrees or additional disk-only evidence.
+The committed documentation and evidence archive are preserved by Git history.
+
+## Archived evidence
+
+[evidence.tar.gz](evidence.tar.gz) contains all 142 JSON/log artifacts from the
+original `~/bench/` (28,970,468 uncompressed bytes), including every report and
+comparison log cited in the findings. Files retain their original bytes and
+names. [evidence-manifest.json](evidence-manifest.json) records each size and
+SHA-256 checksum; the original 110-file `artifact-manifest.json` remains a
+historical metadata snapshot. Archive contents were verified against both
+manifests. No batch was run to create this archive.
+
+From the repository root, extract into a new directory and verify:
+
+```sh
+mkdir -p /tmp/chiriboga-pr13-evidence
+tar -xzf documentation/corp-ai-regression/assets/evidence.tar.gz -C /tmp/chiriboga-pr13-evidence
+python3 - <<'PYVERIFY'
+import hashlib, json
+from pathlib import Path
+manifest = json.loads(Path('documentation/corp-ai-regression/assets/evidence-manifest.json').read_text())
+root = Path('/tmp/chiriboga-pr13-evidence')
+for entry in manifest['entries']:
+    data = (root / entry['name']).read_bytes()
+    assert len(data) == entry['bytes'], entry['name']
+    assert hashlib.sha256(data).hexdigest() == entry['sha256'], entry['name']
+print(f"Verified {len(manifest['entries'])} evidence files")
+PYVERIFY
+```
+
+These are existing experiment results, not authorization to execute archived
+queues. Later artifacts outside this archive and temporary smoke evidence still
+need independent preservation.
 
 ## Commit/tag manifest and reachability
 
