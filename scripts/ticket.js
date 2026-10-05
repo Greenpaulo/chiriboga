@@ -221,12 +221,15 @@ function greenPathFor(pending) {
   return null;
 }
 
+function isReproductionExpectation(file, line) {
+  if (file.endsWith('.txt')) return /^\/\/\s*(EXPECT|OPTIONS)/.test(line);
+  if (/^\s*\/\//.test(line)) return false;
+  return /\b(?:assert|expect|throws|doesNotThrow|rejects|doesNotReject|equal|notEqual|deepEqual|notDeepEqual|strictEqual|notStrictEqual|deepStrictEqual|notDeepStrictEqual|ok|fail)\s*[.(]/.test(line);
+}
+
 function reproductionExpectationsMatch(file, before, after) {
-  const isExpectation = line => file.endsWith('.txt')
-    ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line)
-    : /assert/.test(line);
-  const beforeExpectations = before.filter(isExpectation);
-  const afterExpectations = after.filter(isExpectation);
+  const beforeExpectations = before.filter(line => isReproductionExpectation(file, line));
+  const afterExpectations = after.filter(line => isReproductionExpectation(file, line));
   return beforeExpectations.length === afterExpectations.length &&
     beforeExpectations.every((line, index) => line === afterExpectations[index]);
 }
@@ -271,8 +274,8 @@ function check(ticket) {
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
         const removed = before.filter(line => !after.includes(line));
         const addedLines = after.filter(line => !before.includes(line));
-        const isExpectation = line => green.endsWith('.txt') ? /^\/\/\s*(EXPECT|OPTIONS)/.test(line) : /assert/.test(line);
-        const changedExpectations = removed.concat(addedLines).filter(isExpectation);
+        const changedExpectations = removed.concat(addedLines)
+          .filter(line => isReproductionExpectation(green, line));
         if (changedExpectations.length || !reproductionExpectationsMatch(green, before, after)) {
           const detail = changedExpectations.length
             ? ':\n      ' + changedExpectations.map(l => l.trim()).join('\n      ')

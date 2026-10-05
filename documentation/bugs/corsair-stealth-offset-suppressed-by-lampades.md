@@ -12,8 +12,10 @@ counting the same credits twice. Lampades carries the same marker without
 providing an offset, so when Lampades was installed before Corsair, neither card
 reports the credits. The Corp then underestimates the Runner's credits when
 judging server security, and the Runner AI underestimates its own. Today the
-only affected source is Cloak, and Vantage Point is still hidden, so there is no
-live-game impact yet.
+only affected source is Cloak from Creation and Control, which is marked
+`not-implemented` and hidden in the normal set selection. This limits the
+current impact to games that explicitly load that set; it does not remove the
+credit-planning defect.
 
 ## Evidence
 

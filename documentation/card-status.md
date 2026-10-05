@@ -19,7 +19,7 @@ which is why playability is a decision recorded in card-sets.md.
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | true / true | no |
 | `elevation` | playable | 82 | 76 | 6 | 0 | false / false | yes |
-| `vantagepoint` | playable | 66 | 66 | 0 | 16 | false / false | no |
+| `vantagepoint` | in-progress | 66 | 66 | 0 | 16 | true / true | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | true / true | no |
@@ -31,10 +31,17 @@ config.js must follow card-sets.md; `tests/card-status.test.js` fails on any of 
 
 None.
 
+## Playability disagreements
+
+Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.
+
+Only the six explicitly recorded missing Elevation definitions are exempt.
+
+None.
+
 ## Incomplete playable sets
 
 - `elevation`: 6 missing and 0 unfinished cards (listed below).
-- `vantagepoint`: 0 missing and 16 unfinished cards (listed below).
 
 ## Missing and unfinished cards in playable and in-progress sets
 
@@ -86,8 +93,7 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
 | `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
-| `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
-| **Total** | 115 | 55 | 25 | 35 | 7 |
+| **Total** | 92 | 35 | 25 | 32 | 6 |
 
 **Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
 
@@ -97,7 +103,6 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30033 Smartware Distributor
 - 30034 Verbal Plasticity
 - 31038 Prepaid VoicePAD
-- 36011 Sell Out
 
 **Intent hook and `AIWorthKeeping` (candidates for W5: the hand-written check may duplicate a shared need):**
 
@@ -113,11 +118,6 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 35011 Rent Rioters
 - 35022 Open Market
 - 35034 Side Hustle
-- 36003 The Tungsten Tailor
-- 36007 Nurse Hạnh
-- 36016 Underdome Irregulars
-- 36020 Methuselah
-- 36021 Touchstone
 
 **Neither hook nor subtype fallback (discarded first):**
 
@@ -153,6 +153,3 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 35017 Transfer of Wealth
 - 35025 Illumination
 - 35029 Azimat
-- 36005 Lampades
-- 36011 Sell Out
-- 36012 Tailgate
