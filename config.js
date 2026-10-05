@@ -161,8 +161,8 @@ var setRegistry = {
       file: "vantagepoint",
       code: "vp",
       name: "Vantage Point",
-      hidden: false,
-      untested: false,
+      hidden: true,
+      untested: true,
       idRange: [36000, 36999],
     },
     uprising: {
@@ -225,7 +225,7 @@ var setRegistry = {
     "systemupdate2021",
     "elevation",
     // Playable sets are decided in documentation/card-sets.md. Vantage Point is
-    // playable but not a default until its last batches are complete.
+    // in progress, hidden and untested until its last batches are complete.
     // 'uprising',
     // 'midnightsun',
     // 'parhelion',

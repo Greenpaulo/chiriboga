@@ -6404,12 +6404,17 @@ class CorpAI {
         var rankedInstallOptions = this._rankedInstallOptions(corp.HQ.cards);
         //check if options would be expanded by slightly more credits
         if (optionList.indexOf("gain") > -1) {
+          var originalCreditPool = corp.creditPool;
           corp.creditPool += this._clicksLeft() - 1; //temporary (hypothetical)
           this._hypotheticalDepth++;
-          var optionsExpanded =
-            rankedInstallOptions < this._rankedInstallOptions(corp.HQ.cards);
-          this._hypotheticalDepth--;
-          corp.creditPool -= this._clicksLeft() - 1; //roll back the change
+          var optionsExpanded;
+          try {
+            optionsExpanded =
+              rankedInstallOptions < this._rankedInstallOptions(corp.HQ.cards);
+          } finally {
+            this._hypotheticalDepth--;
+            corp.creditPool = originalCreditPool;
+          }
           if (optionsExpanded) {
             this._log("Just need a tiny bit more cash");
             return optionList.indexOf("gain");

@@ -190,20 +190,19 @@ boundaries stay unmerged until F4 can compare the behavior-bearing historical
 layers; the project owner runs the long commands and an agent prepares and
 checks the reports. That audit does not replace I0 or any option's normal gate.
 
-As of 2026-09-25:
+As of 2026-10-05:
 
-- **No gate can be run yet.** F4 is `ready` but not built, and it depends on
-  **D2** (seedable randomness for the Runner AI), which is `in-progress`.
-- **D2 remediation is owned by the existing approved PR #1.** On this branch
-  its ticket remains in `documentation/backlog/remediation/` and the roadmap
-  remains `in-progress` until that dedicated change lands. Do not promote the
-  ticket independently here; `node scripts/roadmap.js raise` applies only to
-  proposed items and is not the next action for D2.
-- **F4 is real work, and its first step decides feasibility.** It must first
-  prove that one full game can run to a winner headlessly (the engine's main
-  loop uses browser timers and page elements, which have to be stubbed). If
-  that fails, the ticket falls back to a real browser under Playwright, which
-  works but is much slower.
+- **No gate can be run yet.** F4 is `ready`, but its complete batch harness,
+  committed baselines and acceptance-gate workflow are not built. Step 1's
+  headless single-game runner is implemented.
+- **D2 is done.** The injectable Runner policy stream and its regression
+  tests are recorded in
+  [D2's completed ticket](backlog/done/D2-injectable-runner-randomness.md).
+  F4 remains the prerequisite for judging the pending gates.
+- **F4 still needs the batch and gate workflow.** Step 1 has
+  proved that a full game can run to a winner headlessly using browser stubs.
+  The remaining harness must add the committed deck pool, metrics, collectors,
+  paired comparison and baseline workflow.
 - **Until F4 exists**, gated items can be built and merged with their options
   off. `roadmap.js gates` keeps the list, so nothing is forgotten.
 

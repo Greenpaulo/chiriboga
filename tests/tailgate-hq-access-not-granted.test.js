@@ -2,22 +2,11 @@
 //
 // Reproduces documentation/debug-logs/bug_raised/tailgate_access_2_additional_hq_cards_didnt_fire.txt
 //
-// Tailgate's responseOnRunSuccessful.Resolve (sets/vantagepoint.js:1054-1059)
-// expects a `server` argument so it can check `server == corp.HQ` before
-// setting this.runWasSuccessful. But the real engine dispatches automatic
-// "responseOnRunSuccessful" triggers via AddTriggersToTriggerList's
-// automatic branch (phase.js:332):
-//
-//   initialList[i].card[triggerName].Resolve.call(initialList[i].card);
-//
-// — called with NO arguments. So in real play `server` is always undefined,
-// the check always fails, and modifyBreachAccess never grants the 2
-// additional HQ accesses Tailgate's card text promises.
-//
-// tests/vantagepoint-integration.test.js does not catch this because it
-// calls tailgate.responseOnRunSuccessful.Resolve.call(tailgate, context.corp.HQ)
-// directly, manually supplying the parameter the real dispatch never does.
-// This test instead dispatches the hook exactly the way phase.js:332 does.
+// Guards the original regression: automatic responseOnRunSuccessful triggers
+// call Resolve with no server argument. Tailgate now tracks its own run with
+// runningWithThis, records success only for that run, and grants two additional
+// HQ accesses during the breach. Dispatch the real automatic hook without
+// arguments and guard against unrelated runs and leftover run state.
 
 const assert = require('assert');
 const fs = require('fs');

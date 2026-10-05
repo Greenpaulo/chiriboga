@@ -35,7 +35,7 @@ const run = spawnSync(process.execPath, [path.join(root, 'tests', 'run-all-tests
 if (run.status === 0) { resetCount(); process.exit(0); }
 
 const blocks = readCount();
-if (blocks >= MAX_BLOCKS) { resetCount(); process.exit(0); }
+if (blocks >= MAX_BLOCKS) process.exit(0);
 fs.writeFileSync(counterFile, String(blocks + 1));
 
 const tail = ((run.stdout || '') + (run.stderr || '')).trim().split('\n').slice(-60).join('\n');
