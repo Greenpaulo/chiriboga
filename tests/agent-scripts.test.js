@@ -104,6 +104,8 @@ const nonMarkdownBlockerFixture = path.join(root, 'documentation', 'bugs',
 const movedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review', path.basename(blockerFixture));
 const alreadyMovedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review',
   'agent-script-already-moved-test-' + fixtureSuffix + '.md');
+const reviewFixtureDir = path.dirname(alreadyMovedBlockerFixture);
+const needsReviewFixtureDir = !fs.existsSync(reviewFixtureDir);
 const createdFixtures = [];
 const createFixture = file => {
   const descriptor = fs.openSync(file, 'wx');
@@ -112,6 +114,8 @@ const createFixture = file => {
   finally { fs.closeSync(descriptor); }
 };
 try {
+  // Git does not retain the workflow directory when all its tickets have moved.
+  if (needsReviewFixtureDir) fs.mkdirSync(reviewFixtureDir);
   createFixture(untrackedSet);
   createFixture(untrackedSetData);
   createFixture(untrackedRoot);
@@ -176,6 +180,7 @@ try {
 } finally {
   for (const file of createdFixtures) if (fs.existsSync(file)) fs.unlinkSync(file);
   if (fs.existsSync(movedBlockerFixture)) fs.unlinkSync(movedBlockerFixture);
+  if (needsReviewFixtureDir) fs.rmdirSync(reviewFixtureDir);
 }
 
 const hooks = JSON.parse(fs.readFileSync(path.join(root, '.codex', 'hooks.json'), 'utf8'));
