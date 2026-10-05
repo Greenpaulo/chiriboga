@@ -68,8 +68,8 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
   (scenario 4), and hypotheticals started from Baker or `runcalculator.js`
   (scenario 5). The first carries the depth counter, and the other two change
   state only inside an evaluation that is already running, where nested
-  evaluations bypass the cache. The game comparison below covers all of them
-  in real play.
+  evaluations bypass the cache. The game comparison below reports aggregate
+  results, but does not establish that these paths ran.
 - **Interim gate evidence (F4 is not built).** Using `node scripts/ai-game.js
 --seeds 1-20` with Duel PD vs Tao and a `--setup` file that toggles the
   cache:
