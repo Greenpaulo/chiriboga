@@ -83,7 +83,9 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
-  ai.options.evidenceBasedHostedCardRez = false;
+  Object.assign(ai.options, {evidenceBasedHostedCardRez: false, secureScoringServerGate: false,
+    serverAtRiskInstallOverride: false, committedAgendaReserveBypass: false,
+    emptyArchivesRunPressure: false, valuelessServerDebtReset: false});
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
   tests++; if (verbose) console.log('PASS ' + name);
 }
@@ -242,6 +244,7 @@ test('non-ETR ice has less protection value than equivalent ETR ice', () => {
   assert.ok(harmlessValue < stoppingValue, harmlessValue + ' should be less than ' + stoppingValue);
 });
 test('an insecure remote is never a scoring server even when it outranks HQ', () => {
+  ai.options.secureScoringServerGate = true;
   const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
   const hq = {serverName: 'HQ', cards: [{player: corp, cardType: 'agenda'}], ice: [], root: []};
   Object.assign(corp, {HQ: hq, RnD: {cards: [], ice: [], root: []}, archives: {cards: [], ice: [], root: []}, remoteServers: [remote]});
@@ -252,6 +255,9 @@ test('an insecure remote is never a scoring server even when it outranks HQ', ()
   ai._protectionScore = target => target === remote ? 10 : 0;
   ai._emptyProtectedRemotes = () => [remote];
   try {
+    ai.options.secureScoringServerGate = false;
+    assert.strictEqual(ai._isAScoringServer(remote), true);
+    ai.options.secureScoringServerGate = true;
     assert.strictEqual(ai._isAScoringServer(remote), false);
     assert.strictEqual(ai._scoringServers([remote]).length, 0);
   } finally {
@@ -873,11 +879,15 @@ test('one-shot outer bypass defeats one layer but not a second inner ETR', () =>
   assert.strictEqual(ai._evaluateServerSecurity(server([etr(), etr()])).hasHardLockout, true);
 });
 test('poor Corp may layer a breachable agenda remote with unrezzed ICE', () => {
+  ai.options.serverAtRiskInstallOverride = true;
   const unrezzedWall = etr(); unrezzedWall.rezzed = false;
   const target = {serverName: 'Remote 0', ice: [unrezzedWall], root: [{player: corp, cardType: 'agenda', agendaPoints: 3}]};
   servers = [target];
   runner.cards = [card(30006)]; runner.creditPool = 10;
   assert.strictEqual(ai._evaluateServerSecurity(target).isSecure, false);
+  ai.options.serverAtRiskInstallOverride = false;
+  assert.strictEqual(ai._shouldInstallIceLayer(target, false), false);
+  ai.options.serverAtRiskInstallOverride = true;
   assert.strictEqual(ai._shouldInstallIceLayer(target, false), true);
 });
 test('poor Corp does not layer an empty remote with unrezzed ICE', () => {
@@ -1835,6 +1845,7 @@ test('empty Archives without current run pressure is not selected for protection
   assert.strictEqual(ai._serverToProtect(), hq);
 });
 test('a recent successful run makes an empty reachable Archives eligible temporarily', () => {
+  ai.options.emptyArchivesRunPressure = true;
   const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 1};
   const rnd = {serverName: 'R&D', cards: [], ice: [], root: [], score: 2};
   const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 0};
@@ -1856,6 +1867,7 @@ test('a recent successful run makes an empty reachable Archives eligible tempora
   assert.strictEqual(ai._serverToProtect(), hq);
 });
 test('public installed run rewards create state-based Archives pressure', () => {
+  ai.options.emptyArchivesRunPressure = true;
   const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
   Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []}, archives, remoteServers: []});
   runner.cards = [card(30008), card(30014), card(31024)];
@@ -1865,6 +1877,9 @@ test('public installed run rewards create state-based Archives pressure', () => 
   assert.strictEqual(pressure.persistentPressure, 1);
   assert.strictEqual(pressure.rawPenalty, 1);
   assert.strictEqual(pressure.penalty, 1);
+  ai.options.emptyArchivesRunPressure = false;
+  assert.strictEqual(ai._nothingWorthProtecting(archives), true);
+  ai.options.emptyArchivesRunPressure = true;
   assert.strictEqual(ai._nothingWorthProtecting(archives), false);
   assert.strictEqual(ai._serverRunPressure(archives, {isSecure: true}).penalty, 0);
 });
@@ -1901,6 +1916,9 @@ test('valueless Archives does not bank protection debt for a later threat', () =
   ai._emptyProtectedRemotes = () => [{}];
   ai._HVTsInstalled = () => 0;
   for (let turn = 0; turn < 4; turn++) ai._ageProtectionPriorities();
+  assert.strictEqual(ai._serverProtectionDebt.get(archives), 4);
+  ai.options.valuelessServerDebtReset = true;
+  ai._ageProtectionPriorities();
   assert.strictEqual(ai._serverProtectionDebt.get(archives), 0);
 });
 test('Archives containing an agenda remains a valid protection target', () => {
@@ -2132,5 +2150,66 @@ test('emergency draw preserves ordinary economy and agenda-flood safeguards', ()
     ai._rankedServersToProtect = oldRanked;
     ai._sufficientEconomy = oldEconomy;
   }
+});
+test('regression options default off and are independent between AI instances', () => {
+  const first = vm.runInContext('new CorpAI()', context);
+  const second = vm.runInContext('new CorpAI()', context);
+  const names = ['secureScoringServerGate', 'serverAtRiskInstallOverride',
+    'committedAgendaReserveBypass', 'emptyArchivesRunPressure', 'valuelessServerDebtReset'];
+  for (const name of names) {
+    assert.strictEqual(first.options[name], false);
+    first.options[name] = true;
+    assert.strictEqual(second.options[name], false);
+  }
+  assert.strictEqual(vm.runInContext('Object.isFrozen(CorpAI.DEFAULT_OPTIONS)', context), true);
+});
+test('committed agenda reserve bypass changes the actual main-phase decision only when enabled', () => {
+  const gated = vm.runInContext('new CorpAI()', context);
+  gated._log = () => {};
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2,
+    advancement: 1, AIScoringPlanCommitted: true};
+  const remote = {serverName: 'Remote 0', ice: [], root: [agenda]};
+  Object.assign(corp, {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []},
+    archives: {cards: [], ice: [], root: []}, remoteServers: [remote], clickTracker: 3});
+  servers = [remote];
+  Object.assign(gated, {_sufficientEconomy: () => false,
+    _isFullyAdvanceableAgenda: () => false, _isFullyAdvanceableHostileAsset: () => false,
+    _criticalBreachDefenseAction: () => -1, _emergencyProtectionRecoveryAction: () => -1,
+    _bestMainPhaseEconomyOption: options => options.indexOf('gain'),
+    _obsoleteBluff: () => false, _advancementLimit: () => 3,
+    _deceptionAdvancementTarget: (card, server, limit) => limit,
+    _protectionScore: target => target === remote ? 2 : 0,
+    _potentialAdvancement: () => 3});
+  const oldCheckTags = context.CheckTags;
+  context.CheckTags = () => false;
+  try {
+    const choices = ['advance', 'gain'];
+    assert.strictEqual(gated.Phase_Main(choices), choices.indexOf('gain'));
+    gated.options.committedAgendaReserveBypass = true;
+    assert.strictEqual(gated.Phase_Main(choices), choices.indexOf('advance'));
+    assert.strictEqual(gated.preferred.cardToAdvance, agenda);
+    agenda.AIScoringPlanCommitted = false;
+    assert.strictEqual(gated.Phase_Main(choices), choices.indexOf('gain'));
+  } finally { context.CheckTags = oldCheckTags; }
+});
+test('Archives admission and valueless-debt reset preserve their shared-rule interaction', () => {
+  const gated = vm.runInContext('new CorpAI()', context);
+  gated._log = () => {};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  corp.archives = archives;
+  gated._archivesIsBackdoorToHQ = () => false;
+  gated._serverRunPressure = () => ({penalty: 1});
+  gated._rankedServersToProtect = () => [{server: archives, isSecure: false, security: {isSecure: false}}];
+  for (const admission of [false, true]) for (const reset of [false, true]) {
+    gated.options.emptyArchivesRunPressure = admission;
+    gated.options.valuelessServerDebtReset = reset;
+    gated._serverProtectionDebt.set(archives, 1);
+    gated._ageProtectionPriorities();
+    assert.strictEqual(gated._serverProtectionDebt.get(archives), !admission && reset ? 0 : 2);
+  }
+  archives.cards = [{cardType: 'agenda'}];
+  gated.options.emptyArchivesRunPressure = false;
+  assert.strictEqual(gated._nothingWorthProtecting(archives), false,
+    'turning off pressure admission must preserve visible-agenda stakes');
 });
 console.log(tests + ' regression cases passed.');
