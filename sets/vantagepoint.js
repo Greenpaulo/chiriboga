@@ -3720,7 +3720,10 @@ cardSet[36043] = {
   Resolve: function () {
     var count = Math.min(5, corp.RnD.cards.length);
     var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count);
-    for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+    //Only the human Corp needs visible cards for these decisions. AI choices
+    //resolve later, so revealing now would expose R&D during the next render.
+    if (!corp.AI)
+      for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
     var choices = ChoicesArrayCards(cards);
     if (corp.AI) {
       var cardDef = this;
