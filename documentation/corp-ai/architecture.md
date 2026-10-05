@@ -517,8 +517,10 @@ needs.
     the effective options for both sides.
     The regression options below default to `false`. Turning one on restores
     that behavior from the tested harness tip b52d451; leaving all five off
-    implements the combined diagnostic policy edc177a. Benchmark fidelity
-    remains pending the owner-run queue.
+    implements the combined diagnostic policy edc177a. The owner-run queue
+    confirmed exact default/combined and all-on/old-tip fidelity on 1,000
+    completed pairs each; see the
+    [gated-fix handoff](../corp-ai-regression/gated-fix-handoff.md).
 
     | Corp option | Behavior when enabled |
     |---|---|

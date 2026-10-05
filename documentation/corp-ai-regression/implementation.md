@@ -58,6 +58,14 @@ fidelity failure stops further arms. Each comparison log contains the raw
 paired `--compare` output and an outcome table with win-rate differences in
 percentage points and paired 95% intervals.
 
-These seven reports have **not been run by the agent**. Fidelity and isolated
-option effects remain pending owner execution; no historical effect is
-assumed to transfer unchanged to the new default.
+The owner completed all seven arms on 2026-10-05: 1,000 games per arm,
+zero failures. Both fidelity checks passed with 1,000 identical completed
+pairs. Against H0, the new default retains a scoring deficit of -0.344
+[-0.564, -0.124]; win-rate difference is -3.5 percentage points [-7.5, +0.4].
+The first four options each clearly worsen scoring and win rate when enabled
+alone on this new default; valueless-server debt reset remains inconclusive.
+The agent did not launch or poll any batch.
+
+See [the completed handoff](gated-fix-handoff.md) for source commit subjects,
+intent, measured effects, mechanism limitations, full recovery results,
+manual configuration examples and the agreed stack-integration order.

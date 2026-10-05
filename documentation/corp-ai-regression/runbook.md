@@ -4,6 +4,12 @@ Supersedes `runbook-v1.md` (v1) where they differ. Read
 `response-plan.md`, [AI batch harness](../ai-batch-harness.md) and
 [legacy stack validation](../legacy-ai-stack-validation.md) first.
 
+The gated implementation and its owner-run validation are now complete on
+the isolated fix branch. Read [the handoff](gated-fix-handoff.md) before
+continuing: it records source commits, confirmed fidelity, single-option
+effects, residual scoring loss, playtest configuration and integration order.
+This investigation procedure does not authorize additional batches.
+
 Audited 2026-10-05 against saved state, arm commits and tooling. Read the
 [recovery and asset inventory](assets/README.md) before
 resuming: it includes historical numbering, exact arm tags, archived tools,
