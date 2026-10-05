@@ -82,7 +82,8 @@ reproduction is confirmed later by `implement-ticket`.
   make it ungated. Write `## Acceptance gate` as `N/A — deterministic fix
   (principle 4): <the oracle>` for the common case. When the fix genuinely has
   no single correct answer, select either an F4 seeded-game gate or a human-game
-  gate and specify its sample size, metrics and numeric thresholds.
+  gate, written in the exact form given in "Writing a gate" in
+  `documentation/ai-planning.md`.
   A deterministic reproduction proves that the decision is repeatable, not
   that it is strategically correct. Always use the exact, unnumbered headings
   `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse
@@ -117,11 +118,9 @@ decisions that could shift.>
 ## Acceptance gate
 <N/A — deterministic fix (principle 4): <the oracle>, for the common case.
 If the fix's goal is instead to play better with no single correct answer,
-select an F4 seeded-game gate or a human-game gate and state its sample size,
-metrics and numeric thresholds — "better"/"reduce" need a number. For an F4
-gate, also name the committed deck pairs, paired seed range, bootstrap 95%
-confidence intervals, guarded-regression conditions and applicable pass
-conditions. Depends on: F4 when selected.>
+copy the F4 or human gate form from "Writing a gate" in
+documentation/ai-planning.md and fill in every row, including the standard
+regression guards and the gate command. Depends on: F4 when selected.>
 
 ## Acceptance criteria
 - [ ] The reproduction passes and has moved into the green suite
@@ -131,6 +130,12 @@ conditions. Depends on: F4 when selected.>
 - [ ] `node tests/run-all-tests.js` passes.
 - [ ] (Gated items) The behaviour change ships behind an AI option that
       defaults to off (named in the Resolution).
+- [ ] (Gated items) The gate is ready to run: every collector and start
+      board it names exists and is tested, and a `--quick` run of each gate
+      command completes and reports at least one game changed by the options.
+- [ ] (Gated items, one per piece) <Collector `name` / start board `path`>
+      is built and tested. A start board is extracted from this ticket's
+      source log where possible, since the log already shows the situation.
 - [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
       For F4: exact command, committed deck pairs, paired seeds, seed count,
       every metric's baseline/candidate result and bootstrap 95% confidence
@@ -142,13 +147,14 @@ conditions. Depends on: F4 when selected.>
 ## Out of scope / related
 ```
 
-Ungated (the common case): write `## Acceptance gate` as shown and delete both
-`(Gated items)` bullets. Gated: fill in `## Acceptance gate` with real numbers
-and keep both bullets, dropping their `(Gated items)` prefix — matching
+Ungated (the common case): write `## Acceptance gate` as shown and delete every
+`(Gated items)` bullet. Gated: fill in `## Acceptance gate` with real numbers,
+list its `Collectors:` and `Starts:`, and keep the bullets (one per collector
+or start board), dropping their `(Gated items)` prefix — matching
 `ai-planning.md`'s own template convention, so `implement-ticket`'s Orient
 step ("A ticket is gated when its acceptance criteria require an AI option or
-its Acceptance gate needs seeded games... If a gated ticket lacks the two gate
-criteria or its gate has no numbers, fix the ticket before planning") finds
+its Acceptance gate needs seeded games... If a gated ticket lacks the three gate
+criteria, a criterion for each collector or start board its gate names, or numbers in its gate, fix the ticket before planning") finds
 exactly what it expects either way.
 
 If no reproduction was possible, replace the **Reproduction** line with

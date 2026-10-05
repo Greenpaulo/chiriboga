@@ -667,6 +667,27 @@ var DecisionSnapshots = {
   totalMs: 0,
   worstMs: 0,
   list: [],
+  //Telemetry mode (F4 batch harness): when set to {sink: function(entry)},
+  //every Choice() of both AIs is streamed to the sink, unfiltered and without
+  //ReproductionCode(). It only observes: no state changes and no randomness.
+  telemetry: null,
+  telemetryCount: 0,
+  Now: function () {
+    return typeof performance !== "undefined" ? performance.now() : Date.now();
+  },
+  Record: function (side, choiceType, optionList, chosen, latencyMs) {
+    try {
+      this.telemetry.sink({
+        n: ++this.telemetryCount,
+        side: side,
+        identifier: currentPhase ? currentPhase.identifier : "",
+        choiceType: choiceType || "",
+        options: optionList.map(this.Label),
+        chosen: chosen,
+        latencyMs: latencyMs,
+      });
+    } catch (e) {}
+  },
   Label: function (option) {
     var label = "[object]";
     if (typeof option === "string") label = option;
@@ -1961,6 +1982,17 @@ function ShowGauntletLostModal(gauntletState) {
 }
 
 /**
+ * Tell each AI player that the game has ended.<br/>Called by PlayerWin; headless harnesses that replace PlayerWin call it too.
+ *
+ * @method AIGameEnded
+ * @param {Player} winner either corp or runner
+ */
+function AIGameEnded(winner) {
+  if (corp.AI != null) corp.AI.GameEnded(winner);
+  if (runner.AI != null) runner.AI.GameEnded(winner);
+}
+
+/**
  * Player wins the game (the game ends).<br/>Logs a message and disables command prompt.
  *
  * @method PlayerWin
@@ -1975,6 +2007,7 @@ function PlayerWin(player, msgstr) {
   */
   PlaySound('gameEnd');
   var winner = player;
+  AIGameEnded(winner);
 
   // Track game end in Google Analytics
   if (typeof gtag !== "undefined" && window.location.hostname !== "localhost") {
@@ -2884,6 +2917,7 @@ function ResetProperties(card) {
  * @param {Card[]} locationto destination array
  */
 function MoveCardTriggers(card, locationfrom, locationto) {
+  if (CardHasModifierCallback(card)) InvalidateActiveTriggerCandidateCache();
   card.renderer.sprite.visible = true; //all card moves are visible
   if (locationto !== null) {
     if (
@@ -3655,10 +3689,45 @@ function ChoicesExistingServers() {
  * @param {Player} [player] only include this player's cards (null for both)
  * @returns {Params[]} array of {card,label} where card[callbackName] is defined
  */
+var activeTriggerCandidateCache = {};
+
+function InvalidateActiveTriggerCandidateCache() {
+  activeTriggerCandidateCache = {};
+}
+
+function CardHasModifierCallback(card) {
+  for (var propertyName in card) {
+    if (
+      propertyName.indexOf("modify") == 0 &&
+      typeof card[propertyName] === "object"
+    )
+      return true;
+  }
+  return false;
+}
+
+function ActiveTriggerCandidates(callbackName, player) {
+  if (
+    typeof callbackName != "string" ||
+    callbackName.indexOf("modify") != 0
+  )
+    return AllCards(player);
+
+  var playerKey = player == corp ? "corp" : "runner";
+  var cacheKey = playerKey + ":" + callbackName;
+  if (typeof activeTriggerCandidateCache[cacheKey] === "undefined") {
+    var allCards = AllCards(player);
+    activeTriggerCandidateCache[cacheKey] = allCards.filter(function (card) {
+      return typeof card[callbackName] !== "undefined";
+    });
+  }
+  return activeTriggerCandidateCache[cacheKey];
+}
+
 function ChoicesActiveTriggers(callbackName, player = null) {
   var ret = [];
   if (player !== runner) {
-    var corpAllCards = AllCards(corp); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
+    var corpAllCards = ActiveTriggerCandidates(callbackName, corp); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
     for (var i = 0; i < corpAllCards.length; i++) {
       if (CheckCallback(corpAllCards[i], callbackName)) {
         var choice = { card: corpAllCards[i] };
@@ -3669,7 +3738,7 @@ function ChoicesActiveTriggers(callbackName, player = null) {
     }
   }
   if (player !== corp) {
-    var runnerAllCards = AllCards(runner); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
+    var runnerAllCards = ActiveTriggerCandidates(callbackName, runner); //get all cards, not just active. but require CheckCallback (e.g. active or callbackName.availableWhenInactive) to push to ret
     for (var i = 0; i < runnerAllCards.length; i++) {
       if (CheckCallback(runnerAllCards[i], callbackName)) {
         var choice = { card: runnerAllCards[i] };

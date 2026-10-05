@@ -32,7 +32,7 @@ Observation pieces already exist:
   (`CheckInstallDestination`).
 
 Nothing records the candidates considered, the servers skipped and why, or the
-fate of a root commitment. There is no seeded batch runner yet (F4).
+fate of a root commitment. The seeded batch runner is F4, `scripts/ai-batch.js`.
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
@@ -46,7 +46,14 @@ No new telemetry system. Extend the existing pieces:
   generating group and `reason`, affordability, the chosen option, the
   destination's `_protectionScore()` and `_evaluateServerSecurity()` result.
   `Text()` prints it as `//` comment lines so `extract-fixture.js` round-trips
-  unchanged.
+  unchanged. In F4 batches the same `Note()` data also attaches to the
+  decision's telemetry entry: F4's telemetry mode
+  (`DecisionSnapshots.telemetry`, entries streamed by `DecisionSnapshots.Record()`
+  after `_choiceInner()` returns) is the single decision-log path, so `Note()`
+  buffers its data while telemetry is on and `Record()` adds it to the entry it
+  streams. There is no second logger. See
+  [architecture: Foundations](../architecture.md#foundations) and
+  [ai-batch-harness.md](../../ai-batch-harness.md).
 - **Skipped servers.** Record each server ranked above the chosen protection
   target by `_rankedServersToProtect()` and the exact reason it was skipped:
   illegal destination, layer-policy rejection (`_shouldInstallIceLayer()`),
@@ -61,9 +68,11 @@ No new telemetry system. Extend the existing pieces:
   `trapTriggers`. Also add `successfulRunsByServer`, `corpInsolventTurns`,
   and, unless R1.1 already added them, `stallTurns` and `unusedCreditsAtEnd`
   (definitions in the R1.1 spec).
-- **Baseline report.** Run F4 on the committed deck pool (every playable set
-  in `documentation/card-sets.md` represented) with all collectors and commit
-  the JSON report at the location F4 defines for baselines.
+- **Baseline report.** Run F4 (`node scripts/ai-batch.js`) on the committed
+  deck pool, `tests/fixtures/ai-batch/deck-pool.json`, whose trusted sets are
+  listed in the pool file, not `card-sets.md`. Use all I0 collectors
+  (`--collector <name>` each) and commit the JSON report under
+  `tests/fixtures/ai-batch/baselines/`, as F4 defines.
 - **Baseline snapshots.** Add representative install fixtures to
   `tests/fixtures/corp-decisions/` (the design note's fixture matrix), then
   record their snapshots with candidate blocks and commit them as the I1

@@ -5924,7 +5924,7 @@ cardSet[35071] = {
                         Install(foundCard, serverParams.server, true, null, true, null, cardRef);
                         Log(GetTitle(foundCard, true) + " installed from R&D via Off the Books");
                         //Shuffle R&D
-                        ShuffleArray(corp.RnD.cards);
+                        Shuffle(corp.RnD.cards);
                       },
                       "Off the Books",
                       "Choose install destination",
@@ -5936,7 +5936,7 @@ cardSet[35071] = {
                     MoveCard(foundCard, corp.HQ.cards);
                     Log(GetTitle(foundCard, true) + " added to HQ from R&D via Off the Books");
                     //Shuffle R&D
-                    ShuffleArray(corp.RnD.cards);
+                    Shuffle(corp.RnD.cards);
                   }
                 },
                 "Off the Books",

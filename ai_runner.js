@@ -410,6 +410,7 @@ class RunnerAI {
 
   constructor() {
     this.preferred = null;
+    this.options = Object.assign({}, RunnerAI.DEFAULT_OPTIONS);
     this.cardsWorthKeeping = [];
     this.runsEverCalculated = []; //used to check whether calculation is needed to return cachedCost
     this.cachedCosts = []; //for all servers, updated each time a *complete* run is calculated
@@ -2828,8 +2829,11 @@ console.log(this.preferred);
   }
 
   _computeChoice(optionList, choiceType) {
+	var telemetry = typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
+	var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
 	return new Promise((resolve) => {
 		this._internalChoiceDetermination(optionList, choiceType).then((ret) => {		
+			if (telemetry) DecisionSnapshots.Record("runner", choiceType, optionList, ret, DecisionSnapshots.Now() - startedAt);
 			//restore temporary set values
 			this._RestoreTemporaryValueModifications();
 			//return result
@@ -2895,3 +2899,7 @@ console.log(this.preferred);
 
   GameEnded(winner) {}
 }
+
+//AI options (see "AI options" in documentation/ai-planning.md): every option
+//defaults to false; gated items add theirs here.
+RunnerAI.DEFAULT_OPTIONS = Object.freeze({});

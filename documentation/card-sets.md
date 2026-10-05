@@ -6,7 +6,7 @@ Change a row only by deliberate decision.
 
 Tickets that touch card hooks cover the **playable** sets unless they say
 otherwise. Measured status for every set (card counts, missing definitions,
-unfinished markers, and where `config.js` disagrees with this table) is in the
+scaffold markers, required AI hooks, and where `config.js` disagrees with this table) is in the
 generated [card-status.md](card-status.md).
 
 | Set (registry key) | Decision | Notes |

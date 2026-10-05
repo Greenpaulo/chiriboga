@@ -2522,7 +2522,7 @@ function debugAddCardToHand() {
   
   // Add to hand
   destination.push(newCard);
-  
+  InvalidateActiveTriggerCandidateCache();
   Log('DEBUG: Added ' + newCard.title + ' to hand');
   Render();
   EnumeratePhase();

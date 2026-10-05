@@ -33,8 +33,8 @@ cannot price yet.
 ### L3.5.2 Action-feasible protection target fallback
 - **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [corp-not-protecting-archives-with-baker-backdoor.md](../bugs/code-review/corp-not-protecting-archives-with-baker-backdoor.md)
-- **Goal:** An ineligible top-ranked server no longer blocks protection of the next viable one. Implemented; awaiting review. Interim until I1–I2.
+- **Ticket:** [corp-not-protecting-archives-with-baker-backdoor.md](../bugs/remediation/corp-not-protecting-archives-with-baker-backdoor.md)
+- **Goal:** An ineligible top-ranked server no longer blocks protection of the next viable one. The original fallback is implemented, but a later Baker play-test still fails when Touchstone is empty during Corp planning; remediation is required before review. Interim until I1–I2.
 
 ### L4.1 Unified bypass capability allocation
 - **Status:** ready
@@ -133,9 +133,9 @@ Shared infrastructure used by every area.
 - **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
 
 ### F4 Seeded AI-vs-AI batch harness
-- **Status:** ready
-- **Depends on:** D2
-- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/corp_ai_finding_12_seeded_batch_harness.md)
+- **Status:** in-progress
+- **Depends on:** D2, F6
+- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/code-review/corp_ai_finding_12_seeded_batch_harness.md)
 - **Goal:** Headless seeded AI-vs-AI games on a committed deck pool with core metrics, collectors, AI-option flags, paired comparison and committed baselines.
 
 ### F5 Mulligan weight calibration
@@ -144,17 +144,30 @@ Shared infrastructure used by every area.
 - **Spec:** [F5-mulligan-weight-calibration.md](specs/F5-mulligan-weight-calibration.md)
 - **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option.
 
-### F6 Cheaper security evaluation
+### F7 Indexed card-state and trigger discovery
 - **Status:** proposed
-- **Depends on:** F3
-- **Spec:** [F6-cheaper-security-evaluation.md](specs/F6-cheaper-security-evaluation.md)
-- **Goal:** Price each ICE once per security evaluation instead of once per rez plan, so seeded games and gates run faster with identical decisions.
+- **Depends on:** F2, F4
+- **Spec:** [F7-indexed-card-state-and-trigger-discovery.md](specs/F7-indexed-card-state-and-trigger-discovery.md)
+- **Goal:** Replace repeated whole-board installed, active and trigger-provider scans with verified engine-owned indexes while preserving exact query results, ordering and seeded behaviour.
+
+### F8 Balanced deck-pool screening
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F8-balanced-deck-pool-screening.md](specs/F8-balanced-deck-pool-screening.md)
+- **Goal:** Choose the F4 deck pool by screening candidate pairs for Corp win rates near even, with a stated selection rule and re-screening policy.
+
+### F9 AI work budget and fair timing
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
+- **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
 ### Done
 
 | ID | Item | Delivered by | Architecture |
 |---|---|---|---|
 | F1 | Injectable, seedable randomness | [finding 09](../backlog/done/corp_ai_finding_09_seeded_randomness.md) | [Foundations](architecture.md#foundations) |
+| F6 | Headless AI performance | [F6-headless-ai-performance](../backlog/done/F6-headless-ai-performance.md) | [Server security evaluation](architecture.md#server-security-evaluation) |
 
 ## Install decisions (I)
 

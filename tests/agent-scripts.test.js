@@ -9,7 +9,7 @@ const {spawnSync} = require('child_process');
 const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch} = require('../scripts/ticket.js');
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -81,6 +81,11 @@ const reproductionBefore = [
   "assert.strictEqual(firstChoice, 'install');",
   "assert.strictEqual(secondChoice, 'advance');",
 ];
+assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --corp-option x=true\n' +
+  '--collector runs --start tests/fixtures/corp-decisions --collector <name> --guard winRate=0.02`'), [],
+  'gate setup check accepts existing collectors, start boards and template placeholders');
+assert.deepStrictEqual(gateSetupProblems('**Gate command:** `node scripts/ai-batch.js gate --collector noSuch --start tests/fixtures/missing.txt`').length, 2,
+  'gate setup check reports a missing collector and a missing start board');
 assert(reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice()),
   'ticket.js accepts reproduction expectations that remain in sequence');
 assert(!reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice().reverse()),
@@ -157,7 +162,13 @@ const movedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-revie
 const alreadyMovedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review',
   'agent-script-already-moved-test-' + fixtureSuffix + '.md');
 const createdFixtures = [];
+// Status folders such as bugs/code-review/ vanish from a checkout when they are
+// empty (Git keeps no empty directories); create them for the test and remove
+// them afterwards if they were missing.
+const createdDirs = [];
 const createFixture = file => {
+  const dir = path.dirname(file);
+  if (!fs.existsSync(dir)) { fs.mkdirSync(dir, {recursive: true}); createdDirs.push(dir); }
   const descriptor = fs.openSync(file, 'wx');
   createdFixtures.push(file);
   try { fs.writeFileSync(descriptor, '// created by tests/agent-scripts.test.js\n'); }
@@ -228,6 +239,7 @@ try {
 } finally {
   for (const file of createdFixtures) if (fs.existsSync(file)) fs.unlinkSync(file);
   if (fs.existsSync(movedBlockerFixture)) fs.unlinkSync(movedBlockerFixture);
+  for (const dir of createdDirs) if (fs.existsSync(dir) && !fs.readdirSync(dir).length) fs.rmdirSync(dir);
 }
 
 const hooks = JSON.parse(fs.readFileSync(path.join(root, '.codex', 'hooks.json'), 'utf8'));
