@@ -5,12 +5,14 @@
 **Verified against code:** c9d80d2 (2026-10-05)
 
 ## Goal
+
 Choose the `(ICE, server)` pair that most improves security, weighted by what a
 breach would cost, using the existing security evaluator rather than input-card
 order. This is the first intentional policy change on the I1 candidate
 framework.
 
 ## Current behaviour
+
 `_iceInstallOptions()` lists affordable ICE in input-card order, then
 unaffordable ICE when low-priority options are permitted, for the one server
 `_serverToProtect(false, false, targetIsEligible)` picks; the predicate
@@ -48,6 +50,7 @@ Two pieces of hypothetical ICE scoring already exist:
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
+
 1. Switch on the I1 candidates for every strategically relevant server
    (`eligible` true for ICE on any server `_rankedServersToProtect()` lists),
    instead of one server chosen in advance.
@@ -102,12 +105,14 @@ in `_iceInstallScore()` (deleted with the function) and the other ICE-selection
 titles.
 
 ## Safety and information boundary
+
 Hypothetical outermost-layer evaluation uses only public Runner capabilities
 and must not mutate live server contents or credits. Candidate evaluation must
 be unchanged when hidden Runner Grip cards are substituted. Unrezzable ICE must
 not receive active-security credit.
 
 ## Test scenarios
+
 1. Against a publicly installed Fracter only, otherwise comparable Code Gate or
    Sentry ICE outranks an efficiently broken Barrier.
 2. An affordable ETR ICE that creates a hard lockout outranks higher
@@ -146,6 +151,7 @@ not receive active-security credit.
     measure the change separately; agenda and backdoor stakes remain eligible.
 
 ## Acceptance gate
+
 F4 gate. Option `iceMarginalSecurity` (Corp AI), off in the baseline and on
 in the candidate. Committed deck pool, paired seeds, 200 games per deck
 pair, bootstrap 95% intervals. Both arms keep all five legacy regression
@@ -182,6 +188,7 @@ Gate command (after the collector setup exists):
 `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns.mean=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
 
 ## Things to consider
+
 - **Owned open gap: empty-Archives reward valuation.** I2 planning must decide
   whether its marginal-value comparison can cover the public reward prevented
   by protection. Before hand-off, implement and validate that scoped policy,
@@ -198,6 +205,7 @@ Gate command (after the collector setup exists):
   it is not a dependency, and the fresh-run latency check applies now.
 
 ## Acceptance criteria
+
 - [ ] The Resolution explicitly disposes of the empty-Archives reward-valuation gap: either it links implemented behavior, focused counterexamples and gate evidence, or it links a filed follow-up ticket with remaining scope, roadmap ownership and an acceptance gate. Update the shared design's gap status and reference; "investigate later" without a ticket does not satisfy this criterion.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`; the L3.5.2 regressions (scenarios 9 and 10) pass without it.

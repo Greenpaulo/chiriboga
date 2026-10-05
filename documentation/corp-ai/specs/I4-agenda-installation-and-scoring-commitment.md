@@ -5,11 +5,13 @@
 **Verified against code:** bf8bed4 (2026-10-05)
 
 ## Goal
+
 Commit an agenda only when the destination stays safe for as long as the agenda
 is exposed and the Corp has a plan to finish it, weighting the required margin
 by what a steal would cost.
 
 ## Current behaviour
+
 The security floor is optional. `_isAScoringServer()` calls
 `_evaluateServerSecurity()` but rejects a remote solely for not being
 `isSecure` only when `secureScoringServerGate` is enabled. It defaults to
@@ -66,6 +68,7 @@ What is missing:
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
+
 - **Completion plan.** Before committing, run the same test
   `_installedAgendaCanBeCompleted()` runs, hypothetically, for the candidate
   agenda in the candidate server (`_advancementLimit()` and
@@ -103,12 +106,14 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
   (`deceptionValue`); I4 does not duplicate it.
 
 ## Safety and information boundary
+
 Game-winning scores and game-losing steals are hard tactical constraints, not
 score components. The projected Runner income uses only public cards and
 counters. Existing agenda bluff guards (no bluff when the Corp would win or a
 breach would lose, in `_shouldBluffAgendaServer()`) stay authoritative.
 
 ## Test scenarios
+
 Already green and kept as regressions: with `secureScoringServerGate=true`,
 an insecure remote is rejected even when HQ is weaker
 (`corp-no-agenda-into-insecure-remote.txt`), and a
@@ -142,6 +147,7 @@ deterministically secure remote accepts an agenda
    for the choice; point totals plus current breachability are insufficient.
 
 ## Acceptance gate
+
 F4 gate. Option `agendaCommitmentPlan` (Corp AI), off in the baseline and on
 in the candidate. I0's committed deck pool and paired seeds, 200 games per
 deck pair, bootstrap 95% intervals. I0 must capture the corrected default;
@@ -184,6 +190,7 @@ machine; cached timing is not an adoption gate. This remains a strategic
 improvement gate, not an ungated deterministic fix.
 
 ## Things to consider
+
 - The "derelict remote" edge case (design note) affects whether an existing
   1-ICE remote is considered for agendas; I3 owns the role, I4 the plan.
 - The in-hand winning line pre-empted by the critical-central interrupt
@@ -191,6 +198,7 @@ improvement gate, not an ungated deterministic fix.
   I7.2, not here.
 
 ## Acceptance criteria
+
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
