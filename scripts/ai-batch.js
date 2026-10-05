@@ -206,27 +206,49 @@ function runBatch(config) {
   const started = Date.now();
   return new Promise((resolve, reject) => {
     let active = 0;
+    let failed = false;
+    const children = [];
+    const fail = error => {
+      if (failed) return;
+      failed = true;
+      for (const child of children) child.kill();
+      reject(error);
+    };
     const workers = Math.max(1, Math.min(config.jobs, jobs.length));
     const progress = () => {
       if (process.stderr.isTTY) process.stderr.write(`\r${games.length}/${total} games, ${Math.round((Date.now() - started) / 1000)} s`);
     };
     for (let w = 0; w < workers; w++) {
       const child = fork(__filename, ['--worker'], {stdio: ['ignore', 'ignore', 'inherit', 'ipc']});
+      children.push(child);
       active++;
+      let pending = null;
       const next = () => {
+        if (failed) return;
         if (!jobs.length) { child.kill(); return; }
         const job = jobs.shift();
+        pending = job;
         child.once('message', message => {
-          if (message.error) { child.kill(); reject(new Error(message.error)); return; }
+          pending = null;
+          if (failed) return;
+          if (message.error) { fail(new Error(message.error)); return; }
           games.push(message.record);
           effective = effective || message.options;
           progress();
           next();
         });
-        child.send(job);
+        child.send(job, error => { if (error) fail(error); });
       };
-      child.on('exit', () => {
+      child.on('error', fail);
+      child.on('exit', (code, signal) => {
+        if (failed) return;
+        if (pending) {
+          fail(new Error(`Worker exited before returning ${pending.deckPairId} seed ${pending.seed}` +
+            `${pending.fixtureId ? ' start ' + pending.fixtureId : ''} (code ${code}, signal ${signal})`));
+          return;
+        }
         if (--active) return;
+        if (jobs.length || games.length !== total) { fail(new Error('Incomplete batch results')); return; }
         if (process.stderr.isTTY) process.stderr.write('\n');
         resolve({games, effective, wallMs: Date.now() - started});
       });
@@ -314,11 +336,28 @@ function cachedReport(key) {
     for (const file of fs.readdirSync(dir).filter(f => f.endsWith('.json'))) {
       try {
         const report = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
-        if (report.key === key) return {report, file: path.join(dir, file)};
+        if (report.key === key && completeReport(report)) return {report, file: path.join(dir, file)};
       } catch (e) {}
     }
   }
   return null;
+}
+
+// Older interrupted runs could cache a full configuration key with missing games.
+// Require exactly one terminal record for every configured job before reuse.
+function completeReport(report) {
+  if (!Array.isArray(report.games) || !Array.isArray(report.pairs) ||
+      !Array.isArray(report.seeds) || !Array.isArray(report.starts)) return false;
+  const expected = new Set();
+  for (const start of report.starts.length ? report.starts : [{id: null}])
+    for (const pair of report.pairs)
+      for (const seed of report.seeds) expected.add(JSON.stringify([start.id, pair, String(seed)]));
+  if (!expected.size || report.games.length !== expected.size) return false;
+  for (const game of report.games) {
+    if (typeof game.ok !== 'boolean' ||
+        !expected.delete(JSON.stringify([game.fixtureId || null, game.deckPairId, String(game.seed)]))) return false;
+  }
+  return expected.size === 0;
 }
 
 // ---- printing ----

@@ -193,13 +193,19 @@ For future agents, [runbook v2](runbook.md) and the
 [recovery/asset inventory](assets/README.md) are the entry
 points. The inventory includes annotated tag targets, the full 28-commit list,
 saved shim/overlays/queues/runbooks and a checksum manifest of raw evidence.
-Repository documentation copies are prepared but uncommitted at the 2026-10-05
-audit. A full, initially byte-verified working copy now exists in gitignored
-repository `bench/`; its six shell scripts use repository-relative paths.
-Original `~/bench/` is retained untouched. Neither ignored files nor these local
-copies replace a separate backup of the raw reports/logs.
+Investigation documents, scripts and overlays were preserved in `7b28f2a`.
+The [evidence archive](assets/evidence.tar.gz) now preserves all 142 JSON/log
+artifacts from the original `~/bench/`, including the later early-policy
+follow-ups cited below. [Checksums](assets/evidence-manifest.json) cover every
+archived file; the original 110-artifact manifest remains a historical snapshot.
+See the [extraction and verification instructions](assets/README.md#archived-evidence).
 
-All under `~/bench/`: `orig.json`/`current.json` (H0 and tip), `h2.json` and the other checkpoint reports, `a2-<sha>.json` (H1..H2 commits), `causal-a-no-is-secure-gate.json`, `causal-b-legacy-ice-weighting.json`, `benchmark-plan.md`, `review-point-a.md`, `bisect-state.md`, `beginner-pool.json`, `regression-report.md`. Runbooks: `original-vs-current-corp-ai-benchmark.md`, `runbook-v1.md`.
+Report and log names throughout this document refer to files inside that archive;
+`~/bench/` identifies their original location, not a fresh-checkout requirement.
+The frozen plans, pool and narrative are also in [assets/](assets/README.md).
+Original `~/bench/` and the ignored repository `bench/` copy remain local working
+copies. Additional experiments or temporary artifacts outside this archive still
+need their own backup.
 
 ## Updated early localization and gating assessment (2026-10-05)
 

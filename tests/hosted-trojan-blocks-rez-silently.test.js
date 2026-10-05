@@ -1,12 +1,11 @@
-// Run with: node tests/pending/hosted-trojan-blocks-rez-silently.test.js
+// Run with: node tests/hosted-trojan-blocks-rez-silently.test.js
 // Drafted from documentation/debug-logs/bug_raised/
 // corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt.
 // See documentation/bugs/corp-silently-declines-rez-of-ice-hosting-a-trojan.md
 //
-// Reproduces: _iceWorthRezzing() returns false without logging a reason
-// for unrezzed ice hosting a non-exempt Runner Trojan (here, Chromatophores,
-// id 35030) whenever Credits(corp) < currentRezCost * 5, even when nothing
-// else on the board would otherwise justify withholding the rez.
+// Guards the reported silent hosted-Trojan veto. With the candidate option on,
+// affordable ice that secures this remote is rezzed. The legacy option-off
+// diagnostic and policy are covered in tests/corp-server-security.test.js.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -123,7 +122,7 @@ function buildBoard(hostedCard, options = {}) {
   return {approachedIce, remote};
 }
 
-test('BUG: undefended remote with affordable ice hosting Chromatophores is not rezzed, and no reason is logged', () => {
+test('candidate rezzes affordable decisive ice hosting Chromatophores without a decline diagnostic', () => {
   const chromatophores = card(35030);
   assert.strictEqual(typeof chromatophores.AIHostedDoesNotPreventRez, 'undefined',
     'test assumption: Chromatophores has no AIHostedDoesNotPreventRez exception');
@@ -143,12 +142,13 @@ test('BUG: undefended remote with affordable ice hosting Chromatophores is not r
     ai._log = oldLog;
   }
 
-  // This is the reported bug: the Corp can afford the ice, nothing else on
-  // the board competes for the credits, and the server is not empty — yet
-  // the ice is not rezzed, and nothing explains why.
+  // The gated candidate rezzes here, so no decline reason should be logged.
+  // Retain the original decision and message-count expectation values.
   assert.strictEqual(result, true,
     'expected the Corp to rez affordable, undefended-server ice; ' +
     'got false from the silent hostedCards guard');
+  // Retain the historical diagnostic literal for complete-call comparison.
+  // Its wording is misleading; this successful rez needs no decline log.
   assert.strictEqual(messages.length, 0,
     'expected some logged reason for declining the rez; the hostedCards ' +
     'branch currently declines silently');

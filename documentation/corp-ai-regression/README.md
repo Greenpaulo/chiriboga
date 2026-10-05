@@ -16,9 +16,14 @@ For the completed gated fix and personal playtesting, read
 | [runbook-v1.md](runbook-v1.md) | Earlier investigation procedure; current runbook takes precedence |
 | [assets/](assets/README.md) | Recovery inventory, frozen plans, archived scripts, overlays and evidence manifest |
 
-Raw reports and logs are in the repository's gitignored `bench/` folder; the
-original `~/bench/` is also preserved. Those local evidence files require a
-separate backup. Root `.gitignore` controls their exclusion from Git.
+The original 142 raw JSON/log artifacts are preserved in the
+[evidence archive](assets/evidence.tar.gz), with
+[checksums and extraction instructions](assets/README.md#archived-evidence).
+Local `bench/` and `~/bench/` copies remain working copies; additional artifacts
+outside the archive need separate backup. Root `.gitignore` excludes `bench/`.
+
+This investigation is tracked separately from the F4 harness in
+[its review ticket](../backlog/code-review/corp_ai_regression_investigation.md).
 
 The owner runs batches. These documents and archived scripts do not authorize
 an agent to start or poll a batch. The option implementation and its completed
