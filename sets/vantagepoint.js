@@ -4292,11 +4292,79 @@ cardSet[36051] = {
   subTypes: ["Sentry", "Observer"],
   rezCost: 9,
   strength: 6,
+  fullyBrokenThisEncounter: false,
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (ice == this) this.fullyBrokenThisEncounter = false;
+    },
+  },
+  responseOnSubroutineBroken: {
+    Enumerate: function (subroutine) {
+      if (this.fullyBrokenThisEncounter || !this.subroutines.includes(subroutine)) return [];
+      if (!this.subroutines.every(function (sr) { return sr.broken; })) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      this.fullyBrokenThisEncounter = true;
+      AddTags(1);
+    },
+  },
+  responseOnBypassed: {
+    Enumerate: function (ice) { return ice == this ? [{}] : []; },
+    Resolve: function () { AddTags(1); },
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "You may add 1 card from Archives to the top or bottom of R&D.",
+      Resolve: function () {
+        var choices = [];
+        corp.archives.cards.forEach(function (card) {
+          choices.push({card: card, bottom: false, label: GetTitle(card) + " to top of R&D"});
+          choices.push({card: card, bottom: true, label: GetTitle(card) + " to bottom of R&D"});
+        });
+        var decline = {card: null, label: "Continue", button: "Continue"};
+        choices.push(decline);
+        if (corp.AI) {
+          var best = decline;
+          for (var i = 0; i < choices.length - 1; i++) {
+            var choice = choices[i];
+            if (choice.bottom != CheckCardType(choice.card, ["agenda"])) continue;
+            if (!best.card || (best.bottom && !choice.bottom) ||
+                (best.bottom == choice.bottom && choice.card.elo > best.card.elo)) best = choice;
+          }
+          corp.AI.preferred = {title: this.title, option: best};
+        }
+        DecisionPhase(corp, choices, function (params) {
+          if (params.card) MoveCard(params.card, corp.RnD.cards, params.bottom ? 0 : null);
+        }, this.title, "Add a card to R&D", this);
+      },
+      visual: {y: 102, h: 32},
+    },
+    {
+      text: "Add 1 installed Runner card to the grip.",
+      Resolve: function () {
+        var choices = ChoicesInstalledCards(runner);
+        if (choices.length == 0) return;
+        if (corp.AI) {
+          var index = corp.AI._bestTrashOption(choices);
+          corp.AI.preferred = {title: this.title, option: choices[Math.max(0, index)]};
+        }
+        DecisionPhase(corp, choices, function (params) {
+          Uninstall(params.card, runner.grip);
+        }, this.title, "Add to grip", this);
+      },
+      visual: {y: 137, h: 32},
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [corp.archives.cards.length > 0 ? ["misc_minor"] : []],
+      [ChoicesInstalledCards(runner).length > 0 ? ["misc_serious"] : []],
+    ];
+    var alreadyTriggered = typeof encountering != "undefined" && encountering &&
+      attackedServer && attackedServer.ice[approachIce] == this && this.fullyBrokenThisEncounter;
+    result.fullyBrokenEffects = alreadyTriggered ? [] : ["tag"];
+    result.bypassEffects = ["tag"];
     return result;
   },
 };
@@ -4315,11 +4383,33 @@ cardSet[36052] = {
   subTypes: ["Barrier"],
   rezCost: 1,
   strength: 1,
+  responseOnEncounter: {
+    Enumerate: function (ice) { return ice == this ? [{}] : []; },
+    Resolve: function () { LoseCredits(runner, 1); },
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run unless the Runner pays 1[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 1)) choices.push({id: 0, label: "Pay 1[c]", button: "Pay 1[c]"});
+        choices.push({id: 1, label: "End the run", button: "End the run"});
+        if (runner.AI) {
+          var choice = choices[choices.length - 1];
+          if (runner.AI.cachedComplete && runner.AI.cachedBestPath) choice = choices[0];
+          runner.AI.preferred = {title: this.title, option: choice};
+        }
+        DecisionPhase(runner, choices, function (params) {
+          if (params.id == 0) SpendCredits(runner, 1);
+          else EndTheRun();
+        }, this.title, this.title, this);
+      },
+      visual: {y: 102, h: 32},
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.encounterEffects = [["loseCredits"]];
+    result.sr = [[["payCredits"], ["endTheRun"]]];
     return result;
   },
 };
@@ -4337,8 +4427,38 @@ cardSet[36053] = {
   cardType: "operation",
   subTypes: ["Double"],
   playCost: 3,
+  _advancementCount: function () {
+    return corp.remoteServers.filter(function (server) {
+      return server.root.length > 0 && server.ice.length > 0;
+    }).length;
+  },
+  Enumerate: function () {
+    var choices = ChoicesInstalledCards(corp, CheckAdvance);
+    if (corp.AI) {
+      var target = this.AIPreferredTarget;
+      if (target && choices.some(function (choice) { return choice.card == target; }))
+        return [{card: target}];
+      choices = choices.filter(function (choice) {
+        return Counters(choice.card, "advancement") < corp.AI._advancementLimit(choice.card);
+      });
+      choices.sort(function (a, b) {
+        return (CheckCardType(b.card, ["agenda"]) ? 1 : 0) -
+          (CheckCardType(a.card, ["agenda"]) ? 1 : 0) || b.card.elo - a.card.elo;
+      });
+      return choices.slice(0, 1);
+    }
+    return choices;
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    if (params && params.card) PlaceAdvancement(params.card, this._advancementCount());
+  },
+  AIFastAdvance: true,
+  AIFastAdvanceCounters: function (card) {
+    if (card && !CheckAdvance(card)) return 0;
+    return this._advancementCount();
+  },
+  AIWouldPlay: function () {
+    return this._advancementCount() >= 3 && this.Enumerate().length > 0;
   },
 };
 
@@ -4355,8 +4475,46 @@ cardSet[36054] = {
   subTypes: ["Gray Ops"],
   playCost: 0,
   Resolve: function (params) {
-    // TODO: Implement effect
+    var targets = ChoicesInstalledCards(runner);
+    var choices = [
+      {id: 0, label: "Remove 2 bad publicity", button: "Remove 2 bad publicity"},
+      {id: 1, label: "Shuffle an installed Runner card into the stack", button: "Shuffle a card"},
+    ];
+    if (runner.AI) {
+      var maxInstallCost = 0;
+      targets.forEach(function (choice) {
+        maxInstallCost = Math.max(maxInstallCost, choice.card.installCost || 0);
+      });
+      var shuffle = targets.length == 0 || (corp.badPublicity >= 2 && maxInstallCost <= 1);
+      runner.AI.preferred = {title: this.title, option: choices[shuffle ? 1 : 0]};
+    }
+    DecisionPhase(runner, choices, function (mode) {
+      if (mode.id == 0) {
+        var removed = Math.min(2, corp.badPublicity);
+        corp.badPublicity -= removed;
+        Log(removed + " bad publicity removed");
+        UpdateCounters();
+        return;
+      }
+      //Both modes are available even when one has no effect.
+      var cards = ChoicesInstalledCards(runner);
+      if (cards.length == 0) return;
+      if (corp.AI) {
+        var index = corp.AI._bestTrashOption(cards);
+        corp.AI.preferred = {title: this.title, option: cards[Math.max(0, index)]};
+      }
+      DecisionPhase(corp, cards, function (target) {
+        Uninstall(target.card, runner.stack, function () {
+          Shuffle(runner.stack);
+          Log("Runner shuffled a card into the stack");
+        }, this);
+      }, this.title, "Choose a Runner card", this);
+    }, this.title, "Runner chooses an effect", this);
   },
+  AIWouldPlay: function () {
+    return corp.badPublicity > 0 && ChoicesInstalledCards(runner).length > 0;
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Hype Machine (36055)
@@ -4373,7 +4531,87 @@ cardSet[36055] = {
   subTypes: ["Advertisement"],
   rezCost: 6,
   trashCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  agendaScoredOrStolenThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.agendaScoredOrStolenThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.agendaScoredOrStolenThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnScored: {
+    Resolve: function () { this.agendaScoredOrStolenThisTurn = true; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnStolen: {
+    Resolve: function () { this.agendaScoredOrStolenThisTurn = true; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  modifyRezCost: {
+    Resolve: function (card) {
+      return card == this && this.agendaScoredOrStolenThisTurn ? -6 : 0;
+    },
+    availableWhenInactive: true,
+  },
+  abilities: [
+    {
+      text: "Trash: Place 1 advancement counter on a card in this server's root.",
+      Enumerate: function () {
+        if (!CheckTrash(this)) return [];
+        var server = GetServer(this);
+        if (!server) return [];
+        var choices = ChoicesArrayCards(server.root, CheckAdvance);
+        if (corp.AI) {
+          var target = this.AIPreferredTarget;
+          if (target && choices.some(function (choice) { return choice.card == target; }) &&
+              Counters(target, "advancement") < corp.AI._advancementLimit(target))
+            return [{card: target}];
+          choices = choices.filter(function (choice) {
+            return CheckCardType(choice.card, ["agenda"]) &&
+              Counters(choice.card, "advancement") < AdvancementRequirement(choice.card);
+          });
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        var target = params.card;
+        var server = GetServer(this);
+        Trash(this, false, function (trashed) {
+          if (trashed.includes(this) && server && server.root.includes(target) &&
+              CheckInstalled(target) && CheckAdvance(target))
+            PlaceAdvancement(target, 1);
+        }, this);
+      },
+    },
+  ],
+  AIIsScoringUpgrade: true,
+  AITriggerWhenCan: true,
+  AIFastAdvanceCounters: function (card) {
+    var server = GetServer(this);
+    if (!this.rezzed && RezCost(this) > 0 && !CheckCardType(card || {}, ["agenda"])) return 0;
+    return card && server && server.root.includes(card) && CheckAdvance(card) && CheckTrash(this) ? 1 : 0;
+  },
+  AIRezWhenCan: function () {
+    return RezCost(this) == 0;
+  },
+  RezUsability: function () {
+    var server = GetServer(this);
+    if (!server) return false;
+    //Bank the discount for a future agenda, even if this server is now empty.
+    if (RezCost(this) == 0) return true;
+    if (playerTurn != corp) return false;
+    return server.root.some(function (card) {
+      if (!CheckCardType(card, ["agenda"]) || !CheckAdvance(card)) return false;
+      var remaining = AdvancementRequirement(card) - Counters(card, "advancement");
+      return remaining > corp.clickTracker && remaining <= corp.clickTracker + 1 &&
+        Credits(corp) >= RezCost(this) + remaining - 1;
+    }, this);
+  },
 };
 
 //Sacrifice Zone Expansion (36056)

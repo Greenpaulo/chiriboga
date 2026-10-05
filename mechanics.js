@@ -45,7 +45,10 @@ function Bypass() {
 		runner.AI.cachedBestPath = null; //force a recalculation
 	}
 	phases.runEncounterEnd.next = phases.runPassesIce; //this needs to be said because it's not constant what happens when the encounter ends (e.g. the run may end)
-	ChangePhase(phases.runEncounterEnd);
+  var ice = attackedServer.ice[approachIce];
+  TriggeredResponsePhase(playerTurn, "responseOnBypassed", [ice], function () {
+    ChangePhase(phases.runEncounterEnd);
+  }, "Ice Bypassed");
 }
 
 /**
@@ -464,6 +467,19 @@ function Forfeit(card, afterForfeit) {
     }
   }, "Forfeited");
   return true;
+}
+
+/** Move an installed card to a non-installed zone and trash its hosted cards. */
+function Uninstall(card, destination, afterUninstall = null, context = null) {
+  var hosted = (card.hostedCards || []).slice();
+  MoveCard(card, destination);
+  if (hosted.length == 0) {
+    if (afterUninstall) afterUninstall.call(context);
+    return;
+  }
+  Trash(hosted, false, function () {
+    if (afterUninstall) afterUninstall.call(context);
+  });
 }
 
 /**
