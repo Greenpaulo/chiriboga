@@ -82,6 +82,7 @@ responseOnRunSuccessful: { Resolve, automatic: true }
 responseOnRunEnds:       { Resolve, automatic: true }
 responseOnPassesIce:     { Resolve, automatic: true }
 responseOnWouldApproachServer: { Enumerate?, Resolve } // optional pre-approach redirect window
+automaticOnRunEndCleanup: { Resolve } // receives a callback queue after responses and run state cleanup
 ```
 
 ### Encounter
@@ -126,6 +127,17 @@ onSteal: {
 }
 ```
 
+### Bad publicity
+
+`BadPublicity` fires `responseOnTakeBadPublicity` only after prevention has
+resolved and the Corp actually takes at least 1 bad publicity. The response
+receives the amount taken. Its optional continuation runs after all responses.
+
+```js
+BadPublicity(1, afterBadPublicity, context);
+responseOnTakeBadPublicity: { Enumerate, Resolve, text? }
+```
+
 ### Modify Hooks (return a number, 0 = no change)
 
 ```js
@@ -133,6 +145,8 @@ modifyStrength: Resolve(card); // card = target card being checked
 modifyInstallCost: Resolve(card, destination); // destination is a server or host, null for a normal Runner install
 modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
+modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
+modifyStealCost: Resolve(card); // returns {credits, clicks} additional costs
 modifyMaxHandSize: Resolve(player);
 modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
 ```
@@ -157,6 +171,17 @@ abilities: [{
 canBeRezzed: function() { return currentPhase.identifier == "Corp 2.2"; }
 ```
 
+### Corp install destination restriction
+
+```js
+installOnlyIn: function(server) {
+  return server == corp.HQ || server == corp.RnD || server == corp.archives;
+}
+```
+
+`ChoicesCardInstall` and Corp upgrade planning both respect this hook. Runner
+card hosting restrictions continue to use `installOnlyOn(host)`.
+
 ---
 
 ## Engine Functions — Quick Reference
@@ -168,7 +193,14 @@ GainCredits(player, amount, reason, source);
 LoseCredits(player, amount);
 SpendCredits(player, amount, reason, source, callback, context);
 CheckCredits(player, amount); // true if player can afford
+CreditPoolCanBeUsed(player, action, reason, source); // pool only; hosted/temporary credits are separate
 ```
+
+An active card can temporarily forbid pool spending or loss with
+`preventCreditPoolUse(player, action, doing, card)`. Return `true` to lock the
+pool for that action. `AvailableCredits` and `CheckCredits` will still count
+eligible hosted credits and Runner temporary credits, and `SpendCredits` and
+`LoseCredits` will leave the locked pool unchanged.
 
 ### Clicks
 
@@ -176,6 +208,7 @@ CheckCredits(player, amount); // true if player can afford
 SpendClicks(player, n);
 GainClicks(player, n);
 CheckClicks(player, n); // alias CheckActionClicks
+PlayClickCost(card); // 1 normally, 2 for Double, including active modifiers
 ```
 
 ### Cards / Zones
@@ -192,9 +225,17 @@ Install(
   position,
   returnToPhase,
   onInstallResolve,
-  context
+  context,
+  onCancelResolve,
+  onPaymentComplete,
+  allowCancel,
+  onInstallComplete
 );
 ```
+
+Use `onInstallComplete` when a follow-up effect must wait until the card has
+moved to its install destination and all `responseOnInstall` triggers have
+finished. `onInstallResolve` runs earlier, before payment and card movement.
 
 ### Damage / Tags
 
@@ -202,6 +243,7 @@ Install(
 Damage('net' | 'meat' | 'brain', amount, preventable);
 AddTags(n);
 RemoveTags(n);
+Purge(afterPurge?, context?);
 ```
 
 ### Counters
@@ -219,6 +261,7 @@ Trace(strength, callback); // callback(successful: bool)
 Break(subroutine);
 CheckUnbrokenSubroutines();
 ChoicesEncounteredSubroutines(); // unbroken + unlocked subs (respects _lockedFromBreak)
+Rez(card, ignoreAllCosts, onRezResolve, context, allowCancel, costReduction, afterRezResponses);
 ```
 
 ### Servers / Locations
@@ -236,6 +279,7 @@ runner.grip / runner.stack / runner.heap;
 ```js
 CheckCardType(card, ["ice","asset",...])
 CheckSubType(card, "Barrier")
+StealCost(card); // {credits, clicks}, including printed and active additional costs
 InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)
@@ -465,9 +509,9 @@ AIEconomyInstall: function() {
 },
 ```
 
-**`AIEconomyPlay: <number>`** — plain numeric property (not a function in existing usage) for prioritizing playing an economy operation/event.
+**`AIEconomyPlay: <number>`** — plain numeric property (not a function in existing usage) for prioritizing playing an economy operation/event. Both AI sides consume it; Corp declarations join the main-phase economy list after the established core economy cards.
 
-**`AIEconomyTrigger: <number>`**, **`AIDrawTrigger: <number>`**, **`AIPlayWhenCan: <number>`**, **`AIPlayToDraw: <number>`** — plain numeric priority properties (not functions) used to rank competing trigger/play options in their respective decision loops. Higher wins.
+**`AIEconomyTrigger: <number>`**, **`AIDrawTrigger: <number>`**, **`AIPlayWhenCan: <number>`**, **`AIPlayToDraw: <number>`** — plain numeric priority properties (not functions) used to rank competing trigger/play options in their respective decision loops. Higher wins. Corp operations with `AIPlayWhenCan` are proactively checked after the built-in urgent-operation list and should also validate their opportunity with `AIWouldPlay` or `Enumerate`.
 
 **`AIPlayToRemoveTags: function() { return n; }`** — how many tags this removes if played; used to prioritize tag-removal.
 

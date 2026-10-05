@@ -23,12 +23,20 @@ context.AllottedClicks = player => player === runner ? 4 : 3;
 context.InstalledCards = player => player === runner ? runner.cards : servers.reduce((cards, server) => cards.concat(server.ice, server.root), []);
 context.ActiveCards = player => {
   const runnerCards = runner.cards.concat(runner.identityCard ? [runner.identityCard] : []);
-  const corpCards = corp.scoreArea;
+  const corpCards = corp.scoreArea.concat(
+    servers.reduce(
+      (cards, currentServer) =>
+        cards.concat(currentServer.root.filter(card => card.rezzed)),
+      [],
+    ),
+  );
   return player === runner ? runnerCards : player === corp ? corpCards : runnerCards.concat(corpCards);
 };
 context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
+context.CheckInstallDestination = (card, destination) =>
+  typeof card.installOnlyIn !== 'function' || card.installOnlyIn(destination);
 context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';
 context.CheckScore = (card, ignoreRequirement) => !runner.cards.some(active =>
   !active.disabled && (active.agendasInstalledThisTurn || []).includes(card));
@@ -46,7 +54,7 @@ context.ServerName = server => server.serverName || 'Regression server';
 vm.createContext(context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
-['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js'].forEach(file =>
+['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js', 'sets/vantagepoint.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
@@ -819,6 +827,51 @@ test('Nisei activation and security evaluation share the global ETR policy hook'
   assert.strictEqual(options.length, 1);
   assert.deepStrictEqual(calls, [target, target]);
 });
+test('active installed upgrades contribute declared global ETR uses', () => {
+  const redRoom = card(36045);
+  redRoom.rezzed = true;
+  redRoom.power = 1;
+  const hq = {serverName: 'HQ', ice: [], root: [redRoom], cards: []};
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const target = {serverName: 'Remote 0', ice: [etr()], root: [agenda]};
+  corp.HQ = hq;
+  servers = [hq, target];
+  runner.agendaPoints = 5;
+  runner.creditPool = 10;
+  context.playerTurn = corp;
+  const oldCorpAI = corp.AI;
+  corp.AI = ai;
+  assert.strictEqual(ai._globalETRUses(target), 1);
+  assert.strictEqual(ai._globalETRUses(hq), 0, 'Red Room cannot defend its own server');
+  corp.AI = oldCorpAI;
+});
+test('upgrade planning redirects a central-only card away from a preferred remote', () => {
+  const redRoom = card(36045);
+  const hq = {serverName: 'HQ', ice: [], root: [], cards: []};
+  const rnd = {serverName: 'R&D', ice: [], root: [], cards: []};
+  const archives = {serverName: 'Archives', ice: [], root: [], cards: []};
+  const remote = {serverName: 'Remote 0', ice: [etr()], root: []};
+  const oldHQ = corp.HQ;
+  const oldRnD = corp.RnD;
+  const oldArchives = corp.archives;
+  const oldRemotes = corp.remoteServers;
+  const oldNonEmpty = ai._nonEmptyProtectedRemotes;
+  const oldProtectionScore = ai._protectionScore;
+  corp.HQ = hq;
+  corp.RnD = rnd;
+  corp.archives = archives;
+  corp.remoteServers = [remote];
+  ai._nonEmptyProtectedRemotes = () => [remote];
+  ai._protectionScore = target =>
+    target === remote ? 0 : target === archives ? 1 : target === hq ? 3 : 4;
+  assert.strictEqual(ai._bestServerToUpgrade(redRoom), archives);
+  ai._nonEmptyProtectedRemotes = oldNonEmpty;
+  ai._protectionScore = oldProtectionScore;
+  corp.HQ = oldHQ;
+  corp.RnD = oldRnD;
+  corp.archives = oldArchives;
+  corp.remoteServers = oldRemotes;
+});
 test('breaker-compatible hosted credits count but trash-only credits do not', () => {
   const wall = ice(['End the run.', 'End the run.'], [[['endTheRun']], [['endTheRun']]]);
   const breaker = {player: runner, strength: 3, subTypes: ['Icebreaker', 'Fracter'],
@@ -1493,6 +1546,88 @@ test('poor Corp does not treat a generic remote asset as emergency stakes', () =
   assert.strictEqual(ai._serverHasStakes(remote), false);
   remote.root[0].subTypes = ['Hostile'];
   assert.strictEqual(ai._serverHasStakes(remote), true);
+});
+test('Archives stakes reflect visible cards, backdoors, and observed pressure', () => {
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: []};
+  const oldArchivesIsBackdoorToHQ = ai._archivesIsBackdoorToHQ;
+  const oldServerRunPressure = ai._serverRunPressure;
+  Object.assign(corp, {
+    HQ: {serverName: 'HQ', cards: [], ice: [], root: []},
+    RnD: {serverName: 'R&D', cards: [{cardType: 'agenda'}], ice: [], root: []},
+    archives,
+  });
+  try {
+    ai._archivesIsBackdoorToHQ = () => false;
+    ai._serverRunPressure = () => ({penalty: 0});
+    assert.strictEqual(ai._serverHasStakes(archives), false);
+    archives.cards.push({cardType: 'agenda'});
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    archives.cards = [];
+    ai._archivesIsBackdoorToHQ = () => true;
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    ai._archivesIsBackdoorToHQ = () => false;
+    ai._serverRunPressure = () => ({penalty: 1});
+    assert.strictEqual(ai._serverHasStakes(archives), true);
+    assert.strictEqual(
+      ai._serverHasStakes(corp.RnD),
+      false,
+      'hidden R&D contents must not bypass the economy reserve',
+    );
+  } finally {
+    ai._archivesIsBackdoorToHQ = oldArchivesIsBackdoorToHQ;
+    ai._serverRunPressure = oldServerRunPressure;
+  }
+});
+test('ice protection skips a higher-ranked server whose next layer is blocked', () => {
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: [], score: 5};
+  const rndIce = etr(); rndIce.rezzed = false;
+  const rnd = {serverName: 'R&D', cards: [], ice: [rndIce], root: [], score: 0};
+  const archives = {serverName: 'Archives', cards: [], ice: [], root: [], score: 1};
+  const oldProtectionScore = ai._protectionScore;
+  const oldEvaluateServerSecurity = ai._evaluateServerSecurity;
+  const oldEmptyProtectedRemotes = ai._emptyProtectedRemotes;
+  const oldHVTsInstalled = ai._HVTsInstalled;
+  const oldArchivesIsBackdoorToHQ = ai._archivesIsBackdoorToHQ;
+  Object.assign(corp, {HQ: hq, RnD: rnd, archives, remoteServers: []});
+  runner.identityCard = {faction: 'Criminal'};
+  try {
+    ai._protectionScore = target => target ? target.score : 4;
+    ai._evaluateServerSecurity = () => ({isSecure: false});
+    ai._emptyProtectedRemotes = () => [{}];
+    ai._HVTsInstalled = () => 0;
+    ai._archivesIsBackdoorToHQ = () => true;
+    ai._protectionInstallsThisTurn = [];
+    ai._serverProtectionDebt = new Map();
+    assert.strictEqual(ai._shouldInstallIceLayer(rnd, false), false);
+    assert.strictEqual(ai._shouldInstallIceLayer(archives, false), true);
+    const eligibilityChecks = [];
+    assert.strictEqual(
+      ai._serverToProtect(
+        false,
+        false,
+        (server, security) => {
+          eligibilityChecks.push({server, security});
+          return ai._shouldInstallIceLayer(server, false, security);
+        },
+      ),
+      archives,
+    );
+    assert(
+      eligibilityChecks.every((entry) => entry.security),
+      'layer eligibility receives each ranked server security result',
+    );
+    assert.deepStrictEqual(
+      eligibilityChecks.map((entry) => entry.server),
+      [rnd, archives],
+      'layer eligibility stops after finding the first viable ranked server',
+    );
+  } finally {
+    ai._protectionScore = oldProtectionScore;
+    ai._evaluateServerSecurity = oldEvaluateServerSecurity;
+    ai._emptyProtectedRemotes = oldEmptyProtectedRemotes;
+    ai._HVTsInstalled = oldHVTsInstalled;
+    ai._archivesIsBackdoorToHQ = oldArchivesIsBackdoorToHQ;
+  }
 });
 test('Corp turn-start protection aging skips the opening turn and then runs once', () => {
   let calls = 0;

@@ -1281,14 +1281,14 @@ coreSet[1031] = {
       Enumerate: function () {
         if (!CheckActionClicks(runner, 1)) return [];
         // Must have an agenda in score area to forfeit
-        if (runner.scoreArea.length == 0) return [];
+        if (ChoicesForfeitableAgendas(runner).length == 0) return [];
         return [{}];
       },
       Resolve: function (params) {
         SpendClicks(runner, 1);
         var dataDealerCard = this;
         // Choose agenda to forfeit
-        var choices = ChoicesArrayCards(runner.scoreArea);
+        var choices = ChoicesForfeitableAgendas(runner);
         
         // AI: Prefer the lowest-value agenda
         if (runner.AI != null && choices.length > 1) {
@@ -1308,8 +1308,8 @@ coreSet[1031] = {
           runner,
           choices,
           function (params) {
-            Forfeit(params.card, function () {
-              GainCredits(runner, 9, "", dataDealerCard);
+            Forfeit(params.card, function (wasForfeited) {
+              if (wasForfeited) GainCredits(runner, 9, "", dataDealerCard);
             });
           },
           null,
@@ -2419,18 +2419,21 @@ coreSet[1061] = {
 		//damage can be prevented
         Damage("core", 1, true);
       },
+      visual: { y: 103, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
+      visual: { y: 119, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
+      visual: { y: 137, h: 16 },
     },
   ],
 };
@@ -2483,12 +2486,14 @@ coreSet[1063] = {
 		//damage can be prevented
         Damage("core", 1, true);
       },
+      visual: { y: 101, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
+      visual: { y: 118, h: 16 },
     },
   ],
 };
@@ -2876,6 +2881,7 @@ coreSet[1074] = {
         ChangePhase(phases.runDecideContinue);
         Derez(cellPortal);
       },
+      visual: { y: 88, h: 64 },
     },
   ],
 };
@@ -2896,6 +2902,7 @@ coreSet[1075] = {
       Resolve: function () {
         attackedServer.ice[approachIce].chumEffectActive = true;
       },
+      visual: { y: 111, h: 48 },
     },
   ],
   modifyStrength: {
@@ -2949,6 +2956,7 @@ coreSet[1076] = {
           Trash(attackedServer.ice[approachIce], true);
         });
       },
+      visual: { y: 74, h: 32 },
     },
   ],
 };
@@ -2969,6 +2977,7 @@ coreSet[1077] = {
 		//damage can be prevented
         Damage("net", 3, true);
       },
+      visual: { y: 66, h: 16 },
     },
   ],
 };
@@ -2989,12 +2998,14 @@ coreSet[1078] = {
 		//damage can be prevented
         Damage("net", 2, true);
       },
+      visual: { y: 66, h: 16 },
     },
     {
       text: "End the run.",
       Resolve: function () {
         EndTheRun();
       },
+      visual: { y: 84, h: 16 },
     },
   ],
 };
@@ -3077,6 +3088,7 @@ coreSet[1088] = {
           if (successful) AddCounters(attackedServer.ice[approachIce], "power");
         });
       },
+      visual: { y: 158, h: 32 },
     },
   ],
   abilities: [
@@ -3153,6 +3165,7 @@ coreSet[1089] = {
           if (successful) AddTags(1);
         });
       },
+      visual: { y: 138, h: 32 },
     },
   ],
 };
@@ -3315,6 +3328,7 @@ coreSet[1112] = {
           if (successful) AddTags(1);
         });
       },
+      visual: { y: 78, h: 32 },
     },
   ],
 };
@@ -3334,6 +3348,7 @@ coreSet[1113] = {
       Resolve: function () {
         EndTheRun();
       },
+      visual: { y: 66, h: 16 },
     },
   ],
 };

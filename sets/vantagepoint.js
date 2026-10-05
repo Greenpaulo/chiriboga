@@ -1222,16 +1222,23 @@ cardSet[36015] = {
   memoryCost: 1,
   usedThisTurn: false,
   runningWithThis: false,
-  _stealthCreditCards: function () {
+  _stealthCreditCards: function (planningServer) {
     var baker = this;
-    return InstalledCards(runner).filter(function (card) {
-      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
-        return false;
-      return (
-        typeof card.canUseCredits !== "function" ||
-        card.canUseCredits("using", baker)
-      );
-    });
+    var storedAttackedServer = attackedServer;
+    if (planningServer && attackedServer === null)
+      attackedServer = planningServer;
+    try {
+      return InstalledCards(runner).filter(function (card) {
+        if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
+          return false;
+        return (
+          typeof card.canUseCredits !== "function" ||
+          card.canUseCredits("using", baker)
+        );
+      });
+    } finally {
+      attackedServer = storedAttackedServer;
+    }
   },
   responseOnRunnerTurnBegins: {
     Resolve: function () {
@@ -1303,12 +1310,12 @@ cardSet[36015] = {
       !this.usedThisTurn &&
       fromServer == corp.archives &&
       (toServer == corp.HQ || toServer == corp.RnD) &&
-      this._stealthCreditCards().length > 0
+      this._stealthCreditCards(fromServer).length > 0
     );
   },
   AIRunAbilityExtraPotential: function (server, potential) {
     if (server != corp.archives || this.usedThisTurn) return 0;
-    if (this._stealthCreditCards().length < 1) return 0;
+    if (this._stealthCreditCards(server).length < 1) return 0;
     var redirectedPotential = Math.max(
       runner.AI._getCachedPotential(corp.HQ),
       runner.AI._getCachedPotential(corp.RnD),
@@ -1406,6 +1413,45 @@ cardSet[36017] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 0,
+  _lookAtTopOfRnD: function () {
+    if (corp.RnD.cards.length < 1) return;
+    var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
+    topCard.knownToRunner = true;
+    Log(GetTitle(this) + " looks at the top card of R&D");
+  },
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (
+        card &&
+        card.player == runner &&
+        CheckCardType(card, ["hardware"]) &&
+        corp.RnD.cards.length > 0
+      )
+        return [{}];
+      return [];
+    },
+    Resolve: function () {
+      this._lookAtTopOfRnD();
+    },
+    text: "Look at the top card of R&D",
+  },
+  responseOnTrash: {
+    Enumerate: function (cards) {
+      if (corp.RnD.cards.length < 1) return [];
+      for (var i = 0; i < cards.length; i++) {
+        if (
+          cards[i].player == runner &&
+          CheckCardType(cards[i], ["hardware"])
+        )
+          return [{}];
+      }
+      return [];
+    },
+    Resolve: function () {
+      this._lookAtTopOfRnD();
+    },
+    text: "Look at the top card of R&D",
+  },
 };
 
 //Aircheck (36018)
@@ -1422,8 +1468,100 @@ cardSet[36018] = {
   cardType: "event",
   subTypes: ["Run", "Stealth"],
   playCost: 1,
+  runningWithThis: false,
+  primaryRun: false,
+  primaryRunWasSuccessful: false,
+  pendingRunServer: null,
+  credits: 0,
+  Enumerate: function () {
+    return [
+      {server: corp.HQ, label: "HQ"},
+      {server: corp.RnD, label: "R&D"},
+    ];
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    PlaceCredits(this, 4);
+    this.runningWithThis = true;
+    this.primaryRun = true;
+    this.primaryRunWasSuccessful = false;
+    this.pendingRunServer = null;
+    MakeRun(params.server);
+  },
+  canUseCredits: function () {
+    return this.runningWithThis;
+  },
+  preventCreditPoolUse: function (player, action) {
+    return this.runningWithThis && player == runner &&
+      (action == "spend" || action == "lose");
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (this.runningWithThis && this.primaryRun)
+        this.primaryRunWasSuccessful = true;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Enumerate: function () {
+      if (!this.runningWithThis || !this.primaryRun)
+        return [];
+      if (!this.primaryRunWasSuccessful) return [];
+      var choices = ChoicesExistingServers().filter(function (choice) {
+        return typeof choice.server.cards === "undefined";
+      });
+      choices.push({server: null, label: "Do not run", button: "Continue"});
+      if (runner.AI && choices.length > 1) {
+        var bestChoice = choices[choices.length - 1];
+        var bestPotential = 0;
+        for (var i = 0; i < choices.length - 1; i++) {
+          var potential = runner.AI._getCachedPotential(choices[i].server);
+          if (potential > bestPotential) {
+            bestPotential = potential;
+            bestChoice = choices[i];
+          }
+        }
+        return [bestChoice];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.primaryRun = false;
+      this.primaryRunWasSuccessful = false;
+      this.pendingRunServer = params.server;
+    },
+    text: "You may run a remote server",
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function (postCleanupCallbacks) {
+      if (!this.runningWithThis) return;
+      if (this.pendingRunServer) {
+        var nextServer = this.pendingRunServer;
+        this.pendingRunServer = null;
+        postCleanupCallbacks.push(function () {
+          MakeRun(nextServer);
+        });
+      } else {
+        this.runningWithThis = false;
+        this.primaryRun = false;
+        this.primaryRunWasSuccessful = false;
+      }
+    },
+  },
+  AIRunEventExtraPotential: function (server, potential) {
+    if (server != corp.HQ && server != corp.RnD) return 0;
+    return potential > 1.5 ? 0.2 : 0.05;
+  },
+  AIRunEventExtraCredits: 4,
+  AIRunEventModify: function () {
+    this.storedAIRunnerCreditPool = runner.creditPool;
+    runner.creditPool = this.playCost;
+  },
+  AIRunEventRestore: function () {
+    runner.creditPool = this.storedAIRunnerCreditPool;
+    this.storedAIRunnerCreditPool = null;
+  },
+  AIWorthKeeping: function () {
+    return true;
   },
 };
 
@@ -1440,8 +1578,94 @@ cardSet[36019] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  lingeringEffectTarget: null,
+  runningWithThis: false,
+  Enumerate: function () {
+    var programs = ChoicesArrayInstall(runner.stack, true, function (card) {
+      return CheckCardType(card, ["program"]) && !CheckSubType(card, "Virus");
+    });
+    var servers = ChoicesExistingServers();
+    var choices = [];
+    for (var i = 0; i < programs.length; i++) {
+      for (var j = 0; j < servers.length; j++) {
+        choices.push({
+          card: programs[i].card,
+          host: programs[i].host,
+          server: servers[j].server,
+          label:
+            programs[i].label + "; run " + ServerName(servers[j].server),
+        });
+      }
+    }
+    return choices;
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    Shuffle(runner.stack);
+    var betaBuild = this;
+    Install(
+      params.card,
+      params.host,
+      true,
+      null,
+      true,
+      null,
+      this,
+      null,
+      null,
+      false,
+      function () {
+        betaBuild.lingeringEffectTarget = params.card;
+        betaBuild.runningWithThis = true;
+        MakeRun(params.server);
+      },
+    );
+  },
+  automaticOnUninstall: {
+    Resolve: function (card) {
+      if (card == this.lingeringEffectTarget)
+        this.lingeringEffectTarget = null;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      this.runningWithThis = false;
+      if (!this.lingeringEffectTarget) return;
+      var target = this.lingeringEffectTarget;
+      this.lingeringEffectTarget = null;
+      MoveCard(target, runner.stack);
+      Log(GetTitle(target) + " added to top of the stack");
+    },
+    automatic: true,
+  },
+  AIPreferredPlayChoice: function (choices) {
+    var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(
+      runner.stack,
+      InstalledCards(runner),
+    );
+    var preferredServer = null;
+    if (runner.AI.serverList && runner.AI.serverList.length > 0)
+      preferredServer = runner.AI.serverList[0].server;
+    for (var i = 0; i < choices.length; i++) {
+      if (
+        (!preferredCard || choices[i].card == preferredCard) &&
+        (!preferredServer || choices[i].server == preferredServer)
+      )
+        return i;
+    }
+    return choices.length > 0 ? 0 : -1;
+  },
+  AIIcebreakerTutor: function () {
+    return runner.stack.filter(function (card) {
+      return CheckCardType(card, ["program"]) &&
+        CheckSubType(card, "Icebreaker") &&
+        !CheckSubType(card, "Virus");
+    });
+  },
+  AIWorthKeeping: function (installedRunnerCards) {
+    return this.AIIcebreakerTutor(installedRunnerCards).length > 0;
   },
 };
 
@@ -1460,7 +1684,65 @@ cardSet[36020] = {
   cardType: "hardware",
   subTypes: ["Console", "Stealth"],
   installCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  credits: 0,
+  responseOnRunBegins: {
+    Enumerate: function () {
+      var choices = ChoicesArrayCards(runner.grip, function (card) {
+        return CheckCardType(card, ["hardware"]) && CheckTrash(card);
+      });
+      if (choices.length < 1) return [];
+      choices.push({card: null, label: "Do not trash hardware", button: "Continue"});
+      if (runner.AI) {
+        var trashChoices = choices.slice(0, choices.length - 1);
+        var index = runner.AI._indexOfBestDiscardOption(trashChoices);
+        var runCost = runner.AI._getCachedCost(attackedServer);
+        if (
+          index > -1 &&
+          (runCost > AvailableCredits(runner) ||
+            !runner.AI.cardsWorthKeeping.includes(trashChoices[index].card))
+        )
+          return [trashChoices[index]];
+        return [choices[choices.length - 1]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params.card) return;
+      Trash(
+        params.card,
+        false,
+        function () {
+          PlaceCredits(this, 2);
+        },
+        this,
+      );
+    },
+    text: "You may trash hardware from your grip to place 2[c]",
+  },
+  canUseCredits: function () {
+    return attackedServer !== null;
+  },
+  AIRunPoolCreditOffset: function () {
+    return this.credits;
+  },
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost) {
+    if (runCreditCost <= AvailableCredits(runner)) return 0;
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (runner.grip[i] != this && CheckCardType(runner.grip[i], ["hardware"]))
+        return 2;
+    }
+    return 0;
+  },
+  AIEconomyInstall: 2,
+  AIWorthKeeping: function () {
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (runner.grip[i] != this && CheckCardType(runner.grip[i], ["hardware"]))
+        return true;
+    }
+    return false;
+  },
 };
 
 //Touchstone (36021)
@@ -1476,7 +1758,42 @@ cardSet[36021] = {
   cardType: "hardware",
   subTypes: ["Stealth"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  credits: 0,
+  playedEventThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.playedEventThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.playedEventThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnPlay: {
+    Resolve: function (card) {
+      if (card.player != runner || !CheckCardType(card, ["event"])) return;
+      if (this.playedEventThisTurn) return;
+      this.playedEventThisTurn = true;
+      if (CheckActive(this)) PlaceCredits(this, 1);
+    },
+    availableWhenInactive: true,
+  },
+  canUseCredits: function () {
+    return attackedServer !== null;
+  },
+  AIRunPoolCreditOffset: function () {
+    return this.credits;
+  },
+  AIEconomyInstall: 2,
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Read-Write Share (36022)
@@ -1494,7 +1811,77 @@ cardSet[36022] = {
   subTypes: [],
   installCost: 0,
   memoryCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  hostedCards: [],
+  _hostFromGripChoices: function () {
+    if (this.hostedCards.length >= 4 || runner.grip.length < 1) return [];
+    var choices = ChoicesArrayCards(runner.grip);
+    choices.push({ card: null, label: "Decline", button: "Decline" });
+    if (runner.AI != null) {
+      if (runner.grip.length < 3) return [choices[choices.length - 1]];
+      var lowestEloChoice = choices[0];
+      for (var i = 1; i < choices.length - 1; i++) {
+        if ((choices[i].card.elo || 1500) < (lowestEloChoice.card.elo || 1500))
+          lowestEloChoice = choices[i];
+      }
+      return [lowestEloChoice];
+    }
+    return choices;
+  },
+  _hostFromGripResolve: function (params) {
+    if (!params || !params.card) return;
+    MoveCard(params.card, this.hostedCards);
+    params.card.host = this;
+    params.card.faceUp = false;
+    params.card.notInstalled = true;
+    Draw(runner, 1);
+  },
+  responseOnInstall: {
+    Enumerate: function (installedCard) {
+      if (installedCard != this) return [];
+      return this._hostFromGripChoices();
+    },
+    Resolve: function (params) {
+      this._hostFromGripResolve(params);
+    },
+    text: "Read-Write Share: host a card from the grip to draw 1 card?",
+  },
+  responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      return this._hostFromGripChoices();
+    },
+    Resolve: function (params) {
+      this._hostFromGripResolve(params);
+    },
+    text: "Read-Write Share: host a card from the grip to draw 1 card?",
+  },
+  abilities: [
+    {
+      text: "[trash]: Shuffle all hosted cards into your stack.",
+      Enumerate: function () {
+        if (this.hostedCards.length < 1) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var hosted = this.hostedCards.slice();
+        for (var i = 0; i < hosted.length; i++) {
+          hosted[i].host = null;
+          hosted[i].notInstalled = false;
+          MoveCard(hosted[i], runner.stack);
+        }
+        Trash(
+          this,
+          false,
+          function () {
+            Shuffle(runner.stack);
+          },
+          this,
+        );
+      },
+    },
+  ],
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Sipa (36023)
@@ -1510,7 +1897,77 @@ cardSet[36023] = {
   subTypes: [],
   installCost: 1,
   memoryCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnPassesIce: {
+    Enumerate: function () {
+      if (this.usedThisTurn || !attackedServer || approachIce < 0) return [];
+      var passedIce = attackedServer.ice[approachIce];
+      if (!passedIce || approachIce != attackedServer.ice.length - 1) return [];
+      if (!passedIce.subroutines || passedIce.subroutines.length < 1) return [];
+      for (var i = 0; i < passedIce.subroutines.length; i++) {
+        if (!passedIce.subroutines[i].broken) return [];
+      }
+      var choices = ChoicesInstalledCards(corp, function (card) {
+        return CheckCardType(card, ["ice"]) && card != passedIce;
+      });
+      var declineChoice = { card: null, label: "Decline", button: "Decline" };
+      choices.push(declineChoice);
+      if (runner.AI != null) {
+        var passedScore = runner.AI._iceComparisonScore(passedIce);
+        var bestChoice = declineChoice;
+        var bestScore = passedScore;
+        for (var j = 0; j < choices.length - 1; j++) {
+          var targetScore = runner.AI._iceComparisonScore(choices[j].card);
+          if (targetScore < bestScore) {
+            bestScore = targetScore;
+            bestChoice = choices[j];
+          }
+        }
+        runner.AI.preferred = { title: "Sipa", option: bestChoice };
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.usedThisTurn = true;
+      if (!params || !params.card) return;
+      var passedIce = attackedServer.ice[approachIce];
+      var passedServer = GetServer(passedIce);
+      var otherServer = GetServer(params.card);
+      if (!passedServer || !otherServer) return;
+      var passedIndex = passedServer.ice.indexOf(passedIce);
+      var otherIndex = otherServer.ice.indexOf(params.card);
+      var passedRemoteIndex = corp.remoteServers.indexOf(passedServer);
+      MoveCard(passedIce, otherServer.ice, otherIndex);
+      // Moving the only card out briefly empties a remote, but a swap must not
+      // destroy that server before the replacement card moves in.
+      if (
+        passedRemoteIndex > -1 &&
+        corp.remoteServers.indexOf(passedServer) < 0
+      )
+        corp.remoteServers.splice(passedRemoteIndex, 0, passedServer);
+      MoveCard(params.card, passedServer.ice, passedIndex);
+      Log(
+        GetTitle(this) + " swapped " + GetTitle(passedIce) + " with " +
+          GetTitle(params.card),
+      );
+    },
+    text: "Sipa: swap the fully broken outermost ice?",
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Stowaway (36024)
@@ -1527,7 +1984,38 @@ cardSet[36024] = {
   subTypes: ["Trojan"],
   installCost: 0,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  installOnlyOn: function (card) {
+    return card.player == corp && CheckCardType(card, ["ice"]);
+  },
+  responseOnRunSuccessful: {
+    Resolve: function (server) {
+      if (this.host && GetServer(this.host) == server) GainCredits(runner, 2, "", this);
+    },
+    automatic: true,
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (choices.length < 1) return -1;
+    var bestIndex = 0;
+    var bestIceCount = -1;
+    for (var i = 0; i < choices.length; i++) {
+      var server = GetServer(choices[i].host);
+      var iceCount = server && server.ice ? server.ice.length : 0;
+      if (iceCount > bestIceCount) {
+        bestIceCount = iceCount;
+        bestIndex = i;
+      }
+    }
+    return bestIndex;
+  },
+  AIRunExtraPotential: function (server) {
+    return this.host && GetServer(this.host) == server ? 0.6 : 0;
+  },
+  AIBreachNotRequired: true,
+  AIWorthKeeping: function () {
+    return InstalledCards(corp).some(function (card) {
+      return CheckCardType(card, ["ice"]);
+    });
+  },
 };
 
 //Word on the Street (36025)
@@ -1543,7 +2031,60 @@ cardSet[36025] = {
   cardType: "resource",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  corpCardsInstalledThisTurn: [],
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.corpCardsInstalledThisTurn = [];
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.corpCardsInstalledThisTurn = [];
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card.player == corp && !this.corpCardsInstalledThisTurn.includes(card))
+        this.corpCardsInstalledThisTurn.push(card);
+    },
+    availableWhenInactive: true,
+  },
+  responsePreventableScore: {
+    Resolve: function () {
+      if (!intended.score || !this.corpCardsInstalledThisTurn.includes(intended.score))
+        return;
+      this.agendaPoints = -1;
+      this.cannotForfeit = true;
+      this.faceUp = true;
+      MoveCard(this, corp.scoreArea);
+      Log(GetTitle(this) + " was added to the Corp's score area as an agenda worth -1 point");
+    },
+    automatic: true,
+  },
+  responseOnScored: {
+    Enumerate: function () {
+      return [{}];
+    },
+    Resolve: function () {
+      Trash(
+        this,
+        true,
+        function () {
+          GainCredits(runner, 4, "", this);
+          Draw(runner, 1);
+        },
+        this,
+      );
+    },
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Méliès City Luxury Line (36026)
@@ -1560,7 +2101,13 @@ cardSet[36026] = {
   subTypes: ["Expansion"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  stealCost: { clicks: 1 },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) GainClicks(corp, 1);
+    },
+    automatic: true,
+  },
 };
 
 //Synchrocyclotron (36027)
@@ -1576,7 +2123,57 @@ cardSet[36027] = {
   subTypes: ["Facility"],
   rezCost: 3,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  playedDoubleOperationThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.playedDoubleOperationThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.playedDoubleOperationThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnPlay: {
+    Resolve: function (card) {
+      if (
+        card.player == corp &&
+        CheckCardType(card, ["operation"]) &&
+        CheckSubType(card, "Double")
+      )
+        this.playedDoubleOperationThisTurn = true;
+    },
+    availableWhenInactive: true,
+  },
+  modifyPlayClickCost: {
+    Resolve: function (card) {
+      if (
+        !this.playedDoubleOperationThisTurn &&
+        card.player == corp &&
+        CheckCardType(card, ["operation"]) &&
+        CheckSubType(card, "Double")
+      )
+        return -1;
+      return 0;
+    },
+  },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.creditPool < this.rezCost) return -1;
+    var doubles = corp.HQ.cards.filter(function (card) {
+      return CheckCardType(card, ["operation"]) && CheckSubType(card, "Double");
+    });
+    if (doubles.length < 1) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //Ansel 2.0 (36028)
@@ -1596,11 +2193,176 @@ cardSet[36028] = {
   subTypes: ["Sentry", "Bioroid", "Destroyer"],
   rezCost: 8,
   strength: 5,
+  runnerAbilities: [
+    {
+      text: "Lose [click][click]: Break up to 2 subroutines on this ice.",
+      runnerAbility: true,
+      Enumerate: function () {
+        if (!CheckEncounter() || GetApproachEncounterIce() != this) return [];
+        if (!CheckClicks(runner, 2)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        LoseClicks(runner, 2);
+        Break(params.subroutine);
+        var choices = ChoicesEncounteredSubroutines();
+        if (choices.length < 1) return;
+        choices.push({ id: -1, label: "Done", button: "Done" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (choice) {
+            if (choice && choice.subroutine) Break(choice.subroutine);
+          },
+          "Ansel 2.0",
+          "Break up to 1 more subroutine",
+          this,
+        );
+      },
+    },
+  ],
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trash 1 installed Runner card.",
+      Resolve: function () {
+        var choices = ChoicesInstalledCards(runner, CheckTrash);
+        if (choices.length < 1) return;
+        if (corp.AI != null) {
+          var best = choices[0];
+          for (var i = 1; i < choices.length; i++) {
+            if ((choices[i].card.elo || 0) > (best.card.elo || 0)) best = choices[i];
+          }
+          corp.AI.preferred = { title: "Ansel 2.0", option: best };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (choice && choice.card) Trash(choice.card, true);
+          },
+          "Ansel 2.0",
+          "Trash 1 installed Runner card",
+          this,
+          "trash",
+        );
+      },
+      visual: { y: 103, h: 16 },
+    },
+    {
+      text: "Remove 1 card in the heap from the game.",
+      Resolve: function () {
+        var choices = ChoicesArrayCards(runner.heap);
+        if (choices.length < 1) return;
+        if (corp.AI != null) {
+          var best = choices[0];
+          for (var i = 1; i < choices.length; i++) {
+            if ((choices[i].card.elo || 0) > (best.card.elo || 0)) best = choices[i];
+          }
+          corp.AI.preferred = { title: "Ansel 2.0", option: best };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (choice && choice.card) RemoveFromGame(choice.card);
+          },
+          "Ansel 2.0",
+          "Remove 1 card in the heap from the game",
+          this,
+        );
+      },
+      visual: { y: 128, h: 32 },
+    },
+    {
+      text: "You may install 1 card from HQ or Archives.",
+      Resolve: function () {
+        var handOptions = ChoicesHandInstall(corp);
+        var archivesOptions = ChoicesArrayInstall(corp.archives.cards);
+        var sourceChoices = [];
+        if (handOptions.length > 0)
+          sourceChoices.push({ id: 0, label: "Install from HQ", button: "HQ" });
+        if (archivesOptions.length > 0)
+          sourceChoices.push({ id: 1, label: "Install from Archives", button: "Archives" });
+        sourceChoices.push({ id: -1, label: "Do not install", button: "Continue" });
+        var ansel = this;
+        if (corp.AI != null && typeof corp.AI._bestInstallOption === "function") {
+          var archiveIndex = corp.AI._bestInstallOption(archivesOptions, false);
+          var handIndex = corp.AI._bestInstallOption(handOptions, true);
+          var preferred = sourceChoices[sourceChoices.length - 1];
+          if (archiveIndex > -1)
+            preferred = sourceChoices.find(function (choice) { return choice.id === 1; });
+          else if (handIndex > -1)
+            preferred = sourceChoices.find(function (choice) { return choice.id === 0; });
+          corp.AI.preferred = { title: "Ansel 2.0", option: preferred };
+        }
+        DecisionPhase(
+          corp,
+          sourceChoices,
+          function (source) {
+            if (!source || source.id < 0) return;
+            var installChoices = source.id === 0 ? handOptions : archivesOptions;
+            DecisionPhase(
+              corp,
+              installChoices,
+              function (choice) {
+                if (choice && choice.card) Install(choice.card, choice.server);
+              },
+              "Ansel 2.0",
+              "Choose a card to install",
+              ansel,
+              "install",
+            );
+          },
+          "Ansel 2.0",
+          "You may install 1 card from HQ or Archives",
+          this,
+        );
+      },
+      visual: { y: 159, h: 32 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 182, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var installed = ChoicesInstalledCards(runner);
+    var programs = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]);
+    });
+    result.sr = [
+      installed.length < 1
+        ? [[]]
+        : programs.length > 0
+          ? [["misc_serious"]]
+          : [["misc_moderate"]],
+      runner.heap.length > 0 ? [["misc_moderate"]] : [[]],
+      corp.HQ.cards.length + corp.archives.cards.length > 0
+        ? [["misc_moderate"]]
+        : [[]],
+      [["endTheRun"]],
+    ];
+    return result;
+  },
+  AIImplementBreaker: function (
+    rc,
+    result,
+    point,
+    server,
+    cardStrength,
+    iceAI,
+    iceStrength,
+    clicksLeft,
+  ) {
+    if (this == iceAI.ice && clicksLeft >= 2) {
+      var breakresult = rc.SrBreak(this, iceAI, point, 2);
+      for (var i = 0; i < breakresult.length; i++)
+        breakresult[i].runner_clicks_spent += 2;
+      result = result.concat(breakresult);
+    }
     return result;
   },
 };
@@ -1621,10 +2383,37 @@ cardSet[36029] = {
   rezCost: 4,
   strength: 2,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 94, h: 16 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 114, h: 16 },
+    },
   ],
+  modifyRezCost: {
+    Resolve: function (card) {
+      if (card != this) return 0;
+      var otherUnrezzedIce = ChoicesInstalledCards(corp, function (installedCard) {
+        return (
+          installedCard != card &&
+          CheckCardType(installedCard, ["ice"]) &&
+          !installedCard.rezzed
+        );
+      });
+      return -otherUnrezzedIce.length;
+    },
+    availableWhenInactive: true,
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]], [["endTheRun"]]];
     return result;
   },
 };
@@ -1645,10 +2434,74 @@ cardSet[36030] = {
   rezCost: 4,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "You may draw 1 card.",
+      Resolve: function () {
+        var choices = [{ id: 0, label: "Do not draw", button: "Continue" }];
+        if (corp.RnD.cards.length > 0)
+          choices.unshift({ id: 1, label: "Draw 1 card", button: "Draw" });
+        if (corp.AI != null)
+          corp.AI.preferred = { title: "Sleipnir", option: choices[0] };
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (choice && choice.id === 1) Draw(corp, 1);
+          },
+          "Sleipnir",
+          "You may draw 1 card",
+          this,
+        );
+      },
+      visual: { y: 60, h: 16 },
+    },
+    {
+      text: "You may shuffle 1 card from HQ or Archives into R&D.",
+      Resolve: function () {
+        var choices = ChoicesArrayCards(corp.HQ.cards.concat(corp.archives.cards));
+        choices.push({ card: null, label: "Do not shuffle a card", button: "Continue" });
+        if (corp.AI != null) {
+          var preferred = choices[choices.length - 1];
+          for (var i = 0; i < choices.length - 1; i++) {
+            if (
+              choices[i].card.cardLocation == corp.archives.cards &&
+              (!preferred.card || (choices[i].card.elo || 0) > (preferred.card.elo || 0))
+            )
+              preferred = choices[i];
+          }
+          corp.AI.preferred = { title: "Sleipnir", option: preferred };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (choice) {
+            if (!choice || !choice.card) return;
+            MoveCard(choice.card, corp.RnD.cards);
+            Shuffle(corp.RnD.cards);
+          },
+          "Sleipnir",
+          "You may shuffle 1 card from HQ or Archives into R&D",
+          this,
+        );
+      },
+      visual: { y: 87, h: 32 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 114, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      corp.RnD.cards.length > 0 ? [["misc_minor"]] : [[]],
+      corp.HQ.cards.length + corp.archives.cards.length > 0
+        ? [["misc_moderate"]]
+        : [[]],
+      [["endTheRun"]],
+    ];
     return result;
   },
 };
@@ -1667,12 +2520,51 @@ cardSet[36031] = {
   subTypes: ["Code Gate"],
   rezCost: 1,
   strength: 1,
+  responseOnPassesIce: {
+    Resolve: function () {
+      if (
+        !attackedServer ||
+        approachIce < 0 ||
+        attackedServer.ice[approachIce] != this ||
+        runner.clickTracker > 0
+      )
+        return;
+      AddLingeringEffect({
+        modifyCannot: {
+          Resolve: function (id, card) {
+            return (
+              card &&
+              card.player == corp &&
+              (id == "steal" || id == "trash")
+            );
+          },
+        },
+        responseOnRunEnds: {
+          Resolve: function () {
+            RemoveLingeringEffect(this);
+          },
+          automatic: true,
+        },
+      });
+    },
+    automatic: true,
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "The Runner loses [click].",
+      Resolve: function () {
+        LoseClicks(runner, 1);
+      },
+      visual: { y: 57, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["loseClicks", "iceSpecificEffect"]]];
     return result;
+  },
+  AIIceSpecificEffect: function (poolCreditsLeft, otherCreditsLeft, clicksLeft) {
+    if (clicksLeft < 1) return ["misc_serious"];
+    return [];
   },
 };
 
@@ -1689,9 +2581,38 @@ cardSet[36032] = {
   cardType: "operation",
   subTypes: ["Transaction"],
   playCost: 5,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    var choices = [
+      {
+        credits: 6,
+        clicks: -1,
+        label: "Gain 6[c]; Runner gets -1 allotted click next turn",
+        button: "Gain 6[c]",
+      },
+      {
+        credits: 10,
+        clicks: 1,
+        label: "Gain 10[c]; Runner gets +1 allotted click next turn",
+        button: "Gain 10[c]",
+      },
+    ];
+    if (corp.AI != null) {
+      var preferred = choices[1];
+      if (
+        typeof AgendaPoints == "function" &&
+        typeof AgendaPointsToWin == "function" &&
+        AgendaPoints(runner) >= AgendaPointsToWin() - 1
+      )
+        preferred = choices[0];
+      return [preferred];
+    }
+    return choices;
   },
+  Resolve: function (params) {
+    GainCredits(corp, params.credits, "", this);
+    AddTempBonusClicks(runner, params.clicks);
+  },
+  AIEconomyPlay: 2,
 };
 
 //realloc() (36033)
@@ -1707,9 +2628,54 @@ cardSet[36033] = {
   cardType: "operation",
   subTypes: ["Double"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    var iceChoices = ChoicesInstalledCards(corp, function (card) {
+      return card.rezzed && CheckCardType(card, ["ice"]);
+    });
+    var pairs = [];
+    for (var i = 0; i < iceChoices.length; i++) {
+      for (var j = i + 1; j < iceChoices.length; j++) {
+        pairs.push({
+          cards: [iceChoices[i].card, iceChoices[j].card],
+          label:
+            GetTitle(iceChoices[i].card) +
+            " and " +
+            GetTitle(iceChoices[j].card),
+        });
+      }
+    }
+    if (corp.AI != null && pairs.length > 0) {
+      var best = pairs[0];
+      var bestValue = -Infinity;
+      for (var k = 0; k < pairs.length; k++) {
+        var value =
+          (pairs[k].cards[0].rezCost || 0) +
+          (pairs[k].cards[1].rezCost || 0);
+        if (typeof corp.AI._cardProtectionValue == "function") {
+          value -= 0.5 * corp.AI._cardProtectionValue(pairs[k].cards[0]);
+          value -= 0.5 * corp.AI._cardProtectionValue(pairs[k].cards[1]);
+        }
+        if (value > bestValue) {
+          bestValue = value;
+          best = pairs[k];
+        }
+      }
+      if (bestValue < 3) return [];
+      return [best];
+    }
+    return pairs;
   },
+  Resolve: function (params) {
+    if (!params || !params.cards || params.cards.length != 2) return;
+    for (var i = 0; i < params.cards.length; i++) {
+      GainCredits(corp, params.cards[i].rezCost || 0, "", this);
+      Derez(params.cards[i]);
+    }
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AIEconomyPlay: 1,
 };
 
 //Retirement Plan (36034)
@@ -1725,9 +2691,34 @@ cardSet[36034] = {
   cardType: "operation",
   subTypes: ["Double"],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    var choices = ChoicesArrayInstall(
+      corp.archives.cards,
+      false,
+      function (card) {
+        return CheckCardType(card, ["agenda", "asset", "ice"]);
+      },
+    );
+    if (
+      corp.AI != null &&
+      choices.length > 0 &&
+      typeof corp.AI._bestInstallOption == "function"
+    ) {
+      var bestIndex = corp.AI._bestInstallOption(choices, true);
+      if (bestIndex < 0) return [];
+      return [choices[bestIndex]];
+    }
+    return choices;
   },
+  Resolve: function (params) {
+    if (params && params.card) Install(params.card, params.server);
+  },
+  command: "install",
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AIPlayWhenCan: 1,
+  AIIsRecurOrTutor: true,
 };
 
 //Perfect Recall (36035)
@@ -1744,7 +2735,109 @@ cardSet[36035] = {
   subTypes: [],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  _scoringServer: null,
+  responseOnRez: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 1);
+    },
+    automatic: true,
+  },
+  responsePreventableScore: {
+    Resolve: function () {
+      this._scoringServer = intended.score ? GetServer(intended.score) : null;
+    },
+    automatic: true,
+  },
+  responseOnScored: {
+    Resolve: function () {
+      if (this._scoringServer && this._scoringServer == GetServer(this))
+        AddCounters(this, "power", 1);
+      this._scoringServer = null;
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      if (attackedServer && attackedServer == GetServer(this))
+        AddCounters(this, "power", 1);
+    },
+    automatic: true,
+  },
+  abilities: [
+    {
+      text: "Hosted power counter: Reveal 1 card in HQ and protect copies for this run.",
+      Enumerate: function () {
+        if (!attackedServer || !CheckCounters(this, "power", 1)) return [];
+        var choices = ChoicesArrayCards(corp.HQ.cards);
+        if (corp.AI != null) {
+          var cardsAtRisk = attackedServer.root.concat(attackedServer.cards || []);
+          var best = null;
+          var bestScore = 0;
+          for (var i = 0; i < choices.length; i++) {
+            var score = 0;
+            if (attackedServer == corp.HQ) score += 1;
+            for (var j = 0; j < cardsAtRisk.length; j++) {
+              if (GetTitle(cardsAtRisk[j]) == GetTitle(choices[i].card))
+                score += 20;
+            }
+            if (CheckCardType(choices[i].card, ["agenda"]))
+              score += 10 + (choices[i].card.agendaPoints || 0);
+            else score += choices[i].card.trashCost || 0;
+            if (score > bestScore) {
+              bestScore = score;
+              best = choices[i];
+            }
+          }
+          if (!best || bestScore < 1) return [];
+          return [best];
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        if (!params || !params.card) return;
+        RemoveCounters(this, "power", 1);
+        var protectedTitle = GetTitle(params.card);
+        Reveal(
+          params.card,
+          function () {
+            if (runner.AI != null && typeof runner.AI.GainInfoAboutHQCards == "function")
+              runner.AI.GainInfoAboutHQCards([params.card]);
+            AddLingeringEffect({
+              titleToProtect: protectedTitle,
+              modifyCannot: {
+                Resolve: function (id, card) {
+                  return (
+                    card &&
+                    card.player == corp &&
+                    GetTitle(card) == this.titleToProtect &&
+                    (id == "steal" || id == "trash")
+                  );
+                },
+              },
+              responseOnRunEnds: {
+                Resolve: function () {
+                  RemoveLingeringEffect(this);
+                },
+                automatic: true,
+              },
+            });
+          },
+          this,
+        );
+      },
+    },
+  ],
+  AIIsScoringUpgrade: true,
+  AIDefensiveValue: function (server) {
+    if (!server || corp.HQ.cards.length < 1) return 0;
+    return 2;
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  AIWouldRezBeforeScore: function (cardToScore, serverToScoreIn) {
+    return serverToScoreIn == GetServer(this) || GetServer(cardToScore) == GetServer(this);
+  },
 };
 
 //Méliès U: Only the Brightest (36036)
@@ -1767,6 +2860,194 @@ cardSet[36036] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
+  department: "HQ",
+  flipped: false,
+  _departmentChoices: function () {
+    return [
+      { department: "HQ", label: "Tenure Floors (HQ)" },
+      { department: "R&D", label: "Subsurface Labs (R&D)" },
+      { department: "Archives", label: "Disposal Grounds (Archives)" },
+    ];
+  },
+  _serverForDepartment: function (department) {
+    if (department == "HQ") return corp.HQ;
+    if (department == "R&D") return corp.RnD;
+    return corp.archives;
+  },
+  _departmentForServer: function (server) {
+    if (server == corp.HQ) return "HQ";
+    if (server == corp.RnD) return "R&D";
+    if (server == corp.archives) return "Archives";
+    return null;
+  },
+  _departmentTitle: function () {
+    if (this.department == "HQ") return "Tenure Floors";
+    if (this.department == "R&D") return "Subsurface Labs";
+    return "Disposal Grounds";
+  },
+  _departmentImageFile: function () {
+    if (this.department == "HQ") return "36036-0.webp";
+    if (this.department == "R&D") return "36036-1.webp";
+    return "36036-2.webp";
+  },
+  _showIdentityFace: function (imageFile) {
+    this.imageFile = imageFile;
+    if (
+      typeof this.renderer !== "undefined" &&
+      typeof cardRenderer !== "undefined"
+    ) {
+      var texture = cardRenderer.LoadTexture(
+        "images/" + ChangeImageFileToJPG(imageFile),
+      );
+      this.renderer.frontTexture = texture;
+      this.renderer.loresTexture = texture;
+      if (this.renderer.dummy) this.renderer.dummy.texture = texture;
+      if (typeof this.renderer.SetTextureToFront == "function")
+        this.renderer.SetTextureToFront();
+    }
+  },
+  _setDepartment: function (department) {
+    this.department = department;
+    this.flipped = false;
+    this.subTypes = ["Division"];
+    this._showIdentityFace("36036.png");
+  },
+  _flipToDepartment: function () {
+    this.flipped = true;
+    this.subTypes = ["Department"];
+    this._showIdentityFace(this._departmentImageFile());
+    Log(GetTitle(this) + " flipped to " + this._departmentTitle());
+  },
+  _flipToFront: function () {
+    this.flipped = false;
+    this.subTypes = ["Division"];
+    this._showIdentityFace("36036.png");
+    Log(GetTitle(this) + " flipped to its front side");
+  },
+  _bestArchiveCard: function () {
+    if (corp.archives.cards.length < 1) return null;
+    var choices = ChoicesArrayCards(corp.archives.cards);
+    if (corp.AI && typeof corp.AI._bestRecurToHQOption == "function") {
+      var preferred = corp.AI._bestRecurToHQOption(choices, corp.archives, true);
+      if (preferred) return preferred.card;
+    }
+    var best = corp.archives.cards[0];
+    for (var i = 1; i < corp.archives.cards.length; i++) {
+      if ((corp.archives.cards[i].elo || 0) > (best.elo || 0))
+        best = corp.archives.cards[i];
+    }
+    return best;
+  },
+  _resolveDepartmentEffect: function () {
+    if (corp.RnD.cards.length < 1) return;
+    var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
+    var trashChoice = {
+      id: 1,
+      label: "Trash " + GetTitle(topCard),
+      button: "Trash",
+    };
+    var keepChoice = { id: 0, label: "Keep the card", button: "Keep" };
+    var choices = [trashChoice, keepChoice];
+    if (corp.AI) {
+      var archiveCard = this._bestArchiveCard();
+      var topValue = topCard.elo || 1500;
+      var archiveValue = archiveCard ? archiveCard.elo || 1500 : 0;
+      corp.AI.preferred = {
+        title: this.title,
+        option: archiveCard && archiveValue > topValue ? trashChoice : keepChoice,
+      };
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || params.id !== 1) return;
+        Trash(
+          topCard,
+          true,
+          function (cardsTrashed) {
+            if (!cardsTrashed || !cardsTrashed.includes(topCard)) return;
+            if (corp.archives.cards.length < 1) return;
+            var archiveChoices = ChoicesArrayCards(corp.archives.cards);
+            if (corp.AI) {
+              var preferredCard = this._bestArchiveCard();
+              for (var i = 0; i < archiveChoices.length; i++) {
+                if (archiveChoices[i].card == preferredCard) {
+                  corp.AI.preferred = { title: this.title, option: archiveChoices[i] };
+                  break;
+                }
+              }
+            }
+            DecisionPhase(
+              corp,
+              archiveChoices,
+              function (archiveParams) {
+                if (!archiveParams || !archiveParams.card) return;
+                MoveCard(archiveParams.card, corp.HQ.cards);
+                Log(GetTitle(archiveParams.card) + " added from Archives to HQ");
+              },
+              this._departmentTitle(),
+              "Choose a card in Archives to add to HQ",
+              this,
+            );
+          },
+          this,
+        );
+      },
+      this._departmentTitle(),
+      "Look at the top card of R&D: " + GetTitle(topCard),
+      this,
+    );
+  },
+  responseOnCorpDiscardEnds: {
+    Enumerate: function () {
+      if (this.flipped) return [];
+      var choices = this._departmentChoices();
+      if (corp.AI) {
+        var preferred = choices[0];
+        var fewestIce = corp.HQ.ice.length;
+        for (var i = 1; i < choices.length; i++) {
+          var server = this._serverForDepartment(choices[i].department);
+          if (server.ice.length < fewestIce) {
+            preferred = choices[i];
+            fewestIce = server.ice.length;
+          }
+        }
+        corp.AI.preferred = { title: this.title, option: preferred };
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params && params.department) this._setDepartment(params.department);
+    },
+    text: "Secretly set Méliès U",
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function (server) {
+      if (!this.flipped && this._departmentForServer(server || attackedServer))
+        return [{}];
+      return [];
+    },
+    Resolve: function (server) {
+      var successfulServer = this._departmentForServer(server) ? server : attackedServer;
+      if (!this._departmentForServer(successfulServer)) return;
+      this._flipToDepartment();
+      if (this.department == this._departmentForServer(successfulServer))
+        this._resolveDepartmentEffect();
+    },
+  },
+  responseOnRunnerActionPhaseEnds: {
+    Resolve: function () {
+      if (!this.flipped) GainCredits(corp, 1, "", this);
+    },
+    automatic: true,
+  },
+  responseOnRunnerDiscardEnds: {
+    Resolve: function () {
+      if (this.flipped) this._flipToFront();
+    },
+    automatic: true,
+  },
 };
 
 //Lotus Haze (36037)
@@ -1783,7 +3064,116 @@ cardSet[36037] = {
   subTypes: ["Security"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) AddCounters(this, "agenda", 3);
+    },
+    automatic: true,
+  },
+  _destinationChoices: function (upgrade) {
+    var source = GetServer(upgrade);
+    var choices = ChoicesExistingServers();
+    for (var i = choices.length - 1; i > -1; i--) {
+      var server = choices[i].server;
+      var legal = server != source;
+      if (legal && CheckSubType(upgrade, "Region")) {
+        for (var j = 0; j < server.root.length; j++) {
+          if (CheckSubType(server.root[j], "Region")) {
+            legal = false;
+            break;
+          }
+        }
+      }
+      if (!legal) choices.splice(i, 1);
+    }
+    return choices;
+  },
+  _upgradeChoices: function () {
+    var cardDef = this;
+    return ChoicesInstalledCards(corp, function (card) {
+      return (
+        card.rezzed &&
+        CheckCardType(card, ["upgrade"]) &&
+        cardDef._destinationChoices(card).length > 0
+      );
+    });
+  },
+  _aiDestinationScore: function (upgrade, server) {
+    var score = server.ice.length;
+    if (server.root) {
+      for (var i = 0; i < server.root.length; i++) {
+        if (CheckCardType(server.root[i], ["agenda"])) score += 4;
+      }
+    }
+    if (
+      corp.AI &&
+      typeof upgrade.AIDefensiveValue == "function"
+    )
+      score += upgrade.AIDefensiveValue.call(upgrade, server) || 0;
+    return score;
+  },
+  abilities: [
+    {
+      text: "Hosted agenda counter: Move 1 rezzed upgrade to another server.",
+      Enumerate: function () {
+        if (!CheckCounters(this, "agenda", 1)) return [];
+        var choices = this._upgradeChoices();
+        if (corp.AI && choices.length > 0) {
+          var bestChoice = choices[0];
+          var bestGain = -Infinity;
+          for (var i = 0; i < choices.length; i++) {
+            var source = GetServer(choices[i].card);
+            var sourceScore = this._aiDestinationScore(choices[i].card, source);
+            var destinations = this._destinationChoices(choices[i].card);
+            for (var j = 0; j < destinations.length; j++) {
+              var gain =
+                this._aiDestinationScore(choices[i].card, destinations[j].server) -
+                sourceScore;
+              if (gain > bestGain) {
+                bestGain = gain;
+                bestChoice = choices[i];
+              }
+            }
+          }
+          if (bestGain <= 0) return [];
+          return [bestChoice];
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        if (!params || !params.card) return;
+        var upgrade = params.card;
+        var choices = this._destinationChoices(upgrade);
+        if (choices.length < 1) return;
+        if (corp.AI) {
+          var best = choices[0];
+          var bestScore = this._aiDestinationScore(upgrade, best.server);
+          for (var i = 1; i < choices.length; i++) {
+            var score = this._aiDestinationScore(upgrade, choices[i].server);
+            if (score > bestScore) {
+              best = choices[i];
+              bestScore = score;
+            }
+          }
+          corp.AI.preferred = { title: this.title, option: best };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (serverParams) {
+            if (!serverParams || !serverParams.server) return;
+            RemoveCounters(this, "agenda", 1);
+            MoveCard(upgrade, serverParams.server.root);
+            Log(GetTitle(upgrade) + " moved to the root of " + ServerName(serverParams.server));
+          },
+          this.title,
+          "Choose another server",
+          this,
+        );
+      },
+    },
+  ],
+  AITriggerWhenCan: true,
 };
 
 //Esca (36038)
@@ -1800,7 +3190,43 @@ cardSet[36038] = {
   subTypes: ["Ambush"],
   rezCost: 0,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  storedFaceUp: false,
+  _resolveAccessEffect: function () {
+    LoseCredits(runner, 1);
+    if (CheckTags(1)) Damage("net", 1, true);
+  },
+  automaticOnAccess: {
+    Resolve: function (card) {
+      if (card != this) return;
+      this.storedFaceUp = this.faceUp;
+      if (this.cardLocation == corp.RnD.cards) {
+        this.faceUp = true;
+        this.knownToRunner = true;
+        Log(GetTitle(this) + " revealed");
+      }
+      this._resolveAccessEffect();
+    },
+  },
+  automaticOnAccessComplete: {
+    Resolve: function (card) {
+      if (
+        card == this &&
+        card.cardLocation != corp.archives.cards &&
+        !this.storedFaceUp
+      )
+        this.faceUp = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  AIPunishesAccess: function (server) {
+    if (!server) return 0;
+    var installedHere = server.root && server.root.includes(this);
+    var inCentral = server.cards && server.cards.includes(this);
+    if (!installedHere && !inCentral) return 0;
+    return CheckTags(1) ? 2 : 1;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //ezaM (36039)
@@ -1818,13 +3244,129 @@ cardSet[36039] = {
   subTypes: ["Code Gate"],
   rezCost: 1,
   strength: 3,
+  _swapWith: function (otherIce) {
+    var firstServer = GetServer(this);
+    var secondServer = GetServer(otherIce);
+    if (!firstServer || !secondServer || otherIce == this) return;
+    var firstIndex = firstServer.ice.indexOf(this);
+    var secondIndex = secondServer.ice.indexOf(otherIce);
+    var firstRemoteIndex = corp.remoteServers.indexOf(firstServer);
+    MoveCard(this, secondServer.ice, secondIndex);
+    if (
+      firstRemoteIndex > -1 &&
+      corp.remoteServers.indexOf(firstServer) < 0
+    )
+      corp.remoteServers.splice(firstRemoteIndex, 0, firstServer);
+    MoveCard(otherIce, firstServer.ice, firstIndex);
+    Log(GetTitle(this) + " swapped with " + GetTitle(otherIce));
+  },
+  abilities: [
+    {
+      text: "[click]: Swap this ice with another installed piece of ice.",
+      Enumerate: function () {
+        if (!CheckActionClicks(corp, 1)) return [];
+        var choices = ChoicesInstalledCards(corp, function (card) {
+          return CheckCardType(card, ["ice"]) && card != this;
+        }.bind(this));
+        if (corp.AI && choices.length > 0) {
+          var currentServer = GetServer(this);
+          var best = null;
+          var bestGain = 0;
+          for (var i = 0; i < choices.length; i++) {
+            var otherServer = GetServer(choices[i].card);
+            if (!currentServer || !otherServer) continue;
+            var gain = otherServer.ice.length - currentServer.ice.length;
+            if (gain > bestGain) {
+              bestGain = gain;
+              best = choices[i];
+            }
+          }
+          return best ? [best] : [];
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        if (!params || !params.card) return;
+        SpendClicks(corp, 1);
+        this._swapWith(params.card);
+      },
+    },
+  ],
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Look at the top card of R&D. You may add that card to the bottom of R&D.",
+      Resolve: function () {
+        if (corp.RnD.cards.length < 1) return;
+        var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
+        var bottomChoice = {
+          id: 1,
+          label: "Add " + GetTitle(topCard) + " to the bottom of R&D",
+          button: "Move to bottom",
+        };
+        var keepChoice = { id: 0, label: "Leave it on top", button: "Keep" };
+        var choices = [bottomChoice, keepChoice];
+        if (corp.AI) {
+          var moveToBottom = CheckCardType(topCard, ["agenda"]);
+          corp.AI.preferred = {
+            title: this.title,
+            option: moveToBottom ? bottomChoice : keepChoice,
+          };
+        }
+        DecisionPhase(
+          corp,
+          choices,
+          function (params) {
+            if (params && params.id === 1) {
+              MoveCard(topCard, corp.RnD.cards, 0);
+              Log("The top card of R&D was added to the bottom of R&D");
+            }
+          },
+          this.title,
+          "Look at the top card of R&D: " + GetTitle(topCard),
+          this,
+        );
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "Each piece of ice gets +1 strength for the remainder of this run.",
+      Resolve: function () {
+        var affectedIce = ChoicesInstalledCards(corp, function (card) {
+          return CheckCardType(card, ["ice"]);
+        }).map(function (choice) {
+          return choice.card;
+        });
+        var effect = {
+          affectedIce: affectedIce,
+          createdDuringRun: attackedServer != null,
+          modifyStrength: {
+            Resolve: function (card) {
+              return this.affectedIce.includes(card) ? 1 : 0;
+            },
+          },
+          responseOnRunEnds: {
+            Resolve: function () {
+              RemoveLingeringEffect(this);
+            },
+            automatic: true,
+          },
+          responseOnEncounterEnds: {
+            Resolve: function () {
+              if (!this.createdDuringRun) RemoveLingeringEffect(this);
+            },
+            automatic: true,
+          },
+        };
+        AddLingeringEffect(effect);
+      },
+      visual: { y: 105, h: 32 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_minor"]], [["strengthenAllIce"]]];
     return result;
   },
+  AITriggerWhenCan: true,
 };
 
 //Knowledge Seeker (36040)
@@ -1843,11 +3385,101 @@ cardSet[36040] = {
   subTypes: ["Code Gate"],
   rezCost: 5,
   strength: 5,
+  _cardValueForRnD: function (card) {
+    var value = card.elo || 1500;
+    if (CheckCardType(card, ["agenda"])) value += 300;
+    return value;
+  },
+  _applyRnDOrder: function (bottomToTop) {
+    for (var i = 0; i < bottomToTop.length; i++) {
+      bottomToTop[i].faceUp = false;
+      MoveCard(bottomToTop[i], corp.RnD.cards);
+    }
+    Log(bottomToTop.length + " cards on top of R&D were arranged");
+  },
+  _arrangeTopOfRnD: function () {
+    var count = Math.min(4, corp.RnD.cards.length);
+    if (count < 2) return;
+    var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count);
+    for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+    if (corp.AI) {
+      var cardDef = this;
+      cards.sort(function (a, b) {
+        return cardDef._cardValueForRnD(a) - cardDef._cardValueForRnD(b);
+      });
+      this._applyRnDOrder(cards);
+      return;
+    }
+    var ordered = [];
+    var remaining = cards.slice();
+    var chooseNext = function () {
+      if (remaining.length == 1) {
+        ordered.push(remaining[0]);
+        this._applyRnDOrder(ordered);
+        return;
+      }
+      var choices = ChoicesArrayCards(remaining);
+      DecisionPhase(
+        corp,
+        choices,
+        function (params) {
+          if (!params || !params.card || !remaining.includes(params.card)) return;
+          ordered.push(params.card);
+          remaining.splice(remaining.indexOf(params.card), 1);
+          chooseNext.call(this);
+        },
+        this.title,
+        "Choose the next card from the bottom of the arranged group",
+        this,
+      );
+    };
+    chooseNext.call(this);
+  },
+  responseOnEncounterEnds: {
+    Enumerate: function () {
+      if (GetApproachEncounterIce() != this) return [];
+      if (CheckCounters(this, "virus", 3)) return [{}];
+      return [];
+    },
+    Resolve: function () {
+      Purge(
+        function () {
+          Derez(this);
+        },
+        this,
+      );
+    },
+    text: "Purge virus counters and derez Knowledge Seeker",
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Place 1 virus counter on this ice.",
+      Resolve: function () {
+        AddCounters(this, "virus", 1);
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "Look at the top 4 cards of R&D and arrange them in any order.",
+      Resolve: function () {
+        this._arrangeTopOfRnD();
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 105, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [[CheckCounters(this, "virus", 2) ? "misc_moderate" : "misc_minor"]],
+      [["misc_minor"]],
+      [["endTheRun"]],
+    ];
     return result;
   },
 };
@@ -1868,10 +3500,69 @@ cardSet[36041] = {
   rezCost: 6,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Do 2 net damage.",
+      Resolve: function () {
+        Damage("net", 2, true);
+      },
+      visual: { y: 57, h: 16 },
+    },
+    {
+      text: "Do 2 net damage unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({ id: 1, label: "Pay 3[c]", button: "Pay 3[c]" });
+        choices.push({ id: 0, label: "Take 2 net damage", button: "Take damage" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            if (params && params.id == 1)
+              SpendCredits(runner, 3, "using", this);
+            else Damage("net", 2, true);
+          },
+          this.title,
+          "Pay 3[c] to avoid 2 net damage?",
+          this,
+        );
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "Do 2 net damage unless the Runner jacks out.",
+      Resolve: function () {
+        if (!CheckRunning()) {
+          Damage("net", 2, true);
+          return;
+        }
+        DecisionPhase(
+          runner,
+          [
+            { id: 1, label: "Jack out", button: "Jack out" },
+            { id: 0, label: "Take 2 net damage", button: "Take damage" },
+          ],
+          function (params) {
+            if (params && params.id == 1) JackOut();
+            else Damage("net", 2, true);
+          },
+          this.title,
+          "Jack out to avoid 2 net damage?",
+          this,
+        );
+      },
+      visual: { y: 105, h: 32 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [["netDamage", "netDamage"]],
+      [
+        ["payCredits", "payCredits", "payCredits"],
+        ["netDamage", "netDamage"],
+      ],
+      [["endTheRun"], ["netDamage", "netDamage"]],
+    ];
     return result;
   },
 };
@@ -1891,10 +3582,42 @@ cardSet[36042] = {
   rezCost: 2,
   strength: 3,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Do X net damage and give the Runner X tags. X is equal to the number of tags the Runner has.",
+      Resolve: function () {
+        var tagCount = runner.tags;
+        if (tagCount < 1) return;
+        Damage(
+          "net",
+          tagCount,
+          true,
+          function () {
+            AddTags(tagCount);
+          },
+          this,
+        );
+      },
+      visual: { y: 57, h: 48 },
+    },
+    {
+      text: "Give the Runner 1 tag. Trash this ice.",
+      Resolve: function () {
+        AddTags(
+          1,
+          function () {
+            Trash(this, false);
+          },
+          this,
+        );
+      },
+      visual: { y: 105, h: 32 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var effects = [];
+    for (var i = 0; i < runner.tags; i++) effects.push("netDamage");
+    for (var j = 0; j < runner.tags; j++) effects.push("tag");
+    result.sr = [[effects], [["tag"]]];
     return result;
   },
 };
@@ -1911,9 +3634,128 @@ cardSet[36043] = {
   cardType: "operation",
   subTypes: [],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _cardValueForRnD: function (card) {
+    var value = card.elo || 1500;
+    if (CheckCardType(card, ["agenda"])) value += 300;
+    return value;
   },
+  _finishArrangement: function (bottomToTop) {
+    for (var i = 0; i < bottomToTop.length; i++) {
+      bottomToTop[i].faceUp = false;
+      MoveCard(bottomToTop[i], corp.RnD.cards);
+    }
+    Log(bottomToTop.length + " cards on top of R&D were arranged");
+  },
+  _arrangeRemaining: function (cards) {
+    if (cards.length < 2) {
+      if (cards.length == 1) this._finishArrangement(cards);
+      return;
+    }
+    if (corp.AI) {
+      var cardDef = this;
+      cards.sort(function (a, b) {
+        return cardDef._cardValueForRnD(a) - cardDef._cardValueForRnD(b);
+      });
+      this._finishArrangement(cards);
+      return;
+    }
+    var ordered = [];
+    var remaining = cards.slice();
+    var chooseNext = function () {
+      if (remaining.length == 1) {
+        ordered.push(remaining[0]);
+        this._finishArrangement(ordered);
+        return;
+      }
+      DecisionPhase(
+        corp,
+        ChoicesArrayCards(remaining),
+        function (params) {
+          if (!params || !params.card || !remaining.includes(params.card)) return;
+          ordered.push(params.card);
+          remaining.splice(remaining.indexOf(params.card), 1);
+          chooseNext.call(this);
+        },
+        this.title,
+        "Choose the next card from the bottom of the arranged group",
+        this,
+      );
+    };
+    chooseNext.call(this);
+  },
+  _chooseForHQ: function (cards) {
+    if (cards.length < 1) return;
+    var choices = ChoicesArrayCards(cards);
+    if (corp.AI) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        return cardDef._cardValueForRnD(b.card) - cardDef._cardValueForRnD(a.card);
+      });
+      choices = [choices[0]];
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || !params.card || !cards.includes(params.card)) return;
+        var remaining = cards.filter(function (card) {
+          return card != params.card;
+        });
+        params.card.faceUp = false;
+        MoveCard(params.card, corp.HQ.cards);
+        this._arrangeRemaining(remaining);
+      },
+      this.title,
+      "Choose 1 card to add to HQ",
+      this,
+    );
+  },
+  Enumerate: function () {
+    if (corp.RnD.cards.length < 1) return [];
+    return [{}];
+  },
+  Resolve: function () {
+    var count = Math.min(5, corp.RnD.cards.length);
+    var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count);
+    //Only the human Corp needs visible cards for these decisions. AI choices
+    //resolve later, so revealing now would expose R&D during the next render.
+    if (!corp.AI)
+      for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+    var choices = ChoicesArrayCards(cards);
+    if (corp.AI) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        return cardDef._cardValueForRnD(a.card) - cardDef._cardValueForRnD(b.card);
+      });
+      choices = [choices[0]];
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || !params.card || !cards.includes(params.card)) return;
+        var remaining = cards.filter(function (card) {
+          return card != params.card;
+        });
+        params.card.faceUp = false;
+        Trash(
+          params.card,
+          false,
+          function () {
+            this._chooseForHQ(remaining);
+          },
+          this,
+        );
+      },
+      this.title,
+      "Choose 1 card to trash",
+      this,
+    );
+  },
+  AIWouldPlay: function () {
+    return corp.RnD.cards.length > 1;
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Unleash (36044)
@@ -1929,9 +3771,123 @@ cardSet[36044] = {
   cardType: "operation",
   subTypes: ["Gray Ops"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _subroutineThreatScore: function (subroutine) {
+    var text = subroutine && subroutine.text ? subroutine.text : "";
+    var score = 1;
+    if (/end the run/i.test(text)) score += 100;
+    if (/net damage/i.test(text)) {
+      var match = text.match(/([0-9]+) net damage/i);
+      score += 20 * (match ? Number(match[1]) : 1);
+    }
+    if (/tag/i.test(text)) score += 15;
+    if (/trash/i.test(text)) score += 20;
+    return score;
   },
+  _offerSubroutine: function (ice) {
+    if (!ice || !ice.rezzed || !ice.subroutines || ice.subroutines.length < 1)
+      return;
+    var choices = ice.subroutines.map(function (subroutine) {
+      return { card: ice, subroutine: subroutine, label: subroutine.text };
+    });
+    if (corp.AI) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        return (
+          cardDef._subroutineThreatScore(b.subroutine) -
+          cardDef._subroutineThreatScore(a.subroutine)
+        );
+      });
+      choices = [choices[0]];
+    } else {
+      choices.push({ decline: true, label: "Decline", button: "Decline" });
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (!params || params.decline || !params.subroutine) return;
+        var subroutineChoices = ChoicesSubroutine(params.card, params.subroutine);
+        if (!subroutineChoices || subroutineChoices.length < 1) return;
+        DecisionPhase(
+          corp,
+          subroutineChoices,
+          function (subParams) {
+            AutomaticTriggers("automaticOnSubroutineFiring", [
+              subParams.card,
+              subParams.ability,
+            ]);
+            Trigger(
+              subParams.card,
+              subParams.ability,
+              subParams.choice,
+              "Firing",
+            );
+          },
+          params.card.title,
+          "Choose option for: " + params.subroutine.text,
+          params.card,
+        );
+      },
+      this.title,
+      "Choose a subroutine to resolve",
+      this,
+    );
+  },
+  Enumerate: function () {
+    if (runner.tags < 1) return [];
+    var choices = ChoicesInstalledCards(corp, function (card) {
+      return (
+        CheckCardType(card, ["ice"]) &&
+        !card.rezzed
+      );
+    });
+    if (corp.AI && choices.length > 0) {
+      var cardDef = this;
+      choices.sort(function (a, b) {
+        var aBest = 0;
+        var bBest = 0;
+        var aSubs = a.card.subroutines || [];
+        var bSubs = b.card.subroutines || [];
+        for (var i = 0; i < aSubs.length; i++)
+          aBest = Math.max(
+            aBest,
+            cardDef._subroutineThreatScore(aSubs[i]),
+          );
+        for (var j = 0; j < bSubs.length; j++)
+          bBest = Math.max(
+            bBest,
+            cardDef._subroutineThreatScore(bSubs[j]),
+          );
+        return (
+          (b.card.rezCost || 0) + bBest - ((a.card.rezCost || 0) + aBest)
+        );
+      });
+      return [choices[0]];
+    }
+    return choices;
+  },
+  Resolve: function (params) {
+    if (!params || !params.card || runner.tags < 1 || params.card.rezzed) return;
+    RemoveTags(1);
+    var source = this;
+    var target = params.card;
+    Rez(
+      target,
+      true,
+      null,
+      source,
+      true,
+      0,
+      function () {
+        this._offerSubroutine(target);
+      },
+    );
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AITagPunishment: 1,
+  AIPlayWhenCan: 2,
 };
 
 //The Red Room (36045)
@@ -1949,7 +3905,77 @@ cardSet[36045] = {
   subTypes: ["Facility"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  triggeredThisTurn: false,
+  installOnlyIn: function (server) {
+    return server == corp.HQ || server == corp.RnD || server == corp.archives;
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.triggeredThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _placePowerCounter: function () {
+    if (this.triggeredThisTurn) return;
+    this.triggeredThisTurn = true;
+    AddCounters(this, "power", 1);
+  },
+  responseOnScored: {
+    Resolve: function () {
+      this._placePowerCounter();
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      this._placePowerCounter();
+    },
+    automatic: true,
+  },
+  _AIShouldEndRun: function (server) {
+    if (!corp.AI || !server || server == GetServer(this)) return false;
+    if (typeof corp.AI._runnerMayWinIfServerBreached == "function")
+      return corp.AI._runnerMayWinIfServerBreached(server);
+    return true;
+  },
+  abilities: [
+    {
+      text: "Hosted power counter: End the run.",
+      Enumerate: function () {
+        if (!attackedServer || attackedServer == GetServer(this)) return [];
+        if (!CheckCounters(this, "power", 1)) return [];
+        if (corp.AI && !this._AIShouldEndRun(attackedServer)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        RemoveCounters(this, "power", 1);
+        EndTheRun();
+      },
+    },
+  ],
+  AIDefensiveValue: function (server) {
+    if (!this.installOnlyIn(server)) return 0;
+    // This is an install-placement signal only: Red Room cannot defend the
+    // central where it is installed.
+    if (GetServer(this) == server) return 0;
+    return 2;
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  AIGlobalETRUses: function (server) {
+    if (!this._AIShouldEndRun(server)) return 0;
+    return Counters(this, "power");
+  },
 };
 
 //Editorial Division: Ad Nihilum (36046)
@@ -1964,6 +3990,58 @@ cardSet[36046] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
+  tookBadPublicityThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.tookBadPublicityThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.tookBadPublicityThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnTakeBadPublicity: {
+    Enumerate: function () {
+      if (this.tookBadPublicityThisTurn) return [];
+      var choices = ChoicesArrayCards(corp.RnD.cards, function (card) {
+        return (
+          !CheckCardType(card, ["agenda"]) &&
+          (CheckSubType(card, "Black Ops") ||
+            CheckSubType(card, "Gray Ops") ||
+            CheckSubType(card, "Liability"))
+        );
+      });
+      choices.push({ card: null, label: "Do not add a card", button: "Continue" });
+      if (corp.AI != null) {
+        if (corp.RnD.cards.length < 3) return [choices[choices.length - 1]];
+        var tutorChoices = choices.slice(0, choices.length - 1);
+        if (tutorChoices.length > 0)
+          return [corp.AI._bestNonAgendaTutorOption(tutorChoices)];
+        return [choices[choices.length - 1]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.tookBadPublicityThisTurn = true;
+      Shuffle(corp.RnD.cards);
+      Log("R&D shuffled");
+      if (!params || !params.card) return;
+      MoveCard(params.card, corp.RnD.cards);
+      Render();
+      Reveal(
+        params.card,
+        function () {
+          Log(GetTitle(params.card) + " added to HQ");
+          MoveCard(params.card, corp.HQ.cards);
+        },
+        this,
+      );
+    },
+    text: "Search R&D for a non-agenda Black Ops, Gray Ops, or Liability card",
+  },
 };
 
 //Witch Hunt (36047)
@@ -1980,7 +4058,41 @@ cardSet[36047] = {
   subTypes: ["Initiative", "Liability"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  scoredThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.scoredThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.scoredThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      this.scoredThisTurn = true;
+      BadPublicity(1);
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      if (intended.steal == this) BadPublicity(1);
+    },
+    automatic: true,
+  },
+  responseOnCorpActionPhaseEnds: {
+    Resolve: function () {
+      if (!this.scoredThisTurn) return;
+      RemoveTags(runner.tags);
+      AddTags(3);
+    },
+    automatic: true,
+  },
 };
 
 //Magistrate Revontulet (36048)
@@ -1997,7 +4109,26 @@ cardSet[36048] = {
   subTypes: ["Executive"],
   rezCost: 2,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  modifyStealCost: {
+    Resolve: function () {
+      return { credits: 3, clicks: 0 };
+    },
+  },
+  responseOnScored: {
+    Resolve: function () {
+      LoseCredits(runner, 3);
+    },
+    automatic: true,
+  },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.creditPool < this.rezCost) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //Nihilo Agent (36049)
@@ -2015,7 +4146,53 @@ cardSet[36049] = {
   subTypes: ["Enforcer", "Liability"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  responseOnRez: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 3);
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      RemoveTags(1);
+      if (corp.badPublicity > 0) {
+        corp.badPublicity -= 1;
+        Log("1 bad publicity removed");
+        UpdateCounters();
+      }
+    },
+    automatic: true,
+  },
+  responseOnCorpDiscardEnds: {
+    Resolve: function () {
+      AddTags(
+        1,
+        function () {
+          BadPublicity(
+            1,
+            function () {
+              RemoveCounters(this, "power", 1);
+              if (!CheckCounters(this, "power", 1)) Trash(this, false);
+            },
+            this,
+          );
+        },
+        this,
+      );
+    },
+    automatic: true,
+  },
+  RezUsability: function () {
+    return currentPhase.identifier == "Corp 3.2";
+  },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.creditPool < this.rezCost) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
 };
 
 //Grubber (36050)
@@ -2033,11 +4210,66 @@ cardSet[36050] = {
   subTypes: ["Barrier", "Liability"],
   rezCost: 5,
   strength: 5,
+  responseOnRez: {
+    Resolve: function (card) {
+      if (card != this) return;
+      var server = GetServer(this);
+      if (server == corp.HQ || server == corp.RnD || server == corp.archives)
+        BadPublicity(1);
+    },
+    automatic: true,
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({ id: 1, label: "Pay 3[c]", button: "Pay 3[c]" });
+        choices.push({ id: 0, label: "End the run", button: "End the run" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            if (params && params.id == 1)
+              SpendCredits(runner, 3, "using", this);
+            else EndTheRun();
+          },
+          this.title,
+          "Pay 3[c] to avoid ending the run?",
+          this,
+        );
+      },
+      visual: { y: 74, h: 16 },
+    },
+    {
+      text: "End the run unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({ id: 1, label: "Pay 3[c]", button: "Pay 3[c]" });
+        choices.push({ id: 0, label: "End the run", button: "End the run" });
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            if (params && params.id == 1)
+              SpendCredits(runner, 3, "using", this);
+            else EndTheRun();
+          },
+          this.title,
+          "Pay 3[c] to avoid ending the run?",
+          this,
+        );
+      },
+      visual: { y: 90, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [
+      [["payCredits", "payCredits", "payCredits"], ["endTheRun"]],
+      [["payCredits", "payCredits", "payCredits"], ["endTheRun"]],
+    ];
     return result;
   },
 };

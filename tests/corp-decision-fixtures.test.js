@@ -149,7 +149,7 @@ vm.createContext(context);
 vm.runInContext('var attackedServer = null, encountering = false, approachIce = -1;', context);
 const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
 vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
-['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js'].forEach(file =>
+['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js', 'sets/vantagepoint.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('runnerRC = new RunCalculator();', context);
 

@@ -2655,7 +2655,15 @@ function AddTempBonusClicks(player, amount) {
   if (typeof player.tempBonusClicks === "undefined") player.tempBonusClicks = 0;
   player.tempBonusClicks += amount;
   var playerName = player == corp ? "Corp" : "Runner";
-  Log(playerName + " will receive +" + amount + " allotted click(s) next turn");
+  if (amount < 0)
+    Log(
+      playerName +
+        " will receive " +
+        Math.abs(amount) +
+        " fewer allotted click(s) next turn",
+    );
+  else
+    Log(playerName + " will receive +" + amount + " allotted click(s) next turn");
 }
 
 /**
@@ -3288,6 +3296,40 @@ function Credits(player) {
 }
 
 /**
+ * Checks whether effects on active cards permit a player to use credits from
+ * their credit pool. Hosted and temporary credits are handled separately.
+ *
+ * @method CreditPoolCanBeUsed
+ * @param {Player} player either corp or runner
+ * @param {String} [action] "spend" or "lose"
+ * @param {String} [doing] purpose supplied to recurring-credit checks
+ * @param {Card} [card] card being paid for or used
+ * @returns {Boolean} true unless an active effect forbids using the pool
+ */
+function CreditPoolCanBeUsed(
+  player,
+  action = "spend",
+  doing = "",
+  card = null,
+) {
+  var activeCards = ActiveCards(player);
+  for (var i = 0; i < activeCards.length; i++) {
+    if (
+      typeof activeCards[i].preventCreditPoolUse === "function" &&
+      activeCards[i].preventCreditPoolUse.call(
+        activeCards[i],
+        player,
+        action,
+        doing,
+        card,
+      )
+    )
+      return false;
+  }
+  return true;
+}
+
+/**
  * Gets the available credit pool for a player, including bad publicity and recurring credits.<br/>Nothing is logged.
  *
  * @method AvailableCredits
@@ -3297,7 +3339,10 @@ function Credits(player) {
  * @returns {int} credits available, including recurring credits
  */
 function AvailableCredits(player, doing = "", card = null) {
-  var availableCred = Credits(player);
+  var availableCred = 0;
+  if (CreditPoolCanBeUsed(player, "spend", doing, card))
+    availableCred += player.creditPool;
+  if (player == runner) availableCred += runner.temporaryCredits;
   var activeCards = ActiveCards(player);
   for (var i = 0; i < activeCards.length; i++) {
     if (typeof activeCards[i].credits !== "undefined") {
@@ -3355,6 +3400,51 @@ function InstallCost(
  */
 function PlayCost(card) {
   return GetCardProperty(card, "playCost");
+}
+
+/**
+ * Gets the number of clicks required to play an operation or event.
+ * Double cards normally cost 2 clicks; active card effects may modify that
+ * cost, but never below 0.
+ *
+ * @method PlayClickCost
+ * @param {Card} card card to check
+ * @returns {int} click cost to play the card
+ */
+function PlayClickCost(card) {
+  var ret = CheckSubType(card, "Double") ? 2 : 1;
+  ret += ModifyingTriggers("modifyPlayClickCost", card, -ret);
+  return ret;
+}
+
+/**
+ * Gets the additional credit and click costs to steal an agenda.
+ * A cost printed on the accessed agenda is combined with active modifying
+ * effects such as The Source.
+ *
+ * @method StealCost
+ * @param {Card} card agenda being accessed
+ * @returns {{credits:int, clicks:int}} additional steal costs
+ */
+function StealCost(card) {
+  var ret = { credits: 0, clicks: 0 };
+  if (card && card.stealCost) {
+    ret.credits += card.stealCost.credits || 0;
+    ret.clicks += card.stealCost.clicks || 0;
+  }
+  var triggerList = ChoicesActiveTriggers("modifyStealCost");
+  for (var i = 0; i < triggerList.length; i++) {
+    var modification = triggerList[i].card.modifyStealCost.Resolve.call(
+      triggerList[i].card,
+      card,
+    );
+    if (!modification) continue;
+    ret.credits += modification.credits || 0;
+    ret.clicks += modification.clicks || 0;
+  }
+  ret.credits = Math.max(0, ret.credits);
+  ret.clicks = Math.max(0, ret.clicks);
+  return ret;
 }
 
 /**
@@ -3795,39 +3885,44 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
         //add each valid server as an option { card:card, server:server, label:GetTitle(card,true)+" -> "+server.serverName }
 
         //all can be added to a new server (indicated as params.server = null)
-        ret.push({
-          card: card,
-          server: null,
-          label: GetTitle(card, true) + " -> new server",
-        });
+        if (CheckInstallDestination(card, null))
+          ret.push({
+            card: card,
+            server: null,
+            label: GetTitle(card, true) + " -> new server",
+          });
 
         //all can be added to remote servers (things can be trashed at install time if necessary)
         for (var j = 0; j < corp.remoteServers.length; j++) {
-          ret.push({
-            card: card,
-            server: corp.remoteServers[j],
-            label:
-              GetTitle(card, true) + " -> " + corp.remoteServers[j].serverName,
-          });
+          if (CheckInstallDestination(card, corp.remoteServers[j]))
+            ret.push({
+              card: card,
+              server: corp.remoteServers[j],
+              label:
+                GetTitle(card, true) + " -> " + corp.remoteServers[j].serverName,
+            });
         }
 
         //ice and upgrades can be installed in front of/root of centrals
         if (card.cardType == "ice" || card.cardType == "upgrade") {
-          ret.push({
-            card: card,
-            server: corp.HQ,
-            label: GetTitle(card, true) + " -> HQ",
-          });
-          ret.push({
-            card: card,
-            server: corp.RnD,
-            label: GetTitle(card, true) + " -> R&D",
-          });
-          ret.push({
-            card: card,
-            server: corp.archives,
-            label: GetTitle(card, true) + " -> Archives",
-          });
+          if (CheckInstallDestination(card, corp.HQ))
+            ret.push({
+              card: card,
+              server: corp.HQ,
+              label: GetTitle(card, true) + " -> HQ",
+            });
+          if (CheckInstallDestination(card, corp.RnD))
+            ret.push({
+              card: card,
+              server: corp.RnD,
+              label: GetTitle(card, true) + " -> R&D",
+            });
+          if (CheckInstallDestination(card, corp.archives))
+            ret.push({
+              card: card,
+              server: corp.archives,
+              label: GetTitle(card, true) + " -> Archives",
+            });
         }
       }
     } else if (card.player == runner) {
@@ -3966,6 +4061,21 @@ function ChoicesHandInstall(player, ignoreCreditCost = false, cardCheck) {
 }
 
 /**
+ * Gets scored agendas that may legally be forfeited.
+ * Cards such as Word on the Street can be in a score area while explicitly
+ * forbidding forfeiture.
+ *
+ * @method ChoicesForfeitableAgendas
+ * @param {Player} player owner of the score area
+ * @returns {Choice[]} legal agenda choices
+ */
+function ChoicesForfeitableAgendas(player) {
+  return ChoicesArrayCards(player.scoreArea, function (agenda) {
+    return !agenda.cannotForfeit;
+  });
+}
+
+/**
  * Gets list of valid/legal abilities on a card.<br/>Nothing is logged.
  *
  * @method ChoicesAbility
@@ -4014,8 +4124,7 @@ function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
  */
 function FullCheckPlay(card, requireActionPhase = true) {
   if (card == null) return false;
-  var clicksRequired = 1;
-  if (CheckSubType(card, "Double")) clicksRequired = 2;
+  var clicksRequired = PlayClickCost(card);
   if (
     (!requireActionPhase && CheckClicks(card.player, clicksRequired)) ||
     CheckActionClicks(card.player, clicksRequired)
@@ -4043,7 +4152,10 @@ function FullCheckPlay(card, requireActionPhase = true) {
  * @returns {boolean} true if can rez, false if not
  */
 function FullCheckRez(card, validTypes = ["upgrade", "asset", "ice"]) {
-  if (card.additionalRezCostForfeitAgenda && card.player.scoreArea.length < 1)
+  if (
+    card.additionalRezCostForfeitAgenda &&
+    ChoicesForfeitableAgendas(card.player).length < 1
+  )
     return false;
   if (CheckRez(card, validTypes)) {
     var currentRezCost = RezCost(card);
@@ -4056,7 +4168,7 @@ function FullCheckRez(card, validTypes = ["upgrade", "asset", "ice"]) {
     //Check if can afford reduced rez cost with optional forfeit (e.g. Biawak)
     if (
       typeof card.optionalForfeitRezReduction === "number" &&
-      card.player.scoreArea.length > 0
+      ChoicesForfeitableAgendas(card.player).length > 0
     ) {
       var reducedCost = Math.max(
         0,

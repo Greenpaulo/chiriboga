@@ -25,6 +25,17 @@ Regression coverage verifies that equal seeds produce equal destination orders, 
 
 `_withHypothetical(apply, evaluate, restore)` provides exception-safe restoration for migrated planning probes. Finding 10 tracks remaining unsafe mutations and the accidental array comparison; finding 11 tracks its interaction with decision-scoped caching.
 
+The Baker/Touchstone Archives-backdoor fix exposed another migration case. Baker's
+`AIRedirectsRun` must ask run-only credit sources whether they would be usable in
+a prospective Archives run even though no run is active during Corp planning.
+Its card-local helper currently supplies `attackedServer` under `try/finally` and
+restores the live value, which is safe and regression-tested but duplicates the
+guarded-hypothetical pattern. When F2 is completed, migrate this probe (and other
+card hooks that need a prospective run context) to `_withHypothetical()` or a
+narrow shared run-context wrapper. The migration must preserve the hook's
+read-only behavior, restore state after exceptions, and avoid populating F3's
+decision cache with results from the hypothetical context.
+
 ## F3: Per-Decision Evaluation Cache — `[PROPOSED]`
 
 Finding 11 owns a cache for repeated deterministic security evaluation within one `Choice`. It must be cleared at decision boundaries and bypassed during hypothetical state changes. The small F1 destination-order cache establishes the decision-lifetime pattern but does not cache security results or complete F3.

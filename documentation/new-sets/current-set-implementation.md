@@ -40,7 +40,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**3 complete, 10 outstanding** (`9 Pending`, `1 In progress`, `0 Blocked`).
+**10 complete, 3 outstanding** (`3 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -51,13 +51,13 @@ Agents must refresh these counts whenever a batch status changes.
 |     1 | 36001–36004 | Complete | Antigravity / 2026-09-18 | Reviewed and repaired by Codex; behavioral and full regression suites pass |
 |     2 | 36005–36008 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
 |     3 | 36009–36016 | Complete | Codex / 2026-09-18       | Mechanics, AI and focused/full regressions pass                            |
-|     4 | 36017–36020 | In progress | Codex / 2026-09-24       | —                                                                          |
-|     5 | 36021–36025 | Pending  | —                        | —                                                                          |
-|     6 | 36026–36030 | Pending  | —                        | —                                                                          |
-|     7 | 36031–36035 | Pending  | —                        | —                                                                          |
-|     8 | 36036–36040 | Pending  | —                        | —                                                                          |
-|     9 | 36041–36045 | Pending  | —                        | —                                                                          |
-|    10 | 36046–36050 | Pending  | —                        | —                                                                          |
+|     4 | 36017–36020 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
+|     5 | 36021–36025 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
+|     6 | 36026–36030 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
+|     7 | 36031–36035 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
+|     8 | 36036–36040 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
+|     9 | 36041–36045 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
+|    10 | 36046–36050 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    11 | 36051–36055 | Pending  | —                        | —                                                                          |
 |    12 | 36056–36060 | Pending  | —                        | —                                                                          |
 |    13 | 36061–36066 | Pending  | —                        | —                                                                          |
@@ -77,6 +77,13 @@ Do not remove an older entry if later work revisits one of its cards.
 |     1 | 36001–36004 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Repaired turn tracking, trash sequencing, uniqueness and stealth payment/AI modelling; added behavioral coverage                                                                  |
 |     2 | 36005–36008 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Lampades, Hackerspace, Nurse Hạnh and Stick and Poke; added grouped Archives faceup and zero-damage continuation support                                              |
 |     3 | 36009–36016 | 2026-09-18 | Codex       | `vantagepoint-integration.test.js`; all `tests/*.test.js` | Implemented Vic, Kompromat, Sell Out, Tailgate, Borrowed Goods, Rotary, Baker and Underdome Irregulars; added Corp-controlled Runner abilities and a pre-approach response window |
+|     4 | 36017–36020 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `credit-pool-lock.test.js`; all `tests/*.test.js` | Implemented Hiram, Aircheck, Beta Build and Methuselah; added credit-pool locking and post-run cleanup hooks plus payment/tutor compatibility repairs |
+|     5 | 36021–36025 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `forfeit-restriction.test.js`; all `tests/*.test.js` | Implemented Touchstone, Read-Write Share, Sipa, Stowaway and Word on the Street; added non-forfeitable score-area cards and legal forfeit filtering |
+|     6 | 36026–36030 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `play-and-steal-cost.test.js`; all `tests/*.test.js` | Implemented Méliès City Luxury Line, Synchrocyclotron, Ansel 2.0, Reverb and Sleipnir; added shared play-click and additional steal-cost handling |
+|     7 | 36031–36035 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Vertigo, Caveat Emptor, realloc(), Retirement Plan and Perfect Recall; added Corp declarative operation priorities and click-aware ICE-specific run modelling |
+|     8 | 36036–36040 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Méliès U, Lotus Haze, Esca, ezaM and Knowledge Seeker; added purge continuations and persistent route-wide ICE-strength modelling |
+|     9 | 36041–36045 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `corp-install-destination.test.js`; `corp-server-security.test.js`; `mycoweb-rez-discount.test.js`; all `tests/*.test.js` | Implemented Lionsmane, Vicsek, Cultivate, Unleash and The Red Room; added Corp install-destination restrictions, post-rez continuations and installed global ETR planning |
+|    10 | 36046–36050 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `play-and-steal-cost.test.js`; all `tests/*.test.js` | Implemented Editorial Division, Witch Hunt, Magistrate Revontulet, Nihilo Agent and Grubber; added post-prevention bad-publicity responses and continuations |
 
 ## Required shared verification
 

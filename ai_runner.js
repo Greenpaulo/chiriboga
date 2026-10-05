@@ -2100,29 +2100,29 @@ console.log(this.preferred);
 						for (var j = 0; j < tutorableIcebreakers.length; j++) {
 						  var alreadyInListOrDontCheck = false;
 						  for (var l = 0; l < uniqueAffordableBreakers.length; l++) {
-							if (uniqueAffordableBreakers[l].card.title == this.tutorableIcebreakers[j].title) {
+							if (uniqueAffordableBreakers[l].card.title == tutorableIcebreakers[j].title) {
 							  alreadyInListOrDontCheck = true;
 							  break;
 							}
 						  }
 						  if (!alreadyInListOrDontCheck) {
 							for (var l = 0; l < dontCheckAgain.length; l++) {
-							  if (dontCheckAgain[l] == this.tutorableIcebreakers[j].title) {
+							  if (dontCheckAgain[l] == tutorableIcebreakers[j].title) {
 								alreadyInListOrDontCheck = true;
 								break;
 							  }
 							}
 						  }
-						  dontCheckAgain.push(this.tutorableIcebreakers[j].title);
-						  if (!alreadyInListOrDontCheck && CheckInstall(this.tutorableIcebreakers[j])) {
+						  dontCheckAgain.push(tutorableIcebreakers[j].title);
+						  if (!alreadyInListOrDontCheck && CheckInstall(tutorableIcebreakers[j])) {
 							//check costs, mu, etc.
-							var choices = ChoicesCardInstall(this.tutorableIcebreakers[j], true); //true ignores credit cost
+							var choices = ChoicesCardInstall(tutorableIcebreakers[j], true); //true ignores credit cost
 							if (choices.length > 0) {
 							  //make sure a preferred choice exists
 							  var preferredInstallChoice = 0;
-							  if (typeof this.tutorableIcebreakers[j].AIPreferredInstallChoice == 'function') preferredInstallChoice = this.tutorableIcebreakers[j].AIPreferredInstallChoice(choices);
+							if (typeof tutorableIcebreakers[j].AIPreferredInstallChoice == 'function') preferredInstallChoice = tutorableIcebreakers[j].AIPreferredInstallChoice(choices);
 							  if (preferredInstallChoice > -1) {
-								uniqueAffordableBreakers.push({ card:this.tutorableIcebreakers[j], tutor:this.cardsWorthKeeping[k], host:choices[preferredInstallChoice].host, cost:PlayCost(this.cardsWorthKeeping[k]) });
+								uniqueAffordableBreakers.push({ card:tutorableIcebreakers[j], tutor:this.cardsWorthKeeping[k], host:choices[preferredInstallChoice].host, cost:PlayCost(this.cardsWorthKeeping[k]) });
 							  }
 							}
 						  }
