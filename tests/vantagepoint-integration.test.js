@@ -465,6 +465,7 @@ nurseHanh.automaticOnArchivesCardsTurnedFaceUp.Resolve.call(nurseHanh, [
 ]);
 assert.strictEqual(cardsDrawn, 2, '36007 draws for one group of 2 or more cards');
 context.corp.archives.cards = [{faceUp: false}, {faceUp: false}];
+context.runner.stack = [{}, {}];
 assert.strictEqual(nurseHanh.AIInstallBeforeRun.call(nurseHanh, context.corp.archives), 2);
 assert.strictEqual(nurseHanh.AIInstallBeforeRun.call(nurseHanh, context.corp.HQ), 0);
 assert(
@@ -509,13 +510,16 @@ assert.deepStrictEqual(firstIce.subroutines, [originalSubroutine]);
 stickAndPoke.responseOnCorpTurnBegins.Resolve.call(stickAndPoke);
 stickAndPoke.automaticOnEncounter.Resolve.call(stickAndPoke, secondIce);
 assert.strictEqual(secondIce.subroutines.length, 1, '36008 resets on the next turn');
-const routeServer = {ice: [firstIce, secondIce]};
+const routeServer = {ice: [secondIce, firstIce]};
 firstIce.server = routeServer;
 secondIce.server = routeServer;
 stickAndPoke.usedThisTurn = false;
+firstIce.rezzed = true;
+secondIce.rezzed = false;
+context.PlayerCanLook = () => false;
 const firstIceAI = {ice: firstIce, sr: [[['endTheRun']]]};
 stickAndPoke.AIModifyIceAI.call(stickAndPoke, firstIceAI, 1);
-assert.strictEqual(JSON.stringify(firstIceAI.sr[0]), '[["netDamage"]]');
+assert.strictEqual(JSON.stringify(firstIceAI.sr[0]), '[["netDamage","drawCard"]]');
 // Batch 3: Criminal cards 36009-36016.
 context.runner.tags = 1;
 context.runner.clickTracker = 4;

@@ -100,8 +100,8 @@ checks the hosted Companion and Connection subtypes.
 Stick and Poke inserts its temporary subroutine at index 0 and removes that
 exact object at encounter end, including if the resource becomes inactive
 during the encounter. Corp route planning models the immediately relevant net
-damage; the Run Calculator has no draw effect token, so its accompanying draw
-is deliberately not represented as damage prevention.
+damage. The original implementation omitted the following draw; that finding
+is superseded by the ordered finite-draw repair documented below.
 
 `tests/vantagepoint-integration.test.js` covers Batch 2 payments and negative
 access cases, hosted-install eligibility and discount scope, hand-size state,
@@ -991,3 +991,215 @@ including Corp decision fixtures and decision snapshots. Card-status regeneratio
 has no diff. Batch 1 is implementation-complete; independent re-review of
 CR4/TT1, retained per-card evidence and both shared consumers remains required.
 Batch13's affected regression coverage passed; batch 2 is the next repair.
+
+## Batch 2 remediation — C2-1, C2-2, C2-3 (2026-10-06)
+
+Exact scope: 36005–36008. All metadata and ELO values are preserved. Printed
+human mechanics remain intact; the repairs address current AI consumers and
+missing essential evidence in the independent batch report.
+
+- **Lampades 36005:** actual access commands contrast legal stealth/power with
+  exhaustion, ordinary cheap trash and ability-only trash. A subsequent real
+  Corsair barrier route proves the scarce-stealth opportunity cost. Recursive
+  `SpendHostedCredits` payments prefer access-only sources before breaker/general
+  sources, preserving flexible funding. Legality, counter consumption, split
+  payment and unsupported agenda costs remain covered by integration tests.
+- **Hackerspace 36006 / C2-2:** reusable Runner destination ranking carries the
+  selected host through draw-install, pre-run and generic keep/install commands.
+  An explicit card preference keeps its veto/index contract; legal defaults rank
+  destination cost and marginal hand slots. Real command/card/host selection
+  proves both one-credit and hosted-only zero-credit installs, ordinary ineligible
+  installation, and the actual maximum hand size of seven after completing the
+  pair. Setup checks distinct, not-already-installed targets, budgets clicks and
+  costs, declines a lone discount and selects setup for immediate paired hand
+  pressure. Exposed tagged resource hosts are excluded from default ranking.
+- **Nurse Hạnh 36007:** installation requires at least two public facedown
+  Archives cards, actual Stack capacity, useful hand space and time/funding for a
+  survivable Archives route. Scarce-credit, zero/one reveal, empty/one-card Stack,
+  last-click, overdraw and blocked-Archives command contrasts cover declines.
+  `AIRunExtraPotential` makes the installed draw opportunity change actual server
+  selection; `AIRunBreachDraw` supplies its ordered finite breach draw to both
+  planners. Real `runBreachServer.Init` dispatch moves zero/zero/two actual Stack
+  cards for zero/one/two facedown reveal groups.
+- **Stick and Poke 36008 / C2-1:** `drawCard` effects track finite public Stack
+  counts and damage peaks before draw. Both actual planners accept outer ezaM /
+  inner Tithe with one Grip and one Stack card; empty Grip or empty Stack rejects,
+  while an already-used effect does not fire again. Exactly one predicted
+  encounter receives the addition, without inspecting hidden ICE identities.
+  Live `AIEncounterEffects` inserts the same ordered model before broken masking.
+  Real breakers, Inside Job bypass, prevention response, once-per-turn state and
+  encounter cleanup preserve both damage and draw timing. A public free finite
+  net-prevention contract has actual engine-response and opposing-planner fixture
+  evidence; it does not grant legacy paid prevention without payment costs.
+- **C2-3:** `_runAfterInstall` uses a separate calculator after the chosen
+  destination's cost, installation click and Grip removal. `finally` restores
+  zones, location/host, resources and live state, including an exception probe.
+  Six-point known-agenda command/card/server selection runs directly on the
+  reviewed empty-Stack/Tithe board; the nonwinning control also declines unsafe
+  preparation. Safe useful paired installation and last-click decline are
+  contrasted. Mandatory damage/cycling alone no longer creates an install reason;
+  paired hand capacity or supported free prevention supplies a strategic benefit.
+
+Shared route accounting preserves Stack/Grip depletion, first-encounter use and
+free prevention over finite Event Horizon reruns and payment-policy branches.
+A real Shackleton route proves that a later payment's damage follows the earlier
+Stick and Poke damage/draw: four cards survive, three do not, and both planners
+agree without reserving hypothetical extra credit clicks during the active run.
+Historical omitted-draw notes above are superseded, not accepted as a limitation.
+
+Permanent acceptance: `tests/vantagepoint-batch2.test.js`, supplemented by
+`tests/vantagepoint-integration.test.js`. Shared consumers requiring independent
+revalidation include batch 1's Corsair/Tailor routes, batches 12–13's finite
+payment/prevention routes and all existing install-before-run/draw-install users.
+The batch 2 report's independent verdict remains Changes required until re-review;
+no set registry or playability flags changed. No new card limitation is accepted.
+The obsolete pending Corsair offset expectations remain untouched; current-code
+counterevidence was appended to their bug ticket rather than changing them.
+
+Verification: Node 20.19.0; focused batch 2/integration, affected batch 1/11/12/13,
+Corp security (145 cases), credit-pool and hook-documentation tests pass.
+All required syntax/format/deck/identity checks and `git diff --check` pass.
+Final `node tests/run-all-tests.js`: **52 test files passed**, including Corp
+decision fixtures and decision snapshots, excluding known-red pending tests.
+Batch 2 is Complete in the implementation tracker; independent re-review is
+still required. No new limitation is accepted; batch 3 is next for repair.
+
+
+## Batch 2 decisive access funding repair — C2-4 (2026-10-06)
+
+The independent positive-savings counterexample reproduced: six Runner points,
+a public winning agenda behind Funhouse, Corsair, two Methuselah stealth credits,
+and Luana access with printed cost one versus normal trash three. Actual Lampades
+payment destroyed the complete route even though paying three pool credits
+preserved it. C2-1–C2-3 repairs remain supported by the current focused suite.
+
+Lampades now supplies the same `_stealthPaymentPlan` to its access priority and
+recursive live payment. The reusable Runner `_accessPaymentPreservesWinningRun`
+compares complete routes to public winning remote agendas before and after the
+exact proposed allocation. It accounts for the initiating click, route costs,
+remaining steal credits/clicks, public restrictions and finite installed funding.
+Current temporary credits expire; the next run receives its own bad-publicity
+credits. It does not assume future source replenishment or inspect hidden Corp
+or Stack identities. Independent calculators preserve the live route/cost caches;
+funding and encounter globals restore in `finally`, including throwing consumers.
+
+The ordinary-trash selector uses the same evaluation with `_accessTrashPayment`,
+which mirrors actual `SpendCredits` allocation. `AIPreserveOutsideCredits` makes
+that real consumer spend affordable pool credits when hosted credits are necessary
+for the known winning follow-up. Both branches decline when their costs eliminate
+all currently funded public winning steals. No named-card exception or numerical
+priority tuning was introduced.
+
+Permanent real access command/card/payment regressions in
+`tests/vantagepoint-batch2.test.js` cover scarce versus plentiful stealth, positive
+savings versus free trash, unaffordable ordinary trash, additional steal costs,
+access-only source allocation, nonwinning/hidden targets and expired clicks.
+Actual payment leaves two stealth credits and a complete route in the ordinary
+trash and plentiful-ability cases; unavailable safe trash leaves the card.
+Concealed Corp/Stack getters, cache checks and a throwing resource consumer cover
+information boundaries and restoration. Existing all-card acceptance revalidates
+Hackerspace destinations/hand capacity, Nurse reveal/draw choices, Stick and Poke
+ordered damage/draw and opposing finite route models.
+
+Affected consumers: Runner access triggers and ordinary trash (including Imp and
+other access cards), `SpendCredits` outside-credit preservation, shared complete
+routes, batch 1 Corsair/Tailor and batches 11–13 finite/payment/prevention effects.
+Independent re-review must assess C2-4 and these affected consumers; the historical
+review verdict remains Changes required. No new limitation is accepted.
+
+Verification: Node 20.19.0; focused batch 2/integration, affected batch 1/11/12/13,
+Corp security (145 cases), credit-pool and hook-documentation tests passed.
+Required syntax/format/deck/identity checks and `git diff --check` passed.
+Final `node tests/run-all-tests.js`: **52 files passed**, including Corp decision
+fixtures and decision snapshots; known-red pending reproductions excluded.
+`card-status.js` regenerated the status document; batch brief reports no unfinished
+markers for all four cards, and their gameplay effects have no empty stubs.
+Batch 2 is Complete; batch 3 is next. Independent re-review remains required.
+
+
+## Batch 2 actual access payment contract repair — C2-4 (2026-10-06)
+
+The second independent re-review correctly found that the previous test bypassed
+actual access-phase payment. The engine enumerates and resolves ordinary access
+trash using `"paying trash costs"`; the reserve policy and hypothetical allocator
+used `"trashing"`, missing both the live reserve check and Azimat eligibility.
+The real phase reproduction lost the public winning route before this repair.
+
+Runner `AIPreserveOutsideCredits`, `_accessTrashPayment` and the access selector
+now share the engine's existing reason. Source/pool eligibility and deterministic
+allocation therefore agree with actual `SpendCredits`. The separate Corp
+click-to-trash reason remains unchanged. No gameplay card, ELO or priority tuning
+changed. Scarce stealth stays available for Corsair's known winning follow-up;
+Azimat's legal trash-only credits fund trash without consuming that reserve.
+
+Permanent acceptance in `tests/vantagepoint-batch2.test.js` uses real legal phase
+enumeration, command/card/ability selection and phase resolution, including
+`phases.runAccessingCard.Resolve.trash`. Contrasts cover scarce/plentiful stealth,
+one pool credit with Azimat, temporary credits, free/unsafe/unaffordable trash,
+ordinary trash without Lampades, the actual Méliès City Luxury Line steal-click
+cost, hidden/nonwinning agendas, expired clicks and a reason-sensitive pool lock
+with/without Azimat. Both resource balances and complete winning routes are
+asserted. Existing all-card tests retain C2-1–C2-3 ordered draw, hosted install,
+preparation and opposing-planner evidence, plus privacy/restoration coverage.
+
+Affected consumers are shared Runner ordinary access trash, hosted-source and
+pool eligibility, `SpendCredits` outside-credit preservation, source-sensitive
+damage/prevention and batches 1/11/12/13. Their focused regressions pass, as do
+all required syntax/format/deck/identity/hook-doc checks, status regeneration and
+the empty-effect/no-unfinished-marker audits. Node 20.19.0 full verification:
+`node tests/run-all-tests.js` — **52 files passed**, including Corp decision
+fixtures and decision snapshots. Pending known-red reproductions are excluded.
+
+Batch 2 implementation is Complete; batch 3 is next. Independent re-review must
+verify C2-4 through actual phase payment, Azimat and these affected shared
+consumers, alongside retained all-card acceptance. The independent report's
+Changes required verdict is preserved; no new limitation is accepted.
+
+
+## Batch 2 ordinary winning-run precedence repair — C2-5 (2026-10-06)
+
+Repair checklist: C2-5 reproduced with the permanent real command/server test
+before code edits (installed Nurse selected Archives instead of the winning
+remote). C2-1–C2-4 are already independently resolved in the latest report;
+retain and rerun their permanent ordered-draw, hosting, preparation and actual
+access-payment contrasts, rather than alter their supported behavior.
+
+Runner's ordinary run selector now calls `_winningRunBeforeOpportunity` before
+potential scoring or hypothetical preparation. The existing expiring-play
+consumer remains supported. Both require an enumerated legal ordinary run,
+public winning agenda, complete route and affordable post-route credit/click
+steal costs, with public breach and steal prohibitions respected. No Nurse
+specific title check or bonus tuning is involved. The helper retains prospective
+encounter context throughout the complete calculation and restores it in
+`finally`; this exposes run-only funding and avoids applying end-of-turn hand
+retention to a last-click winning route. It performs no installs, run-event
+preparation or live resource spending. A chosen complete route remains cached
+for the real server choice and subsequent run decisions.
+
+`tests/vantagepoint-batch2.test.js` adds twelve real command/server contrasts:
+installed Nurse, Nurse in Grip, absent Nurse, empty Stack, faceup Archives,
+useful draw-only board, infeasible route, unaffordable steal, expired steal-click
+budget, steal prohibition, hidden agenda and breach prohibition. The five
+immediate-win boards choose the remote; the seven unusable/nonwinning boards
+choose useful Archives draw. Two further boards exercise actual Corsair/
+Methuselah restricted funding and a later steal payment: funded win versus
+exhausted stealth, without spending either source. Supplemental exception
+coverage proves prospective cost failure restores context and leaves Grip,
+Stack, credits and clicks intact. Existing C2-1–C2-4 tests retain every card's
+mechanics, cleanup, strategic alternatives and opposing planner evidence.
+
+Affected consumers: ordinary Runner command/server ranking, expiring play
+priority (batch 1), and the complete route/payment calculator shared with other
+batch evidence. Re-review batch 2 C2-5 and C2-1–C2-4 retention, plus batch 1's
+winning-run consumer and batches 11/12/13 route/payment regressions. This repair
+is implementation evidence; it leaves all independent verdicts intact. No new
+accepted limitation or registry/playability change.
+
+Verification: Node 20.19.0; focused batch 2/integration, affected batch 1/11/12/13,
+Corp security, credit-pool lock, source payment UI and hook-doc suites pass.
+`node tests/run-all-tests.js`: all 52 files pass, including Corp decision fixtures
+and decision snapshots; pending known-red reproductions remain excluded.
+Card-status regeneration, batch brief (all four without unfinished markers),
+range empty-effect/subroutine audit, syntax, format, deck pool, identity and
+`git diff --check` pass. No further implementation gaps identified in this batch;
+independent batch 2/shared-consumer re-review is required. Batch 3 is next.

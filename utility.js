@@ -2739,6 +2739,15 @@ function PublicMeatDamagePrevention() {
   }, 0);
 }
 
+// Free finite net prevention available to both public run planners. Paid or
+// conditional prevention must not promise this budget without its costs.
+function PublicNetDamagePrevention() {
+  return InstalledCards(runner).reduce(function (sum, card) {
+    if (!CheckHasAbilities(card) || typeof card.AINetDamagePrevention != "function") return sum;
+    return sum + Math.max(0, card.AINetDamagePrevention.call(card));
+  }, 0);
+}
+
 function OutsideCreditDamageSources(server) {
   if (!server) return [];
   return server.root.filter(function (card) {

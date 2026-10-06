@@ -110,8 +110,26 @@ on 2026-10-06 with all 51 regression files passing. Its independent [second re-r
 now records **Pass**, including affected run-calculator consumers, Runner
 winning-steal priority and ordinary Corp income routes. Twelve new independent
 scenarios and batch13 shared-consumer regressions pass; this does not renew
-batch13's snapshot verdict or the set-wide review. Batch 2 is the next
-implementation repair; 11 batches remain reopened.
+batch13's snapshot verdict or the set-wide review. Batch 2 remediation
+(36005–36008, C2-1–C2-3 and named strategic coverage) subsequently completed
+with all 52 regression files passing: ordered finite draw, hosted destination
+selection, safe preparation and real per-card decision evidence. See its
+[remediation log](reviews/vantage-point/vantagepoint-batch-2.md#remediation-log).
+Independent remediation re-review resolved C2-1–C2-3 but demonstrated C2-4:
+positive access savings consumed stealth required for a publicly known winning
+steal. The subsequent C2-4 repair preserves that reserve through actual command,
+source allocation and payment, including affordable ordinary trash/decline and
+plentiful-stealth contrasts. See the same remediation log and
+[decisive funding notes](vantage-point-implementation-notes.md#batch-2-decisive-access-funding-repair--c2-4-2026-10-06).
+Second independent re-review then exposed a mismatched actual-phase payment
+reason and ignored Azimat funding. The latest repair aligns reserve/allocator/
+selector with `"paying trash costs"` and replaces substitute payment tests with
+real phase resolution, including Azimat, steal-click and locked-pool contrasts;
+all 52 regression files pass. See the
+[actual payment notes](vantage-point-implementation-notes.md#batch-2-actual-access-payment-contract-repair--c2-4-2026-10-06).
+Batch 2 and affected shared consumers require independent re-review; batch 3 is
+next for implementation repairs, with 10 batches outstanding. The former omitted
+draw approximation is repaired and is not an accepted limitation.
 No new limitation is accepted; shared finding S1 remains open.
 The [post-review snapshot](history/vantagepoint-2026-10-06-reviewed.md) preserves
 the repair queue, review log and original completion history.
@@ -217,3 +235,13 @@ For each completed item:
 When the card population changes, regenerate the ELO counts by loading
 `config.js` plus every registered set file and counting definitions for which
 `typeof card.elo !== "number" || !isFinite(card.elo)`.
+
+
+Batch 2 C2-5 ordinary run precedence repair completed on 2026-10-06: legal funded
+public winning steals outrank Nurse's passive draw, using prospective run context
+for complete route/steal affordability. Fifteen added permanent scenarios retain
+useful draw, privacy, funding/restriction boundaries and restoration; all 52
+regression files pass. C2-1–C2-4 evidence is retained. See the
+[repair notes](vantage-point-implementation-notes.md#batch-2-ordinary-winning-run-precedence-repair--c2-5-2026-10-06).
+Independent batch 2 and affected shared-consumer re-review remains required;
+no new accepted limitation. Batch 3 (36009–36016) is the next implementation repair.

@@ -567,6 +567,25 @@ cardSet[36005] = {
       return total + card.credits;
     }, 0);
   },
+  // Use the same allocation for hypothetical evaluation and live AI payment.
+  _stealthPaymentPlan: function (amount) {
+    var flexibility = function (source) {
+      if (typeof source.canUseCredits !== "function") return 2;
+      if (source.canUseCredits("", null)) return 2;
+      return source.canUseCredits("using", null) ? 1 : 0;
+    };
+    var sources = this._stealthCreditCards();
+    sources.sort(function (a, b) {
+      return flexibility(a) - flexibility(b) || Math.min(amount, b.credits) - Math.min(amount, a.credits);
+    });
+    var plan = [];
+    for (var source of sources) {
+      var spend = Math.min(amount, source.credits);
+      if (spend > 0) plan.push({card: source, amount: spend});
+      amount -= spend;
+    }
+    return plan;
+  },
   _spendStealthCredits: function (amount, callback) {
     var lampades = this;
     if (amount < 1) {
@@ -593,7 +612,10 @@ cardSet[36005] = {
     }
     if (choices.length < 1) return;
     if (runner.AI) {
-      choices = [choices[choices.length - 1]];
+      var payment = this._stealthPaymentPlan(amount)[0];
+      choices = [choices.find(function (choice) {
+        return choice.card == payment.card && choice.amount == payment.amount;
+      })];
     }
     var spendFromChoice = function (params) {
       SpendHostedCredits(runner, params.card, params.amount, function () {
@@ -647,8 +669,12 @@ cardSet[36005] = {
   AIAccessTriggerPriority: function (optionList) {
     var printedCost = this._printedAccessCost(accessingCard);
     if (typeof printedCost !== "number") return 0;
-    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost)
+    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost) {
+      if (runner.AI && !runner.AI._accessPaymentPreservesWinningRun({
+        hosted: this._stealthPaymentPlan(printedCost),
+      })) return 0;
       return 3;
+    }
     return 0;
   },
   AIReducesTrashCost: function (card) {
@@ -708,8 +734,43 @@ cardSet[36006] = {
       return hasCompanion && hasConnection ? 2 : 0;
     },
   },
+  _setupTargets: function () {
+    var seen = new Set();
+    return runner.grip.filter(function (card) {
+      if (!this._hostableCard(card) || seen.has(card.title) ||
+          (runner.AI && runner.AI._uniqueCopyAlreadyInstalled(card))) return false;
+      seen.add(card.title);
+      return true;
+    }, this);
+  },
+  AIHostedInstallValue: function (card) {
+    if (!this._hostableCard(card)) return 0;
+    var before = this.modifyMaxHandSize.Resolve.call(this, runner);
+    var companion = CheckSubType(card, "Companion");
+    var connection = CheckSubType(card, "Connection");
+    for (var hosted of this.hostedCards) {
+      companion = companion || CheckSubType(hosted, "Companion");
+      connection = connection || CheckSubType(hosted, "Connection");
+    }
+    return (companion && connection ? 2 : 0) - before;
+  },
   AIWorthKeeping: function () {
-    return true;
+    var targets = this._setupTargets();
+    var discounts = targets.filter(card => InstallCost(card) > 0).length;
+    var pair = targets.some(card => CheckSubType(card, "Companion")) &&
+      targets.some(card => CheckSubType(card, "Connection"));
+    return discounts >= this.installCost ||
+      (pair && runner.grip.length - 1 - targets.length >= MaxHandSize(runner));
+  },
+  AIWastefulToInstall: function () {
+    return !this.AIWorthKeeping();
+  },
+  AIInstallBeforeInstall: function (card) {
+    if (!this._hostableCard(card) || !this.AIWorthKeeping()) return false;
+    var targets = this._setupTargets();
+    var totalCost = InstallCost(this);
+    for (var target of targets) totalCost += Math.max(0, InstallCost(target) - 1);
+    return runner.clickTracker >= 1 + targets.length && runner.creditPool >= totalCost;
   },
   AIOkToTrash: function () {
     return this.hostedCards.length < 1;
@@ -734,7 +795,16 @@ cardSet[36007] = {
       if (cards.length >= 2) Draw(runner, 2);
     },
   },
+  AIRunOrderedDraw: true,
+  AIRunBreachDraw: function (server) {
+    if (server != corp.archives || corp.archives.cards.filter(card => !card.faceUp).length < 2) return 0;
+    return Math.min(2, runner.stack.length);
+  },
+  AIRunExtraPotential: function (server) {
+    return Math.min(this.AIRunBreachDraw(server), Math.max(0, MaxHandSize(runner) - runner.grip.length));
+  },
   AIWorthKeeping: function () {
+    if (runner.stack.length < 2) return false;
     return corp.archives.cards.filter(function (card) {
       return !card.faceUp;
     }).length >= 2;
@@ -743,8 +813,15 @@ cardSet[36007] = {
     if (server != corp.archives) return 0;
     return this.AIWorthKeeping() ? 2 : 0;
   },
+  AIWastefulToInstall: function () {
+    return this.AIDrawInstall() == 0;
+  },
   AIDrawInstall: function () {
-    return this.AIWorthKeeping() ? 2 : 0;
+    if (!this.AIWorthKeeping() || runner.clickTracker < 2) return 0;
+    var host = runner.AI._installHost(this);
+    var extraSpace = host && typeof host.AIHostedInstallValue == "function" ? host.AIHostedInstallValue(this) : 0;
+    if (runner.grip.length - 1 + 2 > MaxHandSize(runner) + extraSpace) return 0;
+    return runner.AI._runAfterInstall(this, host, corp.archives) ? 2 : 0;
   },
 };
 
@@ -783,6 +860,7 @@ cardSet[36008] = {
       this.modifiedIce = ice;
       this.addedSubroutine = {
         text: "Do 1 net damage. The Runner draws 1 card.",
+        AIEncounterEffects: ["netDamage", "drawCard"],
         Resolve: function () {
           Damage(
             "net",
@@ -810,26 +888,41 @@ cardSet[36008] = {
     automatic: true,
     availableWhenInactive: true,
   },
-  AIModifyIceAI: function (iceAI, startIceIdx) {
-    if (this.usedThisTurn) return iceAI;
+  AIRunOrderedDraw: true,
+  AIModifyIceAI: function (iceAI, startIceIdx, rc) {
+    if (this.usedThisTurn || (rc && rc._firstEncounterUsed)) return iceAI;
     var server = GetServer(iceAI.ice);
     if (!server) return iceAI;
+    // Exactly one predicted encounter. Unknown ICE is considered using the
+    // calculator's public generic threat; never inspect its identity or cost.
     for (var i = startIceIdx; i > -1; i--) {
-      if (server.ice[i] == iceAI.ice) {
-        // The run calculator has no draw token, so retain the immediately
-        // flatline-relevant net damage as the conservative route effect.
-        iceAI.sr.unshift([["netDamage"]]);
-        return iceAI;
-      }
-      if (server.ice[i].rezzed) return iceAI;
+      var candidate = server.ice[i];
+      if (rc && rc._ignoredIce.has(candidate)) continue;
+      if (rc && rc._securityPlanning) {
+        if (!rc._securityPlanning.eligibleIce.has(candidate)) continue;
+      } else if (!candidate.rezzed && PlayerCanLook(runner, candidate) &&
+          AvailableCredits(corp) < RezCost(candidate)) continue;
+      if (candidate == iceAI.ice) iceAI.sr.unshift([["netDamage", "drawCard"]]);
+      break;
     }
     return iceAI;
   },
   AIInstallBeforeRun: function () {
+    if (!this.AIWorthKeeping() || this.usedThisTurn) return 0;
     return 2;
   },
   AIWorthKeeping: function () {
-    return true;
+    if (runner.stack.length < 1) return false;
+    // This mandatory damage/cycle is useful as a free Companion completing
+    // a hand-space pair. Otherwise retain the card as damage protection in
+    // Grip instead of paying a click merely to replace it at an encounter.
+    if (typeof PublicNetDamagePrevention == "function" && PublicNetDamagePrevention() > 0) return true;
+    return InstalledCards(runner).some(function (host) {
+      return typeof host.AIHostedInstallValue == "function" && host.AIHostedInstallValue(this) > 0;
+    }, this);
+  },
+  AIWastefulToInstall: function () {
+    return !this.AIWorthKeeping();
   },
 };
 

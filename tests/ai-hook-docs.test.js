@@ -11,7 +11,7 @@ const aiDoc = fs.readFileSync(path.join(root, 'documentation', 'ai.md'), 'utf8')
 
 // Hooks that predate the documentation rule. Document one, then delete it here.
 const LEGACY_UNDOCUMENTED = [
-  'AIAccessTriggerPriority', 'AIBreachReplacementValue',
+  'AIBreachReplacementValue',
   'AIBreaksRegardlessOfStrength', 'AIBypassCost', 'AICardsDiscarded',
   'AIChooseBestInstall', 'AIDrawTrigger', 'AIEncounterOptions',
   'AIGripRunPotential', 'AIHostedDoesNotPreventRez', 'AIImplementIcebreaker',

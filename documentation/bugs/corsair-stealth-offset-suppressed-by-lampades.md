@@ -125,3 +125,21 @@ reductions.
   ticket. If Cloak gets `canUseCredits("using", icebreaker)`, the generic
   hosted-credit path will count it, and Corsair's offset would have no remaining
   source. At that point, decide whether the offset is still needed.
+
+## Current-code evidence — 2026-10-06 batch 2 repair
+
+The retained pending reproduction still fails all four cases, including both
+controls. Its required `AIRunPoolCreditOffset` function no longer exists on
+Corsair. Current Corsair uses `AIRunRestrictedCredits` and releases stealth
+funding at strength-reduction nodes; these are deliberately not unrestricted
+`_effectiveRunnerCreditPool(...).recurringCredits`. Therefore the four original
+expectations no longer test the current architecture. No expectation was changed,
+no pending file was moved, and this ticket is not declared fixed by that failure.
+
+Permanent current-consumer evidence is in `tests/vantagepoint-batch13.test.js`
+(restricted payments, source depletion and opposing public routes) and
+`tests/vantagepoint-batch2.test.js` (Lampades installed before Corsair, scarce
+stealth preserved for a barrier route, and actual access-source allocation).
+Re-ground this ticket's acceptance against those consumers before implementing
+its historical offset proposal or treating its obsolete reproduction as a
+current strategic defect.

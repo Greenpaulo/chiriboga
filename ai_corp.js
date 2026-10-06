@@ -2951,7 +2951,7 @@ class CorpAI {
   _restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext) {
     if (typeof RunCalculator == "undefined" || !evaluationContext.runnerActiveCards.some(card =>
         CheckHasAbilities(card) && (typeof card.AIRunRestrictedCredits == "function" ||
-          typeof card.AIRunBreakCreditGain == "function"))) return null;
+          typeof card.AIRunBreakCreditGain == "function" || card.AIRunOrderedDraw === true))) return null;
     var credits = this._effectiveRunnerCreditPool(server);
     var previousServer = attackedServer;
     var outsideCredits = credits.temporaryCredits + credits.badPublicityCredits;
