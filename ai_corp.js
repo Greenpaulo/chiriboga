@@ -466,6 +466,12 @@ class CorpAI {
       ret.persistentPressure += contribution.persistentPressure;
       ret.growth += contribution.growth;
     }
+    if (typeof ServerAccessLimit == "function")
+      ret.additionalAccess = Math.min(ret.additionalAccess, Math.max(0, ServerAccessLimit(server) - 1));
+    if (typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(server)) {
+      ret.persistentPressure = 0;
+      ret.growth = 0;
+    }
     ret.penalty = Math.min(
       8,
       ret.additionalAccess * 1.5 +
@@ -521,7 +527,7 @@ class CorpAI {
     for (var i = 0; i < server.cards.length; i++) {
       var card = server.cards[i];
       var points = CheckCardType(card, ["agenda"])
-        ? Math.max(0, Number(card.agendaPoints) || 0)
+        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
         : 0;
       var maximumChosen = Math.min(ret.accessCount - 1, seen);
       for (var chosen = maximumChosen; chosen >= 0; chosen--) {
@@ -571,6 +577,13 @@ class CorpAI {
 
   //returns the preferred server. input is the upgrade to install
   _bestServerToUpgrade(upgrade) {
+    if (upgrade && typeof upgrade.AIPreferredUpgradeServer == "function") {
+      var legalServers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).filter(function (server) {
+        return CheckInstallDestination(upgrade, server);
+      });
+      var chosen = upgrade.AIPreferredUpgradeServer.call(upgrade, legalServers);
+      return legalServers.includes(chosen) ? chosen : null;
+    }
     var preferredServer = null; //install into new if necessary
     var nonEmptyProtectedRemotes = this._nonEmptyProtectedRemotes();
     if (nonEmptyProtectedRemotes.length > 0)
@@ -1165,12 +1178,12 @@ class CorpAI {
     var ret = 0;
     for (var i = 0; i < server.root.length; i++) {
       if (CheckCardType(server.root[i], ["agenda"]))
-        ret += server.root[i].agendaPoints;
+        ret += typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(server.root[i], runner) : server.root[i].agendaPoints;
     }
     if (typeof server.cards !== "undefined") {
       for (var i = 0; i < server.cards.length; i++) {
         if (CheckCardType(server.cards[i], ["agenda"]))
-          ret += server.cards[i].agendaPoints;
+          ret += typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(server.cards[i], runner) : server.cards[i].agendaPoints;
       }
     }
     return ret;
@@ -2704,6 +2717,7 @@ class CorpAI {
       ? 0
       : Math.max(0, corp.badPublicity || 0);
     var recurringCredits = 0;
+    var poolUsable = true;
     var activeCards = ActiveCards(runner);
     var spendTargets = activeCards.filter(
       (card) =>
@@ -2724,6 +2738,8 @@ class CorpAI {
     if (typeof attackedServer != "undefined") attackedServer = server;
     this._hypotheticalDepth++;
     try {
+      poolUsable = typeof CreditPoolCanBeUsed != "function" || CreditPoolCanBeUsed(runner, "spend", "using", null);
+      if (!poolUsable) baseCredits = 0;
       for (var i = 0; i < activeCards.length; i++) {
         var source = activeCards[i];
         if (
@@ -2766,7 +2782,7 @@ class CorpAI {
     var clicks = this._projectedRunnerClicks();
     //One click must remain to initiate an ordinary run. Once a run has begun,
     //click-for-credit is no longer available.
-    var clickCredits = evaluatingActiveRun ? 0 : Math.max(0, clicks - 1);
+    var clickCredits = evaluatingActiveRun || !poolUsable ? 0 : Math.max(0, clicks - 1);
     return {
       baseCredits: baseCredits,
       temporaryCredits: temporaryCredits,
@@ -2929,9 +2945,65 @@ class CorpAI {
     return inputs;
   }
 
+  // Restricted payments need a complete route: a scalar activation probe
+  // cannot allocate stealth across ICE, alternate funding policies or reruns.
+  _restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext) {
+    if (typeof RunCalculator == "undefined" || !evaluationContext.runnerActiveCards.some(card =>
+        CheckHasAbilities(card) && typeof card.AIRunRestrictedCredits == "function")) return null;
+    var credits = this._effectiveRunnerCreditPool(server);
+    var previousServer = attackedServer;
+    var outsideCredits = credits.temporaryCredits + credits.badPublicityCredits;
+    var damageSources = typeof OutsideCreditDamageSources == "function" ? OutsideCreditDamageSources(server) : [];
+    var clicks = Math.max(0, this._projectedRunnerClicks() - (previousServer == server ? 0 : 1));
+    var best = null;
+    this._hypotheticalDepth++;
+    try {
+      attackedServer = server;
+      // Match the generic Runner route budget. Restricted supplements are
+      // released by the calculator only at their actual payment nodes.
+      for (var source of evaluationContext.runnerActiveCards) {
+        if (CheckHasAbilities(source) && typeof source.canUseCredits == "function" &&
+            source.canUseCredits.call(source, "", null)) outsideCredits += Math.max(0, source.credits || 0);
+      }
+      // Gaining a credit consumes the same public click budget as reruns and
+      // click abilities; it cannot simultaneously finance both alternatives.
+      for (var gains = 0; gains <= credits.clickCredits; gains++) {
+        var rc = new RunCalculator();
+        rc.suppressOutput = true;
+        rc._securityPlanning = {eligibleIce: new Set(eligibleIce), damageSources: damageSources,
+          temporaryCredits: credits.temporaryCredits + credits.badPublicityCredits};
+        var paths = rc.Calculate(server, clicks - gains, credits.baseCredits + gains,
+          outsideCredits, (runner.grip || []).length, Infinity, false, null);
+        if (!paths.length) continue;
+        var path = paths[paths.length - 1];
+        var last = path[path.length - 1];
+        var value = rc.PathCost(path) + 0.8 * gains;
+        if (!best || value < best.value) best = {last: last, rc: rc, value: value};
+      }
+    } finally {
+      attackedServer = previousServer;
+      this._hypotheticalDepth--;
+    }
+    var last = best ? best.last : null;
+    var cost = last ? last.runner_credits_spent + last.runner_credits_lost +
+      (last.runner_credits_reserved || 0) : Infinity;
+    return {
+      hasHardLockout: false,
+      totalBreakCost: cost,
+      totalMandatoryBreakCost: cost,
+      routeFeasible: !!last,
+      restrictedCreditsPaid: last ? last.restrictedCreditsPaid || 0 : 0,
+      routeDamage: last ? best.rc.TotalDamage(best.rc.TotalEffect(last)) : 0,
+      reasons: [last ? "restricted-credit route is feasible" : "no feasible restricted-credit route"],
+      rezCost: eligibleIce.reduce((total, card) => total + (card.rezzed ? 0 : Math.max(0, RezCost(card))), 0),
+    };
+  }
+
   _icePlanOutcome(server, eligibleIce, evaluationContext) {
     if (!evaluationContext)
       evaluationContext = this._securityEvaluationContext(server);
+    var restrictedOutcome = this._restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext);
+    if (restrictedOutcome) return restrictedOutcome;
     var outcome = {
       hasHardLockout: false,
       totalBreakCost: 0,
@@ -3217,7 +3289,7 @@ class CorpAI {
       result.reasons.push(
         "global end the run covers " + projectedRuns + " projected runs",
       );
-    } else if (globalETRUses > 0) {
+    } else if (globalETRUses > 0 && typeof bestPlan.routeFeasible != "boolean") {
       //A finite supply makes the Runner pay this route again after each ETR.
       var repeatedRouteCost = result.totalMandatoryBreakCost;
       for (var etrIndex = 0; etrIndex < bestCards.length; etrIndex++) {
@@ -3233,6 +3305,20 @@ class CorpAI {
         "global end the run adds " + globalETRUses + " repeated route cost",
       );
     }
+    var outsideDamageSources = typeof OutsideCreditDamageSources == "function" ? OutsideCreditDamageSources(server) : [];
+    var outsideDamage = outsideDamageSources.reduce((sum, source) => sum + source.damage, 0);
+    var meatPrevention = typeof PublicMeatDamagePrevention == "function" ? PublicMeatDamagePrevention() : 0;
+    if (typeof bestPlan.routeFeasible == "boolean") {
+      // The shared route already applies conditional damage and prevention.
+    } else if (outsideDamage > (runner.grip || []).length + meatPrevention) {
+      // Lethal outside payments are optional: test the safe pool-only route.
+      result.runnerCredits = effectiveCredits.baseCredits + effectiveCredits.clickCredits;
+      result.reasons.push("outside-credit damage requires a pool-only route");
+    } else if (outsideDamage > 0 && result.totalMandatoryBreakCost > effectiveCredits.baseCredits + effectiveCredits.clickCredits) {
+      result.deterrence += Math.max(0, outsideDamage - meatPrevention);
+      result.reasons.push("outside-credit payment takes " + Math.max(0, outsideDamage - meatPrevention) + " meat damage");
+    }
+    if (typeof bestPlan.routeFeasible == "boolean") result.runnerCredits += bestPlan.restrictedCreditsPaid;
     if (result.totalMandatoryBreakCost > result.runnerCredits) {
       result.reasons.push(
         "break cost " +
@@ -3241,9 +3327,10 @@ class CorpAI {
           result.runnerCredits,
       );
     }
-    result.isSecure =
-      result.hasHardLockout ||
-      result.totalMandatoryBreakCost > result.runnerCredits;
+    if (typeof bestPlan.routeFeasible == "boolean") {
+      result.deterrence += bestPlan.routeDamage;
+      result.isSecure = result.hasHardLockout || !bestPlan.routeFeasible;
+    } else result.isSecure = result.hasHardLockout || result.totalMandatoryBreakCost > result.runnerCredits;
     return result;
   }
 
@@ -6342,6 +6429,16 @@ class CorpAI {
     if (this.debugSecurityLog) this._serverToProtect(false, true);
 
     var cardToPlay = null; //used for checks
+
+    // An affordable operation that wins immediately outranks setup and defense.
+    if (optionList.includes("play")) {
+      for (var winningCard of corp.HQ.cards) {
+        if (typeof winningCard.AIImmediateWin == "function" &&
+            winningCard.AIImmediateWin.call(winningCard) &&
+            this._commonCardToPlayChecks(winningCard, "to win immediately", true))
+          return this._returnPreference(optionList, "play", {cardToPlay: winningCard});
+      }
+    }
 
     var sufficientEconomy = this._sufficientEconomy();
 

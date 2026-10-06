@@ -138,6 +138,10 @@ context.Log = () => {};
 context.GainCredits = (player, amount) => {
   creditsGained += amount;
 };
+context.SpendHostedCredits = (player, source, amount, callback, callbackContext) => {
+  source.credits -= amount;
+  if (callback) callback.call(callbackContext);
+};
 context.UpdateCounters = () => {};
 context.Strength = (card) => card.currentStrength;
 context.CheckEncounter = () => true;
@@ -311,7 +315,7 @@ const fakeRunCalculator = {
   ImplementIcebreaker() {
     return [{kind: 'break'}];
   },
-  StrModify(target, source, originalPoint, amount) {
+  StrModify(source, target, originalPoint, amount) {
     return {
       runner_credits_spent: originalPoint.runner_credits_spent,
       card_str_mods: originalPoint.card_str_mods.concat([

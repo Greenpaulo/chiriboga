@@ -24,10 +24,7 @@ const LEGACY_UNDOCUMENTED = [
   'AIShouldInstallOnRez', 'AIShouldTakeCard', 'AIWouldTrashProgram',
   'AIWouldTrashResource', 'AIWouldTriggerArchivesAbility', 'AIWouldUse',
   'AIWouldRez', 'AIWouldUseAbility',
-  // Added with Vantage Point batch 1 after the rule existed. Corsair's
-  // AIRunPoolCreditOffset treats any card with this marker as a Corsair, so an
-  // earlier-installed Lampades suppresses Corsair's offset. Document the
-  // contract when that is resolved rather than enshrining it.
+  // Legacy marker identifying strength modifications made with stealth.
   'AIUsesStealthCredits',
 ];
 
