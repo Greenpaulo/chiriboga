@@ -2775,6 +2775,15 @@ body::-webkit-scrollbar-track {
   display: none;
 }
 
+/* Stacking: the identity list panel opens downward over the "Load Precon
+   Deck" selector that follows it. Both wrappers sit at the shared z-index
+   above, and the precon wrapper is a later sibling, so it would paint over
+   the panel's first rows and swallow their clicks. The panel is confined to
+   its wrapper's stacking context, so the wrapper itself must stack higher. */
+#identityselect-custom {
+  z-index: 40;
+}
+
 .custom-select-trigger {
   display: block;
   width: 100%;

@@ -138,4 +138,20 @@ assert(
   'trigger label styling missing',
 );
 
+// Stacking: the open identity panel overlaps the "Load Precon Deck" wrapper
+// that follows it. The precon wrapper is a later sibling at the shared
+// .custom-select z-index, so the identity wrapper must stack strictly higher
+// or the panel's first rows hide behind the precon trigger and can't be
+// clicked (the panel itself is confined to its wrapper's stacking context).
+const wrapRule = css.match(/\.custom-select\s*\{[^}]*\}/);
+assert(wrapRule, '.custom-select wrapper rule missing');
+const identityWrapRule = css.match(/#identityselect-custom\s*\{[^}]*\}/);
+assert(identityWrapRule, '#identityselect-custom stacking rule missing');
+const baseZ = Number((wrapRule[0].match(/z-index:\s*(\d+)/) || [])[1]);
+const identityZ = Number((identityWrapRule[0].match(/z-index:\s*(\d+)/) || [])[1]);
+assert(
+  Number.isFinite(baseZ) && Number.isFinite(identityZ) && identityZ > baseZ,
+  'identity wrapper must stack above the precon wrapper below it',
+);
+
 console.log('Decklauncher custom identity dropdown regression cases passed.');
