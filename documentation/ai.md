@@ -1668,6 +1668,15 @@ does not play it without a useful effect.
 
 ### 5.7 Agendas
 
+**`AIAdvanceCreditGain(thisTurn, advancedInPlan)`**
+
+Return credits gained from a basic advance, excluding its one-credit cost.
+`thisTurn` distinguishes the current turn from a future turn;
+`advancedInPlan` records whether this plan already used a basic advance on the
+card. Consumers track that locally without changing card flags. Counter placement
+does not trigger this income. See the Batch 12 contracts below for consumers and
+hypothetical advancement budgets.
+
 **`AIAdvancementLimit()`**
 
 Return the number of advancement counters to place on this agenda. Normally you do not need this (the AI reads `advancementRequirement`). Use it for advanceable assets/ambushes that should be advanced to a non-standard level:
@@ -2053,6 +2062,12 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIReserveCredits(server)` | function | Return state-sensitive post-rez credits to preserve for this card |
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
 | `AIGlobalETRUses(server)` | function | Number of active global end-the-run uses the Corp will spend defending this server |
+| `AITriggerInPaidWindow()` | function | Declare a useful legal paid ability in the current window |
+| `AITriggerAfterTactics` | boolean | Delay an `AITriggerWhenCan` setup action until kills, scoring, defense and priority installs are considered |
+| `AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` | function | Price a mandatory ICE passage when ETR subroutines have payment alternatives |
+| `AIETRTrashesSelf` | boolean | A declared global ETR consumes its own ICE layer |
+| `AIRunExtraRuns(server)` | function | Public self-consuming ICE defense requires an additional ordinary run; see Batch 12 contracts below |
+| `AIRunSuccessfulDamage(server)` | function | Public available hand damage after a successful run |
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
@@ -2065,6 +2080,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
+| `AIAdvanceCreditGain(thisTurn, advancedInPlan)` | function | Read-only credit income from the next basic advance, consumed by advancement and economy planners |
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
 
@@ -2191,6 +2207,70 @@ if (!runner.AI || runner.AI.rc !== rc) {
   discount expires. `RezUsability` permits a free rez, or pays six only
   when the counter can bridge the click shortfall for scoring. Its AI ability
   targets unfinished agendas and honours a legal `AIPreferredTarget`.
+
+### Vantage Point Batch 12 card hooks
+
+- Sacrifice Zone Expansion uses `AIAdvancementLimit()` for its normal scoring
+  target. `AIAdvanceCreditGain(thisTurn, advancedInPlan)` returns the credit
+  income from a basic advance: three on the first advance, zero thereafter.
+  `_potentialAdvancementDirections` consumes it and records the basic advance
+  locally in `point.persist`; placed counters do not consume the opportunity.
+  `_bestMainPhaseEconomyOption` compares its net income with a credit click.
+  Both consumers are read-only. Next-turn plans reset the opportunity and can
+  use an explicit click budget and hypothetical starting counter count in
+  `_potentialAdvancement(card, limit, thisTurn, fastAdvanceArray, assumeClicks,
+  output, startingCounters)` without mutating the board. The live damage choice
+  preserves a completed score or a counter essential to scoring next turn,
+  unless the damage wins immediately. `AIRunSuccessfulDamage(server)` returns
+  the public available damage after a successful run, using only installed
+  state, counters and once-per-turn capacity. `CalculatePieceBegin` includes
+  it independently of breach replacement. Generic `netDamage` represents the
+  meat damage; stopped attempts do not pay successful-run damage.
+- Luana Campos uses `AIWorthInstalling(remotes)`, `AIRezWhenCan()` and the
+  opening-hand economy flag `AIEconomyCard`. Placement chooses the strongest
+  empty protected remote, otherwise a new one. Installing/rezzing requires bad
+  publicity, an affordable rez and at least two R&D cards. Turn-start choices
+  decline a draw that leaves no card for the mandatory draw.
+- Event Horizon uses `AITriggerInPaidWindow()` for legal Corp paid-window
+  command/card selection. It waits until all ICE is passed, then sacrifices
+  against a potentially winning breach or to save an agenda on the Runner's
+  last click. `AIGlobalETRUses(server)` shares that one-use policy with Corp
+  security planning. `AIMandatoryPassCost(breaker, server, iceIndex, ai,
+  evaluationContext)` returns the cheaper of paying three or breaking the ETR;
+  `_securityIcePlanInputs` consumes it. `AIETRTrashesSelf` excludes the consumed
+  layer from repeated-route taxes.
+  `AIRunExtraRuns(server)` returns one when its public, installed, rezzed,
+  active and trashable paid defense can stop a run on that server. It must
+  describe a self-consuming ICE, not a renewable stop. For complete Runner
+  routes, `CalculatePieceEnd` consumes one such defense per attempt and
+  `_finiteRunContinuations` calculates an ordinary follow-up run through a
+  local ICE-model overlay. The failed attempt pays encounters, the continuation
+  receives fresh bad-publicity credits, and only the successful attempt pays
+  approach/breach effects. Additional pool expenditure is stored in
+  `runner_credits_reserved`, consumed by `ValidPoint` and `PointCost`. Incomplete
+  encounter planning and Corp severity calculation are unchanged. This is a
+  conservative public-information plan assuming the Corp uses each available
+  stop; it can afford a rerun and does not treat disposable defense as permanent.
+  Hypothetical continuations retain the current installed rig and ordinary run
+  calculator assumptions; they do not simulate intervening installs or draws.
+  The real Runner subroutine selector follows calculator OR branches. Choices
+  can expose `srChoice` to retain their model index when unaffordable payments
+  disappear from the legal menu; no inline preference overrides the route.
+- Flywheel uses `AIImplementIce` for two economy subroutines, never an ETR.
+  Each mandatory credit resolves before the optional draw. The actual option
+  selector takes a draw with room in HQ and more than one R&D card, and declines
+  overflow or consuming the card needed for the mandatory draw.
+- Tocsin uses `AITriggerWhenCan` with `AITriggerAfterTactics: true`. `Phase_Main`
+  delays these setup triggers until after kill, scoring, critical defense and
+  useful priority installs, before ordinary recovery/economy. Its HQ ability
+  uses `availableFromHQ`. It preserves the last click, an affordable ETR
+  defender, hand space and mandatory-draw safety. The tutor budget uses the
+  current protection target, includes the expend credit and ICE installation
+  cost, and reserves credits for that server's already unrezzed ICE. Searches
+  select affordable new ICE, ranking stopping subroutines, absence of a compatible installed
+  public breaker, then existing ELO, instead of the generic operation tutor
+  scorer. Real option selection handles each subtype and a separate decline.
+  `AIImplementIce` models two pool-credit losses and two separate ETRs.
 
 ## 8. Step-by-Step Worked Example
 

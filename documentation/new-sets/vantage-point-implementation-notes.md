@@ -488,3 +488,151 @@ checks full rez legality before acting on it in any legal rez window. Hype
 Machine returns true only at zero rez cost. Focused tests exercise actual
 `CorpAI.Choice` command and card selection after scoring and at Runner EOT,
 including no-discount, already-rezzed and no-rez-window negative cases.
+
+## Batch 12 — 36056–36060 (2026-10-05, Codex)
+
+- Sacrifice Zone Expansion installs publicly, pays three credits on the first
+  advance on either player's turn, and optionally spends an advancement counter
+  for preventable meat damage after a successful run on a different server.
+  Turn/uninstall cleanup prevents stale guards. Its public successful-run damage
+  is included in complete Runner routes, independently of breach replacement;
+  the Corp advancement selector uses the ordinary four-counter scoring target.
+- Luana Campos is unique. Hosting transfers actual bad publicity to visible
+  `bad_publicity` counters, gives income and draws mandatorily. The new
+  `interruptOnUninstall` continuation, consumed by `Trash` and `Uninstall`,
+  finishes bad-publicity prevention and responses before moving the card.
+  Hosted counters are consumed once even when returning publicity is prevented.
+  Corp install/rez hooks and turn-start choices use actual available publicity.
+- Event Horizon exposes both three-credit payment choices, legal program
+  targets and a preventable program trash; its paid trash cost is unpreventable.
+  Corp `AITriggerInPaidWindow` selection saves the sacrifice for the final
+  movement window before a potentially winning breach. `AIGlobalETRUses` shares
+  that one-use policy with security planning. `AIMandatoryPassCost` prices the
+  cheaper of the ETR payment or a real breaker activation; `AIETRTrashesSelf`
+  prevents charging for the sacrificed layer on repeated routes. Complete
+  Runner route modelling sees its public paid defense even after passing or
+  bypassing it. The Runner conservatively assumes the sacrifice will be used;
+  the Corp policy can decline it on a non-winning breach.
+- Flywheel gives each mandatory credit before offering its separate optional
+  draw. Real Corp option selection declines hand overflow and imminent decking.
+  Its run model describes economy punishment without asserting an ETR.
+- Tocsin's `availableFromHQ` ability is discovered by the real Corp trigger
+  selector, with action-click, credit, trash and HQ checks. Payment, reveal and
+  unpreventable trash finish before searching. Separate barrier/sentry choices
+  allow finding neither, either or both, never selecting the same physical card
+  twice. Every completed search shuffles, then reveals and adds the selected
+  cards. The existing tutor scorer selects affordable new ICE; real selector
+  tests cover command, card and both search targets, plus expired/empty searches.
+
+Shared additions are limited to HQ paid-ability discovery, mandatory uninstall
+continuations, rendering/resetting hosted bad publicity, paid-window Corp
+trigger selection, mandatory ICE pass pricing and public complete-run effects.
+Existing ELO values and registry/playability flags are preserved.
+Subroutine overlay positions were measured and verified with ASCII pixel
+windows: Event Horizon `(103,32)`, `(137,32)`; Flywheel `(59,16)`, `(79,16)`;
+Tocsin `(123,16)`, `(143,16)`, `(162,16)`.
+
+Focused evidence: `tests/vantagepoint-batch12.test.js` exercises mechanics,
+cleanup, negative cases, real Corp command/card/option selection, real Runner
+route calculation, and real trash/bad-publicity prevention/response ordering.
+`tests/corp-server-security.test.js` exercises the real security planner with
+payment, a cheaper Mimic break, one-use ETR capacity and sacrificed-layer cost.
+The integration test checks the batch's definitions and shared entry points.
+
+Batch 12 verification passed on Node 20.19.0: focused batch/integration/security
+and subroutine-visual tests; all required format/deckbuilding/identity checks;
+JavaScript syntax and `git diff --check`; and `node tests/run-all-tests.js`
+(46 test files, including Corp decision fixtures and decision snapshots).
+The batch brief reports no unfinished markers for all five cards. Batch scope,
+exact ELO preservation and absence of empty effects were checked separately.
+
+### Batch 12 stop-hook runtime follow-up
+
+The Stop hook inherited Node 8.17.0 and found a test-harness leak: loading
+`utility.js` in the Batch 12 VM modified the host `console.log`, so printing the
+final test summary invoked the utility logger's modern `replaceAll` API. The
+harness now gives the VM its own console object. The focused Batch 12 test
+passes on both Node 8.17.0 and Node 20.19.0; all 46 test files pass on Node 20.
+
+The Node 8 full run still fails `agent-scripts.test.js`,
+`agent-skills.test.js`, `ai-batch.test.js`, `ai-hook-docs.test.js`,
+`card-status.test.js`, `corp-ai-card-titles.test.js`,
+`ticket-roadmap-sync.test.js` and `verify-on-stop.test.js`. An isolated unchanged
+HEAD archive, with read-only links to the existing images and Git metadata,
+fails the same eight tests under Node 8 (45 baseline test files). These existing
+runtime incompatibilities are unrelated to Batch 12; the Stop hook's full
+suite is therefore not green under its inherited Node 8 runtime.
+
+### Batch 12 AI audit and recurring hook runtime repair
+
+The follow-up audit found that Luana's automatic income preference could draw
+the last R&D card before the Corp's mandatory draw. Her AI now declines hosting
+in that state, and declines installing/rezzing her as economy until at least two
+cards remain. Real option-selector tests cover the one-card decline and
+two-card activation; human choices and printed mandatory draw are unchanged.
+
+The remaining policies are working heuristics rather than optimal tactical
+search: Sacrifice Zone Expansion spends its damage counter whenever eligible;
+Event Horizon protects potentially winning breaches and its Runner model is
+conservative; Tocsin prioritizes an affordable new ICE search without comparing
+it against an entire defense/scoring plan. This audit does not establish that
+those policies maximize win probability.
+
+The recurring Node 8 hook mismatch is repaired at the suite launcher.
+`.nvmrc` pins 20.19.0. `verify-on-stop.js` resolves the installed nvm binary and
+puts it first on the child PATH. If that installation is absent, it accepts a
+current Node of at least the pinned major version; an older runtime produces
+an explicit setup error without running an incompatible suite. The hook itself
+remains parsable by Node 8. Its tests cover old-shell selection, modern fallback,
+missing-runtime diagnostics, block limits and counter reset, on Node 8 and 20.
+
+### Batch 12 strategic rework (2026-10-05)
+
+This review supersedes the simple policies recorded above. The prior green
+suite established usable mechanics, but did not establish good resource tradeoffs.
+Batch 12 was reopened before correcting those decisions. The skill and workflow
+now require strategic alternatives and contrasting real-consumer tests before
+completion; final set review verifies support rather than postponing it.
+
+- Sacrifice Zone's first-advance income is included once in each advancement
+  plan, independent of placed counters, and competes with ordinary click economy.
+  Damage preserves completed scoring or a counter essential to the next
+  three-click scoring window, except when damage immediately flatlines. The
+  next-turn comparison uses current credits and owned fast-advance cards, not
+  a prediction of hidden draws, so it is a conservative scoring budget.
+- Luana chooses existing empty protected remotes. Real install selection tests
+  verify that placement; previous publicity and mandatory-draw safeguards remain.
+- Event Horizon's paid defense protects winning breaches and last-click agenda
+  breaches, while preserving recurring ICE against repeatable non-winning runs.
+  The Runner calculates finite ordinary continuations through a local ICE-model
+  overlay, budgets extra clicks, pool credits, fresh bad-publicity credits and
+  successful-run damage, and leaves the real server unchanged. Continuations
+  are cached only within one calculation snapshot. Multiple copies require
+  multiple extra runs. The current installed rig and ordinary static-board run
+  assumptions are retained; no intervening draw/install search is introduced.
+  Its real Runner selector now follows calculated subroutine OR branches,
+  including no-program declines and shrinking unaffordable payment menus.
+- Flywheel takes a useful draw with two cards remaining and then preserves the
+  final mandatory-draw card; mandatory income and hand-overflow checks remain.
+- Tocsin's setup trigger yields to winning advancement and useful installs.
+  It preserves a final installation click and affordable stopping ICE in HQ.
+  Search affordability includes the expend credit, the protection target's
+  installation cost and unrezzed ICE reserve. Targets rank stopping behavior,
+  public breaker coverage and existing ELO; duplicate titles are declined.
+  Three R&D cards can support a one-card search that leaves two behind.
+
+`tests/vantagepoint-batch12.test.js` exercises the real Corp command, card,
+install and target selectors, real advancement search, real Runner option
+selection and run calculator. Contrasting cases cover a winning advance versus
+expend, score preservation versus immediate flatline, useful versus unsafe draws,
+a stopping versus higher-ELO economy-only tutor target, and affordable versus
+unaffordable finite reruns. The existing security suite covers Event Horizon's
+payment versus actual killer cost and self-consumption in Corp planning.
+
+Verification after the strategic rework: the focused batch and security suites,
+all required shared checks and `node tests/run-all-tests.js` pass on Node
+20.19.0 (46 files, including Corp decision fixtures and decision snapshots).
+AI hook documentation checks 120 hooks. The skill-creator quick validator passes
+using PyYAML in an isolated temporary validation environment. Batch 12 is complete
+again; Batch 13 remains pending. No claims are made about earlier batches' strategy
+without their own audit evidence.

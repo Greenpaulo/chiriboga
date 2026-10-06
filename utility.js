@@ -4163,6 +4163,10 @@ function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
     if (abilitiesProperty === "abilities" && !CheckHasAbilities(card))
       return [];
     for (var i = 0; i < card[abilitiesProperty].length; i++) {
+      if (card.player === corp && card.cardLocation === corp.HQ.cards &&
+          !card[abilitiesProperty][i].availableFromHQ) continue;
+      if (card[abilitiesProperty][i].availableFromHQ && card.cardLocation !== corp.HQ.cards)
+        continue;
       checkedClick = false;
       checkedAccess = false;
       var choices = card[abilitiesProperty][i].Enumerate.call(card);
@@ -4266,6 +4270,16 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
   //each ability on each card
   var ret = [];
   var activeCards = ActiveCards(player);
+  // Some printed abilities are usable from HQ rather than while installed.
+  if (player === corp) {
+    for (var hqIndex = 0; hqIndex < corp.HQ.cards.length; hqIndex++) {
+      var hqCard = corp.HQ.cards[hqIndex];
+      if (hqCard.abilities && hqCard.abilities.some(function (ability) {
+        return ability.availableFromHQ;
+      }) && activeCards.indexOf(hqCard) < 0) activeCards.push(hqCard);
+    }
+  }
+
   for (var i = 0; i < activeCards.length; i++) {
     var abilities = ChoicesAbility(activeCards[i], limitTo);
     for (var j = 0; j < abilities.length; j++) {

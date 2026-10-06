@@ -129,6 +129,14 @@ responseOnInstall: { Resolve, automatic: true }
 responseOnTrash:   { Enumerate, Resolve, text }   // optional choice on trash
 ```
 
+`interruptOnUninstall: { Resolve(afterInterrupt) }` is a mandatory continuation
+hook consumed by `UninstallInterrupts` from `Trash` and `Uninstall`. The card
+must still be installed and its callback active. Call `afterInterrupt` exactly
+once after prevention and responses finish; movement waits for that call.
+Use `Uninstall` for installed-to-noninstalled movement requiring this timing.
+Hosted bad publicity uses the `bad_publicity` counter property and existing
+bad-publicity counter texture; clearing counters also clears that property.
+
 ### Score / Steal
 
 ```js
@@ -177,6 +185,11 @@ abilities: [{
   Resolve: function() { SpendClicks(corp, 1); /* effect */ },
 }],
 ```
+
+An ability with `availableFromHQ: true` is included by Corp ability discovery
+while its card is in HQ, even though the card is inactive there. Its enumeration
+must check HQ location, action-click legality, credit/trash costs and targets.
+The flag does not make other abilities on the card active.
 
 ### canBeRezzed (conditional)
 
@@ -766,3 +779,8 @@ modifyInstallCost: {
 | 26060 | Trebuchet              | ✅     |
 | 26064 | CSR Campaign           | ✅     |
 | 26065 | Rime                   | ✅     |
+
+Subroutine payment menus may attach `srChoice` to each option to identify the
+corresponding `AIImplementIce` OR branch. `RunnerAI` matches that stable index
+when unaffordable choices disappear. Keep the model branch order consistent and
+do not override its selected branch with an unconditional inline preference.

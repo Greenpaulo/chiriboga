@@ -2922,6 +2922,9 @@ class CorpAI {
         evaluationContext,
       ),
     };
+    if (typeof iceCard.AIMandatoryPassCost == "function")
+      inputs.mandatoryCost = iceCard.AIMandatoryPassCost.call(
+        iceCard, breaker, server, iceIndex, this, evaluationContext);
     evaluationContext.icePlanInputs.set(iceCard, inputs);
     return inputs;
   }
@@ -3216,8 +3219,16 @@ class CorpAI {
       );
     } else if (globalETRUses > 0) {
       //A finite supply makes the Runner pay this route again after each ETR.
-      result.totalMandatoryBreakCost +=
-        globalETRUses * result.totalMandatoryBreakCost;
+      var repeatedRouteCost = result.totalMandatoryBreakCost;
+      for (var etrIndex = 0; etrIndex < bestCards.length; etrIndex++) {
+        var etrCard = bestCards[etrIndex];
+        if (etrCard.AIETRTrashesSelf && etrCard.rezzed &&
+            typeof etrCard.AIGlobalETRUses == "function" &&
+            etrCard.AIGlobalETRUses.call(etrCard, server) > 0)
+          repeatedRouteCost -= this._securityIcePlanInputs(
+            etrCard, server, server.ice.indexOf(etrCard), evaluationContext).mandatoryCost;
+      }
+      result.totalMandatoryBreakCost += globalETRUses * Math.max(0, repeatedRouteCost);
       result.reasons.push(
         "global end the run adds " + globalETRUses + " repeated route cost",
       );
@@ -3825,6 +3836,16 @@ class CorpAI {
   //enact best economy (called from main phase)
   _bestMainPhaseEconomyOption(optionList) {
     var installedCards = InstalledCards(corp);
+
+    if (optionList.includes("advance") && Credits(corp) > 0) {
+      for (var incomeIndex = 0; incomeIndex < installedCards.length; incomeIndex++) {
+        var incomeCard = installedCards[incomeIndex];
+        if (typeof incomeCard.AIAdvanceCreditGain == "function" &&
+            incomeCard.AIAdvanceCreditGain.call(incomeCard, true, false) > 1 &&
+            CheckAdvance(incomeCard) && this._cardNeedsAdvancement(incomeCard))
+          return this._returnPreference(optionList, "advance", {cardToAdvance: incomeCard});
+      }
+    }
 
     //special case: Oaktown Renovation is installed
     if (optionList.indexOf("advance") > -1) {
@@ -5675,6 +5696,13 @@ class CorpAI {
           else newCredits += 3;
         }
       }
+      // Track first-advance income locally; placing counters does not trigger it.
+      var advancePersist = point.persist;
+      if (card && typeof card.AIAdvanceCreditGain == "function") {
+        newCredits += card.AIAdvanceCreditGain.call(
+          card, thisTurn, point.persist.includes(card));
+        advancePersist = point.persist.includes(card) ? point.persist : point.persist.concat([card]);
+      }
       var basicadvcards = point.handCards.concat([]); //make a copy of the array
       ret.push({
         corpCredits: newCredits,
@@ -5682,7 +5710,7 @@ class CorpAI {
         handCards: basicadvcards,
         advancementSoFar: point.advancementSoFar + 1,
         using: null, //not using a card
-        persist: point.persist,
+        persist: advancePersist,
       });
     }
     //other actions e.g. placing advancement counters, gaining clicks...
@@ -5862,12 +5890,14 @@ class CorpAI {
     fastAdvanceArray,
     assumeClicks,
     output = [],
+    startingCounters,
   ) {
     if (typeof fastAdvanceArray == "undefined")
       fastAdvanceArray = corp.resolvingCards.concat(corp.HQ.cards); //source of fast advance cards
     var availableCredits = Credits(corp);
     var advancementSoFar = 0;
-    if (card) advancementSoFar = Counters(card, "advancement");
+    if (card) advancementSoFar = typeof startingCounters == "undefined"
+      ? Counters(card, "advancement") : startingCounters;
     var startingAdvancement = advancementSoFar; //this function returns change to advancement not total
     var options = {
       card: card,
@@ -5879,8 +5909,8 @@ class CorpAI {
     if (thisTurn) {
       var clicksLeft = this._clicksLeft();
       if (!card) clicksLeft--;
-      if (typeof assumeClicks != "undefined") clicksLeft = assumeClicks;
     }
+    if (typeof assumeClicks != "undefined") clicksLeft = assumeClicks;
     var startingPoint = {
       corpCredits: availableCredits,
       corpClicks: clicksLeft,
@@ -6325,7 +6355,7 @@ class CorpAI {
     if (optionList.includes("trigger")) {
       var triggerables = ChoicesTriggerableAbilities(corp);
       for (var i = 0; i < triggerables.length; i++) {
-        if (triggerables[i].card.AITriggerWhenCan) {
+        if (triggerables[i].card.AITriggerWhenCan && !triggerables[i].card.AITriggerAfterTactics) {
           this._log("there is an active card I would use ability of");
           return this._returnPreference(optionList, "trigger", {
             cardToTrigger: triggerables[i].card,
@@ -6726,6 +6756,18 @@ class CorpAI {
     //central-loss interrupt: it catches any severely exposed server after the
     //normal install plan has found no useful option. Use immediate draw tools
     //or basic draws before accumulating credits that cannot protect it.
+    // Tutors marked as setup actions yield to kills, scoring and useful installs.
+    if (optionList.includes("trigger")) {
+      var setupTriggers = ChoicesTriggerableAbilities(corp);
+      for (var setupIndex = 0; setupIndex < setupTriggers.length; setupIndex++) {
+        if (setupTriggers[setupIndex].card.AITriggerWhenCan &&
+            setupTriggers[setupIndex].card.AITriggerAfterTactics)
+          return this._returnPreference(optionList, "trigger", {
+            cardToTrigger: setupTriggers[setupIndex].card,
+          });
+      }
+    }
+
     var emergencyRecovery = this._emergencyProtectionRecoveryAction(optionList);
     if (emergencyRecovery > -1) return emergencyRecovery;
 
@@ -6964,6 +7006,15 @@ class CorpAI {
               FullCheckRez(rezCandidate, ["asset", "upgrade"]) &&
               rezCandidate.AIRezWhenCan.call(rezCandidate))
             return this._returnPreference(optionList, "rez", {cardToRez: rezCandidate});
+        }
+      }
+      if (optionList.includes("trigger")) {
+        var paidTriggers = ChoicesTriggerableAbilities(corp);
+        for (var paidIndex = 0; paidIndex < paidTriggers.length; paidIndex++) {
+          var paidCard = paidTriggers[paidIndex].card;
+          if (typeof paidCard.AITriggerInPaidWindow == "function" &&
+              paidCard.AITriggerInPaidWindow.call(paidCard))
+            return this._returnPreference(optionList, "trigger", {cardToTrigger: paidCard});
         }
       }
       if (optionList.indexOf("score") > -1) ret = this.Phase_Score(optionList);
