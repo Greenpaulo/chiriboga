@@ -45,6 +45,19 @@ made the real 20-seed batch slower and was reverted. The remaining opportunity
 therefore needs a coherent state/index design and representative F4 evidence,
 not more local conditionals.
 
+Two further local ideas were measured on 2026-10-02 (F4 branch, F6's fixed
+Duel PD vs Tao 20-seed, eight-job workload; every hash unchanged) and
+rejected:
+
+- Hoisting the `modifyHasAbilities` provider scan out of each
+  `ChoicesActiveTriggers()` loop was slower: about 3.3 s per game against
+  2.0–2.3 s. `CheckCallback()` already calls `CheckHasAbilities()` only after
+  `CheckActive()` passes, so the scan is lazy and eager hoisting adds work.
+- An early `false` from `CheckInstalled()` for unhosted cards in HQ, R&D,
+  Archives, the Grip, the Stack or the Heap was 4–6% faster. That is within
+  run-to-run noise (1.76–2.30 s for unchanged code), so it is not material on
+  its own; an index would subsume it.
+
 ## Design
 - **Measure across the committed pool first.** Use F4's deck pool and timing
   output to record per-deck-pair game time, aggregate throughput and CPU

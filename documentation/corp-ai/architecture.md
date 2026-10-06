@@ -494,11 +494,94 @@ needs.
   response hooks remain uncached. On fixed Duel PD vs Tao seeds 1–20 with eight
   jobs, these behaviour-identical changes reduced mean game time from 42.188 s
   to 2.255 s while preserving every recorded log hash.
-- **Batch harness (F4, step 1 done).** `scripts/ai-game.js` plays seeded
-  AI-vs-AI games headlessly with the real engine; the batch runner, metrics and
-  comparison are not built. `GameEnded(winner)` is an empty stub and nothing
-  calls it; `DecisionSnapshots.totalMs` measures the recorder's own cost, not
-  decision latency. Mulligan weights are uncalibrated until F5.
+- **Batch harness (F4).** `scripts/ai-batch.js` plays seeded AI-vs-AI
+  batches headlessly on the committed deck pool
+  (`tests/fixtures/ai-batch/deck-pool.json`) and writes a JSON report;
+  `scripts/ai-game.js` replays one game. Both use
+  `scripts/ai-batch/headless.js`, which loads the real engine, sets and AIs
+  into a fresh `vm` context per game with only browser globals stubbed. The
+  owner's guide is [ai-batch-harness.md](../ai-batch-harness.md).
+  - *Sets.* The pool lists its own trusted sets (System Gateway, System Update
+    2021, Elevation) and the batch loads only those set files. Being marked
+    playable in `card-sets.md` is not enough. A pool test checks every deck card
+    against that list and against `cardSet` definitions, and `--start` rejects
+    a fixture that uses other cards.
+  - *Seeds.* Each game has three independent `Math.seedrandom` streams named
+    `<seed>:<deckPairId>:engine|corp|runner`. The engine stream replaces
+    `Math.random` inside the game's own context only; the AI streams are
+    assigned to `corp.AI._random` and `runner.AI._random` after construction.
+    A policy change on one side therefore cannot shift another stream.
+  - *AI options.* `CorpAI.DEFAULT_OPTIONS` and `RunnerAI.DEFAULT_OPTIONS` are
+    copied into `this.options`. `--corp-option`/`--runner-option` set one
+    option for that run; an unknown name is an error, and the report records
+    the effective options for both sides.
+    The regression options below default to `false`. Turning one on restores
+    that behavior from the tested harness tip b52d451; leaving all five off
+    implements the combined diagnostic policy edc177a. The owner-run queue
+    confirmed exact default/combined and all-on/old-tip fidelity on 1,000
+    completed pairs each; see the
+    [gated-fix handoff](../corp-ai-regression/gated-fix-handoff.md).
+
+    | Corp option | Behavior when enabled |
+    |---|---|
+    | `secureScoringServerGate` | Reject insecure remotes in `_isAScoringServer`, even when their protection score beats HQ. |
+    | `serverAtRiskInstallOverride` | Allow the final `serverAtRisk` override in `_shouldInstallIceLayer`; earlier affordability and stakes checks still apply. |
+    | `committedAgendaReserveBypass` | Admit advancement through `_installedAgendaCanBeCompleted()` despite the ordinary economy reserve gate. |
+    | `emptyArchivesRunPressure` | Admit empty Archives with run pressure through `_nothingWorthProtecting`, affecting both protection allocation and debt aging. |
+    | `valuelessServerDebtReset` | Reset protection debt when `_nothingWorthProtecting` reports no stakes. |
+
+    Archives admission and debt reset share the same eligibility predicate:
+    enabling admission can prevent a reset for pressured empty Archives when
+    both options are enabled. Visible agendas and the HQ backdoor remain
+    protection stakes with either setting. The relative HQ penalty, secure
+    server +2 bonus, debt ranking subtraction and commitment bookkeeping are
+    unchanged.
+  - *Telemetry.* When `DecisionSnapshots.telemetry` is `{sink}`,
+    `DecisionSnapshots.Record()` streams every Corp `Choice()` and every Runner
+    `_computeChoice()` as `{n, side, identifier, choiceType, options, chosen,
+    latencyMs}`. Latency is measured around `_choiceInner()` and the Runner's
+    async decision, not around the recorder. Corp decisions with a single
+    option return before `Choice()` and are not recorded. Telemetry is off in
+    the browser and changes no decision or random draw (tested by `logHash`).
+    It is the one decision-log path: I0 attaches its install-candidate records
+    to these entries rather than adding a logger.
+  - *Events and metrics.* Harness-local wrappers (they call the real functions
+    unchanged) emit `gameStart`, `decision`, `run` (server, success), `score`,
+    `steal` (card, server, points; the server comes from
+    `agendaStolenLocations`), `mulligan`, `turnEnd` and `gameEnd`. The core
+    metrics are computed from these events by a pure function:
+    `winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer.*`,
+    `gameLength`, `decisionLatencyMs.<side>.mean|p95|max` and
+    `mulliganRate.<side>`. A fixture start counts only points that change hands
+    during play.
+  - *Collectors.* A consumer adds
+    `scripts/ai-batch/collectors/<name>.js` exporting `{name, onEvent(event,
+    game), finish(game)}` and optional `directions`. `game` is a per-game
+    object the collector may write to. Events are frozen plain data, so a
+    collector cannot reach game state. `finish` returns a number or an object
+    of numbers, reported as `<name>.<key>` metrics. The collector is selected
+    with `--collector <name>`; the `runs` collector is the example.
+  - *Comparison.* `--compare` and `gate` refuse reports whose pool hash, seeds,
+    fixtures or collectors differ. They pair games by `(fixtureId,
+    deckPairId, seed)` and give each metric's paired mean difference with a
+    10,000-resample bootstrap 95% interval from a fixed seed. `--guard
+    metric=tolerance` and `--improve metric` apply the gate rule to the
+    oriented difference. Any gate also requires that at least one paired
+    game's `logHash` differs from the baseline (`changed option effect`),
+    since an option that changes nothing passes every guard. `gate` reuses a cached or committed report whose key
+    (code hash of every loaded file, pool, seeds, fixtures, collectors and
+    options) matches.
+  - *Failed games.* A game fails when it logs an engine error, times out, or
+    stalls: the main loop takes no step for 10 s while the event loop is idle
+    (for example after "No valid commands available"). Failed games are listed
+    in the report and left out of comparisons.
+  - *Gate flags.* `--side runner` flips the outcome metrics' directions for a
+    Runner item; `--max metric=n` is a hard check on every candidate game.
+  - *Game end.* `PlayerWin()` calls `AIGameEnded()`, which calls each AI's
+    `GameEnded(winner)` (still empty); harnesses that replace `PlayerWin()`
+    call it too.
+  - `DecisionSnapshots.totalMs` still measures only the bounded recorder's own
+    cost. Mulligan weights are uncalibrated until F5.
 
 ## Known limits
 

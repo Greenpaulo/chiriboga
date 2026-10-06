@@ -133,9 +133,9 @@ Shared infrastructure used by every area.
 - **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
 
 ### F4 Seeded AI-vs-AI batch harness
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** D2, F6
-- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/corp_ai_finding_12_seeded_batch_harness.md)
+- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/code-review/corp_ai_finding_12_seeded_batch_harness.md)
 - **Goal:** Headless seeded AI-vs-AI games on a committed deck pool with core metrics, collectors, AI-option flags, paired comparison and committed baselines.
 
 ### F5 Mulligan weight calibration
@@ -150,6 +150,18 @@ Shared infrastructure used by every area.
 - **Spec:** [F7-indexed-card-state-and-trigger-discovery.md](specs/F7-indexed-card-state-and-trigger-discovery.md)
 - **Goal:** Replace repeated whole-board installed, active and trigger-provider scans with verified engine-owned indexes while preserving exact query results, ordering and seeded behaviour.
 
+### F8 Balanced deck-pool screening
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F8-balanced-deck-pool-screening.md](specs/F8-balanced-deck-pool-screening.md)
+- **Goal:** Choose the F4 deck pool by screening candidate pairs for Corp win rates near even, with a stated selection rule and re-screening policy.
+
+### F9 AI work budget and fair timing
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
+- **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
+
 ### Done
 
 | ID | Item | Delivered by | Architecture |
@@ -161,6 +173,11 @@ Shared infrastructure used by every area.
 
 What should the Corp install, where, and is that better than another action?
 Shared design: [specs/install-decisions-design.md](specs/install-decisions-design.md).
+The [regression ownership table](specs/install-decisions-design.md#corrected-regression-baseline-and-ownership)
+maps the five default-off recovery gates to these layers and L3.5.1/L7.1,
+including the remaining empty-Archives reward-valuation gap. Future I-layer
+baselines must capture the corrected policy rather than the old unconditional
+behaviors.
 I0 → I1 → I2 → I3 run in order: I2 (ICE selection) is the first intentional
 policy change and I3 decides what each remote is for. I4 (agendas) and I5
 (assets) then run in parallel; I6 (upgrades) follows I3 and I4. I7.1 compares

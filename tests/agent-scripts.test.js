@@ -9,7 +9,7 @@ const {spawnSync} = require('child_process');
 const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch} = require('../scripts/ticket.js');
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -81,6 +81,11 @@ const reproductionBefore = [
   "assert.strictEqual(firstChoice, 'install');",
   "assert.strictEqual(secondChoice, 'advance');",
 ];
+assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --corp-option x=true\n' +
+  '--collector runs --start tests/fixtures/corp-decisions --collector <name> --guard winRate=0.02`'), [],
+  'gate setup check accepts existing collectors, start boards and template placeholders');
+assert.deepStrictEqual(gateSetupProblems('**Gate command:** `node scripts/ai-batch.js gate --collector noSuch --start tests/fixtures/missing.txt`').length, 2,
+  'gate setup check reports a missing collector and a missing start board');
 assert(reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice()),
   'ticket.js accepts reproduction expectations that remain in sequence');
 assert(!reproductionExpectationsMatch('tests/example.test.js', reproductionBefore, reproductionBefore.slice().reverse()),
@@ -88,6 +93,58 @@ assert(!reproductionExpectationsMatch('tests/example.test.js', reproductionBefor
 const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund'];
 assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
   fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
+
+for (const [before, after] of [
+  ["expect(choice).toBe('install');", "expect(choice).toBe('gain');"],
+  ["t.equal(choice, 'install');", "t.equal(choice, 'gain');"],
+  ["throws(action, /original/);", "throws(action, /changed/);"],
+  ["fail('original');", "fail('changed');"],
+  ["assert.throws(action, /original/);", "assert.throws(action, /changed/);"],
+]) {
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [before], [after]),
+    'ticket.js rejects changed expectations: ' + before);
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [before], []),
+    'ticket.js rejects removed expectations: ' + before);
+  assert(!reproductionExpectationsMatch('tests/example.test.js', [], [after]),
+    'ticket.js rejects added expectations: ' + after);
+}
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['// assert original behaviour'], ['// assert current behaviour']),
+  'comment-only edits are not changed expectations');
+
+for (const [before, after] of [
+  ['assert.strictEqual(\n  result,\n  1\n);', 'assert.strictEqual(\n  result,\n  2\n);'],
+  ['assert.strictEqual(\n  result,\n  1\n);', 'assert.strictEqual(\n  other,\n  1\n);'],
+  ['expect(result)\n  .toEqual({value: 1});', 'expect(result)\n  .toEqual({value: 2});'],
+  ['t.equal(\n  result,\n  1\n);', 't.equal(\n  result,\n  2\n);'],
+  ['assert.throws(() => {\n  action(1);\n}, /[()]/);',
+    'assert.throws(() => {\n  action(2);\n}, /[()]/);'],
+  ['assert.strictEqual(value, ")");', 'assert.strictEqual(value, "]");'],
+  ['assert["strictEqual"](result, 1);', 'assert["strictEqual"](result, 2);'],
+  ['expect(result)?.toBe?.(1);', 'expect(result)?.toBe?.(2);'],
+  ['assert?.(result === 1);', 'assert?.(result === 2);'],
+  ['assert.strictEqual(value, `outer${`inner)`} tail1`);',
+    'assert.strictEqual(value, `outer${`inner)`} tail2`);'],
+]) {
+  assert(!reproductionExpectationsMatch('tests/example.test.js', before.split('\n'), after.split('\n')),
+    'reject changed complete assertion arguments: ' + before);
+}
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['setup(1);', 'assert.strictEqual(result, 1);'],
+  ['setup(2);', 'assert.strictEqual(', '  result, // comment containing )', '  1', ');']),
+  'setup, whitespace and comment changes do not change assertion arguments');
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['assert.match(value, /[()]/);', 'assert.strictEqual(other, 1);'],
+  ['assert.match(', '  value,', '  /[()]/', ');', 'assert.strictEqual(other, 1);']),
+  'regex parentheses do not truncate an assertion or swallow the next one');
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['const note = "assert.strictEqual(result, 1)";'],
+  ['const note = "assert.strictEqual(result, 2)";']),
+  'assertion-like strings in setup are not assertion calls');
+assert(reproductionExpectationsMatch('tests/example.test.js',
+  ['assert.strictEqual(result.constructor, Object);', 'setup(1);'],
+  ['assert.strictEqual(result.constructor, Object);', 'setup(2);']),
+  'object prototype names inside assertions do not prevent finding the closing parenthesis');
 
 assert.strictEqual(pendingGate('# Ticket\n\n**Gate:** pending F4\n\n## Resolution\n\nNot decided.\n'), undefined,
   'roadmap blocker discovery ignores pending-gate examples outside Resolution');
@@ -105,7 +162,13 @@ const movedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-revie
 const alreadyMovedBlockerFixture = path.join(root, 'documentation', 'bugs', 'code-review',
   'agent-script-already-moved-test-' + fixtureSuffix + '.md');
 const createdFixtures = [];
+// Status folders such as bugs/code-review/ vanish from a checkout when they are
+// empty (Git keeps no empty directories); create them for the test and remove
+// them afterwards if they were missing.
+const createdDirs = [];
 const createFixture = file => {
+  const dir = path.dirname(file);
+  if (!fs.existsSync(dir)) { fs.mkdirSync(dir, {recursive: true}); createdDirs.push(dir); }
   const descriptor = fs.openSync(file, 'wx');
   createdFixtures.push(file);
   try { fs.writeFileSync(descriptor, '// created by tests/agent-scripts.test.js\n'); }
@@ -176,6 +239,7 @@ try {
 } finally {
   for (const file of createdFixtures) if (fs.existsSync(file)) fs.unlinkSync(file);
   if (fs.existsSync(movedBlockerFixture)) fs.unlinkSync(movedBlockerFixture);
+  for (const dir of createdDirs) if (fs.existsSync(dir) && !fs.readdirSync(dir).length) fs.rmdirSync(dir);
 }
 
 const hooks = JSON.parse(fs.readFileSync(path.join(root, '.codex', 'hooks.json'), 'utf8'));

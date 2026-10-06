@@ -11,9 +11,11 @@ or credits cannot complete.
 
 ## Current behaviour
 Install and action choices are made one click at a time. The only plan-like
-state is the agenda commitment: `_returnPreference()` marks an installed agenda
-`AIScoringPlanCommitted` and `_installedAgendaCanBeCompleted()` reads it (I4
-turns it into a plan record). Nothing carries costs, reserved credits or
+state is the agenda commitment: `_returnPreference()` marks an agenda selected
+for install `AIScoringPlanCommitted` and `_installedAgendaCanBeCompleted()`
+reads it (I4 turns it into a plan record). Its admission term in `Phase_Main`
+requires `committedAgendaReserveBypass`, now default `false`; commitment marking
+alone does not enable advancement past the reserve. Nothing carries costs, reserved credits or
 terminal value between clicks of different kinds.
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
@@ -42,6 +44,10 @@ Work:
 - Never assume hidden future draws.
 - Avoid committing a root card when the remaining clicks or credits cannot
   complete the minimum safe plan.
+- Keep the five legacy regression gates off in both arms, with prerequisite
+  I-layer options identical. Explicitly price defense versus scoring in plans;
+  do not restore the old at-risk install override or reserve bypass as a
+  shortcut. See the shared design's corrected-baseline ownership table.
 
 ## Safety and information boundary
 Planning never assumes hidden future draws, never triggers card effects,

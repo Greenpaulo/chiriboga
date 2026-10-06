@@ -5924,7 +5924,7 @@ cardSet[35071] = {
                         Install(foundCard, serverParams.server, true, null, true, null, cardRef);
                         Log(GetTitle(foundCard, true) + " installed from R&D via Off the Books");
                         //Shuffle R&D
-                        ShuffleArray(corp.RnD.cards);
+                        Shuffle(corp.RnD.cards);
                       },
                       "Off the Books",
                       "Choose install destination",
@@ -5936,7 +5936,7 @@ cardSet[35071] = {
                     MoveCard(foundCard, corp.HQ.cards);
                     Log(GetTitle(foundCard, true) + " added to HQ from R&D via Off the Books");
                     //Shuffle R&D
-                    ShuffleArray(corp.RnD.cards);
+                    Shuffle(corp.RnD.cards);
                   }
                 },
                 "Off the Books",
@@ -6131,7 +6131,7 @@ cardSet[35062] = {
 };
 
 //Syailendra
-//Weyland Ice: Barrier
+//Weyland Ice: Code Gate
 //Rez: 4, Strength: 5
 //You can advance this ice.
 //When the Runner encounters this ice, if it has 3 or more hosted advancement counters, 
@@ -6146,7 +6146,7 @@ cardSet[35076] = {
   faction: "Weyland Consortium",
   influence: 2,
   cardType: "ice",
-  subTypes: ["Barrier"],
+  subTypes: ["Code Gate"],
   rezCost: 4,
   strength: 5,
   canBeAdvanced: true,

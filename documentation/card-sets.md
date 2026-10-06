@@ -6,15 +6,15 @@ Change a row only by deliberate decision.
 
 Tickets that touch card hooks cover the **playable** sets unless they say
 otherwise. Measured status for every set (card counts, missing definitions,
-unfinished markers, and where `config.js` disagrees with this table) is in the
+scaffold markers, required AI hooks, and where `config.js` disagrees with this table) is in the
 generated [card-status.md](card-status.md).
 
 | Set (registry key) | Decision | Notes |
 |---|---|---|
 | `systemgateway` | playable | |
 | `systemupdate2021` | playable | |
-| `elevation` | playable | Six cards have no definition yet (see card-status.md). |
-| `vantagepoint` | playable | Active set; the last batches are in progress. |
+| `elevation` | playable | Six cards have no definition yet (see card-status.md). Their IDs are explicitly exempted by the playability check in scripts/card-status.js; new missing cards are not exempt. |
+| `vantagepoint` | in-progress | Sixteen cards in batches 11–13 still contain scaffolds; hidden and untested until those batches are complete. |
 | `downfall` | not-implemented | Every card is defined but many mechanics are missing. |
 | `creationandcontrol` | not-implemented | Every card is defined but mechanics are incomplete (see `documentation/new-sets/creation_and_control_audit.md`). |
 | `midnightsun` | not-implemented | |

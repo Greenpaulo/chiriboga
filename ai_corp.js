@@ -624,10 +624,10 @@ class CorpAI {
     if (typeof server.cards == "undefined") {
       //is remote
       //A relative protection score cannot establish that the Runner is unable
-      //to breach this server. Never offer an insecure remote for scoring,
-      //regardless of how poorly HQ or Archives currently score.
+      //to breach this server. With the strict gate enabled, reject insecure
+      //remotes regardless of how poorly HQ or Archives currently score.
       var security = this._evaluateServerSecurity(server);
-      if (!security.isSecure) return false;
+      if (this.options.secureScoringServerGate && !security.isSecure) return false;
 
       //yes if it has a scoring upgrade, an agenda or an ambush installed
       //this code was originally after the protection check but this lead to AI installing random assets in scoring servers
@@ -3463,7 +3463,8 @@ class CorpAI {
       if (
         !entry.server ||
         entry.isSecure ||
-        this._nothingWorthProtecting(entry.server, entry.security)
+        (this.options.valuelessServerDebtReset &&
+          this._nothingWorthProtecting(entry.server, entry.security))
       ) {
         if (entry.server) this._serverProtectionDebt.set(entry.server, 0);
       } else if (this._protectionInstallsThisTurn.includes(entry.server)) {
@@ -3560,6 +3561,7 @@ class CorpAI {
       if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
     }
     return (
+      !this.options.emptyArchivesRunPressure ||
       this._serverRunPressure(corp.archives, securityEvaluation).penalty <= 0
     );
   }
@@ -4181,10 +4183,11 @@ class CorpAI {
       shouldInstall = false;
     }
     //An existing unrezzed ICE is not protection if the evaluator already
-    //knows the Runner can breach the server. Allow another affordable layer
-    //when an agenda or asset is actually at stake; _iceInstallOptions still
+    //knows the Runner can breach the server. The optional final override allows
+    //another layer when an agenda or asset is actually at stake; _iceInstallOptions still
     //filters out ICE the Corp cannot afford to install and rez.
-    return shouldInstall || economyIsSufficient || serverAtRisk;
+    return shouldInstall || economyIsSufficient ||
+      (this.options.serverAtRiskInstallOverride && serverAtRisk);
   }
 
   //Return a shuffled copy so planning never changes a caller-owned ranking.
@@ -6451,7 +6454,8 @@ class CorpAI {
       (almostDoneAgenda ||
         almostDoneHostileAsset ||
         sufficientEconomy ||
-        this._installedAgendaCanBeCompleted()) &&
+        (this.options.committedAgendaReserveBypass &&
+          this._installedAgendaCanBeCompleted())) &&
       optionList.indexOf("advance") > -1
     ) {
       //agendas and assets
@@ -6699,12 +6703,17 @@ class CorpAI {
         var rankedInstallOptions = this._rankedInstallOptions(corp.HQ.cards);
         //check if options would be expanded by slightly more credits
         if (optionList.indexOf("gain") > -1) {
+          var originalCreditPool = corp.creditPool;
           corp.creditPool += this._clicksLeft() - 1; //temporary (hypothetical)
           this._hypotheticalDepth++;
-          var optionsExpanded =
-            rankedInstallOptions < this._rankedInstallOptions(corp.HQ.cards);
-          this._hypotheticalDepth--;
-          corp.creditPool -= this._clicksLeft() - 1; //roll back the change
+          var optionsExpanded;
+          try {
+            optionsExpanded =
+              rankedInstallOptions < this._rankedInstallOptions(corp.HQ.cards);
+          } finally {
+            this._hypotheticalDepth--;
+            corp.creditPool = originalCreditPool;
+          }
           if (optionsExpanded) {
             this._log("Just need a tiny bit more cash");
             return optionList.indexOf("gain");
@@ -6776,7 +6785,17 @@ class CorpAI {
         typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
           ? DecisionSnapshots.Before(choiceType, optionList)
           : null;
+      var telemetry =
+        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
+      //Discard/sabotage filtering may mutate the array and its option objects.
+      var telemetryOptions = telemetry ? optionList.slice() : null;
+      var telemetryLabels = telemetry ? optionList.map(DecisionSnapshots.Label) : null;
+      var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
       var ret = this._choiceInner(optionList, choiceType);
+      if (telemetry) {
+        var recordedChoice = ret >= 0 ? telemetryOptions.indexOf(optionList[ret]) : ret;
+        DecisionSnapshots.Record("corp", choiceType, telemetryLabels, recordedChoice, DecisionSnapshots.Now() - startedAt);
+      }
       if (snapshot) DecisionSnapshots.After(snapshot, ret);
       return ret;
     } finally {
@@ -7013,4 +7032,9 @@ class CorpAI {
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
   evidenceBasedHostedCardRez: false,
+  secureScoringServerGate: false,
+  serverAtRiskInstallOverride: false,
+  committedAgendaReserveBypass: false,
+  emptyArchivesRunPressure: false,
+  valuelessServerDebtReset: false,
 });

@@ -14,6 +14,25 @@ server as a hard lockout even when the Runner can easily pay to get in. The
 Runner AI's `RunCalculator` also reads breaker behaviour only from
 `AIImplementBreaker`, so it probably cannot plan breaks with these two cards.
 
+## Additional evidence — 2026-10-02
+
+Found while adding required-hook checks to `scripts/card-status.js`
+(`documentation/card-status.md` now lists both cards as "icebreaker without
+`AIImplementBreaker` or `AISpecialBreaker`").
+
+- [Verified] Both cards do define an AI hook, under the wrong name:
+  `AIImplementIcebreaker` (`sets/elevation.js`, Sang Kancil and Principia).
+  Nothing reads that name: `rg -n "AIImplementIcebreaker"` finds only the two
+  definitions and the `LEGACY_UNDOCUMENTED` list in
+  `tests/ai-hook-docs.test.js`.
+- [Verified] The dead hook also has the wrong shape for the real contract: it
+  takes no arguments and returns `{breakCost, boostCost, boostAmount}` (for
+  Sang Kancil `{1, 3, 2}`), while `AIImplementBreaker` receives the run
+  calculator and adds break and pump options through it (`documentation/ai.md`
+  §4.1). So the fix is to write a proper `AIImplementBreaker` for each card,
+  not to rename the property. Then delete `AIImplementIcebreaker` from
+  `LEGACY_UNDOCUMENTED`.
+
 ## Evidence
 
 - `node scripts/show.js card 35020` (Sang Kancil) and `node scripts/show.js
