@@ -1389,15 +1389,11 @@ function SpendCredits(
       }
     }
     if (canUsePool && player.creditPool > 0) {
-      var poolSpend = Math.min(num, player.creditPool);
       choices.push({
         card: null,
-        num: poolSpend,
-        label:
-          "Spend " +
-          poolSpend +
-          (poolSpend == 1 ? " credit" : " credits") +
-          " from the credit pool",
+        num: 1,
+        label: "Spend 1 credit from the credit pool",
+        button: "Spend 1[c] from pool",
       });
     }
 
