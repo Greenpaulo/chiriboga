@@ -247,6 +247,13 @@ recurringCredits, badPublicityCredits, clickCredits, total}`:
 
 `_evaluateServerSecurity()` uses this ceiling for affordability lockouts.
 
+Public break-income hooks (`AIRunBreakCreditGain`) require complete route
+planning just as restricted-credit hooks do. `_restrictedPaymentPlanOutcome`
+runs the shared calculator when either is present, including with ordinary
+breakers. It preserves first-payment affordability, once-per-turn rebate state,
+finite reruns and public resource budgets rather than summing independent
+per-ICE costs.
+
 ## Central pressure and breach-loss risk
 
 **Purpose.** HQ and R&D need different treatment from remotes depending on the

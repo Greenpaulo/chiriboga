@@ -2535,3 +2535,50 @@ That covers the full AI hook system. With these patterns you can add solid AI su
   consumes `agendaPointsForPlayer(player)` so score totals, Runner known-agenda
   potential and Corp breach-loss estimates value this agenda as one Runner point
   and two Corp points, preserving the printed metadata.
+
+### Vantage Point batch 1 repair
+
+- Chain Reaction uses `AIPlayWhenCan: 2` and `AIWouldPlay()` to claim its
+  expiring three-central window through Runner command selection. It prioritizes
+  a publicly known score-ready winning agenda over generic economy denial;
+  otherwise it compares two target replacement costs against the worst Runner
+  sacrifice and event cost, preserving its only matching breaker. Unknown
+  facedown targets contribute only their public advancement counters. Its Corp
+  sacrifice uses the existing `_bestTrashOption` threat ranking. Before returning
+  an expiring play, Runner command selection checks legal ordinary runs for a
+  publicly known installed agenda that wins immediately. A complete current
+  route must leave enough credits and clicks for `StealCost`; the payment is
+  checked after route rebates, and `CardEffectsForbid("steal", agenda)` is
+  checked in a guarded prospective server context. Unknown agendas, blocked
+  routes, prevented breaches and unaffordable steals do not displace denial.
+- Take a Dive's `AIRunEventExtraPotential(server, potential)` offers its bonus
+  only on HQ/R&D with a known rezzed harmless subroutine and no known Crisium
+  Grid. It queries real `IceAI` subroutine models, then the normal event route
+  calculation pays the event cost and checks surviving hand, break payments and
+  other effects. Harmless subroutines can fire rather than being broken; unknown
+  ICE, pure ETR and empty routes do not promise a reward.
+- `AIRunBreakCreditGain(iceCard, effectiveStrength)` returns nonnegative pool
+  income from the first subroutine break in a turn. `iceCard === null` queries
+  the maximum remaining income for pruning; otherwise the strength includes
+  route-specific modifiers. `RunCalculator.SrBreak` consumes it on actual break
+  branches, once per source, after the break's affordability check. Branch-local
+  `breakIncome` persistents and a negative `runner_credits_lost` record the pool
+  rebate, preserving gross payments for source-sensitive effects. Finite reruns
+  and alternate funding policies carry used sources; live card state is untouched.
+  The pruning allowance uses the existing credit-loss cost coefficient, so a
+  later rebate cannot cause a cheaper route to be discarded prematurely.
+  Tungsten Tailor returns one only while unused and the ICE is at zero or less
+  strength. This public, read-only hook is consumed by both Runner routes and
+  Corp security; it must never inspect Grip contents or promise prepayment.
+  Corp `_restrictedPaymentPlanOutcome` uses the shared route calculator whenever
+  an active card exposes either `AIRunRestrictedCredits` or this income hook.
+  Ordinary breakers therefore receive the same public once-only income model
+  as restricted-credit breakers; independent per-ICE sums cannot model rebates.
+  Eligibility resets with the card's real turn triggers, not each encounter/run.
+
+`tests/vantagepoint-batch1.test.js` exercises command/card/server selection,
+actual success/prevention/run-end phases, public target ranking, opposing route
+budgets, install/hold and immediate-win alternatives, and spent income across
+finite reruns. `tests/vantagepoint-batch13.test.js` revalidates restricted sources,
+exhaustion, prevention, damage and opposing public security after this shared
+run-calculator change.

@@ -903,3 +903,91 @@ The focused batch/integration, Corp security and pool-lock regressions and all
 required syntax/format/deck checks pass. `node tests/run-all-tests.js` passes all 50 test files, including Corp decision
 fixtures and decision snapshots, on Node 20.19.0. This repairs the known implementation gap;
 independent batch/set-wide review remains separate.
+
+## Batch 1 review repairs — 2026-10-06
+
+Repair list: **CR1** actual central-run dispatch/turn history; **CR2** supported
+publicity reward with nested prevention and real run-end removal; **CR3** known
+winning-agenda targeting plus Runner sacrifice. All three reproduced on the
+current source using the retained review probes before edits. Independent verdicts
+remain unchanged pending re-review.
+
+Chain Reaction now reads `attackedServer` in its no-argument automatic response,
+tracking copies in Grip. The real command selector claims its expiring play
+window, ranks known score-ready winning agendas first, declines ordinary denial
+that sacrifices its sole matching breaker, and uses public advancement only for
+unknown targets. Corp sacrifice selection reuses its public threat ranking.
+Take a Dive's reward is a mandatory normal successful-run trigger calling
+`BadPublicity`, allowing prevention/responses to finish without an automatic
+phase change. Its event potential requires a known harmless subroutine; the real
+planner decides which other subroutines to break and validates payment/survival.
+
+Tungsten Tailor now contributes its once-per-turn income through
+`AIRunBreakCreditGain` and `RunCalculator.SrBreak`. The rebate can fund a later
+break, never the payment that earns it. Encounter debuffs, consumed rewards,
+finite repeat attempts and alternate credit policies stay branch-local. Public
+Corp security uses the same route model. Income-aware pruning preserves cheaper
+reward routes using the existing resource cost coefficient; gross credit spending
+remains available for outside-credit damage calculations.
+
+Permanent evidence: `tests/vantagepoint-batch1.test.js` loads actual engine and AI,
+with rendering/audio replaced by inert functions. It covers real multi-copy
+success dispatch, partial history and both turn resets, successful/failed/
+no-subroutine outcomes, publicity prevention and run-end removal; command and
+known urgent target selection; sole-breaker preservation and expired windows;
+Tailor/Corsair affordable-versus-scarce install decisions; last-click winning
+access before Tailor; Take a Dive on Tithe with a harmless subroutine versus
+insufficient protection budgets, pure ETR and empty routes; zero-strength
+routability and one-versus-two payment income contrasts through both planners;
+and finite reruns that cannot regain spent income. Target-selection tests observe
+`Trash` after the real selector; existing integration tests cover human multi-trash
+selection and prevention/sequencing. No browser-playthrough claim is made.
+
+Shared consumers requiring revalidation: all `AIImplementBreaker` users of
+`SrBreak`, Corp complete public security routes, finite-run continuations and
+restricted-payment policy calculators. Batch 13's opposing-source suite is
+required in this repair; batch 2 and the remaining reopened batch reports still
+need their own repairs/re-review. Set-wide S1 (bad-publicity balances/loss) is
+outside this batch's necessary shared change and remains open in batches 4/11.
+
+Verification: Node 20.19.0; `node tests/run-all-tests.js` passes **51 files**,
+including `corp-decision-fixtures.test.js`, `decision-snapshots.test.js` and
+batch 13 restricted-funding evidence. Focused batch 1, integration and hook-doc
+checks pass; set/calculator syntax, Eternal, deckbuild pool, launcher identity
+and `git diff --check` pass. `card-status.js` regenerated with no resulting
+status diff; every batch 1 card has no unfinished markers or empty effect.
+Live pool payment tests confirm the planner rebate, and Corp sacrifice tests
+confirm its public threat selector. Batch 2 is the next repair; independent
+batch 1 and shared-consumer re-review is required before review approval.
+
+
+## Batch 1 second remediation — CR4 and TT1 (2026-10-06)
+
+Both independent re-review findings were reproduced before editing and have
+permanent real-path regressions in `tests/vantagepoint-batch1.test.js`.
+
+CR4 required a small shared Runner consumer: `_winningRunBeforeOpportunity`
+checks legally offered ordinary runs before discretionary `AIPlayWhenCan`
+returns. It uses public installed agenda points and the existing complete-route
+calculator, then checks remaining credits/clicks against public steal costs.
+The prospective steal-rule context is restored in `finally`. A break rebate
+may fund the later steal payment; an unknown agenda, blocked route, forbidden
+steal or unaffordable access payment does not override a useful expiring play.
+Tests assert the actual run command and legal server selection, and retain
+ordinary denial, sacrifice-aware decline and known Corp-winning-agenda denial.
+
+TT1 required enabling the existing complete Corp route planner for active
+`AIRunBreakCreditGain` sources, even with no restricted-credit breaker installed.
+Independent per-ICE sums cannot account for the once-only rebate. The same-board
+Corroder/Corsair tests now agree with Runner feasibility with unused/used income,
+zero/one pool credits and finite reruns. Corp never consults the Runner-private
+planner; public resources and active run context are unchanged after assessment.
+No gameplay/card metadata or ELO changes were needed. No new limitation accepted.
+
+Node 20.19.0 verification: batch1/batch13/integration, 145 Corp security cases,
+hook-doc checks, both AI/set syntax checks, Eternal/deckbuild/launcher tests and
+`git diff --check` pass. Full `node tests/run-all-tests.js`: **51 files passed**,
+including Corp decision fixtures and decision snapshots. Card-status regeneration
+has no diff. Batch 1 is implementation-complete; independent re-review of
+CR4/TT1, retained per-card evidence and both shared consumers remains required.
+Batch13's affected regression coverage passed; batch 2 is the next repair.
