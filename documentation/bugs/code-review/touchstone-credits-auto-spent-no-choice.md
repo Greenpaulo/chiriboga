@@ -33,6 +33,12 @@ The full suite was compared in fresh worktrees at the recorded base (`f795a63`) 
 
 The pending reproduction was moved into the green suite. Its repository-root path required the expected one-level adjustment after moving from `tests/pending/` to `tests/`; its assertions were not changed.
 
+### Historical observations before the 2026-10-02 remediation
+
+The following observations describe the interim implementation before the pool
+button and source-selection coverage were added. The remediation above addresses
+these UI and verification gaps.
+
 The diagnosis was confirmed. A payment-priority workaround was initially
 considered, but rejected because it would merely replace "always spend
 Touchstone first" with "always spend the pool first." Neither behavior matches
