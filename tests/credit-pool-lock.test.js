@@ -5,8 +5,27 @@ const path = require('path');
 const vm = require('vm');
 
 const root = path.resolve(__dirname, '..');
-const runner = {side: 'runner', creditPool: 6, temporaryCredits: 1, AI: {}};
-const corp = {side: 'corp', creditPool: 5, AI: {}};
+const runner = {
+  side: 'runner',
+  creditPool: 6,
+  temporaryCredits: 1,
+  AI: {},
+  rig: {programs: [], hardware: [], resources: []},
+  identityCard: {},
+  resolvingCards: [],
+};
+const corp = {
+  side: 'corp',
+  creditPool: 5,
+  AI: {},
+  RnD: {root: [], ice: []},
+  HQ: {root: [], ice: []},
+  archives: {root: [], ice: []},
+  remoteServers: [],
+  scoreArea: [],
+  identityCard: {},
+  resolvingCards: [],
+};
 const context = {
   console: {log() {}, warn() {}, error() {}},
   runner,
@@ -18,6 +37,7 @@ vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(root, 'utility.js'), 'utf8'), context);
 vm.runInContext(fs.readFileSync(path.join(root, 'checks.js'), 'utf8'), context);
 vm.runInContext(fs.readFileSync(path.join(root, 'mechanics.js'), 'utf8'), context);
+const realActiveCards = context.ActiveCards;
 vm.runInContext(
   fs.readFileSync(path.join(root, 'sets', 'elevation.js'), 'utf8'),
   context,
@@ -178,6 +198,7 @@ context.SpendCredits(runner, 3, 'using', {}, () => paymentsCompleted++);
 const partialPoolChoice = paymentDecision.choices.find((choice) => choice.card === null);
 assert(partialPoolChoice, 'a partially funded credit pool is offered');
 assert.strictEqual(partialPoolChoice.num, 1, 'the pool choice is capped at available credits');
+assert.strictEqual(partialPoolChoice.button, 'Spend 1[c] from pool');
 paymentDecision.callback(partialPoolChoice);
 assert.strictEqual(runner.creditPool, 0, 'the partial pool contribution is spent');
 paymentDecision.callback(paymentDecision.choices.find((choice) => choice.card === touchstone));
@@ -194,5 +215,37 @@ context.SpendCredits(runner, 1, 'using', {}, () => paymentsCompleted++);
 assert.strictEqual(runner.creditPool, 2, 'an unavailable pool is not spent');
 assert.strictEqual(paymentsCompleted, 0, 'an unpaid locked-pool payment does not continue');
 assert.strictEqual(paymentErrors.length, 1, 'an unpaid locked-pool payment logs an error');
+
+const installedSource = {
+  title: 'Installed source',
+  player: runner,
+  credits: 1,
+  canUseCredits() { return true; },
+};
+const identitySource = {
+  title: 'Identity source',
+  player: runner,
+  credits: 1,
+  canUseCredits() { return true; },
+};
+const overclock = {
+  title: 'Overclock',
+  player: runner,
+  cardType: 'event',
+  credits: 5,
+  canUseCredits() { return true; },
+};
+runner.rig.hardware = [installedSource];
+runner.identityCard = identitySource;
+runner.resolvingCards = [overclock];
+runner.creditPool = 2;
+context.ActiveCards = realActiveCards;
+context.SpendCredits(runner, 2, 'using', {});
+for (const source of [installedSource, identitySource, overclock]) {
+  assert(
+    paymentDecision.choices.some((choice) => choice.card === source),
+    `${source.title} is offered as a selectable hosted-credit card`,
+  );
+}
 
 console.log('Credit-pool lock regression test passed.');
