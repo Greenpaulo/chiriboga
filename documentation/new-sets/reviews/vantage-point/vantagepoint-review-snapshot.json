@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-06",
+  "commit": "45833a14c83fef2f9ce71506d344460181445021",
+  "node": "v20.19.0",
+  "dirty": " M AGENTS.md\n M documentation/new-sets/card-implementation-backlog.md\n M documentation/new-sets/card-set-agent-operator-guide.md\n M documentation/new-sets/current-set-implementation.md\n M documentation/new-sets/new-set-integration-guide.md\n?? .agents/skills/review-card-set/\n?? documentation/new-sets/history/\n?? documentation/new-sets/reviews/\n",
+  "files": 91
+}
