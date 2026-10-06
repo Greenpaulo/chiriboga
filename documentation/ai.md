@@ -1515,6 +1515,17 @@ Set to `true` if this upgrade is used for fast advancing agendas. This tells the
 AIIsScoringUpgrade: true,
 ```
 
+**`AIRezWhenCan()`**
+
+Return `true` to select this installed asset or upgrade for rez at the next
+available paid-ability window. Corp command selection calls this after
+`FullCheckRez` validates card type, affordability, additional costs and
+`RezUsability`, and before the ordinary phase policy. The hook must be
+read-only, safe outside a run, and use only information available to the Corp.
+Return `false` to leave selection to ordinary phase policy. Hype Machine uses
+this to bank its free rez after either scoring or stealing, even in an empty
+server and at the end of the Runner's turn.
+
 **`AILimitPerServer(server)`**
 
 Return the maximum number of copies of this upgrade allowed per server. Prevents the AI from piling up multiple copies:
@@ -1572,6 +1583,24 @@ Set to `true` if this operation is used to fast advance an agenda:
 // Seamless Launch: places 2 advancement counters on an already-installed card
 AIFastAdvance: true,
 ```
+
+**`AIFastAdvanceCounters(card)`**
+
+Return the nonnegative number of advancement counters this card can place on
+the supplied target. The advancement search calls this on operations in its
+candidate hand and installed one-shot upgrades. `card` may be null when
+estimating advancement of a future install; return zero when its destination
+or legality cannot be established. The hook must be read-only, safe outside a
+run, and use only public information and the Corp's own cards.
+
+Operations consume their actual `PlayCost` and `PlayClickCost` (including
+Double); already-resolving operations have paid those costs. Installed upgrades
+consume their rez cost if unrezzed, no clicks, and one locally recorded use.
+This upgrade contract is for trash-to-place-counter abilities without other
+costs. Execution rezzes or triggers the planned upgrade and supplies
+`AIPreferredTarget`; its ability must validate that target. Flood the Market
+returns the number of qualifying remotes; Hype Machine returns one only for
+an advanceable card in its own root.
 
 **`AIDamageOperation`** (boolean)
 
@@ -2017,6 +2046,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
 | `AIDefensiveValue(server)` | function | Numeric protection value of this upgrade |
 | `AIIsScoringUpgrade` | bool | True if this is a fast-advance scoring upgrade |
+| `AIRezWhenCan()` | function | Select a legal asset/upgrade rez opportunity in any available paid-ability window |
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
@@ -2026,6 +2056,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
+| `AIFastAdvanceCounters(card)` | function | Read-only counter count for an operation or installed one-shot advancement upgrade |
 | `AIDamageOperation` | bool | True if this operation deals damage |
 | `AITagPunishment` | number | Min tags needed for this punishment op to fire |
 | `AIWouldPlay()` | function | Return true to play this operation |
@@ -2137,6 +2168,29 @@ if (!runner.AI || runner.AI.rc !== rc) {
   between paying 3 credits and ending the run.
 
 ---
+
+### Vantage Point Batch 11 card hooks
+
+- Lethe's `AIImplementIce` describes optional recursion and the installed-card
+  return. Its result also carries `fullyBrokenEffects` and `bypassEffects`,
+  arrays of effect strings applied by `Directions` when all subroutines were
+  broken or the ICE was bypassed, respectively. These branches each add one
+  tag; a partial break does not. Recursion prefers a strong non-agenda draw,
+  otherwise buries an agenda; the return targets a public Runner threat.
+- Paywall's `AIImplementIce` separates credit-pool loss on encounter from the
+  pay-one-or-end-the-run subroutine, so temporary credits cannot absorb loss.
+- Flood the Market uses `AIFastAdvance`, `AIFastAdvanceCounters` and
+  `AIWouldPlay`, respects the planner's `AIPreferredTarget`, and avoids ordinary
+  plays with fewer than three qualifying remotes.
+- Scapegoat uses `AIPlayWhenCan` and `AIWouldPlay` only when both modes can
+  benefit the Corp. Runner mode selection preserves expensive installs, or
+  preserves two bad publicity against cheap targets. Corp targeting uses
+  public installed-card threat ranking.
+- Hype Machine uses `AIIsScoringUpgrade`, `AITriggerWhenCan`, `AIRezWhenCan` and
+  `AIFastAdvanceCounters`. `AIRezWhenCan` selects the free rez before its
+  discount expires. `RezUsability` permits a free rez, or pays six only
+  when the counter can bridge the click shortfall for scoring. Its AI ability
+  targets unfinished agendas and honours a legal `AIPreferredTarget`.
 
 ## 8. Step-by-Step Worked Example
 

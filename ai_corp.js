@@ -5686,6 +5686,47 @@ class CorpAI {
       });
     }
     //other actions e.g. placing advancement counters, gaining clicks...
+    //One-shot installed advancement upgrades. Record consumption locally.
+    var installedAdvancementCards = InstalledCards(corp);
+    for (var upgradeIndex = 0; upgradeIndex < installedAdvancementCards.length; upgradeIndex++) {
+      var upgrade = installedAdvancementCards[upgradeIndex];
+      if (!CheckCardType(upgrade, ["upgrade"]) ||
+          typeof upgrade.AIFastAdvanceCounters != "function" ||
+          point.persist.includes(upgrade) || !CheckHasAbilities(upgrade)) continue;
+      var upgradeCounters = upgrade.AIFastAdvanceCounters.call(upgrade, card);
+      var upgradeCost = upgrade.rezzed ? 0 : RezCost(upgrade);
+      if (upgradeCounters <= 0 || point.corpCredits < upgradeCost) continue;
+      ret.push({
+        corpCredits: point.corpCredits - upgradeCost,
+        corpClicks: point.corpClicks,
+        handCards: point.handCards,
+        advancementSoFar: point.advancementSoFar + upgradeCounters,
+        using: upgrade,
+        persist: point.persist.concat([upgrade]),
+      });
+    }
+    //Card-declared advancement operations, including Double click costs.
+    for (var opIndex = 0; opIndex < point.handCards.length; opIndex++) {
+      var operation = point.handCards[opIndex];
+      if (!CheckCardType(operation, ["operation"]) ||
+          typeof operation.AIFastAdvanceCounters != "function") continue;
+      var counters = operation.AIFastAdvanceCounters.call(operation, card);
+      if (counters <= 0) continue;
+      var resolving = corp.resolvingCards.includes(operation);
+      var creditCost = resolving ? 0 : PlayCost(operation);
+      var clickCost = resolving ? 0 : PlayClickCost(operation);
+      if (point.corpCredits < creditCost || point.corpClicks < clickCost) continue;
+      var remainingCards = point.handCards.slice();
+      remainingCards.splice(opIndex, 1);
+      ret.push({
+        corpCredits: point.corpCredits - creditCost,
+        corpClicks: point.corpClicks - clickCost,
+        handCards: remainingCards,
+        advancementSoFar: point.advancementSoFar + counters,
+        using: operation,
+        persist: point.persist,
+      });
+    }
     //Seamless Launch
     if (card && point.corpCredits > 0 && point.corpClicks > 0) {
       var slih = this._copyOfCardExistsIn("Seamless Launch", point.handCards);
@@ -6523,6 +6564,15 @@ class CorpAI {
                     JSON.stringify(potentialAdvCards),
                 );
                 if (potentialAdvCards.length > 0 && potentialAdvCards[0]) {
+                  var plannedCard = potentialAdvCards[0];
+                  if (CheckCardType(plannedCard, ["upgrade"]) && CheckInstalled(plannedCard)) {
+                    plannedCard.AIPreferredTarget = card;
+                    if (!plannedCard.rezzed && optionList.includes("rez") &&
+                        CheckCredits(corp, RezCost(plannedCard), "rezzing", plannedCard))
+                      return this._returnPreference(optionList, "rez", {cardToRez: plannedCard});
+                    if (plannedCard.rezzed && optionList.includes("trigger"))
+                      return this._returnPreference(optionList, "trigger", {cardToTrigger: plannedCard});
+                  }
                   //don't waste these by overadvancing an ordinary advancement target
                   if (
                     Counters(card, "advancement") < advancementLimit - 1 ||
@@ -6905,6 +6955,17 @@ class CorpAI {
 
     //call situational subroutine
     if (ret < 0) {
+      //Card-declared rez opportunities can expire before the next main phase.
+      if (optionList.includes("rez")) {
+        var rezCandidates = InstalledCards(corp);
+        for (var rezIndex = 0; rezIndex < rezCandidates.length; rezIndex++) {
+          var rezCandidate = rezCandidates[rezIndex];
+          if (typeof rezCandidate.AIRezWhenCan == "function" &&
+              FullCheckRez(rezCandidate, ["asset", "upgrade"]) &&
+              rezCandidate.AIRezWhenCan.call(rezCandidate))
+            return this._returnPreference(optionList, "rez", {cardToRez: rezCandidate});
+        }
+      }
       if (optionList.indexOf("score") > -1) ret = this.Phase_Score(optionList);
       if (ret > -1)
         return ret; //i.e. use score response if requested

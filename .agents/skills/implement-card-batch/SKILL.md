@@ -53,8 +53,15 @@ which you only append to.
   Signal Games) only for a genuine ruling question, and capture consequential
   rulings in a focused test or concise comment.
 
-Roadmaps and work summaries are context, not implemented APIs. Use a hook only
-if current documentation and an engine call site show it exists.
+Roadmaps and work summaries are context, not implemented APIs. For an existing
+hook, confirm its contract in `documentation/ai.md` and inspect its current
+consumer. Trace the relevant AI path from legal options through command/card
+selection, target choice and resolution; for passive effects, trace the
+planning or run-calculator consumer. Distinguish eligibility or valuation from
+action selection: a hook can allow an action without making the AI choose it.
+Check the relevant timing windows, including expiring opportunities and cases
+where no immediate target remains. Fixed card lists in a selector can exclude
+a new card even when its hooks return the right values.
 
 ## 3. Implement every card in the batch
 
@@ -76,10 +83,23 @@ information legally available to the Corp. Remove a TODO only once the
 behaviour and its AI support exist; never hide missing behaviour behind a
 silent approximation. Avoid unrelated refactors and formatting churn.
 
+When an existing hook cannot express a required AI decision, add the smallest
+shared consumer or new hook within the batch's scope. Implement its engine/AI
+call site and document its signature, return value, timing and information
+constraints in `documentation/ai.md` in the same change. Defining and
+documenting a hook without a working consumer does not provide AI support.
+
 Add focused tests for human mechanics and meaningful AI behaviour, including
 cleanup and negative cases. The set's focused integration test is large: read
 its setup (the first 60 or so lines) and the nearest similar test block found
 with `rg -n`, then append new blocks at the end. Do not read the whole file.
+
+For AI actions, exercise the real selector with legal options and assert the
+chosen command, card and target as applicable. Cover a useful timing window
+and a meaningful decline or expired/illegal opportunity; do not stub the
+selection path under test. For passive effects, exercise the real planner or
+run calculator instead. Direct hook-return tests are useful supplements;
+`ai-hook-docs.test.js` checks documentation coverage, not action selection.
 
 Work card by card: implement one card, run the focused test, then move to the
 next. Small failures are cheaper to fix than a batch's worth at once.
@@ -93,6 +113,8 @@ next. Small failures are cheaper to fix than a batch's worth at once.
 - Rerun `node scripts/batch-brief.js <n>`: every card must show "no unfinished
   markers". Also check the range for empty effects and empty subroutine arrays.
 - Never remove or weaken assertions to make tests pass.
+- Record the relevant AI consumers and selection/planning test evidence in the
+  set's implementation notes before marking the batch complete.
 
 ## 5. Update the tracker and hand off
 
