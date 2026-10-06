@@ -4629,7 +4629,76 @@ cardSet[36056] = {
   subTypes: ["Public", "Expansion"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  advancedThisTurn: false,
+  usedThisTurn: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) { this.faceUp = true; this.knownToRunner = true; }
+    },
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.advancedThisTurn = false; this.usedThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.advancedThisTurn = false; this.usedThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnUninstall: {
+    Resolve: function (card) {
+      if (card == this) { this.advancedThisTurn = false; this.usedThisTurn = false; }
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnAdvance: {
+    Resolve: function (card) {
+      if (card != this || !CheckInstalled(this) || this.advancedThisTurn) return;
+      this.advancedThisTurn = true;
+      GainCredits(corp, 3, "", this);
+    },
+    availableWhenInactive: true,
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (!CheckInstalled(this) || !attackedServer || attackedServer == GetServer(this) ||
+          this.usedThisTurn || !CheckCounters(this, "advancement", 1)) return [];
+      var choices = [{id: 1, label: "Remove 1 advancement counter: do 1 meat damage"},
+        {id: 0, label: "Continue", button: "Continue"}];
+      if (corp.AI) {
+        // A flatline outranks scoring. Otherwise preserve a counter that makes
+        // the difference between scoring next turn and missing the window.
+        if (runner.grip.length == 0) return [choices[0]];
+        var counters = Counters(this, "advancement");
+        var required = AdvancementRequirement(this);
+        var before = corp.AI._potentialAdvancement(this, required, false, undefined, 3);
+        var after = corp.AI._potentialAdvancement(this, required, false, undefined, 3, [], counters - 1);
+        var preserve = counters >= required ||
+          (counters + before >= required && counters - 1 + after < required);
+        return [choices[runner.grip.length > 0 && preserve ? 1 : 0]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params.id != 1) return;
+      this.usedThisTurn = true;
+      RemoveCounters(this, "advancement", 1);
+      Damage("meat", 1, true);
+    },
+    availableWhenInactive: true,
+    text: "Sacrifice Zone Expansion: do 1 meat damage",
+  },
+  AIRunSuccessfulDamage: function (server) {
+    if (!CheckInstalled(this) || this.usedThisTurn || server == GetServer(this) ||
+        !CheckCounters(this, "advancement", 1)) return 0;
+    return 1;
+  },
+  AIAdvancementLimit: function () { return AdvancementRequirement(this); },
+  AIAdvanceCreditGain: function (thisTurn, advancedInPlan) {
+    return advancedInPlan || (thisTurn && this.advancedThisTurn) ? 0 : 3;
+  },
 };
 
 //Luana Campos (36057)
@@ -4646,7 +4715,39 @@ cardSet[36057] = {
   subTypes: ["Executive", "Liability"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  bad_publicity: 0,
+  responseOnCorpTurnBegins: {
+    Enumerate: function () {
+      if (corp.badPublicity < 1) return [];
+      var choices = [{id: 1, label: "Host 1 bad publicity"},
+        {id: 0, label: "Continue", button: "Continue"}];
+      if (corp.AI) return [choices[corp.RnD.cards.length > 1 ? 0 : 1]];
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params.id != 1) return;
+      corp.badPublicity--;
+      this.bad_publicity++;
+      UpdateCounters();
+      GainCredits(corp, 3, "", this);
+      Draw(corp, 1);
+    },
+    text: "Luana Campos: host 1 bad publicity",
+  },
+  interruptOnUninstall: {
+    Resolve: function (afterInterrupt) {
+      var amount = this.bad_publicity;
+      this.bad_publicity = 0;
+      BadPublicity(amount, afterInterrupt, this);
+    },
+  },
+  AIWorthInstalling: function (remotes) {
+    if (corp.badPublicity < 1 || corp.RnD.cards.length < 2 || Credits(corp) < RezCost(this)) return -1;
+    return 0; // strongest empty protected remote, or a new server if none
+  },
+  AIRezWhenCan: function () { return corp.badPublicity > 0 && corp.RnD.cards.length > 1; },
+  AIEconomyCard: true,
 };
 
 //Event Horizon (36058)
@@ -4664,11 +4765,79 @@ cardSet[36058] = {
   subTypes: ["Sentry", "Destroyer"],
   rezCost: 4,
   strength: 0,
+  abilities: [{
+    text: "[trash]: End the run.",
+    Enumerate: function () {
+      if (!attackedServer || attackedServer != GetServer(this) || !CheckTrash(this)) return [];
+      if (corp.AI && !this.AITriggerInPaidWindow()) return [];
+      return [{}];
+    },
+    Resolve: function () { Trash(this, false, function () { EndTheRun(); }, this); },
+  }],
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trash 1 installed program unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({id: 1, srChoice: 0, label: "Pay 3[c]", button: "Pay 3[c]"});
+        choices.push({id: 0, srChoice: 1, label: "Do not pay", button: "Continue"});
+        DecisionPhase(runner, choices, function (params) {
+          if (params.id == 1) { SpendCredits(runner, 3, "using", this); return; }
+          var targets = ChoicesInstalledCards(runner, function (card) {
+            return CheckCardType(card, ["program"]) && CheckTrash(card);
+          });
+          if (targets.length == 0) return;
+          DecisionPhase(corp, targets, function (target) { Trash(target.card, true); },
+            this.title, "Trash 1 installed program", this, "trash");
+        }, this.title, "Pay 3[c] to avoid program trash?", this);
+      },
+      visual: {y: 103, h: 32},
+    },
+    {
+      text: "End the run unless the Runner pays 3[c].",
+      Resolve: function () {
+        var choices = [];
+        if (CheckCredits(runner, 3, "using", this))
+          choices.push({id: 1, srChoice: 0, label: "Pay 3[c]", button: "Pay 3[c]"});
+        choices.push({id: 0, srChoice: 1, label: "End the run", button: "End the run"});
+        DecisionPhase(runner, choices, function (params) {
+          if (params.id == 1) SpendCredits(runner, 3, "using", this);
+          else EndTheRun();
+        }, this.title, "Pay 3[c] to avoid ending the run?", this);
+      },
+      visual: {y: 137, h: 32},
+    },
   ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  AITriggerInPaidWindow: function () {
+    return !!attackedServer && attackedServer == GetServer(this) && approachIce < 0 &&
+      this.AIGlobalETRUses(attackedServer) > 0;
+  },
+  AIGlobalETRUses: function (server) {
+    return server == GetServer(this) && CheckTrash(this) &&
+      corp.AI && (corp.AI._runnerMayWinIfServerBreached(server) ||
+        (playerTurn == runner && runner.clickTracker < 1 && corp.AI._agendaPointsInServer(server) > 0)) ? 1 : 0;
+  },
+  AIETRTrashesSelf: true,
+  AIMandatoryPassCost: function (breaker, server, iceIndex, ai, evaluationContext) {
+    // The ETR can be paid off; lacking a killer is not a hard lockout.
+    if (ai._hostedBreakContribution(this) > 0) return 0;
+    var breakCost = breaker ? ai._breakerActivationCost(
+      this, breaker, 1, server, iceIndex, evaluationContext) : Infinity;
+    return Math.min(3, breakCost);
+  },
+  AIRunExtraRuns: function (server) {
+    return this.rezzed && CheckInstalled(this) && CheckHasAbilities(this) &&
+      server == GetServer(this) && CheckTrash(this) ? 1 : 0;
+  },
+  AIImplementIce: function (rc, result) {
+    var programs = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]) && CheckTrash(card);
+    });
+    result.sr = [
+      [["payCredits", "payCredits", "payCredits"], programs.length ? ["misc_serious"] : []],
+      [["payCredits", "payCredits", "payCredits"], ["endTheRun"]],
+    ];
     return result;
   },
 };
@@ -4687,11 +4856,25 @@ cardSet[36059] = {
   subTypes: ["Sentry"],
   rezCost: 2,
   strength: 3,
+  _gainAndDraw: function () {
+    GainCredits(corp, 1, "", this);
+    var choices = [{id: 1, label: "Draw 1 card", button: "Draw 1"},
+      {id: 0, label: "Continue", button: "Continue"}];
+    if (corp.AI) corp.AI.preferred = {title: this.title,
+      option: choices[corp.RnD.cards.length > 1 && corp.HQ.cards.length < MaxHandSize(corp) ? 0 : 1]};
+    DecisionPhase(corp, choices, function (params) {
+      if (params.id == 1) Draw(corp, 1);
+    }, this.title, "Draw 1 card?", this);
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {text: "Gain 1[c]. You may draw 1 card.",
+      Resolve: function () { this._gainAndDraw(); }, visual: {y: 59, h: 16}},
+    {text: "Gain 1[c]. You may draw 1 card.",
+      Resolve: function () { this._gainAndDraw(); }, visual: {y: 79, h: 16}},
   ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  AIImplementIce: function (rc, result, maxCorpCred) {
+    var effect = maxCorpCred < 5 ? "misc_moderate" : "misc_minor";
+    result.sr = [[[effect]], [[effect]]];
     return result;
   },
 };
@@ -4712,11 +4895,110 @@ cardSet[36060] = {
   subTypes: ["Code Gate", "Expendable"],
   rezCost: 8,
   strength: 5,
+  _searchIce: function () {
+    var chosen = [];
+    var card = this;
+    function chooseType(index) {
+      if (index == 2) {
+        Shuffle(corp.RnD.cards);
+        Log("R&D shuffled");
+        function revealNext(n) {
+          if (n >= chosen.length) return;
+          Reveal(chosen[n], function () {
+            MoveCard(chosen[n], corp.HQ.cards);
+            revealNext(n + 1);
+          }, card);
+        }
+        revealNext(0);
+        return;
+      }
+      var type = index == 0 ? "Barrier" : "Sentry";
+      var choices = ChoicesArrayCards(corp.RnD.cards, function (candidate) {
+        return CheckCardType(candidate, ["ice"]) && CheckSubType(candidate, type) &&
+          chosen.indexOf(candidate) < 0;
+      });
+      var decline = {card: null, label: "Do not find a " + type, button: "Continue"};
+      choices.push(decline);
+      if (corp.AI) {
+        var searchBudget = card._iceTutorBudget(0);
+        var useful = choices.filter(function (option) {
+          return option.card && RezCost(option.card) <= searchBudget &&
+            !corp.HQ.cards.some(function (inHand) { return inHand.title == option.card.title; }) &&
+            !chosen.some(function (selected) { return selected.title == option.card.title; });
+        });
+        useful.sort(function (a, b) {
+          var aStops = corp.AI._iceHasETR(a.card) ? 1 : 0;
+          var bStops = corp.AI._iceHasETR(b.card) ? 1 : 0;
+          if (aStops != bStops) return bStops - aStops;
+          var aCovered = corp.AI._aCompatibleBreakerIsInstalled(a.card) ? 1 : 0;
+          var bCovered = corp.AI._aCompatibleBreakerIsInstalled(b.card) ? 1 : 0;
+          if (aCovered != bCovered) return aCovered - bCovered;
+          return (b.card.elo || 0) - (a.card.elo || 0);
+        });
+        var best = useful.length ? useful[0] : null;
+        corp.AI.preferred = {title: card.title,
+          option: best && corp.RnD.cards.length - chosen.length > 2 &&
+            corp.HQ.cards.length + chosen.length < MaxHandSize(corp) ? best : decline};
+      }
+      DecisionPhase(corp, choices, function (params) {
+        if (params.card) chosen.push(params.card);
+        chooseType(index + 1);
+      }, card.title, "Search R&D for up to 1 " + type, card);
+    }
+    chooseType(0);
+  },
+  abilities: [{
+    text: "[click], 1[c], reveal and trash from HQ: find a barrier and a sentry.",
+    availableFromHQ: true,
+    Enumerate: function () {
+      if (this.cardLocation != corp.HQ.cards || !CheckActionClicks(corp, 1) ||
+          !CheckCredits(corp, 1, "using", this) || !CheckTrash(this)) return [];
+      if (corp.AI) {
+        if (corp.RnD.cards.length < 3 || corp.HQ.cards.length > MaxHandSize(corp) ||
+            corp.clickTracker < 2) return [];
+        // Keep an affordable defender rather than spending a click replacing it.
+        if (corp.AI._affordableIce(corp.AI._serverToProtect()).some(function (card) { return corp.AI._iceHasETR(card); })) return [];
+        var searchBudget = this._iceTutorBudget(1);
+        var target = corp.RnD.cards.some(function (card) {
+          return CheckCardType(card, ["ice"]) &&
+            (CheckSubType(card, "Barrier") || CheckSubType(card, "Sentry")) &&
+            RezCost(card) <= searchBudget &&
+            !corp.HQ.cards.some(function (inHand) { return inHand.title == card.title; });
+        });
+        if (!target) return [];
+      }
+      return [{}];
+    },
+    Resolve: function () {
+      SpendClicks(corp, 1);
+      SpendCredits(corp, 1, "using", this, function () {
+        Reveal(this, function () {
+          this.faceUp = true;
+          Trash(this, false, function () { this._searchIce(); }, this);
+        }, this);
+      }, this);
+    },
+  }],
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {text: "The Runner loses 2[c].", Resolve: function () { LoseCredits(runner, 2); },
+      visual: {y: 123, h: 16}},
+    {text: "End the run.", Resolve: function () { EndTheRun(); }, visual: {y: 143, h: 16}},
+    {text: "End the run.", Resolve: function () { EndTheRun(); }, visual: {y: 162, h: 16}},
   ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  _iceTutorBudget: function (abilityCost) {
+    var server = corp.AI._serverToProtect();
+    var cost = abilityCost;
+    if (server) {
+      cost += server.ice.length;
+      var unrezzed = corp.AI._unrezzedIce(server);
+      for (var i = 0; i < unrezzed.length; i++) cost += RezCost(unrezzed[i]);
+    }
+    return Credits(corp) - cost;
+  },
+  AITriggerWhenCan: true,
+  AITriggerAfterTactics: true,
+  AIImplementIce: function (rc, result) {
+    result.sr = [[["loseCredits", "loseCredits"]], [["endTheRun"]], [["endTheRun"]]];
     return result;
   },
 };

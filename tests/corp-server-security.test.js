@@ -27,7 +27,7 @@ context.ActiveCards = player => {
   const corpCards = corp.scoreArea.concat(
     servers.reduce(
       (cards, currentServer) =>
-        cards.concat(currentServer.root.filter(card => card.rezzed)),
+        cards.concat(currentServer.root.concat(currentServer.ice).filter(card => card.rezzed)),
       [],
     ),
   );
@@ -2211,5 +2211,38 @@ test('Archives admission and valueless-debt reset preserve their shared-rule int
   gated.options.emptyArchivesRunPressure = false;
   assert.strictEqual(gated._nothingWorthProtecting(archives), false,
     'turning off pressure admission must preserve visible-agenda stakes');
+});
+test('Event Horizon pay-off tax is finite and its sacrificed layer is not charged twice', () => {
+  const previousAI = corp.AI;
+  const previousTrash = context.CheckTrash;
+  const previousInstalled = context.CheckInstalled;
+  const horizonAI = vm.runInContext('new CorpAI()', context);
+  horizonAI._log = () => {};
+  corp.AI = horizonAI;
+  context.CheckTrash = () => true;
+  context.CheckInstalled = target => context.InstalledCards(corp).includes(target);
+  try {
+    const horizon = card(36058); horizon.rezzed = true;
+    const protectedServer = server([horizon]);
+    protectedServer.root = [{cardType: 'agenda', agendaPoints: 2}];
+    runner.agendaPoints = 5; runner.creditPool = 8; runner.clickTracker = 2;
+    const result = horizonAI._evaluateServerSecurity(protectedServer);
+    assert.strictEqual(result.hasHardLockout, false, 'one sacrifice cannot cover two runs');
+    assert.strictEqual(result.totalMandatoryBreakCost, 3, 'pay three once; Horizon is gone for the next run');
+    assert.strictEqual(horizon.rezzed, true, 'planning does not consume the card');
+    protectedServer.root = [];
+    const noSacrifice = horizonAI._evaluateServerSecurity(protectedServer);
+    assert.strictEqual(noSacrifice.totalMandatoryBreakCost, 3, 'paying off ETR is a real mandatory tax without a killer');
+    assert.strictEqual(noSacrifice.hasHardLockout, false, 'no killer still permits payment');
+    runner.cards = [card(31008)]; // Mimic: one credit to break one sentry subroutine.
+    const cheaperBreak = horizonAI._evaluateServerSecurity(protectedServer);
+    assert.strictEqual(cheaperBreak.totalMandatoryBreakCost, 1,
+      'security planner chooses breaking over the three-credit payment');
+    runner.cards = [];
+    horizon.rezzed = false;
+    assert.strictEqual(horizonAI._globalETRUses(protectedServer), 0, 'unrezzed paid abilities supply no defense');
+  } finally {
+    corp.AI = previousAI; context.CheckTrash = previousTrash; context.CheckInstalled = previousInstalled;
+  }
 });
 console.log(tests + ' regression cases passed.');

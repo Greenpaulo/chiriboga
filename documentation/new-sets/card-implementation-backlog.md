@@ -84,7 +84,7 @@ cards into generated decks.
 ### Other sets
 
 `sets/vantagepoint.js` contains structural definitions and exact, dated ELO
-values for all 66 cards. Batches 1–11 (36001–36055) are implemented and behavior
+values for all 66 cards. Batches 1–12 (36001–36060) are implemented and behavior
 tested; the remaining generated rules bodies are not implementations. The
 remaining gaps are generated in `documentation/card-status.md`. Vantage Point
 remains `in-progress`, hidden and untested per `documentation/card-sets.md`;
@@ -95,6 +95,14 @@ Vantage Point is the active batched implementation. Its live queue, ownership,
 status summary and append-only completion log are maintained in
 `documentation/new-sets/current-set-implementation.md`. The `implement-card-batch` skill must
 update that tracker after every status transition and completed batch.
+
+Batch 12's AI review replaced Event Horizon's permanent Runner lockout with
+finite continuation planning. The Runner budgets encounters and a fresh ordinary
+run after each sacrifice, using only visible defenses. It assumes the Corp
+will spend them even when the private Corp policy would decline. Continuations
+use the currently installed rig and the existing run calculator's static-board
+assumptions; they do not search intervening draw/install actions. Strategic
+support is required during each batch; final review verifies it.
 
 No repository-wide rules-text comparison has yet been completed for the other
 registered definitions. A lack of `TODO` does not prove a card is complete.

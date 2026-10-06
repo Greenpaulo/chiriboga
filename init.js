@@ -1658,7 +1658,7 @@ function UpdateCounterColors() {
   }
 }
 
-var counterList = ["advancement", "credits", "virus", "power", "agenda"]; //used for resetting all counters on a card, setting them up for render, etc.
+var counterList = ["advancement", "credits", "virus", "power", "agenda", "bad_publicity"]; //used for resetting all counters on a card, setting them up for render, etc.
 var countersUI = {
   credits: {},
   click: {},

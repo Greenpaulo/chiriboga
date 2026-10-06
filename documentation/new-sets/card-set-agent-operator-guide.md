@@ -11,6 +11,8 @@ explains exactly what the user should do and say.
 | ------------------------------------------ | ------------------------------------------------------------------ | ---------------------------- |
 | `current-set-implementation.md`            | Active set, batch queue, ownership, status and completion evidence | Setup agent and batch agents |
 | `.agents/skills/implement-card-batch/SKILL.md` | Set-agnostic one-batch instructions for any coding agent       | Maintainers only             |
+| `.agents/skills/review-card-batch/SKILL.md` | Independent strategic AI review of an implemented batch | Maintainers only |
+| `reviews/<registry-key>-batch-<n>.md` | Per-card review evidence, findings and verdict for a specific code snapshot | Batch-review agents |
 | `card-implementation-backlog.md`           | Long-term unfinished work and archived set-level status            | Batch/final-review agents    |
 | `new-set-integration-guide.md`             | Definition of done for adding a complete set                       | Maintainers only             |
 
@@ -72,6 +74,39 @@ Do not rely only on the agent's chat response. Inspect the repository:
 Then open a fresh chat and use the same one-line prompt for the next batch. A
 fresh chat keeps context smaller; the tracker supplies continuity.
 
+## Review a completed batch's AI support
+
+Use a fresh chat for the independent check:
+
+```text
+$review-card-batch Vantage Point 5
+```
+
+The skill accepts the set name, registry key or pack code and a batch number.
+`$review-card-batch 5` uses the active set. Without a number it selects the earliest
+completed batch without a current passing review. An archived set needs preserved
+batch boundaries; the agent will ask for exact IDs if those records are missing.
+It never substitutes the active set's numbering for a different set.
+
+The reviewer audits every card's strategic choices through real selectors and
+planners, including competing actions, resource/scoring budgets, targets and the
+opposing AI. It records a per-card verdict and reproducible findings under
+`documentation/new-sets/reviews/`. It runs focused and full regression checks,
+but green tests alone do not establish strong strategy. Reviews are tied to the
+reviewed source/test snapshot; changed consumers require rechecking the evidence.
+
+The review does not repair code. A **Changes required** verdict reopens the active
+batch as `Pending`, or `Blocked` for a precise dependency beyond that batch.
+`$implement-card-batch` picks up reopened work under its usual selection rule,
+then the repaired batch is reviewed again. An **Inconclusive** verdict identifies
+the missing evidence and does not count as review approval. Review history is
+separate from the append-only implementation completion log.
+
+You can review earlier batches while the last batch is still pending, one chat
+at a time. For an existing set, start with the earliest completed batch and work
+through the queue. For new batches, review after implementation and before moving
+on. Never run a reviewer while an agent is editing the same set file or tracker.
+
 ## Resume an interrupted batch
 
 If a session ends while a row remains `In progress`, do not reset it to
@@ -96,11 +131,14 @@ the tests, change the status and append the completion evidence.
 ## Perform the final set-wide review
 
 Completing every batch does not automatically make the set production-ready.
+Check that every completed batch has a passing strategic review for the current
+code and that repairs or inconclusive reviews have been resolved. The final
+review still checks interactions across batches and overall integration.
 Start a separate chat and paste:
 
 ```text
 Read documentation/new-sets/current-set-implementation.md and
-documentation/new-set-integration-guide.md. All implementation batches should
+documentation/new-sets/new-set-integration-guide.md. All implementation batches should
 now be complete. Perform the full set-wide definition-of-done review: audit all
 card mechanics and AI hooks, search for unfinished stubs, run focused and shared
 tests, validate metadata/images/formats/random decks, update the backlog, and

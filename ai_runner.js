@@ -1608,7 +1608,14 @@ console.log(this.preferred);
             //console.log(p.alt);
             //find the right subroutine
             for (var i = 0; i < p.alt.length; i++) {
-              if (p.alt[i].srIdx == subroutine - 1) return p.alt[i].choiceIdx; //subroutine has incremented because it fired
+              if (p.alt[i].srIdx == subroutine - 1) {
+                // Legal payment choices can shrink as credits are spent. Match
+                // stable model branches instead of their current menu position.
+                var modelChoice = p.alt[i].choiceIdx;
+                var mapped = optionList.findIndex(option => option.srChoice === modelChoice);
+                if (mapped >= 0) return mapped;
+                if (!optionList.some(option => typeof option.srChoice != "undefined")) return modelChoice;
+              }
             }
             console.error(
               "No .alt for sr " + (subroutine - 1) + "? " + JSON.stringify(bestpath)
@@ -1622,11 +1629,19 @@ console.log(this.preferred);
         AvailableCredits(corp)
       ).sr[subroutine - 1];
       for (var i = 0; i < sroptions.length; i++) {
-        if (sroptions[i].includes("endTheRun")) return i;
+        if (sroptions[i].includes("endTheRun")) {
+          var mappedETR = optionList.findIndex(option => option.srChoice === i);
+          if (mappedETR >= 0) return mappedETR;
+          if (!optionList.some(option => typeof option.srChoice != "undefined")) return i;
+        }
       }
       this._log("No etr found, avoiding tags");
       for (var i = 0; i < sroptions.length; i++) {
-        if (!sroptions[i].includes("tag")) return i;
+        if (!sroptions[i].includes("tag")) {
+          var mappedSafe = optionList.findIndex(option => option.srChoice === i);
+          if (mappedSafe >= 0) return mappedSafe;
+          if (!optionList.some(option => typeof option.srChoice != "undefined")) return i;
+        }
       }
       //console.log("no good!");
     }

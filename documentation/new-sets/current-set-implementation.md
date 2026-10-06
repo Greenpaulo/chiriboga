@@ -8,7 +8,10 @@ User-facing prompts and operating instructions are in
 `documentation/new-sets/card-set-agent-operator-guide.md`.
 
 Do not run multiple agents against this tracker or its definition file at the
-same time.
+same time. `Complete` records implementation, not independent strategic review.
+Use `$review-card-batch <set> <batch>` to audit completed batches; the reviewer
+links snapshot-specific reports in a separate batch-review log and reopens
+confirmed gaps for repair. See the operator guide for arguments and recovery.
 
 ## Active set
 
@@ -41,7 +44,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**11 complete, 2 outstanding** (`2 Pending`, `0 In progress`, `0 Blocked`).
+**12 complete, 1 outstanding** (`1 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -60,7 +63,7 @@ Agents must refresh these counts whenever a batch status changes.
 |     9 | 36041–36045 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    10 | 36046–36050 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    11 | 36051–36055 | Complete | Codex / 2026-10-05       | Mechanics, AI and focused/full regressions pass                            |
-|    12 | 36056–36060 | Pending  | —                        | —                                                                          |
+|    12 | 36056–36060 | Complete | Codex / 2026-10-05       | Strategic rework: competing actions and finite-run budgets verified        |
 |    13 | 36061–36066 | Pending  | —                        | —                                                                          |
 
 When claiming a batch, record the agent/extension name and current date in
@@ -87,6 +90,10 @@ Do not remove an older entry if later work revisits one of its cards.
 |    10 | 36046–36050 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `play-and-steal-cost.test.js`; all `tests/*.test.js` | Implemented Editorial Division, Witch Hunt, Magistrate Revontulet, Nihilo Agent and Grubber; added post-prevention bad-publicity responses and continuations |
 
 |    11 | 36051–36055 | 2026-10-05 | Codex       | `vantagepoint-integration.test.js`; `vantagepoint-batch11-engine.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Lethe, Paywall, Flood the Market, Scapegoat and Hype Machine; added bypass responses, hosted-card uninstall sequencing, full-break/bypass run effects and declarative advancement search; 45 test files pass on Node 20.19.0; Node 8 hook incompatibilities recorded in implementation notes |
+
+|    12 | 36056–36060 | 2026-10-05 | Codex       | `vantagepoint-integration.test.js`; `vantagepoint-batch12.test.js`; `corp-server-security.test.js`; all `tests/*.test.js` | Implemented Sacrifice Zone Expansion, Luana Campos, Event Horizon, Flywheel and Tocsin; added uninstall interrupts, hosted bad-publicity counters, HQ expend abilities, paid-window AI selection and public run/security models; 46 test files pass on Node 20.19.0 |
+
+| 12 | 36056–36060 | 2026-10-05 | Codex | `tests/vantagepoint-batch12.test.js`, `tests/corp-server-security.test.js` | Strategic rework: alternatives verified through real selectors/planners; finite Horizon continuations, income/scoring budgets, protected Luana placement, useful draws and defensive tutor priorities; full 46-file suite passes |
 
 ## Required shared verification
 
