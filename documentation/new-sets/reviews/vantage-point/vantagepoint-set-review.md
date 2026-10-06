@@ -155,12 +155,12 @@ use the pinned executable or activate Node 20.19.0 first.
 | `node tests/eternal-format.test.js` | Passed; included in full run and original explicit shared check. |
 | `node tests/deckbuild-format-pool.test.js` | Passed; included in full run and original explicit shared check. |
 | `node tests/decklauncher-identity-change.test.js` | Passed; included in full run and original explicit shared check. |
-| `node documentation/new-sets/reviews/probes/vantagepoint-set-integration.js` | Passed: 66 definitions; 315 legal seeded decks; zero numeric-field differences. |
-| `node documentation/new-sets/reviews/probes/vantagepoint-headless-smoke.js` | 8 games, 0 failed; JSON results retained. |
-| `node documentation/new-sets/reviews/probes/vantagepoint-bad-publicity-fund.js` | **Expected red**: four current balance/loss mismatches; outside green suite. |
-| `node documentation/new-sets/reviews/probes/vantagepoint-batch2-access.cjs` | Four current access decisions reproduced. |
-| `node documentation/new-sets/reviews/probes/vantagepoint-batch2-strategy.cjs` | Destination/reveal and lethal/survivable observations reproduced. |
-| `node documentation/new-sets/reviews/probes/vantagepoint-batch2-draw-route.cjs` | Current survivable-route false rejection reproduced. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-set-integration.js` | Passed: 66 definitions; 315 legal seeded decks; zero numeric-field differences. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-headless-smoke.js` | 8 games, 0 failed; JSON results retained. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-bad-publicity-fund.js` | **Expected red**: four current balance/loss mismatches; outside green suite. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-access.cjs` | Four current access decisions reproduced. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-strategy.cjs` | Destination/reveal and lethal/survivable observations reproduced. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-draw-route.cjs` | Current survivable-route false rejection reproduced. |
 | Batch review probes and focused tests | Exact commands/results in each linked report; expected bad behavior assertions are identified as observations. |
 | `git diff --check` | Passed at final handoff. |
 

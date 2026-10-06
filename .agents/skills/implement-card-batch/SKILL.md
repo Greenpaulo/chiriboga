@@ -34,6 +34,33 @@ which you only append to.
 - Change only the selected card range, except for the smallest shared helper or
   engine fix those cards strictly require.
 
+### Repair a reopened batch
+
+Read the linked batch report's latest findings, per-card evidence gaps and
+acceptance criteria, plus the related set-wide findings in the set report.
+The tracker’s **Review directory** locates the report/index/probes; follow its
+existing links rather than guessing paths. Use the index's artifact retention
+and provenance notes when interpreting historical hashes or observation probes.
+
+Make a finding-by-finding repair list with IDs and required evidence. Verify each
+claim against current code and reproduce supported defects before changing it;
+if a claim is wrong or already fixed, record concrete evidence. Review probes
+that assert current bad behavior are diagnostic observations, not green tests.
+Add meaningful permanent regressions asserting the justified expected decision
+or game outcome, and migrate any passing pending reproduction into the green
+suite under the repository rules. Address named missing essential evidence too.
+
+For shared repairs, identify affected consumers and other batches whose evidence
+needs revalidation, including previously passing batches. Keep changes within
+the selected cards and their necessary shared dependencies. A genuine broader
+blocker needs a precise capability/dependency and repair criterion in the tracker.
+
+Append dated remediation notes to a separate **Remediation log** in the linked
+batch report: finding IDs, changed behavior/code, regression evidence and
+remaining gaps/re-review scope. Keep the independent findings and verdict intact.
+Completion still requires focused/shared/full verification and the append-only
+tracker completion row; it is not independent review approval.
+
 ## 2. Establish context before editing
 
 - Check `git status` and preserve unrelated and pre-existing changes.
@@ -164,4 +191,5 @@ Do not change the set's `hidden`/`untested` registry flags or its row in
 `documentation/card-sets.md`; the user decides playability and the flags follow
 it. Do not commit, push or discard work. Report the batch and card IDs, important mechanics
 and AI decisions, tests and results, limitations, and the next outstanding
-batch.
+batch. For remediation, include finding IDs, report path and the exact independent
+re-review needed. Do not overwrite the review log with a repair-completion claim.

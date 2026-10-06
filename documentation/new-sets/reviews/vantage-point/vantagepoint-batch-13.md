@@ -37,6 +37,6 @@ Locally run on Node 20.19.0, all passing:
 - `node tests/vantagepoint-batch11-engine.test.js`
 - `node tests/vantagepoint-batch12.test.js`
 - `node tests/vantagepoint-batch13.test.js`
-- `node documentation/new-sets/reviews/probes/vantagepoint-batches-10-13.js`
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batches-10-13.js`
 
 The coordinator ran `node tests/run-all-tests.js` on this immutable production snapshot: all 50 files passed, including Corp decision fixtures and decision snapshots, excluding known-red pending reproductions. Shared syntax/integration/format/deck verification also passed; see [set review](vantagepoint-set-review.md) for the exact commands and results. A green suite is not evidence that the set is free of independently demonstrated defects.

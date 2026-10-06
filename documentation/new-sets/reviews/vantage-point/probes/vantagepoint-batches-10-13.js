@@ -1,4 +1,4 @@
-const assert = require('assert'); const fs = require('fs'); const vm = require('vm'); const path = require('path'); const root = path.resolve(__dirname, '../../../..');
+const assert = require('assert'); const fs = require('fs'); const vm = require('vm'); const path = require('path'); const root = path.resolve(__dirname, '../../../../..');
 async function main() {
 const corp = {side: 'corp', creditPool: 15, clickTracker: 3, badPublicity: 0,
   HQ: {serverName: 'HQ', cards: [], root: [], ice: []},

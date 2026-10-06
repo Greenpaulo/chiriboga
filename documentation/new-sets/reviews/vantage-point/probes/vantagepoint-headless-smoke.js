@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const root = path.resolve(__dirname, '../../../..');
+const root = path.resolve(__dirname, '../../../../..');
 const {playGame} = require(path.join(root, 'scripts/ai-batch/headless'));
 async function main() {
   const results = [];
@@ -15,7 +15,7 @@ async function main() {
     }
   }
   const destination = path.join(__dirname, '../vantagepoint-headless-smoke.json');
-  fs.writeFileSync(destination, JSON.stringify({date: '2026-10-06', command: 'node documentation/new-sets/reviews/probes/vantagepoint-headless-smoke.js', results}, null, 2) + '\n');
+  fs.writeFileSync(destination, JSON.stringify({date: '2026-10-06', command: 'node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-headless-smoke.js', results}, null, 2) + '\n');
   const failed = results.filter(r => !r.winner || r.errors.length);
   console.log(`${results.length} full-engine games, ${failed.length} failed; report saved.`);
   process.exitCode = failed.length ? 1 : 0;

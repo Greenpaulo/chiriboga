@@ -103,9 +103,22 @@ Name every failure and distinguish related from demonstrated
 pre-existing failures. An unrelated failure prevents claiming a green suite;
 it does not by itself prove this batch's strategy is defective.
 
+## Locate and retain review evidence
+
+Use **Review directory** from the active or archived tracker, or the existing
+linked report directory. For a new set, record a directory under
+`documentation/new-sets/reviews/<set-slug>/` in its tracker. Keep that set's
+reports, probes, manifests and result JSON together, with probes in `probes/`.
+Preserve referenced evidence while findings or revalidation remain open.
+Historical hashes describe the original snapshot; path/documentation changes do
+not renew approval. After fixes have permanent green regressions and passing
+independent review, redundant probes/manifests/results can be consolidated or
+removed with report links and provenance updated; retain useful reproductions,
+final reports and completion/review history. Follow a set index's retention notes.
+
 ## Record the verdict and hand off
 
-Write `documentation/new-sets/reviews/<registry-key>-batch-<n>.md`. Include the
+Write `<review-directory>/<registry-key>-batch-<n>.md`. Include the
 review date, reviewer, exact card IDs, reviewed commit and dirty-worktree state,
 and content hashes of the reviewed source and test files (for example, use
 `shasum -a 256 <paths>`). Preserve previous review history when updating it;

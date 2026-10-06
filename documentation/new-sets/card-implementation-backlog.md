@@ -98,7 +98,7 @@ update that tracker after every status transition and completed batch.
 The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves all batch boundaries and the full append-only completion log before
 final review. Future snapshots must retain later repair/review evidence before
-the active tracker is replaced; do not overwrite older snapshots. The [2026-10-06 full set review](reviews/vantagepoint-set-review.md) has verdict
+the active tracker is replaced; do not overwrite older snapshots. The [2026-10-06 full set review](reviews/vantage-point/vantagepoint-set-review.md) has verdict
 **Changes required**. Twelve batches are reopened for supported defects; batch 13
 has current passing evidence requiring revalidation after shared repairs. Findings
 include engine dispatch/reward crashes, missing draw/click/damage models, illegal

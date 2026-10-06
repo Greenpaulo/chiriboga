@@ -7,7 +7,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const root = path.resolve(__dirname, '../../../..');
+const root = path.resolve(__dirname, '../../../../..');
 const verbose = !!process.env.VERBOSE;
 
 // ---- headless engine: real engine files, browser globals stubbed ----

@@ -13,9 +13,9 @@ explains exactly what the user should do and say.
 | `.agents/skills/implement-card-batch/SKILL.md` | Set-agnostic one-batch instructions for any coding agent       | Maintainers only             |
 | `.agents/skills/review-card-batch/SKILL.md` | Independent strategic AI review of an implemented batch | Maintainers only |
 | `.agents/skills/review-card-set/SKILL.md` | Full-set review coordinating batch evidence and readiness checks | Maintainers only |
-| `reviews/<registry-key>-batch-<n>.md` | Per-card review evidence, findings and verdict for a specific code snapshot | Batch-review agents |
+| `reviews/<set-slug>/<registry-key>-batch-<n>.md` | Per-card review evidence, findings and verdict for a specific code snapshot | Batch-review agents |
 | `history/<registry-key>-<YYYY-MM-DD>.md` | Dated full tracker snapshots, retaining batch boundaries and completion/review history | Setup/final-review agents |
-| `reviews/<registry-key>-set-review.md` | Final set-wide evidence, unresolved findings and readiness verdict | Final-review agents |
+| `reviews/<set-slug>/<registry-key>-set-review.md` | Final set-wide evidence, unresolved findings and readiness verdict | Final-review agents |
 | `card-implementation-backlog.md`           | Long-term unfinished work and archived set-level status            | Batch/final-review agents    |
 | `new-set-integration-guide.md`             | Definition of done for adding a complete set                       | Maintainers only             |
 
@@ -101,7 +101,12 @@ reviewed source/test snapshot; changed consumers require rechecking the evidence
 The review does not repair code. A **Changes required** verdict reopens the active
 batch as `Pending`, or `Blocked` for a precise dependency beyond that batch.
 `$implement-card-batch` picks up reopened work under its usual selection rule,
-then the repaired batch is reviewed again. An **Inconclusive** verdict identifies
+then the repaired batch is reviewed again. The implementation agent reads the
+linked batch report and related findings in the set report, reproduces each
+required defect, adds permanent decision-level regression coverage, and appends
+remediation evidence without changing the independent verdict. Missing essential
+coverage listed in the report is part of the repair work. Shared repairs also
+identify other batches whose passing evidence needs revalidation. An **Inconclusive** verdict identifies
 the missing evidence and does not count as review approval. Review history is
 separate from the append-only implementation completion log.
 
@@ -158,7 +163,7 @@ implementation-completion claim:
    and shared integration tests, and finish with `node tests/run-all-tests.js`,
    including Corp decision fixtures and decision snapshots. Pending known-red
    reproductions remain outside the green suite.
-5. **Recorded verdict:** write `reviews/<registry-key>-set-review.md` with the
+5. **Recorded verdict:** write `reviews/<set-slug>/<registry-key>-set-review.md` with the
    reviewed commit, dirty-worktree state, source/test hashes, per-card evidence
    or links to current batch reports, cross-batch results, commands/results,
    manual checks, findings and a verdict of **Pass**, **Changes required** or
@@ -224,6 +229,7 @@ In `documentation/new-sets/current-set-implementation.md`, update all of these t
 - exact intended card range;
 - registry state expected during implementation;
 - focused integration-test path;
+- review directory, recorded explicitly for the selected set;
 - status-summary counts;
 - every row in the batch queue;
 - completion log, reset to its empty placeholder after archiving;

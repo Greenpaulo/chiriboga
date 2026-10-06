@@ -1,4 +1,4 @@
-// Run from repository root: node documentation/new-sets/reviews/probes/vantagepoint-batches-5-9.js
+// Run from repository root: node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batches-5-9.js
 // Review probe: real card selectors, CorpAI.Choice and RunnerAI.SelectChoice.
 // Reuses only the public-board engine adapters from the regression harness;
 // no strategy method is stubbed. Expected findings are asserted as current

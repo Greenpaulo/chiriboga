@@ -32,8 +32,8 @@ Node `v20.19.0` matches `.nvmrc`. Commands executed:
 - `node tests/credit-pool-lock.test.js`: passed.
 - `node tests/tailgate-hq-access-not-granted.test.js`: passed.
 - `node tests/vantagepoint-batch13.test.js`: passed, including current Corsair restricted-payment modelling.
-- `node documentation/new-sets/reviews/probes/vantagepoint-batches-1-4.cjs`: passed all current-behavior observations, reproducing reported defects. These assertions deliberately describe current bad behavior; they are not repair acceptance tests.
-- `node documentation/new-sets/reviews/probes/vantagepoint-early-command-coverage.cjs`: 40 real command decisions completed without an uncaught error. This is a broad smoke probe, not sufficient contrasting strategy acceptance.
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batches-1-4.cjs`: passed all current-behavior observations, reproducing reported defects. These assertions deliberately describe current bad behavior; they are not repair acceptance tests.
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-early-command-coverage.cjs`: 40 real command decisions completed without an uncaught error. This is a broad smoke probe, not sufficient contrasting strategy acceptance.
 - `git diff --check`: passed during review.
 
 The coordinator's immutable-snapshot full run is recorded in [the set review](vantagepoint-set-review.md): `node tests/run-all-tests.js`, 50 test files passed, including Corp decision fixtures and decision snapshots. Shared syntax/integration/eternal/deckbuild/identity checks passed. Known-red pending tests were excluded from that green result. Separately, the existing pending Corsair/Lampades reproduction was examined and fails all four cases because it expects a removed `AIRunPoolCreditOffset` hook; it is not evidence that the current restricted-credit repair failed.
@@ -64,7 +64,7 @@ The hook explicitly adds `netDamage` and omits the following draw because there
 is no draw token. This is a precise missing planner capability, not merely missing
 hook documentation.
 
-Reproduction: run `node documentation/new-sets/reviews/probes/vantagepoint-batch2-draw-route.cjs`.
+Reproduction: run `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-draw-route.cjs`.
 The real engine instances real ezaM on outer HQ and Tithe on inner HQ. Both are
 rezzed; Runner has no breakers, one Grip card, one Stack card, ten pool credits
 and four clicks. The ordinary route is complete: ezaM has no damage/ETR and Tithe
@@ -89,9 +89,9 @@ support.
 
 Additional executed commands, pinned Node 20.19.0:
 
-- `node documentation/new-sets/reviews/probes/vantagepoint-batch2-access.cjs`: four current-selector contrasts passed.
-- `node documentation/new-sets/reviews/probes/vantagepoint-batch2-strategy.cjs`: current destination/reveal and lethal/survivable observations passed.
-- `node documentation/new-sets/reviews/probes/vantagepoint-batch2-draw-route.cjs`: asserted and reproduced the current false rejection. A passing observation probe is not a repair acceptance test.
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-access.cjs`: four current-selector contrasts passed.
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-strategy.cjs`: current destination/reveal and lethal/survivable observations passed.
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-draw-route.cjs`: asserted and reproduced the current false rejection. A passing observation probe is not a repair acceptance test.
 
 The remaining missing coverage is listed above and must be completed for a Pass.
 This review establishes a supported defect, so reopen batch 2 without rewriting

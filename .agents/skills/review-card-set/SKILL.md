@@ -54,9 +54,22 @@ must still run their focused checks and cite that coordinator result explicitly.
   or runtime evidence prevents Pass; name what would settle it. Do not claim
   browser playthroughs based on VM tests or infer rules correctness from no TODOs.
 
+## Locate and retain review evidence
+
+Use **Review directory** from the active or archived tracker, or the existing
+linked report directory. For a new set, record a directory under
+`documentation/new-sets/reviews/<set-slug>/` in its tracker. Keep that set's
+reports, probes, manifests and result JSON together, with probes in `probes/`.
+Preserve referenced evidence while findings or revalidation remain open.
+Historical hashes describe the original snapshot; path/documentation changes do
+not renew approval. After fixes have permanent green regressions and passing
+independent review, redundant probes/manifests/results can be consolidated or
+removed with report links and provenance updated; retain useful reproductions,
+final reports and completion/review history. Follow a set index's retention notes.
+
 ## Record and hand off
 
-Write `documentation/new-sets/reviews/<registry-key>-set-review.md`, retaining
+Write `<review-directory>/<registry-key>-set-review.md`, retaining
 prior review history. Include date/reviewer, exact IDs, commit, dirty-worktree
 state and source/test hashes (a linked manifest is fine); all batch verdicts and
 report links; integration/cross-batch evidence; exact commands/results; manual

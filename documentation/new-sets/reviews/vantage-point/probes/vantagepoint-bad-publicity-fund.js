@@ -1,11 +1,11 @@
 // Known-red review reproduction, outside the green test suite.
-// Node documentation/new-sets/reviews/probes/vantagepoint-bad-publicity-fund.js
+// Node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-bad-publicity-fund.js
 // Rules source: https://nullsignal.games/blog/the-return-of-bad-publicity-in-vantage-point/
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const root = path.resolve(__dirname, '../../../..');
+const root = path.resolve(__dirname, '../../../../..');
 const runner = {side: 'runner', creditPool: 6, temporaryCredits: 2, rig: {programs: [], hardware: [], resources: []}};
 const corp = {side: 'corp', creditPool: 5, HQ: {root: [], ice: [], cards: []}, RnD: {root: [], ice: [], cards: []}, archives: {root: [], ice: [], cards: []}, remoteServers: []};
 const c = {runner, corp, cardSet: [], setIdentifiers: [], console, Log() {}};

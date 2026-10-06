@@ -59,18 +59,18 @@ Agents must refresh these counts whenever a batch status changes.
 
 | Batch | Card IDs    | Status   | Owner / started          | Notes/blocker                                                              |
 | ----: | ----------- | -------- | ------------------------ | -------------------------------------------------------------------------- |
-| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](../reviews/vantagepoint-batch-1.md). |
-| 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](../reviews/vantagepoint-batch-2.md). |
-| 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](../reviews/vantagepoint-batch-3.md). |
-| 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](../reviews/vantagepoint-batch-4.md). |
-| 5 | 36021–36025 | Pending | — | Changes required: Economy/hosting decisions require repair. See [independent review](../reviews/vantagepoint-batch-5.md). |
-| 6 | 36026–36030 | Pending | — | Changes required: Click steal cost and central defense choices require repair. See [independent review](../reviews/vantagepoint-batch-6.md). |
-| 7 | 36031–36035 | Pending | — | Changes required: Pass restriction and paid-defense/tactical choices require repair. See [independent review](../reviews/vantagepoint-batch-7.md). |
-| 8 | 36036–36040 | Pending | — | Changes required: Identity, damage, target ordering and upgrade-placement decisions require repair. See [independent review](../reviews/vantagepoint-batch-8.md). |
-| 9 | 36041–36045 | Pending | — | Changes required: Tutor and post-rez choices miss immediate kill alternatives. See [independent review](../reviews/vantagepoint-batch-9.md). |
-| 10 | 36046–36050 | Pending | — | Changes required: Magistrate useful rez windows ignored. See [independent review](../reviews/vantagepoint-batch-10.md). |
-| 11 | 36051–36055 | Pending | — | Changes required: Scapegoat loses critical breaker; shared bad-publicity credit-loss defect. See [independent review](../reviews/vantagepoint-batch-11.md). |
-| 12 | 36056–36060 | Pending | — | Changes required: Meat damage modelled as net; prevention/security consequences. See [independent review](../reviews/vantagepoint-batch-12.md). |
+| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](../reviews/vantage-point/vantagepoint-batch-1.md). |
+| 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](../reviews/vantage-point/vantagepoint-batch-2.md). |
+| 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](../reviews/vantage-point/vantagepoint-batch-3.md). |
+| 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](../reviews/vantage-point/vantagepoint-batch-4.md). |
+| 5 | 36021–36025 | Pending | — | Changes required: Economy/hosting decisions require repair. See [independent review](../reviews/vantage-point/vantagepoint-batch-5.md). |
+| 6 | 36026–36030 | Pending | — | Changes required: Click steal cost and central defense choices require repair. See [independent review](../reviews/vantage-point/vantagepoint-batch-6.md). |
+| 7 | 36031–36035 | Pending | — | Changes required: Pass restriction and paid-defense/tactical choices require repair. See [independent review](../reviews/vantage-point/vantagepoint-batch-7.md). |
+| 8 | 36036–36040 | Pending | — | Changes required: Identity, damage, target ordering and upgrade-placement decisions require repair. See [independent review](../reviews/vantage-point/vantagepoint-batch-8.md). |
+| 9 | 36041–36045 | Pending | — | Changes required: Tutor and post-rez choices miss immediate kill alternatives. See [independent review](../reviews/vantage-point/vantagepoint-batch-9.md). |
+| 10 | 36046–36050 | Pending | — | Changes required: Magistrate useful rez windows ignored. See [independent review](../reviews/vantage-point/vantagepoint-batch-10.md). |
+| 11 | 36051–36055 | Pending | — | Changes required: Scapegoat loses critical breaker; shared bad-publicity credit-loss defect. See [independent review](../reviews/vantage-point/vantagepoint-batch-11.md). |
+| 12 | 36056–36060 | Pending | — | Changes required: Meat damage modelled as net; prevention/security consequences. See [independent review](../reviews/vantage-point/vantagepoint-batch-12.md). |
 |    13 | 36061–36066 | Complete | Codex / 2026-10-06 | Repaired Corp restricted-credit route assessment; both planners agree on survivability, source exhaustion and finite-repeat/prevention budgets. All 50 test files pass. See [repair evidence](../vantage-point-implementation-notes.md#batch-13-corp-restricted-payment-repair-2026-10-06). Separate set-wide review is next. |
 
 When claiming a batch, record the agent/extension name and current date in
@@ -113,23 +113,23 @@ Verdicts apply to the linked snapshot-specific reports; repairs require re-revie
 
 | Batch | Card IDs | Reviewed | Verdict | Evidence |
 | ----: | -------- | -------- | ------- | -------- |
-| 1 | 36001–36004 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-1.md) |
-| 2 | 36005–36008 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-2.md) |
-| 3 | 36009–36016 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-3.md) |
-| 4 | 36017–36020 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-4.md) |
-| 5 | 36021–36025 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-5.md) |
-| 6 | 36026–36030 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-6.md) |
-| 7 | 36031–36035 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-7.md) |
-| 8 | 36036–36040 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-8.md) |
-| 9 | 36041–36045 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-9.md) |
-| 10 | 36046–36050 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-10.md) |
-| 11 | 36051–36055 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-11.md) |
-| 12 | 36056–36060 | 2026-10-06 | Changes required | [Report](../reviews/vantagepoint-batch-12.md) |
-| 13 | 36061–36066 | 2026-10-06 | Pass | [Report](../reviews/vantagepoint-batch-13.md) |
+| 1 | 36001–36004 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-1.md) |
+| 2 | 36005–36008 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-2.md) |
+| 3 | 36009–36016 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-3.md) |
+| 4 | 36017–36020 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-4.md) |
+| 5 | 36021–36025 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-5.md) |
+| 6 | 36026–36030 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-6.md) |
+| 7 | 36031–36035 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-7.md) |
+| 8 | 36036–36040 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-8.md) |
+| 9 | 36041–36045 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-9.md) |
+| 10 | 36046–36050 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-10.md) |
+| 11 | 36051–36055 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-11.md) |
+| 12 | 36056–36060 | 2026-10-06 | Changes required | [Report](../reviews/vantage-point/vantagepoint-batch-12.md) |
+| 13 | 36061–36066 | 2026-10-06 | Pass | [Report](../reviews/vantage-point/vantagepoint-batch-13.md) |
 
 ## Set-wide review status
 
-**Changes required** — [full set report](../reviews/vantagepoint-set-review.md).
+**Changes required** — [full set report](../reviews/vantage-point/vantagepoint-set-review.md).
 Reviewed all 66 cards in the recorded 13 batches: 12 batches require repairs,
 1 passed, 0 inconclusive. A failing batch may also retain named evidence
 gaps; both defects and missing essential coverage must be resolved before Pass.
