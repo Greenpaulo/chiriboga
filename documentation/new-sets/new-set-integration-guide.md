@@ -13,6 +13,8 @@ Use these companion references while implementing cards:
   every small batch.
 - `documentation/new-sets/card-implementation-backlog.md` — known unfinished cards and
   the current ELO audit.
+- `.agents/skills/review-card-set/SKILL.md` — independent full-set audit, using
+  batch review evidence before the readiness verdict and preserving history.
 
 The Corp AI roadmap and specs (`documentation/corp-ai/`) describe plans, not
 card-authoring APIs. A hook proposed by a roadmap item must not be used until

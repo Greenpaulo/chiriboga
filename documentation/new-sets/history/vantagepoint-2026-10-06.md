@@ -1,3 +1,11 @@
+# Vantage Point implementation snapshot — 2026-10-06
+
+Preserved before the final set-wide review: all 13 batches are recorded as
+implemented; independent review and playability approval remain outstanding.
+This is a historical snapshot, not the active handoff. Repository-relative
+paths in the captured tracker still refer to the repository root. Markdown
+links below have been adjusted for this archive directory.
+
 # Current Card-Set Implementation
 
 This is the canonical handoff and progress log for the one card set currently
@@ -64,7 +72,7 @@ Agents must refresh these counts whenever a batch status changes.
 |    10 | 36046–36050 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    11 | 36051–36055 | Complete | Codex / 2026-10-05       | Mechanics, AI and focused/full regressions pass                            |
 |    12 | 36056–36060 | Complete | Codex / 2026-10-05       | Strategic rework: competing actions and finite-run budgets verified        |
-|    13 | 36061–36066 | Complete | Codex / 2026-10-06 | Repaired Corp restricted-credit route assessment; both planners agree on survivability, source exhaustion and finite-repeat/prevention budgets. All 50 test files pass. See [repair evidence](vantage-point-implementation-notes.md#batch-13-corp-restricted-payment-repair-2026-10-06). Separate set-wide review is next. |
+|    13 | 36061–36066 | Complete | Codex / 2026-10-06 | Repaired Corp restricted-credit route assessment; both planners agree on survivability, source exhaustion and finite-repeat/prevention budgets. All 50 test files pass. See [repair evidence](../vantage-point-implementation-notes.md#batch-13-corp-restricted-payment-repair-2026-10-06). Separate set-wide review is next. |
 
 When claiming a batch, record the agent/extension name and current date in
 `Owner / started`. When blocked, put the actionable reason in `Notes/blocker`.
@@ -99,19 +107,6 @@ Do not remove an older entry if later work revisits one of its cards.
 
 | 13 | 36061–36066 | 2026-10-06 | Codex | `tests/vantagepoint-batch13.test.js`; `tests/corp-server-security.test.js`; full `node tests/run-all-tests.js` | Repaired the reopened Corsair/Shackleton public-security gap using complete restricted-payment routes. Same-board opposing planner tests cover lethal/survivable damage, prevention, source exhaustion, finite reruns, click preparation, funded hidden ICE and read-only/private-information constraints. All 50 files pass, including Corp decision fixtures and decision snapshots. |
 
-## Set-wide review status
-
-**Awaiting review.** All 13 batches are implemented; this does not establish
-independent review approval or permission to change playability flags. Follow the
-[final-review procedure](card-set-agent-operator-guide.md#perform-the-final-set-wide-review)
-using `$review-card-set Vantage Point` and record the evidence and verdict in
-`reviews/vantagepoint-set-review.md`.
-
-The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
-preserves the full batch queue and completion log before final review. Keep the
-live completion log append-only if review leads to repairs, and archive the
-updated tracker again before selecting another set.
-
 ## Required shared verification
 
 Run focused batch tests plus all commands below:
@@ -134,19 +129,11 @@ set-wide review or the user explicitly changes priorities.
 
 Before replacing the active set:
 
-1. Archive the entire tracker, including batch boundaries, completion log,
-   batch-review log (if present) and set-wide review state, under
-   `documentation/new-sets/history/<registry-key>-<YYYY-MM-DD>.md`. Adjust relative
-   Markdown links and label the snapshot with its date and review status. Never
-   overwrite an existing snapshot; add a suffix when archiving twice on one date.
-   Keep the linked implementation notes and review reports in place.
-2. Link the archive and final review report from
-   `documentation/new-sets/card-implementation-backlog.md`, preserving the final
-   completion summary, unresolved findings and explicitly accepted limitations.
-3. Replace every value in **Active set**, the status summary, batch queue,
-   completion log and verification commands. Reset the set-wide review status
-   and remove the previous set’s live review/archive links after preserving them.
-4. Verify the new batches cover every intended card exactly once without gaps
+1. Preserve its final completion summary and accepted limitations in
+   `documentation/new-sets/card-implementation-backlog.md`.
+2. Replace every value in **Active set**, the status summary, batch queue,
+   completion log and verification commands.
+3. Verify the new batches cover every intended card exactly once without gaps
    or overlaps.
-5. Update the **Implementation notes** row to the new set's notes file.
-6. Leave the generic `implement-card-batch` skill unchanged.
+4. Update the **Implementation notes** row to the new set's notes file.
+5. Leave the generic `implement-card-batch` skill unchanged.

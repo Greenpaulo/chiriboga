@@ -84,17 +84,22 @@ cards into generated decks.
 ### Other sets
 
 `sets/vantagepoint.js` contains structural definitions and exact, dated ELO
-values for all 66 cards. Batches 1–12 (36001–36060) are implemented and behavior
-tested; the remaining generated rules bodies are not implementations. The
-remaining gaps are generated in `documentation/card-status.md`. Vantage Point
-remains `in-progress`, hidden and untested per `documentation/card-sets.md`;
-its unfinished cards still need the remaining batches and a separate set-wide
-review.
+values for all 66 cards. The tracker records all 13 batches (36001–36066) as
+implemented and behavior tested. This is an implementation status, not an
+independent rules/strategy sign-off. Vantage Point remains `in-progress`, hidden
+and untested per `documentation/card-sets.md`; independent review and the
+separate set-wide readiness verdict remain outstanding.
 
 Vantage Point is the active batched implementation. Its live queue, ownership,
 status summary and append-only completion log are maintained in
 `documentation/new-sets/current-set-implementation.md`. The `implement-card-batch` skill must
 update that tracker after every status transition and completed batch.
+
+The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
+preserves all batch boundaries and the full append-only completion log before
+final review. Future snapshots must retain later repair/review evidence before
+the active tracker is replaced; do not overwrite older snapshots. The final
+report will be `reviews/vantagepoint-set-review.md` (not yet performed).
 
 Batch 12's AI review replaced Event Horizon's permanent Runner lockout with
 finite continuation planning. The Runner budgets encounters and a fresh ordinary

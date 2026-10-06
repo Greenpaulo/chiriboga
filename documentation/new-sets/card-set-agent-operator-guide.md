@@ -12,7 +12,10 @@ explains exactly what the user should do and say.
 | `current-set-implementation.md`            | Active set, batch queue, ownership, status and completion evidence | Setup agent and batch agents |
 | `.agents/skills/implement-card-batch/SKILL.md` | Set-agnostic one-batch instructions for any coding agent       | Maintainers only             |
 | `.agents/skills/review-card-batch/SKILL.md` | Independent strategic AI review of an implemented batch | Maintainers only |
+| `.agents/skills/review-card-set/SKILL.md` | Full-set review coordinating batch evidence and readiness checks | Maintainers only |
 | `reviews/<registry-key>-batch-<n>.md` | Per-card review evidence, findings and verdict for a specific code snapshot | Batch-review agents |
+| `history/<registry-key>-<YYYY-MM-DD>.md` | Dated full tracker snapshots, retaining batch boundaries and completion/review history | Setup/final-review agents |
+| `reviews/<registry-key>-set-review.md` | Final set-wide evidence, unresolved findings and readiness verdict | Final-review agents |
 | `card-implementation-backlog.md`           | Long-term unfinished work and archived set-level status            | Batch/final-review agents    |
 | `new-set-integration-guide.md`             | Definition of done for adding a complete set                       | Maintainers only             |
 
@@ -134,21 +137,53 @@ Completing every batch does not automatically make the set production-ready.
 Check that every completed batch has a passing strategic review for the current
 code and that repairs or inconclusive reviews have been resolved. The final
 review still checks interactions across batches and overall integration.
-Start a separate chat and paste:
+The review must produce evidence for the whole set, rather than another
+implementation-completion claim:
+
+1. **Coverage and rules:** account for every intended card, metadata mapping,
+   image path and ELO value; compare implemented mechanics with card text and
+   current rulings. Exercise timing, cancellation, prevention, restrictions and
+   turn/run/encounter cleanup. Record which checks are automated and which are
+   manual, including anything not verified.
+2. **Strategic AI:** verify current passing batch-review evidence for every
+   card. Exercise real selectors and planners with competing actions, resource
+   budgets and opposing-side decisions. Recheck evidence affected by later
+   shared-engine or AI changes; a hook's existence is insufficient.
+3. **Cross-batch interactions:** test shared payment, prevention, hosting,
+   access, run-continuation and scoring mechanics together where applicable,
+   including interactions with already playable sets. Record the scenarios and
+   results so another reviewer can reproduce them.
+4. **Integration and regression:** check legal formats and launcher defaults,
+   generate legal Runner and Corp decks in every applicable format, run focused
+   and shared integration tests, and finish with `node tests/run-all-tests.js`,
+   including Corp decision fixtures and decision snapshots. Pending known-red
+   reproductions remain outside the green suite.
+5. **Recorded verdict:** write `reviews/<registry-key>-set-review.md` with the
+   reviewed commit, dirty-worktree state, source/test hashes, per-card evidence
+   or links to current batch reports, cross-batch results, commands/results,
+   manual checks, findings and a verdict of **Pass**, **Changes required** or
+   **Inconclusive**. Preserve earlier review history. Missing evidence means
+   Inconclusive; confirmed defects mean Changes required. Reopen affected
+   batches with actionable findings, update tracker counts and the backlog,
+   and retain the append-only completion log. A repair requires re-review.
+
+A Pass supports a recommendation to mark the set playable. Changing registry
+status/flags is a separate action; unresolved blockers or unverified checks must
+remain visible, and limitations require explicit user acceptance.
+
+Start a separate chat and use:
 
 ```text
-Read documentation/new-sets/current-set-implementation.md and
-documentation/new-sets/new-set-integration-guide.md. All implementation batches should
-now be complete. Perform the full set-wide definition-of-done review: audit all
-card mechanics and AI hooks, search for unfinished stubs, run focused and shared
-tests, validate metadata/images/formats/random decks, update the backlog, and
-recommend whether the set can be marked playable in documentation/card-sets.md.
-Do not change card-sets.md or the config.js flags yourself. Do not silently
-accept limitations; report and record any blocker.
+$review-card-set Vantage Point
 ```
 
-This is deliberately not part of the one-batch skill. It checks interactions
-between batches and decides whether the registry flags can safely change.
+Without a set argument, the skill uses the active tracker. It establishes missing
+current batch reviews using `review-card-batch`, then checks cross-batch mechanics
+and integration and records the final verdict. Independent reviewers may audit
+disjoint batches while one coordinator owns the tracker and shared verification;
+production code stays unchanged throughout the review. Repairs are handed back
+to `implement-card-batch`, followed by re-review. The review does not enable the
+set or silently accept limitations.
 
 ## Change to a different active set
 
@@ -159,13 +194,16 @@ checklist below, or ask an agent to prepare it.
 ### Exact setup prompt
 
 ```text
-Prepare documentation/current-set-implementation.md for <SET DISPLAY NAME>
+Prepare documentation/new-sets/current-set-implementation.md for <SET DISPLAY NAME>
 using pack code <PACK CODE>, registry key <REGISTRY KEY>, definition file
 <SET FILE>, and card range <FIRST ID>-<LAST ID>.
 
 Read documentation/new-sets/card-set-agent-operator-guide.md and
-documentation/new-set-integration-guide.md. Inspect the metadata and card text,
-archive the previous active set's final status in the backlog, create sensible
+documentation/new-sets/new-set-integration-guide.md. Inspect the metadata and card text,
+archive the entire previous tracker under documentation/new-sets/history/ with
+its batch boundaries and complete implementation/review logs. Preserve existing
+snapshots, adjust relative Markdown links, and link the archive and final review
+from the backlog. Create sensible
 reviewable batches based on card complexity, reset the completion log, add the
 correct set-specific verification commands, and validate that every intended
 card ID is covered exactly once without gaps or overlaps. Do not implement any
@@ -188,12 +226,18 @@ In `documentation/new-sets/current-set-implementation.md`, update all of these t
 - focused integration-test path;
 - status-summary counts;
 - every row in the batch queue;
-- completion log, reset to its empty placeholder;
+- completion log, reset to its empty placeholder after archiving;
+- batch-review log and set-wide review state/links, reset for the new set;
 - set-specific syntax and test commands.
 
-Before replacing the previous tracker contents, preserve its completed-batch
-summary, unresolved limitations and final review state in
-`documentation/new-sets/card-implementation-backlog.md`.
+Before replacing the previous tracker contents, save a dated full snapshot in
+`documentation/new-sets/history/<registry-key>-<YYYY-MM-DD>.md`, including the
+entire completion log, batch boundaries, review log and final review state.
+Never overwrite an existing snapshot; add a suffix if necessary. Adjust relative
+Markdown links, keep linked notes/reports in place, and link the snapshot and
+final report from `documentation/new-sets/card-implementation-backlog.md` with a
+summary of unresolved findings and explicitly accepted limitations. The next
+set starts with an empty live log; the previous set's evidence stays in history.
 
 ### Choosing batches
 
