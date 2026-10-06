@@ -84,11 +84,11 @@ cards into generated decks.
 ### Other sets
 
 `sets/vantagepoint.js` contains structural definitions and exact, dated ELO
-values for all 66 cards. The tracker records all 13 batches (36001–36066) as
+values for all 66 cards. The pre-review tracker recorded all 13 batches (36001–36066) as
 implemented and behavior tested. This is an implementation status, not an
 independent rules/strategy sign-off. Vantage Point remains `in-progress`, hidden
 and untested per `documentation/card-sets.md`; independent review and the
-separate set-wide readiness verdict remain outstanding.
+set-wide review demonstrate necessary rules/AI repairs; see the report below.
 
 Vantage Point is the active batched implementation. Its live queue, ownership,
 status summary and append-only completion log are maintained in
@@ -98,8 +98,15 @@ update that tracker after every status transition and completed batch.
 The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves all batch boundaries and the full append-only completion log before
 final review. Future snapshots must retain later repair/review evidence before
-the active tracker is replaced; do not overwrite older snapshots. The final
-report will be `reviews/vantagepoint-set-review.md` (not yet performed).
+the active tracker is replaced; do not overwrite older snapshots. The [2026-10-06 full set review](reviews/vantagepoint-set-review.md) has verdict
+**Changes required**. Twelve batches are reopened for supported defects; batch 13
+has current passing evidence requiring revalidation after shared repairs. Findings
+include engine dispatch/reward crashes, missing draw/click/damage models, illegal
+upgrade placement and missed immediate win/kill alternatives. The shared
+bad-publicity fund/loss abstraction also needs repair. Remaining per-card and
+manual coverage gaps are explicit in the reports; no new limitation is accepted.
+The [post-review snapshot](history/vantagepoint-2026-10-06-reviewed.md) preserves
+the repair queue, review log and original completion history.
 
 Batch 12's AI review replaced Event Horizon's permanent Runner lockout with
 finite continuation planning. The Runner budgets encounters and a fresh ordinary

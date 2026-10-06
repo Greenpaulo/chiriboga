@@ -29,6 +29,42 @@ Repair criterion: conform to the real hook contract, decide useful fuel/credit i
 
 Aircheck's second-run forced maximum potential needs affordable-route and lethal-ice decline scenarios under the remaining hosted-credit budget, plus cross-event run cleanup against other run-end effects. Beta Build needs a real temporary tutor run selector, not only its hook returns. Hiram needs knowledge-boundary and real run choice tests following a hardware-triggered look, and human-facing reveal evidence. Methuselah needs hardware discard versus required install (including its console cost) and stealth-credit sharing with Corsair/Lampades.
 
+
+## Additional audit on the isolated review snapshot
+
+Continued on 2026-10-06 in `/private/tmp/chiriboga-vantagepoint-set-review`, saved WIP commit `bd733d65f3bb9aa104083edb335f7a137e94d3c3`. Production source and existing focused tests were revalidated against the original manifest; the original code snapshot remains unchanged. The dirty worktree contains review artifacts from independent reviewers and an image-directory symlink for verification. No production/test changes were made. Current source/probe hashes are in [the continuation manifest](probes/vantagepoint-early-revalidation.sha256).
+
+The following evidence updates the initial audit table above. Run `/Users/paulbingham/.nvm/versions/node/v20.19.0/bin/node documentation/new-sets/reviews/probes/vantagepoint-early-strategy.cjs` for the preserved real planner/selector contrasts (18 observations), with `VERBOSE=1` only for scenario diagnostics. The initial observations probe and 40-command smoke were rerun under that same pinned binary. Integration, batch13, credit-lock and Tailgate regression tests passed again. Shared full-suite and smoke revalidation is coordinator-owned and recorded in the set report; this reviewer makes no browser-playthrough claim.
+
+| ID | Added real-path evidence | Current card assessment |
+|---|---|---|
+| 36017 | Hiram's legitimate look makes the actual R&D potential positive and chooses run for a known agenda; for known Seamless Launch potential becomes zero and it chooses gain. The existing `PlayerCanLook` consumer permits `knownToRunner`; no hidden-card content was supplied to the planner before the look. | Knowledge-to-strategy consumer **supported**; browser disclosure and post-draw knowledge invalidation remain broader readiness limits. |
+| 36018 | Real credit-lock suite passes normal cases, but a real route-consumer exception after the temporary mutation leaves the live credit pool 15→1. Positive-potential follow-up remains forced without a fresh affordable-route check. Shared Paywall/fund defect is separately reproduced by the coordinator. | **Changes required:** C4-3 and the set-level bad-publicity-fund finding. Secondary-run risk contrasts remain limited. |
+| 36019 | Actual play choice without tutor `nextPrefs` selects different programs/servers by seed. Last-click, 4-credit state with stack Cleaver and a remembered game-winning HQ agenda chooses gain, although a correctly budgeted real route succeeds. | **Changes required:** C4-2 and C4-4. |
+| 36020 | Actual selected fuel discards redundant Borrowed Goods and preserves useful Tailor when funds suffice. The real console command can still install through generic paths despite its ignored numeric economy hook. | **Changes required:** C4-1; the issue is the missing economy consumer, not a claim that installation never occurs. Useful/decline fuel paths are now supported. |
+
+### C4-2 — 36019 drops the tutor's planned program and server
+
+`ai_runner.js:2348` returns a tutor play preference containing only `cardToPlay`, explicitly omitting `nextPrefs`. Beta Build's separately defined `AIPreferredPlayChoice` is not consumed on this path. In the preserved full-engine selector probe, with HQ the planned server and both Buzzsaw and Cleaver legal stack targets, actual `SelectChoice` in `Playing Beta Build` selects Buzzsaw/HQ with seed 0, but Cleaver/Archives with seed .99. This breaks the planner's chosen answer/route; the selector is not stubbed.
+
+Repair criterion: carry the selected legal program/host/server through to the actual event resolution, or invoke an actual choice consumer that reconstructs the same plan safely. Test an urgent needed breaker against another legal program and a competing server, plus illegal/changed-target fallback. Do not accept hook-return tests alone.
+
+### C4-3 — 36018 hypothetical pool mutation leaks after a route exception
+
+Aircheck's `AIRunEventModify` (`sets/vantagepoint.js:1544`) temporarily changes `runner.creditPool` to its printed play cost. `_commonRunCalculationChecksAsync` calls Restore only after awaiting the real run calculator (`ai_runner.js:1123–1127`); it has no `finally` safeguard. The probe injects a throwing getter on the public strength of a rezzed Ice Wall, retaining the actual route consumer. After the expected route exception, the live pool remains 1 rather than its original 15, and restore state remains on the event.
+
+This is controlled exception-safety evidence, not a claim that this artificial strength getter occurs in ordinary gameplay. Shared principle 6 requires hypothetical changes to restore on exceptions. Repair criterion: guarded `finally` restoration of pool, card scratch state, hypothetical bonus breaker and calculator runEvent on both successful and throwing routes, with meaningful exception-path regression.
+
+### C4-4 — 36019 is modelled as needing extra tutor-preparation clicks
+
+The generic tutor budget at `ai_runner.js:1090–1093` subtracts the tutor play cost and two additional setup clicks in addition to the initiating-run click. Beta Build's printed resolution already installs the program ignoring costs and starts the run with the same one-click event. The continuation probe gives the Runner 6 agenda points, one remaining click, 4 credits, Beta Build in Grip, Cleaver in Stack and Ice Wall on HQ; the one HQ card is a publicly remembered Superconducting Hub. Actual CommandChoice chooses gain. A real run calculation with the correct one-click/three-credit event budget and bonus Cleaver returns a complete one-credit-break route, yielding a game-winning access.
+
+Repair criterion: a run-initiating tutor must be budgeted as its real combined action, preserve temporary installation/return semantics, select the winning route on the last click, and decline when the combined play/break budget or MU is insufficient. Keep ordinary non-run tutor planning correct.
+
+### Set-level cross-batch finding — Aircheck, Paywall and bad-publicity fund
+
+See [the coordinator's real-helper reproduction](probes/vantagepoint-bad-publicity-fund.js) and [set review](vantagepoint-set-review.md). The fund is spendable outside the ordinary pool; the current shared `Credits`/`LoseCredits` helpers treat it as ordinary loseable credits, including under Aircheck's lock and on Corp credit-loss paths. This affects 36018 with 36052 and existing playable effects. The batch credit-lock test passing does not cover the corrected primary-rule expectation. Repair/re-review must retain the real helper and cross-batch paths.
+
 ## Verification
 
 Node `v20.19.0` matches `.nvmrc`. Commands executed:

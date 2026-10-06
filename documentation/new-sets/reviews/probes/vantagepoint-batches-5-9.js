@@ -19,7 +19,7 @@ vm.runInContext(utility.slice(utility.indexOf('const k_combinations ='),utility.
 runner.AI = c.runnerReviewAI;
 runner.AI._log = () => {};
 corp.AI = ai;
-const makeServer = name => ({serverName: name, cards: [], root: [], ice: []});
+const makeServer = name => Object.assign({serverName:name,root:[],ice:[]}, name.startsWith('Remote') ? {} : {cards:[]});
 corp.HQ = makeServer('HQ'); corp.RnD = makeServer('R&D'); corp.archives = makeServer('Archives');
 corp.remoteServers = [makeServer('Remote 0')];
 const servers = [corp.HQ, corp.RnD, corp.archives, ...corp.remoteServers];
@@ -34,11 +34,8 @@ c.CheckActionClicks = (player, n) => player.clickTracker >= n;
 c.AvailableMemory = () => 4;
 c.InstalledMemoryCost = () => 0;
 c.CheckUnique = () => true;
-c.FullCheckPlay = () => true;
 c.InstallCost = card => card.installCost || 0;
 c.PlayCost = card => card.playCost || 0;
-c.CheckInstall = () => true;
-c.CheckPlay = () => true;
 c.CheckTags = n => runner.tags >= n;
 c.PlayerHand = player => player === runner ? runner.grip : corp.HQ.cards;
 c.PlayerDeck = player => player === runner ? runner.stack : corp.RnD.cards;
@@ -54,6 +51,7 @@ c.AddCounters = (card, type, n) => {card[type] = (card[type] || 0) + n;};
 c.RemoveCounters = (card, type, n) => {card[type] = (card[type] || 0) - n;};
 c.AddTags = (n, callback, owner) => {runner.tags += n; if (callback) callback.call(owner);};
 c.LoseCredits = (player, n) => {player.creditPool = Math.max(0, player.creditPool - n);};
+c.SpendClicks = (player,n) => {player.clickTracker-=n;};
 c.Draw = (player, n) => { for (let i=0; i<n; i++) {const deck=c.PlayerDeck(player); if(deck.length) c.MoveCard(deck[deck.length-1], c.PlayerHand(player));} };
 c.CheckRunning = () => c.attackedServer !== null;
 c.debugging = false;
@@ -67,15 +65,31 @@ c.CheckClicks = (player,n) => player.clickTracker >= n;
 c.CheckStrength = (card,n) => c.Strength(card) >= n;
 c.TrashCost = card => card.trashCost || 0;
 c.PlayCost = card => card.playCost || 0;
-c.ChoicesCardInstall = card => [{card}];
-c.ChoicesArrayInstall = (cards,ignore,filter) => cards.filter(card=>!filter||filter(card)).flatMap(card=>servers.map(server=>({card,server})));
 c.AdvancementRequirement = card => card.advancementRequirement || 0;
-c.CheckPlay = () => true;
-c.FullCheckInstall = () => true;
 c.AllCards = player => c.InstalledCards(player).concat(player===corp?corp.HQ.cards.concat(corp.archives.cards):runner.grip.concat(runner.heap));
 c.ChoicesTriggerableAbilities = () => [];
 c.CheckAccess = () => true;
+const actualDamage=[];
+c.Damage=(type,amount,preventable,callback,owner)=>{actualDamage.push({type,amount});if(callback)callback.call(owner);};
+c.Trash=(card,preventable,callback,owner)=>{if(card.cardLocation){const i=card.cardLocation.indexOf(card);if(i>=0)card.cardLocation.splice(i,1);}if(callback)callback.call(owner,[card]);};
 c.ChoicesInstalledCards = (player,filter) => c.InstalledCards(player).filter(card=>!filter||filter(card)).map(card=>({card}));
+corp.resolvingCards=[]; corp.installingCards=[]; corp.scoreArea=[];
+runner.resolvingCards=[]; runner.scoreArea=[]; corp.side='corp'; runner.side='runner';
+// Use actual legal option builders instead of permissive test adapters.
+const checksSource=fs.readFileSync('checks.js','utf8');
+function loadFunction(source,name) {
+  const start=source.indexOf('function '+name+'(');
+  assert(start>=0,name+' source');
+  const end=source.indexOf('\n}',start)+2;
+  vm.runInContext(source.slice(start,end),c,{filename:'review actual '+name});
+}
+for(const name of ['CheckInstall','CheckPlay','CheckInstallDestination','CheckClicks','CheckActionClicks','CheckSteal']) loadFunction(checksSource,name);
+for(const name of ['PlayClickCost','StealCost','ChoicesCardInstall','ChoicesArrayInstall','ChoicesHandInstall','FullCheckPlay','ModifyingTriggers']) loadFunction(utility,name);
+loadFunction(fs.readFileSync('command.js','utf8'),'CardEffectsForbid');
+const originalInstalledCards=c.InstalledCards;
+c.InstalledCards = player => player===null ? originalInstalledCards(corp).concat(originalInstalledCards(runner)) : originalInstalledCards(player);
+c.ChoicesInstalledCards = (player,filter) => c.InstalledCards(player).filter(card=>!filter||filter(card)).map(card=>({card,label:card.title}));
+c.ChoicesActiveTriggers=(hook,player=null)=>c.ActiveCards(player).filter(active=>active[hook]).map(card=>({card}));
 let decisions = [];
 c.DecisionPhase = (player, choices, callback, title, text, owner) => {
   decisions.push({player, choices, title, text, choose: option => callback.call(owner, option)});
@@ -91,10 +105,11 @@ const observations = [];
 function observe(name, body) {body(); checks++; observations.push(name);}
 
 async function main() {
+  let sipaMenu;
   observe('Read-Write Share hides a unique emergency breaker based only on ELO', () => {
     const share = card(36022); share.hostedCards = [];
-    const emergency = {title: 'Only decoder', cardType: 'program', subTypes: ['Icebreaker', 'Decoder'], memoryCost:1, elo: 1300, player: runner};
-    runner.grip = [emergency, {title:'Extra economy', cardType:'event',subTypes:[],player:runner,elo:1600}, {title:'Extra economy 2',cardType:'event',subTypes:[],player:runner,elo:1700}];
+    const emergency = card(30005); // Buzzsaw, the only Decoder available; ELO 1615.
+    runner.grip = [emergency, card(30011), card(30024)]; // Higher-ELO Mutual Favor / Conduit.
     assert(runner.AI._cardsWorthKeeping(runner.grip).includes(emergency),'real keep scorer retains the only decoder');
     const choices = share.responseOnRunnerTurnBegins.Enumerate.call(share);
     assert.strictEqual(choices.length, 1); assert.strictEqual(choices[0].card, emergency);
@@ -111,11 +126,21 @@ async function main() {
     const choices=sipa.responseOnPassesIce.Enumerate.call(sipa);
     assert.strictEqual(runner.AI.preferred.option.card,light);
     c.currentPhase={title:'Sipa',identifier:'Review'};
-    // The async real SelectChoice is exercised below; both cached states use real scoring.
     light.rezCost=30;
-    sipa.responseOnPassesIce.Enumerate.call(sipa);
+    sipaMenu=sipa.responseOnPassesIce.Enumerate.call(sipa);
     assert.strictEqual(runner.AI.preferred.option.card,null);
-    runner.AI.preferred={title:'Sipa',option:choices[0]};
+  });
+  assert.strictEqual(sipaMenu[await runner.AI.SelectChoice(sipaMenu)].card,null,'real Sipa preferred-option consumer declines'); checks++;
+  observe('Sipa moves an unbreakable Ansel into HQ because its original Archives potential is low', () => {
+    const sipa=card(36023); sipa.usedThisTurn=false;
+    const passed=card(36029); passed.rezzed=true; passed.subroutines=passed.subroutines.map(sr=>({...sr,broken:true}));
+    const harder=card(36028); harder.rezzed=true;
+    corp.HQ.ice=[passed]; corp.archives.ice=[harder]; runner.cards=[card(31006)];
+    c.attackedServer=corp.HQ; c.approachIce=0;
+    runner.AI.cachedPotentials=[{server:corp.HQ,potential:3},{server:corp.archives,potential:0.1}];
+    const choices=sipa.responseOnPassesIce.Enumerate.call(sipa);
+    assert.strictEqual(runner.AI.preferred.option.card,harder);
+    assert.strictEqual(choices.length,2); runner.cards=[];
   });
   observe('Stowaway host selector prefers a locked three-ice server over a cheap central', () => {
     const stowaway=card(36024);
@@ -134,11 +159,13 @@ async function main() {
   observe('Sleipnir draws into a full HQ and declines to recycle an exposed winning HQ agenda', () => {
     const sleipnir=card(36030);
     corp.HQ.cards=Array.from({length:5},(_,i)=>({title:'HQ '+i,cardType:'operation'}));
-    const top={title:'Extra agenda',cardType:'agenda',agendaPoints:2};
+    const top={title:'Extra agenda',player:corp,cardType:'agenda',agendaPoints:2};
     corp.RnD.cards=[top]; top.cardLocation=corp.RnD.cards;
     decisions=[]; sleipnir.subroutines[0].Resolve.call(sleipnir);
     assert.strictEqual(corpChoose(decisions[0]).id,1); assert.strictEqual(corp.HQ.cards.length,6);
     corp.HQ.cards=[top]; top.cardLocation=corp.HQ.cards; corp.archives.cards=[];
+    sleipnir.subroutines=sleipnir.subroutines.map((sr,i)=>({...sr,broken:i===2}));
+    corp.HQ.ice=[sleipnir]; sleipnir.rezzed=true;
     runner.agendaPoints=5; c.attackedServer=corp.HQ;
     decisions=[]; sleipnir.subroutines[1].Resolve.call(sleipnir);
     assert.strictEqual(corpChoose(decisions[0]).card,null);
@@ -169,10 +196,12 @@ async function main() {
   });
   observe('Knowledge Seeker orders a winning agenda on top during an R&D run', () => {
     const seeker=card(36040);
+    seeker.subroutines=seeker.subroutines.map((sr,i)=>({...sr,broken:i===2}));
     const agenda={title:'Winning two-pointer',cardType:'agenda',agendaPoints:2,elo:1600};
     const filler={title:'Filler operation',cardType:'operation',elo:1200};
     corp.RnD.cards=[agenda,filler]; for (const x of corp.RnD.cards) x.cardLocation=corp.RnD.cards;
     c.attackedServer=corp.RnD; runner.agendaPoints=5;
+    seeker.rezzed=true; corp.RnD.ice=[seeker]; c.approachIce=0;
     seeker.subroutines[1].Resolve.call(seeker);
     assert.strictEqual(corp.RnD.cards[corp.RnD.cards.length-1],agenda);
   });
@@ -186,10 +215,16 @@ async function main() {
   });
   observe('Lotus Haze enumerates moving The Red Room to a remote', () => {
     const lotus=card(36037); lotus.agenda=1; const red=card(36045); red.rezzed=true;
-    corp.HQ.root=[red]; const destinations=lotus._destinationChoices.call(lotus,red);
+    corp.remoteServers[0].root=[card(36037)];
+    corp.HQ.root=[red]; red.cardLocation=corp.HQ.root; const destinations=lotus._destinationChoices.call(lotus,red);
     assert(destinations.some(choice=>choice.server===corp.remoteServers[0]));
     assert.strictEqual(red.installOnlyIn(corp.remoteServers[0]),false);
-    // This is a rules question, not asserted as a supported defect.
+    // NSG Comprehensive Rules 26.03 rule 8.5.12 forbids moving central-only upgrades to remotes.
+    const offered=lotus.abilities[0].Enumerate.call(lotus);
+    assert(offered.some(choice=>choice.card===red));
+    decisions=[]; lotus.abilities[0].Resolve.call(lotus,offered[0]);
+    assert.strictEqual(corpChoose(decisions[0]).server,corp.remoteServers[0]);
+    assert(corp.remoteServers[0].root.includes(red));
   });
   runner.grip=[]; runner.cards=[]; runner.AI.preferred=null;
   const rc=runner.AI.rc;
@@ -198,6 +233,8 @@ async function main() {
     target.root=[agenda]; target.ice=[];
     const paths=rc.Calculate(target,0,0,0,0,0,false,null);
     assert(paths.length>0); assert.strictEqual(agenda.stealCost.clicks,1);
+    c.accessingCard=agenda; runner.clickTracker=0; assert.strictEqual(c.CheckSteal(),false);
+    runner.clickTracker=1; assert.strictEqual(c.CheckSteal(),true); c.accessingCard=null;
     target.root=[];
   });
   observe('Vertigo zero-click pass restriction is omitted when its subroutine is broken', () => {
@@ -215,6 +252,17 @@ async function main() {
     const paths=rc.Calculate(target,3,10,0,damageLimit,Infinity,false,null);
     assert.strictEqual(paths.length>0,expectRoute,`${id} route expectation`); checks++;
   }
+  observe('Vicsek inner damage/tag scaling ignores tags acquired earlier on the route', () => {
+    const inner=card(36042),outer=card(36042); inner.rezzed=true; outer.rezzed=true;
+    const target=corp.remoteServers[0]; target.ice=[inner,outer]; target.root=[];
+    c.attackedServer=target; runner.tags=0; runner.cards=[]; actualDamage.length=0;
+    const paths=rc.Calculate(target,3,10,0,0,Infinity,false,null);
+    assert(paths.length>0,'model allows zero-damage route');
+    outer.subroutines[0].Resolve.call(outer); outer.subroutines[1].Resolve.call(outer);
+    inner.subroutines[0].Resolve.call(inner); inner.subroutines[1].Resolve.call(inner);
+    assert.strictEqual(actualDamage.reduce((sum,d)=>sum+d.amount,0),1);
+    assert.strictEqual(runner.tags,3,'actual route ends on three tags');
+  });
   // Real subroutine menu mapping for Lionsmane follows a complete planned route.
   const lionsmane=card(36041); lionsmane.rezzed=true;
   const target=corp.remoteServers[0]; target.ice=[lionsmane]; target.root=[];
@@ -260,6 +308,8 @@ async function main() {
     const unleash=card(36044); const lion=card(36041); const vicsek=card(36042);
     lion.rezzed=false; vicsek.rezzed=false; target.ice=[lion,vicsek];
     c.attackedServer=null; runner.tags=5; runner.grip=[{},{},{}];
+    c.currentPhase={identifier:'Corp 2.2',title:"Corporation's Action Phase"}; corp.clickTracker=1; corp.creditPool=0;
+    assert(c.FullCheckPlay(unleash),'actual Unleash play legality');
     assert.strictEqual(unleash.Enumerate.call(unleash)[0].card,lion);
     decisions=[]; unleash._offerSubroutine.call(unleash,{...lion,rezzed:true});
     assert.strictEqual(decisions[0].choices[0].subroutine,lion.subroutines[0]);
@@ -271,14 +321,17 @@ async function main() {
     const filler=card(30050); // Anoetic Void ELO 1911, higher than lethal Neurospike 1678.
     corp.RnD.cards=[spike,filler]; spike.cardLocation=corp.RnD.cards; filler.cardLocation=corp.RnD.cards;
     runner.grip=[{}]; corp.creditPool=3; corp.clickTracker=2;
+    c.currentPhase={identifier:'Corp 2.2',title:"Corporation's Action Phase"};
+    assert(c.FullCheckPlay(spike),'the immediate winning follow-up is actually playable');
     decisions=[]; cultivate.Resolve.call(cultivate);
     assert.strictEqual(decisions[0].choices[0].card,spike);
     assert(spike.printedAgendaPointsThisTurn>runner.grip.length);
   });
   observe('Caveat Emptor grants the extra click that opens two Ansel defenses at five Runner points', () => {
     const caveat=card(36032); const a=card(36028); a.rezzed=true;
-    target.ice=[a,{...a}]; target.root=[]; runner.cards=[]; runner.grip=[]; runner.heap=[];
+    target.ice=[a,{...a}]; target.root=[Object.assign(card(36037),{knownToRunner:true})]; runner.cards=[]; runner.grip=[]; runner.heap=[];
     runner.tags=0; runner.agendaPoints=5; corp.HQ.cards=[]; corp.archives.cards=[];
+    corp.HQ.root=[]; corp.clickTracker=1; corp.creditPool=5;
     const mode=caveat.Enumerate.call(caveat)[0]; assert.strictEqual(mode.clicks,1);
     c.attackedServer=target;
     assert(rc.Calculate(target,4,0,0,0,0,false,null).length>0,'five-click turn leaves four after initiating run');
@@ -304,6 +357,18 @@ async function main() {
     corp.creditPool=2; ranked=ai._rankedInstallOptions([synchro]);
     assert(!ranked.some(option=>option.cardToInstall===synchro));
   });
+  observe('Synchrocyclotron is never rezzed at its post-action opportunity to enable a last-click Double', () => {
+    const synchro=card(36027); synchro.rezzed=false; synchro.playedDoubleOperationThisTurn=false;
+    target.root=[synchro]; target.ice=[]; corp.HQ.cards=[card(36034)];
+    corp.creditPool=4; corp.clickTracker=1; corp.archives.cards=[card(36029)];
+    c.currentPhase={identifier:'Corp 2.2*',title:'Post-action'}; ai.preferred=null;
+    assert(c.CheckRez(synchro,['asset'])); assert(c.CheckCredits(corp,c.RezCost(synchro)));
+    assert.strictEqual(ai.Choice(['rez','n'],'command'),1);
+    synchro.rezzed=true; c.currentPhase={identifier:'Corp 2.2',title:"Corporation's Action Phase"};
+    assert.strictEqual(c.PlayClickCost(corp.HQ.cards[0]),1);
+    assert(c.FullCheckPlay(corp.HQ.cards[0]),'discount enables an actually legal Retirement Plan');
+    target.root=[];
+  });
   observe('Retirement Plan real install scorer declines empty Archives and returns legal ICE destination', () => {
     const retirement=card(36034); corp.creditPool=10; corp.clickTracker=3; corp.HQ.cards=[]; corp.archives.cards=[];
     assert.strictEqual(retirement.Enumerate.call(retirement).length,0);
@@ -312,9 +377,55 @@ async function main() {
     assert.strictEqual(choices.length,1); assert.strictEqual(choices[0].card,corp.archives.cards[0]);
     assert(servers.includes(choices[0].server));
   });
+  observe('Esca Corp punishment value is consumed, but the Runner calculator omits its tagged damage', () => {
+    const esca=card(36038); esca.rezzed=false; target.root=[esca]; target.ice=[];
+    runner.cards=[]; runner.tags=1; runner.grip=[]; corp.HQ.ice=[]; c.attackedServer=target;
+    assert.strictEqual(ai._accessPunishmentSeverity(target),2);
+    esca.rezzed=true;
+    assert(rc.Calculate(target,1,4,0,0,Infinity,false,null).length>0);
+    runner.tags=0; esca.rezzed=false; assert.strictEqual(ai._accessPunishmentSeverity(target),1);
+    target.root=[];
+  });
+  observe('ezaM real ability menu permits its beneficial outer swap and declines equal-depth swaps', () => {
+    const ezam=card(36039); ezam.rezzed=true;
+    corp.HQ.ice=[ezam]; target.ice=[card(36029),card(36028)]; target.root=[];
+    c.currentPhase={identifier:'Corp 2.2',title:"Corporation's Action Phase"}; corp.clickTracker=3;
+    assert.strictEqual(ezam.abilities[0].Enumerate.call(ezam).length,1);
+    target.ice=[target.ice[0]]; assert.strictEqual(ezam.abilities[0].Enumerate.call(ezam).length,0);
+    corp.clickTracker=0; assert.strictEqual(ezam.abilities[0].Enumerate.call(ezam).length,0);
+  });
+  observe('ezaM depth heuristic opens a previously locked winning agenda server', () => {
+    const ezam=card(36039),first=card(36028),second=card(36028);
+    for(const ice of [ezam,first,second]) ice.rezzed=true;
+    corp.HQ.ice=[ezam]; ezam.cardLocation=corp.HQ.ice;
+    target.ice=[first,second]; first.cardLocation=target.ice; second.cardLocation=target.ice;
+    target.root=[Object.assign(card(36037),{knownToRunner:true})];
+    runner.cards=[]; runner.grip=[]; runner.heap=[]; runner.tags=0; runner.agendaPoints=5;
+    c.attackedServer=null; c.playerTurn=corp; c.activePlayer=corp;
+    assert.strictEqual(rc.Calculate(target,3,0,0,0,0,false,null).length,0);
+    c.currentPhase={identifier:'Corp 2.2',title:"Corporation's Action Phase"}; corp.clickTracker=1;
+    const selected=ezam.abilities[0].Enumerate.call(ezam); assert.strictEqual(selected.length,1);
+    ezam.abilities[0].Resolve.call(ezam,selected[0]);
+    assert(rc.Calculate(target,3,0,0,0,0,false,null).length>0);
+  });
+  observe('Red Room real opposing security/live policy agree at match point, decline otherwise', () => {
+    const red=card(36045); red.rezzed=true; red.power=1; corp.HQ.root=[red]; target.ice=[];
+    target.root=[card(36037)]; c.attackedServer=target; runner.agendaPoints=5;
+    assert.strictEqual(ai._globalETRUses(target),1);
+    assert.strictEqual(red.abilities[0].Enumerate.call(red).length,1);
+    c.currentPhase={identifier:'Run 4.5',title:'Movement'}; c.approachIce=-1; ai.preferred=null;
+    assert.strictEqual(ai.Choice(['trigger','n'],'command'),0);
+    runner.agendaPoints=0; assert.strictEqual(ai._globalETRUses(target),0);
+    assert.strictEqual(red.abilities[0].Enumerate.call(red).length,0);
+    runner.agendaPoints=5; c.attackedServer=corp.HQ;
+    assert.strictEqual(red.abilities[0].Enumerate.call(red).length,0);
+    red.power=0; c.attackedServer=target; assert.strictEqual(red.abilities[0].Enumerate.call(red).length,0);
+    corp.HQ.root=[]; target.root=[];
+  });
   for(const id of [36022,36023,36024,36025]) {
+    corp.HQ.ice=[Object.assign(card(36029),{rezzed:true})];
     const installed=card(id); runner.grip=[installed]; runner.cards=[]; runner.tags=0; runner.clickTracker=4;
-    c.attackedServer=null; c.currentPhase={identifier:'Runner 2.2',title:"Runner's Action Phase"};
+    c.attackedServer=null; c.currentPhase={identifier:'Runner 1.3',title:"Runner's Action Phase"};
     c.executingCommand=''; runner.AI.preferred=null; runner.creditPool=13;
     const commands=['install','gain'];
     assert.strictEqual(commands[await runner.AI.CommandChoice(commands)],'install',`${id} rich state installs`);
@@ -323,6 +434,6 @@ async function main() {
     checks++;
   }
   console.log(checks+' review selector/planner probes passed (current behavior; see reports).');
-  console.log(JSON.stringify(observations));
+  if(process.env.VERBOSE) console.log(JSON.stringify(observations));
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

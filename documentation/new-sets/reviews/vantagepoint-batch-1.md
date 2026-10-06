@@ -31,6 +31,26 @@ Repair criterion: use the real dispatch context or a hook that receives the serv
 
 Repair criterion: use the supported helper with correct prevention/continuation timing; successful run with a subroutine adds bad publicity without phase/cleanup corruption, while failed and no-subroutine runs do not. Verify remove-from-game on the real run-end path.
 
+
+## Additional audit on the isolated review snapshot
+
+Continued on 2026-10-06 in `/private/tmp/chiriboga-vantagepoint-set-review`, saved WIP commit `bd733d65f3bb9aa104083edb335f7a137e94d3c3`. Production source and existing focused tests were revalidated against the original manifest; the original code snapshot remains unchanged. The dirty worktree contains review artifacts from independent reviewers and an image-directory symlink for verification. No production/test changes were made. Current source/probe hashes are in [the continuation manifest](probes/vantagepoint-early-revalidation.sha256).
+
+The following evidence updates the initial audit table above. Run `/Users/paulbingham/.nvm/versions/node/v20.19.0/bin/node documentation/new-sets/reviews/probes/vantagepoint-early-strategy.cjs` for the preserved real planner/selector contrasts (18 observations), with `VERBOSE=1` only for scenario diagnostics. The initial observations probe and 40-command smoke were rerun under that same pinned binary. Integration, batch13, credit-lock and Tailgate regression tests passed again. Shared full-suite and smoke revalidation is coordinator-owned and recorded in the set report; this reviewer makes no browser-playthrough claim.
+
+| ID | Added real-path evidence | Current card assessment |
+|---|---|---|
+| 36001 | Actual automatic callback failure remains; inline target selector also trashes two rezzed PAD Campaigns while preserving a public known, fully advanced Superconducting Hub with Corp at 6 points. | **Changes required:** CR1 and CR3, both backed by probes. |
+| 36002 | Actual success dispatch still throws undefined helper; unsuccessful/no-subroutine mechanics covered by inspected integration assertions. | **Changes required:** CR2. Deliberate harmless-subroutine policy still needs repair-era acceptance scenarios. |
+| 36003 | Real complete-run planner fails to pass Ice Wall with Corsair/no stealth/1 pool credit without Tailor, and succeeds with Tailor. Actual Corp security changes secure→insecure consistently. Real install command also contrasts 1 versus 10 available credits. | Passive debuff and defensive modelling **supported**; recurring income's contribution to route budget and install-versus-urgent-action evidence remain limited. |
+| 36004 | The same real planner/security contrast proves useful zero-strength breaking. Inspected batch13 assertions exercise live RunCalculator and Corp security across required stealth, pool alternative, lethal damage, exhaustion across two barriers, finite repeated runs, hidden Grip guards and unfunded hidden ice. | Core route/security support **verified** on these contrasting cases; remaining install/economy policy must stay visible in repair/re-review coverage. |
+
+### CR3 — 36001 ignores a public known winning agenda when selecting trash targets
+
+In the continuation probe, Corp has three scored 2-point Above the Law agendas (6 points). Installed targets are a fully advanced Superconducting Hub known to the Runner from an earlier reveal/access, and two rezzed PAD Campaigns. With Chain Reaction's play prerequisites explicitly set to isolate this second defect, its actual `Resolve` selector (`sets/vantagepoint.js:64`) selects both PADs because every rezzed card outranks every unrezzed card. The agenda would win if scored next turn; public knowledge is available, so prioritizing it requires no hidden-card read. `Trash` is only replaced by an observation sink after target selection; the selector itself is real.
+
+Repair criterion: a publicly known score-ready winning agenda must displace generic economy targets. Retain imperfect information for truly unknown facedown cards. Test the actual selector with an urgent public target, ordinary economy/ice targets, and Runner-side sacrifice cost.
+
 ## Verification
 
 Node `v20.19.0` matches `.nvmrc`. Commands executed:

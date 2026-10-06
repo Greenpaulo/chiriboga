@@ -14,7 +14,7 @@ generated [card-status.md](card-status.md).
 | `systemgateway` | playable | |
 | `systemupdate2021` | playable | |
 | `elevation` | playable | Six cards have no definition yet (see card-status.md). Their IDs are explicitly exempted by the playability check in scripts/card-status.js; new missing cards are not exempt. |
-| `vantagepoint` | in-progress | Sixteen cards in batches 11–13 still contain scaffolds; hidden and untested until those batches are complete. |
+| `vantagepoint` | in-progress | All 13 batches were implemented; the 2026-10-06 independent set review found necessary rules/AI repairs. See [review](new-sets/reviews/vantagepoint-set-review.md); hidden and untested pending repairs and re-review. |
 | `downfall` | not-implemented | Every card is defined but many mechanics are missing. |
 | `creationandcontrol` | not-implemented | Every card is defined but mechanics are incomplete (see `documentation/new-sets/creation_and_control_audit.md`). |
 | `midnightsun` | not-implemented | |

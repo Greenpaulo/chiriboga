@@ -4,7 +4,7 @@
 
 Date: 2026-10-06. Reviewer: independent Codex reviewer `/root/review_batches_10_13`.
 Reviewed commit: `45833a14c83fef2f9ce71506d344460181445021` (Node `v20.19.0`, matching `.nvmrc`).
-At review start the tracker, operator guide and backlog had documentation edits; the set-review skill and history were untracked. Other reviewers wrote disjoint review artifacts concurrently. Production and existing test files were not edited. [SHA-256 manifest](probes/vantagepoint-batches-10-13.sha256.txt) identifies reviewed definitions, consumers, documentation, metadata, tests and the preserved probe.
+At review start the tracker, operator guide and backlog had documentation edits; the set-review skill and history were untracked. Other reviewers wrote disjoint review artifacts concurrently. Production and existing test files were not edited. Review artifacts were recovered to the isolated `/private/tmp/chiriboga-vantagepoint-set-review` worktree after the main checkout changed branch; all further review work used that isolated snapshot. [SHA-256 manifest](probes/vantagepoint-batches-10-13.sha256.txt) identifies reviewed definitions, consumers, documentation, metadata, tests and the preserved probe.
 
 Scope: current definitions, printed metadata, rules/timing/cleanup and both sides' relevant strategic consumers. Implementation notes were treated as claims. This is sampled contrasting decision evidence, not exhaustive combinations or browser playthroughs.
 
@@ -39,4 +39,4 @@ Locally run on Node 20.19.0, all passing:
 - `node tests/vantagepoint-batch13.test.js`
 - `node documentation/new-sets/reviews/probes/vantagepoint-batches-10-13.js`
 
-The coordinator ran `node tests/run-all-tests.js` on this immutable production snapshot: all 50 files passed, including Corp decision fixtures and decision snapshots, excluding known-red pending reproductions. Shared syntax/integration/format/deck verification also passed; see [set review](vantagepoint-set-review.md) for the exact commands and results. A green suite did not prevent the independently demonstrated defects below.
+The coordinator ran `node tests/run-all-tests.js` on this immutable production snapshot: all 50 files passed, including Corp decision fixtures and decision snapshots, excluding known-red pending reproductions. Shared syntax/integration/format/deck verification also passed; see [set review](vantagepoint-set-review.md) for the exact commands and results. A green suite is not evidence that the set is free of independently demonstrated defects.

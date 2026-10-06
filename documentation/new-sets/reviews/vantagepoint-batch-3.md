@@ -43,6 +43,30 @@ Full-engine `CommandChoice(['install','gain'])`, with one remaining click, one c
 
 Repair criterion: real command decline in the no-rez last-click case; useful install after a remembered ice rez; reasoned install before an achievable rez opportunity, plus tag/draw choice and overdraw costs.
 
+
+## Additional audit on the isolated review snapshot
+
+Continued on 2026-10-06 in `/private/tmp/chiriboga-vantagepoint-set-review`, saved WIP commit `bd733d65f3bb9aa104083edb335f7a137e94d3c3`. Production source and existing focused tests were revalidated against the original manifest; the original code snapshot remains unchanged. The dirty worktree contains review artifacts from independent reviewers and an image-directory symlink for verification. No production/test changes were made. Current source/probe hashes are in [the continuation manifest](probes/vantagepoint-early-revalidation.sha256).
+
+The following evidence updates the initial audit table above. Run `/Users/paulbingham/.nvm/versions/node/v20.19.0/bin/node documentation/new-sets/reviews/probes/vantagepoint-early-strategy.cjs` for the preserved real planner/selector contrasts (18 observations), with `VERBOSE=1` only for scenario diagnostics. The initial observations probe and 40-command smoke were rerun under that same pinned binary. Integration, batch13, credit-lock and Tailgate regression tests passed again. Shared full-suite and smoke revalidation is coordinator-owned and recorded in the set report; this reviewer makes no browser-playthrough claim.
+
+| ID | Added real-path evidence | Current card assessment |
+|---|---|---|
+| 36009 | Real command triggers Vic for an untagged empty grip with 1 credit, declines with 0, but uses the standard removal action at tags=1/credits=2/empty grip. | **Changes required:** new C3-5. |
+| 36010 | Real run-end reward callback crash reproduced; inline cheap-ice derez policy inspected. | **Changes required:** C3-1. Security-aware derez/bad-publicity choice needs repair acceptance evidence. |
+| 36011 | Actual `_wastefulToPlay` contract crash reproduced. | **Changes required:** C3-2. Valuable-versus-depleted resource target selection remains for repair/re-review. |
+| 36012 | Real command chooses Tailgate for HQ with five unknown cards at 10 credits; at 2 credits it chooses a normal run instead. Actual no-argument success-dispatch regression passes. | Multiaccess opportunity/affordability and actual gameplay trigger **supported**; known success-prevention and decisive-steal variants remain limited. |
+| 36013 | Real generic install decision declines MU hardware when 2 MU are spare and installs when only 1 is spare. Existing last-click/zero-pool state declines; runtime tag branches pass integration. | MU-oriented opportunity/decline **supported**, but tag-risk/kill/resource-loss decisions need acceptance coverage; no claim of strategic completeness. |
+| 36014 | Actual optional-breach selector switches take-tag/decline purely by random seed on one unchanged board. | **Changes required:** C3-3; access model and choice are inconsistent. |
+| 36015 | Real command chooses Baker's ability to bypass Ice Wall-protected HQ when only one run-only stealth credit is available; once used, it instead chooses an ordinary legal run. Actual shared calculator/ability consumer retained. | Useful alternate route, once-per-turn decline and source-context behaviour **supported**; choosing to preserve a better Archives breach remains limited. |
+| 36016 | Last-click no-rez install gives no payoff and destroys the resource; inspected end-phase selector chooses draw versus tag removal and remembers public rez before installation. | **Changes required:** C3-4; useful-state installation/effect evidence remains in focused integration. |
+
+### C3-5 — 36009 cheaper tag removal with draw is bypassed by the basic action
+
+On the actual Runner command path, with Vic as identity, 1 tag, 2 credits, an empty Grip and 4 clicks, `CommandChoice(['trigger','remove','draw','gain'])` chooses `remove`. The identity ability is legal (once unused, one click and one credit), removes the same tag, draws a useful card and preserves one additional credit. The basic two-credit removal is strictly dominated in this state. `ai_runner.js:1520` returns the basic remove action before the generic draw-trigger/`AIWouldTrigger` consumer can consider Vic; the card's tagged preference cannot reach that branch.
+
+Repair criterion: exercise actual command selection for Vic tag removal versus the basic action, used/unused and affordable/unaffordable ability, draw-space/overdraw costs, and competing game-winning run. Route the decision through a supported tag-removal-ability consumer rather than a title special case.
+
 ## Verification
 
 Node `v20.19.0` matches `.nvmrc`. Commands executed:

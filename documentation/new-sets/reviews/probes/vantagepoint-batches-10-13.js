@@ -128,22 +128,29 @@ for (const [archived,bottom] of [[c.cardSet[36063],false],[c.cardSet[36047],true
   assert.strictEqual(choice.card,archived);
   if (archived) assert.strictEqual(choice.bottom,bottom);
 }
-// Return uses the actual public threat consumer and selector, then actual Uninstall continuation.
+// Return uses the actual public threat consumer and selector with competing installed cards.
 runner.rig.programs=[mayfly]; mayfly.cardLocation=runner.rig.programs;
+runner.rig.resources=[crash]; crash.cardLocation=runner.rig.resources;
 c.currentPhase={identifier:'Run Subroutines',title:lethe.title};
 lethe.subroutines[1].Resolve.call(lethe);
 let d=decisions.pop(); assert.strictEqual(d.choices[ai.Choice(d.choices,'select')].card,mayfly);
-runner.rig.programs=[];
-lethe.subroutines[1].Resolve.call(lethe); assert.strictEqual(decisions.length,1,'only earlier unused Scapegoat target remains; no empty-rig Lethe choice');
+corp.remoteServers=[];
+lethe.subroutines[1].Resolve.call(lethe);
+d=decisions.pop(); assert.strictEqual(d.choices[ai.Choice(d.choices,'select')].card,crash,'without threatened ICE, return higher investment rather than a redundant breaker');
+runner.rig.programs=[]; runner.rig.resources=[];
+lethe.subroutines[1].Resolve.call(lethe); assert.strictEqual(decisions.length,0,'empty-rig Lethe creates no target decision');
 // Compare ordinary scoring, holding with no resource, and immediate winning advance for actual Witch Hunt.
-const witch=c.cardSet[36047]; witch.advancement=3; witch.rezzed=false;
-const witchHome={root:[],ice:[]}; corp.remoteServers=[witchHome]; put(witch,witchHome.root);
+const witch=c.cardSet[36047]; witch.advancement=3; witch.rezzed=false; witch.canBeAdvanced=true;
+const witchHome={root:[],ice:[]}; put(wall,witchHome.ice); corp.remoteServers=[witchHome]; put(witch,witchHome.root);
 corp.HQ.root=[]; corp.HQ.ice=[]; corp.archives.cards=[]; corp.HQ.cards=[];
 corp.RnD.cards=[{cardType:'operation'}, {cardType:'operation'}, {cardType:'operation'}];
 corp.scoreArea=[{agendaPoints:5}]; corp.creditPool=4; corp.clickTracker=1;
 c.playerTurn=corp; c.attackedServer=null; action();
 assert.strictEqual(ai.Choice(['advance','gain','n'],'command'),0);
 assert.strictEqual(ai.preferred.cardToAdvance,witch);
+const phaseSource=fs.readFileSync(path.join(root,'phase.js'),'utf8');
+c.phaseTemplates={corpScorableResponse:{Enumerate:{}}};
+vm.runInContext(phaseSource.slice(phaseSource.indexOf('phaseTemplates.corpScorableResponse.Enumerate.score ='),phaseSource.indexOf('phaseTemplates.corpScorableResponse.Resolve.score =')),c);
 witch.advancement=4; ai.preferred=null;
 assert.strictEqual(ai.Choice(['score','gain','n'],'command'),0);
 witch.advancement=3; corp.creditPool=0; action();
