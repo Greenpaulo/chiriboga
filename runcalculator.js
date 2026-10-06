@@ -1298,35 +1298,39 @@ class RunCalculator {
     server,
     clicks,
     poolCredits,
-	otherCredits,
+    otherCredits,
     damageLimit,
     tagLimit,
     incomplete,
-	bonusBreaker,
+    bonusBreaker,
     startIceIdx,
-	rcOptions,
+    rcOptions,
   ) {
-	//use shared begin code
-	var data = this.CalculatePieceBegin({ server:server, clicks:clicks, poolCredits:poolCredits, otherCredits:otherCredits, damageLimit:damageLimit, tagLimit:tagLimit, incomplete:incomplete, bonusBreaker:bonusBreaker, startIceIdx:startIceIdx, rcOptions:rcOptions });
-	if (data.doInnerLoop) {
-	  var skip_counter=0;
-      while (data.todo.length > 0 && data.num_loops_left > 0) {
-		skip_counter++;
-		if (skip_counter % 10 == 0) await new Promise(resolve => setTimeout(resolve, 0));
-		//use shared middle code
-		this.CalculatePieceMiddle(data);
+    try {
+      //use shared begin code
+      var data = this.CalculatePieceBegin({ server:server, clicks:clicks, poolCredits:poolCredits, otherCredits:otherCredits, damageLimit:damageLimit, tagLimit:tagLimit, incomplete:incomplete, bonusBreaker:bonusBreaker, startIceIdx:startIceIdx, rcOptions:rcOptions });
+      if (data.doInnerLoop) {
+        var skip_counter=0;
+        while (data.todo.length > 0 && data.num_loops_left > 0) {
+          skip_counter++;
+          if (skip_counter % 10 == 0) await new Promise(resolve => setTimeout(resolve, 0));
+          //use shared middle code
+          this.CalculatePieceMiddle(data);
+        }
       }
+      //use shared end code
+      this.CalculatePieceEnd(data);
+      //if incomplete path not found, try again permitting more tags
+      if (this.paths.length == 0 && incomplete && tagLimit != Infinity) {
+          var infiniteTagPath = await this.CalculateAsync(server,clicks,poolCredits,otherCredits,damageLimit,Infinity,true,bonusBreaker,startIceIdx);
+          if (infiniteTagPath.length > 0) return infiniteTagPath;
+          //failing that, permit damage (this may lose the game but should reduce chance of error)
+          return await this.CalculateAsync(server,clicks,poolCredits,otherCredits,Infinity,Infinity,true,bonusBreaker,startIceIdx);
+      }
+      return this.paths;
+    } finally {
+      this._calculationActive = false;
     }
-	//use shared end code
-	this.CalculatePieceEnd(data);
-	//if incomplete path not found, try again permitting more tags
-	if (this.paths.length == 0 && incomplete && tagLimit != Infinity) {
-		var infiniteTagPath = await this.CalculateAsync(server,clicks,poolCredits,otherCredits,damageLimit,Infinity,true,bonusBreaker,startIceIdx);
-		if (infiniteTagPath.length > 0) return infiniteTagPath;
-		//failing that, permit damage (this may lose the game but should reduce chance of error)
-		return await this.CalculateAsync(server,clicks,poolCredits,otherCredits,Infinity,Infinity,true,bonusBreaker,startIceIdx);
-	}
-    return this.paths;
   }
 
   //modifies this.paths and also returns it
@@ -1337,32 +1341,36 @@ class RunCalculator {
     server,
     clicks,
     poolCredits,
-	otherCredits,
+    otherCredits,
     damageLimit,
     tagLimit,
     incomplete,
-	bonusBreaker,
+    bonusBreaker,
     startIceIdx,
-	rcOptions,
+    rcOptions,
   ) {
-	//use shared begin code
-	var data = this.CalculatePieceBegin({ server:server, clicks:clicks, poolCredits:poolCredits, otherCredits:otherCredits, damageLimit:damageLimit, tagLimit:tagLimit, incomplete:  incomplete, bonusBreaker:bonusBreaker, startIceIdx:startIceIdx, rcOptions:rcOptions });
-	if (data.doInnerLoop) {
-      while (data.todo.length > 0 && data.num_loops_left > 0) {
-		//use shared middle code
-		this.CalculatePieceMiddle(data);
+    try {
+      //use shared begin code
+      var data = this.CalculatePieceBegin({ server:server, clicks:clicks, poolCredits:poolCredits, otherCredits:otherCredits, damageLimit:damageLimit, tagLimit:tagLimit, incomplete:  incomplete, bonusBreaker:bonusBreaker, startIceIdx:startIceIdx, rcOptions:rcOptions });
+      if (data.doInnerLoop) {
+        while (data.todo.length > 0 && data.num_loops_left > 0) {
+          //use shared middle code
+          this.CalculatePieceMiddle(data);
+        }
       }
+      //use shared end code
+      this.CalculatePieceEnd(data);
+      //if incomplete path not found, try again permitting more tags
+      if (this.paths.length == 0 && incomplete && tagLimit != Infinity) {
+          var infiniteTagPath = this.Calculate(server,clicks,poolCredits,otherCredits,damageLimit,Infinity,true,bonusBreaker,startIceIdx);
+          if (infiniteTagPath.length > 0) return infiniteTagPath;
+          //failing that, permit damage (this may lose the game but should reduce chance of error)
+          return this.Calculate(server,clicks,poolCredits,otherCredits,Infinity,Infinity,true,bonusBreaker,startIceIdx);
+      }
+      return this.paths;
+    } finally {
+      this._calculationActive = false;
     }
-	//use shared end code
-	this.CalculatePieceEnd(data);
-	//if incomplete path not found, try again permitting more tags
-	if (this.paths.length == 0 && incomplete && tagLimit != Infinity) {
-		var infiniteTagPath = this.Calculate(server,clicks,poolCredits,otherCredits,damageLimit,Infinity,true,bonusBreaker,startIceIdx);
-		if (infiniteTagPath.length > 0) return infiniteTagPath;
-		//failing that, permit damage (this may lose the game but should reduce chance of error)
-		return this.Calculate(server,clicks,poolCredits,otherCredits,Infinity,Infinity,true,bonusBreaker,startIceIdx);
-	}
-    return this.paths;
   }
 
   //convert a path to a concise string
