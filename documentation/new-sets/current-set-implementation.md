@@ -44,7 +44,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**12 complete, 1 outstanding** (`1 Pending`, `0 In progress`, `0 Blocked`).
+**12 complete, 1 outstanding** (`0 Pending`, `0 In progress`, `1 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -64,7 +64,7 @@ Agents must refresh these counts whenever a batch status changes.
 |    10 | 36046–36050 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    11 | 36051–36055 | Complete | Codex / 2026-10-05       | Mechanics, AI and focused/full regressions pass                            |
 |    12 | 36056–36060 | Complete | Codex / 2026-10-05       | Strategic rework: competing actions and finite-run budgets verified        |
-|    13 | 36061–36066 | Pending  | —                        | —                                                                          |
+|    13 | 36061–36066 | Blocked | Codex / 2026-10-06 | Partial 36061–36064 tested; 36065 needs payment-source-aware Runner routes, live payment choice and Corp security estimates. See [dependency and acceptance criteria](vantage-point-implementation-notes.md#batch-13-partial-implementation-and-payment-model-blocker-2026-10-06). 36066 remains pending within this batch. |
 
 When claiming a batch, record the agent/extension name and current date in
 `Owner / started`. When blocked, put the actionable reason in `Notes/blocker`.

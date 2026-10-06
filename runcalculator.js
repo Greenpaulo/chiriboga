@@ -905,7 +905,8 @@ class RunCalculator {
       for (var successfulIndex = 0; successfulIndex < publicSuccessfulRunCards.length; successfulIndex++) {
         var successfulCard = publicSuccessfulRunCards[successfulIndex];
         if (PlayerCanLook(runner, successfulCard) && CheckHasAbilities(successfulCard) &&
-            typeof successfulCard.AIRunSuccessfulDamage == "function") {
+            typeof successfulCard.AIRunSuccessfulDamage == "function" &&
+            !(typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(data.server))) {
           var successfulDamage = successfulCard.AIRunSuccessfulDamage.call(successfulCard, data.server);
           var successfulEffects = [];
           for (var damageIndex = 0; damageIndex < successfulDamage; damageIndex++) successfulEffects.push("netDamage");

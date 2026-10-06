@@ -2436,3 +2436,43 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
+
+### Vantage Point Batch 13 partial implementation
+
+- `AIImmediateWin()` returns a boolean for a Corp operation whose resolution
+  wins immediately. `CorpAI.Phase_Main` checks this before ordinary tactics,
+  then applies `AIWouldPlay`, `FullCheckPlay`, costs and target legality. It must
+  be read-only and use only public state and Corp-owned information. Myōshu
+  requires a qualifying score and two more points reaching the victory target.
+  Its ordinary `AIPlayWhenCan` opportunity preserves all installed unrezzed
+  ICE rez costs; an immediate win can spend that reserve.
+- Reanimation Protocol uses `AIPlayWhenCan`, `AIWouldPlay` and
+  `AIIsRecurOrTutor`. Resolution sets a normal title/option preference for the
+  current protection server. Affordable candidates rank stopping ICE, absence
+  of a public matching breaker, Liability (avoiding extra bad publicity), actual
+  combined discounted cost and existing ELO. A cheaper affordable stopping HQ
+  installation is a reason to hold the operation. The install discount uses
+  `modifyInstallCost(card, destination)`, now also consumed for ICE; the unused
+  part of its ten-credit reduction is passed to `Rez`, retaining additional
+  rez costs and post-rez response timing.
+- Vulture Fund uses `AIEconomyPlay: 1`, `AIEconomyCard` and `AIWouldPlay`.
+  Main-phase tactics precede economy; existing clean economy titles precede
+  its declared economy play. It is unavailable below its seven-credit cost.
+- `AIAccessLimit(server)` returns a nonnegative maximum number of other cards
+  accessible on a route, or `Infinity`. `ServerAccessLimit` queries rezzed,
+  enabled upgrades in the supplied public server root. Corp central-threat
+  planning caps additional accesses; Runner `_additionalHQAccessValue` caps
+  access bonuses. This query does not simulate a future rez or persistent
+  copies after a trash. Flagship returns one for its installed rezzed server.
+- `AIPreventsSuccessfulRun(server)` returns a boolean; the public query
+  `ServerSuccessfulRunPrevented` uses rezzed, enabled upgrades. Flagship returns
+  true for its installed rezzed server. Corp central-pressure planning excludes
+  successful-run growth and pressure; the run calculator excludes successful
+  damage. Existing Runner benefit hooks querying Crisium through
+  `_rootKnownToContainCopyOfCard` also recognize this public capability.
+  This prevents success, while retaining ordinary breach and single-card value.
+
+Batch 13 is not complete. Shackleton Grid requires a shared payment-source and
+conditional damage model before its human trigger and strategic hooks can be
+finished; see the active tracker and Vantage Point implementation notes. These
+partial hooks do not establish completion or independent review of the batch.

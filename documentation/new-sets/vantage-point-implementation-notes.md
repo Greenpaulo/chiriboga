@@ -636,3 +636,109 @@ AI hook documentation checks 120 hooks. The skill-creator quick validator passes
 using PyYAML in an isolated temporary validation environment. Batch 12 is complete
 again; Batch 13 remains pending. No claims are made about earlier batches' strategy
 without their own audit evidence.
+
+
+## Batch 13 partial implementation and payment-model blocker (2026-10-06)
+
+Owner: Codex. Range: 36061–36066. **Blocked, not complete.** No completion-log
+row or independent review verdict is added. Registry/playability flags are
+unchanged. The tree began clean; exact ELO and metadata are preserved.
+
+Partial work retained for 36061–36064:
+
+- Myōshu records installs and qualifying scores while inactive, resets on both
+  turn starts, and adds itself to the Corp score area with two agenda points.
+  The real `CorpAI.Choice` command/card path chooses a ten-credit immediate win
+  before other tactics. Ordinary priority play takes its expiring window while
+  reserving all installed unrezzed ICE costs. Tests contrast an immediate win,
+  non-winning points, a defensive reserve, an unaffordable purchase, a same-turn
+  installation and an expired score window.
+- Reanimation Protocol uses the standard install/trash/payment callbacks and
+  discounted `Rez`, retaining additional rez costs. The ten-credit discount is
+  shared between actual installation and rez costs; it expires after payment.
+  Non-Liability bad publicity waits for rez responses. The real Corp command,
+  card and target selectors recur stopping ICE for the planner's protection
+  target and hold when a cheaper affordable HQ stopping defender exists.
+  Tests cover combined cost, no affordability, discount handoff/cleanup and
+  Liability/non-Liability outcomes. Installation and rez callback contracts are
+  exercised through a headless harness; this is not a full UI timing audit.
+- Vulture Fund gains fourteen credits and takes preventable bad publicity.
+  Existing main-phase tactics outrank ordinary economy, and clean economy such
+  as Hedge Fund precedes its declared economy play. Actual command/card tests
+  cover useful income, the seven-credit threshold and competing Hedge Fund.
+- Flagship restricts placement to HQ/R&D and is unique. Success suppression
+  uses the real declaration modifier; access filtering covers central cards
+  and other root cards together, excluding Flagship itself. Only its marked
+  access limit persists after access-trash and expires at run-end cleanup.
+  Local CR 9.12.5 establishes that persistence applies when the Runner trashes
+  a rezzed accessed card, through the end of that run. Public planning helpers
+  cap Corp central multi-access pressure and Runner HQ access value, and
+  existing Runner successful-run benefit queries recognize success suppression.
+  Tests contrast active/unrezzed protection, root-first/central-first access,
+  trash persistence and cleanup, actual useful/unaffordable Corp rez selection,
+  and real public planning consumers. This does not claim full set-wide
+  strategic coverage or independent review of Flagship.
+
+Shared changes: `InstallCost` now applies `modifyInstallCost` to ICE, with the
+same destination parameter used by other installation costs. Optional-forfeit
+rez menus account for an initiating effect's credit reduction. `AIImmediateWin`
+has an affordable/legality-checked main-phase consumer. Public access/success
+planning queries are documented in `documentation/ai.md` with their consumers.
+
+### Exact blocker: Shackleton Grid payment-source choices
+
+The necessary dependency is a shared source-aware payment and planning model,
+not a card-only damage hook. Current code proves the gap:
+
+- `SpendCredits` in `mechanics.js` spends Runner temporary credits before any
+  choice and, for AI players, drains eligible hosted credits before the pool.
+  Hosted `onCreditsSpent` observes only its own source. There is no general
+  payment-complete event identifying outside-pool contributions, including
+  bad-publicity credits, for another installed card's conditional ability.
+- `RunCalculator.ValidPoint` in `runcalculator.js` explicitly spends aggregate
+  `otherCredits` before the pool. Route points have total expenditure/loss, not
+  source allocations; a four-damage trigger cannot distinguish a pool-only
+  alternative from a route that uses bad-publicity/hosted credits. Complete
+  routes, in-progress encounters and finite rerun continuations all consume
+  this representation.
+- `CorpAI._effectiveRunnerCreditPool` returns pool, temporary, recurring and
+  bad-publicity totals, and its security consumers use their aggregate buying
+  power. They do not express the source-dependent four-damage consequence or
+  the Runner's alternative of preserving outside credits.
+
+Adding unconditional meat damage or zeroing all outside credits would misstate
+legal/strategic routes. Greedy live AI payment could also flatline a Runner who
+can afford a safe pool-only payment. Addressing all three consumers and their
+continuations materially exceeds this card batch, so the skill requires a
+blocked handoff rather than calling the missing support an accepted limitation.
+
+To unblock, implement and verify the shared dependency with these acceptance
+criteria, then resume this same range:
+
+1. Emit outside-pool spend information after complete payment, including mixed
+   hosted/pool payments and temporary bad-publicity credits. Preserve the
+   cost-paid checkpoint and callback/response ordering (local CR 9.5.7b),
+   including existing synchronous payment callers, prevention and no-spend cases.
+2. Support safe pool-only and outside-credit routes in the real Runner
+   calculator and payment selector. Choosing outside credits applies four
+   preventable meat damage once per turn, while an available safe pool route
+   avoids it. Source restrictions such as required stealth remain enforced.
+3. Preserve the trigger's used/unused state across encounters and repeated runs
+   in the turn; reset it at each turn boundary. Account for payments while
+   accessing, and do not replace a conditional damage effect with an ETR.
+4. Make Corp public security/rez/install planning compare those same legal
+   alternatives without reading hidden Grip identities or mutating the board.
+5. Exercise real selectors/calculators on contrasting boards: lethal outside
+   spend versus an affordable safe pool payment; unavoidable outside spend;
+   zero/pool-only spend; surviving damage; already-used ability; scarce credits;
+   and repeated-run continuations. Then implement Shackleton's human optional
+   trigger, prevention, strategic placement/rez and once-per-turn cleanup.
+
+36065 and 36066 retain their unfinished markers. Let Them Dream has not been
+started; do not skip the blocked batch to claim a later batch or set-wide review.
+
+Validation of the partial tree: `tests/vantagepoint-batch13.test.js`, Vantage
+Point integration, AI hook docs, Mycoweb/rez-callback and Corp security tests;
+required shared format/deck tests, syntax checks and `git diff --check` pass.
+The final `node tests/run-all-tests.js` run passed all 47 files, including Corp
+decision fixtures and decision snapshots (Node 20.19.0).

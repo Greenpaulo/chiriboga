@@ -466,6 +466,12 @@ class CorpAI {
       ret.persistentPressure += contribution.persistentPressure;
       ret.growth += contribution.growth;
     }
+    if (typeof ServerAccessLimit == "function")
+      ret.additionalAccess = Math.min(ret.additionalAccess, Math.max(0, ServerAccessLimit(server) - 1));
+    if (typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(server)) {
+      ret.persistentPressure = 0;
+      ret.growth = 0;
+    }
     ret.penalty = Math.min(
       8,
       ret.additionalAccess * 1.5 +
@@ -6342,6 +6348,16 @@ class CorpAI {
     if (this.debugSecurityLog) this._serverToProtect(false, true);
 
     var cardToPlay = null; //used for checks
+
+    // An affordable operation that wins immediately outranks setup and defense.
+    if (optionList.includes("play")) {
+      for (var winningCard of corp.HQ.cards) {
+        if (typeof winningCard.AIImmediateWin == "function" &&
+            winningCard.AIImmediateWin.call(winningCard) &&
+            this._commonCardToPlayChecks(winningCard, "to win immediately", true))
+          return this._returnPreference(optionList, "play", {cardToPlay: winningCard});
+      }
+    }
 
     var sufficientEconomy = this._sufficientEconomy();
 

@@ -2728,6 +2728,27 @@ function Shuffle(array) {
  *
  * @method AccessCardList
  */
+// Public limits for hypothetical run and central-threat planning. Infinity
+// means no limit. These hooks never inspect concealed Corp card identities.
+function ServerAccessLimit(server) {
+  var limit = Infinity;
+  for (var card of server.root) {
+    if (card.rezzed && CheckHasAbilities(card) && typeof card.AIAccessLimit == "function")
+      limit = Math.min(limit, card.AIAccessLimit.call(card, server));
+  }
+  return limit;
+}
+
+function ServerSuccessfulRunPrevented(server) {
+  if (!server) return false;
+  return server.root.some(function (card) {
+    if (!card.rezzed || !CheckHasAbilities(card)) return false;
+    if (typeof card.AIPreventsSuccessfulRun == "function")
+      return card.AIPreventsSuccessfulRun.call(card, server);
+    return card.title == "Crisium Grid"; // existing declarative-success modifier
+  });
+}
+
 function AccessCardList() {
   if (!attackedServer) return [];
   var ret = [];
@@ -2770,6 +2791,9 @@ function AccessCardList() {
     if (!accessedCards.root.includes(attackedServer.root[i]))
       ret.push(attackedServer.root[i]); //card move triggers not required, this is just a reference list (copy) not move
   }
+  ret = ret.filter(function (card) {
+    return ModifyingTriggers("modifyAccessCardAllowed", card, 0) == 0;
+  });
   //prepare the cards for access
   for (var i = 0; i < ret.length; i++) {
     if (ret[i].renderer.zoomed) ret[i].renderer.ToggleZoom();
@@ -3417,11 +3441,8 @@ function InstallCost(
 ) {
   if (ignoreAllCosts) return 0;
   if (installingCard.cardType == "ice") {
-    if (position !== null) return position;
-    else {
-      var cardlist = InstallDestination(installingCard, destination);
-      return cardlist.length;
-    }
+    var base = position !== null ? position : InstallDestination(installingCard, destination).length;
+    return base + ModifyingTriggers("modifyInstallCost", installingCard, -base, undefined, [destination]);
   } else return GetCardProperty(installingCard, "installCost", [destination]);
 }
 

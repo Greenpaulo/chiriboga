@@ -5016,9 +5016,61 @@ cardSet[36061] = {
   cardType: "operation",
   subTypes: [],
   playCost: 10,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  cardsInstalledThisTurn: [],
+  eligibleScoreThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.cardsInstalledThisTurn = [];
+      this.eligibleScoreThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
   },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.cardsInstalledThisTurn = [];
+      this.eligibleScoreThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card.player == corp && !this.cardsInstalledThisTurn.includes(card))
+        this.cardsInstalledThisTurn.push(card);
+    },
+    availableWhenInactive: true,
+  },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score && !this.cardsInstalledThisTurn.includes(intended.score))
+        this.eligibleScoreThisTurn = true;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  Enumerate: function () {
+    return this.eligibleScoreThisTurn ? [{}] : [];
+  },
+  Resolve: function () {
+    this.agendaPoints = 2;
+    this.faceUp = true;
+    MoveCard(this, corp.scoreArea);
+    Log(GetTitle(this) + " added to the Corp's score area (2 points)");
+  },
+  AIImmediateWin: function () {
+    return this.eligibleScoreThisTurn && AgendaPoints(corp) + 2 >= AgendaPointsToWin();
+  },
+  AIWouldPlay: function () {
+    if (!this.eligibleScoreThisTurn) return false;
+    if (this.AIImmediateWin()) return true;
+    // Preserve already committed unrezzed defenses before buying non-winning points.
+    var reserve = InstalledCards(corp).reduce(function (total, card) {
+      return total + (card.cardType == "ice" && !card.rezzed ? RezCost(card) : 0);
+    }, 0);
+    return Credits(corp) - PlayCost(this) >= reserve;
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Reanimation Protocol (36062)
@@ -5033,9 +5085,91 @@ cardSet[36062] = {
   cardType: "operation",
   subTypes: ["Liability"],
   playCost: 2,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  installingIce: null,
+  modifyInstallCost: {
+    Resolve: function (card) { return card == this.installingIce ? -10 : 0; },
   },
+  _choices: function (credits) {
+    var choices = [];
+    var servers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers, [null]);
+    for (var ice of corp.archives.cards) {
+      if (ice.cardType != "ice" || !CheckRez(ice, ["ice"])) continue;
+      if (ice.additionalRezCostForfeitAgenda && ChoicesForfeitableAgendas(corp).length < 1) continue;
+      if (ice.additionalRezCostForfeitOrTrashThree &&
+          ChoicesForfeitableAgendas(corp).length < 1 && corp.HQ.cards.length < 3) continue;
+      var reduction = ChoicesForfeitableAgendas(corp).length > 0 ? (ice.optionalForfeitRezReduction || 0) : 0;
+      for (var server of servers) {
+        if (!CheckInstallDestination(ice, server)) continue;
+        var installCost = server ? InstallCost(ice, server) : 0;
+        var cost = Math.max(0, installCost + Math.max(0, RezCost(ice) - reduction) - 10);
+        if (cost <= credits) choices.push({card: ice, server: server, cost: cost,
+          label: GetTitle(ice) + " → " + (server ? ServerName(server) : "new server")});
+      }
+    }
+    return choices;
+  },
+  Enumerate: function () {
+    // The operation has not yet paid its own cost at play enumeration.
+    return this._choices(Math.max(0, Credits(corp) - PlayCost(this))).length ? [{}] : [];
+  },
+  Resolve: function () {
+    var choices = this._choices(Credits(corp));
+    if (!choices.length) return;
+    if (corp.AI) {
+      var preferred = this._preferredChoice(choices, true);
+      if (preferred) corp.AI.preferred = {title: this.title, option: preferred};
+    }
+    DecisionPhase(corp, choices, function (params) {
+      this.installingIce = params.card;
+      var remainingReduction = 10;
+      Install(params.card, params.server, false, null, true, function () {
+        // Install trashing has finished: measure the actual installation cost.
+        this.installingIce = null;
+        remainingReduction = Math.max(0, 10 - (params.server ? InstallCost(params.card, params.server) : 0));
+        this.installingIce = params.card;
+      }, this, null, function () {
+        this.installingIce = null;
+      }, false, function () {
+        if (!CheckInstalled(params.card) || params.card.rezzed) return;
+        Rez(params.card, false, null, this, false, remainingReduction, function () {
+          if (!CheckSubType(params.card, "Liability")) BadPublicity(1);
+        });
+      });
+    }, this.title, "Install and rez ice from Archives", this);
+  },
+  _preferredChoice: function (choices, costsPaid) {
+    var server = corp.AI._serverToProtect();
+    if (!server) return null;
+    // Recursion serves the current defense plan, rather than an empty remote.
+    var candidates = choices.filter(function (choice) {
+      return choice.server == server && choice.cost + (costsPaid ? 0 : PlayCost(this)) <= Credits(corp);
+    }, this);
+    var ai = corp.AI;
+    candidates.sort(function (a, b) {
+      var stopping = Number(ai._iceHasETR(b.card)) - Number(ai._iceHasETR(a.card));
+      if (stopping) return stopping;
+      var covered = Number(ai._aCompatibleBreakerIsInstalled(a.card)) - Number(ai._aCompatibleBreakerIsInstalled(b.card));
+      if (covered) return covered;
+      // Avoid gratuitous bad publicity when equally effective liability ICE exists.
+      var liability = Number(CheckSubType(b.card, "Liability")) - Number(CheckSubType(a.card, "Liability"));
+      return liability || a.cost - b.cost || b.card.elo - a.card.elo;
+    });
+    return candidates[0] || null;
+  },
+  AIWouldPlay: function () {
+    var choices = this._choices(Math.max(0, Credits(corp) - PlayCost(this)));
+    var preferred = this._preferredChoice(choices);
+    if (!preferred) return false;
+    // A normal affordable HQ install is a competing use; save recursion unless
+    // its discount gives a cheaper stopping defender or HQ has none.
+    var hqIce = corp.AI._affordableIce(preferred.server, corp.HQ.cards);
+    return !hqIce.some(function (ice) {
+      return corp.AI._iceHasETR(ice) &&
+        InstallCost(ice, preferred.server) + RezCost(ice) <= PlayCost(this) + preferred.cost;
+    }, this);
+  },
+  AIPlayWhenCan: 1,
+  AIIsRecurOrTutor: true,
 };
 
 //Vulture Fund (36063)
@@ -5051,8 +5185,12 @@ cardSet[36063] = {
   subTypes: ["Transaction", "Liability"],
   playCost: 7,
   Resolve: function (params) {
-    // TODO: Implement effect
+    GainCredits(corp, 14, "", this);
+    BadPublicity(1);
   },
+  AIEconomyPlay: 1,
+  AIEconomyCard: true,
+  AIWouldPlay: function () { return Credits(corp) >= PlayCost(this); },
 };
 
 //Flagship (36064)
@@ -5070,7 +5208,54 @@ cardSet[36064] = {
   subTypes: ["Ritzy"],
   rezCost: 3,
   trashCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  persistentServer: null,
+  installOnlyIn: function (server) { return server == corp.HQ || server == corp.RnD; },
+  modifyDeclareSuccess: {
+    Resolve: function () { return attackedServer == GetServer(this) ? 1 : 0; },
+  },
+  automaticOnWouldTrash: {
+    Resolve: function (cards) {
+      if (cards.includes(this) && this.rezzed && CheckHasAbilities(this) && accessingCard == this)
+        this.persistentServer = GetServer(this);
+    },
+    availableWhenInactive: true,
+  },
+  modifyAccessCardAllowed: {
+    Resolve: function (card) {
+      if (CheckInstalled(this) && !CheckHasAbilities(this)) return 0;
+      var server = CheckInstalled(this) && this.rezzed ? GetServer(this) : this.persistentServer;
+      if (!server || attackedServer != server || card == this) return 0;
+      return accessedCards.cards.concat(accessedCards.root).some(function (seen) {
+        return seen != this;
+      }, this) ? 1 : 0;
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () { this.persistentServer = null; },
+    availableWhenInactive: true,
+  },
+  AIAccessLimit: function (server) {
+    return CheckInstalled(this) && this.rezzed && GetServer(this) == server ? 1 : Infinity;
+  },
+  AIPreventsSuccessfulRun: function (server) {
+    return CheckInstalled(this) && this.rezzed && GetServer(this) == server;
+  },
+  AIDefensiveValue: function (server) {
+    if (!this.installOnlyIn(server)) return 0;
+    var threat = corp.AI._centralServerThreat(server);
+    return threat.additionalAccess + threat.persistentPressure + threat.growth +
+      Math.max(0, server.root.length - 1);
+  },
+  AILimitPerServer: function () { return 1; },
+  RezUsability: function () {
+    return attackedServer == GetServer(this) && approachIce < 1;
+  },
+  AIRezWhenCan: function () { return this.AIWouldTrigger(); },
+  AIWouldTrigger: function () {
+    return this.RezUsability() && this.AIDefensiveValue(GetServer(this)) > 0;
+  },
 };
 
 //Shackleton Grid (36065)

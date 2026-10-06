@@ -109,6 +109,15 @@ registered definitions. A lack of `TODO` does not prove a card is complete.
 Their `untested` registry flags should be treated literally. Add confirmed
 per-card findings here rather than describing an entire set as implemented.
 
+### Vantage Point batch 13 blocked dependency
+
+Batch 13 (36061–36066) has partial tested work for 36061–36064. Shackleton Grid
+(36065) requires source-aware live payments, Runner run routes and Corp public
+security estimates before its mechanics and strategic support can be completed.
+Let Them Dream (36066) remains unstarted. This is unfinished work, not an accepted
+limitation. See the [exact dependency and acceptance criteria](vantage-point-implementation-notes.md#batch-13-partial-implementation-and-payment-model-blocker-2026-10-06)
+and [active batch tracker](current-set-implementation.md).
+
 ## 3. Confirmed AI hook gaps
 
 | ID   | Card       | Gap                                                                                                                                                      |

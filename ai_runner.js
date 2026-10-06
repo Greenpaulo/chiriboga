@@ -78,6 +78,11 @@ class RunnerAI {
   }
   
   _rootKnownToContainCopyOfCard(server, title) {
+    // Older run-benefit hooks query Crisium by title; include public cards
+    // with the same success-prevention capability in that existing contract.
+    if (title == "Crisium Grid" && typeof ServerSuccessfulRunPrevented == "function" &&
+        ServerSuccessfulRunPrevented(server)) return true;
+
 	  if (!server) return false;
 	  for (var j = 0; j < server.root.length; j++) {
 		if (PlayerCanLook(runner, server.root[j])) {
@@ -254,6 +259,8 @@ class RunnerAI {
 		  totalAccesses += usingCard.AIAdditionalAccess.call(usingCard,corp.HQ);
 	    }
 	  }
+    if (typeof ServerAccessLimit == "function")
+      totalAccesses = Math.min(totalAccesses, ServerAccessLimit(corp.HQ));
 	  //take into account size
 	  if (totalAccesses > corp.HQ.cards.length) {
 		  totalAccesses = corp.HQ.cards.length;

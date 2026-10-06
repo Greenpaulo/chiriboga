@@ -136,7 +136,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
 		var oldPhase = currentPhase;
 		var oldActivePlayer = activePlayer;
 		var rezReduction = card.optionalForfeitRezReduction;
-		var fullRezCost = RezCost(card);
+		var fullRezCost = Math.max(0, RezCost(card) - Math.max(0, Number(costReduction) || 0));
 		var choices = ChoicesForfeitableAgendas(corp);
 		//Add decline option only if player can afford full rez cost
 		if (CheckCredits(corp, fullRezCost, "rezzing", card)) {
