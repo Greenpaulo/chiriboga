@@ -2945,11 +2945,13 @@ class CorpAI {
     return inputs;
   }
 
-  // Restricted payments need a complete route: a scalar activation probe
-  // cannot allocate stealth across ICE, alternate funding policies or reruns.
+  // Restricted payments and break income need a complete route: independent
+  // per-ICE costs cannot allocate sources or once-per-turn rebates across ICE
+  // and finite reruns.
   _restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext) {
     if (typeof RunCalculator == "undefined" || !evaluationContext.runnerActiveCards.some(card =>
-        CheckHasAbilities(card) && typeof card.AIRunRestrictedCredits == "function")) return null;
+        CheckHasAbilities(card) && (typeof card.AIRunRestrictedCredits == "function" ||
+          typeof card.AIRunBreakCreditGain == "function"))) return null;
     var credits = this._effectiveRunnerCreditPool(server);
     var previousServer = attackedServer;
     var outsideCredits = credits.temporaryCredits + credits.badPublicityCredits;
@@ -2994,7 +2996,7 @@ class CorpAI {
       routeFeasible: !!last,
       restrictedCreditsPaid: last ? last.restrictedCreditsPaid || 0 : 0,
       routeDamage: last ? best.rc.TotalDamage(best.rc.TotalEffect(last)) : 0,
-      reasons: [last ? "restricted-credit route is feasible" : "no feasible restricted-credit route"],
+      reasons: [last ? "resource-aware route is feasible" : "no feasible resource-aware route"],
       rezCost: eligibleIce.reduce((total, card) => total + (card.rezzed ? 0 : Math.max(0, RezCost(card))), 0),
     };
   }

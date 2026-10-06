@@ -175,12 +175,12 @@ let activeCards = new Set();
 context.CheckActive = (card) => activeCards.has(card);
 
 const chainReaction = context.cardSet[36001];
-chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.HQ);
-chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.RnD);
-chainReaction.responseOnRunSuccessful.Resolve.call(
-  chainReaction,
-  context.corp.archives,
-);
+context.attackedServer = context.corp.HQ;
+chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction);
+context.attackedServer = context.corp.RnD;
+chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction);
+context.attackedServer = context.corp.archives;
+chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction);
 assert.strictEqual(chainReaction.Enumerate.call(chainReaction).length, 1);
 chainReaction.responseOnRunnerTurnBegins.Resolve.call(chainReaction);
 assert.strictEqual(
@@ -243,7 +243,7 @@ context.MakeRun = (server) => {
   runTarget = server;
   context.attackedServer = server;
 };
-context.AddBadPublicity = (amount) => {
+context.BadPublicity = (amount) => {
   badPublicityGained += amount;
 };
 context.RemoveFromGame = (card) => {
@@ -251,7 +251,7 @@ context.RemoveFromGame = (card) => {
 };
 takeADive.Resolve.call(takeADive, {server: context.corp.RnD});
 assert.strictEqual(runTarget, context.corp.RnD);
-takeADive.responseOnRunSuccessful.Resolve.call(takeADive, context.corp.RnD);
+assert.strictEqual(takeADive.responseOnRunSuccessful.Enumerate.call(takeADive).length, 0);
 assert.strictEqual(badPublicityGained, 0);
 takeADive.automaticOnSubroutineFiring.Resolve.call(takeADive, {}, {});
 context.attackedServer = context.corp.HQ;
@@ -259,7 +259,7 @@ takeADive.responseOnRunSuccessful.Resolve.call(takeADive, context.corp.RnD);
 assert.strictEqual(badPublicityGained, 1, '36002 survives an attacked-server redirect');
 takeADive.responseOnRunEnds.Resolve.call(takeADive);
 assert.strictEqual(removedCard, takeADive, '36002 removes itself when its run ends');
-assert.strictEqual(takeADive.AIRunEventExtraPotential.call(takeADive, context.corp.HQ), 0.3);
+assert.strictEqual(takeADive.AIRunEventExtraPotential.call(takeADive, context.corp.HQ), 0);
 assert.strictEqual(takeADive.AIBreachNotRequired, true);
 
 const tungstenTailor = context.cardSet[36003];

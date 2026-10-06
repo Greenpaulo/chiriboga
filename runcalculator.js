@@ -200,6 +200,24 @@ class RunCalculator {
         effects: point.effects,
       });
     }
+    for (var branch of result) {
+      if (branch.sr_broken.length <= point.sr_broken.length) continue;
+      var effectiveStrength = iceAI.strength;
+      for (var mod of point.card_str_mods)
+        if (mod.card === iceAI.ice) effectiveStrength += mod.amt;
+      for (var source of this.precalculated.activeCards || []) {
+        if (typeof source.AIRunBreakCreditGain !== "function" ||
+          (this._breakIncomeUsed && this._breakIncomeUsed.has(source)) ||
+          branch.persistents.some(p => p.use === source && p.action === "breakIncome")) continue;
+        var gain = source.AIRunBreakCreditGain(iceAI.ice, effectiveStrength);
+        if (gain > 0) {
+          // A rebate arrives after the paid break. ImplementIcebreaker checks
+          // that payment first; the next break can spend the newly gained pool.
+          branch.runner_credits_lost -= gain;
+          branch.persistents = branch.persistents.concat({use: source, action: "breakIncome"});
+        }
+      }
+    }
     return result;
   }
 
@@ -1159,6 +1177,10 @@ class RunCalculator {
 	  for (var i=0; i<potentialActiveCards.length; i++) {
 		  if (CheckHasAbilities(potentialActiveCards[i])) this.precalculated.activeCards.push(potentialActiveCards[i]);
 	  }
+      this._breakIncomeBound = this.precalculated.activeCards.reduce((sum, card) =>
+        sum + (typeof card.AIRunBreakCreditGain === "function" &&
+          !(this._breakIncomeUsed && this._breakIncomeUsed.has(card)) ?
+          card.AIRunBreakCreditGain(null, 0) : 0), 0) * 0.7;
       //create a pathfinding-style approach
       data.todo = []; //array of path arrays that are not finished
       //encounter options at starting ice
@@ -1198,7 +1220,7 @@ class RunCalculator {
         var this_cost = this.PathCost(current);
         //if cost is less than best so far and still valid, continue processing (this optimisation reduced typical full paths processed from 178 to 4! The test case was Ansel 1.0 with Botulus then an unrezzed)
         if (
-          this_cost < data.min_cost &&
+          this_cost < data.min_cost + (this._breakIncomeBound || 0) &&
           this.ValidPath(
             current,
             data.damageLimit,
@@ -1215,8 +1237,9 @@ class RunCalculator {
           else path_finished = current[current.length - 1].iceIdx < data.startIceIdx;
 
           if (path_finished) {
-            data.min_cost = this_cost;
-            this.paths.push(current); //since here we only store better paths, this.paths[this.paths.length-1] will always be the best path
+            data.min_cost = Math.min(data.min_cost, this_cost);
+            this.paths.push(current);
+            this.paths.sort((a, b) => this.PathCost(b) - this.PathCost(a)); // best path remains last
             data.successful_paths++;
             report_as = "success";
           } //otherwise keep going
@@ -1224,7 +1247,7 @@ class RunCalculator {
             var directions = this.Directions(
               data.server,
               current[current.length - 1],
-              data.min_cost,
+              data.min_cost + (this._breakIncomeBound || 0),
               data.damageLimit,
               data.clickLimit,
 			  data.poolCreditLimit,
@@ -1270,7 +1293,7 @@ class RunCalculator {
     // Different break paths often leave identical continuation budgets. Cache
     // only within this synchronous board snapshot, never across game actions.
     if (!data.continuationCache) data.continuationCache = new Map();
-    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit, icePoint.restrictedCreditsSpent || 0].join(":");
+    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit, icePoint.restrictedCreditsSpent || 0, icePoint.persistents.filter(p => p.action === "breakIncome").map(p => p.use.title).join(",")].join(":");
     var routes = data.continuationCache.get(cacheKey);
     if (!routes) {
       var future = new RunCalculator();
@@ -1279,6 +1302,9 @@ class RunCalculator {
       future._securityPlanning = this._securityPlanning;
       future._ignoredIce = new Set(this._ignoredIce);
       future._ignoredIce.add(defender);
+      future._breakIncomeUsed = new Set(this._breakIncomeUsed || []);
+      for (var persistent of icePoint.persistents)
+        if (persistent.action === "breakIncome") future._breakIncomeUsed.add(persistent.use);
       future._restrictedCreditsUsed = (this._restrictedCreditsUsed || 0) + (icePoint.restrictedCreditsSpent || 0);
       future._creditPolicyBranch = !!this._poolOnly;
       future._poolOnly = !!this._poolOnly;
@@ -1381,6 +1407,7 @@ class RunCalculator {
       rc._meatPreventionOverride = this._meatPreventionOverride;
       rc._restrictedCreditsUsed = this._restrictedCreditsUsed || 0;
       rc._ignoredIce = new Set(this._ignoredIce);
+      rc._breakIncomeUsed = new Set(this._breakIncomeUsed || []);
       rc._runnerPlanning = this._runnerPlanning || (runner.AI && runner.AI.rc == this);
       rc.runEvent = this.runEvent;
       rc.suppressOutput = this.suppressOutput;

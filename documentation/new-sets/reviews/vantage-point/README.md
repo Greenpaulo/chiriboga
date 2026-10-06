@@ -4,8 +4,10 @@ Start with the [full-set review](vantagepoint-set-review.md), which links all 13
 batch reports and records shared finding S1. The [active tracker](../../current-set-implementation.md)
 selects the next reopened batch. The original [completion history](../../history/vantagepoint-2026-10-06.md)
 and [post-review snapshot](../../history/vantagepoint-2026-10-06-reviewed.md)
-remain archived separately. Current verdict: **Changes required**; batches 1–12
-need repairs and batch 13 must be revalidated after relevant shared changes.
+remain archived separately. Set-wide verdict: **Changes required**. Batch 1 now has an independent
+[Pass after remediation](vantagepoint-batch-1.md#second-independent-remediation-re-review--2026-10-06);
+batches 2–12 need repairs. Batch13 shared-consumer regressions pass, but its
+independent approval must be revalidated after relevant shared changes.
 
 ## Repair and re-review
 

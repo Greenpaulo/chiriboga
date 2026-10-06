@@ -241,7 +241,11 @@ The AI mulligans (option 0) when `this.cardsWorthKeeping` is empty, else keeps
 Before running is considered: when tagged, the grip card with the highest
 `AIPlayToRemoveTags()` that passes `FullCheckPlay` is played, else the basic
 remove-tag action is taken whenever offered. The playable event with the highest
-`AIPlayWhenCan` (and `AIWouldPlay`, if defined) is played. In the Runner Install
+`AIPlayWhenCan` (and `AIWouldPlay`, if defined) is played, unless a legal
+ordinary run can immediately win by stealing a publicly known installed agenda.
+That check uses the complete current route and its remaining pool/run credits
+and clicks after rebates, plus public steal costs and steal prohibitions.
+Unknown agendas and routes needing preparation do not override the opportunity. In the Runner Install
 phase, an installed program whose `AIOkToTrash()` is true is trashed for room.
 
 **priorityEcon.** The worth-keeping card with the highest `AIEconomyInstall()`

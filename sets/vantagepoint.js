@@ -33,7 +33,8 @@ cardSet[36001] = {
     availableWhenInactive: true,
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
+    Resolve: function () {
+      var server = attackedServer;
       if (server == corp.HQ) this.madeSuccessfulRunOnHQThisTurn = true;
       else if (server == corp.RnD) this.madeSuccessfulRunOnRnDThisTurn = true;
       else if (server == corp.archives)
@@ -65,10 +66,9 @@ cardSet[36001] = {
     }
 
     if (runner.AI != null) {
+      var event = this;
       choices.sort(function (a, b) {
-        var aScore = a.card.rezzed ? 100 + (a.card.trashCost || 0) : 0;
-        var bScore = b.card.rezzed ? 100 + (b.card.trashCost || 0) : 0;
-        return bScore - aScore;
+        return event._corpTargetValue(b.card) - event._corpTargetValue(a.card);
       });
       this._trashCorpCards(
         choices.slice(0, requiredCount).map(function (choice) {
@@ -122,13 +122,8 @@ cardSet[36001] = {
     if (runnerCards.length > 0) {
       if (corp.AI != null) {
         var preferred = runnerCards[0];
-        for (var i = 0; i < runnerCards.length; i++) {
-          if (
-            (runnerCards[i].card.installCost || 0) >
-            (preferred.card.installCost || 0)
-          ) {
-            preferred = runnerCards[i];
-          }
+        if (typeof corp.AI._bestTrashOption === "function") {
+          preferred = runnerCards[corp.AI._bestTrashOption(runnerCards)];
         }
         corp.AI.preferred = {
           title: "Chain Reaction",
@@ -147,14 +142,42 @@ cardSet[36001] = {
       );
     }
   },
+  _winningAgenda: function (card) {
+    return PlayerCanLook(runner, card) && CheckCardType(card, ["agenda"]) &&
+      Counters(card, "advancement") >= AdvancementRequirement(card) &&
+      AgendaPoints(corp) + AgendaPointsForCard(card, corp) >= globalProperties.agendaPointsToWin;
+  },
+  _corpTargetValue: function (card) {
+    // Never consult the identity or printed costs of an unknown facedown card.
+    if (!PlayerCanLook(runner, card)) return Counters(card, "advancement");
+    if (this._winningAgenda(card)) return Infinity;
+    if (CheckCardType(card, ["agenda"]))
+      return Counters(card, "advancement") + AgendaPointsForCard(card, corp);
+    return (card.rezCost || 0) + (card.trashCost || 0) + Counters(card, "credits");
+  },
+  AIPlayWhenCan: 2,
   AIWouldPlay: function () {
-    if (
-      !this.madeSuccessfulRunOnHQThisTurn ||
-      !this.madeSuccessfulRunOnRnDThisTurn ||
-      !this.madeSuccessfulRunOnArchivesThisTurn
-    )
-      return false;
-    return ChoicesInstalledCards(corp, CheckTrash).length >= 1;
+    if (this.Enumerate().length === 0) return false;
+    var event = this;
+    var targets = ChoicesInstalledCards(corp, CheckTrash).map(function (c) { return c.card; });
+    if (targets.some(function (card) { return event._winningAgenda(card); })) return true;
+    targets.sort(function (a, b) { return event._corpTargetValue(b) - event._corpTargetValue(a); });
+    var gain = targets.slice(0, 2).reduce(function (sum, card) {
+      return sum + event._corpTargetValue(card);
+    }, 0);
+    var losses = ChoicesInstalledCards(runner, CheckTrash);
+    // Avoid sacrificing our only matching breaker for ordinary economy denial.
+    for (var i = 0; i < losses.length; i++) {
+      var card = losses[i].card;
+      if (CheckSubType(card, "Icebreaker") && InstalledCards(corp).some(function (ice) {
+        return CheckCardType(ice, ["ice"]) && PlayerCanLook(runner, ice) &&
+          runner.AI._matchingBreakerInstalled(ice) === card;
+      })) return false;
+    }
+    var loss = losses.reduce(function (max, choice) {
+      return Math.max(max, (choice.card.installCost || 0) + Counters(choice.card, "credits") + Counters(choice.card, "virus"));
+    }, 0);
+    return gain > loss + PlayCost(this);
   },
   AIWorthKeeping: function () {
     return true;
@@ -206,18 +229,14 @@ cardSet[36002] = {
     },
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
-      if (this.runningWithThis) {
-        if (this.subroutineResolvedThisRun) {
-          Log(
-            GetTitle(this) +
-              ": a subroutine resolved during this run; giving Corp 1 bad publicity.",
-          );
-          AddBadPublicity(1);
-        }
-      }
+    Enumerate: function () {
+      return this.runningWithThis && this.subroutineResolvedThisRun ? [{}] : [];
     },
-    automatic: true,
+    Resolve: function () {
+      // This opens prevention and response phases, so it must be a normal
+      // mandatory trigger rather than an automatic callback.
+      BadPublicity(1);
+    },
   },
   responseOnRunEnds: {
     Resolve: function () {
@@ -230,7 +249,19 @@ cardSet[36002] = {
   },
   AIBreachNotRequired: true,
   AIRunEventExtraPotential: function (server, potential) {
-    if (server == corp.HQ || server == corp.RnD) return 0.3;
+    if (server !== corp.HQ && server !== corp.RnD) return 0;
+    if (runner.AI && runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    // Bank publicity by letting a harmless subroutine fire. Unknown ICE is
+    // not evidence of a reward, and lethal/ETR effects are not a reason to play.
+    if (runner.AI && server.ice.some(function (ice) {
+      if (!ice.rezzed || !PlayerCanLook(runner, ice)) return false;
+      var model = runner.AI.rc.IceAI(ice, AvailableCredits(corp));
+      return model.sr.some(function (sr) {
+        return sr.some(function (effects) {
+          return effects.every(function (effect) { return effect === "misc_minor"; });
+        });
+      });
+    })) return 0.3;
     return 0;
   },
   AIWorthKeeping: function () {
@@ -273,9 +304,6 @@ cardSet[36003] = {
       return 0;
     },
   },
-  AIReducesIceStrength: function (iceCard) {
-    return 1;
-  },
   responseOnSubroutineBroken: {
     Resolve: function (subroutine) {
       if (this.usedThisTurn) return;
@@ -291,6 +319,13 @@ cardSet[36003] = {
       }
     },
     automatic: true,
+  },
+  AIReducesIceStrength: function (iceCard) {
+    return 1;
+  },
+  AIRunBreakCreditGain: function (iceCard, effectiveStrength) {
+    if (this.usedThisTurn || (iceCard && effectiveStrength > 0)) return 0;
+    return 1;
   },
   AIEconomyInstall: function () {
     return 2;
