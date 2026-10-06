@@ -1264,6 +1264,7 @@ coreSet[1030] = {
       // If prevent is 0, do nothing (don't trash, don't prevent)
     },
   },
+  AIMeatDamagePrevention: function () { return CheckTrash(this) ? 3 : 0; },
 };
 coreSet[1031] = {
   title: "Data Dealer",

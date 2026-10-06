@@ -640,8 +640,10 @@ without their own audit evidence.
 
 ## Batch 13 partial implementation and payment-model blocker (2026-10-06)
 
-Owner: Codex. Range: 36061–36066. **Blocked, not complete.** No completion-log
-row or independent review verdict is added. Registry/playability flags are
+Historical handoff (superseded by the completion below): owner Codex, range
+36061–36066, originally blocked. The user authorized the shared dependency
+after merging the Touchstone payment-choice fix. No independent review verdict
+is added by implementation. Registry/playability flags are
 unchanged. The tree began clean; exact ELO and metadata are preserved.
 
 Partial work retained for 36061–36064:
@@ -742,3 +744,162 @@ Point integration, AI hook docs, Mycoweb/rez-callback and Corp security tests;
 required shared format/deck tests, syntax checks and `git diff --check` pass.
 The final `node tests/run-all-tests.js` run passed all 47 files, including Corp
 decision fixtures and decision snapshots (Node 20.19.0).
+
+
+## Batch 13 completion and payment dependency resolution (2026-10-06)
+
+Owner: Codex. Range: 36061–36066. The shared dependency is implemented on this
+branch; the previously recorded blocker is resolved. Existing 36061–36064 work
+is retained, all six cards preserve their metadata/ELO, and registry/playability
+flags remain unchanged. This completes implementation, not independent review.
+
+- `SpendCredits` now aggregates outside-pool contributions and emits
+  `responseOnCreditsSpent` at payment completion, before its continuation.
+  Temporary credits become optional human choices when Shackleton matters.
+  Existing pool/hosted choices from the merged Touchstone fix remain in use.
+  `SpendHostedCredits` routes required stealth payments through this checkpoint;
+  Corsair, Lampades and Baker use it, with Baker paying before changing servers.
+- Shackleton has an optional four-meat-damage response and normal prevention.
+  Declining leaves its opportunity available; accepting consumes it, with resets
+  on both turn boundaries. Install ranking consumes `AIPreferredUpgradeServer`
+  to choose funded paid-defense servers, using existing threat ranking. It holds
+  the Region without outside funding or with an occupied Region. Rez planning
+  requires an unused opportunity and impending encounter/access payment.
+- Runner `RunCalculator.Calculate` and `CalculateAsync` compare independent
+  outside-first and pool-only policies and rank them using the existing route
+  costs. Points retain the selected policy, conditional damage and public meat
+  prevention. `RunnerAI.AIPreserveOutsideCredits` follows that plan in live
+  payments. Credit locks exclude pool funding. Four cards survive four damage;
+  fewer require prevention or a legal pool-only alternative.
+- Repeated-run continuations carry consumed Shackleton opportunities and
+  prevention capacity without mutating actual cards. Their reserved pool budget
+  respects each continuation's policy. Prevention still resolves through the
+  real `Damage` path; Crash Space exposes its trashable three-point capacity
+  with `AIMeatDamagePrevention`. Its consumption retains the existing damage
+  opportunity cost rather than treating the prevention card as free.
+- Required stealth uses `AIRunRestrictedCredits` and explicit route counters.
+  Supplemental credits become available only after their restricted payment;
+  they cannot finance ordinary breaks or access trash costs. Consumption spans
+  ICE and finite reruns. This replaces Corsair's pool-credit supplement. The
+  real-calculator test also exposed reversed arguments in Corsair's `StrModify`
+  call; its source/target order and the integration harness's stub are corrected
+  to the actual engine contract.
+- Corp `_effectiveRunnerCreditPool` checks pool-use restrictions in its restored
+  hypothetical-server context. `_evaluateServerSecurityUncached` compares
+  lethal outside funding against the safe pool ceiling, and records survivable
+  meat damage as deterrence. These queries use public counters, Grip size and
+  installed prevention only. They do not inspect Grip identities or alter cards.
+- Let Them Dream searches the chosen source, reveals the selected agenda and
+  offers HQ or bottom-of-R&D placement. A searched R&D is shuffled immediately
+  after selection, before reveal/movement (CR 8.7.3); decline and HQ/Archives
+  searches do not shuffle. Restricted R&D searches may fail to find; HQ/Archives
+  must find an eligible agenda if present (CR 8.7.2e). Empty sources terminate.
+  The Corp's real option selector retrieves a fast winning agenda when protected
+  staging, a click and hand space exist; otherwise it recovers Archives agendas
+  or hides flooded/exposed HQ agendas. It declines without a useful target.
+- `AgendaPointsForCard` consumes the new owner-sensitive gameplay property
+  `agendaPointsForPlayer`; score totals, Runner known-agenda potential and Corp
+  defensive agenda/breach-loss estimates value Let Them Dream at one Runner
+  point and two Corp points. Moving score areas does not alter printed metadata.
+
+Decision-level evidence in `tests/vantagepoint-batch13.test.js` covers real
+payment choices, Corp damage/rez/install/search selection, synchronous and
+asynchronous run calculation, safe versus lethal/unavoidable outside funding,
+surviving damage, pool locks, direct hosted payments, prevention resolution,
+already-used and reset opportunities, repeated runs, restricted stealth across
+multiple ICE, region conflicts, useful/declined searches, shuffle/failure timing,
+bottom insertion and owner-sensitive victory risk. Existing tests for Myōshu's
+immediate-win/reserve alternatives, Reanimation targets/costs, Vulture economy,
+and Flagship success/access planning remain green.
+
+Validation: focused batch/integration, Corp security (145 cases), credit-pool
+locks, AI hook documentation, required format/deck checks, syntax and whitespace
+checks; `node tests/run-all-tests.js` passes all 50 test files, including Corp
+decision fixtures and decision snapshots, on Node 20.19.0. The separate set-wide
+review is next; no new accepted limitation is recorded for this batch.
+
+
+## Batch 13 reopened: Corp Corsair security gap (2026-10-06)
+
+The completion claim above is superseded. Checking whether the AI uses these
+cards well exposed a missing opposing-planner case, so batch 13 is In progress.
+This is unfinished strategic support, not an accepted limitation or a deferred
+set-wide-review task.
+
+Reproduction: reuse the required-stealth board in
+`tests/vantagepoint-batch13.test.js`: rezzed Shackleton in HQ, one strength-three
+Barrier with one ETR, Corsair, one ability-only stealth credit, four pool credits,
+four Grip cards, no prevention and no generic outside credits. The real Runner
+calculator finds an outside-payment route costing one required stealth credit,
+one ordinary break credit and three pool credits to trash Shackleton, taking
+four survivable meat damage. On that identical board the Corp
+`_evaluateServerSecurity(corp.HQ)` returns `isSecure: true`, infinite mandatory
+break cost and a four-credit ceiling.
+
+Code confirms both missing consumers: the Corp breaker-cost probe calls
+`AIImplementBreaker` once and ignores returned strength-modification directions,
+so Corsair's reduction never reaches its breaking branch. The public credit
+ceiling also does not consume `AIRunRestrictedCredits`, and credits allowed only
+for `canUseCredits("using", null)` are excluded when it probes installed breakers.
+Existing Runner restricted-payment tests pass; existing Corp cases use an
+ordinary breaker and do not exercise this contrast. All 50 green test files
+passing therefore did not establish this part of the acceptance criteria.
+
+Required repair: make Corp cost/resource assessment follow the legal restricted
+payment route, retain source exhaustion across multiple ICE/repeated runs, and
+account for Shackleton/prevention without treating survivable damage as an ETR.
+Add contrasting same-board assertions through both real consumers: four cards
+survive; three do not without prevention; pool credits cannot replace required
+stealth; insufficient/exhausted stealth prevents additional reductions; a usable
+ordinary breaker may provide a safe pool-only alternative. Preserve public-only,
+read-only planning and rerun the required full regression suite before restoring
+Complete. Other cards' tested strategic decisions are retained, but this finding
+prevents an unqualified batch-wide strategic sign-off.
+
+
+## Batch 13 Corp restricted-payment repair (2026-10-06)
+
+The reopened finding above is repaired; its reproduction is now a green
+assertion in `tests/vantagepoint-batch13.test.js`. The ordinary-breaker probe is
+retained for other boards. With an enabled restricted-credit provider installed,
+Corp `_icePlanOutcome` uses `_restrictedPaymentPlanOutcome` and the shared
+RunCalculator to follow complete payment/strength-reduction routes. Thus it
+also retains credit exhaustion and finite-repeat budgets, rather than treating
+Corsair's first reduction as an unbreakable ICE result.
+
+The calculator's local `_securityPlanning` context restricts ICE to the chosen
+fundable rez plan and uses Corp knowledge of that ICE. Optional access and trash
+costs are excluded from this ICE-pass/security forecast. It preserves the usual
+finite-defender continuation and pool-only/outside-credit branches. Corp
+security consumes route feasibility, includes supplements only at restricted
+payments and counts planned damage once. Preparation credit gains consume the
+same click budget as paid click abilities, initiating the run and repeating it.
+
+Outside-damage opportunities are captured before temporarily supplying a
+hypothetical attacked server, so next-turn resets and already-used current-turn
+opportunities retain their proper meanings. Hypothetical context is restored
+in `finally`; actual cards/counters and Runner route caches are untouched. Tests
+make numeric Grip reads throw while retaining its public length.
+
+Contrasting evidence through the actual Corp security consumer and Runner
+calculator now covers:
+
+- four cards survive required stealth plus Shackleton; three cannot, even with
+  a large pool, while an ordinary breaker supplies a safe pool-only alternative;
+- one stealth credit cannot pay reductions for two ICE; two credits can;
+- a finite outer stop requires a third reduction on the repeated inner ICE,
+  with separate source and click budgets and no repeated Shackleton damage;
+- public Crash Space prevention enables a one-card required-stealth route,
+  and its one-shot capacity cannot be reused on a later damage encounter;
+- a used opportunity stays consumed this Runner turn and is restored for the
+  next Runner turn without changing the real card;
+- hidden Corp ICE is forecast only in an affordable rez plan;
+- one spare click cannot both gain a credit and initiate a repeated run; two
+  distinct spare clicks can support both; and
+- forecasts do not read hidden Grip identities or change credits, counters,
+  current phase/run state or the actual Runner's cached route.
+
+The focused batch/integration, Corp security and pool-lock regressions and all
+required syntax/format/deck checks pass. `node tests/run-all-tests.js` passes all 50 test files, including Corp decision
+fixtures and decision snapshots, on Node 20.19.0. This repairs the known implementation gap;
+independent batch/set-wide review remains separate.

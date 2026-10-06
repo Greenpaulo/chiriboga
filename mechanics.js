@@ -1258,6 +1258,27 @@ function GainClicks(player, num) {
  * @param {function} [afterSpend] called after spending complete
  * @param {Object} [context] for afterSpend
  */
+// Notify source-dependent spend responses only after a payment is complete.
+// The continuation waits for optional damage/prevention and all responses.
+function CreditSpendResponses(player, outsideAmount, doing, card, afterSpend, context) {
+  if (outsideAmount > 0 && ActiveCards(null).some(function (source) {
+    return source && source.responseOnCreditsSpent && CheckHasAbilities(source);
+  })) {
+    TriggeredResponsePhase(playerTurn, "responseOnCreditsSpent", [player, outsideAmount, doing, card],
+      function () { if (typeof afterSpend == "function") afterSpend.call(context); }, "Credits spent");
+  } else if (typeof afterSpend == "function") afterSpend.call(context);
+}
+
+// Restricted payments (e.g. required stealth) cannot substitute pool credits.
+function SpendHostedCredits(player, source, amount, afterSpend, context) {
+  if (amount < 1 || source.credits < amount) return;
+  source.credits -= amount;
+  UpdateCounters();
+  Log(PlayerName(player) + " spent " + amount + " credits from " + GetTitle(source, true));
+  if (typeof source.onCreditsSpent == "function") source.onCreditsSpent.call(source, amount);
+  CreditSpendResponses(player, amount, "using", source, afterSpend, context);
+}
+
 function SpendCredits(
   player,
   num,
@@ -1266,24 +1287,15 @@ function SpendCredits(
   afterSpend,
   context
 ) {
-  //Temporary credits are still consumed first. Choosing between the credit
-  //pool and eligible card-hosted sources happens below.
-  if (player == runner) {
-    var spendCred_temporary = Math.min(num, runner.temporaryCredits);
-    if (spendCred_temporary > 0) {
-      runner.temporaryCredits -= spendCred_temporary;
-      num -= spendCred_temporary;
-      if (spendCred_temporary == 1)
-        Log(PlayerName(player) + " spent one temporary credit");
-      //TODO specific messages per type?
-      else
-        Log(
-          PlayerName(player) +
-            " spent " +
-            spendCred_temporary +
-            " temporary credits"
-        );
-    }
+  var outsideSpent = 0;
+  var temporaryAvailable = function () {
+    return player == runner ? Math.max(0, runner.temporaryCredits || 0) : 0;
+  };
+  function spendTemporary(amount) {
+    runner.temporaryCredits -= amount;
+    num -= amount;
+    outsideSpent += amount;
+    Log(PlayerName(player) + " spent " + amount + " temporary credits");
   }
   function eligibleHostedSources() {
     return ActiveCards(player).filter(function (source) {
@@ -1296,6 +1308,7 @@ function SpendCredits(
   function spendFromCard(source, amount) {
     source.credits -= amount;
     num -= amount;
+    outsideSpent += amount;
     if (amount == 1)
       Log(PlayerName(player) + " spent one credit from " + GetTitle(source, true));
     else
@@ -1330,7 +1343,7 @@ function SpendCredits(
       );
       return;
     }
-    if (typeof afterSpend === "function") afterSpend.call(context);
+    CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context);
   }
 
   function choosePaymentSource() {
@@ -1345,6 +1358,10 @@ function SpendCredits(
     //Keep computer-player payments deterministic and compatible with the
     //existing strategy code. Human players choose every non-forced allocation.
     if (player.AI) {
+      var preserveOutside = player == runner && typeof player.AI.AIPreserveOutsideCredits == "function" &&
+        player.AI.AIPreserveOutsideCredits(doing, card, num);
+      if (preserveOutside && canUsePool) spendFromPool(num);
+      if (num > 0 && temporaryAvailable() > 0) spendTemporary(Math.min(num, temporaryAvailable()));
       for (var i = 0; i < sources.length && num > 0; i++)
         spendFromCard(sources[i], Math.min(num, sources[i].credits));
       if (num > 0 && canUsePool) spendFromPool(num);
@@ -1352,7 +1369,22 @@ function SpendCredits(
       return;
     }
 
-    if (sources.length < 1) {
+    // Temporary credits are optional sources too. Avoid adding a choice to
+    // existing payments unless a source-sensitive effect makes it meaningful.
+    var temporary = temporaryAvailable();
+    var sourceSensitive = player == runner && typeof OutsideCreditDamageSources == "function" &&
+      OutsideCreditDamageSources(typeof attackedServer == "undefined" ? null : attackedServer).length > 0;
+    if (temporary > 0 && !sourceSensitive) {
+      spendTemporary(Math.min(num, temporary));
+      if (num < 1) { finishPayment(); return; }
+      temporary = temporaryAvailable();
+    }
+    if (sources.length < 1 && temporary > 0 && (!canUsePool || player.creditPool < 1)) {
+      spendTemporary(Math.min(num, temporary));
+      choosePaymentSource();
+      return;
+    }
+    if (sources.length < 1 && temporary < 1) {
       if (canUsePool) spendFromPool(num);
       finishPayment();
       return;
@@ -1364,7 +1396,7 @@ function SpendCredits(
     var minimumHostedSpend = Math.max(0, num - usablePoolCredits);
     var maximumHostedSpend = Math.min(num, sources[0].credits);
     if (
-      sources.length == 1 &&
+      temporary < 1 && sources.length == 1 &&
       minimumHostedSpend > 0 &&
       minimumHostedSpend == maximumHostedSpend
     ) {
@@ -1374,6 +1406,8 @@ function SpendCredits(
     }
 
     var choices = [];
+    if (temporary > 0) choices.push({temporary: true, num: 1,
+      label: "Spend 1 temporary credit", button: "Spend 1[c] temporary credit"});
     for (var i = 0; i < sources.length; i++) {
       for (var amount = 1; amount <= Math.min(num, sources[i].credits); amount++) {
         choices.push({
@@ -1401,7 +1435,8 @@ function SpendCredits(
       player,
       choices,
       function (params) {
-        if (params.card) spendFromCard(params.card, params.num);
+        if (params.temporary) spendTemporary(params.num);
+        else if (params.card) spendFromCard(params.card, params.num);
         else spendFromPool(params.num);
         choosePaymentSource();
       },

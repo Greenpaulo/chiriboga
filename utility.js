@@ -2730,6 +2730,24 @@ function Shuffle(array) {
  */
 // Public limits for hypothetical run and central-threat planning. Infinity
 // means no limit. These hooks never inspect concealed Corp card identities.
+// Public source-sensitive damage, safe with a hypothetical server and outside
+// a run. Hooks report only available effects and may not inspect hidden Grip.
+function PublicMeatDamagePrevention() {
+  return InstalledCards(runner).reduce(function (sum, card) {
+    if (!CheckHasAbilities(card) || typeof card.AIMeatDamagePrevention != "function") return sum;
+    return sum + Math.max(0, card.AIMeatDamagePrevention.call(card));
+  }, 0);
+}
+
+function OutsideCreditDamageSources(server) {
+  if (!server) return [];
+  return server.root.filter(function (card) {
+    return card.rezzed && CheckHasAbilities(card) && typeof card.AIOutsideCreditDamage == "function";
+  }).map(function (card) {
+    return {card: card, damage: Math.max(0, card.AIOutsideCreditDamage.call(card, server))};
+  }).filter(function (source) { return source.damage > 0; });
+}
+
 function ServerAccessLimit(server) {
   var limit = Infinity;
   for (var card of server.root) {
@@ -2870,11 +2888,14 @@ function InstalledMemoryCost(destination = null, ignoreCards = []) {
  * @returns {int} number of agenda points
  */
 
+function AgendaPointsForCard(card, player) {
+  return typeof card.agendaPointsForPlayer == "function" ? card.agendaPointsForPlayer.call(card, player) : (card.agendaPoints || 0);
+}
+
 function AgendaPoints(player) {
-  var ret = 0;
-  for (var i = 0; i < player.scoreArea.length; i++)
-    ret += player.scoreArea[i].agendaPoints;
-  return ret;
+  return player.scoreArea.reduce(function (total, card) {
+    return total + AgendaPointsForCard(card, player);
+  }, 0);
 }
 /**
  * Get the array of a runner row by string.<br/>Logs an error if invalid row.

@@ -31,10 +31,10 @@ in card-sets.md.
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
 | `elevation` | playable | 82 | 76 | 6 | 0 | 2 | 55 / 64 | false / false | yes |
-| `vantagepoint` | in-progress | 66 | 66 | 0 | 2 | 0 | 58 / 62 | true / true | no |
+| `vantagepoint` | in-progress | 66 | 66 | 0 | 0 | 0 | 60 / 62 | true / true | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
-| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 15 / 57 | true / true | no |
+| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 
 ## config.js disagreements
@@ -78,8 +78,7 @@ None.
 
 ### `vantagepoint` (sets/vantagepoint.js)
 
-- 36065 Shackleton Grid: 1 scaffold marker(s)
-- 36066 Let Them Dream: 1 scaffold marker(s)
+None.
 
 ## Runner keep coverage (playable sets)
 

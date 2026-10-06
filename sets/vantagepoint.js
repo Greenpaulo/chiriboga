@@ -325,7 +325,7 @@ cardSet[36004] = {
         return false;
       return (
         typeof card.canUseCredits !== "function" ||
-        card.canUseCredits("using", corsair)
+        card.canUseCredits("using", null)
       );
     });
   },
@@ -383,8 +383,7 @@ cardSet[36004] = {
         var applyDebuff = function (selection) {
           if (!selection || !selection.card || selection.card.credits < 1)
             return;
-          selection.card.credits -= 1;
-          UpdateCounters();
+          SpendHostedCredits(runner, selection.card, 1, function () {
           self.barrierDebuff = (self.barrierDebuff || 0) + 3;
           var targetIce = attackedServer.ice[approachIce];
           if (targetIce) {
@@ -397,6 +396,7 @@ cardSet[36004] = {
                 " gets -3 strength for this encounter.",
             );
           }
+          }, self);
         };
         if (stealthCards.length === 1) {
           applyDebuff(stealthCards[0]);
@@ -466,26 +466,21 @@ cardSet[36004] = {
         );
       },
     ).length;
-    if (reductionsUsed < stealthCredits) {
-      var reduction = rc.StrModify(iceAI.ice, this, point, -3, false);
+    if (!rc._poolOnly && Math.max(reductionsUsed, (point.restrictedCreditsSpent || 0) + (rc._restrictedCreditsUsed || 0)) < stealthCredits) {
+      var reduction = rc.StrModify(this, iceAI.ice, point, -3, false);
       reduction.runner_credits_spent += 1;
+      reduction.restrictedCreditsSpent = (point.restrictedCreditsSpent || 0) + 1;
+      reduction.restrictedCreditsPaid = Math.min(reduction.restrictedCreditsSpent, rc._restrictedStealthCredits || 0);
       result.push(reduction);
     }
     return result;
   },
-  AIRunPoolCreditOffset: function (server, runEventCardToUse) {
-    var corsair = this;
-    var installedCorsairs = InstalledCards(runner).filter(function (card) {
-      return card.AIUsesStealthCredits;
-    });
-    if (installedCorsairs[0] != this) return 0;
+  AIRunRestrictedCredits: function (server) {
     return this._stealthCreditCards().reduce(function (total, card) {
-      if (
-        typeof card.canUseCredits === "function" &&
-        card.canUseCredits("using", corsair)
-      )
-        return total;
-      return total + card.credits;
+      // Credits excluded from the generic route budget can pay only the
+      // explicitly modelled stealth strength-reduction payment.
+      return typeof card.canUseCredits == "function" && card.canUseCredits("", null) ?
+        total : total + card.credits;
     }, 0);
   },
   AIPreferredInstallChoice: function (choices) {
@@ -566,18 +561,9 @@ cardSet[36005] = {
       choices = [choices[choices.length - 1]];
     }
     var spendFromChoice = function (params) {
-      params.card.credits -= params.amount;
-      UpdateCounters();
-      Log(
-        GetTitle(lampades) +
-          " spent " +
-          params.amount +
-          " credit" +
-          (params.amount == 1 ? "" : "s") +
-          " from " +
-          GetTitle(params.card),
-      );
-      lampades._spendStealthCredits(amount - params.amount, callback);
+      SpendHostedCredits(runner, params.card, params.amount, function () {
+        lampades._spendStealthCredits(amount - params.amount, callback);
+      }, lampades);
     };
     if (choices.length == 1) spendFromChoice(choices[0]);
     else {
@@ -1284,10 +1270,10 @@ cardSet[36015] = {
       var baker = this;
       var creditChoices = ChoicesArrayCards(this._stealthCreditCards());
       var spendAndRedirect = function (creditParams) {
-        creditParams.card.credits -= 1;
-        UpdateCounters();
-        attackedServer = params.server;
-        Log("Attacked server changed to " + ServerName(params.server));
+        SpendHostedCredits(runner, creditParams.card, 1, function () {
+          attackedServer = params.server;
+          Log("Attacked server changed to " + ServerName(params.server));
+        }, baker);
       };
       if (creditChoices.length == 1) spendAndRedirect(creditChoices[0]);
       else
@@ -5272,7 +5258,63 @@ cardSet[36065] = {
   subTypes: ["Region"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    automatic: true, availableWhenInactive: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    automatic: true, availableWhenInactive: true,
+  },
+  responseOnCreditsSpent: {
+    Enumerate: function (player, outsideAmount) {
+      if (player != runner || outsideAmount < 1 || this.usedThisTurn ||
+          !attackedServer || attackedServer != GetServer(this)) return [];
+      var choices = [{id: 1, label: "Do 4 meat damage", button: "Do 4 meat damage"},
+        {id: 0, label: "Continue", button: "Continue"}];
+      if (corp.AI) corp.AI.preferred = {title: "Credits spent", option: choices[0]};
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params.id) return;
+      this.usedThisTurn = true;
+      Damage("meat", 4, true);
+    },
+    text: "Do 4 meat damage after outside-credit payment",
+  },
+  AIOutsideCreditDamage: function (server) {
+    if (!CheckInstalled(this) || !this.rezzed || GetServer(this) != server) return 0;
+    // Corp-turn projection models the next Runner turn's fresh opportunity.
+    if (this.usedThisTurn && (attackedServer || playerTurn == runner)) return 0;
+    return 4;
+  },
+  AIDefensiveValue: function (server) {
+    if (!server) return 0;
+    var credits = corp.AI._effectiveRunnerCreditPool(server);
+    var outside = credits.temporaryCredits + credits.recurringCredits + credits.badPublicityCredits;
+    if (outside < 1) return 0;
+    var cost = corp.AI._evaluateServerSecurity(server).totalMandatoryBreakCost;
+    if (cost < 1) return 0;
+    // Four damage is credible only where passing the ICE requires payment.
+    // Otherwise this is not a substitute for a stopping defender.
+    return Math.min(4, cost);
+  },
+  AIPreferredUpgradeServer: function (servers) {
+    var grid = this;
+    var useful = servers.filter(function (server) {
+      return !server.root.some(card => CheckSubType(card, "Region")) && grid.AIDefensiveValue(server) > 0;
+    });
+    return useful.length ? corp.AI._serverToProtect(useful) : null;
+  },
+  AILimitPerServer: function () { return 1; },
+  AIRezWhenCan: function () {
+    if (!attackedServer || attackedServer != GetServer(this) || this.usedThisTurn) return false;
+    var credits = corp.AI._effectiveRunnerCreditPool(attackedServer);
+    return credits.temporaryCredits + credits.recurringCredits + credits.badPublicityCredits > 0 &&
+      (approachIce >= 0 || attackedServer.root.some(card => card != this && (card.trashCost || 0) > 0));
+  },
+  RezUsability: function () { return this.AIRezWhenCan(); },
 };
 
 //Let Them Dream (36066)
@@ -5289,5 +5331,83 @@ cardSet[36066] = {
   subTypes: ["Initiative"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  agendaPointsForPlayer: function (player) { return player == runner ? 1 : 2; },
+  responseOnScored: {
+    Enumerate: function () {
+      if (intended.score != this) return [];
+      if (corp.AI && !this._preferredSearch()) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var choices = [{source: corp.HQ.cards, label: "Search HQ", button: "Search HQ"},
+        {source: corp.RnD.cards, label: "Search R&D", button: "Search R&D"},
+        {source: corp.archives.cards, label: "Search Archives", button: "Search Archives"},
+        {source: null, label: "Continue", button: "Continue"}];
+      var plan = corp.AI ? this._preferredSearch() : null;
+      if (corp.AI) corp.AI.preferred = {title: this.title, option:
+        choices.find(choice => choice.source == (plan ? plan.source : null))};
+      DecisionPhase(corp, choices, function (params) {
+        if (!params.source) return;
+        var source = params.source;
+        var agendas = ChoicesArrayCards(source, function (card) { return card.cardType == "agenda"; });
+        // Only a restricted deck search may fail to find an existing agenda
+        // (CR 8.7.2e). HQ/Archives must find one when available.
+        if (source == corp.RnD.cards || !agendas.length)
+          agendas.push({card: null, label: "No agenda found", button: "No agenda found"});
+        if (corp.AI) corp.AI.preferred = {title: this.title, option:
+          agendas.find(choice => choice.card == (plan ? plan.card : null)) || agendas[0]};
+        DecisionPhase(corp, agendas, function (found) {
+          if (source == corp.RnD.cards) { Shuffle(corp.RnD.cards); Log("R&D shuffled"); }
+          if (!found.card) return;
+          Reveal(found.card, function () {
+            var destinations = [{destination: corp.HQ.cards, label: "Add to HQ", button: "Add to HQ"},
+              {destination: corp.RnD.cards, label: "Add to bottom of R&D", button: "Bottom of R&D"}];
+            if (corp.AI) corp.AI.preferred = {title: this.title, option:
+              destinations.find(choice => choice.destination == (plan ? plan.destination : corp.HQ.cards))};
+            DecisionPhase(corp, destinations, function (target) {
+              MoveCard(found.card, target.destination, target.destination == corp.RnD.cards ? 0 : null);
+              Log(GetTitle(found.card) + " added to " + (target.destination == corp.HQ.cards ? "HQ" : "the bottom of R&D"));
+            }, this.title, "Choose agenda destination", this);
+          }, this);
+        }, this.title, "Choose an agenda", this);
+      }, this.title, "Search for an agenda?", this);
+    },
+    text: "Search HQ, R&D or Archives for an agenda",
+  },
+  _preferredSearch: function () {
+    var ai = corp.AI;
+    var agendasInHand = corp.HQ.cards.filter(card => card.cardType == "agenda");
+    var scoringServers = ai._scoringServers(ai._emptyProtectedRemotes());
+    var canStage = scoringServers.length > 0 && ai._clicksLeft() > 0 &&
+      corp.HQ.cards.length < MaxHandSize(corp);
+    var pointsNeeded = AgendaPointsToWin() - AgendaPoints(corp);
+    if (canStage && agendasInHand.length == 0) {
+      var candidates = corp.archives.cards.concat(corp.RnD.cards).filter(card => card.cardType == "agenda");
+      candidates.sort(function (a, b) {
+        var winning = Number(b.agendaPoints >= pointsNeeded) - Number(a.agendaPoints >= pointsNeeded);
+        return winning || AdvancementRequirement(a) - AdvancementRequirement(b) || b.agendaPoints - a.agendaPoints;
+      });
+      if (candidates.length) {
+        var card = candidates[0];
+        return {source: card.cardLocation, card: card, destination: corp.HQ.cards};
+      }
+    }
+    // Remove agendas from exposed Archives; put them safely under R&D instead
+    // of flooding HQ when no protected scoring opportunity is ready.
+    var archiveAgenda = corp.archives.cards.filter(card => card.cardType == "agenda").sort(function (a, b) {
+      return AgendaPointsForCard(b, runner) - AgendaPointsForCard(a, runner);
+    })[0];
+    if (archiveAgenda) return {source: corp.archives.cards, card: archiveAgenda, destination: corp.RnD.cards};
+    if (agendasInHand.length > 1 || (!canStage && agendasInHand.length && !ai._evaluateServerSecurity(corp.HQ).isSecure)) {
+      // Keep the fastest winning scoring candidate; hide the other agenda.
+      agendasInHand.sort(function (a, b) {
+        return Number(b.agendaPoints >= pointsNeeded) - Number(a.agendaPoints >= pointsNeeded) ||
+          AdvancementRequirement(a) - AdvancementRequirement(b);
+      });
+      var hide = agendasInHand.length > 1 ? agendasInHand[agendasInHand.length - 1] : agendasInHand[0];
+      return {source: corp.HQ.cards, card: hide, destination: corp.RnD.cards};
+    }
+    return null;
+  },
+  AIAdvancementLimit: function () { return 4; },
 };

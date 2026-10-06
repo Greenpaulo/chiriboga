@@ -109,14 +109,16 @@ registered definitions. A lack of `TODO` does not prove a card is complete.
 Their `untested` registry flags should be treated literally. Add confirmed
 per-card findings here rather than describing an entire set as implemented.
 
-### Vantage Point batch 13 blocked dependency
+### Vantage Point batch 13 dependency and strategic repair complete
 
-Batch 13 (36061–36066) has partial tested work for 36061–36064. Shackleton Grid
-(36065) requires source-aware live payments, Runner run routes and Corp public
-security estimates before its mechanics and strategic support can be completed.
-Let Them Dream (36066) remains unstarted. This is unfinished work, not an accepted
-limitation. See the [exact dependency and acceptance criteria](vantage-point-implementation-notes.md#batch-13-partial-implementation-and-payment-model-blocker-2026-10-06)
-and [active batch tracker](current-set-implementation.md).
+Batch 13 (36061–36066) implements Shackleton's source-aware payments and opposing
+AI funding/damage models, plus Let Them Dream's search strategy and owner-sensitive
+points. The reopened Corsair/stealth security finding is repaired: Corp planning
+now follows complete restricted-payment routes with source exhaustion, prevention
+and finite-repeat/click budgets. Both real planners have same-board contrasting
+coverage; all 50 test files pass. See the [repair evidence](vantage-point-implementation-notes.md#batch-13-corp-restricted-payment-repair-2026-10-06).
+No new accepted limitation is recorded. Independent batch/set-wide review remains
+separate; playability flags are unchanged.
 
 ## 3. Confirmed AI hook gaps
 

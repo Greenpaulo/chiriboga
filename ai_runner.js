@@ -77,6 +77,19 @@ class RunnerAI {
     return null;
   }
   
+  AIPreserveOutsideCredits(doing, card, amount) {
+    if (!attackedServer || typeof OutsideCreditDamageSources != "function" ||
+        OutsideCreditDamageSources(attackedServer).length < 1) return false;
+    // Follow the real route's source allocation when it is for this server.
+    if (this.cachedPathServer == attackedServer && this.cachedBestPath) {
+      var last = this.cachedBestPath[this.cachedBestPath.length - 1];
+      if (typeof last.paymentPoolOnly == "boolean") return last.paymentPoolOnly;
+    }
+    // Without a route, prefer avoiding four damage over spending a free credit.
+    // If the pool cannot cover the cost, SpendCredits still pays from legal sources.
+    return true;
+  }
+
   _rootKnownToContainCopyOfCard(server, title) {
     // Older run-benefit hooks query Crisium by title; include public cards
     // with the same success-prevention capability in that existing contract.
@@ -1916,7 +1929,7 @@ console.log(this.preferred);
               server.cards[server.cards.length - 1].knownToRunner
             ) {
               if (server.cards[server.cards.length - 1].cardType == "agenda")
-				this.serverList[i].potential = server.cards[server.cards.length - 1].agendaPoints + 1.0;
+				this.serverList[i].potential = AgendaPointsForCard(server.cards[server.cards.length - 1], runner) + 1.0;
 			  else
                 this.serverList[i].potential = 0;
             } else if (server == corp.RnD) {
@@ -1970,7 +1983,7 @@ console.log(this.preferred);
             if (PlayerCanLook(runner, server.root[j])) {
               if (server.root[j].cardType == "agenda")
                 this.serverList[i].potential +=
-                  server.root[j].agendaPoints + 1.0;
+                  AgendaPointsForCard(server.root[j], runner) + 1.0;
               //the constant is arbitrary
               else if (server.root[j].title == "Clearinghouse")
                 this.serverList[i].potential += Math.max(
