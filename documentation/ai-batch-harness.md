@@ -67,6 +67,138 @@ The terminal shows a summary for each deck pair:
 `stolen` are the average agenda points per game, and `turns` is the average
 game length.
 
+### Five-pair regression benchmark (including N/A tickets)
+
+Use the frozen `beginner-v1` pool from the Corp AI regression investigation
+to screen gameplay changes, including tickets whose acceptance gate is
+`N/A`. It contains PD–Tao, BTL–Kit, NEH–Zahya, PE–Steve and Gateway, using
+System Gateway, System Update 2021 and Elevation. Seeds 1–200 give 1,000 games.
+Before the first comparison, check that `bench/current/baseline.json` exists.
+Benchmark JSON is ignored local evidence, so a fresh clone has no baseline.
+If it is missing, run `node scripts/refresh-ai-baseline.js` on a clean,
+committed checkout of the PR's target main build to initialise it (see
+[baseline refresh](#refreshing-the-accepted-baseline-after-a-merge)). Then
+return to the candidate branch before running the commands below. Use the
+same checkout so its ignored `bench/` reports remain available; if using
+separate worktrees, copy the target-main baseline into the candidate's
+`bench/current/baseline.json` first. Do not initialise the comparison baseline
+from the candidate build.
+
+If the target-main build predates the refresh script, initialise the report
+there with the harness directly instead:
+
+```sh
+node scripts/ai-batch.js \
+  --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --seeds 1-200 \
+  --out bench/current/baseline.json
+```
+
+Check that this initial report records a clean build, 1,000 games and zero
+failures before using it as the baseline.
+
+Run on a clean, committed candidate branch, using a new output filename for
+each PR/revision so earlier evidence is preserved:
+
+```sh
+node scripts/ai-batch.js \
+  --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --seeds 1-200 \
+  --out bench/pr-12-candidate.json
+
+node scripts/ai-batch.js \
+  --compare bench/current/baseline.json bench/pr-12-candidate.json
+```
+
+Replace `pr-12-candidate.json` with the ticket/PR and revision being tested.
+Keep reports in the ignored `bench/` evidence folder. The saved benchmark
+JSON is local evidence; it is not included in a fresh clone. Preserve/back up
+that file rather than overwriting it with a new run.
+
+The historical corrected-default benchmark was run on **2026-10-05**, at clean
+commit **`28cc665`**, with **1,000 games and zero failures**, pool hash
+`fe8cb821d04c9dd7` and code hash `83dee8ba06045827`. Its report is
+`bench/corp-options-default.json`. This is the corrected default intended for
+integration into main, rather than the investigation's old tip `b52d451`
+(`bench/current.json`, 25.3% Corp wins).
+
+| Pooled metric | Corrected-default benchmark |
+|---|---:|
+| Corp win rate | **39.8%** |
+| Corp points scored per game | 3.920 |
+| Runner points stolen per game | 5.767 |
+| Points stolen from HQ per game | 1.756 |
+| Points stolen from R&D per game | 2.044 |
+| Points stolen from Archives per game | 0.008 |
+| Points stolen from remotes per game | 1.959 |
+| Game length (turns) | 14.931 |
+
+The report used no start fixtures or collectors, Runner options `{}`, and
+all six Corp options false: `evidenceBasedHostedCardRez`,
+`secureScoringServerGate`, `serverAtRiskInstallOverride`,
+`committedAgendaReserveBypass`, `emptyArchivesRunPressure` and
+`valuelessServerDebtReset`. PR #18 removes `evidenceBasedHostedCardRez`
+after its failed acceptance gate; the other five options still default to false.
+The command above uses the candidate's defaults;
+check its report's effective options against the current baseline and explain any
+intentional difference. Keep the pool, decks, seeds, fixtures and collectors
+identical; the comparator rejects mismatches in pool hash, seeds, starts or
+collectors. Different source commits/code hashes are allowed.
+
+Read both reports' failure counts before interpreting the paired comparison:
+failed games are dropped from paired metrics and must be investigated, not
+treated as ordinary losses. Inspect pooled and per-pair results, win rate,
+scoring, total and per-server theft, and game length together. The plain
+comparison reports differences and paired 95% intervals; it does not award a
+regression pass/fail. Its phrase "changed by the options" counts differing
+game log hashes even when comparing code revisions.
+
+For a behaviour-preserving refactor, require zero changed games and unchanged
+decision snapshots. For an objective bug fix, changed games are expected when
+the fixed path is reached: investigate adverse outcome differences and record
+their explanation alongside the deterministic reproduction. A correctness
+fix is not rejected solely because one side's win rate falls. Pure documentation
+and human-only UI changes need not run this gameplay screen.
+
+The historical benchmark tracks cumulative changes. Compare new PRs against
+`bench/current/baseline.json`, the accepted current-main baseline. If that
+report does not represent the PR's target main build, also run the same command
+on its target main commit with a distinct output such as `bench/pr-12-main.json`,
+then compare that report with the candidate. This screen
+supplements the full regression suite and any ticket-specific strategic gate.
+See the [completed investigation handoff](corp-ai-regression/gated-fix-handoff.md)
+for the evidence and remaining scoring deficit against the historical H0 build.
+
+### Refreshing the accepted baseline after a merge
+
+After merging an accepted gameplay change, run this on the clean, committed
+merged build:
+
+```sh
+node scripts/refresh-ai-baseline.js
+```
+
+The script runs the five-pair pool with seeds 1–200 and writes
+`bench/baseline.json`. Once the report contains 1,000 games, zero failures and
+a clean-build marker, it copies the previous current baseline into
+`bench/archived-current/<archive-time>-<commit>.json`, then moves the new report
+to `bench/current/baseline.json`. The historical `bench/corp-options-default.json`
+is preserved. A single dated JSON filename already in `bench/current/` is
+also supported; more than one report there is rejected as ambiguous.
+
+If the run fails or the report is rejected, the previous baseline stays in
+place. Any new `bench/baseline.json` is retained for inspection; move it aside
+before retrying. The script also refuses to overwrite an existing report at
+that staging path. Concurrent refreshes are blocked by
+`bench/.baseline-refresh.lock`; if the process is forcibly terminated, remove
+that lock only after checking no refresh is still running.
+
+Refreshing records a change already accepted in review; it does not decide
+whether a candidate should be accepted. A Runner fix can legitimately lower
+Corp win rate. Record the merged commit, results and reason for the baseline
+change in the PR or ticket. Reports in `bench/` remain local, ignored evidence
+and should be backed up.
+
 ### What a report contains
 
 The JSON report has one line per game, plus:

@@ -1,7 +1,57 @@
 # Corp AI: install choice crashes on a "Skip install" option whose card is null
 
 **Source log:** none. Found by the F4 baseline run (`leo-topan` seed 101); replay with `node scripts/ai-game.js --seed 101:leo-topan --corp "LEO Glacier.js" --runner "Topan CBB.js" --tail 30`.
-**Reproduction:** `tests/pending/corp-install-choice-null-skip-option.test.js` — `node tests/pending/corp-install-choice-null-skip-option.test.js` (fails at `f795a63`, 2026-10-02); variation `tests/pending/corp-install-choice-null-decline-option.test.js` — `node tests/pending/corp-install-choice-null-decline-option.test.js` (fails at `5b8952f`, 2026-10-02)
+**Reproduction:** `tests/pending/corp-install-choice-null-skip-option.test.js` — `node tests/pending/corp-install-choice-null-skip-option.test.js` (fails at `f795a63`, 2026-10-02). It now passes and has moved, unchanged, to `tests/corp-install-choice-null-skip-option.test.js` (`node tests/corp-install-choice-null-skip-option.test.js`).
+
+## Resolution
+
+Implemented from `b52d451`, on branch `temp/corp-install-null-option`.
+
+- **Fix.** `_bestInstallOption()` now skips options whose `card` is null when
+  building its candidate list, so a "Skip install" (or any other null-card)
+  option is
+  never ranked as a card. The comparison changed from
+  `typeof card !== "undefined"` to `card != null`. Options with a real card
+  are handled exactly as before.
+- **Audit.** These are all the Corp AI places that read `optionList[i].card`:
+  - `_reducedDiscardList()` passed the card to `CheckCardType()`, which reads
+    `card.cardType` with no null check, so it gets the same guard. A
+    null-card option in a discard prompt was not seen in play [Inferred], but
+    the guard is harmless.
+  - `_bestTrashOption()` only compares the card with known threats, so a null
+    card is harmless.
+  - `Phase_TrashBeforeInstall()` already checks `card !== null`.
+  - `_bestNonAgendaTutorOption()` and the other helpers use truthy checks.
+- **Not changed (strategic, out of scope).** When the ranking finds nothing
+  worth installing, `_choiceInner()` still falls back to option 0 and logs
+  "bestInstallOption failed to find any desired install options". With a
+  skip option present, choosing skip would be legal, but whether it is better
+  is a strategic question for a separate, gated item if wanted.
+- **Tests.**
+  - The reproduction moved to `tests/` with its expectation unchanged,
+    together with the shared board helper (`tests/_headless-board.js`). The two
+    still-pending tests that use the helper
+    (`humanoid-resources-install-stalls-game`,
+    `scrounge-unaffordable-program-stalls-game`) now find it in either folder.
+    That was a path change only, and both still fail for their own reasons.
+  - New `tests/corp-ai-null-card-options.test.js` calls `_bestInstallOption()`
+    (only a skip option returns -1; a skip option is never chosen as a card)
+    and `_reducedDiscardList()` with null-card options in a real game context.
+    It fails without the fix.
+  - Note: the Humanoid Resources reproduction now reaches that card's
+    separate freeze, so its game ends on the 3 s stall watchdog. The test
+    still asserts only the crash and passes.
+- **Checks.**
+  - `node tests/run-all-tests.js` passes: 45 files, including corp-decision
+    fixtures and decision snapshots. It was run with the git-ignored `images/`
+    folder linked in, because a fresh worktree has no card art and two
+    image-asset tests fail without it.
+  - F6's seeded hashes are unchanged (PD/Tao seeds 1–3).
+- No AI hook changed, so `documentation/ai.md` is unchanged. No
+  `architecture.md` section describes this input handling.
+
+The Scatter Field null-Decline variation is also covered by
+`tests/corp-install-choice-null-decline-option.test.js`, with its original expectation unchanged.
 
 ## Summary
 When a card offers the Corp an install prompt with a skip option such as
@@ -83,11 +133,11 @@ option a card offers; a thrown error replaces the decision with an arbitrary
 option.
 
 ## Acceptance criteria
-- [ ] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged, together with `tests/pending/_headless-board.js`.
-- [ ] The Scatter Field variation `tests/pending/corp-install-choice-null-decline-option.test.js` passes and has moved into `tests/`, expectation unchanged.
-- [ ] A unit test covers a null-card option in each Corp AI helper changed by the audit.
-- [ ] New or changed AI hooks are documented in `documentation/ai.md`.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged, together with `tests/pending/_headless-board.js`.
+- [x] The Scatter Field variation `tests/corp-install-choice-null-decline-option.test.js` passes, expectation unchanged.
+- [x] A unit test covers a null-card option in each Corp AI helper changed by the audit.
+- [x] New or changed AI hooks are documented in `documentation/ai.md`. (None changed.)
+- [x] `node tests/run-all-tests.js` passes.
 
 ## Out of scope / related
 - After the crash the game deadlocks; that is a separate card bug,

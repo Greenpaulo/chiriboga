@@ -1,5 +1,5 @@
 'use strict';
-// Pending reproduction: documentation/bugs/corp-install-choice-crashes-on-null-skip-option.md
+// Regression: documentation/bugs/code-review/corp-install-choice-crashes-on-null-skip-option.md
 // Variation: Scatter Field's "You may install 1 card from HQ." subroutine
 // offers `{card: null, label: "Decline"}`; the Corp AI's install-choice ranking
 // must not throw on it.

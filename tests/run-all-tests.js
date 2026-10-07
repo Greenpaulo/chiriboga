@@ -13,8 +13,16 @@ const testsDir = __dirname;
 const verbose = !!process.env.VERBOSE;
 const QUIET_MAX_LINES = 5;
 const QUIET_MAX_BYTES = 600;
+// This integration test launches AI games/batches; exclude it only when requested.
+const nonUnitFiles = new Set(['ai-batch.test.js']);
+const args = process.argv.slice(2);
+if (args.some(arg => arg !== '--unit-only')) {
+  console.error('Usage: node tests/run-all-tests.js [--unit-only]');
+  process.exit(2);
+}
+const unitOnly = args.includes('--unit-only');
 const files = fs.readdirSync(testsDir)
-  .filter(file => file.endsWith('.test.js'))
+  .filter(file => file.endsWith('.test.js') && (!unitOnly || !nonUnitFiles.has(file)))
   .sort();
 
 const failed = [];
@@ -48,4 +56,4 @@ if (failed.length) {
   console.log(failed.length + ' of ' + files.length + ' test files failed: ' + failed.join(', '));
   process.exit(1);
 }
-console.log(files.length + ' test files passed.');
+console.log(files.length + (unitOnly ? ' unit test files passed; skipped ai-batch.test.js (plays batches).' : ' test files passed.'));

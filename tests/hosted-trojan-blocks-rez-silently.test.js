@@ -5,10 +5,8 @@
 // Its "should rez" reproduction is pending in
 // tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js.
 //
-// Reproduces: _iceWorthRezzing() returns false without logging a reason
-// for unrezzed ice hosting a non-exempt Runner Trojan (here, Chromatophores,
-// id 35030) whenever Credits(corp) < currentRezCost * 5, even when nothing
-// else on the board would otherwise justify withholding the rez.
+// Guards the retained hosted-card rez policy after the candidate failed its gate.
+// Further diagnostic and policy cases are in tests/corp-server-security.test.js.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');

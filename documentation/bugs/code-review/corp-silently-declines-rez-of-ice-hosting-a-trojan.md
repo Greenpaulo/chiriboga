@@ -28,9 +28,13 @@ suite pass; no expectation was changed and no art was committed.
   This diagnostic is active with the option off as well as on.
 - Moved the original reproduction to
   `tests/hosted-trojan-blocks-rez-silently.test.js` with its `true` decision
-  assertion unchanged. Its harness now resets the option per case, enables the
-  candidate for the reproduction, and puts the hosted card in the public
-  installed-card list with its real `host`; these setup-only changes account
+  assertion and zero-message-count expectation unchanged (both are present
+  in the pending test at `64bcf17`). The historical assertion message incorrectly
+  asks for a decline log while asserting zero messages. It is retained verbatim
+  so the complete original assertion calls remain comparable; explanatory
+  comments clarify that the candidate's successful rez needs no decline log.
+  Its harness now resets the option per case, enables the candidate for the
+  reproduction, and puts the hosted card in the public installed-card list with its real `host`; these setup-only changes account
   for the ticket checker's non-expectation diff warning. Added option-off
   coverage plus decisive and redundant Tranquilizer cases to the shared Corp
   security suite, while retaining the reproduction's Saci-style and rich-Corp
@@ -70,8 +74,10 @@ suite pass; no expectation was changed and no art was committed.
 
 - Removed the option, its branch and its option-only tests from
   `ai_corp.js` and `tests/corp-server-security.test.js`.
-  `CorpAI.DEFAULT_OPTIONS` is now empty. The hosted-card veto and its logging
-  are as before the option.
+  `CorpAI.DEFAULT_OPTIONS` was empty at closing. The later merge of main
+  retains five independent default-off regression options;
+  `evidenceBasedHostedCardRez` stays removed. The hosted-card veto and its
+  logging are as before the option.
 - Split the reproduction. Its two guards (Saci exemption, rich Corp) stay
   green in `tests/hosted-trojan-blocks-rez-silently.test.js`. Its "should
   rez" case moved back, unchanged, to

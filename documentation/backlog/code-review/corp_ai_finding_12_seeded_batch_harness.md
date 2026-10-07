@@ -4,6 +4,12 @@
 
 Implemented from `f795a63`.
 
+**Separate investigation.** The `documentation/corp-ai-regression/` tree was
+added in `7b28f2a` after the harness was used. It preserves historical benchmark
+findings, runbooks and evidence; it is tracked in
+[corp_ai_regression_investigation.md](corp_ai_regression_investigation.md),
+not claimed as F4 implementation or a production AI fix.
+
 **What was built.**
 - `scripts/ai-batch/headless.js` is the shared headless game module,
   extracted from `scripts/ai-game.js`; `ai-game.js` now uses it with its old
@@ -526,7 +532,9 @@ processes. The games cost no tokens. The runner therefore supports:
     `Zwicky Supermodernism.js` and `LEO Glacier.js`.
 
 ## Acceptance gate
-Not gated: F4 adds infrastructure and changes no AI decision. It is adopted
+
+N/A — deterministic fix (principle 4): the acceptance criteria below are the
+oracle for this infrastructure change. F4 changes no AI decision. It is adopted
 when:
 - scenarios 1 to 10 pass;
 - the first all-options-off baseline report is committed under
@@ -544,10 +552,11 @@ when:
 - **Dependency:** F4 depends on Runner item D2 (injectable Runner
   randomness). `scripts/roadmap.js` and `tests/ai-roadmaps.test.js` resolve
   dependencies across both roadmaps, so this Corp-to-Runner dependency is
-  valid. D2's seam is implemented and awaiting independent review; no baseline
-  is committed and no gate is judged until D2 is done. The harness must keep a
-  regression check that Runner policy draws use the dedicated stream rather
-  than silently falling back to the engine stream.
+  valid. D2 is done, with its ticket in `documentation/backlog/done/`. F4's
+  committed baseline and complete gate workflow are recorded in this ticket's
+  Resolution. The harness retains a regression check that Runner policy draws
+  use the dedicated stream rather than silently falling back to the engine
+  stream.
 
 ## Acceptance criteria
 - [x] Every test scenario above is covered by a deterministic test.

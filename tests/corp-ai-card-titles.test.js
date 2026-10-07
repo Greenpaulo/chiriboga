@@ -20,7 +20,6 @@ const verbose = !!process.env.VERBOSE;
 
 const LEGACY_TITLES = [
   '_iceIsDisabled: Femme Fatale',
-  '_iceInstallScore: Palisade',
   '_advancementLimit: SanSan City Grid',
   '_bestRecurToHQOption: Snare!',
   '_potentialDamageOnBreach: Hokusai Grid',

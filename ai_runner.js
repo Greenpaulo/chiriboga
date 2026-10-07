@@ -24,7 +24,55 @@ function AIIceEncounterRestoreState(stored) {
 	attackedServer = stored.attackedServer;
 	approachIce = stored.approachIce;
 }
-  
+
+//Guarded hypothetical evaluation (Corp roadmap F2). Every planning probe that
+//temporarily changes game state goes through one of these, so state is restored
+//even if evaluate throws, and AIHypothetical.depth is above 0 while the changed
+//board is evaluated (the Corp security cache is bypassed at any depth).
+var AIHypothetical = { depth: 0 };
+function AIWithHypothetical(apply, evaluate, restore) {
+	AIHypothetical.depth++;
+	try {
+		apply();
+		return evaluate();
+	} finally {
+		restore();
+		AIHypothetical.depth--;
+	}
+}
+//evaluate with a prospective run on server (sets attackedServer only; a
+//context without the engine's run globals evaluates unchanged, still guarded)
+function AIWithRunContext(server, evaluate) {
+	var hasRunState = typeof attackedServer != "undefined";
+	var stored = hasRunState ? attackedServer : null;
+	return AIWithHypothetical(
+		function () {
+			if (hasRunState) attackedServer = server;
+		},
+		evaluate,
+		function () {
+			if (hasRunState) attackedServer = stored;
+		},
+	);
+}
+//evaluate as if iceCard were being encountered. evaluate receives false, with
+//the encounter state unchanged, when iceCard is not in a server.
+function AIWithIceEncounter(iceCard, evaluate) {
+	var stored = AIIceEncounterSaveState();
+	var entered = false;
+	return AIWithHypothetical(
+		function () {
+			entered = AIIceEncounterModifyState(iceCard);
+		},
+		function () {
+			return evaluate(entered);
+		},
+		function () {
+			AIIceEncounterRestoreState(stored);
+		},
+	);
+}
+
 
 //actual class
 class RunnerAI {

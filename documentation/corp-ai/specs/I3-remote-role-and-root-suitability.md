@@ -15,8 +15,11 @@ Root destinations come from legacy helpers built on `_protectionScore()`:
 `_emptyProtectedRemotes()`, `_isAScoringServer()`, `_scoringServers()`,
 `_bestProtectedRemote()` and `_bestServerToUpgrade()`. Roles are implicit:
 `_rankedInstallOptions()` keeps generic non-HVT assets off the strongest empty
-remote by skipping it, and `_isAScoringServer()` treats a secure remote that
-already holds an agenda, scoring upgrade or Ambush as a scoring server.
+remote by skipping it, and `_isAScoringServer()` treats a remote that already
+holds an agenda, scoring upgrade or Ambush as a scoring server after its
+optional security check. `secureScoringServerGate` now defaults to `false`;
+an insecure remote can qualify. Derive roles from observed contents and
+candidate plans, not an assumption that every legacy scoring server is safe.
 
 `_classifyRunnerMacroThreat()` reports whether the visible board is balanced,
 HQ-focused, R&D-focused or split (`focus`) and flags non-interactive pressure.
@@ -25,7 +28,8 @@ penalties instead, so nothing yet uses `focus`.
 
 Bait and agenda-bluff postures (`_shouldBaitServer()`,
 `_remoteDeceptionProfile()`) are cached for an installed card's lifetime and
-never end; L8.4 replaces them with bounded epochs.
+have no timed expiry; existing card-eligibility and winning-breach checks can
+disable them. L8.4 replaces lifetime caching with bounded epochs.
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design

@@ -32,7 +32,7 @@ const ai = context.reviewAI;
 corp.AI = ai;
 // Ballista's AIWouldTrigger() calls Math.random() directly rather than the
 // injectable corp.AI._random() (a separate, already-known principle-5 gap -
-// see documentation/backlog/remediation/D2-injectable-runner-randomness.md).
+// see documentation/corp-ai/specs/P2-corp-card-policy-randomness.md).
 // Forcing it to 0 makes any branch that actually consults
 // corp.AI._agendasInServer() land on "protect the agenda" (return false),
 // so the central-server branch's failure to do the same is deterministic
@@ -45,7 +45,7 @@ const agenda = {cardType: 'agenda', agendaPoints: 1};
 
 let failures = 0;
 function test(name, fn) {
-  try { fn(); console.log('ok   ' + name); } catch (e) { failures++; console.log('FAIL ' + name + '\n     ' + e.message); }
+  try { fn(); if (process.env.VERBOSE) console.log('ok   ' + name); } catch (e) { failures++; console.log('FAIL ' + name + '\n     ' + e.message); }
 }
 
 test('control: a remote server holding the accessed agenda ends the run on this roll', () => {

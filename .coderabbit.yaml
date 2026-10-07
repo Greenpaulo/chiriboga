@@ -149,8 +149,9 @@ reviews:
           For each ticket under review, fail if:
           - the PR description does not name the ticket's path and include
             the pasted output of `node scripts/ticket.js check <ticket>`;
-          - that output contains a FAIL, unless the ticket's Resolution gives
-            concrete evidence that it is pre-existing and unrelated;
+          - that output contains a FAIL outside the reproduction-move check, or
+            a reproduction-move FAIL lacks a Resolution justification permitted
+            by the review-ticket skill;
           - the reproduction's expectation was changed when it was moved;
           - a ticked acceptance criterion has no supporting evidence in the
             diff or Resolution; or

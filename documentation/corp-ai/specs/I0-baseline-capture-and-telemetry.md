@@ -38,6 +38,13 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
 ## Design
 No new telemetry system. Extend the existing pieces:
 
+Capture the [corrected regression default](install-decisions-design.md#corrected-regression-baseline-and-ownership),
+with all five legacy regression gates off, and record their effective settings
+alongside the build/pool hashes. The old unconditional policies are not the
+baseline for future I-layer work. Observation-only additions must preserve
+that corrected policy's outcomes. Later layers compare matching controls with
+their prerequisite options identical, back-filling collectors as required.
+
 - **Candidate record in snapshots.** When `DecisionSnapshots.enabled`, attach
   an `install` block to the current snapshot entry (a small `Note(key, data)`
   method on the recorder, called from `_rankedInstallOptions()` and

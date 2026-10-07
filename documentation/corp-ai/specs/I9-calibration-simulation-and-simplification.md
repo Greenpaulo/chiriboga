@@ -76,6 +76,7 @@ coefficients:
   bucket is within 0.05 of the documented formula.
 
 ## Acceptance criteria
+- [ ] Before retiring the legacy fallback, audit I2's empty-Archives reward-valuation disposition. The Resolution links its completed fix/evidence or its still-open follow-up ticket and states the remaining policy. An open gap must remain tracked, and unvalidated reward-based Archives admission must remain off; omission from the calibrated policy does not count as resolving it.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The `bluffSingleVariableCorrelation` collector (added by an L8 item through F4's collector extension point) also covers install-role decisions.
 - [ ] Each removed band or branch is listed in the Resolution with its equivalent-coverage evidence.

@@ -1,11 +1,43 @@
 # Runner: any credit spent during a run silently drains Touchstone (or any hosted-credit source) first, with no choice given to the player
 
+## Implementation plan
+
+Proposed at `f795a63`, 2026-10-02. **Approved 2026-10-02.**
+
+- **Validation:** The remediation finding reproduces in the payment-choice data: `SpendCredits()` emits hosted sources as card choices but emits the pool as `{card: null}` without a `button`. `MakeChoice()` therefore takes its multi-card highlight path and returns without rendering a modal, leaving eligible hosted cards clickable but the pool option with no UI target. `ActiveCards()` already includes every supported active source location (installed cards, identity, and resolving cards), and `MakeChoice()` applies the same generic glow/click handling to every non-null `choice.card`; no Touchstone, card-type, or payment-purpose special case was found. The new pending regression below fails because the pool choice has no button.
+- **Approach:** Add a `Spend 1[c] from pool` footer button to the pool choice in `SpendCredits()`. Each click spends exactly 1 credit and rebuilds the choices for the remaining cost, allowing any split between the pool and one or more hosted sources. Keep hosted sources as card choices so all eligible installed cards, identities, and in-flight events remain highlighted and clickable through the existing generic renderer. Do not change eligibility, AI payment order, or continuation behavior.
+- **Tests:** Move `tests/pending/touchstone-credit-pool-choice-ui.test.js` into the green suite unchanged once it passes; it uses a multi-credit cost to require a one-credit pool contribution rather than an all-or-nothing payment. Extend `tests/credit-pool-lock.test.js` to exercise a split pool/hosted allocation, verify the pool button, and verify that eligible installed, identity, and resolving-card sources are all returned as selectable card choices. Run the focused tests and the full suite.
+- **Risk:** `SpendCredits()` is shared by Runner and Corp payments, so the button will appear for either human side whenever pool-versus-hosted allocation is genuinely optional. Each pool selection now spends 1 credit and rebuilds the payment choices, allowing payment to split between the pool and hosted sources. Focused tests will retain the existing forced-payment, locked-pool, partial-allocation, callback, and continuation coverage.
+- **Docs:** Add a dated remediation entry to the Resolution covering the live-test findings and final verification. No AI documentation or architecture update is needed because this changes only human payment UI and leaves AI behavior unchanged.
+
 **Suggested location:** `documentation/bugs/` (move to `documentation/bugs/done/` once merged).
 **Source log:** `documentation/debug-logs/bug_raised/any_cred_spent_during_run_is_removed_from_touchstone_no_choice_given.txt`
 **File:** `mechanics.js` (root cause), `sets/vantagepoint.js` (Touchstone eligibility, verified correct). Line numbers are from `main` at `512a8f3`, 2026-09-24, and will drift; search by function name.
-**Status:** Remediation. The original fix remains incomplete: live play-testing found no selectable credit-pool option in mixed hosted-credit payments, and other eligible hosted sources still require verification.
+**Status:** Code review. The remediation adds the missing one-credit pool control and verifies generic selection/highlighting for every active-card source location, including resolving events.
+**Reproduction:** `tests/pending/touchstone-credit-pool-choice-ui.test.js` — failed at `f795a63`, 2026-10-02: the legal pool option had no footer-button metadata and offered the full remaining payment rather than a one-credit contribution. Moved to `tests/touchstone-credit-pool-choice-ui.test.js`; passes with the assertions unchanged (only the repository-relative harness path changed after the move).
 
 ## Resolution
+
+Implemented from `f795a63`.
+
+### Remediation 2026-10-02
+
+1. The missing pool control is fixed by giving the pool choice a visible `Spend 1[c] from pool` footer button.
+2. A pool selection now contributes exactly 1 credit before `SpendCredits()` rebuilds the choices. This permits arbitrary splits between the pool and one or more eligible hosted sources instead of making pool payment all-or-nothing.
+3. Hosted sources remain card choices. Coverage now verifies that an eligible installed card, identity, and resolving event (modelled on Overclock) are each discovered by `ActiveCards()`, offered by `SpendCredits()`, and highlighted by the generic card-choice UI while the pool button is visible. This covers the active locations used by all current hosted-credit sources, without card-title or card-type special cases.
+4. The change is inside the shared `SpendCredits()` choice construction, so it applies equally to breaker payments, access trash costs, subroutine taxes, and other costs that use this payment flow. Forced payments, pool locks, callbacks, continuations, and deterministic AI allocation remain unchanged.
+
+### Review follow-up 2026-10-04
+
+The full suite was compared in fresh worktrees at the recorded base (`f795a63`) and the PR head (`8e1677f`). Both reproduced the same `flipped-identity.test.js` and `vantagepoint-integration.test.js` failures because Git worktrees omit the ignored local `images/` directory; neither test nor its referenced card/set code changes in this PR. With the repository's existing local image assets linked into the isolated PR worktree, `node tests/run-all-tests.js` passed all 43 test files. The three focused payment regressions also pass directly.
+
+The pending reproduction was moved into the green suite. Its repository-root path required the expected one-level adjustment after moving from `tests/pending/` to `tests/`; its assertions were not changed.
+
+### Historical observations before the 2026-10-02 remediation
+
+The following observations describe the interim implementation before the pool
+button and source-selection coverage were added. The remediation above addresses
+these UI and verification gaps.
 
 The diagnosis was confirmed. A payment-priority workaround was initially
 considered, but rejected because it would merely replace "always spend
@@ -40,6 +72,14 @@ source and credit-pool allocations, multi-source allocation, continuation
 timing, hosted-source callbacks, and forced payment while the pool is locked.
 It does not verify that the rendered UI exposes the pool choice or that every
 eligible hosted source is player-selectable.
+
+## Acceptance criteria
+
+- [x] A mixed pool/hosted payment displays `Spend 1[c] from pool` as a selectable footer button.
+- [x] The pool contributes one credit at a time so a payment can be split across the pool and hosted sources.
+- [x] Eligible installed cards, identities, and resolving cards such as Overclock are offered and highlighted as clickable payment sources.
+- [x] The shared payment flow retains forced-payment, locked-pool, callback, continuation, and AI behavior.
+- [x] The full regression suite passes (`node tests/run-all-tests.js`: 43 test files).
 
 ---
 
@@ -164,11 +204,7 @@ Follow `tests/fixtures/README.md` and whichever runner-side decision/mechanics t
 
 ## 6. Watch-outs
 
-- **Don't reintroduce a prompt when there is only one legal allocation.** Skip
-  it when no hosted source is eligible, only the pool can pay, or payment is
-  otherwise forced. Keep the prompt when both a hosted source and the credit
-  pool can legally fund the payment; that is the genuine choice this fix must
-  preserve.
+- **Don't reintroduce a prompt for every single credit when there's nothing to choose.** Automatic payment should apply only when there is one legal allocation, such as pool-only payment with no eligible hosted source, or a forced contribution from the sole eligible hosted source with the balance paid from the pool. One eligible hosted source plus enough pool credits to pay the cost still offers different legal allocations: the player must be able to choose whether and how much to spend from the hosted source.
 - **`ActiveCards()` order matters for anything that stays auto-spent.** If the fix keeps *any* auto-spend fallback (e.g., default-to-pool-first per §4.2), double check corp-side hosted-credit cards (rez discounts, recurring credits on corp assets) aren't accidentally reordered by the same change — `ActiveCards()` is shared by both players.
 - **This function is called from many places** (`phase.js:985,1003,1018,1265,1292,1621,1636`, plus `mechanics.js:112,716,1995,2024`) covering trashing, stealing, ability costs, and more — a fix here is systemic, not local to runs or to Touchstone. Re-test corp-side costs (rez, trace) too, since `SpendCredits()` is shared.
 - **Reconstructing a fixture from this log carries the same risk flagged in the Archives/Baker report:** the log's final state dump is captured after the last logged action, and hand/board contents earlier in the game are partly inferred from `SPOILER:` lines. Build the fixture at the specific point right before the first "spent one credit from Touchstone" line, not from the end-of-log snapshot.

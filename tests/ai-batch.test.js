@@ -39,6 +39,7 @@ const game = (extra = {}) => playGame(Object.assign({streamPrefix: '1:gateway', 
 
 function cli(args, env = {}) {
   const result = spawnSync(process.execPath, [script, ...args], {encoding: 'utf8',
+    timeout: 180000,
     env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache'), AI_BATCH_TEST_OPTION: TEST_OPTION}, env)});
   return {status: result.status, out: (result.stdout || '') + (result.stderr || '')};
 }
@@ -145,6 +146,31 @@ const EXTRA_DRAW = side => `
     const [a, b] = outs.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));
     assert.deepStrictEqual(stable(a), stable(b));
     assert.strictEqual(a.games.length, 2);
+  });
+
+  await scenario('worker exits with an outstanding job reject without publishing a report', async () => {
+    // A preload intercepts the real worker's first dispatch, before playJob.
+    // Seed 2 stays alive without replying: failure must also stop this sibling.
+    for (const code of [0, 1]) {
+      const preload = setupFile('worker-exit-' + code, `
+        if (process.argv.includes('--worker')) {
+          process.on('message', job => {
+            if (job.seed === '1') process.exit(${code});
+            else setInterval(() => {}, 1000);
+          });
+          process.on = function(name, listener) {
+            if (name === 'message') return this;
+            return require('events').EventEmitter.prototype.on.call(this, name, listener);
+          };
+        }
+      `);
+      const out = path.join(tmp, 'worker-exit-' + code + '.json');
+      const r = cli(['--pairs', 'gateway', '--seeds', '1-3', '--jobs', '2', '--out', out],
+        {NODE_OPTIONS: '--require ' + JSON.stringify(preload)});
+      assert.strictEqual(r.status, 2, r.out);
+      assert.match(r.out, /Worker exited before returning gateway seed 1/);
+      assert.ok(!fs.existsSync(out), 'an incomplete report must not be published');
+    }
   });
 
   await scenario('2. an extra Corp AI draw leaves the engine and Runner streams unchanged', async () => {
@@ -333,6 +359,19 @@ const EXTRA_DRAW = side => `
     assert.notStrictEqual(first.status, 0, first.out);
     const second = cli(args);
     assert.ok(/baseline: reusing/.test(second.out) && /candidate: reusing/.test(second.out), second.out);
+    // Simulate an incomplete cached report written by the old worker lifecycle.
+    const cached = fs.readdirSync(path.join(tmp, 'cache')).map(file => path.join(tmp, 'cache', file))
+      .filter(file => file.endsWith('.json'));
+    const baselineFile = cached.find(file => {
+      const report = JSON.parse(fs.readFileSync(file, 'utf8'));
+      return report.options.corp[TEST_OPTION] === false;
+    });
+    assert.ok(baselineFile, 'the baseline was cached');
+    const baseline = JSON.parse(fs.readFileSync(baselineFile, 'utf8'));
+    baseline.games.pop();
+    fs.writeFileSync(baselineFile, JSON.stringify(baseline));
+    const repaired = cli(args);
+    assert.ok(/baseline: playing 2 games/.test(repaired.out) && /candidate: reusing/.test(repaired.out), repaired.out);
     const quick = cli(['gate', '--pairs', 'gateway', '--quick', '--seeds', '1-2', '--jobs', '2', '--guard', 'winRate=1']);
     assert.ok(/indicative only/.test(quick.out), quick.out);
     assert.notStrictEqual(quick.status, 0, 'a quick run cannot pass a gate');

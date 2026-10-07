@@ -17,6 +17,29 @@ const root = path.resolve(__dirname, '..', '..');
 let input = {};
 try { input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}'); } catch (e) { /* no payload */ }
 
+// A running Codex session may retain the old hook command and its inherited
+// Node PATH. Resolve the login-shell runtime before using modern test APIs.
+if (process.versions && Number(process.versions.node.split('.')[0]) < 18) {
+  if (process.env.CHIRIBOGA_HOOK_RUNTIME_RETRY) {
+    process.stdout.write(JSON.stringify({decision: 'block', reason: 'The login-shell Node runtime is still older than Node 18.'}));
+    process.exit(0);
+  }
+  const lookup = spawnSync('/bin/zsh', ['-lc', 'command -v node'], {cwd: root, encoding: 'utf8'});
+  const executable = (lookup.stdout || '').trim().split('\n').pop();
+  if (lookup.status !== 0 || !executable || executable === process.execPath) {
+    process.stdout.write(JSON.stringify({decision: 'block',
+      reason: 'The Stop hook requires Node 18 or newer. Its inherited runtime is ' +
+        process.versions.node + '; the login shell did not provide a newer runtime.'}));
+    process.exit(0);
+  }
+  const rerun = spawnSync(executable, [path.join(root, 'scripts/agent-hooks/verify-on-stop.js')],
+    {cwd: root, encoding: 'utf8', input: JSON.stringify(input), maxBuffer: 64 * 1024 * 1024,
+      env: Object.assign({}, process.env, {CHIRIBOGA_HOOK_RUNTIME_RETRY: '1'})});
+  process.stdout.write(rerun.stdout || '');
+  if (rerun.stderr) process.stderr.write(rerun.stderr);
+  process.exit(rerun.status === null ? 1 : rerun.status);
+}
+
 const counterFile = path.join(os.tmpdir(),
   'chiriboga-stop-hook-' + String(input.session_id || 'manual').replace(/[^\w-]/g, '') + '.count');
 const readCount = () => { try { return Number(fs.readFileSync(counterFile, 'utf8')) || 0; } catch (e) { return 0; } };
@@ -35,7 +58,7 @@ const run = spawnSync(process.execPath, [path.join(root, 'tests', 'run-all-tests
 if (run.status === 0) { resetCount(); process.exit(0); }
 
 const blocks = readCount();
-if (blocks >= MAX_BLOCKS) { resetCount(); process.exit(0); }
+if (blocks >= MAX_BLOCKS) process.exit(0);
 fs.writeFileSync(counterFile, String(blocks + 1));
 
 const tail = ((run.stdout || '') + (run.stderr || '')).trim().split('\n').slice(-60).join('\n');
