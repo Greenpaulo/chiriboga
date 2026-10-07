@@ -366,8 +366,8 @@ Everything else below is situational — add it only if the card's effect genuin
 
 A handful of `AI*`-named properties are **written by the engine at runtime as caches/counters**, not something a card definition sets. Setting them yourself will be overwritten or ignored:
 
-- `AIIceInstallScore`, `AInumCompatibleIceInstalled`, `AIPreferredTarget`, `AIPlayedWithCost`, `AITurnsInstalled`, `AISuccessfulRuns` — engine-computed, read-only from a card-author's perspective.
-- `AIIceEncounterSaveState` / `AIIceEncounterModifyState` / `AIIceEncounterRestoreState` — these are global engine functions in `ai_runner.js`/`runcalculator.js`, not per-card hooks at all.
+- `AInumCompatibleIceInstalled`, `AIPreferredTarget`, `AIPlayedWithCost`, `AITurnsInstalled`, `AISuccessfulRuns` — engine-computed, read-only from a card-author's perspective.
+- `AIIceEncounterSaveState` / `AIIceEncounterModifyState` / `AIIceEncounterRestoreState` and the guarded wrappers `AIWithHypothetical` / `AIWithRunContext` / `AIWithIceEncounter` — these are global functions in the utility prefix of `ai_runner.js`, not per-card hooks at all. A card that needs a pretend run or encounter calls the guarded wrappers (see `documentation/ai.md` §2 "Evaluating hypothetical state"), never the save/modify/restore trio directly.
 
 ---
 

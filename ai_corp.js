@@ -11,15 +11,16 @@ class CorpAI {
     console.log("AI: " + message);
   }
 
+  //Every planning probe that changes game state goes through this (or the
+  //AIWithRunContext/AIWithIceEncounter wrappers in ai_runner.js), which
+  //restores in finally and keeps the one shared hypothetical depth count.
   _withHypothetical(apply, evaluate, restore) {
-    this._hypotheticalDepth++;
-    try {
-      apply();
-      return evaluate();
-    } finally {
-      restore();
-      this._hypotheticalDepth--;
-    }
+    return AIWithHypothetical(apply, evaluate, restore);
+  }
+
+  //above 0 while a probe has changed the board (the F3 cache is bypassed)
+  get _hypotheticalDepth() {
+    return AIHypothetical.depth;
   }
 
   //A basic purge costs the whole turn, so use it only for a concrete change in
@@ -237,51 +238,6 @@ class CorpAI {
   ) {
     if (!card.unique) return false; //i.e. .unique == false or undefined
     return this._copyAlreadyInstalled(card);
-  }
-
-  _iceInstallScore(ice, serverToInstallTo) {
-    //higher is better
-    var ret = 0;
-    //put a temporary copy of this card into the server to test for effects (if it's null we'll need a pretend remote)
-    if (serverToInstallTo == null)
-      corp.remoteServers.push({ ice: [ice], root: [] });
-    else serverToInstallTo.ice.push(ice);
-    //start with strength as a base
-    ret = Strength(ice);
-    //include rez cost as an assumption of value
-    ret += RezCost(ice);
-    //special specifics
-    if (
-      ice.title == "Palisade" &&
-      serverToInstallTo != null &&
-      typeof serverToInstallTo.cards !== "undefined"
-    )
-      ret -= 3; //arbitrary, encourage to save Palisade for remotes
-    //weaker if threatened
-    if (this._aCompatibleBreakerIsInstalled(ice)) ret *= 0.5;
-    //remove the temporary copy
-    if (serverToInstallTo == null)
-      corp.remoteServers.splice(corp.remoteServers.length - 1, 1); //by removing the pretend server
-    else serverToInstallTo.ice.splice(serverToInstallTo.ice.length - 1, 1); //by removing the temporary ice copy
-    return ret;
-  }
-
-  //returns the ice (assumes list is all ice and at least one present)
-  _bestIceToInstall(iceToChooseFrom, serverToInstallTo) {
-    if (iceToChooseFrom.length < 2) return iceToChooseFrom[0];
-    //calculate an install score for each (higher is better)
-    for (var i = 0; i < iceToChooseFrom.length; i++) {
-      iceToChooseFrom[i].AIIceInstallScore = this._iceInstallScore(
-        iceToChooseFrom[i],
-        serverToInstallTo,
-      );
-    }
-    //now sort
-    iceToChooseFrom.sort(function (a, b) {
-      return b.AIIceInstallScore - a.AIIceInstallScore;
-    });
-    //console.log(iceToChooseFrom);
-    return iceToChooseFrom[0]; //just random for now
   }
 
   //Public, active cards can expose a generic server-redirection hook. The
@@ -766,8 +722,8 @@ class CorpAI {
       i < optionList.length && optionList.length > minCount;
       i++
     ) {
-      if (typeof optionList[i].card !== "undefined") {
-        //in case there are non-card options present
+      if (optionList[i].card != null) {
+        //in case there are non-card options present (including a null-card "Skip"/"Decline")
         if (CheckCardType(optionList[i].card, ["agenda"])) {
           optionList.splice(i, 1);
           i--;
@@ -1803,27 +1759,16 @@ class CorpAI {
     for (var i = 0; i < activeCards.length; i++) {
       var card = activeCards[i];
       if (card.player != runner || !CheckHasAbilities(card)) continue;
-      var mod = null;
-      var storedEncounter =
-        typeof AIIceEncounterSaveState == "function"
-          ? AIIceEncounterSaveState()
-          : null;
-      if (storedEncounter && typeof AIIceEncounterModifyState == "function")
-        AIIceEncounterModifyState(iceCard);
-      this._hypotheticalDepth++;
-      try {
+      var mod = AIWithIceEncounter(iceCard, () => {
         if (typeof card.AIEffectiveIceSubtypes == "function")
-          mod = card.AIEffectiveIceSubtypes.call(card, iceCard, server, iceIndex);
-        else if (
+          return card.AIEffectiveIceSubtypes.call(card, iceCard, server, iceIndex);
+        if (
           card.modifySubTypes &&
           typeof card.modifySubTypes.Resolve == "function"
         )
-          mod = card.modifySubTypes.Resolve.call(card, iceCard);
-      } finally {
-        this._hypotheticalDepth--;
-        if (storedEncounter && typeof AIIceEncounterRestoreState == "function")
-          AIIceEncounterRestoreState(storedEncounter);
-      }
+          return card.modifySubTypes.Resolve.call(card, iceCard);
+        return null;
+      });
       if (mod && Array.isArray(mod.add)) {
         for (var j = 0; j < mod.add.length; j++)
           if (!ret.includes(mod.add[j])) ret.push(mod.add[j]);
@@ -2719,11 +2664,7 @@ class CorpAI {
 
     //Some canUseCredits hooks are route-sensitive and consult attackedServer.
     //Provide that public hypothetical context, then restore the real run state.
-    var previousAttackedServer =
-      typeof attackedServer == "undefined" ? null : attackedServer;
-    if (typeof attackedServer != "undefined") attackedServer = server;
-    this._hypotheticalDepth++;
-    try {
+    AIWithRunContext(server, () => {
       for (var i = 0; i < activeCards.length; i++) {
         var source = activeCards[i];
         if (
@@ -2757,11 +2698,7 @@ class CorpAI {
         }
         recurringCredits += Math.max(0, sourceCredits);
       }
-    } finally {
-      this._hypotheticalDepth--;
-      if (typeof attackedServer != "undefined")
-        attackedServer = previousAttackedServer;
-    }
+    });
 
     var clicks = this._projectedRunnerClicks();
     //One click must remain to initiate an ordinary run. Once a run has begun,
@@ -3747,7 +3684,8 @@ class CorpAI {
     //make a cards list from optionList (since this could be hand, archives, card-generated list, etc)
     var cards = [];
     for (var i = 0; i < optionList.length; i++) {
-      if (typeof optionList[i].card !== "undefined") {
+      //a null card is a "Skip"/"Decline" option, not a card to rank
+      if (optionList[i].card != null) {
         if (!cards.includes(optionList[i].card)) {
           cards.push(optionList[i].card);
         }
@@ -4705,32 +4643,8 @@ class CorpAI {
     )
       return false;
 
-    var iceIndex = server.ice.indexOf(card);
-    var originalRezzed = card.rezzed;
-    var withIce = null;
-    var withoutIce = null;
-
-    card.rezzed = true;
-    corp.creditPool -= currentRezCost;
-    this._hypotheticalDepth++;
-    try {
-      withIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      corp.creditPool += currentRezCost;
-      card.rezzed = originalRezzed;
-    }
-
-    server.ice.splice(iceIndex, 1);
-    this._hypotheticalDepth++;
-    try {
-      withoutIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      server.ice.splice(iceIndex, 0, card);
-    }
-
-    return withIce.isSecure && !withoutIce.isSecure;
+    var outcome = this._iceSecurityWithAndWithout(card, currentRezCost, server);
+    return outcome.withIce.isSecure && !outcome.withoutIce.isSecure;
   }
 
   //Whether reserving this ICE would change its server from breachable to
@@ -4738,29 +4652,34 @@ class CorpAI {
   //value root alone is not evidence that an arbitrary unrezzed layer matters.
   _iceWouldSecureServer(card, rezCost, server) {
     if (!card || !server || !server.ice.includes(card)) return false;
-    var iceIndex = server.ice.indexOf(card);
+    var outcome = this._iceSecurityWithAndWithout(card, rezCost, server);
+    return outcome.withIce.isSecure && !outcome.withoutIce.isSecure;
+  }
+
+  //Security of server with card (in server.ice) rezzed and rezCost paid, and
+  //with card removed from the server. Both are hypotheticals: the board is
+  //restored afterwards, even if an evaluation throws.
+  _iceSecurityWithAndWithout(card, rezCost, server) {
     var originalRezzed = card.rezzed;
-    var withIce = null;
-    var withoutIce = null;
-    card.rezzed = true;
-    corp.creditPool -= rezCost;
-    this._hypotheticalDepth++;
-    try {
-      withIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      corp.creditPool += rezCost;
-      card.rezzed = originalRezzed;
-    }
-    server.ice.splice(iceIndex, 1);
-    this._hypotheticalDepth++;
-    try {
-      withoutIce = this._evaluateServerSecurity(server);
-    } finally {
-      this._hypotheticalDepth--;
-      server.ice.splice(iceIndex, 0, card);
-    }
-    return withIce.isSecure && !withoutIce.isSecure;
+    var originalCredits = corp.creditPool;
+    var originalIce = server.ice.slice();
+    var withIce = this._withHypothetical(
+      () => {
+        card.rezzed = true;
+        corp.creditPool -= rezCost;
+      },
+      () => this._evaluateServerSecurity(server),
+      () => {
+        corp.creditPool = originalCredits;
+        card.rezzed = originalRezzed;
+      },
+    );
+    var withoutIce = this._withHypothetical(
+      () => server.ice.splice(server.ice.indexOf(card), 1),
+      () => this._evaluateServerSecurity(server),
+      () => server.ice.splice(0, server.ice.length, ...originalIce),
+    );
+    return { withIce: withIce, withoutIce: withoutIce };
   }
 
   //returns true to rez, false not to
@@ -4964,13 +4883,7 @@ class CorpAI {
               break;
             }
           }
-          if (
-            threateningHosted &&
-            !(
-              this.options.evidenceBasedHostedCardRez &&
-              this._iceWouldSecureServer(card, currentRezCost, server)
-            )
-          ) {
+          if (threateningHosted) {
             this._log(
               "Not rezzing " +
                 GetTitle(card) +
@@ -6102,17 +6015,19 @@ class CorpAI {
         )
           continue;
         var installCost = risk.server.ice.length;
-        var postInstallRisk = null;
-        corp.creditPool -= installCost;
-        risk.server.ice.push(option.cardToInstall);
-        this._hypotheticalDepth++;
-        try {
-          postInstallRisk = this._centralBreachLossRisk(risk.server);
-        } finally {
-          this._hypotheticalDepth--;
-          risk.server.ice.pop();
-          corp.creditPool += installCost;
-        }
+        var originalCredits = corp.creditPool;
+        var originalIce = risk.server.ice.slice();
+        var postInstallRisk = this._withHypothetical(
+          () => {
+            corp.creditPool -= installCost;
+            risk.server.ice.push(option.cardToInstall);
+          },
+          () => this._centralBreachLossRisk(risk.server),
+          () => {
+            risk.server.ice.splice(0, risk.server.ice.length, ...originalIce);
+            corp.creditPool = originalCredits;
+          },
+        );
         if (postInstallRisk.probability < bestPostInstallRisk) {
           bestInstall = option;
           bestPostInstallRisk = postInstallRisk.probability;
@@ -6279,27 +6194,25 @@ class CorpAI {
   _potentialTagPunishment(tags, clicks, credits) {
     if (clicks > 0 && credits > 1 && runner.rig.resources.length > 0)
       return true; //could trash a resource using the main phase action
-    //set up for hypothetical testing
     var storedTags = runner.tags;
     var storedClicks = corp.clickTracker;
     var storedCredits = corp.creditPool;
     var storedPhaseIdentifier = currentPhase.identifier;
-    //set hypotheticals
-    runner.tags = tags;
-    corp.clickTracker = clicks;
-    corp.creditPool = credits;
-    currentPhase.identifier = "Corp 2.2"; //for CheckActionClicks
-    this._hypotheticalDepth++;
-    try {
-      var useWhenTaggedCard = this._useWhenTaggedCard();
-    } finally {
-      this._hypotheticalDepth--;
-    }
-    //restore actual values
-    runner.tags = storedTags;
-    corp.creditPool = storedCredits;
-    corp.clickTracker = storedClicks;
-    currentPhase.identifier == storedPhaseIdentifier;
+    var useWhenTaggedCard = this._withHypothetical(
+      () => {
+        runner.tags = tags;
+        corp.clickTracker = clicks;
+        corp.creditPool = credits;
+        currentPhase.identifier = "Corp 2.2"; //for CheckActionClicks
+      },
+      () => this._useWhenTaggedCard(),
+      () => {
+        runner.tags = storedTags;
+        corp.creditPool = storedCredits;
+        corp.clickTracker = storedClicks;
+        currentPhase.identifier = storedPhaseIdentifier;
+      },
+    );
     if (useWhenTaggedCard) return true;
     return false;
   }
@@ -6753,17 +6666,18 @@ class CorpAI {
         var rankedInstallOptions = this._rankedInstallOptions(corp.HQ.cards);
         //check if options would be expanded by slightly more credits
         if (optionList.indexOf("gain") > -1) {
-          var originalCreditPool = corp.creditPool;
-          corp.creditPool += this._clicksLeft() - 1; //temporary (hypothetical)
-          this._hypotheticalDepth++;
-          var optionsExpanded;
-          try {
-            optionsExpanded =
-              rankedInstallOptions < this._rankedInstallOptions(corp.HQ.cards);
-          } finally {
-            this._hypotheticalDepth--;
-            corp.creditPool = originalCreditPool;
-          }
+          var storedCredits = corp.creditPool;
+          var optionsExpanded = this._withHypothetical(
+            () => {
+              corp.creditPool += this._clicksLeft() - 1;
+            },
+            () =>
+              rankedInstallOptions.length <
+              this._rankedInstallOptions(corp.HQ.cards).length,
+            () => {
+              corp.creditPool = storedCredits;
+            },
+          );
           if (optionsExpanded) {
             this._log("Just need a tiny bit more cash");
             return optionList.indexOf("gain");
@@ -6816,7 +6730,6 @@ class CorpAI {
     this._decisionRandomState = null;
     //F3: security results are cached for one Choice() on the real board.
     //_hypotheticalDepth > 0 while a planning probe has changed the board.
-    this._hypotheticalDepth = 0;
     this._securityCache = null;
     this._securityEvaluating = 0;
     this._securityCacheEnabled = true;
@@ -7092,7 +7005,6 @@ class CorpAI {
 }
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
-  evidenceBasedHostedCardRez: false,
   secureScoringServerGate: false,
   serverAtRiskInstallOverride: false,
   committedAgendaReserveBypass: false,
