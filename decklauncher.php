@@ -25,6 +25,8 @@
     var setIdentifiers = []; //set identifiers
     //new globals for visual builder
     var deckCounts = {}; //cardId -> count
+    var MAX_COPIES_PER_CARD = 3; //Netrunner deckbuilding limit for a single card
+
     var allCardIdsForPlayer = []; //cache of non-identity cards for current side
     var cardData = null; //loaded from carddata.json for lightbox display
   </script>
@@ -424,6 +426,8 @@
 
     function AddCardToDeck(id) {
       if (typeof deckCounts[id] === 'undefined') deckCounts[id] = 0;
+      //Netrunner limit: never allow more than 3 copies of one card into a deck
+      if (deckCounts[id] >= MAX_COPIES_PER_CARD) return;
       deckCounts[id]++;
       json.cards.push(id);
       MarkDeckModified()
@@ -641,7 +645,10 @@
         $(this).text(ct);
         $(this).toggleClass('has-copies', ct > 0);
         // Apply darkening to cards not in deck
-        $(this).closest('.card-item').toggleClass('not-in-deck', ct === 0);
+        var cardItem = $(this).closest('.card-item');
+        cardItem.toggleClass('not-in-deck', ct === 0);
+        // Disable the + button once the 3-copy limit is reached
+        cardItem.find('.add-btn').prop('disabled', ct >= MAX_COPIES_PER_CARD);
       });
       // Keep filters in sync after counts change
       if (showingOnlySelected) {
@@ -1436,7 +1443,8 @@
             !cardSet[cardId] ||
             cardSet[cardId].player != identity.player ||
             !isFinite(quantity) ||
-            quantity < 1
+            quantity < 1 ||
+            quantity > MAX_COPIES_PER_CARD
           ) {
             preconIsValid = false;
             break;
@@ -2699,8 +2707,9 @@
     }
 
     function Parse() {
-      //disable launch while checking
+      //Disable both ways to use this deck while checking
       $("#launch").prop("disabled", "disabled");
+      $("#opponent").prop("disabled", true);
       $("#launch").html("Checking...");
       $("#output").html("");
       //visual deck preview retired
@@ -2754,6 +2763,14 @@
           }
         }
       }
+      //Netrunner limit: a deck may not contain more than 3 copies of one card
+      for (var overLimitId in deckCounts) {
+        if (deckCounts[overLimitId] > MAX_COPIES_PER_CARD) {
+          var overLimitTitle = cardSet[overLimitId] ? cardSet[overLimitId].title : overLimitId;
+          $("#output").append(overLimitTitle + " has more than " + MAX_COPIES_PER_CARD + " copies<br/>");
+          validDeck = false;
+        }
+      }
       UpdateCardCountsUI();
       //done checking, permit launch if valid
       if (validDeck) {
@@ -2779,6 +2796,7 @@
         validityOutput += '</div>';
         $("#output").html(validityOutput);
         $("#launch").prop("disabled", false);
+        $("#opponent").prop("disabled", false);
       }
       $("#launch").html("PLAY<br>DECK");
       UpdateLaunchStrings();
