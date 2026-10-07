@@ -52,6 +52,10 @@ Implemented from `b52d451`, on branch `temp/corp-install-null-option`.
 
 The Scatter Field null-Decline variation is also covered by
 `tests/corp-install-choice-null-decline-option.test.js`, with its original expectation unchanged.
+PR #17 review follow-up (2026-10-07) adds positive setup checks: the card is
+Scatter Field, HQ has an affordable install choice, and the actual install
+prompt offers the null Decline option before `Main()` drives the decision.
+The original no-crash assertion remains unchanged.
 
 ## Summary
 When a card offers the Corp an install prompt with a skip option such as

@@ -215,9 +215,16 @@ function section(text, heading) {
 }
 
 function greenPathFor(pending) {
-  if (pending.startsWith('tests/pending/')) return 'tests/' + pending.slice('tests/pending/'.length);
-  if (pending.startsWith('tests/fixtures/corp-decisions-pending/'))
-    return 'tests/fixtures/corp-decisions/' + pending.slice('tests/fixtures/corp-decisions-pending/'.length);
+  for (const [pendingRoot, greenRoot] of [
+    ['tests/pending/', 'tests/'],
+    ['tests/fixtures/corp-decisions-pending/', 'tests/fixtures/corp-decisions/'],
+  ]) {
+    if (!pending.startsWith(pendingRoot)) continue;
+    const relative = path.relative(path.resolve(root, pendingRoot), path.resolve(root, pending));
+    if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative))
+      return null;
+    return greenRoot + relative.split(path.sep).join('/');
+  }
   return null;
 }
 
@@ -412,7 +419,11 @@ function check(ticket) {
   const pending = (reproLine.match(/`(tests\/[^`]+)`/) || [])[1];
   const green = pending && greenPathFor(pending);
   if (notAdopted) {
-    report('PASS', 'Not adopted: its reproduction stays pending under the follow-up ticket; reproduction checks skipped.');
+    if (!pending) report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
+    else if (!green) report('FAIL', 'Not adopted, but reproduction ' + pending + ' is not a pending path.');
+    else if (!fs.existsSync(path.join(root, pending)))
+      report('FAIL', 'Not adopted, but pending reproduction ' + pending + ' does not exist.');
+    else report('PASS', 'Not adopted: its reproduction stays pending under the follow-up ticket; reproduction checks skipped.');
   } else if (!pending) {
     report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
   } else if (!green) {

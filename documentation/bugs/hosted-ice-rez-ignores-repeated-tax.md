@@ -31,11 +31,19 @@ the rez.
 
 ## Reproduction
 `tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js` is the earlier
-reproduction, moved back to pending unchanged. On an undefended remote, with
+reproduction, moved back to pending. On an undefended remote, with
 no breaker and affordable ICE hosting Chromatophores, it expects the rez.
 Today it fails: `_iceWorthRezzing()` returns false through the hosted-card
 veto. A candidate that rezzes when the ICE would secure the server passes
 it. The tax case needs its own deterministic test (see criteria).
+
+PR #17 review follow-up (2026-10-07): the rez expectation remains `true` and
+the reproduction remains pending and fails today. Its obsolete
+`messages.length === 0` assertion was removed: it claimed to require a logged
+reason while asserting no messages, and it ran after an expected successful
+rez, so it could not check refusal logging. The retained veto already logs
+its reason, covered by `tests/corp-server-security.test.js` and the real-board
+probe in `tests/hosted-threat-rez-gate-setup.test.js`.
 
 ## Root cause
 - [Verified] The hosted-card veto in `_iceWorthRezzing()` ignores what the

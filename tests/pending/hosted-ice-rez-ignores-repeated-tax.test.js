@@ -1,12 +1,12 @@
 // Run with: node tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js
 // Pending reproduction for documentation/bugs/hosted-ice-rez-ignores-repeated-tax.md,
-// split unchanged from the original reproduction of
+// split from the original reproduction of
 // corp-silently-declines-rez-of-ice-hosting-a-trojan.md
 // (documentation/bugs/)
 // (its source log: documentation/debug-logs/bug_raised/
 // corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt).
 //
-// Reproduces: _iceWorthRezzing() returns false without logging a reason
+// Reproduces: _iceWorthRezzing() returns false
 // for unrezzed ice hosting a non-exempt Runner Trojan (here, Chromatophores,
 // id 35030) whenever Credits(corp) < currentRezCost * 5, even when nothing
 // else on the board would otherwise justify withholding the rez.
@@ -125,7 +125,7 @@ function buildBoard(hostedCard, options = {}) {
   return {approachedIce, remote};
 }
 
-test('BUG: undefended remote with affordable ice hosting Chromatophores is not rezzed, and no reason is logged', () => {
+test('BUG: undefended remote with affordable ice hosting Chromatophores is not rezzed', () => {
   const chromatophores = card(35030);
   assert.strictEqual(typeof chromatophores.AIHostedDoesNotPreventRez, 'undefined',
     'test assumption: Chromatophores has no AIHostedDoesNotPreventRez exception');
@@ -134,25 +134,14 @@ test('BUG: undefended remote with affordable ice hosting Chromatophores is not r
   runner.cards = [chromatophores];
   corp.creditPool = 12; // 12 < rezCost(3) * 5 == 15, so the "super rich" gate is not met
 
-  const messages = [];
-  const oldLog = ai._log;
-  ai._log = message => messages.push(message);
-  let result;
-  try {
-    result = ai._iceWorthRezzing(approachedIce, 3, remote);
-  } finally {
-    ai._log = oldLog;
-  }
+  const result = ai._iceWorthRezzing(approachedIce, 3, remote);
 
   // This is the reported bug: the Corp can afford the ice, nothing else on
   // the board competes for the credits, and the server is not empty — yet
-  // the ice is not rezzed, and nothing explains why.
+  // the ice is not rezzed. The retained veto now logs its reason.
   assert.strictEqual(result, true,
     'expected the Corp to rez affordable, undefended-server ice; ' +
-    'got false from the silent hostedCards guard');
-  assert.strictEqual(messages.length, 0,
-    'expected some logged reason for declining the rez; the hostedCards ' +
-    'branch currently declines silently');
+    'got false from the hostedCards guard');
 });
 
 
