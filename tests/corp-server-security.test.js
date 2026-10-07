@@ -110,7 +110,7 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
   try {
     for (const startingDepth of [0, 2]) {
       for (const shouldThrow of [false, true]) {
-        ai._hypotheticalDepth = startingDepth;
+        context.AIHypothetical.depth = startingDepth;
         corp.creditPool = 20;
         corp.clickTracker = 3;
         let probes = 0;
@@ -133,7 +133,7 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
     }
   } finally {
     Object.assign(ai, original);
-    ai._hypotheticalDepth = oldDepth;
+    context.AIHypothetical.depth = oldDepth;
     context.PlayerHand = oldPlayerHand;
     context.CheckTags = oldCheckTags;
   }
@@ -828,11 +828,13 @@ test('effective subtype matching never swaps the live ice subtype array', () => 
 });
 test('Kit shifts only the first ice encountered for Corp planning', () => {
   const inner = etr(), outer = etr();
+  const decoder = card(30005);
   runner.identityCard = card(31026);
-  runner.cards = [card(30005)]; runner.creditPool = 10;
+  runner.cards = [decoder]; runner.creditPool = 10;
   server([inner, outer]);
   assert(ai._effectiveIceSubtypes(outer, servers[0], 1).includes('Code Gate'));
   assert(!ai._effectiveIceSubtypes(inner, servers[0], 0).includes('Code Gate'));
+  assert.strictEqual(ai._matchingBreakerForIce(outer, servers[0], 1), decoder);
   assert.strictEqual(ai._evaluateServerSecurity(servers[0]).hasHardLockout, true);
 });
 test('generic first-encounter subtype wording applies only to the outermost relevant ice', () => {

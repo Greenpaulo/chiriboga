@@ -39,13 +39,11 @@ Two pieces of hypothetical ICE scoring already exist:
 - `_criticalBreachDefenseAction()` scores post-install risk for each ICE on
   the at-risk central: it subtracts the install cost from `corp.creditPool`,
   pushes the ICE onto `server.ice`, reads `_centralBreachLossRisk()` and
-  restores in `try/finally`, installing the best ICE when the loss probability
+  restores through `_withHypothetical()` (F2), installing the best ICE when the loss probability
   (at least `CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD`) falls by
   `CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT`.
-- `_iceInstallScore()` (printed strength plus rez cost, a Palisade title case,
-  halved for a compatible breaker) pushes a fake remote onto
-  `corp.remoteServers` unguarded. Only `_bestIceToInstall()` calls it, and
-  nothing calls that.
+- The older, uncalled `_iceInstallScore()`/`_bestIceToInstall()` pair was
+  deleted by F2 as dead code (2026-10-02).
 
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
@@ -70,7 +68,7 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
    `_criticalBreachDefenseAction()` reads `lossRiskAfter` from I2's candidate
    evaluation (computed through the shared helper) instead of its own
    push/pop loop; its thresholds and behaviour stay the same.
-6. Delete `_iceInstallScore()` and `_bestIceToInstall()`.
+6. (Done by F2: `_iceInstallScore()` and `_bestIceToInstall()` are deleted.)
 7. Same-turn multi-server allocation stays authoritative: a server already in
    `_protectionInstallsThisTurn` keeps its current treatment.
 8. Retire `_serverToProtect(..., targetIsEligible)` from ordinary ICE-install
@@ -101,8 +99,8 @@ Distinctions the score must respect:
 
 **Title cases.** Own the rows tagged I2 in the P1 ticket
 (`documentation/backlog/corp_ai_finding_13_legacy_title_lists.md`): Palisade
-in `_iceInstallScore()` (deleted with the function) and the other ICE-selection
-titles.
+in `_iceInstallScore()` (already deleted with the function by F2) and the other
+ICE-selection titles.
 
 ## Safety and information boundary
 
@@ -209,7 +207,7 @@ Gate command (after the collector setup exists):
 - [ ] The Resolution explicitly disposes of the empty-Archives reward-valuation gap: either it links implemented behavior, focused counterexamples and gate evidence, or it links a filed follow-up ticket with remaining scope, roadmap ownership and an acceptance gate. Update the shared design's gap status and reference; "investigate later" without a ticket does not satisfy this criterion.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`; the L3.5.2 regressions (scenarios 9 and 10) pass without it.
-- [ ] `_criticalBreachDefenseAction()` consumes I2's candidate evaluation; `_iceInstallScore()` and `_bestIceToInstall()` are deleted.
+- [ ] `_criticalBreachDefenseAction()` consumes I2's candidate evaluation.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
 - [ ] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
