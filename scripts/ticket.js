@@ -412,7 +412,11 @@ function check(ticket) {
   const pending = (reproLine.match(/`(tests\/[^`]+)`/) || [])[1];
   const green = pending && greenPathFor(pending);
   if (notAdopted) {
-    report('PASS', 'Not adopted: its reproduction stays pending under the follow-up ticket; reproduction checks skipped.');
+    if (!pending) report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
+    else if (!green) report('FAIL', 'Not adopted, but reproduction ' + pending + ' is not a pending path.');
+    else if (!fs.existsSync(path.join(root, pending)))
+      report('FAIL', 'Not adopted, but pending reproduction ' + pending + ' does not exist.');
+    else report('PASS', 'Not adopted: its reproduction stays pending under the follow-up ticket; reproduction checks skipped.');
   } else if (!pending) {
     report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
   } else if (!green) {
