@@ -588,6 +588,211 @@ async function main() {
   c.runner.grip.pop();
   assert.strictEqual(c.runner.AI._calculateBestCompleteRun(c.corp.HQ, 0, 0, 0, 0, null, 1), null, 'four payment damage still needs four cards');
   assert.strictEqual(c.corp.AI._evaluateServerSecurity(c.corp.HQ).isSecure, true);
+  // C2-6: an immediate win may spend retained Grip cards. Soft keep
+  // preferences and cold/warm potential caches cannot change survivability.
+  for (const [pool, clicks, spare] of [[0, 1, false], [4, 1, false],
+      [5, 1, false], [0, 2, false], [0, 1, true]]) {
+    reset(); card(36007, c.runner.rig.resources);
+    c.runner.scoreArea = [{agendaPoints: 6, player: c.runner}];
+    c.runner.creditPool = pool; c.runner.clickTracker = clicks;
+    card(30020, c.runner.grip); // Creative Commission is retained below five credits
+    if (spare) card(36007, c.runner.grip);
+    c.corp.HQ.cards = []; c.corp.RnD.cards = []; c.corp.archives.cards = [];
+    for (let i = 0; i < 2; i++) card(30054, c.corp.archives.cards).faceUp = false;
+    const target = c.NewServer('Retained Grip winning steal', false); c.corp.remoteServers.push(target);
+    card(30070, target.root).knownToRunner = true;
+    card(30073, target.ice).rezzed = true; // Tithe: one net damage, no mandatory payment
+    const grip = c.runner.grip.slice(), stack = c.runner.stack.slice();
+    for (let repeat = 0; repeat < 2; repeat++) {
+      const options = ['run', 'draw', 'gain'];
+      assert.strictEqual(options[await c.runner.AI.CommandChoice(options)], 'run');
+      c.executingCommand = 'run';
+      const choices = c.currentPhase.Enumerate.run();
+      assert.strictEqual(choices[await c.runner.AI.SelectChoice(choices)].server, target,
+        'survivable immediate win precedes draw regardless of retained cards or cache');
+      c.executingCommand = '';
+      assert.strictEqual(c.runner.AI.cachedPathServer, target);
+      assert(c.runner.AI.cachedComplete);
+      assert.strictEqual(c.runner.creditPool, pool); assert.strictEqual(c.runner.clickTracker, clicks);
+      assert.deepStrictEqual(c.runner.grip, grip); assert.deepStrictEqual(c.runner.stack, stack);
+      assert.strictEqual(c.attackedServer, null); assert.strictEqual(c.encountering, false);
+      assert.strictEqual(c.runner.AI._evaluatingWinningRun, undefined, 'tactical budget ends after planning');
+    }
+  }
+  for (const expiring of [false, true]) for (const mode of
+      ['win', 'lethal', 'unaffordable', 'click-cost', 'forbidden', 'hidden', 'draw-only', 'ordered', 'empty-stack']) {
+    reset(); card(36007, c.runner.rig.resources);
+    const event = expiring ? card(36001, c.runner.grip) : null;
+    if (event) {
+      // Make the opportunity legal through the real successful-run dispatcher.
+      for (const server of [c.corp.HQ, c.corp.RnD, c.corp.archives]) {
+        c.attackedServer = server; c.currentPhase = c.phases.runSuccessful; c.currentPhase.Init();
+      }
+      c.attackedServer = null; c.currentPhase = c.phases.runnerActionMain;
+      assert.strictEqual(event.Enumerate().length, 1);
+    }
+    c.runner.scoreArea = [{agendaPoints: mode === 'draw-only' ? 0 : 6, player: c.runner}];
+    c.runner.clickTracker = 1; c.runner.creditPool = expiring ? 4 : 0;
+    card(30020, c.runner.grip);
+    c.corp.HQ.cards = []; c.corp.RnD.cards = []; c.corp.archives.cards = [];
+    for (let i = 0; i < 2; i++) card(30054, c.corp.archives.cards).faceUp = false;
+    const target = c.NewServer('Tactical damage budget', false); c.corp.remoteServers.push(target);
+    const prize = card(30070, target.root); prize.knownToRunner = mode !== 'hidden';
+    const count = expiring ? 2 : 1; // every retained card is required for survival
+    for (let i = 0; i < count + (mode === 'lethal' ? 1 : 0); i++) card(30073, target.ice).rezzed = true;
+    if (mode === 'ordered' || mode === 'empty-stack') card(36008, c.runner.rig.resources);
+    if (mode === 'empty-stack') c.runner.stack = [];
+    if (mode === 'unaffordable') prize.stealCost = {credits: c.runner.creditPool + 1};
+    if (mode === 'click-cost') prize.stealCost = {clicks: 1};
+    if (mode === 'forbidden') {
+      const restriction = {title: 'Public steal restriction', player: c.corp, cardType: 'upgrade', rezzed: true,
+        modifyCannot: {Resolve(id, x) {return id === 'steal' && x === prize;}}};
+      target.root.push(restriction); restriction.cardLocation = target.root;
+    }
+    if (mode === 'hidden') Object.defineProperty(prize, 'agendaPoints', {get() {throw Error('hidden points');}});
+    if (event) {
+      for (let i = 0; i < 2; i++) {
+        const economy = c.NewServer('Denial alternative ' + i, false); c.corp.remoteServers.push(economy);
+        card(31080, economy.root).rezzed = true;
+      }
+      assert(event.AIWouldPlay(), 'real expiring alternative is strategically useful');
+    }
+    const grip = c.runner.grip.slice(), stack = c.runner.stack.slice();
+    const options = event ? ['play', 'run', 'draw', 'gain'] : ['run', 'draw', 'gain'];
+    const command = options[await c.runner.AI.CommandChoice(options)];
+    const win = mode === 'win' || mode === 'ordered';
+    assert.strictEqual(command, !win && event ? 'play' : mode === 'empty-stack' ? 'draw' : 'run',
+      mode + ' expiring=' + expiring);
+    if (command === 'run') {
+      c.executingCommand = 'run'; const choices = c.currentPhase.Enumerate.run();
+      assert.strictEqual(choices[await c.runner.AI.SelectChoice(choices)].server,
+        win ? target : c.corp.archives, 'tactical survival and legality: ' + mode);
+    } else if (command === 'play') {
+      assert.strictEqual(c.runner.AI.preferred.cardToPlay, event, 'decline win and retain expiring denial');
+      c.executingCommand = 'play'; const choices = c.currentPhase.Enumerate.play();
+      assert.strictEqual(choices[await c.runner.AI.SelectChoice(choices)].card, event);
+    }
+    c.executingCommand = '';
+    assert.deepStrictEqual(c.runner.grip, grip); assert.deepStrictEqual(c.runner.stack, stack);
+    assert.strictEqual(c.runner.clickTracker, 1); assert.strictEqual(c.runner.creditPool, expiring ? 4 : 0);
+    assert.strictEqual(c.attackedServer, null); assert.strictEqual(c.runner.AI._evaluatingWinningRun, undefined);
+  }
+  // Exception cleanup must restore the tactical context as well as run state.
+  reset(); card(36007, c.runner.rig.resources); card(30020, c.runner.grip);
+  c.runner.scoreArea = [{agendaPoints: 6, player: c.runner}]; c.runner.creditPool = 0;
+  const throwing = c.NewServer('Throwing ICE model', false); c.corp.remoteServers.push(throwing);
+  card(30070, throwing.root).knownToRunner = true;
+  const badIce = card(30073, throwing.ice); badIce.rezzed = true;
+  badIce.AIImplementIce = () => {throw Error('tactical ICE model');};
+  c.runner.AI.cardsWorthKeeping = c.runner.grip.slice();
+  await assert.rejects(c.runner.AI._winningRunBeforeOpportunity(), /tactical ICE model/);
+  assert.strictEqual(c.runner.AI._evaluatingWinningRun, undefined);
+  assert.strictEqual(c.attackedServer, null); assert.strictEqual(c.encountering, false);
+  assert.strictEqual(c.runner.grip.length, 1); assert.strictEqual(c.runner.creditPool, 0);
+  // Ordinary low-potential routes still preserve useful cards after an exception.
+  const data = c.runner.AI._calculateRunPathPieceBegin({server: throwing,
+    clickOffset: 0, poolCreditOffset: 0, otherCreditOffset: 0, damageOffset: 0});
+  assert.strictEqual(data.damageLimit, 0, 'exception cannot leak the immediate-win budget into ordinary planning');
+  assert.strictEqual(data.tagLimit, 0, 'exception cannot leak the relaxed tag budget');
+  // C2-7: post-win tag removal is optional; survival and real route costs are not.
+  for (const [clicks, pool, mode, expiring] of [[1, 0, 'win', false],
+      [2, 4, 'win', false], [3, 4, 'win', false], [1, 4, 'win', true],
+      [1, 0, 'nonwinning', false], [1, 0, 'lethal', false],
+      [1, 4, 'lethal', true], [1, 0, 'etr', false], [1, 0, 'tag-damage', false],
+      [1, 0, 'steal-credit', false], [1, 0, 'steal-click', false]]) {
+    reset(); card(36007, c.runner.rig.resources);
+    c.runner.scoreArea = [{agendaPoints: mode === 'nonwinning' ? 0 : 6, player: c.runner}];
+    c.runner.clickTracker = clicks; c.runner.creditPool = pool;
+    c.corp.HQ.cards = []; c.corp.RnD.cards = []; c.corp.archives.cards = [];
+    for (let i = 0; i < 2; i++) card(30054, c.corp.archives.cards).faceUp = false;
+    const event = expiring ? card(36001, c.runner.grip) : null;
+    if (event) {
+      for (const server of [c.corp.HQ, c.corp.RnD, c.corp.archives]) {
+        c.attackedServer = server; c.currentPhase = c.phases.runSuccessful; c.currentPhase.Init();
+      }
+      c.attackedServer = null; c.currentPhase = c.phases.runnerActionMain;
+      for (let i = 0; i < 2; i++) {
+        const economy = c.NewServer('Expiring denial ' + i, false); c.corp.remoteServers.push(economy);
+        card(31080, economy.root).rezzed = true;
+      }
+      assert(event.AIWouldPlay(), 'legal expiring denial competes with the winning run');
+    }
+    const target = c.NewServer('Win before tag cleanup', false); c.corp.remoteServers.push(target);
+    const agenda = card(30070, target.root); agenda.knownToRunner = true;
+    if (mode === 'tag-damage') {
+      c.runner.tags = 1;
+      card(36007, c.runner.grip); card(36007, c.runner.grip);
+      card(35063, target.ice).rezzed = true; // Doomscroll: live tag enables lethal net damage
+    }
+    if (mode === 'steal-credit') agenda.stealCost = {credits: 1};
+    if (mode === 'steal-click') agenda.stealCost = {clicks: 1};
+    // Resolve Funhouse first, then an inner lethal/ETR obstacle in losing controls.
+    if (mode === 'lethal') for (let i = 0; i < c.runner.grip.length + 1; i++)
+      card(30073, target.ice).rezzed = true;
+    if (mode === 'etr') card(30072, target.ice).rezzed = true;
+    const ice = card(30054, target.ice); ice.rezzed = true;
+    const grip = c.runner.grip.slice(), stack = c.runner.stack.slice();
+    for (let repeat = 0; repeat < 2; repeat++) {
+      const options = event ? ['play', 'run', 'draw', 'gain'] : ['run', 'draw', 'gain'];
+      const command = options[await c.runner.AI.CommandChoice(options)];
+      assert.strictEqual(command, event && mode !== 'win' ? 'play' : 'run', mode);
+      c.executingCommand = command;
+      const choices = c.currentPhase.Enumerate[command]();
+      const selected = choices[await c.runner.AI.SelectChoice(choices)];
+      if (command === 'play') assert.strictEqual(selected.card, event);
+      else assert.strictEqual(selected.server, mode === 'win' ? target : c.corp.archives,
+        'take affordable surviving win before draw; decline real losing routes: ' + mode);
+      c.executingCommand = '';
+      assert.strictEqual(c.runner.AI._evaluatingWinningRun, undefined);
+      assert.strictEqual(c.attackedServer, null); assert.strictEqual(c.encountering, false);
+      assert.strictEqual(c.runner.tags, mode === 'tag-damage' ? 1 : 0); assert.strictEqual(c.runner.creditPool, pool);
+      assert.strictEqual(c.runner.clickTracker, clicks);
+      assert.deepStrictEqual(c.runner.grip, grip); assert.deepStrictEqual(c.runner.stack, stack);
+    }
+    if (mode === 'win' && clicks === 1 && pool === 0) {
+      // Follow the AI's cached branches through real encounter/steal decisions.
+      c.attackedServer = target; c.encountering = true; c.approachIce = 0;
+      c.runner.clickTracker = 0;
+      function passResponses() {
+        for (let i = 0; i < 20; i++) {
+          const phase = c.currentPhase;
+          if (!phase.Enumerate.n || !phase.Enumerate.n.call(phase).length) break;
+          phase.Resolve.n.call(phase, {});
+        }
+      }
+      ice.responseOnEncounter.Resolve.call(ice, {});
+      let choices = c.currentPhase.Enumerate.continue();
+      let chosen = choices[await c.runner.AI.SelectChoice(choices)];
+      assert.strictEqual(chosen.id, 0, 'AI commits to the encounter tag');
+      c.currentPhase.Resolve.continue(chosen); passResponses();
+      c.currentPhase = c.phases.runSubroutines; c.subroutine = 1;
+      ice.subroutines[0].Resolve.call(ice);
+      choices = c.currentPhase.Enumerate.continue();
+      chosen = choices[await c.runner.AI.SelectChoice(choices)];
+      assert.strictEqual(chosen.id, 1, 'AI takes the subroutine tag');
+      c.currentPhase.Resolve.continue(chosen); passResponses();
+      assert.strictEqual(c.runner.tags, 2); assert.strictEqual(c.runner.creditPool, 0);
+      c.encountering = false; c.approachIce = -1;
+      c.accessingCard = agenda; c.currentPhase = c.phases.runAccessingCard;
+      const commands = ['steal', 'n'];
+      assert.strictEqual(commands[await c.runner.AI.CommandChoice(commands)], 'steal');
+      assert.strictEqual(c.currentPhase.Enumerate.steal().length, 1);
+      c.currentPhase.Resolve.steal(); passResponses();
+      assert(c.runner.scoreArea.includes(agenda));
+      assert.strictEqual(c.AgendaPoints(c.runner), c.AgendaPointsToWin());
+    }
+  }
+  // Ordinary complete routes keep finite tag cleanup, even after a tactical win/error.
+  const ordinaryTags = c.runner.AI._calculateRunPathPieceBegin({server: c.corp.archives,
+    clickOffset: -1, poolCreditOffset: 0, otherCreditOffset: 0, damageOffset: 0});
+  assert.strictEqual(ordinaryTags.tagLimit, 0);
+  reset();
+  c.runner.clickTracker = 1; c.runner.creditPool = 0;
+  const ordinaryTarget = c.NewServer('Ordinary tag avoidance', false); c.corp.remoteServers.push(ordinaryTarget);
+  card(30054, ordinaryTarget.ice).rezzed = true;
+  assert.strictEqual(c.runner.AI._calculateBestCompleteRun(ordinaryTarget, 0, 0, -1, 0, null), null,
+    'real ordinary calculator still rejects tags without cleanup resources');
+
   console.log('Vantage Point batch 2: strategic acceptance passed');
 }
 main().catch(error => {console.error(error.stack); process.exitCode = 1;});

@@ -1203,3 +1203,106 @@ Card-status regeneration, batch brief (all four without unfinished markers),
 range empty-effect/subroutine audit, syntax, format, deck pool, identity and
 `git diff --check` pass. No further implementation gaps identified in this batch;
 independent batch 2/shared-consumer re-review is required. Batch 3 is next.
+
+
+## Batch 2 immediate-win Grip budget repair — C2-6 (2026-10-07)
+
+Repair checklist: reproduce C2-6, separate immediate winning-route survival
+from soft retention/cache preferences, retain C2-1–C2-5 acceptance and exercise
+the earlier expiring-play consumer. The retained fourth independent re-review
+probe reproduced the reported Archives choices before edits; a permanent
+command/server regression also failed on the zero-credit one-Grip board.
+Historical observation assertions and independent verdicts remain unchanged.
+
+Runner `_winningRunBeforeOpportunity` now guards its complete calculation with
+`_evaluatingWinningRun`, restored in `finally` alongside prospective run state.
+`_calculateRunPathPieceBegin` uses actual Grip capacity in that context rather
+than subtracting `cardsWorthKeeping` according to cached potential. Ordinary
+routes keep their existing retention policy. No card bonus, ELO, title-specific
+branch, gameplay mechanic or opposing security model changed. The complete
+calculator still enforces ordered damage peaks, finite Stack/prevention,
+restricted funding, click budgets and additional steal costs.
+
+Permanent `tests/vantagepoint-batch2.test.js` evidence exercises real command,
+card and server selection. Fresh zero/four-credit one-card wins, five-credit
+and spare-duplicate controls, one/two-click boards and repeated unchanged-board
+choices all take the known winning remote rather than Nurse's Archives draw.
+Both ordinary selection and an actually legal/useful expiring Chain Reaction
+choose survivable wins; lethal, unaffordable, additional-click, forbidden and
+hidden targets decline. Nonwinning controls retain draw or expiring denial.
+Stick and Poke's damage-before-draw permits the finite-Stack winning route;
+empty Stack rejects it. Throwing ICE modelling restores the tactical context,
+and a subsequent ordinary calculation still reserves the useful Grip card.
+Selectors preserve live Grip, Stack, credits, clicks and run context.
+
+Existing per-card acceptance remains in the same focused suite: Lampades's
+actual access payment preserves winning stealth reserves (C2-4); Hackerspace
+chooses funded setup and eligible free hosting/hand capacity (C2-2); Nurse's
+useful finite draw and ordinary winning-run priority persist (C2-5); Stick and
+Poke retains opposing ordered-resource, cleanup/prevention and safe preparation
+contrasts (C2-1/C2-3). No new accepted limitation is introduced.
+
+Shared re-review scope: batch 2 C2-1–C2-6, batch 1 expiring-play precedence,
+and ordinary Runner complete-route consumers of retained-card damage budgets.
+Affected batch 1/11/12/13, payment and Corp-security regressions are rerun;
+independent batch and set review remain required.
+
+Verification on Node 20.19.0: focused batch 2/integration, batch 1/11/12/13,
+145 Corp-security cases, credit-pool lock, payment-source UI and AI hook docs
+pass. All required syntax, Eternal/deck-pool/identity and diff checks pass.
+`node scripts/card-status.js` regenerates the unchanged card status;
+`node scripts/batch-brief.js 2` reports no unfinished markers for all four cards.
+The selected range has no empty effects or subroutine arrays.
+`node tests/run-all-tests.js`: **52 test files passed**, including Corp decision
+fixtures and decision snapshots, excluding known-red pending reproductions.
+Batch 2 implementation is Complete; batch 3 is next. Independent review remains
+required before treating the repair as strategic approval.
+
+
+## Batch 2 immediate-win tag budget repair — C2-7 (2026-10-07)
+
+The fifth independent re-review's Funhouse/known Hub counterexample reproduced
+before edits, as did a new permanent green-suite command/server assertion.
+Repair checklist: remove only post-win tag cleanup from the guarded tactical
+route, retain real survival and legality, and preserve C2-1–C2-6 acceptance.
+Historical diagnostic probes and independent review verdicts remain unchanged.
+
+Runner `_calculateRunPathPieceBegin` now supplies `Infinity` for the tag limit
+under `_evaluatingWinningRun`. The real calculator's `ValidPoint` already
+respects this sentinel, so it no longer recalculates removal clicks/credits
+for a supported immediate winning steal. The existing tactical guard restores
+in `finally` on success, decline and exceptions. Ordinary routes retain finite
+tag cleanup and retained-Grip preferences. Complete route damage peaks, finite
+Stack/prevention, run-ending effects, source-sensitive payments, remaining
+clicks and additional steal costs still apply. No gameplay, card metadata,
+ELO, Nurse draw ranking, new hook or opposing security model changed.
+
+Permanent `tests/vantagepoint-batch2.test.js` exercises actual command/server
+selection on fresh and repeated one-click/zero-credit, two-click/four-credit
+and three-click/funded boards. A genuinely legal useful expiring Chain Reaction
+also yields to the win. Nonwinning boards retain Archives draw, lethal runs
+retain expiring denial, and lethal inner damage, unbreakable ETR and additional
+credit/click steal costs decline. A tagged Doomscroll control preserves actual
+conditional damage. AI choices in actual Funhouse encounter and subroutine
+phases take two tags without credits; the actual access command and steal move
+the agenda to score area and reach the winning total. Planning preserves live
+resources/zones/context; ordinary complete calculations still reject tags with
+no removal budget, including after an exception. The same suite retains each
+card's supported payment, hosting/hand-space, finite draw and safe preparation
+contrasts from C2-1–C2-6. No accepted limitation changed.
+
+Independent re-review scope: batch 2 C2-1–C2-7 and all four cards' retained
+strategic evidence, batch 1 ordinary winning-run and expiring-play consumers,
+and other Runner complete-route tag-budget consumers. Shared security/payment
+and batch 1/11/12/13 regressions are included; independent approval is separate
+from implementation completion.
+
+Verification on Node 20.19.0: focused batch 2/integration, affected batch
+1/11/12/13, Corp security (145 cases), credit-pool lock, payment-source UI and
+AI hook docs pass. Required syntax/format/deck-pool/identity and diff checks
+pass. Card-status regeneration is unchanged; all four brief entries have no
+unfinished markers and the range has no empty effects/subroutine arrays.
+`node tests/run-all-tests.js`: **52 test files passed**, including Corp decision
+fixtures and decision snapshots, excluding known-red pending reproductions.
+Batch 2 implementation is Complete; batch 3 is next. Independent batch and
+shared-consumer re-review remain required.

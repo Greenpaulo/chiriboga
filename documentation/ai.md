@@ -2608,7 +2608,17 @@ run-calculator change.
   passive draw benefit. The check includes complete route payments/rebates,
   remaining clicks, additional steal costs and public breach/steal restrictions.
   It evaluates the route in a prospective run context (including run-only credit
-  sources and last-click damage budgets), restored in `finally`. It installs no
+  sources and last-click damage budgets), restored in `finally`. Its guarded
+  `_evaluatingWinningRun` context uses the actual survivable Grip budget,
+  independent of `AIWorthKeeping` preferences or cold/stale potential caches.
+  Ordered damage peaks, finite draw/prevention and real payments still constrain
+  survival. The guarded terminal calculation passes an unlimited tag limit so
+  `ValidPoint` cannot impose post-run removal costs on an immediate winning
+  steal. This relaxes cleanup preference only: damage, end-the-run effects,
+  payments, clicks and public steal/breach restrictions remain in the complete
+  route model. Ordinary routes retain finite tag cleanup and their keep-card
+  preference. The context is
+  restored on success, decline and exceptions. It installs no
   hypothetical cards or run events; the selected funded route enters the normal
   run cache for subsequent server/encounter choices. Infeasible or concealed
   winning targets leave normal potential and preparation decisions available.

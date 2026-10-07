@@ -717,10 +717,14 @@ class RunnerAI {
 	data.otherCredits = AvailableCredits(runner) - runner.creditPool + data.otherCreditOffset; //sources other than credit pool
     data.damageLimit = runner.grip.length + data.damageOffset; //(this gets updated during the run calculation if data.clicks is used up)
     //this works because potentials are calculated before costs in (optionList.includes("run")). Note the false here prevents an infinite loop
-    if (this._getCachedPotential(data.server) < 2.0)
+    // A supported immediate win may spend useful Grip cards. Retention is a
+    // soft preference for ordinary routes, independent of tactical survival.
+    if (!this._evaluatingWinningRun && this._getCachedPotential(data.server) < 2.0)
       data.damageLimit -= this.cardsWorthKeeping.length; //the 2.0 is arbitrary but basically don't risk stuff for lowish potential
     if (data.damageLimit < 0) data.damageLimit = 0;
-	data.tagLimit =
+	// Post-run cleanup cannot displace a supported immediate winning steal.
+	// Infinity also prevents ValidPoint from recomputing a cleanup budget.
+	data.tagLimit = this._evaluatingWinningRun ? Infinity :
       Math.min(data.clicks, Math.floor(data.poolCredits * 0.5)) - runner.tags; //allow 1 tag for each click+2[c] remaining (pool only atm) but less if tagged (this gets updated during the run calculation)
     if (data.tagLimit < 0) data.tagLimit = 0;
 	return data;
@@ -1161,12 +1165,14 @@ class RunnerAI {
         if (!PlayerCanLook(runner, agenda) || !CheckCardType(agenda, ["agenda"]) ||
             AgendaPoints(runner) + AgendaPointsForCard(agenda, runner) < AgendaPointsToWin()) continue;
         var previousState = AIIceEncounterSaveState();
+        var previousWinningRun = this._evaluatingWinningRun;
         var cost;
         try {
           attackedServer = server; encountering = false; approachIce = -1;
           if (CardEffectsForbid("steal", agenda)) continue;
           cost = StealCost(agenda);
           if (cost.clicks > runner.clickTracker - 1) continue;
+          this._evaluatingWinningRun = true;
           var path = await this._commonRunCalculationChecksAsync(server, null, null, false);
           if (!path || !path.length) continue;
           // Steal costs are paid after the run's breaks and rebates. Recurring
@@ -1184,6 +1190,7 @@ class RunnerAI {
             }
           }
         } finally {
+          this._evaluatingWinningRun = previousWinningRun;
           AIIceEncounterRestoreState(previousState);
         }
       }

@@ -2,7 +2,7 @@
 
 **Current verdict: Changes required.** The initial review verdict was Inconclusive; the continued audit below establishes a missing necessary run-planning effect. Exact IDs: 36005–36008. Implementation was Complete at review start; this review does not equate that status with readiness.
 
-Latest independent re-review: [2026-10-06 fourth remediation snapshot](#fourth-independent-remediation-re-review--2026-10-06). **Changes required:** C2-1–C2-4 remain supported, and the original C2-5 board now takes the win. New C2-6 shows retained-Grip preferences rejecting a survivable immediate winning route before potentials are refreshed. Historical findings and snapshots below are preserved.
+Latest independent re-review: [2026-10-07 sixth remediation snapshot](#sixth-independent-remediation-re-review--2026-10-07). **Changes required:** the consolidated audit retains C2-1–C2-7 repair evidence and identifies three required contracts: C2-8 route-carried tag outcomes, C2-9 terminal-win precedence/reserves/recalculation, and C2-10 useful Lampades preparation. Historical findings and snapshots below are preserved.
 
 Reviewed 2026-10-06 by Codex independent batch reviewer. Snapshot commit: `45833a14c83fef2f9ce71506d344460181445021`. At review start the worktree contained documentation edits to the tracker, backlog and operator guide, plus the new set-review skill and history archive. Production source and existing tests were unchanged; reviews/probes created by the reviewers are additional untracked artifacts. No implementation or playability edits were made.
 
@@ -316,6 +316,78 @@ See [actual payment notes](../../vantage-point-implementation-notes.md#batch-2-a
   and their snapshot results remain unchanged; the C2-5 bad-behavior assertion
   is diagnostic history, not a green expected-outcome test. Independent findings
   and Changes required verdict are preserved.
+
+
+### 2026-10-07 — Codex, C2-6 survivable immediate-win budget
+
+- **Reproduction:** the retained fourth re-review probe passes its diagnostic
+  bad-choice assertions before edits; the new permanent zero-credit retained
+  Creative Commission/Tithe command/server regression fails by choosing Archives.
+- **Repair:** `_winningRunBeforeOpportunity` guards its complete calculation with
+  `_evaluatingWinningRun`; `_calculateRunPathPieceBegin` uses actual Grip survival
+  capacity instead of the soft keep-card deduction and cached-potential threshold.
+  The guard and prospective run context restore in `finally`, including errors.
+  Ordinary routes retain their previous keep-card policy; finite draw/prevention,
+  ordered peaks, payment, clicks and public steal/breach constraints still apply.
+- **Evidence:** permanent batch-2 real command/server choices take zero/four-credit
+  one-Grip wins, five-credit/spare-card controls and two-click wins consistently
+  on fresh and repeated boards. Real legal Chain Reaction command/card alternatives
+  also yield to survivable wins and remain chosen when winning routes are lethal,
+  unaffordable, restricted or concealed. Ordered Stick and Poke draw permits a win
+  with Stack available and rejects the empty-Stack route. Exception cleanup and
+  subsequent ordinary retained-card budgets are asserted. C2-1–C2-5 acceptance
+  remains intact in the focused suite.
+- **Verification:** Node 20.19.0; focused batch 2/integration, affected batch
+  1/11/12/13, Corp security (145 cases), pool-lock, payment-source UI and hook docs
+  pass. Required syntax/format/deck/identity/diff checks pass; regenerated card
+  status is unchanged and all four brief entries show no unfinished markers.
+  Full `node tests/run-all-tests.js`: **52 files passed**, including Corp decision
+  fixtures and decision snapshots. Pending known-red reproductions are excluded.
+- **Independent re-review required:** C2-1–C2-6 and all four cards' retained evidence;
+  batch 1's expiring-play consumer and other ordinary Runner route consumers of
+  keep-card budgets. This remediation entry does not change any independent
+  findings or verdict. Historical probes remain diagnostic snapshot evidence.
+
+### 2026-10-07 — Codex, C2-7 immediate-win tag budget
+
+- **Repair checklist:** reproduce C2-7; separate terminal tag cleanup from
+  survival/legality; retain C2-1–C2-6 and all four cards' strategic evidence;
+  verify ordinary and expiring-play command/card/server consumers, actual
+  tag/steal resolution, losing-route contrasts and guard cleanup.
+- **Reproduction:** the retained fifth re-review probe reproduced its 37
+  diagnostic observations before edits. The new permanent real command/server
+  assertion failed on the one-click/zero-credit board, selecting Archives.
+  Historical observation assertions and independent verdicts remain intact.
+- **Repair:** `_calculateRunPathPieceBegin` passes `Infinity` for the tag limit
+  only under the existing `_evaluatingWinningRun` guard. `ValidPoint` already
+  preserves that sentinel instead of recomputing post-run cleanup. Damage peaks,
+  finite draw/prevention, actual payments/clicks and public steal/breach checks
+  remain enforced. Ordinary routes retain their finite cleanup policy. There
+  are no new card hooks, title checks or changes to metadata/ELO or gameplay.
+- **Permanent evidence:** `tests/vantagepoint-batch2.test.js` takes the winning
+  remote on cold and repeated one-click/zero-credit, two-click/four-credit and
+  three-click/funded boards. Real legal/useful expiring Chain Reaction yields
+  to the winning run, but remains selected for a lethal route. Nonwinning
+  boards prefer Archives; lethal inner ICE, unbreakable ETR and unaffordable
+  credit/click steal costs decline. A live tagged Doomscroll control retains
+  lethal conditional damage. Real AI encounter/subroutine choices take both
+  Funhouse tags, and the real access command/steal reaches seven agenda points.
+  State/resource preservation, exception cleanup and the real ordinary
+  calculator's finite-tag rejection are asserted. C2-1–C2-6 remain green.
+- **Shared scope / required independent re-review:** batch 2 C2-1–C2-7 and all
+  four cards; batch 1 ordinary winning-run/expiring-play precedence; other Runner
+  complete-route consumers of tag budgets. The change does not alter Corp
+  security or payment models; affected batch 1/11/12/13, security and payment
+  regressions are retained. Independent review must verify this repair against
+  the latest snapshot; this log does not change the findings or verdict.
+
+Verification on Node 20.19.0: focused batch 2/integration, affected batch
+1/11/12/13, Corp security (145 cases), credit-pool lock, payment-source UI and
+AI hook docs pass. Required syntax/format/deck-pool/identity and diff checks
+pass. Card-status regeneration is unchanged; all four brief entries have no
+unfinished markers and the range has no empty effects/subroutine arrays.
+`node tests/run-all-tests.js`: **52 test files passed**, including Corp decision
+fixtures and decision snapshots, excluding known-red pending reproductions.
 
 ## Independent remediation re-review — 2026-10-06
 
@@ -887,3 +959,418 @@ necessary defect is established for the other three cards. Current necessary
 limitation is the tactical helper's soft damage-retention budget. Exactly batch
 2 and affected shared consumers were reviewed; other snapshot approvals and the
 historical set-wide verdict are not renewed.
+
+
+## Fifth independent remediation re-review — 2026-10-07
+
+**Verdict: Changes required.** Reviewer: Codex, independent fresh-conversation
+review. Exact cards: **36005 Lampades, 36006 Hackerspace, 36007 Nurse Hạnh,
+36008 Stick and Poke**. Reviewed commit:
+`5ba17a17876af03addee3ae7a47b36a11430adac`, with the existing dirty C2-6
+implementation. At entry six tracked files were modified: `ai_runner.js`,
+`documentation/ai.md`, the active tracker, this report, implementation notes,
+and `tests/vantagepoint-batch2.test.js`. The live agent list contained only this
+reviewer and no batch had an active implementation claim. Pre-existing edits
+and historical evidence were preserved. This review edits only evidence and
+workflow documentation; no production code, existing tests, flags, commits or
+pushes were changed.
+
+The [worktree inventory](probes/vantagepoint-batch2-fifth-rereview-worktree.txt)
+and [SHA-256 manifest](probes/vantagepoint-batch2-fifth-rereview.sha256) identify
+the reviewed snapshot. The manifest hashes all loaded engine/AI/set dependencies,
+all 52 regression files, relevant hook/principle/architecture documentation,
+implementation notes, the headless harness and new independent artifacts. It
+was captured before this review's report/tracker updates. Ignored probe artifacts
+are retained on disk alongside previous evidence.
+
+The [independent probe](probes/vantagepoint-batch2-fifth-rereview.cjs) derives
+from the fourth review's real-phase probe, retaining that historical file intact.
+This new artifact expects C2-6 to be repaired and adds five tag-budget contrasts.
+Its [37 observations](probes/vantagepoint-batch2-fifth-rereview-results.json)
+contain diagnostic assertions of the C2-7 bad choices; successful execution does
+**not** mean strategic approval. Engine/planner/selector paths are real; only
+browser rendering/audio are inert. Manual legal engine choices supplement the
+AI counterexample to establish the alternative outcome; they do not simulate
+repaired AI behavior.
+
+### Current per-card assessment
+
+| Card | Strategic role and actual consumers | Contrasting current evidence and verdict |
+| --- | --- | --- |
+| 36005 Lampades | Finite access trash; legal access enumeration → `AIAccessTriggerPriority` → command/card/ability → `_stealthPaymentPlan`/recursive hosted payment → trash. Shared ordinary `Resolve.trash`/`SpendCredits` and `_accessPaymentPreservesWinningRun`; `AIReducesTrashCost` valuation. | Independent actual-phase scarce/plentiful stealth, free/positive trash, temporary-credit expiry, unaffordable ordinary trash, Azimat, no-Lampades, nonwinning board and steal-click boundaries pass. Permanent exhaustion, flexible-source, hidden-target, pool-lock and exception/cache-restoration assertions pass. **C2-4 remains resolved; sufficient evidence for this card.** |
+| 36006 Hackerspace | Economical setup and paired hand space; keep/wasteful/setup hooks → legal `ChoicesCardInstall` → destination-aware `InstallCost`/`_preferredInstallChoice` → actual command/card/host; `MaxHandSize`. | Independent zero-pool hosted Nurse completes the pair for seven hand slots; tagged board declines. Permanent useful setup/lone uneconomic setup, funded clicks/credits, legal hosted versus ordinary destinations and duplicate/ineligible controls pass. **C2-2 remains resolved; sufficient evidence for this card.** |
+| 36007 Nurse Hạnh | Grouped Archives reveal → automatic callback → `Draw`; public pile counts feed install/keep/pre-run/draw decisions, finite breach draw and run potential. `_winningRunBeforeOpportunity` precedes ordinary ranking and expiring plays. | Permanent useful/declined setup, blocked route, overdraw, clicks, short Stack and actual zero/one/two-card reveals pass. Independent original C2-5 controls and five C2-6 cold/warm retained-Grip boards take the win. **C2-5/C2-6 resolved; C2-7 still lets useful Archives draw displace an immediate win involving tags. Changes required.** |
+| 36008 Stick and Poke | Mandatory first-encounter damage then finite draw; actual inserted subroutine/broken masking/cleanup/turn reset; ordered `DamageResources`, complete public Corp security and post-install route safety. | Independent one-Grip/one-Stack ezaM/Tithe route is feasible to Runner and insecure to Corp; empty Grip/Stack declines and public first-use/resources remain unchanged. Permanent paired useful setup versus unsafe winning/nonwinning preparation, last click, used state, break/bypass, actual prevention continuation, depleted reruns, later payment damage and exception restoration pass. **C2-1/C2-3 remain resolved; sufficient evidence for this card.** |
+
+### C2-6 resolved, with shared-consumer acceptance retained
+
+The independent zero/four-credit one-Grip boards now select the known winning
+remote on the first and repeated unchanged-board decisions; five-credit,
+expendable duplicate and two-click controls also win. A separate real calculator
+confirms the supported survival budget. Inspection confirms the new guard
+bypasses only retained-Grip deduction, is entered only for legal public winning
+agendas, and restores in `finally`. Permanent real command/card/server contrasts
+exercise expiring Chain Reaction, lethal/illegal/unaffordable/hidden declines,
+finite ordered draw and exception restoration. Subsequent ordinary planning
+still uses the original retention policy. No new title checks, hidden-card reads
+or leaked card/resource mutations were found in this repair. C2-1–C2-5 evidence
+is retained by current actual-phase independent probes and focused regressions.
+
+### C2-7 — 36007 tag-cleanup preferences reject a legal immediate win
+
+**Reproduce:**
+`node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-fifth-rereview.cjs`.
+Inspect the `tag cleanup versus immediate steal` observations.
+
+**Board:** Runner has six agenda points, installed Nurse Hạnh, one click and
+zero credits. Archives contains two facedown cards, no ICE, and Stack has four
+cards. HQ/R&D are empty. A remote contains a publicly known one-point
+Superconducting Hub behind rezzed Funhouse, with no other installed Corp cards,
+steal cost, steal prohibition or breach replacement. The rig has no breaker.
+Funhouse's encounter allows taking one tag instead of ending the run, and its
+subroutine allows taking another tag instead of paying four credits. Neither
+effect ends the run when the tag is taken. No damage, payment, tag removal or
+future click is needed to access and steal the winning agenda.
+
+**Observed:** actual `CommandChoice` chooses `run` and legal server `SelectChoice`
+chooses **Archives**, spending the last click on draw rather than winning. With
+two clicks/four credits the same board still chooses Archives; with three
+clicks/four credits it chooses the winning remote because cleanup is budgeted.
+The zero-point control appropriately prefers useful Archives draw. A fifth
+board, one click/four credits with a genuinely legal useful expiring Chain
+Reaction, chooses **play** and selects that event instead of the winning run.
+The opportunity was established by the real successful-run dispatcher, and two
+rezzed PAD Campaigns provide actual denial targets. This confirms the shared
+expiring-play consumer is affected too. Evaluation restores run context and the
+new damage guard; it changes no credits, clicks or tags.
+
+**Supported alternative:** a separate real calculator, preserving resources,
+clicks, public route and damage limits but relaxing tag cleanup alone, finds a
+complete route with two tags. The probe additionally invokes Funhouse's actual
+encounter response and subroutine, chooses their legal take-tag options, passes
+real response windows, and asserts two tags were added without payment. It then
+uses actual access-phase steal enumeration/resolution, verifies the agenda moves
+to Runner score area and verifies seven points equal `AgendaPointsToWin()`.
+This is an engine-supported winning alternative, not a hook-return assertion or
+an assumption that two tags can always be ignored.
+
+**Locations/root cause:** `ai_runner.js:725–727`,
+`_calculateRunPathPieceBegin`, still sets a finite tag limit from remaining
+clicks and credit pool even under `_evaluatingWinningRun`.
+`runcalculator.js:910–918`, `ValidPoint`, recomputes any finite limit from the
+remaining cleanup budget. The one-click/zero-credit route receives a limit of
+zero, so both complete tagged routes are rejected. `_winningRunBeforeOpportunity`
+(`ai_runner.js:1156`, calculator call at `:1173`) therefore returns no immediate
+win. Ordinary run selection (`:2108`) falls through to Nurse's useful draw
+ranking; the expiring-play consumer (`:2091`) falls through to Chain Reaction.
+The tag effects and legal alternatives themselves are correctly represented by
+Funhouse (`sets/systemgateway.js:4201–4286`).
+
+**Expected/impact:** choose the supported immediate winning run when those tags
+have no game-ending consequence before the steal. Post-win removal preferences
+cannot override the immediate outcome (shared principle 4). On the one-click
+board the current choice gives the Corp another turn instead of winning.
+
+**Repair/acceptance:** separate post-run tag cleanup preferences from actual
+legality/survival in the guarded immediate-win calculation. Merely changing the
+initial finite number is insufficient because `ValidPoint` recomputes it.
+Preserve real tag-triggered threats, run-ending effects, damage peaks, finite
+Stack/prevention, clicks, payment sources, steal costs and public restrictions;
+do not globally relax ordinary tag policy or adjust Nurse's potential. Add green
+real command/server regressions for the one-click/zero-credit and two-click/
+four-credit boards, cold and repeated decisions, three-click funded-cleanup
+control, nonwinning draw control, and actual expiring command/card alternative.
+Include an unsafe tag-triggered or otherwise genuinely losing route contrast,
+plus guard/exception cleanup and ordinary tag-policy preservation. Retain
+C2-1–C2-6 acceptance. This is a bounded tactical-policy repair; no deeper
+architecture dependency is established on the demonstrated board. Batch 2 is
+reopened **Pending**, with owner cleared.
+
+### Verification and evidence limits
+
+Node **v20.19.0** matches `.nvmrc`. All commands passed:
+
+- `node scripts/batch-brief.js 2` — exact four implemented IDs, no unfinished markers.
+- `node tests/vantagepoint-batch2.test.js` — strategic acceptance passed; assertions inspected, including all new C2-6 real selector contrasts.
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-fifth-rereview.cjs` — 37 observations; C2-7 diagnostic assertions deliberately retain bad choices.
+- `node --check sets/vantagepoint.js`.
+- `node tests/vantagepoint-integration.test.js`.
+- `node tests/eternal-format.test.js`.
+- `node tests/deckbuild-format-pool.test.js`.
+- `node tests/decklauncher-identity-change.test.js`.
+- Affected focused commands `node tests/<file>`: `vantagepoint-batch1.test.js`, `vantagepoint-batch11-engine.test.js`, `vantagepoint-batch12.test.js`, `vantagepoint-batch13.test.js`, `corp-server-security.test.js` (145 cases), `credit-pool-lock.test.js`, `payment-source-ui.test.js`, `ai-hook-docs.test.js` — all passed.
+- `node tests/run-all-tests.js` — **52 files passed**, including Corp decision fixtures and decision snapshots; pending known-red reproductions excluded.
+- `git diff --check` — passed before and after review documentation edits.
+
+No verification failure requires classification. The green suite lacks the new
+Funhouse tactical counterexample. The independent evidence exercises actual
+selectors and focused engine resolution rather than a full game replay. Tag
+legality is established from the current card, engine and actual steal; no
+external ruling was necessary. Privacy and restoration evidence covers these
+consumers, not the whole repository. No additional necessary defect or missing
+essential evidence was established for Lampades, Hackerspace or Stick and Poke.
+The remaining necessary gap is the tactical helper's post-win tag-cleanup limit;
+ordinary architectural heuristics do not justify it. Exactly batch 2 and its
+affected shared consumers were reviewed; other batch approvals and the historical
+set-wide review are not renewed. Re-review after `implement-card-batch` repairs.
+
+
+## Sixth independent remediation re-review — 2026-10-07
+
+**Verdict: Changes required.** Reviewer: Codex, continuing the independent audit
+under the revised review-card-batch skill. Exact cards: **36005 Lampades,
+36006 Hackerspace, 36007 Nurse Hạnh, 36008 Stick and Poke**. Reviewed commit:
+`5ba17a17876af03addee3ae7a47b36a11430adac`, including dirty C2-7 implementation.
+At resumption seven tracked files were modified: `ai_runner.js`,
+`documentation/ai.md`, the tracker, this report, implementation notes,
+`tests/vantagepoint-batch2.test.js`, and the revised review skill. No other live
+agent or active batch claim was present. Pre-existing edits were preserved.
+This review changes only reports, probes and workflow state; no production code,
+existing tests, playability flags, commits or pushes were changed.
+
+The [worktree inventory](probes/vantagepoint-batch2-sixth-rereview-worktree.txt)
+and [SHA-256 manifest](probes/vantagepoint-batch2-sixth-rereview.sha256) identify
+the snapshot. The manifest covers loaded engine/AI/set dependencies, all 52
+regression files, relevant documentation, the skill, harness and independent
+artifacts. Report/tracker hashes describe the final review documentation;
+workflow edits do not renew approval of any other batch.
+
+### Evidence and per-card assessment
+
+The [independent probe](probes/vantagepoint-batch2-sixth-rereview.cjs) preserves
+previous probes and extends their repaired contrasts. Its
+[70 observations](probes/vantagepoint-batch2-sixth-rereview-results.json) use real
+selectors, planners and focused engine resolution. Browser rendering/audio are
+inert. Supplemental counterfactual calculations change only resources with
+restoration, use real calculators and do not replace the reviewed decision path.
+**Diagnostic assertions deliberately retain bad choices; probe completion is not
+repair acceptance.** The acceptance criteria below specify the desired outcome.
+
+A coverage matrix was drafted in this report before the continued audit. All
+identified necessary rows were then reconciled against actual call sites,
+permanent assertions and independent evidence. Findings were consolidated by
+contract after checking the related consumers, rather than stopping at the first
+counterexample. No row remains merely unexamined; defect rows remain open for
+repair and permanent regressions.
+
+| Card | Strategic role and actual consumers | Contrasting evidence | Assessment |
+| --- | --- | --- | --- |
+| 36005 Lampades | Finite access denial/savings; `AIInstallBeforeRun` through pre-run/generic install selection; legal access trigger → `AIAccessTriggerPriority` → recursive stealth payment; `AIReducesTrashCost` in approach valuation; shared ordinary allocator/reserve policy | Permanent unavailable/power/source/cheap-trash/narrow-source and actual access-payment cases; independent scarce/plentiful stealth, free/temporary/Azimat/steal-click controls; new tagged follow-up and unusable preparation boards | Access mechanics and original C2-4 controls supported. **C2-9 and C2-10 require changes.** |
+| 36006 Hackerspace | Funded setup, unique Companion/Connection destinations, discount and passive hand capacity; keep/wasteful/setup hooks → common install checks and host preference → legal selection → cost/MaxHandSize consumers | Permanent lone-discount decline, funded overfull pair setup, zero-credit Nurse hosting, noneligible and tagged contrasts; independent concealed-Archives hosted choice and actual paired hand capacity | **Supported in the audited contracts.** Explicit card preferences retain veto/index semantics. No necessary standalone defect established. |
+| 36007 Nurse Hạnh | Useful finite Archives draw; keep/draw/pre-run/potential hooks → command/server choice; grouped reveal → actual Draw; breach-draw/ordered-route hooks → both planners; winning-run priority in ordinary and expiring consumers | Original useful/blocked/short-Stack/overdraw/reveal tests; original C2-5/C2-6 and C2-7 controls retained; actual 0/1/2 Stack draws; terminal cleanup/access/recalculation and conditional-route counterexamples | Draw and original winning-choice repairs supported. **C2-8/C2-9 require shared changes.** |
+| 36008 Stick and Poke | Useful paired/prevention setup versus Grip protection; first encounter ordered damage/draw in predicted and live ICE; both planners, finite continuations and payment-policy branches; turn resets and cleanup | Permanent useful/declined installation, broken/bypassed live subroutine, finite draw/prevention/rerun/payment/restoration cases; independent opposing route contrasts and actual empty-Grip flatline, exhausted-Stack survival, draw, cleanup and both resets | **Supported in the audited card-specific contracts.** Shared route repair acceptance must retain this ordered finite-resource evidence. |
+
+### Consolidated coverage matrix
+
+`B2` below means inspected assertions in `tests/vantagepoint-batch2.test.js`;
+`I` means the integration test (supplemental hooks/mechanics where mocked);
+`P` means the retained sixth re-review probe/results above. Related focused
+suites are listed under verification.
+
+| Contract | Cards and distinct consumers | Applicable contrasts and expected outcomes | Evidence/status |
+| --- | --- | --- | --- |
+| Access value and finite payment | 36005: legal trigger, access command/card, recursive allocation, approach trash discount | Use funded savings/otherwise-untrashable targets; prefer cheaper/free ordinary trash; decline unavailable power/stealth; spend narrow sources before breaker-capable sources | B2 access and allocation cases; P actual access/source contrasts. Supported outside C2-9. |
+| Terminal follow-up reserve | 36005: Lampades priority, ordinary access selector, `AIPreserveOutsideCredits`, `_accessTrashPayment`, reserve calculators and actual allocator | Preserve legal public winning route; account for clicks, additional steal cost, source restrictions and expiring credits; no post-win tag cleanup | B2 original C2-4/exception/locked-pool controls; P tagged-route ability and ordinary-payment defect. **C2-9.** |
+| Funded setup and destination | 36006: keep/wasteful/setup ordering, common checks, command/card/host choice | Decline lone discount; fund useful pair setup; take legal hosted discount; avoid tagged hosts and installed unique duplicates | B2 setup/hosting/eligibility/uniqueness checks; P tagged and concealed-Archives contrasts. Supported. |
+| Passive capacity and composition | 36006/36007/36008: marginal host value, MaxHandSize, draw/install ranking | Partial pair gives no bonus; complete pair gives two slots; free hosting can be useful even at zero pool; hand pressure and total setup clocks determine value | B2 paired setup and overdraw/short-clock declines; P host and hand-capacity outcome. Supported. |
+| Useful finite Archives draw | 36007: keep/draw/pre-run/potential, grouped reveal/Draw, both route planners | 0/1 reveals give no bonus; group of 2 draws at most actual Stack; blocked route, short Stack/clicks and wasted overdraw decline setup; installed useful draw changes server selection | B2 setup/run/reveal contrasts; P original ordinary choices and actual Stack 0/1/2 draws. Supported. |
+| Winning route before opportunity | 36007 and shared batch 1 consumer: ordinary and expiring choices, earlier removal branches, approach budget | Take affordable surviving public immediate win before useful draw, setup, denial, tag removal or optional trash; decline lethal/ETR/illegal/hidden/unaffordable alternatives | B2 C2-5–C2-7 controls and actual Funhouse steal retained; P original controls plus removal commands/events and optional SanSan trash. **C2-9.** |
+| Conditional outcomes along route | Shared complete route in Runner selection and Corp security; static `IceAI` and point directions, finite continuations/payment branches | Newly gained tags must enable subsequent conditional damage/ETR; initial tag state, safe Grip threshold, tag avoidance and actual effect order must remain distinct | P Funhouse→Doomscroll/Vicsek lethal and surviving controls, real resolutions, ordinary/expiring selectors, same-board Corp security; Lamplighter same-ICE tag→ETR. **C2-8.** |
+| Ongoing terminal route | Shared `RecalculateRunIfNeeded`, `_cachedOrBestRun`, encounter/subroutine and jack-out consumers | Replanning retains a surviving winning goal's terminal budgets while enforcing newly known danger; ordinary runs keep normal preferences | P real winning command/server, live post-outer-Tithe state, real recalculation and jack/continue contrast with inner Funhouse versus Tithe. **C2-9.** |
+| First encounter damage before draw | 36008: predicted/live insertion and masking, DamageResources/ValidPoint, opposing complete route | Draw cannot reverse flatline; finite Stack can replenish later damage capacity; breaking/bypass gives neither damage nor draw | B2 broken/bypass/prevention/payment cases; P opposing-planner 1/1 versus empty-Grip/Stack contrasts and actual damage/draw. Supported. |
+| Preparation and tactical alternative | All four: host choice, `_runAfterInstall`, pre-run/draw/generic install paths | Installation must provide useful effect and leave actual route survivable after credit/click/Grip loss; immediate win precedes preparation; no mechanically unusable Lampades setup | B2 Nurse/Stick funded usefulness, direct-win and unsafe-install declines; P Lampades zero-stealth versus funded-source setup. **C2-10 for Lampades; other card contracts supported.** |
+| Reset and finite continuation | 36008: both turn resets, cleanup, first-use/draw/prevention overlays and payment branches | First-use, depleted Stack and prevention stay consumed across reruns; cleanup restores printed ICE; resets follow both real turn triggers | B2 finite Event Horizon and payment-damage cases; I supplemental lifecycle assertions; P actual damage/cleanup and both reset callbacks. Supported; retain in C2-8/C2-9 repair regressions. |
+| Planning safety and information | All four: above helpers/hooks and opposing security | Concealed Archives/Stack/Corp identities do not determine choices; public counts are allowed; exceptions restore own zones/resources/context/guards and live caches | B2 concealed target/Stack, source-error, install-error and tactical-error assertions; P throwing concealed-Archives properties and unchanged-state checks. Supported for exercised paths; repair acceptance must extend these guarantees to new state overlays. |
+
+The generic fallback install branch at `ai_runner.js:3000` was also inspected:
+it still uses option zero for cards without an explicit destination preference.
+For the selected hostable cards, useful keep/wasteful gates route eligible
+installations through the documented draw/pre-run/keep consumers; uniqueness and
+wasteful checks exclude their unused fallback states. This is not claimed as a
+new batch defect without a reachable counterexample. Lampades's reachable
+unconditional install paths are covered by C2-10.
+
+### C2-8 — route-carried tags must affect conditional outcomes
+
+**Affected batch card:** 36007 and its shared winning-route consumer; all batch
+ordered-route/security evidence must be retained. **Classification:** escaped
+audit gap in an existing necessary survival/legality contract. The C2-7 budget
+repair makes previously rejected tagged routes selectable; the unchanged
+conditional ICE hooks still use live initial tags rather than predicted tags.
+
+**Reproduction:** installed Nurse, six Runner points, one click, zero credits,
+zero initial tags, two Grip cards, and a publicly known Superconducting Hub behind
+rezzed inner Doomscroll (35063) and outer Funhouse (30054). Real command/server
+selection takes this remote. The route predicts three tags but only one net
+damage. Real AI Funhouse choices take two tags; Doomscroll adds another, then
+deals one plus two net damage. The actual final phase is **Corp wins**, before
+access. With three Grip cards the same real effects survive and the actual steal
+reaches seven points. Removing Funhouse leaves only one tag and a safe win.
+Starting already tagged with two Grip cards correctly declines, explaining why
+the previous permanent losing-route case missed the transition. Both ordinary
+and useful expiring-play consumers exhibit the lethal choice; Corp public
+security also incorrectly reports the server insecure on the lethal board.
+
+**Related consumers checked in the same audit:** Funhouse→Vicsek (36042) predicts
+zero conditional damage with zero initial tags; its actual two damage flatlines
+a one-card Grip, while two Grip cards survive and steal. Lamplighter (35080)
+predicts no conditional ETR when initially untagged, even though its own first
+subroutine adds a tag. At zero credits, actual AI choices take that tag and the
+second subroutine ends the claimed winning run. Initial-tag and outer-Funhouse
+contrasts expose the same root capability, not separate repair requests.
+
+**Locations:** `runcalculator.js:1218` precalculates ICE descriptions;
+`runcalculator.js:547` uses that description at point expansion;
+`sets/elevation.js:5683` (Doomscroll), `sets/elevation.js:7397` (Lamplighter),
+`sets/vantagepoint.js:3733` (Vicsek) consult live tags;
+`ai_corp.js:2951` consumes the same complete route for public security.
+`runcalculator.js:1352` and `:1472` carry continuation/payment overlays but no
+route-derived tag state for these conditional descriptions.
+
+**Impact:** false winning-route safety and deterministic security conclusions;
+a supposedly immediate win can actually flatline or end before access.
+
+**Repair/acceptance:** model conditional public outcomes from the state reached
+at their actual resolution, including earlier ICE and earlier subroutines.
+Do not relax tag cleanup by dropping real tag consequences. Add permanent real
+selector/planner and focused resolution regressions for the lethal and surviving
+Doomscroll/Vicsek boards and unavoidable Lamplighter ETR, plus tag-avoided/broken
+or bypassed controls. Revalidate Runner and Corp same-board outcomes, finite
+continuations and payment-policy branches. Any new overlay must restore on
+success/exception and use no hidden information or title-specific planner code.
+
+### C2-9 — terminal outcome semantics must be consistent across consumers
+
+**Affected cards:** 36005/36007 and shared winning-route consumers.
+**Classification:** unresolved acceptance of the existing C2-4/C2-5/C2-7 tactical
+contract, exposed by the broader consumer audit; this is not a new optimisation
+gate. Consolidate the following symptoms into one terminal-route repair.
+
+1. **Access reserves and allocation:** during HQ access to Luana (printed cost
+   one, ordinary trash three), Lampades has one power counter, Methuselah two
+   stealth credits, Corsair is installed, the Runner has ten pool credits, one
+   remaining click and six points. A public winning Hub is behind Palisade plus
+   Funhouse. A real independent complete calculator permits the winning steal
+   with tags before payment and after a legal three-credit pool-only trash.
+   `_accessPaymentPreservesWinningRun` nevertheless approves spending stealth
+   because its finite tag budget excludes that terminal opportunity. The actual
+   ability leaves one stealth credit and destroys the route. Executing ordinary
+   trash through the real phase also consumes both stealth credits, because
+   `AIPreserveOutsideCredits` uses the same helper. Three initial stealth credits
+   and free-trash controls preserve the route. Expected: ordinary pool-funded
+   trash preserves the two indispensable stealth credits, or decline spending
+   when no safe legal alternative exists.
+2. **Earlier command precedence:** installed Nurse, one existing tag, one click,
+   two pool credits, six points and an unprotected public winning Hub. Enumerated
+   legal commands include run and remove. The AI removes the tag although its
+   actual winning helper returns the remote. With Networking (31020) in Grip and
+   one pool credit it instead plays that event, also using the winning click.
+   Nonwinning controls correctly favour removal; zero-credit controls take the
+   win because basic removal is unavailable. Expected: take the immediate steal
+   before either optional cleanup action, retaining ordinary removal policy.
+3. **Optional access costs:** zero-credit, last-click public winning Hub with
+   rezzed SanSan City Grid in the root. The planner charges five credits for
+   optional trash and chooses Archives. Real legal access can leave SanSan and
+   steal the Hub, reaching seven points with SanSan still installed. A five-credit
+   control selects the remote. Expected: only unavoidable costs/effects precede
+   a terminal steal; optional trash must not establish an affordability failure.
+4. **Ongoing route recalculation:** the real initial command/server takes a public
+   winning Hub behind outer Tithe and inner Funhouse at zero pool/one click.
+   After that click and the outer damage, realistic expendable Grip remains.
+   Real `RecalculateRunIfNeeded` replaces the terminal route with an incomplete
+   path; the real movement selector jacks out. A separate actual calculator
+   confirms the remaining tagged route is survivable and free. Replacing inner
+   Funhouse with Tithe makes the AI continue. Expected: replanning a supported
+   live winning route retains terminal assumptions while checking current danger.
+
+**Locations:** `ai_runner.js:80` outside-credit policy, `:1204` reserve helper
+(and its finite budget at `:1228`), `:1688` basic/event removal before the tactical
+helper, `:1736` jack-out consumption, `:632` cached/rebuilt route,
+`:1009` recalculation, `:1780` ordinary access selection;
+`runcalculator.js:1144`–`:1175` optional trash approach charge;
+`sets/vantagepoint.js:669` Lampades priority.
+
+**Impact:** the ordinary C2-7 choice is repaired but equivalent consumers still
+spend, defer or abandon a legal immediate win. This is one shared tactical
+contract with four demonstrated symptoms.
+
+**Repair/acceptance:** provide consistent terminal-goal evaluation in command
+precedence, follow-up reserves/allocation and ongoing replanning. Permanent
+regressions must exercise each symptom through its actual consumer, with
+nonwinning, unaffordable, lethal, steal/breach-forbidden and hidden-target declines.
+Retain real payments, mandatory access effects, finite damage/draw/prevention and
+additional steal costs. Preserve scarce versus plentiful stealth, pool locks,
+Azimat, temporary-credit expiry, exception/cache restoration and ordinary tag
+policy. Do not merely pass `Infinity` everywhere or skip all approach costs:
+terminal cleanup/optional spending must remain distinct from real safety/legality.
+The shared batch 1 ordinary/expiring consumer must be revalidated together.
+
+### C2-10 — useful Lampades preparation needs a decline path
+
+**Affected card:** 36005. **Classification:** escaped audit gap in the original
+per-card useful-action/justified-decline requirement. Earlier reviews exercised
+access payments but did not establish install usefulness.
+
+**Reproduction:** installed Nurse, Lampades as the sole Grip card, five pool
+credits, three clicks, two facedown Archives ICE and an available finite Stack;
+no installed stealth source or source preparation. The real ordinary selector
+chooses install, and the real install selector chooses Lampades before the useful
+Archives draw. Its paid ability has zero eligible credits even in the prospective
+run context. A funded Methuselah contrast also installs, demonstrating that the
+setup choice does not distinguish whether the effect can be used. `_runAfterInstall`
+checks affordability/survival but cannot supply the missing positive value.
+
+**Locations:** `sets/vantagepoint.js:663` returns unconditional priority one;
+there is no Lampades keep/wasteful suitability gate. `ai_runner.js:2593` consumes
+that priority, `:1325` checks surviving post-install routes, and the generic
+install path at `:3000` likewise has no Lampades-specific usefulness contract.
+
+**Expected/impact:** hold mechanically unusable Lampades and take the useful run
+rather than spend a credit/click, Grip card and MU for no effect on that run.
+This is a preparation-value defect, not a claim that every future speculative
+installation is globally suboptimal.
+
+**Repair/acceptance:** establish useful install/hold criteria from legal usable
+stealth, finite counters, intended access value and competing actions; exercise
+actual command/card/install choices. Add an unfunded setup decline, a funded
+useful access-denial/savings setup, exhausted/unusable-source and duplicate or
+MU-pressure contrasts, last-click/direct-winning alternatives, and ensure the
+post-install evaluation accounts for relevant starting counters without firing
+hypothetical gameplay triggers or leaking changes. Audit both pre-run and generic
+install consumers rather than repairing only this one board. Retain funded actual
+access/payment regressions; document any new or changed hooks in `ai.md`.
+
+### Verification, limits and repair handoff
+
+Node **v20.19.0** matches `.nvmrc`. Commands executed successfully on this source
+snapshot:
+
+- `node scripts/batch-brief.js 2` (scope resolved earlier in this same audit).
+- `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-sixth-rereview.cjs` — **70 observations**, including diagnostic defect assertions.
+- `node tests/vantagepoint-batch2.test.js` — strategic acceptance passed; assertions inspected rather than treated as complete coverage.
+- `node tests/vantagepoint-integration.test.js`.
+- `node --check sets/vantagepoint.js`.
+- `node tests/eternal-format.test.js`.
+- `node tests/deckbuild-format-pool.test.js`.
+- `node tests/decklauncher-identity-change.test.js`.
+- Affected focused commands `node tests/<file>`: `vantagepoint-batch1.test.js`, `vantagepoint-batch11-engine.test.js`, `vantagepoint-batch12.test.js`, `vantagepoint-batch13.test.js`, `corp-server-security.test.js` (145 cases), `credit-pool-lock.test.js`, `payment-source-ui.test.js`, `ai-hook-docs.test.js` — all passed.
+- `node tests/run-all-tests.js` — **52 files passed**, including Corp decision fixtures and decision snapshots, excluding known-red pending reproductions.
+- `git diff --check` — passed during audit and after final report/tracker edits.
+
+No regression command failed. Temporary probe development failures were corrected
+in the probe; they are not production test failures. Existing tests do not cover
+the new demonstrated defects. Actual card text and engine resolution settle these
+outcomes without an external ruling. The independent evidence is focused decision
+and resolution coverage, not a full-game replay or exhaustive optimality proof.
+Privacy/restoration evidence applies to the reviewed paths, not all repository
+code. The missing route-carried conditional state is a precise shared capability;
+it cannot be excused as a generic architectural limitation.
+
+The **single repair handoff** is C2-8, C2-9 (all four consumers/symptoms), and C2-10,
+with the matrix and contrasting acceptance criteria above. C2-1–C2-7 original
+repairs remain evidenced, but C2-4/C2-5/C2-7 approval does not extend to the
+newly audited missing consumers. No unrelated optional improvement is an approval
+gate. Batch 2 is reopened **Pending**, with owner cleared; **2 complete,
+11 outstanding**. Use `implement-card-batch` to address this consolidated handoff,
+then independent re-review of the matrix, actual diff and affected consumers.
+The other batch approvals and historical set-wide verdict are not renewed.

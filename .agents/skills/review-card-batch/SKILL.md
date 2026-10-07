@@ -12,6 +12,12 @@ support. This is a review: do not edit production code or existing tests, commit
 push, or change playability flags. Temporary local reproduction scripts are
 allowed; preserve their useful scenario and results in the review report.
 
+Deliver one consolidated audit and repair handoff. Finding a defect is a reason
+to inspect its affected consumers and interactions, not to end the review and
+leave those checks for the next repair cycle. Re-reviews use the recorded audit
+scope and acceptance criteria; they must not become a sequence of isolated
+counterexamples or silently introduce new requirements.
+
 ## Resolve the set and batch
 
 Accept natural-language arguments such as:
@@ -56,6 +62,39 @@ Use `node scripts/show.js card <id>`, `node scripts/show.js fn <name>` and
 architecture. Check consequential rules ambiguities against the local rules or
 primary ruling sources. Do not open card art or whole engine/AI/set files.
 
+## Map the audit before exercising scenarios
+
+Build a compact coverage matrix in the review report before deciding the verdict.
+Start from current mechanics and call sites, then reconcile implementation tests
+and earlier findings against it. Do not use the latest repair's tests as the
+scope of the audit. For each card, record:
+
+- Its necessary strategic contracts: useful action/decline, tactical safety,
+  resource and timing accounting, targets, information boundary and restoration.
+- The actual consumers of each contract, including separate selectors, payment
+  allocators, preparation checks and the opposing planner where applicable.
+  Search for all uses of affected hooks/helpers and equivalent calculations;
+  similarly named methods are not necessarily the only consumers.
+- Relevant boundaries and state transitions, with an expected game outcome,
+  evidence path and status: supported, defect, missing evidence or not applicable
+  with a reason. Link scenarios to consumers so untested paths remain visible.
+
+Choose scenarios from the mechanic's causal dependencies, not an exhaustive
+product of every board variable. Include scarce/sufficient resources, ordinary
+versus immediate game outcomes, initial versus newly gained/spent state, and
+effect order when those distinctions change legality, survival or valuation.
+For a shared route or budget contract, check every distinct consumer and the
+relevant compositions: state gained at one encounter can enable a later effect;
+damage can precede draw; paying now can remove a follow-up winning route.
+These are examples of dependency analysis, not mandatory scenarios for unrelated
+cards. Inspect related cards only as needed to establish the selected batch's
+contracts; this remains exactly one batch review.
+
+Existing evidence may fill matrix rows after its assertions and current consumers
+are checked. Do not recreate equivalent probes or rerun unchanged evidence
+without a reason. Preserve the matrix across repairs so evidence accumulates
+instead of restarting the audit each time.
+
 ## Audit every card's strategy
 
 For each card, identify its useful role and trace the actual consumer from legal
@@ -94,6 +133,48 @@ A missing necessary consumer or ignored strategic effect is unfinished work.
 If a deeper architecture dependency prevents support, name the precise missing
 capability and affected behavior rather than accepting it as a vague limitation.
 
+## Complete the audit and consolidate repairs
+
+Before handing off Changes required, finish every applicable matrix row across
+all cards, including after the first defect is found. A row may end in a supported
+defect or an explicitly identified evidence gap; a failing scenario does not
+excuse leaving the other consumers unexamined. When a finding reveals a missing
+shared contract, extend the matrix to its affected call sites and causal
+interactions and audit those in this invocation. Record unavailable evidence
+explicitly instead of implying the audit is complete.
+
+Group related symptoms under their root contract and give the implementer one
+repair list covering all affected consumers. Each item must include contrasting
+acceptance scenarios, expected decisions/outcomes, required permanent regressions
+and shared consumers to revalidate. Where existing code already violates that
+contract, include the demonstrated defect in the same handoff even if the latest
+repair did not introduce it. Separate optional improvements and speculative
+optimisation from necessary repairs; they do not reopen a batch.
+
+The stopping condition is that every identified necessary contract and applicable
+consumer has evidence or an explicit unresolved gap, all demonstrated defects
+are consolidated, and required verification is recorded. Do not keep searching
+unrelated architecture or invent new quality requirements after reaching that
+condition. This establishes a bounded audit, not a claim that no undiscovered
+bug can exist. Essential unavailable evidence prevents Pass.
+
+## Re-review against the consolidated handoff
+
+Read the prior coverage matrix and complete repair list, then inspect the actual
+diff and current call sites. If an older report lacks the matrix, build it from
+the current consumers and historical evidence before validating repairs.
+Verify every required repair together, retain
+unaffected evidence with its provenance, and exercise changed consumers and
+their affected interactions. A green reproduction alone does not close an item
+whose other recorded acceptance scenarios or consumers remain unsupported.
+
+If another necessary defect emerges, classify it as an unresolved acceptance
+criterion, a repair regression, or an escaped audit gap. Explain which matrix
+row or dependency was missed and check its related consumers before handing off
+again. Add it to the consolidated matrix/list rather than returning only the
+new counterexample. Distinguish a newly proposed requirement from a defect in
+the agreed strategic contract; do not silently make it a new approval gate.
+
 Run relevant focused tests, the selected set's required shared verification and
 `node tests/run-all-tests.js` on the Node runtime pinned by `.nvmrc`. This includes
 Corp decision fixtures and decision snapshots, excluding known-red pending
@@ -125,8 +206,10 @@ and content hashes of the reviewed source and test files (for example, use
 a passing report must not silently apply to subsequently changed consumers.
 
 Record a per-card table of strategic role, actual consumers, contrasting
-scenario/test evidence and verdict. Each finding needs the card ID, current
-behavior, concrete board state or reproducible probe, expected behavior and its
+scenario/test evidence and verdict, plus the coverage matrix and consolidated
+repair/acceptance list above. State which rows remain unresolved and whether
+the audit covered all identified necessary consumers. Each finding needs the
+card ID, current behavior, concrete board state or reproducible probe, expected behavior and its
 reason, code location, impact and an actionable repair/acceptance criterion.
 Separate supported defects from missing evidence and optional improvements.
 List exact verification commands/results and remaining architecture limitations.
