@@ -68,6 +68,19 @@ const green = check({reproduction: 'tests/review-fixture.test.js'});
 assert.strictEqual(green.status, 1, green.output);
 assert.match(green.output, /FAIL.*not a pending path/);
 
+for (const prefix of ['tests/pending/', 'tests/fixtures/corp-decisions-pending/']) {
+  for (const suffix of ['review-fixture.test.js', 'nested/review-fixture.test.js', 'nested/../review-fixture.test.js']) {
+    const valid = check({reproduction: prefix + suffix});
+    assert.strictEqual(valid.status, 0, valid.output);
+    assert.match(valid.output, /PASS.*Not adopted/);
+  }
+  for (const suffix of ['../outside.test.js', '../../scripts/ticket.js', '../pending-sibling/test.js', '.', 'nested/..']) {
+    const escaped = check({reproduction: prefix + suffix});
+    assert.strictEqual(escaped.status, 1, escaped.output);
+    assert.match(escaped.output, /FAIL.*not a pending path/);
+  }
+}
+
 for (const code of [
   'const options = {removedOption: false};',
   'if (this.options.removedOption) act();',

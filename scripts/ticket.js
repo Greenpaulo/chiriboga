@@ -215,9 +215,16 @@ function section(text, heading) {
 }
 
 function greenPathFor(pending) {
-  if (pending.startsWith('tests/pending/')) return 'tests/' + pending.slice('tests/pending/'.length);
-  if (pending.startsWith('tests/fixtures/corp-decisions-pending/'))
-    return 'tests/fixtures/corp-decisions/' + pending.slice('tests/fixtures/corp-decisions-pending/'.length);
+  for (const [pendingRoot, greenRoot] of [
+    ['tests/pending/', 'tests/'],
+    ['tests/fixtures/corp-decisions-pending/', 'tests/fixtures/corp-decisions/'],
+  ]) {
+    if (!pending.startsWith(pendingRoot)) continue;
+    const relative = path.relative(path.resolve(root, pendingRoot), path.resolve(root, pending));
+    if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative))
+      return null;
+    return greenRoot + relative.split(path.sep).join('/');
+  }
   return null;
 }
 
