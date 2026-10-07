@@ -1443,7 +1443,8 @@
             !cardSet[cardId] ||
             cardSet[cardId].player != identity.player ||
             !isFinite(quantity) ||
-            quantity < 1
+            quantity < 1 ||
+            quantity > MAX_COPIES_PER_CARD
           ) {
             preconIsValid = false;
             break;
