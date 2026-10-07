@@ -145,7 +145,7 @@ function resolveStarts(list, ranges) {
       out.push({id: fixture.id, file, hash: sha1(fs.readFileSync(file, 'utf8')).slice(0, 12)});
     }
   }
-  return out;
+  return [...new Map(out.map(start => [start.file, start])).values()];
 }
 
 function loadCollectors(names) {
@@ -487,12 +487,14 @@ async function replay(args) {
   const describe = (label, g) => `${label}: ${g.winner || 'no winner'} (${g.reason}), Corp ${g.corpPoints}-${g.runnerPoints} Runner, ` +
     `${g.turns} turns, ${g.logLines} log lines, logHash ${g.logHash}${g.errors.length ? ', errors: ' + g.errors.join('; ') : ''}`;
   const candidate = await replayGame(config, {corp: config.corpOptions, runner: config.runnerOptions});
+  if (!candidate.winner || candidate.errors.length) process.exitCode = 1;
   if (!args.diff) {
     console.log(describe('game', candidate));
     console.log(candidate.log.join('\n'));
     return;
   }
   const baseline = await replayGame(config, {corp: {}, runner: {}});
+  if (!baseline.winner || baseline.errors.length) process.exitCode = 1;
   console.log(describe('baseline (options off)', baseline));
   console.log(describe('candidate', candidate));
   console.log(diffLogs(baseline.log, candidate.log));

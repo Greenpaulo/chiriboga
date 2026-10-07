@@ -316,10 +316,14 @@ Averages say whether an option helps; single games show how. To read one,
 pick a pair and seed from the report and replay it:
 
 ```sh
-node scripts/ai-batch.js replay --pairs pd-tao --seeds 2 \
+node scripts/ai-batch.js replay --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --pairs pd-tao --seeds 2 \
   --start tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt \
   --corp-option <option>=true --diff
 ```
+
+Use the report’s `--pool` value when it used a non-default pool, along with
+its pair, seed, start and AI options.
 
 `replay` plays exactly the batch's game (same seed streams, sets and start;
 its `logHash` matches the report) and prints the full log, which the report
@@ -377,7 +381,11 @@ R&D runs out. That is expected.
 ### Building a start board
 
 Gate start boards live in `tests/fixtures/ai-batch/starts/` and are built
-from real logs, never by hand:
+from real logs, never by hand. Source logs must be trusted: the builder
+executes their board statements in the headless engine. The VM is not a
+security boundary, and the game timeout does not bound synchronous source
+execution. Restricting imported statements is tracked in
+[start-board-import-executes-source-code.md](backlog/start-board-import-executes-source-code.md).
 
 ```sh
 node scripts/start-board.js <log> --list

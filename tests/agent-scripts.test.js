@@ -10,7 +10,7 @@ const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
 const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
-  outcomeLine, failedGateResult} = require('../scripts/ticket.js');
+  outcomeLine, failedGateResult, outcomeProblem} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -104,6 +104,17 @@ assert.strictEqual(outcomeLine('# T\n\n**Outcome:** not adopted — gate failed\
 assert.strictEqual(outcomeLine('# T\n'), undefined, 'a ticket without an Outcome line has none');
 assert.strictEqual(failedGateResult('x', 'false')[0], 'FAIL', 'a failed option still in the code fails the check');
 assert.strictEqual(failedGateResult('x', undefined)[0], 'PASS', 'a removed failed option passes');
+for (const code of ['if (this.options.x) act();', 'if (this.options["x"]) act();', 'const {x} = this.options;']) {
+  assert.strictEqual(failedGateResult('x', undefined, code)[0], 'FAIL', 'a branch without its default is still present');
+}
+assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.extra) act();')[0], 'PASS',
+  'similarly named options do not count as the removed option');
+assert.strictEqual(outcomeProblem(undefined, 'failed — `x` removed')[0], 'FAIL');
+assert.strictEqual(outcomeProblem('adopted', 'failed — `x` removed')[0], 'FAIL');
+assert.strictEqual(outcomeProblem('blocked — follow-up', 'failed — `x` removed')[0], 'FAIL');
+assert.strictEqual(outcomeProblem('not adopted — gate failed', 'failed — `x` removed'), null);
+assert.strictEqual(outcomeProblem(undefined, 'pending F4')[0], 'WARN');
+assert.strictEqual(outcomeProblem('adopted', 'passed — `x`'), null);
 
 for (const [before, after] of [
   ["expect(choice).toBe('install');", "expect(choice).toBe('gain');"],

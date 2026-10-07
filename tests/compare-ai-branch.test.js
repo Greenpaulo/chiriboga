@@ -31,6 +31,11 @@ test('benchmarks the branch then compares against current baseline', root => {
   ]);
   assert.strictEqual(fs.readFileSync(path.join(root, 'bench/current/baseline.json'), 'utf8'), '{}');
 });
+test('baseline branch collision stops before publication', root => {
+  fs.writeFileSync(path.join(root, '.git/HEAD'), 'ref: refs/heads/current/baseline\n');
+  assert.throws(() => compareBranch(root, () => assert.fail('must not run')), /would overwrite.*baseline/);
+  assert.strictEqual(fs.readFileSync(path.join(root, 'bench/current/baseline.json'), 'utf8'), '{}');
+});
 test('missing baseline stops before running games', root => {
   fs.unlinkSync(path.join(root, 'bench/current/baseline.json'));
   assert.throws(() => compareBranch(root, () => assert.fail('must not run')), /Missing.*baseline/);

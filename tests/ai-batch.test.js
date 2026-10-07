@@ -272,6 +272,19 @@ const EXTRA_DRAW = side => `
     assert.ok(/Unknown collector: noSuchCollector/.test(unknown.out), unknown.out);
   });
 
+  await scenario('expanded directories and tagged starts each get one share of the budget', () => {
+    const dir = path.join(root, 'tests/fixtures/ai-batch/starts');
+    const tagged = batch.taggedStarts(['hosted-card-on-ice']);
+    const onlyDirectory = batch.buildConfig(batch.parseArgs(['--start', dir, '--budget', '1400']));
+    const overlap = batch.buildConfig(batch.parseArgs(['--start', dir, '--start-tag', 'hosted-card-on-ice', '--budget', '1400']));
+    assert.ok(tagged.length, 'the tag selects a committed board');
+    assert.deepStrictEqual(overlap.starts, onlyDirectory.starts, 'tag overlap does not duplicate expanded boards');
+    assert.deepStrictEqual(overlap.seeds, onlyDirectory.seeds, 'budget allocation follows unique boards');
+    const file = tagged[0];
+    assert.strictEqual(batch.resolveStarts([file, path.relative(root, file)], overlap.poolInfo.ranges).length, 1,
+      'relative and absolute paths resolve to the same file');
+  });
+
   await scenario('7. --start begins from a fixture board, runs to PlayerWin and is reproducible', async () => {
     const file = path.join(root, 'tests/fixtures/corp-decisions/corp-draw-ok-when-hq-secure.txt');
     assert.strictEqual(batch.resolveStarts([file], ranges).length, 1, 'the fixture uses only pool cards');
@@ -389,6 +402,33 @@ const EXTRA_DRAW = side => `
     assert.ok(/Logs are identical/.test(same.out), same.out.slice(0, 300));
     const bad = cli(['replay', '--pairs', 'gateway', '--seeds', '1-2']);
     assert.notStrictEqual(bad.status, 0);
+  });
+
+  await scenario('failed replays exit non-zero and retain diagnostics, including either diff side', () => {
+    const source = readFixture(path.join(root, 'tests/fixtures/corp-decisions/corp-draw-ok-when-hq-secure.txt')).code;
+    const file = path.join(tmp, 'failed-replay.txt');
+    const args = ['replay', '--pairs', 'gateway', '--seeds', '1', '--start', file,
+      '--corp-option', TEST_OPTION + '=true'];
+    for (const [condition, diff] of [
+      ['true', false], ['corp.AI.options.' + TEST_OPTION, true], ['!corp.AI.options.' + TEST_OPTION, true],
+    ]) {
+      fs.writeFileSync(file, source + '\nLog("replay log retained");\nif (' + condition + ') throw new Error("replay regression diagnostic");\n');
+      const result = cli([...args, ...(diff ? ['--diff'] : [])]);
+      assert.strictEqual(result.status, 1, result.out.slice(0, 500));
+      assert.match(result.out, /replay regression diagnostic/, 'fixture errors remain available');
+      assert.ok(result.out.includes(diff ? 'candidate:' : 'game:'), 'game summary remains available');
+      if (diff) {
+        const summaries = result.out.split('\n').slice(0, 2);
+        assert.match(summaries[0], /baseline \(options off\):/);
+        const baselineFails = condition.startsWith('!');
+        assert.strictEqual(summaries[0].includes('errors:'), baselineFails, 'only the intended baseline fails');
+        assert.strictEqual(summaries[1].includes('errors:'), !baselineFails, 'only the intended candidate fails');
+      }
+      else assert.ok(result.out.split('\n').slice(1).includes('replay log retained'), 'the diagnostic log is printed after the summary');
+    }
+    const timeout = cli(['replay', '--pairs', 'gateway', '--seeds', '1', '--timeout', '0.001']);
+    assert.strictEqual(timeout.status, 1, timeout.out.slice(0, 500));
+    assert.match(timeout.out, /no winner \(timeout/);
   });
 
   fs.rmSync(tmp, {recursive: true, force: true});

@@ -18,6 +18,9 @@ function compareBranch(root, runBatch = args => {
   const branch = git.stdout.trim();
   const output = `bench/${branch}.json`;
   const baseline = 'bench/current/baseline.json';
+  if (path.resolve(root, output) === path.resolve(root, baseline)) {
+    throw new Error('Branch output would overwrite ' + baseline + '; use a different branch name.');
+  }
   if (!fs.existsSync(path.join(root, baseline))) {
     throw new Error(`Missing ${baseline}. Run node scripts/refresh-ai-baseline.js on the target main build first, then return to this branch.`);
   }

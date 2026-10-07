@@ -90,7 +90,7 @@ suite pass; no expectation was changed and no art was committed.
   (`AI_BATCH_TEST_OPTION`) instead of a real AI option.
 - Process: "When a gate fails" (`ai-planning.md`), `implement-ticket` and
   `review-ticket`. `ticket.js check` now fails a failed option left in the
-  code and warns when an `**Outcome:**` line is missing.
+  code and requires a `not adopted` `**Outcome:**` for a failed gate.
 
 **Gate setup, 2026-10-02 (not gate evidence).** A pool-only run on the F4
 branch, `node scripts/ai-batch.js gate --corp-option
@@ -614,8 +614,9 @@ thresholds, with these changes:
       effect.
 - [x] A separate case where the hosted card is exploitable returns `false`
       and verifies that the refusal reason is logged.
-- [x] The behavior change ships behind an AI option that defaults to off,
-      named `evidenceBasedHostedCardRez` in the Resolution.
+- [x] The candidate behind an AI option, `evidenceBasedHostedCardRez`, was
+      not adopted after its gate failed; the option and its decision branch
+      are removed, as recorded in the Resolution.
 - [ ] Gate evidence is recorded in the Resolution: exact F4 command, committed
       deck pairs and mid-game starts, paired seeds, seed count, every metric's
       baseline/candidate result and bootstrap 95% confidence interval,
@@ -627,9 +628,10 @@ thresholds, with these changes:
       hosted-card veto. The Tranquilizer board was dropped because moving a
       hosted card is not an allowed builder edit; see the
       [F10 Resolution](../../backlog/code-review/F10-real-board-start-library.md#resolution).
-- [x] The gate is ready to run: every collector and start board it names
-      exists and is tested, and a `--quick` run of each gate command
-      completes and reports at least one game changed by the options.
+- [x] The failed gate is closed with the real Chromatophores board evidence
+      recorded in the Resolution. The historical commands in this ticket are not
+      current runnable gates: the option was removed and the Tranquilizer
+      board was dropped (see the F10 Resolution linked above).
 - [x] New or changed AI hooks are documented in `documentation/ai.md` (none
       expected — no card-facing hook changes, only internal AI logic).
 - [x] `node tests/run-all-tests.js` passes.
