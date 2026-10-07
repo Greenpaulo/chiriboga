@@ -97,7 +97,21 @@ node scripts/ai-batch.js \
 Check that this initial report records a clean build, 1,000 games and zero
 failures before using it as the baseline.
 
-Run on a clean, committed candidate branch, using a new output filename for
+To benchmark the checked-out branch and print its comparison in one command:
+
+```sh
+node scripts/compare-ai-branch.js
+```
+
+This runs the five-pair pool with seeds 1–200, writes `bench/<branchname>.json`,
+then compares it with `bench/current/baseline.json`. The branch name is used
+as written: `bugs/example` writes to `bench/bugs/example.json`, creating
+folders as needed. Re-running on the same branch replaces its report, so copy any earlier
+report you want to keep first. The script checks that the baseline exists
+before starting and stops if the benchmark fails. Run on a clean, committed
+candidate branch so the report records the build being tested.
+
+For manual runs, use a new output filename for
 each PR/revision so earlier evidence is preserved:
 
 ```sh
