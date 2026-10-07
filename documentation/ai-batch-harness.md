@@ -83,7 +83,7 @@ node scripts/ai-batch.js \
   --out bench/pr-12-candidate.json
 
 node scripts/ai-batch.js \
-  --compare bench/corp-options-default.json bench/pr-12-candidate.json
+  --compare bench/current/baseline.json bench/pr-12-candidate.json
 ```
 
 Replace `pr-12-candidate.json` with the ticket/PR and revision being tested.
@@ -91,7 +91,7 @@ Keep reports in the ignored `bench/` evidence folder. The saved benchmark
 JSON is local evidence; it is not included in a fresh clone. Preserve/back up
 that file rather than overwriting it with a new run.
 
-The latest corrected-default benchmark was run on **2026-10-05**, at clean
+The historical corrected-default benchmark was run on **2026-10-05**, at clean
 commit **`28cc665`**, with **1,000 games and zero failures**, pool hash
 `fe8cb821d04c9dd7` and code hash `83dee8ba06045827`. Its report is
 `bench/corp-options-default.json`. This is the corrected default intended for
@@ -114,7 +114,7 @@ all six Corp options false: `evidenceBasedHostedCardRez`,
 `secureScoringServerGate`, `serverAtRiskInstallOverride`,
 `committedAgendaReserveBypass`, `emptyArchivesRunPressure` and
 `valuelessServerDebtReset`. The command above uses the candidate's defaults;
-check its report's effective options against these settings and explain any
+check its report's effective options against the current baseline and explain any
 intentional difference. Keep the pool, decks, seeds, fixtures and collectors
 identical; the comparator rejects mismatches in pool hash, seeds, starts or
 collectors. Different source commits/code hashes are allowed.
@@ -134,14 +134,44 @@ their explanation alongside the deterministic reproduction. A correctness
 fix is not rejected solely because one side's win rate falls. Pure documentation
 and human-only UI changes need not run this gameplay screen.
 
-This frozen benchmark tracks cumulative changes. To attribute a difference
-to one PR, also run the same command on its target main commit with a distinct
-output such as `bench/pr-12-main.json`, then compare that report with the
-candidate. After main integration, verify the merged build against the saved
-benchmark rather than assuming it reproduces the recorded result. This screen
+The historical benchmark tracks cumulative changes. Compare new PRs against
+`bench/current/baseline.json`, the accepted current-main baseline. If that
+report does not represent the PR's target main build, also run the same command
+on its target main commit with a distinct output such as `bench/pr-12-main.json`,
+then compare that report with the candidate. This screen
 supplements the full regression suite and any ticket-specific strategic gate.
 See the [completed investigation handoff](corp-ai-regression/gated-fix-handoff.md)
 for the evidence and remaining scoring deficit against the historical H0 build.
+
+### Refreshing the accepted baseline after a merge
+
+After merging an accepted gameplay change, run this on the clean, committed
+merged build:
+
+```sh
+node scripts/refresh-ai-baseline.js
+```
+
+The script runs the five-pair pool with seeds 1–200 and writes
+`bench/baseline.json`. Once the report contains 1,000 games, zero failures and
+a clean-build marker, it copies the previous current baseline into
+`bench/archived-current/<archive-time>-<commit>.json`, then moves the new report
+to `bench/current/baseline.json`. The historical `bench/corp-options-default.json`
+is preserved. A single dated JSON filename already in `bench/current/` is
+also supported; more than one report there is rejected as ambiguous.
+
+If the run fails or the report is rejected, the previous baseline stays in
+place. Any new `bench/baseline.json` is retained for inspection; move it aside
+before retrying. The script also refuses to overwrite an existing report at
+that staging path. Concurrent refreshes are blocked by
+`bench/.baseline-refresh.lock`; if the process is forcibly terminated, remove
+that lock only after checking no refresh is still running.
+
+Refreshing records a change already accepted in review; it does not decide
+whether a candidate should be accepted. A Runner fix can legitimately lower
+Corp win rate. Record the merged commit, results and reason for the baseline
+change in the PR or ticket. Reports in `bench/` remain local, ignored evidence
+and should be backed up.
 
 ### What a report contains
 

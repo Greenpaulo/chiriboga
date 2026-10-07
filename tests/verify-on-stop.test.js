@@ -13,14 +13,17 @@ let relevant = true;
 let suitePasses = false;
 let suiteRuns = 0;
 
-function invoke(session = 'review-regression') {
+function invoke(session = 'review-regression', runtimeMode) {
   let output = '';
   const context = {
     __dirname: path.join(__dirname, '../scripts/agent-hooks'),
     process: {
       execPath: process.execPath,
+      versions: runtimeMode ? {node: '8.17.0'} : undefined,
+      env: runtimeMode === 'retry' ? {CHIRIBOGA_HOOK_RUNTIME_RETRY: '1'} : {},
       exit(code) { assert.strictEqual(code, 0); throw exit; },
       stdout: {write(text) { output += text; }},
+      stderr: {write(text) { assert.fail('unexpected stderr: ' + text); }},
     },
     require(name) {
       if (name === 'path') return path;
@@ -36,6 +39,16 @@ function invoke(session = 'review-regression') {
       };
       if (name === 'child_process') return {
         spawnSync(command, args, options) {
+          if (command === '/bin/zsh') {
+            assert.deepStrictEqual(Array.from(args), ['-lc', 'command -v node']);
+            return {status: 0, stdout: 'shell startup message\n/modern-node\n'};
+          }
+          if (command === '/modern-node') {
+            assert.deepStrictEqual(Array.from(args), [path.join(hookRoot, 'scripts/agent-hooks/verify-on-stop.js')]);
+            assert.strictEqual(JSON.parse(options.input).session_id, session);
+            assert.strictEqual(options.env.CHIRIBOGA_HOOK_RUNTIME_RETRY, '1');
+            return {status: 0, stdout: JSON.stringify({decision: 'block', reason: 'forwarded'})};
+          }
           if (command === 'git') return {status: 0, stdout: relevant ? ' M ai_corp.js\n' : ''};
           assert.strictEqual(command, process.execPath, 'run the suite with Node');
           assert.deepStrictEqual(Array.from(args), [path.join(hookRoot, 'tests/run-all-tests.js')],
@@ -71,4 +84,8 @@ assert.strictEqual(invoke(), null);
 assert.strictEqual(suiteRuns, runsBefore, 'skip the suite when relevant changes disappear');
 relevant = true;
 assert.strictEqual(invoke().decision, 'block', 'no relevant changes resets the session counter');
+assert.strictEqual(invoke('old-runtime', 'old').reason, 'forwarded',
+  'an inherited old runtime forwards the newer runtime result and session input');
+assert.match(invoke('old-runtime', 'retry').reason, /still older than Node 18/,
+  'an old login-shell runtime cannot cause an infinite retry');
 console.log('Stop hook: repeated failures stay capped and successful checks reset the limit.');
