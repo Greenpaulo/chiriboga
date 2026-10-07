@@ -603,17 +603,21 @@ thresholds, with these changes:
 
 ## Acceptance criteria
 
-- [x] The reproduction in section 4 fails before the fix and passes after,
-      moved into the green suite, with its assertions unchanged.
+- [x] The Saci and rich-Corp guard cases from the reproduction remain in
+      the green suite with their assertions unchanged. The "should rez" case
+      remains pending, unchanged, under the
+      [repeated-tax follow-up](../hosted-ice-rez-ignores-repeated-tax.md).
 - [x] The hostedCards branch logs a reason whenever it sets `rezIce = false`.
 - [x] The Saci (`AIHostedDoesNotPreventRez`) guard case still returns `true`.
 - [x] The "super rich" guard case still returns `true`.
-- [x] A new case demonstrates the fixed behavior: a hosted, non-exempt Trojan
+- [ ] A new case demonstrates the fixed behavior: a hosted, non-exempt Trojan
       no longer blocks the rez when refusing would leave the server otherwise
       undefended and the Runner cannot exploit the hosted card's actual
-      effect.
-- [x] A separate case where the hosted card is exploitable returns `false`
-      and verifies that the refusal reason is logged.
+      effect. This behavior was not adopted after the failed gate; the
+      pending reproduction is tracked by the repeated-tax follow-up above.
+- [x] The retained hosted-card threshold returns `false` below five times
+      the rez cost and logs the refusal reason, covered by
+      `tests/corp-server-security.test.js`.
 - [x] The candidate behind an AI option, `evidenceBasedHostedCardRez`, was
       not adopted after its gate failed; the option and its decision branch
       are removed, as recorded in the Resolution.
