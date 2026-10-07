@@ -297,7 +297,11 @@ Proposed at `64bcf17`, 2026-09-28; revised 2026-09-28. **Approved 2026-09-28.**
   and gate. No AI hook documentation changes are required.
 
 **Source log:** `documentation/debug-logs/bug_raised/corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt`
-**Reproduction:** `tests/pending/hosted-trojan-blocks-rez-silently.test.js` — failed at `64bcf17`, 2026-09-28; moved unchanged to `tests/hosted-trojan-blocks-rez-silently.test.js` and passes with the gated candidate enabled
+**Reproduction:** `tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js` — the unadopted "should rez" case remains pending under the repeated-tax follow-up. PR #17 review follow-up removed its obsolete zero-message assertion; the `true` rez expectation is unchanged and still fails.
+
+Original reproduction: `tests/pending/hosted-trojan-blocks-rez-silently.test.js`
+failed at `64bcf17`, 2026-09-28. Its two guard cases now pass in
+`tests/hosted-trojan-blocks-rez-silently.test.js`; the gated candidate was removed.
 
 ---
 
@@ -542,6 +546,11 @@ Two guard cases are included so a fix does not overcorrect:
 ---
 
 ## Acceptance gate
+
+These commands are historical: `evidenceBasedHostedCardRez` was removed after
+the failed gate, and the Tranquilizer start board was dropped. They are not
+current runnable gates; see the Resolution and F10 evidence above.
+
 F4 gate. Option `evidenceBasedHostedCardRez` (Corp AI), off in the baseline
 and on in the candidate. Committed deck pool, paired seeds, 200 games per deck
 pair, bootstrap 95% intervals. Two game sets, one command each; the gate
@@ -605,7 +614,7 @@ thresholds, with these changes:
 
 - [x] The Saci and rich-Corp guard cases from the reproduction remain in
       the green suite with their assertions unchanged. The "should rez" case
-      remains pending, unchanged, under the
+      remains pending with its rez expectation unchanged, under the
       [repeated-tax follow-up](../hosted-ice-rez-ignores-repeated-tax.md).
 - [x] The hostedCards branch logs a reason whenever it sets `rezIce = false`.
 - [x] The Saci (`AIHostedDoesNotPreventRez`) guard case still returns `true`.

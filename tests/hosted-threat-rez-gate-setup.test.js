@@ -41,11 +41,12 @@ function collect(events) {
 // Run inside the game before play: evaluate the approached Remote 0 rez and
 // capture the reason the Corp AI logs.
 const PROBE = `
-  var __server = corp.remoteServers[0], __ice = __server.ice[0], __messages = [], __log = corp.AI._log;
+  var __server = corp.remoteServers[0], __ice = __server.ice[0], __messages = [], __aiLog = corp.AI._log;
   attackedServer = __server; approachIce = 0; playerTurn = runner;
   corp.AI._log = function(message) { __messages.push(String(message)); };
   var __probeRez = corp.AI._iceWorthRezzing(__ice, RezCost(__ice), __server);
-  corp.AI._log = __log;
+  corp.AI._log = __aiLog;
+  Log('Hosted-rez probe: engine logger restored');
   attackedServer = null; approachIce = -1; playerTurn = corp;
   var __probe = {hosted: __ice.hostedCards.map(function(c) { return c.title; }), rez: __probeRez,
     vetoed: __messages.some(function(m) { return /hosted .* requires/.test(m); })};
@@ -77,10 +78,12 @@ const PROBE = `
       const pair = pool.pairs.find(p => p.id === start.pair);
       const rezzes = [];
       const game = await playGame({streamPrefix: start.seed + ':' + start.pair, corpFile: pair.corp, runnerFile: pair.runner, setFiles,
-        timeoutMs: 60000, start: path.join(root, start.file), setupFile, observe: true,
+        timeoutMs: 60000, start: path.join(root, start.file), setupFile, observe: true, fullLog: true,
         onEvent: event => { if (event.type === 'rez') rezzes.push(event); }});
       assert.deepStrictEqual(game.errors, [], 'engine errors');
       assert.ok(game.winner, 'the game finished');
+      assert.ok(game.log.includes('Hosted-rez probe: engine logger restored'),
+        'the probe preserves the harness engine logger');
       // The board's remote decision is the one a hosted-ICE rez change targets:
       // the hosted card is there and the current rule vetoes the rez.
       assert.deepStrictEqual(game.report, {hosted: [start.hosted], rez: false, vetoed: true});
