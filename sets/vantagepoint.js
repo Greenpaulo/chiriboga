@@ -1227,10 +1227,10 @@ cardSet[36015] = {
   runningWithThis: false,
   _stealthCreditCards: function (planningServer) {
     var baker = this;
-    var storedAttackedServer = attackedServer;
-    if (planningServer && attackedServer === null)
-      attackedServer = planningServer;
-    try {
+    //outside a run, a planning server supplies the prospective run context
+    var runServer =
+      planningServer && attackedServer === null ? planningServer : attackedServer;
+    return AIWithRunContext(runServer, function () {
       return InstalledCards(runner).filter(function (card) {
         if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
           return false;
@@ -1239,9 +1239,7 @@ cardSet[36015] = {
           card.canUseCredits("using", baker)
         );
       });
-    } finally {
-      attackedServer = storedAttackedServer;
-    }
+    });
   },
   responseOnRunnerTurnBegins: {
     Resolve: function () {
@@ -4746,7 +4744,9 @@ cardSet[36057] = {
     if (corp.badPublicity < 1 || corp.RnD.cards.length < 2 || Credits(corp) < RezCost(this)) return -1;
     return 0; // strongest empty protected remote, or a new server if none
   },
-  AIRezWhenCan: function () { return corp.badPublicity > 0 && corp.RnD.cards.length > 1; },
+  AIRezWhenCan: function () {
+    return !attackedServer && corp.badPublicity > 0 && corp.RnD.cards.length > 1;
+  },
   AIEconomyCard: true,
 };
 

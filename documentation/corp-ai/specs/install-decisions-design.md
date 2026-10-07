@@ -237,17 +237,14 @@ starting):
 
 - `_criticalBreachDefenseAction()` already scores post-install risk per ICE: it
   subtracts the install cost from `corp.creditPool`, pushes the ICE onto
-  `risk.server.ice`, calls `_centralBreachLossRisk()` and restores in a manual
-  `try/finally`. I2 moves this onto the shared helper and makes the critical
-  check read I2's candidate evaluation instead of running a second one.
-- `_iceInstallScore()` pushes a fake `{ice: [ice], root: []}` remote onto
-  `corp.remoteServers` with no guard; it is reachable only through
-  `_bestIceToInstall()`, which nothing calls. I2 deletes both.
-- `Phase_Main`'s "just need a tiny bit more cash" probe adds credits and compares
-  two `_rankedInstallOptions()` arrays with `<` (string coercion). It now
-  restores credits and hypothetical depth in `finally`; it still uses a manual
-  probe rather than `_withHypothetical()`. F2 owns that migration; I7.1 replaces
-  the decision.
+  `risk.server.ice`, calls `_centralBreachLossRisk()` and restores through
+  `_withHypothetical()` (F2). I2 makes the critical check read I2's candidate
+  evaluation instead of running a second one.
+- The uncalled `_iceInstallScore()`/`_bestIceToInstall()` pair was deleted by
+  F2.
+- `Phase_Main`'s "just need a tiny bit more cash" probe adds credits through
+  `_withHypothetical()` and compares install-option counts (F2 fixed the
+  mechanics); I7.1 replaces the decision.
 - `_ordinaryPurgeOutcome()` already uses `_withHypothetical()` and is the model
   to follow.
 

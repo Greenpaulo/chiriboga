@@ -111,12 +111,8 @@ class RunCalculator {
     if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
       //ice is known, calculate specifics
       //start with basic details
-	  //we need to pretend it's an encounter
-	  var stored = AIIceEncounterSaveState();
-	  AIIceEncounterModifyState(ice);
-      result.strength = this._baseStrength(ice);
-	  //then restore reality
-	  AIIceEncounterRestoreState(stored);
+	  //we need to pretend it's an encounter (reality is restored afterwards)
+      result.strength = AIWithIceEncounter(ice, () => this._baseStrength(ice));
       result.sr = [];
       result.subTypes = [].concat(ice.subTypes);
 
@@ -1208,7 +1204,11 @@ class RunCalculator {
     var firstDamage = this.TotalDamage(this.TotalEffect(icePoint));
     var futureOther = corp.badPublicity || 0;
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
-    var futurePool = data.poolCreditLimit - firstPoolSpent;
+    // Before a run, bad-publicity credits are included in the pool budget.
+    // Unspent temporary credits expire; credit losses consume permanent credits.
+    var expiredCredits = attackedServer || this._continuationRun ? 0 : Math.max(0,
+      futureOther - Math.max(0, icePoint.runner_credits_spent - data.otherCredits));
+    var futurePool = data.poolCreditLimit - firstPoolSpent - expiredCredits;
     var futureDamage = data.damageLimit - firstDamage;
     // Different break paths often leave identical continuation budgets. Cache
     // only within this synchronous board snapshot, never across game actions.
@@ -1219,6 +1219,7 @@ class RunCalculator {
       var future = new RunCalculator();
       future.suppressOutput = true;
       future._runnerPlanning = true;
+      future._continuationRun = true; // fresh bad-publicity credits are in otherCredits
       future._ignoredIce = new Set(this._ignoredIce);
       future._ignoredIce.add(defender);
       routes = future.Calculate(data.server, futureClicks, futurePool, futureOther,
@@ -1229,7 +1230,7 @@ class RunCalculator {
       var last = route[route.length - 1];
       var result = this.CopyPoint(icePoint);
       result.iceIdx = -1;
-      result.runner_credits_reserved = (last.runner_credits_reserved || 0) +
+      result.runner_credits_reserved = expiredCredits + (last.runner_credits_reserved || 0) +
         Math.max(0, last.runner_credits_spent - futureOther) + last.runner_credits_lost;
       result.runner_clicks_spent += 1 + last.runner_clicks_spent;
       result.virus_counters_spent += last.virus_counters_spent;

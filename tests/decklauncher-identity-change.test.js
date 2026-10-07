@@ -25,6 +25,7 @@ function fixture(precon, generatedCards) {
     runner,
     corp,
     deckPlayer: runner,
+    MAX_COPIES_PER_CARD: 3,
     cardSet: [identity, {title: 'Runner card', player: runner}, {title: 'Corp card', player: corp}],
     json: {identity: 0, cards: [2, 2]},
     deckCounts: {2: 2},
@@ -77,4 +78,26 @@ function fixture(precon, generatedCards) {
 }
 
 assert(source.includes('GenerateDeckForIdentity(json.identity);'));
-console.log('3 decklauncher identity-change regression cases passed.');
+
+{
+  const context = fixture({identity: 0, cards: {1: 3}}, [1]);
+  vm.runInContext('GenerateDeckForIdentity(0)', context);
+  assert.deepStrictEqual(Array.from(context.json.cards), [1, 1, 1]);
+  assert.strictEqual(context.deckCounts[1], 3);
+  assert.strictEqual(context.DeckBuildCalls, 0, 'a precon at the copy limit must stay usable');
+}
+
+{
+  const context = fixture({identity: 0, cards: {1: 4}}, [1, 1]);
+  vm.runInContext('GenerateDeckForIdentity(0)', context);
+  assert.strictEqual(context.DeckBuildCalls, 1, 'an over-limit precon must trigger generation');
+  assert.strictEqual(context.generatedForIdentity, context.cardSet[0]);
+  assert.deepStrictEqual(
+    Array.from(context.generatedWithSetCodes),
+    Array.from(context.deckBuildAllowedSetCodes),
+  );
+  assert.deepStrictEqual(Array.from(context.json.cards), [1, 1]);
+  assert.strictEqual(context.deckCounts[1], 2, 'apply the generated deck rather than clamp the precon');
+}
+
+console.log('5 decklauncher identity-change regression cases passed.');

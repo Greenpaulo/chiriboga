@@ -1,7 +1,21 @@
 # Corp AI: `_potentialTagPunishment` never restores the phase identifier and has no `finally`
 
 **Source:** code inspection during the Corp AI planning audit (no debug log)
-**Reproduction:** none yet: found by reading the code at `376f32c`, 2026-09-25; writing a failing test is the first acceptance criterion.
+**Reproduction:** `tests/pending/potential-tag-punishment-restores-state.test.js` (shared with roadmap item F2 row 7); failed at b52d451, 2026-10-02 (after a normal return `currentPhase.identifier` was still `"Corp 2.2"`). Moved unchanged to `tests/potential-tag-punishment-restores-state.test.js`; passes with `node tests/potential-tag-punishment-restores-state.test.js`.
+
+
+## Resolution
+
+Implemented from `b52d451`, as row 7 of roadmap item F2
+([ticket](../../backlog/corp_ai_finding_10_guarded_hypothetical.md)).
+`_potentialTagPunishment()` now changes the four fields only inside
+`_withHypothetical()`, whose `restore` reassigns `runner.tags`,
+`corp.clickTracker`, `corp.creditPool` and `currentPhase.identifier` in
+`finally`. The reproduction covers both defects (the phase after a normal
+return; every field and the hypothetical depth after `_useWhenTaggedCard()`
+throws). No decision changes: the fix matters only on the latent paths
+described below, and decision snapshots are unchanged. See
+[architecture: foundations](../../corp-ai/architecture.md#foundations).
 
 ## Summary
 `_potentialTagPunishment(tags, clicks, credits)` in `ai_corp.js` asks "could
@@ -67,7 +81,7 @@ is one of the migrations listed in F2
 here or in F2, and tick the F2 row either way.
 
 ## Acceptance criteria
-- [ ] A failing test shows `currentPhase.identifier` is unchanged after `_potentialTagPunishment()` runs from a non-"Corp 2.2" phase with no resource-trash shortcut.
-- [ ] The test also shows tags, clicks, credits and the phase identifier are restored when `_useWhenTaggedCard()` throws.
-- [ ] The test passes after the fix and has moved into `tests/`.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] A failing test shows `currentPhase.identifier` is unchanged after `_potentialTagPunishment()` runs from a non-"Corp 2.2" phase with no resource-trash shortcut.
+- [x] The test also shows tags, clicks, credits and the phase identifier are restored when `_useWhenTaggedCard()` throws.
+- [x] The test passes after the fix and has moved into `tests/`.
+- [x] `node tests/run-all-tests.js` passes.

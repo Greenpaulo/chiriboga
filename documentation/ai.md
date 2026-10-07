@@ -15,6 +15,7 @@ This file is long. Read only the sections a task needs. To find one hook, search
 | Runner cards the Corp's server-security evaluator must see (type shifts, bypasses, redirects, credit sources, pressure) | §4.16–4.22 |
 | Corp protection and economy policy hooks | §5.9–5.11 |
 | Logic written directly in a card's `Enumerate`/`Resolve` | §4.15 (Runner), §5.8 (Corp) |
+| A hook that evaluates a prospective run, encounter or other temporary state | §2 "Evaluating hypothetical state" |
 | Add a new hook | §2 "The Hook Pattern", the nearest existing subsection as a template, then add a row to §7 |
 | Hook usage notes for recent Vantage Point cards | §7 "Vantage Point Batch N card hooks" |
 | First time adding AI support | §2, then §8 (worked examples) |
@@ -130,6 +131,29 @@ if (runner.AI != null) {
 ```
 
 This is useful for more complex cards where the AI needs to make a choice mid-resolution.
+
+### Evaluating hypothetical state
+
+An AI hook or card helper that needs a prospective run or encounter context,
+or any other temporary change to game state, must make it through one of the
+guarded wrappers in the utility prefix of `ai_runner.js` (loaded before card
+code runs in the game, the headless harness and the test harnesses):
+
+| Wrapper | Temporarily sets | Use it for |
+|---|---|---|
+| `AIWithRunContext(server, evaluate)` | `attackedServer = server` | Run-only costs or credits, e.g. a `canUseCredits` that only allows spending during a run (Baker's `_stealthCreditCards`) |
+| `AIWithIceEncounter(iceCard, evaluate)` | `encountering`, `attackedServer`, `approachIce` as if `iceCard` were encountered | Encounter-only strength or subtype effects (Atman and Chameleon `AIMatchingBreakerInstalled`). `evaluate(entered)` receives `false`, with nothing changed, when `iceCard` is not in a server |
+| `AIWithHypothetical(apply, evaluate, restore)` | whatever `apply` changes; `restore` must reassign every field | Anything else. Corp AI code calls it as `this._withHypothetical()` |
+
+Each wrapper returns `evaluate`'s result, restores the state in `finally`
+(also when `evaluate` throws) and raises the shared hypothetical depth count
+`AIHypothetical.depth` while `evaluate` runs, so the Corp's per-decision
+security cache never stores or serves a result computed on a changed board.
+Pass only public context: the server being considered or the ICE position,
+never the Runner's hidden cards. `tests/corp-ai-hypothetical-mutation.test.js`
+fails when an `AI*` or `_*` function in `sets/*.js` changes credits, clicks,
+tags, counters, rez state, ICE arrays or run/encounter context outside these
+wrappers.
 
 ---
 
@@ -325,6 +349,15 @@ AISpecialBreaker: true,
 You still implement `AIImplementBreaker` to explain how they break ice, and `AIMatchingBreakerInstalled` so the AI can check whether a given piece of ice is already covered.
 
 **`AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)`** — Called on every installed program to find a match for a given ice. Return `this` if this card can handle that ice, or `null` if not. `effectiveSubTypes` is an optional array used by Corp security planning for public subtype shifts; use it instead of mutating or retaining `iceCard.subTypes`. Runner-AI callers may omit it, so fall back to the ice's current subtypes.
+
+Identity effects that temporarily add a subtype must also restrict the match to
+the ICE that would receive that subtype. Rielle "Kit" Peddler uses
+`_AIFirstIceToEncounter` for both `AIModifyIceAI` and
+`AIMatchingBreakerInstalled`: it skips unrezzed outer ICE when a rezzed inner
+ICE would be encountered first, and restores any temporary subtype mutation
+before returning. When Corp security supplies `effectiveSubTypes`, Kit defers
+to that evaluator's ordinary breaker matching instead of requiring a live
+Runner AI.
 
 ```js
 // Botulus: only matches the ice it is hosted on
@@ -1202,7 +1235,7 @@ AIRunPoolCreditOffset: function(server, runEventCardToUse) {
 
 The return value is the non-negative number of additional credits available for that route. `server` is the proposed attacked server. `runEventCardToUse` is the proposed event for Runner-AI simulation; Corp security planning always passes `null`, because hidden Grip identities are unavailable to the Corp. The hook must be read-only, use only public active state when called with `null`, and be safe outside a run. If a card exposes both usable hosted credits and this hook, the security evaluator takes the larger value rather than adding both.
 
-`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
+`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It supplies the proposed `attackedServer` through `AIWithRunContext()` (§2 "Evaluating hypothetical state") while probing route-sensitive `canUseCredits` hooks, so the real value is restored afterward even if a hook throws. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
 
 ### 4.21 Public Central Pressure — `AICentralPressure`
 
@@ -1596,6 +1629,10 @@ run, and use only public information and the Corp's own cards.
 Operations consume their actual `PlayCost` and `PlayClickCost` (including
 Double); already-resolving operations have paid those costs. Installed upgrades
 consume their rez cost if unrezzed, no clicks, and one locally recorded use.
+Unrezzed upgrades must pass `FullCheckRez`, including `RezUsability`, with
+the search point’s credits, clicks and target advancement counters. The probe
+restores these fields and the active player even if a hook throws; execution
+checks full rez legality again against the live board.
 This upgrade contract is for trash-to-place-counter abilities without other
 costs. Execution rezzes or triggers the planned upgrade and supplies
 `AIPreferredTarget`; its ability must validate that target. Flood the Market
@@ -2193,8 +2230,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   broken or the ICE was bypassed, respectively. These branches each add one
   tag; a partial break does not. Recursion prefers a strong non-agenda draw,
   otherwise buries an agenda; the return targets a public Runner threat.
-- Paywall's `AIImplementIce` separates credit-pool loss on encounter from the
-  pay-one-or-end-the-run subroutine, so temporary credits cannot absorb loss.
+- Paywall's `AIImplementIce` separates the encounter credit loss
+  (`loseCredits`) from the pay-one-or-end-the-run subroutine.
 - Flood the Market uses `AIFastAdvance`, `AIFastAdvanceCounters` and
   `AIWouldPlay`, respects the planner's `AIPreferredTarget`, and avoids ordinary
   plays with fewer than three qualifying remotes.
@@ -2229,7 +2266,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Luana Campos uses `AIWorthInstalling(remotes)`, `AIRezWhenCan()` and the
   opening-hand economy flag `AIEconomyCard`. Placement chooses the strongest
   empty protected remote, otherwise a new one. Installing/rezzing requires bad
-  publicity, an affordable rez and at least two R&D cards. Turn-start choices
+  publicity, an affordable rez and at least two R&D cards. The rez hook waits
+  until no run is active, preserving approached ICE rez funds. Turn-start choices
   decline a draw that leaves no card for the mandatory draw.
 - Event Horizon uses `AITriggerInPaidWindow()` for legal Corp paid-window
   command/card selection. It waits until all ICE is passed, then sacrifices
@@ -2247,7 +2285,10 @@ if (!runner.AI || runner.AI.rc !== rc) {
   local ICE-model overlay. The failed attempt pays encounters, the continuation
   receives fresh bad-publicity credits, and only the successful attempt pays
   approach/breach effects. Additional pool expenditure is stored in
-  `runner_credits_reserved`, consumed by `ValidPoint` and `PointCost`. Incomplete
+  `runner_credits_reserved`, consumed by `ValidPoint` and `PointCost`. Before
+  a run, unspent first-attempt bad-publicity credits expire and are also
+  reserved so neither continuation nor outer validation can reuse them.
+  Credit losses consume permanent credits rather than bad-publicity credits. Incomplete
   encounter planning and Corp severity calculation are unchanged. This is a
   conservative public-information plan assuming the Corp uses each available
   stop; it can afford a rerun and does not treat disposable defense as permanent.

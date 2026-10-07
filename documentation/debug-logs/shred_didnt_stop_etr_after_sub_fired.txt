@@ -1,0 +1,211 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[René Loup Arcemont: Party Animal,2 Buzzsaw,2 Cacophony,2 Carmen,2 Carnivore,1 Chain Reaction,1 Creative Commission,2 Fermenter,1 Gourmand,1 Lampades,1 Nurse Hạnh,1 Open Market,3 Overclock,3 Rent Rioters,2 Rising Tide,2 Scrounge,1 Sell Out,2 Shred,2 Side Hustle,3 Sure Gamble,3 T400 Memory Diamond,3 Telework Contract]
+[PT Untaian: Life's Building Blocks,1 Manegarm Skunkworks,1 Longevity Serum,2 Urtica Cipher,3 Karunā,3 Hansei Review,2 Anoetic Void,3 Spin Doctor,3 Clearinghouse,2 Send a Message,2 Palisade,3 Whitespace,2 Hedge Fund,3 Proprionegation,3 Sericulture Expansion,2 Empiricist,2 Mycoweb,3 Semak-samun,3 Peer Review,2 Mitra Aman,1 Flyswatter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 4.00; fresh-hand expectation 4.64
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Urtica Cipher,Semak-samun,Send a Message,Manegarm Skunkworks,Sericulture Expansion]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Overclock,Creative Commission,T400 Memory Diamond,Carnivore,Telework Contract]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Petty Cash,Send a Message,Urtica Cipher,Manegarm Skunkworks,Sericulture Expansion]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Overclock,Creative Commission,T400 Memory Diamond,Carnivore,Telework Contract]
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Proprionegation accessed
+Proprionegation stolen
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Peer Review accessed
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Petty Cash,Send a Message,Urtica Cipher,Manegarm Skunkworks,Sericulture Expansion]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 3 card(s) in hand: [Overclock,T400 Memory Diamond,Carnivore]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Urtica Cipher,Petty Cash,Send a Message,Peer Review]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 3 card(s) in hand: [Overclock,T400 Memory Diamond,Carnivore]
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Run initiated attacking R&D
+AI: Could do 0 damage on breach
+Corp spent 2 credits
+Corp rezzed Manegarm Skunkworks
+Approaching R&D
+Whenever the Runner approaches this server triggered
+Runner spent 5 credits
+Run successful
+Karunā accessed
+Manegarm Skunkworks accessed
+Runner spent 3 credits
+Manegarm Skunkworks trashed
+Runner gained one credit
+Runner drew a card
+Run ends
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Urtica Cipher,Petty Cash,Send a Message,Peer Review]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Overclock,T400 Memory Diamond,Carnivore,T400 Memory Diamond]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Send a Message,Peer Review,Sericulture Expansion,Petty Cash,Urtica Cipher]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Overclock,T400 Memory Diamond,Carnivore,T400 Memory Diamond]
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played Shred
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Send a Message,Peer Review,Sericulture Expansion,Petty Cash,Urtica Cipher]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Overclock,T400 Memory Diamond,Carnivore,T400 Memory Diamond]
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played Shred
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+
+SPOILER: Contents of remote servers:
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(30001, [30020,35005], [30030,30003,35005,35011,30005,36001,35011,30015,30027,30030,30029,30007,35010,30031,35010,35011,35009,35034,36011,35009,30005,35004,35007,36007,30029,35022,30015,35004,30007,35034,36005,30030], [30029,30031,30003,30031], [30027,30027], [35048], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [30042], [30053,35054,30061,35055,35056,30053,35048,35079,30074,30075,30074,30048,35049,30053,35053,35048,35055,35049,30050,30050,35052,30061,30044,30075,35054,35081,30061,35052,30047,30074,30045,35056,35081,30072,30048,30047,30072,35053,30069,30048], [30069,35055,35049,35081,30045], [], [30047], [35054], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.rig.resources[0].credits=3;
+runner.rig.resources[0].usedThisTurn=true;
+runner.rig.resources[1].credits=9;
+corp.archives.cards[0].rezzed=true;
+corp.archives.cards[0].host=null;
+corp.RnD.cards[22].AICardsDiscarded=[];
+corp.HQ.ice[0].rezzed=true;
+corp.RnD.AISuccessfulRuns=3;
+
+Version reference: Tue Oct 06 2026 12:27:49 GMT+0100 (British Summer Time)

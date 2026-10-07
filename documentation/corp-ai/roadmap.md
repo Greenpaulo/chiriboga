@@ -121,9 +121,9 @@ cannot price yet.
 Shared infrastructure used by every area.
 
 ### F2 Guarded hypothetical evaluation: remaining migrations
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [corp_ai_finding_10_guarded_hypothetical.md](../backlog/corp_ai_finding_10_guarded_hypothetical.md)
+- **Ticket:** [corp_ai_finding_10_guarded_hypothetical.md](../backlog/code-review/corp_ai_finding_10_guarded_hypothetical.md)
 - **Goal:** Route every hand-written planning probe (11 inventoried functions, including Baker and runcalculator.js) through one guarded helper with a shared depth count, and ratchet new unguarded mutation.
 
 ### F3 Per-decision evaluation cache
@@ -161,6 +161,12 @@ Shared infrastructure used by every area.
 - **Depends on:** F4
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
+
+### F10 Real-board start library for gates
+- **Status:** in-progress
+- **Depends on:** F4
+- **Ticket:** [F10-real-board-start-library.md](../backlog/code-review/F10-real-board-start-library.md)
+- **Goal:** Build gate start boards from real logs with a checked builder, keep them in one tagged library, and run board-based gates under a fixed game budget.
 
 ### Done
 

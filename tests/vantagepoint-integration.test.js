@@ -43,6 +43,9 @@ vm.runInContext(
   context,
   {filename: 'config.js'},
 );
+// AI utilities used by card helpers (guarded hypothetical wrappers).
+const runnerUtilitySource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
+vm.runInContext(runnerUtilitySource.slice(0, runnerUtilitySource.indexOf('//actual class')), context);
 vm.runInContext(
   fs.readFileSync(path.join(root, 'sets', 'vantagepoint.js'), 'utf8'),
   context,
