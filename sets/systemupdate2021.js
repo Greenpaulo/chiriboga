@@ -2185,41 +2185,42 @@ cardSet[31026] = {
     automatic: true,
     availableWhenInactive: true,
   },
+  _AIFirstIceToEncounter: function(iceCard,startIceIdx) {
+	var server = GetServer(iceCard);
+	if (!server) return false;
+	var rezzedIceInServer = 0;
+	for (var i=startIceIdx; i>-1; i--) {
+		if (server.ice[i].rezzed) rezzedIceInServer++;
+	}
+	if (iceCard.rezzed || rezzedIceInServer < 1) {
+		//Walk inwards from startIceIdx. This is first if it is reached before
+		//any other rezzed ice; unrezzed outer ice is assumed to stay unrezzed.
+		for (var i=startIceIdx; i>-1; i--) {
+			if (server.ice[i] == iceCard) return true;
+			if (server.ice[i].rezzed) return false;
+		}
+	}
+	return false;
+  },
   AIModifyIceAI: function(iceAI,startIceIdx) {
 	if (!this.usedThisTurn || iceAI.ice == this.affectedCard) {
-		//If this ice is rezzed and is the next the Runner will encounter, add Code Gate.
-		//It's important to check rezzed here because if it is left unrezzed then the cached run needs to correctly understand the next ice is going 
-		// to be Code Gated and if the ice is rezzed (or no ice in the server are rezzed) then recalculation will include this effect for that instead.
-		//The affectedCard check is also important for mid-encounter
-		var server = GetServer(iceAI.ice);
-		if (server) {
-			var rezzedIceInServer = 0;
-			for (var i=startIceIdx; i>-1; i--) {
-				if (server.ice[i].rezzed) rezzedIceInServer++;
-			}
-			if (iceAI.ice.rezzed || rezzedIceInServer < 1) {
-				//walk inwards from startIceIdx. If this is reached before any other rezzed ice, Code Gate it.
-				for (var i=startIceIdx; i>-1; i--) {
-					if (server.ice[i] == iceAI.ice) {
-						if (!iceAI.subTypes.includes("Code Gate")) iceAI.subTypes.push("Code Gate");
-						return iceAI;
-					}
-					else if (server.ice[i].rezzed) {
-						return iceAI;
-					}
-				}
-			}
+		//The affectedCard check is important for mid-encounter.
+		if (this._AIFirstIceToEncounter(iceAI.ice,startIceIdx)) {
+			if (!iceAI.subTypes.includes("Code Gate")) iceAI.subTypes.push("Code Gate");
 		}
 	}
 	return iceAI;
   },
-  AIMatchingBreakerInstalled: function (iceCard) {
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
 	//returns a matching breaker installed, or null
 	//true if a Decoder is installed, iceCard is outermost ice, and the ability hasn't been used this turn
+	//Corp security already matches ordinary breakers against effectiveSubTypes;
+	//this identity only needs to proxy the Runner AI's raw-subtype query.
+	if (Array.isArray(effectiveSubTypes)) return null;
 	if (this.usedThisTurn) return null;
 	var server = GetServer(iceCard);
 	if (!server) return null;
-	if (server.ice.indexOf(iceCard) !== server.length-1) return null;
+	if (!this._AIFirstIceToEncounter(iceCard,server.ice.length-1)) return null;
 	//pretend the ice is code gate (restore afterwards)
 	var wasntCodeGate = !iceCard.subTypes.includes("Code Gate");
 	if (wasntCodeGate) iceCard.subTypes.push("Code Gate");
