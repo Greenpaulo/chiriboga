@@ -292,13 +292,12 @@ ICE elsewhere only when that server has higher stakes and a with/without
 comparison shows the saved rez changes it from breachable to secure. Higher
 server value alone is not enough, and same-server ICE ordering keeps its
 protection-value tie-break. Breach-loss risks below the 35% threshold leave
-ordinary advancement unchanged. ICE hosting a non-exempt Runner card keeps the
-legacy five-times-rez-cost veto by default and logs the hosted card and credit
-threshold when it declines. The default-off
-`evidenceBasedHostedCardRez` option instead lets an affordable approached ICE
-bypass that veto when `_iceWouldSecureServer()` shows that rezzing it changes
-the current server from breachable to secure; F4 gate evidence is required
-before that option can become the default.
+ordinary advancement unchanged. ICE hosting a non-exempt Runner card is rezzed
+only when the Corp has at least five times its rez cost, unless the card has
+`AIHostedDoesNotPreventRez`; the decline logs the hosted card and the credit
+threshold. Replacing this rule with the normal rez decision failed its F4 gate
+on a real board (2026-10-02); the next candidate is
+[hosted-ice-rez-ignores-repeated-tax.md](../bugs/hosted-ice-rez-ignores-repeated-tax.md).
 
 ## Emergency protection and purge
 
@@ -563,7 +562,9 @@ needs.
   - *Events and metrics.* Harness-local wrappers (they call the real functions
     unchanged) emit `gameStart`, `decision`, `run` (server, success), `score`,
     `steal` (card, server, points; the server comes from
-    `agendaStolenLocations`), `mulligan`, `turnEnd` and `gameEnd`. The core
+    `agendaStolenLocations`), `mulligan`, `rez` (card, card type, credits
+    paid through `SpendCredits` and the cards hosted on it, each with its
+    `AIHostedDoesNotPreventRez` exemption), `turnEnd` and `gameEnd`. The core
     metrics are computed from these events by a pure function:
     `winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer.*`,
     `gameLength`, `decisionLatencyMs.<side>.mean|p95|max` and

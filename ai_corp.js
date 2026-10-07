@@ -4883,13 +4883,7 @@ class CorpAI {
               break;
             }
           }
-          if (
-            threateningHosted &&
-            !(
-              this.options.evidenceBasedHostedCardRez &&
-              this._iceWouldSecureServer(card, currentRezCost, server)
-            )
-          ) {
+          if (threateningHosted) {
             this._log(
               "Not rezzing " +
                 GetTitle(card) +
@@ -6950,7 +6944,6 @@ class CorpAI {
 }
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
-  evidenceBasedHostedCardRez: false,
   secureScoringServerGate: false,
   serverAtRiskInstallOverride: false,
   committedAgendaReserveBypass: false,

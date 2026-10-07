@@ -1,12 +1,15 @@
-// Run with: node tests/hosted-trojan-blocks-rez-silently.test.js
-// Guards for the hosted-card rez veto, from
+// Run with: node tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js
+// Pending reproduction for documentation/bugs/hosted-ice-rez-ignores-repeated-tax.md,
+// split unchanged from the original reproduction of
 // corp-silently-declines-rez-of-ice-hosting-a-trojan.md
-// (documentation/bugs/).
-// Its "should rez" reproduction is pending in
-// tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js.
+// (documentation/bugs/)
+// (its source log: documentation/debug-logs/bug_raised/
+// corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt).
 //
-// Guards the retained hosted-card rez policy after the candidate failed its gate.
-// Further diagnostic and policy cases are in tests/corp-server-security.test.js.
+// Reproduces: _iceWorthRezzing() returns false without logging a reason
+// for unrezzed ice hosting a non-exempt Runner Trojan (here, Chromatophores,
+// id 35030) whenever Credits(corp) < currentRezCost * 5, even when nothing
+// else on the board would otherwise justify withholding the rez.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -122,18 +125,35 @@ function buildBoard(hostedCard, options = {}) {
   return {approachedIce, remote};
 }
 
-test('GUARD: a hosted card with AIHostedDoesNotPreventRez (Saci-style) does not block the rez', () => {
-  const exemptHostedCard = Object.assign(card(35030), {AIHostedDoesNotPreventRez: true});
-  const {approachedIce, remote} = buildBoard(exemptHostedCard);
-  corp.creditPool = 12;
-  assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), true);
-});
-
-test('GUARD: a "super rich" Corp already rezzes despite a non-exempt hosted card', () => {
+test('BUG: undefended remote with affordable ice hosting Chromatophores is not rezzed, and no reason is logged', () => {
   const chromatophores = card(35030);
+  assert.strictEqual(typeof chromatophores.AIHostedDoesNotPreventRez, 'undefined',
+    'test assumption: Chromatophores has no AIHostedDoesNotPreventRez exception');
   const {approachedIce, remote} = buildBoard(chromatophores);
-  corp.creditPool = 15; // 15 is not < rezCost(3) * 5 == 15, so the gate is not triggered
-  assert.strictEqual(ai._iceWorthRezzing(approachedIce, 3, remote), true);
+  chromatophores.host = approachedIce;
+  runner.cards = [chromatophores];
+  corp.creditPool = 12; // 12 < rezCost(3) * 5 == 15, so the "super rich" gate is not met
+
+  const messages = [];
+  const oldLog = ai._log;
+  ai._log = message => messages.push(message);
+  let result;
+  try {
+    result = ai._iceWorthRezzing(approachedIce, 3, remote);
+  } finally {
+    ai._log = oldLog;
+  }
+
+  // This is the reported bug: the Corp can afford the ice, nothing else on
+  // the board competes for the credits, and the server is not empty — yet
+  // the ice is not rezzed, and nothing explains why.
+  assert.strictEqual(result, true,
+    'expected the Corp to rez affordable, undefended-server ice; ' +
+    'got false from the silent hostedCards guard');
+  assert.strictEqual(messages.length, 0,
+    'expected some logged reason for declining the rez; the hostedCards ' +
+    'branch currently declines silently');
 });
 
-console.log(tests + ' hosted Trojan rez test(s) passed');
+
+console.log(tests + ' hosted ICE rez reproduction test(s) passed');
