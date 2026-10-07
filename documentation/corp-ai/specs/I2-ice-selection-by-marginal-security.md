@@ -2,21 +2,37 @@
 
 **Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
-**Verified against code:** 376f32c (2026-09-25)
+**Verified against code:** c9d80d2 (2026-10-05)
 
 ## Goal
+
 Choose the `(ICE, server)` pair that most improves security, weighted by what a
 breach would cost, using the existing security evaluator rather than input-card
 order. This is the first intentional policy change on the I1 candidate
 framework.
 
 ## Current behaviour
+
 `_iceInstallOptions()` lists affordable ICE in input-card order, then
 unaffordable ICE when low-priority options are permitted, for the one server
 `_serverToProtect(false, false, targetIsEligible)` picks; the predicate
 (L3.5.2's interim bridge) wraps `_shouldInstallIceLayer()`. Optional
 `AIWorthwhileIce(server, "install")` hooks filter candidates. No ICE is
 compared with another by its effect.
+
+The final `serverAtRisk` admission override in `_shouldInstallIceLayer()` is
+now behind `serverAtRiskInstallOverride`, default `false`. Earlier uses of
+`serverAtRisk` and downstream affordability checks remain. I2 owns the
+replacement decision: whether an extra layer buys enough security to justify
+its install/rez cost, including the opportunity cost to scoring. Do not
+silently restore the old final OR term while removing the eligibility bridge.
+
+Archives admission also depends on `_nothingWorthProtecting()`. With
+`emptyArchivesRunPressure=false`, empty Archives without a backdoor into HQ
+is excluded even when public rewards or recent runs produce pressure. I2's
+proposal to enumerate every ranked server must preserve that baseline with
+its option off; any change to this exclusion must be explicit, reasoned and
+measured with its option on. The pressure machinery remains in ranking.
 
 Two pieces of hypothetical ICE scoring already exist:
 
@@ -32,6 +48,7 @@ Two pieces of hypothetical ICE scoring already exist:
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
+
 1. Switch on the I1 candidates for every strategically relevant server
    (`eligible` true for ICE on any server `_rankedServersToProtect()` lists),
    instead of one server chosen in advance.
@@ -57,6 +74,12 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
 8. Retire `_serverToProtect(..., targetIsEligible)` from ordinary ICE-install
    generation (design note migration step 7); the server ranking stays for
    diagnostics.
+9. Compare marginal layer value with retained rez capacity and scoring costs.
+   The [regression handoff](../../corp-ai-regression/gated-fix-handoff.md)
+   establishes a cost to the old blanket at-risk override on the tested pool;
+   it does not establish that all extra layers are bad. Empty-Archives reward
+   valuation remains a separate gap, recorded in the shared design's
+   regression ownership table; do not equate recent runs with install value.
 
 Distinctions the score must respect:
 
@@ -80,12 +103,14 @@ in `_iceInstallScore()` (already deleted with the function by F2) and the other
 ICE-selection titles.
 
 ## Safety and information boundary
+
 Hypothetical outermost-layer evaluation uses only public Runner capabilities
 and must not mutate live server contents or credits. Candidate evaluation must
 be unchanged when hidden Runner Grip cards are substituted. Unrezzable ICE must
 not receive active-security credit.
 
 ## Test scenarios
+
 1. Against a publicly installed Fracter only, otherwise comparable Code Gate or
    Sentry ICE outranks an efficiently broken Barrier.
 2. An affordable ETR ICE that creates a hard lockout outranks higher
@@ -115,19 +140,59 @@ not receive active-security credit.
     changes the choice.
 12. `_criticalBreachDefenseAction()` picks the same ICE as before on its
     existing tests while reading I2's candidate evaluation.
+13. With the legacy at-risk override off, contrast an additional layer that
+    prevents a high-consequence breach with one that consumes scoring resources
+    without sufficient benefit. Record the competing costs and outcomes.
+14. Empty Archives without agendas or an HQ backdoor stays excluded in the
+    recovered fallback despite public run rewards. If I2 changes that policy,
+    test meaningful reward prevention against pointless extra defense and
+    measure the change separately; agenda and backdoor stakes remain eligible.
 
 ## Acceptance gate
-Improvement gate with the standard guards (design note). Candidate:
-`this.options.iceMarginalSecurity` on; baseline: I0's report. Collector added:
-`strandedUnrezzedIceCost` (credits spent installing ICE never rezzed before the
-game ends); `successfulRunsByServer` comes from I0.
 
-- Improvement: `pointsStolen` per game falls; the interval's upper bound for
-  candidate minus baseline is below 0.
-- Guards: the standard tolerances, plus `strandedUnrezzedIceCost` upper bound
-  at most +1 credit per game.
+F4 gate. Option `iceMarginalSecurity` (Corp AI), off in the baseline and on
+in the candidate. Committed deck pool, paired seeds, 200 games per deck
+pair, bootstrap 95% intervals. Both arms keep all five legacy regression
+gates off and prerequisite options identical; capture a matching corrected
+control and back-fill observation-only collectors.
+I0 supplies the control/pool and insolvency collector; its successful-run
+observations remain available for diagnosis.
+Collectors: `strandedUnrezzedIceCost`, `corpInsolventTurns`
+(planned, not implemented today). Proposed exported metric paths below
+must be verified when these collectors land; each declares its better
+direction.
+Starts: none initially. If `--quick` changes no game, build real-game-derived
+start boards, record their provenance and add a separate gate command before
+hand-off; all commands must pass.
+
+`strandedUnrezzedIceCost.credits` counts credits spent installing ICE never
+rezzed before game end. Its +1-credit guard and the existing improvement are
+unchanged. Core tolerances retain the shared design's preregistered
+3-percentage-point/0.25-point exceptions to today's 2-point/0.2-point defaults.
+Retain the +25% mean-latency check using fresh same-machine paired runs, not
+cached timing. The security-selection policy remains strategic and gated.
+
+| Check | Metric | Better | Threshold |
+|---|---|---|---|
+| Improve | `pointsStolen` | lower | interval of the improvement above 0 |
+| Guard | `winRate` | higher | regression at most 0.03 |
+| Guard | `pointsScored` | higher | regression at most 0.25 |
+| Guard | `pointsStolen` | lower | regression at most 0.25 |
+| Guard | `gameLength` | lower | regression at most 1.5 |
+| Guard | `corpInsolventTurns.mean` | lower | regression at most 0.5 |
+| Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
+
+Gate command (after the collector setup exists):
+`node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns.mean=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
 
 ## Things to consider
+
+- **Owned open gap: empty-Archives reward valuation.** I2 planning must decide
+  whether its marginal-value comparison can cover the public reward prevented
+  by protection. Before hand-off, implement and validate that scoped policy,
+  or file and link a separate follow-up ticket with a roadmap owner and an
+  acceptance gate. Merely retaining the shared-design note is insufficient.
+  Keep the recovered exclusion while the policy remains unvalidated.
 - L4.1 (unified bypass allocation) changes the evaluator results that
   scenarios 3 and 6 rest on. Assert orderings, not numbers, and if L4.1 lands
   first build those fixtures on its hook format.
@@ -135,15 +200,19 @@ game ends); `successfulRunsByServer` comes from I0.
   scored by consequence must stay below the band-3 fast-advance-to-win
   candidate.
 - Performance: every pair costs an evaluator call. F3's cache will help later;
-  it is not a dependency, and the latency guard applies now.
+  it is not a dependency, and the fresh-run latency check applies now.
 
 ## Acceptance criteria
+
+- [ ] The Resolution explicitly disposes of the empty-Archives reward-valuation gap: either it links implemented behavior, focused counterexamples and gate evidence, or it links a filed follow-up ticket with remaining scope, roadmap ownership and an acceptance gate. Update the shared design's gap status and reference; "investigate later" without a ticket does not satisfy this criterion.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`; the L3.5.2 regressions (scenarios 9 and 10) pass without it.
 - [ ] `_criticalBreachDefenseAction()` consumes I2's candidate evaluation.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
-- [ ] The `strandedUnrezzedIceCost` collector is added through F4's collector extension point.
+- [ ] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
+- [ ] I0's `corpInsolventTurns` collector is verified and back-filled without changing baseline decisions.
+- [ ] The gate's `--quick` run changes at least one game; any required starts have recorded provenance, focused coverage and a separate passing gate command.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.

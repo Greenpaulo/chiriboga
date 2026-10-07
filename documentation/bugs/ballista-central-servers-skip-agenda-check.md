@@ -93,7 +93,7 @@ change too and are outside this ticket's scope.
 - [Verified] `corp.HQ`, `corp.RnD` and `corp.archives` are exactly the server objects with a `.cards` property (`utility.js` `GetServer`/`GetServerByArray`, and `tests/corp-decision-fixtures.test.js`'s own `central()` helper), so this branch covers all three central servers, not HQ alone.
 - [Verified] `_agendasInServer()` (`ai_corp.js`) already knows how to count agendas in a central server's `.cards` (hand/deck/archives pile) as well as a server's `.root`, so the information the fix needs is already available and already used correctly by the remote-server branch two lines down.
 - [Inferred] The function's own comment — "which we'll do for central servers, if there is no agenda, or at random" — reads as though trashing a program was only meant to be the default when there is *no* agenda, with the "central servers" clause describing something else (maybe: prefer trashing over the 50/50 roll for centrals when there's no agenda). As written, the `return true` for central servers pre-empts the "or at random" behaviour entirely rather than combining with it.
-- [Inferred] Ballista's `AIWouldTrigger()` also calls `Math.random()` directly rather than the injectable `corp.AI._random()`, which is a known, separately tracked principle-5 gap (`documentation/backlog/remediation/D2-injectable-runner-randomness.md:147`). Out of scope here, but a fix that starts touching this function is a natural place to also route it through `corp.AI._random()`.
+- [Inferred] Ballista's `AIWouldTrigger()` also calls `Math.random()` directly rather than the injectable `corp.AI._random()`, which is a known, separately tracked principle-5 gap (`documentation/corp-ai/specs/P2-corp-card-policy-randomness.md`). Out of scope here, but a fix that starts touching this function is a natural place to also route it through `corp.AI._random()`.
 
 ## Proposed fix
 
@@ -144,5 +144,5 @@ and Archives while that central contains an agenda the Runner can access.
 
 ## Out of scope / related
 
-- Ballista's `Math.random()` call bypassing `corp.AI._random()` (principle 5) — tracked in `documentation/backlog/remediation/D2-injectable-runner-randomness.md:147`.
+- Ballista's `Math.random()` call bypassing `corp.AI._random()` (principle 5) — tracked in `documentation/corp-ai/specs/P2-corp-card-policy-randomness.md`.
 - `documentation/ai.md`'s `AIWouldTrigger()` sections (4.6, 5.5) don't cover this ice-subroutine-choice usage; a third example/heading may be worth adding there rather than only in this ticket.

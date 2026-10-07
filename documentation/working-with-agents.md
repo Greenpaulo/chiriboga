@@ -250,7 +250,7 @@ suite fails if any of these is skipped.
   `ai_corp.js`: `tests/corp-ai-card-titles.test.js`.)
 - Gates: "play better" items now ship switched off until seeded AI-vs-AI games
   (F4) meet numbers set in advance; see `documentation/judging-ai-changes.md`.
-  No gate can run until D2 and then F4 are built.
+  D2 is done; no gate can run until the complete F4 harness is built.
 
 ## Where things are
 

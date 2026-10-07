@@ -92,7 +92,7 @@ How to run it, change the decks and read a report is in the
 | 1. Build | Codex (`implement-ticket`) | The change is written behind an **AI option**, a named switch such as `weightedProtectionDebt`, which defaults to **off**. With it off, the game plays exactly as before; the ticket's own tests switch it on. Codex also builds what the gate measures with (any collectors and start boards it names), each an acceptance criterion, and proves the gate is ready: a `--quick` run of the gate command reports at least one game changed by the option. | A normal fix hand-off, with the gate-ready criterion ticked |
 | 2. Run the gate | Codex, in the same session | Codex builds the exact `**Gate command:**` from the ticket's gate and runs it as one blocking command (about 15–20 minutes; the games cost no tokens, and the output is a few lines). If it cannot finish in the session, Codex hands off with `**Gate:** pending F4` and you run the command in a terminal; see the [harness guide](ai-batch-harness.md#running-a-gate). | A `**Gate:**` line in the ticket's Resolution: `passed`, `pending F4` or `failed`, with the command used |
 | 3. Switch on | Codex | Only if the gate **passed**: the option's default is changed to on. | The option's default in `ai_corp.js` or `ai_runner.js` |
-| 4. Review | Claude chat (`review-ticket`) | Checks that the option is off unless the gate passed, and that the recorded evidence matches the gate as written: same metrics, same thresholds, enough games. Missing or mismatched evidence blocks the review. | The review section |
+| 4. Review | CodeRabbit on the PR (`review-ticket` rubric) | Checks that the option is off unless the gate passed, and that the recorded evidence matches the gate as written: same metrics, same thresholds, enough games. Missing or mismatched evidence blocks the review. | PR review comments and the ticket review pre-merge check |
 | 5. Decide | **You** | Read the `**Gate:**` line and the comparison output, then accept the review or send it back. | — |
 
 So you never flip the switch by hand, but nothing reaches players switched on
@@ -154,10 +154,11 @@ A `**Gate:**` line in a ticket's Resolution looks like one of these:
 ```
 
 The comparison output lists every metric, then one PASS/FAIL line for each
-metric the gate names (numbers here are made up):
+metric the gate names (numbers here are made up). Seven deck pairs with 200
+seeds give 1,400 paired games, or 2,800 individual baseline/candidate games:
 
 ```
-2800 paired games, 412 changed by the options
+1400 paired games, 412 changed by the options
   metric                               baseline  candidate  difference  95% interval
   highConsequenceBreaches.count           1.840      1.520      -0.320  [-0.410, -0.230] (lower is better)
   pointsStolen                            4.100      4.160      +0.060  [-0.050, +0.170] (lower is better)
@@ -208,16 +209,19 @@ boundaries stay unmerged until F4 can compare the behavior-bearing historical
 layers; the project owner runs the long commands and an agent prepares and
 checks the reports. That audit does not replace I0 or any option's normal gate.
 
-As of 2026-10-02:
+As of 2026-10-05:
 
-- **F4 is built.** `node scripts/ai-batch.js gate ...` runs any gate from the
-  terminal; see the [harness guide](ai-batch-harness.md). The first
-  all-options-off baseline is committed under
+- **F4 is built and awaiting review.** `node scripts/ai-batch.js gate ...`
+  runs gates from the terminal; see the [harness guide](ai-batch-harness.md).
+  The first all-options-off baseline is committed under
   `tests/fixtures/ai-batch/baselines/`.
-- **Gated items pending F4** can now have their gates run. `node
-  scripts/roadmap.js gates` lists them under "Built, option off, gate waiting
-  to be run". An item reviewed before F4 existed could not build its
-  collectors or start boards, so `implement-ticket` builds those first.
+- **D2 is done.** The injectable Runner policy stream and its regression
+  tests are recorded in
+  [D2's completed ticket](backlog/done/D2-injectable-runner-randomness.md).
+- **Gated items pending F4** wait until F4 is `done`, as required by their
+  generated blockers. Once unblocked, `implement-ticket` builds any missing
+  collectors or start boards before running the gate. `roadmap.js gates`
+  lists the items whose gates are still pending.
 - **Thresholds are still first guesses.** The committed baseline shows how much
   each metric varies naturally between deck pairs. Check a gate's numbers
   against it before running that gate.

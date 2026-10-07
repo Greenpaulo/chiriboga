@@ -530,6 +530,27 @@ needs.
     copied into `this.options`. `--corp-option`/`--runner-option` set one
     option for that run; an unknown name is an error, and the report records
     the effective options for both sides.
+    The regression options below default to `false`. Turning one on restores
+    that behavior from the tested harness tip b52d451; leaving all five off
+    implements the combined diagnostic policy edc177a. The owner-run queue
+    confirmed exact default/combined and all-on/old-tip fidelity on 1,000
+    completed pairs each; see the
+    [gated-fix handoff](../corp-ai-regression/gated-fix-handoff.md).
+
+    | Corp option | Behavior when enabled |
+    |---|---|
+    | `secureScoringServerGate` | Reject insecure remotes in `_isAScoringServer`, even when their protection score beats HQ. |
+    | `serverAtRiskInstallOverride` | Allow the final `serverAtRisk` override in `_shouldInstallIceLayer`; earlier affordability and stakes checks still apply. |
+    | `committedAgendaReserveBypass` | Admit advancement through `_installedAgendaCanBeCompleted()` despite the ordinary economy reserve gate. |
+    | `emptyArchivesRunPressure` | Admit empty Archives with run pressure through `_nothingWorthProtecting`, affecting both protection allocation and debt aging. |
+    | `valuelessServerDebtReset` | Reset protection debt when `_nothingWorthProtecting` reports no stakes. |
+
+    Archives admission and debt reset share the same eligibility predicate:
+    enabling admission can prevent a reset for pressured empty Archives when
+    both options are enabled. Visible agendas and the HQ backdoor remain
+    protection stakes with either setting. The relative HQ penalty, secure
+    server +2 bonus, debt ranking subtraction and commitment bookkeeping are
+    unchanged.
   - *Telemetry.* When `DecisionSnapshots.telemetry` is `{sink}`,
     `DecisionSnapshots.Record()` streams every Corp `Choice()` and every Runner
     `_computeChoice()` as `{n, side, identifier, choiceType, options, chosen,
