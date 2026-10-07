@@ -2707,8 +2707,9 @@
     }
 
     function Parse() {
-      //disable launch while checking
+      //Disable both ways to use this deck while checking
       $("#launch").prop("disabled", "disabled");
+      $("#opponent").prop("disabled", true);
       $("#launch").html("Checking...");
       $("#output").html("");
       //visual deck preview retired
@@ -2795,6 +2796,7 @@
         validityOutput += '</div>';
         $("#output").html(validityOutput);
         $("#launch").prop("disabled", false);
+        $("#opponent").prop("disabled", false);
       }
       $("#launch").html("PLAY<br>DECK");
       UpdateLaunchStrings();

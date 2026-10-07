@@ -114,4 +114,78 @@ function cardFor(cards, id) {
   assert.strictEqual(cardFor(cards, 1).addBtn.disabled, false, '+ must re-enable below 3 copies');
 }
 
+// Exercise the real parser and URI builder so refreshing links cannot bypass
+// validation when the current deck is carried across as the opponent deck.
+const launchSource = sourceBetween('function UpdateLaunchStrings() {', 'var mouseDownCallback');
+const parseSource = sourceBetween('function Parse() {', '//function for testing and debugging');
+
+function parseFixture(side, opponentdeckstr) {
+  const runner = {};
+  const corp = {};
+  const deckPlayer = side === 'r' ? runner : corp;
+  const elements = {};
+  const $ = (selector) => {
+    const element = elements[selector] || (elements[selector] = {props: {disabled: false}, value: '', html: ''});
+    return {
+      prop(name, value) { element.props[name] = value; return this; },
+      val() { return element.value; },
+      html(value) { element.html = value; return this; },
+      append(value) { element.html += value; return this; },
+      hide() { return this; },
+    };
+  };
+  const context = {
+    $, runner, corp, deckPlayer,
+    MAX_COPIES_PER_CARD: 3,
+    cardSet: [
+      {faction: 'Test', deckSize: 3, influenceLimit: 15},
+      {title: 'Test card', player: deckPlayer, faction: 'Test'},
+    ],
+    json: {identity: 0, cards: []},
+    deckCounts: {},
+    deckModified: true,
+    dC: side,
+    oC: side === 'r' ? 'c' : 'r',
+    opponentdeckstr,
+    opponentdeckimg: '',
+    LZString: {compressToEncodedURIComponent: encodeURIComponent},
+    history: {replaceState() {}},
+    GetCardIdFromTitle: (title) => title === 'Test card' ? 1 : -1,
+    UpdateCardCountsUI() {},
+  };
+  $('#deck');
+  vm.createContext(context);
+  vm.runInContext(launchSource + parseSource, context);
+  return {context, elements};
+}
+
+for (const side of ['r', 'c']) {
+  for (const existingOpponent of ['', (side === 'r' ? 'c' : 'r') + '=existing&']) {
+    const {context, elements} = parseFixture(side, existingOpponent);
+    const parse = (text) => {
+      elements['#deck'].value = text;
+      vm.runInContext('Parse()', context);
+    };
+    parse('3 Test card');
+    assert.strictEqual(elements['#launch'].props.disabled, false, 'three copies permit play');
+    assert.strictEqual(elements['#opponent'].props.disabled, false, 'three copies permit switching sides');
+    const opponentUrl = new URL(elements['#opponent'].props.href, 'https://example.test/');
+    assert.strictEqual(opponentUrl.searchParams.get('p'), context.oC);
+    assert.strictEqual(opponentUrl.searchParams.get(context.oC), existingOpponent ? 'existing' : 'random');
+    assert.deepStrictEqual(JSON.parse(opponentUrl.searchParams.get(side)).cards, [1, 1, 1]);
+
+    for (const overLimitText of ['4 Test card', '2 Test card\n2 Test card']) {
+      parse(overLimitText);
+      assert(elements['#output'].html.includes('has more than 3 copies'), 'report aggregate copy-limit violations');
+      assert(elements['#launch'].props.disabled, 'four copies block play');
+      assert(elements['#opponent'].props.disabled, 'four copies block switching sides');
+      vm.runInContext('UpdateLaunchStrings()', context);
+      assert(elements['#opponent'].props.disabled, 'refreshing URI metadata must not enable an invalid deck');
+    }
+    parse('3 Test card');
+    assert.strictEqual(elements['#launch'].props.disabled, false, 'correcting the deck re-enables play');
+    assert.strictEqual(elements['#opponent'].props.disabled, false, 'correcting the deck re-enables switching sides');
+  }
+}
+
 console.log('decklauncher copy-limit regression cases passed.');
