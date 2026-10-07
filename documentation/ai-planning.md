@@ -102,9 +102,7 @@ lands. Before raising a spec, and again when `implement-ticket` picks the
 ticket up, check every claim in **Current behaviour** and every function, hook
 or field the spec names against the current code (`node scripts/show.js fn
 <name>`, `rg -n`). Fix what is stale in the spec, or stop and report when the
-premise no longer holds, then set the header line to the commit checked.
-The full procedure, including re-checking the gate classification, is
-`.agents/skills/reground-spec/SKILL.md`.
+premise no longer holds, then set the header line to the commit checked:
 
 ```markdown
 **Verified against code:** <short sha> (<date>)
@@ -174,7 +172,7 @@ F4 gate. Option `<camelCaseName>` (<Corp | Runner> AI), off in the baseline
 and on in the candidate. Committed deck pool, paired seeds, 200 games per deck
 pair <or more: say how many and why>, bootstrap 95% intervals.
 Collectors: <`name` (adds `name.metric`, defined in this ticket) | none>.
-Starts: <`--start-tag` tags selecting boards in `tests/fixtures/ai-batch/starts/`, plus boards this ticket builds with `scripts/start-board.js` | none>.
+Starts: <fixture paths the games begin from, built in this ticket | none>.
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
@@ -233,28 +231,7 @@ Rules for form 2:
 - **One command per game set.** Starts replace the opening, so a gate that
   guards the pool and measures an improvement on start boards has one gate
   command per set, each with its own rows. It passes only when every command
-  passes. Metrics pool across every `--start` board in one command, so a row
-  that must hold on one board (an improvement on one card's boards, or a
-  per-game threshold) needs a command of its own. Each command costs a full
-  baseline and candidate run (about 2 × 8 minutes with `--budget 1400`), so
-  use as few commands as the rows need. A command over a set the
-  option never changes (often the deck pool, for a board-specific option)
-  fails `changed option effect`. Record that no game changed instead of
-  running it.
-- **Start boards come from real boards.** Build them with
-  `scripts/start-board.js` from a log's decision snapshot or dump
-  ([ai-batch-harness.md](ai-batch-harness.md#building-a-start-board)). It
-  allows only the changes needed for the game to run (a crashing card, a
-  card outside the pool's sets) or to restore the moment before the
-  decision, records each one, and tags the board. A board gate selects
-  boards with `--start-tag` and runs with `--budget 1400`, so it costs one
-  baseline and one candidate run however many boards match. Never change the cards that decide whether the candidate is right,
-  such as the Runner's breakers or the ICE involved. If the real board does
-  not reach the option, that is evidence about the option's design: report
-  it rather than editing the board until the option fires.
-- **No conditional rows.** A row cannot say "unless" or depend on another
-  row's result. Rewrite the condition as plain rows; if one branch is
-  certain, keep only the other branch.
+  passes.
 - **Gate command** is the exact command the table implies; one flag per row.
   `implement-ticket` runs it and records its output; see
   [ai-batch-harness.md](ai-batch-harness.md#running-a-gate).
@@ -290,28 +267,6 @@ under test, and F4 runs the candidate with it on (`--corp-option <name>=true`
 or `--runner-option <name>=true`; see
 [ai-batch-harness.md](ai-batch-harness.md)). Gate evidence is the only thing
 that justifies switching the default to `true`.
-
-### When a gate fails
-
-A gated ticket tests one idea; a failed gate answers it. So:
-
-- **The ticket closes.** It moves to `done/` with
-  `**Outcome:** not adopted — gate failed <date> (<the deciding metric>)`
-  directly under its title, and `**Gate:** failed — `<option>` removed.`
-  in its Resolution with the evidence. A roadmap item it belongs to becomes
-  `parked` (with the reason), or is replaced by a new item for the next idea.
-- **The failed behaviour is removed in the same change:** the option, its
-  branch and the tests that exist only for it. Git history keeps them.
-  Anything useful without the idea stays: logging, harness events,
-  collectors, real start boards, tools.
-- **The next idea is a new ticket** that links back for the evidence and
-  carries its own gate. A reproduction whose expected choice the idea
-  needed moves back to `tests/pending/` under that ticket, expectation
-  unchanged.
-
-Every ticket carries an `**Outcome:**` line under its title once it leaves
-open work (`adopted`, `not adopted — <why>`, or `blocked — <what>`), so its
-state can be read without reading the ticket.
 
 ## Spec and ticket template
 

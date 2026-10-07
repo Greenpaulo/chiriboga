@@ -239,7 +239,6 @@ Once all required adjacent comparisons pass or their failures are remediated:
 5. implement I0 to commit the ordinary current-version F4 baseline used by
    future per-option gates.
 
-The legacy audit does not replace I0. The hosted-card rez option it
-mentioned, `evidenceBasedHostedCardRez`, failed its F4 gate and was removed
-(2026-10-02); its next candidate has its own ticket,
-[hosted-ice-rez-ignores-repeated-tax.md](bugs/hosted-ice-rez-ignores-repeated-tax.md).
+The legacy audit does not replace I0 and must not switch on
+`evidenceBasedHostedCardRez`. That option receives its own normal F4 gate,
+including its required starts and collector, after F4 is done.

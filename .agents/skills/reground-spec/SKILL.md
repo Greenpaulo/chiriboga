@@ -23,10 +23,9 @@ runs it too, by name, rather than restating it.
   arbitrary untracked root JavaScript files do not.
 - When `raise` already refused, quoting the changed files.
 - When asked to re-ground, re-verify or refresh a spec or ticket.
-- At the start of `implement-ticket`, for a roadmap ticket it just picked up
-  — even if it already carries a recent `**Verified against code:**` line,
-  since more code may have landed between raise and pickup. Bug tickets from
-  `triage-log` are verified by their failing reproduction instead.
+- At the start of `implement-ticket`, for the ticket it just picked up — even
+  if it already carries a recent `**Verified against code:**` line, since
+  more code may have landed between raise and pickup.
 
 ## Steps
 

@@ -97,21 +97,7 @@ node scripts/ai-batch.js \
 Check that this initial report records a clean build, 1,000 games and zero
 failures before using it as the baseline.
 
-To benchmark the checked-out branch and print its comparison in one command:
-
-```sh
-node scripts/compare-ai-branch.js
-```
-
-This runs the five-pair pool with seeds 1–200, writes `bench/<branchname>.json`,
-then compares it with `bench/current/baseline.json`. The branch name is used
-as written: `bugs/example` writes to `bench/bugs/example.json`, creating
-folders as needed. Re-running on the same branch replaces its report, so copy any earlier
-report you want to keep first. The script checks that the baseline exists
-before starting and stops if the benchmark fails. Run on a clean, committed
-candidate branch so the report records the build being tested.
-
-For manual runs, use a new output filename for
+Run on a clean, committed candidate branch, using a new output filename for
 each PR/revision so earlier evidence is preserved:
 
 ```sh
@@ -151,9 +137,7 @@ The report used no start fixtures or collectors, Runner options `{}`, and
 all six Corp options false: `evidenceBasedHostedCardRez`,
 `secureScoringServerGate`, `serverAtRiskInstallOverride`,
 `committedAgendaReserveBypass`, `emptyArchivesRunPressure` and
-`valuelessServerDebtReset`. PR #18 removes `evidenceBasedHostedCardRez`
-after its failed acceptance gate; the other five options still default to false.
-The command above uses the candidate's defaults;
+`valuelessServerDebtReset`. The command above uses the candidate's defaults;
 check its report's effective options against the current baseline and explain any
 intentional difference. Keep the pool, decks, seeds, fixtures and collectors
 identical; the comparator rejects mismatches in pool hash, seeds, starts or
@@ -242,8 +226,8 @@ The core metrics are:
 latencies when lower. `gameLength` and `mulliganRate` have no better
 direction.
 
-To replay one game from a report in detail, use `ai-batch.js replay` (see
-"Reading why a result moved"); it reproduces the report's game exactly.
+To replay one game from a report in detail, run `ai-game.js` with the same
+decks. That uses different random streams, so compare outcomes, not hashes.
 
 ## Running a gate
 
@@ -310,38 +294,10 @@ records the result and switches the option on only if the output says
 gate is ready to run: the quick run completes, and its first line reports at
 least one game changed by the options. The command exits non-zero so it cannot be mistaken for a pass.
 
-### Reading why a result moved
-
-Averages say whether an option helps; single games show how. To read one,
-pick a pair and seed from the report and replay it:
-
-```sh
-node scripts/ai-batch.js replay --pool documentation/corp-ai-regression/assets/beginner-pool.json \
-  --pairs pd-tao --seeds 2 \
-  --start tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt \
-  --corp-option <option>=true --diff
-```
-
-Use the report’s `--pool` value when it used a non-default pool, along with
-its pair, seed, start and AI options.
-
-`replay` plays exactly the batch's game (same seed streams, sets and start;
-its `logHash` matches the report) and prints the full log, which the report
-does not keep. `--diff` plays it with every option off and as given and
-prints only the differing lines, so the first hunk is the decision the
-option changed. It takes a few seconds. Later hunks usually diverge into a
-different game, so read the first hunk for the cause, and the report's
-averages for the effect.
-
-For more than one game, use a batch (`--seeds 1-2 --out`), which runs in
-parallel with the stall watchdog. Do not write scripts that call
-`playGame()` in a loop: they run one game at a time, keep only the last 200
-log lines, and print nothing until they finish.
-
 ### Comparing two reports by hand
 
 ```sh
-node scripts/ai-batch.js --corp-option <option>=true --out on.json
+node scripts/ai-batch.js --corp-option evidenceBasedHostedCardRez=true --out on.json
 node scripts/ai-batch.js --out off.json
 node scripts/ai-batch.js --compare off.json on.json --guard winRate=0.02
 ```
@@ -377,58 +333,6 @@ when it comes from a directory.
 
 Many fixtures use small hand-made decks, so their games can end quickly when
 R&D runs out. That is expected.
-
-### Building a start board
-
-Gate start boards live in `tests/fixtures/ai-batch/starts/` and are built
-from real logs, never by hand. Source logs must be trusted: the builder
-executes their board statements in the headless engine. The VM is not a
-security boundary, and the game timeout does not bound synchronous source
-execution. Restricting imported statements is tracked in
-[start-board-import-executes-source-code.md](backlog/start-board-import-executes-source-code.md).
-
-```sh
-node scripts/start-board.js <log> --list
-node scripts/start-board.js <log> --dump --out <name> \
-  --unsteal 35038=0 \
-  --replace 35042=30072 --reason "Scatter Field's subroutine crashes the Corp AI" \
-  --setup "corp.creditPool=12; runner.creditPool=0" \
-  --note "what the board is for"
-```
-
-- **Source:** `--snapshot <n>` (a decision snapshot from `--list`, the board
-  at the decision) or `--dump` (the end-of-log dump). One is required; use a
-  snapshot when the log has one.
-- **Edits:** only these, each recorded as a `NOTE` line ending in its flag:
-  - `--replace`, with a `--reason`: only for a card that crashes the engine
-    or is outside the pool's sets. Never the Runner's rig or a hosted card.
-    Replaced installed ICE is named in the note.
-  - `--unsteal` / `--unscore`: restore an agenda taken at the decision.
-  - `--setup`: credits and clicks only.
-  - `--note`: a description.
-- **Tags:** the builder loads the board and writes `// TAGS:`
-  (`hosted-card-on-ice`, `unrezzed-ice`, `breaker-installed`,
-  `agenda-in-remote`, `tagged-runner`). A new tag goes into
-  `scripts/start-board.js` in the change that first needs it.
-- **No hand edits:** `tests/start-board.test.js` rebuilds every committed
-  board from its recorded flags and fails if it differs.
-
-To check that a board reaches the decision an option changes, replay one game
-with `replay --diff` (see "Reading why a result moved"); the first differing
-hunk should be that decision.
-
-### Selecting boards and fixing the cost
-
-```sh
-node scripts/ai-batch.js gate --corp-option <name>=true \
-  --start-tag hosted-card-on-ice --start-tag agenda-in-remote --budget 1400 ...
-```
-
-`--start-tag` (repeatable) selects every board whose tags include all those
-given. `--budget <games>` gives every board and pair the same seeds 1 to
-`max(10, floor(games / (boards × pairs)))`. So a board gate always plays
-about 1,400 games per half, about 8 minutes each, however many boards match.
-Without `--budget`, each board gets the full 200 seeds per pair.
 
 ## Changing the decks
 

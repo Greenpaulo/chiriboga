@@ -304,7 +304,7 @@ function gates(items) {
   const groups = [
     ['Built, option off, gate waiting to be run' + (f4Done ? ' (run these now)' : ' (run when F4 is done)'),
       g => g.state === 'waiting'],
-    ['Gate failed (remove the option; park or replace the item: ai-planning.md, "When a gate fails")', g => g.state === 'failed'],
+    ['Gate failed (option stays off; see the ticket)', g => g.state === 'failed'],
     ['Being built', g => g.state === 'being built'],
     ['Not built yet', g => g.state === 'not built'],
     ['Gate passed', g => g.state === 'passed'],
@@ -345,7 +345,7 @@ function codeChangesSince(sha) {
 function checkVerified(file) {
   const where = path.relative(root, file);
   const sha = (fs.readFileSync(file, 'utf8').match(VERIFIED) || [])[1];
-  const redo = '\nFollow .agents/skills/reground-spec/SKILL.md: re-verify its Current behaviour and every function or hook it names against the code' +
+  const redo = '\nRe-verify its Current behaviour and every function or hook it names against the code' +
     ' (node scripts/show.js fn <name>, rg -n), fix what is stale, then set\n  **Verified against code:** ' +
     git('rev-parse', '--short', 'HEAD').stdout.trim() + ' (' + new Date().toISOString().slice(0, 10) + ')' +
     '\ndirectly under its **Read first:** line.';

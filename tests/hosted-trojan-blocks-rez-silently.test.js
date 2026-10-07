@@ -1,12 +1,11 @@
 // Run with: node tests/hosted-trojan-blocks-rez-silently.test.js
-// Guards for the hosted-card rez veto, from
-// corp-silently-declines-rez-of-ice-hosting-a-trojan.md
-// (documentation/bugs/).
-// Its "should rez" reproduction is pending in
-// tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js.
+// Drafted from documentation/debug-logs/bug_raised/
+// corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt.
+// See documentation/bugs/corp-silently-declines-rez-of-ice-hosting-a-trojan.md
 //
-// Guards the retained hosted-card rez policy after the candidate failed its gate.
-// Further diagnostic and policy cases are in tests/corp-server-security.test.js.
+// Guards the reported silent hosted-Trojan veto. With the candidate option on,
+// affordable ice that secures this remote is rezzed. The legacy option-off
+// diagnostic and policy are covered in tests/corp-server-security.test.js.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -96,6 +95,7 @@ function test(name, body) {
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
+  ai.options.evidenceBasedHostedCardRez = false;
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
   tests++; if (verbose) console.log('PASS ' + name);
 }
@@ -121,6 +121,38 @@ function buildBoard(hostedCard, options = {}) {
   runner.clickTracker = 0;
   return {approachedIce, remote};
 }
+
+test('candidate rezzes affordable decisive ice hosting Chromatophores without a decline diagnostic', () => {
+  const chromatophores = card(35030);
+  assert.strictEqual(typeof chromatophores.AIHostedDoesNotPreventRez, 'undefined',
+    'test assumption: Chromatophores has no AIHostedDoesNotPreventRez exception');
+  const {approachedIce, remote} = buildBoard(chromatophores);
+  chromatophores.host = approachedIce;
+  runner.cards = [chromatophores];
+  corp.creditPool = 12; // 12 < rezCost(3) * 5 == 15, so the "super rich" gate is not met
+  ai.options.evidenceBasedHostedCardRez = true;
+
+  const messages = [];
+  const oldLog = ai._log;
+  ai._log = message => messages.push(message);
+  let result;
+  try {
+    result = ai._iceWorthRezzing(approachedIce, 3, remote);
+  } finally {
+    ai._log = oldLog;
+  }
+
+  // The gated candidate rezzes here, so no decline reason should be logged.
+  // Retain the original decision and message-count expectation values.
+  assert.strictEqual(result, true,
+    'expected the Corp to rez affordable, undefended-server ice; ' +
+    'got false from the silent hostedCards guard');
+  // Retain the historical diagnostic literal for complete-call comparison.
+  // Its wording is misleading; this successful rez needs no decline log.
+  assert.strictEqual(messages.length, 0,
+    'expected some logged reason for declining the rez; the hostedCards ' +
+    'branch currently declines silently');
+});
 
 test('GUARD: a hosted card with AIHostedDoesNotPreventRez (Saci-style) does not block the rez', () => {
   const exemptHostedCard = Object.assign(card(35030), {AIHostedDoesNotPreventRez: true});

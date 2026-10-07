@@ -134,10 +134,8 @@ to do:
 
 - **Built, option off, gate waiting to be run**: your to-do list once F4
   exists. Each one needs its gate run.
-- **Gate failed**: the idea is answered. Its option is removed, its ticket
-  closes with a "not adopted" `**Outcome:**` line, and the item is parked or
-  replaced by a new item for the next idea ("When a gate fails" in
-  [ai-planning.md](ai-planning.md#when-a-gate-fails)).
+- **Gate failed**: the change stays off; read the ticket to decide whether to
+  rework it or drop it.
 - **Being built**, **Not built yet**, **Gate passed**: for information.
 
 Each line shows the item's kind and its option name.
@@ -182,8 +180,7 @@ the metric's direction for you. To read it yourself, look at the interval:
 
 If any line fails, the gate fails, even if the average looks fine.
 `FAIL changed option effect` means the option changed no game at all, so the
-run says nothing about it; the ticket needs start boards (built from real
-boards, see "Writing a gate") that reach the
+run says nothing about it; the ticket needs start boards that reach the
 situation it changes.
 
 ## When to use your own judgement

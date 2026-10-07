@@ -103,25 +103,14 @@ where it is uncertain:
   preference, it is not an ungated correctness oracle: record the disagreement
   and use the plan gate to split, narrow or gate the behavior before changing
   the reproduction.
-- For a gated ticket with a **Source log**, check the design against the real
-  board before planning or building any gate setup. Build a start board from
-  the log with `scripts/start-board.js` (allowed edits only; see
-  `documentation/ai-batch-harness.md`). Replay the logged decision in the
-  headless engine with the candidate off, then on: call `playGame()` from
-  `scripts/ai-batch/headless.js` with `start: <board>` and a `setupFile` that
-  calls the decision function directly and returns its result through
-  `__report`. Probe variables must not reuse the harness's `__` hook names
-  (such as `__rez`). The candidate must
-  change the logged decision in the direction the ticket wants. If it does
-  not, the design does not fix the reported case: stop, record the replay
-  in the ticket, and re-plan. Do not build collectors or start boards
-  around it.
 
-- Roadmap tickets were written against older code. Re-ground them with
-  `.agents/skills/reground-spec/SKILL.md`, even if the
-  `**Verified against code:**` line is recent, since code may have landed
-  between raise and pickup. Set that line to the starting commit. If the
-  skill reports that the premise no longer holds, stop and report.
+- Roadmap tickets were written against older code. Re-ground them as
+  "Re-grounding a spec" in `documentation/ai-planning.md` describes: check
+  every **Current behaviour** claim and every function, hook or field the
+  ticket names (`node scripts/show.js fn <name>`, `rg -n`). Correct what is
+  stale in the ticket; if its premise no longer holds, stop and report. Then
+  set its `**Verified against code:**` line (add it under `**Read first:**` if
+  missing) to the starting commit and today's date.
 
 Note each point where you disagree with the ticket, with evidence.
 
@@ -220,29 +209,18 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   record its first line in the Resolution and tick the gate-ready criterion
   only after it. Never move a gated ticket to code-review with its setup not
   ready.
-  To see why a quick or full result moved, replay a changed game with
-  `node scripts/ai-batch.js replay ... --diff`
-  ([ai-batch-harness.md](../../../documentation/ai-batch-harness.md#reading-why-a-result-moved));
-  run several games as a batch. Never write ad-hoc scripts that play games
-  in one process.
   Switch the default on only if the output ends `Gate: passed`. Never use
   `--quick` or a smaller or unpaired run as evidence. If the gate cannot
   finish in the session, hand off with `**Gate:** pending F4` and the ready
   command, and the owner runs it. For a human-game gate, use the stated human sample, metrics
   and thresholds; do not substitute F4. If the required harness, the owner's gate
   output or the data is not available, leave the option off and hand off
-  with the applicable gate pending. If the gate fails, follow "When a gate fails" in
-  `documentation/ai-planning.md`: remove the option, its branch and its
-  option-only tests; keep what is useful without it; move a reproduction the
-  idea needed back to `tests/pending/`; raise the next idea as a new ticket
-  that links back; add the `**Outcome:**` line; and hand off to code-review
-  as usual. The reviewer moves it to `done/`.
+  with the applicable gate pending. If the gate fails, leave the option off, hand off, and say in your
+  report that the user must choose between retuning (remediation) and parking
+  the item.
 
 ## 7. Hand off
 
-- Put an `**Outcome:**` line directly under the ticket's title: `adopted`,
-  `not adopted — <why>`, or `blocked — <what>` ("When a gate fails" in
-  `documentation/ai-planning.md`). Update it on every hand-off.
 - Add a `## Resolution` section directly under the ticket's header (above any
   plan). Start it with `Implemented from <sha>` (the starting commit from
   step 1) so the reviewer can find the exact diff. Then give what changed and
@@ -257,7 +235,7 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   **Gate:** passed — `<option>` now defaults to on. <gate type and applicable evidence below>
   **Gate:** pending F4 — `<option>` defaults to off.
   **Gate:** pending human-game data — `<option>` defaults to off.
-  **Gate:** failed — `<option>` removed. <gate type and applicable evidence below>
+  **Gate:** failed — `<option>` defaults to off. <gate type and applicable evidence below>
   ```
 
   For an F4 gate, record the exact command, committed deck pairs, paired seeds,

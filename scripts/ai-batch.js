@@ -5,10 +5,6 @@
 //   node scripts/ai-batch.js [batch options] [--out <report.json>]
 //   node scripts/ai-batch.js --compare <baseline.json> <candidate.json> [gate options]
 //   node scripts/ai-batch.js gate [batch options] [gate options]
-//   node scripts/ai-batch.js replay --pairs <id> --seeds <n> [--start <fixture>] [options] [--diff]
-//     plays one game exactly as a batch does and prints its full log; --diff
-//     plays it with every option off and as given, and prints only the
-//     differing log lines (use this to read why a gate result moved)
 //
 // Batch options:
 //   --pool <file>                 deck pool (default tests/fixtures/ai-batch/deck-pool.json)
@@ -16,9 +12,6 @@
 //   --seeds <from>-<to> | <file>  explicit seeds instead (file: JSON array or one per line)
 //   --pairs <id,id>               only these deck pairs from the pool
 //   --start <fixture.txt|dir>     begin every game from a saved board (repeatable)
-//   --start-tag <tag>             every board under tests/fixtures/ai-batch/starts/ whose
-//                                 TAGS include all given tags (repeatable; scripts/start-board.js)
-//   --budget <games>              seeds per board and pair = max(10, floor(games / (boards x pairs)))
 //   --corp-option <name>=<value>  set corp.AI.options.<name> (repeatable; unknown names fail)
 //   --runner-option <name>=<value>
 //   --collector <name>            scripts/ai-batch/collectors/<name>.js (repeatable)
@@ -47,21 +40,15 @@ const CODE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js
 const sha1 = text => crypto.createHash('sha1').update(text).digest('hex');
 
 function parseArgs(argv) {
-  const out = {_: [], start: [], startTag: [], corpOption: [], runnerOption: [], collector: [], guard: [], improve: [], better: [], max: []};
-  const repeatable = {'--start': 'start', '--start-tag': 'startTag', '--corp-option': 'corpOption', '--runner-option': 'runnerOption',
+  const out = {_: [], start: [], corpOption: [], runnerOption: [], collector: [], guard: [], improve: [], better: [], max: []};
+  const repeatable = {'--start': 'start', '--corp-option': 'corpOption', '--runner-option': 'runnerOption',
     '--collector': 'collector', '--guard': 'guard', '--improve': 'improve', '--better': 'better', '--max': 'max'};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    const take = option => {
-      const value = argv[i + 1];
-      if (value === undefined || value.startsWith('-')) throw new Error(option + ' needs an operand');
-      i++;
-      return value;
-    };
-    if (arg === '--compare') { out.compare = [take(arg), take(arg)]; }
-    else if (arg === '--quick' || arg === '--worker' || arg === '--all' || arg === '--diff') out[arg.slice(2)] = true;
-    else if (repeatable[arg]) out[repeatable[arg]].push(take(arg));
-    else if (arg.startsWith('--')) out[arg.slice(2)] = take(arg);
+    if (arg === '--compare') { out.compare = [argv[++i], argv[++i]]; }
+    else if (arg === '--quick' || arg === '--worker' || arg === '--all') out[arg.slice(2)] = true;
+    else if (repeatable[arg]) out[repeatable[arg]].push(argv[++i]);
+    else if (arg.startsWith('--')) out[arg.slice(2)] = argv[++i];
     else out._.push(arg);
   }
   return out;
@@ -145,7 +132,7 @@ function resolveStarts(list, ranges) {
       out.push({id: fixture.id, file, hash: sha1(fs.readFileSync(file, 'utf8')).slice(0, 12)});
     }
   }
-  return [...new Map(out.map(start => [start.file, start])).values()];
+  return out;
 }
 
 function loadCollectors(names) {
@@ -182,7 +169,7 @@ async function playJob(job) {
   const game = await playGame({
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
-    runnerOptions: job.runnerOptions, telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
+    runnerOptions: job.runnerOptions, telemetry: true, observe: true, onEvent,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
   const record = {fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed, ok,
@@ -280,42 +267,14 @@ function buildConfig(args, overrides = {}) {
   }
   const collectorNames = args.collector.slice().sort();
   const collectors = loadCollectors(collectorNames);
-  const starts = resolveStarts([...new Set([...args.start, ...taggedStarts(args.startTag || [])])], poolInfo.ranges);
   return Object.assign({
-    poolInfo, pairs, setFiles: poolInfo.setFiles, seeds: budgetSeeds(args, starts, pairs) || resolveSeeds(args), starts,
-    budget: args.budget ? Number(args.budget) : null,
+    poolInfo, pairs, setFiles: poolInfo.setFiles, seeds: resolveSeeds(args), starts: resolveStarts(args.start, poolInfo.ranges),
     corpOptions: parseAssignments(args.corpOption, '--corp-option'),
     runnerOptions: parseAssignments(args.runnerOption, '--runner-option'),
     collectorNames, directions: Object.assign({}, ...collectors.map(c => c.directions || {})),
     jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
     quick: Boolean(args.quick),
   }, overrides);
-}
-
-const STARTS_DIR = path.join(root, 'tests', 'fixtures', 'ai-batch', 'starts');
-
-// Boards whose TAGS line (scripts/start-board.js) includes every given tag.
-function taggedStarts(tags) {
-  if (!tags.length) return [];
-  const files = fs.existsSync(STARTS_DIR) ? fs.readdirSync(STARTS_DIR).filter(f => f.endsWith('.txt')).sort() : [];
-  const matches = files.filter(f => {
-    const line = (fs.readFileSync(path.join(STARTS_DIR, f), 'utf8').match(/^\/\/ TAGS:(.*)$/m) || [])[1] || '';
-    const has = line.split(',').map(t => t.trim()).filter(Boolean);
-    return tags.every(t => has.includes(t));
-  }).map(f => path.join(STARTS_DIR, f));
-  if (!matches.length) throw new Error('No start board has the tags: ' + tags.join(', '));
-  return matches;
-}
-
-// --budget: the same seeds 1..k for every board and pair, so a board gate's
-// cost does not grow with the number of boards and pairing is unchanged.
-function budgetSeeds(args, starts, pairs) {
-  if (!args.budget) return null;
-  if (args.seeds || args.games || args.quick) throw new Error('--budget cannot be combined with --seeds, --games or --quick');
-  const games = Number(args.budget);
-  if (!(games > 0)) throw new Error('--budget needs a number of games');
-  const k = Math.max(10, Math.floor(games / (Math.max(1, starts.length) * pairs.length)));
-  return Array.from({length: k}, (_, i) => String(i + 1));
 }
 
 // Everything that decides a report's games except wall time.
@@ -334,9 +293,6 @@ function checkOptions(config) {
   vm.createContext(context);
   const defaults = {corp: vm.runInContext('(' + corpDefaults[1] + ')', context),
     runner: vm.runInContext('(' + runnerDefaults[1] + ')', context)};
-  // AI_BATCH_TEST_OPTION adds a no-op Corp option, so the harness's own tests
-  // need no real (gated) option.
-  if (process.env.AI_BATCH_TEST_OPTION) defaults.corp[process.env.AI_BATCH_TEST_OPTION] = false;
   for (const [side, values] of [['corp', config.corpOptions], ['runner', config.runnerOptions]])
     for (const name in values)
       if (!Object.prototype.hasOwnProperty.call(defaults[side], name)) throw new Error(`Unknown ${side} AI option: ${name}`);
@@ -356,7 +312,7 @@ async function batch(config, command) {
     pool: {file: config.poolInfo.file, id: config.poolInfo.pool.id, sets: config.poolInfo.pool.sets},
     poolHash: config.poolInfo.hash, pairs: config.pairs.map(p => p.id), seeds: config.seeds,
     starts: config.starts.map(s => ({id: s.id, hash: s.hash})), collectors: config.collectorNames,
-    directions: config.directions, quick: config.quick, budget: config.budget,
+    directions: config.directions, quick: config.quick,
     options: effective || {corp: config.corpOptions, runner: config.runnerOptions},
     failures: games.filter(g => !g.ok).map(g => ({fixtureId: g.fixtureId, deckPairId: g.deckPairId, seed: g.seed,
       reason: g.reason, errors: g.errors})),
@@ -469,57 +425,8 @@ function applyMaxChecks(result, candidate, max) {
   return result;
 }
 
-// One game, played as playJob() plays it, with its full log.
-function replayGame(config, options) {
-  const pair = config.pairs[0], seed = config.seeds[0], start = config.starts[0];
-  return playGame({streamPrefix: `${seed}:${pair.id}`, corpFile: pair.corp, runnerFile: pair.runner,
-    setFiles: config.setFiles, timeoutMs: config.timeoutMs, start: start ? start.file : null,
-    corpOptions: options.corp, runnerOptions: options.runner, telemetry: true, observe: true, fullLog: true,
-    testOption: process.env.AI_BATCH_TEST_OPTION});
-}
-
-async function replay(args) {
-  if (/^\d+$/.test(args.seeds || '')) args.seeds = args.seeds + '-' + args.seeds;
-  const config = buildConfig(args);
-  if (config.pairs.length !== 1 || config.seeds.length !== 1 || config.starts.length > 1)
-    throw new Error('replay needs exactly one --pairs id, one --seeds value and at most one --start');
-  checkOptions(config);
-  const describe = (label, g) => `${label}: ${g.winner || 'no winner'} (${g.reason}), Corp ${g.corpPoints}-${g.runnerPoints} Runner, ` +
-    `${g.turns} turns, ${g.logLines} log lines, logHash ${g.logHash}${g.errors.length ? ', errors: ' + g.errors.join('; ') : ''}`;
-  const candidate = await replayGame(config, {corp: config.corpOptions, runner: config.runnerOptions});
-  if (!candidate.winner || candidate.errors.length) process.exitCode = 1;
-  if (!args.diff) {
-    console.log(describe('game', candidate));
-    console.log(candidate.log.join('\n'));
-    return;
-  }
-  const baseline = await replayGame(config, {corp: {}, runner: {}});
-  if (!baseline.winner || baseline.errors.length) process.exitCode = 1;
-  console.log(describe('baseline (options off)', baseline));
-  console.log(describe('candidate', candidate));
-  console.log(diffLogs(baseline.log, candidate.log));
-}
-
-// Compare replay logs; only diff's normal exit codes produce a verdict.
-function diffLogs(baseline, candidate) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-replay-'));
-  try {
-    fs.writeFileSync(path.join(dir, 'baseline.log'), baseline.join('\n') + '\n');
-    fs.writeFileSync(path.join(dir, 'candidate.log'), candidate.join('\n') + '\n');
-    const result = require('child_process').spawnSync('diff', ['-U2', 'baseline.log', 'candidate.log'], {cwd: dir, encoding: 'utf8'});
-    if (result.error || (result.status !== 0 && result.status !== 1)) {
-      throw new Error('diff failed: ' + (result.error ? result.error.message :
-        result.stderr || (result.signal ? 'signal ' + result.signal : 'exit status ' + result.status)));
-    }
-    return result.status === 0 ? 'Logs are identical.' : result.stdout;
-  } finally {
-    fs.rmSync(dir, {recursive: true, force: true});
-  }
-}
-
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args._[0] === 'replay') return replay(args);
   const command = 'node scripts/ai-batch.js ' + process.argv.slice(2).join(' ');
   if (args.compare) {
     const [a, b] = args.compare.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));
@@ -561,5 +468,5 @@ async function main() {
   process.exitCode = report.failures.length ? 1 : 0;
 }
 
-module.exports = {diffLogs, parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
+module.exports = {parseArgs, resolveSeeds, loadPool, resolveStarts, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 2; });
