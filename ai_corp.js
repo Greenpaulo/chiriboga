@@ -5606,9 +5606,39 @@ class CorpAI {
       if (!CheckCardType(upgrade, ["upgrade"]) ||
           typeof upgrade.AIFastAdvanceCounters != "function" ||
           point.persist.includes(upgrade) || !CheckHasAbilities(upgrade)) continue;
-      var upgradeCounters = upgrade.AIFastAdvanceCounters.call(upgrade, card);
-      var upgradeCost = upgrade.rezzed ? 0 : RezCost(upgrade);
-      if (upgradeCounters <= 0 || point.corpCredits < upgradeCost) continue;
+      //Rez policy reads the prospective resources and target counters. Use
+      //the shared guard so nested probes bypass caches and exceptions restore.
+      var savedCredits = corp.creditPool;
+      var savedClicks = corp.clickTracker;
+      var savedActivePlayer = activePlayer;
+      var advancementDescriptor = card && Object.getOwnPropertyDescriptor(card, "advancement");
+      var upgradeAction = this._withHypothetical(
+        () => {
+          corp.creditPool = point.corpCredits;
+          corp.clickTracker = point.corpClicks;
+          activePlayer = corp;
+          if (card) card.advancement = point.advancementSoFar;
+        },
+        () => {
+          var counters = upgrade.AIFastAdvanceCounters.call(upgrade, card);
+          var cost = upgrade.rezzed ? 0 : RezCost(upgrade);
+          if (counters <= 0 || point.corpCredits < cost ||
+              (!upgrade.rezzed && !FullCheckRez(upgrade, ["upgrade"]))) return null;
+          return {counters: counters, cost: cost};
+        },
+        () => {
+          corp.creditPool = savedCredits;
+          corp.clickTracker = savedClicks;
+          activePlayer = savedActivePlayer;
+          if (card) {
+            if (advancementDescriptor) Object.defineProperty(card, "advancement", advancementDescriptor);
+            else delete card.advancement;
+          }
+        },
+      );
+      if (!upgradeAction) continue;
+      var upgradeCounters = upgradeAction.counters;
+      var upgradeCost = upgradeAction.cost;
       ret.push({
         corpCredits: point.corpCredits - upgradeCost,
         corpClicks: point.corpClicks,
@@ -6481,7 +6511,7 @@ class CorpAI {
                   if (CheckCardType(plannedCard, ["upgrade"]) && CheckInstalled(plannedCard)) {
                     plannedCard.AIPreferredTarget = card;
                     if (!plannedCard.rezzed && optionList.includes("rez") &&
-                        CheckCredits(corp, RezCost(plannedCard), "rezzing", plannedCard))
+                        FullCheckRez(plannedCard, ["upgrade"]))
                       return this._returnPreference(optionList, "rez", {cardToRez: plannedCard});
                     if (plannedCard.rezzed && optionList.includes("trigger"))
                       return this._returnPreference(optionList, "trigger", {cardToTrigger: plannedCard});

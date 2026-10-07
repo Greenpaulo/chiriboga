@@ -1629,6 +1629,10 @@ run, and use only public information and the Corp's own cards.
 Operations consume their actual `PlayCost` and `PlayClickCost` (including
 Double); already-resolving operations have paid those costs. Installed upgrades
 consume their rez cost if unrezzed, no clicks, and one locally recorded use.
+Unrezzed upgrades must pass `FullCheckRez`, including `RezUsability`, with
+the search point’s credits, clicks and target advancement counters. The probe
+restores these fields and the active player even if a hook throws; execution
+checks full rez legality again against the live board.
 This upgrade contract is for trash-to-place-counter abilities without other
 costs. Execution rezzes or triggers the planned upgrade and supplies
 `AIPreferredTarget`; its ability must validate that target. Flood the Market
@@ -2210,8 +2214,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   broken or the ICE was bypassed, respectively. These branches each add one
   tag; a partial break does not. Recursion prefers a strong non-agenda draw,
   otherwise buries an agenda; the return targets a public Runner threat.
-- Paywall's `AIImplementIce` separates credit-pool loss on encounter from the
-  pay-one-or-end-the-run subroutine, so temporary credits cannot absorb loss.
+- Paywall's `AIImplementIce` separates the encounter credit loss
+  (`loseCredits`) from the pay-one-or-end-the-run subroutine.
 - Flood the Market uses `AIFastAdvance`, `AIFastAdvanceCounters` and
   `AIWouldPlay`, respects the planner's `AIPreferredTarget`, and avoids ordinary
   plays with fewer than three qualifying remotes.
