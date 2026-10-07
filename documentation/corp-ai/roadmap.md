@@ -162,6 +162,12 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
+### F10 Real-board start library for gates
+- **Status:** in-progress
+- **Depends on:** F4
+- **Ticket:** [F10-real-board-start-library.md](../backlog/code-review/F10-real-board-start-library.md)
+- **Goal:** Build gate start boards from real logs with a checked builder, keep them in one tagged library, and run board-based gates under a fixed game budget.
+
 ### Done
 
 | ID | Item | Delivered by | Architecture |
