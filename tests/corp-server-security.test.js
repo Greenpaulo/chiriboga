@@ -110,7 +110,7 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
   try {
     for (const startingDepth of [0, 2]) {
       for (const shouldThrow of [false, true]) {
-        ai._hypotheticalDepth = startingDepth;
+        context.AIHypothetical.depth = startingDepth;
         corp.creditPool = 20;
         corp.clickTracker = 3;
         let probes = 0;
@@ -133,7 +133,7 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
     }
   } finally {
     Object.assign(ai, original);
-    ai._hypotheticalDepth = oldDepth;
+    context.AIHypothetical.depth = oldDepth;
     context.PlayerHand = oldPlayerHand;
     context.CheckTags = oldCheckTags;
   }

@@ -121,9 +121,9 @@ cannot price yet.
 Shared infrastructure used by every area.
 
 ### F2 Guarded hypothetical evaluation: remaining migrations
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [corp_ai_finding_10_guarded_hypothetical.md](../backlog/corp_ai_finding_10_guarded_hypothetical.md)
+- **Ticket:** [corp_ai_finding_10_guarded_hypothetical.md](../backlog/code-review/corp_ai_finding_10_guarded_hypothetical.md)
 - **Goal:** Route every hand-written planning probe (11 inventoried functions, including Baker and runcalculator.js) through one guarded helper with a shared depth count, and ratchet new unguarded mutation.
 
 ### F3 Per-decision evaluation cache

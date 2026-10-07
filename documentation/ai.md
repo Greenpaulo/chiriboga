@@ -15,6 +15,7 @@ This file is long. Read only the sections a task needs. To find one hook, search
 | Runner cards the Corp's server-security evaluator must see (type shifts, bypasses, redirects, credit sources, pressure) | §4.16–4.22 |
 | Corp protection and economy policy hooks | §5.9–5.11 |
 | Logic written directly in a card's `Enumerate`/`Resolve` | §4.15 (Runner), §5.8 (Corp) |
+| A hook that evaluates a prospective run, encounter or other temporary state | §2 "Evaluating hypothetical state" |
 | Add a new hook | §2 "The Hook Pattern", the nearest existing subsection as a template, then add a row to §7 |
 | Hook usage notes for recent Vantage Point cards | §7 "Vantage Point Batch N card hooks" |
 | First time adding AI support | §2, then §8 (worked examples) |
@@ -130,6 +131,29 @@ if (runner.AI != null) {
 ```
 
 This is useful for more complex cards where the AI needs to make a choice mid-resolution.
+
+### Evaluating hypothetical state
+
+An AI hook or card helper that needs a prospective run or encounter context,
+or any other temporary change to game state, must make it through one of the
+guarded wrappers in the utility prefix of `ai_runner.js` (loaded before card
+code runs in the game, the headless harness and the test harnesses):
+
+| Wrapper | Temporarily sets | Use it for |
+|---|---|---|
+| `AIWithRunContext(server, evaluate)` | `attackedServer = server` | Run-only costs or credits, e.g. a `canUseCredits` that only allows spending during a run (Baker's `_stealthCreditCards`) |
+| `AIWithIceEncounter(iceCard, evaluate)` | `encountering`, `attackedServer`, `approachIce` as if `iceCard` were encountered | Encounter-only strength or subtype effects (Atman and Chameleon `AIMatchingBreakerInstalled`). `evaluate(entered)` receives `false`, with nothing changed, when `iceCard` is not in a server |
+| `AIWithHypothetical(apply, evaluate, restore)` | whatever `apply` changes; `restore` must reassign every field | Anything else. Corp AI code calls it as `this._withHypothetical()` |
+
+Each wrapper returns `evaluate`'s result, restores the state in `finally`
+(also when `evaluate` throws) and raises the shared hypothetical depth count
+`AIHypothetical.depth` while `evaluate` runs, so the Corp's per-decision
+security cache never stores or serves a result computed on a changed board.
+Pass only public context: the server being considered or the ICE position,
+never the Runner's hidden cards. `tests/corp-ai-hypothetical-mutation.test.js`
+fails when an `AI*` or `_*` function in `sets/*.js` changes credits, clicks,
+tags, counters, rez state, ICE arrays or run/encounter context outside these
+wrappers.
 
 ---
 
@@ -1211,7 +1235,7 @@ AIRunPoolCreditOffset: function(server, runEventCardToUse) {
 
 The return value is the non-negative number of additional credits available for that route. `server` is the proposed attacked server. `runEventCardToUse` is the proposed event for Runner-AI simulation; Corp security planning always passes `null`, because hidden Grip identities are unavailable to the Corp. The hook must be read-only, use only public active state when called with `null`, and be safe outside a run. If a card exposes both usable hosted credits and this hook, the security evaluator takes the larger value rather than adding both.
 
-`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
+`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It supplies the proposed `attackedServer` through `AIWithRunContext()` (§2 "Evaluating hypothetical state") while probing route-sensitive `canUseCredits` hooks, so the real value is restored afterward even if a hook throws. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
 
 ### 4.21 Public Central Pressure — `AICentralPressure`
 
