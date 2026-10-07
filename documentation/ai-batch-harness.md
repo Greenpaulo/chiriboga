@@ -73,6 +73,30 @@ Use the frozen `beginner-v1` pool from the Corp AI regression investigation
 to screen gameplay changes, including tickets whose acceptance gate is
 `N/A`. It contains PD–Tao, BTL–Kit, NEH–Zahya, PE–Steve and Gateway, using
 System Gateway, System Update 2021 and Elevation. Seeds 1–200 give 1,000 games.
+Before the first comparison, check that `bench/current/baseline.json` exists.
+Benchmark JSON is ignored local evidence, so a fresh clone has no baseline.
+If it is missing, run `node scripts/refresh-ai-baseline.js` on a clean,
+committed checkout of the PR's target main build to initialise it (see
+[baseline refresh](#refreshing-the-accepted-baseline-after-a-merge)). Then
+return to the candidate branch before running the commands below. Use the
+same checkout so its ignored `bench/` reports remain available; if using
+separate worktrees, copy the target-main baseline into the candidate's
+`bench/current/baseline.json` first. Do not initialise the comparison baseline
+from the candidate build.
+
+If the target-main build predates the refresh script, initialise the report
+there with the harness directly instead:
+
+```sh
+node scripts/ai-batch.js \
+  --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --seeds 1-200 \
+  --out bench/current/baseline.json
+```
+
+Check that this initial report records a clean build, 1,000 games and zero
+failures before using it as the baseline.
+
 Run on a clean, committed candidate branch, using a new output filename for
 each PR/revision so earlier evidence is preserved:
 
