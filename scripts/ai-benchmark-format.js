@@ -12,6 +12,10 @@ function benchmarkFormat(format = 'beginner') {
   return formats[format];
 }
 
+function benchmarkBaselines() {
+  return Object.values(formats).map(({bench}) => `${bench}/current/baseline.json`);
+}
+
 function parseFormat(args, script) {
   if (!args.length) return 'beginner';
   if (args.length === 2 && args[0] === '--format') {
@@ -21,4 +25,4 @@ function parseFormat(args, script) {
   throw new Error(`Usage: node scripts/${script} [--format beginner|startup]`);
 }
 
-module.exports = {benchmarkFormat, parseFormat};
+module.exports = {benchmarkFormat, benchmarkBaselines, parseFormat};

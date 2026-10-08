@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
-const {benchmarkFormat, parseFormat} = require('./ai-benchmark-format');
+const {benchmarkFormat, benchmarkBaselines, parseFormat} = require('./ai-benchmark-format');
 
 function compareBranch(root, runBatch = args => {
   const result = spawnSync(process.execPath, args, {cwd: root, stdio: 'inherit'});
@@ -20,8 +20,10 @@ function compareBranch(root, runBatch = args => {
   const branch = git.stdout.trim();
   const output = `${bench}/${branch}.json`;
   const baseline = `${bench}/current/baseline.json`;
-  if (path.resolve(root, output) === path.resolve(root, baseline)) {
-    throw new Error('Branch output would overwrite ' + baseline + '; use a different branch name.');
+  const protectedBaseline = benchmarkBaselines().find(candidate =>
+    path.resolve(root, output) === path.resolve(root, candidate));
+  if (protectedBaseline) {
+    throw new Error('Branch output would overwrite ' + protectedBaseline + '; use a different branch name.');
   }
   if (!fs.existsSync(path.join(root, baseline))) {
     const flag = format === 'beginner' ? '' : ` --format ${format}`;

@@ -41,6 +41,15 @@ test('missing baseline stops before running games', root => {
   fs.unlinkSync(path.join(root, 'bench/current/baseline.json'));
   assert.throws(() => compareBranch(root, () => assert.fail('must not run')), /Missing.*baseline/);
 });
+test('beginner comparison protects the startup baseline', root => {
+  fs.mkdirSync(path.join(root, 'bench/startup/current'), {recursive: true});
+  const baseline = path.join(root, 'bench/startup/current/baseline.json');
+  fs.writeFileSync(baseline, '{"accepted":"startup"}');
+  fs.writeFileSync(path.join(root, '.git/HEAD'), 'ref: refs/heads/startup/current/baseline\n');
+  assert.throws(() => compareBranch(root, () => assert.fail('must not run')),
+    /would overwrite bench\/startup\/current\/baseline.json/);
+  assert.strictEqual(fs.readFileSync(baseline, 'utf8'), '{"accepted":"startup"}');
+});
 test('detached HEAD stops before running games', root => {
   fs.writeFileSync(path.join(root, '.git/HEAD'), '0123456789012345678901234567890123456789\n');
   assert.throws(() => compareBranch(root, () => assert.fail('must not run')), /named branch/);

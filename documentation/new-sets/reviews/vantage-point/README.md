@@ -44,6 +44,13 @@ and linked reports; a separate remediation skill is unnecessary.
   these compact records for this audit; later runs should produce new records,
   rather than overwrite historical evidence.
 
+The headless smoke probe now writes each run to a timestamp-and-UUID filename,
+using exclusive creation so an existing record cannot be replaced. Reports record
+the actual UTC start date and timestamp; the probe prints the saved path. The
+date-only records linked below remain historical evidence. PR #23 follow-up
+corrections refresh the final manifest for these probe and regression changes;
+they do not rerun the eight games or change the recorded readiness verdict.
+
 No evidence has been deleted during this relocation. Any later cleanup must
 update report links and retain enough evidence to understand the original
 finding, repair and independent verification.
