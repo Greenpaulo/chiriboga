@@ -23,7 +23,10 @@ Missing reports are work to perform, not grounds to stop the review immediately.
 
 For a full set, independent agents may review disjoint batches in parallel.
 Each reviewer owns only its batch report and useful reproduction artifacts;
-only the coordinator edits the shared tracker/backlog. Give each reviewer the
+only the coordinator edits the shared tracker/backlog. During a full-set review,
+the batch skill's tracker updates and batch reopening are deferred to the
+coordinator; batch reviewers report the required changes without editing shared
+tracker/backlog files. Give each reviewer the
 batch skill and raw set/test context, without proposed findings. Never run these
 reviews alongside production edits. Each batch retains its separate verdict and
 per-card evidence. One coordinator full-suite run on the shared immutable code

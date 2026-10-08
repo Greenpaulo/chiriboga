@@ -138,6 +138,10 @@ Use one overall verdict:
 - **Inconclusive:** essential evidence or a ruling is unavailable. State exactly
   what would settle it; do not invent a defect or call this a passing review.
 
+During a full-set review, defer the following tracker/backlog updates and batch
+reopening to the coordinator. Batch reviewers record the required updates in
+their reports and do not edit those shared files.
+
 For the active set, link the report and verdict from a separate batch-review log
 in the tracker, creating that section on the first review. Keep implementation
 completion history append-only. For Changes required, reopen a completed queue

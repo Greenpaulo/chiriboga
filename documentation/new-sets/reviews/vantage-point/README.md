@@ -52,10 +52,21 @@ finding, repair and independent verification.
 
 On 2026-10-06, the reports and artifacts moved from the flat `reviews/` and
 `reviews/probes/` directories into this directory and its `probes/` subdirectory.
-Report links and probe root resolution were updated. Historical JSON and hash
+Report links and probe root resolution were updated. Historical JSON and intermediate hash
 manifests retain their original recorded paths and digests; retrieve the completed
 pre-move artifacts from Git commit `5363f34`. Do not interpret a historical path
 or document-digest mismatch after relocation as production drift or renewed
 approval. The [relocation manifest](vantagepoint-relocation.sha256) records the
 updated reports, probes and workflow instructions, excluding the manifest itself.
 The original review verdict remains unchanged.
+
+## PR #23 corrections — 2026-10-08
+
+The [final manifest](vantagepoint-set-review-final.sha256) has been refreshed to
+verify the retained paths and current merged remediation snapshot. Its original
+version remains in Git at `6dd3adb`. This refresh does not renew review approval;
+production changes from the base branch still need independent revalidation.
+The [original smoke record](vantagepoint-headless-smoke.json) is unchanged;
+[corrected results](vantagepoint-headless-smoke-2026-10-08.json) supersede its
+invalid legal-deck/zero-error claim. Four games pass and four fail on recorded
+engine errors; see the full-set report for the outstanding integration findings.
