@@ -44,15 +44,34 @@ ticket records.
 
 ### After merging
 
-The post-merge command for an approved, completed ticket is:
+On your updated, clean `main` checkout after merging the PR, refresh the
+beginner and startup AI baselines with:
+
+```sh
+node scripts/post-merge.js
+```
+
+This runs `refresh-ai-baseline.js --format beginner` followed by
+`refresh-ai-baseline.js --format startup` (1,000 games each). Reports stay in
+the ignored `bench/` directory. If a refresh fails, the command stops;
+any earlier successful refresh remains in place.
+
+For a PR with an approved, completed ticket, include its path:
+
+```sh
+node scripts/post-merge.js --move documentation/bugs/code-review/<ticket>.md
+```
+
+The ticket moves to `done/` only after both refreshes succeed. The command
+does not commit or push. For multiple tickets, refresh once with this command
+and move the remaining tickets directly:
 
 ```sh
 node scripts/ticket.js move documentation/bugs/code-review/<ticket>.md done
 ```
 
 For a backlog ticket, use `documentation/backlog/code-review/<ticket>.md`.
-Run this on your updated `main` checkout after merging the PR, once per ticket.
-The command moves the file, rebases its links, updates its linked roadmap item
+The ticket command moves the file, rebases its links, updates its linked roadmap item
 and refreshes generated blockers. If it asks you to fill a Done-table
 Architecture cell, add the relevant `architecture.md` section link before
 committing.
