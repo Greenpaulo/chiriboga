@@ -129,6 +129,11 @@ required". Notes alone still pass.
   removes that additional blocker, runs only the human-game gate, and hands
   the ticket off again. Do not let this outcome fall through to **Pass** and
   move the ticket to `done/`.
+- **Pass with the gate failed:** the failed option and its branch were
+  removed ("When a gate fails" in `documentation/ai-planning.md`), the
+  `**Outcome:**` line says not adopted, and a follow-up ticket links back.
+  Move it to `done/` as for **Pass**. A failed option still in the code is
+  Blocking.
 - **Changes required:** `node scripts/ticket.js move <ticket> remediation`.
 
 A read-only reviewer outputs the Code review section for the user to paste into

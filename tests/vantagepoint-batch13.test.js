@@ -21,7 +21,7 @@ const c = {globalProperties: {agendaPointsToWin: 7}, console, corp, runner, card
   UpdateCounters: () => {}, Render: () => {}, PlaySound: () => {},
 };
 vm.createContext(c);
-for (const file of ['config.js', 'utility.js', 'checks.js', 'mechanics.js', 'ai_corp.js', 'sets/vantagepoint.js'])
+for (const file of ['config.js', 'utility.js', 'checks.js', 'mechanics.js', 'ai_runner.js', 'ai_corp.js', 'sets/vantagepoint.js'])
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), c, {filename: file});
 vm.runInContext('this.ai = new CorpAI(); ai._log = function () {};', c);
 const ai = c.ai;
@@ -199,10 +199,22 @@ flagship.rezzed = true; assert.strictEqual(ai._centralServerThreat(corp.HQ).addi
 assert.strictEqual(ai._centralServerThreat(corp.HQ).persistentPressure, 0);
 assert.strictEqual(ai._centralServerThreat(corp.RnD).additionalAccess, 0);
 vm.runInContext(fs.readFileSync(path.join(root, 'runcalculator.js'), 'utf8'), c);
-vm.runInContext(fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8') + '\nthis.runnerAI = new RunnerAI(); runnerAI._log = function () {};', c);
+vm.runInContext('this.runnerAI = new RunnerAI(); runnerAI._log = function () {};', c);
 runner.AI = c.runnerAI;
 assert.strictEqual(c.runnerAI._additionalHQAccessValue(), 0, 'Runner planner sees no multi-access value');
-assert(c.runnerAI._rootKnownToContainCopyOfCard(corp.HQ, 'Crisium Grid'), 'existing successful-run benefit consumers recognize Flagship');
+assert(c.ServerSuccessfulRunPrevented(corp.HQ), 'successful-run benefit consumers recognize Flagship');
+// Public capability gates apply to both Crisium and Flagship, on their own server.
+vm.runInContext(fs.readFileSync(path.join(root, 'sets/systemupdate2021.js'), 'utf8'), c);
+const crisium = c.cardSet[31079];
+put(crisium, corp.RnD.root); crisium.rezzed = true;
+assert(c.ServerSuccessfulRunPrevented(corp.RnD));
+assert.strictEqual(crisium.AIPreventsSuccessfulRun(corp.HQ), false);
+crisium.disabled = true; assert.strictEqual(c.ServerSuccessfulRunPrevented(corp.RnD), false);
+crisium.disabled = false; crisium.rezzed = false;
+assert.strictEqual(c.ServerSuccessfulRunPrevented(corp.RnD), false);
+corp.RnD.root = [];
+const runBenefit = c.cardSet[36012];
+assert.strictEqual(runBenefit.AIAdditionalAccess(corp.HQ), 0, 'Flagship suppresses a real successful-run multi-access hook');
 flagship.rezzed = false;
 assert.strictEqual(c.runnerAI._additionalHQAccessValue(), 2, 'ordinary HQ multi-access returns when protection is inactive');
 flagship.rezzed = true;
@@ -251,6 +263,25 @@ assert.strictEqual(shackleton.responseOnCreditsSpent.Enumerate.call(shackleton, 
 c.SpendHostedCredits(runner, hosted, 1, () => finished++);
 assert.strictEqual(hosted.credits, 9); assert.strictEqual(spendEvents.length, 1);
 spendEvents.shift().after(); assert.strictEqual(finished, 3);
+// Exhausting the last hosted credit must still offer temporary/pool choices.
+runner.rig.hardware = []; runner.creditPool = 4; runner.temporaryCredits = 2;
+c.SpendCredits(runner, 2, 'using', {}, () => finished++);
+payment = decisions.shift();
+assert(payment.choices.some(option => option.temporary));
+assert(payment.choices.some(option => option.card === null));
+payment.choose(payment.choices.find(option => option.card === null));
+payment = decisions.shift(); payment.choose(payment.choices.find(option => option.card === null));
+assert.strictEqual(finished, 4); assert.strictEqual(runner.temporaryCredits, 2);
+hosted.credits = 1; runner.rig.hardware = [hosted];
+c.SpendCredits(runner, 2, 'using', {}, () => finished++);
+payment = decisions.shift(); payment.choose(payment.choices.find(option => option.card === hosted));
+payment = decisions.shift();
+assert(payment.choices.some(option => option.temporary));
+assert(payment.choices.some(option => option.card === null));
+payment.choose(payment.choices.find(option => option.card === null));
+assert.strictEqual(finished, 4, 'partial hosted spend still waits for responses');
+spendEvents.shift().after(); assert.strictEqual(finished, 5);
+hosted.credits = 9;
 // The real calculator compares safe pool-only routes with damage-bearing routes.
 const etrIce = put({title: 'Two-credit barrier', cardType: 'ice', rezzed: true,
   rezCost: 1, strength: 3, subTypes: ['Barrier'], subroutines: [{text: 'End the run.'}],
@@ -312,6 +343,37 @@ assert(routes.some(route => !route.at(-1).paymentPoolOnly && rc.TotalDamage(rc.T
 assert(routes.some(route => route.at(-1).paymentPoolOnly && rc.TotalDamage(rc.TotalEffect(route.at(-1))) === 0));
 assert.strictEqual(shackleton.usedThisTurn, false, 'hypothetical continuation never changes the card');
 corp.HQ.ice = [etrIce];
+// Continuations with equal scalar budgets can consume different prevention
+// or outside-credit damage opportunities. Only equivalent states may reuse routes.
+const cacheRC = new rc.constructor();
+cacheRC._meatDamagePrevention = 3; cacheRC._ignoredIce = new Set();
+cacheRC._creditSpendSources = [{card: shackleton}];
+const continuationData = {server: corp.HQ, otherCredits: 1, clickLimit: 3,
+  poolCreditLimit: 5, damageLimit: 5, tagLimit: 0};
+const basePoint = {...cacheRC.EmptyPoint(0), runner_credits_spent: 1, meatDamagePrevention: 3,
+  creditSpendDamage: 0, effects: []};
+const calculate = rc.constructor.prototype.Calculate;
+let continuationCalls = [];
+rc.constructor.prototype.Calculate = function () {
+  continuationCalls.push({prevention: this._meatPreventionOverride,
+    ignored: this._creditDamageIgnored.has(shackleton)});
+  const last = this.EmptyPoint(-1); last.effects = [['meatDamage', 'meatDamage', 'meatDamage']];
+  last.meatDamagePrevention = this._meatPreventionOverride;
+  return [[last]];
+};
+try {
+  const points = [
+    {...basePoint, effects: [['meatDamage', 'meatDamage', 'meatDamage']]},
+    {...basePoint, creditSpendDamage: 3}, basePoint];
+  for (const point of points) {
+    const first = cacheRC._finiteRunContinuations(continuationData, point, disposable);
+    const cached = cacheRC._finiteRunContinuations(continuationData, point, disposable);
+    assert.deepStrictEqual(cached, first, 'cache hits preserve continuation effects');
+  }
+  assert.deepStrictEqual(continuationCalls, [
+    {prevention: 0, ignored: false}, {prevention: 0, ignored: true},
+    {prevention: 3, ignored: false}]);
+} finally {rc.constructor.prototype.Calculate = calculate;}
 // Pool locks cannot finance the safe branch, even with a large printed pool.
 const poolLock = {player: runner, cardType: 'resource', preventCreditPoolUse: () => true};
 runner.rig.resources = [poolLock]; runner.grip = [{}, {}, {}]; runner.creditPool = 100;
@@ -321,8 +383,22 @@ runner.rig.resources = [];
 // Required stealth remains a distinct payment. A pool cannot replace it;
 // restricted credits cannot finance ordinary breaks or the access trash cost.
 const corsair = c.cardSet[36004]; runner.rig.programs = [corsair];
+// An empty or disabled provider retains scalar security evaluation.
+assert.strictEqual(ai._restrictedPaymentPlanOutcome(corp.HQ, [etrIce],
+  {runnerActiveCards: [corsair]}), null);
+const emptyProvider = {AIRunRestrictedCredits: server => server === corp.HQ ? 0 : 2};
+assert.strictEqual(ai._restrictedPaymentPlanOutcome(corp.HQ, [etrIce],
+  {runnerActiveCards: [emptyProvider]}), null);
+assert.strictEqual(ai._restrictedPaymentPlanOutcome(corp.HQ, [etrIce],
+  {runnerActiveCards: [{disabled: true, AIRunRestrictedCredits: () => 2}]}), null);
+vm.runInContext(fs.readFileSync(path.join(root, 'sets/uprising.js'), 'utf8'), c);
+const mantle = c.cardSet[26088]; mantle.credits = 1;
+runner.rig.programs = [corsair, mantle]; runner.rig.hardware = [];
+assert(corsair._stealthCreditCards().includes(mantle), 'Mantle can fund the program target');
+assert.strictEqual(corsair.AIRunRestrictedCredits(corp.HQ), 1);
+runner.rig.programs = [corsair];
 const restrictedStealth = {player: runner, cardType: 'hardware', title: 'Ability-only stealth',
-  subTypes: ['Stealth'], credits: 1, canUseCredits: (doing, card) => doing === 'using' && card === null};
+  subTypes: ['Stealth'], credits: 1, canUseCredits: (doing, card) => doing === 'using' && card === corsair};
 runner.rig.hardware = [restrictedStealth]; runner.creditPool = 4;
 assert.strictEqual(rc.Calculate(corp.HQ, 3, 4, 0, 3, 0, false, null).length, 0,
   'required stealth damage cannot be avoided by substituting the pool');
@@ -498,7 +574,23 @@ corp.creditPool = 15; corp.clickTracker = 3; runner.creditPool = 1;
 hosted.credits = 10; c.attackedServer = null; c.playerTurn = corp; action();
 corp.remoteServers = []; corp.RnD.ice = []; corp.archives.ice = [];
 const gridInstallOptions = [corp.RnD, corp.HQ, corp.archives].map(server => ({card: shackleton, server}));
-assert.strictEqual(ai._bestInstallOption(gridInstallOptions), 1, 'funded paid defense is the useful placement');
+const serverToProtect = ai._serverToProtect;
+const rankedServersToProtect = ai._rankedServersToProtect;
+ai._rankedServersToProtect = () => [corp.RnD, corp.HQ].map(server => ({server, isSecure: false}));
+assert.strictEqual(ai._serverToProtect(), corp.RnD, 'unfiltered protection prioritizes the server with no paid ICE');
+assert.strictEqual(shackleton.AIPreferredUpgradeServer([corp.RnD, corp.HQ, corp.archives]), corp.HQ,
+  'the real protection selector filters out a higher-priority but unsuitable server');
+ai._serverToProtect = (ignoreArchives, outputToLog, targetIsEligible) =>
+  targetIsEligible ? serverToProtect.call(ai, ignoreArchives, outputToLog, targetIsEligible) : corp.archives;
+assert.strictEqual(ai._bestInstallOption(gridInstallOptions), 1, 'hook overrides a protection target with no paid ICE');
+assert.strictEqual(ai._upgradeInstallPreferences(null, [shackleton])[0].serverToInstallTo, corp.HQ);
+const holdGrid = {...shackleton, AIPreferredUpgradeServer: () => null};
+assert.strictEqual(ai._upgradeInstallPreferences(corp.HQ, [holdGrid]).length, 0, 'explicit hook hold overrides a supplied server');
+ai._serverToProtect = serverToProtect;
+ai._rankedServersToProtect = () => [];
+assert.strictEqual(shackleton.AIPreferredUpgradeServer([corp.RnD, corp.HQ, corp.archives]), corp.HQ,
+  'a useful server remains the fallback when the protection selector finds no target');
+ai._rankedServersToProtect = rankedServersToProtect;
 hosted.credits = 0;
 assert.strictEqual(ai._bestInstallOption(gridInstallOptions), -1, 'without outside credits hold the Region');
 hosted.credits = 10; corp.HQ.root.push({cardType: 'upgrade', subTypes: ['Region']});

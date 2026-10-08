@@ -15,6 +15,7 @@ This file is long. Read only the sections a task needs. To find one hook, search
 | Runner cards the Corp's server-security evaluator must see (type shifts, bypasses, redirects, credit sources, pressure) | §4.16–4.22 |
 | Corp protection and economy policy hooks | §5.9–5.11 |
 | Logic written directly in a card's `Enumerate`/`Resolve` | §4.15 (Runner), §5.8 (Corp) |
+| A hook that evaluates a prospective run, encounter or other temporary state | §2 "Evaluating hypothetical state" |
 | Add a new hook | §2 "The Hook Pattern", the nearest existing subsection as a template, then add a row to §7 |
 | Hook usage notes for recent Vantage Point cards | §7 "Vantage Point Batch N card hooks" |
 | First time adding AI support | §2, then §8 (worked examples) |
@@ -130,6 +131,29 @@ if (runner.AI != null) {
 ```
 
 This is useful for more complex cards where the AI needs to make a choice mid-resolution.
+
+### Evaluating hypothetical state
+
+An AI hook or card helper that needs a prospective run or encounter context,
+or any other temporary change to game state, must make it through one of the
+guarded wrappers in the utility prefix of `ai_runner.js` (loaded before card
+code runs in the game, the headless harness and the test harnesses):
+
+| Wrapper | Temporarily sets | Use it for |
+|---|---|---|
+| `AIWithRunContext(server, evaluate)` | `attackedServer = server` | Run-only costs or credits, e.g. a `canUseCredits` that only allows spending during a run (Baker's `_stealthCreditCards`) |
+| `AIWithIceEncounter(iceCard, evaluate)` | `encountering`, `attackedServer`, `approachIce` as if `iceCard` were encountered | Encounter-only strength or subtype effects (Atman and Chameleon `AIMatchingBreakerInstalled`). `evaluate(entered)` receives `false`, with nothing changed, when `iceCard` is not in a server |
+| `AIWithHypothetical(apply, evaluate, restore)` | whatever `apply` changes; `restore` must reassign every field | Anything else. Corp AI code calls it as `this._withHypothetical()` |
+
+Each wrapper returns `evaluate`'s result, restores the state in `finally`
+(also when `evaluate` throws) and raises the shared hypothetical depth count
+`AIHypothetical.depth` while `evaluate` runs, so the Corp's per-decision
+security cache never stores or serves a result computed on a changed board.
+Pass only public context: the server being considered or the ICE position,
+never the Runner's hidden cards. `tests/corp-ai-hypothetical-mutation.test.js`
+fails when an `AI*` or `_*` function in `sets/*.js` changes credits, clicks,
+tags, counters, rez state, ICE arrays or run/encounter context outside these
+wrappers.
 
 ---
 
@@ -325,6 +349,15 @@ AISpecialBreaker: true,
 You still implement `AIImplementBreaker` to explain how they break ice, and `AIMatchingBreakerInstalled` so the AI can check whether a given piece of ice is already covered.
 
 **`AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)`** — Called on every installed program to find a match for a given ice. Return `this` if this card can handle that ice, or `null` if not. `effectiveSubTypes` is an optional array used by Corp security planning for public subtype shifts; use it instead of mutating or retaining `iceCard.subTypes`. Runner-AI callers may omit it, so fall back to the ice's current subtypes.
+
+Identity effects that temporarily add a subtype must also restrict the match to
+the ICE that would receive that subtype. Rielle "Kit" Peddler uses
+`_AIFirstIceToEncounter` for both `AIModifyIceAI` and
+`AIMatchingBreakerInstalled`: it skips unrezzed outer ICE when a rezzed inner
+ICE would be encountered first, and restores any temporary subtype mutation
+before returning. When Corp security supplies `effectiveSubTypes`, Kit defers
+to that evaluator's ordinary breaker matching instead of requiring a live
+Runner AI.
 
 ```js
 // Botulus: only matches the ice it is hosted on
@@ -650,7 +683,7 @@ AIRunEventExtraPotential: function(server, potential) {
 // Jailbreak: only use on HQ or R&D with no unrezzed ice
 AIRunEventExtraPotential: function(server, potential) {
     if (server == corp.HQ || server == corp.RnD) {
-        if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+        if (ServerSuccessfulRunPrevented(server)) return 0;
         var unrezzedIce = server.ice.filter(i => !i.rezzed).length;
         if (unrezzedIce == 0) {
             if (server == corp.HQ) return 0.5 * runner.AI._additionalHQAccessValue(this);
@@ -727,7 +760,7 @@ AIAdditionalAccess: function(server) {
 // Jailbreak: +1 access to HQ or R&D if run succeeds
 AIAdditionalAccess: function(server) {
     if (server != corp.HQ && server != corp.RnD) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     return 1;
 },
 ```
@@ -763,7 +796,7 @@ AIInstallBeforeRun: function(server, potential, useRunEvent, runCreditCost, runC
 ```js
 // Red Team: install before central server runs that haven't been made this turn
 AIInstallBeforeRun: function(server, potential, useRunEvent, runCreditCost, runClickCost) {
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     if (typeof server.cards !== "undefined") { // central server
         var alreadyRunThisTurn = (server == corp.HQ) ? this.runHQ :
                                  (server == corp.RnD) ? this.runRnD : this.runArchives;
@@ -893,7 +926,7 @@ Return a float for extra potential gained by using this card's active ability du
 // Conduit: worth using if we can access new cards in R&D
 AIRunAbilityExtraPotential: function(server, potential) {
     if (server == corp.RnD) {
-        if (runner.AI._rootKnownToContainCopyOfCard(corp.RnD, "Crisium Grid")) return 0;
+        if (ServerSuccessfulRunPrevented(corp.RnD)) return 0;
         var conduitDepth = Counters(this, "virus") + 1;
         var bonusCards = runner.AI._countNewCardsThatWouldBeAccessedInRnD(conduitDepth, []);
         if (bonusCards > 0) return bonusCards - 1;
@@ -1202,7 +1235,7 @@ AIRunPoolCreditOffset: function(server, runEventCardToUse) {
 
 The return value is the non-negative number of additional credits available for that route. `server` is the proposed attacked server. `runEventCardToUse` is the proposed event for Runner-AI simulation; Corp security planning always passes `null`, because hidden Grip identities are unavailable to the Corp. The hook must be read-only, use only public active state when called with `null`, and be safe outside a run. If a card exposes both usable hosted credits and this hook, the security evaluator takes the larger value rather than adding both.
 
-`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It temporarily supplies the proposed `attackedServer` while probing route-sensitive `canUseCredits` hooks and restores the real value afterward. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
+`corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It supplies the proposed `attackedServer` through `AIWithRunContext()` (§2 "Evaluating hypothetical state") while probing route-sensitive `canUseCredits` hooks, so the real value is restored afterward even if a hook throws. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
 
 ### 4.21 Public Central Pressure — `AICentralPressure`
 
@@ -1596,6 +1629,10 @@ run, and use only public information and the Corp's own cards.
 Operations consume their actual `PlayCost` and `PlayClickCost` (including
 Double); already-resolving operations have paid those costs. Installed upgrades
 consume their rez cost if unrezzed, no clicks, and one locally recorded use.
+Unrezzed upgrades must pass `FullCheckRez`, including `RezUsability`, with
+the search point’s credits, clicks and target advancement counters. The probe
+restores these fields and the active player even if a hook throws; execution
+checks full rez legality again against the live board.
 This upgrade contract is for trash-to-place-counter abilities without other
 costs. Execution rezzes or triggers the planned upgrade and supplies
 `AIPreferredTarget`; its ability must validate that target. Flood the Market
@@ -2031,7 +2068,9 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunEventModify(server)` | function | Temporarily modify game state for run calc |
 | `AIRunEventRestore(server)` | function | Restore state after run calc |
 | `AIRunEventExtraCredits` | number | Credits this run event provides |
-| `AIRunPoolCreditOffset(server, runEventCardToUse)` | function | Public extra credits available for a hypothetical route; must be safe with a null event |
+| `AIRunPoolCreditOffset(server, runEventCardToUse)` | function | Public generic run-credit offset (Methuselah, Touchstone, Cezve, Ken Tenma); safe with a null event; restricted payments use `AIRunRestrictedCredits` |
+| `AIRunRestrictedCredits(server)` | function | Nonnegative public credits available only for explicitly modelled restricted payments; shared providers report a maximum, not a sum |
+| `AIMeatDamagePrevention()` | function | Nonnegative currently usable public one-shot meat-damage prevention capacity |
 | `AIAdditionalAccess(server)` | function | Return extra accesses for given server |
 | `AIInstallBeforeRun(server, ...)` | function | Return priority to install before running server |
 | `AIInstallBeforeInstall(card)` | function | Return true to install this before the given card |
@@ -2054,6 +2093,12 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
 | `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
 | `AIDefensiveValue(server)` | function | Numeric protection value of this upgrade |
+| `AIPreferredUpgradeServer(legalServers)` | function | Return a supplied legal server, or `null` to hold; overrides generic placement |
+| `AIAccessLimit(server)` | function | Nonnegative maximum other-card accesses, or `Infinity` for no cap |
+| `AIPreventsSuccessfulRun(server)` | function | Boolean public success-prevention capability on the supplied server |
+| `AIOutsideCreditDamage(server)` | function | Nonnegative preventable meat damage for an available outside-credit spend opportunity |
+| `AIImmediateWin()` | function | Boolean immediate operation win; checked before tactics with normal play legality |
+| `agendaPointsForPlayer(player)` | function | Agenda point value for the supplied scoring player; consumed by `AgendaPointsForCard` |
 | `AIIsScoringUpgrade` | bool | True if this is a fast-advance scoring upgrade |
 | `AIRezWhenCan()` | function | Select a legal asset/upgrade rez opportunity in any available paid-ability window |
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
@@ -2193,8 +2238,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   broken or the ICE was bypassed, respectively. These branches each add one
   tag; a partial break does not. Recursion prefers a strong non-agenda draw,
   otherwise buries an agenda; the return targets a public Runner threat.
-- Paywall's `AIImplementIce` separates credit-pool loss on encounter from the
-  pay-one-or-end-the-run subroutine, so temporary credits cannot absorb loss.
+- Paywall's `AIImplementIce` separates the encounter credit loss
+  (`loseCredits`) from the pay-one-or-end-the-run subroutine.
 - Flood the Market uses `AIFastAdvance`, `AIFastAdvanceCounters` and
   `AIWouldPlay`, respects the planner's `AIPreferredTarget`, and avoids ordinary
   plays with fewer than three qualifying remotes.
@@ -2229,10 +2274,12 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Luana Campos uses `AIWorthInstalling(remotes)`, `AIRezWhenCan()` and the
   opening-hand economy flag `AIEconomyCard`. Placement chooses the strongest
   empty protected remote, otherwise a new one. Installing/rezzing requires bad
-  publicity, an affordable rez and at least two R&D cards. Turn-start choices
+  publicity, an affordable rez and at least two R&D cards. The rez hook waits
+  until no run is active, preserving approached ICE rez funds. Turn-start choices
   decline a draw that leaves no card for the mandatory draw.
 - Event Horizon uses `AITriggerInPaidWindow()` for legal Corp paid-window
-  command/card selection. It waits until all ICE is passed, then sacrifices
+  command/card selection. It uses the final movement window (`Run 4.5` with
+  `approachIce == 0`), or a paid window with `approachIce < 0`, then sacrifices
   against a potentially winning breach or to save an agenda on the Runner's
   last click. `AIGlobalETRUses(server)` shares that one-use policy with Corp
   security planning. `AIMandatoryPassCost(breaker, server, iceIndex, ai,
@@ -2247,7 +2294,10 @@ if (!runner.AI || runner.AI.rc !== rc) {
   local ICE-model overlay. The failed attempt pays encounters, the continuation
   receives fresh bad-publicity credits, and only the successful attempt pays
   approach/breach effects. Additional pool expenditure is stored in
-  `runner_credits_reserved`, consumed by `ValidPoint` and `PointCost`. Incomplete
+  `runner_credits_reserved`, consumed by `ValidPoint` and `PointCost`. Before
+  a run, unspent first-attempt bad-publicity credits expire and are also
+  reserved so neither continuation nor outer validation can reuse them.
+  Credit losses consume permanent credits rather than bad-publicity credits. Incomplete
   encounter planning and Corp severity calculation are unchanged. This is a
   conservative public-information plan assuming the Corp uses each available
   stop; it can afford a rerun and does not treat disposable defense as permanent.
@@ -2271,6 +2321,110 @@ if (!runner.AI || runner.AI.rc !== rc) {
   public breaker, then existing ELO, instead of the generic operation tutor
   scorer. Real option selection handles each subtype and a separate decline.
   `AIImplementIce` models two pool-credit losses and two separate ETRs.
+
+### Vantage Point Batch 13
+
+- `AIImmediateWin()` returns a boolean for a Corp operation whose resolution
+  wins immediately. `CorpAI.Phase_Main` checks this before ordinary tactics,
+  then applies `AIWouldPlay`, `FullCheckPlay`, costs and target legality. It must
+  be read-only and use only public state and Corp-owned information. Myōshu
+  requires a qualifying score and two more points reaching the victory target.
+  Its ordinary `AIPlayWhenCan` opportunity preserves all installed unrezzed
+  ICE rez costs; an immediate win can spend that reserve.
+- Reanimation Protocol uses `AIPlayWhenCan`, `AIWouldPlay` and
+  `AIIsRecurOrTutor`. Resolution sets a normal title/option preference for the
+  current protection server. Affordable candidates rank stopping ICE, absence
+  of a public matching breaker, Liability (avoiding extra bad publicity), actual
+  combined discounted cost and existing ELO. A cheaper affordable stopping HQ
+  installation is a reason to hold the operation. The install discount uses
+  `modifyInstallCost(card, destination)`, now also consumed for ICE; the unused
+  part of its ten-credit reduction is passed to `Rez`, retaining additional
+  rez costs and post-rez response timing.
+- Vulture Fund uses `AIEconomyPlay: 1`, `AIEconomyCard` and `AIWouldPlay`.
+  Main-phase tactics precede economy; existing clean economy titles precede
+  its declared economy play. It is unavailable below its seven-credit cost.
+- `AIAccessLimit(server)` returns a nonnegative maximum number of other cards
+  accessible on a route, or `Infinity`. `ServerAccessLimit` queries rezzed,
+  enabled upgrades in the supplied public server root. Corp central-threat
+  planning caps additional accesses; Runner `_additionalHQAccessValue` caps
+  access bonuses. This query does not simulate a future rez or persistent
+  copies after a trash. Flagship returns one for its installed rezzed server.
+- `AIPreventsSuccessfulRun(server)` returns a boolean; the public query
+  `ServerSuccessfulRunPrevented` uses rezzed, enabled upgrades. Flagship returns
+  true for its installed rezzed server. Corp central-pressure planning excludes
+  successful-run growth and pressure; the run calculator excludes successful
+  damage. Crisium Grid declares the same hook, and Runner benefit hooks
+  query `ServerSuccessfulRunPrevented(server)` for this public capability.
+  This prevents success, while retaining ordinary breach and single-card value.
+
+- `AIOutsideCreditDamage(server)` returns the nonnegative printed preventable
+  meat damage for an unused outside-credit opportunity on the supplied public
+  server. `OutsideCreditDamageSources` queries rezzed, enabled root cards;
+  `RunCalculator` compares outside-first and pool-only policies, and Corp
+  `_evaluateServerSecurityUncached` excludes lethal outside funding while
+  retaining affordable pool routes. Surviving damage is deterrence, not an ETR.
+  Shackleton returns four; its used opportunity is ignored during the current
+  Runner turn and projected fresh on the next Runner turn during Corp planning.
+  Queries are read-only and inspect no hidden Runner cards.
+- `AIMeatDamagePrevention()` returns the currently usable public one-shot meat
+  prevention capacity. `PublicMeatDamagePrevention` sums enabled installed
+  Runner cards for both planners. Crash Space returns three when trashable.
+  Run routes reduce meat damage, retain the prevention resource's cost using
+  the existing damage weight, and carry consumed capacity into repeated runs.
+  Runtime still resolves printed damage through normal prevention responses.
+- `AIRunRestrictedCredits(server)` returns public credits excluded from the
+  generic run budget that can finance an explicitly modelled restricted
+  payment. The calculator takes the maximum report across installed providers
+  because Corsairs share their stealth sources. Corsair reports stealth credits
+  whose `canUseCredits("", null)` is false. Its reduction records restricted
+  spending on the route; only those payments release the supplemental budget.
+  They cannot fund ordinary breaks or trash costs, and pool-only routes cannot
+  substitute pool credits. Consumption is retained across ICE and finite reruns.
+  Corp `_icePlanOutcome` consumes a positive credit report through
+  `_restrictedPaymentPlanOutcome`, using the shared calculator to follow
+  restricted-payment/strength-modification sequences across the entire funded
+  ICE route. Its `_securityPlanning` context supplies the selected rez plan,
+  Corp knowledge of its own ICE and captured source-damage opportunities.
+  It forecasts passing ICE and finite reruns, leaving optional access/trash
+  costs out of Corp security. Generic outside credits and payment-only
+  supplements remain separate; security uses the actual route's feasibility.
+  It enumerates preparation credits with their click costs, preserving separate
+  clicks for run initiation, paid click abilities and repeats. Survival uses
+  public Grip size and installed prevention; hidden Grip identities, proposed
+  hidden run events and the real Runner's cached route are unavailable. The
+  hypothetical server context is restored even on failure. Conditional damage
+  is counted once, with turn projection captured before changing that context.
+  This replaces Corsair's old pool-credit offset. The hook must be read-only,
+  safe outside a run, and use public cards and counters only.
+- `AIPreferredUpgradeServer(legalServers)` returns a supplied server or `null`
+  to hold the upgrade. Corp `_bestServerToUpgrade` validates that result before
+  ordinary install ranking. Shackleton filters servers with paid ICE defense
+  and a public outside-credit budget, excludes occupied Regions, then uses
+  `_serverToProtect` with its third-argument eligibility filter to rank the
+  remaining threats, falling back to the first useful supplied server when
+  no protection target qualifies. `AIDefensiveValue` values
+  its payment tax; `AIRezWhenCan` requires an unused opportunity and an upcoming
+  run payment. Both preserve meaningful hold/decline alternatives.
+- `RunnerAI.AIPreserveOutsideCredits(doing, card, amount)` follows the cached
+  route's `paymentPoolOnly` policy during live payment; absent a route it tries
+  the safer pool first. `SpendCredits` offers human temporary-credit choices
+  when a source-sensitive hazard is active. A completed payment emits
+  `responseOnCreditsSpent(player, outsideAmount, doing, card)` before its
+  continuation. `SpendHostedCredits` sends required stealth payments through
+  the same checkpoint, including Corsair, Lampades and Baker before redirect.
+  Shackleton's optional response uses normal title/option preferences; only
+  choosing damage consumes its opportunity, reset at both turn boundaries.
+- Let Them Dream uses `AIAdvancementLimit: 4` and normal score-response option
+  preferences. `_preferredSearch` takes a fast winning agenda into HQ only
+  with a protected scoring location, staging click and hand space; otherwise
+  it rescues Archives agendas or hides flooded/exposed HQ agendas at the bottom
+  of R&D. It can decline when no useful search exists. `AgendaPointsForCard`
+  consumes `agendaPointsForPlayer(player)` so score totals, Runner known-agenda
+  potential and Corp breach-loss estimates value this agenda as one Runner point
+  and two Corp points, preserving the printed metadata.
+
+
+---
 
 ## 8. Step-by-Step Worked Example
 
@@ -2436,102 +2590,3 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
-
-### Vantage Point Batch 13
-
-- `AIImmediateWin()` returns a boolean for a Corp operation whose resolution
-  wins immediately. `CorpAI.Phase_Main` checks this before ordinary tactics,
-  then applies `AIWouldPlay`, `FullCheckPlay`, costs and target legality. It must
-  be read-only and use only public state and Corp-owned information. Myōshu
-  requires a qualifying score and two more points reaching the victory target.
-  Its ordinary `AIPlayWhenCan` opportunity preserves all installed unrezzed
-  ICE rez costs; an immediate win can spend that reserve.
-- Reanimation Protocol uses `AIPlayWhenCan`, `AIWouldPlay` and
-  `AIIsRecurOrTutor`. Resolution sets a normal title/option preference for the
-  current protection server. Affordable candidates rank stopping ICE, absence
-  of a public matching breaker, Liability (avoiding extra bad publicity), actual
-  combined discounted cost and existing ELO. A cheaper affordable stopping HQ
-  installation is a reason to hold the operation. The install discount uses
-  `modifyInstallCost(card, destination)`, now also consumed for ICE; the unused
-  part of its ten-credit reduction is passed to `Rez`, retaining additional
-  rez costs and post-rez response timing.
-- Vulture Fund uses `AIEconomyPlay: 1`, `AIEconomyCard` and `AIWouldPlay`.
-  Main-phase tactics precede economy; existing clean economy titles precede
-  its declared economy play. It is unavailable below its seven-credit cost.
-- `AIAccessLimit(server)` returns a nonnegative maximum number of other cards
-  accessible on a route, or `Infinity`. `ServerAccessLimit` queries rezzed,
-  enabled upgrades in the supplied public server root. Corp central-threat
-  planning caps additional accesses; Runner `_additionalHQAccessValue` caps
-  access bonuses. This query does not simulate a future rez or persistent
-  copies after a trash. Flagship returns one for its installed rezzed server.
-- `AIPreventsSuccessfulRun(server)` returns a boolean; the public query
-  `ServerSuccessfulRunPrevented` uses rezzed, enabled upgrades. Flagship returns
-  true for its installed rezzed server. Corp central-pressure planning excludes
-  successful-run growth and pressure; the run calculator excludes successful
-  damage. Existing Runner benefit hooks querying Crisium through
-  `_rootKnownToContainCopyOfCard` also recognize this public capability.
-  This prevents success, while retaining ordinary breach and single-card value.
-
-- `AIOutsideCreditDamage(server)` returns the nonnegative printed preventable
-  meat damage for an unused outside-credit opportunity on the supplied public
-  server. `OutsideCreditDamageSources` queries rezzed, enabled root cards;
-  `RunCalculator` compares outside-first and pool-only policies, and Corp
-  `_evaluateServerSecurityUncached` excludes lethal outside funding while
-  retaining affordable pool routes. Surviving damage is deterrence, not an ETR.
-  Shackleton returns four; its used opportunity is ignored during the current
-  Runner turn and projected fresh on the next Runner turn during Corp planning.
-  Queries are read-only and inspect no hidden Runner cards.
-- `AIMeatDamagePrevention()` returns the currently usable public one-shot meat
-  prevention capacity. `PublicMeatDamagePrevention` sums enabled installed
-  Runner cards for both planners. Crash Space returns three when trashable.
-  Run routes reduce meat damage, retain the prevention resource's cost using
-  the existing damage weight, and carry consumed capacity into repeated runs.
-  Runtime still resolves printed damage through normal prevention responses.
-- `AIRunRestrictedCredits(server)` returns public credits excluded from the
-  generic run budget that can finance an explicitly modelled restricted
-  payment. The calculator takes the maximum report across installed providers
-  because Corsairs share their stealth sources. Corsair reports stealth credits
-  whose `canUseCredits("", null)` is false. Its reduction records restricted
-  spending on the route; only those payments release the supplemental budget.
-  They cannot fund ordinary breaks or trash costs, and pool-only routes cannot
-  substitute pool credits. Consumption is retained across ICE and finite reruns.
-  Corp `_icePlanOutcome` consumes this hook's presence through
-  `_restrictedPaymentPlanOutcome`, using the shared calculator to follow
-  restricted-payment/strength-modification sequences across the entire funded
-  ICE route. Its `_securityPlanning` context supplies the selected rez plan,
-  Corp knowledge of its own ICE and captured source-damage opportunities.
-  It forecasts passing ICE and finite reruns, leaving optional access/trash
-  costs out of Corp security. Generic outside credits and payment-only
-  supplements remain separate; security uses the actual route's feasibility.
-  It enumerates preparation credits with their click costs, preserving separate
-  clicks for run initiation, paid click abilities and repeats. Survival uses
-  public Grip size and installed prevention; hidden Grip identities, proposed
-  hidden run events and the real Runner's cached route are unavailable. The
-  hypothetical server context is restored even on failure. Conditional damage
-  is counted once, with turn projection captured before changing that context.
-  This replaces Corsair's old pool-credit offset. The hook must be read-only,
-  safe outside a run, and use public cards and counters only.
-- `AIPreferredUpgradeServer(legalServers)` returns a supplied server or `null`
-  to hold the upgrade. Corp `_bestServerToUpgrade` validates that result before
-  ordinary install ranking. Shackleton filters servers with paid ICE defense
-  and a public outside-credit budget, excludes occupied Regions, then uses
-  `_serverToProtect` to rank the remaining threats. `AIDefensiveValue` values
-  its payment tax; `AIRezWhenCan` requires an unused opportunity and an upcoming
-  run payment. Both preserve meaningful hold/decline alternatives.
-- `RunnerAI.AIPreserveOutsideCredits(doing, card, amount)` follows the cached
-  route's `paymentPoolOnly` policy during live payment; absent a route it tries
-  the safer pool first. `SpendCredits` offers human temporary-credit choices
-  when a source-sensitive hazard is active. A completed payment emits
-  `responseOnCreditsSpent(player, outsideAmount, doing, card)` before its
-  continuation. `SpendHostedCredits` sends required stealth payments through
-  the same checkpoint, including Corsair, Lampades and Baker before redirect.
-  Shackleton's optional response uses normal title/option preferences; only
-  choosing damage consumes its opportunity, reset at both turn boundaries.
-- Let Them Dream uses `AIAdvancementLimit: 4` and normal score-response option
-  preferences. `_preferredSearch` takes a fast winning agenda into HQ only
-  with a protected scoring location, staging click and hand space; otherwise
-  it rescues Archives agendas or hides flooded/exposed HQ agendas at the bottom
-  of R&D. It can decline when no useful search exists. `AgendaPointsForCard`
-  consumes `agendaPointsForPlayer(player)` so score totals, Runner known-agenda
-  potential and Corp breach-loss estimates value this agenda as one Runner point
-  and two Corp points, preserving the printed metadata.

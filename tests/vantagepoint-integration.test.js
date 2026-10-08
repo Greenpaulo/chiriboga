@@ -43,6 +43,9 @@ vm.runInContext(
   context,
   {filename: 'config.js'},
 );
+// AI utilities used by card helpers (guarded hypothetical wrappers).
+const runnerUtilitySource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
+vm.runInContext(runnerUtilitySource.slice(0, runnerUtilitySource.indexOf('//actual class')), context);
 vm.runInContext(
   fs.readFileSync(path.join(root, 'sets', 'vantagepoint.js'), 'utf8'),
   context,
@@ -243,9 +246,20 @@ context.MakeRun = (server) => {
   runTarget = server;
   context.attackedServer = server;
 };
-context.AddBadPublicity = (amount) => {
+context.BadPublicity = (amount, callback, callbackContext) => {
   badPublicityGained += amount;
+  if (callback) callback.call(callbackContext, amount);
 };
+const publicityCallbackContext = {};
+let publicityCallbackRan = false;
+context.BadPublicity(2, function(amount) {
+  assert.strictEqual(this, publicityCallbackContext);
+  assert.strictEqual(amount, 2);
+  assert.strictEqual(badPublicityGained, 2, 'publicity is gained before the continuation');
+  publicityCallbackRan = true;
+}, publicityCallbackContext);
+assert.strictEqual(publicityCallbackRan, true, 'BadPublicity stub runs its continuation');
+badPublicityGained = 0;
 context.RemoveFromGame = (card) => {
   removedCard = card;
 };

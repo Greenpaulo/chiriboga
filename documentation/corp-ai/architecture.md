@@ -31,6 +31,13 @@ Read only the section you need:
 
 ## Decision flow
 
+The advancement search includes card-declared operations and one-shot installed
+upgrades through `AIFastAdvanceCounters`. Unrezzed upgrades must pass
+`FullCheckRez` with the search point’s credits, clicks and target counters.
+The shared hypothetical guard restores resources, counters and active player
+on success or exception. Main-phase selection checks full rez legality again
+before choosing the planned upgrade.
+
 `Choice()` dispatches each engine decision to a phase handler such as
 `Phase_Main`. Most main-phase planning reads the same inputs:
 
@@ -85,7 +92,10 @@ punishment). `totalMandatoryBreakCost` counts only breaks needed to avoid
 end-the-run or lethal damage, and only that cost is compared with the Runner's
 credits to declare security. Optional tags or program trash never establish a
 lockout; negligible effects (`misc_minor`, `loseCredits`, `payCredits`) are
-ignored. `_effectiveIceStrength()` applies active strength reducers and virus
+ignored. For ICE with payment alternatives, `_securityIcePlanInputs()` uses
+`AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` to
+override the mandatory passage cost rather than assuming the ETR must be
+broken. `_effectiveIceStrength()` applies active strength reducers and virus
 counters.
 
 **Shared unrezzed-ICE rez budget (L1.1).** A route with several unrezzed ICE
@@ -107,7 +117,13 @@ strength. It also reuses the Runner active-card view, a Corp-owned run
 calculator, and plan-independent outermost/one-shot bypass checks. Plan
 membership, rez affordability, restricted-credit allocation and the selected
 outermost relevant ICE remain per plan. The context never enters the
-per-decision cache or crosses into another real or hypothetical evaluation.
+per-decision cache or crosses into another real or hypothetical evaluation. When an enabled Runner
+provider reports positive `AIRunRestrictedCredits(server)`, each funded ICE
+plan uses the shared run calculator to allocate those credits across restricted
+payments and finite reruns. Empty providers retain scalar evaluation. The
+planner uses `AIWithRunContext` to restore run state and guard the security
+cache. `AIPreferredUpgradeServer(legalServers)` overrides the generic upgrade
+placement target, including a `null` result that holds the card.
 
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent
@@ -115,7 +131,10 @@ prevention (for example Ash or Caprice Nisei, neither currently implemented)
 must not receive an unconditional hook. `_globalETRUses(server)` counts the
 global end-the-run uses the Corp will actually spend on a server, from
 `AIGlobalETRUses(server)`, which cards share with their live activation policy
-(Nisei MK II). Capacity covering every projected run
+(Nisei MK II and Event Horizon). A finite supply adds repeated mandatory
+route costs. The repeated route excludes the mandatory passage cost of
+a rezzed `AIETRTrashesSelf` card with a declared use, since that ICE is
+consumed by the defence. Capacity covering every projected run
 (`_projectedRunnerRuns(server)`) is a hard lockout; smaller capacity adds one
 repeated mandatory route cost per use. `_iceIsLethal()` treats damage as lethal
 only when it exceeds the Runner's grip, and the mandatory estimate breaks only
@@ -292,13 +311,12 @@ ICE elsewhere only when that server has higher stakes and a with/without
 comparison shows the saved rez changes it from breachable to secure. Higher
 server value alone is not enough, and same-server ICE ordering keeps its
 protection-value tie-break. Breach-loss risks below the 35% threshold leave
-ordinary advancement unchanged. ICE hosting a non-exempt Runner card keeps the
-legacy five-times-rez-cost veto by default and logs the hosted card and credit
-threshold when it declines. The default-off
-`evidenceBasedHostedCardRez` option instead lets an affordable approached ICE
-bypass that veto when `_iceWouldSecureServer()` shows that rezzing it changes
-the current server from breachable to secure; F4 gate evidence is required
-before that option can become the default.
+ordinary advancement unchanged. ICE hosting a non-exempt Runner card is rezzed
+only when the Corp has at least five times its rez cost, unless the card has
+`AIHostedDoesNotPreventRez`; the decline logs the hosted card and the credit
+threshold. Replacing this rule with the normal rez decision failed its F4 gate
+on a real board (2026-10-02); the next candidate is
+[hosted-ice-rez-ignores-repeated-tax.md](../bugs/hosted-ice-rez-ignores-repeated-tax.md).
 
 ## Emergency protection and purge
 
@@ -402,10 +420,7 @@ does not yet compare concrete options by their outcome.
 - **ICE.** `_iceInstallOptions(serverToInstallTo, cards, priorityOnly)` lists
   affordable ICE in input order, then unaffordable ICE when low-priority options
   are allowed, filtered by optional `AIWorthwhileIce(server, "install")` hooks.
-  It does not compare each ICE's marginal effect on security. The older
-  `_iceInstallScore()` (printed strength, rez cost, one title case, breaker
-  coverage) is used only by `_bestIceToInstall()`, which has no callers, and
-  does not consult `_evaluateServerSecurity()`.
+  It does not compare each ICE's marginal effect on security.
 - **Root destinations** are influenced indirectly through shared protection
   scores: `_emptyProtectedRemotes()`, `_isAScoringServer()`,
   `_scoringServers()`, `_scoringWindow()`, `_bestProtectedRemote()` and
@@ -431,6 +446,24 @@ does not yet compare concrete options by their outcome.
   option. There is no common scored candidate across ICE, roots and non-install
   actions.
 
+Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
+rez choices. Luana Campos permits this economy rez only outside a run, with
+bad publicity and at least two R&D cards, preserving funds for approached ICE.
+
+`Phase_Main()` delays `AITriggerWhenCan` setup actions marked
+`AITriggerAfterTactics` until after kills, scoring, critical defence and useful
+priority installs. `_bestMainPhaseEconomyOption()` considers legal advances
+with `AIAdvanceCreditGain(true, false) > 1` on cards still needing advancement
+before its other economy choices, provided the Corp can pay the advance cost.
+
+When a trigger command is offered, `_choiceInner()` selects a legal ability
+whose card's `AITriggerInPaidWindow()` returns true before phase-specific
+handlers. Event Horizon uses the final movement paid window (`Run 4.5`,
+`approachIce == 0`), or a paid window with all ICE already passed, to sacrifice
+against a potentially winning breach or to save an agenda on the Runner's
+last click. This paid-ability selection is separate from ordering simultaneous
+callback triggers.
+
 ## Not yet modelled: holding and trigger ordering
 
 - Credit holds exist only for installed cards: `_sufficientEconomy()` sums
@@ -443,9 +476,10 @@ does not yet compare concrete options by their outcome.
   the bioroid is picked by index (bug ticket
   [leo-construction-ability-chosen-without-consulting-ai-hook.md](../bugs/leo-construction-ability-chosen-without-consulting-ai-hook.md); R1.2).
 - Each player orders their own simultaneous triggers (`ValidateTriggerList()`
-  is in `utility.js`, not `phase.js`). The Corp AI has no Run 4.6.2 handler, so
-  `_choiceInner()` falls back to index 0, which is `ActiveCards()` install
-  order (R2).
+  is in `utility.js`, not `phase.js`). For simultaneous callback triggers in
+  Run 4.6.2, the Corp AI still has no dedicated ordering handler and falls
+  back to index 0, which is `ActiveCards()` install order (R2). The paid-ability
+  hook above does not order this callback list.
 
 ## Foundations
 
@@ -461,12 +495,30 @@ needs.
   roll with the card or server; transient tie-breaks are cached for one
   `Choice` (`_decisionRandomState`); `_shuffleCopy()` shuffles a copy through the
   injected source.
-- **Guarded hypotheticals (F2, partial).** `_withHypothetical(apply, evaluate,
-  restore)` restores state in `finally`; only `_ordinaryPurgeOutcome()` uses it
-  today. The other planning probes still mutate and restore manually (item F2),
-  but they, `_withHypothetical()` and the `Phase_Main` "gain then install" check
-  raise `_hypotheticalDepth` while the board is changed, so the security cache
-  can tell a probe from the real board.
+- **Guarded hypotheticals (F2).** Every planning probe that temporarily
+  changes game state does so in the `apply`/`restore` closures of
+  `_withHypothetical(apply, evaluate, restore)` or one of the shared wrappers in
+  the utility prefix of `ai_runner.js`: `AIWithHypothetical()` (which
+  `_withHypothetical()` delegates to), `AIWithRunContext(server, evaluate)`
+  (sets `attackedServer` for a prospective run) and
+  `AIWithIceEncounter(iceCard, evaluate)` (a pretend encounter, built on
+  `AIIceEncounterSaveState()`). Each restores in `finally`, so a throw cannot
+  leave credits, clicks, tags, ICE arrays, rez state, run or encounter context
+  or the phase changed, and each raises the one shared count
+  `AIHypothetical.depth` while the changed board is evaluated;
+  `_hypotheticalDepth` reads it, so the security cache tells a probe from the
+  real board even when the probe is in a card hook or `runcalculator.js`.
+  Users: `_ordinaryPurgeOutcome()`; `_iceSecurityWithAndWithout()` (this ICE
+  rezzed and paid for, then removed) behind `_icePreventsGameWinningBreach()`
+  and `_iceWouldSecureServer()`; `_criticalBreachDefenseAction()`;
+  `_potentialTagPunishment()`; the `Phase_Main` "gain then install" check,
+  which compares install-option counts; `_effectiveRunnerCreditPool()` and
+  Baker's `_stealthCreditCards()` (run context); `_effectiveIceSubtypes()`,
+  `RunCalculator.IceAI()` and the Atman and Chameleon strength checks
+  (encounter). `tests/corp-ai-hypothetical-mutation.test.js` fails on any new
+  unguarded state change in `ai_corp.js`, `runcalculator.js` or a card's AI
+  or helper function; it lists the Runner-side paired hooks (Botulus, Tread
+  Lightly, Aircheck) as Runner debt and three real-effect card helpers.
 - **Per-decision security cache (F3).** `Choice()` gives each Corp decision a
   fresh `_securityCache` and restores the previous one in `finally`;
   `_withSecurityCache()` gives the same one-call lifetime to entry points the
@@ -548,7 +600,9 @@ needs.
   - *Events and metrics.* Harness-local wrappers (they call the real functions
     unchanged) emit `gameStart`, `decision`, `run` (server, success), `score`,
     `steal` (card, server, points; the server comes from
-    `agendaStolenLocations`), `mulligan`, `turnEnd` and `gameEnd`. The core
+    `agendaStolenLocations`), `mulligan`, `rez` (card, card type, credits
+    paid through `SpendCredits` and the cards hosted on it, each with its
+    `AIHostedDoesNotPreventRez` exemption), `turnEnd` and `gameEnd`. The core
     metrics are computed from these events by a pure function:
     `winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer.*`,
     `gameLength`, `decisionLatencyMs.<side>.mean|p95|max` and
@@ -619,4 +673,4 @@ Card-facing hook contracts are in `documentation/ai.md`. Key Corp AI methods:
 | `_calculateBaitFrequency(server)` | Severity-weighted bait probability |
 | `_remoteDeceptionProfile(card)` | Shared agenda/trap depth and advancement profile |
 | `_tagPunishmentDeterrence(server)` | Bounded relief from a live tag punishment |
-| `_withHypothetical(apply, evaluate, restore)` | Exception-safe hypothetical evaluation |
+| `_withHypothetical(apply, evaluate, restore)` | Exception-safe hypothetical evaluation (shared depth count) |

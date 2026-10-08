@@ -42,10 +42,29 @@ function loadPrecon(file) {
   return context.precon;
 }
 
+function validatePrecon(file, deck, hasCard) {
+  const missing = [...new Set([deck.identity, ...Object.keys(deck.cards)].map(Number))]
+    .filter(id => !hasCard(id));
+  if (missing.length)
+    throw new Error(`Precon ${file}: cards ${missing.join(', ')} have no definition in the loaded sets`);
+}
+
+// Set files declare their cards with literal cardSet[id] assignments.
+// Check the selected decks before spawning workers or playing any games.
+function validateDeckPairs(pairs, setFiles) {
+  const defined = new Set();
+  for (const file of setFiles)
+    for (const match of fs.readFileSync(path.join(root, file), 'utf8').matchAll(/^cardSet\[(\d+)\]\s*=/gm))
+      defined.add(Number(match[1]));
+  for (const file of new Set(pairs.flatMap(pair => [pair.corp, pair.runner])))
+    validatePrecon(file, loadPrecon(file), id => defined.has(id));
+}
+
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
-//   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail}
+//   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
+//   testOption (a no-op Corp option name, for the harness's own tests)}
 // Resolves to a summary: {winner, reason, turns, ms, steps, corpPoints,
-//   runnerPoints, logLines, logHash, errors, tail, report}.
+//   runnerPoints, logLines, logHash, errors, tail, log (with fullLog), report}.
 function playGame(options) {
   const onEvent = options.onEvent || (() => {});
   const emit = (type, data) => onEvent(Object.assign({type}, data));
@@ -67,6 +86,7 @@ function playGame(options) {
   const errors = new Set();
   let lastError = null;
   const logTail = [];
+  const fullLog = options.fullLog ? [] : null;
   const hash = crypto.createHash('sha1');
   let logLines = 0, steps = 0;
   const immediates = new Set();
@@ -99,6 +119,8 @@ function playGame(options) {
   const run = code => vm.runInContext(code, context);
 
   context.__decks = {corp: loadPrecon(options.corpFile), runner: loadPrecon(options.runnerFile)};
+  for (const side of ['corp', 'runner'])
+    validatePrecon(options[side + 'File'], context.__decks[side], id => Boolean(context.cardSet[id]));
   const fixture = options.start ? readFixture(options.start) : null;
 
   let result = null, turns = 0, lastTurn = null;
@@ -137,6 +159,7 @@ function playGame(options) {
   };
   context.__log = line => {
     hash.update(line + '\n'); logLines++;
+    if (fullLog) fullLog.push(line);
     logTail.push(line); if (logTail.length > 200) logTail.shift();
   };
   context.__stop = () => {
@@ -155,6 +178,10 @@ function playGame(options) {
   };
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
+  // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
+  // cards hosted on the rezzed card at that moment.
+  context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
+    hosted: (card.hostedCards || []).map(h => ({title: h.title, exempt: Boolean(h.AIHostedDoesNotPreventRez)}))});
   if (options.telemetry) context.__decision = entry => emit('decision', entry);
 
   const json = value => JSON.stringify(value);
@@ -200,11 +227,17 @@ function playGame(options) {
         if (name === "automaticOnRunSuccessful") __runSuccessful();
         return __automaticTriggers.apply(this, arguments);
       };
+      var __spendCredits = SpendCredits;
+      SpendCredits = function(player, num, doing, card) {
+        if (player === corp && doing === "rezzing" && card) __rez(card, num);
+        return __spendCredits.apply(this, arguments);
+      };
       var __mulliganFn = Mulligan;
       Mulligan = function() { __mulligan(activePlayer === corp ? "corp" : "runner"); return __mulliganFn.apply(this, arguments); };
     `);
   }
   if (options.telemetry) run('DecisionSnapshots.telemetry = {sink: __decision};');
+  if (options.testOption) run(`corp.AI.options[${json(options.testOption)}] = false`);
   for (const [side, values] of [['corp', options.corpOptions], ['runner', options.runnerOptions]]) {
     for (const [name, value] of Object.entries(values || {})) {
       if (!run(`Object.prototype.hasOwnProperty.call(${side}.AI.options, ${json(name)})`))
@@ -247,6 +280,7 @@ function playGame(options) {
       options: effectiveOptions,
     }, typeof context.__report === 'function' ? {report: JSON.parse(JSON.stringify(context.__report()))} : {});
     if (options.tail) summary.tail = logTail.slice(-options.tail);
+    if (fullLog) summary.log = fullLog;
     resolveGame(summary);
   }
   playGame.fail = message => { errors.add(message); done(); };
@@ -283,4 +317,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {playGame, readFixture, loadPrecon, root};
+module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, root};

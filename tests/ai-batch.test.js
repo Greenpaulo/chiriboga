@@ -32,13 +32,15 @@ async function scenario(name, fn) {
 }
 
 const gateway = pool.pairs.find(p => p.id === 'gateway');
+// A no-op Corp option the harness adds for its own tests (AI_BATCH_TEST_OPTION).
+const TEST_OPTION = 'harnessTestOption';
 const game = (extra = {}) => playGame(Object.assign({streamPrefix: '1:gateway', corpFile: gateway.corp,
-  runnerFile: gateway.runner, setFiles, timeoutMs: 120000, observe: true, telemetry: true}, extra));
+  runnerFile: gateway.runner, setFiles, timeoutMs: 120000, observe: true, telemetry: true, testOption: TEST_OPTION}, extra));
 
 function cli(args, env = {}) {
   const result = spawnSync(process.execPath, [script, ...args], {encoding: 'utf8',
     timeout: 180000,
-    env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache')}, env)});
+    env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache'), AI_BATCH_TEST_OPTION: TEST_OPTION}, env)});
   return {status: result.status, out: (result.stdout || '') + (result.stderr || '')};
 }
 
@@ -83,6 +85,88 @@ const EXTRA_DRAW = side => `
 `;
 
 (async () => {
+  await scenario('missing deck definitions fail before games; pair ids must be unique', () => {
+    const invalidDeck = setupFile('missing-cards', 'registerPrecon(' + JSON.stringify({
+      identity: '99999', cards: {'99998': 3},
+    }) + ');');
+    const invalidFile = path.relative(path.join(root, 'precons'), invalidDeck);
+    const testPool = Object.assign({}, pool, {pairs: [gateway,
+      {id: 'missing', corp: invalidFile, runner: gateway.runner}]});
+    const file = path.join(tmp, 'missing-pool.json');
+    fs.writeFileSync(file, JSON.stringify(testPool));
+    const missing = /cards 99999, 99998 have no definition in the loaded sets/;
+    assert.throws(() => batch.buildConfig(batch.parseArgs(['--pool', file])), missing);
+    const selectedArgs = batch.parseArgs(['--pool', file, '--pairs', gateway.id]);
+    assert.throws(() => batch.buildConfig(selectedArgs, {pairs: [testPool.pairs[1]]}), missing,
+      'overridden pairs must be validated even when the selected pool pair is valid');
+    assert.throws(() => batch.buildConfig(selectedArgs, {setFiles: []}), /have no definition in the loaded sets/,
+      'overridden sets must supply the selected decks');
+    assert.deepStrictEqual(batch.buildConfig(batch.parseArgs(['--pool', file]), {pairs: [gateway]}).pairs,
+      [gateway], 'valid overrides replace invalid pool pairs before validation');
+    assert.throws(() => game({corpFile: invalidFile}), missing,
+      'direct headless games also explain missing definitions');
+    const result = cli(['--pool', file, '--seeds', '1-1']);
+    assert.strictEqual(result.status, 2, result.out);
+    assert.match(result.out, missing);
+    assert.ok(!/games,/.test(result.out), 'validation happens before batch progress');
+    const selected = batch.buildConfig(batch.parseArgs(['--pool', file, '--pairs', gateway.id]));
+    assert.deepStrictEqual(selected.pairs, [gateway], 'unselected missing decks do not block a batch');
+    fs.writeFileSync(file, JSON.stringify(Object.assign({}, pool, {pairs: [gateway, gateway]})));
+    assert.throws(() => batch.loadPool(file), /Duplicate deck pair id in pool: gateway/);
+  });
+
+  await scenario('CLI value options require operands, including both comparison reports', () => {
+    for (const option of ['--budget', '--pool', '--games', '--seeds', '--pairs', '--jobs', '--timeout', '--out',
+      '--side', '--start', '--start-tag', '--corp-option', '--runner-option', '--collector', '--guard',
+      '--improve', '--better', '--max', '--compare']) {
+      for (const suffix of [[], ['--quick']]) {
+        assert.throws(() => batch.parseArgs([option, ...suffix]), new RegExp(option + ' needs an operand'));
+      }
+    }
+    for (const suffix of [[], ['--quick']]) {
+      assert.throws(() => batch.parseArgs(['--compare', 'baseline.json', ...suffix]), /--compare needs an operand/);
+    }
+    const parsed = batch.parseArgs(['--compare', 'baseline.json', 'candidate.json', '--budget', '1400',
+      '--start-tag', 'hosted-card-on-ice', '--start-tag', 'unrezzed-ice']);
+    assert.deepStrictEqual(parsed.compare, ['baseline.json', 'candidate.json']);
+    assert.strictEqual(parsed.budget, '1400');
+    assert.deepStrictEqual(parsed.startTag, ['hosted-card-on-ice', 'unrezzed-ice']);
+    const invalid = cli(['--budget']);
+    assert.strictEqual(invalid.status, 2, invalid.out);
+    assert.match(invalid.out, /--budget needs an operand/);
+  });
+
+  await scenario('replay diff distinguishes equal, changed and failed comparisons and cleans up', () => {
+    const childProcess = require('child_process');
+    const original = childProcess.spawnSync;
+    let dir;
+    try {
+      for (const result of [
+        {status: 0, stdout: ''}, {status: 1, stdout: '-baseline\n+candidate\n'},
+        {status: null, error: new Error('spawn diff ENOENT')},
+        {status: 2, stderr: 'cannot read file'}, {status: null, signal: 'SIGTERM'},
+      ]) {
+        childProcess.spawnSync = (command, args, options) => {
+          assert.strictEqual(command, 'diff');
+          assert.deepStrictEqual(args, ['-U2', 'baseline.log', 'candidate.log']);
+          dir = options.cwd;
+          assert.strictEqual(fs.readFileSync(path.join(dir, 'baseline.log'), 'utf8'), 'baseline\n');
+          assert.strictEqual(fs.readFileSync(path.join(dir, 'candidate.log'), 'utf8'), 'candidate\n');
+          return result;
+        };
+        if (result.status === 0 || result.status === 1) {
+          assert.strictEqual(batch.diffLogs(['baseline'], ['candidate']),
+            result.status === 0 ? 'Logs are identical.' : result.stdout);
+        } else {
+          assert.throws(() => batch.diffLogs(['baseline'], ['candidate']), /diff failed: (spawn diff ENOENT|cannot read file|signal SIGTERM)/);
+        }
+        assert.ok(!fs.existsSync(dir), 'temporary logs are removed even on failure');
+      }
+    } finally {
+      childProcess.spawnSync = original;
+    }
+  });
+
   await scenario('1. identical runs give identical reports (ignoring timing)', async () => {
     const outs = [1, 2].map(i => path.join(tmp, `repro-${i}.json`));
     for (const out of outs) {
@@ -119,6 +203,57 @@ const EXTRA_DRAW = side => `
     }
   });
 
+  await scenario('SIGSEGV retries the identical job once and rejects a repeated crash', () => {
+    const baselineOut = path.join(tmp, 'retry-baseline.json');
+    const args = ['--pairs', 'gateway', '--seeds', '1-3', '--jobs', '2'];
+    const baseline = cli([...args, '--out', baselineOut]);
+    assert.strictEqual(baseline.status, 0, baseline.out);
+    for (const repeat of [false, true]) {
+      const attempts = path.join(tmp, 'retry-attempts-' + repeat + '.jsonl');
+      const preload = setupFile('worker-segv-' + repeat, `
+        const fs = require('fs');
+        const attempts = ${JSON.stringify(attempts)};
+        if (process.argv.includes('--worker')) {
+          process.prependListener('message', job => {
+            if (job.seed !== '1') return;
+            const first = !fs.existsSync(attempts);
+            fs.appendFileSync(attempts, JSON.stringify(job) + '\\n');
+            if (first || ${repeat}) process.exit(77);
+          });
+        } else {
+          // Simulate a native signal in the parent without crashing Node itself.
+          const cp = require('child_process');
+          const fork = cp.fork;
+          cp.fork = function(...args) {
+            const child = fork.apply(this, args);
+            const emit = child.emit;
+            child.emit = function(event, ...values) {
+              if (event === 'exit' && values[0] === 77) values = [null, 'SIGSEGV'];
+              return emit.call(this, event, ...values);
+            };
+            return child;
+          };
+        }
+      `);
+      const out = path.join(tmp, 'worker-segv-' + repeat + '.json');
+      const result = cli([...args, '--out', out], {NODE_OPTIONS: '--require ' + JSON.stringify(preload)});
+      assert.match(result.out, /signal SIGSEGV\); retrying once in a fresh worker/);
+      const dispatched = fs.readFileSync(attempts, 'utf8').trim().split('\n').map(JSON.parse);
+      assert.strictEqual(dispatched.length, 2, 'at most one retry');
+      assert.deepStrictEqual(dispatched[1], dispatched[0], 'retry preserves the entire job');
+      if (repeat) {
+        assert.strictEqual(result.status, 2, result.out);
+        assert.match(result.out, /signal SIGSEGV\) after retry/);
+        assert.ok(!fs.existsSync(out), 'a repeated crash must not publish an incomplete report');
+      } else {
+        assert.strictEqual(result.status, 0, result.out);
+        assert.deepStrictEqual(stable(JSON.parse(fs.readFileSync(out, 'utf8'))).games,
+          stable(JSON.parse(fs.readFileSync(baselineOut, 'utf8'))).games,
+          'all games retain their seeded results, including completed sibling games');
+      }
+    }
+  });
+
   await scenario('2. an extra Corp AI draw leaves the engine and Runner streams unchanged', async () => {
     const base = await game({setupFile: setupFile('record', RECORD)});
     const extra = await game({setupFile: setupFile('corp-extra', RECORD + EXTRA_DRAW('corp'))});
@@ -139,12 +274,12 @@ const EXTRA_DRAW = side => `
 
   await scenario('4. AI options: set per run, recorded, unknown names fail, comparison keys', async () => {
     const out = path.join(tmp, 'option.json');
-    const r = cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--corp-option', 'evidenceBasedHostedCardRez=true', '--out', out]);
+    const r = cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--corp-option', TEST_OPTION + '=true', '--out', out]);
     assert.strictEqual(r.status, 0, r.out);
     const report = JSON.parse(fs.readFileSync(out, 'utf8'));
-    assert.strictEqual(report.options.corp.evidenceBasedHostedCardRez, true);
+    assert.strictEqual(report.options.corp[TEST_OPTION], true);
     const defaults = await game();
-    assert.strictEqual(defaults.options.corp.evidenceBasedHostedCardRez, false, 'the option is off in other runs');
+    assert.strictEqual(defaults.options.corp[TEST_OPTION], false, 'the option is off in other runs');
     const unknown = cli(['--pairs', 'gateway', '--seeds', '1-1', '--corp-option', 'noSuchOption=true', '--out', path.join(tmp, 'x.json')]);
     assert.notStrictEqual(unknown.status, 0);
     assert.ok(/Unknown corp AI option: noSuchOption/.test(unknown.out), unknown.out);
@@ -216,6 +351,19 @@ const EXTRA_DRAW = side => `
     assert.ok('runs.successful' in metrics.compareReports(report, report).metrics);
     const unknown = cli(['--pairs', 'gateway', '--seeds', '1-1', '--collector', 'noSuchCollector', '--out', path.join(tmp, 'x.json')]);
     assert.ok(/Unknown collector: noSuchCollector/.test(unknown.out), unknown.out);
+  });
+
+  await scenario('expanded directories and tagged starts each get one share of the budget', () => {
+    const dir = path.join(root, 'tests/fixtures/ai-batch/starts');
+    const tagged = batch.taggedStarts(['hosted-card-on-ice']);
+    const onlyDirectory = batch.buildConfig(batch.parseArgs(['--start', dir, '--budget', '1400']));
+    const overlap = batch.buildConfig(batch.parseArgs(['--start', dir, '--start-tag', 'hosted-card-on-ice', '--budget', '1400']));
+    assert.ok(tagged.length, 'the tag selects a committed board');
+    assert.deepStrictEqual(overlap.starts, onlyDirectory.starts, 'tag overlap does not duplicate expanded boards');
+    assert.deepStrictEqual(overlap.seeds, onlyDirectory.seeds, 'budget allocation follows unique boards');
+    const file = tagged[0];
+    assert.strictEqual(batch.resolveStarts([file, path.relative(root, file)], overlap.poolInfo.ranges).length, 1,
+      'relative and absolute paths resolve to the same file');
   });
 
   await scenario('7. --start begins from a fixture board, runs to PlayerWin and is reproducible', async () => {
@@ -294,7 +442,7 @@ const EXTRA_DRAW = side => `
   await scenario('gate: baseline reuse and --quick', async () => {
     assert.strictEqual(batch.resolveSeeds(batch.parseArgs(['--quick'])).length, 50);
     assert.strictEqual(batch.resolveSeeds(batch.parseArgs([])).length, 200);
-    const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', 'evidenceBasedHostedCardRez=true',
+    const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', TEST_OPTION + '=true',
       '--guard', 'winRate=1'];
     const first = cli(args);
     assert.ok(/baseline: playing 2 games/.test(first.out) && /candidate: playing 2 games/.test(first.out), first.out);
@@ -310,7 +458,7 @@ const EXTRA_DRAW = side => `
       .filter(file => file.endsWith('.json'));
     const baselineFile = cached.find(file => {
       const report = JSON.parse(fs.readFileSync(file, 'utf8'));
-      return report.options.corp.evidenceBasedHostedCardRez === false;
+      return report.options.corp[TEST_OPTION] === false;
     });
     assert.ok(baselineFile, 'the baseline was cached');
     const baseline = JSON.parse(fs.readFileSync(baselineFile, 'utf8'));
@@ -321,6 +469,47 @@ const EXTRA_DRAW = side => `
     const quick = cli(['gate', '--pairs', 'gateway', '--quick', '--seeds', '1-2', '--jobs', '2', '--guard', 'winRate=1']);
     assert.ok(/indicative only/.test(quick.out), quick.out);
     assert.notStrictEqual(quick.status, 0, 'a quick run cannot pass a gate');
+  });
+
+  await scenario('replay plays the batch game with its full log, and --diff shows only differing lines', async () => {
+    const out = path.join(tmp, 'replay-batch.json');
+    assert.strictEqual(cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--out', out]).status, 0);
+    const batchGame = JSON.parse(fs.readFileSync(out, 'utf8')).games[0];
+    const one = cli(['replay', '--pairs', 'gateway', '--seeds', '1']);
+    assert.strictEqual(one.status, 0, one.out);
+    assert.ok(one.out.includes('logHash ' + batchGame.logHash), 'replay reproduces the batch game: ' + one.out.split('\n')[0]);
+    assert.ok(one.out.split('\n').length > 50, 'the full log is printed');
+    const same = cli(['replay', '--pairs', 'gateway', '--seeds', '1', '--diff']);
+    assert.ok(/Logs are identical/.test(same.out), same.out.slice(0, 300));
+    const bad = cli(['replay', '--pairs', 'gateway', '--seeds', '1-2']);
+    assert.notStrictEqual(bad.status, 0);
+  });
+
+  await scenario('failed replays exit non-zero and retain diagnostics, including either diff side', () => {
+    const source = readFixture(path.join(root, 'tests/fixtures/corp-decisions/corp-draw-ok-when-hq-secure.txt')).code;
+    const file = path.join(tmp, 'failed-replay.txt');
+    const args = ['replay', '--pairs', 'gateway', '--seeds', '1', '--start', file,
+      '--corp-option', TEST_OPTION + '=true'];
+    for (const [condition, diff] of [
+      ['true', false], ['corp.AI.options.' + TEST_OPTION, true], ['!corp.AI.options.' + TEST_OPTION, true],
+    ]) {
+      fs.writeFileSync(file, source + '\nLog("replay log retained");\nif (' + condition + ') throw new Error("replay regression diagnostic");\n');
+      const result = cli([...args, ...(diff ? ['--diff'] : [])]);
+      assert.strictEqual(result.status, 1, result.out.slice(0, 500));
+      assert.match(result.out, /replay regression diagnostic/, 'fixture errors remain available');
+      assert.ok(result.out.includes(diff ? 'candidate:' : 'game:'), 'game summary remains available');
+      if (diff) {
+        const summaries = result.out.split('\n').slice(0, 2);
+        assert.match(summaries[0], /baseline \(options off\):/);
+        const baselineFails = condition.startsWith('!');
+        assert.strictEqual(summaries[0].includes('errors:'), baselineFails, 'only the intended baseline fails');
+        assert.strictEqual(summaries[1].includes('errors:'), !baselineFails, 'only the intended candidate fails');
+      }
+      else assert.ok(result.out.split('\n').slice(1).includes('replay log retained'), 'the diagnostic log is printed after the summary');
+    }
+    const timeout = cli(['replay', '--pairs', 'gateway', '--seeds', '1', '--timeout', '0.001']);
+    assert.strictEqual(timeout.status, 1, timeout.out.slice(0, 500));
+    assert.match(timeout.out, /no winner \(timeout/);
   });
 
   fs.rmSync(tmp, {recursive: true, force: true});

@@ -2763,7 +2763,7 @@ function ServerSuccessfulRunPrevented(server) {
     if (!card.rezzed || !CheckHasAbilities(card)) return false;
     if (typeof card.AIPreventsSuccessfulRun == "function")
       return card.AIPreventsSuccessfulRun.call(card, server);
-    return card.title == "Crisium Grid"; // existing declarative-success modifier
+    return false;
   });
 }
 

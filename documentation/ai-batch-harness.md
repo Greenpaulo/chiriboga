@@ -54,6 +54,11 @@ on 8 processes. `--jobs <n>` sets the number of processes; the default is your
 CPU count minus 2. Without `--out`, the report goes to `.ai-batch-cache/`,
 which Git ignores.
 
+If a worker exits with `SIGSEGV`, the runner prints a warning and retries that
+same seed, deck pair, fixture and options once in a fresh worker, retaining
+completed games. A second crash for that game, or any other unexpected worker
+exit, aborts the batch without publishing an incomplete report.
+
 The terminal shows a summary for each deck pair:
 
 ```
@@ -73,7 +78,45 @@ Use the frozen `beginner-v1` pool from the Corp AI regression investigation
 to screen gameplay changes, including tickets whose acceptance gate is
 `N/A`. It contains PD–Tao, BTL–Kit, NEH–Zahya, PE–Steve and Gateway, using
 System Gateway, System Update 2021 and Elevation. Seeds 1–200 give 1,000 games.
-Run on a clean, committed candidate branch, using a new output filename for
+Before the first comparison, check that `bench/current/baseline.json` exists.
+Benchmark JSON is ignored local evidence, so a fresh clone has no baseline.
+If it is missing, run `node scripts/refresh-ai-baseline.js` on a clean,
+committed checkout of the PR's target main build to initialise it (see
+[baseline refresh](#refreshing-the-accepted-baseline-after-a-merge)). Then
+return to the candidate branch before running the commands below. Use the
+same checkout so its ignored `bench/` reports remain available; if using
+separate worktrees, copy the target-main baseline into the candidate's
+`bench/current/baseline.json` first. Do not initialise the comparison baseline
+from the candidate build.
+
+If the target-main build predates the refresh script, initialise the report
+there with the harness directly instead:
+
+```sh
+node scripts/ai-batch.js \
+  --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --seeds 1-200 \
+  --out bench/current/baseline.json
+```
+
+Check that this initial report records a clean build, 1,000 games and zero
+failures before using it as the baseline.
+
+To benchmark the checked-out branch and print its comparison in one command:
+
+```sh
+node scripts/compare-ai-branch.js
+```
+
+This runs the five-pair pool with seeds 1–200, writes `bench/<branchname>.json`,
+then compares it with `bench/current/baseline.json`. The branch name is used
+as written: `bugs/example` writes to `bench/bugs/example.json`, creating
+folders as needed. Re-running on the same branch replaces its report, so copy any earlier
+report you want to keep first. The script checks that the baseline exists
+before starting and stops if the benchmark fails. Run on a clean, committed
+candidate branch so the report records the build being tested.
+
+For manual runs, use a new output filename for
 each PR/revision so earlier evidence is preserved:
 
 ```sh
@@ -83,7 +126,7 @@ node scripts/ai-batch.js \
   --out bench/pr-12-candidate.json
 
 node scripts/ai-batch.js \
-  --compare bench/corp-options-default.json bench/pr-12-candidate.json
+  --compare bench/current/baseline.json bench/pr-12-candidate.json
 ```
 
 Replace `pr-12-candidate.json` with the ticket/PR and revision being tested.
@@ -91,7 +134,7 @@ Keep reports in the ignored `bench/` evidence folder. The saved benchmark
 JSON is local evidence; it is not included in a fresh clone. Preserve/back up
 that file rather than overwriting it with a new run.
 
-The latest corrected-default benchmark was run on **2026-10-05**, at clean
+The historical corrected-default benchmark was run on **2026-10-05**, at clean
 commit **`28cc665`**, with **1,000 games and zero failures**, pool hash
 `fe8cb821d04c9dd7` and code hash `83dee8ba06045827`. Its report is
 `bench/corp-options-default.json`. This is the corrected default intended for
@@ -113,8 +156,10 @@ The report used no start fixtures or collectors, Runner options `{}`, and
 all six Corp options false: `evidenceBasedHostedCardRez`,
 `secureScoringServerGate`, `serverAtRiskInstallOverride`,
 `committedAgendaReserveBypass`, `emptyArchivesRunPressure` and
-`valuelessServerDebtReset`. The command above uses the candidate's defaults;
-check its report's effective options against these settings and explain any
+`valuelessServerDebtReset`. PR #18 removes `evidenceBasedHostedCardRez`
+after its failed acceptance gate; the other five options still default to false.
+The command above uses the candidate's defaults;
+check its report's effective options against the current baseline and explain any
 intentional difference. Keep the pool, decks, seeds, fixtures and collectors
 identical; the comparator rejects mismatches in pool hash, seeds, starts or
 collectors. Different source commits/code hashes are allowed.
@@ -134,14 +179,44 @@ their explanation alongside the deterministic reproduction. A correctness
 fix is not rejected solely because one side's win rate falls. Pure documentation
 and human-only UI changes need not run this gameplay screen.
 
-This frozen benchmark tracks cumulative changes. To attribute a difference
-to one PR, also run the same command on its target main commit with a distinct
-output such as `bench/pr-12-main.json`, then compare that report with the
-candidate. After main integration, verify the merged build against the saved
-benchmark rather than assuming it reproduces the recorded result. This screen
+The historical benchmark tracks cumulative changes. Compare new PRs against
+`bench/current/baseline.json`, the accepted current-main baseline. If that
+report does not represent the PR's target main build, also run the same command
+on its target main commit with a distinct output such as `bench/pr-12-main.json`,
+then compare that report with the candidate. This screen
 supplements the full regression suite and any ticket-specific strategic gate.
 See the [completed investigation handoff](corp-ai-regression/gated-fix-handoff.md)
 for the evidence and remaining scoring deficit against the historical H0 build.
+
+### Refreshing the accepted baseline after a merge
+
+After merging an accepted gameplay change, run this on the clean, committed
+merged build:
+
+```sh
+node scripts/refresh-ai-baseline.js
+```
+
+The script runs the five-pair pool with seeds 1–200 and writes
+`bench/baseline.json`. Once the report contains 1,000 games, zero failures and
+a clean-build marker, it copies the previous current baseline into
+`bench/archived-current/<archive-time>-<commit>.json`, then moves the new report
+to `bench/current/baseline.json`. The historical `bench/corp-options-default.json`
+is preserved. A single dated JSON filename already in `bench/current/` is
+also supported; more than one report there is rejected as ambiguous.
+
+If the run fails or the report is rejected, the previous baseline stays in
+place. Any new `bench/baseline.json` is retained for inspection; move it aside
+before retrying. The script also refuses to overwrite an existing report at
+that staging path. Concurrent refreshes are blocked by
+`bench/.baseline-refresh.lock`; if the process is forcibly terminated, remove
+that lock only after checking no refresh is still running.
+
+Refreshing records a change already accepted in review; it does not decide
+whether a candidate should be accepted. A Runner fix can legitimately lower
+Corp win rate. Record the merged commit, results and reason for the baseline
+change in the PR or ticket. Reports in `bench/` remain local, ignored evidence
+and should be backed up.
 
 ### What a report contains
 
@@ -172,8 +247,8 @@ The core metrics are:
 latencies when lower. `gameLength` and `mulliganRate` have no better
 direction.
 
-To replay one game from a report in detail, run `ai-game.js` with the same
-decks. That uses different random streams, so compare outcomes, not hashes.
+To replay one game from a report in detail, use `ai-batch.js replay` (see
+"Reading why a result moved"); it reproduces the report's game exactly.
 
 ## Running a gate
 
@@ -240,10 +315,38 @@ records the result and switches the option on only if the output says
 gate is ready to run: the quick run completes, and its first line reports at
 least one game changed by the options. The command exits non-zero so it cannot be mistaken for a pass.
 
+### Reading why a result moved
+
+Averages say whether an option helps; single games show how. To read one,
+pick a pair and seed from the report and replay it:
+
+```sh
+node scripts/ai-batch.js replay --pool documentation/corp-ai-regression/assets/beginner-pool.json \
+  --pairs pd-tao --seeds 2 \
+  --start tests/fixtures/ai-batch/starts/hosted-chromatophores-on-remote-ice.txt \
+  --corp-option <option>=true --diff
+```
+
+Use the report’s `--pool` value when it used a non-default pool, along with
+its pair, seed, start and AI options.
+
+`replay` plays exactly the batch's game (same seed streams, sets and start;
+its `logHash` matches the report) and prints the full log, which the report
+does not keep. `--diff` plays it with every option off and as given and
+prints only the differing lines, so the first hunk is the decision the
+option changed. It takes a few seconds. Later hunks usually diverge into a
+different game, so read the first hunk for the cause, and the report's
+averages for the effect.
+
+For more than one game, use a batch (`--seeds 1-2 --out`), which runs in
+parallel with the stall watchdog. Do not write scripts that call
+`playGame()` in a loop: they run one game at a time, keep only the last 200
+log lines, and print nothing until they finish.
+
 ### Comparing two reports by hand
 
 ```sh
-node scripts/ai-batch.js --corp-option evidenceBasedHostedCardRez=true --out on.json
+node scripts/ai-batch.js --corp-option <option>=true --out on.json
 node scripts/ai-batch.js --out off.json
 node scripts/ai-batch.js --compare off.json on.json --guard winRate=0.02
 ```
@@ -279,6 +382,58 @@ when it comes from a directory.
 
 Many fixtures use small hand-made decks, so their games can end quickly when
 R&D runs out. That is expected.
+
+### Building a start board
+
+Gate start boards live in `tests/fixtures/ai-batch/starts/` and are built
+from real logs, never by hand. Source logs must be trusted: the builder
+executes their board statements in the headless engine. The VM is not a
+security boundary, and the game timeout does not bound synchronous source
+execution. Restricting imported statements is tracked in
+[start-board-import-executes-source-code.md](backlog/start-board-import-executes-source-code.md).
+
+```sh
+node scripts/start-board.js <log> --list
+node scripts/start-board.js <log> --dump --out <name> \
+  --unsteal 35038=0 \
+  --replace 35042=30072 --reason "Scatter Field's subroutine crashes the Corp AI" \
+  --setup "corp.creditPool=12; runner.creditPool=0" \
+  --note "what the board is for"
+```
+
+- **Source:** `--snapshot <n>` (a decision snapshot from `--list`, the board
+  at the decision) or `--dump` (the end-of-log dump). One is required; use a
+  snapshot when the log has one.
+- **Edits:** only these, each recorded as a `NOTE` line ending in its flag:
+  - `--replace`, with a `--reason`: only for a card that crashes the engine
+    or is outside the pool's sets. Never the Runner's rig or a hosted card.
+    Replaced installed ICE is named in the note.
+  - `--unsteal` / `--unscore`: restore an agenda taken at the decision.
+  - `--setup`: credits and clicks only.
+  - `--note`: a description.
+- **Tags:** the builder loads the board and writes `// TAGS:`
+  (`hosted-card-on-ice`, `unrezzed-ice`, `breaker-installed`,
+  `agenda-in-remote`, `tagged-runner`). A new tag goes into
+  `scripts/start-board.js` in the change that first needs it.
+- **No hand edits:** `tests/start-board.test.js` rebuilds every committed
+  board from its recorded flags and fails if it differs.
+
+To check that a board reaches the decision an option changes, replay one game
+with `replay --diff` (see "Reading why a result moved"); the first differing
+hunk should be that decision.
+
+### Selecting boards and fixing the cost
+
+```sh
+node scripts/ai-batch.js gate --corp-option <name>=true \
+  --start-tag hosted-card-on-ice --start-tag agenda-in-remote --budget 1400 ...
+```
+
+`--start-tag` (repeatable) selects every board whose tags include all those
+given. `--budget <games>` gives every board and pair the same seeds 1 to
+`max(10, floor(games / (boards × pairs)))`. So a board gate always plays
+about 1,400 games per half, about 8 minutes each, however many boards match.
+Without `--budget`, each board gets the full 200 seeds per pair.
 
 ## Changing the decks
 

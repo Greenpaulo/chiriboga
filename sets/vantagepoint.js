@@ -213,7 +213,7 @@ cardSet[36002] = {
             GetTitle(this) +
               ": a subroutine resolved during this run; giving Corp 1 bad publicity.",
           );
-          AddBadPublicity(1);
+          BadPublicity(1);
         }
       }
     },
@@ -325,7 +325,7 @@ cardSet[36004] = {
         return false;
       return (
         typeof card.canUseCredits !== "function" ||
-        card.canUseCredits("using", null)
+        card.canUseCredits("using", corsair)
       );
     });
   },
@@ -926,9 +926,10 @@ cardSet[36010] = {
         corp,
         choices,
         function (params) {
-          if (params.derez) Derez(params.card);
-          else AddBadPublicity(1);
-          finish();
+          if (params.derez) {
+            Derez(params.card);
+            finish();
+          } else BadPublicity(1, finish);
         },
         "Kompromat",
         "Derez ice protecting " + ServerName(attackedServer) + "?",
@@ -1060,13 +1061,13 @@ cardSet[36012] = {
   },
   AIAdditionalAccess: function (server) {
     if (server != corp.HQ) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid"))
+    if (ServerSuccessfulRunPrevented(server))
       return 0;
     return 2;
   },
   AIRunEventExtraPotential: function (server) {
     if (server != corp.HQ) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid"))
+    if (ServerSuccessfulRunPrevented(server))
       return 0;
     return 0.5 * runner.AI._additionalHQAccessValue(this);
   },
@@ -1213,10 +1214,10 @@ cardSet[36015] = {
   runningWithThis: false,
   _stealthCreditCards: function (planningServer) {
     var baker = this;
-    var storedAttackedServer = attackedServer;
-    if (planningServer && attackedServer === null)
-      attackedServer = planningServer;
-    try {
+    //outside a run, a planning server supplies the prospective run context
+    var runServer =
+      planningServer && attackedServer === null ? planningServer : attackedServer;
+    return AIWithRunContext(runServer, function () {
       return InstalledCards(runner).filter(function (card) {
         if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
           return false;
@@ -1225,9 +1226,7 @@ cardSet[36015] = {
           card.canUseCredits("using", baker)
         );
       });
-    } finally {
-      attackedServer = storedAttackedServer;
-    }
+    });
   },
   responseOnRunnerTurnBegins: {
     Resolve: function () {
@@ -4732,7 +4731,9 @@ cardSet[36057] = {
     if (corp.badPublicity < 1 || corp.RnD.cards.length < 2 || Credits(corp) < RezCost(this)) return -1;
     return 0; // strongest empty protected remote, or a new server if none
   },
-  AIRezWhenCan: function () { return corp.badPublicity > 0 && corp.RnD.cards.length > 1; },
+  AIRezWhenCan: function () {
+    return !attackedServer && corp.badPublicity > 0 && corp.RnD.cards.length > 1;
+  },
   AIEconomyCard: true,
 };
 
@@ -4796,7 +4797,8 @@ cardSet[36058] = {
     },
   ],
   AITriggerInPaidWindow: function () {
-    return !!attackedServer && attackedServer == GetServer(this) && approachIce < 0 &&
+    return !!attackedServer && attackedServer == GetServer(this) &&
+      (approachIce < 0 || (currentPhase.identifier == "Run 4.5" && approachIce == 0)) &&
       this.AIGlobalETRUses(attackedServer) > 0;
   },
   AIGlobalETRUses: function (server) {
@@ -5305,7 +5307,9 @@ cardSet[36065] = {
     var useful = servers.filter(function (server) {
       return !server.root.some(card => CheckSubType(card, "Region")) && grid.AIDefensiveValue(server) > 0;
     });
-    return useful.length ? corp.AI._serverToProtect(useful) : null;
+    if (!useful.length) return null;
+    var target = corp.AI._serverToProtect(false, false, server => useful.includes(server));
+    return useful.includes(target) ? target : useful[0];
   },
   AILimitPerServer: function () { return 1; },
   AIRezWhenCan: function () {
