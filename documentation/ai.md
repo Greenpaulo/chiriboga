@@ -2270,7 +2270,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   until no run is active, preserving approached ICE rez funds. Turn-start choices
   decline a draw that leaves no card for the mandatory draw.
 - Event Horizon uses `AITriggerInPaidWindow()` for legal Corp paid-window
-  command/card selection. It waits until all ICE is passed, then sacrifices
+  command/card selection. It uses the final movement window (`Run 4.5` with
+  `approachIce == 0`), or a paid window with `approachIce < 0`, then sacrifices
   against a potentially winning breach or to save an agenda on the Runner's
   last click. `AIGlobalETRUses(server)` shares that one-use policy with Corp
   security planning. `AIMandatoryPassCost(breaker, server, iceIndex, ai,

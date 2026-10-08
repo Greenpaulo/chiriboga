@@ -92,7 +92,10 @@ punishment). `totalMandatoryBreakCost` counts only breaks needed to avoid
 end-the-run or lethal damage, and only that cost is compared with the Runner's
 credits to declare security. Optional tags or program trash never establish a
 lockout; negligible effects (`misc_minor`, `loseCredits`, `payCredits`) are
-ignored. `_effectiveIceStrength()` applies active strength reducers and virus
+ignored. For ICE with payment alternatives, `_securityIcePlanInputs()` uses
+`AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` to
+override the mandatory passage cost rather than assuming the ETR must be
+broken. `_effectiveIceStrength()` applies active strength reducers and virus
 counters.
 
 **Shared unrezzed-ICE rez budget (L1.1).** A route with several unrezzed ICE
@@ -122,7 +125,10 @@ prevention (for example Ash or Caprice Nisei, neither currently implemented)
 must not receive an unconditional hook. `_globalETRUses(server)` counts the
 global end-the-run uses the Corp will actually spend on a server, from
 `AIGlobalETRUses(server)`, which cards share with their live activation policy
-(Nisei MK II). Capacity covering every projected run
+(Nisei MK II and Event Horizon). A finite supply adds repeated mandatory
+route costs. The repeated route excludes the mandatory passage cost of
+a rezzed `AIETRTrashesSelf` card with a declared use, since that ICE is
+consumed by the defence. Capacity covering every projected run
 (`_projectedRunnerRuns(server)`) is a hard lockout; smaller capacity adds one
 repeated mandatory route cost per use. `_iceIsLethal()` treats damage as lethal
 only when it exceeds the Runner's grip, and the mandatory estimate breaks only
@@ -438,6 +444,20 @@ Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
 rez choices. Luana Campos permits this economy rez only outside a run, with
 bad publicity and at least two R&D cards, preserving funds for approached ICE.
 
+`Phase_Main()` delays `AITriggerWhenCan` setup actions marked
+`AITriggerAfterTactics` until after kills, scoring, critical defence and useful
+priority installs. `_bestMainPhaseEconomyOption()` considers legal advances
+with `AIAdvanceCreditGain(true, false) > 1` on cards still needing advancement
+before its other economy choices, provided the Corp can pay the advance cost.
+
+When a trigger command is offered, `_choiceInner()` selects a legal ability
+whose card's `AITriggerInPaidWindow()` returns true before phase-specific
+handlers. Event Horizon uses the final movement paid window (`Run 4.5`,
+`approachIce == 0`), or a paid window with all ICE already passed, to sacrifice
+against a potentially winning breach or to save an agenda on the Runner's
+last click. This paid-ability selection is separate from ordering simultaneous
+callback triggers.
+
 ## Not yet modelled: holding and trigger ordering
 
 - Credit holds exist only for installed cards: `_sufficientEconomy()` sums
@@ -450,9 +470,10 @@ bad publicity and at least two R&D cards, preserving funds for approached ICE.
   the bioroid is picked by index (bug ticket
   [leo-construction-ability-chosen-without-consulting-ai-hook.md](../bugs/leo-construction-ability-chosen-without-consulting-ai-hook.md); R1.2).
 - Each player orders their own simultaneous triggers (`ValidateTriggerList()`
-  is in `utility.js`, not `phase.js`). The Corp AI has no Run 4.6.2 handler, so
-  `_choiceInner()` falls back to index 0, which is `ActiveCards()` install
-  order (R2).
+  is in `utility.js`, not `phase.js`). For simultaneous callback triggers in
+  Run 4.6.2, the Corp AI still has no dedicated ordering handler and falls
+  back to index 0, which is `ActiveCards()` install order (R2). The paid-ability
+  hook above does not order this callback list.
 
 ## Foundations
 

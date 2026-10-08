@@ -5824,7 +5824,7 @@ class CorpAI {
   //persist, array of persistent effects
 
   //if null card is specified, this is a generic "what if one was to be installed?" check
-  //(in which case it will assume a click less) unless assumeClicks (int) is specified (but assumeClicks will be ignored if thisTurn=false)
+  //(in which case it will assume a click less) unless assumeClicks (int) is specified (assumeClicks applies regardless of thisTurn)
   //if an output array is specified, the cards will be written to it in the order decided here (except for cards already resolving)
   _potentialAdvancement(
     card,
