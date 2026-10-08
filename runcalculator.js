@@ -131,10 +131,6 @@ class RunCalculator {
         }
       }
 
-      //blank out subroutines that are already broken
-      for (var i = 0; i < ice.subroutines.length && i < result.sr.length; i++) {
-        if (ice.subroutines[i].broken) result.sr[i] = [[]];
-      }
     }
 	
 	//passive effects (assuming Runner only for now)
@@ -144,6 +140,13 @@ class RunCalculator {
 		result = activeCards[i].AIModifyIceAI.call(activeCards[i],result,startIceIdx);
 	  }
 	}
+
+    // Apply broken flags only after modifiers align modeled and actual rows.
+    if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
+      for (var i = 0; i < ice.subroutines.length && i < result.sr.length; i++) {
+        if (ice.subroutines[i].broken) result.sr[i] = [[]];
+      }
+    }
 
     return result;
   }

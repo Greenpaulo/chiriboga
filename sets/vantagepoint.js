@@ -776,6 +776,15 @@ cardSet[36008] = {
     availableWhenInactive: true,
   },
   AIModifyIceAI: function (iceAI, startIceIdx) {
+    // Once used, the actual added row still exists until this encounter ends.
+    // Default ICE models already describe every actual row; printed models do not.
+    if (this.modifiedIce === iceAI.ice && this.addedSubroutine &&
+        iceAI.ice.subroutines.includes(this.addedSubroutine)) {
+      if (typeof iceAI.ice.AIImplementIce === "function")
+        iceAI.sr.unshift([["netDamage"]]);
+      else iceAI.sr[iceAI.ice.subroutines.indexOf(this.addedSubroutine)] = [["netDamage"]];
+      return iceAI;
+    }
     if (this.usedThisTurn) return iceAI;
     var server = GetServer(iceAI.ice);
     if (!server) return iceAI;

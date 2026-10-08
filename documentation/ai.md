@@ -1114,6 +1114,13 @@ not these hooks.
   already expose this hook are also understood by Corp security planning.
   Standard engine `modifySubTypes` modifiers are consumed too, so most subtype
   cards do not need an additional AI-only hook.
+  Stick and Poke also uses this hook to prepend its net-damage row when
+  predicting the first encounter, and to retain that row while its actual
+  added subroutine remains on the encountered ice, even after `usedThisTurn`
+  becomes true. Default models already contain the actual added row, so the
+  hook replaces that row instead of duplicating it. `IceAI()` applies broken
+  flags after these modifiers, preserving actual/model row alignment. The
+  draw remains unmodeled because the calculator has no draw effect token.
 - `AIBypassesIce(iceCard, server, iceIndex)` returns `false`, `true` for a free
   targeted bypass, or the bypass's credit cost.
 - `AIBypassesOutermostIce(server)` returns whether this card can skip the next

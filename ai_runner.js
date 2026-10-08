@@ -1677,7 +1677,8 @@ console.log(this.preferred);
                 var modelChoice = p.alt[i].choiceIdx;
                 var mapped = optionList.findIndex(option => option.srChoice === modelChoice);
                 if (mapped >= 0) return mapped;
-                if (!optionList.some(option => typeof option.srChoice != "undefined")) return modelChoice;
+                if (!optionList.some(option => typeof option.srChoice != "undefined") &&
+                    Number.isInteger(modelChoice) && modelChoice >= 0 && modelChoice < optionList.length) return modelChoice;
               }
             }
             console.error(
@@ -1691,11 +1692,13 @@ console.log(this.preferred);
         GetApproachEncounterIce(),
         AvailableCredits(corp)
       ).sr[subroutine - 1];
+      // Missing/stale model data cannot justify an index outside the legal menu.
+      if (!Array.isArray(sroptions)) return 0;
       for (var i = 0; i < sroptions.length; i++) {
         if (sroptions[i].includes("endTheRun")) {
           var mappedETR = optionList.findIndex(option => option.srChoice === i);
           if (mappedETR >= 0) return mappedETR;
-          if (!optionList.some(option => typeof option.srChoice != "undefined")) return i;
+          if (!optionList.some(option => typeof option.srChoice != "undefined") && i < optionList.length) return i;
         }
       }
       this._log("No etr found, avoiding tags");
@@ -1703,7 +1706,7 @@ console.log(this.preferred);
         if (!sroptions[i].includes("tag")) {
           var mappedSafe = optionList.findIndex(option => option.srChoice === i);
           if (mappedSafe >= 0) return mappedSafe;
-          if (!optionList.some(option => typeof option.srChoice != "undefined")) return i;
+          if (!optionList.some(option => typeof option.srChoice != "undefined") && i < optionList.length) return i;
         }
       }
       //console.log("no good!");
