@@ -31,7 +31,7 @@ in card-sets.md.
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
 | `elevation` | playable | 82 | 76 | 6 | 0 | 2 | 55 / 64 | false / false | yes |
-| `vantagepoint` | in-progress | 66 | 66 | 0 | 16 | 0 | 49 / 62 | true / true | no |
+| `vantagepoint` | in-progress | 66 | 66 | 0 | 11 | 0 | 52 / 62 | true / true | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 15 / 57 | true / true | no |
@@ -78,11 +78,6 @@ None.
 
 ### `vantagepoint` (sets/vantagepoint.js)
 
-- 36051 Lethe: 2 scaffold marker(s)
-- 36052 Paywall: 2 scaffold marker(s)
-- 36053 Flood the Market: 1 scaffold marker(s)
-- 36054 Scapegoat: 1 scaffold marker(s)
-- 36055 Hype Machine: 1 scaffold marker(s)
 - 36056 Sacrifice Zone Expansion: 1 scaffold marker(s)
 - 36057 Luana Campos: 1 scaffold marker(s)
 - 36058 Event Horizon: 2 scaffold marker(s)

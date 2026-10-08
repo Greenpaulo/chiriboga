@@ -418,3 +418,73 @@ Calculator model preserves those alternatives.
 searches, first-time resets, score/steal and phase timing, steal costs, counter
 cleanup, central-only rez behavior, Runner payment choices, AI policies and the
 post-prevention bad-publicity response/continuation path.
+
+## Batch 11 engine support
+
+`Bypass` now opens `responseOnBypassed` with the bypassed ICE before continuing
+to encounter-end responses. Lethe uses that window for its preventable tag.
+The run calculator supports `fullyBrokenEffects` and `bypassEffects` on the
+ICE analysis, charging the appropriate tag when ending that branch rather than
+incorrectly treating it as an encounter or subroutine effect.
+
+`Uninstall` moves a host to the grip or stack, trashes all hosted cards through
+normal unpreventable trash sequencing, then runs an optional continuation.
+Lethe and Scapegoat use it; Scapegoat shuffles after hosted trash responses.
+
+The Corp advancement search consumes the read-only `AIFastAdvanceCounters`
+hook on candidate operations and installed one-shot upgrades. It models actual
+operation credit/click costs, already-paid resolving operations, upgrade rez
+costs and one-shot consumption using local search state. Main-phase execution
+can rez or activate the planned upgrade and supply its preferred target.
+
+## Batch 11 confirmed patterns
+
+Lethe tags on the final subroutine break, with a guard reset each encounter,
+and separately on bypass. Its optional recursion offers either end of R&D
+plus decline. Corp AI prefers strong non-agenda draws, buries agendas when
+only agendas are available, and returns public Runner threats to the grip.
+Paywall loses credits from the Runner's main pool (down to zero), then offers
+a separate legal payment or end-the-run choice.
+
+Flood the Market counts only remotes with both a nonempty root and protecting
+ICE, including unrezzed ICE; Double's additional click is paid by the engine.
+Scapegoat's mode is chosen by the Runner and its installed target by the Corp.
+Both modes remain selectable even when they have no effect. Returning or
+shuffling is not trashing the chosen card, so trash prohibitions do not exclude
+that target.
+
+Hype Machine tracks any score or steal while inactive, including before it is
+installed, and clears that turn state on either player's next turn. Its cost
+reduction applies only to itself; trashing it as a cost is unpreventable and
+places a counter only on an advanceable installed card in its own root. Corp
+AI banks free rezzes, uses counters on unfinished agendas, and models the
+upgrade as a finite advancement source without mutating real cards.
+
+Subroutine overlays were measured and checked with the ASCII pixel tool:
+Lethe `(102,32)` and `(137,32)`; Paywall `(102,32)`.
+Focused coverage is in `tests/vantagepoint-integration.test.js` and
+`tests/vantagepoint-batch11-engine.test.js` (mechanics, choices, cleanup,
+AI branches, bypass sequencing, hosted-trash continuation and advancement
+search affordability/one-shot/read-only checks).
+
+Batch 11 verification used Node 20.19.0. The Stop hook instead inherited Node
+8.17.0, which exposed an `Array.at()` call in the new integration test; this
+was replaced with ordinary array indexing. Both Batch 11 focused tests now
+pass on Node 8.17.0 as well. The eight remaining Node 8 suite failures also
+occur on the unchanged HEAD baseline: `agent-scripts.test.js`,
+`agent-skills.test.js`, `ai-batch.test.js`, `ai-hook-docs.test.js`,
+`card-status.test.js`, `corp-ai-card-titles.test.js`,
+`ticket-roadmap-sync.test.js`, and `verify-on-stop.test.js`. These are existing
+runtime incompatibilities (modern string/array/fs APIs and VM shebang parsing),
+not Batch 11 regressions.
+
+## Batch 11 AI call-site follow-up
+
+Checking the hook consumers exposed a missing selection path for Hype Machine:
+`RezUsability` allowed a free rez, but post-action and Runner end-of-turn policy
+used fixed card lists and could leave it unrezzed when its server was empty.
+`AIRezWhenCan()` now declares that opportunity, and Corp command selection
+checks full rez legality before acting on it in any legal rez window. Hype
+Machine returns true only at zero rez cost. Focused tests exercise actual
+`CorpAI.Choice` command and card selection after scoring and at Runner EOT,
+including no-discount, already-rezzed and no-rez-window negative cases.

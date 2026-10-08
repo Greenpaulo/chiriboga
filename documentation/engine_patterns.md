@@ -93,6 +93,7 @@ automaticOnRunBegins:  { Resolve }          // fires at start of EVERY run, no E
 responseOnRunSuccessful: { Resolve, automatic: true }
 responseOnRunEnds:       { Resolve, automatic: true }
 responseOnPassesIce:     { Resolve, automatic: true }
+responseOnBypassed:      { Enumerate?, Resolve } // receives the bypassed ice, before encounter-end responses
 responseOnWouldApproachServer: { Enumerate?, Resolve } // optional pre-approach redirect window
 automaticOnRunEndCleanup: { Resolve } // receives a callback queue after responses and run state cleanup
 ```
@@ -227,6 +228,12 @@ PlayClickCost(card); // 1 normally, 2 for Double, including active modifiers
 
 ### Cards / Zones
 
+`Uninstall(card, destination, afterUninstall?, context?)` moves an installed
+card to a non-installed zone, trashes its hosted cards unpreventably, then
+runs the optional continuation. Use it for returning an installed host to the
+grip or shuffling it into the stack; the continuation can shuffle after hosted
+trash responses finish.
+
 ```js
 Draw(player, n);
 Trash(card, runner_paid); // runner_paid=true if runner paid cost
@@ -312,9 +319,12 @@ DecisionPhase(player, choices, callback, title, instruction, context, command?, 
 ```js
 Log("message")
 GetTitle(card, withArticle?)
-AddBadPublicity(n)
+BadPublicity(n, afterBadPublicity?, context?)
 ServerName(server)
 ```
+
+`BadPublicity` opens prevention and take-bad-publicity response phases. Use its
+completion callback for effects that must continue after those phases finish.
 
 ---
 

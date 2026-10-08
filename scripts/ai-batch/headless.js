@@ -42,6 +42,24 @@ function loadPrecon(file) {
   return context.precon;
 }
 
+function validatePrecon(file, deck, hasCard) {
+  const missing = [...new Set([deck.identity, ...Object.keys(deck.cards)].map(Number))]
+    .filter(id => !hasCard(id));
+  if (missing.length)
+    throw new Error(`Precon ${file}: cards ${missing.join(', ')} have no definition in the loaded sets`);
+}
+
+// Set files declare their cards with literal cardSet[id] assignments.
+// Check the selected decks before spawning workers or playing any games.
+function validateDeckPairs(pairs, setFiles) {
+  const defined = new Set();
+  for (const file of setFiles)
+    for (const match of fs.readFileSync(path.join(root, file), 'utf8').matchAll(/^cardSet\[(\d+)\]\s*=/gm))
+      defined.add(Number(match[1]));
+  for (const file of new Set(pairs.flatMap(pair => [pair.corp, pair.runner])))
+    validatePrecon(file, loadPrecon(file), id => defined.has(id));
+}
+
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
 //   testOption (a no-op Corp option name, for the harness's own tests)}
@@ -101,6 +119,8 @@ function playGame(options) {
   const run = code => vm.runInContext(code, context);
 
   context.__decks = {corp: loadPrecon(options.corpFile), runner: loadPrecon(options.runnerFile)};
+  for (const side of ['corp', 'runner'])
+    validatePrecon(options[side + 'File'], context.__decks[side], id => Boolean(context.cardSet[id]));
   const fixture = options.start ? readFixture(options.start) : null;
 
   let result = null, turns = 0, lastTurn = null;
@@ -297,4 +317,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {playGame, readFixture, loadPrecon, root};
+module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, root};

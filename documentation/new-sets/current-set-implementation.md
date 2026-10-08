@@ -21,7 +21,7 @@ same time.
 | Definition file               | `sets/vantagepoint.js`                   |
 | Metadata file                 | `carddata/carddata.json`                 |
 | Card range                    | `36001–36066`                            |
-| Registry state during batches | follows `documentation/card-sets.md` (Vantage Point: playable) |
+| Registry state during batches | follows `documentation/card-sets.md` (Vantage Point: in-progress, hidden and untested) |
 | Focused integration test      | `tests/vantagepoint-integration.test.js` |
 | Implementation notes          | `documentation/new-sets/vantage-point-implementation-notes.md` |
 
@@ -41,7 +41,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**10 complete, 3 outstanding** (`3 Pending`, `0 In progress`, `0 Blocked`).
+**11 complete, 2 outstanding** (`2 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -59,7 +59,7 @@ Agents must refresh these counts whenever a batch status changes.
 |     8 | 36036–36040 | Complete | Codex / 2026-09-24       | Mechanics, AI and focused/full regressions pass                            |
 |     9 | 36041–36045 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
 |    10 | 36046–36050 | Complete | Codex / 2026-09-25       | Mechanics, AI and focused/full regressions pass                            |
-|    11 | 36051–36055 | Pending  | —                        | —                                                                          |
+|    11 | 36051–36055 | Complete | Codex / 2026-10-05       | Mechanics, AI and focused/full regressions pass                            |
 |    12 | 36056–36060 | Pending  | —                        | —                                                                          |
 |    13 | 36061–36066 | Pending  | —                        | —                                                                          |
 
@@ -85,6 +85,8 @@ Do not remove an older entry if later work revisits one of its cards.
 |     8 | 36036–36040 | 2026-09-24 | Codex       | `vantagepoint-integration.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Méliès U, Lotus Haze, Esca, ezaM and Knowledge Seeker; added purge continuations and persistent route-wide ICE-strength modelling |
 |     9 | 36041–36045 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `corp-install-destination.test.js`; `corp-server-security.test.js`; `mycoweb-rez-discount.test.js`; all `tests/*.test.js` | Implemented Lionsmane, Vicsek, Cultivate, Unleash and The Red Room; added Corp install-destination restrictions, post-rez continuations and installed global ETR planning |
 |    10 | 36046–36050 | 2026-09-25 | Codex       | `vantagepoint-integration.test.js`; `play-and-steal-cost.test.js`; all `tests/*.test.js` | Implemented Editorial Division, Witch Hunt, Magistrate Revontulet, Nihilo Agent and Grubber; added post-prevention bad-publicity responses and continuations |
+
+|    11 | 36051–36055 | 2026-10-05 | Codex       | `vantagepoint-integration.test.js`; `vantagepoint-batch11-engine.test.js`; `subroutine-visual.test.js`; all `tests/*.test.js` | Implemented Lethe, Paywall, Flood the Market, Scapegoat and Hype Machine; added bypass responses, hosted-card uninstall sequencing, full-break/bypass run effects and declarative advancement search; 45 test files pass on Node 20.19.0; Node 8 hook incompatibilities recorded in implementation notes |
 
 ## Required shared verification
 

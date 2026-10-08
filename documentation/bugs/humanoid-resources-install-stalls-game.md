@@ -26,6 +26,18 @@ ERROR Null command
 ```
 
 ## Reproduction
+Additional seeded evidence (2026-10-08, `4eaca7b`):
+`documentation/debug-logs/bug_raised/startup-pd-muslihat-seed-25.log`, generated with
+`node scripts/ai-batch.js replay --pool tests/fixtures/ai-batch/deck-pool-startup-format.json --pairs pd-muslihaT --seeds 25`.
+Line 1 reports a stall after `Null command`, at 16 turns with Corp 5–2 Runner
+(log hash `354c259e57e7`). Lines 499–506 show Humanoid Resources used,
+three clicks spent, four credits gained, the card trashed, three cards drawn,
+a new remote created, and three credits spent; play then stops.
+[Verified] This replay reproduces the same install stall using the Startup
+pool, without the test's null-option workaround. The original batch completed
+999 of 1000 games; this was its only failure. The pool and referenced precons
+include local changes, so retain those deck versions when replaying this seed.
+
 The test builds the same board as the Corp AI ticket (Humanoid Resources
 rezzed, 3 clicks, 5 credits, the AI forced to trigger it). It also patches
 `CorpAI.prototype._rankedInstallOptions` to drop null cards, so it tests the

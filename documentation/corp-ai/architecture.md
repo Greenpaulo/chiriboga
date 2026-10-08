@@ -31,6 +31,13 @@ Read only the section you need:
 
 ## Decision flow
 
+The advancement search includes card-declared operations and one-shot installed
+upgrades through `AIFastAdvanceCounters`. Unrezzed upgrades must pass
+`FullCheckRez` with the search point’s credits, clicks and target counters.
+The shared hypothetical guard restores resources, counters and active player
+on success or exception. Main-phase selection checks full rez legality again
+before choosing the planned upgrade.
+
 `Choice()` dispatches each engine decision to a phase handler such as
 `Phase_Main`. Most main-phase planning reads the same inputs:
 

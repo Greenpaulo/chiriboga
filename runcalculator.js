@@ -553,6 +553,11 @@ class RunCalculator {
     //for each possibility, consider the option of completing the encounter
     for (var k = 0; k < sr_possibilities.length; k++) {
       var sr_effects = []; //the effects that would happen if we continue encounter
+      if (bypassed) sr_effects = sr_effects.concat(iceAI.bypassEffects || []);
+      else if (iceAI.sr.length > 0 && iceAI.sr.every((sr, index) =>
+        this.SrBroken(point, index) ||
+        (iceAI.ice.subroutines && iceAI.ice.subroutines[index] && iceAI.ice.subroutines[index].broken)))
+        sr_effects = sr_effects.concat(iceAI.fullyBrokenEffects || []);
       for (
         var i = 0;
         i < sr_possibilities[k].length;

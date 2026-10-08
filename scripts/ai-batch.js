@@ -35,7 +35,7 @@ const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
 const {fork, execSync} = require('child_process');
-const {playGame, readFixture, root} = require('./ai-batch/headless');
+const {playGame, readFixture, validateDeckPairs, root} = require('./ai-batch/headless');
 const metricsLib = require('./ai-batch/metrics');
 
 const DEFAULT_POOL = path.join(root, 'tests/fixtures/ai-batch/deck-pool.json');
@@ -92,6 +92,11 @@ function setRegistry() {
 function loadPool(file) {
   const text = fs.readFileSync(file, 'utf8');
   const pool = JSON.parse(text);
+  const pairIds = new Set();
+  for (const pair of pool.pairs) {
+    if (pairIds.has(pair.id)) throw new Error('Duplicate deck pair id in pool: ' + pair.id);
+    pairIds.add(pair.id);
+  }
   const registry = setRegistry();
   const setFiles = pool.sets.map(key => {
     if (!registry[key]) throw new Error(`Pool set ${key} is not in config.js setRegistry`);
@@ -221,6 +226,7 @@ function runBatch(config) {
     let active = 0;
     let failed = false;
     const children = [];
+    const retried = new Set();
     const fail = error => {
       if (failed) return;
       failed = true;
@@ -231,7 +237,7 @@ function runBatch(config) {
     const progress = () => {
       if (process.stderr.isTTY) process.stderr.write(`\r${games.length}/${total} games, ${Math.round((Date.now() - started) / 1000)} s`);
     };
-    for (let w = 0; w < workers; w++) {
+    const spawnWorker = () => {
       const child = fork(__filename, ['--worker'], {stdio: ['ignore', 'ignore', 'inherit', 'ipc']});
       children.push(child);
       active++;
@@ -256,8 +262,20 @@ function runBatch(config) {
       child.on('exit', (code, signal) => {
         if (failed) return;
         if (pending) {
-          fail(new Error(`Worker exited before returning ${pending.deckPairId} seed ${pending.seed}` +
-            `${pending.fixtureId ? ' start ' + pending.fixtureId : ''} (code ${code}, signal ${signal})`));
+          const detail = `Worker exited before returning ${pending.deckPairId} seed ${pending.seed}` +
+            `${pending.fixtureId ? ' start ' + pending.fixtureId : ''} (code ${code}, signal ${signal})`;
+          // A native V8 crash can depend on a long-lived worker's history.
+          // Replay the identical job once in a fresh process; never skip it.
+          if (signal === 'SIGSEGV' && !retried.has(pending)) {
+            retried.add(pending);
+            jobs.unshift(pending);
+            active--;
+            if (process.stderr.isTTY) process.stderr.write('\n');
+            console.error(detail + '; retrying once in a fresh worker');
+            spawnWorker();
+            return;
+          }
+          fail(new Error(detail + (retried.has(pending) ? ' after retry' : '')));
           return;
         }
         if (--active) return;
@@ -266,7 +284,8 @@ function runBatch(config) {
         resolve({games, effective, wallMs: Date.now() - started});
       });
       next();
-    }
+    };
+    for (let w = 0; w < workers; w++) spawnWorker();
   });
 }
 
@@ -281,7 +300,7 @@ function buildConfig(args, overrides = {}) {
   const collectorNames = args.collector.slice().sort();
   const collectors = loadCollectors(collectorNames);
   const starts = resolveStarts([...new Set([...args.start, ...taggedStarts(args.startTag || [])])], poolInfo.ranges);
-  return Object.assign({
+  const config = Object.assign({
     poolInfo, pairs, setFiles: poolInfo.setFiles, seeds: budgetSeeds(args, starts, pairs) || resolveSeeds(args), starts,
     budget: args.budget ? Number(args.budget) : null,
     corpOptions: parseAssignments(args.corpOption, '--corp-option'),
@@ -290,6 +309,8 @@ function buildConfig(args, overrides = {}) {
     jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
     quick: Boolean(args.quick),
   }, overrides);
+  validateDeckPairs(config.pairs, config.setFiles);
+  return config;
 }
 
 const STARTS_DIR = path.join(root, 'tests', 'fixtures', 'ai-batch', 'starts');
