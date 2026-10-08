@@ -72,4 +72,41 @@ test('concurrent refresh is rejected', root => {
   assert.throws(() => refreshBaseline(root, () => assert.fail('must not run')), /EEXIST/);
   assert(fs.existsSync(path.join(root, 'bench/.baseline-refresh.lock')));
 });
+test('startup rotates independently of beginner reports and locks', root => {
+  const beginner = writeOld(root);
+  writeReport(root);
+  fs.writeFileSync(path.join(root, 'bench/.baseline-refresh.lock'), '');
+  fs.mkdirSync(path.join(root, 'bench/startup/current'), {recursive: true});
+  const previous = path.join(root, 'bench/startup/current/baseline.json');
+  fs.writeFileSync(previous, oldText);
+  const result = refreshBaseline(root, args => {
+    assert.deepStrictEqual(args, ['scripts/ai-batch.js', '--pool',
+      'tests/fixtures/ai-batch/deck-pool-startup-format.json', '--seeds', '1-200',
+      '--out', 'bench/startup/baseline.json']);
+    fs.writeFileSync(path.join(root, 'bench/startup/baseline.json'),
+      fs.readFileSync(path.join(root, 'bench/baseline.json')));
+  }, 'startup');
+  assert.strictEqual(result.current, previous);
+  assert.strictEqual(path.dirname(result.archived), path.join(root, 'bench/startup/archived-current'));
+  assert.strictEqual(fs.readFileSync(result.archived, 'utf8'), oldText);
+  assert.strictEqual(fs.readFileSync(beginner, 'utf8'), oldText);
+  assert(fs.existsSync(path.join(root, 'bench/baseline.json')));
+  assert(fs.existsSync(path.join(root, 'bench/.baseline-refresh.lock')));
+  assert(!fs.existsSync(path.join(root, 'bench/startup/.baseline-refresh.lock')));
+  assert(!fs.existsSync(path.join(root, 'bench/startup/baseline.json')));
+});
+test('failed startup report preserves startup and beginner baselines', root => {
+  const beginner = writeOld(root);
+  fs.mkdirSync(path.join(root, 'bench/startup/current'), {recursive: true});
+  const previous = path.join(root, 'bench/startup/current/baseline.json');
+  fs.writeFileSync(previous, oldText);
+  assert.throws(() => refreshBaseline(root, () => {
+    fs.writeFileSync(path.join(root, 'bench/startup/baseline.json'),
+      JSON.stringify({kind: 'ai-batch-report', dirty: false, games: [], failures: []}));
+  }, 'startup'), /1,000 games/);
+  assert.strictEqual(fs.readFileSync(previous, 'utf8'), oldText);
+  assert.strictEqual(fs.readFileSync(beginner, 'utf8'), oldText);
+  assert(!fs.existsSync(path.join(root, 'bench/startup/archived-current')));
+  assert(!fs.existsSync(path.join(root, 'bench/startup/.baseline-refresh.lock')));
+});
 console.log(`${cases} baseline refresh cases passed.`);

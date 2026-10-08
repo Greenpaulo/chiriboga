@@ -190,6 +190,26 @@ for the evidence and remaining scoring deficit against the historical H0 build.
 
 ### Refreshing the accepted baseline after a merge
 
+Both `refresh-ai-baseline.js` and `compare-ai-branch.js` default to the beginner
+pool. Use `--format startup` to select the existing startup
+pool at `tests/fixtures/ai-batch/deck-pool-startup-format.json`:
+
+```sh
+# On the clean, committed target main build:
+node scripts/refresh-ai-baseline.js --format startup
+# On the candidate branch:
+node scripts/compare-ai-branch.js --format startup
+```
+
+Startup uses `bench/startup/current/baseline.json` as its current benchmark,
+`bench/startup/<branch>.json` for candidate reports, and
+`bench/startup/archived-current/` for archives. Its staging report and refresh
+lock also live under `bench/startup/`, independently of beginner runs. Both
+formats use five deck pairs and seeds 1–200 (1,000 games). A missing startup
+baseline must be refreshed on the target main build before comparing; the
+comparison never falls back to beginner. `--format beginner` explicitly
+selects the default paths described below.
+
 After merging an accepted gameplay change, run this on the clean, committed
 merged build:
 

@@ -5,13 +5,15 @@
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
+const {benchmarkFormat, parseFormat} = require('./ai-benchmark-format');
 
 function refreshBaseline(root, runBatch = args => {
   const result = spawnSync(process.execPath, args, {cwd: root, stdio: 'inherit'});
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error('Benchmark failed; current baseline was preserved.');
-}) {
-  const bench = path.join(root, 'bench');
+}, format = 'beginner') {
+  const config = benchmarkFormat(format);
+  const bench = path.join(root, config.bench);
   const current = path.join(bench, 'current');
   const archive = path.join(bench, 'archived-current');
   const pending = path.join(bench, 'baseline.json');
@@ -21,14 +23,14 @@ function refreshBaseline(root, runBatch = args => {
   const descriptor = fs.openSync(lock, 'wx');
   try {
     const files = fs.readdirSync(current).filter(file => file.endsWith('.json'));
-    if (files.length > 1) throw new Error('Expected at most one report in bench/current/.');
+    if (files.length > 1) throw new Error(`Expected at most one report in ${config.bench}/current/.`);
     if (fs.existsSync(pending)) {
-      throw new Error('bench/baseline.json already exists; move it aside before retrying.');
+      throw new Error(`${config.bench}/baseline.json already exists; move it aside before retrying.`);
     }
     const previous = files.length ? path.join(current, files[0]) : null;
     runBatch(['scripts/ai-batch.js', '--pool',
-      'documentation/corp-ai-regression/assets/beginner-pool.json',
-      '--seeds', '1-200', '--out', 'bench/baseline.json']);
+      config.pool,
+      '--seeds', '1-200', '--out', `${config.bench}/baseline.json`]);
     const report = JSON.parse(fs.readFileSync(pending, 'utf8'));
     if (report.kind !== 'ai-batch-report' || !Array.isArray(report.games) || report.games.length !== 1000 ||
         !Array.isArray(report.failures) || report.failures.length !== 0) {
@@ -59,9 +61,9 @@ function refreshBaseline(root, runBatch = args => {
 
 if (require.main === module) {
   try {
-    if (process.argv.length !== 2) throw new Error('Usage: node scripts/refresh-ai-baseline.js');
+    const format = parseFormat(process.argv.slice(2), 'refresh-ai-baseline.js');
     const root = path.resolve(__dirname, '..');
-    const result = refreshBaseline(root);
+    const result = refreshBaseline(root, undefined, format);
     if (result.archived) console.log(`Archived: ${path.relative(root, result.archived)}`);
     console.log(`Current baseline: ${path.relative(root, result.current)}`);
   } catch (error) {
