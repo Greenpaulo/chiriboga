@@ -242,9 +242,20 @@ context.MakeRun = (server) => {
   runTarget = server;
   context.attackedServer = server;
 };
-context.BadPublicity = (amount) => {
+context.BadPublicity = (amount, callback, callbackContext) => {
   badPublicityGained += amount;
+  if (callback) callback.call(callbackContext, amount);
 };
+const publicityCallbackContext = {};
+let publicityCallbackRan = false;
+context.BadPublicity(2, function(amount) {
+  assert.strictEqual(this, publicityCallbackContext);
+  assert.strictEqual(amount, 2);
+  assert.strictEqual(badPublicityGained, 2, 'publicity is gained before the continuation');
+  publicityCallbackRan = true;
+}, publicityCallbackContext);
+assert.strictEqual(publicityCallbackRan, true, 'BadPublicity stub runs its continuation');
+badPublicityGained = 0;
 context.RemoveFromGame = (card) => {
   removedCard = card;
 };

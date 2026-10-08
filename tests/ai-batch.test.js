@@ -96,6 +96,13 @@ const EXTRA_DRAW = side => `
     fs.writeFileSync(file, JSON.stringify(testPool));
     const missing = /cards 99999, 99998 have no definition in the loaded sets/;
     assert.throws(() => batch.buildConfig(batch.parseArgs(['--pool', file])), missing);
+    const selectedArgs = batch.parseArgs(['--pool', file, '--pairs', gateway.id]);
+    assert.throws(() => batch.buildConfig(selectedArgs, {pairs: [testPool.pairs[1]]}), missing,
+      'overridden pairs must be validated even when the selected pool pair is valid');
+    assert.throws(() => batch.buildConfig(selectedArgs, {setFiles: []}), /have no definition in the loaded sets/,
+      'overridden sets must supply the selected decks');
+    assert.deepStrictEqual(batch.buildConfig(batch.parseArgs(['--pool', file]), {pairs: [gateway]}).pairs,
+      [gateway], 'valid overrides replace invalid pool pairs before validation');
     assert.throws(() => game({corpFile: invalidFile}), missing,
       'direct headless games also explain missing definitions');
     const result = cli(['--pool', file, '--seeds', '1-1']);
