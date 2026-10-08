@@ -718,7 +718,7 @@ coreSet[1018] = {
     // Only HQ
     if (server != corp.HQ) return 0;
     // Check for Crisium Grid
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     
     // Calculate economic value
     var corpCredits = corp.creditPool;
@@ -1264,6 +1264,7 @@ coreSet[1030] = {
       // If prevent is 0, do nothing (don't trash, don't prevent)
     },
   },
+  AIMeatDamagePrevention: function () { return CheckTrash(this) ? 3 : 0; },
 };
 coreSet[1031] = {
   title: "Data Dealer",

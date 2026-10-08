@@ -601,7 +601,7 @@ cardSet[35014] = {
   //AI: use for easy runs where success is likely
   AIRunEventExtraPotential: function(server, potential) {
     //Requires successful run - don't use if Crisium Grid is known
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     //Only use if there are no unrezzed ice (to ensure success)
     for (var i = 0; i < server.ice.length; i++) {
       if (!server.ice[i].rezzed) return 0; //unrezzed ice might end the run
@@ -729,7 +729,7 @@ cardSet[35016] = {
     
     //Check for Crisium Grid on Archives - doesn't prevent redirect (happens before success)
     //But if HQ has Crisium, success won't be declared there
-    if (runner.AI._rootKnownToContainCopyOfCard(corp.HQ, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(corp.HQ)) return 0;
     
     //Get HQ potential
     var HQpotential = runner.AI._getCachedPotential(corp.HQ);
@@ -4598,7 +4598,7 @@ cardSet[35017] = {
   AIRunEventExtraPotential: function(server, potential) {
     if (server !== corp.HQ) return 0;
     //Require successful run
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     //Value depends on Corp's credits - at 3+ credits, we get 6 credits for 1 tag
     var corpCreds = Math.min(3, Credits(corp));
     var netGain = (corpCreds * 2) - 0; //0 play cost
@@ -5329,7 +5329,7 @@ cardSet[35025] = {
   //AI code
   AIRunEventExtraPotential: function(server, potential) {
     if (server !== corp.RnD) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     //Value based on installable cards in grip
     var installableCount = 0;
     for (var i = 0; i < runner.grip.length; i++) {

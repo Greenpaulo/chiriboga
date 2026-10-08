@@ -61,6 +61,11 @@ class RunCalculator {
     };
     // Local continuation overlay: the board is never mutated during planning.
     if (this._ignoredIce.has(ice)) return result;
+    if (this._securityPlanning) {
+      knowledgePlayer = corp;
+      if (!this._securityPlanning.eligibleIce.has(ice)) return result;
+      maxCorpCred = Math.max(maxCorpCred, RezCost(ice));
+    }
     var iceKnown = PlayerCanLook(knowledgePlayer, ice);
     if (!iceKnown) {
       //unknown ice
@@ -177,6 +182,11 @@ class RunCalculator {
       result.push({
         iceIdx: point.iceIdx,
         runner_credits_spent: point.runner_credits_spent,
+        paymentPoolOnly: !!this._poolOnly,
+        creditSpendDamage: this._creditSpendDamage || 0,
+        restrictedCreditsSpent: point.restrictedCreditsSpent || 0,
+        restrictedCreditsPaid: point.restrictedCreditsPaid || 0,
+        meatDamagePrevention: this._meatDamagePrevention || 0,
         runner_credits_lost: point.runner_credits_lost,
         runner_clicks_spent: point.runner_clicks_spent,
         virus_counters_spent: point.virus_counters_spent,
@@ -200,6 +210,11 @@ class RunCalculator {
     return {
       iceIdx: point.iceIdx,
       runner_credits_spent: point.runner_credits_spent,
+        paymentPoolOnly: !!this._poolOnly,
+        creditSpendDamage: this._creditSpendDamage || 0,
+        restrictedCreditsSpent: point.restrictedCreditsSpent || 0,
+        restrictedCreditsPaid: point.restrictedCreditsPaid || 0,
+        meatDamagePrevention: this._meatDamagePrevention || 0,
       runner_credits_lost: point.runner_credits_lost,
       runner_clicks_spent: point.runner_clicks_spent,
       virus_counters_spent: point.virus_counters_spent,
@@ -291,7 +306,7 @@ class RunCalculator {
     }
     var clicksLeft = this.baseClicks - point.runner_clicks_spent;
 	//assume both pool and extra credits can be used for breakers
-    var creditsLeft = this.basePoolCredits + this.baseOtherCredits - point.runner_credits_spent - point.runner_credits_lost;
+    var creditsLeft = this.basePoolCredits + this.baseOtherCredits + (point.restrictedCreditsPaid || 0) - point.runner_credits_spent - point.runner_credits_lost;
 
     //apply icebreaker specific details
 	if (typeof card.AIImplementBreaker == "function") {
@@ -341,7 +356,7 @@ class RunCalculator {
 		  //recalculate current click/financial situation (ice specific effects may rely on it)
 		  var clicksLeft = this.baseClicks - point.runner_clicks_spent - clickLoss;
 		  var poolCreditsLeft = this.basePoolCredits - point.runner_credits_lost - creditLoss;
-		  var otherCreditsLeft = this.baseOtherCredits - point.runner_credits_spent - creditPayment;
+		  var otherCreditsLeft = this.baseOtherCredits + (point.restrictedCreditsPaid || 0) - point.runner_credits_spent - creditPayment;
 		  var overallCreditsLeft = poolCreditsLeft + otherCreditsLeft;
 		  //take into account pool being affected by excess other spend
 		  if (otherCreditsLeft < 0) poolCreditsLeft += otherCreditsLeft;
@@ -428,6 +443,11 @@ class RunCalculator {
 		return {
 		  iceIdx: nextIceIdx,
 		  runner_credits_spent: point.runner_credits_spent + creditPayment,
+      paymentPoolOnly: !!this._poolOnly,
+      creditSpendDamage: this._creditSpendDamage || 0,
+        restrictedCreditsSpent: point.restrictedCreditsSpent || 0,
+        restrictedCreditsPaid: point.restrictedCreditsPaid || 0,
+        meatDamagePrevention: this._meatDamagePrevention || 0,
 		  runner_credits_lost: point.runner_credits_lost + creditLoss,
 		  runner_clicks_spent: point.runner_clicks_spent + clickLoss,
 		  virus_counters_spent: point.virus_counters_spent,
@@ -709,6 +729,10 @@ class RunCalculator {
         else result[p.effects[j][i]]++;
       }
     }
+    if (p.runner_credits_spent > 0 && p.creditSpendDamage > 0)
+      result.meatDamage = (result.meatDamage || 0) + p.creditSpendDamage;
+    if (result.meatDamage && p.meatDamagePrevention)
+      result.meatDamage = Math.max(0, result.meatDamage - p.meatDamagePrevention);
     return result;
   }
 
@@ -730,8 +754,11 @@ class RunCalculator {
 	  
 	  //reduce cost of credit spend depending on bad pub credits i.e. corp.badPublicity or runner.temporaryCredits (depending on whether run is hypothetical)
 	  var spentCredits = p.runner_credits_spent;
-	  if (attackedServer) spentCredits -= runner.temporaryCredits;
-	  else spentCredits -= corp.badPublicity;
+	  if (!p.paymentPoolOnly) {
+        if (this._securityPlanning) spentCredits -= this._securityPlanning.temporaryCredits;
+        else if (attackedServer) spentCredits -= runner.temporaryCredits;
+        else spentCredits -= corp.badPublicity;
+      }
 	  if (spentCredits < 0) spentCredits = 0;
 
       //tweak this algorithm
@@ -741,6 +768,9 @@ class RunCalculator {
       result += 0.8 * p.runner_clicks_spent;
       result += 0.3 * p.virus_counters_spent;
       var totalEffect = this.TotalEffect(p);
+      var rawMeat = (p.creditSpendDamage || 0) * Number(p.runner_credits_spent > 0) +
+        p.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
+      result += 1.3 * Math.min(rawMeat, p.meatDamagePrevention || 0);
       result += 1.3 * this.TotalDamage(totalEffect); //during 1.0 the runner seemed too willing to take damage
       if (totalEffect.tag) result += 2.4 * totalEffect.tag; //not sure about this
       if (totalEffect.misc_serious) result += 3.0 * totalEffect.misc_serious; //was 1.5 for quite some time but I think this wasn't enough
@@ -775,7 +805,7 @@ class RunCalculator {
 	  var clicksLeft = clickLimit - p.runner_clicks_spent;
 	  
 	  //runner credits are 'spent' from other credits first until it is depleted, then from pool
-	  var otherCreditsLeft = otherCredits - p.runner_credits_spent;
+	  var otherCreditsLeft = (p.paymentPoolOnly ? 0 : otherCredits) + (p.restrictedCreditsPaid || 0) - p.runner_credits_spent;
 	  //whereas they are 'lost' from pool only
 	  var poolCreditsLeft = poolCreditLimit - p.runner_credits_lost - (p.runner_credits_reserved || 0);
 	  if (otherCreditsLeft < 0) {
@@ -795,7 +825,7 @@ class RunCalculator {
           if (totalEffect.meatDamage) totalDamage += totalEffect.meatDamage;
           if (totalEffect.coreDamage) totalDamage += totalEffect.coreDamage;
 		  //update damage limit based on clicks spent (unless it is set to Infinity or already mid-run)
-		  if (clicksLeft < 1 && damageLimit != Infinity && !attackedServer) damageLimit = runner.grip.length - MaxHandSize(runner); //try to keep a full hand at end of turn	
+		  if (clicksLeft < 1 && damageLimit != Infinity && !attackedServer && !this._securityPlanning) damageLimit = runner.grip.length - MaxHandSize(runner); //try to keep a full hand at end of turn
 		  if (damageLimit < 0) damageLimit = 0;
 		  //now check damage against limit
 		  reason = "damage";
@@ -835,6 +865,11 @@ class RunCalculator {
 	  var ret = {
                 iceIdx: iceIdx,
                 runner_credits_spent: 0,
+                paymentPoolOnly: !!this._poolOnly,
+                creditSpendDamage: this._creditSpendDamage || 0,
+        restrictedCreditsSpent: 0,
+        restrictedCreditsPaid: 0,
+        meatDamagePrevention: this._meatDamagePrevention || 0,
 				runner_credits_lost: 0,
                 runner_clicks_spent: 0,
                 virus_counters_spent: 0,
@@ -852,6 +887,11 @@ class RunCalculator {
 	  var ret = {
                 iceIdx: point.iceIdx,
                 runner_credits_spent: point.runner_credits_spent,
+        paymentPoolOnly: !!this._poolOnly,
+        creditSpendDamage: this._creditSpendDamage || 0,
+        restrictedCreditsSpent: point.restrictedCreditsSpent || 0,
+        restrictedCreditsPaid: point.restrictedCreditsPaid || 0,
+        meatDamagePrevention: this._meatDamagePrevention || 0,
 				runner_credits_lost: point.runner_credits_lost,
                 runner_clicks_spent: point.runner_clicks_spent,
                 virus_counters_spent: point.virus_counters_spent,
@@ -879,14 +919,30 @@ class RunCalculator {
     var installedRunnerCards = InstalledCards(runner);
 	data.clickLimit = data.clicks; //this is maybe not ideal (e.g. Enigma might break things)
 	data.poolCreditLimit = data.poolCredits; //same as above, maybe
+    if (typeof OutsideCreditDamageSources == "function" && OutsideCreditDamageSources(data.server).length &&
+        typeof CreditPoolCanBeUsed == "function" && !CreditPoolCanBeUsed(runner, "spend", "using", null)) {
+      data.poolCredits = 0;
+      data.poolCreditLimit = 0;
+    }
     this.baseClicks = data.clicks;
     this.basePoolCredits = data.poolCredits;
 	this.baseOtherCredits = data.otherCredits;
     this.paths = []; //completed paths
+    this._creditSpendSources = (this._securityPlanning ? this._securityPlanning.damageSources :
+      typeof OutsideCreditDamageSources == "function" ? OutsideCreditDamageSources(data.server) : []).filter(source =>
+        !(this._creditDamageIgnored && this._creditDamageIgnored.has(source.card)));
+    this._restrictedStealthCredits = Math.max(0, InstalledCards(runner).reduce(function (maximum, card) {
+      return typeof card.AIRunRestrictedCredits == "function" ?
+        Math.max(maximum, card.AIRunRestrictedCredits.call(card, data.server)) : maximum;
+    }, 0) - (this._restrictedCreditsUsed || 0));
+    this._creditSpendDamage = !this._poolOnly && (data.otherCredits > 0 || this._restrictedStealthCredits > 0) ?
+      this._creditSpendSources.reduce((sum, source) => sum + source.damage, 0) : 0;
+    this._meatDamagePrevention = this._meatPreventionOverride === undefined ?
+      (typeof PublicMeatDamagePrevention == "function" ? PublicMeatDamagePrevention() : 0) : this._meatPreventionOverride;
     //default approach cost is none (but not an empty approachOptions array - that would mean no path ever and this process would fail)
     data.approachOptions = [{ clicks: 0, credits: 0, effects: 0, tags: 0 }];
     //for complete runs, include known trash costs any other costs to get into server
-    if (!data.incomplete) {
+    if (!data.incomplete && !this._securityPlanning) {
       var approachClicks = 0;
       var approachCredits = 0;
       var approachEffects = [];
@@ -901,7 +957,8 @@ class RunCalculator {
       for (var successfulIndex = 0; successfulIndex < publicSuccessfulRunCards.length; successfulIndex++) {
         var successfulCard = publicSuccessfulRunCards[successfulIndex];
         if (PlayerCanLook(runner, successfulCard) && CheckHasAbilities(successfulCard) &&
-            typeof successfulCard.AIRunSuccessfulDamage == "function") {
+            typeof successfulCard.AIRunSuccessfulDamage == "function" &&
+            !(typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(data.server))) {
           var successfulDamage = successfulCard.AIRunSuccessfulDamage.call(successfulCard, data.server);
           var successfulEffects = [];
           for (var damageIndex = 0; damageIndex < successfulDamage; damageIndex++) successfulEffects.push("netDamage");
@@ -1199,10 +1256,10 @@ class RunCalculator {
   // credits. The failed attempt pays encounter costs but no successful-run or
   // breach costs. Its path remains the current run's command plan.
   _finiteRunContinuations(data, icePoint, defender) {
-    var firstPoolSpent = Math.max(0, icePoint.runner_credits_spent - data.otherCredits) +
+    var firstPoolSpent = Math.max(0, icePoint.runner_credits_spent - data.otherCredits - (icePoint.restrictedCreditsPaid || 0)) +
       icePoint.runner_credits_lost;
     var firstDamage = this.TotalDamage(this.TotalEffect(icePoint));
-    var futureOther = corp.badPublicity || 0;
+    var futureOther = this._poolOnly ? 0 : (corp.badPublicity || 0);
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
     // Before a run, bad-publicity credits are included in the pool budget.
     // Unspent temporary credits expire; credit losses consume permanent credits.
@@ -1213,15 +1270,28 @@ class RunCalculator {
     // Different break paths often leave identical continuation budgets. Cache
     // only within this synchronous board snapshot, never across game actions.
     if (!data.continuationCache) data.continuationCache = new Map();
-    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit].join(":");
+    var rawMeat = (icePoint.creditSpendDamage || 0) * Number(icePoint.runner_credits_spent > 0) +
+      icePoint.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
+    var remainingPrevention = Math.max(0, this._meatDamagePrevention - rawMeat);
+    var spentOutside = icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0;
+    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit,
+      icePoint.restrictedCreditsSpent || 0, remainingPrevention, Number(spentOutside)].join(":");
     var routes = data.continuationCache.get(cacheKey);
     if (!routes) {
       var future = new RunCalculator();
       future.suppressOutput = true;
       future._runnerPlanning = true;
+      future._securityPlanning = this._securityPlanning;
       future._continuationRun = true; // fresh bad-publicity credits are in otherCredits
       future._ignoredIce = new Set(this._ignoredIce);
       future._ignoredIce.add(defender);
+      future._restrictedCreditsUsed = (this._restrictedCreditsUsed || 0) + (icePoint.restrictedCreditsSpent || 0);
+      future._creditPolicyBranch = !!this._poolOnly;
+      future._poolOnly = !!this._poolOnly;
+      future._creditDamageIgnored = new Set(this._creditDamageIgnored || []);
+      future._meatPreventionOverride = remainingPrevention;
+      if (spentOutside)
+        for (var source of this._creditSpendSources) future._creditDamageIgnored.add(source.card);
       routes = future.Calculate(data.server, futureClicks, futurePool, futureOther,
         futureDamage, data.tagLimit, false, null);
       data.continuationCache.set(cacheKey, routes);
@@ -1231,10 +1301,13 @@ class RunCalculator {
       var result = this.CopyPoint(icePoint);
       result.iceIdx = -1;
       result.runner_credits_reserved = expiredCredits + (last.runner_credits_reserved || 0) +
-        Math.max(0, last.runner_credits_spent - futureOther) + last.runner_credits_lost;
+        Math.max(0, last.runner_credits_spent - (last.paymentPoolOnly ? 0 : futureOther) - (last.restrictedCreditsPaid || 0)) + last.runner_credits_lost;
       result.runner_clicks_spent += 1 + last.runner_clicks_spent;
       result.virus_counters_spent += last.virus_counters_spent;
-      result.effects = result.effects.concat(last.effects);
+      var futureMeat = future ? future.TotalEffect(last).meatDamage || 0 :
+        this.TotalEffect(last).meatDamage || 0;
+      result.effects = result.effects.concat(last.effects.map(effects => Array.isArray(effects) ? effects.filter(effect => effect != "meatDamage") : effects));
+      if (futureMeat > 0) result.effects.push(Array(futureMeat).fill("netDamage"));
       return result;
     }, this);
   }
@@ -1274,9 +1347,9 @@ class RunCalculator {
 		approachPoint.runner_clicks_spent += data.approachOptions[j].clicks;
 		approachPoint.effects = approachPoint.effects.concat(data.approachOptions[j].effects);
         var approachPoints = [approachPoint];
-        if (!data.incomplete && runner.AI && (runner.AI.rc === this || this._runnerPlanning)) {
+        if (!data.incomplete && (this._securityPlanning || (runner.AI && (runner.AI.rc === this || this._runnerPlanning)))) {
           var defender = InstalledCards(corp).find(function (card) {
-            return !this._ignoredIce.has(card) && PlayerCanLook(runner, card) &&
+            return !this._ignoredIce.has(card) && PlayerCanLook(this._securityPlanning ? corp : runner, card) &&
               typeof card.AIRunExtraRuns == "function" && card.AIRunExtraRuns.call(card, data.server) > 0;
           }, this);
           if (defender) approachPoints = this._finiteRunContinuations(
@@ -1294,7 +1367,71 @@ class RunCalculator {
     this._calculationActive = false;
   }
 
-  async CalculateAsync(
+  // Compare the existing outside-first route with a pool-only route. Policy
+  // branches use independent calculators, keeping state and cached costs local.
+  _creditPolicyCalculators(server, otherCredits) {
+    if (this._creditPolicyBranch ||
+        typeof OutsideCreditDamageSources != "function" ||
+        (this._securityPlanning ? this._securityPlanning.damageSources : OutsideCreditDamageSources(server)).length < 1) return null;
+    var policies = [false];
+    if (typeof CreditPoolCanBeUsed != "function" || CreditPoolCanBeUsed(runner, "spend", "using", null))
+      policies.push(true);
+    return policies.map(function (poolOnly) {
+      var rc = new RunCalculator();
+      rc._creditPolicyBranch = true;
+      rc._securityPlanning = this._securityPlanning;
+      rc._poolOnly = poolOnly;
+      rc._creditDamageIgnored = new Set(this._creditDamageIgnored || []);
+      rc._meatPreventionOverride = this._meatPreventionOverride;
+      rc._restrictedCreditsUsed = this._restrictedCreditsUsed || 0;
+      rc._ignoredIce = new Set(this._ignoredIce);
+      rc._runnerPlanning = this._runnerPlanning || (runner.AI && runner.AI.rc == this);
+      rc.runEvent = this.runEvent;
+      rc.suppressOutput = this.suppressOutput;
+      rc.avoidETR = this.avoidETR;
+      return rc;
+    }, this);
+  }
+
+  _retainCreditPolicyModel(branches) {
+    if (!this.paths.length) return;
+    var best = this.paths[this.paths.length - 1];
+    var model = branches.find(rc => rc.paths.includes(best));
+    this.precalculated = model.precalculated;
+    this.baseClicks = model.baseClicks;
+    this.basePoolCredits = model.basePoolCredits;
+    this.baseOtherCredits = model.baseOtherCredits;
+    this.bonusBreaker = model.bonusBreaker;
+  }
+
+  Calculate(...args) {
+    var branches = this._creditPolicyCalculators(args[0], args[3]);
+    if (!branches) return this._calculate(...args);
+    this.paths = branches.flatMap(function (rc) {
+      var branchArgs = args.slice();
+      if (rc._poolOnly) branchArgs[3] = 0;
+      return rc._calculate(...branchArgs);
+    });
+    this.paths.sort((a, b) => this.PathCost(b) - this.PathCost(a));
+    this._retainCreditPolicyModel(branches);
+    return this.paths;
+  }
+
+  async CalculateAsync(...args) {
+    var branches = this._creditPolicyCalculators(args[0], args[3]);
+    if (!branches) return this._calculateAsync(...args);
+    var paths = [];
+    for (var rc of branches) {
+      var branchArgs = args.slice();
+      if (rc._poolOnly) branchArgs[3] = 0;
+      paths = paths.concat(await rc._calculateAsync(...branchArgs));
+    }
+    this.paths = paths.sort((a, b) => this.PathCost(b) - this.PathCost(a));
+    this._retainCreditPolicyModel(branches);
+    return this.paths;
+  }
+
+  async _calculateAsync(
     server,
     clicks,
     poolCredits,
@@ -1337,7 +1474,7 @@ class RunCalculator {
   //set incomplete to true to return lowest cost exit strategy
   //if incomplete is false, paths that include misc_serious effect will be ignored (careful! if no valid path is found, serious sr may fire).
   //if incomplete is true, a non-empty, non-complete path is expected (i.e. will jack out or fire etr at earliest opportunity)
-  Calculate(
+  _calculate(
     server,
     clicks,
     poolCredits,

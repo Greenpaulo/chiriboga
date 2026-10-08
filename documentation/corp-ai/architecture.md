@@ -117,7 +117,13 @@ strength. It also reuses the Runner active-card view, a Corp-owned run
 calculator, and plan-independent outermost/one-shot bypass checks. Plan
 membership, rez affordability, restricted-credit allocation and the selected
 outermost relevant ICE remain per plan. The context never enters the
-per-decision cache or crosses into another real or hypothetical evaluation.
+per-decision cache or crosses into another real or hypothetical evaluation. When an enabled Runner
+provider reports positive `AIRunRestrictedCredits(server)`, each funded ICE
+plan uses the shared run calculator to allocate those credits across restricted
+payments and finite reruns. Empty providers retain scalar evaluation. The
+planner uses `AIWithRunContext` to restore run state and guard the security
+cache. `AIPreferredUpgradeServer(legalServers)` overrides the generic upgrade
+placement target, including a `null` result that holds the card.
 
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent

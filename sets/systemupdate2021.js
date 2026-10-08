@@ -290,7 +290,7 @@ cardSet[31004] = {
 	  //archives only
 	  if (server == corp.archives) { 
 		  //require successful run
-		  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		  if (ServerSuccessfulRunPrevented(server)) return 0;
 		  //only play if there are cards worth retrieving from heap
 		  if (this.SharedPreferredCard()) 
 		  return 1.5; //arbitrary, for getting that important card install
@@ -1350,14 +1350,14 @@ cardSet[31019] = {
   //indicate bonus to accesses (when active)
   AIAdditionalAccess: function(server) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
       if (server != corp.HQ) return 0;
       return 2;
   },
   //don't define AIWouldPlay for run events, instead use AIRunEventExtraPotential(server,potential) and return float (0 to not play)
   AIRunEventExtraPotential: function(server,potential) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
 	  //use HQ with no unrezzed ice
 	  if (server == corp.HQ) {
 		var unrezzedIceThisServer = 0;
@@ -1818,7 +1818,7 @@ cardSet[31023] = {
   AIRunAbilityExtraPotential: function(server,potential) {
 	  if (server == corp.archives) {
 		//require successful run
-		if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		if (ServerSuccessfulRunPrevented(server)) return 0;
 		//this works because in the AI, HQ potential is calculated and stored before Archives is calculated
 		var HQpotential = runner.AI._getCachedPotential(corp.HQ);
 		if (HQpotential > potential) {
@@ -1985,7 +1985,7 @@ cardSet[31024] = {
   AIRunExtraPotential: function(server,potential) {
 	  if (!this.madeSuccessfulRunOnChosenServerThisTurn && server == this.chosenServer) {
 		//require successful run
-		if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		if (ServerSuccessfulRunPrevented(server)) return 0;
 		//Runner AI knows that this will prevent usual breach so this will probably be the full potential (except e.g. Red Team combo)
 	    //the choice of 1.5 is to prevent the AI from considering it a worthless run
 		return 1.5;
@@ -2418,7 +2418,7 @@ cardSet[31029] = {
   //indicate bonus to accesses (when active)
   AIAdditionalAccess: function(server) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
       if (server != corp.RnD) return 0;
       return 2;
   },
@@ -2427,7 +2427,7 @@ cardSet[31029] = {
 	  //use The Maker's Eye only for R&D with no unrezzed ice
 	  if (server == corp.RnD) {
 	    //require successful run
-	    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	    if (ServerSuccessfulRunPrevented(server)) return 0;
 		var unrezzedIceThisServer = 0;
 		for (var i = 0; i < server.ice.length; i++) {
 		  if (!server.ice[i].rezzed) unrezzedIceThisServer++;
@@ -3294,7 +3294,7 @@ cardSet[31037] = {
   //don't define AIWouldPlay for run events, instead use AIRunEventExtraPotential(server,potential) and return float (0 to not play)
   AIRunEventExtraPotential: function(server,potential) {
 	//require successful run
-	if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0; // don't use
+	if (ServerSuccessfulRunPrevented(server)) return 0; // don't use
 	//not worth it if run is expensive for no benefit (the 0.5 and 4 are arbitrary)
 	if ( potential < 0.5 && (server.ice.length > 0 || Credits(runner) > 4) ) return 0;
 	//use Dirty Laundry only if there are no unrezzed ice
@@ -6376,6 +6376,9 @@ cardSet[31079] = {
 		if (attackedServer == GetServer(this)) return 1;
 		return 0;
     },
+  },
+  AIPreventsSuccessfulRun: function (server) {
+    return GetServer(this) == server;
   },
   AIDefensiveValue: function(server) {
 	//don't install in a new server

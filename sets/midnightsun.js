@@ -111,7 +111,7 @@ cardSet[33002] = {
 	  //HQ only
 	  if (server == corp.HQ) { 
 		  //require successful run
-		  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		  if (ServerSuccessfulRunPrevented(server)) return 0;
 		  //use only if there are no unrezzed ice/root
 		  var cardsThisServer = server.ice.concat(server.root);
 		  for (var i=0; i<cardsThisServer.length; i++) {

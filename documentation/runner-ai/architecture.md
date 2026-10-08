@@ -416,3 +416,9 @@ Contracts are in `documentation/ai.md`, which has no entry yet for
 | `AIReducesTrashCost` | `CalculatePieceBegin()` | Trash-cost discount |
 | `AIAccessTriggerPriority`, `AIBreachReplacementValue` | Run Accessing, Run 5.1 | Access and breach choices |
 | `AIDefensiveValue` | `_serverIsProtected()` | Visible root defence |
+
+Public successful-run benefits use `ServerSuccessfulRunPrevented(server)`,
+which queries rezzed, enabled upgrades through `AIPreventsSuccessfulRun`.
+Crisium Grid and Flagship both declare that capability. Finite-run continuation
+caches distinguish remaining meat-damage prevention and consumed outside-credit
+damage opportunities as well as credit, click and damage budgets.
