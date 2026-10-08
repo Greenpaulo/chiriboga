@@ -54,6 +54,11 @@ on 8 processes. `--jobs <n>` sets the number of processes; the default is your
 CPU count minus 2. Without `--out`, the report goes to `.ai-batch-cache/`,
 which Git ignores.
 
+If a worker exits with `SIGSEGV`, the runner prints a warning and retries that
+same seed, deck pair, fixture and options once in a fresh worker, retaining
+completed games. A second crash for that game, or any other unexpected worker
+exit, aborts the batch without publishing an incomplete report.
+
 The terminal shows a summary for each deck pair:
 
 ```

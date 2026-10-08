@@ -85,6 +85,29 @@ const EXTRA_DRAW = side => `
 `;
 
 (async () => {
+  await scenario('missing deck definitions fail before games; pair ids must be unique', () => {
+    const invalidDeck = setupFile('missing-cards', 'registerPrecon(' + JSON.stringify({
+      identity: '99999', cards: {'99998': 3},
+    }) + ');');
+    const invalidFile = path.relative(path.join(root, 'precons'), invalidDeck);
+    const testPool = Object.assign({}, pool, {pairs: [gateway,
+      {id: 'missing', corp: invalidFile, runner: gateway.runner}]});
+    const file = path.join(tmp, 'missing-pool.json');
+    fs.writeFileSync(file, JSON.stringify(testPool));
+    const missing = /cards 99999, 99998 have no definition in the loaded sets/;
+    assert.throws(() => batch.buildConfig(batch.parseArgs(['--pool', file])), missing);
+    assert.throws(() => game({corpFile: invalidFile}), missing,
+      'direct headless games also explain missing definitions');
+    const result = cli(['--pool', file, '--seeds', '1-1']);
+    assert.strictEqual(result.status, 2, result.out);
+    assert.match(result.out, missing);
+    assert.ok(!/games,/.test(result.out), 'validation happens before batch progress');
+    const selected = batch.buildConfig(batch.parseArgs(['--pool', file, '--pairs', gateway.id]));
+    assert.deepStrictEqual(selected.pairs, [gateway], 'unselected missing decks do not block a batch');
+    fs.writeFileSync(file, JSON.stringify(Object.assign({}, pool, {pairs: [gateway, gateway]})));
+    assert.throws(() => batch.loadPool(file), /Duplicate deck pair id in pool: gateway/);
+  });
+
   await scenario('CLI value options require operands, including both comparison reports', () => {
     for (const option of ['--budget', '--pool', '--games', '--seeds', '--pairs', '--jobs', '--timeout', '--out',
       '--side', '--start', '--start-tag', '--corp-option', '--runner-option', '--collector', '--guard',
@@ -170,6 +193,57 @@ const EXTRA_DRAW = side => `
       assert.strictEqual(r.status, 2, r.out);
       assert.match(r.out, /Worker exited before returning gateway seed 1/);
       assert.ok(!fs.existsSync(out), 'an incomplete report must not be published');
+    }
+  });
+
+  await scenario('SIGSEGV retries the identical job once and rejects a repeated crash', () => {
+    const baselineOut = path.join(tmp, 'retry-baseline.json');
+    const args = ['--pairs', 'gateway', '--seeds', '1-3', '--jobs', '2'];
+    const baseline = cli([...args, '--out', baselineOut]);
+    assert.strictEqual(baseline.status, 0, baseline.out);
+    for (const repeat of [false, true]) {
+      const attempts = path.join(tmp, 'retry-attempts-' + repeat + '.jsonl');
+      const preload = setupFile('worker-segv-' + repeat, `
+        const fs = require('fs');
+        const attempts = ${JSON.stringify(attempts)};
+        if (process.argv.includes('--worker')) {
+          process.prependListener('message', job => {
+            if (job.seed !== '1') return;
+            const first = !fs.existsSync(attempts);
+            fs.appendFileSync(attempts, JSON.stringify(job) + '\\n');
+            if (first || ${repeat}) process.exit(77);
+          });
+        } else {
+          // Simulate a native signal in the parent without crashing Node itself.
+          const cp = require('child_process');
+          const fork = cp.fork;
+          cp.fork = function(...args) {
+            const child = fork.apply(this, args);
+            const emit = child.emit;
+            child.emit = function(event, ...values) {
+              if (event === 'exit' && values[0] === 77) values = [null, 'SIGSEGV'];
+              return emit.call(this, event, ...values);
+            };
+            return child;
+          };
+        }
+      `);
+      const out = path.join(tmp, 'worker-segv-' + repeat + '.json');
+      const result = cli([...args, '--out', out], {NODE_OPTIONS: '--require ' + JSON.stringify(preload)});
+      assert.match(result.out, /signal SIGSEGV\); retrying once in a fresh worker/);
+      const dispatched = fs.readFileSync(attempts, 'utf8').trim().split('\n').map(JSON.parse);
+      assert.strictEqual(dispatched.length, 2, 'at most one retry');
+      assert.deepStrictEqual(dispatched[1], dispatched[0], 'retry preserves the entire job');
+      if (repeat) {
+        assert.strictEqual(result.status, 2, result.out);
+        assert.match(result.out, /signal SIGSEGV\) after retry/);
+        assert.ok(!fs.existsSync(out), 'a repeated crash must not publish an incomplete report');
+      } else {
+        assert.strictEqual(result.status, 0, result.out);
+        assert.deepStrictEqual(stable(JSON.parse(fs.readFileSync(out, 'utf8'))).games,
+          stable(JSON.parse(fs.readFileSync(baselineOut, 'utf8'))).games,
+          'all games retain their seeded results, including completed sibling games');
+      }
     }
   });
 

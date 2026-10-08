@@ -2118,7 +2118,7 @@ cardSet[26060] = {
   responseOnRez: {
     Resolve: function () {
       Log("Trebuchet rezzed: Corp takes 1 bad publicity");
-      AddBadPublicity(1);
+      BadPublicity(1);
     },
     automatic: true,
   },
