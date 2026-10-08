@@ -4797,7 +4797,8 @@ cardSet[36058] = {
     },
   ],
   AITriggerInPaidWindow: function () {
-    return !!attackedServer && attackedServer == GetServer(this) && approachIce < 0 &&
+    return !!attackedServer && attackedServer == GetServer(this) &&
+      (approachIce < 0 || (currentPhase.identifier == "Run 4.5" && approachIce == 0)) &&
       this.AIGlobalETRUses(attackedServer) > 0;
   },
   AIGlobalETRUses: function (server) {
