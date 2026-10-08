@@ -155,6 +155,7 @@ vm.runInContext(fs.readFileSync(path.join(root, 'utility.js'), 'utf8'), c);
 const real = {ChoicesTriggerableAbilities: c.ChoicesTriggerableAbilities,
   ChoicesAbility: c.ChoicesAbility, ActiveCards: c.ActiveCards};
 Object.assign(c, saved, real);
+vm.runInContext(fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8'), c);
 vm.runInContext(fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8') + '\nthis.ai = new CorpAI();', c);
 const ai = c.ai; ai._log = () => {};
 c.InstalledCards = player => installed.filter(card => card.player === player);
@@ -285,6 +286,23 @@ assert.strictEqual(ai.Choice(['rez', 'n'], 'command'), 0);
 assert.strictEqual(ai.preferred.cardToRez, liveLuana);
 c.executingCommand = 'rez';
 assert.strictEqual(ai.Choice([{card: liveLuana}], 'select'), 0);
+c.executingCommand = '';
+// Luana must leave the only affordable rez for the approached defensive ICE.
+const defensiveIce = {...barrier, rezzed: false};
+luanaServer.ice = [defensiveIce]; luanaServer.root.push(prize);
+installed = [liveLuana, defensiveIce, prize]; corp.creditPool = defensiveIce.rezCost;
+c.attackedServer = luanaServer; c.approachIce = 0;
+c.currentPhase = {identifier: 'Run 2.1', title: 'Approach ice'};
+const originalIceWorthRezzing = ai._iceWorthRezzing;
+ai._iceWorthRezzing = () => true;
+ai.preferred = null;
+assert.strictEqual(ai.Choice(['rez', 'n'], 'command'), 0);
+assert.strictEqual(ai.preferred.cardToRez, defensiveIce,
+  'the actual command selector preserves ICE rez funds instead of choosing Luana');
+ai._iceWorthRezzing = originalIceWorthRezzing;
+c.attackedServer = null; luanaServer.ice = []; luanaServer.root = [liveLuana];
+installed = [liveLuana]; corp.creditPool = 8;
+c.currentPhase = {identifier: 'Runner 2.2', title: 'Runner turn ends'};
 c.executingCommand = ''; corp.badPublicity = 0; ai.preferred = null;
 assert.strictEqual(ai.Choice(['rez', 'n'], 'command'), 1, 'no bad publicity means no economy rez');
 corp.badPublicity = 1;
@@ -442,7 +460,7 @@ threatened.root = []; c.playerTurn = corp; runner.grip = [];
 // Complete-run modelling must still see Event Horizon after it was passed.
 vm.runInContext(fs.readFileSync(path.join(root, 'runcalculator.js'), 'utf8') + '\nthis.rc = new RunCalculator();', c);
 const rc = c.rc; rc.suppressOutput = true; rc._log = () => {};
-vm.runInContext(fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8') + '\nthis.runnerAI = new RunnerAI();', c);
+vm.runInContext('this.runnerAI = new RunnerAI();', c);
 runner.AI = c.runnerAI; runner.AI.rc = rc; runner.AI._log = () => {};
 c.PlayerCanLook = (player, card) => !!card.rezzed;
 c.Strength = card => card.strength;
@@ -518,6 +536,39 @@ assert(rc.Calculate(threatened, 3, 5, 1, Infinity, Infinity, false, null).length
   'each run receives its own bad-publicity credit');
 assert.strictEqual(rc.Calculate(threatened, 3, 4, 1, Infinity, Infinity, false, null).length, 0,
   'fresh bad-publicity credits still cannot substitute for five required pool credits');
+// Before a run, the Runner caller includes bad publicity in poolCreditLimit.
+// A stopped attempt spending fewer than those credits cannot carry them over.
+corp.badPublicity = 2;
+const rerunToll = {...toll, AIImplementIce: (calculator, result) => {
+  result.sr = [[['payCredits', 'payCredits', 'payCredits']]]; return result;
+}};
+threatened.ice = [liveHorizon, rerunToll]; installed = [liveHorizon, rerunToll];
+const continuationData = {server: threatened, clickLimit: 3, poolCreditLimit: 2,
+  otherCredits: 0, damageLimit: Infinity, tagLimit: Infinity};
+assert.strictEqual(rc._finiteRunContinuations(continuationData, rc.EmptyPoint(-1), liveHorizon).length, 0,
+  'zero permanent credits cannot pay a three-credit rerun with two fresh bad-publicity credits');
+for (const firstSpend of [0, 1, 2, 3]) {
+  const attempt = rc.EmptyPoint(-1); attempt.runner_credits_spent = firstSpend;
+  const data = {...continuationData, poolCreditLimit: 3};
+  const continuations = rc._finiteRunContinuations(data, attempt, liveHorizon);
+  assert.strictEqual(continuations.length > 0, firstSpend <= 2,
+    'rerun affordability uses permanent credits remaining after the first attempt');
+  if (continuations.length) {
+    assert.strictEqual(continuations[0].runner_credits_reserved, 1 + Math.max(0, 2 - firstSpend));
+    assert(rc.ValidPoint(continuations[0], Infinity, 3, 3, 0, Infinity),
+      'outer validation reserves expired first-run credits as well as rerun spending');
+  }
+}
+const lostCreditAttempt = rc.EmptyPoint(-1); lostCreditAttempt.runner_credits_lost = 1;
+assert.strictEqual(rc._finiteRunContinuations({...continuationData, poolCreditLimit: 3},
+  lostCreditAttempt, liveHorizon).length, 0,
+  'losing a permanent credit does not spend temporary bad-publicity credits');
+c.attackedServer = threatened;
+const midrun = rc._finiteRunContinuations({...continuationData, poolCreditLimit: 1, otherCredits: 2},
+  rc.EmptyPoint(-1), liveHorizon);
+assert(midrun.length > 0, 'during a run temporary credits are separate from the permanent pool');
+assert.strictEqual(midrun[0].runner_credits_reserved, 1);
+c.attackedServer = null;
 corp.badPublicity = 0;
 const secondHorizon = {...liveHorizon};
 threatened.ice = [liveHorizon, secondHorizon]; installed = [liveHorizon, secondHorizon];
@@ -525,6 +576,11 @@ assert.strictEqual(rc.Calculate(threatened, 1, 20, 0, Infinity, Infinity, false,
   'two independent sacrifices require two additional run clicks');
 assert(rc.Calculate(threatened, 2, 20, 0, Infinity, Infinity, false, null).length > 0,
   'both finite sacrifices can be exhausted');
+
+corp.badPublicity = 10;
+assert(rc.Calculate(threatened, 2, 10, 0, Infinity, Infinity, false, null).length > 0,
+  'nested continuations do not expire bad-publicity credits from a permanent-only pool');
+corp.badPublicity = 0;
 
 // Successful-run damage applies to the eventual breach, not the stopped run.
 threatened.ice = [liveHorizon]; publicAgenda.usedThisTurn = false; publicAgenda.advancement = 1;

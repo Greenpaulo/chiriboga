@@ -131,6 +131,13 @@ worth-keeping count when cached potential is below 2) and tags (min(clicks, half
 the pool) minus current tags). If a click would remain after the run, grip
 cards' `AIGripRunPotential(server)` add potential (after caching).
 
+Complete-run planning against public self-consuming defenses such as Event
+Horizon reserves another run click and calculates the follow-up through a local
+ICE overlay. Each attempt receives fresh bad-publicity credits. Unspent
+first-attempt bad-publicity credits expire; `_finiteRunContinuations()` removes
+them from the next pool budget and includes them in `runner_credits_reserved`
+for outer `ValidPoint()` validation. Credit losses consume permanent credits.
+
 **Choosing.** Each potential gets `0.2 * this._random() - 0.1` of jitter, one
 roll per server per decision (`serverList` is rebuilt once per
 `_internalChoiceDetermination()`). **Randomness (D2):** all Runner AI policy
@@ -176,7 +183,10 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   ICE are guessed from advancement and Corp credits (Pharos, Hortum, Ice Wall,
   or a Sentry with net damage plus pay-or-ETR); ICE behind the first unseen one
   are assumed weaker. Active cards' `AIModifyIceAI(iceAI, startIceIdx)` adjust
-  the result.
+  the result. Rielle "Kit" Peddler shares `_AIFirstIceToEncounter` between that
+  modifier and `AIMatchingBreakerInstalled`, so an installed Decoder covers the
+  first ICE that would actually be encountered, including a rezzed inner ICE
+  behind an unrezzed outer one.
 - Search is a depth-first stack with best-cost pruning, capped at 1000 loops.
   `Directions()` collects `IceAct()` moves (`AIImplementBreaker`) from active
   cards and the bonus breaker, rejects unused pumps and expands subroutine
@@ -406,3 +416,9 @@ Contracts are in `documentation/ai.md`, which has no entry yet for
 | `AIReducesTrashCost` | `CalculatePieceBegin()` | Trash-cost discount |
 | `AIAccessTriggerPriority`, `AIBreachReplacementValue` | Run Accessing, Run 5.1 | Access and breach choices |
 | `AIDefensiveValue` | `_serverIsProtected()` | Visible root defence |
+
+Public successful-run benefits use `ServerSuccessfulRunPrevented(server)`,
+which queries rezzed, enabled upgrades through `AIPreventsSuccessfulRun`.
+Crisium Grid and Flagship both declare that capability. Finite-run continuation
+caches distinguish remaining meat-damage prevention and consumed outside-credit
+damage opportunities as well as credit, click and damage budgets.

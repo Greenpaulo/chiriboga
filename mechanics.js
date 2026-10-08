@@ -1394,7 +1394,7 @@ function SpendCredits(
     //decision is needed; spend it and then handle any pool remainder.
     var usablePoolCredits = canUsePool ? player.creditPool : 0;
     var minimumHostedSpend = Math.max(0, num - usablePoolCredits);
-    var maximumHostedSpend = Math.min(num, sources[0].credits);
+    var maximumHostedSpend = sources.length == 1 ? Math.min(num, sources[0].credits) : 0;
     if (
       temporary < 1 && sources.length == 1 &&
       minimumHostedSpend > 0 &&

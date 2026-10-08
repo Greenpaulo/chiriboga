@@ -116,12 +116,8 @@ class RunCalculator {
     if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
       //ice is known, calculate specifics
       //start with basic details
-	  //we need to pretend it's an encounter
-	  var stored = AIIceEncounterSaveState();
-	  AIIceEncounterModifyState(ice);
-      result.strength = this._baseStrength(ice);
-	  //then restore reality
-	  AIIceEncounterRestoreState(stored);
+	  //we need to pretend it's an encounter (reality is restored afterwards)
+      result.strength = AIWithIceEncounter(ice, () => this._baseStrength(ice));
       result.sr = [];
       result.subTypes = [].concat(ice.subTypes);
 
@@ -1265,28 +1261,36 @@ class RunCalculator {
     var firstDamage = this.TotalDamage(this.TotalEffect(icePoint));
     var futureOther = this._poolOnly ? 0 : (corp.badPublicity || 0);
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
-    var futurePool = data.poolCreditLimit - firstPoolSpent;
+    // Before a run, bad-publicity credits are included in the pool budget.
+    // Unspent temporary credits expire; credit losses consume permanent credits.
+    var expiredCredits = attackedServer || this._continuationRun ? 0 : Math.max(0,
+      futureOther - Math.max(0, icePoint.runner_credits_spent - data.otherCredits));
+    var futurePool = data.poolCreditLimit - firstPoolSpent - expiredCredits;
     var futureDamage = data.damageLimit - firstDamage;
     // Different break paths often leave identical continuation budgets. Cache
     // only within this synchronous board snapshot, never across game actions.
     if (!data.continuationCache) data.continuationCache = new Map();
-    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit, icePoint.restrictedCreditsSpent || 0].join(":");
+    var rawMeat = (icePoint.creditSpendDamage || 0) * Number(icePoint.runner_credits_spent > 0) +
+      icePoint.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
+    var remainingPrevention = Math.max(0, this._meatDamagePrevention - rawMeat);
+    var spentOutside = icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0;
+    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit,
+      icePoint.restrictedCreditsSpent || 0, remainingPrevention, Number(spentOutside)].join(":");
     var routes = data.continuationCache.get(cacheKey);
     if (!routes) {
       var future = new RunCalculator();
       future.suppressOutput = true;
       future._runnerPlanning = true;
       future._securityPlanning = this._securityPlanning;
+      future._continuationRun = true; // fresh bad-publicity credits are in otherCredits
       future._ignoredIce = new Set(this._ignoredIce);
       future._ignoredIce.add(defender);
       future._restrictedCreditsUsed = (this._restrictedCreditsUsed || 0) + (icePoint.restrictedCreditsSpent || 0);
       future._creditPolicyBranch = !!this._poolOnly;
       future._poolOnly = !!this._poolOnly;
       future._creditDamageIgnored = new Set(this._creditDamageIgnored || []);
-      var rawMeat = (icePoint.creditSpendDamage || 0) * Number(icePoint.runner_credits_spent > 0) +
-        icePoint.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
-      future._meatPreventionOverride = Math.max(0, this._meatDamagePrevention - rawMeat);
-      if (icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0)
+      future._meatPreventionOverride = remainingPrevention;
+      if (spentOutside)
         for (var source of this._creditSpendSources) future._creditDamageIgnored.add(source.card);
       routes = future.Calculate(data.server, futureClicks, futurePool, futureOther,
         futureDamage, data.tagLimit, false, null);
@@ -1296,7 +1300,7 @@ class RunCalculator {
       var last = route[route.length - 1];
       var result = this.CopyPoint(icePoint);
       result.iceIdx = -1;
-      result.runner_credits_reserved = (last.runner_credits_reserved || 0) +
+      result.runner_credits_reserved = expiredCredits + (last.runner_credits_reserved || 0) +
         Math.max(0, last.runner_credits_spent - (last.paymentPoolOnly ? 0 : futureOther) - (last.restrictedCreditsPaid || 0)) + last.runner_credits_lost;
       result.runner_clicks_spent += 1 + last.runner_clicks_spent;
       result.virus_counters_spent += last.virus_counters_spent;

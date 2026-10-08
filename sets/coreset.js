@@ -718,7 +718,7 @@ coreSet[1018] = {
     // Only HQ
     if (server != corp.HQ) return 0;
     // Check for Crisium Grid
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     
     // Calculate economic value
     var corpCredits = corp.creditPool;
