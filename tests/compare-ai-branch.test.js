@@ -5,6 +5,7 @@ const os = require('os');
 const path = require('path');
 const {spawnSync} = require('child_process');
 const {compareBranch} = require('../scripts/compare-ai-branch');
+const {parseFormat} = require('../scripts/ai-benchmark-format');
 
 let cases = 0;
 function test(name, fn) {
@@ -40,6 +41,15 @@ test('missing baseline stops before running games', root => {
   fs.unlinkSync(path.join(root, 'bench/current/baseline.json'));
   assert.throws(() => compareBranch(root, () => assert.fail('must not run')), /Missing.*baseline/);
 });
+test('beginner comparison protects the startup baseline', root => {
+  fs.mkdirSync(path.join(root, 'bench/startup/current'), {recursive: true});
+  const baseline = path.join(root, 'bench/startup/current/baseline.json');
+  fs.writeFileSync(baseline, '{"accepted":"startup"}');
+  fs.writeFileSync(path.join(root, '.git/HEAD'), 'ref: refs/heads/startup/current/baseline\n');
+  assert.throws(() => compareBranch(root, () => assert.fail('must not run')),
+    /would overwrite bench\/startup\/current\/baseline.json/);
+  assert.strictEqual(fs.readFileSync(baseline, 'utf8'), '{"accepted":"startup"}');
+});
 test('detached HEAD stops before running games', root => {
   fs.writeFileSync(path.join(root, '.git/HEAD'), '0123456789012345678901234567890123456789\n');
   assert.throws(() => compareBranch(root, () => assert.fail('must not run')), /named branch/);
@@ -51,5 +61,38 @@ test('failed benchmark never runs comparison', root => {
     throw new Error('benchmark failed');
   }), /benchmark failed/);
   assert.strictEqual(calls, 1);
+});
+test('startup uses its own pool, output and current baseline', root => {
+  const calls = [];
+  fs.mkdirSync(path.join(root, 'bench/startup/current'), {recursive: true});
+  fs.writeFileSync(path.join(root, 'bench/startup/current/baseline.json'), '{}');
+  assert.strictEqual(compareBranch(root, args => calls.push(args), 'startup'),
+    'bench/startup/pr/fix-11.json');
+  assert.deepStrictEqual(calls, [
+    ['scripts/ai-batch.js', '--pool', 'tests/fixtures/ai-batch/deck-pool-startup-format.json',
+      '--seeds', '1-200', '--out', 'bench/startup/pr/fix-11.json'],
+    ['scripts/ai-batch.js', '--compare', 'bench/startup/current/baseline.json', 'bench/startup/pr/fix-11.json'],
+  ]);
+  fs.writeFileSync(path.join(root, '.git/HEAD'), 'ref: refs/heads/current/baseline\n');
+  assert.throws(() => compareBranch(root, () => assert.fail('must not run'), 'startup'), /would overwrite/);
+});
+test('startup never falls back to beginner baseline', root => {
+  assert.throws(() => compareBranch(root, () => assert.fail('must not run'), 'startup'),
+    /Missing bench\/startup\/current\/baseline.json.*refresh-ai-baseline.js --format startup/);
+});
+test('both entry points reject invalid flags before launching a benchmark', () => {
+  assert.strictEqual(parseFormat([], 'script.js'), 'beginner');
+  for (const format of ['beginner', 'startup']) {
+    assert.strictEqual(parseFormat(['--format', format], 'script.js'), format);
+  }
+  for (const script of ['compare-ai-branch.js', 'refresh-ai-baseline.js']) {
+    for (const args of [['--format'], ['--format', 'unknown'], ['--unknown'], ['--startup']]) {
+      const result = spawnSync(process.execPath, [path.resolve(__dirname, '../scripts', script), ...args],
+        {encoding: 'utf8'});
+      assert.strictEqual(result.status, 1);
+      assert.match(result.stderr, /Usage:|Unknown benchmark format/);
+      assert.strictEqual(result.stdout, '');
+    }
+  }
 });
 console.log(`${cases} branch comparison cases passed.`);
