@@ -2679,4 +2679,14 @@ hypeMachine.trashable = true;
 hypeMachine.server = null;
 assert.strictEqual(hypeMachine.abilities[0].Enumerate.call(hypeMachine).length, 0);
 
-console.log('Vantage Point integration and Batch 1-11 behavior checks passed.');
+// Batch 12 definitions expose their shared engine and AI entry points.
+const batch12Agenda = context.cardSet[36056];
+assert(batch12Agenda.automaticOnInstall.availableWhenInactive);
+assert(batch12Agenda.responseOnRunSuccessful.availableWhenInactive);
+assert.strictEqual(context.cardSet[36057].unique, true);
+assert.strictEqual(context.cardSet[36057].bad_publicity, 0);
+assert.strictEqual(typeof context.cardSet[36057].interruptOnUninstall.Resolve, 'function');
+assert.deepStrictEqual([36058, 36059, 36060].map(id => context.cardSet[id].subroutines.length), [2, 2, 3]);
+assert.strictEqual(context.cardSet[36060].abilities[0].availableFromHQ, true);
+
+console.log('Vantage Point integration and Batch 1-12 behavior checks passed.');

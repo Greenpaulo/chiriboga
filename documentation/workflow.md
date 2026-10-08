@@ -28,6 +28,7 @@ Why the workflow is set up this way is explained in
 | 5. Finish | Codex, then terminal | `$address-pr-review <PR>` for any findings, on the same PR; once CodeRabbit approves, merge the PR, then run each ticket's post-merge move command and commit the ticket move | The ticket in `done/`, or back in the open ticket root with a generated blocker when review passes but its gate is pending |
 | Gate (fallback) | Terminal | Only if Codex handed off with `**Gate:** pending F4` because the gate could not finish in its session: run the `**Gate command:**` from the ticket's Resolution (about 15–20 min), then `$implement-ticket <ticket>` with the output | The result recorded and the option switched on if it passed |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
+| Card batch review | Codex, fresh chat | `$review-card-batch <set> <batch>` | Independent per-card AI evidence and verdict; incomplete batches reopened for repair |
 | PR feedback | Codex, PR branch | `$address-pr-review <PR>` | Each review comment verified and accepted, adapted, rejected or marked obsolete; supported fixes applied and tested |
 
 Codex can also do steps 1 and 4 itself (`$triage-log <log>`, `$review-ticket
@@ -128,7 +129,15 @@ triage.
 Card-set implementation runs one batch at a time from
 `documentation/new-sets/current-set-implementation.md`. See
 [card-set-agent-operator-guide.md](new-sets/card-set-agent-operator-guide.md)
-for setup, blocked batches and the final set-wide review.
+for setup, blocked batches and the final set-wide review. Each batch must deliver
+strategic AI support alongside mechanics, including tests of useful activations,
+resource tradeoffs, targeting and competing actions through the actual selectors
+or planners. The final review verifies that support; it is not where unfinished
+card strategy is scheduled. Use `$review-card-batch <set> <batch>` for an
+independent strategic audit of a completed batch; findings and snapshot evidence
+are recorded under `documentation/new-sets/reviews/`, and necessary repairs
+reopen the implementation queue. A necessary AI dependency that exceeds a batch's
+scope blocks completion and must be recorded in the tracker.
 
 ## 🗺️ Roadmaps
 
@@ -194,6 +203,13 @@ Free, deterministic steps that agents (and you) run instead of reading files:
   `node tests/run-all-tests.js` fails. It is sent back to fix the failure up to
   twice, then must report it. Codex asks you to trust the hook (or use `/hooks`)
   the first time and again whenever the hook file changes.
+  The repository pins Node in `.nvmrc`. The hook resolves that installed nvm
+  executable directly and puts its directory first on the suite's PATH, so an
+  old Node inherited by the hook shell cannot produce false regression failures.
+  Without the pinned nvm installation, a current Node of at least the pinned
+  major version is accepted. An older runtime produces an explicit setup error
+  before tests run. Use `nvm install` and `nvm use` from the repository for manual
+  checks; this does not change your global Node default.
 - **Ticket check** (`scripts/ticket.js check`): fails when a fixed ticket has no
   starting commit in its Resolution, its reproduction is still pending or had
   its assertions or `EXPECT` lines changed, any test fails, or a gated ticket

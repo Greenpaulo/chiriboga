@@ -53,8 +53,29 @@ const relevant = changed.filter(file =>
   file.endsWith('.js') || file.startsWith('tests/') || file === 'documentation/ai.md');
 if (!relevant.length) { resetCount(); process.exit(0); }
 
-const run = spawnSync(process.execPath, [path.join(root, 'tests', 'run-all-tests.js')],
-  {cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
+// Hook shells may inherit an old global Node even when interactive terminals
+// use nvm. Resolve the repository pin directly, without changing that shell.
+const nodeVersion = fs.readFileSync(path.join(root, '.nvmrc'), 'utf8').trim().replace(/^v/, '');
+const nvmRoot = process.env.NVM_DIR || path.join(os.homedir(), '.nvm');
+const pinnedNode = path.join(nvmRoot, 'versions', 'node', 'v' + nodeVersion, 'bin', 'node');
+let suiteNode = process.execPath;
+if (fs.existsSync(pinnedNode)) suiteNode = pinnedNode;
+else if (Number(process.versions.node.split('.')[0]) < Number(nodeVersion.split('.')[0])) {
+  process.stdout.write(JSON.stringify({
+    decision: 'block',
+    reason: 'Stop-hook runtime mismatch: Node ' + process.versions.node +
+      " cannot run this repository's regression suite. Install the pinned runtime with " +
+      '`nvm install ' + nodeVersion + '` or put Node ' + nodeVersion.split('.')[0] +
+      '+ on the hook PATH. No tests were run.',
+  }));
+  process.exit(0);
+}
+const suiteEnv = Object.assign({}, process.env, {
+  PATH: path.dirname(suiteNode) + path.delimiter + (process.env.PATH || ''),
+});
+
+const run = spawnSync(suiteNode, [path.join(root, 'tests', 'run-all-tests.js')],
+  {cwd: root, env: suiteEnv, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 if (run.status === 0) { resetCount(); process.exit(0); }
 
 const blocks = readCount();
@@ -64,7 +85,7 @@ fs.writeFileSync(counterFile, String(blocks + 1));
 const tail = ((run.stdout || '') + (run.stderr || '')).trim().split('\n').slice(-60).join('\n');
 process.stdout.write(JSON.stringify({
   decision: 'block',
-  reason: 'node tests/run-all-tests.js fails with the current working-tree changes (' +
+  reason: 'Regression suite (Node ' + (suiteNode === pinnedNode ? nodeVersion : process.versions.node) + ') fails with the current working-tree changes (' +
     relevant.length + ' changed code/test files). Fix the failure before finishing. ' +
     'If it is pre-existing and unrelated to your change, say so explicitly in your final ' +
     'message with the failing test name instead of claiming success.\n\n' + tail,

@@ -26,6 +26,11 @@ which you only append to.
 - When claiming a batch, mark it `In progress`, record your agent name (for
   example `Codex`) and today's date under `Owner / started`, and refresh the
   status-summary counts.
+- When the queue links a batch-review report, read its latest findings before
+  editing. A reopened batch's repair must address each required finding and its
+  decision-level acceptance criteria within the same card range. Preserve the
+  report link in the handoff; implementation completion does not replace an
+  independent re-review or change the reviewer verdict to Pass.
 - Change only the selected card range, except for the smallest shared helper or
   engine fix those cards strictly require.
 
@@ -89,6 +94,13 @@ call site and document its signature, return value, timing and information
 constraints in `documentation/ai.md` in the same change. Defining and
 documenting a hook without a working consumer does not provide AI support.
 
+Before accepting a card's AI support, identify its strategic role and the real
+alternatives at each decision: install versus hold, rez versus save credits,
+activate versus preserve resources, and which target serves the current scoring,
+defense or kill plan. Use the existing planner's metrics and public information;
+a high ELO, an always-activate flag, or a legal choice alone is not evidence of
+good play. Include the opposing AI's response and resource model where relevant.
+
 Add focused tests for human mechanics and meaningful AI behaviour, including
 cleanup and negative cases. The set's focused integration test is large: read
 its setup (the first 60 or so lines) and the nearest similar test block found
@@ -98,7 +110,12 @@ For AI actions, exercise the real selector with legal options and assert the
 chosen command, card and target as applicable. Cover a useful timing window
 and a meaningful decline or expired/illegal opportunity; do not stub the
 selection path under test. For passive effects, exercise the real planner or
-run calculator instead. Direct hook-return tests are useful supplements;
+run calculator instead. Add contrasting board states that change the best decision: an immediate win
+or loss, a scarce click/credit/counter, and a realistic competing use of the
+card. Assert the strategic outcome through the real consumer, not just that the
+card is selectable. Explain the reason for the expected choice. Do not invent
+numerical tuning where an existing ranking or resource calculation suffices.
+Direct hook-return tests are useful supplements;
 `ai-hook-docs.test.js` checks documentation coverage, not action selection.
 
 Work card by card: implement one card, run the focused test, then move to the
@@ -113,10 +130,21 @@ next. Small failures are cheaper to fix than a batch's worth at once.
 - Rerun `node scripts/batch-brief.js <n>`: every card must show "no unfinished
   markers". Also check the range for empty effects and empty subroutine arrays.
 - Never remove or weaken assertions to make tests pass.
+- Audit each card against its printed strategic effects and competing actions.
+  A missing valuation, ignored scoring cost, or finite effect modelled as a
+  permanent lockout prevents completion even when every test is green. Record
+  the supported decisions and their contrasting test evidence. If a necessary
+  planner change materially exceeds the batch, leave it blocked with the exact
+  dependency; do not relabel unfinished AI support as an accepted limitation.
 - Record the relevant AI consumers and selection/planning test evidence in the
   set's implementation notes before marking the batch complete.
 
 ## 5. Update the tracker and hand off
+
+Strategic card support is delivered in this batch. The set-wide review verifies
+that support and catches omissions; it is not the planned implementation stage
+for card strategy. "Complete" means well-supported decisions within the current
+AI architecture, not a claim of mathematically optimal play.
 
 Only after every card and test in the batch is complete:
 

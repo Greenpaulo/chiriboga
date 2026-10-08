@@ -131,6 +131,13 @@ worth-keeping count when cached potential is below 2) and tags (min(clicks, half
 the pool) minus current tags). If a click would remain after the run, grip
 cards' `AIGripRunPotential(server)` add potential (after caching).
 
+Complete-run planning against public self-consuming defenses such as Event
+Horizon reserves another run click and calculates the follow-up through a local
+ICE overlay. Each attempt receives fresh bad-publicity credits. Unspent
+first-attempt bad-publicity credits expire; `_finiteRunContinuations()` removes
+them from the next pool budget and includes them in `runner_credits_reserved`
+for outer `ValidPoint()` validation. Credit losses consume permanent credits.
+
 **Choosing.** Each potential gets `0.2 * this._random() - 0.1` of jitter, one
 roll per server per decision (`serverList` is rebuilt once per
 `_internalChoiceDetermination()`). **Randomness (D2):** all Runner AI policy

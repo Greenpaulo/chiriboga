@@ -13,27 +13,33 @@ let relevant = true;
 let suitePasses = false;
 let suiteRuns = 0;
 
-function invoke(session = 'review-regression', runtimeMode) {
+function invoke(session = 'review-regression', runtime = {}) {
+  const installed = runtime.installed !== false;
+  const version = runtime.version || '20.19.0';
+  const pinnedNode = path.join('/virtual-nvm', 'versions', 'node', 'v20.19.0', 'bin', 'node');
   let output = '';
   const context = {
     __dirname: path.join(__dirname, '../scripts/agent-hooks'),
     process: {
       execPath: process.execPath,
-      versions: runtimeMode ? {node: '8.17.0'} : undefined,
-      env: runtimeMode === 'retry' ? {CHIRIBOGA_HOOK_RUNTIME_RETRY: '1'} : {},
+      versions: {node: version},
+      env: {NVM_DIR: '/virtual-nvm', PATH: '/old-node/bin',
+        ...(runtime.retry ? {CHIRIBOGA_HOOK_RUNTIME_RETRY: '1'} : {})},
       exit(code) { assert.strictEqual(code, 0); throw exit; },
       stdout: {write(text) { output += text; }},
       stderr: {write(text) { assert.fail('unexpected stderr: ' + text); }},
     },
     require(name) {
       if (name === 'path') return path;
-      if (name === 'os') return {tmpdir: () => '/virtual-temp'};
+      if (name === 'os') return {tmpdir: () => '/virtual-temp', homedir: () => '/virtual-home'};
       if (name === 'fs') return {
         readFileSync(file) {
+          if (file === path.join(hookRoot, '.nvmrc')) return '20.19.0\n';
           if (file === 0) return JSON.stringify({session_id: session});
           if (!counts.has(file)) throw new Error('missing counter');
           return counts.get(file);
         },
+        existsSync(file) { assert.strictEqual(file, pinnedNode); return installed; },
         writeFileSync(file, value) { counts.set(file, value); },
         unlinkSync(file) { counts.delete(file); },
       };
@@ -50,7 +56,8 @@ function invoke(session = 'review-regression', runtimeMode) {
             return {status: 0, stdout: JSON.stringify({decision: 'block', reason: 'forwarded'})};
           }
           if (command === 'git') return {status: 0, stdout: relevant ? ' M ai_corp.js\n' : ''};
-          assert.strictEqual(command, process.execPath, 'run the suite with Node');
+          assert.strictEqual(command, installed ? pinnedNode : process.execPath, 'use the pinned Node when installed');
+          assert.strictEqual(options.env.PATH.split(path.delimiter)[0], path.dirname(command), 'child scripts inherit the same Node');
           assert.deepStrictEqual(Array.from(args), [path.join(hookRoot, 'tests/run-all-tests.js')],
             'run the complete regression suite');
           assert.strictEqual(options.cwd, hookRoot, 'run from the repository root');
@@ -61,7 +68,7 @@ function invoke(session = 'review-regression', runtimeMode) {
       throw new Error('unexpected require: ' + name);
     },
   };
-  try { vm.runInNewContext(source, context); }
+  try { vm.runInNewContext(source.replace(/^#![^\n]*\n/, ''), context); }
   catch (error) { if (error !== exit) throw error; }
   return output ? JSON.parse(output) : null;
 }
@@ -84,8 +91,19 @@ assert.strictEqual(invoke(), null);
 assert.strictEqual(suiteRuns, runsBefore, 'skip the suite when relevant changes disappear');
 relevant = true;
 assert.strictEqual(invoke().decision, 'block', 'no relevant changes resets the session counter');
-assert.strictEqual(invoke('old-runtime', 'old').reason, 'forwarded',
+suitePasses = true;
+assert.strictEqual(invoke('older-shell', {version: '18.20.0'}), null,
+  'an old hook shell runs the complete suite under the installed pinned Node');
+assert.strictEqual(invoke('modern-without-nvm', {installed: false}), null,
+  'a supported current runtime works without nvm');
+const beforeMissingRuntime = suiteRuns;
+const mismatch = invoke('older-without-nvm', {version: '18.20.0', installed: false});
+assert.strictEqual(mismatch.decision, 'block');
+assert(mismatch.reason.includes('runtime mismatch'));
+assert(mismatch.reason.includes('nvm install 20.19.0'));
+assert.strictEqual(suiteRuns, beforeMissingRuntime, 'never misreport old-runtime errors as failing regressions');
+assert.strictEqual(invoke('old-runtime', {version: '8.17.0'}).reason, 'forwarded',
   'an inherited old runtime forwards the newer runtime result and session input');
-assert.match(invoke('old-runtime', 'retry').reason, /still older than Node 18/,
+assert.match(invoke('old-runtime', {version: '8.17.0', retry: true}).reason, /still older than Node 18/,
   'an old login-shell runtime cannot cause an infinite retry');
 console.log('Stop hook: repeated failures stay capped and successful checks reset the limit.');

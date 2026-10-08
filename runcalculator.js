@@ -14,6 +14,8 @@ class RunCalculator {
       cardStrengths: new Map(),
     };
     this._calculationActive = false;
+    this._ignoredIce = new Set();
+    this._runnerPlanning = false;
     this.reason = "error"; //for reporting
 	
 	this.bonusBreaker = null; //for hypothetical calculations
@@ -57,6 +59,8 @@ class RunCalculator {
       strength: 0,
       encounterEffects: [[]],
     };
+    // Local continuation overlay: the board is never mutated during planning.
+    if (this._ignoredIce.has(ice)) return result;
     var iceKnown = PlayerCanLook(knowledgePlayer, ice);
     if (!iceKnown) {
       //unknown ice
@@ -733,6 +737,7 @@ class RunCalculator {
       //tweak this algorithm
       result += 0.6 * spentCredits;
       result += 0.7 * p.runner_credits_lost;
+      result += 0.6 * (p.runner_credits_reserved || 0);
       result += 0.8 * p.runner_clicks_spent;
       result += 0.3 * p.virus_counters_spent;
       var totalEffect = this.TotalEffect(p);
@@ -772,7 +777,7 @@ class RunCalculator {
 	  //runner credits are 'spent' from other credits first until it is depleted, then from pool
 	  var otherCreditsLeft = otherCredits - p.runner_credits_spent;
 	  //whereas they are 'lost' from pool only
-	  var poolCreditsLeft = poolCreditLimit - p.runner_credits_lost;
+	  var poolCreditsLeft = poolCreditLimit - p.runner_credits_lost - (p.runner_credits_reserved || 0);
 	  if (otherCreditsLeft < 0) {
 		  poolCreditsLeft += otherCreditsLeft;
 		  otherCreditsLeft = 0;
@@ -892,6 +897,17 @@ class RunCalculator {
       if (runnerAI == null) runnerAI = runner.testAI;
 	  //effects that might happen regardless of breach
 	  //1 net damage for each House of Knives that hasn't been used this run
+      var publicSuccessfulRunCards = InstalledCards(corp);
+      for (var successfulIndex = 0; successfulIndex < publicSuccessfulRunCards.length; successfulIndex++) {
+        var successfulCard = publicSuccessfulRunCards[successfulIndex];
+        if (PlayerCanLook(runner, successfulCard) && CheckHasAbilities(successfulCard) &&
+            typeof successfulCard.AIRunSuccessfulDamage == "function") {
+          var successfulDamage = successfulCard.AIRunSuccessfulDamage.call(successfulCard, data.server);
+          var successfulEffects = [];
+          for (var damageIndex = 0; damageIndex < successfulDamage; damageIndex++) successfulEffects.push("netDamage");
+          if (successfulEffects.length) approachEffects.push(successfulEffects);
+        }
+      }
 	  var activeHOKs = 0;
 	  corp.scoreArea.forEach(function(item){
 		if (!attackedServer || !item.usedThisRun) {
@@ -1178,6 +1194,51 @@ class RunCalculator {
         //uncomment other console.log lines if more detail is desired to debug the run calculator
         if (!continuing && debugging && !this.suppressOutput) console.log(this.OneLiner(current,report_as));
   }
+  // A disposable server-wide stop forces another ordinary run, not a permanent
+  // lockout. Recalculate that run with a local ICE overlay and fresh bad-publicity
+  // credits. The failed attempt pays encounter costs but no successful-run or
+  // breach costs. Its path remains the current run's command plan.
+  _finiteRunContinuations(data, icePoint, defender) {
+    var firstPoolSpent = Math.max(0, icePoint.runner_credits_spent - data.otherCredits) +
+      icePoint.runner_credits_lost;
+    var firstDamage = this.TotalDamage(this.TotalEffect(icePoint));
+    var futureOther = corp.badPublicity || 0;
+    var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
+    // Before a run, bad-publicity credits are included in the pool budget.
+    // Unspent temporary credits expire; credit losses consume permanent credits.
+    var expiredCredits = attackedServer || this._continuationRun ? 0 : Math.max(0,
+      futureOther - Math.max(0, icePoint.runner_credits_spent - data.otherCredits));
+    var futurePool = data.poolCreditLimit - firstPoolSpent - expiredCredits;
+    var futureDamage = data.damageLimit - firstDamage;
+    // Different break paths often leave identical continuation budgets. Cache
+    // only within this synchronous board snapshot, never across game actions.
+    if (!data.continuationCache) data.continuationCache = new Map();
+    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit].join(":");
+    var routes = data.continuationCache.get(cacheKey);
+    if (!routes) {
+      var future = new RunCalculator();
+      future.suppressOutput = true;
+      future._runnerPlanning = true;
+      future._continuationRun = true; // fresh bad-publicity credits are in otherCredits
+      future._ignoredIce = new Set(this._ignoredIce);
+      future._ignoredIce.add(defender);
+      routes = future.Calculate(data.server, futureClicks, futurePool, futureOther,
+        futureDamage, data.tagLimit, false, null);
+      data.continuationCache.set(cacheKey, routes);
+    }
+    return routes.map(function (route) {
+      var last = route[route.length - 1];
+      var result = this.CopyPoint(icePoint);
+      result.iceIdx = -1;
+      result.runner_credits_reserved = expiredCredits + (last.runner_credits_reserved || 0) +
+        Math.max(0, last.runner_credits_spent - futureOther) + last.runner_credits_lost;
+      result.runner_clicks_spent += 1 + last.runner_clicks_spent;
+      result.virus_counters_spent += last.virus_counters_spent;
+      result.effects = result.effects.concat(last.effects);
+      return result;
+    }, this);
+  }
+
   CalculatePieceEnd(data) {
 	if (data.doInnerLoop) {
       //if (!this.suppressOutput) console.log(data.max_loops - data.num_loops_left);
@@ -1212,11 +1273,21 @@ class RunCalculator {
 		approachPoint.runner_credits_spent += data.approachOptions[j].credits;
 		approachPoint.runner_clicks_spent += data.approachOptions[j].clicks;
 		approachPoint.effects = approachPoint.effects.concat(data.approachOptions[j].effects);
-		possiblePath.push(approachPoint);
-		var validity = this.ValidPath(possiblePath, data.damageLimit, data.clickLimit, data.poolCreditLimit, data.otherCredits, data.tagLimit);
-        if (validity.valid)
-          finalpaths.push(possiblePath);
-	    else this._log("Ignoring path "+i+" due to invalid approach ("+validity.reason+")");
+        var approachPoints = [approachPoint];
+        if (!data.incomplete && runner.AI && (runner.AI.rc === this || this._runnerPlanning)) {
+          var defender = InstalledCards(corp).find(function (card) {
+            return !this._ignoredIce.has(card) && PlayerCanLook(runner, card) &&
+              typeof card.AIRunExtraRuns == "function" && card.AIRunExtraRuns.call(card, data.server) > 0;
+          }, this);
+          if (defender) approachPoints = this._finiteRunContinuations(
+            data, possiblePath[possiblePath.length - 1], defender);
+        }
+        for (var continuationIndex = 0; continuationIndex < approachPoints.length; continuationIndex++) {
+          var completedPath = possiblePath.concat([approachPoints[continuationIndex]]);
+          var validity = this.ValidPath(completedPath, data.damageLimit, data.clickLimit, data.poolCreditLimit, data.otherCredits, data.tagLimit);
+          if (validity.valid) finalpaths.push(completedPath);
+        }
+
 	  }
 	}
 	this.paths = finalpaths;

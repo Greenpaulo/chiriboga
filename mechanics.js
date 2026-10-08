@@ -469,16 +469,32 @@ function Forfeit(card, afterForfeit) {
   return true;
 }
 
+/** Finish mandatory uninstall interrupts before moving any of the cards. */
+function UninstallInterrupts(cards, afterInterrupts) {
+  cards = cards.slice();
+  function next(index) {
+    if (index >= cards.length) { afterInterrupts(); return; }
+    var card = cards[index];
+    if (card.interruptOnUninstall && CheckInstalled(card) &&
+        CheckCallback(card, "interruptOnUninstall"))
+      card.interruptOnUninstall.Resolve.call(card, function () { next(index + 1); });
+    else next(index + 1);
+  }
+  next(0);
+}
+
 /** Move an installed card to a non-installed zone and trash its hosted cards. */
 function Uninstall(card, destination, afterUninstall = null, context = null) {
-  var hosted = (card.hostedCards || []).slice();
-  MoveCard(card, destination);
-  if (hosted.length == 0) {
-    if (afterUninstall) afterUninstall.call(context);
-    return;
-  }
-  Trash(hosted, false, function () {
-    if (afterUninstall) afterUninstall.call(context);
+  UninstallInterrupts([card], function () {
+    var hosted = (card.hostedCards || []).slice();
+    MoveCard(card, destination);
+    if (hosted.length == 0) {
+      if (afterUninstall) afterUninstall.call(context);
+      return;
+    }
+    Trash(hosted, false, function () {
+      if (afterUninstall) afterUninstall.call(context);
+    });
   });
 }
 
@@ -528,6 +544,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
   //then the Enumerate ones
   //currently giving whoever's turn it is priority...not sure this is always going to be right
   TriggeredResponsePhase(playerTurn, "responseOnWouldTrash", [cards], function() {
+    UninstallInterrupts(cards, function () {
 	//loop through all the cards (move cards, lose information about HQ cards, cancel encounters if relevant, set host to null, and log message)
 	//BUT fire the on trashed trigger just once, when all this is one (i.e. for all cards at once)
 	for (var i=0; i<cards.length; i++) {
@@ -566,6 +583,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 		afterTrashing.call(context, cards);
 	  }
 	}, pseudoPhaseTitle, null, secondCallbackName, secondEnumerateParams);
+    });
   }, "Would Trash");
 }
 
