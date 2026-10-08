@@ -42,3 +42,7 @@ No benchmark or production gameplay change was performed for this ticket.
 
 New investigations, gating or enabling production AI options, and human
 playtesting are separate work. The historical source SHAs remain fixed.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #13](https://github.com/Greenpaulo/chiriboga/pull/13) merged.

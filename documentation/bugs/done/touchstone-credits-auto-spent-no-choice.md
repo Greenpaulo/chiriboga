@@ -229,3 +229,7 @@ The above is also the case any time a credit can be spent during a run, not just
 Moving to remediation until this is fixed.
 
 Original fix - commit `Addressed documentation/bugs/touchstone-credits-auto-spent-no-choice.md` on branch `24Sept-fixes`
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #11](https://github.com/Greenpaulo/chiriboga/pull/11) merged.

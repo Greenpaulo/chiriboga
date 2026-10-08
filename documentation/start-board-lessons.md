@@ -1,7 +1,7 @@
 # What went wrong with gate boards, and what fixed it
 
 Written 2026-10-02, after the hosted-Trojan rez ticket
-([corp-silently-declines-rez-of-ice-hosting-a-trojan.md](bugs/code-review/corp-silently-declines-rez-of-ice-hosting-a-trojan.md)).
+([corp-silently-declines-rez-of-ice-hosting-a-trojan.md](bugs/done/corp-silently-declines-rez-of-ice-hosting-a-trojan.md)).
 A short record for the owner, so the same mistakes are recognisable if they
 come back.
 
@@ -60,7 +60,7 @@ new way to close tickets whose gate fails.
 - The builder is roadmap item F10, in code review on branch
   `roadmap/F10-real-board-start-library`.
 - Still open: Scatter Field's crash
-  ([corp-install-choice-crashes-on-null-skip-option.md](bugs/corp-install-choice-crashes-on-null-skip-option.md)).
+  ([corp-install-choice-crashes-on-null-skip-option.md](bugs/done/corp-install-choice-crashes-on-null-skip-option.md)).
   Until it's fixed, boards from logs with Scatter Field need a recorded
   crash-fix swap.
 

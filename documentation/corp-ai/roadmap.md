@@ -120,23 +120,11 @@ cannot price yet.
 
 Shared infrastructure used by every area.
 
-### F2 Guarded hypothetical evaluation: remaining migrations
-- **Status:** in-progress
-- **Depends on:** none
-- **Ticket:** [corp_ai_finding_10_guarded_hypothetical.md](../backlog/code-review/corp_ai_finding_10_guarded_hypothetical.md)
-- **Goal:** Route every hand-written planning probe (11 inventoried functions, including Baker and runcalculator.js) through one guarded helper with a shared depth count, and ratchet new unguarded mutation.
-
 ### F3 Per-decision evaluation cache
 - **Status:** in-progress
 - **Depends on:** F2, F4
 - **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/corp_ai_finding_11_evaluate_once_per_decision.md)
 - **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
-
-### F4 Seeded AI-vs-AI batch harness
-- **Status:** in-progress
-- **Depends on:** D2, F6
-- **Ticket:** [corp_ai_finding_12_seeded_batch_harness.md](../backlog/code-review/corp_ai_finding_12_seeded_batch_harness.md)
-- **Goal:** Headless seeded AI-vs-AI games on a committed deck pool with core metrics, collectors, AI-option flags, paired comparison and committed baselines.
 
 ### F5 Mulligan weight calibration
 - **Status:** proposed
@@ -162,18 +150,15 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
-### F10 Real-board start library for gates
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [F10-real-board-start-library.md](../backlog/code-review/F10-real-board-start-library.md)
-- **Goal:** Build gate start boards from real logs with a checked builder, keep them in one tagged library, and run board-based gates under a fixed game budget.
-
 ### Done
 
 | ID | Item | Delivered by | Architecture |
 |---|---|---|---|
 | F1 | Injectable, seedable randomness | [finding 09](../backlog/done/corp_ai_finding_09_seeded_randomness.md) | [Foundations](architecture.md#foundations) |
 | F6 | Headless AI performance | [F6-headless-ai-performance](../backlog/done/F6-headless-ai-performance.md) | [Server security evaluation](architecture.md#server-security-evaluation) |
+| F2 | Guarded hypothetical evaluation: remaining migrations | [corp_ai_finding_10_guarded_hypothetical](../backlog/done/corp_ai_finding_10_guarded_hypothetical.md) | [architecture: foundations](architecture.md#foundations) |
+| F4 | Seeded AI-vs-AI batch harness | [corp_ai_finding_12_seeded_batch_harness](../backlog/done/corp_ai_finding_12_seeded_batch_harness.md) | [architecture.md](architecture.md#foundations) |
+| F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 

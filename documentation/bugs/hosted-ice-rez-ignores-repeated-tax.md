@@ -4,7 +4,7 @@
 **Source log:** `documentation/debug-logs/bug_raised/corp_didnt_rez_ice_when_would_have_forced_runner_to_spend_creds.txt`
 **Reproduction:** `tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js` — `node tests/pending/hosted-ice-rez-ignores-repeated-tax.test.js` (fails at `5b8952f`, 2026-10-02)
 
-Follows [corp-silently-declines-rez-of-ice-hosting-a-trojan.md](code-review/corp-silently-declines-rez-of-ice-hosting-a-trojan.md),
+Follows [corp-silently-declines-rez-of-ice-hosting-a-trojan.md](done/corp-silently-declines-rez-of-ice-hosting-a-trojan.md),
 which tested two ideas and adopted neither. Read its Resolution for the
 evidence.
 
@@ -110,5 +110,5 @@ Depends on: F4.
 
 ## Out of scope / related
 - Scatter Field's install subroutine crash:
-  [corp-install-choice-crashes-on-null-skip-option.md](corp-install-choice-crashes-on-null-skip-option.md).
+  [corp-install-choice-crashes-on-null-skip-option.md](done/corp-install-choice-crashes-on-null-skip-option.md).
 - Real-board start library: roadmap item F10.

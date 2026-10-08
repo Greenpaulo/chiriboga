@@ -51,3 +51,7 @@ N/A — local benchmark evidence management; no gameplay or AI policy change.
 - [x] `node tests/refresh-ai-baseline.test.js` passes all 10 cases; the full
   `node tests/run-all-tests.js` run passes all 51 test files, including Corp
   decision fixtures and decision snapshots.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #12](https://github.com/Greenpaulo/chiriboga/pull/12) merged.

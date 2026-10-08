@@ -77,7 +77,7 @@ off; seeds 1–200 per pair; 1,400 games in 344 s).
 - Per pair: pd-tao 51.5%, zwicky-magdalene 43.4%, btl-kit 34.0%, pe-steve
   22.0%, gateway 9.5%, neh-zahya 9.5%, leo-topan 5.0%.
 - 3 games failed. These are real engine bugs, now ticketed (out of scope):
-[corp-install-choice-crashes-on-null-skip-option.md](../../bugs/corp-install-choice-crashes-on-null-skip-option.md),
+[corp-install-choice-crashes-on-null-skip-option.md](../../bugs/done/corp-install-choice-crashes-on-null-skip-option.md),
 [humanoid-resources-install-stalls-game.md](../../bugs/humanoid-resources-install-stalls-game.md)
 and [scrounge-unaffordable-program-stalls-game.md](../../bugs/scrounge-unaffordable-program-stalls-game.md),
 each with a failing pending reproduction:
@@ -567,3 +567,7 @@ when:
 - [x] Baseline reuse and `--quick` work as described under "Running gates", with tests.
 - [x] Once the runner works, the same change updates the process to match: `implement-ticket` and `review-ticket` (amended with the owner, 2026-10-02: after F6 a gate takes 15–20 minutes, so the implementing agent runs it as one blocking command and the owner runs it only as a fallback, which is cheaper in tokens than a second session), `documentation/workflow.md` (the gate command in the quick reference and helper table), and `documentation/judging-ai-changes.md` (how to run a gate, how long it takes, reading the report).
 - [x] `node tests/run-all-tests.js` passes.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #13](https://github.com/Greenpaulo/chiriboga/pull/13) merged.

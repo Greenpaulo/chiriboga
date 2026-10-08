@@ -57,7 +57,7 @@ if every line holds.
 
 "Measured over many games" needs a machine to play them. That machine is
 **F4**, the seeded AI-vs-AI batch harness
-([ticket](backlog/corp_ai_finding_12_seeded_batch_harness.md)). It is a Node
+([ticket](backlog/done/corp_ai_finding_12_seeded_batch_harness.md)). It is a Node
 script, `scripts/ai-batch.js`, that plays the Corp AI against the Runner AI
 with no screen and writes a report.
 

@@ -161,3 +161,7 @@ Follow `tests/fixtures/README.md` and whichever ice/breaker test file already ex
    that point; the cause remains unresolved until the full log or execution
    path can confirm or rule out a crash, hang, or ordinary termination.
 2. `_icePlanOutcome`'s tie-break rule — prefer the cheaper of two plans that tie on lockout status and mandatory/total break cost (`ai_corp.js`, `_icePlanIsBetter`, final `return candidate.rezCost < current.rezCost;`) — is a reasonable, deliberate piece of design (don't pay to rez redundant ice) and is flagged here only because it's what made this particular bug's symptom read as "Syailendra omitted" turn after turn rather than something more obviously wrong.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #20](https://github.com/Greenpaulo/chiriboga/pull/20) merged.

@@ -217,7 +217,7 @@ changed 0 of 1,397 deck-pool games. On the unmodified log board, all 28 of
   break the ice.
 - Scatter Field's install subroutine offers a `card: null` Decline option and
   crashes the Corp AI the same way as Humanoid Resources. It is added to the
-  open ticket [corp-install-choice-crashes-on-null-skip-option.md](../corp-install-choice-crashes-on-null-skip-option.md)
+  open ticket [corp-install-choice-crashes-on-null-skip-option.md](corp-install-choice-crashes-on-null-skip-option.md)
   with the variation reproduction
   `tests/pending/corp-install-choice-null-decline-option.test.js`.
 
@@ -248,7 +248,7 @@ Proposed at `5b8952f`, 2026-10-02. **Awaiting approval.**
 - **Start boards:** Rebuild both from the log's real board, keeping Kessleroid
   and Rising Tide installed, so the gate measures the tax case.
   - Only Scatter Field is swapped (for Palisade), because it crashes; see
-    [corp-install-choice-crashes-on-null-skip-option.md](../corp-install-choice-crashes-on-null-skip-option.md).
+    [corp-install-choice-crashes-on-null-skip-option.md](corp-install-choice-crashes-on-null-skip-option.md).
   - The Chromatophores board puts Tranquilizer back on HQ; the Tranquilizer
     board hosts it on the remote ICE instead of Chromatophores.
   - Pre-rezzing the central ICE only if the quick run shows no change without it.
@@ -640,7 +640,7 @@ thresholds, with these changes:
 - [x] The Chromatophores start board is committed and tested to reach the
       hosted-card veto. The Tranquilizer board was dropped because moving a
       hosted card is not an allowed builder edit; see the
-      [F10 Resolution](../../backlog/code-review/F10-real-board-start-library.md#resolution).
+      [F10 Resolution](../../backlog/done/F10-real-board-start-library.md#resolution).
 - [x] The failed gate is closed with the real Chromatophores board evidence
       recorded in the Resolution. The historical commands in this ticket are not
       current runnable gates: the option was removed and the Tranquilizer
@@ -658,3 +658,9 @@ thresholds, with these changes:
 - The exact identity of the Remote 0 ice is hidden information and was never
   confirmed; the reproduction uses a representative rez cost (3) rather than
   asserting a specific card.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #17](https://github.com/Greenpaulo/chiriboga/pull/17) merged.
+Review follow-up also merged in [PR #29](https://github.com/Greenpaulo/chiriboga/pull/29).
+This closes the withdrawn proposal; the repeated-tax follow-up remains open.
