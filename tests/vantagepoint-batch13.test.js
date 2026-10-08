@@ -575,12 +575,22 @@ hosted.credits = 10; c.attackedServer = null; c.playerTurn = corp; action();
 corp.remoteServers = []; corp.RnD.ice = []; corp.archives.ice = [];
 const gridInstallOptions = [corp.RnD, corp.HQ, corp.archives].map(server => ({card: shackleton, server}));
 const serverToProtect = ai._serverToProtect;
-ai._serverToProtect = servers => servers ? serverToProtect.call(ai, servers) : corp.archives;
+const rankedServersToProtect = ai._rankedServersToProtect;
+ai._rankedServersToProtect = () => [corp.RnD, corp.HQ].map(server => ({server, isSecure: false}));
+assert.strictEqual(ai._serverToProtect(), corp.RnD, 'unfiltered protection prioritizes the server with no paid ICE');
+assert.strictEqual(shackleton.AIPreferredUpgradeServer([corp.RnD, corp.HQ, corp.archives]), corp.HQ,
+  'the real protection selector filters out a higher-priority but unsuitable server');
+ai._serverToProtect = (ignoreArchives, outputToLog, targetIsEligible) =>
+  targetIsEligible ? serverToProtect.call(ai, ignoreArchives, outputToLog, targetIsEligible) : corp.archives;
 assert.strictEqual(ai._bestInstallOption(gridInstallOptions), 1, 'hook overrides a protection target with no paid ICE');
 assert.strictEqual(ai._upgradeInstallPreferences(null, [shackleton])[0].serverToInstallTo, corp.HQ);
 const holdGrid = {...shackleton, AIPreferredUpgradeServer: () => null};
 assert.strictEqual(ai._upgradeInstallPreferences(corp.HQ, [holdGrid]).length, 0, 'explicit hook hold overrides a supplied server');
 ai._serverToProtect = serverToProtect;
+ai._rankedServersToProtect = () => [];
+assert.strictEqual(shackleton.AIPreferredUpgradeServer([corp.RnD, corp.HQ, corp.archives]), corp.HQ,
+  'a useful server remains the fallback when the protection selector finds no target');
+ai._rankedServersToProtect = rankedServersToProtect;
 hosted.credits = 0;
 assert.strictEqual(ai._bestInstallOption(gridInstallOptions), -1, 'without outside credits hold the Region');
 hosted.credits = 10; corp.HQ.root.push({cardType: 'upgrade', subTypes: ['Region']});

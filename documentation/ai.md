@@ -2400,7 +2400,9 @@ if (!runner.AI || runner.AI.rc !== rc) {
   to hold the upgrade. Corp `_bestServerToUpgrade` validates that result before
   ordinary install ranking. Shackleton filters servers with paid ICE defense
   and a public outside-credit budget, excludes occupied Regions, then uses
-  `_serverToProtect` to rank the remaining threats. `AIDefensiveValue` values
+  `_serverToProtect` with its third-argument eligibility filter to rank the
+  remaining threats, falling back to the first useful supplied server when
+  no protection target qualifies. `AIDefensiveValue` values
   its payment tax; `AIRezWhenCan` requires an unused opportunity and an upcoming
   run payment. Both preserve meaningful hold/decline alternatives.
 - `RunnerAI.AIPreserveOutsideCredits(doing, card, amount)` follows the cached

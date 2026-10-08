@@ -5307,7 +5307,9 @@ cardSet[36065] = {
     var useful = servers.filter(function (server) {
       return !server.root.some(card => CheckSubType(card, "Region")) && grid.AIDefensiveValue(server) > 0;
     });
-    return useful.length ? corp.AI._serverToProtect(useful) : null;
+    if (!useful.length) return null;
+    var target = corp.AI._serverToProtect(false, false, server => useful.includes(server));
+    return useful.includes(target) ? target : useful[0];
   },
   AILimitPerServer: function () { return 1; },
   AIRezWhenCan: function () {
