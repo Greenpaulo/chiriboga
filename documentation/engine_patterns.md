@@ -319,9 +319,12 @@ DecisionPhase(player, choices, callback, title, instruction, context, command?, 
 ```js
 Log("message")
 GetTitle(card, withArticle?)
-AddBadPublicity(n)
+BadPublicity(n, afterBadPublicity?, context?)
 ServerName(server)
 ```
+
+`BadPublicity` opens prevention and take-bad-publicity response phases. Use its
+completion callback for effects that must continue after those phases finish.
 
 ---
 

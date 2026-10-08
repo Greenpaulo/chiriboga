@@ -1,0 +1,40 @@
+{
+  "id": "startup-v1",
+  "sets": [
+    "systemgateway",
+    "elevation",
+    "vantagepoint"
+  ],
+  "pairs": [
+    {
+      "id": "-anarch",
+      "corp": "",
+      "runner": "[Startup] High Pressure Ryo.js"
+    },
+    {
+      "id": "haas-crim",
+      "corp": "[Startup] Problematic LEO.js",
+      "runner": "[Startup] Negative Marketing Campaign.js"
+    },
+    {
+      "id": "nbn-shaper",
+      "corp": "Tempo ED.js",
+      "runner": "[Startup] Old Man is Proud of his Sourdough Starter.js"
+    },
+    {
+      "id": "wey-anarch",
+      "corp": "Rushy Zwycky.js",
+      "runner": "[Startup] They Are Huge With It.js"
+    },
+    {
+      "id": "wey-",
+      "corp": "[Startup] De Profundis (3-0 Worlds 2026).js",
+      "runner": ""
+    },
+    {
+      "id": "haas-crim-remotes",
+      "corp": "[Startup] The Two Remotes Problem.js",
+      "runner": "Hare Song [Startup].js"
+    }
+  ]
+}

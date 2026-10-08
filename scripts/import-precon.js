@@ -70,11 +70,13 @@ async function main() {
     if (!Object.keys(cards).length) throw new Error("Decklist has no cards after removing the identity");
 
     // Infer set codes from card code ranges, matching existing precon files:
-    //   300xx -> sg, 310xx -> su21, 350xx -> elev, 1xxx/2xxx -> core
+    //   300xx -> sg, 310xx -> su21, 350xx -> elev, 360xx -> vp, 1xxx/2xxx -> core
+    // Include the identity: it can be the deck's only card from its set.
     const sets = new Set();
-    for (const code of Object.keys(cards)) {
+    for (const code of [...Object.keys(cards), identity]) {
         const n = parseInt(code, 10);
-        if (n >= 35000 && n < 36000) sets.add("elev");
+        if (n >= 36000 && n < 37000) sets.add("vp");
+        else if (n >= 35000 && n < 36000) sets.add("elev");
         else if (n >= 31000 && n < 32000) sets.add("su21");
         else if (n >= 30000 && n < 31000) sets.add("sg");
         else if (n < 30000) sets.add("core");
@@ -103,7 +105,8 @@ async function main() {
     lines.push("    // name: Display name of the precon deck");
     lines.push(`    name: ${JSON.stringify(deck.name)},`);
     lines.push("    // identity: Card ID of the identity/commander for this deck");
-    lines.push(`    identity: "${identity}",`);
+    const identityTitle = cardTitles[identity];
+    lines.push(`    identity: "${identity}",${identityTitle ? `  // ${identityTitle}` : ""}`);
     lines.push("    // useAsCustomDefault: Whether this deck is the default choice for its identity when auto-selecting");
     lines.push(`    useAsCustomDefault: ${options.default},`);
     lines.push("    // useForQuickGame: Whether to include this deck in Quick Game selection");

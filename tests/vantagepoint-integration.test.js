@@ -242,7 +242,7 @@ context.MakeRun = (server) => {
   runTarget = server;
   context.attackedServer = server;
 };
-context.AddBadPublicity = (amount) => {
+context.BadPublicity = (amount) => {
   badPublicityGained += amount;
 };
 context.RemoveFromGame = (card) => {

@@ -213,7 +213,7 @@ cardSet[36002] = {
             GetTitle(this) +
               ": a subroutine resolved during this run; giving Corp 1 bad publicity.",
           );
-          AddBadPublicity(1);
+          BadPublicity(1);
         }
       }
     },
@@ -940,9 +940,10 @@ cardSet[36010] = {
         corp,
         choices,
         function (params) {
-          if (params.derez) Derez(params.card);
-          else AddBadPublicity(1);
-          finish();
+          if (params.derez) {
+            Derez(params.card);
+            finish();
+          } else BadPublicity(1, finish);
         },
         "Kompromat",
         "Derez ice protecting " + ServerName(attackedServer) + "?",
