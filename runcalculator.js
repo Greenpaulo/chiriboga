@@ -131,10 +131,6 @@ class RunCalculator {
         }
       }
 
-      //blank out subroutines that are already broken
-      for (var i = 0; i < ice.subroutines.length && i < result.sr.length; i++) {
-        if (ice.subroutines[i].broken) result.sr[i] = [[]];
-      }
     }
 	
 	//passive effects (assuming Runner only for now)
@@ -144,6 +140,15 @@ class RunCalculator {
 		result = activeCards[i].AIModifyIceAI.call(activeCards[i],result,startIceIdx);
 	  }
 	}
+
+    // Prospective prepended rows have no actual subroutine or broken flag yet.
+    // Live encounter rows use the actual indexes (offset zero).
+    if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
+      var actualOffset = result.srActualOffset || 0;
+      for (var i = 0; i < ice.subroutines.length && i + actualOffset < result.sr.length; i++) {
+        if (ice.subroutines[i].broken) result.sr[i + actualOffset] = [[]];
+      }
+    }
 
     return result;
   }

@@ -187,6 +187,12 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   modifier and `AIMatchingBreakerInstalled`, so an installed Decoder covers the
   first ICE that would actually be encountered, including a rezzed inner ICE
   behind an unrezzed outer one.
+  Stick and Poke retains its added net-damage row throughout the active
+  encounter after its once-per-turn use, and removes it from the model when
+  the actual row is removed. Broken flags are applied after modifiers have
+  aligned the modeled rows with the actual subroutines. Prospective prepended
+  rows carry `srActualOffset` so printed broken flags skip the predicted row;
+  live encounters keep offset zero because the added row exists on the ICE.
 - Search is a depth-first stack with best-cost pruning, capped at 1000 loops.
   `Directions()` collects `IceAct()` moves (`AIImplementBreaker`) from active
   cards and the bonus breaker, rejects unused pumps and expands subroutine
@@ -310,7 +316,9 @@ costs under 0.8, and otherwise switches to an exit strategy.
   bypass); else continue or pass. With no path at all it triggers any ability.
 - **Run Subroutines.** Choices come from the `alt` on the first node for the
   next ICE; without one, `IceAI()` is re-read and an end-the-run option is
-  picked, else one without a tag.
+  picked, else one without a tag. Model branches map through offered `srChoice`
+  identifiers when present; positional indexes must fit the legal menu.
+  Missing model rows return the first offered choice without throwing.
 
 ## Access decisions
 

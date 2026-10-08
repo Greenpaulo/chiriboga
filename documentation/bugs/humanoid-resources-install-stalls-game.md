@@ -3,6 +3,36 @@
 **Source log:** none. Found by the F4 baseline run (`leo-topan` seed 101); replay with `node scripts/ai-game.js --seed 101:leo-topan --corp "LEO Glacier.js" --runner "Topan CBB.js" --tail 30`.
 **Reproduction:** `tests/pending/humanoid-resources-install-stalls-game.test.js` — `node tests/pending/humanoid-resources-install-stalls-game.test.js` (fails at `f795a63`, 2026-10-02)
 
+## Implementation plan
+
+Proposed at `e894637`, 2026-10-08. **Awaiting approval.**
+
+- **Validation:** the original pending reproduction still stalls after the
+  first install. A temporary card-only experiment moved the continuation to
+  `Install`'s final `onInstallComplete` callback with `returnToPhase=true`.
+  Both installs then finished, but the unchanged reproduction still stalled
+  at `Playing Petty Cash`, whose real `Enumerate` returned zero choices.
+  The experiment was reverted. The proposed install fix is necessary but
+  insufficient; the operation menu's credit-only eligibility check also
+  permits operations with unsatisfied play restrictions.
+- **Approach:** sequence the second install and optional operation after all
+  install responses complete, retaining the original return phase. Handle
+  cancellation explicitly. Filter the free operation offer by affordability
+  and the operation's legal enumerated choices without requiring another
+  action click; `FullCheckPlay` requires clicks even with its second argument
+  false, so it cannot be used unchanged here. Keep the skip paths valid.
+- **Tests:** move the original reproduction unchanged when it passes. Add
+  real-engine variations for two installs followed by a legal operation,
+  skipping directly to the operation, skipping the operation, cancellation,
+  install responses, and excluding Petty Cash after a completed action.
+  Replay Startup `pd-muslihaT` seed 25 and run the full regression suite.
+- **Risk:** changes remain in this card's two helpers and preserve shared
+  engine contracts. The oracle is legal choices and uninterrupted resolution;
+  no strategic AI preference or new hook is proposed.
+- **Docs:** record the extra legality defect and final verification in this
+  ticket; correct the stale helper-move criterion (the shared helper already
+  resides at `tests/_headless-board.js`).
+
 ## Summary
 After Humanoid Resources' ability (Elevation 35039: gain 4, draw 3, install up
 to 2 cards, may play 1 operation), the first install from HQ leaves the engine
