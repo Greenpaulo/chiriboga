@@ -36,6 +36,14 @@ selects the actual offered Principia choice and stops at the sequencing
 boundary before paying for the installation. It observes prompts without
 changing install/payment logic or the card's effect.
 
+PR #24 review strengthened this reproduction with a second board using 5
+credits. It drives the real payment and install-response phases and requires
+the next offer to contain Unity at cost 2, with Principia installed, no pending
+installation, and 2 credits left. Both scenarios remain known-red. A temporary
+test-only callback continuation makes both pass; removing that continuation
+fails the second-offer assertion. The production card remains unfixed and the
+test remains pending.
+
 The expected invariant is that no further Illumination install prompt opens
 while an installation is pending. Today it fails with:
 

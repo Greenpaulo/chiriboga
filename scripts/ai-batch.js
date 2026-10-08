@@ -297,11 +297,10 @@ function buildConfig(args, overrides = {}) {
     pairs = pairs.filter(p => wanted.includes(p.id));
     if (pairs.length !== wanted.length) throw new Error('Unknown deck pair in --pairs: ' + args.pairs);
   }
-  validateDeckPairs(pairs, poolInfo.setFiles);
   const collectorNames = args.collector.slice().sort();
   const collectors = loadCollectors(collectorNames);
   const starts = resolveStarts([...new Set([...args.start, ...taggedStarts(args.startTag || [])])], poolInfo.ranges);
-  return Object.assign({
+  const config = Object.assign({
     poolInfo, pairs, setFiles: poolInfo.setFiles, seeds: budgetSeeds(args, starts, pairs) || resolveSeeds(args), starts,
     budget: args.budget ? Number(args.budget) : null,
     corpOptions: parseAssignments(args.corpOption, '--corp-option'),
@@ -310,6 +309,8 @@ function buildConfig(args, overrides = {}) {
     jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
     quick: Boolean(args.quick),
   }, overrides);
+  validateDeckPairs(config.pairs, config.setFiles);
+  return config;
 }
 
 const STARTS_DIR = path.join(root, 'tests', 'fixtures', 'ai-batch', 'starts');
