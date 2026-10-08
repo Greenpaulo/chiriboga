@@ -3118,14 +3118,17 @@ function humanoidResourcesInstall(cardRef, installCount) {
     choices,
     function(params) {
       if (params.card !== null) {
-        Install(params.card, params.server);
-        installCount++;
-        //Continue to next install or operation
-        if (installCount < 2) {
-          humanoidResourcesInstall(cardRef, installCount);
-        } else {
-          humanoidResourcesPlayOp(cardRef);
-        }
+        //Wait for payment and all install responses before offering the next step.
+        Install(params.card, params.server, false, null, true, undefined, cardRef,
+          function() {
+            humanoidResourcesInstall(cardRef, installCount);
+          }, undefined, true, function() {
+            if (installCount + 1 < 2) {
+              humanoidResourcesInstall(cardRef, installCount + 1);
+            } else {
+              humanoidResourcesPlayOp(cardRef);
+            }
+          });
       } else {
         //Skipped install, move to operation
         humanoidResourcesPlayOp(cardRef);
@@ -3145,8 +3148,9 @@ function humanoidResourcesPlayOp(cardRef) {
   for (var i = 0; i < corp.HQ.cards.length; i++) {
     var card = corp.HQ.cards[i];
     if (card.cardType === "operation") {
-      //Check if playable (cost check)
-      if (AvailableCredits(corp, "playing", card) >= PlayCost(card)) {
+      //This ability pays no action click, but play restrictions still apply.
+      if (AvailableCredits(corp, "playing", card) >= PlayCost(card) &&
+          (typeof card.Enumerate !== "function" || card.Enumerate.call(card).length > 0)) {
         //No button property - card will show as clickable card, not footer button
         opChoices.push({ card: card, label: card.title });
       }
