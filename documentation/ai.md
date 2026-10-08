@@ -1119,7 +1119,14 @@ not these hooks.
   added subroutine remains on the encountered ice, even after `usedThisTurn`
   becomes true. Default models already contain the actual added row, so the
   hook replaces that row instead of duplicating it. `IceAI()` applies broken
-  flags after these modifiers, preserving actual/model row alignment. The
+  flags after these modifiers. A hook prepending prospective rows absent from
+  `iceAI.ice.subroutines` must increment `iceAI.srActualOffset` by their count
+  (default zero): actual row `i` maps to model row `i + srActualOffset`.
+  Stick and Poke sets this offset only for its predicted row; live added rows
+  already have actual indexes and keep offset zero. This metadata uses the
+  public subroutine list and never inserts prospective rows into live state.
+  `tests/stick-and-poke-subroutine-alignment.test.js` covers prospective broken
+  rows for printed and default ICE models, and every live Event Horizon row. The
   draw remains unmodeled because the calculator has no draw effect token.
 - `AIBypassesIce(iceCard, server, iceIndex)` returns `false`, `true` for a free
   targeted bypass, or the bypass's credit cost.
