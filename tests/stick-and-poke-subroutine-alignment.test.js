@@ -40,6 +40,26 @@ const reset = () => resource.responseOnRunnerTurnBegins.Resolve.call(resource);
 async function main() {
   // Prospective routes get only the first encountered row; unused routes stay intact.
   assert.strictEqual(model(horizon).sr.length, 3);
+  const defaultIce = {rezzed: true, subTypes: [], subroutines: [{}, {}]};
+  for (const ice of [horizon, lion, defaultIce]) {
+    server.ice = [ice];
+    const intact = plain(model(ice).sr);
+    const actualRows = ice.subroutines.slice();
+    for (let index = 0; index < actualRows.length; index++) {
+      ice.subroutines[index].broken = true;
+      const broken = plain(model(ice).sr);
+      assert.deepStrictEqual(broken[index + 1], [[]],
+        'prospective row shifts each broken printed row by one');
+      for (let other = 0; other < broken.length; other++)
+        if (other !== index + 1) assert.deepStrictEqual(broken[other], intact[other],
+          'prospective damage and other printed rows stay intact');
+      assert.deepStrictEqual(ice.subroutines, actualRows, 'planning never inserts a live row');
+      // Without a prospective modifier, the same flag still uses the actual index.
+      const unmodified = plain(rc.IceAI(ice, 10).sr);
+      assert.deepStrictEqual(unmodified[index], [[]]);
+      delete ice.subroutines[index].broken;
+    }
+  }
   server.ice = [horizon, lion];
   assert.strictEqual(rc.IceAI(horizon, 10, false, false, 1).sr.length, 2);
   assert.strictEqual(rc.IceAI(lion, 10, false, false, 1).sr.length, 4);

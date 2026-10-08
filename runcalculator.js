@@ -141,10 +141,12 @@ class RunCalculator {
 	  }
 	}
 
-    // Apply broken flags only after modifiers align modeled and actual rows.
+    // Prospective prepended rows have no actual subroutine or broken flag yet.
+    // Live encounter rows use the actual indexes (offset zero).
     if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
-      for (var i = 0; i < ice.subroutines.length && i < result.sr.length; i++) {
-        if (ice.subroutines[i].broken) result.sr[i] = [[]];
+      var actualOffset = result.srActualOffset || 0;
+      for (var i = 0; i < ice.subroutines.length && i + actualOffset < result.sr.length; i++) {
+        if (ice.subroutines[i].broken) result.sr[i + actualOffset] = [[]];
       }
     }
 

@@ -793,6 +793,7 @@ cardSet[36008] = {
         // The run calculator has no draw token, so retain the immediately
         // flatline-relevant net damage as the conservative route effect.
         iceAI.sr.unshift([["netDamage"]]);
+        iceAI.srActualOffset = (iceAI.srActualOffset || 0) + 1;
         return iceAI;
       }
       if (server.ice[i].rezzed) return iceAI;

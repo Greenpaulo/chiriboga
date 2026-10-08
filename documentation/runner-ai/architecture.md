@@ -190,7 +190,9 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   Stick and Poke retains its added net-damage row throughout the active
   encounter after its once-per-turn use, and removes it from the model when
   the actual row is removed. Broken flags are applied after modifiers have
-  aligned the modeled rows with the actual subroutines.
+  aligned the modeled rows with the actual subroutines. Prospective prepended
+  rows carry `srActualOffset` so printed broken flags skip the predicted row;
+  live encounters keep offset zero because the added row exists on the ICE.
 - Search is a depth-first stack with best-cost pruning, capped at 1000 loops.
   `Directions()` collects `IceAct()` moves (`AIImplementBreaker`) from active
   cards and the bonus breaker, rejects unused pumps and expands subroutine
