@@ -7,32 +7,27 @@
   ],
   "pairs": [
     {
-      "id": "-anarch",
-      "corp": "",
+      "id": "btl-ryo",
+      "corp": "[Startup] De Profundis (3-0 Worlds 2026).js",
       "runner": "[Startup] High Pressure Ryo.js"
     },
     {
-      "id": "haas-crim",
-      "corp": "[Startup] Problematic LEO.js",
-      "runner": "[Startup] Negative Marketing Campaign.js"
+      "id": "pd-muslihaT",
+      "corp": "[Startup] The Two Remotes Problem.js",
+      "runner": "[Startup] Smear Campaign 3.0.js"
     },
     {
-      "id": "nbn-shaper",
-      "corp": "Tempo ED.js",
+      "id": "zwicky-hiram",
+      "corp": "Zwift Deth 1st@Uppsala CTK Startup.js",
       "runner": "[Startup] Old Man is Proud of his Sourdough Starter.js"
     },
     {
-      "id": "wey-anarch",
+      "id": "zwicky-topan",
       "corp": "Rushy Zwycky.js",
       "runner": "[Startup] They Are Huge With It.js"
     },
     {
-      "id": "wey-",
-      "corp": "[Startup] De Profundis (3-0 Worlds 2026).js",
-      "runner": ""
-    },
-    {
-      "id": "haas-crim-remotes",
+      "id": "pd-zahya",
       "corp": "[Startup] The Two Remotes Problem.js",
       "runner": "Hare Song [Startup].js"
     }
