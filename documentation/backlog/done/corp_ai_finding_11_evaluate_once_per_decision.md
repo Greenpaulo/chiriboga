@@ -86,7 +86,7 @@ the unfinished dependency and test-coverage notes.
   - Historical at implementation: the F4 comparison and `evaluatorCallCount` collector waited for F4. F4 is now done; the completion entry below supersedes this blocker.
   - About half the remaining time is still in the evaluations that must run,
     where each ICE is repriced once per rez plan. That is proposed as F6
-    ([F6-headless-ai-performance.md](../done/F6-headless-ai-performance.md)). With F3, a 2,400-game gate
+    ([F6-headless-ai-performance.md](F6-headless-ai-performance.md)). With F3, a 2,400-game gate
     takes about 2¼ hours.
 - Docs: [architecture: foundations](../../corp-ai/architecture.md#foundations)
   (cache and depth counter), the F2 ticket, and new roadmap item F6.
@@ -178,6 +178,8 @@ Implemented from `44479ba` (uncommitted follow-up).
 - No remaining implementation or acceptance work. The completion follow-up
   awaits independent review; the original cache's historical review below
   does not review these new collector/tests/comparison changes.
+- Completion follow-up accepted on CodeRabbit's approval of PR #32
+  (2026-10-09); no separate ticket review.
 
 Per-check evidence revalidated on 2026-10-09 with
 `checkSecurityCacheGate(off, on, verify)` from `scripts/ai-batch.js`, reading

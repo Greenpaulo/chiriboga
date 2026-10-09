@@ -5133,8 +5133,10 @@ cardSet[35031] = {
   },
   
   //AI code
+  //Power counters are placed only on install, so none left means spent.
   AICentralPressure: function(server) {
-    if (server !== corp.RnD || Counters(this, "power") < 1) return {};
+    if (server !== corp.RnD) return {};
+    if (Counters(this, "power") < 1) return { exhausted: true };
     return { additionalAccess: 1 };
   },
   AIWorthKeeping: function(installedRunnerCards, spareMU) {
