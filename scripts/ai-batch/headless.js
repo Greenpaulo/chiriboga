@@ -144,8 +144,10 @@ function playGame(options) {
       emit('steal', {card: card.title, server: SERVER_KEYS[where] || 'remote', points: card.agendaPoints || 0});
     }
     // The engine clears attackedServer when a run ends.
+    if (seen.run && run('attackedServer'))
+      seen.run.destination = serverKey(run('attackedServer'));
     if (seen.run && !run('attackedServer')) {
-      emit('run', {server: seen.run.server, success: seen.run.success});
+      emit('run', Object.assign({}, seen.run));
       seen.run = null;
     }
   };
@@ -153,7 +155,7 @@ function playGame(options) {
     if (result) return;
     observe();
     result = {winner: player === context.corp ? 'corp' : 'runner', reason};
-    if (seen.run) { emit('run', {server: seen.run.server, success: seen.run.success}); seen.run = null; }
+    if (seen.run) { emit('run', Object.assign({}, seen.run)); seen.run = null; }
     emit('gameEnd', {winner: result.winner, reason, turns: Math.ceil(turns / 2)});
     setImmediate(done);
   };
@@ -173,10 +175,16 @@ function playGame(options) {
     return false;
   };
   context.__runBegins = server => {
-    if (seen.run) emit('run', {server: seen.run.server, success: seen.run.success});
-    seen.run = {server: serverKey(server), success: false};
+    if (seen.run) emit('run', Object.assign({}, seen.run));
+    seen.run = {server: serverKey(server), destination: serverKey(server),
+      sourceIceCount: server.ice.length, success: false};
   };
-  context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
+  context.__runSuccessful = () => {
+    if (seen.run) {
+      seen.run.destination = serverKey(run('attackedServer'));
+      seen.run.success = true;
+    }
+  };
   context.__mulligan = side => emit('mulligan', {side});
   // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
   // cards hosted on the rezzed card at that moment.

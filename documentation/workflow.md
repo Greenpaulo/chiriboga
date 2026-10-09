@@ -271,6 +271,12 @@ Free, deterministic steps that agents (and you) run instead of reading files:
   When a pending reproduction moves into the green suite, its ticket keeps the
   original pending path on `**Reproduction:**` and also records the green path,
   so the check can compare the original assertions through Git history.
+  If the reproduction is created and promoted in one uncommitted session,
+  record its original byte hash before changing it as
+  `**Reproduction SHA-256:** \`<64 lowercase hex characters>\``.
+  The check uses that hash only when no pending Git version exists, and fails
+  on any changed byte. Keep the reproduction unchanged during promotion;
+  additional variations belong in separate tests.
 - **Quiet tests** (`tests/run-all-tests.js`): a passing test that prints more
   than 5 lines fails the suite. Per-case output belongs behind `VERBOSE=1`.
 - **Hook documentation check** (`tests/ai-hook-docs.test.js`): fails when a card

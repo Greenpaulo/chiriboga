@@ -32,9 +32,9 @@ cannot price yet.
 
 ### L3.5.2 Action-feasible protection target fallback
 - **Status:** in-progress
-- **Depends on:** none
-- **Ticket:** [corp-not-protecting-archives-with-baker-backdoor.md](../bugs/remediation/corp-not-protecting-archives-with-baker-backdoor.md)
-- **Goal:** An ineligible top-ranked server no longer blocks protection of the next viable one. The original fallback is implemented, but a later Baker play-test still fails when Touchstone is empty during Corp planning; remediation is required before review. Interim until I1–I2.
+- **Depends on:** F4
+- **Ticket:** [corp-not-protecting-archives-with-baker-backdoor.md](../bugs/code-review/corp-not-protecting-archives-with-baker-backdoor.md)
+- **Goal:** An ineligible top-ranked server no longer blocks protection of the next viable one. The fallback is implemented and its regression fixture passes. The linked ticket now corrects next-turn Baker use-reset handling and models potential Touchstone refill through `projectedRedirectThreats`, adopted (default on) after its seeded batch gate passed. Status tracks the combined ticket's outstanding review, not a broken fallback. Interim until I1–I2.
 
 ### L4.1 Unified bypass capability allocation
 - **Status:** ready

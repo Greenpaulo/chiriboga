@@ -1,0 +1,10 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, advance, n
+// EXPECT: install
+// EXPECT_SERVER: Archives
+// EXPECT_CARD: Bumi 1.0
+// SETUP: corp.creditPool=11; corp.clickTracker=3; runner.creditPool=1; runner.rig.programs[0].usedThisTurn=true; runner.rig.hardware[0].credits=0; corp.HQ.AISuccessfulRuns=1; reviewAI.options.projectedRedirectThreats=true
+// SOURCE: corp_still_not_protecting_archives_from_baker.txt, lines 135-145
+// NOTE: Reconstruction of the first Corp action after the first Baker redirect. The log has no decision snapshots and its final dump follows later play/rewinds. Assumes the first drawn card is Bumi 1.0 (the installed remote ICE is unnamed); the opening Syailendra protects R&D and the opening Bumi protects HQ, both unrezzed since no rez is logged. Their destinations are not named with card identities. Remaining R&D/Stack order is deliberately unspecified. The public 11/1 credits, naked Archives, empty Touchstone, spent Baker, Docklands Pass, stolen Project Ingatan and surviving HQ cards are logged. Off selects a new remote; on protects Archives. This is candidate strategic coverage, not evidence of optimal play.
+RunnerTestField(36009, [30030], [], [30026,35015], [36015,36021,30013], [35038], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35035, [30042,30075], [], [35040,35045,35082,35041], [], [35076], [35041], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);

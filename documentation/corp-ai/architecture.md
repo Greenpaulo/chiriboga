@@ -220,6 +220,23 @@ Beta title check is gone); the Corp asks only about Archives-to-HQ redirects
 Egret, Chromatophores and Rielle "Kit" Peddler already exposed enough subtype
 hooks and needed no change.
 
+During the Corp turn outside a run, the redirect query supplies a next-Runner-turn
+context. Baker (`vantagepoint.js`) then projects its known once-per-turn reset;
+the previous Runner turn's use flag does not hide an already funded future
+route. Current-turn and real payment queries still respect the actual flag.
+Hosted-credit compatibility is evaluated in a guarded prospective run context.
+
+**Projected refill:** Corp option `projectedRedirectThreats` defaults to on,
+adopted after its seeded batch gate passed. With it enabled, Baker can report a potential route funded by installed sources'
+`AIPotentialHostedCredits` hooks. Touchstone's possible first-event refill is
+the source currently in scope. This uses public mechanics without inspecting
+hidden event identities or changing live counters. Potential funding affects
+existing Archives protection ranking and stakes; it does not enter deterministic
+security, run-credit ceilings, or actual redirect/payment enumeration. The
+[Baker ticket](../bugs/code-review/corp-not-protecting-archives-with-baker-backdoor.md)
+records the seeded batch gate and its evidence. L3.5.2's action-feasible fallback is separate from
+this next-turn threat model.
+
 **Out-of-run redirects.** A redirect paid by a run-only credit source must be
 detected during Corp planning. Baker's `AIRedirectsRun` evaluates its stealth
 credit sources in the prospective Archives-run context and restores the real

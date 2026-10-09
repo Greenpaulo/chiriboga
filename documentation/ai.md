@@ -49,7 +49,7 @@ This file is long. Read only the sections a task needs. To find one hook, search
    - [4.17 Hosted Subroutine Breakers — `AIHostedBreakContribution`](#417-hosted-subroutine-breakers--aihostedbreakcontribution)
    - [4.18 Corp Security: Type Shifts, Bypasses, and Redirects](#418-corp-security-type-shifts-bypasses-and-redirects)
    - [4.19 Hidden Single-ICE Threats — `AIHiddenThreat`](#419-hidden-single-ice-threats--aihiddenthreat)
-   - [4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`](#420-run-credit-sources--canusecredits-airunpoolcreditoffset)
+   - [4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`, `AIPotentialHostedCredits`](#420-run-credit-sources--canusecredits-airunpoolcreditoffset-aipotentialhostedcredits)
    - [4.21 Public Central Pressure — `AICentralPressure`](#421-public-central-pressure--aicentralpressure)
    - [4.22 Public Successful-Run Pressure — `AIPublicRunPressure`](#422-public-successful-run-pressure--aipublicrunpressure)
 5. [Corp AI Hooks](#5-corp-ai-hooks)
@@ -1135,8 +1135,17 @@ not these hooks.
 - `AIBypassesOneIce(iceCard, server, iceIndex)` returns whether a once-per-run
   bypass can target that ice. The evaluator spends it on the layer with the
   highest mandatory break cost.
-- `AIRedirectsRun(fromServer, toServer)` returns whether a run through the
+- `AIRedirectsRun(fromServer, toServer, planningContext)` returns whether a run through the
   first server can become a run on the second, bypassing the destination's ice.
+  The optional context has `nextRunnerTurn` (project a publicly known turn
+  reset) and `includePotentialCredits` (permit conditional public funding as
+  strategic protection pressure). Without a context, report only currently
+  usable routes. Existing two-argument implementations remain valid. The Corp
+  passes `nextRunnerTurn: true` only during its turn outside a run, and permits
+  potential funding only with its `projectedRedirectThreats` option (on by
+  default since its seeded gate passed).
+  Potential funding must never become real payment availability or deterministic
+  run-credit affordability.
 
 These hooks are called during Corp-turn planning as well as run simulation.
 Base their answers on the supplied arguments and public persistent state; do
@@ -1148,6 +1157,12 @@ prospective Archives server while checking hosted stealth credits. This lets
 run-only sources such as Touchstone answer in the context where the redirect
 cost would actually be paid; the helper restores the real `attackedServer`
 immediately after the read-only planning query.
+For next-Runner-turn protection, Baker disregards its previous turn's
+`usedThisTurn` flag without changing it. With conditional funding explicitly
+enabled, it also consults installed compatible Stealth sources'
+`AIPotentialHostedCredits` hooks. Touchstone reports a possible event refill;
+neither hook inspects the Grip or Stack. Actual redirect enumeration and Runner
+simulation continue to require current hosted credits and an unused Baker.
 
 ```js
 AIEffectiveIceSubtypes: function(iceCard, server, iceIndex) {
@@ -1234,7 +1249,7 @@ Rules for new cards:
 - When every expected copy of a threat class is faceup in the Heap, its hidden
   risk must be zero.
 
-### 4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`
+### 4.20 Run Credit Sources — `canUseCredits`, `AIRunPoolCreditOffset`, `AIPotentialHostedCredits`
 
 Corp security planning calculates a public effective credit ceiling for each server. Existing hosted-credit cards participate through the engine's normal `canUseCredits(doing, card)` hook. A source is eligible for breaking when `canUseCredits("using", installedBreaker)` returns true; credits restricted to installs, event plays, tag removal, or trash costs are deliberately excluded.
 
@@ -1250,6 +1265,29 @@ AIRunPoolCreditOffset: function(server, runEventCardToUse) {
 The return value is the non-negative number of additional credits available for that route. `server` is the proposed attacked server. `runEventCardToUse` is the proposed event for Runner-AI simulation; Corp security planning always passes `null`, because hidden Grip identities are unavailable to the Corp. The hook must be read-only, use only public active state when called with `null`, and be safe outside a run. If a card exposes both usable hosted credits and this hook, the security evaluator takes the larger value rather than adding both.
 
 `corp.AI._effectiveRunnerCreditPool(server)` returns `{baseCredits, temporaryCredits, recurringCredits, badPublicityCredits, clickCredits, total}`. It supplies the proposed `attackedServer` through `AIWithRunContext()` (§2 "Evaluating hypothetical state") while probing route-sensitive `canUseCredits` hooks, so the real value is restored afterward even if a hook throws. Click credits reserve one click for initiating an ordinary run; during the Corp turn `_projectedRunnerClicks()` uses the next Runner allotment, while an active run receives no click-to-credit allowance. `_projectedRunnerRuns(server)` converts that public click budget into ordinary run attempts and includes the current run when applicable.
+
+**`AIPotentialHostedCredits(doing, card, planningContext) -> number`** describes
+additional conditional hosted funding, beyond credits already on an installed
+source. Return a finite nonnegative number, using only public installed state;
+return zero when potential funding is not explicitly requested. `doing` and
+`card` describe the proposed payment, as in `canUseCredits`. The caller must
+check that the source has abilities and can pay that cost, and supply any run
+context through `AIWithRunContext`. The hook must be read-only and safe outside
+a run. It must not read hidden cards or mutate counters/reset flags. This is a
+strategic projection consumed by Baker's redirect protection query, not by
+actual payment, Runner run simulation, or the deterministic credit ceiling.
+
+Touchstone (`vantagepoint.js`) can gain one credit after the first event of a
+turn. Its source hook projects the event reset without claiming an event is
+held or will be played:
+
+```js
+AIPotentialHostedCredits: function(doing, card, planningContext) {
+  if (!planningContext || !planningContext.includePotentialCredits) return 0;
+  if (!planningContext.nextRunnerTurn && this.playedEventThisTurn) return 0;
+  return 1;
+},
+```
 
 ### 4.21 Public Central Pressure — `AICentralPressure`
 
@@ -2066,7 +2104,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
 | `AIPreventsPurgeTrash` | boolean | Conservatively keep purge-trashed Runner cards active in an ordinary-purge hypothetical while this public prevention is available |
 | `AIBypassesOneIce(ice, server, index)` | function | Report a public one-shot bypass that can target this ice |
-| `AIRedirectsRun(from, to)` | function | Report a public server-redirection/backdoor route |
+| `AIRedirectsRun(from, to, planningContext)` | function | Report a public redirect; optional next-turn reset and gated potential-funding context |
 | `AIHiddenThreat` | object | Describe a hidden event's mechanic class, expected copies, severity, and eligible one-ice servers |
 | `AICentralPressure(server)` | function | Describe public installed multi-access, non-access central pressure, and growth |
 | `AIPublicRunPressure(server)` | function | Describe visible economy, growth, or persistent value from a successful run |
@@ -2083,6 +2121,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunEventRestore(server)` | function | Restore state after run calc |
 | `AIRunEventExtraCredits` | number | Credits this run event provides |
 | `AIRunPoolCreditOffset(server, runEventCardToUse)` | function | Public generic run-credit offset (Methuselah, Touchstone, Cezve, Ken Tenma); safe with a null event; restricted payments use `AIRunRestrictedCredits` |
+| `AIPotentialHostedCredits(doing, card, planningContext)` | function | Additional conditional hosted funding for gated redirect pressure; excludes actual payment and deterministic credits |
 | `AIRunRestrictedCredits(server)` | function | Nonnegative public credits available only for explicitly modelled restricted payments; shared providers report a maximum, not a sum |
 | `AIMeatDamagePrevention()` | function | Nonnegative currently usable public one-shot meat-damage prevention capacity |
 | `AIAdditionalAccess(server)` | function | Return extra accesses for given server |

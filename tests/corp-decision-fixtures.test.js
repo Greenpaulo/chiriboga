@@ -56,6 +56,9 @@ context.ActiveCards = player => {
   return player === runner ? runnerCards : player === corp ? corpCards : runnerCards.concat(corpCards);
 };
 context.CheckHasAbilities = card => !card.disabled;
+context.CheckInstallDestination = (card, destination) =>
+  !(card && card.player === corp && typeof card.installOnlyIn === 'function') ||
+  !!card.installOnlyIn(destination);
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
 context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';

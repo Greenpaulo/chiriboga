@@ -439,7 +439,18 @@ function check(ticket) {
         if (added) original = git('show', added + ':' + pending);
       }
       if (original.status !== 0) {
-        report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        //A reproduction created and promoted in one uncommitted session has
+        //no pending Git version. A recorded pre-fix byte hash still prevents
+        //expectation (or any other source) changes from being hidden.
+        const recordedHash = (text.match(/^\*\*Reproduction SHA-256:\*\*\s*`([a-f0-9]{64})`\s*$/m) || [])[1];
+        if (recordedHash) {
+          const actualHash = require('crypto').createHash('sha256')
+            .update(fs.readFileSync(path.join(root, green))).digest('hex');
+          report(actualHash === recordedHash ? 'PASS' : 'FAIL',
+            'New reproduction ' + green + (actualHash === recordedHash ?
+              ' matches its recorded pre-fix SHA-256 byte hash.' :
+              ' differs from its recorded pre-fix SHA-256 byte hash.'));
+        } else report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
       } else {
         const before = original.stdout.split('\n');
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');

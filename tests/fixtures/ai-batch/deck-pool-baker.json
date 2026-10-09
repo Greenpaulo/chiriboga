@@ -1,0 +1,8 @@
+{
+  "id": "baker-touchstone-v1",
+  "note": "Focused Baker remediation pool, authorized 2026-10-09. Vantage Point inclusion is limited to this benchmark; decks use only Vic, Baker and Touchstone from that set. The standard pool and set playability are unchanged. A fresh paired baseline is required.",
+  "sets": ["systemgateway", "systemupdate2021", "elevation", "vantagepoint"],
+  "pairs": [
+    {"id": "leo-baker", "corp": "LEO Glacier.js", "runner": "Baker Touchstone Benchmark.js"}
+  ]
+}

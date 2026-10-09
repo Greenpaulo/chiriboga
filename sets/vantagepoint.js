@@ -1222,15 +1222,26 @@ cardSet[36015] = {
   memoryCost: 1,
   usedThisTurn: false,
   runningWithThis: false,
-  _stealthCreditCards: function (planningServer) {
+  _stealthCreditCards: function (planningServer, planningContext) {
     var baker = this;
     //outside a run, a planning server supplies the prospective run context
     var runServer =
       planningServer && attackedServer === null ? planningServer : attackedServer;
     return AIWithRunContext(runServer, function () {
       return InstalledCards(runner).filter(function (card) {
-        if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
-          return false;
+        if (!CheckSubType(card, "Stealth")) return false;
+        if (planningContext && !CheckHasAbilities(card)) return false;
+        var credits = card.credits || 0;
+        //Conditional future funding is protection pressure only. Real payment
+        //and Runner run simulation never supply this context.
+        if (
+          planningContext && planningContext.includePotentialCredits &&
+          typeof card.AIPotentialHostedCredits === "function"
+        )
+          credits += Math.max(0, card.AIPotentialHostedCredits(
+            "using", baker, planningContext,
+          ) || 0);
+        if (credits < 1) return false;
         return (
           typeof card.canUseCredits !== "function" ||
           card.canUseCredits("using", baker)
@@ -1303,12 +1314,12 @@ cardSet[36015] = {
     },
     automatic: true,
   },
-  AIRedirectsRun: function (fromServer, toServer) {
+  AIRedirectsRun: function (fromServer, toServer, planningContext) {
     return (
-      !this.usedThisTurn &&
+      (!this.usedThisTurn || !!(planningContext && planningContext.nextRunnerTurn)) &&
       fromServer == corp.archives &&
       (toServer == corp.HQ || toServer == corp.RnD) &&
-      this._stealthCreditCards(fromServer).length > 0
+      this._stealthCreditCards(fromServer, planningContext).length > 0
     );
   },
   AIRunAbilityExtraPotential: function (server, potential) {
@@ -1787,6 +1798,13 @@ cardSet[36021] = {
   },
   AIRunPoolCreditOffset: function () {
     return this.credits;
+  },
+  AIPotentialHostedCredits: function (doing, card, planningContext) {
+    //An event may refill Touchstone before a run, but its identity/presence in
+    //the Grip is unknown to the Corp. Never report this as spendable funding.
+    if (!planningContext || !planningContext.includePotentialCredits) return 0;
+    if (!planningContext.nextRunnerTurn && this.playedEventThisTurn) return 0;
+    return 1;
   },
   AIEconomyInstall: 2,
   AIWorthKeeping: function () {

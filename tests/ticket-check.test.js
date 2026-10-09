@@ -11,15 +11,21 @@ const source = fs.readFileSync(script, 'utf8');
 const ticket = 'documentation/bugs/code-review/review-fixture.md';
 const pending = 'tests/pending/review-fixture.test.js';
 
-function check({reproduction = pending, exists = true, option = 'removedOption', code = '', gate} = {}) {
+function check({reproduction = pending, exists = true, option = 'removedOption', code = '', gate,
+  outcome = 'not adopted — failed gate', reproductionHash, greenSource = '// original assertion'} = {}) {
   const files = new Map([
-    [path.join(root, ticket), '# Fixture\n\n**Outcome:** not adopted — failed gate\n' +
+    [path.join(root, ticket), '# Fixture\n\n**Outcome:** ' + outcome + '\n' +
       '**Reproduction:** `' + reproduction + '`\n\n## Resolution\n\nImplemented from `1fdb396`.\n\n' +
-      '**Gate:** ' + (gate || 'failed — `' + option + '` removed.') + '\n'],
+      '**Gate:** ' + (gate || 'failed — `' + option + '` removed.') + '\n' +
+      (reproductionHash ? '**Reproduction SHA-256:** `' + reproductionHash + '`\n' : '')],
     [path.join(root, 'ai_corp.js'), code],
     [path.join(root, 'ai_runner.js'), ''],
   ]);
   if (exists) files.set(path.join(root, reproduction), '// reproduction');
+  if (outcome === 'adopted') {
+    files.delete(path.join(root, pending));
+    files.set(path.join(root, 'tests/review-fixture.test.js'), greenSource);
+  }
   const output = [];
   let suiteRuns = 0;
   const processStub = {execPath: process.execPath, argv: [process.execPath, script, 'check', ticket], exitCode: 0};
@@ -34,11 +40,15 @@ function check({reproduction = pending, exists = true, option = 'removedOption',
     };
     if (name === 'child_process') return {spawnSync: (command, args) => {
       if (command === process.execPath) {
+        if (outcome === 'adopted' && args[0] === 'tests/review-fixture.test.js')
+          return {status: 0, stdout: 'passed\n', stderr: ''};
         assert.deepStrictEqual(Array.from(args), ['tests/run-all-tests.js']);
         suiteRuns++;
         return {status: 0, stdout: '54 test files passed.\n', stderr: ''};
       }
       assert.strictEqual(command, 'git');
+      if (outcome === 'adopted' && ['show', 'log'].includes(args[0]))
+        return {status: args[0] === 'show' ? 1 : 0, stdout: '', stderr: ''};
       assert(['cat-file', 'diff', 'ls-files', 'remote', 'rev-parse'].includes(args[0]),
         'unexpected git command: ' + args.join(' '));
       return {status: 0, stdout: '', stderr: ''};
@@ -98,4 +108,20 @@ const malformed = check({gate: 'failed — see `ai_corp.js`'});
 assert.strictEqual(malformed.status, 1, malformed.output);
 assert.match(malformed.output, /FAIL.*does not name its AI option/);
 
-console.log('Ticket check: pending reproduction and failed gate integration checks passed.');
+const preFixSource = 'assert.strictEqual(actualChoice, expectedChoice);\n';
+const preFixHash = require('crypto').createHash('sha256').update(preFixSource).digest('hex');
+const adoptedOptions = {outcome: 'adopted', gate: 'passed — `candidateOption` now defaults to on.',
+  code: 'const options = {candidateOption: true};', reproductionHash: preFixHash};
+const newUnchanged = check({...adoptedOptions, greenSource: preFixSource});
+assert.strictEqual(newUnchanged.status, 0, newUnchanged.output);
+assert.match(newUnchanged.output, /PASS.*matches its recorded pre-fix SHA-256/);
+assert.doesNotMatch(newUnchanged.output, /Could not find the pending version/);
+for (const greenSource of [preFixSource.replace('expectedChoice', 'actualChoice'), preFixSource + '// added\n']) {
+  const changed = check({...adoptedOptions, greenSource});
+  assert.strictEqual(changed.status, 1, changed.output);
+  assert.match(changed.output, /FAIL.*differs from its recorded pre-fix SHA-256/);
+}
+const missingHash = check({...adoptedOptions, reproductionHash: undefined, greenSource: preFixSource});
+assert.match(missingHash.output, /WARN.*Could not find the pending version/);
+
+console.log('Ticket check: reproduction provenance and failed gate integration checks passed.');

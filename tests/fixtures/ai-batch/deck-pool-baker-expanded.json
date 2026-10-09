@@ -1,0 +1,13 @@
+{
+  "id": "baker-touchstone-expanded-v2",
+  "note": "Owner-requested broader evidence on 2026-10-09. Three Corp strategies (LEO glacier, NEH fast advance, PE damage) crossed with event-heavy Vic and economy-oriented Zahya Baker/Touchstone decks. The original v1 pool remains reproducible. This does not change the standard pool or Vantage Point playability. A fresh paired baseline is required.",
+  "sets": ["systemgateway", "systemupdate2021", "elevation", "vantagepoint"],
+  "pairs": [
+    {"id": "leo-baker", "corp": "LEO Glacier.js", "runner": "Baker Touchstone Benchmark.js"},
+    {"id": "leo-baker-economy", "corp": "LEO Glacier.js", "runner": "Baker Touchstone Economy Benchmark.js"},
+    {"id": "neh-baker", "corp": "Duel NEH vs Zahya.js", "runner": "Baker Touchstone Benchmark.js"},
+    {"id": "neh-baker-economy", "corp": "Duel NEH vs Zahya.js", "runner": "Baker Touchstone Economy Benchmark.js"},
+    {"id": "pe-baker", "corp": "Duel PE vs Steve.js", "runner": "Baker Touchstone Benchmark.js"},
+    {"id": "pe-baker-economy", "corp": "Duel PE vs Steve.js", "runner": "Baker Touchstone Economy Benchmark.js"}
+  ]
+}

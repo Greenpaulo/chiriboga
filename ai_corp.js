@@ -243,13 +243,24 @@ class CorpAI {
   //Public, active cards can expose a generic server-redirection hook. The
   //wording fallback keeps older implementations useful without title checks.
   _archivesIsBackdoorToHQ() {
+    //Corp protection planning concerns the next Runner turn, not the spent
+    //once-per-turn abilities left over from the previous one. Conditional
+    //funding is a separate, default-off strategic projection.
+    var nextRunnerTurn =
+      typeof playerTurn != "undefined" && playerTurn == corp &&
+      attackedServer === null;
+    var planningContext = {
+      nextRunnerTurn: nextRunnerTurn,
+      includePotentialCredits:
+        nextRunnerTurn && this.options.projectedRedirectThreats,
+    };
     var activeCards = ActiveCards(runner);
     for (var i = 0; i < activeCards.length; i++) {
       var card = activeCards[i];
       if (card.player != runner || !CheckHasAbilities(card)) continue;
       if (
         typeof card.AIRedirectsRun == "function" &&
-        card.AIRedirectsRun.call(card, corp.archives, corp.HQ)
+        card.AIRedirectsRun.call(card, corp.archives, corp.HQ, planningContext)
       )
         return true;
       var text = (card.cardText || "").toString().toLowerCase();
@@ -7186,4 +7197,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   committedAgendaReserveBypass: false,
   emptyArchivesRunPressure: false,
   valuelessServerDebtReset: false,
+  projectedRedirectThreats: true,
 });
