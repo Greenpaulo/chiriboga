@@ -78,6 +78,12 @@ receive them.
 
 I0 must record the corrected default and effective options before collecting
 the install-series baseline; I1's compatibility path must preserve that policy.
+I0's baseline (done 2026-10-09, all five options `false` in its recorded
+options) is the F4 report
+[`tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json`](../../../tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json)
+with the I0 collectors, and the install-decision snapshots
+[`tests/fixtures/corp-install-baseline.json`](../../../tests/fixtures/corp-install-baseline.json);
+see [ai-batch-harness.md](../../ai-batch-harness.md#install-series-collectors-and-baselines-i0).
 I9 must compare its combined policy against the corrected baseline, not inherit
 old-tip strength claims. Do not turn a legacy gate on just to satisfy an old
 fixture: those fixtures now explicitly request the historical policy.

@@ -178,15 +178,15 @@ installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
 
 ### I0 Baseline capture and decision telemetry
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** F4
-- **Spec:** [I0-baseline-capture-and-telemetry.md](specs/I0-baseline-capture-and-telemetry.md)
+- **Ticket:** [I0-baseline-capture-and-telemetry.md](../backlog/code-review/I0-baseline-capture-and-telemetry.md)
 - **Goal:** Record current install choices and outcomes before changing any policy.
 
 ### I1 Unified install candidate model
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** I0
-- **Spec:** [I1-unified-install-candidate-model.md](specs/I1-unified-install-candidate-model.md)
+- **Ticket:** [I1-unified-install-candidate-model.md](../backlog/code-review/I1-unified-install-candidate-model.md)
 - **Goal:** Replace concatenation priority with explicit, scored candidate records, initially preserving behaviour.
 
 ### I2 ICE selection by marginal security

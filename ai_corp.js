@@ -3534,6 +3534,7 @@ class CorpAI {
       (entry) => !this._nothingWorthProtecting(entry.server, entry.security),
     );
     var eligibility = new Map();
+    //The filter may return a boolean or {allowed, reason}.
     var entryIsEligible = (entry) => {
       if (targetIsEligible == null) return true;
       if (!eligibility.has(entry.server))
@@ -3541,7 +3542,8 @@ class CorpAI {
           entry.server,
           targetIsEligible(entry.server, entry.security),
         );
-      return eligibility.get(entry.server);
+      var verdict = eligibility.get(entry.server);
+      return verdict && typeof verdict == "object" ? verdict.allowed : verdict;
     };
     var selected = protectableRanked.find(
       (entry) =>
@@ -3579,6 +3581,11 @@ class CorpAI {
         "Ranked server protection: " + JSON.stringify(protectionScores),
       );
     }
+    if (this._installTrace)
+      this._installTrace.push(
+        this._protectionTrace(ranked, protectableRanked, selected, eligibility,
+          targetIsEligible != null),
+      );
     //An action-specific caller needs to distinguish "no viable target" from HQ.
     //General protection queries retain the historical HQ fallback.
     if (!selected && targetIsEligible != null) return undefined;
@@ -3799,11 +3806,13 @@ class CorpAI {
           optionList[i].card == rankedInstallOptions[j].cardToInstall &&
           optionList[i].server == rankedInstallOptions[j].serverToInstallTo
         ) {
+          this._noteBestInstall(rankedInstallOptions, j, i);
           return i;
         }
       }
     }
     //no desirable option
+    this._noteBestInstall(rankedInstallOptions, -1, -1);
     return -1;
   }
 
@@ -4211,6 +4220,12 @@ class CorpAI {
   }
 
   _shouldInstallIceLayer(server, economyIsSufficient, securityEvaluation) {
+    return this._iceLayerPolicy(server, economyIsSufficient, securityEvaluation)
+      .allowed;
+  }
+
+  //_shouldInstallIceLayer() with the reason it decided, for I0 telemetry.
+  _iceLayerPolicy(server, economyIsSufficient, securityEvaluation) {
     var shouldInstall = this._unrezzedIce(server).length == 0;
     var security = securityEvaluation;
     if (server != null && typeof security == "undefined")
@@ -4219,19 +4234,30 @@ class CorpAI {
       server != null &&
       !security.isSecure &&
       this._serverHasStakes(server, security);
+    var rezzedLayerWithoutRisk = false;
     if (
       !economyIsSufficient &&
       this._rezzedIce(server).length > 0 &&
       !serverAtRisk
     ) {
       shouldInstall = false;
+      rezzedLayerWithoutRisk = true;
     }
     //An existing unrezzed ICE is not protection if the evaluator already
     //knows the Runner can breach the server. The optional final override allows
     //another layer when an agenda or asset is actually at stake; _iceInstallOptions still
     //filters out ICE the Corp cannot afford to install and rez.
-    return shouldInstall || economyIsSufficient ||
-      (this.options.serverAtRiskInstallOverride && serverAtRisk);
+    if (shouldInstall) return { allowed: true, reason: "noUnrezzedIce" };
+    if (economyIsSufficient)
+      return { allowed: true, reason: "economySufficient" };
+    if (this.options.serverAtRiskInstallOverride && serverAtRisk)
+      return { allowed: true, reason: "serverAtRiskOverride" };
+    return {
+      allowed: false,
+      reason: rezzedLayerWithoutRisk
+        ? "rezzedIceNotAtRiskAndPoor"
+        : "existingUnrezzedIceAndPoor",
+    };
   }
 
   //Return a shuffled copy so planning never changes a caller-owned ranking.
@@ -4283,6 +4309,344 @@ class CorpAI {
     priorityOnly = false, //set true to exclude low priorities like unaffordable ice or non-ice into new server
     inhibit = true, //if inhibit is false, more willing installs are permitted (use this for free install&rez)
   ) {
+    if (!this._installRecording())
+      return this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+    //I0/I1 telemetry: observe the unchanged ranking, its protection choices
+    //and its candidate records. The legacy option list is returned as is,
+    //duplicates included (Phase_Main compares ranked list lengths).
+    var ranked = this._rankedInstallCandidates(cards, priorityOnly, inhibit);
+    this._noteRankedInstall(
+      ranked.options,
+      ranked.protection,
+      priorityOnly,
+      inhibit,
+      cards,
+    );
+    DecisionSnapshots.Note(
+      "installCandidates",
+      ranked.candidates.map((record) => this._traceInstallCandidate(record)),
+    );
+    return ranked.options;
+  }
+
+  //I1: install candidates as explicit records. The legacy generator keeps its
+  //order and every call it makes; records are derived from the preferences it
+  //emitted and, for ICE it did not offer, from the protection walk it already
+  //performed (no extra security evaluation, card hook or randomness).
+  //Returns {options (legacy list), protection (walk traces), candidates}.
+  _rankedInstallCandidates(cards, priorityOnly = false, inhibit = true) {
+    var previousTrace = this._installTrace;
+    this._installTrace = [];
+    try {
+      var options = this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+      var protection = this._installTrace;
+      return {
+        options: options,
+        protection: protection,
+        candidates: this._installCandidateRecords(options, protection, cards),
+      };
+    } finally {
+      this._installTrace = previousTrace;
+    }
+  }
+
+  //Compatibility bands reproduce the legacy order exactly: the fast-advance
+  //win candidate is band 3 (where legacy already ranks it), every other
+  //legacy group band 0, ordered by compatibilityOrder (emission position).
+  //The same (card, server) emitted twice is one record with merged reasons;
+  //the first occurrence keeps its position and its option object.
+  _installCandidateRecords(options, protection, cards) {
+    var records = [];
+    var groupIndex = -1;
+    var inGroupIndex = 0;
+    var previousGroup = null;
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      var group = this._installPreferenceGroup(option.reason);
+      if (group != previousGroup) {
+        groupIndex++;
+        inGroupIndex = 0;
+        previousGroup = group;
+      } else inGroupIndex++;
+      var existing = records.find(
+        (record) =>
+          record.card == option.cardToInstall &&
+          record.server == option.serverToInstallTo,
+      );
+      if (existing) {
+        if (!existing.reasons.includes(option.reason))
+          existing.reasons.push(option.reason);
+        continue;
+      }
+      records.push({
+        card: option.cardToInstall,
+        server: option.serverToInstallTo,
+        kind: option.cardToInstall ? option.cardToInstall.cardType : null,
+        role: group,
+        band: group == "win" ? 3 : 0,
+        compatibilityOrder: i,
+        groupIndex: groupIndex,
+        inGroupIndex: inGroupIndex,
+        //Title cases survive only as legacy bands, never as scoring (I9).
+        scoreBreakdown: {
+          legacy: group == "specificCase" ? "titleCase:Snare!" : group,
+          compatibilityOrder: i,
+        },
+        reasons: [option.reason || group],
+        eligible: true,
+        rejectionReasons: [],
+        option: option,
+      });
+    }
+    //ICE legacy did not offer to a server its protection walk ranked:
+    //recorded for diagnostics (and for I2), never returned.
+    var walk = protection.find((trace) => trace.filtered);
+    if (!walk) return records;
+    var ice = cards.filter((card) => CheckCardType(card, ["ice"]));
+    var eligibleCount = records.length;
+    walk.ranked.forEach((row) => {
+      var rejection = ["legacy: server not selected"];
+      if (row.server == walk.selected)
+        rejection = ["legacy: not offered for the selected server"];
+      else if (row.skipped == "layerPolicy")
+        rejection.push("layerPolicy:" + row.layerPolicy);
+      else if (row.skipped) rejection.push(row.skipped);
+      ice.forEach((card) => {
+        if (
+          records.some(
+            (record) => record.card == card && record.server == row.serverRef,
+          )
+        )
+          return;
+        records.push({
+          card: card,
+          server: row.serverRef,
+          kind: "ice",
+          role: "protectionIce",
+          band: 0,
+          compatibilityOrder: null,
+          scoreBreakdown: { legacy: "notGenerated", compatibilityOrder: null },
+          reasons: [],
+          eligible: false,
+          rejectionReasons: rejection.slice(),
+          option: null,
+        });
+      });
+    });
+    for (var j = eligibleCount; j < records.length; j++)
+      records[j].ineligibleOrder = j - eligibleCount;
+    return records;
+  }
+
+  _traceInstallCandidate(record) {
+    var row = {
+      card: record.card ? record.card.title : null,
+      server: this._traceServerName(record.server),
+      role: record.role,
+      band: record.band,
+      order: record.compatibilityOrder,
+      eligible: record.eligible,
+    };
+    if (record.reasons.length > 1) row.reasons = record.reasons;
+    if (!record.eligible) row.rejection = record.rejectionReasons;
+    if (record.scoreBreakdown.legacy != record.role)
+      row.legacy = record.scoreBreakdown.legacy;
+    return row;
+  }
+
+  //The single builder of hypothetical post-install servers (install design
+  //note). Installs card into server (ICE as the outermost layer, anything else
+  //in the root) and pays the ICE install cost, or, for a null server, into a
+  //detached empty remote that is never added to corp.remoteServers; then
+  //returns evaluate(server). The board is restored even if evaluate throws.
+  _hypotheticalServerAfterInstall(card, server, evaluate) {
+    var target = server;
+    if (target == null) {
+      target = NewServer("Hypothetical remote", false);
+      target.AIHypothetical = true;
+    }
+    var isIce = CheckCardType(card, ["ice"]);
+    var layer = isIce ? target.ice : target.root;
+    var originalLayer = layer.slice();
+    var originalCredits = corp.creditPool;
+    var installCost = isIce && server != null ? server.ice.length : 0;
+    return this._withHypothetical(
+      () => {
+        corp.creditPool -= installCost;
+        layer.push(card);
+      },
+      () => evaluate(target),
+      () => {
+        layer.splice(0, layer.length, ...originalLayer);
+        corp.creditPool = originalCredits;
+      },
+    );
+  }
+
+  //I0 telemetry helpers. They read values the ranking already computed and
+  //printed card costs only: no security evaluation, card hook or randomness.
+  _installRecording() {
+    return (
+      typeof DecisionSnapshots !== "undefined" &&
+      DecisionSnapshots.notes != null &&
+      this._hypotheticalDepth === 0
+    );
+  }
+
+  _traceServerName(server) {
+    if (server == null) return "new remote";
+    return server.serverName;
+  }
+
+  _securitySummary(security) {
+    if (!security) return null;
+    return {
+      isSecure: security.isSecure,
+      hasHardLockout: security.hasHardLockout,
+      totalBreakCost: security.totalBreakCost,
+      totalMandatoryBreakCost: security.totalMandatoryBreakCost,
+      runnerCredits: security.runnerCredits,
+      structuralRisk: security.structuralRisk,
+      publicThreatRisk: security.publicThreatRisk,
+    };
+  }
+
+  _protectionTrace(ranked, protectableRanked, selected, eligibility, filtered) {
+    var protectable = new Set(protectableRanked);
+    var selectedIndex = selected ? ranked.indexOf(selected) : ranked.length;
+    var anyInsecureEligible = protectableRanked.some((entry) => {
+      var verdict = eligibility.has(entry.server)
+        ? eligibility.get(entry.server)
+        : true;
+      var allowed =
+        verdict && typeof verdict == "object" ? verdict.allowed : verdict;
+      return !entry.isSecure && allowed;
+    });
+    return {
+      filtered: filtered,
+      selected: selected ? this._traceServerName(selected.server) : null,
+      ranked: ranked.map((entry, index) => {
+        var verdict = eligibility.get(entry.server);
+        var row = {
+          server: this._traceServerName(entry.server),
+          score: entry.score,
+          debt: entry.debt,
+          adjusted: entry.adjustedScore,
+          security: this._securitySummary(entry.security),
+        };
+        //I1 candidate records need the server itself; kept out of the notes.
+        Object.defineProperty(row, "serverRef", { value: entry.server });
+        if (verdict && typeof verdict == "object")
+          row.layerPolicy = verdict.reason;
+        else if (typeof verdict == "boolean") row.layerPolicy = verdict;
+        if (index >= selectedIndex) return row;
+        //Why the walk passed over a server ranked above the selection.
+        if (!protectable.has(entry)) row.skipped = "valueless";
+        else if (
+          eligibility.has(entry.server) &&
+          !(verdict && typeof verdict == "object" ? verdict.allowed : verdict)
+        )
+          row.skipped = "layerPolicy";
+        else if (entry.isSecure && anyInsecureEligible) row.skipped = "secure";
+        else if (this._protectionInstallsThisTurn.includes(entry.server))
+          row.skipped = "protectedThisTurn";
+        else if (entry.server == corp.archives) row.skipped = "archivesRedirect";
+        else row.skipped = "outranked";
+        return row;
+      }),
+    };
+  }
+
+  _installPreferenceGroup(reason) {
+    if (reason == "could be installed and fast-advanced to win") return "win";
+    if (/^AIWorthInstalling/.test(reason)) return "worthInstalling";
+    if (reason == "returned by _iceInstallOptions for server that needs protection")
+      return "protectionIce";
+    if (reason == "HVT into scoring server" || reason == "asset into non-scoring server")
+      return "rootIntoServer";
+    if (reason == "returned by _upgradeInstallPreferences") return "upgrade";
+    if (reason == "returned by _iceInstallOptions for new server")
+      return "fallbackIce";
+    if (reason == "Specific case") return "specificCase";
+    return "other";
+  }
+
+  _traceInstallPreference(option) {
+    var card = option.cardToInstall;
+    var server = option.serverToInstallTo;
+    var row = {
+      card: card ? card.title : null,
+      cardType: card ? card.cardType : null,
+      server: this._traceServerName(server),
+      group: this._installPreferenceGroup(option.reason),
+      reason: option.reason || "",
+    };
+    if (card && card.cardType == "ice") {
+      //Mirrors _iceInCardsCommon()'s credit check with printed costs.
+      row.installCost = server ? server.ice.length : 0;
+      row.pendingRez = 0;
+      if (server)
+        for (var i = 0; i < server.ice.length; i++)
+          if (!server.ice[i].rezzed) row.pendingRez += server.ice[i].rezCost || 0;
+      row.rezCost = card.rezCost || 0;
+      row.affordable =
+        row.installCost + row.pendingRez + row.rezCost <= corp.creditPool;
+    } else if (card && typeof card.rezCost == "number") {
+      row.rezCost = card.rezCost;
+      row.affordable = card.rezCost <= corp.creditPool;
+    }
+    return row;
+  }
+
+  _noteRankedInstall(ret, protection, priorityOnly, inhibit, cards) {
+    var preferences = ret.map((option) => this._traceInstallPreference(option));
+    var candidates = {};
+    preferences.forEach((row) => {
+      if (row.group != "protectionIce" && row.group != "fallbackIce") return;
+      var key = row.group + ":" + row.server;
+      if (!candidates[key])
+        candidates[key] = { group: row.group, server: row.server, affordable: 0, unaffordable: 0 };
+      candidates[key][row.affordable ? "affordable" : "unaffordable"]++;
+    });
+    this._lastProtectionTrace = protection;
+    DecisionSnapshots.Note("install", {
+      call: "rankedInstallOptions",
+      priorityOnly: priorityOnly,
+      inhibit: inhibit,
+      credits: corp.creditPool,
+      cards: cards.length,
+      preferences: preferences,
+      iceCandidates: Object.keys(candidates).map((key) => candidates[key]),
+      protection: protection,
+    });
+  }
+
+  _noteBestInstall(ranked, preferenceIndex, optionIndex) {
+    if (!this._installRecording()) return;
+    var chosen = preferenceIndex > -1 ? ranked[preferenceIndex] : null;
+    var note = {
+      call: "bestInstallOption",
+      chosenOption: optionIndex,
+      chosen: chosen ? this._traceInstallPreference(chosen) : null,
+      //Preferences ranked above the choice that matched no legal engine option.
+      noLegalOption: ranked
+        .slice(0, preferenceIndex > -1 ? preferenceIndex : ranked.length)
+        .map((option) => this._traceInstallPreference(option)),
+    };
+    if (chosen && this._lastProtectionTrace) {
+      var name = this._traceServerName(chosen.serverToInstallTo);
+      for (var i = this._lastProtectionTrace.length - 1; i > -1; i--) {
+        var row = this._lastProtectionTrace[i].ranked.find((r) => r.server == name);
+        if (row) {
+          note.destination = { score: row.score, adjusted: row.adjusted, security: row.security };
+          break;
+        }
+      }
+    }
+    DecisionSnapshots.Note("install", note);
+  }
+
+  _rankedInstallOptionsCore(cards, priorityOnly, inhibit) {
     var ret = [];
 
     var strongestEmptyRemote = null;
@@ -4347,11 +4711,7 @@ class CorpAI {
       false,
       false,
       (server, security) =>
-        this._shouldInstallIceLayer(
-          server,
-          iceInstallEconomyCheck,
-          security,
-        ),
+        this._iceLayerPolicy(server, iceInstallEconomyCheck, security),
     );
 
     //Too poor? Do not spend frivolously on new layers. A breachable server
@@ -4509,11 +4869,7 @@ class CorpAI {
         false,
         false,
         (server, security) =>
-          this._shouldInstallIceLayer(
-            server,
-            iceInstallEconomyCheck,
-            security,
-          ),
+          this._iceLayerPolicy(server, iceInstallEconomyCheck, security),
       );
     //but don't create a new server if the above economy check failed
     //because we might be saving to afford better ice in critical server
@@ -6910,25 +7266,32 @@ class CorpAI {
     var previousSecurityCache = this._securityCache;
     this._decisionRandomState = { assetDestinationOrders: [] };
     this._securityCache = this._securityCacheEnabled ? new Map() : null;
+    var recorder =
+      typeof DecisionSnapshots !== "undefined" ? DecisionSnapshots : null;
+    var previousNotes = recorder ? recorder.notes : null;
     try {
       var snapshot =
-        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.enabled
+        recorder && recorder.enabled
           ? DecisionSnapshots.Before(choiceType, optionList)
           : null;
-      var telemetry =
-        typeof DecisionSnapshots !== "undefined" && DecisionSnapshots.telemetry;
+      var telemetry = recorder && recorder.telemetry;
+      //I0 observation notes for this decision only (nested decisions keep
+      //their own frame and the outer frame is restored in finally).
+      if (recorder) recorder.BeginNotes(Boolean(snapshot || telemetry));
       //Discard/sabotage filtering may mutate the array and its option objects.
       var telemetryOptions = telemetry ? optionList.slice() : null;
       var telemetryLabels = telemetry ? optionList.map(DecisionSnapshots.Label) : null;
       var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
       var ret = this._choiceInner(optionList, choiceType);
+      var notes = recorder ? recorder.notes : null;
       if (telemetry) {
         var recordedChoice = ret >= 0 ? telemetryOptions.indexOf(optionList[ret]) : ret;
-        DecisionSnapshots.Record("corp", choiceType, telemetryLabels, recordedChoice, DecisionSnapshots.Now() - startedAt);
+        DecisionSnapshots.Record("corp", choiceType, telemetryLabels, recordedChoice, DecisionSnapshots.Now() - startedAt, notes);
       }
-      if (snapshot) DecisionSnapshots.After(snapshot, ret);
+      if (snapshot) DecisionSnapshots.After(snapshot, ret, notes);
       return ret;
     } finally {
+      if (recorder) recorder.EndNotes(previousNotes);
       this._decisionRandomState = previousDecisionRandomState;
       this._securityCache = previousSecurityCache;
     }

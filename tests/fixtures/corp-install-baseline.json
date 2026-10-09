@@ -1,0 +1,1615 @@
+{
+ "advance-agenda-one-short.txt": {
+  "chosen": "advance",
+  "server": null,
+  "card": null,
+  "install": []
+ },
+ "corp-agenda-into-secure-remote-still-ok.txt": {
+  "chosen": "install",
+  "server": "Remote 0",
+  "card": "Send a Message",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 10,
+    "cards": 1,
+    "preferences": [
+     {
+      "card": "Send a Message",
+      "cardType": "agenda",
+      "server": "Remote 0",
+      "group": "rootIntoServer",
+      "reason": "HVT into scoring server"
+     }
+    ],
+    "iceCandidates": [],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -4.5,
+        "debt": 0,
+        "adjusted": -4.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 2.5,
+        "debt": 0,
+        "adjusted": 2.5,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     },
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -4.5,
+        "debt": 0,
+        "adjusted": -4.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 2.5,
+        "debt": 0,
+        "adjusted": 2.5,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-continues-send-a-message-scoring-plan.txt": {
+  "chosen": "advance",
+  "server": null,
+  "card": null,
+  "install": []
+ },
+ "corp-installs-agenda-in-protected-remote.txt": {
+  "chosen": "install",
+  "server": "Remote 0",
+  "card": "Hostile Takeover",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 8,
+    "cards": 3,
+    "preferences": [
+     {
+      "card": "Hostile Takeover",
+      "cardType": "agenda",
+      "server": "Remote 0",
+      "group": "rootIntoServer",
+      "reason": "HVT into scoring server"
+     }
+    ],
+    "iceCandidates": [],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "Remote 0",
+      "ranked": [
+       {
+        "server": "Remote 0",
+        "score": 3.2,
+        "debt": 0,
+        "adjusted": 3.2,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "HQ",
+        "score": 3.9695421765734267,
+        "debt": 0,
+        "adjusted": 3.9695421765734267,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 4.469542176573427,
+        "debt": 0,
+        "adjusted": 4.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 7.469542176573427,
+        "debt": 0,
+        "adjusted": 7.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       }
+      ]
+     },
+     {
+      "filtered": true,
+      "selected": "Remote 0",
+      "ranked": [
+       {
+        "server": "Remote 0",
+        "score": 3.2,
+        "debt": 0,
+        "adjusted": 3.2,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "HQ",
+        "score": 3.9695421765734267,
+        "debt": 0,
+        "adjusted": 3.9695421765734267,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 4.469542176573427,
+        "debt": 0,
+        "adjusted": 4.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 7.469542176573427,
+        "debt": 0,
+        "adjusted": 7.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-installs-ice-on-naked-hq-with-agendas.txt": {
+  "chosen": "install",
+  "server": "HQ",
+  "card": "Ice Wall",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 5,
+    "cards": 4,
+    "preferences": [
+     {
+      "card": "Ice Wall",
+      "cardType": "ice",
+      "server": "HQ",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 0,
+      "pendingRez": 0,
+      "rezCost": 1,
+      "affordable": true
+     },
+     {
+      "card": "Ice Wall",
+      "cardType": "ice",
+      "server": "new remote",
+      "group": "fallbackIce",
+      "reason": "returned by _iceInstallOptions for new server",
+      "installCost": 0,
+      "pendingRez": 0,
+      "rezCost": 1,
+      "affordable": true
+     }
+    ],
+    "iceCandidates": [
+     {
+      "group": "protectionIce",
+      "server": "HQ",
+      "affordable": 1,
+      "unaffordable": 0
+     },
+     {
+      "group": "fallbackIce",
+      "server": "new remote",
+      "affordable": 1,
+      "unaffordable": 0
+     }
+    ],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -9,
+        "debt": 0,
+        "adjusted": -9,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "new remote",
+        "score": 1,
+        "debt": 0,
+        "adjusted": 1,
+        "security": null
+       },
+       {
+        "server": "R&D",
+        "score": 4.469542176573427,
+        "debt": 0,
+        "adjusted": 4.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 7.469542176573427,
+        "debt": 0,
+        "adjusted": 7.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       }
+      ]
+     },
+     {
+      "filtered": false,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -9,
+        "debt": 0,
+        "adjusted": -9,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "new remote",
+        "score": 1,
+        "debt": 0,
+        "adjusted": 1,
+        "security": null
+       },
+       {
+        "server": "R&D",
+        "score": 4.469542176573427,
+        "debt": 0,
+        "adjusted": 4.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 7.469542176573427,
+        "debt": 0,
+        "adjusted": 7.469542176573427,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 8,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.5304578234265734
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-layers-breachable-agenda-remote.txt": {
+  "chosen": "install",
+  "server": "Remote 1",
+  "card": "Semak-samun",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 10,
+    "cards": 5,
+    "preferences": [
+     {
+      "card": "Semak-samun",
+      "cardType": "ice",
+      "server": "Remote 1",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 1,
+      "pendingRez": 3,
+      "rezCost": 3,
+      "affordable": true
+     },
+     {
+      "card": "Semak-samun",
+      "cardType": "ice",
+      "server": "Remote 1",
+      "group": "fallbackIce",
+      "reason": "returned by _iceInstallOptions for new server",
+      "installCost": 1,
+      "pendingRez": 3,
+      "rezCost": 3,
+      "affordable": true
+     }
+    ],
+    "iceCandidates": [
+     {
+      "group": "protectionIce",
+      "server": "Remote 1",
+      "affordable": 1,
+      "unaffordable": 0
+     },
+     {
+      "group": "fallbackIce",
+      "server": "Remote 1",
+      "affordable": 1,
+      "unaffordable": 0
+     }
+    ],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "Remote 1",
+      "ranked": [
+       {
+        "server": "Remote 1",
+        "score": -1.046542901356295,
+        "debt": 0,
+        "adjusted": -1.046542901356295,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.4215429013562949
+        },
+        "layerPolicy": "serverAtRiskOverride"
+       },
+       {
+        "server": "Remote 0",
+        "score": 0.7,
+        "debt": 0,
+        "adjusted": 0.7,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 1.2470742591862232,
+        "debt": 0,
+        "adjusted": 1.2470742591862232,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 3,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.25292574081377694
+        }
+       },
+       {
+        "server": "HQ",
+        "score": 1.7470742591862232,
+        "debt": 0,
+        "adjusted": 1.7470742591862232,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 1,
+         "totalMandatoryBreakCost": 1,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.25292574081377694
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3.265957098643705,
+        "debt": 0,
+        "adjusted": 3.265957098643705,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 7,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.4215429013562949
+        }
+       }
+      ]
+     },
+     {
+      "filtered": true,
+      "selected": "Remote 1",
+      "ranked": [
+       {
+        "server": "Remote 1",
+        "score": -1.046542901356295,
+        "debt": 0,
+        "adjusted": -1.046542901356295,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.4215429013562949
+        },
+        "layerPolicy": "serverAtRiskOverride"
+       },
+       {
+        "server": "Remote 0",
+        "score": 0.7,
+        "debt": 0,
+        "adjusted": 0.7,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 1.2470742591862232,
+        "debt": 0,
+        "adjusted": 1.2470742591862232,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 3,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.25292574081377694
+        }
+       },
+       {
+        "server": "HQ",
+        "score": 1.7470742591862232,
+        "debt": 0,
+        "adjusted": 1.7470742591862232,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 1,
+         "totalMandatoryBreakCost": 1,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.25292574081377694
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3.265957098643705,
+        "debt": 0,
+        "adjusted": 3.265957098643705,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 7,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 16,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.4215429013562949
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-no-agenda-behind-conditional-etr-ice.txt": {
+  "chosen": "draw",
+  "server": null,
+  "card": null,
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 5,
+    "cards": 1,
+    "preferences": [],
+    "iceCandidates": [],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -3.5,
+        "debt": 0,
+        "adjusted": -3.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 1.4085365853658536,
+        "debt": 0,
+        "adjusted": 1.4085365853658536,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.09146341463414642
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     },
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -3.5,
+        "debt": 0,
+        "adjusted": -3.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 1.4085365853658536,
+        "debt": 0,
+        "adjusted": 1.4085365853658536,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.09146341463414642
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-no-agenda-behind-no-etr-ice.txt": {
+  "chosen": "draw",
+  "server": null,
+  "card": null,
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 5,
+    "cards": 1,
+    "preferences": [],
+    "iceCandidates": [],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -3.5,
+        "debt": 0,
+        "adjusted": -3.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 0.2835365853658536,
+        "debt": 0,
+        "adjusted": 0.2835365853658536,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.09146341463414642
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     },
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -3.5,
+        "debt": 0,
+        "adjusted": -3.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 0.2835365853658536,
+        "debt": 0,
+        "adjusted": 0.2835365853658536,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.09146341463414642
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 3,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-no-agenda-into-insecure-remote.txt": {
+  "chosen": "draw",
+  "server": null,
+  "card": null,
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 10,
+    "cards": 1,
+    "preferences": [],
+    "iceCandidates": [],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -4.5,
+        "debt": 0,
+        "adjusted": -4.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 0.75,
+        "debt": 0,
+        "adjusted": 0.75,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 1,
+         "totalMandatoryBreakCost": 1,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     },
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -4.5,
+        "debt": 0,
+        "adjusted": -4.5,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 0,
+        "debt": 0,
+        "adjusted": 0,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Remote 0",
+        "score": 0.75,
+        "debt": 0,
+        "adjusted": 0.75,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 1,
+         "totalMandatoryBreakCost": 1,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "Archives",
+        "score": 3,
+        "debt": 0,
+        "adjusted": 3,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 13,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-protects-baker-backdoor-after-rnd-layer-blocked.txt": {
+  "chosen": "install",
+  "server": "Archives",
+  "card": "Empiricist",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 7,
+    "cards": 5,
+    "preferences": [
+     {
+      "card": "Empiricist",
+      "cardType": "ice",
+      "server": "Archives",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 0,
+      "pendingRez": 0,
+      "rezCost": 7,
+      "affordable": true
+     }
+    ],
+    "iceCandidates": [
+     {
+      "group": "protectionIce",
+      "server": "Archives",
+      "affordable": 1,
+      "unaffordable": 0
+     }
+    ],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "Archives",
+      "ranked": [
+       {
+        "server": "Archives",
+        "score": -5,
+        "debt": 3,
+        "adjusted": -8,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 14,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "R&D",
+        "score": 3.711711711711712,
+        "debt": 5,
+        "adjusted": -1.288288288288288,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 14,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.788288288288288
+        }
+       },
+       {
+        "server": "new remote",
+        "score": 1,
+        "debt": 0,
+        "adjusted": 1,
+        "security": null
+       },
+       {
+        "server": "Remote 0",
+        "score": 5.300000000000001,
+        "debt": 0,
+        "adjusted": 5.300000000000001,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 14,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "HQ",
+        "score": 6.211711711711712,
+        "debt": 0,
+        "adjusted": 6.211711711711712,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 14,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.788288288288288
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-protects-hq-not-archives-stale-allocation.txt": {
+  "chosen": "install",
+  "server": "HQ",
+  "card": "Semak-samun",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 5,
+    "cards": 8,
+    "preferences": [
+     {
+      "card": "Semak-samun",
+      "cardType": "ice",
+      "server": "HQ",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 1,
+      "pendingRez": 0,
+      "rezCost": 3,
+      "affordable": true
+     },
+     {
+      "card": "Karunā",
+      "cardType": "ice",
+      "server": "HQ",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 1,
+      "pendingRez": 0,
+      "rezCost": 4,
+      "affordable": true
+     }
+    ],
+    "iceCandidates": [
+     {
+      "group": "protectionIce",
+      "server": "HQ",
+      "affordable": 2,
+      "unaffordable": 0
+     }
+    ],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -10.825,
+        "debt": 0,
+        "adjusted": -10.825,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 7,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.07500000000000007
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "new remote",
+        "score": 1,
+        "debt": 0,
+        "adjusted": 1,
+        "security": null
+       },
+       {
+        "server": "Archives",
+        "score": 2,
+        "debt": 0,
+        "adjusted": 2,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 7,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 3.25,
+        "debt": 0,
+        "adjusted": 3.25,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 7,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.1250000000000001
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-protects-hq-when-poor.txt": {
+  "chosen": "install",
+  "server": "HQ",
+  "card": "Semak-samun",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 5,
+    "cards": 8,
+    "preferences": [
+     {
+      "card": "Semak-samun",
+      "cardType": "ice",
+      "server": "HQ",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 1,
+      "pendingRez": 0,
+      "rezCost": 3,
+      "affordable": true
+     },
+     {
+      "card": "Karunā",
+      "cardType": "ice",
+      "server": "HQ",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 1,
+      "pendingRez": 0,
+      "rezCost": 4,
+      "affordable": true
+     }
+    ],
+    "iceCandidates": [
+     {
+      "group": "protectionIce",
+      "server": "HQ",
+      "affordable": 2,
+      "unaffordable": 0
+     }
+    ],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -10.825,
+        "debt": 0,
+        "adjusted": -10.825,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 7,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.07500000000000007
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "new remote",
+        "score": 1,
+        "debt": 0,
+        "adjusted": 1,
+        "security": null
+       },
+       {
+        "server": "Archives",
+        "score": 2,
+        "debt": 0,
+        "adjusted": 2,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 7,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 3.25,
+        "debt": 0,
+        "adjusted": 3.25,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 7,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.1250000000000001
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "corp-protects-hq-when-reserve-exceeds-credits.txt": {
+  "chosen": "install",
+  "server": "HQ",
+  "card": "Semak-samun",
+  "install": [
+   {
+    "call": "rankedInstallOptions",
+    "priorityOnly": true,
+    "inhibit": true,
+    "credits": 7,
+    "cards": 3,
+    "preferences": [
+     {
+      "card": "Semak-samun",
+      "cardType": "ice",
+      "server": "HQ",
+      "group": "protectionIce",
+      "reason": "returned by _iceInstallOptions for server that needs protection",
+      "installCost": 1,
+      "pendingRez": 0,
+      "rezCost": 3,
+      "affordable": true
+     }
+    ],
+    "iceCandidates": [
+     {
+      "group": "protectionIce",
+      "server": "HQ",
+      "affordable": 1,
+      "unaffordable": 0
+     }
+    ],
+    "protection": [
+     {
+      "filtered": true,
+      "selected": "HQ",
+      "ranked": [
+       {
+        "server": "HQ",
+        "score": -10.712662235383064,
+        "debt": 0,
+        "adjusted": -10.712662235383064,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 1,
+         "totalMandatoryBreakCost": 1,
+         "runnerCredits": 6,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.21266223538306428
+        },
+        "layerPolicy": "noUnrezzedIce"
+       },
+       {
+        "server": "Remote 0",
+        "score": -0.9500000000000002,
+        "debt": 0,
+        "adjusted": -0.9500000000000002,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 6,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0
+        }
+       },
+       {
+        "server": "new remote",
+        "score": 1,
+        "debt": 0,
+        "adjusted": 1,
+        "security": null
+       },
+       {
+        "server": "Archives",
+        "score": 2.645562941028226,
+        "debt": 0,
+        "adjusted": 2.645562941028226,
+        "security": {
+         "isSecure": false,
+         "hasHardLockout": false,
+         "totalBreakCost": 0,
+         "totalMandatoryBreakCost": 0,
+         "runnerCredits": 6,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.3544370589717738
+        }
+       },
+       {
+        "server": "R&D",
+        "score": 5.020562941028226,
+        "debt": 0,
+        "adjusted": 5.020562941028226,
+        "security": {
+         "isSecure": true,
+         "hasHardLockout": true,
+         "totalBreakCost": null,
+         "totalMandatoryBreakCost": null,
+         "runnerCredits": 6,
+         "structuralRisk": 0,
+         "publicThreatRisk": 0.3544370589717738
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -68,9 +68,9 @@ evaluator calls in one planning window.
 Improvement gate: candidate `this.options.assetValue` on against I0's baseline,
 with the standard guards (design note) and:
 
-- Improvement: `assetNetCredits` per game rises (candidate minus baseline
+- Improvement: `installOutcomes.assetNetCredits` per game rises (candidate minus baseline
   lower bound above 0).
-- Guards: `trapTriggers` per game lower bound at least -20% of the baseline
+- Guards: `installOutcomes.trapTriggers` per game lower bound at least -20% of the baseline
   mean (traps stay credible); `pointsStolenByServer.remote` upper bound at most
   +0.15 points per game (scoring remotes are not starved of protection).
 

@@ -444,7 +444,48 @@ does not yet compare concrete options by their outcome.
   order in which independent option groups are concatenated;
   `_bestInstallOption()` picks the first preference matching a legal engine
   option. There is no common scored candidate across ICE, roots and non-install
-  actions.
+  actions. The ICE-protection target comes from `_serverToProtect()` with
+  `_iceLayerPolicy()` as its filter (`_shouldInstallIceLayer()` is its boolean
+  form). A server is passed over only when valueless, secure while an insecure
+  server is eligible, already protected this turn, rejected by the layer policy
+  (`existingUnrezzedIceAndPoor` or `rezzedIceNotAtRiskAndPoor`) or, for
+  Archives, outranked by a naturally insecure server. Cost and rez shortfall
+  never skip a server; they leave the chosen server with no affordable ICE.
+- **Install telemetry (I0).** While a `DecisionSnapshots` notes frame is open
+  (a snapshot entry or F4 telemetry) and no hypothetical probe is running,
+  `_rankedInstallOptions()` (a recording wrapper around the unchanged
+  `_rankedInstallOptionsCore()`) notes each preference with its card,
+  destination, group (derived from its `reason`), printed install/rez costs and
+  credit check, the ICE candidate counts per protection server, and every
+  `_serverToProtect()` walk: each ranked server's score, debt, security summary
+  and layer-policy reason, and why each server above the selection was skipped.
+  `_bestInstallOption()` notes its choice, the preferences above it that had no
+  legal engine option, and the destination's score and security from that walk.
+  The helpers reuse values already computed (no extra security evaluation,
+  card hook or `_random` call) and mutate no option object; the fixture suite
+  checks that recording leaves choices, reasons and `_random` calls unchanged.
+- **Install candidate records (I1).** `_rankedInstallCandidates()` runs the
+  unchanged `_rankedInstallOptionsCore()` and returns `{options, protection,
+  candidates}`: the legacy option list, the protection walks, and one record
+  per `(card, server)` pair. Each record carries `kind`, `role` (the legacy
+  group), `band` (3 for the fast-advance-to-win agenda, 0 otherwise),
+  `compatibilityOrder` (the legacy emission position), a `scoreBreakdown`
+  (`legacy` group, or `titleCase:Snare!`), merged `reasons`, `eligible` and
+  `rejectionReasons`, and the legacy `option` object. A pair that two groups
+  emit is one record with both reasons; the option list still contains both,
+  because `Phase_Main`'s gain-credit probe compares list lengths. ICE that the
+  first filtered protection walk ranked but legacy did not offer is recorded
+  with `eligible: false` and the walk's skip reason (for example
+  `layerPolicy:existingUnrezzedIceAndPoor`), after every eligible record; it is
+  never returned, so I2 can switch such candidates on deliberately. While
+  recording, `_rankedInstallOptions()` notes the records as
+  `installCandidates`; otherwise it calls the core directly, so untraced play
+  does no extra work. `_hypotheticalServerAfterInstall(card, server, evaluate)`
+  is the single builder of post-install hypothetical servers (ICE as the
+  outermost layer with its install cost paid, anything else in the root; a
+  null server is a detached empty remote never added to
+  `corp.remoteServers`), restored through `_withHypothetical()`. No ranking
+  path calls it yet.
 
 Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
 rez choices. Luana Campos permits this economy rez only outside a run, with
@@ -603,14 +644,25 @@ needs.
     async decision, not around the recorder. Corp decisions with a single
     option return before `Choice()` and are not recorded. Telemetry is off in
     the browser and changes no decision or random draw (tested by `logHash`).
-    It is the one decision-log path: I0 attaches its install-candidate records
-    to these entries rather than adding a logger.
+    It is the one decision-log path: `CorpAI.Choice()` opens a per-decision
+    notes frame (`DecisionSnapshots.BeginNotes()`/`EndNotes()`), AI code adds
+    to it with `DecisionSnapshots.Note()`, and `Record()` copies the notes onto
+    the streamed entry (I0's `install` records); `After()` keeps them on a
+    snapshot entry and `Text()` prints them as `// INSTALL:` comment lines.
   - *Events and metrics.* Harness-local wrappers (they call the real functions
     unchanged) emit `gameStart`, `decision`, `run` (server, success), `score`,
     `steal` (card, server, points; the server comes from
     `agendaStolenLocations`), `mulligan`, `rez` (card, card type, credits
     paid through `SpendCredits` and the cards hosted on it, each with its
-    `AIHostedDoesNotPreventRez` exemption), `turnEnd` and `gameEnd`. The core
+    `AIHostedDoesNotPreventRez` exemption, plus the root-card `id`), `turnEnd`
+    and `gameEnd` (with the Corp's final credits). For I0 they also emit
+    `turnStart` (with Corp credits, HQ card types and printed play costs, and
+    installed unrezzed ICE rez costs on a Corp turn), `install`/`leave` for Corp
+    root cards installed during play (`createRootTracker()`, by card identity;
+    fates `scored`, `stolen`, `trashedOnAccess`, `trashed`, `returned`,
+    `other`), `cardUsed` (a Corp `TriggerAbility()`) and `cardCredits`
+    (`GainCredits()` with a source card, or `TakeCredits()`). None of these
+    fires inside a hypothetical probe. The core
     metrics are computed from these events by a pure function:
     `winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer.*`,
     `gameLength`, `decisionLatencyMs.<side>.mean|p95|max` and

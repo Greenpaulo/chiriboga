@@ -562,6 +562,59 @@ command with `--collector <name>`. [collectors/runs.js](../scripts/ai-batch/coll
 is the example. Details are in
 [architecture: Foundations](corp-ai/architecture.md#foundations).
 
+## Install-series collectors and baselines (I0)
+
+Corp roadmap I0 added these observation-only collectors. Every metric is per
+game, and the report gives its mean over games. A single number is reported
+under the collector's own name.
+
+| Collector and metric | Meaning | Better |
+|---|---|---|
+| `installOutcomes.installToScoreTurns` | Mean turns from installing an agenda to scoring it, over agendas installed and scored this game; 0 if none | lower |
+| `installOutcomes.agendaExposureTurns` | Mean Runner turns begun while an agenda installed this game was on the board, over those agendas; 0 if none | lower |
+| `installOutcomes.assetNetCredits` | Credits gained from assets installed this game (`GainCredits` with the asset as source, `TakeCredits` from it) minus credits paid to rez them | higher |
+| `installOutcomes.trapTriggers` | Times an installed Ambush card's ability was triggered | higher |
+| `installOutcomes.abandoned` | Root cards that left the board through a trash outside a breach without ever being used or producing credits | lower |
+| `installOutcomes.agendasInstalled` / `agendasScored` / `agendasStolen` | Agenda counts behind the means above | none / higher / lower |
+| `installOutcomes.assetsInstalled` / `assetsTrashedBeforePayoff` | Assets installed, and assets trashed before paying off (credits covering their rez cost, or used if they produce no credits) | none / lower |
+| `installOutcomes.upgradesInstalled` / `upgradesUsed` | Upgrades installed, and those used or producing credits | none |
+| `successfulRunsByServer.hq` / `.rd` / `.archives` / `.remote` | Successful Runner runs | lower |
+| `corpInsolventTurns` | Corp turns that began with 0 credits, or fewer than the cheapest printed rez cost among its installed unrezzed ICE | lower |
+| `stallTurns` | Corp turns whose every main-phase action was the basic credit action although HQ held an ICE, agenda, asset or upgrade, or an operation whose printed play cost the Corp could pay (play restrictions are not modelled) | lower |
+| `unusedCreditsAtEnd` | Corp credits at game end | lower |
+
+`installOutcomes` follows only root cards installed during play (a start
+board's cards are ignored), from the headless runner's `install`, `leave`,
+`cardUsed`, `cardCredits` and `rez` events; passive effects (an upgrade that
+never triggers an ability) do not count as use. Empty observations are 0 for
+the means, so read them with the counts beside them.
+
+The corrected install-series baseline, with all five 2026-10-05 recovery
+options off (they are recorded in the report's `options`), is
+[`tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json`](../tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json) (commit 1f64f5d, clean tree, 7 pairs x 200 seeds, no failed games). It was produced with
+
+```sh
+node scripts/ai-batch.js --collector corpInsolventTurns --collector installOutcomes --collector stallTurns \
+  --collector successfulRunsByServer --collector unusedCreditsAtEnd --out <file>
+```
+
+A later item that needs another collector back-fills it by re-running this
+command with that collector added, at its own base commit. The baseline's
+`codeHash` changes with the code, so a later gate reuses it only while the
+code is unchanged; otherwise prepare a matching control as the install design
+note says.
+
+Install-decision snapshots for the same baseline are in
+`tests/fixtures/corp-install-baseline.json`: for every green fixture in
+`tests/fixtures/corp-decisions/` that offers `install`, the choice and the
+recorded install notes. They are not part of the test suite. Compare the
+current code with `node tests/corp-decision-fixtures.test.js --install-snapshots`
+(it lists changed fixtures and exits non-zero); an item that intends changes
+lists and justifies each delta, then rewrites the file with `--write`.
+The same command also compares the I1 candidate records (the
+`installCandidates` notes) with `tests/fixtures/corp-install-candidates.json`,
+kept in a separate file so the I0 baseline above stays unchanged.
+
 ## Checking the F3 security cache
 
 `node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`
