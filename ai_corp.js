@@ -1477,11 +1477,9 @@ class CorpAI {
     var stored = this._agendaBluffDecisions.get(server);
     if (stored && stored.card == card) return stored.bluff;
     var points = Math.max(1, card.agendaPoints || 1);
-    var runnerPressure = Math.min(4, (runner.grip || []).length * 0.25);
-    var probability = Math.max(
-      0.05,
-      Math.min(0.18, 0.22 / points + 0.02 - runnerPressure * 0.01),
-    );
+    //no public board term (e.g. Grip size): one observable variable moving
+    //the posture is a learnable tell (corp-ai/principles.md §5)
+    var probability = Math.max(0.05, Math.min(0.18, 0.22 / points + 0.02));
     var roll = this._random();
     var bluff = roll < probability;
     this._agendaBluffDecisions.set(server, {
