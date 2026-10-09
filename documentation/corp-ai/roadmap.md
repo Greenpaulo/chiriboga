@@ -67,7 +67,7 @@ cannot price yet.
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
 
 ### L8.4 Bounded posture epochs
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4
 - **Ticket:** [feature-layer-8-4-bounded-posture-epochs.md](../backlog/feature-layer-8-4-bounded-posture-epochs.md)
 - **Goal:** Replace lifetime bait/bluff postures with epoch-bounded ones that can be reconsidered at meaningful boundaries. Required to complete Layer 8.
