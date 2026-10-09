@@ -672,12 +672,35 @@ var DecisionSnapshots = {
   //ReproductionCode(). It only observes: no state changes and no randomness.
   telemetry: null,
   telemetryCount: 0,
+  //Per-decision observation notes (I0). CorpAI.Choice() opens a frame while
+  //a snapshot entry exists or telemetry is on; AI code adds data with Note().
+  //Notes only observe: callers must not compute anything for them that
+  //changes state, consumes randomness or calls the security evaluator.
+  notes: null,
+  BeginNotes: function (active) {
+    var previous = this.notes;
+    this.notes = active ? {} : null;
+    return previous;
+  },
+  EndNotes: function (previous) {
+    var notes = this.notes;
+    this.notes = typeof previous === "undefined" ? null : previous;
+    return notes;
+  },
+  Recording: function () {
+    return this.notes !== null;
+  },
+  Note: function (key, data) {
+    if (!this.notes) return;
+    if (!this.notes[key]) this.notes[key] = [];
+    this.notes[key].push(data);
+  },
   Now: function () {
     return typeof performance !== "undefined" ? performance.now() : Date.now();
   },
-  Record: function (side, choiceType, optionList, chosen, latencyMs) {
+  Record: function (side, choiceType, optionList, chosen, latencyMs, notes) {
     try {
-      this.telemetry.sink({
+      var entry = {
         n: ++this.telemetryCount,
         side: side,
         identifier: currentPhase ? currentPhase.identifier : "",
@@ -685,7 +708,9 @@ var DecisionSnapshots = {
         options: optionList.map(this.Label),
         chosen: chosen,
         latencyMs: latencyMs,
-      });
+      };
+      if (notes) for (var key in notes) entry[key] = notes[key];
+      this.telemetry.sink(entry);
     } catch (e) {}
   },
   Label: function (option) {
@@ -749,9 +774,10 @@ var DecisionSnapshots = {
       return null;
     }
   },
-  After: function (entry, chosenIndex) {
+  After: function (entry, chosenIndex, notes) {
     if (entry && typeof chosenIndex === "number" && entry.options[chosenIndex])
       entry.chosen = entry.options[chosenIndex];
+    if (entry && notes) entry.notes = notes;
   },
   Text: function () {
     var out =
@@ -773,6 +799,15 @@ var DecisionSnapshots = {
       out += "// CHOSEN: " + entry.chosen + "\n";
       out += "// REPLAYABLE: " + entry.replayable + "\n";
       if (entry.run) out += "// SETUP: " + entry.run + "\n";
+      //Notes are comment lines, so an extracted fixture still replays as-is.
+      for (var key in entry.notes || {})
+        for (var j = 0; j < entry.notes[key].length; j++)
+          out +=
+            "// " +
+            key.toUpperCase() +
+            ": " +
+            JSON.stringify(entry.notes[key][j]).replace(/[\r\n]+/g, " ") +
+            "\n";
       out += entry.repro + "\n### END DECISION " + entry.n + "\n";
     }
     return out;

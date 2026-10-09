@@ -27,7 +27,8 @@ const test = (name, body) => {
 
 test('CorpAI Choice wraps decisions with the snapshot recorder', () => {
   assert(aiSource.includes('DecisionSnapshots.Before(choiceType, optionList)'));
-  assert(aiSource.includes('DecisionSnapshots.After(snapshot, ret)'));
+  assert(aiSource.includes('DecisionSnapshots.After(snapshot, ret, notes)'));
+  assert(aiSource.includes('recorder.BeginNotes(') && aiSource.includes('recorder.EndNotes(previousNotes)'));
   assert(aiSource.includes('_choiceInner(optionList, choiceType)'));
 });
 
@@ -111,5 +112,46 @@ test('Corp telemetry snapshots labels before an option object changes', () => {
   assert.deepStrictEqual(Array.from(events[0].options), ['First', 'Second']);
   assert.strictEqual(events[0].chosen, 1);
   DS.telemetry = null;
+});
+test('notes frames are per decision and restore the outer frame', () => {
+  assert.strictEqual(DS.Recording(), false);
+  DS.Note('install', {ignored: true}); // no frame: nothing is recorded
+  const outer = DS.BeginNotes(true);
+  DS.Note('install', {a: 1});
+  const inner = DS.BeginNotes(true);
+  DS.Note('install', {b: 2});
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(DS.EndNotes(inner))), {install: [{b: 2}]});
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(DS.EndNotes(outer))), {install: [{a: 1}]});
+  assert.strictEqual(DS.Recording(), false);
+  const events = [];
+  DS.telemetry = {sink: entry => events.push(entry)};
+  DS.Record('corp', '', ['a', 'b'], 1, 0, {install: [{c: 3}]});
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(events[0].install)), [{c: 3}]);
+  DS.telemetry = null;
+});
+// I0 scenario 3: a snapshot carrying an install block still becomes a fixture
+// that the fixture runner replays to the same choice.
+test('a snapshot with install notes round-trips into a replaying fixture', () => {
+  const {execFileSync} = require('child_process');
+  const os = require('os');
+  const fixture = fs.readFileSync(path.join(__dirname, 'fixtures', 'corp-decisions',
+    'corp-protects-baker-backdoor-after-rnd-layer-blocked.txt'), 'utf8').replace(/\r/g, '');
+  const setup = /^\/\/\s*SETUP:\s*(.*)$/m.exec(fixture)[1];
+  const board = fixture.split('\n').filter(line => line.trim() && !line.startsWith('//')).join('\n');
+  context.ReproductionCode = () => board + '\n' + setup + ';\n';
+  context.currentPhase = {identifier: 'Corp 2.2', title: "Corporation's Action Phase"};
+  DS.list = [];
+  const entry = DS.Before('', ['gain', 'draw', 'install', 'advance', 'n']);
+  DS.After(entry, 2, {install: [{call: 'rankedInstallOptions', preferences: [{card: 'Empiricist', server: 'Archives'}]}]});
+  const text = DS.Text();
+  assert(text.includes('// INSTALL: {"call":"rankedInstallOptions"'), 'install notes are printed as comment lines');
+  const parsed = parseSnapshots(text);
+  assert.strictEqual(parsed.length, 1);
+  assert.strictEqual(parsed[0].chosen, 'install');
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'i0-snapshot-')), 'round-trip.txt');
+  fs.writeFileSync(file, buildFixture(parsed[0], 'round-trip-log.txt', 'install').replace('// EXPECT: install\n',
+    '// EXPECT: install\n// EXPECT_SERVER: Archives\n'));
+  const output = execFileSync(process.execPath, [path.join(__dirname, 'corp-decision-fixtures.test.js'), file], {encoding: 'utf8'});
+  assert(/ 0 failed, 1 fixtures\./.test(output), output);
 });
 console.log(tests + ' snapshot tests passed.');

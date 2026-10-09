@@ -60,6 +60,70 @@ function validateDeckPairs(pairs, setFiles) {
     validatePrecon(file, loadPrecon(file), id => defined.has(id));
 }
 
+// I0 root-commitment observation (observe mode only). Follows every Corp root
+// card (agenda, asset, upgrade) installed during play, by object identity,
+// from its install to where it leaves the board, and emits `install` and
+// `leave` events. It reads only Corp-known or public state and never calls
+// engine functions. Cards already installed when the game starts (a start
+// board) are ignored.
+function createRootTracker(emit) {
+  const ids = new WeakMap();
+  let next = 0;
+  const idOf = card => {
+    if (!ids.has(card)) ids.set(card, ++next);
+    return ids.get(card);
+  };
+  const tracked = new Map(); // id -> card, installed during play
+  const preexisting = new Set();
+  const leaving = new Map(); // id -> {card, turn} until its destination settles
+  const trashedOnAccess = new WeakSet();
+  const roots = corp => {
+    const out = [];
+    const add = (server, key) => { for (const card of server.root || []) out.push([card, server, key]); };
+    add(corp.HQ, 'hq'); add(corp.RnD, 'rd'); add(corp.archives, 'archives');
+    for (const server of corp.remoteServers) add(server, 'remote');
+    return out;
+  };
+  const fate = (corp, runner, card) => {
+    const where = card.cardLocation;
+    if (where === corp.scoreArea) return 'scored';
+    if (where === runner.scoreArea) return 'stolen';
+    if (where === corp.archives.cards) return trashedOnAccess.has(card) ? 'trashedOnAccess' : 'trashed';
+    if (where === corp.HQ.cards || where === corp.RnD.cards) return 'returned';
+    return null; // still resolving or being accessed: settle on a later step
+  };
+  return {
+    idOf,
+    // Cards trashed while the Runner is accessing them.
+    trashing(cards, accessing) {
+      for (const card of [].concat(cards || [])) if (card && card === accessing) trashedOnAccess.add(card);
+    },
+    start(corp) {
+      for (const [card] of roots(corp)) preexisting.add(idOf(card));
+    },
+    observe(corp, runner, turn, final) {
+      const present = new Set();
+      for (const [card, server, key] of roots(corp)) {
+        const id = idOf(card);
+        present.add(id);
+        if (preexisting.has(id) || tracked.has(id)) continue;
+        leaving.delete(id);
+        tracked.set(id, card);
+        emit('install', {id, card: card.title, cardType: card.cardType,
+          ambush: (card.subTypes || []).includes('Ambush'), server: key, serverName: server.serverName, turn});
+      }
+      for (const [id, card] of tracked)
+        if (!present.has(id)) { tracked.delete(id); leaving.set(id, {card, turn}); }
+      for (const [id, entry] of leaving) {
+        const where = fate(corp, runner, entry.card);
+        if (!where && !final) continue;
+        leaving.delete(id);
+        emit('leave', {id, card: entry.card.title, cardType: entry.card.cardType, fate: where || 'other', turn: entry.turn});
+      }
+    },
+  };
+}
+
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
 //   testOption (a no-op Corp option name, for the harness's own tests)}
@@ -68,6 +132,7 @@ function validateDeckPairs(pairs, setFiles) {
 function playGame(options) {
   const onEvent = options.onEvent || (() => {});
   const emit = (type, data) => onEvent(Object.assign({type}, data));
+  const roots = options.observe ? createRootTracker(emit) : null;
   const stub = new Proxy(function() {}, {
     get: (target, key) => key === Symbol.toPrimitive ? () => 0 : key === 'length' ? 0 : stub,
     apply: () => stub, construct: () => stub,
@@ -148,13 +213,20 @@ function playGame(options) {
       emit('run', {server: seen.run.server, success: seen.run.success});
       seen.run = null;
     }
+    if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), false);
   };
+  // Corp-known state when a Corp turn begins (I0 stall and insolvency collectors).
+  const corpTurnState = () => JSON.parse(JSON.stringify(run(`({credits: corp.creditPool,
+    hand: corp.HQ.cards.map(function (c) { return {cardType: c.cardType, playCost: typeof c.playCost == "number" ? c.playCost : null}; }),
+    unrezzedIceRezCosts: [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).reduce(function (costs, s) {
+      s.ice.forEach(function (ice) { if (!ice.rezzed) costs.push(ice.rezCost || 0); }); return costs; }, [])})`)));
   context.__onWin = (player, reason) => {
     if (result) return;
     observe();
     result = {winner: player === context.corp ? 'corp' : 'runner', reason};
     if (seen.run) { emit('run', {server: seen.run.server, success: seen.run.success}); seen.run = null; }
-    emit('gameEnd', {winner: result.winner, reason, turns: Math.ceil(turns / 2)});
+    if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), true);
+    emit('gameEnd', {winner: result.winner, reason, turns: Math.ceil(turns / 2), corpCredits: run('corp.creditPool')});
     setImmediate(done);
   };
   context.__log = line => {
@@ -169,6 +241,8 @@ function playGame(options) {
     if (side !== lastTurn) {
       if (lastTurn) emit('turnEnd', {side: lastTurn, turn: Math.ceil(turns / 2)});
       lastTurn = side; turns++;
+      if (options.observe) emit('turnStart', side === 'corp' ? {side, turn: Math.ceil(turns / 2), corp: corpTurnState()} :
+        {side, turn: Math.ceil(turns / 2)});
     }
     return false;
   };
@@ -181,6 +255,7 @@ function playGame(options) {
   // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
   // cards hosted on the rezzed card at that moment.
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
+    id: roots ? roots.idOf(card) : undefined,
     hosted: (card.hostedCards || []).map(h => ({title: h.title, exempt: Boolean(h.AIHostedDoesNotPreventRez)}))});
   if (options.telemetry) context.__decision = entry => {
     const counts = entry.side === 'corp' && context.__securityDecisionCounts;
@@ -221,6 +296,9 @@ function playGame(options) {
     Main = function() { if (__stop()) return; return __main(); };
   `);
   if (options.observe) {
+    context.__trashing = (cards, accessing) => roots.trashing(cards, accessing);
+    context.__cardUsed = card => emit('cardUsed', {id: roots.idOf(card), card: card.title});
+    context.__cardCredits = (card, credits) => emit('cardCredits', {id: roots.idOf(card), card: card.title, credits});
     // Event wrappers: they call the real functions unchanged and only record.
     run(`
       var __makeRun = MakeRun;
@@ -237,6 +315,45 @@ function playGame(options) {
       };
       var __mulliganFn = Mulligan;
       Mulligan = function() { __mulligan(activePlayer === corp ? "corp" : "runner"); return __mulliganFn.apply(this, arguments); };
+      // I0: card use, credits from a card and trashes; never during an AI probe.
+      var __trashFn = Trash;
+      Trash = function(cards) {
+        if (AIHypothetical.depth === 0) __trashing(cards, accessingCard);
+        return __trashFn.apply(this, arguments);
+      };
+      var __triggerAbilityFn = TriggerAbility;
+      TriggerAbility = function(card) {
+        if (AIHypothetical.depth === 0 && card && card.player === corp) __cardUsed(card);
+        return __triggerAbilityFn.apply(this, arguments);
+      };
+      var __gainCreditsFn = GainCredits;
+      GainCredits = function(player, num, temporary, sourceCard) {
+        if (AIHypothetical.depth === 0 && player === corp && sourceCard && num > 0) __cardCredits(sourceCard, num);
+        return __gainCreditsFn.apply(this, arguments);
+      };
+      // A Corp card's own response/automatic trigger (for example an Ambush
+      // asset's access trigger) resolves through a DecisionPhase whose callback
+      // is that trigger's Resolve; count it as a use when it resolves.
+      var __decisionPhaseFn = DecisionPhase;
+      DecisionPhase = function(player, choices, callback, title, instruction, context) {
+        if (typeof callback === "function" && context && context.player === corp && context.cardType &&
+            Object.keys(context).some(function(key) {
+              return /^(response|automatic)On/.test(key) && context[key] && context[key].Resolve === callback;
+            })) {
+          var original = callback;
+          arguments[2] = function() {
+            if (AIHypothetical.depth === 0) __cardUsed(context);
+            return original.apply(this, arguments);
+          };
+        }
+        return __decisionPhaseFn.apply(this, arguments);
+      };
+      var __takeCreditsFn = TakeCredits;
+      TakeCredits = function(player, card, num) {
+        var taken = card && typeof card.credits === "number" ? Math.min(card.credits, num) : 0;
+        if (AIHypothetical.depth === 0 && player === corp && taken >= 1) __cardCredits(card, taken);
+        return __takeCreditsFn.apply(this, arguments);
+      };
     `);
   }
   if (options.securityCache !== undefined) {
@@ -334,6 +451,7 @@ function playGame(options) {
   seen.corpScored = run('corp.scoreArea.length');
   seen.runnerScored = run('runner.scoreArea.length');
   seen.stolenLocations = run('agendaStolenLocations.length');
+  if (roots) roots.start(run('corp'));
   emit('gameStart', {fixtureId: fixture ? fixture.id : null, corpIdentity: run('corp.identityCard.title'),
     runnerIdentity: run('runner.identityCard.title')});
   if (errors.size) { done(); return finished; }
@@ -347,4 +465,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, root};
+module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, root};
