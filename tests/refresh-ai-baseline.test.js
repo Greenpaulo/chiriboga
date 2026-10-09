@@ -58,9 +58,33 @@ test('batch exception preserves baseline', root => {
   assert.throws(() => refreshBaseline(root, () => { throw new Error('batch failed'); }), /batch failed/);
   assert.strictEqual(fs.readFileSync(previous, 'utf8'), oldText);
 });
-test('existing pending report is never overwritten', root => {
-  writeReport(root);
-  assert.throws(() => refreshBaseline(root, () => assert.fail('must not run')), /already exists/);
+test('retry archives the pending report exactly before running a fresh batch', root => {
+  writeOld(root);
+  writeReport(root, {failures: [{error: 'old failure'}]});
+  const pending = path.join(root, 'bench/baseline.json');
+  const pendingText = fs.readFileSync(pending, 'utf8');
+  const result = refreshBaseline(root, () => {
+    assert(!fs.existsSync(pending));
+    const files = fs.readdirSync(path.join(root, 'bench/archived-pending'));
+    assert.strictEqual(files.length, 1);
+    assert.strictEqual(fs.readFileSync(path.join(root, 'bench/archived-pending', files[0]), 'utf8'), pendingText);
+    writeReport(root);
+  });
+  assert.strictEqual(fs.readFileSync(result.archivedPending, 'utf8'), pendingText);
+  assert.strictEqual(fs.readFileSync(result.archived, 'utf8'), oldText);
+  assert.strictEqual(JSON.parse(fs.readFileSync(result.current)).failures.length, 0);
+});
+test('failed retry preserves malformed pending evidence and the current baseline', root => {
+  const previous = writeOld(root);
+  fs.writeFileSync(path.join(root, 'bench/baseline.json'), '{interrupted');
+  assert.throws(() => refreshBaseline(root, () => {
+    writeReport(root, {failures: [{}]});
+  }), /1,000 games/);
+  const archive = path.join(root, 'bench/archived-pending');
+  assert.strictEqual(fs.readFileSync(path.join(archive, fs.readdirSync(archive)[0]), 'utf8'), '{interrupted');
+  assert.strictEqual(fs.readFileSync(previous, 'utf8'), oldText);
+  assert.strictEqual(JSON.parse(fs.readFileSync(path.join(root, 'bench/baseline.json'))).failures.length, 1);
+  assert(!fs.existsSync(path.join(root, 'bench/.baseline-refresh.lock')));
 });
 test('ambiguous current folder is rejected', root => {
   writeOld(root);
@@ -108,5 +132,25 @@ test('failed startup report preserves startup and beginner baselines', root => {
   assert.strictEqual(fs.readFileSync(beginner, 'utf8'), oldText);
   assert(!fs.existsSync(path.join(root, 'bench/startup/archived-current')));
   assert(!fs.existsSync(path.join(root, 'bench/startup/.baseline-refresh.lock')));
+});
+test('startup retries preserve leftover failures independently of beginner evidence', root => {
+  const beginner = writeOld(root);
+  writeReport(root, {failures: [{error: 'beginner evidence'}]});
+  const beginnerPending = fs.readFileSync(path.join(root, 'bench/baseline.json'), 'utf8');
+  fs.mkdirSync(path.join(root, 'bench/startup'), {recursive: true});
+  const pending = path.join(root, 'bench/startup/baseline.json');
+  const failedText = JSON.stringify({kind: 'ai-batch-report', dirty: false,
+    games: Array(1000).fill({}), failures: [{error: 'startup failure'}]});
+  fs.writeFileSync(pending, failedText);
+  const result = refreshBaseline(root, () => {
+    assert(!fs.existsSync(pending));
+    fs.writeFileSync(pending, JSON.stringify({kind: 'ai-batch-report', dirty: false,
+      games: Array(1000).fill({}), failures: []}));
+  }, 'startup');
+  assert.strictEqual(path.dirname(result.archivedPending), path.join(root, 'bench/startup/archived-pending'));
+  assert.strictEqual(fs.readFileSync(result.archivedPending, 'utf8'), failedText);
+  assert.strictEqual(JSON.parse(fs.readFileSync(result.current)).failures.length, 0);
+  assert.strictEqual(fs.readFileSync(beginner, 'utf8'), oldText);
+  assert.strictEqual(fs.readFileSync(path.join(root, 'bench/baseline.json'), 'utf8'), beginnerPending);
 });
 console.log(`${cases} baseline refresh cases passed.`);
