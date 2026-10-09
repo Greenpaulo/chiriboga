@@ -21,6 +21,7 @@
 //   --budget <games>              seeds per board and pair = max(10, floor(games / (boards x pairs)))
 //   --corp-option <name>=<value>  set corp.AI.options.<name> (repeatable; unknown names fail)
 //   --runner-option <name>=<value>
+//   --security-cache off|on|verify  F3 comparison only; defaults to the game's setting
 //   --collector <name>            scripts/ai-batch/collectors/<name>.js (repeatable)
 //   --jobs <n>                    parallel processes (default: CPUs - 2)
 //   --timeout <seconds>           per game (default 900)
@@ -187,12 +188,15 @@ async function playJob(job) {
   const game = await playGame({
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
-    runnerOptions: job.runnerOptions, telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
+    runnerOptions: job.runnerOptions, securityCache: job.securityCache,
+    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
   const record = {fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed, ok,
     winner: game.winner, reason: game.reason, turns: game.turns, corpPoints: game.corpPoints, runnerPoints: game.runnerPoints,
-    logHash: game.logHash, ms: game.ms, errors: game.errors};
+    logHash: game.logHash, ms: game.ms, errors: game.errors,
+    decisionHash: sha1(JSON.stringify(events.filter(e => e.type === 'decision')
+      .map(e => [e.n, e.side, e.identifier, e.choiceType, e.options, e.chosen])))};
   if (ok) {
     record.metrics = metricsLib.coreMetrics(events);
     collectors.forEach((c, i) => Object.assign(record.metrics, metricsLib.flattenCollector(c.name, c.finish(states[i]))));
@@ -217,7 +221,8 @@ function runBatch(config) {
       for (const seed of config.seeds)
         jobs.push({fixtureId: start ? start.id : null, start: start ? start.file : null, deckPairId: pair.id,
           corp: pair.corp, runner: pair.runner, seed, setFiles: config.setFiles, timeoutMs: config.timeoutMs,
-          corpOptions: config.corpOptions, runnerOptions: config.runnerOptions, collectors: config.collectorNames});
+          corpOptions: config.corpOptions, runnerOptions: config.runnerOptions, collectors: config.collectorNames,
+          securityCache: config.securityCache});
   const total = jobs.length;
   const games = [];
   let effective = null;
@@ -297,6 +302,8 @@ function buildConfig(args, overrides = {}) {
     pairs = pairs.filter(p => wanted.includes(p.id));
     if (pairs.length !== wanted.length) throw new Error('Unknown deck pair in --pairs: ' + args.pairs);
   }
+  if (args['security-cache'] && !['off', 'on', 'verify'].includes(args['security-cache']))
+    throw new Error('--security-cache must be off, on or verify');
   const collectorNames = args.collector.slice().sort();
   const collectors = loadCollectors(collectorNames);
   const starts = resolveStarts([...new Set([...args.start, ...taggedStarts(args.startTag || [])])], poolInfo.ranges);
@@ -307,7 +314,7 @@ function buildConfig(args, overrides = {}) {
     runnerOptions: parseAssignments(args.runnerOption, '--runner-option'),
     collectorNames, directions: Object.assign({}, ...collectors.map(c => c.directions || {})),
     jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
-    quick: Boolean(args.quick),
+    quick: Boolean(args.quick), securityCache: args['security-cache'],
   }, overrides);
   validateDeckPairs(config.pairs, config.setFiles);
   return config;
@@ -343,7 +350,7 @@ function budgetSeeds(args, starts, pairs) {
 function reportKey(config) {
   return sha1(JSON.stringify([codeHash(config.setFiles, config.collectorNames), config.poolInfo.hash,
     config.pairs.map(p => p.id), config.seeds, config.starts.map(s => s.hash), config.collectorNames,
-    config.corpOptions, config.runnerOptions])).slice(0, 16);
+    config.corpOptions, config.runnerOptions, config.securityCache])).slice(0, 16);
 }
 
 // Validate option names before playing any game: unknown names are errors.
@@ -373,7 +380,7 @@ async function batch(config, command) {
     kind: 'ai-batch-report', format: 1,
     sha: git('rev-parse --short HEAD'), dirty: dirtyText === null ? null : dirtyText.length > 0,
     codeHash: codeHash(config.setFiles, config.collectorNames), key: reportKey(config),
-    command, createdAt: new Date().toISOString(), wallMs,
+    securityCache: config.securityCache, command, createdAt: new Date().toISOString(), wallMs,
     pool: {file: config.poolInfo.file, id: config.poolInfo.pool.id, sets: config.poolInfo.pool.sets},
     poolHash: config.poolInfo.hash, pairs: config.pairs.map(p => p.id), seeds: config.seeds,
     starts: config.starts.map(s => ({id: s.id, hash: s.hash})), collectors: config.collectorNames,
@@ -495,7 +502,8 @@ function replayGame(config, options) {
   const pair = config.pairs[0], seed = config.seeds[0], start = config.starts[0];
   return playGame({streamPrefix: `${seed}:${pair.id}`, corpFile: pair.corp, runnerFile: pair.runner,
     setFiles: config.setFiles, timeoutMs: config.timeoutMs, start: start ? start.file : null,
-    corpOptions: options.corp, runnerOptions: options.runner, telemetry: true, observe: true, fullLog: true,
+    corpOptions: options.corp, runnerOptions: options.runner, securityCache: config.securityCache,
+    telemetry: true, observe: true, fullLog: true,
     testOption: process.env.AI_BATCH_TEST_OPTION});
 }
 
@@ -538,9 +546,76 @@ function diffLogs(baseline, candidate) {
   }
 }
 
+// Behaviour-identical F3 gate: unlike a strategic option gate, any changed
+// decision or game log is a failure. Reuse F4 paired bootstrap intervals.
+function checkSecurityCacheGate(baseline, candidate, verified) {
+  const comparison = metricsLib.compareReports(baseline, candidate);
+  metricsLib.compareReports(candidate, verified); // validate paired configurations
+  const expected = baseline.games.length;
+  const byKey = report => new Map(report.games.map(g => [[g.deckPairId, g.seed, g.fixtureId || ''].join('|'), g]));
+  const on = byKey(candidate), verify = byKey(verified);
+  const complete = [baseline, candidate, verified].every(completeReport) &&
+    JSON.stringify(baseline.pairs) === JSON.stringify(candidate.pairs) &&
+    JSON.stringify(baseline.pairs) === JSON.stringify(verified.pairs);
+  const modes = baseline.securityCache === 'off' && candidate.securityCache === 'on' && verified.securityCache === 'verify';
+  const healthy = complete && [baseline, candidate, verified].every(r => !r.failures.length && r.games.every(g => g.ok));
+  const identical = expected > 0 && on.size === expected && verify.size === expected && baseline.games.every(b => {
+      const c = on.get([b.deckPairId, b.seed, b.fixtureId || ''].join('|'));
+      const v = verify.get([b.deckPairId, b.seed, b.fixtureId || ''].join('|'));
+      return c && v && b.logHash && b.decisionHash &&
+        b.logHash === c.logHash && b.logHash === v.logHash &&
+        b.decisionHash === c.decisionHash && b.decisionHash === v.decisionHash;
+    });
+  const calls = comparison.metrics['evaluatorCallCount.computationsPerMainDecision'];
+  const latency = comparison.metrics['decisionLatencyMs.corp.mean'];
+  const counted = [...baseline.games, ...candidate.games, ...verified.games].every(g =>
+    g.metrics && g.metrics['evaluatorCallCount.mainDecisions'] > 0);
+  const countName = 'evaluatorCallCount.computationsPerMainDecision';
+  const finite = [...baseline.games, ...candidate.games].every(g => g.metrics &&
+    Number.isFinite(g.metrics[countName]) && Number.isFinite(g.metrics['decisionLatencyMs.corp.mean']));
+  // Evaluate thresholds before rounding the human-readable summary.
+  const sum = report => report.games.reduce((total, g) => total + g.metrics[countName], 0);
+  const latencyInterval = finite && complete ? metricsLib.bootstrap(candidate.games.map(c => {
+    const b = baseline.games.find(b => b.deckPairId === c.deckPairId && b.seed === c.seed &&
+      (b.fixtureId || '') === (c.fixtureId || ''));
+    return c.metrics['decisionLatencyMs.corp.mean'] - b.metrics['decisionLatencyMs.corp.mean'];
+  }), 'decisionLatencyMs.corp.mean') : null;
+  const pass = identical && healthy && modes && baseline.codeHash === candidate.codeHash && baseline.codeHash === verified.codeHash &&
+    !baseline.quick && !candidate.quick && !verified.quick && counted && finite && calls && calls.baseline > 0 &&
+    sum(candidate) <= sum(baseline) * 0.5 && latencyInterval && latencyInterval.high <= 0;
+  return {pass: Boolean(pass), identical, healthy, counted, games: expected, calls, latency};
+}
+
+async function securityCacheGate(args) {
+  if (args.games && (!Number.isInteger(Number(args.games)) || Number(args.games) < 200) && !args.quick)
+    throw new Error('F3 gate requires at least 200 games per pair');
+  if (args.pairs || args.seeds || args.start.length || args.startTag.length || args.pool)
+    throw new Error('F3 gate uses the full committed deck pool and seeds 1..games');
+  if (args.budget || args['security-cache'] || args.corpOption.length || args.runnerOption.length)
+    throw new Error('F3 gate fixes cache modes and uses default AI options');
+  const config = buildConfig(Object.assign({}, args, {collector: ['evaluatorCallCount']}));
+  const reports = [];
+  const directory = args.out || path.join(CACHE_DIR, 'f3-security-cache');
+  for (const mode of ['off', 'on', 'verify']) {
+    console.log(`cache ${mode}: playing ${config.pairs.length * config.seeds.length} games`);
+    const report = await batch(Object.assign({}, config, {securityCache: mode}),
+      'node scripts/ai-batch.js ' + process.argv.slice(2).join(' ') + ` [${mode}]`);
+    writeReport(path.join(directory, mode + '.json'), report);
+    console.log(`cache ${mode}: ${report.games.length} games, ${report.failures.length} failed, ${Math.round(report.wallMs / 1000)} s`);
+    reports.push(report);
+  }
+  const result = checkSecurityCacheGate(...reports);
+  console.log(`F3: ${result.games} paired games; decisions and logs identical: ${result.identical}; error-free complete reports: ${result.healthy}; main decisions measured: ${result.counted}`);
+  for (const [name, metric] of [['computations/main decision', result.calls], ['Corp decision latency ms', result.latency]])
+    console.log(`${name}: ${metric ? `${metric.baseline} -> ${metric.candidate}; difference ${metric.difference} [${metric.low}, ${metric.high}]` : 'missing'}`);
+  console.log('Gate: ' + (args.quick ? 'indicative only (--quick)' : result.pass ? 'passed' : 'failed'));
+  process.exitCode = result.pass && !args.quick ? 0 : 1;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args._[0] === 'replay') return replay(args);
+  if (args._[0] === 'security-cache-gate') return securityCacheGate(args);
   const command = 'node scripts/ai-batch.js ' + process.argv.slice(2).join(' ');
   if (args.compare) {
     const [a, b] = args.compare.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));
@@ -582,5 +657,5 @@ async function main() {
   process.exitCode = report.failures.length ? 1 : 0;
 }
 
-module.exports = {diffLogs, parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
+module.exports = {checkSecurityCacheGate, diffLogs, parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 2; });

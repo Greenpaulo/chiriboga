@@ -1,12 +1,21 @@
 # F3 Per-decision evaluation cache
 
+**Outcome:** adopted — full behaviour-identical F3 comparison passed, 2026-10-09.
+
 **Roadmap item:** F3 · **Depends on:** F2, F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
-**Verified against code:** 376f32c (2026-09-25)
+**Verified against code:** 44479ba (2026-10-09)
 
 ## Resolution
 
-Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
+**Comparison status:** passed — behaviour-identical F4 comparison on the full committed pool, 2026-10-09. No strategic option or AI default change.
+
+Implemented from `44479ba` for the completion follow-up below.
+
+Historical cache implementation: built from `58f3a4d` (with D2 and F4 step 1
+uncommitted in the same tree). The following original measurements and review
+are preserved as historical evidence; the dated completion entry supersedes
+the unfinished dependency and test-coverage notes.
 
 - **Depth counter (the part of F2 that F3 needs).** `CorpAI._hypotheticalDepth`
   is raised in `try/finally` by `_withHypothetical()` and by F2 sites #2 to #8
@@ -74,13 +83,101 @@ Implemented from `58f3a4d` (with D2 and F4 step 1 uncommitted in the same tree).
   - evaluator calls in seed 1: 2,209, of which 508 were computed (110
     hypothetical, 21 outside a decision).
 - **Left open:**
-  - The F4 comparison and the `evaluatorCallCount` collector wait for F4.
+  - Historical at implementation: the F4 comparison and `evaluatorCallCount` collector waited for F4. F4 is now done; the completion entry below supersedes this blocker.
   - About half the remaining time is still in the evaluations that must run,
     where each ICE is repriced once per rez plan. That is proposed as F6
-    ([F6-headless-ai-performance.md](done/F6-headless-ai-performance.md)). With F3, a 2,400-game gate
+    ([F6-headless-ai-performance.md](../done/F6-headless-ai-performance.md)). With F3, a 2,400-game gate
     takes about 2¼ hours.
-- Docs: [architecture: foundations](../corp-ai/architecture.md#foundations)
+- Docs: [architecture: foundations](../../corp-ai/architecture.md#foundations)
   (cache and depth counter), the F2 ticket, and new roadmap item F6.
+
+## Completion follow-up — 2026-10-09
+
+Implemented from `44479ba` (uncommitted follow-up).
+
+- Follow the previously approved F3 plan: complete the collector, deterministic
+  scenarios and formal comparison without changing cache semantics or AI
+  heuristics. Re-grounding corrected the obsolete F2/F4 and cache-lifetime
+  claims above. No new risk plan is required for passive harness measurements
+  and additional regression coverage.
+- `evaluatorCallCount` observes per-Choice harness telemetry. It distinguishes
+  requests from computations, filters main-phase command decisions, and rejects
+  missing instrumentation. Instrumentation is confined to the headless harness;
+  ordinary play incurs no added counting work.
+- `security-cache-gate` checks exact decision-sequence and log identity,
+  complete/error-free reports, at least 50% fewer computations per main decision,
+  and the paired latency interval. Tests reject changed choices/logs, missing
+  games, missing main decisions, quick runs, insufficient savings and slower
+  decisions. Reports record cache mode and include it in their configuration key.
+- Green decision fixtures run off/on/verify against unchanged expectations and
+  compare both choices and logged reasons. F3 tests now exercise real nested
+  `Choice()` lifetimes and exception restoration, a warmed main-phase credit
+  probe, a real critical-defence ICE install with its logged reason and lower
+  post-install risk, and warm-cache bypass through Baker and RC encounter
+  wrappers. F2's existing throw/restoration cases also cover these wrappers.
+- The old generic criterion demanding logged choices for every internal helper
+  was clarified: internal cache helpers emit no choice or decision log; their
+  deterministic oracle is the returned security result and restored state.
+  Decision paths that do log reasons are checked for those reasons.
+- Preliminary command:
+  `node scripts/ai-batch.js security-cache-gate --quick --jobs 8 --out /tmp/chiriboga-f3-quick`.
+  Both off and on arms hit the same Scrounge stalls (`zwicky-magdalene` seeds
+  8 and 36). Seed 8 replay stalls immediately after playing Scrounge, matching
+  [the existing engine ticket](../../bugs/scrounge-unaffordable-program-stalls-game.md).
+  This is a prerequisite to an error-free acceptance run, not evidence of an
+  F3 decision regression. All three arms finished with those two failures.
+  On 348 completed pairs, mean computations/main decision were 35.482 off
+  versus 8.364 on (76.4% reduction; paired difference -27.118,
+  95% interval [-28.068, -26.206]); mean Corp decision latency was 11.175 ms
+  versus 5.294 ms (difference -5.882 ms, interval [-6.357, -5.430]).
+  Ordered decision digests and game-log hashes were identical on all 350
+  seeds/pairs in all three arms, including both failures. The command ended
+  `Gate: indicative only (--quick)`. No acceptance claim is made from this run.
+- After the authorized Scrounge fix, repeated preliminary command:
+  `node scripts/ai-batch.js security-cache-gate --quick --jobs 8 --out /tmp/chiriboga-f3-quick-fixed`.
+  All 350 games in each arm completed without errors; all ordered decision
+  digests and log hashes matched. Mean computations/main decision: 35.568
+  off vs 8.387 on (difference -27.182, 95% interval [-28.128, -26.267]);
+  Corp decision latency: 11.243 vs 5.058 ms (difference -6.185 ms,
+  interval [-6.677, -5.721]). Ends `Gate: indicative only (--quick)`.
+  The formal 200-seed-per-pair run below supersedes this indicative result.
+- Focused tests pass: server security (143 cases), hypothetical guards (34),
+  batch harness (23), green decision fixtures (45 checks across 15 boards),
+  and snapshots (11). Final `node tests/run-all-tests.js`: all 74 test files
+  pass (including the promoted Scrounge reproduction and its new resolution
+  suite), with the required decision fixtures and snapshots included.
+
+### Full F3 acceptance evidence — 2026-10-09
+
+**Gate command:** `node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`
+
+- Same final working-tree source based on `44479ba` in all arms, including
+  the Scrounge prerequisite fix; default strategic AI options throughout.
+- Committed `tests/fixtures/ai-batch/deck-pool.json` (`core-v1`), all seven
+  deck pairs (`pd-tao`, `btl-kit`, `neh-zahya`, `pe-steve`, `gateway`,
+  `zwicky-magdalene`, `leo-topan`), paired seeds 1–200: 1,400 games per arm,
+  4,200 executions total.
+- Cache off: 1,400 games, zero failures, 429 s. Cache on: 1,400 games,
+  zero failures, 309 s. Cache on with every hit verified: 1,400 games,
+  zero failures, 475 s; no stale-result exception.
+- Every paired ordered decision digest and game-log hash is identical in all
+  three arms. No missing games or unmeasured main command decisions.
+- Mean computations/main decision: **35.995 off → 8.475 on**, a **76.5%**
+  reduction (requirement: at least 50%). Paired on-minus-off difference:
+  **-27.520**, bootstrap 95% interval **[-27.991, -27.055]**.
+- Mean Corp decision latency: **11.659 ms off → 5.553 ms on**, a **52.4%**
+  reduction. Paired difference **-6.106 ms**, 95% interval
+  **[-6.369, -5.861] ms**; the upper bound is below the required 0.
+- Terminal result: **`Gate: passed`**. Raw F4 reports are retained locally as
+  `/tmp/chiriboga-f3-gate/off.json`, `on.json`, and `verify.json`; the recorded
+  command reproduces them. No timing baseline was reused.
+- `node scripts/ticket.js check` passes, including the full 74-file suite.
+  Its missing-reproduction-line warning reflects this existing performance
+  feature having no pending bug reproduction; its deterministic green coverage
+  and formal comparison are recorded above.
+- No remaining implementation or acceptance work. The completion follow-up
+  awaits independent review; the original cache's historical review below
+  does not review these new collector/tests/comparison changes.
 
 ## Implementation plan
 
@@ -152,31 +249,31 @@ The cache must never change a decision.
 
 ## Current behaviour
 
-- `_withHypothetical()` exists but only `_ordinaryPurgeOutcome()` uses it.
-  Most probes that change the board and then call the security evaluator do
-  so by hand: `_icePreventsGameWinningBreach`, `_iceWouldSecureServer`,
-  `_criticalBreachDefenseAction`, the `Phase_Main` "gain then install" check
-  (through `_rankedInstallOptions`), `_effectiveRunnerCreditPool` (which is
-  called inside the evaluator and changes `attackedServer`), and
-  `_potentialTagPunishment`. F2 lists them all and migrates them.
-- Decision-snapshot recording is opt-in (`DecisionSnapshots.enabled = false`
-  by default), so ordinary play does not generate reproduction code.
-- Local double work is gone. `_rankedServersToProtect()` computes one
-  security result per real server and passes it into `_protectionScore()`.
-  `_bestProtectedRemote()` computes each candidate's protection score once.
-  Call-count regressions enforce both.
-- `Choice()` already has a decision lifetime:
-  - it saves `_decisionRandomState`, installs a fresh one, and restores the
-    old one in `finally`;
-  - the F1 asset-destination order cache lives in that state;
-  - it does not cache security results.
-- Security evaluators are also called from card hooks outside a Corp
-  `Choice()`. Examples: `corp.AI._serverToProtect()` in `sets/systemgateway.js`
-  and `sets/elevation.js`, `corp.AI._protectionScore()` in
-  `sets/systemupdate2021.js`, and `corp.AI._evaluateServerSecurity()` in
-  `sets/elevation.js`.
+Re-grounded at `44479ba`, 2026-10-09. The original cache implementation is
+already enabled; this follow-up finishes its measurement and coverage.
 
-See [architecture: foundations](../corp-ai/architecture.md#foundations).
+- `Choice()` creates a fresh `_securityCache` and restores the previous cache
+  and `_decisionRandomState` in `finally`.
+- `_evaluateServerSecurity()` caches only at hypothetical depth 0 outside a
+  nested evaluation. Its key includes the server and `_securityBoardKey()`.
+  `_evaluateServerSecurityUncached()` performs the work;
+  `_securityCacheVerify` recomputes cache hits and rejects stale results.
+- `_withSecurityCache()` supplies a one-call lifetime for turn-start protection
+  priorities and card-facing install selection. Direct calls outside these
+  lifetimes remain uncached.
+- F2 is done. The shared `AIWithRunContext()` and `AIWithIceEncounter()`
+  wrappers now raise the same hypothetical depth as `_withHypothetical()`;
+  Baker and `RunCalculator.IceAI()` no longer rely only on evaluator nesting.
+- F4 is done and supplies the passive collector extension point. F3's
+  remaining acceptance run can use the committed pool and paired seeds.
+- The main-phase debug protection ranking is gated by `debugSecurityLog`.
+  Existing ranked-protection and best-remote local call-count guarantees remain.
+- Decision-snapshot recording is opt-in. This performance change is an
+  objective behaviour-preservation invariant, not a strategic preference.
+  It needs no default-off strategic AI option, but its promised performance
+  comparison remains mandatory for completion.
+
+See [architecture: foundations](../../corp-ai/architecture.md#foundations).
 
 ## Design
 
@@ -260,16 +357,32 @@ true)` call behind a debug flag.
 
 ## Acceptance gate
 
-Behaviour-identical performance change, so it ships without an option.
+Behaviour-identical performance change; no strategic option. Use F4's
+committed `core-v1` pool, paired seeds 1–200 on all seven deck pairs, at the
+same source code and default AI options. Run three arms: cache off, on, and
+on with every cache hit verified. Never reuse timing reports for this command.
 
-- Decision snapshots are identical to the recorded baseline, with no deltas.
-- An F4 run on the committed deck pool with the same seeds, cache off
-  compared with cache on, shows:
-  - identical per-decision choices in the decision logs;
-  - mean `evaluatorCallCount` per `Phase_Main` decision lower by at least
-    50%;
-  - `decisionLatencyMs` not higher (the upper bound of the 95% interval of
-    the difference is at most 0).
+Collector: `evaluatorCallCount`. For each `Corp 2.2` command decision it counts
+security requests and actual computations separately; calls outside `Choice()`
+are excluded. Verify-mode recomputations count as work. The per-game mean of
+computations per main decision is the gate metric, averaged over paired games.
+Counting requests alone cannot demonstrate caching: the callers still request
+the same results. Decisions that compute nothing remain in the denominator.
+
+| Check | Evidence | Threshold |
+|---|---|---|
+| Identity | Ordered decision digest (side, phase, type, option labels, chosen index), plus full game-log hash | identical in all three arms for every game |
+| Integrity | Complete pool, all games finish without errors, main command decisions measured | no missing or failed games |
+| Performance | `evaluatorCallCount.computationsPerMainDecision` | candidate mean at most 50% of baseline |
+| Latency | `decisionLatencyMs.corp.mean`, F4 paired bootstrap 95% interval of on minus off | upper bound at most 0 |
+| Snapshots | Green decision fixtures and decision-snapshot tests | unchanged expectations; fixtures identical off/on/verify, including logged reasons |
+
+**Gate command:** `node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`
+
+The dedicated behaviour-identical command reuses F4's workers, pool, seeds,
+collector and paired-bootstrap comparison. The strategic `gate` command
+requires changed games and is therefore unsuitable for F3. A `--quick` run
+is diagnostic only and cannot pass. Failed games are not silently dropped.
 
 ## Things to consider
 
@@ -282,9 +395,10 @@ Behaviour-identical performance change, so it ships without an option.
 
 ## Acceptance criteria
 
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [x] Every test scenario above has deterministic coverage: choices and logged reasons where the decision path logs a reason; internal cache probes assert returned security results and state restoration.
 - [x] Decision snapshots are identical to the recorded baseline except for listed, justified deltas (none expected).
-- [ ] The `evaluatorCallCount` collector is added through F4's collector extension point, and the F4 cache-off versus cache-on comparison (command, deck pairs, seeds, results) is recorded in the Resolution.
+- [x] The passive `evaluatorCallCount` collector and fail-closed behaviour-identical comparison command are built and tested.
+- [x] The `evaluatorCallCount` collector is added through F4's collector extension point, and the F4 cache-off versus cache-on comparison (command, deck pairs, seeds, results) is recorded in the Resolution.
 - [x] New or changed card-facing hooks are documented in `documentation/ai.md`. (None: no card-facing hook changed.)
 - [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [x] `node tests/run-all-tests.js` passes.

@@ -285,6 +285,46 @@ check('wrappers share one depth count', () => {
   corp.remoteServers = [];
 }
 
+// F3 scenario 5: actual Baker and RC wrappers bypass a warmed real-board
+// cache, even when the fingerprint is held constant. A fresh sentinel exposes
+// a cached read; cache size/object identity exposes a hypothetical write.
+check('F3 warm cache bypassed by Baker and RunCalculator encounter wrappers', () => {
+  const wall = ice({rezzed: true});
+  const server = {serverName: 'Remote', ice: [wall], root: []};
+  corp.remoteServers = [server];
+  const originalKey = ai._securityBoardKey;
+  const originalEvaluate = ai._evaluateServerSecurityUncached;
+  ai._securityBoardKey = () => 'constant';
+  ai._evaluateServerSecurityUncached = () => ({depth: depth(), run: context.attackedServer,
+    encountering: context.encountering});
+  ai._securityCache = new Map();
+  const real = ai._evaluateServerSecurity(server);
+  const probe = () => {
+    const result = ai._evaluateServerSecurity(server);
+    assert.notStrictEqual(result, real);
+    assert(result.depth > 0);
+    assert.strictEqual(ai._securityCache.get(server).size, 1);
+  };
+  try {
+    const baker = Object.assign({}, context.cardSet[36015]);
+    const cloak = {player: runner, subTypes: ['Stealth'], credits: 1,
+      canUseCredits() { probe(); assert.strictEqual(context.attackedServer, corp.archives); return true; }};
+    runnerCards = [baker, cloak];
+    assert.strictEqual(baker.AIRedirectsRun(corp.archives, corp.HQ), true);
+    const rc = vm.runInContext('new RunCalculator()', context);
+    rc._baseStrength = () => { probe(); assert.strictEqual(context.encountering, true); return 5; };
+    assert.strictEqual(rc.IceAI(wall, 0).strength, 5);
+    assert.strictEqual(depth(), 0);
+    assert.strictEqual(ai._evaluateServerSecurity(server), real);
+    assert.deepStrictEqual(encounter(), {encountering: false, attackedServer: null, approachIce: -1});
+  } finally {
+    ai._securityBoardKey = originalKey;
+    ai._evaluateServerSecurityUncached = originalEvaluate;
+    ai._securityCache = null;
+    runnerCards = []; corp.remoteServers = [];
+  }
+});
+
 // Rows 12 to 14: Atman and Chameleon check strength during a pretend encounter.
 {
   const wall = ice({subTypes: ['Barrier']});

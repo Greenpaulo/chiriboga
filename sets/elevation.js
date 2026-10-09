@@ -809,6 +809,13 @@ cardSet[35004] = {
     var installChoices = ChoicesArrayInstall(runner.heap, false, function(card) {
       return CheckCardType(card, ["program"]);
     });
+
+    //Costs or the Heap may have changed since Enumerate. Resolve as much as
+    //possible: skip an impossible install, but still offer the optional step.
+    if (installChoices.length === 0) {
+      this.responseOnInstall.Resolve.call(this, {});
+      return;
+    }
     
     //**AI code for install choice
     if (runner.AI != null && installChoices.length > 1) {

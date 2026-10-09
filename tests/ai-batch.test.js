@@ -85,6 +85,62 @@ const EXTRA_DRAW = side => `
 `;
 
 (async () => {
+  await scenario('F3 collector distinguishes requests from work and filters main commands', () => {
+    const collector = require('../scripts/ai-batch/collectors/evaluatorCallCount');
+    const state = {};
+    collector.onEvent({type: 'gameStart'}, state);
+    const event = {type: 'decision', side: 'corp', identifier: 'Corp 2.2', choiceType: 'command',
+      securityEvaluation: {requests: 12, computations: 3}};
+    collector.onEvent(event, state);
+    collector.onEvent(Object.assign({}, event, {securityEvaluation: {requests: 8, computations: 1}}), state);
+    for (const change of [{side: 'runner'}, {identifier: 'Corp 2.1'}, {choiceType: 'select'}])
+      collector.onEvent(Object.assign({}, event, change), state);
+    assert.deepStrictEqual(collector.finish(state), {mainDecisions: 2, requests: 20, computations: 4,
+      requestsPerMainDecision: 10, computationsPerMainDecision: 2});
+    assert.throws(() => collector.onEvent(Object.assign({}, event, {securityEvaluation: null}), state), /Missing/);
+    assert.throws(() => collector.finish(state), /Missing/);
+  });
+  await scenario('F3 gate fails on changed decisions, missing evidence, poor savings or latency', () => {
+    const report = (computations, ms) => ({poolHash: 'pool', seeds: [1], starts: [], collectors: ['evaluatorCallCount'],
+      failures: [], pairs: ['gateway'], codeHash: 'same-code', games: [{deckPairId: 'gateway', seed: 1, ok: true, logHash: 'same', decisionHash: 'choices',
+        metrics: {'evaluatorCallCount.mainDecisions': 2, 'evaluatorCallCount.computationsPerMainDecision': computations,
+          'decisionLatencyMs.corp.mean': ms}}]});
+    const off = report(10, 10), on = report(4, 3), verify = report(10, 11);
+    off.securityCache = 'off'; on.securityCache = 'on'; verify.securityCache = 'verify';
+    assert(batch.checkSecurityCacheGate(off, on, verify).pass);
+    for (const change of [r => {r.games[0].decisionHash = 'changed';}, r => {r.games[0].logHash = 'changed';},
+      r => {r.quick = true;}, r => {r.games[0].ok = false;}, r => {r.games = [];},
+      r => {r.games[0].metrics['evaluatorCallCount.computationsPerMainDecision'] = 6;},
+      r => {r.games[0].metrics['decisionLatencyMs.corp.mean'] = 11;},
+      r => {r.games[0].metrics['evaluatorCallCount.mainDecisions'] = 0;}]) {
+      const bad = JSON.parse(JSON.stringify(on)); change(bad);
+      assert(!batch.checkSecurityCacheGate(off, bad, verify).pass);
+    }
+    verify.games[0].decisionHash = 'bad verification';
+    assert(!batch.checkSecurityCacheGate(off, on, verify).pass);
+  });
+  await scenario('F3 instrumented cache modes preserve real Gateway choices', async () => {
+    const results = [];
+    for (const mode of ['off', 'on', 'verify']) {
+      const events = [];
+      const result = await game({securityCache: mode, evaluatorTelemetry: true, onEvent: e => events.push(e)});
+      assert(result.winner); assert.deepStrictEqual(result.errors, []);
+      const choices = events.filter(e => e.type === 'decision').map(e =>
+        [e.side, e.identifier, e.choiceType, Array.from(e.options), e.chosen]);
+      const main = events.filter(e => e.type === 'decision' && e.side === 'corp' && e.identifier === 'Corp 2.2' && e.choiceType === 'command');
+      assert(main.length > 0);
+      const totals = main.reduce((s, e) => ({requests: s.requests + e.securityEvaluation.requests,
+        computations: s.computations + e.securityEvaluation.computations}), {requests: 0, computations: 0});
+      results.push({hash: result.logHash, choices, totals});
+    }
+    assert.deepStrictEqual(results[0].choices, results[1].choices);
+    assert.deepStrictEqual(results[0].choices, results[2].choices);
+    assert.strictEqual(results[0].hash, results[1].hash);
+    assert.strictEqual(results[0].hash, results[2].hash);
+    assert(results[1].totals.computations < results[0].totals.computations);
+    assert.deepStrictEqual(results[0].totals, results[2].totals);
+  });
+
   await scenario('missing deck definitions fail before games; pair ids must be unique', () => {
     const invalidDeck = setupFile('missing-cards', 'registerPrecon(' + JSON.stringify({
       identity: '99999', cards: {'99998': 3},
