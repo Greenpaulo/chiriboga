@@ -158,9 +158,10 @@ control and back-fill observation-only collectors.
 I0 supplies the control/pool and insolvency collector; its successful-run
 observations remain available for diagnosis.
 Collectors: `strandedUnrezzedIceCost`, `corpInsolventTurns`
-(planned, not implemented today). Proposed exported metric paths below
-must be verified when these collectors land; each declares its better
-direction.
+(`corpInsolventTurns` added by I0, defined in
+`documentation/ai-batch-harness.md`; `strandedUnrezzedIceCost` is planned by
+this item, and its exported path must be verified when it lands). Each
+declares its better direction.
 Starts: none initially. If `--quick` changes no game, build real-game-derived
 start boards, record their provenance and add a separate gate command before
 hand-off; all commands must pass.
@@ -179,11 +180,11 @@ cached timing. The security-selection policy remains strategic and gated.
 | Guard | `pointsScored` | higher | regression at most 0.25 |
 | Guard | `pointsStolen` | lower | regression at most 0.25 |
 | Guard | `gameLength` | lower | regression at most 1.5 |
-| Guard | `corpInsolventTurns.mean` | lower | regression at most 0.5 |
+| Guard | `corpInsolventTurns` | lower | regression at most 0.5 |
 | Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
 
 Gate command (after the collector setup exists):
-`node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns.mean=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
+`node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
 
 ## Things to consider
 
