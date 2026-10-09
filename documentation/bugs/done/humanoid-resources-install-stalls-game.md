@@ -153,7 +153,7 @@ command; a deadlock is never legal play.
 - [x] `node tests/run-all-tests.js` passes.
 
 ## Out of scope / related
-- [corp-install-choice-crashes-on-null-skip-option.md](../done/corp-install-choice-crashes-on-null-skip-option.md),
+- [corp-install-choice-crashes-on-null-skip-option.md](corp-install-choice-crashes-on-null-skip-option.md),
   the Corp AI crash on the same prompt.
 - [scrounge-unaffordable-program-stalls-game.md](../scrounge-unaffordable-program-stalls-game.md)
   is a different card that also leaves the game with no command.
