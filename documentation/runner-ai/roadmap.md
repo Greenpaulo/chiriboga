@@ -66,7 +66,7 @@ Existing Runner AI code that breaks a shared principle.
 - **Goal:** Replace the title lists and title comparisons in `ai_runner.js` with hooks.
 
 ### D3 Close Runner AI information-boundary leaks
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** none
 - **Ticket:** [D3-close-runner-information-leaks.md](../backlog/D3-close-runner-information-leaks.md)
 - **Goal:** Stop Runner decisions depending on hidden Corp cards or Stack order; make helpers enforce visibility.
