@@ -340,8 +340,10 @@ uncertainty; `_infoHQScore()` sums copies × (1 − uncertainty). `phase.js` cal
 `GainInfoAboutHQCards(cards)` with HQ cards accessed in a breach; `MoveCard`
 calls `GainInfoAboutHQCard(card)` for a visible card entering HQ.
 `LoseInfoAboutHQCards(card, cardType)` decrements a title on rez, play, score,
-steal and trash, and on install from HQ adds uncertainty to entries of the same
-combined type (`_combinedCardType()`).
+steal and on a trash from HQ the Runner can see (an accessed or known card);
+a facedown trash from HQ, like an install from HQ, passes `null` and only adds
+uncertainty (on install, to entries of the same combined type via
+`_combinedCardType()`), so the model never learns which hidden card left.
 
 **Visibility checks.** Corp card reads normally go through
 `PlayerCanLook(runner, card)`, `knownToRunner` or `rezzed`: server potential,
@@ -352,24 +354,25 @@ handling in the run calculator. Unseen cards are modelled from advancement,
 Corp credits, faction and identity. `PlayerCanLook()` returns true for every
 card while the debug flag `viewAllFronts` is on.
 
-**Reads of information a human Runner could not know:**
+**Helpers that enforce the boundary themselves** (so card hooks need not):
 
-- `Trash()` in `mechanics.js` calls `LoseInfoAboutHQCards(card)` for any card
-  trashed from HQ, passing its identity even when it leaves HQ facedown, so the
-  AI removes exactly that title from its HQ model.
-- `IceAI()` for unseen ICE computes `RezCost(ice) - ice.rezCost` from the hidden
-  card; a cost modifier that depends on the hidden card's identity or subtype
-  changes the guess.
-- `CalculatePieceBegin()` compares every root card's title with Hokusai Grid
-  when no unadvanced unseen card is present, including advanced unseen cards
-  (no practical effect, since Hokusai Grid cannot be advanced).
-- `_icebreakerInPileNotInHandOrArray()` scans the pile it is given; card hooks
-  (`AIWorthKeeping`, `AIIcebreakerTutor`) pass the Stack. Contents follow from
-  the decklist, but which of several matches is returned depends on hidden Stack
-  order, and bonus-breaker ranking evaluates that card.
-- `_matchingBreakerInstalled()` and `_breakerMatchesIce()` read ICE subtypes
-  without a visibility check; every caller in `ai_runner.js` checks first, some
-  card callers do not.
+- `_matchingBreakerInstalled()` returns `null`, and `_breakerMatchesIce()`
+  returns `false`, for ICE the Runner cannot look at (unrezzed and not
+  exposed or otherwise known). This also covers every on-card
+  `AIMatchingBreakerInstalled` reached through `_matchingBreakerInstalled()`.
+- For unseen ICE, `IceAI()` takes its rez-cost adjustment from
+  `RunCalculator._publicRezCostModifier()`: the sum of `modifyRezCost` effects
+  from other sources the Runner can see (or lingering effects), never the
+  hidden ICE's own effect or printed cost (unclamped).
+- `_icebreakerInPileNotInHandOrArray()` scans a pile containing any card the
+  Runner cannot see (the Stack) in title order, so a tutor's or
+  `AIWorthKeeping` choice depends only on the pile's contents. Fully visible
+  piles (the Heap) keep their order.
+- `CalculatePieceBegin()` checks only known root cards for Hokusai Grid (the
+  title comparison itself is D1's scope).
+
+**Remaining reads of information a human Runner could not know:**
+
 - `Print()` logs strength-change and bypass target titles through `GetTitle()`
   without hiding (log output only).
 
