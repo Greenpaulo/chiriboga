@@ -125,6 +125,25 @@ planner uses `AIWithRunContext` to restore run state and guard the security
 cache. `AIPreferredUpgradeServer(legalServers)` overrides the generic upgrade
 placement target, including a `null` result that holds the card.
 
+**Honest verdict (L9.0, observation only).** Beside today's fields the result
+carries `honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`,
+`honestBreakCost`, `noBreakerLockout` and `honestReasons`. No decision reads
+them yet; L9.0.1 adopts them behind an option, and `isSecure`,
+`hasHardLockout`, `reasons` and every cost above are computed exactly as
+before. For the chosen rez plan, `_honestLayerOptions()` lists each layer's
+ways through as credits plus clicks: today's mandatory cost when finite, the
+ICE's own click-break declared by `AIBreakCost` (bioroids), and, when no
+matching breaker is installed, `_breakerAbsentCost()`: installing the
+cheapest matching icebreaker in the Heap, else
+`CORP_AI_NO_BREAKER_ASSUMED_COST`, plus the install click (none with an empty
+Grip). `_honestRouteVerdict()` picks one option per layer, so the route fits
+the Runner's click budget (projected clicks, less one to run outside a run).
+Clicks spent breaking cannot also be clicked for credits (1 credit per click).
+Defensive upgrades and global ETR covering every projected run stay honest
+lockouts; the restricted-credit route copies today's verdict. The
+`securityCalibration` collector compares both verdicts with next-turn
+breaches.
+
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent
 prevention (for example Ash or Caprice Nisei, neither currently implemented)

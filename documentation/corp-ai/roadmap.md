@@ -94,7 +94,7 @@ cannot price yet.
 ### L9.0 Lockout honesty
 - **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [L9.0-lockout-honesty.md](../backlog/L9.0-lockout-honesty.md)
+- **Ticket:** [L9.0-lockout-honesty.md](../backlog/code-review/L9.0-lockout-honesty.md)
 - **Goal:** Report an honest security verdict next to today's (bioroid click-breaks priced; "no breaker installed yet" as its own flag with a finite cost), so I2 gets a graded signal. Observation-only: no decision changes.
 
 ### L9.0.1 Adopt honest lockout
