@@ -106,12 +106,18 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
   ai._bestMainPhaseEconomyOption = choices => choices.indexOf('gain');
   ai._clicksLeft = () => corp.clickTracker;
   corp.HQ.cards = Array.from({length: 5}, () => ({}));
+  const {rnd} = branBoard();
+  corp.HQ.cards = Array.from({length: 5}, () => ({}));
   const probeError = new Error('ranked install probe failed');
   try {
     for (const startingDepth of [0, 2]) {
       for (const shouldThrow of [false, true]) {
-        context.AIHypothetical.depth = startingDepth;
+        context.AIHypothetical.depth = 0;
         corp.creditPool = 20;
+        ai._securityCache = new Map();
+        const real = ai._evaluateServerSecurity(rnd);
+        const cacheSize = ai._securityCache.get(rnd).size;
+        context.AIHypothetical.depth = startingDepth;
         corp.clickTracker = 3;
         let probes = 0;
         ai._rankedInstallOptions = (cards, priorityOnly) => {
@@ -119,6 +125,8 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
           probes++;
           assert.strictEqual(corp.creditPool, 22, 'probe sees hypothetical click credits');
           assert.strictEqual(ai._hypotheticalDepth, startingDepth + 1);
+          assert.notStrictEqual(ai._evaluateServerSecurity(rnd), real, 'credit probe bypasses the warm cache');
+          assert.strictEqual(ai._securityCache.get(rnd).size, cacheSize, 'hypothetical did not enter the cache');
           // Restore the saved pool, even if a failed dependency changed clicks.
           if (shouldThrow) { corp.clickTracker = 1; throw probeError; }
           return [];
@@ -133,6 +141,7 @@ test('main-phase credit probe restores credits and hypothetical depth on return 
     }
   } finally {
     Object.assign(ai, original);
+    ai._securityCache = null;
     context.AIHypothetical.depth = oldDepth;
     context.PlayerHand = oldPlayerHand;
     context.CheckTags = oldCheckTags;
@@ -432,6 +441,38 @@ function assertCacheMatchesBoard() {
       assert(ai._sameSecurityResult(result, ai._evaluateServerSecurityUncached(srv)),
         'cache holds a result that differs from the real board for ' + srv.serverName);
 }
+
+test('F3: Choice restores cache lifetimes across nested decisions and throws', () => {
+  const {rndBran, rnd} = branBoard();
+  const original = ai._choiceInner;
+  const outerCache = new Map();
+  ai._securityCache = outerCache;
+  let first;
+  ai._choiceInner = options => {
+    assert.notStrictEqual(ai._securityCache, outerCache);
+    const decisionCache = ai._securityCache;
+    const result = ai._evaluateServerSecurity(rnd);
+    assert.strictEqual(ai._evaluateServerSecurity(rnd), result);
+    if (options[0] === 'nested') {
+      assert.strictEqual(ai.Choice(['inner'], 'command'), 0);
+      assert.strictEqual(ai._securityCache, decisionCache);
+      assert.strictEqual(ai._evaluateServerSecurity(rnd), result);
+    }
+    if (options[0] === 'throw') throw new Error('decision failure');
+    if (!first) first = result;
+    else if (options[0] === 'changed') assert(!ai._sameSecurityResult(first, result));
+    return 0;
+  };
+  try {
+    assert.strictEqual(ai.Choice(['nested'], 'command'), 0);
+    assert.strictEqual(ai._securityCache, outerCache);
+    rndBran.rezzed = true;
+    assert.strictEqual(ai.Choice(['changed'], 'command'), 0);
+    assert.throws(() => ai.Choice(['throw'], 'command'), /decision failure/);
+    assert.strictEqual(ai._securityCache, outerCache);
+    assert.strictEqual(ai._decisionRandomState, null);
+  } finally { ai._choiceInner = original; ai._securityCache = null; }
+});
 
 test('F3: the Bran with-ICE probe still differs with a warm cache', () => {
   const {rndBran, rnd} = branBoard();
@@ -1346,14 +1387,37 @@ test('critical defence prefers ICE that actually secures the threatened central'
   runner.cards = [{player: runner, AICentralPressure: target =>
     target === corp.RnD ? {additionalAccess: 1} : {}}];
   const oldRankedInstallOptions = ai._rankedInstallOptions;
+  const oldRisk = ai._centralBreachLossRisk;
+  const oldLog = ai._log;
+  const messages = [];
+  ai._log = message => messages.push(message);
   ai._rankedInstallOptions = () => [{cardToInstall: wall, serverToInstallTo: corp.RnD}];
   try {
-    ai.preferred = null;
-    assert.strictEqual(ai._criticalBreachDefenseAction(['install', 'purge']), 0);
-    assert.strictEqual(ai.preferred.cardToInstall, wall);
-    assert.strictEqual(ai.preferred.serverToInstallTo, corp.RnD);
+    for (const cached of [false, true]) {
+      messages.length = 0;
+      ai._securityCache = cached ? new Map() : null;
+      const before = oldRisk.call(ai, corp.RnD).probability; // warm the real-board cache
+      let after = null;
+      ai._centralBreachLossRisk = function(server, options) {
+        const result = oldRisk.call(this, server, options);
+        if (this._hypotheticalDepth > 0) after = result.probability;
+        return result;
+      };
+      ai.preferred = null;
+      assert.strictEqual(ai._criticalBreachDefenseAction(['install', 'purge']), 0);
+      assert.strictEqual(ai.preferred.cardToInstall, wall);
+      assert.strictEqual(ai.preferred.serverToInstallTo, corp.RnD);
+      assert(after < before, 'the actual hypothetical install lowers loss risk');
+      assert(messages.some(m => /Critical breach risk.*installing effective ICE/.test(m)));
+      assert.strictEqual(ai._hypotheticalDepth, 0);
+      assert.deepStrictEqual(corp.RnD.ice, []);
+      if (cached) assertCacheMatchesBoard();
+    }
   } finally {
     ai._rankedInstallOptions = oldRankedInstallOptions;
+    ai._centralBreachLossRisk = oldRisk;
+    ai._log = oldLog;
+    ai._securityCache = null;
   }
 });
 test('modest breach risk does not interrupt ordinary advancement', () => {

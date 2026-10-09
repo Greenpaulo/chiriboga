@@ -561,3 +561,23 @@ game), finish(game)}` and optional `directions`, and lists it in its gate
 command with `--collector <name>`. [collectors/runs.js](../scripts/ai-batch/collectors/runs.js)
 is the example. Details are in
 [architecture: Foundations](corp-ai/architecture.md#foundations).
+
+## Checking the F3 security cache
+
+`node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`
+
+This behaviour-identical comparison plays the complete committed pool at the
+same code with the cache off, on, and on with every hit recomputed and verified.
+It writes `off.json`, `on.json` and `verify.json` in the output directory.
+The passive `evaluatorCallCount` collector counts requests and computations
+inside main-phase command decisions. The command requires identical ordered
+choice digests and full game-log hashes in all arms, no failed/missing games,
+at least 50% fewer computations per main decision, and a nonpositive upper
+bound of the paired 95% latency-difference interval. `--quick` is diagnostic
+only. The strategic option `gate` command requires changed games and cannot
+judge this comparison.
+
+For diagnosis, ordinary batch and replay commands accept
+`--security-cache off|on|verify`; omitting it preserves the game's default.
+Batch reports record the mode and the report key includes it. Measurements
+and cache toggles are harness-only and do not introduce strategic AI options.

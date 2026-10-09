@@ -533,7 +533,15 @@ needs.
   turns the cache off for comparisons. The main-phase protection ranking that
   only fed the log runs only when `debugSecurityLog` is on. Local duplication
   guarantees remain (one security result per server per ranked pass; one
-  protection score per candidate in `_bestProtectedRemote()`).
+  protection score per candidate in `_bestProtectedRemote()`). The headless
+  `evaluatorCallCount` collector observes requests and actual computations per
+  main-phase command decision. `security-cache-gate` compares off/on/verify
+  arms using identical decision digests and game logs, complete/error-free
+  batches, the computation-reduction threshold and paired decision latency.
+  Counting and mode overrides exist only in the harness. The full `core-v1`
+  comparison on seeds 1–200 (all seven pairs) passed on 2026-10-09: all
+  4,200 executions were error-free and paired decisions/logs were identical;
+  computations/main decision fell 76.5% and mean Corp latency fell 52.4%.
 - **Headless performance (F6).** Security cache misses use the evaluation-local
   context described above instead of rebuilding ICE analysis for every rez
   plan. `RunCalculator._baseStrength()` separately caches each card's

@@ -31,6 +31,7 @@ const context = {console, corp, runner, playerTurn: corp, cardSet: {}, setIdenti
   currentPhase: {identifier: '', title: ''}, executingCommand: ''};
 let servers = [];
 let ai = null;
+let decisionMessages = [];
 // ---- engine stubs (keep in sync with tests/corp-server-security.test.js) ----
 context.GetTitle = card => card.title;
 context.Counters = (card, type) => card[type] || 0;
@@ -119,7 +120,8 @@ Object.assign(context, {InstanceCard, InstanceCardsPush, CorpTestField, RunnerTe
 function resetState() {
   vm.runInContext('reviewAI = new CorpAI();', context);
   ai = context.reviewAI;
-  ai._log = process.env.AI_LOG ? m => console.log('    [ai] ' + m) : function() {};
+  decisionMessages = [];
+  ai._log = m => { decisionMessages.push(m); if (process.env.AI_LOG) console.log('    [ai] ' + m); };
   const central = name => ({serverName: name, cards: [], ice: [], root: []});
   Object.assign(corp, {HQ: central('HQ'), RnD: central('R&D'), archives: central('Archives'), remoteServers: [],
     scoreArea: [], resolvingCards: [], identityCard: null, creditPool: 5, clickTracker: 3,
@@ -185,9 +187,15 @@ files.forEach(file => {
   const options = directive('OPTIONS').split(',').map(s => s.trim()).filter(Boolean);
   const expect = directive('EXPECT');
   const stubbed = [];
+  let baseline = null;
+  // Pending fixtures remain single known-red reproductions. Green fixtures
+  // also prove identical choices and logged reasons across F3 cache modes.
+  for (const cacheMode of (pending ? ['on'] : ['off', 'on', 'verify'])) {
   for (let attempt = 0; attempt < 80; attempt++) {
     try {
       resetState();
+      ai._securityCacheEnabled = cacheMode !== 'off';
+      ai._securityCacheVerify = cacheMode === 'verify';
       vm.runInContext(src, context, {filename: file});
       if (directive('SETUP')) vm.runInContext(directive('SETUP'), context);
       finaliseState();
@@ -206,7 +214,8 @@ files.forEach(file => {
         idx = ai.Choice(options.slice(), choiceType);
       } else {
         if (typeof ai[phase] != 'function') throw new Error('Unknown PHASE ' + phase);
-        idx = ai[phase](options.slice());
+        idx = cacheMode === 'off' ? ai[phase](options.slice()) :
+          ai._withSecurityCache(() => ai[phase](options.slice()));
       }
       const chosen = typeof idx === 'number' ? options[idx] : JSON.stringify(idx);
       const negate = expect.startsWith('!');
@@ -218,6 +227,9 @@ files.forEach(file => {
       const commandOK = negate ? chosen !== expect.slice(1) : chosen === expect;
       const serverOK = !expectedServer || chosenServer === expectedServer;
       const cardOK = !expectedCard || chosenCard === expectedCard;
+      const result = JSON.stringify([chosen, chosenServer, chosenCard, decisionMessages]);
+      if (baseline === null) baseline = result;
+      assert.strictEqual(result, baseline, 'F3 choice/reasons differ in cache mode ' + cacheMode);
       const ok = commandOK && serverOK && cardOK;
       const replayPath = identifier ? 'Choice ' + identifier : phase;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
@@ -236,6 +248,7 @@ files.forEach(file => {
       failed++; console.log('ERROR ' + file + '  ' + String(e.message).split('\n')[0] + '\n    ' + String(e.stack).split('\n').slice(1, 3).join('\n    '));
       break;
     }
+  }
   }
 });
 console.log(passed + ' passed, ' + failed + ' failed, ' + files.length + ' fixtures.');

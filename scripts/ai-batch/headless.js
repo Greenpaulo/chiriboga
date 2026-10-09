@@ -182,7 +182,10 @@ function playGame(options) {
   // cards hosted on the rezzed card at that moment.
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
     hosted: (card.hostedCards || []).map(h => ({title: h.title, exempt: Boolean(h.AIHostedDoesNotPreventRez)}))});
-  if (options.telemetry) context.__decision = entry => emit('decision', entry);
+  if (options.telemetry) context.__decision = entry => {
+    const counts = entry.side === 'corp' && context.__securityDecisionCounts;
+    emit('decision', counts ? Object.assign({}, entry, {securityEvaluation: Object.assign({}, counts)}) : entry);
+  };
 
   const json = value => JSON.stringify(value);
   const prefix = options.streamPrefix;
@@ -236,6 +239,33 @@ function playGame(options) {
       Mulligan = function() { __mulligan(activePlayer === corp ? "corp" : "runner"); return __mulliganFn.apply(this, arguments); };
     `);
   }
+  if (options.securityCache !== undefined) {
+    if (!['off', 'on', 'verify'].includes(options.securityCache)) throw new Error('Invalid security-cache mode');
+    run(`corp.AI._securityCacheEnabled = ${options.securityCache !== 'off'};
+      corp.AI._securityCacheVerify = ${options.securityCache === 'verify'};`);
+  }
+  // F3 instrumentation exists only in the harness. Frames follow Choice(),
+  // including nested decisions and throws; turn-start/card calls are excluded.
+  if (options.evaluatorTelemetry) run(`
+    var __securityDecisionCounts = null;
+    var __securityChoice = corp.AI.Choice;
+    corp.AI.Choice = function() {
+      var previous = __securityDecisionCounts;
+      __securityDecisionCounts = {requests: 0, computations: 0};
+      try { return __securityChoice.apply(this, arguments); }
+      finally { __securityDecisionCounts = previous; }
+    };
+    var __securityRequest = corp.AI._evaluateServerSecurity;
+    corp.AI._evaluateServerSecurity = function() {
+      if (__securityDecisionCounts) __securityDecisionCounts.requests++;
+      return __securityRequest.apply(this, arguments);
+    };
+    var __securityCompute = corp.AI._evaluateServerSecurityCounted;
+    corp.AI._evaluateServerSecurityCounted = function() {
+      if (__securityDecisionCounts) __securityDecisionCounts.computations++;
+      return __securityCompute.apply(this, arguments);
+    };
+  `);
   if (options.telemetry) run('DecisionSnapshots.telemetry = {sink: __decision};');
   if (options.testOption) run(`corp.AI.options[${json(options.testOption)}] = false`);
   for (const [side, values] of [['corp', options.corpOptions], ['runner', options.runnerOptions]]) {
