@@ -14,10 +14,10 @@ PR for each in this order. Do not merge `scratch/l7-1-failure-analysis`.
 | 1 | `bug/agenda-bluff-probability-tracks-runner-grip-size` | `40eec12` | Removes the Grip-size term from bluff probability | Already pushed |
 | 2 | `roadmap/D3-close-runner-information-leaks` | `197f1c2` | Runner AI information-boundary fixes | Already pushed |
 | 3 | `roadmap/feature-layer-7-1-consequence-calibration` | `840a19e` | L7.1: gate failed, option removed; keeps `_breachConsequence()`, hook fixes, collectors. Also moves F3 to done | — |
-| 4 | `roadmap/L7.1.1-failure-analysis` | `29587cf` | Why L7.1 failed (doc only). Based on #3 | Merge after #3 |
+| 4 | `roadmap/L7.1.1-failure-analysis` | `19d76e4` | Why L7.1 failed; I2 spec updated with the lesson; L7.1.1 parked (doc only). Based on #3 | Merge after #3 |
 | 5 | `roadmap/I0-baseline-capture-and-telemetry` | `eddf683` | I0: install telemetry, collectors, F4 baseline | Expect `ai_corp.js` conflicts with #3 |
 | 6 | `roadmap/I1-unified-install-candidate-model` | `2db37e7` | I1: install candidate records, no choice changes. Based on #5 | Rebase onto `main` after #5 merges |
-| 7 | `roadmap/L9.0-lockout-honesty-spec` | `ec24d09` | L9.0 and L9.0.1 specs; I2 now depends on L9.0 (doc only) | Small `roadmap.md` conflict with #6 |
+| 7 | `roadmap/L9.0-lockout-honesty-spec` | `ec24d09` | L9.0 and L9.0.1 specs; I2 now depends on L9.0 (doc only) | Small conflicts with #4 and #6 in `roadmap.md` and the I2 spec's header |
 | 8 | `roadmap/feature-layer-8-4-bounded-posture-epochs` | `aaa8f65` | L8.4 `postureEpochs` option, default off | Run its full F4 gate after #1 merges. The `--quick` run failed the bluff-correlation ceiling (0.342 vs 0.10), which is driven by ICE count; the ceiling may need revisiting |
 | 9 | `docs/merge-and-roadmap-order` | — | This file | Any time |
 
@@ -34,8 +34,9 @@ they must match.
   Details: the "Failure analysis" section of
   `documentation/corp-ai/specs/L7.1.1-horizon-aware-central-consequence.md`
   (branch #4).
-- **L7.1.1's horizon idea is not supported** by that evidence. Retire it or
-  rewrite it around remote-scoring eligibility.
+- **L7.1.1's horizon idea is not supported** by that evidence; it is parked
+  (branch #4). I2's spec and the install design note now keep
+  `consequenceWeight` inside I2's ranking, with HQ and R&D unweighted.
 - **The security evaluator is sound but over-reports lockouts.** About nine in
   ten "secure" verdicts mean only "no matching breaker is installed yet", and
   bioroid click-breaks are not modelled. Servers judged secure were still
@@ -46,7 +47,7 @@ they must match.
 
 | Step | Item | Gate | Why this order |
 |---|---|---|---|
-| 1 | Update the I2 spec with the L7.1 findings | Doc only | Keep `consequenceWeight` inside I2's own ranking, never in `_protectionScore()`; weight 1 for HQ and R&D (or gate central weighting separately). Retire or rewrite L7.1.1 |
+| 1 | ~~Update the I2 spec with the L7.1 findings; park L7.1.1~~ | Doc only | Done on branch #4 |
 | 2 | **L9.0** Lockout honesty | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Unblocks I2 |
 | 3 | **L9.1** Unpriceable breakers (L9 limit 1) | None | Optional before I2: Sang Kancil and Principia are the same kind of false lockout. Split L9's priority slice into its own item |
 | 4 | **I2** ICE selection by marginal security | F4 | Depends on I1, F2, F4, L7.1, L9.0. Reads the honest fields behind its own option |
