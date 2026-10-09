@@ -55,7 +55,7 @@ cannot price yet.
 - **Goal:** Allocate restricted credit sources (stealth, breaker-only, central-only) against actual payments instead of one scalar ceiling.
 
 ### L7.1 Consequence-calibrated central pressure
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4
 - **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/feature-layer-7-1-consequence-calibration.md)
 - **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
