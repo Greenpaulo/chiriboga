@@ -120,13 +120,6 @@ cannot price yet.
 
 Shared infrastructure used by every area.
 
-### F3 Per-decision evaluation cache
-- **Status:** in-progress
-- **Depends on:** F2, F4
-- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/code-review/corp_ai_finding_11_evaluate_once_per_decision.md)
-- **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
-- **Acceptance:** Full off/on/verify comparison passed on 1,400 paired games (4,200 executions), 2026-10-09; completion follow-up awaits independent review.
-
 ### F5 Mulligan weight calibration
 - **Status:** proposed
 - **Depends on:** F4
@@ -160,6 +153,7 @@ Shared infrastructure used by every area.
 | F2 | Guarded hypothetical evaluation: remaining migrations | [corp_ai_finding_10_guarded_hypothetical](../backlog/done/corp_ai_finding_10_guarded_hypothetical.md) | [architecture: foundations](architecture.md#foundations) |
 | F4 | Seeded AI-vs-AI batch harness | [corp_ai_finding_12_seeded_batch_harness](../backlog/done/corp_ai_finding_12_seeded_batch_harness.md) | [architecture.md](architecture.md#foundations) |
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
+| F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 
