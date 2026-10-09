@@ -1,5 +1,7 @@
 # Syailendra is implemented as a Barrier, so the game looks for a Fracter to break it instead of the Decoder it actually needs
 
+**Outcome:** adopted — corrected Syailendra's primary subtype to Code Gate, matching canonical card data.
+
 ## Resolution
 
 Implemented from `f2054ee`.
