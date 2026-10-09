@@ -398,6 +398,13 @@ one-turn-delayed advancement. The profile feeds scoring-remote selection
 advancement (`_deceptionAdvancementTarget()`). Profiles never create naked
 agenda servers and are disabled when a breach could win.
 
+**Agenda bluff probability.** `_shouldBluffAgendaServer()` rolls once per
+remote and agenda (cached in `_agendaBluffDecisions`) with probability
+`0.22 / points + 0.02`, clamped to 0.05–0.18, where points are the agenda's own
+(hidden) agenda points. No public board variable such as Grip size enters the
+probability; game state only gates eligibility (a lone advanceable agenda the
+Runner cannot see, not a Corp win on score, and no winning breach).
+
 **Tag deterrence (L8.3).** `_tagPunishmentDeterrence()` gives bounded
 protection relief when the Runner is tagged and the Corp holds an affordable
 card declaring `AITagPunishment` (for example Retribution in `systemgateway.js`
