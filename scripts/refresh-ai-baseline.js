@@ -4,6 +4,7 @@
 // After merging an accepted gameplay change: node scripts/refresh-ai-baseline.js
 const fs = require('fs');
 const path = require('path');
+const {randomUUID} = require('crypto');
 const {spawnSync} = require('child_process');
 const {benchmarkFormat, parseFormat} = require('./ai-benchmark-format');
 
@@ -24,8 +25,16 @@ function refreshBaseline(root, runBatch = args => {
   try {
     const files = fs.readdirSync(current).filter(file => file.endsWith('.json'));
     if (files.length > 1) throw new Error(`Expected at most one report in ${config.bench}/current/.`);
+    // Failed/interrupted runs leave their report here. Preserve that evidence
+    // separately from accepted baselines so a retry can run without cleanup.
+    let archivedPending;
     if (fs.existsSync(pending)) {
-      throw new Error(`${config.bench}/baseline.json already exists; move it aside before retrying.`);
+      const pendingArchive = path.join(bench, 'archived-pending');
+      fs.mkdirSync(pendingArchive, {recursive: true});
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      archivedPending = path.join(pendingArchive, `${timestamp}-${randomUUID()}.json`);
+      fs.copyFileSync(pending, archivedPending, fs.constants.COPYFILE_EXCL);
+      fs.unlinkSync(pending);
     }
     const previous = files.length ? path.join(current, files[0]) : null;
     runBatch(['scripts/ai-batch.js', '--pool',
@@ -52,7 +61,7 @@ function refreshBaseline(root, runBatch = args => {
     // On the same filesystem rename replaces baseline.json atomically.
     fs.renameSync(pending, target);
     if (previous && previous !== target) fs.unlinkSync(previous);
-    return {current: target, archived};
+    return {current: target, archived, archivedPending};
   } finally {
     fs.closeSync(descriptor);
     fs.unlinkSync(lock);
@@ -64,6 +73,7 @@ if (require.main === module) {
     const format = parseFormat(process.argv.slice(2), 'refresh-ai-baseline.js');
     const root = path.resolve(__dirname, '..');
     const result = refreshBaseline(root, undefined, format);
+    if (result.archivedPending) console.log(`Preserved pending report: ${path.relative(root, result.archivedPending)}`);
     if (result.archived) console.log(`Archived: ${path.relative(root, result.archived)}`);
     console.log(`Current baseline: ${path.relative(root, result.current)}`);
   } catch (error) {
