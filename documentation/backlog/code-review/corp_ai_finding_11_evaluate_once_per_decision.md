@@ -179,6 +179,21 @@ Implemented from `44479ba` (uncommitted follow-up).
   awaits independent review; the original cache's historical review below
   does not review these new collector/tests/comparison changes.
 
+Per-check evidence revalidated on 2026-10-09 with
+`checkSecurityCacheGate(off, on, verify)` from `scripts/ai-batch.js`, reading
+the retained reports above. The following is an equivalent evidence summary,
+not a verbatim capture of the original CLI output; the snapshot check uses
+the focused green tests recorded above.
+
+```text
+PASS Identity: all 1,400 paired decision digests and game-log hashes identical off/on/verify.
+PASS Integrity: 1,400 games per arm; zero missing or failed games; main command decisions measured.
+PASS evaluatorCallCount.computationsPerMainDecision: 35.995 -> 8.475 (76.5% reduction; requirement >= 50%); difference -27.520, 95% interval [-27.991, -27.055].
+PASS decisionLatencyMs.corp.mean: 11.659 -> 5.553 ms; difference -6.106 ms, 95% interval [-6.369, -5.861] ms; upper bound <= 0.
+PASS Snapshots: 45 fixture checks across 15 boards off/on/verify, including logged reasons; 11 decision snapshots; unchanged expectations.
+Gate: passed
+```
+
 ## Implementation plan
 
 Proposed at `58f3a4d` (plus uncommitted D2 and F4 step 1), 2026-09-25. **Approved 2026-09-25.**
