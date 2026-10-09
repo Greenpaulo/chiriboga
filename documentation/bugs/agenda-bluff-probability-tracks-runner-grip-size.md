@@ -1,7 +1,7 @@
 # Corp AI: agenda-bluff probability falls as the Runner's Grip grows, a learnable single-variable tell
 
 **Source:** code inspection during the Corp AI planning audit (no debug log)
-**Reproduction:** none written yet (no pending test). The deterministic check under Reproduction can become `tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js`. Checked at `376f32c`, 2026-09-25.
+**Reproduction:** `tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js` (`node tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js`); fails at `3c25455`, 2026-10-09 (2-point agenda: 0.12 at Grip 4 vs 0.13 at Grip 0).
 
 ## Summary
 
@@ -65,6 +65,10 @@ Rejected alternative: keep a threat term but base it on a different public
 variable. Any single public input has the same problem; if threat should
 matter, it belongs in L8.5's match-local feedback, which is bounded and
 checked by `bluffSingleVariableCorrelation`.
+
+## Acceptance gate
+
+N/A — deterministic fix (principle 4): `documentation/corp-ai/principles.md` §5 invariant that no bluff posture may correlate with a single observable game-state variable; with every other input fixed, the stored bluff probability must not change with public Grip size.
 
 ## Acceptance criteria
 
