@@ -1381,6 +1381,12 @@ class CorpAI {
       delayTurns: delayRoll < 0.3 ? 1 : 0,
     };
     this._cardDeceptionProfiles.set(card, profile);
+    this._postureTelemetryEvent({
+      kind: "profile",
+      action: "profile",
+      isAgenda: CheckCardType(card, ["agenda"]) ? 1 : 0,
+      profile: profile,
+    }, null);
     return profile;
   }
 
@@ -1426,14 +1432,12 @@ class CorpAI {
   }
 
   //Roll once for this installed trap, then retain the posture. Re-evaluating a
-  //server must not offer repeated chances to hit the threshold.
+  //server must not offer repeated chances to hit the threshold. With the
+  //postureEpochs option the posture is kept for a bounded epoch instead of the
+  //card's lifetime (_epochPosture).
   _shouldBaitServer(server) {
     var punishment = this._accessPunishmentSeverity(server);
     if (punishment <= 0) return false;
-    //Normally an access-punishing root cannot also expose agenda points, but
-    //keep the same authoritative safety boundary as every deception path for
-    //mixed/future root configurations.
-    if (this._runnerMayWinIfServerBreached(server)) return false;
     var trap = server.root.find(
       (card) =>
         card &&
@@ -1441,7 +1445,18 @@ class CorpAI {
         !PlayerCanLook(runner, card) &&
         typeof card.AIPunishesAccess == "function",
     );
+    //Normally an access-punishing root cannot also expose agenda points, but
+    //keep the same authoritative safety boundary as every deception path for
+    //mixed/future root configurations.
+    if (this._runnerMayWinIfServerBreached(server)) {
+      if (trap) this._postureGuardStop("bait", server, trap);
+      return false;
+    }
     if (!trap) return false;
+    if (this.options.postureEpochs)
+      return this._epochPosture("bait", server, trap, () =>
+        this._calculateBaitFrequency(server),
+      );
     var stored = this._serverBaitDecisions.get(server);
     if (stored && stored.card == trap) return stored.bait;
     var probability = this._calculateBaitFrequency(server);
@@ -1453,6 +1468,11 @@ class CorpAI {
       roll: roll,
       bait: bait,
     });
+    this._postureTelemetryEvent(
+      { kind: "bait", action: "roll", reason: "lifetime", postured: bait ? 1 : 0, isAgenda: 0 },
+      server,
+      trap,
+    );
     return bait;
   }
 
@@ -1469,19 +1489,29 @@ class CorpAI {
     if (
       !CheckCardType(card, ["agenda"]) ||
       PlayerCanLook(runner, card) ||
-      !CheckAdvance(card) ||
-      AgendaPoints(corp) + (card.agendaPoints || 0) >= AgendaPointsToWin() ||
-      this._runnerMayWinIfServerBreached(server)
+      !CheckAdvance(card)
     )
       return false;
+    if (
+      AgendaPoints(corp) + (card.agendaPoints || 0) >= AgendaPointsToWin() ||
+      this._runnerMayWinIfServerBreached(server)
+    ) {
+      this._postureGuardStop("bluff", server, card);
+      return false;
+    }
+    var probabilityFor = () => {
+      var points = Math.max(1, card.agendaPoints || 1);
+      var runnerPressure = Math.min(4, (runner.grip || []).length * 0.25);
+      return Math.max(
+        0.05,
+        Math.min(0.18, 0.22 / points + 0.02 - runnerPressure * 0.01),
+      );
+    };
+    if (this.options.postureEpochs)
+      return this._epochPosture("bluff", server, card, probabilityFor);
     var stored = this._agendaBluffDecisions.get(server);
     if (stored && stored.card == card) return stored.bluff;
-    var points = Math.max(1, card.agendaPoints || 1);
-    var runnerPressure = Math.min(4, (runner.grip || []).length * 0.25);
-    var probability = Math.max(
-      0.05,
-      Math.min(0.18, 0.22 / points + 0.02 - runnerPressure * 0.01),
-    );
+    var probability = probabilityFor();
     var roll = this._random();
     var bluff = roll < probability;
     this._agendaBluffDecisions.set(server, {
@@ -1490,7 +1520,189 @@ class CorpAI {
       roll: roll,
       bluff: bluff,
     });
+    this._postureTelemetryEvent(
+      { kind: "bluff", action: "roll", reason: "lifetime", postured: bluff ? 1 : 0, isAgenda: 1 },
+      server,
+      card,
+    );
     return bluff;
+  }
+
+  //L8.4 posture epochs (option postureEpochs). One bait or bluff posture per
+  //server root card, rolled at its first query and kept until a meaningful
+  //boundary: the commitment horizon expires, the server is run, public Runner
+  //pressure changes, the root's advancement changes or either side reaches
+  //match point. Boundaries are checked once, at the first posture query of a
+  //later Corp turn, so repeated evaluator calls (including after an F3 cache
+  //clear) never consume randomness. A reevaluation rerolls at the current
+  //probability, so it may retain the old posture.
+  _epochPosture(kind, server, card, probabilityFor) {
+    var epoch = this._postureEpoch;
+    var record = this._postureEpochRecords.get(server);
+    var reasons;
+    if (record && record.card == card) {
+      var expired = epoch >= record.commitmentHorizon;
+      if (
+        record.checkedEpoch == epoch ||
+        typeof playerTurn === "undefined" ||
+        playerTurn != corp
+      ) {
+        this._postureTelemetryEvent(
+          {
+            kind: kind,
+            action: "reuse",
+            epochId: record.epochId,
+            corpTurn: playerTurn == corp ? 1 : 0,
+            expired: expired && playerTurn == corp ? 1 : 0,
+            postured: record.selectedScript == "neutral" ? 0 : 1,
+          },
+          server,
+          card,
+        );
+        return record.selectedScript != "neutral";
+      }
+      reasons = this._postureReevaluationReasons(record, server, card);
+      record.checkedEpoch = epoch;
+      if (!reasons.length) {
+        record.boundary = this._postureBoundary(server, card);
+        this._postureTelemetryEvent(
+          {
+            kind: kind,
+            action: "reuse",
+            epochId: record.epochId,
+            corpTurn: 1,
+            expired: 0,
+            postured: record.selectedScript == "neutral" ? 0 : 1,
+          },
+          server,
+          card,
+        );
+        return record.selectedScript != "neutral";
+      }
+    } else reasons = [record ? "newCard" : "install"];
+    var probability = probabilityFor();
+    var roll = this._random();
+    var postured = roll < probability;
+    var horizonRoll = this._random();
+    var previous = record && record.card == card ? record.selectedScript : null;
+    record = {
+      card: card,
+      kind: kind,
+      epochId: epoch,
+      checkedEpoch: epoch,
+      selectedScript: postured ? kind : "neutral",
+      //Commitment lasts two or three Corp turns; a fixed cadence would itself
+      //be a learnable tell.
+      commitmentHorizon: epoch + (horizonRoll < 0.5 ? 2 : 3),
+      reevaluationReasons: reasons,
+      previousScript: previous,
+      probability: probability,
+      roll: roll,
+      boundary: this._postureBoundary(server, card),
+    };
+    this._postureEpochRecords.set(server, record);
+    this._log(
+      "Posture " +
+        kind +
+        " epoch " +
+        epoch +
+        ": " +
+        record.selectedScript +
+        " (" +
+        reasons.join(", ") +
+        ")",
+    );
+    this._postureTelemetryEvent(
+      {
+        kind: kind,
+        action: "roll",
+        epochId: epoch,
+        reason: reasons.join(","),
+        postured: postured ? 1 : 0,
+        isAgenda: kind == "bluff" ? 1 : 0,
+      },
+      server,
+      card,
+    );
+    return postured;
+  }
+
+  //Public state a posture boundary compares against. Grip size, HQ size and
+  //Corp credits are deliberately absent: they are not reasons to reconsider.
+  _postureBoundary(server, card) {
+    var programs = (runner.rig && runner.rig.programs) || [];
+    var pointsToWin = AgendaPointsToWin();
+    return {
+      challenges: this._postureChallenges.get(server) || 0,
+      creditBand: Math.floor(Math.max(0, Credits(runner) || 0) / 5),
+      breakers: programs.filter((p) => CheckSubType(p, "Icebreaker")).length,
+      advancement: Math.max(0, Counters(card, "advancement") || 0),
+      matchPoint:
+        AgendaPoints(corp) >= pointsToWin - 2 ||
+        AgendaPoints(runner) >= pointsToWin - 2,
+    };
+  }
+
+  _postureReevaluationReasons(record, server, card) {
+    var reasons = [];
+    var now = this._postureBoundary(server, card);
+    var before = record.boundary;
+    if (this._postureEpoch >= record.commitmentHorizon)
+      reasons.push("horizonExpired");
+    if (now.challenges > before.challenges) reasons.push("challenged");
+    if (now.creditBand != before.creditBand || now.breakers != before.breakers)
+      reasons.push("runnerPressure");
+    if (now.advancement != before.advancement) reasons.push("stakes");
+    if (now.matchPoint && !before.matchPoint) reasons.push("matchPoint");
+    return reasons;
+  }
+
+  //Called by MakeRun() for every run, successful or not.
+  _notePostureChallenge(server) {
+    if (!server) return;
+    this._postureChallenges.set(
+      server,
+      (this._postureChallenges.get(server) || 0) + 1,
+    );
+  }
+
+  _postureGuardStop(kind, server, card) {
+    this._postureTelemetryEvent(
+      { kind: kind, action: "guard" },
+      server,
+      card,
+    );
+  }
+
+  //Harness-only telemetry (F4 collectors). A no-op unless a sink is attached;
+  //it reads only public state and never affects a decision.
+  _postureTelemetryEvent(event, server, card) {
+    if (typeof this._postureTelemetry !== "function") return;
+    var iceOf = (central) => ((central && central.ice) || []).length;
+    var deepestCentral = Math.max(
+      iceOf(corp.HQ),
+      iceOf(corp.RnD),
+      iceOf(corp.archives),
+    );
+    if (card) {
+      if (!this._postureCardIds.has(card))
+        this._postureCardIds.set(card, ++this._postureCardCount);
+      event.cardId = this._postureCardIds.get(card);
+    }
+    event.epoch = this._postureEpoch;
+    event.publicVars = {
+      turn: this._postureEpoch,
+      corpCredits: Credits(corp) || 0,
+      runnerCredits: Credits(runner) || 0,
+      gripSize: (runner.grip || []).length,
+      hqSize: ((corp.HQ && corp.HQ.cards) || []).length,
+      rootCount: server ? (server.root || []).length : 0,
+      iceCount: server ? (server.ice || []).length : 0,
+      deepestCentralIce: deepestCentral,
+      corpPoints: AgendaPoints(corp),
+      runnerPoints: AgendaPoints(runner),
+    };
+    this._postureTelemetry(event);
   }
 
   //A playable punishment in HQ is a real consequence once the Runner is
@@ -3518,6 +3730,9 @@ class CorpAI {
   _prepareProtectionPrioritiesForCorpTurn() {
     if (!this._securityCache && this._securityCacheEnabled)
       return this._withSecurityCache(() => this._prepareProtectionPrioritiesForCorpTurn());
+    //Each Corp turn starts a new posture epoch (after the cache wrapper, so it
+    //counts once; clearing the security cache never starts an epoch).
+    this._postureEpoch++;
     this._rollRecentSuccessfulRunPressure();
     //The first Corp turn has no previous allocation round to age.
     if (!this._hasReachedCorpMainPhase) return;
@@ -6892,6 +7107,15 @@ class CorpAI {
     this._serverBaitDecisions = new WeakMap();
     this._agendaBluffDecisions = new WeakMap();
     this._cardDeceptionProfiles = new WeakMap();
+    //L8.4 posture epochs: per-server records, the Corp-turn epoch counter and
+    //public run counts (option postureEpochs). _postureTelemetry is a
+    //harness-only sink (scripts/ai-batch/headless.js).
+    this._postureEpochRecords = new WeakMap();
+    this._postureChallenges = new WeakMap();
+    this._postureEpoch = 0;
+    this._postureCardIds = new WeakMap();
+    this._postureCardCount = 0;
+    this._postureTelemetry = null;
     this._hiddenThreatProfilesByFaction = new Map();
     this._random = Math.random;
     this._decisionRandomState = null;
@@ -7186,4 +7410,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   committedAgendaReserveBypass: false,
   emptyArchivesRunPressure: false,
   valuelessServerDebtReset: false,
+  postureEpochs: false,
 });

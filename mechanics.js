@@ -12,6 +12,9 @@ function MakeRun(server) {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
+  //Corp AI posture epochs treat a run on the server as a boundary (L8.4)
+  if (corp.AI && typeof corp.AI._notePostureChallenge === "function")
+    corp.AI._notePostureChallenge(server);
   Log("Run initiated attacking " + server.serverName);
   GainCredits(runner, corp.badPublicity, "bad publicity"); //(Nisei 2021 1.2)
   AutomaticTriggers("automaticOnRunBegins", [server]); //(Nisei 2021 1.3)
