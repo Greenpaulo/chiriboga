@@ -68,7 +68,7 @@ Existing Runner AI code that breaks a shared principle.
 ### D3 Close Runner AI information-boundary leaks
 - **Status:** in-progress
 - **Depends on:** none
-- **Ticket:** [D3-close-runner-information-leaks.md](../backlog/D3-close-runner-information-leaks.md)
+- **Ticket:** [D3-close-runner-information-leaks.md](../backlog/code-review/D3-close-runner-information-leaks.md)
 - **Goal:** Stop Runner decisions depending on hidden Corp cards or Stack order; make helpers enforce visibility.
 
 ### Done

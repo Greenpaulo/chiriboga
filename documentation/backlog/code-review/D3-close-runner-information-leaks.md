@@ -1,12 +1,58 @@
 # D3 Close Runner AI information-boundary leaks
 
+**Outcome:** adopted
+
 **Roadmap item:** D3 · **Depends on:** none · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`
 **Verified against code:** 3c25455 (2026-10-09)
 
+## Resolution
+
+Implemented from `3c25455`, following the approved plan (no deviations).
+Architecture: [what the Runner AI knows](../../runner-ai/architecture.md#what-the-runner-ai-knows).
+
+- `Trash()` (`mechanics.js`): a card leaving HQ updates the HQ model by title
+  only when `PlayerCanLook(runner, card)`; a facedown trash calls
+  `LoseInfoAboutHQCards(null)` (one fewer card, more uncertainty).
+- `IceAI()` (`runcalculator.js`): unseen ICE uses the new
+  `RunCalculator._publicRezCostModifier()` (visible or lingering
+  `modifyRezCost` sources other than the ICE itself, unclamped) instead of
+  `RezCost(ice) - ice.rezCost`. Visible modifiers in the playable sets
+  (Reina Roja, Xanadu, HB: Architects of Tomorrow, Tread Lightly, Fransofia
+  Ward; Hype Machine in vantagepoint) read only public state of the target.
+- `_icebreakerInPileNotInHandOrArray()` (`ai_runner.js`): a pile with any card
+  the Runner cannot see is scanned in title order; fully visible piles keep
+  their order.
+- `_matchingBreakerInstalled()` / `_breakerMatchesIce()`: return no match for
+  ICE the Runner cannot look at; the dead "strength 3 for unseen ICE"
+  fallback for `AIFixedStrength` was removed.
+- `CalculatePieceBegin()`: Hokusai Grid check loops over `knownCardsInRoot`
+  only; the title comparison stays for D1.
+
+**Cards affected (no card definitions changed; their hooks call the changed helpers):**
+- systemgateway: Leech (`_matchingBreakerInstalled`, already guarded),
+  Mutual Favor (Stack tutor — now order-independent).
+- systemupdate2021: Kit (`AIMatchingBreakerInstalled` — now no match on hidden
+  ICE), Egret (already guarded/rezzed host), Test Run (Stack+Heap pile — now
+  order-independent), Retrieval Run (Heap only — unchanged).
+- elevation: Chromatophores (`AIOkToTrash` on an unrezzed host now returns no
+  match, i.e. not OK to trash), Scrounge (Heap only — unchanged).
+- vantagepoint (in-progress set): Beta Build (Stack — now order-independent).
+Checked with `rg -n "_icebreakerInPileNotInHandOrArray|_matchingBreakerInstalled|_breakerMatchesIce" sets/`;
+none missed (the remaining hits are in non-playable `uprising`).
+
+**Tests:** new `tests/runner-information-boundary.test.js` (9 checks, scenarios
+1–5, each with 2–3 substituted hidden cards or Stack orders, `viewAllFronts`
+asserted off); all four scenario blocks fail on `3c25455`. Harness-only fix in
+`tests/kit-matching-breaker-hook-always-returns-null.test.js`: added a
+`PlayerCanLook` stub to its stubbed globals (assertions unchanged).
+`node tests/run-all-tests.js`: 75 test files passed.
+
+Acceptance gate is N/A (deterministic information-boundary fix); no F4 run.
+
 ## Implementation plan
 
-Proposed at `3c25455`, 2026-10-09. **Awaiting approval.**
+Proposed at `3c25455`, 2026-10-09. **Approved 2026-10-09.**
 
 - **Validation:** All five reads confirmed at `3c25455`. Gate classification:
   objective (information-boundary oracle, runner principles §1); the ticket's
@@ -82,7 +128,7 @@ themselves instead of relying on every caller.
 
 ## Current behaviour
 Found while documenting the Runner AI (see
-[architecture: what the Runner AI knows](../runner-ai/architecture.md#what-the-runner-ai-knows)):
+[architecture: what the Runner AI knows](../../runner-ai/architecture.md#what-the-runner-ai-knows)):
 
 - `Trash()` in `mechanics.js` calls `LoseInfoAboutHQCards(card)` with the real
   identity of any card trashed from HQ, even when it leaves face down, so the
@@ -137,8 +183,8 @@ state) pass.
 flag is on; tests must run with it off.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [ ] The side's `architecture.md` describes the new behaviour.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] Every test scenario above is covered by a deterministic test.
+- [x] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
+- [x] The side's `architecture.md` describes the new behaviour.
+- [x] `node tests/run-all-tests.js` passes.

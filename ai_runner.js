@@ -222,11 +222,11 @@ class RunnerAI {
   }
 
   //check if a breaker matches ice, including strength check for fixed-strength breakers
+  //only ice the Runner can see can match (unrezzed, unexposed ice reveals nothing)
   _breakerMatchesIce(breakerCard, iceCard) {
+	  if (!PlayerCanLook(runner, iceCard)) return false;
 	  if (breakerCard.AIFixedStrength) {
-		  var strToCompare = 3; //common strength
-		  if (PlayerCanLook(runner,iceCard)) strToCompare = Strength(iceCard);
-		  if (Strength(breakerCard) < strToCompare) return false;
+		  if (Strength(breakerCard) < Strength(iceCard)) return false;
 	  }
 	  var ret = BreakerMatchesIce(breakerCard, iceCard);
 	  return ret;
@@ -234,7 +234,9 @@ class RunnerAI {
 
   //check if a matching type breaker is installed (or AI)
   //returns the matching breaker or null if none found
+  //returns null for ice the Runner cannot see (enforces the information boundary for card hooks too)
   _matchingBreakerInstalled(iceCard,excludeIcebreakers=[]) {
+    if (!PlayerCanLook(runner, iceCard)) return null;
     var possibleBreakers = ActiveCards(runner);
     for (var i = 0; i < possibleBreakers.length; i++) {
 	  var breakerCard = possibleBreakers[i];
@@ -903,6 +905,13 @@ class RunnerAI {
   //returns the first card found fulfilling this description (or an AI if needed, or null if none found)
   //note that the AI will search first for what it considers to be higher priority cards so the override might not be followed in order
   _icebreakerInPileNotInHandOrArray(pileToCheck,installedRunnerCards) {
+    //a pile with cards the Runner cannot see (e.g. the Stack) has hidden order: scan it in title order
+    //so the choice depends only on its contents (fully visible piles such as the Heap keep their order)
+    if (pileToCheck.some(function (card) { return !PlayerCanLook(runner, card); })) {
+      pileToCheck = pileToCheck.concat([]).sort(function (a, b) {
+        return a.title < b.title ? -1 : a.title > b.title ? 1 : 0;
+      });
+    }
     var essentialBreakerTypesNotInHandOrArray =
       this._essentialBreakerTypesNotInHandOrArray(installedRunnerCards);
 	if (essentialBreakerTypesNotInHandOrArray.length > 1) {

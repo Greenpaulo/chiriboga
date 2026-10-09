@@ -550,8 +550,11 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	for (var i=0; i<cards.length; i++) {
 	  var card = cards[i];
 	  card.host = null;
-	  if (runner.AI != null && card.cardLocation == corp.HQ.cards)
-	    runner.AI.LoseInfoAboutHQCards(card);
+	  if (runner.AI != null && card.cardLocation == corp.HQ.cards) {
+	    //only update by title if the Runner can see the card (e.g. accessed); a facedown trash only means one fewer card
+	    if (PlayerCanLook(runner, card)) runner.AI.LoseInfoAboutHQCards(card);
+	    else runner.AI.LoseInfoAboutHQCards(null);
+	  }
 	  //if the currently encountered ice is trashed, it's no longer being encountered
 	  if (GetApproachEncounterIce() == card) {
 	    encountering = false;

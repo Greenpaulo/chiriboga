@@ -51,6 +51,21 @@ class RunCalculator {
   // misc_serious e.g. install another ice inward (like endTheRun, paths that fire these will be avoided)
   // strengthenAllIce gives every ice on the route +1 strength for the remainder of the run
   //encounterEffects is an array of OR arrays of effects
+  //rez cost modification of a piece of ice the knowledge player cannot see, from public effects only:
+  //sums modifyRezCost triggers from other sources the player can look at (or lingering effects),
+  //ignoring the hidden ice's own triggers and unclamped (the printed rez cost is hidden)
+  _publicRezCostModifier(ice, knowledgePlayer = runner) {
+    var ret = 0;
+    var triggerList = ChoicesActiveTriggers("modifyRezCost");
+    for (var i = 0; i < triggerList.length; i++) {
+      var source = triggerList[i].card;
+      if (source == ice) continue;
+      if (!lingeringEffects.includes(source) && !PlayerCanLook(knowledgePlayer, source)) continue;
+      ret += source.modifyRezCost.Resolve.call(source, ice);
+    }
+    return ret;
+  }
+
   IceAI(ice, maxCorpCred, assumeWeakerUnknown = false, incomplete = false, startIceIdx = -1, knowledgePlayer = runner) {
     var result = {
       ice: ice,
@@ -69,7 +84,7 @@ class RunCalculator {
     var iceKnown = PlayerCanLook(knowledgePlayer, ice);
     if (!iceKnown) {
       //unknown ice
-	  var extraRezCost = RezCost(ice) - ice.rezCost; //this isn't cheating because we only check the bonus cost (easy way of summarising any card effects)
+	  var extraRezCost = this._publicRezCostModifier(ice, knowledgePlayer); //public effects only (the hidden card's own effects and printed cost are not read)
       //advanceable ice assumptions
 	  var advCounters = Counters(ice, "advancement");
 	  if (advCounters > 0) {
@@ -1044,8 +1059,8 @@ class RunCalculator {
 		  var mightHitHokusai = false;
 		  if (numUnknownCardsInRoot > 0) mightHitHokusai = true;
 		  else {
-			for (var i = 0; i < data.server.root.length; i++) {
-			  if (data.server.root[i].title == "Hokusai Grid") {
+			for (var i = 0; i < knownCardsInRoot.length; i++) {
+			  if (knownCardsInRoot[i].title == "Hokusai Grid") {
 				  mightHitHokusai = true;
 				  break;
 			  }
