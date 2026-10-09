@@ -51,11 +51,15 @@ they must match.
 | Step | Item | Gate | Why this order |
 |---|---|---|---|
 | 1 | ~~Update the I2 spec with the L7.1 findings; park L7.1.1~~ | Doc only | Done on branch #4 |
-| 2 | **L9.0** Lockout honesty | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Unblocks I2 |
-| 3 | **L9.1** Unpriceable breakers (L9 limit 1) | None | Optional before I2: Sang Kancil and Principia are the same kind of false lockout. Split L9's priority slice into its own item |
-| 4 | **I2** ICE selection by marginal security | F4 | Depends on I1, F2, F4, L7.1, L9.0. Reads the honest fields behind its own option |
+| 2 | **L9.0** Lockout honesty | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Supplies I2's honest fields; L9.1 is also required |
+| 3 | **L9.1** Unpriceable breakers (L9 limit 1) | None | Required before I2: an installed matching breaker with an unknown price must not create false lockout or break-cost values. Split L9's priority slice into its own item |
+| 4 | **I2** ICE selection by marginal security | F4 | Depends on I1, F2, F4, L7.1, L9.0, L9.1. Reads the honest fields behind its own option |
 | 5 | **L9.0.1** Adopt honest lockout | F4 | Lets existing scoring, rez and protection decisions use the honest verdict. Can run in parallel with I2; gate them separately |
 | 6 | I3 onward | Per spec | Root suitability, agenda commitment, assets, upgrades, then the short-horizon planner |
+
+When integrating branch #7, add L9.1 to I2's dependencies in the roadmap and
+spec as well. L9.0's honest fields alone do not correct unpriceable installed
+breakers; I2 must wait for L9.1's correction before scoring candidates.
 
 Not yet an item: the evaluator's Runner credit ceiling appears too low
 (provisional: 19 of 115 sampled breaches of "secure" servers). The evaluation
