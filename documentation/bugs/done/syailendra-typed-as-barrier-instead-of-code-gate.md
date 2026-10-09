@@ -16,7 +16,7 @@ Validation completed with the focused regression, `tests/corp-server-security.te
 **Source log:** `documentation/debug-logs/bug_raised/code_gate_is_looking_for_a_fracter_to_break_it.txt`
 **File:** `sets/elevation.js` — Syailendra's card definition (`cardSet[35076]`).
 **Confirmed against:** `carddata/carddata.json` (`code: 35076`, `keywords: "Code Gate - AP"`).
-**Status:** Implemented; awaiting independent review.
+**Status:** Review completed; merged in PR #20 and moved to `done/`.
 **Reproduction:** `tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js` fails at `6781c2d`, 2026-10-04: implemented `Barrier` does not match canonical `Code Gate`. Moved unchanged in substance to `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` passes after the fix.
 
 ## Acceptance gate
