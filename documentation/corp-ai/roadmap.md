@@ -91,11 +91,29 @@ cannot price yet.
 - **Ticket:** [feature-layer-8-card-set-audit-and-set-adoption.md](../backlog/feature-layer-8-card-set-audit-and-set-adoption.md)
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
 
+### L9.0 Lockout honesty
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [L9.0-lockout-honesty.md](specs/L9.0-lockout-honesty.md)
+- **Goal:** Report an honest security verdict next to today's (bioroid click-breaks priced; "no breaker installed yet" as its own flag with a finite cost), so I2 gets a graded signal. Observation-only: no decision changes.
+
+### L9.0.1 Adopt honest lockout
+- **Status:** proposed
+- **Depends on:** L9.0, F4
+- **Spec:** [L9.0.1-adopt-honest-lockout.md](specs/L9.0.1-adopt-honest-lockout.md)
+- **Goal:** Gated option `honestLockout`: existing scoring, rez and protection decisions read the honest verdict.
+
+### L9.1 Unpriceable breakers
+- **Status:** proposed
+- **Depends on:** L9.0
+- **Spec:** [L9.1-unpriceable-breakers.md](specs/L9.1-unpriceable-breakers.md)
+- **Goal:** L9 limit 1: a matching breaker the evaluator cannot price never creates a secure verdict, lockout or finite break cost; `AIBreakCost` read on breakers.
+
 ### L9 Run-simulation fidelity
 - **Status:** proposed
 - **Depends on:** none
 - **Spec:** [L9-run-simulation-fidelity.md](specs/L9-run-simulation-fidelity.md)
-- **Goal:** Model what the per-ICE heuristic misses, starting with breakers it cannot price (they make servers look secure when they are not); then cumulative damage, optional effects that remove later breakers, and shared strength-reducer counters.
+- **Goal:** Model what the per-ICE heuristic misses: cumulative damage, optional effects that remove later breakers, and shared strength-reducer counters.
 
 ### Done
 
@@ -191,7 +209,7 @@ I9 comes last.
 
 ### I2 ICE selection by marginal security
 - **Status:** proposed
-- **Depends on:** I1, F2, F4, L7.1
+- **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1
 - **Spec:** [I2-ice-selection-by-marginal-security.md](specs/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Choose the `(ICE, server)` pair that most improves security, using the existing evaluator.
 
