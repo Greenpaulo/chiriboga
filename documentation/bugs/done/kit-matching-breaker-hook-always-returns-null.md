@@ -69,3 +69,7 @@ route-aware first-encounter invariant as `AIModifyIceAI`.
 - [x] The shared route-aware hook behaviour is documented in
   `documentation/ai.md` and `documentation/runner-ai/architecture.md`.
 - [x] `node tests/run-all-tests.js` passes.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #12](https://github.com/Greenpaulo/chiriboga/pull/12) merged.

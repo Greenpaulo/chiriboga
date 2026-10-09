@@ -25,7 +25,7 @@ planning probe; see
 - Rows 2/3 share `_iceSecurityWithAndWithout()`. Rows 2, 3, 4, 7 and 8 restore
   saved values (credits, rez state, ICE array contents in place) instead of
   reversing arithmetic. Row 7 now restores `currentPhase.identifier` (closes
-  [the bug ticket](../../bugs/potential-tag-punishment-never-restores-phase.md)).
+  [the bug ticket](../../bugs/done/potential-tag-punishment-never-restores-phase.md)).
   Row 8 compares install-option counts with `.length`.
 - Rows 5 and 10 use `AIWithRunContext()`; Baker still sets the planning server
   only when no run is in progress. Rows 6, 11, 12, 13 and 14 use
@@ -181,7 +181,7 @@ hypothetical, because every hypothetical passes through code that keeps a
 depth count. This ticket also fixes the accidental array `<` comparison in
 `Phase_Main` (review finding 10) and the unrestored phase in
 `_potentialTagPunishment()`
-([bug ticket](../../bugs/potential-tag-punishment-never-restores-phase.md)).
+([bug ticket](../../bugs/done/potential-tag-punishment-never-restores-phase.md)).
 
 ## Current behaviour
 
@@ -211,7 +211,7 @@ and `_*` functions in `sets/*.js`. The patterns searched were assignments to
 | 4 | `_criticalBreachDefenseAction` (ai_corp.js) | `corp.creditPool`; `risk.server.ice.push`/`pop` | hand-written `try/finally` | `_centralBreachLossRisk` (calls the security evaluator) | Migrate |
 | 5 | `_effectiveRunnerCreditPool` (ai_corp.js) | `attackedServer` | hand-written `try/finally` | Runner `canUseCredits`, `AIRunPoolCreditOffset` hooks | Migrate to the shared run-context wrapper |
 | 6 | `_effectiveIceSubtypes` (ai_corp.js) | `encountering`, `attackedServer`, `approachIce` via `AIIceEncounterSaveState`/`ModifyState`/`RestoreState` (ai_runner.js) | hand-written `try/finally` | `AIEffectiveIceSubtypes`, `modifySubTypes.Resolve` | Migrate to the shared encounter wrapper |
-| 7 | `_potentialTagPunishment` (ai_corp.js) | `runner.tags`, `corp.clickTracker`, `corp.creditPool`, `currentPhase.identifier` | **none**; the phase is never restored (`==` for `=`) | `_useWhenTaggedCard` (card `AIWouldPlay`, `FullCheckPlay`) | Migrate; closes the [bug ticket](../../bugs/potential-tag-punishment-never-restores-phase.md) |
+| 7 | `_potentialTagPunishment` (ai_corp.js) | `runner.tags`, `corp.clickTracker`, `corp.creditPool`, `currentPhase.identifier` | **none**; the phase is never restored (`==` for `=`) | `_useWhenTaggedCard` (card `AIWouldPlay`, `FullCheckPlay`) | Migrate; closes the [bug ticket](../../bugs/done/potential-tag-punishment-never-restores-phase.md) |
 | 8 | `Phase_Main` "gain a credit, then install" check (ai_corp.js) | `corp.creditPool += _clicksLeft() - 1` and manual rollback | **none** | `_rankedInstallOptions` (calls the security evaluator) | Migrate; compare `.length` instead of arrays with `<` |
 | 9 | `_iceInstallScore` (ai_corp.js) | `serverToInstallTo.ice.push`/`splice`, or a fake remote pushed onto `corp.remoteServers` | **none** | `Strength`, `_aCompatibleBreakerIsInstalled` | Delete: its only caller, `_bestIceToInstall`, has no callers (and writes `AIIceInstallScore` onto card objects) |
 | 10 | Baker `_stealthCreditCards` (sets/vantagepoint.js), used by Baker's `AIRedirectsRun` | `attackedServer` | hand-written `try/finally` | Runner `canUseCredits` | Migrate to the shared run-context wrapper |
@@ -339,3 +339,7 @@ N/A — deterministic fix (principle 4): every probe leaves the board exactly as
 - [x] The Resolution lists the cards updated in each set in scope (Baker in vantagepoint) and confirms none were missed.
 - [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [x] `node tests/run-all-tests.js` passes.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #15](https://github.com/Greenpaulo/chiriboga/pull/15) merged.

@@ -145,7 +145,12 @@ option.
 
 ## Out of scope / related
 - After the crash the game deadlocks; that is a separate card bug,
-  [humanoid-resources-install-stalls-game.md](humanoid-resources-install-stalls-game.md).
+  [humanoid-resources-install-stalls-game.md](../code-review/humanoid-resources-install-stalls-game.md).
 - The same `TypeError` appeared once in an F4 fixture-start game
   (`corp-continues-send-a-message-scoring-plan`, `btl-kit`, seed 3); it was
   not investigated separately.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #14](https://github.com/Greenpaulo/chiriboga/pull/14) merged.
+Review follow-up also merged in [PR #29](https://github.com/Greenpaulo/chiriboga/pull/29).

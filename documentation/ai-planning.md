@@ -128,7 +128,7 @@ normalizes older or manually created tickets before planning.
 An item whose goal is to play better, rather than to reproduce a fixed
 decision, is **gated**: deterministic tests cannot show that the change helps,
 so its **Acceptance gate** decides adoption from seeded games run with the F4
-harness ([corp_ai_finding_12_seeded_batch_harness.md](backlog/corp_ai_finding_12_seeded_batch_harness.md)).
+harness ([corp_ai_finding_12_seeded_batch_harness.md](backlog/done/corp_ai_finding_12_seeded_batch_harness.md)).
 A gated item:
 
 - keeps its deterministic **Test scenarios**;

@@ -7,7 +7,7 @@
 ## Resolution
 
 Implemented from `b52d451`, as row 7 of roadmap item F2
-([ticket](../../backlog/corp_ai_finding_10_guarded_hypothetical.md)).
+([ticket](../../backlog/done/corp_ai_finding_10_guarded_hypothetical.md)).
 `_potentialTagPunishment()` now changes the four fields only inside
 `_withHypothetical()`, whose `restore` reassigns `runner.tags`,
 `corp.clickTracker`, `corp.creditPool` and `currentPhase.identifier` in
@@ -85,3 +85,7 @@ here or in F2, and tick the F2 row either way.
 - [x] The test also shows tags, clicks, credits and the phase identifier are restored when `_useWhenTaggedCard()` throws.
 - [x] The test passes after the fix and has moved into `tests/`.
 - [x] `node tests/run-all-tests.js` passes.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #15](https://github.com/Greenpaulo/chiriboga/pull/15) merged.

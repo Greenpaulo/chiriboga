@@ -1,14 +1,58 @@
 # Engine: Humanoid Resources' installs leave the game with no valid command
 
+**Outcome:** adopted
+
 **Source log:** none. Found by the F4 baseline run (`leo-topan` seed 101); replay with `node scripts/ai-game.js --seed 101:leo-topan --corp "LEO Glacier.js" --runner "Topan CBB.js" --tail 30`.
 **Reproduction:** `tests/pending/humanoid-resources-install-stalls-game.test.js` — `node tests/pending/humanoid-resources-install-stalls-game.test.js` (fails at `f795a63`, 2026-10-02)
 
+## Resolution
+
+Implemented from `2c58361`, 2026-10-08.
+
+- `humanoidResourcesInstall` now continues from `Install`'s final
+  `onInstallComplete` callback with `returnToPhase=true`, after payment and
+  all install responses finish. Only successful installs consume the two-card
+  allowance. Cancellation restores the card to HQ and reopens the menu with
+  the same allowance; skip paths return through the original phase.
+- `humanoidResourcesPlayOp` now checks the operation's real `Enumerate` in
+  addition to affordability. This excludes operations such as Petty Cash
+  after a completed action while still allowing the free play with zero
+  clicks. `FullCheckPlay` is unsuitable here because it requires action clicks.
+- The unchanged reproduction is now
+  `tests/humanoid-resources-install-stalls-game.test.js` and passes with
+  `node tests/humanoid-resources-install-stalls-game.test.js`.
+  `tests/humanoid-resources-resolution.test.js` passes seven real-engine
+  scenarios: two installs and operation play, skipping all installs,
+  skipping the second install, skipping the operation, cancellation and
+  retry, nested install-response decisions, and operation restrictions and
+  affordability. The tests verify original-phase restoration and no extra
+  action click.
+- The change is an objective legality and uninterrupted-resolution fix,
+  with no strategic AI preference, AI hook change, or acceptance gate needed.
+  The extra operation-legality defect is covered by the approved plan.
+  The shared helper already lives at `tests/_headless-board.js`; the stale
+  criterion asking to move it has been corrected.
+- Startup replay command:
+  `node scripts/ai-batch.js replay --pool tests/fixtures/ai-batch/deck-pool-startup-format.json --pairs pd-muslihaT --seeds 25`.
+  Humanoid Resources resolves two installs and plays Nanomanagement; the
+  game finishes at 23 turns (Runner wins by empty R&D, Corp 5–5 Runner,
+  log hash `22cdcf4238c1`), instead of stalling at turn 16.
+- `node tests/run-all-tests.js`: all 71 test files pass, including
+  `tests/corp-decision-fixtures.test.js`, `tests/decision-snapshots.test.js`,
+  the promoted reproduction and the new resolution scenarios.
+
 ## Implementation plan
 
-Proposed at `e894637`, 2026-10-08. **Awaiting approval.**
+Proposed at `e894637`, revalidated at `2c58361`, 2026-10-08. **Approved 2026-10-08.**
 
 - **Validation:** the original pending reproduction still stalls after the
-  first install. A temporary card-only experiment moved the continuation to
+  first install (confirmed again at `2c58361`: `stalled: no main-loop step
+  for 3 s after: Null command`). Current code still starts the next prompt
+  immediately after calling `Install`; its final callback runs only after
+  install responses. The operation menu still checks only credits, while
+  Petty Cash's `Enumerate` rejects play after a completed action. These two
+  helpers have no callers outside this card's resolution chain.
+  A temporary card-only experiment moved the continuation to
   `Install`'s final `onInstallComplete` callback with `returnToPhase=true`.
   Both installs then finished, but the unchanged reproduction still stalled
   at `Playing Petty Cash`, whose real `Enumerate` returned zero choices.
@@ -103,13 +147,13 @@ N/A — deterministic fix (principle 4): the game must always have a valid
 command; a deadlock is never legal play.
 
 ## Acceptance criteria
-- [ ] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged, together with `tests/pending/_headless-board.js`.
-- [ ] A variation covers two installs followed by playing an operation, and one skipping straight to the operation.
-- [ ] New or changed AI hooks are documented in `documentation/ai.md`.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged, using the existing shared helper at `tests/_headless-board.js`.
+- [x] A variation covers two installs followed by playing an operation, and one skipping straight to the operation.
+- [x] New or changed AI hooks are documented in `documentation/ai.md` (none changed).
+- [x] `node tests/run-all-tests.js` passes.
 
 ## Out of scope / related
-- [corp-install-choice-crashes-on-null-skip-option.md](corp-install-choice-crashes-on-null-skip-option.md),
+- [corp-install-choice-crashes-on-null-skip-option.md](../done/corp-install-choice-crashes-on-null-skip-option.md),
   the Corp AI crash on the same prompt.
-- [scrounge-unaffordable-program-stalls-game.md](scrounge-unaffordable-program-stalls-game.md)
+- [scrounge-unaffordable-program-stalls-game.md](../scrounge-unaffordable-program-stalls-game.md)
   is a different card that also leaves the game with no command.

@@ -1,7 +1,7 @@
 # What went wrong with gate boards, and what fixed it
 
 Written 2026-10-02, after the hosted-Trojan rez ticket
-([corp-silently-declines-rez-of-ice-hosting-a-trojan.md](bugs/code-review/corp-silently-declines-rez-of-ice-hosting-a-trojan.md)).
+([corp-silently-declines-rez-of-ice-hosting-a-trojan.md](bugs/done/corp-silently-declines-rez-of-ice-hosting-a-trojan.md)).
 A short record for the owner, so the same mistakes are recognisable if they
 come back.
 
@@ -57,12 +57,14 @@ new way to close tickets whose gate fails.
   beats the rez cost, is
   [hosted-ice-rez-ignores-repeated-tax.md](bugs/hosted-ice-rez-ignores-repeated-tax.md).
   Its gate uses the real board, selected by tag.
-- The builder is roadmap item F10, in code review on branch
-  `roadmap/F10-real-board-start-library`.
-- Still open: Scatter Field's crash
-  ([corp-install-choice-crashes-on-null-skip-option.md](bugs/corp-install-choice-crashes-on-null-skip-option.md)).
-  Until it's fixed, boards from logs with Scatter Field need a recorded
-  crash-fix swap.
+- The builder is roadmap item F10, completed and merged in PR #18
+  ([F10-real-board-start-library.md](backlog/done/F10-real-board-start-library.md)).
+- Scatter Field's crash is fixed
+  ([corp-install-choice-crashes-on-null-skip-option.md](bugs/done/corp-install-choice-crashes-on-null-skip-option.md)).
+  `_bestInstallOption()` excludes null cards, and the regression exercises
+  Scatter Field's real install prompt with its null `Decline` option.
+  Boards from logs with Scatter Field no longer need a crash-fix swap for
+  this defect.
 
 ## What to watch for
 

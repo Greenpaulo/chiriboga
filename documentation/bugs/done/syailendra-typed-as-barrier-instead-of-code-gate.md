@@ -1,5 +1,7 @@
 # Syailendra is implemented as a Barrier, so the game looks for a Fracter to break it instead of the Decoder it actually needs
 
+**Outcome:** adopted — corrected Syailendra's primary subtype to Code Gate, matching canonical card data.
+
 ## Resolution
 
 Implemented from `f2054ee`.
@@ -16,7 +18,7 @@ Validation completed with the focused regression, `tests/corp-server-security.te
 **Source log:** `documentation/debug-logs/bug_raised/code_gate_is_looking_for_a_fracter_to_break_it.txt`
 **File:** `sets/elevation.js` — Syailendra's card definition (`cardSet[35076]`).
 **Confirmed against:** `carddata/carddata.json` (`code: 35076`, `keywords: "Code Gate - AP"`).
-**Status:** Implemented; awaiting independent review.
+**Status:** Review completed; merged in PR #20 and moved to `done/`.
 **Reproduction:** `tests/pending/syailendra-typed-as-barrier-instead-of-code-gate.test.js` fails at `6781c2d`, 2026-10-04: implemented `Barrier` does not match canonical `Code Gate`. Moved unchanged in substance to `tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js`; `node tests/syailendra-typed-as-barrier-instead-of-code-gate.test.js` passes after the fix.
 
 ## Acceptance gate
@@ -161,3 +163,7 @@ Follow `tests/fixtures/README.md` and whichever ice/breaker test file already ex
    that point; the cause remains unresolved until the full log or execution
    path can confirm or rule out a crash, hang, or ordinary termination.
 2. `_icePlanOutcome`'s tie-break rule — prefer the cheaper of two plans that tie on lockout status and mandatory/total break cost (`ai_corp.js`, `_icePlanIsBetter`, final `return candidate.rezCost < current.rezCost;`) — is a reasonable, deliberate piece of design (don't pay to rez redundant ice) and is flagged here only because it's what made this particular bug's symptom read as "Syailendra omitted" turn after turn rather than something more obviously wrong.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #20](https://github.com/Greenpaulo/chiriboga/pull/20) merged.

@@ -51,3 +51,7 @@ N/A — agent verification tooling; no gameplay or AI policy change.
 - [x] `node tests/verify-on-stop.test.js` passes; the full
   `node tests/run-all-tests.js` run passes all 51 test files, including Corp
   decision fixtures and decision snapshots.
+
+## Post-merge closure
+
+2026-10-08: moved to `done/` after [PR #12](https://github.com/Greenpaulo/chiriboga/pull/12) merged.
