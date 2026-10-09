@@ -108,6 +108,16 @@ const EXTRA_DRAW = side => `
     const off = report(10, 10), on = report(4, 3), verify = report(10, 11);
     off.securityCache = 'off'; on.securityCache = 'on'; verify.securityCache = 'verify';
     assert(batch.checkSecurityCacheGate(off, on, verify).pass);
+    for (const arm of [0, 1, 2]) {
+      for (const metric of ['evaluatorCallCount.computationsPerMainDecision', 'decisionLatencyMs.corp.mean']) {
+        for (const value of [undefined, null, NaN, Infinity, -Infinity]) {
+          const reports = [off, on, verify].map(r => JSON.parse(JSON.stringify(r)));
+          reports[arm].games[0].metrics[metric] = value;
+          assert.strictEqual(batch.checkSecurityCacheGate(...reports).pass, false,
+            `${reports[arm].securityCache} arm must reject ${metric}=${value}`);
+        }
+      }
+    }
     for (const change of [r => {r.games[0].decisionHash = 'changed';}, r => {r.games[0].logHash = 'changed';},
       r => {r.quick = true;}, r => {r.games[0].ok = false;}, r => {r.games = [];},
       r => {r.games[0].metrics['evaluatorCallCount.computationsPerMainDecision'] = 6;},

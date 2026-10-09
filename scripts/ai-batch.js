@@ -571,7 +571,7 @@ function checkSecurityCacheGate(baseline, candidate, verified) {
   const counted = [...baseline.games, ...candidate.games, ...verified.games].every(g =>
     g.metrics && g.metrics['evaluatorCallCount.mainDecisions'] > 0);
   const countName = 'evaluatorCallCount.computationsPerMainDecision';
-  const finite = [...baseline.games, ...candidate.games].every(g => g.metrics &&
+  const finite = [...baseline.games, ...candidate.games, ...verified.games].every(g => g.metrics &&
     Number.isFinite(g.metrics[countName]) && Number.isFinite(g.metrics['decisionLatencyMs.corp.mean']));
   // Evaluate thresholds before rounding the human-readable summary.
   const sum = report => report.games.reduce((total, g) => total + g.metrics[countName], 0);
