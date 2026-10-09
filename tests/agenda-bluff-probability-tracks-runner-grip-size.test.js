@@ -1,4 +1,4 @@
-// Run with: node tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js
+// Run with: node tests/agenda-bluff-probability-tracks-runner-grip-size.test.js
 // Reproduction for documentation/bugs/agenda-bluff-probability-tracks-runner-grip-size.md.
 //
 // Reproduces: _shouldBluffAgendaServer() stores a bluff probability that falls
