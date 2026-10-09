@@ -296,10 +296,26 @@ effective purge, then guarded emergency ICE acquisition. A game-winning score
 of an installed agenda is exempt; a winning agenda still in HQ is not (bug
 ticket
 [winning-hq-agenda-preempted-by-critical-breach-interrupt.md](../bugs/winning-hq-agenda-preempted-by-critical-breach-interrupt.md)). `AICentralPressureAfterPurge(server)` lets scaling cards such
-as Conduit describe their post-purge pressure. Nothing yet weights central
-pressure by what a breach would expose; L7.1 adds that and owns the shared
-breach-consequence signal (a planned breachConsequence accessor) that L3.5.1
-and I2 consume.
+as Conduit describe their post-purge pressure.
+
+**Breach consequence (L7.1).** `_breachConsequence()` is the one
+breach-consequence signal, for any server and independent of current security:
+`pointsExposed` (remotes: agenda points installed there; HQ and R&D: the
+expected agenda points from one breach with the public access count, which
+`_centralAccessCount()` takes from the raw `_centralPressureSummary()`;
+Archives: its agenda points), `winProbability` (remotes: win/no-win from
+`_runnerMayWinIfServerBreached()`; HQ and R&D: the same order-agnostic
+`_centralWinProbability()` that `_centralBreachLossRisk()` uses, which keeps
+its own security early return), `advancedAgenda`, `backdoorTo` (HQ while
+`_archivesIsBackdoorToHQ()` holds, when Archives takes the larger of its own
+and HQ's consequence) and `weight = max(winProbability, min(1, pointsExposed /
+points needed))`. L3.5.1 and I2 consume it. It does not weight
+`_centralServerThreat()`: scaling the access term by `0.25 + 0.75 × weight`
+failed its F4 gate (more points stolen from HQ and R&D, not fewer; see the L7.1
+ticket), so the central penalty stays unweighted. Revealed
+R&D positions are not used: nothing tracks them. Cards updated: Devadatta Drone
+reports `exhausted` at zero counters; Docklands Pass reports its access outside
+the Runner's turn, when its once-per-turn use is live for the next breach.
 
 **Rez consistency.** `_icePreventsGameWinningBreach()` compares security with an
 approached ICE rezzed (after paying) and absent. If rezzing changes a possibly
@@ -610,7 +626,9 @@ needs.
     `steal` (card, server, points; the server comes from
     `agendaStolenLocations`), `mulligan`, `rez` (card, card type, credits
     paid through `SpendCredits` and the cards hosted on it, each with its
-    `AIHostedDoesNotPreventRez` exemption), `turnEnd` and `gameEnd`. The core
+    `AIHostedDoesNotPreventRez` exemption), `install` (Corp ICE installs on
+    HQ or R&D, with each Runner card's normalized `AICentralPressure` on that
+    server: `additionalAccess` and `exhausted`), `turnEnd` and `gameEnd`. The core
     metrics are computed from these events by a pure function:
     `winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer.*`,
     `gameLength`, `decisionLatencyMs.<side>.mean|p95|max` and

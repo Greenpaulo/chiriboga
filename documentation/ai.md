@@ -1274,13 +1274,18 @@ The hook returns an object with non-negative numeric fields:
 | `additionalAccess` | Extra cards the installed card can expose on the next breach of `server` |
 | `persistentPressure` | Severity of a central-focused payoff that replaces or bypasses normal access, such as milling/burn |
 | `growth` | Bounded warning that successful central runs strengthen the installed engine |
+| `exhausted` | `true` when a limited-use source has spent its public uses or counters and offers no current access (for example Devadatta Drone with no power counters). Ignored when `additionalAccess` is positive |
 
 Return `{}` when the card does not currently apply. The hook is called outside
 runs and must be read-only, depend only on the supplied server and public state,
 and never inspect Runner Grip or Stack identities. Hidden run events must not use
 this hook: they belong to `AIHiddenThreat` or a future hidden central-event model.
-Limited-use cards should return zero after their public counters or uses are
-exhausted. `corp.AI._centralServerThreat(server)` aggregates installed sources;
+Limited-use cards should return no access after their public counters or uses
+are exhausted, and say so with `exhausted: true`; the F4 collector
+`exhaustedPressureProtectionInstalls` reads that field. A once-per-turn use that
+resets when the Runner's turn begins (Docklands Pass) is not exhausted: outside
+the Runner's turn the hook reports the access available on the next Runner turn,
+because the Corp plans protection on its own turn for that breach. `corp.AI._centralServerThreat(server)` aggregates installed sources;
 `_classifyRunnerMacroThreat()` reports the visible board's central focus and
 whether persistent non-access pressure is live. Its `focus` field is currently
 diagnostic input for future install planning; protection scoring uses each
@@ -1294,6 +1299,13 @@ cards without it. For example, Conduit returns `{growth: 2}` but no
 `additionalAccess`, because it can grow again only after the post-purge breach.
 The Corp compares the resulting game-loss probability with the current state
 before choosing a tactical purge.
+
+`corp.AI._breachConsequence(server)` is the single breach-consequence signal
+for any server, computed "if breached" regardless of current security:
+`{pointsExposed, winProbability, advancedAgenda, backdoorTo, weight}`. It does
+not change `_centralServerThreat()`'s penalty (weighting the access term by it
+failed its F4 gate, L7.1). Card hooks stay mechanical; they never weight their
+own pressure by consequence.
 
 `corp.AI._centralBreachLossRisk(server)` calculates an order-agnostic
 probability that the next affordable HQ or R&D breach supplies the agenda
