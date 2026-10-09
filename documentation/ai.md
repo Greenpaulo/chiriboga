@@ -1509,6 +1509,20 @@ AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, ice
 },
 ```
 
+`AIImplementBreaker` is read by the Runner's `RunCalculator`. The Corp's
+server-security evaluator never treats Corp ICE as a Runner breaker, so also
+declare `AIBreakCost` on the ice. It prices breaking `subroutineCount`
+subroutines and returns `{credits, clicks, counters}`, or `null` when
+`iceCard` is not this ice. The evaluator reads it only for the honest verdict
+(`honestIsSecure` and related fields, L9.0); today's `isSecure` ignores it.
+
+```js
+AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
+},
+```
+
 ---
 
 ### 5.4 ICE Install Decisions
@@ -2124,6 +2138,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AITriggerInPaidWindow()` | function | Declare a useful legal paid ability in the current window |
 | `AITriggerAfterTactics` | boolean | Delay an `AITriggerWhenCan` setup action until kills, scoring, defense and priority installs are considered |
 | `AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` | function | Price a mandatory ICE passage when ETR subroutines have payment alternatives |
+| `AIBreakCost(iceCard, subroutineCount, server)` | function | `{credits, clicks, counters}` to break that many subroutines on `iceCard` with the ICE's own Runner ability (bioroids), or `null`; read by the honest security verdict (§5.3) |
 | `AIETRTrashesSelf` | boolean | A declared global ETR consumes its own ICE layer |
 | `AIRunExtraRuns(server)` | function | Public self-consuming ICE defense requires an additional ordinary run; see Batch 12 contracts below |
 | `AIRunSuccessfulDamage(server)` | function | Public available hand damage after a successful run |
