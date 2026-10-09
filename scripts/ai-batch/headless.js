@@ -331,6 +331,23 @@ function playGame(options) {
         if (AIHypothetical.depth === 0 && player === corp && sourceCard && num > 0) __cardCredits(sourceCard, num);
         return __gainCreditsFn.apply(this, arguments);
       };
+      // A Corp card's own response/automatic trigger (for example an Ambush
+      // asset's access trigger) resolves through a DecisionPhase whose callback
+      // is that trigger's Resolve; count it as a use when it resolves.
+      var __decisionPhaseFn = DecisionPhase;
+      DecisionPhase = function(player, choices, callback, title, instruction, context) {
+        if (typeof callback === "function" && context && context.player === corp && context.cardType &&
+            Object.keys(context).some(function(key) {
+              return /^(response|automatic)On/.test(key) && context[key] && context[key].Resolve === callback;
+            })) {
+          var original = callback;
+          arguments[2] = function() {
+            if (AIHypothetical.depth === 0) __cardUsed(context);
+            return original.apply(this, arguments);
+          };
+        }
+        return __decisionPhaseFn.apply(this, arguments);
+      };
       var __takeCreditsFn = TakeCredits;
       TakeCredits = function(player, card, num) {
         var taken = card && typeof card.credits === "number" ? Math.min(card.credits, num) : 0;
