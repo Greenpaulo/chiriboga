@@ -57,8 +57,14 @@ cannot price yet.
 ### L7.1 Consequence-calibrated central pressure
 - **Status:** in-progress
 - **Depends on:** F4
-- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/feature-layer-7-1-consequence-calibration.md)
+- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/code-review/feature-layer-7-1-consequence-calibration.md)
 - **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
+
+### L7.1.1 Horizon-aware central consequence
+- **Status:** proposed
+- **Depends on:** F4, L7.1
+- **Spec:** [L7.1.1-horizon-aware-central-consequence.md](specs/L7.1.1-horizon-aware-central-consequence.md)
+- **Goal:** Find out why L7.1's consequence-weighted central penalty failed its gate (more central steals), then test a horizon-aware exposure behind a default-off option.
 
 ### L8.2 Deception legibility signals
 - **Status:** ready

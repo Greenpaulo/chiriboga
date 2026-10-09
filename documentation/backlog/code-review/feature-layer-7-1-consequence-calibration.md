@@ -1,12 +1,72 @@
 # L7.1 Consequence-calibrated central pressure
 
+**Outcome:** not adopted — gate failed 2026-10-09 (`centralStolen.points` rose: +0.045 per game, interval [+0.001, +0.089])
+
 **Roadmap item:** L7.1 · **Depends on:** F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 **Verified against code:** 143ac4f (2026-10-09)
 
+## Resolution
+
+Implemented from `5f09697` (plan approved 2026-10-09).
+
+**Gate:** failed — `consequenceWeightedCentralPressure` removed. F4 gate, run
+after the full suite passed:
+
+**Gate command:** `node scripts/ai-batch.js gate --corp-option consequenceWeightedCentralPressure=true --collector centralStolen --collector exhaustedPressureProtectionInstalls --improve centralStolen.points --guard winRate=0.02 --guard pointsScored=0.2 --guard pointsStolen=0.2 --guard exhaustedPressureProtectionInstalls.count=0.1 --jobs 4`
+
+Committed pool `core-v1` (pd-tao, btl-kit, neh-zahya, pe-steve, gateway,
+zwicky-magdalene, leo-topan), paired seeds 1–200 per pair, 1,400 paired games,
+0 failed, 223 changed by the option. Bootstrap 95% intervals:
+
+| Metric | Baseline | Candidate | Difference | 95% interval | Threshold | Result |
+|---|---|---|---|---|---|---|
+| `centralStolen.points` (lower) | 3.659 | 3.704 | +0.045 | [+0.001, +0.089] | improvement interval above 0 | FAIL (significantly worse) |
+| `winRate` (higher) | 0.372 | 0.369 | −0.003 | [−0.014, +0.008] | regression ≤ 0.02 | PASS |
+| `pointsScored` (higher) | 3.921 | 3.935 | +0.014 | [−0.034, +0.061] | regression ≤ 0.2 | PASS |
+| `pointsStolen` (lower) | 5.859 | 5.872 | +0.014 | [−0.032, +0.061] | regression ≤ 0.2 | PASS |
+| `exhaustedPressureProtectionInstalls.count` (lower) | 0.005 | 0.004 | −0.001 | [−0.002, +0.000] | regression ≤ 0.1 | PASS |
+
+Gate setup check (`--quick`, not evidence): "350 paired games, 55 changed by
+the options".
+
+Following "When a gate fails", the option, its `_centralServerThreat()`
+branch, its `CENTRAL PRESSURE` protection log and its option-only tests
+(scenarios 1, 4 and 8) were removed. Kept, because they are useful without the
+weighting:
+
+- `_breachConsequence(server)` (the owned signal for L3.5.1 and I2), with
+  `_centralPressureSummary()`, `_centralAccessCount()` and
+  `_centralWinProbability()` shared with `_centralBreachLossRisk()` (whose
+  output is unchanged).
+- Hook semantics (`AICentralPressure` `exhausted` field; documented in
+  `documentation/ai.md`). Cards updated, playable sets: `systemgateway` —
+  Docklands Pass (reports its access outside the Runner's turn); `elevation` —
+  Devadatta Drone (`exhausted: true` at zero power counters);
+  `systemupdate2021` — none (no central-pressure sources). Conduit needed no
+  change (zero counters is growth, not spent). No other playable card
+  implements `AICentralPressure`. Neither card change moved a decision
+  snapshot or corp-decision fixture.
+- Harness `install` event (`scripts/ai-batch/headless.js`) and collectors
+  `centralStolen` and `exhaustedPressureProtectionInstalls`.
+
+Tests: L7.1 scenarios 2, 3, 5, 6, 7 and 9 in `tests/corp-server-security.test.js`
+(scenario 2 now asserts the consequence signal rather than a weighted penalty);
+collector and `install`-event tests in `tests/central-consequence-gate-setup.test.js`.
+Departures from the plan: tests were added to the existing
+`tests/corp-server-security.test.js` harness rather than a new file.
+
+Next idea: [L7.1.1 Horizon-aware central consequence](../../corp-ai/specs/L7.1.1-horizon-aware-central-consequence.md)
+(proposed): first explain the failure from replays, the likely cause being a
+current-snapshot weight that discounts an agenda-free HQ that refills by draw.
+Note for I2: its planned `consequenceWeight = 0.25 + 0.75 × weight` is the
+same mapping this gate rejected for central protection.
+
+Architecture: [central pressure and breach-loss risk](../../corp-ai/architecture.md#central-pressure-and-breach-loss-risk).
+
 ## Implementation plan
 
-Proposed at `143ac4f`, 2026-10-09. **Awaiting approval.** (Plan gate: changes
+Proposed at `143ac4f`, 2026-10-09. **Approved 2026-10-09.** (Plan gate: changes
 the shared protection evaluator `_centralServerThreat()` / `_protectionScore()`
 in `ai_corp.js`, extends the `AICentralPressure` hook contract, and touches more
 than three source files.)
@@ -107,20 +167,20 @@ than three source files.)
 Scale the mechanic-level central-pressure penalty by the actual consequence of the next central breach, rather than treating every extra access as equally dangerous, and provide the one breach-consequence signal every other item uses. This completes the non-lethal consequence weighting that remains after the tactical loss interrupt.
 
 ## Current behaviour
-See [architecture: central pressure and breach-loss risk](../corp-ai/architecture.md#central-pressure-and-breach-loss-risk). Verified details:
+See [architecture: central pressure and breach-loss risk](../../corp-ai/architecture.md#central-pressure-and-breach-loss-risk). Verified details:
 
 - Installed Runner cards expose `AICentralPressure(server)` (a number, or `{additionalAccess, persistentPressure, growth}`), and `AICentralPressureAfterPurge(server)` for purge-dependent cards. `_centralServerThreat()` turns these into `penalty = min(8, 1.5 × additionalAccess + 2 × persistentPressure + min(2, growth))`, which `_protectionScore()` subtracts for HQ and R&D only. Nothing weights it by what a breach would expose.
 - `_centralBreachLossRisk(server)` computes, for HQ or R&D, the order-agnostic probability that one breach with `1 + floor(additionalAccess)` accesses gives the Runner enough points to win, from the Corp-known contents of that server. It returns 0 when the server is currently secure. At `CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD` (0.35) or more, `_criticalBreachDefenseAction()` may interrupt non-winning advancement.
 - Remotes have only a win/no-win check, `_runnerMayWinIfServerBreached(server)`, based on `_agendaPointsInServer(server)`. There is no shared function that reports what a breach of an arbitrary server would expose.
 
 ## Design
-Scope clarification after the [regression recovery](../corp-ai-regression/gated-fix-handoff.md):
+Scope clarification after the [regression recovery](../../corp-ai-regression/gated-fix-handoff.md):
 `emptyArchivesRunPressure` gates empty-Archives admission, not removal of the
 pressure machinery or the central tactical interrupt. Its off setting remains
 the control for this item. The agenda/backdoor consequence signal below does
 not value non-agenda run rewards or recent-run pressure on empty Archives.
 That admission/reward calibration is an explicit gap tracked in the
-[install design ownership table](../corp-ai/specs/install-decisions-design.md#corrected-regression-baseline-and-ownership);
+[install design ownership table](../../corp-ai/specs/install-decisions-design.md#corrected-regression-baseline-and-ownership);
 it must not be silently bundled into this central-consequence policy.
 
 - **Owned consequence signal.** Add `_breachConsequence(server)` returning `{pointsExposed, winProbability, advancedAgenda, backdoorTo, weight}` for every server, computed "if breached", independent of current security:
@@ -193,8 +253,8 @@ reports `pointsStolenByServer.hq` and `.rd` separately; the standard
       interval, guarded-regression result, pass conditions and thresholds; an
       improvement interval's lower bound must be above zero. Only then is the
       option switched on by default.
-- [ ] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the options.
-- [ ] The F4 collector `exhaustedPressureProtectionInstalls` is added through
+- [x] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the options.
+- [x] The F4 collector `exhaustedPressureProtectionInstalls` is added through
   F4's collector extension point. It counts a Corp ICE install on HQ or R&D only
   when at least one public central-pressure source for that server reports
   `exhausted: true` (spent uses or counters, through the hook) and no source
@@ -203,11 +263,11 @@ reports `pointsStolenByServer.hq` and `.rd` separately; the standard
   2026-10-09: "spent" is the hook's explicit signal, not inferred per card;
   Docklands Pass after an HQ breach is live for the next Runner turn and is not
   exhausted.)
-- [ ] The F4 collector `centralStolen` is added through F4's collector
+- [x] The F4 collector `centralStolen` is added through F4's collector
   extension point and reports `centralStolen.points`, agenda points stolen from
   HQ plus R&D per game.
-- [ ] `_breachConsequence(server)` exists and is the only breach-consequence calculation; L3.5.1 and I2 are told to consume it.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] `_breachConsequence(server)` exists and is the only breach-consequence calculation; L3.5.1 and I2 are told to consume it.
+- [x] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
+- [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [x] `node tests/run-all-tests.js` passes.
