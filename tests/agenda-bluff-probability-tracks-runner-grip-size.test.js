@@ -99,4 +99,4 @@ for (const points of [1, 2, 3]) {
     cases++;
   });
 }
-console.log(cases + ' agenda-bluff Grip-size cases passed.');
+if (verbose) console.log(cases + ' agenda-bluff Grip-size cases passed.');

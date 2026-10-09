@@ -12,7 +12,9 @@ Implemented from `3c25455`.
 - `ai_corp.js` `_shouldBluffAgendaServer()`: removed the `runnerPressure` term, so the stored probability is `clamp(0.22 / points + 0.02, 0.05, 0.18)` and no longer moves with Grip size. Eligibility guards (lone advanceable hidden agenda, Corp-winning score, winning breach) are unchanged. This is the ticket's proposed fix.
 - Classification: objective oracle (principles.md §5 invariant), so no F4 gate; `## Acceptance gate` added as N/A. No plan was needed: one function with one caller (`_deceptionPostureActive()`), the diagnosis held under validation (reproduction reproduced the ticket's table exactly), and no green expectation changed.
 - Reproduction written first, failed at `3c25455`, then moved unchanged from `tests/pending/` to `tests/agenda-bluff-probability-tracks-runner-grip-size.test.js` (18 cases: 1–3 points × Grip 0–20). The only line changed in the move is the `// Run with:` path comment; assertions are identical.
-- Docs: [architecture: baits, bluffs and deterrence](../../../corp-ai/architecture.md#baits-bluffs-and-deterrence) now states the bluff probability's inputs.
+- Docs: [architecture: baits, bluffs and deterrence](../../corp-ai/architecture.md#baits-bluffs-and-deterrence) now states the bluff probability's inputs.
+- PR review: the reproduction's success summary is now gated by `VERBOSE`; its assertions remain unchanged.
+- Validation (2026-10-09): `node tests/agenda-bluff-probability-tracks-runner-grip-size.test.js` passes all 18 cases quietly; `node tests/corp-server-security.test.js` reports `143 regression cases passed.` unchanged; `node tests/run-all-tests.js` reports `75 test files passed.`, including `tests/corp-decision-fixtures.test.js` and `tests/decision-snapshots.test.js`.
 - Open: agenda points remain an input (out of scope, as the ticket notes, for L8.6). F4 baselines for L8.2/L8.4/L8.5 should be taken from this commit onward.
 
 ## Summary
