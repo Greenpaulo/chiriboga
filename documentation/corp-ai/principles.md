@@ -39,8 +39,9 @@ security" and related cases in `tests/corp-server-security.test.js`.
 ## 3. Randomness and hypotheticals in the Corp AI
 
 - AI policy randomness comes only from `CorpAI._random`. Persistent postures
-  cache their roll with the card or server; transient tie-breaks are cached for
-  one `Choice`.
+  cache their roll with the card or server (for the card's lifetime, or for a
+  bounded posture epoch with the L8.4 `postureEpochs` option); transient
+  tie-breaks are cached for one `Choice`.
 - The rule for hypotheticals: a probe that temporarily changes state goes
   through `_withHypothetical(apply, evaluate, restore)` (or a shared run or
   encounter wrapper built on the same guard), which is the only place state is

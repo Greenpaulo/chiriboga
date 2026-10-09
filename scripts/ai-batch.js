@@ -31,6 +31,8 @@
 //   --better <metric>=higher|lower  direction for a metric without a default
 //   --side runner                 a Runner item: flip the outcome metrics' directions
 //   --max <metric>=<n>            hard check: fail if any candidate game exceeds n
+//   --ceiling <metric>=<n>        batch metric (a collector's finishBatch): fail unless the
+//                                 candidate's 95% interval upper bound is at most n
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -48,9 +50,9 @@ const CODE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js
 const sha1 = text => crypto.createHash('sha1').update(text).digest('hex');
 
 function parseArgs(argv) {
-  const out = {_: [], start: [], startTag: [], corpOption: [], runnerOption: [], collector: [], guard: [], improve: [], better: [], max: []};
+  const out = {_: [], start: [], startTag: [], corpOption: [], runnerOption: [], collector: [], guard: [], improve: [], better: [], max: [], ceiling: []};
   const repeatable = {'--start': 'start', '--start-tag': 'startTag', '--corp-option': 'corpOption', '--runner-option': 'runnerOption',
-    '--collector': 'collector', '--guard': 'guard', '--improve': 'improve', '--better': 'better', '--max': 'max'};
+    '--collector': 'collector', '--guard': 'guard', '--improve': 'improve', '--better': 'better', '--max': 'max', '--ceiling': 'ceiling'};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     const take = option => {
@@ -200,6 +202,9 @@ async function playJob(job) {
   if (ok) {
     record.metrics = metricsLib.coreMetrics(events);
     collectors.forEach((c, i) => Object.assign(record.metrics, metricsLib.flattenCollector(c.name, c.finish(states[i]))));
+    collectors.forEach((c, i) => {
+      if (typeof c.samples === 'function') (record.samples = record.samples || {})[c.name] = c.samples(states[i]);
+    });
   }
   return {record, options: game.options};
 }
@@ -389,6 +394,7 @@ async function batch(config, command) {
     failures: games.filter(g => !g.ok).map(g => ({fixtureId: g.fixtureId, deckPairId: g.deckPairId, seed: g.seed,
       reason: g.reason, errors: g.errors})),
     aggregates: metricsLib.aggregate(games),
+    batchMetrics: metricsLib.batchMetrics(loadCollectors(config.collectorNames), games),
     games,
   };
 }
@@ -463,8 +469,11 @@ function printComparison(result, quick, only = null) {
     lines.push(`  ${name.padEnd(36)} ${m.baseline.toFixed(3).padStart(8)}  ${m.candidate.toFixed(3).padStart(9)}  ${fmt(m.difference).padStart(10)}` +
       `  [${fmt(m.low)}, ${fmt(m.high)}]${m.direction ? ' (' + m.direction + ' is better)' : ''}`);
   }
+  const batchLine = m => m ? `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]` : 'missing';
+  for (const [name, m] of Object.entries(result.batchMetrics || {}))
+    lines.push(`  ${name.padEnd(36)} batch: baseline ${batchLine(m.baseline)}  candidate ${batchLine(m.candidate)}`);
   for (const c of result.checks)
-    lines.push(`  ${c.pass ? 'PASS' : 'FAIL'} ${c.kind} ${c.name}${c.tolerance !== undefined ? (c.kind === 'max' ? ' at most ' : ' tolerance ') + c.tolerance : ''}${c.why ? ' (' + c.why + ')' : ''}`);
+    lines.push(`  ${c.pass ? 'PASS' : 'FAIL'} ${c.kind} ${c.name}${c.tolerance !== undefined ? (c.kind === 'max' || c.kind === 'ceiling' ? ' at most ' : ' tolerance ') + c.tolerance : ''}${c.why ? ' (' + c.why + ')' : ''}`);
   if (result.pass !== null) lines.push(`Gate: ${result.pass && !quick ? 'passed' : quick ? 'indicative only' : 'failed'}`);
   console.log(lines.join('\n'));
 }
@@ -481,7 +490,23 @@ function gateSpec(args) {
     for (const name of OUTCOME_METRICS)
       better[name] = metricsLib.CORE_DIRECTIONS[name] === 'higher' ? 'lower' : 'higher';
   Object.assign(better, parseAssignments(args.better, '--better'));
-  return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max')};
+  return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max'),
+    ceiling: parseAssignments(args.ceiling || [], '--ceiling')};
+}
+
+// Ceiling checks: a batch-level metric (collector finishBatch) whose candidate
+// 95% interval upper bound must not exceed n. Baseline values are printed for
+// context only.
+function applyCeilingChecks(result, baseline, candidate, ceiling) {
+  for (const [name, limit] of Object.entries(ceiling || {})) {
+    const m = candidate.batchMetrics && candidate.batchMetrics[name];
+    const b = baseline.batchMetrics && baseline.batchMetrics[name];
+    (result.batchMetrics = result.batchMetrics || {})[name] = {baseline: b || null, candidate: m || null};
+    result.checks.push({name, kind: 'ceiling', tolerance: limit, pass: Boolean(m) && m.high <= limit,
+      why: !m ? 'unknown batch metric' : m.high > limit ? 'candidate interval upper bound ' + m.high : undefined});
+  }
+  if (result.checks.length) result.pass = result.checks.every(c => c.pass);
+  return result;
 }
 
 // Hard checks: a condition that must hold in every candidate game, not on average.
@@ -620,7 +645,7 @@ async function main() {
   if (args.compare) {
     const [a, b] = args.compare.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));
     const spec = gateSpec(args);
-    const result = applyMaxChecks(metricsLib.compareReports(a, b, spec), b, spec.max);
+    const result = applyCeilingChecks(applyMaxChecks(metricsLib.compareReports(a, b, spec), b, spec.max), a, b, spec.ceiling);
     printComparison(result, a.quick || b.quick);
     process.exitCode = result.pass === false ? 1 : 0;
     return;
@@ -643,7 +668,8 @@ async function main() {
       reports.push(report);
     }
     const spec = gateSpec(args);
-    const result = applyMaxChecks(metricsLib.compareReports(reports[0], reports[1], spec), reports[1], spec.max);
+    const result = applyCeilingChecks(applyMaxChecks(metricsLib.compareReports(reports[0], reports[1], spec), reports[1], spec.max),
+      reports[0], reports[1], spec.ceiling);
     printComparison(result, candidateConfig.quick, args.all ? null : result.checks.map(c => c.name));
     process.exitCode = result.pass === false || candidateConfig.quick ? 1 : 0;
     return;
@@ -657,5 +683,5 @@ async function main() {
   process.exitCode = report.failures.length ? 1 : 0;
 }
 
-module.exports = {checkSecurityCacheGate, diffLogs, parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks};
+module.exports = {checkSecurityCacheGate, diffLogs, parseArgs, resolveSeeds, loadPool, resolveStarts, taggedStarts, budgetSeeds, buildConfig, fixtureCardIds, writeReport, gateSpec, applyMaxChecks, applyCeilingChecks};
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 2; });

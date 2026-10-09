@@ -178,6 +178,8 @@ function playGame(options) {
   };
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
+  // Corp AI bait/bluff/profile posture decisions (CorpAI._postureTelemetryEvent).
+  context.__posture = event => emit('posture', JSON.parse(JSON.stringify(event)));
   // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
   // cards hosted on the rezzed card at that moment.
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
@@ -237,6 +239,7 @@ function playGame(options) {
       };
       var __mulliganFn = Mulligan;
       Mulligan = function() { __mulligan(activePlayer === corp ? "corp" : "runner"); return __mulliganFn.apply(this, arguments); };
+      corp.AI._postureTelemetry = __posture;
     `);
   }
   if (options.securityCache !== undefined) {

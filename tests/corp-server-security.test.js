@@ -79,13 +79,15 @@ function test(name, body) {
   corp.HQ.cards = []; corp.agendaPoints = 0; runner.tags = 0; runner.agendaPoints = 0;
   ai._serverBaitDecisions = new WeakMap(); ai._agendaBluffDecisions = new WeakMap();
   ai._cardDeceptionProfiles = new WeakMap(); ai._random = Math.random;
+  ai._postureEpochRecords = new WeakMap(); ai._postureChallenges = new WeakMap();
+  ai._postureEpoch = 0; ai._postureTelemetry = null;
   ai._decisionRandomState = null;
   ai._protectionInstallsThisTurn = []; ai._serverProtectionDebt = new Map();
   ai._recentSuccessfulRunPressure = new WeakMap();
   ai._hasReachedCorpMainPhase = false;
   Object.assign(ai.options, {secureScoringServerGate: false,
     serverAtRiskInstallOverride: false, committedAgendaReserveBypass: false,
-    emptyArchivesRunPressure: false, valuelessServerDebtReset: false});
+    emptyArchivesRunPressure: false, valuelessServerDebtReset: false, postureEpochs: false});
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
   tests++; if (verbose) console.log('PASS ' + name);
 }
@@ -2274,5 +2276,178 @@ test('Event Horizon pay-off tax is finite and its sacrificed layer is not charge
   } finally {
     corp.AI = previousAI; context.CheckTrash = previousTrash; context.CheckInstalled = previousInstalled;
   }
+});
+// ---- L8.4 posture epochs (option postureEpochs) ----
+// Each test asserts the logged reevaluation reasons (record and telemetry) as
+// well as the choice. Scenario 5 (seeded games) is in tests/ai-batch.test.js.
+function postureEpochs() {
+  ai.options.postureEpochs = true;
+  context.playerTurn = corp;
+  ai._postureEpoch = 1;
+  const events = [];
+  ai._postureTelemetry = event => events.push(event);
+  return events;
+}
+const scripted = values => () => {
+  if (!values.length) throw Error('posture consumed unexpected randomness');
+  return values.shift();
+};
+const trapServer = () => ({ice: [etr()], root: [card(30045)]});
+test('posture epochs: repeated calls in one epoch consume no extra randomness', () => {
+  const events = postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([0, 0]); //bait roll, horizon roll
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  for (let i = 0; i < 4; i++) assert.strictEqual(ai._shouldBaitServer(remote), true);
+  context.playerTurn = runner; //Runner-turn queries reuse too
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  const record = ai._postureEpochRecords.get(remote);
+  assert.deepStrictEqual([...record.reevaluationReasons], ['install']);
+  assert.strictEqual(record.selectedScript, 'bait');
+  assert.deepStrictEqual(events.filter(e => e.action === 'roll').map(e => e.reason), ['install']);
+  assert.strictEqual(events.filter(e => e.action === 'reuse').length, 5);
+});
+test('posture epochs: a new Corp turn permits at most one reevaluation', () => {
+  postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([0, 0]);
+  ai._shouldBaitServer(remote);
+  ai._postureEpoch = 2;
+  runner.creditPool = 10; //public Runner pressure changed
+  ai._random = scripted([0, 0]);
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['runnerPressure']);
+  runner.creditPool = 20; //more boundaries in the same epoch: no second decision
+  ai._notePostureChallenge(remote);
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  assert.strictEqual(ai._postureEpochRecords.get(remote).epochId, 2);
+});
+test('posture epochs: a material threat change can abandon a bait', () => {
+  const events = postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([0, 0]);
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  ai._notePostureChallenge(remote); //the Runner ran the server
+  ai._postureEpoch = 2;
+  ai._random = scripted([0.99, 0]);
+  assert.strictEqual(ai._shouldBaitServer(remote), false);
+  const record = ai._postureEpochRecords.get(remote);
+  assert.deepStrictEqual([...record.reevaluationReasons], ['challenged']);
+  assert.strictEqual(record.previousScript, 'bait');
+  assert.strictEqual(record.selectedScript, 'neutral');
+  assert.strictEqual(events.filter(e => e.action === 'roll').pop().reason, 'challenged');
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), false, 'abandoned bait permits protection');
+});
+test('posture epochs: irrelevant state changes do not reroll', () => {
+  const events = postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([0, 0.9]); //horizon of three Corp turns
+  ai._shouldBaitServer(remote);
+  ai._postureEpoch = 2;
+  runner.grip.push({}, {}, {}); corp.HQ.cards = [{}, {}]; corp.creditPool = 3;
+  runner.creditPool = 4; //same credit band as 0
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['install']);
+  assert.strictEqual(events.filter(e => e.action === 'roll').length, 1);
+  assert.strictEqual(events.pop().action, 'reuse');
+});
+test('posture epochs: a posture is reevaluated once its commitment horizon expires', () => {
+  const events = postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([0, 0.9]); //bait, horizon 1 + 3 = 4
+  ai._shouldBaitServer(remote);
+  assert.strictEqual(ai._postureEpochRecords.get(remote).commitmentHorizon, 4);
+  for (const epoch of [2, 3]) {
+    ai._postureEpoch = epoch;
+    assert.strictEqual(ai._shouldBaitServer(remote), true);
+  }
+  ai._postureEpoch = 4;
+  ai._random = scripted([0.99, 0]);
+  assert.strictEqual(ai._shouldBaitServer(remote), false);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['horizonExpired']);
+  assert.strictEqual(events.filter(e => e.action === 'reuse' && e.expired).length, 0, 'never locked past horizon');
+});
+test('posture epochs: advancement and match point are agenda-bluff boundaries', () => {
+  postureEpochs();
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 1, canBeAdvanced: true, advancement: 0};
+  const remote = {ice: [etr()], root: [agenda]};
+  ai._random = scripted([0, 0.9]);
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), true);
+  agenda.advancement = 2;
+  ai._postureEpoch = 2;
+  ai._random = scripted([0, 0.9]);
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), true);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['stakes']);
+  corp.agendaPoints = 5; //match point, and scoring this 1-pointer still does not win
+  ai._postureEpoch = 3;
+  ai._random = scripted([0.99, 0]);
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['matchPoint']);
+});
+test('posture epochs: clearing the security cache does not start a new epoch', () => {
+  postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([0, 0, 0.5, 0.5, 0.5]); //bait, horizon, then the shape profile
+  ai._shouldBaitServer(remote);
+  ai._withSecurityCache(() => ai._shouldBaitServer(remote));
+  ai._securityCache = null;
+  ai._withSecurityCache(() => ai._NoMoreProtectionForThisServer(remote));
+  assert.strictEqual(ai._postureEpoch, 1);
+  const enabled = ai._securityCacheEnabled;
+  ai._securityCacheEnabled = true;
+  ai._prepareProtectionPrioritiesForCorpTurn(); //re-enters through the cache wrapper
+  ai._securityCacheEnabled = enabled;
+  assert.strictEqual(ai._postureEpoch, 2, 'a Corp turn start is one epoch');
+  assert.strictEqual(ai._shouldBaitServer(remote), true); //no reason holds: no randomness
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['install']);
+});
+test('posture epochs off: the lifetime caches behave as before', () => {
+  const remote = trapServer();
+  ai._random = scripted([0]); //one roll, no horizon roll
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  ai._postureEpoch = 5; ai._notePostureChallenge(remote); runner.creditPool = 30;
+  context.playerTurn = corp;
+  assert.strictEqual(ai._shouldBaitServer(remote), true);
+  assert.strictEqual(ai._serverBaitDecisions.get(remote).bait, true);
+  assert.strictEqual(ai._postureEpochRecords.get(remote), undefined);
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2, canBeAdvanced: true};
+  const bluffRemote = {ice: [etr()], root: [agenda]};
+  ai._random = scripted([0.99]);
+  assert.strictEqual(ai._shouldBluffAgendaServer(bluffRemote), false);
+  assert.strictEqual(ai._shouldBluffAgendaServer(bluffRemote), false);
+  ai._random = scripted([0.5, 0.5, 0.5]);
+  const profile = ai._remoteDeceptionProfile(agenda);
+  assert.strictEqual(ai._remoteDeceptionProfile(agenda), profile, 'profiles stay lifetime');
+});
+test('posture epochs on: profiles stay lifetime across epochs', () => {
+  postureEpochs();
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2, canBeAdvanced: true};
+  ai._random = scripted([0.5, 0.5, 0.5]);
+  const profile = ai._remoteDeceptionProfile(agenda);
+  ai._postureEpoch = 9;
+  assert.strictEqual(ai._remoteDeceptionProfile(agenda), profile);
+});
+test('posture epochs on: bait posture is disabled when breaching the same root could win the game', () => {
+  const events = postureEpochs();
+  const trap = card(30045);
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2};
+  const remote = {ice: [etr()], root: [trap, agenda]};
+  runner.agendaPoints = 5;
+  ai._random = () => {throw Error('unsafe bait posture rolled');};
+  assert.strictEqual(ai._shouldBaitServer(remote), false);
+  assert.deepStrictEqual(events.map(e => e.action), ['guard']);
+});
+test('posture epochs on: agenda bluff supports variable ice depth and never risks the winning steal', () => {
+  postureEpochs();
+  const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2, canBeAdvanced: true};
+  const remote = {ice: [etr()], root: [agenda]};
+  ai._random = scripted([0, 0, 0.6, 0.2, 0.8]); //active, horizon, then two ice, one advance, no delay
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), false);
+  remote.ice.push(etr());
+  assert.strictEqual(ai._NoMoreProtectionForThisServer(remote), true);
+  runner.agendaPoints = 5;
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
+  runner.agendaPoints = 0; corp.agendaPoints = 5;
+  assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
 });
 console.log(tests + ' regression cases passed.');

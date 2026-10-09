@@ -403,8 +403,30 @@ protection relief when the Runner is tagged and the Corp holds an affordable
 card declaring `AITagPunishment` (for example Retribution in `systemgateway.js`
 and Unleash in `vantagepoint.js`); it never changes deterministic security.
 
-**Current gaps:** postures are cached for the card's lifetime (L8.4) and public
-outcomes do not feed back into later postures (L8.5).
+**Bounded posture epochs (L8.4, option `postureEpochs`, default off pending
+its F4 gate).** With the option on, `_shouldBaitServer()` and
+`_shouldBluffAgendaServer()` run their winning-breach guards first, then call
+`_epochPosture()`, which keeps one record per server root card (epoch id,
+selected script `bait`/`bluff`/`neutral`, commitment horizon, reevaluation
+reasons). The epoch counter `_postureEpoch` advances once per Corp turn in
+`_prepareProtectionPrioritiesForCorpTurn()`. The roll happens at the first
+query after install; the commitment horizon is two or three Corp turns, drawn
+at roll time. `_postureReevaluationReasons()` compares the public boundary
+from `_postureBoundary()` (runs on the server counted by
+`_notePostureChallenge()` from `MakeRun()`, Runner credit band and breaker
+count, root advancement, match point) once, at the first posture query of a
+later Corp turn; with no reason the posture is reused, otherwise it is rerolled
+at the current probability and may stay the same. Within an epoch, on the
+Runner's turn and after F3 cache clears, the stored result is reused without
+calling `_random`. Grip size, HQ size and Corp credits are never reasons.
+`_remoteDeceptionProfile()` stays lifetime: it chooses a shape, not whether a
+card is postured. With the option off the lifetime caches are unchanged.
+`_postureTelemetryEvent()` feeds the F4 posture collectors through a
+harness-only sink and never affects a decision.
+
+**Current gaps:** with `postureEpochs` off (the default), postures are cached
+for the card's lifetime; public outcomes do not feed back into later postures
+(L8.5).
 
 ## Install planning today
 

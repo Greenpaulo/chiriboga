@@ -1936,11 +1936,16 @@ and the policy never deliberately creates a naked agenda or retains an unsafe
 agenda posture when a breach could win the game or when the Corp could score
 that agenda to win immediately.
 
-These profiles and their bait/bluff activation decisions are currently cached
-for the installed card's lifetime. This prevents accidental rerolling during
-repeated evaluator calls, but is intentionally documented as an incomplete
-policy. The roadmap's required Layer 8.4 replaces lifetime caching with bounded
-decision epochs, and Layer 8.5 adds match-local feedback from public outcomes.
+Profiles (the shape) are cached for the card's lifetime. The bait/bluff
+activation decision is too, unless the Corp AI option `postureEpochs` (L8.4,
+default off until its F4 gate passes) is on: then the decision is kept for a
+bounded epoch of two or three Corp turns and reconsidered, at most once per
+Corp turn, after a public boundary (the server was run, Runner credits or
+breakers changed, the root's advancement changed, or either side reached match
+point). Repeated evaluator calls never reroll. `AIPunishesAccess(server)` is
+unchanged: its signature and contract are the same with the option on or off,
+and posture epochs add no card-facing hook. Layer 8.5 adds match-local
+feedback from public outcomes.
 
 ### 5.11 Emergency Protection Draw — `AIEmergencyDraw`
 

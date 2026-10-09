@@ -1,12 +1,74 @@
 # L8.4 Bounded posture epochs
+**Outcome:** blocked — full F4 gate waits for the Grip-size agenda-bluff bug fix.
 
 **Roadmap item:** L8.4 · **Depends on:** F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 **Verified against code:** 3c25455 (2026-10-09)
 
+## Additional blocker
+The full gate must not run until [agenda-bluff-probability-tracks-runner-grip-size](../bugs/agenda-bluff-probability-tracks-runner-grip-size.md)
+is fixed (being fixed on its own branch): every epoch reevaluation re-draws the
+Grip-dependent bluff probability, so the baseline and candidate would carry
+that defect into `bluffSingleVariableCorrelation`.
+
+## Resolution
+
+Implemented from `23d6052` (plan commit; code base `3c25455`), following the
+approved plan.
+
+**Gate:** pending F4 — `postureEpochs` defaults to off. Waits for the Grip-size
+bug above; the ticket stays in `backlog/` until then.
+
+**Gate command:** `node scripts/ai-batch.js gate --corp-option postureEpochs=true --collector postureDecisionsPerEpoch --collector postureLockedPastHorizon --collector bluffSingleVariableCorrelation --ceiling bluffSingleVariableCorrelation.max=0.10 --guard winRate=0.02 --guard pointsStolen=0.2 --guard pointsScored=0.2 --max postureDecisionsPerEpoch.violations=0 --max postureLockedPastHorizon.count=0`
+
+- **AI (`ai_corp.js`):** option `postureEpochs` (default `false`) in
+  `CorpAI.DEFAULT_OPTIONS`. On: `_shouldBaitServer()` and
+  `_shouldBluffAgendaServer()` keep their safety guards first, then call
+  `_epochPosture()` (records `{epochId, selectedScript, commitmentHorizon,
+  reevaluationReasons, …}`), with boundaries from `_postureBoundary()` /
+  `_postureReevaluationReasons()`: `horizonExpired` (2 or 3 Corp turns, drawn
+  at roll time), `challenged`, `runnerPressure` (credit band of 5, breaker
+  count), `stakes` (root advancement), `matchPoint` (either side at
+  `AgendaPointsToWin() - 2`). Boundaries are checked once per Corp turn, at the
+  first posture query; Runner-turn queries reuse. `_postureEpoch` advances in
+  `_prepareProtectionPrioritiesForCorpTurn()` after the F3 cache wrapper.
+  Off: lifetime caches unchanged. `_remoteDeceptionProfile()` stays lifetime
+  (disagreement 3). Telemetry `_postureTelemetryEvent()` is a harness-only sink.
+- **Engine (`mechanics.js`):** `MakeRun()` calls
+  `corp.AI._notePostureChallenge(server)` (guarded). Deviation from the plan,
+  which named `phase.js`: run initiation lives in `MakeRun()`.
+- **Harness:** `posture` events (`scripts/ai-batch/headless.js`); collectors
+  `postureDecisionsPerEpoch`, `postureLockedPastHorizon`,
+  `bluffSingleVariableCorrelation`; batch-level metrics
+  (`samples`/`finishBatch`, `metricsLib.batchMetrics`, report `batchMetrics`)
+  and `--ceiling` (`scripts/ai-batch.js`).
+- **Tests:** scenarios 1–4 and 6–8, plus the two match-point regressions with
+  the option on, in `tests/corp-server-security.test.js` (deviation: added to
+  that file rather than a new one, to reuse its harness); scenario 5 and the
+  collector and `--ceiling` tests in `tests/ai-batch.test.js` (5c–5e).
+- **Docs:** `documentation/ai.md` §5.10 (no new card-facing hook),
+  [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence),
+  `documentation/corp-ai/principles.md` §3, `documentation/ai-batch-harness.md`
+  and `documentation/ai-planning.md` (ceiling rows).
+
+**Gate-ready smoke run (indicative only, `--quick --jobs 3`, 2026-10-09):**
+first line `350 paired games, 87 changed by the options [quick: indicative
+only, cannot pass a gate]`. Guards and both hard checks passed;
+`bluffSingleVariableCorrelation.max` was baseline 0.314 [0.197, 0.498],
+candidate 0.197 [0.165, 0.342], so the ceiling failed.
+
+**New finding: the 0.10 ceiling may be out of reach for L8.4.** In both arms the
+largest pair is `isAgenda` × the server's ICE count (baseline ρ 0.314 over 118
+postured decisions, candidate 0.197 over 243). Among postured servers, agendas
+sit behind more ICE than traps. That comes from install and protection policy
+(the profile depth and scoring-remote choice), not from epoch timing. The
+Grip-size bug fix will not remove it. If the full gate fails only on this row,
+the correlation belongs to L8.2 (legibility) or I3 (remote roles) rather than to
+L8.4. The threshold was set before any result and has not been changed here.
+
 ## Implementation plan
 
-Proposed at `3c25455`, 2026-10-09. **Awaiting approval.**
+Proposed at `3c25455`, 2026-10-09. **Approved.** 
 
 - **Validation:** Current behaviour re-grounded at `3c25455`: confirmed
   unchanged. The three `WeakMap`s are created in the `CorpAI` constructor and
@@ -190,13 +252,13 @@ Gate command: `node scripts/ai-batch.js gate --corp-option postureEpochs=true
 - The shipped agenda-bluff probability already fails this rule for Grip size: [`documentation/bugs/agenda-bluff-probability-tracks-runner-grip-size.md`](../bugs/agenda-bluff-probability-tracks-runner-grip-size.md). Fix it before measuring the baseline, or the baseline carries the defect.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [x] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
-- [ ] Collector `postureDecisionsPerEpoch` is built and tested.
-- [ ] Collector `postureLockedPastHorizon` is built and tested.
-- [ ] Collector `bluffSingleVariableCorrelation` (unless L8.5 or L8.2 already added it) is built and tested, with the batch-level metric and `--ceiling` gate check it needs.
-- [ ] The gate setup is ready: a `--quick` run of the gate command reports at least one game changed by the option.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] Collector `postureDecisionsPerEpoch` is built and tested.
+- [x] Collector `postureLockedPastHorizon` is built and tested.
+- [x] Collector `bluffSingleVariableCorrelation` (unless L8.5 or L8.2 already added it) is built and tested, with the batch-level metric and `--ceiling` gate check it needs.
+- [x] The gate setup is ready: a `--quick` run of the gate command reports at least one game changed by the option.
+- [x] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [x] `node tests/run-all-tests.js` passes (72 of 74 files in this worktree; `flipped-identity` and `vantagepoint-integration` need local card art the worktree lacks).

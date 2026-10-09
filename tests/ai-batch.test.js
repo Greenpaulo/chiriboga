@@ -405,6 +405,75 @@ const EXTRA_DRAW = side => `
     assert.strictEqual(ok.pass, true);
   });
 
+  await scenario('5c. batch metrics bootstrap over games; --ceiling checks the candidate upper bound', async () => {
+    const collector = {name: 'demo', samples: g => g.values, finishBatch: perGame => ({mean: [].concat(...perGame).reduce((a, b) => a + b, 0) /
+      Math.max(1, [].concat(...perGame).length)}), batchResamples: 100};
+    const games = Array.from({length: 30}, (_, i) => ({ok: true, samples: {demo: [i % 3 === 0 ? 1 : 0, 0]}}));
+    const out = metrics.batchMetrics([collector], games);
+    assert.strictEqual(out['demo.mean'].games, 30);
+    assert.ok(out['demo.mean'].low <= out['demo.mean'].value && out['demo.mean'].value <= out['demo.mean'].high);
+    assert.deepStrictEqual(metrics.batchMetrics([collector], games), out, 'seeded and reproducible');
+    const report = value => ({poolHash: 'p', seeds: [], starts: [], collectors: [], games: [],
+      batchMetrics: {'demo.mean': {value, low: value - 0.05, high: value + 0.05, games: 30}}});
+    const spec = batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=0.10']));
+    const fail = batch.applyCeilingChecks({checks: []}, report(0), report(0.2), spec.ceiling);
+    assert.strictEqual(fail.pass, false);
+    assert.ok(/upper bound 0.25/.test(fail.checks[0].why), fail.checks[0].why);
+    assert.strictEqual(batch.applyCeilingChecks({checks: []}, report(0.2), report(0.04), spec.ceiling).pass, true);
+    const missing = batch.applyCeilingChecks({checks: []}, report(0), {games: []}, spec.ceiling);
+    assert.strictEqual(missing.checks[0].why, 'unknown batch metric');
+  });
+
+  await scenario('5d. posture collectors: violations, horizon locks and single-variable correlation', async () => {
+    const perEpoch = require('../scripts/ai-batch/collectors/postureDecisionsPerEpoch');
+    const locked = require('../scripts/ai-batch/collectors/postureLockedPastHorizon');
+    const corr = require('../scripts/ai-batch/collectors/bluffSingleVariableCorrelation');
+    const vars = (grip, turn) => ({turn, corpCredits: 5, runnerCredits: 5, gripSize: grip, hqSize: 5, rootCount: 1,
+      iceCount: 1, deepestCentralIce: 1, corpPoints: 0, runnerPoints: 0});
+    const events = [
+      {type: 'posture', kind: 'bait', action: 'roll', cardId: 1, epoch: 2, postured: 1, isAgenda: 0, publicVars: vars(1, 2)},
+      {type: 'posture', kind: 'bait', action: 'roll', cardId: 1, epoch: 2, postured: 0, isAgenda: 0, publicVars: vars(2, 2)},
+      {type: 'posture', kind: 'bluff', action: 'roll', cardId: 2, epoch: 2, postured: 1, isAgenda: 1, publicVars: vars(3, 2)},
+      {type: 'posture', kind: 'bait', action: 'reuse', cardId: 1, epoch: 3, corpTurn: 1, expired: 1, publicVars: vars(4, 3)},
+      {type: 'posture', kind: 'bait', action: 'reuse', cardId: 1, epoch: 3, corpTurn: 0, expired: 0, publicVars: vars(4, 3)},
+      {type: 'posture', kind: 'bluff', action: 'guard', cardId: 2, epoch: 3, publicVars: vars(9, 3)},
+      {type: 'posture', kind: 'profile', action: 'profile', profile: {targetIce: 2, openingAdvances: 1, delayTurns: 0}, publicVars: vars(5, 1)},
+    ];
+    const state = {};
+    for (const e of events) [perEpoch, locked, corr].forEach(c => c.onEvent(e, state));
+    assert.deepStrictEqual(perEpoch.finish(state), {violations: 1, rolls: 3});
+    assert.deepStrictEqual(locked.finish(state), {count: 1});
+    assert.deepStrictEqual(corr.finish(state), {decisions: 4}, 'guard stops and reuses are excluded');
+    assert.strictEqual(corr.spearman([1, 2, 3, 4], [10, 20, 30, 40]), 1);
+    assert.strictEqual(corr.spearman([1, 2, 3, 4], [4, 3, 2, 1]), -1);
+    assert.strictEqual(corr.spearman([1, 1, 1, 1], [1, 2, 3, 4]), null, 'a constant column has no correlation');
+    // Posture tracking Grip size exactly is a perfect single-variable tell.
+    const tell = Array.from({length: 40}, (_, i) => ({k: 'p', postured: i < 20 ? 1 : 0, isAgenda: 0,
+      v: corr.VARIABLES.map(name => name === 'gripSize' ? i : 3)}));
+    assert.ok(corr.finishBatch([tell]).max > 0.8);
+    const fair = Array.from({length: 40}, (_, i) => ({k: 'p', postured: i % 2, isAgenda: 0,
+      v: corr.VARIABLES.map(name => name === 'gripSize' ? Math.floor(i / 2) : 3)}));
+    assert.ok(corr.finishBatch([fair]).max < 0.1, String(corr.finishBatch([fair]).max));
+  });
+
+  await scenario('5e. posture epochs: seeded games reproduce the same epoch sequence', async () => {
+    const play = async () => {
+      const seen = [];
+      const g = await game({corpOptions: {postureEpochs: true}, onEvent: e => { if (e.type === 'posture') seen.push(e); }});
+      return {g, seen};
+    };
+    const a = await play(), b = await play();
+    assert.ok(a.seen.length > 0, 'the game reaches posture or profile decisions');
+    assert.deepStrictEqual(a.seen, b.seen);
+    assert.strictEqual(a.g.logHash, b.g.logHash);
+    const perEpoch = require('../scripts/ai-batch/collectors/postureDecisionsPerEpoch');
+    const locked = require('../scripts/ai-batch/collectors/postureLockedPastHorizon');
+    const state = {};
+    for (const e of a.seen) { perEpoch.onEvent(e, state); locked.onEvent(e, state); }
+    assert.strictEqual(perEpoch.finish(state).violations, 0);
+    assert.strictEqual(locked.finish(state).count, 0);
+  });
+
   await scenario('6. a collector receives the events and its metric reaches the report and comparison', async () => {
     const seen = new Set();
     const g = await game({onEvent: e => seen.add(e.type)});
