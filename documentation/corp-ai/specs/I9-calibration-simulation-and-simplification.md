@@ -20,9 +20,9 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
 ## Design
 Metrics, all from F4's core set or collectors earlier items added:
 `pointsScored`, `pointsStolen` and `pointsStolenByServer`,
-`installToScoreTurns`, `agendaExposureTurns`, `assetNetCredits`,
-`trapTriggers`, `strandedUnrezzedIceCost`, `corpInsolventTurns`,
-`installOutcomes` (abandoned plans), `decisionLatencyMs`, and
+`installOutcomes.installToScoreTurns`, `.agendaExposureTurns`, `.assetNetCredits`,
+`.trapTriggers`, `strandedUnrezzedIceCost`, `corpInsolventTurns`,
+`installOutcomes.abandoned` (abandoned plans), `decisionLatencyMs`, and
 `bluffSingleVariableCorrelation` (defined in the L8.4 ticket and added by
 whichever of L8.2, L8.4 or L8.5 lands first; I9 extends it).
 
@@ -67,7 +67,7 @@ coefficients:
   (`winRate`, `pointsScored`, `pointsStolen`, `gameLength`,
   `decisionLatencyMs`, `corpInsolventTurns`).
 - **Improvement:** at least one of `pointsStolen` (falls), `pointsScored`
-  (rises) or `assetNetCredits` (rises) has an interval excluding zero in the
+  (rises) or `installOutcomes.assetNetCredits` (rises) has an interval excluding zero in the
   improving direction.
 - **Deception confidence threshold:** over at least 2,000 bait/bluff decisions,
   for every observable variable that is not a documented bounded input of the

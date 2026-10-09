@@ -71,7 +71,7 @@ baseline (with I2 to I7.2 options on in both arms), with the standard guards
 (design note) and:
 
 - Improvement: root commitments that I0's `installOutcomes` collector records
-  as `abandoned` fall per game (candidate minus baseline upper bound below 0).
+  as abandoned (`installOutcomes.abandoned`) fall per game (candidate minus baseline upper bound below 0).
 - Guards: `decisionLatencyMs` mean upper bound at most +50% of the baseline
   mean (planning is allowed more than the standard +25%), and the worst single
   decision at most 500 ms; `stallTurns` upper bound at most +0.5 turns per

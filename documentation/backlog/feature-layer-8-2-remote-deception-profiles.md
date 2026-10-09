@@ -66,7 +66,7 @@ F4 comparison (paired seeds, committed deck pool, 200 games per deck pair, boots
 - Overlap: `postureShapeByCardClass` total-variation distance between agenda and trap shapes (target depth, opening advancement, delay) at most 0.05.
 - Guard: `pointsStolen` per game: CI upper bound of (candidate − baseline) at most +0.2.
 - Guard: `winRate`: CI lower bound of (candidate − baseline) at least −0.02.
-- Guard: `trapTriggers` per game: CI lower bound of (candidate − baseline) at least −0.05.
+- Guard: `installOutcomes.trapTriggers` per game: CI lower bound of (candidate − baseline) at least −0.05.
 
 ## Things to consider
 - The earlier ticket asked for deception postures to suppress or exempt value-weighted protection debt. L3.5.1 now handles this by relying on the existing `_NoMoreProtectionForThisServer()` exclusion; the top-up rule above changes when that exclusion ends, so check L3.5.1's scenario 7 still holds.
@@ -76,7 +76,7 @@ F4 comparison (paired seeds, committed deck pool, 200 games per deck pair, boots
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
-- [ ] The F4 collectors `postureShapeByCardClass` and, unless L8.4 or L8.5 already added it, `bluffSingleVariableCorrelation` (defined in the L8.4 ticket) are added through F4's collector extension point; `trapTriggers` is added if F4 does not already have it.
+- [ ] The F4 collectors `postureShapeByCardClass` and, unless L8.4 or L8.5 already added it, `bluffSingleVariableCorrelation` (defined in the L8.4 ticket) are added through F4's collector extension point; `installOutcomes.trapTriggers` is added if F4 does not already have it.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

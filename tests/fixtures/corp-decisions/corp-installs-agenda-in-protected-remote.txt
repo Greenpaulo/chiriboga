@@ -1,0 +1,14 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, n
+// EXPECT: install
+// EXPECT_CARD: Hostile Takeover
+// EXPECT_SERVER: Remote 0
+// SETUP: corp.creditPool=8; corp.clickTracker=3; runner.creditPool=5
+// NOTE: I0 representative install fixture (agenda / scoring remote). Every central and the empty remote carry rezzed ICE, the Runner has no breakers, and HQ holds an agenda: the Corp should commit the agenda to the protected empty remote.
+RunnerTestField(30019, [], [30030,30030,30011,30020,30006,30005,30026,31033,30018,30027], [30030,30020,30011], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30059, [], [30075,30064,31077,30072,30070,30067,30075,31081,30062,30068], [31071,30075,30075], [31077], [31077], [30072], [[30072,31081]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.RnD.ice[0].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].ice[1].rezzed=true;

@@ -6,7 +6,7 @@
 
 ## Implementation plan
 
-Proposed at `3c25455`, 2026-10-09. **Awaiting approval.**
+Proposed at `3c25455`, 2026-10-09. **Approved 2026-10-09.** (Paul, relayed by the coordinator; the snapshot comparison stays out of the green suite.)
 
 - **Validation:** Re-grounded at 3c25455 (see the dated notes in Current
   behaviour and Design). The ticket holds up with four corrections: (1) servers
