@@ -180,7 +180,7 @@ I9 comes last.
 ### I0 Baseline capture and decision telemetry
 - **Status:** in-progress
 - **Depends on:** F4
-- **Ticket:** [I0-baseline-capture-and-telemetry.md](../backlog/I0-baseline-capture-and-telemetry.md)
+- **Ticket:** [I0-baseline-capture-and-telemetry.md](../backlog/code-review/I0-baseline-capture-and-telemetry.md)
 - **Goal:** Record current install choices and outcomes before changing any policy.
 
 ### I1 Unified install candidate model

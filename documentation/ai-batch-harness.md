@@ -591,7 +591,7 @@ the means, so read them with the counts beside them.
 
 The corrected install-series baseline, with all five 2026-10-05 recovery
 options off (they are recorded in the report's `options`), is
-`BASELINE_PATH`. It was produced with
+[`tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json`](../tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json) (commit 1f64f5d, clean tree, 7 pairs x 200 seeds, no failed games). It was produced with
 
 ```sh
 node scripts/ai-batch.js --collector corpInsolventTurns --collector installOutcomes --collector stallTurns \

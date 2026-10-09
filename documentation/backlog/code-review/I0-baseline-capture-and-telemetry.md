@@ -1,8 +1,109 @@
 # I0 Baseline capture and telemetry
 
+**Outcome:** adopted
+
 **Roadmap item:** I0 · **Depends on:** F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 3c25455 (2026-10-09)
+
+## Resolution
+
+Implemented from `3c25455`. Ungated, observation-only (see Acceptance gate);
+no Corp choice changed.
+
+**What changed**
+- `utility.js` `DecisionSnapshots`: per-decision notes frame
+  (`BeginNotes()`/`EndNotes()`/`Recording()`/`Note()`); `Record()` copies the
+  notes onto the streamed telemetry entry, `After()` onto the snapshot entry,
+  and `Text()` prints them as `// INSTALL:` comment lines.
+- `ai_corp.js`: `CorpAI.Choice()` opens the frame when a snapshot entry exists
+  or telemetry is on and restores the outer frame in `finally`.
+  `_shouldInstallIceLayer()` now delegates to `_iceLayerPolicy()`
+  (`{allowed, reason}`, identical logic). `_serverToProtect()` accepts either
+  form from its filter and, while tracing, records each ranked server's score,
+  debt, security summary, layer-policy reason and skip reason.
+  `_rankedInstallOptions()` is a recording wrapper around the unchanged
+  `_rankedInstallOptionsCore()`; `_bestInstallOption()` notes its choice and
+  the preferences with no legal option. Recording reuses already-computed
+  security results, makes no `_evaluateServerSecurity()`, card-hook or
+  `_random` call, mutates no option object, and is skipped inside
+  hypothetical probes.
+- `scripts/ai-batch/headless.js` (observe mode only): `createRootTracker()`
+  emits `install`/`leave` for Corp root cards installed during play;
+  wrappers on `Trash`, `TriggerAbility`, `GainCredits` and `TakeCredits` emit
+  `cardUsed`/`cardCredits` (never during a probe); new `turnStart` event with
+  Corp-known state; `rez` carries the card id; `gameEnd` carries Corp credits.
+- Collectors `installOutcomes`, `successfulRunsByServer`,
+  `corpInsolventTurns` (defined here: 0 credits, or fewer than the cheapest
+  printed rez cost among installed unrezzed ICE), `stallTurns` (R1.1's
+  definition, approximated as documented) and `unusedCreditsAtEnd`; metric
+  paths, definitions and directions in
+  [ai-batch-harness.md](../../ai-batch-harness.md#install-series-collectors-and-baselines-i0).
+- Consuming specs now use the real paths: `stallTurns` and
+  `corpInsolventTurns` (not `.mean`) in I2/I4/I7.2, and
+  `installOutcomes.<metric>` in I5, I8, I9 and L8.2.
+- Docs: [architecture: install planning today](../../corp-ai/architecture.md#install-planning-today)
+  and Foundations; the harness guide; the install design note's baseline
+  paths. No card hook changed, so `documentation/ai.md` is unchanged.
+
+**Departures from the ticket**
+- Scenario 2's example no longer shows a skip: at 3c25455 Archives already
+  ranks first in `corp-protects-baker-backdoor-after-rnd-layer-blocked.txt`
+  (its recorded walk is `Archives` selected, nothing skipped), and boards
+  derived from it also rank Archives first. The skip-reason scenario is
+  therefore covered by a deterministic unit board in
+  `tests/corp-install-decisions.test.js` (empty Archives `valueless`, R&D
+  `layerPolicy:existingUnrezzedIceAndPoor`, secure HQ `secure`, remote
+  selected), and the fixture runner gained an `EXPECT_SKIPPED` directive for
+  future board fixtures.
+- Scenario 4 drives `createRootTracker()` and the collectors through a
+  scripted sequence on engine-shaped board objects rather than a full
+  headless game; real-game behaviour is exercised by the baseline batch.
+- Representative fixtures: two new green install fixtures
+  (`corp-installs-agenda-in-protected-remote.txt`,
+  `corp-installs-ice-on-naked-hq-with-agendas.txt`) whose current choices are
+  defensible, plus the existing install fixtures. The full design-note matrix
+  is not covered; later I items add fixtures for the cases they change.
+- The install snapshot comparison is deliberately outside the green suite
+  (approved with the plan).
+
+**Tests**
+- `tests/corp-decision-fixtures.test.js`: every green fixture also replays
+  with recording on; choice, logged reasons and `_random` call count must
+  match the three cache modes (scenario 1).
+- `tests/corp-install-decisions.test.js` (scenario 2 and recorder unit tests).
+- `tests/decision-snapshots.test.js`: notes frames, telemetry notes, and a
+  snapshot with an install block extracted into a fixture that the fixture
+  runner replays to the same choice and server (scenario 3).
+- `tests/ai-batch-install-outcomes.test.js` (scenario 4 and the other
+  collectors).
+
+**Baselines and evidence**
+- F4 baseline report:
+  [`tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json`](../../../tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json)
+  (commit 1f64f5d, `dirty: false`, pool `core-v1`, 7 pairs x seeds 1-200,
+  1,400 games, 0 failed; all five recovery options recorded `false`).
+  Command: `node scripts/ai-batch.js --jobs 3 --collector corpInsolventTurns
+  --collector installOutcomes --collector stallTurns --collector
+  successfulRunsByServer --collector unusedCreditsAtEnd --out <file>`.
+  Pooled: `winRate` 0.370, `pointsScored` 3.924, `pointsStolen` 5.871,
+  `gameLength` 15.28, `decisionLatencyMs.corp.mean` 4.58,
+  `installOutcomes.installToScoreTurns` 1.128, `.agendaExposureTurns` 1.442,
+  `.assetNetCredits` 4.583, `.trapTriggers` 0.284, `.abandoned` 0.223,
+  `stallTurns` 1.766, `corpInsolventTurns` 1.413, `unusedCreditsAtEnd` 9.478.
+- Install snapshots:
+  [`tests/fixtures/corp-install-baseline.json`](../../../tests/fixtures/corp-install-baseline.json)
+  (13 install fixtures; `node tests/corp-decision-fixtures.test.js --install-snapshots`
+  reports 0 of 13 changed).
+- Reproducibility: a second full run of the same seeds (at 0a9d0c1, before the
+  trigger-use fix changed only `headless.js`) matched all 1,400 games'
+  `winner`, `turns`, `logHash` and `decisionHash` exactly.
+- Instrumentation identity: 60 paired games (pd-tao, gateway, leo-topan,
+  seeds 1-20) played on the uninstrumented 3c25455 build match both
+  instrumented runs on all four fields (0 of 60 differ).
+- A first full run showed `trapTriggers` 0: access triggers resolve through a
+  `DecisionPhase` callback, not `TriggerAbility()`. Fixed in 1f64f5d before the
+  committed run.
 
 ## Implementation plan
 
@@ -162,12 +263,12 @@ Nothing records the candidates considered, the servers skipped and why, or the
 fate of a root commitment. No collector named below exists yet; R1.1 (which
 would also add `stallTurns` and `unusedCreditsAtEnd`) is still `proposed`, and
 no document defines `corpInsolventTurns`.
-See [architecture.md: install planning today](../corp-ai/architecture.md#install-planning-today).
+See [architecture.md: install planning today](../../corp-ai/architecture.md#install-planning-today).
 
 ## Design
 No new telemetry system. Extend the existing pieces:
 
-Capture the [corrected regression default](../corp-ai/specs/install-decisions-design.md#corrected-regression-baseline-and-ownership),
+Capture the [corrected regression default](../../corp-ai/specs/install-decisions-design.md#corrected-regression-baseline-and-ownership),
 with all five legacy regression gates off, and record their effective settings
 alongside the build/pool hashes. The old unconditional policies are not the
 baseline for future I-layer work. Observation-only additions must preserve
@@ -188,8 +289,8 @@ their prerequisite options identical, back-filling collectors as required.
   after `_choiceInner()` returns) is the single decision-log path, so `Note()`
   buffers its data while telemetry is on and `Record()` adds it to the entry it
   streams. There is no second logger. See
-  [architecture: Foundations](../corp-ai/architecture.md#foundations) and
-  [ai-batch-harness.md](../ai-batch-harness.md).
+  [architecture: Foundations](../../corp-ai/architecture.md#foundations) and
+  [ai-batch-harness.md](../../ai-batch-harness.md).
 - **Skipped servers.** Record each server ranked above the chosen protection
   target by `_rankedServersToProtect()` and the exact reason `_serverToProtect()`
   passed over it, in the current code's terms: valueless, secure, already
@@ -258,10 +359,10 @@ deliverables, the committed baseline report and snapshots, are acceptance
 criteria below.)*
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] The F4 baseline report and baseline snapshots are committed, and their paths are recorded in the Resolution and in the design note. The report covers F4's core metrics (`winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer`, `gameLength`, `decisionLatencyMs`, `mulliganRate`) plus every collector listed under Design, with all five recovery options recorded as `false`.
-- [ ] Re-running F4 with the same seeds reproduces the committed report's per-game outcomes (`logHash`, `decisionHash`) exactly, and the instrumented build matches the uninstrumented build on a paired sample.
-- [ ] Each collector (`installOutcomes`, `successfulRunsByServer`, `corpInsolventTurns`, `stallTurns`, `unusedCreditsAtEnd`) is built and tested, and its exported metric paths and directions are documented in `documentation/ai-batch-harness.md` and used consistently by the consuming specs.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [x] The F4 baseline report and baseline snapshots are committed, and their paths are recorded in the Resolution and in the design note. The report covers F4's core metrics (`winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer`, `gameLength`, `decisionLatencyMs`, `mulliganRate`) plus every collector listed under Design, with all five recovery options recorded as `false`.
+- [x] Re-running F4 with the same seeds reproduces the committed report's per-game outcomes (`logHash`, `decisionHash`) exactly, and the instrumented build matches the uninstrumented build on a paired sample.
+- [x] Each collector (`installOutcomes`, `successfulRunsByServer`, `corpInsolventTurns`, `stallTurns`, `unusedCreditsAtEnd`) is built and tested, and its exported metric paths and directions are documented in `documentation/ai-batch-harness.md` and used consistently by the consuming specs.
+- [x] New or changed card-facing hooks are documented in `documentation/ai.md`. (None changed.)
+- [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [x] `node tests/run-all-tests.js` passes.
