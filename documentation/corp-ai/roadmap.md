@@ -61,10 +61,11 @@ cannot price yet.
 - **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
 
 ### L7.1.1 Horizon-aware central consequence
-- **Status:** proposed
+- **Status:** parked
 - **Depends on:** F4, L7.1
 - **Spec:** [L7.1.1-horizon-aware-central-consequence.md](specs/L7.1.1-horizon-aware-central-consequence.md)
 - **Goal:** Find out why L7.1's consequence-weighted central penalty failed its gate (more central steals), then test a horizon-aware exposure behind a default-off option.
+- **Parked because:** its first step is done and refuted the premise. L7.1 failed because HQ's protection score is also the bar for remote scoring, not because of the horizon (see the spec's Failure analysis). I2 carries the lesson; revive only as a new item about remote-scoring eligibility, with fresh evidence.
 
 ### L8.2 Deception legibility signals
 - **Status:** ready

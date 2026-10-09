@@ -59,11 +59,19 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
    `futureValue`, `installCost` and `reserveCost` components. Rez affordability
    uses the evaluator's shared unrezzed-ICE budget (L1.1); ICE outside that
    budget earns no `lockout` or `breakCost`.
-4. **Consequence comes from the evaluator.** `consequenceWeight` is
+4. **Consequence comes from the evaluator and stays inside I2's ranking.**
+   For remotes and Archives, `consequenceWeight` is
    `0.25 + 0.75 × _breachConsequence(server).weight`, the breach-consequence
-   signal L7.1 (consequence-calibrated central pressure) owns and L3.5.1 also
-   consumes. I2 reads it as is, adds no weights, and install planning must
-   not invent its own.
+   signal L7.1 owns and L3.5.1 also consumes; I2 reads it as is and install
+   planning must not invent its own. For HQ and R&D it is 1 (unweighted);
+   weighting the centrals needs its own gated option. The weight multiplies
+   only I2's candidate score: it must never feed `_protectionScore()` or any
+   value another decision compares against. *(2026-10-09, from L7.1's failure
+   analysis in `specs/L7.1.1-horizon-aware-central-consequence.md`: weighting
+   HQ's protection score moved the remote-scoring bar in `_isAScoringServer()`
+   and `_scoringWindow()` and caused the whole regression, `centralStolen.points`
+   +0.048 [+0.011, +0.085]; weighting only the ICE-target ranking was neutral,
+   +0.007 [−0.021, +0.036], and gave no improvement on the centrals.)*
 5. **Generalise the critical-breach check, do not duplicate it.**
    `_criticalBreachDefenseAction()` reads `lossRiskAfter` from I2's candidate
    evaluation (computed through the shared helper) instead of its own

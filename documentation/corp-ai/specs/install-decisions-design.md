@@ -308,7 +308,7 @@ legacy relative order.
 | `lockout` | 0, 0.7 or 1 | 1 if the server goes from not secure to a hard lockout, 0.7 to a soft credit lockout, per `_evaluateServerSecurity()` after the L1.1 rez budget |
 | `breakCost` | 0 to 1 | increase in `totalMandatoryBreakCost` divided by `max(1, runnerCredits)`, capped at 1 |
 | `bypass` | 0 to 1 | decrease in `structuralRisk + publicThreatRisk`, capped at 1 |
-| `consequenceWeight` | 0.25 to 1 | `0.25 + 0.75 × breachConsequence`, where `breachConsequence` (0 to 1) is `_breachConsequence(server).weight`, the evaluator signal L7.1 owns (L3.5.1 also consumes it); install planning adds no weighting of its own |
+| `consequenceWeight` | 0.25 to 1 | Remotes and Archives: `0.25 + 0.75 × breachConsequence`, where `breachConsequence` (0 to 1) is `_breachConsequence(server).weight`, the evaluator signal L7.1 owns (L3.5.1 also consumes it). HQ and R&D: 1 unless a separately gated option weights them. Used only inside candidate scores, never in `_protectionScore()` (L7.1's failure analysis); install planning adds no weighting of its own |
 | `futureValue` | 0 to 1 | delayed or bluff value of ICE that cannot be rezzed in the projected budget (it earns no `lockout` or `breakCost`) |
 | `scoringValue` | 0 to 8 | I4: `2 × agendaPoints × planCompletion`, where `planCompletion` is 1 when the completion plan finishes with no exposed Runner turn, 0.5 with one, and 0 otherwise |
 | `economyValue` | -4 to 8 | I5: expected return over expected lifetime minus install, rez and activation costs (clicks at `CLICK_VALUE`) |
