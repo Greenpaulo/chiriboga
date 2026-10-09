@@ -126,7 +126,8 @@ function createRootTracker(emit) {
 
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
-//   testOption (a no-op Corp option name, for the harness's own tests)}
+//   testOption (a no-op Corp option name, for the harness's own tests),
+//   securitySnapshot (L9.0: emit 'securitySnapshot' once per Runner turn)}
 // Resolves to a summary: {winner, reason, turns, ms, steps, corpPoints,
 //   runnerPoints, logLines, logHash, errors, tail, log (with fullLog), report}.
 function playGame(options) {
@@ -191,6 +192,7 @@ function playGame(options) {
   let result = null, turns = 0, lastTurn = null;
   // Observed state, compared at every main-loop step and at the win.
   const seen = {corpScored: 0, runnerScored: 0, stolenLocations: 0, run: null};
+  const emitRun = () => emit('run', {server: seen.run.server, serverName: seen.run.serverName, success: seen.run.success});
   const serverKey = server => {
     if (!server) return 'remote';
     return SERVER_KEYS[server.serverName] || 'remote';
@@ -210,7 +212,7 @@ function playGame(options) {
     }
     // The engine clears attackedServer when a run ends.
     if (seen.run && !run('attackedServer')) {
-      emit('run', {server: seen.run.server, success: seen.run.success});
+      emitRun();
       seen.run = null;
     }
     if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), false);
@@ -224,7 +226,7 @@ function playGame(options) {
     if (result) return;
     observe();
     result = {winner: player === context.corp ? 'corp' : 'runner', reason};
-    if (seen.run) { emit('run', {server: seen.run.server, success: seen.run.success}); seen.run = null; }
+    if (seen.run) { emitRun(); seen.run = null; }
     if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), true);
     emit('gameEnd', {winner: result.winner, reason, turns: Math.ceil(turns / 2), corpCredits: run('corp.creditPool')});
     setImmediate(done);
@@ -234,6 +236,18 @@ function playGame(options) {
     if (fullLog) fullLog.push(line);
     logTail.push(line); if (logTail.length > 200) logTail.shift();
   };
+  // L9.0: today's and the honest security verdict of every server with stakes,
+  // read through the uncached evaluator so no cache or telemetry counter moves.
+  const securitySnapshot = () => JSON.parse(JSON.stringify(run(`[corp.HQ, corp.RnD, corp.archives]
+    .concat(corp.remoteServers).filter(function (s) {
+      return s.cards ? s != corp.archives || s.cards.length > 0 : s.root.length > 0;
+    }).map(function (s) {
+      var r = corp.AI._evaluateServerSecurityUncached(s);
+      return {serverName: s.serverName, agenda: !s.cards && s.root.some(function (c) { return c.cardType == "agenda"; }),
+        isSecure: r.isSecure, hasHardLockout: r.hasHardLockout, honestIsSecure: r.honestIsSecure,
+        honestLockout: r.honestLockout, noBreakerLockout: r.noBreakerLockout};
+    })`)));
+  let snapshotPending = false;
   context.__stop = () => {
     if (result) return true;
     observe();
@@ -243,12 +257,18 @@ function playGame(options) {
       lastTurn = side; turns++;
       if (options.observe) emit('turnStart', side === 'corp' ? {side, turn: Math.ceil(turns / 2), corp: corpTurnState()} :
         {side, turn: Math.ceil(turns / 2)});
+      snapshotPending = Boolean(options.securitySnapshot) && side === 'runner';
+    }
+    // The Runner's clicks are granted after its turn begins.
+    if (snapshotPending && !seen.run && run('runner.clickTracker') > 0) {
+      snapshotPending = false;
+      emit('securitySnapshot', {turn: Math.ceil(turns / 2), servers: securitySnapshot()});
     }
     return false;
   };
   context.__runBegins = server => {
-    if (seen.run) emit('run', {server: seen.run.server, success: seen.run.success});
-    seen.run = {server: serverKey(server), success: false};
+    if (seen.run) emitRun();
+    seen.run = {server: serverKey(server), serverName: server ? server.serverName : null, success: false};
   };
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
