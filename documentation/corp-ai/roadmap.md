@@ -184,9 +184,9 @@ I9 comes last.
 - **Goal:** Record current install choices and outcomes before changing any policy.
 
 ### I1 Unified install candidate model
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** I0
-- **Spec:** [I1-unified-install-candidate-model.md](specs/I1-unified-install-candidate-model.md)
+- **Ticket:** [I1-unified-install-candidate-model.md](../backlog/code-review/I1-unified-install-candidate-model.md)
 - **Goal:** Replace concatenation priority with explicit, scored candidate records, initially preserving behaviour.
 
 ### I2 ICE selection by marginal security

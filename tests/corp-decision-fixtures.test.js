@@ -13,7 +13,8 @@
 //         node tests/corp-decision-fixtures.test.js --ids     list card ids to help write fixtures
 //         node tests/corp-decision-fixtures.test.js --install-snapshots [--write]
 //                                                    compare (or rewrite) the I0 install-decision baseline,
-//                                                    tests/fixtures/corp-install-baseline.json; not part of the suite
+//                                                    tests/fixtures/corp-install-baseline.json, and the I1 candidate
+//                                                    records, tests/fixtures/corp-install-candidates.json; not part of the suite
 //         node tests/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
 //                                                    (returns false; results are NOT trustworthy until real stubs are written)
 //
@@ -172,7 +173,9 @@ vm.runInContext(utilitySource.slice(utilitySource.indexOf('// BEGIN DecisionSnap
 const recorder = vm.runInContext('DecisionSnapshots', context);
 const installSnapshots = process.argv.includes('--install-snapshots');
 const snapshotFile = path.join(__dirname, 'fixtures', 'corp-install-baseline.json');
+const candidatesFile = path.join(__dirname, 'fixtures', 'corp-install-candidates.json');
 const snapshots = {};
+const candidateSnapshots = {};
 
 if (process.argv.includes('--ids')) {
   const show = (label, pred) => console.log(label + ': ' + Object.entries(context.cardSet)
@@ -282,8 +285,10 @@ files.forEach(file => {
           skippedOK = (skipped[server] || []).includes(reason);
           if (!skippedOK) skippedNote = ', skipped ' + JSON.stringify(skipped) + ', expected ' + expectedSkip;
         }
-        if (installSnapshots && options.includes('install'))
+        if (installSnapshots && options.includes('install')) {
           snapshots[file] = {chosen, server: chosenServer || null, card: chosenCard || null, install: notes.install || []};
+          candidateSnapshots[file] = notes.installCandidates || [];
+        }
       }
       const ok = commandOK && serverOK && cardOK && skippedOK;
       const replayPath = identifier ? 'Choice ' + identifier : phase;
@@ -322,6 +327,20 @@ if (installSnapshots) {
       (saved[name] && snapshots[name] ? ' (chosen ' + saved[name].chosen + '/' + saved[name].server + '/' + saved[name].card +
         ' -> ' + snapshots[name].chosen + '/' + snapshots[name].server + '/' + snapshots[name].card + ')' : ' (added or removed)')));
     console.log(changed.length + ' of ' + names.length + ' install snapshots changed.');
+    if (changed.length) failed++;
+  }
+  // I1 candidate records (installCandidates notes), kept apart so the I0
+  // baseline above stays byte-identical.
+  const currentCandidates = JSON.stringify(candidateSnapshots, null, 1) + '\n';
+  if (process.argv.includes('--write')) {
+    fs.writeFileSync(candidatesFile, currentCandidates);
+    console.log('Wrote ' + Object.keys(candidateSnapshots).length + ' install candidate snapshots to ' + path.relative(root, candidatesFile));
+  } else {
+    const saved = fs.existsSync(candidatesFile) ? JSON.parse(fs.readFileSync(candidatesFile, 'utf8')) : {};
+    const names = [...new Set(Object.keys(saved).concat(Object.keys(candidateSnapshots)))].sort();
+    const changed = names.filter(name => JSON.stringify(saved[name]) !== JSON.stringify(candidateSnapshots[name]));
+    changed.forEach(name => console.log('CHANGED install candidates ' + name));
+    console.log(changed.length + ' of ' + names.length + ' install candidate snapshots changed.');
     if (changed.length) failed++;
   }
 }

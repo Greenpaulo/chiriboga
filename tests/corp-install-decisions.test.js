@@ -13,12 +13,16 @@ const server = (name, ice = []) => ({serverName: name, cards: [], ice, root: []}
 const corp = {HQ: server('HQ'), RnD: server('R&D', [{title: 'Unrezzed wall', rezzed: false, rezCost: 3}]),
   archives: server('Archives'), remoteServers: [], creditPool: 2};
 corp.remoteServers.push({serverName: 'Server 1', ice: [], root: [{title: 'Asset', cardType: 'asset'}]});
-const context = {console, corp, runner: {}, AIHypothetical: {depth: 0},
+const context = {console, corp, runner: {},
+  NewServer: (name, isCentral) => Object.assign({isServer: true, root: [], ice: [], serverName: name}, isCentral ? {cards: []} : {}),
   CheckCardType: (card, types) => types.includes(card.cardType)};
 vm.createContext(context);
 const utility = fs.readFileSync(path.join(root, 'utility.js'), 'utf8');
 vm.runInContext(utility.slice(utility.indexOf('// BEGIN DecisionSnapshots'), utility.indexOf('// END DecisionSnapshots')) +
   '\nthis.DecisionSnapshots = DecisionSnapshots;', context);
+const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
+vm.runInContext(runnerSource.slice(runnerSource.indexOf('var AIHypothetical'), runnerSource.indexOf('//evaluate with a prospective run')) +
+  '\nthis.AIHypothetical = AIHypothetical; this.AIWithHypothetical = AIWithHypothetical;', context);
 vm.runInContext(fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8') + '\nthis.CorpAI = CorpAI;', context, {filename: 'ai_corp.js'});
 const DS = context.DecisionSnapshots;
 
@@ -134,6 +138,158 @@ test('nothing is recorded without a frame or inside a hypothetical probe', () =>
   try { ai._rankedInstallOptions([iceA, iceB]); } finally { context.AIHypothetical.depth = 0; }
   const notes = DS.EndNotes(previous);
   assert.deepStrictEqual(Object.keys(notes), []);
+});
+
+// I1 candidate records. The real legacy generator runs over stubbed board
+// queries, so each scenario controls exactly which option groups emit.
+// Ranking (protectionAI): Archives valueless, R&D layer-blocked (unrezzed ICE,
+// poor), HQ secure, Server 1 selected.
+const plain = value => JSON.parse(JSON.stringify(value));
+const same = (actual, expected, message) => assert.deepStrictEqual(plain(actual), plain(expected), message);
+function candidateAI(setup = {}) {
+  const ai = protectionAI();
+  const affordable = setup.affordable || [iceA];
+  ai._emptyProtectedRemotes = () => setup.emptyRemotes || [];
+  ai._potentialAdvancement = () => 0;
+  ai._uniqueCopyAlreadyInstalled = () => false;
+  ai._sufficientEconomy = () => !!setup.economy;
+  ai._HVTsInstalled = () => 0;
+  ai._clicksLeft = () => 3;
+  ai._affordableIce = (target, cards) => cards.filter(c => c.cardType === 'ice' && affordable.includes(c));
+  ai._notAffordableIce = (target, cards) => cards.filter(c => c.cardType === 'ice' && !affordable.includes(c));
+  ai._scoringServers = () => [];
+  ai._isHVT = () => false;
+  ai._assetDestinationOrder = destinations => destinations.slice();
+  ai._bestProtectedRemote = () => null;
+  ai._upgradeInstallPreferences = (target, cards, inhibit) => { ai.upgradeInhibit = inhibit; return []; };
+  ai._scoringWindow = () => 0;
+  ai._copyOfCardExistsIn = () => null;
+  ai._agendasInHand = () => 0;
+  return ai;
+}
+const pairs = list => list.map(o => [o.cardToInstall.title, o.serverToInstallTo ? o.serverToInstallTo.serverName : 'new remote']);
+const recordPairs = list => list.map(r => [r.card.title, r.server ? r.server.serverName : 'new remote']);
+const assetCard = {title: 'Asset X', cardType: 'asset'};
+
+test('I1 scenario 1: priority-only excludes unaffordable ICE and new-server ICE on a poor economy', () => {
+  const ai = candidateAI();
+  const priority = ai._rankedInstallCandidates([iceA, iceB], true);
+  same(pairs(priority.options), [['Ice A', 'Server 1']]);
+  const any = ai._rankedInstallCandidates([iceA, iceB], false);
+  same(pairs(any.options), [['Ice A', 'Server 1'], ['Ice B', 'Server 1']]);
+  assert.ok(!any.options.some(o => o.serverToInstallTo === null), 'no new remote without economy');
+  const offered = priority.candidates.find(r => r.card === iceB && r.server === remote);
+  assert.strictEqual(offered.eligible, false);
+  same(offered.rejectionReasons, ['legacy: not offered for the selected server']);
+  const rich = candidateAI({economy: true})._rankedInstallCandidates([iceA], true);
+  assert.ok(rich.options.some(o => o.serverToInstallTo === null && o.reason === 'returned by _iceInstallOptions for new server'),
+    'a sufficient economy may open a new remote');
+});
+
+test('I1 scenario 2: inhibit false reaches the generator and the wrapper returns its list unchanged', () => {
+  const ai = candidateAI();
+  const core = ai._rankedInstallOptionsCore([iceA, iceB], false, false);
+  assert.strictEqual(ai.upgradeInhibit, false);
+  const previous = DS.BeginNotes(true);
+  const wrapped = ai._rankedInstallOptions([iceA, iceB], false, false);
+  DS.EndNotes(previous);
+  assert.strictEqual(ai.upgradeInhibit, false);
+  same(pairs(wrapped), pairs(core));
+  same(wrapped.map(o => o.reason), core.map(o => o.reason));
+});
+
+test('I1 scenario 3: a pair emitted by two groups is one record with merged reasons; the list keeps both', () => {
+  // An empty protected remote makes the fallback ICE group repeat the protection group.
+  const ai = candidateAI({emptyRemotes: [server('Server 2', [{rezzed: true}])]});
+  const ranked = ai._rankedInstallCandidates([iceA], true);
+  same(pairs(ranked.options), [['Ice A', 'Server 1'], ['Ice A', 'Server 1']], 'Phase_Main compares list lengths');
+  const eligible = ranked.candidates.filter(r => r.eligible);
+  assert.strictEqual(eligible.length, 1);
+  same(eligible[0].reasons, ['returned by _iceInstallOptions for server that needs protection',
+    'returned by _iceInstallOptions for new server']);
+  assert.strictEqual(eligible[0].option, ranked.options[0], 'the first occurrence keeps its option object');
+  same([eligible[0].compatibilityOrder, eligible[0].band, eligible[0].scoreBreakdown.legacy], [0, 0, 'protectionIce']);
+});
+
+test('I1 scenario 4: unrelated cards do not reorder the ICE candidates', () => {
+  const order = cards => recordPairs(candidateAI({affordable: [iceA, iceB]})._rankedInstallCandidates(cards, false).candidates);
+  same(order([assetCard, iceA, iceB]), order([iceA, iceB, assetCard]));
+  same(order([iceA, assetCard, iceB]).slice(0, 2), [['Ice A', 'Server 1'], ['Ice B', 'Server 1']]);
+});
+
+test('I1 scenario 5: a hypothetical install restores the board, including when evaluation throws', () => {
+  const ai = candidateAI();
+  ai._protectionInstallsThisTurn = [];
+  const credits = corp.creditPool;
+  const rndIce = corp.RnD.ice.slice();
+  const seen = ai._hypotheticalServerAfterInstall(iceA, corp.RnD, target => ({
+    outermost: target.ice[target.ice.length - 1], credits: corp.creditPool, depth: context.AIHypothetical.depth}));
+  same(seen, {outermost: iceA, credits: credits - 1, depth: 1}, 'install cost is one per existing layer');
+  assert.throws(() => ai._hypotheticalServerAfterInstall(iceA, corp.RnD, () => { throw new Error('probe'); }), /probe/);
+  const root = ai._hypotheticalServerAfterInstall(assetCard, remote, target => target.root.includes(assetCard));
+  assert.strictEqual(root, true);
+  const detached = ai._hypotheticalServerAfterInstall(iceA, null, target =>
+    [target.AIHypothetical, target.ice.length, corp.remoteServers.includes(target), corp.creditPool]);
+  same(detached, [true, 1, false, credits]);
+  same(corp.RnD.ice, rndIce);
+  assert.ok(!remote.root.includes(assetCard));
+  assert.strictEqual(corp.creditPool, credits);
+  assert.strictEqual(context.AIHypothetical.depth, 0);
+  same(ai._protectionInstallsThisTurn, []);
+});
+
+test('I1 scenario 6: a layer-policy rejection falls through, and the rejected server is recorded with its reason', () => {
+  const ai = candidateAI();
+  const ranked = ai._rankedInstallCandidates([iceA], true);
+  same(pairs(ranked.options), [['Ice A', 'Server 1']]);
+  const rnd = ranked.candidates.find(r => r.server === corp.RnD);
+  same([rnd.eligible, rnd.rejectionReasons],
+    [false, ['legacy: server not selected', 'layerPolicy:existingUnrezzedIceAndPoor']]);
+  const reasons = name => ranked.candidates.find(r => r.server && r.server.serverName === name).rejectionReasons;
+  same(reasons('Archives'), ['legacy: server not selected', 'valueless']);
+  same(reasons('HQ'), ['legacy: server not selected', 'secure']);
+});
+
+test('I1 scenario 6 (cost case) and 7: ICE for a server legacy did not select is recorded but never chosen', () => {
+  // Nothing is affordable: legacy keeps Server 1 and offers no ICE priority-only.
+  const ai = candidateAI({affordable: []});
+  const ranked = ai._rankedInstallCandidates([iceB], true);
+  same(ranked.options, []);
+  assert.ok(ranked.candidates.every(r => !r.eligible));
+  assert.ok(ranked.candidates.some(r => r.server === corp.RnD && r.card === iceB));
+  const previous = DS.BeginNotes(true);
+  const index = ai._bestInstallOption([{card: iceB, server: corp.RnD}]);
+  const notes = DS.EndNotes(previous);
+  assert.strictEqual(index, -1, 'an ineligible record is never returned');
+  assert.ok(notes.installCandidates[0].some(r => r.server === 'R&D' && r.eligible === false));
+});
+
+test('I1 scenario 8: returned preferences keep their protection flags and side effects', () => {
+  const ai = candidateAI({emptyRemotes: [server('Server 2', [{rezzed: true}])]});
+  const recorded = [];
+  ai._recordProtectionInstall = target => recorded.push(target);
+  const previous = DS.BeginNotes(true);
+  const options = ai._rankedInstallOptions([iceA], true);
+  DS.EndNotes(previous);
+  assert.ok(options.every(o => o.AIProtectionInstall === true));
+  ai._returnPreference(['install'], 'install', options[0]);
+  same(recorded, [remote]);
+  const agenda = {title: 'Agenda', cardType: 'agenda'};
+  ai._returnPreference(['install'], 'install', {cardToInstall: agenda, serverToInstallTo: null});
+  assert.strictEqual(agenda.AIScoringPlanCommitted, true);
+});
+
+test('I1: every eligible record carries a score breakdown and a reason, and notes are serialisable', () => {
+  const ai = candidateAI({affordable: [iceA, iceB], economy: true});
+  const previous = DS.BeginNotes(true);
+  ai._rankedInstallOptions([iceA, iceB], false);
+  const notes = DS.EndNotes(previous);
+  const ranked = ai._rankedInstallCandidates([iceA, iceB], false);
+  for (const record of ranked.candidates.filter(r => r.eligible)) {
+    assert.ok(record.scoreBreakdown && typeof record.scoreBreakdown.compatibilityOrder === 'number');
+    assert.ok(record.reasons.length > 0 && record.reasons.every(Boolean));
+  }
+  assert.strictEqual(JSON.stringify(notes.installCandidates[0]), JSON.stringify(ranked.candidates.map(r => ai._traceInstallCandidate(r))));
 });
 
 console.log(tests + ' install-decision telemetry tests passed.');

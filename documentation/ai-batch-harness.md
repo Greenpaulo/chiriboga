@@ -611,6 +611,9 @@ recorded install notes. They are not part of the test suite. Compare the
 current code with `node tests/corp-decision-fixtures.test.js --install-snapshots`
 (it lists changed fixtures and exits non-zero); an item that intends changes
 lists and justifies each delta, then rewrites the file with `--write`.
+The same command also compares the I1 candidate records (the
+`installCandidates` notes) with `tests/fixtures/corp-install-candidates.json`,
+kept in a separate file so the I0 baseline above stays unchanged.
 
 ## Checking the F3 security cache
 

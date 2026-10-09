@@ -4311,17 +4311,176 @@ class CorpAI {
   ) {
     if (!this._installRecording())
       return this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
-    //I0 telemetry: observe the unchanged ranking and its protection choices.
+    //I0/I1 telemetry: observe the unchanged ranking, its protection choices
+    //and its candidate records. The legacy option list is returned as is,
+    //duplicates included (Phase_Main compares ranked list lengths).
+    var ranked = this._rankedInstallCandidates(cards, priorityOnly, inhibit);
+    this._noteRankedInstall(
+      ranked.options,
+      ranked.protection,
+      priorityOnly,
+      inhibit,
+      cards,
+    );
+    DecisionSnapshots.Note(
+      "installCandidates",
+      ranked.candidates.map((record) => this._traceInstallCandidate(record)),
+    );
+    return ranked.options;
+  }
+
+  //I1: install candidates as explicit records. The legacy generator keeps its
+  //order and every call it makes; records are derived from the preferences it
+  //emitted and, for ICE it did not offer, from the protection walk it already
+  //performed (no extra security evaluation, card hook or randomness).
+  //Returns {options (legacy list), protection (walk traces), candidates}.
+  _rankedInstallCandidates(cards, priorityOnly = false, inhibit = true) {
     var previousTrace = this._installTrace;
     this._installTrace = [];
     try {
-      var ret = this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+      var options = this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
       var protection = this._installTrace;
-      this._noteRankedInstall(ret, protection, priorityOnly, inhibit, cards);
-      return ret;
+      return {
+        options: options,
+        protection: protection,
+        candidates: this._installCandidateRecords(options, protection, cards),
+      };
     } finally {
       this._installTrace = previousTrace;
     }
+  }
+
+  //Compatibility bands reproduce the legacy order exactly: the fast-advance
+  //win candidate is band 3 (where legacy already ranks it), every other
+  //legacy group band 0, ordered by compatibilityOrder (emission position).
+  //The same (card, server) emitted twice is one record with merged reasons;
+  //the first occurrence keeps its position and its option object.
+  _installCandidateRecords(options, protection, cards) {
+    var records = [];
+    var groupIndex = -1;
+    var inGroupIndex = 0;
+    var previousGroup = null;
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      var group = this._installPreferenceGroup(option.reason);
+      if (group != previousGroup) {
+        groupIndex++;
+        inGroupIndex = 0;
+        previousGroup = group;
+      } else inGroupIndex++;
+      var existing = records.find(
+        (record) =>
+          record.card == option.cardToInstall &&
+          record.server == option.serverToInstallTo,
+      );
+      if (existing) {
+        if (!existing.reasons.includes(option.reason))
+          existing.reasons.push(option.reason);
+        continue;
+      }
+      records.push({
+        card: option.cardToInstall,
+        server: option.serverToInstallTo,
+        kind: option.cardToInstall ? option.cardToInstall.cardType : null,
+        role: group,
+        band: group == "win" ? 3 : 0,
+        compatibilityOrder: i,
+        groupIndex: groupIndex,
+        inGroupIndex: inGroupIndex,
+        //Title cases survive only as legacy bands, never as scoring (I9).
+        scoreBreakdown: {
+          legacy: group == "specificCase" ? "titleCase:Snare!" : group,
+          compatibilityOrder: i,
+        },
+        reasons: [option.reason || group],
+        eligible: true,
+        rejectionReasons: [],
+        option: option,
+      });
+    }
+    //ICE legacy did not offer to a server its protection walk ranked:
+    //recorded for diagnostics (and for I2), never returned.
+    var walk = protection.find((trace) => trace.filtered);
+    if (!walk) return records;
+    var ice = cards.filter((card) => CheckCardType(card, ["ice"]));
+    var eligibleCount = records.length;
+    walk.ranked.forEach((row) => {
+      var rejection = ["legacy: server not selected"];
+      if (row.server == walk.selected)
+        rejection = ["legacy: not offered for the selected server"];
+      else if (row.skipped == "layerPolicy")
+        rejection.push("layerPolicy:" + row.layerPolicy);
+      else if (row.skipped) rejection.push(row.skipped);
+      ice.forEach((card) => {
+        if (
+          records.some(
+            (record) => record.card == card && record.server == row.serverRef,
+          )
+        )
+          return;
+        records.push({
+          card: card,
+          server: row.serverRef,
+          kind: "ice",
+          role: "protectionIce",
+          band: 0,
+          compatibilityOrder: null,
+          scoreBreakdown: { legacy: "notGenerated", compatibilityOrder: null },
+          reasons: [],
+          eligible: false,
+          rejectionReasons: rejection.slice(),
+          option: null,
+        });
+      });
+    });
+    for (var j = eligibleCount; j < records.length; j++)
+      records[j].ineligibleOrder = j - eligibleCount;
+    return records;
+  }
+
+  _traceInstallCandidate(record) {
+    var row = {
+      card: record.card ? record.card.title : null,
+      server: this._traceServerName(record.server),
+      role: record.role,
+      band: record.band,
+      order: record.compatibilityOrder,
+      eligible: record.eligible,
+    };
+    if (record.reasons.length > 1) row.reasons = record.reasons;
+    if (!record.eligible) row.rejection = record.rejectionReasons;
+    if (record.scoreBreakdown.legacy != record.role)
+      row.legacy = record.scoreBreakdown.legacy;
+    return row;
+  }
+
+  //The single builder of hypothetical post-install servers (install design
+  //note). Installs card into server (ICE as the outermost layer, anything else
+  //in the root) and pays the ICE install cost, or, for a null server, into a
+  //detached empty remote that is never added to corp.remoteServers; then
+  //returns evaluate(server). The board is restored even if evaluate throws.
+  _hypotheticalServerAfterInstall(card, server, evaluate) {
+    var target = server;
+    if (target == null) {
+      target = NewServer("Hypothetical remote", false);
+      target.AIHypothetical = true;
+    }
+    var isIce = CheckCardType(card, ["ice"]);
+    var layer = isIce ? target.ice : target.root;
+    var originalLayer = layer.slice();
+    var originalCredits = corp.creditPool;
+    var installCost = isIce && server != null ? server.ice.length : 0;
+    return this._withHypothetical(
+      () => {
+        corp.creditPool -= installCost;
+        layer.push(card);
+      },
+      () => evaluate(target),
+      () => {
+        layer.splice(0, layer.length, ...originalLayer);
+        corp.creditPool = originalCredits;
+      },
+    );
   }
 
   //I0 telemetry helpers. They read values the ranking already computed and
@@ -4375,6 +4534,8 @@ class CorpAI {
           adjusted: entry.adjustedScore,
           security: this._securitySummary(entry.security),
         };
+        //I1 candidate records need the server itself; kept out of the notes.
+        Object.defineProperty(row, "serverRef", { value: entry.server });
         if (verdict && typeof verdict == "object")
           row.layerPolicy = verdict.reason;
         else if (typeof verdict == "boolean") row.layerPolicy = verdict;

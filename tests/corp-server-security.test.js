@@ -2275,4 +2275,27 @@ test('Event Horizon pay-off tax is finite and its sacrificed layer is not charge
     corp.AI = previousAI; context.CheckTrash = previousTrash; context.CheckInstalled = previousInstalled;
   }
 });
+test('I1 hypothetical new remote evaluates like a real empty remote', () => {
+  context.NewServer = (name, isCentral) => Object.assign({isServer: true, root: [], ice: [], serverName: name}, isCentral ? {cards: []} : {});
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {serverName: 'R&D', cards: [], ice: [], root: []},
+    archives: {serverName: 'Archives', cards: [], ice: [], root: []}, remoteServers: []});
+  runner.creditPool = 4;
+  const summary = target => {
+    const security = ai._evaluateServerSecurity(target);
+    return JSON.stringify([security.isSecure, security.hasHardLockout, security.totalBreakCost,
+      security.totalMandatoryBreakCost, security.runnerCredits]);
+  };
+  for (const rezzed of [true, false]) {
+    const wall = Object.assign(etr(), {cardType: 'ice', rezzed});
+    const detached = ai._hypotheticalServerAfterInstall(wall, null, summary);
+    assert.strictEqual(corp.remoteServers.length, 0, 'the detached remote is never added');
+    const real = {serverName: 'Remote 0', ice: [], root: []};
+    corp.remoteServers = [real]; servers = [real];
+    const actual = ai._hypotheticalServerAfterInstall(wall, real, summary);
+    corp.remoteServers = []; servers = [];
+    assert.strictEqual(detached, actual, (rezzed ? 'rezzed' : 'unrezzed') + ' ICE');
+    assert.deepStrictEqual(real.ice, []);
+  }
+});
 console.log(tests + ' regression cases passed.');

@@ -464,6 +464,28 @@ does not yet compare concrete options by their outcome.
   The helpers reuse values already computed (no extra security evaluation,
   card hook or `_random` call) and mutate no option object; the fixture suite
   checks that recording leaves choices, reasons and `_random` calls unchanged.
+- **Install candidate records (I1).** `_rankedInstallCandidates()` runs the
+  unchanged `_rankedInstallOptionsCore()` and returns `{options, protection,
+  candidates}`: the legacy option list, the protection walks, and one record
+  per `(card, server)` pair. Each record carries `kind`, `role` (the legacy
+  group), `band` (3 for the fast-advance-to-win agenda, 0 otherwise),
+  `compatibilityOrder` (the legacy emission position), a `scoreBreakdown`
+  (`legacy` group, or `titleCase:Snare!`), merged `reasons`, `eligible` and
+  `rejectionReasons`, and the legacy `option` object. A pair that two groups
+  emit is one record with both reasons; the option list still contains both,
+  because `Phase_Main`'s gain-credit probe compares list lengths. ICE that the
+  first filtered protection walk ranked but legacy did not offer is recorded
+  with `eligible: false` and the walk's skip reason (for example
+  `layerPolicy:existingUnrezzedIceAndPoor`), after every eligible record; it is
+  never returned, so I2 can switch such candidates on deliberately. While
+  recording, `_rankedInstallOptions()` notes the records as
+  `installCandidates`; otherwise it calls the core directly, so untraced play
+  does no extra work. `_hypotheticalServerAfterInstall(card, server, evaluate)`
+  is the single builder of post-install hypothetical servers (ICE as the
+  outermost layer with its install cost paid, anything else in the root; a
+  null server is a detached empty remote never added to
+  `corp.remoteServers`), restored through `_withHypothetical()`. No ranking
+  path calls it yet.
 
 Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
 rez choices. Luana Campos permits this economy rez only outside a run, with
