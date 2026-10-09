@@ -2,7 +2,120 @@
 
 **Roadmap item:** I1 · **Depends on:** I0 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
-**Verified against code:** 376f32c (2026-09-25)
+**Verified against code:** eddf683 (2026-10-09)
+
+*Raise pending I0's merge: re-grounded on branch
+`roadmap/I1-unified-install-candidate-model` (from I0's branch at eddf683).
+`node scripts/roadmap.js raise I1` is deferred until I0 is `done`; raising now
+would immediately generate a `## Blocker` on I0.*
+
+## Implementation plan
+
+Proposed at `eddf683`, 2026-10-09. **Awaiting approval.**
+
+- **Validation:** Re-grounded at eddf683 (dated notes inline). The design
+  holds up with four disagreements, each changing what the design should do:
+  1. **Do not deduplicate the compatibility list.** `Phase_Main`'s gain-credit
+     probe compares `_rankedInstallOptions().length` with and without extra
+     credits. Duplicates are routine: when an empty protected remote exists,
+     the "new server" ICE group calls the same filtered `_serverToProtect()`
+     and repeats the whole protection-ICE group. Removing duplicates from the
+     returned list can change that count comparison and so a real choice
+     (breaking the F4 per-game identity the gate demands). Deduplication and
+     reason merging therefore happen in the candidate records only; the
+     wrapper still returns every legacy preference, duplicates included, in
+     legacy order. The merged record keeps the first occurrence's flags
+     (`AIProtectionInstall`), which is the object first-match consumers use.
+  2. **Scenario 6 is not today's behaviour for unaffordable ICE.** The L3.5.2
+     fallback skips a server only when `_iceLayerPolicy()` rejects it (or it is
+     valueless, secure, protected this turn, or an outranked Archives). Cost or
+     rez shortfall never skips a server; it leaves the chosen server with no
+     affordable ICE and (priority-only) an empty group. A behaviour-identical
+     I1 cannot select the lower server there; it records those ICE as
+     `eligible: false` ("legacy: server not selected"). Scenario 6 is narrowed
+     to the layer-policy case; the cost case is asserted as recorded-not-chosen
+     and left to I2.
+  3. **Candidate notes go under a new `installCandidates` note key**, so the
+     existing `install` notes (and `tests/fixtures/corp-install-baseline.json`)
+     stay byte-identical: the snapshot comparison should report 0 of 13
+     changed, with no deltas to justify. `--install-snapshots` also stores the
+     new key per fixture in a separate `corp-install-candidates.json` (new
+     baseline, outside the green suite like I0's).
+  4. `tests/corp-install-decisions.test.js` already exists (I0); I1 extends it.
+  Classification: no Corp choice changes; objective invariant oracle (identical
+  choices, logged reasons, `_random` call counts, F4 per-game hashes), so
+  ungated. Acceptance gate rewritten into the `N/A — deterministic fix` form
+  with the same content.
+- **Approach:** Keep `_rankedInstallOptionsCore()`'s generation code and call
+  sequence intact (every `_serverToProtect()`, `_assetDestinationOrder()`,
+  card-hook and `_scoringWindow()` call happens once, in the same order, so
+  `_random` and the security cache see identical traffic); change only how
+  each group's output is collected.
+  1. `_rankedInstallCandidates(cards, priorityOnly, inhibit)` (new) runs the
+     legacy generation, tagging each preference as it is produced with
+     `{group, groupIndex, inGroupIndex}` and wrapping it in a candidate record
+     (design-note shape: `card`, `server`, `kind`, `role` from the group,
+     `band` 3 for the win candidate and 0 for every other legacy group,
+     `compatibilityOrder`, `scoreBreakdown` `{legacy: <group>, compatibilityOrder}`,
+     `reasons`, `eligible: true`, `rejectionReasons: []`, `option`: the
+     legacy preference object, unmodified). The Snare! group is a band-0
+     record with `scoreBreakdown.legacy: "titleCase:Snare!"`; the Trick of
+     Light check stays inside `_emptyProtectedRemotes()` and is tagged
+     `legacy` in the records of remotes it kept occupied (no new title
+     checks; the ratchet entry is renamed only if the Snare! line moves).
+  2. Joint ICE enumeration (only while a notes frame is open or a caller asks
+     for records, so untraced play does no extra work): from the protection
+     walk the core already performed (the I0 `_installTrace` rows), add a record
+     for every ICE card × every ranked server legacy did not offer it to,
+     `eligible: false`, rejection reason `legacy: server not selected` plus the
+     walk's skip reason (`valueless`, `secure`, `layerPolicy:<reason>`, …),
+     ordered after all eligible records by ranked-server position then input
+     card order. Built from values already computed and printed costs only:
+     no extra `_evaluateServerSecurity()`, card hook or `_random` call.
+  3. Records are deduplicated by `(card, server)`; reasons merge onto the
+     first occurrence, which keeps its position and option object.
+  4. `_rankedInstallOptions()` becomes the compatibility wrapper: it returns
+     the legacy option objects of eligible entries in emission order
+     (duplicates included, point 1 of Validation) and, while recording, notes
+     the records under `installCandidates`. `_bestInstallOption()`,
+     `_criticalBreachDefenseAction()`, `Phase_Main` and the card callers are
+     untouched; `_returnPreference()` side effects fire from the same objects.
+  5. `_hypotheticalServerAfterInstall(card, server, evaluate)` (new): the
+     single builder of hypothetical servers, via `_withHypothetical()`;
+     existing server = push ICE as outermost layer / root, subtract install
+     cost from `corp.creditPool`, restore in `finally`; `server == null` = a
+     detached `NewServer(..., false)` with `AIHypothetical: true`, never added
+     to `corp.remoteServers`. I1 does not call it on the ranking path (that
+     would add evaluator calls and latency); it is exercised by tests,
+     including the detached-vs-real empty remote equivalence test, after
+     auditing `_evaluateServerSecurityUncached()` callees for remote-list or
+     index lookups (any found are fixed to take the server argument).
+  Rejected: rewriting generation as a single joint enumerator ranked by bands
+  (re-orders hook and `_random` calls, risking identity for no I1 benefit);
+  deduplicating the returned list (probe count change, above).
+- **Tests:** extend `tests/corp-install-decisions.test.js` with scenarios
+  1–8 (6 as narrowed), each asserting the choice and logged reason/record
+  fields; record-shape test (every returned preference has a record with
+  `scoreBreakdown` and non-empty `reasons`); wrapper-identity test comparing
+  the wrapper with the pre-I1 concatenation on the unit boards (copy of the
+  old core kept only in the test); hypothetical-helper restore tests
+  (normal and throwing evaluate) and the detached-remote equivalence test.
+  `corp-decision-fixtures` and `decision-snapshots` must pass unchanged;
+  `--install-snapshots` must report 0 of 13 changed.
+- **Risk:** every install decision passes through the changed collector, so
+  any ordering slip shifts many choices; guarded by the unchanged fixture
+  suite (all four cache modes plus `_random` counts), the 0-of-13 snapshot
+  check, and a paired F4 re-run of I0's configuration that must match all
+  1,400 games' `winner`, `turns`, `logHash` and `decisionHash` with
+  `decisionLatencyMs.corp.mean` within +25% of 4.58 (owner runs, or I run it
+  as one blocking command if the session allows). Telemetry entries grow by
+  the candidate notes; latency is checked in that run.
+- **Docs:** `documentation/corp-ai/architecture.md` "Install planning today"
+  (candidate records, wrapper, ineligible diagnostics, the helper);
+  `documentation/ai-batch-harness.md` / fixture runner comment for the new
+  baseline file; no card hook changes, so `documentation/ai.md` is expected
+  unchanged (re-checked at the end); roadmap I1 status to `in-progress` at
+  raise.
 
 ## Goal
 Replace implicit concatenation priority with explicit, inspectable install
@@ -10,18 +123,26 @@ candidate records, with identical choices. This is the foundation every later
 I item scores against; it must not change card selection policy.
 
 ## Current behaviour
-`_rankedInstallOptions(cards, priorityOnly, inhibit)` concatenates
+`_rankedInstallOptions(cards, priorityOnly, inhibit)` (since I0 a recording
+wrapper around `_rankedInstallOptionsCore()`) concatenates
 independently generated groups in a fixed order: the "could be installed and
-fast-advanced to win" agenda candidate; `AIWorthInstalling` assets; ICE for the
+fast-advanced to win" agenda candidate (built from `corp.HQ.cards`, not the
+`cards` argument, into the strongest empty protected remote or a new remote); `AIWorthInstalling` assets; ICE for the
 server `_serverToProtect(false, false, targetIsEligible)` picks (the
-eligibility predicate is L3.5.2's interim bridge around
-`_shouldInstallIceLayer()`); HVTs into `_scoringServers()` and assets into
-`_assetDestinationOrder()` remotes, sorted by scoring window and
+eligibility predicate is L3.5.2's interim bridge, now `_iceLayerPolicy()`
+returning `{allowed, reason}`; `_shouldInstallIceLayer()` is its boolean form); HVTs into `_scoringServers()` and assets into
+`_assetDestinationOrder()` remotes (never the strongest empty remote; a new
+remote too for Archives or resolving cards when fewer than two empty protected
+remotes exist), sorted by scoring window and
 `_deceptionInstallDistance()`; upgrades from `_upgradeInstallPreferences()`
 (only when the economy check passes; ahead of the root group when a scoring
 upgrade targets the same server); ICE for the most-needy server, or for a new
-remote when no empty protected remote exists; then a Snare! title case. ICE within a group follow input
-order. See [architecture.md: install planning today](../architecture.md#install-planning-today).
+remote when no empty protected remote exists (only when that server is
+non-null or the economy check passes); then a Snare! title case. Within an ICE
+group, affordable ICE come first in input order, then (unless `priorityOnly`)
+unaffordable ICE in input order. When an empty protected remote exists, both
+ICE groups query the same filtered `_serverToProtect()`, so the second group
+routinely repeats the first *(re-grounded 2026-10-09)*. See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 Consumers, all of which must keep working unchanged:
 
@@ -34,8 +155,9 @@ Consumers, all of which must keep working unchanged:
 - `Phase_Main`: the priority-only path returns `priorityRankedInstallOptions[0]`
   through `_returnPreference()`; the hand-pressure path reads
   `rankedInstallOptions[0]` to decide whether a non-ICE install into an
-  unprotected server is acceptable, and compares two ranked lists in its
-  gain-credit probe.
+  unprotected server is acceptable, and its gain-credit probe compares the
+  *lengths* of two ranked lists (with and without extra credits), so the
+  number of returned entries, duplicates included, is behaviour.
 - `_criticalBreachDefenseAction()`, which scans `_rankedInstallOptions(corp.HQ.cards, true)`
   for ICE on the at-risk central.
 - Side effects in `_returnPreference()`: an installed agenda gets
@@ -61,7 +183,10 @@ Consumers, all of which must keep working unchanged:
   still returns -1 where it did. They exist so I2 can switch them on and so
   snapshots show what was skipped.
 - Remove duplicate `(card, server)` candidates, merging their reasons; the
-  first legacy occurrence keeps its position.
+  first legacy occurrence keeps its position. *(2026-10-09: only among the
+  candidate records. The compatibility wrapper must keep returning duplicates,
+  because `Phase_Main`'s gain-credit probe compares list lengths; see the
+  plan.)*
 - Carry `AIProtectionInstall` and the agenda commitment through unchanged, so
   `_returnPreference()` side effects fire exactly as before.
 - Build hypothetical servers only through `_hypotheticalServerAfterInstall()`
@@ -70,12 +195,14 @@ Consumers, all of which must keep working unchanged:
 - Keep `_rankedInstallOptions()` as the compatibility wrapper returning
   `{cardToInstall, serverToInstallTo, reason, ...}`; card-driven and non-HQ
   sources keep working.
-- Add `tests/corp-install-decisions.test.js`.
+- Extend `tests/corp-install-decisions.test.js` (created by I0).
 - **Title cases.** Own the rows tagged I1 in the P1 ticket
   (`documentation/backlog/corp_ai_finding_13_legacy_title_lists.md`): the
   Snare! install case and the Trick of Light case in `_emptyProtectedRemotes()`
   are carried over only as compatibility bands marked `legacy` in the score
   breakdown, never as title checks in candidate scoring. I9 removes the bands.
+  (The title ratchet in `tests/corp-ai-card-titles.test.js` currently lists the
+  Snare! row as `_rankedInstallOptionsCore: Snare!`.)
 
 ## Safety and information boundary
 Hypothetical evaluation must not change card locations, server contents,
@@ -95,9 +222,12 @@ behaviour must be preserved exactly.
 5. No evaluation changes card locations, server contents, counters, protection
    debt, `_protectionInstallsThisTurn` or cached deception decisions, including
    when an evaluation throws.
-6. When the top-ranked server has no viable ICE, the lower-ranked server's
-   candidate is still selected (as L3.5.2 does today) and the top server's
-   candidates appear with their rejection reasons.
+6. When `_iceLayerPolicy()` rejects the top-ranked server, the lower-ranked
+   server's candidate is still selected (as L3.5.2 does today) and the top
+   server's candidates appear with their rejection reasons. *(Narrowed
+   2026-10-09: when the top server merely has no affordable ICE, legacy does
+   not fall through; I1 records the lower server's ICE as `eligible: false`
+   and does not select it. Selecting it is I2's change.)*
 7. An ICE for a server legacy did not select is recorded with `eligible: false`
    and is never returned, so `_bestInstallOption()` returns -1 on a board where
    it returned -1 before.
@@ -105,12 +235,15 @@ behaviour must be preserved exactly.
    installs as before.
 
 ## Acceptance gate
-Behaviour-identical refactor, not flagged: the install-fixture decision
+N/A — deterministic fix (principle 4): behaviour-identical refactor with an invariant oracle, not flagged: the install-fixture decision
 snapshots are identical to I0's committed baseline except for listed, justified
 deltas, every existing fixture and focused AI test passes unchanged, and every
 returned preference carries a score breakdown and reason. Re-running I0's F4
 configuration reproduces the baseline's per-game outcomes exactly, with
 `decisionLatencyMs` within the standard guard (+25% mean).
+
+*(Reworded 2026-10-09 into the `N/A — deterministic fix` form; content
+unchanged. I1 changes no Corp choice, so it is not a strategic change.)*
 
 ## Things to consider
 - Joint enumeration is what later allows `_serverToProtect(..., targetIsEligible)`
