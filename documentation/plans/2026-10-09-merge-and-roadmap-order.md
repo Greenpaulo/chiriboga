@@ -37,11 +37,14 @@ they must match.
 - **L7.1.1's horizon idea is not supported** by that evidence; it is parked
   (branch #4). I2's spec and the install design note now keep
   `consequenceWeight` inside I2's ranking, with HQ and R&D unweighted.
-- **The security evaluator is sound but over-reports lockouts.** About nine in
-  ten "secure" verdicts mean only "no matching breaker is installed yet", and
-  bioroid click-breaks are not modelled. Servers judged secure were still
-  breached 8% of the time (insecure: 23%). I2 would mostly be measuring these
-  false lockouts, so L9.0 comes first.
+- **The security evaluator is sound but over-reports lockouts.** Provisional
+  figures suggest about nine in ten "secure" verdicts mean only "no matching
+  breaker is installed yet", and bioroid click-breaks are not modelled.
+  Provisional breach rates were 8% for servers judged secure (insecure: 23%).
+  The evaluation artefact, code revision and sample-selection method for these
+  figures are not recorded here; verify them before relying on the figures for
+  roadmap sequencing. I2 would mostly be measuring these false lockouts, so
+  L9.0 comes first.
 
 ## 3. Roadmap order after the merges
 
@@ -54,9 +57,10 @@ they must match.
 | 5 | **L9.0.1** Adopt honest lockout | F4 | Lets existing scoring, rez and protection decisions use the honest verdict. Can run in parallel with I2; gate them separately |
 | 6 | I3 onward | Per spec | Root suitability, agenda commitment, assets, upgrades, then the short-horizon planner |
 
-Not yet an item: the evaluator's Runner credit ceiling appears too low (19 of
-115 sampled breaches of "secure" servers). Confirm the cause before raising
-one.
+Not yet an item: the evaluator's Runner credit ceiling appears too low
+(provisional: 19 of 115 sampled breaches of "secure" servers). The evaluation
+artefact, code revision and sample-selection method for this count are not
+recorded here. Verify the count and confirm the cause before raising an item.
 
 ## 4. Other open decisions
 
