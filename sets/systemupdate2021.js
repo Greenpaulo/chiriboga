@@ -3757,6 +3757,12 @@ cardSet[31043] = {
     }
 	return result;
   },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
+  },
 };
 
 cardSet[31044] = {
@@ -3994,6 +4000,12 @@ cardSet[31045] = {
   AIWorthwhileIce: function(server, purpose) {
 	  //worthwhile only if there is a rezzed bioroid ice that isn't a Ravana 1.0
 	  return (this.SharedChoicesCards().length > 0);
+  },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 

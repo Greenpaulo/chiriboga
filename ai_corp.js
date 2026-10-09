@@ -3,6 +3,10 @@
 const CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD = 0.35;
 const CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT = 0.15;
 const CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE = 1;
+//L9.0: assumed price of installing and using a matching breaker the Runner
+//has not shown yet: the median install cost of the playable sets' typed
+//icebreakers (3) plus 1 credit per subroutine, and the install click.
+const CORP_AI_NO_BREAKER_ASSUMED_COST = {install: 3, perSubroutine: 1};
 
 class CorpAI {
   //**CORP UTILITY FUNCTIONS**
@@ -2877,8 +2881,137 @@ class CorpAI {
     if (typeof iceCard.AIMandatoryPassCost == "function")
       inputs.mandatoryCost = iceCard.AIMandatoryPassCost.call(
         iceCard, breaker, server, iceIndex, this, evaluationContext);
+    inputs.honest = this._honestLayerOptions(
+      iceCard, inputs, server, iceIndex, evaluationContext);
     evaluationContext.icePlanInputs.set(iceCard, inputs);
     return inputs;
+  }
+
+  //L9.0 observation only: the ways the Runner could pass this layer's
+  //mandatory subroutines, as {credits, clicks, kind} options. Adds what the
+  //current verdict ignores: an ICE's own click-break (AIBreakCost on the ICE)
+  //and a breaker not installed yet. No consumer reads these; see
+  //_honestRouteVerdict().
+  _honestLayerOptions(iceCard, inputs, server, iceIndex, evaluationContext) {
+    var options = [];
+    var mandatoryCost = Math.min(inputs.mandatoryCost, inputs.bypassCost);
+    if (mandatoryCost < Infinity)
+      options.push({credits: mandatoryCost, clicks: 0, kind: "current"});
+    var count = this._requiredSubroutineIndices(iceCard, true, evaluationContext).length;
+    count = Math.max(0, count - this._hostedBreakContribution(iceCard));
+    if (count == 0) return {options: options, noBreaker: false};
+    var clickBreak = this._iceSelfBreakCost(iceCard, 1, server);
+    var noBreaker = !inputs.breaker && mandatoryCost == Infinity;
+    var absentCost = noBreaker
+      ? (remaining) => this._breakerAbsentCost(iceCard, remaining, server, iceIndex, evaluationContext)
+      : null;
+    //k subroutines broken with the ICE's own ability, the rest by a breaker.
+    for (var k = clickBreak ? 1 : 0; k <= (clickBreak ? count : 0); k++) {
+      var self = clickBreak
+        ? {credits: clickBreak.credits * k, clicks: clickBreak.clicks * k}
+        : {credits: 0, clicks: 0};
+      var rest = count - k;
+      if (rest == 0) {
+        options.push({credits: self.credits, clicks: self.clicks, kind: "click-break"});
+        continue;
+      }
+      if (inputs.breaker && !inputs.breaker.AIBotulus) {
+        var priced = this._breakerActivationCost(
+          iceCard, inputs.breaker, rest, server, iceIndex, evaluationContext);
+        if (priced < Infinity)
+          options.push({credits: self.credits + priced, clicks: self.clicks, kind: "click-break"});
+      }
+      if (absentCost) {
+        var absent = absentCost(rest);
+        if (absent)
+          options.push({credits: self.credits + absent.credits,
+            clicks: self.clicks + absent.clicks, kind: k > 0 ? "click-break" : "no-breaker"});
+      }
+    }
+    return {options: options, noBreaker: noBreaker};
+  }
+
+  //Cost of breaking `count` subroutines with the ICE's own Runner ability,
+  //declared by AIBreakCost on the ICE, or null.
+  _iceSelfBreakCost(iceCard, count, server) {
+    if (typeof iceCard.AIBreakCost != "function") return null;
+    var cost = null;
+    try {
+      cost = iceCard.AIBreakCost.call(iceCard, iceCard, count, server);
+    } catch (error) {
+      return null;
+    }
+    if (!cost || typeof cost != "object") return null;
+    var credits = Math.max(0, Number(cost.credits) || 0);
+    var clicks = Math.max(0, Number(cost.clicks) || 0);
+    if (!isFinite(credits) || !isFinite(clicks)) return null;
+    return {credits: credits / count, clicks: clicks / count};
+  }
+
+  //Public estimate of installing a matching breaker this turn and breaking
+  //`count` subroutines with it: the cheapest matching icebreaker in the Heap
+  //(public evidence of what the deck runs), else CORP_AI_NO_BREAKER_ASSUMED_COST.
+  //Null when the Runner has no Grip to install from.
+  _breakerAbsentCost(iceCard, count, server, iceIndex, evaluationContext) {
+    if (!runner.grip || runner.grip.length < 1) return null;
+    var best = Infinity;
+    var heap = runner.heap || [];
+    for (var i = 0; i < heap.length; i++) {
+      var candidate = heap[i];
+      if (!candidate || !CheckSubType(candidate, "Icebreaker")) continue;
+      if (!this._breakerTypeMatchesIce(candidate, iceCard, server, iceIndex, evaluationContext))
+        continue;
+      var breakCost = this._breakerActivationCost(
+        iceCard, candidate, count, server, iceIndex, evaluationContext);
+      if (breakCost < Infinity)
+        best = Math.min(best, Math.max(0, candidate.installCost || 0) + breakCost);
+    }
+    if (best == Infinity)
+      best = CORP_AI_NO_BREAKER_ASSUMED_COST.install + CORP_AI_NO_BREAKER_ASSUMED_COST.perSubroutine * count;
+    return {credits: best, clicks: 1};
+  }
+
+  _breakerTypeMatchesIce(breaker, iceCard, server, iceIndex, evaluationContext) {
+    var pairs = [["Fracter", "Barrier"], ["Decoder", "Code Gate"], ["Killer", "Sentry"]];
+    for (var i = 0; i < pairs.length; i++) {
+      if (CheckSubType(breaker, pairs[i][0]) &&
+          this._iceHasEffectiveSubtype(iceCard, pairs[i][1], server, iceIndex, evaluationContext))
+        return true;
+    }
+    return CheckSubType(breaker, "AI");
+  }
+
+  //Choose one honest option per layer: the cheapest route the Runner can
+  //afford with its click budget, where clicks spent breaking are no longer
+  //available for click-for-credit (1 credit per click, as clickCredits).
+  _honestRouteVerdict(layers, credits, clickBudget, clickCredits) {
+    var best = null;
+    var cheapest = null;
+    var visit = (index, spentCredits, spentClicks) => {
+      if (index >= layers.length) {
+        var total = spentCredits + spentClicks;
+        var available = credits - Math.min(spentClicks, clickCredits);
+        var feasible = spentClicks <= clickBudget && spentCredits <= available;
+        if (!cheapest || total < cheapest.total)
+          cheapest = {credits: spentCredits, clicks: spentClicks, total: total};
+        if (feasible && (!best || total < best.total))
+          best = {credits: spentCredits, clicks: spentClicks, total: total};
+        return;
+      }
+      var options = layers[index].options;
+      for (var i = 0; i < options.length; i++)
+        visit(index + 1, spentCredits + options[i].credits, spentClicks + options[i].clicks);
+    };
+    var combinations = layers.reduce((product, layer) => product * Math.max(1, layer.options.length), 1);
+    if (combinations <= 4096) visit(0, 0, 0);
+    else {
+      //Bounded fallback: the cheapest option per layer.
+      var picked = layers.map((layer) => layer.options.reduce((a, b) =>
+        a.credits + a.clicks <= b.credits + b.clicks ? a : b));
+      layers = picked.map((option) => ({options: [option]}));
+      visit(0, 0, 0);
+    }
+    return {feasible: best, cheapest: cheapest};
   }
 
   // Restricted payments need a complete route: a scalar activation probe
@@ -2943,6 +3076,7 @@ class CorpAI {
       totalMandatoryBreakCost: 0,
       reasons: [],
       rezCost: 0,
+      honestLayers: [],
     };
     for (var i = 0; i < eligibleIce.length; i++) {
       if (!eligibleIce[i].rezzed)
@@ -2988,6 +3122,8 @@ class CorpAI {
         );
       }
       outcome.totalMandatoryBreakCost += mandatoryCost;
+      outcome.honestLayers.push({card: iceCard, options: inputs.honest.options,
+        noBreaker: inputs.honest.noBreaker});
     }
     return outcome;
   }
@@ -3165,8 +3301,10 @@ class CorpAI {
     result.publicThreatRisk = this._estimateRunnerBypassRisk(server);
     result.deterrence = this._tagPunishmentDeterrence(server);
     //defensive upgrades can prevent the breach outright
+    var serverLockout = false; //lockouts that do not depend on breaking ICE
     if (this._hasDefensiveUpgrade(server)) {
       result.hasHardLockout = true;
+      serverLockout = true;
       result.reasons.push("defensive upgrade prevents breach");
     }
     //Choose the strongest server-local rez plan the Corp can actually fund.
@@ -3219,6 +3357,7 @@ class CorpAI {
     var projectedRuns = this._projectedRunnerRuns(server);
     if (globalETRUses > 0 && globalETRUses >= projectedRuns) {
       result.hasHardLockout = true;
+      serverLockout = true;
       result.reasons.push(
         "global end the run covers " + projectedRuns + " projected runs",
       );
@@ -3264,7 +3403,68 @@ class CorpAI {
       result.deterrence += bestPlan.routeDamage;
       result.isSecure = result.hasHardLockout || !bestPlan.routeFeasible;
     } else result.isSecure = result.hasHardLockout || result.totalMandatoryBreakCost > result.runnerCredits;
+    this._addHonestVerdict(result, bestPlan, effectiveCredits, server,
+      serverLockout, globalETRUses);
     return result;
+  }
+
+  //L9.0 observation only: the honest verdict beside today's. Today's fields
+  //are not touched and no consumer reads these yet (L9.0.1 adopts them).
+  //honestLockout survives the click-break and "no breaker yet" corrections;
+  //noBreakerLockout marks a layer today locked only by a missing breaker.
+  _addHonestVerdict(result, plan, credits, server, serverLockout, globalETRUses) {
+    result.honestReasons = [];
+    result.noBreakerLockout = false;
+    if (!plan.honestLayers) {
+      //The restricted-credit route already plans with the full RunCalculator.
+      result.honestLockout = result.hasHardLockout;
+      result.honestIsSecure = result.isSecure;
+      result.honestMandatoryBreakCost = result.totalMandatoryBreakCost;
+      result.honestBreakCost = result.totalBreakCost;
+      return;
+    }
+    var layers = [];
+    var layerLockout = false;
+    for (var i = 0; i < plan.honestLayers.length; i++) {
+      var layer = plan.honestLayers[i];
+      var title = GetTitle(layer.card);
+      if (layer.noBreaker) {
+        result.noBreakerLockout = true;
+        result.honestReasons.push(title + " has no matching breaker installed yet");
+      }
+      if (layer.options.length == 0) {
+        layerLockout = true;
+        result.honestReasons.push(title + " cannot be passed");
+        continue;
+      }
+      if (layer.options.some((option) => option.kind == "click-break"))
+        result.honestReasons.push(title + " can be broken by spending clicks");
+      //A finite global ETR supply makes the Runner pass the route again.
+      var repeats = 1;
+      if (globalETRUses > 0 && !serverLockout && !(layer.card.AIETRTrashesSelf &&
+          typeof layer.card.AIGlobalETRUses == "function" &&
+          layer.card.AIGlobalETRUses.call(layer.card, server) > 0))
+        repeats += globalETRUses;
+      for (var r = 0; r < repeats; r++) layers.push(layer);
+    }
+    result.honestLockout = serverLockout || layerLockout;
+    var evaluatingActiveRun = typeof attackedServer != "undefined" && attackedServer == server;
+    var clicks = this._projectedRunnerClicks();
+    var clickBudget = evaluatingActiveRun ? clicks : Math.max(0, clicks - 1);
+    var verdict = result.honestLockout
+      ? {feasible: null, cheapest: null}
+      : this._honestRouteVerdict(layers, result.runnerCredits, clickBudget,
+        Math.min(credits.clickCredits, result.runnerCredits));
+    var route = verdict.feasible || verdict.cheapest;
+    result.honestMandatoryBreakCost = route ? route.total : Infinity;
+    result.honestBreakCost = route
+      ? Math.max(route.total, isFinite(result.totalBreakCost) ? result.totalBreakCost : 0)
+      : Infinity;
+    result.honestIsSecure = result.honestLockout || !verdict.feasible;
+    if (!result.honestLockout && !verdict.feasible && route)
+      result.honestReasons.push("honest route needs " + route.credits + " credits and " +
+        route.clicks + " clicks; Runner has " + result.runnerCredits + " credits and " +
+        clickBudget + " clicks to break with");
   }
 
   //Security evaluation is used repeatedly while scoring possible actions. Keep

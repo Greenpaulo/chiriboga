@@ -2275,4 +2275,57 @@ test('Event Horizon pay-off tax is finite and its sacrificed layer is not charge
     corp.AI = previousAI; context.CheckTrash = previousTrash; context.CheckInstalled = previousInstalled;
   }
 });
+// L9.0 lockout honesty: honest fields sit beside today's, which stay unchanged.
+const honest = srv => Object.getPrototypeOf(ai)._evaluateServerSecurityUncached.call(ai, srv);
+test('L9.0: Eli 1.0 click-break is not an honest lockout; today\'s verdict unchanged', () => {
+  context.playerTurn = corp; runner.creditPool = 10; // 4 clicks next turn, 3 to break with
+  const eli = card(31043); eli.rezzed = true;
+  const result = honest(server([eli]));
+  assert.strictEqual(result.isSecure, true); assert.strictEqual(result.hasHardLockout, true);
+  assert.strictEqual(result.honestIsSecure, false); assert.strictEqual(result.honestLockout, false);
+  assert.strictEqual(result.honestMandatoryBreakCost, 2, 'two clicks at one credit each');
+  assert.ok(result.honestReasons.includes('Eli 1.0 can be broken by spending clicks'), result.honestReasons);
+});
+test('L9.0: one click to break with does not pass Eli 1.0\'s two ETR subroutines', () => {
+  runner.clickTracker = 2; runner.creditPool = 0; // one click runs, one is left
+  const eli = card(31043); eli.rezzed = true;
+  const result = honest(server([eli]));
+  assert.strictEqual(result.honestIsSecure, true); assert.strictEqual(result.honestLockout, false);
+  assert.ok(result.honestReasons.some(reason => /^honest route needs 0 credits and 2 clicks; Runner has 1 credits and 1 clicks/.test(reason)),
+    result.honestReasons);
+});
+test('L9.0: a missing breaker is noBreakerLockout with a finite public estimate', () => {
+  context.playerTurn = corp; runner.creditPool = 30;
+  const barrier = etr();
+  let result = honest(server([barrier]));
+  assert.strictEqual(result.isSecure, true); assert.strictEqual(result.hasHardLockout, true);
+  assert.strictEqual(result.noBreakerLockout, true); assert.strictEqual(result.honestLockout, false);
+  assert.strictEqual(result.honestMandatoryBreakCost, 5, 'assumed install 3 + 1 per subroutine + install click');
+  assert.strictEqual(result.honestIsSecure, false);
+  assert.ok(result.honestReasons.includes('Regression ice has no matching breaker installed yet'), result.honestReasons);
+  runner.heap = [card(31008)]; // a public Killer does not match a Barrier
+  assert.strictEqual(honest(server([barrier])).honestMandatoryBreakCost, 5);
+  runner.grip = [];
+  result = honest(server([barrier]));
+  assert.strictEqual(result.honestLockout, true, 'nothing to install from an empty Grip');
+  assert.strictEqual(result.honestIsSecure, true);
+});
+test('L9.0: click-break and paid layers share one click budget', () => {
+  context.playerTurn = corp; runner.creditPool = 0; runner.cards = [card(31008)];
+  const eli = card(31043); eli.rezzed = true;
+  const sentry = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Sentry'], strength: 2});
+  let result = honest(server([sentry, eli]));
+  assert.strictEqual(result.honestIsSecure, false, '2 clicks break Eli, 1 click gains the Mimic credit');
+  assert.strictEqual(result.honestMandatoryBreakCost, 3);
+  context.playerTurn = runner; runner.clickTracker = 3; // 2 clicks after the run click
+  result = honest(server([sentry, eli]));
+  assert.strictEqual(result.honestIsSecure, true, 'no click left to gain the credit');
+});
+test('L9.0: hidden Grip and Stack identities do not change the honest verdict', () => {
+  runner.creditPool = 30;
+  const before = JSON.stringify(honest(server([etr()])), (k, v) => (v === Infinity ? 'Inf' : v));
+  runner.grip = [card(31008), card(31008), {}, {}, {}]; runner.stack = Array(40).fill(card(31008));
+  const after = JSON.stringify(honest(server([etr()])), (k, v) => (v === Infinity ? 'Inf' : v));
+  assert.strictEqual(after, before);
+});
 console.log(tests + ' regression cases passed.');
