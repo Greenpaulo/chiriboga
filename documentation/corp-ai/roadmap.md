@@ -92,9 +92,9 @@ cannot price yet.
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
 
 ### L9.0 Lockout honesty
-- **Status:** proposed
+- **Status:** ready
 - **Depends on:** none
-- **Spec:** [L9.0-lockout-honesty.md](specs/L9.0-lockout-honesty.md)
+- **Ticket:** [L9.0-lockout-honesty.md](../backlog/L9.0-lockout-honesty.md)
 - **Goal:** Report an honest security verdict next to today's (bioroid click-breaks priced; "no breaker installed yet" as its own flag with a finite cost), so I2 gets a graded signal. Observation-only: no decision changes.
 
 ### L9.0.1 Adopt honest lockout
