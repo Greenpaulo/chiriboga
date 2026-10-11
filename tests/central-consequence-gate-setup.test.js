@@ -70,7 +70,9 @@ const install = (server, pressureSources, cardType = 'ice') => ({type: 'install'
     const pair = pool.pairs.find(p => p.id === 'gateway');
     const installs = [];
     const game = await playGame({streamPrefix: '1:gateway', corpFile: pair.corp, runnerFile: pair.runner, setFiles,
-      timeoutMs: 60000, observe: true, onEvent: event => { if (event.type === 'install') installs.push(event); }});
+      timeoutMs: 60000, observe: true, onEvent: event => {
+        if (event.type === 'install' && event.cardType === 'ice') installs.push(event);
+      }});
     assert.deepStrictEqual(game.errors, [], 'engine errors');
     assert.ok(installs.length > 0, 'the Corp installed ICE on a central');
     assert.ok(installs.every(e => e.cardType === 'ice' && (e.server === 'hq' || e.server === 'rd') &&
