@@ -54,12 +54,6 @@ cannot price yet.
 - **Ticket:** [feature-layer-6-1-payment-constraint-allocation.md](../backlog/feature-layer-6-1-payment-constraint-allocation.md)
 - **Goal:** Allocate restricted credit sources (stealth, breaker-only, central-only) against actual payments instead of one scalar ceiling.
 
-### L7.1 Consequence-calibrated central pressure
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/code-review/feature-layer-7-1-consequence-calibration.md)
-- **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
-
 ### L7.1.1 Horizon-aware central consequence
 - **Status:** parked
 - **Depends on:** F4, L7.1
@@ -141,6 +135,7 @@ cannot price yet.
 | L7.3 | Outcome-based ordinary purge | [finding 03](../backlog/done/corp_ai_finding_03_purge_random_roll.md) | [Emergency protection and purge](architecture.md#emergency-protection-and-purge) |
 | L8.1 | Baiting with access-punishing traps | Legacy roadmap work | [Baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L8.3 | Tag-punishment deterrence | Legacy roadmap work | [Baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
+| L7.1 | Consequence-calibrated central pressure | [feature-layer-7-1-consequence-calibration](../backlog/done/feature-layer-7-1-consequence-calibration.md) | [central pressure and breach-loss risk](architecture.md#central-pressure-and-breach-loss-risk) |
 
 ## Foundations (F)
 
@@ -197,18 +192,6 @@ ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
 installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
 
-### I0 Baseline capture and decision telemetry
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [I0-baseline-capture-and-telemetry.md](../backlog/code-review/I0-baseline-capture-and-telemetry.md)
-- **Goal:** Record current install choices and outcomes before changing any policy.
-
-### I1 Unified install candidate model
-- **Status:** in-progress
-- **Depends on:** I0
-- **Ticket:** [I1-unified-install-candidate-model.md](../backlog/code-review/I1-unified-install-candidate-model.md)
-- **Goal:** Replace concatenation priority with explicit, scored candidate records, initially preserving behaviour.
-
 ### I2 ICE selection by marginal security
 - **Status:** proposed
 - **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1
@@ -262,6 +245,13 @@ I9 comes last.
 - **Depends on:** I8, F4
 - **Spec:** [I9-calibration-simulation-and-simplification.md](specs/I9-calibration-simulation-and-simplification.md)
 - **Goal:** Tune bounded weights with seeded evidence and remove superseded legacy branches.
+
+### Done
+
+| ID | Item | Delivered by | Architecture |
+|---|---|---|---|
+| I0 | Baseline capture and decision telemetry | [I0-baseline-capture-and-telemetry](../backlog/done/I0-baseline-capture-and-telemetry.md) | [architecture: install planning today](architecture.md#install-planning-today) |
+| I1 | Unified install candidate model | [I1-unified-install-candidate-model](../backlog/done/I1-unified-install-candidate-model.md) | [architecture: install planning today](architecture.md#install-planning-today) |
 
 ## Reactive commitment (R)
 

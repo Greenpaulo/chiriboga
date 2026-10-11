@@ -6,6 +6,8 @@
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 3c25455 (2026-10-09)
 
+**Merged:** PR #34; workflow reconciled with `node scripts/ticket.js move` on 2026-10-11.
+
 ## Resolution
 
 Implemented from `3c25455`. Ungated, observation-only (see Acceptance gate);

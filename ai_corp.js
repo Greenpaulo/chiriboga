@@ -3006,7 +3006,7 @@ class CorpAI {
       ? (remaining) => this._breakerAbsentCost(iceCard, remaining, server, iceIndex, evaluationContext)
       : null;
     //k subroutines broken with the ICE's own ability, the rest by a breaker.
-    for (var k = clickBreak ? 1 : 0; k <= (clickBreak ? count : 0); k++) {
+    for (var k = 0; k <= (clickBreak ? count : 0); k++) {
       var self = clickBreak
         ? {credits: clickBreak.credits * k, clicks: clickBreak.clicks * k}
         : {credits: 0, clicks: 0};
@@ -3019,7 +3019,8 @@ class CorpAI {
         var priced = this._breakerActivationCost(
           iceCard, inputs.breaker, rest, server, iceIndex, evaluationContext);
         if (priced < Infinity)
-          options.push({credits: self.credits + priced, clicks: self.clicks, kind: "click-break"});
+          options.push({credits: self.credits + priced, clicks: self.clicks,
+            kind: k > 0 ? "click-break" : "current"});
       }
       if (absentCost) {
         var absent = absentCost(rest);
@@ -3071,7 +3072,11 @@ class CorpAI {
     return {credits: best, clicks: 1};
   }
 
+  //Heap-candidate legality and type match, independent of installed-breaker hooks.
   _breakerTypeMatchesIce(breaker, iceCard, server, iceIndex, evaluationContext) {
+    if ((iceCard.cannotBreakUsingAIPrograms && CheckSubType(breaker, "AI")) ||
+        (iceCard.canOnlyBreakUsingFracter && !CheckSubType(breaker, "Fracter")))
+      return false;
     var pairs = [["Fracter", "Barrier"], ["Decoder", "Code Gate"], ["Killer", "Sentry"]];
     for (var i = 0; i < pairs.length; i++) {
       if (CheckSubType(breaker, pairs[i][0]) &&

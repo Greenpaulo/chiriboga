@@ -2303,6 +2303,35 @@ test('L9.0: one click to break with does not pass Eli 1.0\'s two ETR subroutines
   assert.ok(result.honestReasons.some(reason => /^honest route needs 0 credits and 2 clicks; Runner has 1 credits and 1 clicks/.test(reason)),
     result.honestReasons);
 });
+test('L9.0: Eli permits a breaker-only route with one available click', () => {
+  runner.clickTracker = 2; runner.creditPool = 10;
+  const eli = card(31043); eli.rezzed = true;
+  const result = honest(server([eli]));
+  assert.strictEqual(result.honestIsSecure, false);
+  assert.strictEqual(result.honestLockout, false);
+  assert.strictEqual(result.honestMandatoryBreakCost, 6, 'five credits plus the install click');
+});
+test('L9.0: Heap estimates reject breakers forbidden by ICE restrictions', () => {
+  const wall = etr();
+  const srv = server([wall]);
+  const candidate = {cardType: 'program', subTypes: ['Icebreaker', 'AI'], installCost: 0};
+  runner.heap = [candidate];
+  const previousActivationCost = ai._breakerActivationCost;
+  ai._breakerActivationCost = () => 0;
+  try {
+    const estimate = () => ai._breakerAbsentCost(wall, 1, srv, 0, ai._securityEvaluationContext(srv));
+    assert.strictEqual(estimate().credits, 0, 'an unrestricted AI is eligible');
+    wall.cannotBreakUsingAIPrograms = true;
+    assert.strictEqual(estimate().credits, 4, 'forbidden AI uses the public fallback');
+    wall.cannotBreakUsingAIPrograms = false;
+    wall.canOnlyBreakUsingFracter = true;
+    wall.subTypes = ['Barrier', 'Code Gate'];
+    candidate.subTypes = ['Icebreaker', 'Decoder'];
+    assert.strictEqual(estimate().credits, 4, 'effective subtype does not waive Fracter restriction');
+    candidate.subTypes = ['Icebreaker', 'Fracter'];
+    assert.strictEqual(estimate().credits, 0, 'a legal Fracter remains eligible');
+  } finally { ai._breakerActivationCost = previousActivationCost; }
+});
 test('L9.0: a missing breaker is noBreakerLockout with a finite public estimate', () => {
   context.playerTurn = corp; runner.creditPool = 30;
   const barrier = etr();
