@@ -403,6 +403,9 @@ class CorpAI {
         if (typeof contribution == "number")
           contribution = { additionalAccess: contribution };
         contribution = contribution || {};
+        var exhausted =
+          contribution.exhausted === true &&
+          !(Number(contribution.additionalAccess) > 0);
         contribution = {
           additionalAccess: Math.max(
             0,
@@ -413,6 +416,7 @@ class CorpAI {
             Number(contribution.persistentPressure) || 0,
           ),
           growth: Math.max(0, Number(contribution.growth) || 0),
+          exhausted: exhausted,
         };
       } else {
         contribution = this._centralPressureFromCard(installed[i], server);

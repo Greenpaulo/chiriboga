@@ -2329,6 +2329,25 @@ test('L7.1 scenario 3: exhausted sources add no access; once-per-turn sources st
   context.playerTurn = runner;
   assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 0, 'used this Runner turn');
 });
+test('after-purge pressure preserves exhaustion only for enabled sources without live access', () => {
+  l71Board([], []);
+  for (const [additionalAccess, exhausted, expected] of [
+    [0, true, 1], [-2, true, 1], [2, true, 0], [0, false, 0], [0, 'true', 0],
+  ]) {
+    runner.cards = [{player: runner,
+      AICentralPressure: () => ({additionalAccess: 3}),
+      AICentralPressureAfterPurge: () => ({additionalAccess, exhausted, persistentPressure: 2, growth: -1}),
+    }];
+    const summary = ai._centralPressureSummary(corp.RnD, {afterPurge: true});
+    assert.strictEqual(summary.exhaustedSources, expected);
+    assert.strictEqual(summary.additionalAccess, Math.max(0, additionalAccess));
+    assert.strictEqual(summary.persistentPressure, 2);
+    assert.strictEqual(summary.growth, 0);
+    assert.strictEqual(ai._centralPressureSummary(corp.RnD).exhaustedSources, 0);
+    runner.cards[0].disabled = true;
+    assert.strictEqual(ai._centralPressureSummary(corp.RnD, {afterPurge: true}).exhaustedSources, 0);
+  }
+});
 test('L7.1 scenario 5: hidden Grip/Stack identities change nothing', () => {
   l71Board([l71Agenda(), l71Operation()], [l71Agenda(), l71Operation()]);
   runner.cards = [{player: runner, AICentralPressure: () => ({additionalAccess: 1})}];

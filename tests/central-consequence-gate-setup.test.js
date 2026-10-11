@@ -7,6 +7,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const vm = require('vm');
 const {playGame} = require('../scripts/ai-batch/headless');
 const batch = require('../scripts/ai-batch');
 const centralStolen = require('../scripts/ai-batch/collectors/centralStolen');
@@ -206,6 +207,63 @@ const install = (server, pressureSources, cardType = 'ice') => ({type: 'install'
     } finally {
       fs.rmSync(directory, {recursive: true, force: true});
     }
+  });
+
+  await scenario('7. install telemetry waits for completion and preserves callbacks and decision pressure', async () => {
+    // Exercise the actual harness wrapper with a controllable asynchronous
+    // Install boundary: cancellation never invokes onInstallComplete.
+    const source = fs.readFileSync(path.join(root, 'scripts/ai-batch/headless.js'), 'utf8');
+    const wrapper = source.slice(source.indexOf('      var __install = Install;'), source.indexOf('      var __mulliganFn = Mulligan;'));
+    assert.ok(wrapper.length > 0, 'found install wrapper');
+    const events = [];
+    const calls = [];
+    let pressure = {additionalAccess: 0, persistentPressure: 0, growth: 0, exhausted: true};
+    const corp = {HQ: {}, RnD: {}, AI: {_centralPressureFromCard: () => pressure}};
+    const runner = {};
+    const context = vm.createContext({corp, runner,
+      InstalledCards: () => [{title: 'Pressure source'}],
+      __centralIceInstall: (card, destination, sources) => events.push(install(destination === corp.HQ ? 'hq' : 'rd', sources)),
+      Install: function() { calls.push({receiver: this, args: Array.from(arguments)}); return 'pending'; },
+    });
+    vm.runInContext(wrapper, context);
+    const receiver = {};
+    const callbackContext = {};
+    const token = {};
+    let callbacks = 0;
+    const callback = function(arg) {
+      assert.strictEqual(this, callbackContext);
+      assert.strictEqual(arg, token);
+      assert.strictEqual(events.length, 1, 'telemetry precedes original callback');
+      callbacks++;
+      return 'completed';
+    };
+    const args = [{player: corp, cardType: 'ice'}, corp.RnD, false, null, true,
+      undefined, callbackContext, undefined, undefined, true, callback];
+    assert.strictEqual(context.Install.apply(receiver, args), 'pending');
+    assert.strictEqual(events.length, 0, 'no event while installation is pending');
+    assert.strictEqual(calls[0].receiver, receiver);
+    assert.deepStrictEqual(calls[0].args.slice(0, 10), args.slice(0, 10));
+    pressure = {additionalAccess: 2, persistentPressure: 0, growth: 0, exhausted: false};
+    assert.strictEqual(calls[0].args[10].call(callbackContext, token), 'completed');
+    assert.strictEqual(callbacks, 1);
+    assert.strictEqual(events[0].pressureSources[0].exhausted, true, 'pressure captured at decision');
+    assert.deepStrictEqual(collect(exhausted, events), {'exhaustedPressureProtectionInstalls.count': 1});
+
+    context.Install.apply(receiver, args); // cancelled: completion never fires
+    assert.strictEqual(events.length, 1, 'cancelled install contributes no event');
+    context.Install(args[0], corp.HQ); // completion callback is optional
+    calls[2].args[10]();
+    assert.strictEqual(events.length, 2);
+    for (const [card, destination] of [
+      [{player: runner, cardType: 'ice'}, corp.HQ],
+      [{player: corp, cardType: 'asset'}, corp.HQ],
+      [args[0], {}],
+    ]) {
+      const otherArgs = [card, destination, ...args.slice(2)];
+      context.Install.apply(receiver, otherArgs);
+      assert.deepStrictEqual(calls[calls.length - 1].args, otherArgs, 'nonmatching install unchanged');
+    }
+    assert.strictEqual(events.length, 2);
   });
 
   if (failures.length) {
