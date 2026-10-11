@@ -368,20 +368,25 @@ class CorpAI {
       var value = Number(pressure[key]);
       if (isFinite(value) && value > 0) ret[key] = value;
     });
+    //A limited-use source whose public uses/counters are spent reports it
+    //explicitly; it never claims current access at the same time.
+    if (pressure.exhausted === true && ret.additionalAccess <= 0)
+      ret.exhausted = true;
     return ret;
   }
 
-  //Returns a diagnostic summary and a bounded protection-score penalty for a
-  //central server. Hidden run events remain Layer 5's responsibility.
-  _centralServerThreat(server, options = {}) {
+  //Raw, unweighted public pressure summary for HQ or R&D. The access count
+  //used by _breachConsequence() and _centralBreachLossRisk() comes from here,
+  //so consequence weighting in _centralServerThreat() cannot recurse.
+  _centralPressureSummary(server, options = {}) {
     var ret = {
       additionalAccess: 0,
       persistentPressure: 0,
       growth: 0,
-      penalty: 0,
       sources: 0,
+      exhaustedSources: 0,
     };
-    if (server != corp.HQ && server != corp.RnD) return ret;
+    if (!server || (server != corp.HQ && server != corp.RnD)) return ret;
     var installed = InstalledCards(runner);
     for (var i = 0; i < installed.length; i++) {
       var contribution = null;
@@ -412,6 +417,7 @@ class CorpAI {
       } else {
         contribution = this._centralPressureFromCard(installed[i], server);
       }
+      if (contribution.exhausted) ret.exhaustedSources++;
       if (
         contribution.additionalAccess > 0 ||
         contribution.persistentPressure > 0 ||
@@ -428,12 +434,133 @@ class CorpAI {
       ret.persistentPressure = 0;
       ret.growth = 0;
     }
+    return ret;
+  }
+
+  //Returns a diagnostic summary and a bounded protection-score penalty for a
+  //central server. Hidden run events remain Layer 5's responsibility.
+  //Weighting the access term by _breachConsequence() failed its F4 gate
+  //(L7.1, 2026-10-09), so the penalty stays unweighted.
+  _centralServerThreat(server, options = {}) {
+    var ret = this._centralPressureSummary(server, options);
     ret.penalty = Math.min(
       8,
       ret.additionalAccess * 1.5 +
         ret.persistentPressure * 2 +
         Math.min(2, ret.growth),
     );
+    return ret;
+  }
+
+  //Cards one breach of HQ or R&D exposes, from the raw public access count.
+  _centralAccessCount(server, summary = null, options = {}) {
+    if (!server || !server.cards || server.cards.length < 1) return 0;
+    var raw = summary || this._centralPressureSummary(server, options);
+    return Math.min(
+      server.cards.length,
+      Math.max(1, 1 + Math.floor(raw.additionalAccess)),
+    );
+  }
+
+  //Fair, order-agnostic probability that accessing accessCount cards of
+  //server.cards yields at least pointsNeeded agenda points. The Corp may count
+  //its own server's contents but never uses the engine's hidden card order.
+  _centralWinProbability(server, accessCount, pointsNeeded) {
+    if (!server || !server.cards || server.cards.length < 1) return 0;
+    if (accessCount < 1) return 0;
+    if (pointsNeeded < 1) return 1;
+    //Dynamic programming counts equally likely combinations without relying
+    //on the actual order of HQ or R&D. Scores at/above the target are collapsed
+    //into one bucket because only a game-winning breach matters here.
+    var ways = [];
+    for (var chosen = 0; chosen <= accessCount; chosen++) {
+      ways.push(new Array(pointsNeeded + 1).fill(0));
+    }
+    ways[0][0] = 1;
+    var seen = 0;
+    for (var i = 0; i < server.cards.length; i++) {
+      var card = server.cards[i];
+      var points = CheckCardType(card, ["agenda"])
+        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
+        : 0;
+      var maximumChosen = Math.min(accessCount - 1, seen);
+      for (var chosen = maximumChosen; chosen >= 0; chosen--) {
+        for (var score = 0; score <= pointsNeeded; score++) {
+          if (ways[chosen][score] <= 0) continue;
+          var nextScore = Math.min(pointsNeeded, score + points);
+          ways[chosen + 1][nextScore] += ways[chosen][score];
+        }
+      }
+      seen++;
+    }
+    var totalWays = ways[accessCount].reduce(
+      (total, count) => total + count,
+      0,
+    );
+    if (totalWays <= 0) return 0;
+    return ways[accessCount][pointsNeeded] / totalWays;
+  }
+
+  //The one breach-consequence signal (L7.1): what a breach of server would
+  //expose "if breached", independent of current security. L3.5.1 and I2
+  //consume this rather than re-deriving agenda exposure or win risk.
+  //Returns {pointsExposed, winProbability, advancedAgenda, backdoorTo, weight};
+  //weight in [0, 1] is max(winProbability, pointsExposed / points needed).
+  _breachConsequence(server, summary = null) {
+    var ret = {
+      pointsExposed: 0,
+      winProbability: 0,
+      advancedAgenda: false,
+      backdoorTo: null,
+      weight: 0,
+    };
+    if (!server) return ret;
+    var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
+    var agendaPoints = (card) =>
+      CheckCardType(card, ["agenda"])
+        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
+        : 0;
+    if (server == corp.HQ || server == corp.RnD) {
+      var cards = server.cards || [];
+      var accessCount = this._centralAccessCount(server, summary);
+      if (cards.length > 0 && accessCount > 0) {
+        var total = cards.reduce((sum, card) => sum + agendaPoints(card), 0);
+        ret.pointsExposed = (total * accessCount) / cards.length;
+        ret.winProbability = this._centralWinProbability(
+          server,
+          accessCount,
+          pointsNeeded,
+        );
+      }
+    } else if (server == corp.archives) {
+      ret.pointsExposed = (server.cards || []).reduce(
+        (sum, card) => sum + agendaPoints(card),
+        0,
+      );
+      if (ret.pointsExposed > 0 && ret.pointsExposed >= pointsNeeded)
+        ret.winProbability = 1;
+    } else {
+      ret.pointsExposed = this._agendaPointsInServer(server);
+      ret.winProbability =
+        ret.pointsExposed > 0 && this._runnerMayWinIfServerBreached(server)
+          ? 1
+          : 0;
+      ret.advancedAgenda = (server.root || []).some(
+        (card) =>
+          CheckCardType(card, ["agenda"]) && Counters(card, "advancement") > 0,
+      );
+    }
+    ret.weight = Math.max(
+      ret.winProbability,
+      Math.min(1, ret.pointsExposed / Math.max(1, pointsNeeded)),
+    );
+    if (server == corp.archives && this._archivesIsBackdoorToHQ()) {
+      var hq = this._breachConsequence(corp.HQ);
+      if (hq.weight > ret.weight) {
+        ret = hq;
+        ret.backdoorTo = corp.HQ;
+      } else ret.backdoorTo = corp.HQ;
+    }
     return ret;
   }
 
@@ -461,47 +588,16 @@ class CorpAI {
     if (this._evaluateServerSecurity(server).isSecure) return ret;
 
     ret.canBreach = true;
-    var threat = this._centralServerThreat(server, options);
-    ret.accessCount = Math.min(
-      server.cards.length,
-      Math.max(1, 1 + Math.floor(threat.additionalAccess)),
-    );
+    ret.accessCount = this._centralAccessCount(server, null, options);
     if (ret.pointsNeeded < 1) {
       ret.probability = 1;
       return ret;
     }
-
-    //Dynamic programming counts equally likely combinations without relying
-    //on the actual order of HQ or R&D. Scores at/above the target are collapsed
-    //into one bucket because only a game-winning breach matters here.
-    var ways = [];
-    for (var chosen = 0; chosen <= ret.accessCount; chosen++) {
-      ways.push(new Array(ret.pointsNeeded + 1).fill(0));
-    }
-    ways[0][0] = 1;
-    var seen = 0;
-    for (var i = 0; i < server.cards.length; i++) {
-      var card = server.cards[i];
-      var points = CheckCardType(card, ["agenda"])
-        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
-        : 0;
-      var maximumChosen = Math.min(ret.accessCount - 1, seen);
-      for (var chosen = maximumChosen; chosen >= 0; chosen--) {
-        for (var score = 0; score <= ret.pointsNeeded; score++) {
-          if (ways[chosen][score] <= 0) continue;
-          var nextScore = Math.min(ret.pointsNeeded, score + points);
-          ways[chosen + 1][nextScore] += ways[chosen][score];
-        }
-      }
-      seen++;
-    }
-    var totalWays = ways[ret.accessCount].reduce(
-      (total, count) => total + count,
-      0,
+    ret.probability = this._centralWinProbability(
+      server,
+      ret.accessCount,
+      ret.pointsNeeded,
     );
-    if (totalWays > 0)
-      ret.probability =
-        ways[ret.accessCount][ret.pointsNeeded] / totalWays;
     return ret;
   }
 
