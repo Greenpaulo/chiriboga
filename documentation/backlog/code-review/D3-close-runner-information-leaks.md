@@ -20,8 +20,9 @@ Architecture: [what the Runner AI knows](../../runner-ai/architecture.md#what-th
   `RunCalculator._publicRezCostModifier()` (visible or lingering
   `modifyRezCost` sources other than the ICE itself, unclamped) instead of
   `RezCost(ice) - ice.rezCost`. Visible modifiers in the playable sets
-  (Reina Roja, Xanadu, HB: Architects of Tomorrow, Tread Lightly, Fransofia
-  Ward; Hype Machine in vantagepoint) read only public state of the target.
+  (Reina Roja, Xanadu, HB: Architects of Tomorrow, Akitaro Watanabe, Tread
+  Lightly, Fransofia Ward; Hype Machine in vantagepoint) read only public state
+  of the target.
 - `_icebreakerInPileNotInHandOrArray()` (`ai_runner.js`): a pile with any card
   the Runner cannot see is scanned in title order; fully visible piles keep
   their order.
