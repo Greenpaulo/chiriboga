@@ -179,10 +179,19 @@ function playGame(options) {
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
   // A Corp ICE install on HQ or R&D, with each installed Runner card's public
-  // central pressure on that server at that moment (AICentralPressure,
+  // central pressure measured when the install was requested (AICentralPressure,
   // normalized by the Corp AI; sources reporting nothing are omitted).
+  // Emit only after installation and its responses complete.
   context.__centralIceInstall = (card, server, sources) => emit('install', {card: card.title, cardType: card.cardType,
     server: serverKey(server), pressureSources: sources});
+  // Reject incomplete measurements without interrupting the engine install.
+  context.__centralPressureError = error => {
+    let message;
+    try {
+      message = error && typeof error.message === 'string' ? error.message : String(error);
+    } catch (_) { message = 'unprintable thrown value'; }
+    errors.add('central install observation: ' + message);
+  };
   // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
   // cards hosted on the rezzed card at that moment.
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
@@ -245,20 +254,25 @@ function playGame(options) {
         if (installingCard && installingCard.player === corp && installingCard.cardType === "ice" &&
             (destination === corp.HQ || destination === corp.RnD)) {
           var __sources = [];
-          InstalledCards(runner).forEach(function(c) {
-            var p = corp.AI._centralPressureFromCard(c, destination);
-            if (p.additionalAccess > 0 || p.persistentPressure > 0 || p.growth > 0 || p.exhausted)
-              __sources.push({card: c.title, additionalAccess: p.additionalAccess, exhausted: !!p.exhausted});
-          });
-          // Snapshot pressure at the decision, but count only completed installs.
-          var __args = Array.prototype.slice.call(arguments);
-          var __onInstallComplete = __args[10];
-          __args[10] = function() {
-            __centralIceInstall(installingCard, destination, __sources);
+          try {
+            InstalledCards(runner).forEach(function(c) {
+              var p = corp.AI._centralPressureFromCard(c, destination);
+              if (p.additionalAccess > 0 || p.persistentPressure > 0 || p.growth > 0 || p.exhausted)
+                __sources.push({card: c.title, additionalAccess: p.additionalAccess, exhausted: !!p.exhausted});
+            });
+          } catch (error) {
+            __sources = [];
+            __centralPressureError(error);
+          }
+          var __installArgs = Array.prototype.slice.call(arguments);
+          var __onInstallComplete = __installArgs[10];
+          __installArgs[10] = function() {
+            try { __centralIceInstall(installingCard, destination, __sources); }
+            catch (error) { __centralPressureError(error); }
             if (typeof __onInstallComplete === "function")
               return __onInstallComplete.apply(this, arguments);
           };
-          return __install.apply(this, __args);
+          return __install.apply(this, __installArgs);
         }
         return __install.apply(this, arguments);
       };
