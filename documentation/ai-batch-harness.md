@@ -584,7 +584,8 @@ under the collector's own name.
 | `unusedCreditsAtEnd` | Corp credits at game end | lower |
 
 `installOutcomes` follows only root cards installed during play (a start
-board's cards are ignored), from the headless runner's `install`, `leave`,
+board's cards are ignored until they leave and are installed again), from
+the headless runner's `install`, `leave`,
 `cardUsed`, `cardCredits` and `rez` events; passive effects (an upgrade that
 never triggers an ability) do not count as use. Each reinstallation is a
 separate commitment with its own fate, exposure, use, credits and rez costs;
@@ -618,6 +619,9 @@ recorded install notes. They are not part of the test suite. Compare the
 current code with `node tests/corp-decision-fixtures.test.js --install-snapshots`
 (it lists changed fixtures and exits non-zero); an item that intends changes
 lists and justifies each delta, then rewrites the file with `--write`.
+The same command also compares the I1 candidate records (the
+`installCandidates` notes) with `tests/fixtures/corp-install-candidates.json`,
+kept in a separate file so the I0 baseline above stays unchanged.
 
 ## Security calibration collector (L9.0)
 

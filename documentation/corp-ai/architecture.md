@@ -315,10 +315,26 @@ effective purge, then guarded emergency ICE acquisition. A game-winning score
 of an installed agenda is exempt; a winning agenda still in HQ is not (bug
 ticket
 [winning-hq-agenda-preempted-by-critical-breach-interrupt.md](../bugs/winning-hq-agenda-preempted-by-critical-breach-interrupt.md)). `AICentralPressureAfterPurge(server)` lets scaling cards such
-as Conduit describe their post-purge pressure. Nothing yet weights central
-pressure by what a breach would expose; L7.1 adds that and owns the shared
-breach-consequence signal (a planned breachConsequence accessor) that L3.5.1
-and I2 consume.
+as Conduit describe their post-purge pressure.
+
+**Breach consequence (L7.1).** `_breachConsequence()` is the one
+breach-consequence signal, for any server and independent of current security:
+`pointsExposed` (remotes: agenda points installed there; HQ and R&D: the
+expected agenda points from one breach with the public access count, which
+`_centralAccessCount()` takes from the raw `_centralPressureSummary()`;
+Archives: its agenda points), `winProbability` (remotes: win/no-win from
+`_runnerMayWinIfServerBreached()`; HQ and R&D: the same order-agnostic
+`_centralWinProbability()` that `_centralBreachLossRisk()` uses, which keeps
+its own security early return), `advancedAgenda`, `backdoorTo` (HQ while
+`_archivesIsBackdoorToHQ()` holds, when Archives takes the larger of its own
+and HQ's consequence) and `weight = max(winProbability, min(1, pointsExposed /
+points needed))`. L3.5.1 and I2 consume it. It does not weight
+`_centralServerThreat()`: scaling the access term by `0.25 + 0.75 × weight`
+failed its F4 gate (more points stolen from HQ and R&D, not fewer; see the L7.1
+ticket), so the central penalty stays unweighted. Revealed
+R&D positions are not used: nothing tracks them. Cards updated: Devadatta Drone
+reports `exhausted` at zero counters; Docklands Pass reports its access outside
+the Runner's turn, when its once-per-turn use is live for the next breach.
 
 **Rez consistency.** `_icePreventsGameWinningBreach()` compares security with an
 approached ICE rezzed (after paying) and absent. If rezzing changes a possibly
@@ -490,6 +506,31 @@ does not yet compare concrete options by their outcome.
   The helpers reuse values already computed (no extra security evaluation,
   card hook or `_random` call) and mutate no option object; the fixture suite
   checks that recording leaves choices, reasons and `_random` calls unchanged.
+- **Install candidate records (I1).** `_rankedInstallCandidates()` runs the
+  unchanged `_rankedInstallOptionsCore()` and returns `{options, protection,
+  candidates}`: the legacy option list, the protection walks, and one record
+  per `(card, server)` pair. Each record carries `kind`, `role` (the legacy
+  group), `band` (3 for the fast-advance-to-win agenda, 0 otherwise),
+  `compatibilityOrder` (the legacy emission position), a `scoreBreakdown`
+  (`legacy` group, or `titleCase:Snare!`), merged `reasons`, `eligible` and
+  `rejectionReasons`, and the legacy `option` object. A pair that two groups
+  emit is one record with both reasons; the option list still contains both
+  because `Phase_Main`'s gain-credit probe compares list lengths. ICE that the
+  first filtered protection walk ranked but legacy did not offer is recorded
+  with `eligible: false`, the walk's skip reason and, when no skip reason
+  exists, its recorded string-valued layer-policy verdict (for example
+  `layerPolicy:existingUnrezzedIceAndPoor`), after every eligible record; it is
+  never returned, so I2 can switch such candidates on deliberately. While
+  recording, `_rankedInstallOptions()` notes the records as
+  `installCandidates`. Protection notes omit the private server identity
+  references used to build candidates; snapshots and telemetry receive only
+  diagnostic fields. Otherwise it calls the core directly, so untraced play
+  does no extra work. `_hypotheticalServerAfterInstall(card, server, evaluate)`
+  is the single builder of post-install hypothetical servers (ICE as the
+  outermost layer with its install cost paid, anything else in the root; a
+  null server is a detached empty remote never added to
+  `corp.remoteServers`), restored through `_withHypothetical()`. No ranking
+  path calls it yet.
 
 Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
 rez choices. Luana Campos permits this economy rez only outside a run, with
@@ -659,7 +700,10 @@ needs.
     `agendaStolenLocations`), `mulligan`, `rez` (card, card type, credits
     paid through `SpendCredits` and the cards hosted on it, each with its
     `AIHostedDoesNotPreventRez` exemption, plus the root-card `id`), `turnEnd`
-    and `gameEnd` (with the Corp's final credits). For I0 they also emit
+    and `gameEnd` (with the Corp's final credits). They also emit `install`
+    for completed Corp ICE installs on HQ or R&D, with each Runner card's
+    normalized `AICentralPressure` measured when installation was requested
+    (`additionalAccess` and `exhausted`). For I0 they also emit
     `turnStart` (with Corp credits, HQ card types and printed play costs, and
     installed unrezzed ICE rez costs on a Corp turn), `install`/`leave` for Corp
     root cards installed during play (`createRootTracker()`, by card identity;

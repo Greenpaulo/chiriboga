@@ -70,6 +70,9 @@ const etr = () => ice(['End the run.'], [[['endTheRun']]]);
 let tests = 0;
 const verbose = !!process.env.VERBOSE; // passing cases are silent by default to keep agent context small
 function test(name, body) {
+  const originalServers = {};
+  for (const key of ['HQ', 'RnD', 'archives', 'remoteServers'])
+    originalServers[key] = Object.getOwnPropertyDescriptor(corp, key);
   runner.cards = []; runner.identityCard = null; runner.AI = null;
   runner.grip = [{}, {}, {}, {}, {}]; runner.stack = Array(40).fill({}); runner.heap = []; runner.creditPool = 0;
   runner.temporaryCredits = 0; runner.tempBonusClicks = 0; runner.clickTracker = 0;
@@ -87,6 +90,12 @@ function test(name, body) {
     serverAtRiskInstallOverride: false, committedAgendaReserveBypass: false,
     emptyArchivesRunPressure: false, valuelessServerDebtReset: false});
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
+  finally {
+    for (const [key, descriptor] of Object.entries(originalServers)) {
+      if (descriptor) Object.defineProperty(corp, key, descriptor);
+      else delete corp[key];
+    }
+  }
   tests++; if (verbose) console.log('PASS ' + name);
 }
 
@@ -2327,5 +2336,148 @@ test('L9.0: hidden Grip and Stack identities do not change the honest verdict', 
   runner.grip = [card(31008), card(31008), {}, {}, {}]; runner.stack = Array(40).fill(card(31008));
   const after = JSON.stringify(honest(server([etr()])), (k, v) => (v === Infinity ? 'Inf' : v));
   assert.strictEqual(after, before);
+});
+test('I1 hypothetical new remote evaluates like a real empty remote', () => {
+  context.NewServer = (name, isCentral) => Object.assign({isServer: true, root: [], ice: [], serverName: name}, isCentral ? {cards: []} : {});
+  const hq = {serverName: 'HQ', cards: [], ice: [], root: []};
+  Object.assign(corp, {HQ: hq, RnD: {serverName: 'R&D', cards: [], ice: [], root: []},
+    archives: {serverName: 'Archives', cards: [], ice: [], root: []}, remoteServers: []});
+  runner.creditPool = 4;
+  const summary = target => {
+    const security = ai._evaluateServerSecurity(target);
+    return JSON.stringify([security.isSecure, security.hasHardLockout, security.totalBreakCost,
+      security.totalMandatoryBreakCost, security.runnerCredits]);
+  };
+  for (const rezzed of [true, false]) {
+    const wall = Object.assign(etr(), {cardType: 'ice', rezzed});
+    const detached = ai._hypotheticalServerAfterInstall(wall, null, summary);
+    assert.strictEqual(corp.remoteServers.length, 0, 'the detached remote is never added');
+    const real = {serverName: 'Remote 0', ice: [], root: []};
+    corp.remoteServers = [real]; servers = [real];
+    const actual = ai._hypotheticalServerAfterInstall(wall, real, summary);
+    corp.remoteServers = []; servers = [];
+    assert.strictEqual(detached, actual, (rezzed ? 'rezzed' : 'unrezzed') + ' ICE');
+    assert.deepStrictEqual(real.ice, []);
+  }
+});
+
+// L7.1 shared breach-consequence signal and pressure-hook semantics
+// (documentation/backlog/feature-layer-7-1-consequence-calibration.md). The
+// consequence-weighted penalty failed its F4 gate and was removed.
+const l71Agenda = (points = 2) => ({player: corp, cardType: 'agenda', agendaPoints: points});
+const l71Operation = () => ({player: corp, cardType: 'operation'});
+const beforeL71Servers = {};
+for (const key of ['HQ', 'RnD', 'archives', 'remoteServers'])
+  beforeL71Servers[key] = Object.getOwnPropertyDescriptor(corp, key);
+function l71Board(hqCards, rndCards, archivesCards = []) {
+  Object.assign(corp, {
+    HQ: {serverName: 'HQ', cards: hqCards, ice: [], root: []},
+    RnD: {serverName: 'R&D', cards: rndCards, ice: [], root: []},
+    archives: {serverName: 'Archives', cards: archivesCards, ice: [], root: []},
+    remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+}
+test('L7.1 scenario 2: R&D multi-access consequence is critical when a breach could win', () => {
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.RnD ? {additionalAccess: 1} : {}}];
+  l71Board([], [l71Agenda(), l71Agenda(), l71Operation(), l71Operation()]);
+  runner.agendaPoints = 5;
+  const winning = ai._breachConsequence(corp.RnD);
+  assert(Math.abs(winning.winProbability - 5 / 6) < 1e-9);
+  assert.strictEqual(winning.weight, 1, 'expected exposure covers the 2 points needed');
+  const risk = ai._centralBreachLossRisk(corp.RnD);
+  assert(risk.probability >= 0.35, 'the tactical interrupt threshold is reached');
+  runner.agendaPoints = 0;
+  assert(ai._breachConsequence(corp.RnD).weight < 1, 'far from winning, the same breach matters less');
+});
+test('L7.1 scenario 3: exhausted sources add no access; once-per-turn sources stay live on the Corp turn', () => {
+  l71Board([l71Agenda()], [l71Agenda()]);
+  const drone = card(35031); drone.power = 0;
+  const docklands = card(30013); docklands.breachedHQThisTurn = true;
+  runner.cards = [drone, docklands];
+  const rnd = ai._centralServerThreat(corp.RnD);
+  assert.strictEqual(rnd.additionalAccess, 0);
+  assert.strictEqual(rnd.penalty, 0);
+  assert.strictEqual(rnd.exhaustedSources, 1, 'Devadatta Drone with no counters reports exhausted');
+  context.playerTurn = corp;
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 1, 'Docklands is live for the next Runner turn');
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).exhaustedSources, 0);
+  context.playerTurn = runner;
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 0, 'used this Runner turn');
+});
+test('after-purge pressure preserves exhaustion only for enabled sources without live access', () => {
+  l71Board([], []);
+  for (const [additionalAccess, exhausted, expected] of [
+    [0, true, 1], [-2, true, 1], [2, true, 0], [0, false, 0], [0, 'true', 0],
+  ]) {
+    runner.cards = [{player: runner,
+      AICentralPressure: () => ({additionalAccess: 3}),
+      AICentralPressureAfterPurge: () => ({additionalAccess, exhausted, persistentPressure: 2, growth: -1}),
+    }];
+    const summary = ai._centralPressureSummary(corp.RnD, {afterPurge: true});
+    assert.strictEqual(summary.exhaustedSources, expected);
+    assert.strictEqual(summary.additionalAccess, Math.max(0, additionalAccess));
+    assert.strictEqual(summary.persistentPressure, 2);
+    assert.strictEqual(summary.growth, 0);
+    assert.strictEqual(ai._centralPressureSummary(corp.RnD).exhaustedSources, 0);
+    runner.cards[0].disabled = true;
+    assert.strictEqual(ai._centralPressureSummary(corp.RnD, {afterPurge: true}).exhaustedSources, 0);
+  }
+});
+test('L7.1 scenario 5: hidden Grip/Stack identities change nothing', () => {
+  l71Board([l71Agenda(), l71Operation()], [l71Agenda(), l71Operation()]);
+  runner.cards = [{player: runner, AICentralPressure: () => ({additionalAccess: 1})}];
+  const before = [ai._breachConsequence(corp.HQ), ai._centralServerThreat(corp.RnD).penalty];
+  runner.grip = [{get title() { throw Error('hidden grip read'); }, cardType: 'event'}];
+  runner.stack = [{get title() { throw Error('hidden stack read'); }, cardType: 'program'}];
+  assert.deepStrictEqual([ai._breachConsequence(corp.HQ), ai._centralServerThreat(corp.RnD).penalty], before);
+});
+test('L7.1 scenario 6: HQ consequence matches loss risk when insecure and survives security', () => {
+  l71Board([l71Agenda(), l71Agenda(), l71Operation(), l71Operation()], []);
+  runner.agendaPoints = 5;
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.HQ ? {additionalAccess: 1} : {}}];
+  const risk = ai._centralBreachLossRisk(corp.HQ);
+  assert.strictEqual(risk.canBreach, true);
+  assert.strictEqual(ai._breachConsequence(corp.HQ).winProbability, risk.probability);
+  const oldSecurity = ai._evaluateServerSecurity;
+  ai._evaluateServerSecurity = () => ({isSecure: true});
+  try {
+    assert.strictEqual(ai._centralBreachLossRisk(corp.HQ).probability, 0);
+    assert.strictEqual(ai._breachConsequence(corp.HQ).winProbability, risk.probability);
+  } finally { ai._evaluateServerSecurity = oldSecurity; }
+});
+test('L7.1 scenario 7: Archives inherits HQ consequence only while it is a backdoor to HQ', () => {
+  l71Board([l71Agenda(3), l71Agenda(3)], [], [l71Operation()]);
+  runner.cards = [];
+  const plain = ai._breachConsequence(corp.archives);
+  assert.strictEqual(plain.pointsExposed, 0);
+  assert.strictEqual(plain.backdoorTo, null);
+  runner.cards = [{player: runner, AIRedirectsRun: (from, to) => from === corp.archives && to === corp.HQ}];
+  const backdoor = ai._breachConsequence(corp.archives);
+  assert.strictEqual(backdoor.backdoorTo, corp.HQ);
+  assert.strictEqual(backdoor.pointsExposed, ai._breachConsequence(corp.HQ).pointsExposed);
+  assert.strictEqual(backdoor.weight, ai._breachConsequence(corp.HQ).weight);
+});
+test('L7.1 scenario 9: remote weight is 1 when a breach wins, 0 when empty, between otherwise', () => {
+  l71Board([], []);
+  const remote = {serverName: 'Server 1', cards: undefined, ice: [], root: []};
+  corp.remoteServers = [remote]; servers.push(remote);
+  assert.strictEqual(ai._breachConsequence(remote).weight, 0);
+  const agenda = l71Agenda(2); agenda.advancement = 1; remote.root = [agenda];
+  runner.agendaPoints = 2;
+  const partial = ai._breachConsequence(remote);
+  assert(partial.weight > 0 && partial.weight < 1);
+  assert.strictEqual(partial.pointsExposed, 2);
+  assert.strictEqual(partial.advancedAgenda, true);
+  runner.agendaPoints = 5;
+  const winning = ai._breachConsequence(remote);
+  assert.strictEqual(winning.winProbability, 1);
+  assert.strictEqual(winning.weight, 1);
+});
+test('L7.1 boards restore original server references and absent properties', () => {
+  for (const [key, descriptor] of Object.entries(beforeL71Servers)) {
+    assert.deepStrictEqual(Object.getOwnPropertyDescriptor(corp, key), descriptor, key + ' restored');
+    if (descriptor) assert.strictEqual(corp[key], descriptor.value, key + ' reference restored');
+  }
 });
 console.log(tests + ' regression cases passed.');

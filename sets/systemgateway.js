@@ -1110,8 +1110,11 @@ cardSet[30013] = {
       return 1;
   },
   //Public, out-of-run description for Corp central-security planning.
+  //Once per turn, reset when the Runner's turn begins: outside the Runner's
+  //turn the use is live again for the next breach, so it is never exhausted.
   AICentralPressure: function(server) {
-      if (server != corp.HQ || this.breachedHQThisTurn) return {};
+      if (server != corp.HQ) return {};
+      if (this.breachedHQThisTurn && playerTurn == runner) return {};
       return { additionalAccess: 1 };
   },
   //install before run if the server is HQ and Docklands is in worthkeeping

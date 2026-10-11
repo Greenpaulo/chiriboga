@@ -372,20 +372,25 @@ class CorpAI {
       var value = Number(pressure[key]);
       if (isFinite(value) && value > 0) ret[key] = value;
     });
+    //A limited-use source whose public uses/counters are spent reports it
+    //explicitly; it never claims current access at the same time.
+    if (pressure.exhausted === true && ret.additionalAccess <= 0)
+      ret.exhausted = true;
     return ret;
   }
 
-  //Returns a diagnostic summary and a bounded protection-score penalty for a
-  //central server. Hidden run events remain Layer 5's responsibility.
-  _centralServerThreat(server, options = {}) {
+  //Raw, unweighted public pressure summary for HQ or R&D. The access count
+  //used by _breachConsequence() and _centralBreachLossRisk() comes from here,
+  //so consequence weighting in _centralServerThreat() cannot recurse.
+  _centralPressureSummary(server, options = {}) {
     var ret = {
       additionalAccess: 0,
       persistentPressure: 0,
       growth: 0,
-      penalty: 0,
       sources: 0,
+      exhaustedSources: 0,
     };
-    if (server != corp.HQ && server != corp.RnD) return ret;
+    if (!server || (server != corp.HQ && server != corp.RnD)) return ret;
     var installed = InstalledCards(runner);
     for (var i = 0; i < installed.length; i++) {
       var contribution = null;
@@ -402,6 +407,9 @@ class CorpAI {
         if (typeof contribution == "number")
           contribution = { additionalAccess: contribution };
         contribution = contribution || {};
+        var exhausted =
+          contribution.exhausted === true &&
+          !(Number(contribution.additionalAccess) > 0);
         contribution = {
           additionalAccess: Math.max(
             0,
@@ -412,10 +420,12 @@ class CorpAI {
             Number(contribution.persistentPressure) || 0,
           ),
           growth: Math.max(0, Number(contribution.growth) || 0),
+          exhausted: exhausted,
         };
       } else {
         contribution = this._centralPressureFromCard(installed[i], server);
       }
+      if (contribution.exhausted) ret.exhaustedSources++;
       if (
         contribution.additionalAccess > 0 ||
         contribution.persistentPressure > 0 ||
@@ -432,12 +442,133 @@ class CorpAI {
       ret.persistentPressure = 0;
       ret.growth = 0;
     }
+    return ret;
+  }
+
+  //Returns a diagnostic summary and a bounded protection-score penalty for a
+  //central server. Hidden run events remain Layer 5's responsibility.
+  //Weighting the access term by _breachConsequence() failed its F4 gate
+  //(L7.1, 2026-10-09), so the penalty stays unweighted.
+  _centralServerThreat(server, options = {}) {
+    var ret = this._centralPressureSummary(server, options);
     ret.penalty = Math.min(
       8,
       ret.additionalAccess * 1.5 +
         ret.persistentPressure * 2 +
         Math.min(2, ret.growth),
     );
+    return ret;
+  }
+
+  //Cards one breach of HQ or R&D exposes, from the raw public access count.
+  _centralAccessCount(server, summary = null, options = {}) {
+    if (!server || !server.cards || server.cards.length < 1) return 0;
+    var raw = summary || this._centralPressureSummary(server, options);
+    return Math.min(
+      server.cards.length,
+      Math.max(1, 1 + Math.floor(raw.additionalAccess)),
+    );
+  }
+
+  //Fair, order-agnostic probability that accessing accessCount cards of
+  //server.cards yields at least pointsNeeded agenda points. The Corp may count
+  //its own server's contents but never uses the engine's hidden card order.
+  _centralWinProbability(server, accessCount, pointsNeeded) {
+    if (!server || !server.cards || server.cards.length < 1) return 0;
+    if (accessCount < 1) return 0;
+    if (pointsNeeded < 1) return 1;
+    //Dynamic programming counts equally likely combinations without relying
+    //on the actual order of HQ or R&D. Scores at/above the target are collapsed
+    //into one bucket because only a game-winning breach matters here.
+    var ways = [];
+    for (var chosen = 0; chosen <= accessCount; chosen++) {
+      ways.push(new Array(pointsNeeded + 1).fill(0));
+    }
+    ways[0][0] = 1;
+    var seen = 0;
+    for (var i = 0; i < server.cards.length; i++) {
+      var card = server.cards[i];
+      var points = CheckCardType(card, ["agenda"])
+        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
+        : 0;
+      var maximumChosen = Math.min(accessCount - 1, seen);
+      for (var chosen = maximumChosen; chosen >= 0; chosen--) {
+        for (var score = 0; score <= pointsNeeded; score++) {
+          if (ways[chosen][score] <= 0) continue;
+          var nextScore = Math.min(pointsNeeded, score + points);
+          ways[chosen + 1][nextScore] += ways[chosen][score];
+        }
+      }
+      seen++;
+    }
+    var totalWays = ways[accessCount].reduce(
+      (total, count) => total + count,
+      0,
+    );
+    if (totalWays <= 0) return 0;
+    return ways[accessCount][pointsNeeded] / totalWays;
+  }
+
+  //The one breach-consequence signal (L7.1): what a breach of server would
+  //expose "if breached", independent of current security. L3.5.1 and I2
+  //consume this rather than re-deriving agenda exposure or win risk.
+  //Returns {pointsExposed, winProbability, advancedAgenda, backdoorTo, weight};
+  //weight in [0, 1] is max(winProbability, pointsExposed / points needed).
+  _breachConsequence(server, summary = null) {
+    var ret = {
+      pointsExposed: 0,
+      winProbability: 0,
+      advancedAgenda: false,
+      backdoorTo: null,
+      weight: 0,
+    };
+    if (!server) return ret;
+    var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
+    var agendaPoints = (card) =>
+      CheckCardType(card, ["agenda"])
+        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
+        : 0;
+    if (server == corp.HQ || server == corp.RnD) {
+      var cards = server.cards || [];
+      var accessCount = this._centralAccessCount(server, summary);
+      if (cards.length > 0 && accessCount > 0) {
+        var total = cards.reduce((sum, card) => sum + agendaPoints(card), 0);
+        ret.pointsExposed = (total * accessCount) / cards.length;
+        ret.winProbability = this._centralWinProbability(
+          server,
+          accessCount,
+          pointsNeeded,
+        );
+      }
+    } else if (server == corp.archives) {
+      ret.pointsExposed = (server.cards || []).reduce(
+        (sum, card) => sum + agendaPoints(card),
+        0,
+      );
+      if (ret.pointsExposed > 0 && ret.pointsExposed >= pointsNeeded)
+        ret.winProbability = 1;
+    } else {
+      ret.pointsExposed = this._agendaPointsInServer(server);
+      ret.winProbability =
+        ret.pointsExposed > 0 && this._runnerMayWinIfServerBreached(server)
+          ? 1
+          : 0;
+      ret.advancedAgenda = (server.root || []).some(
+        (card) =>
+          CheckCardType(card, ["agenda"]) && Counters(card, "advancement") > 0,
+      );
+    }
+    ret.weight = Math.max(
+      ret.winProbability,
+      Math.min(1, ret.pointsExposed / Math.max(1, pointsNeeded)),
+    );
+    if (server == corp.archives && this._archivesIsBackdoorToHQ()) {
+      var hq = this._breachConsequence(corp.HQ);
+      if (hq.weight > ret.weight) {
+        ret = hq;
+        ret.backdoorTo = corp.HQ;
+      } else ret.backdoorTo = corp.HQ;
+    }
     return ret;
   }
 
@@ -465,47 +596,16 @@ class CorpAI {
     if (this._evaluateServerSecurity(server).isSecure) return ret;
 
     ret.canBreach = true;
-    var threat = this._centralServerThreat(server, options);
-    ret.accessCount = Math.min(
-      server.cards.length,
-      Math.max(1, 1 + Math.floor(threat.additionalAccess)),
-    );
+    ret.accessCount = this._centralAccessCount(server, null, options);
     if (ret.pointsNeeded < 1) {
       ret.probability = 1;
       return ret;
     }
-
-    //Dynamic programming counts equally likely combinations without relying
-    //on the actual order of HQ or R&D. Scores at/above the target are collapsed
-    //into one bucket because only a game-winning breach matters here.
-    var ways = [];
-    for (var chosen = 0; chosen <= ret.accessCount; chosen++) {
-      ways.push(new Array(ret.pointsNeeded + 1).fill(0));
-    }
-    ways[0][0] = 1;
-    var seen = 0;
-    for (var i = 0; i < server.cards.length; i++) {
-      var card = server.cards[i];
-      var points = CheckCardType(card, ["agenda"])
-        ? Math.max(0, typeof AgendaPointsForCard == "function" ? AgendaPointsForCard(card, runner) : Number(card.agendaPoints) || 0)
-        : 0;
-      var maximumChosen = Math.min(ret.accessCount - 1, seen);
-      for (var chosen = maximumChosen; chosen >= 0; chosen--) {
-        for (var score = 0; score <= ret.pointsNeeded; score++) {
-          if (ways[chosen][score] <= 0) continue;
-          var nextScore = Math.min(ret.pointsNeeded, score + points);
-          ways[chosen + 1][nextScore] += ways[chosen][score];
-        }
-      }
-      seen++;
-    }
-    var totalWays = ways[ret.accessCount].reduce(
-      (total, count) => total + count,
-      0,
+    ret.probability = this._centralWinProbability(
+      server,
+      ret.accessCount,
+      ret.pointsNeeded,
     );
-    if (totalWays > 0)
-      ret.probability =
-        ways[ret.accessCount][ret.pointsNeeded] / totalWays;
     return ret;
   }
 
@@ -4509,17 +4609,178 @@ class CorpAI {
   ) {
     if (!this._installRecording())
       return this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
-    //I0 telemetry: observe the unchanged ranking and its protection choices.
+    //I0/I1 telemetry: observe the unchanged ranking, its protection choices
+    //and its candidate records. The legacy option list is returned as is,
+    //duplicates included (Phase_Main compares ranked list lengths).
+    var ranked = this._rankedInstallCandidates(cards, priorityOnly, inhibit);
+    this._noteRankedInstall(
+      ranked.options,
+      ranked.protection,
+      priorityOnly,
+      inhibit,
+      cards,
+    );
+    DecisionSnapshots.Note(
+      "installCandidates",
+      ranked.candidates.map((record) => this._traceInstallCandidate(record)),
+    );
+    return ranked.options;
+  }
+
+  //I1: install candidates as explicit records. The legacy generator keeps its
+  //order and every call it makes; records are derived from the preferences it
+  //emitted and, for ICE it did not offer, from the protection walk it already
+  //performed (no extra security evaluation, card hook or randomness).
+  //Returns {options (legacy list), protection (walk traces), candidates}.
+  _rankedInstallCandidates(cards, priorityOnly = false, inhibit = true) {
     var previousTrace = this._installTrace;
     this._installTrace = [];
     try {
-      var ret = this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+      var options = this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
       var protection = this._installTrace;
-      this._noteRankedInstall(ret, protection, priorityOnly, inhibit, cards);
-      return ret;
+      return {
+        options: options,
+        protection: protection,
+        candidates: this._installCandidateRecords(options, protection, cards),
+      };
     } finally {
       this._installTrace = previousTrace;
     }
+  }
+
+  //Compatibility bands reproduce the legacy order exactly: the fast-advance
+  //win candidate is band 3 (where legacy already ranks it), every other
+  //legacy group band 0, ordered by compatibilityOrder (emission position).
+  //The same (card, server) emitted twice is one record with merged reasons;
+  //the first occurrence keeps its position and its option object.
+  _installCandidateRecords(options, protection, cards) {
+    var records = [];
+    var groupIndex = -1;
+    var inGroupIndex = 0;
+    var previousGroup = null;
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      var group = this._installPreferenceGroup(option.reason);
+      if (group != previousGroup) {
+        groupIndex++;
+        inGroupIndex = 0;
+        previousGroup = group;
+      } else inGroupIndex++;
+      var existing = records.find(
+        (record) =>
+          record.card == option.cardToInstall &&
+          record.server == option.serverToInstallTo,
+      );
+      if (existing) {
+        if (!existing.reasons.includes(option.reason))
+          existing.reasons.push(option.reason);
+        continue;
+      }
+      records.push({
+        card: option.cardToInstall,
+        server: option.serverToInstallTo,
+        kind: option.cardToInstall ? option.cardToInstall.cardType : null,
+        role: group,
+        band: group == "win" ? 3 : 0,
+        compatibilityOrder: i,
+        groupIndex: groupIndex,
+        inGroupIndex: inGroupIndex,
+        //Title cases survive only as legacy bands, never as scoring (I9).
+        scoreBreakdown: {
+          legacy: group == "specificCase" ? "titleCase:Snare!" : group,
+          compatibilityOrder: i,
+        },
+        reasons: [option.reason || group],
+        eligible: true,
+        rejectionReasons: [],
+        option: option,
+      });
+    }
+    //ICE legacy did not offer to a server its protection walk ranked:
+    //recorded for diagnostics (and for I2), never returned.
+    var walk = protection.find((trace) => trace.filtered);
+    if (!walk) return records;
+    var ice = cards.filter((card) => CheckCardType(card, ["ice"]));
+    var eligibleCount = records.length;
+    walk.ranked.forEach((row) => {
+      var rejection = ["legacy: server not selected"];
+      if (row.server == walk.selected)
+        rejection = ["legacy: not offered for the selected server"];
+      else if (row.skipped == "layerPolicy")
+        rejection.push("layerPolicy:" + row.layerPolicy);
+      else if (row.skipped) rejection.push(row.skipped);
+      else if (typeof row.layerPolicy == "string")
+        rejection.push("layerPolicy:" + row.layerPolicy);
+      ice.forEach((card) => {
+        if (
+          records.some(
+            (record) => record.card == card && record.server == row.serverRef,
+          )
+        )
+          return;
+        records.push({
+          card: card,
+          server: row.serverRef,
+          kind: "ice",
+          role: "protectionIce",
+          band: 0,
+          compatibilityOrder: null,
+          scoreBreakdown: { legacy: "notGenerated", compatibilityOrder: null },
+          reasons: [],
+          eligible: false,
+          rejectionReasons: rejection.slice(),
+          option: null,
+        });
+      });
+    });
+    for (var j = eligibleCount; j < records.length; j++)
+      records[j].ineligibleOrder = j - eligibleCount;
+    return records;
+  }
+
+  _traceInstallCandidate(record) {
+    var row = {
+      card: record.card ? record.card.title : null,
+      server: this._traceServerName(record.server),
+      role: record.role,
+      band: record.band,
+      order: record.compatibilityOrder,
+      eligible: record.eligible,
+    };
+    if (record.reasons.length > 1) row.reasons = record.reasons;
+    if (!record.eligible) row.rejection = record.rejectionReasons;
+    if (record.scoreBreakdown.legacy != record.role)
+      row.legacy = record.scoreBreakdown.legacy;
+    return row;
+  }
+
+  //The single builder of hypothetical post-install servers (install design
+  //note). Installs card into server (ICE as the outermost layer, anything else
+  //in the root) and pays the ICE install cost, or, for a null server, into a
+  //detached empty remote that is never added to corp.remoteServers; then
+  //returns evaluate(server). The board is restored even if evaluate throws.
+  _hypotheticalServerAfterInstall(card, server, evaluate) {
+    var target = server;
+    if (target == null) {
+      target = NewServer("Hypothetical remote", false);
+      target.AIHypothetical = true;
+    }
+    var isIce = CheckCardType(card, ["ice"]);
+    var layer = isIce ? target.ice : target.root;
+    var originalLayer = layer.slice();
+    var originalCredits = corp.creditPool;
+    var installCost = isIce && server != null ? server.ice.length : 0;
+    return this._withHypothetical(
+      () => {
+        corp.creditPool -= installCost;
+        layer.push(card);
+      },
+      () => evaluate(target),
+      () => {
+        layer.splice(0, layer.length, ...originalLayer);
+        corp.creditPool = originalCredits;
+      },
+    );
   }
 
   //I0 telemetry helpers. They read values the ranking already computed and
@@ -4573,6 +4834,8 @@ class CorpAI {
           adjusted: entry.adjustedScore,
           security: this._securitySummary(entry.security),
         };
+        //I1 candidate records need the server itself; kept out of the notes.
+        Object.defineProperty(row, "serverRef", { value: entry.server });
         if (verdict && typeof verdict == "object")
           row.layerPolicy = verdict.reason;
         else if (typeof verdict == "boolean") row.layerPolicy = verdict;
@@ -4645,6 +4908,10 @@ class CorpAI {
         candidates[key] = { group: row.group, server: row.server, affordable: 0, unaffordable: 0 };
       candidates[key][row.affordable ? "affordable" : "unaffordable"]++;
     });
+    protection = protection.map((trace) => ({
+      ...trace,
+      ranked: trace.ranked.map((row) => ({ ...row })),
+    }));
     this._lastProtectionTrace = protection;
     DecisionSnapshots.Note("install", {
       call: "rankedInstallOptions",
