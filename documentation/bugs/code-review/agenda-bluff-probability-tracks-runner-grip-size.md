@@ -1,7 +1,21 @@
 # Corp AI: agenda-bluff probability falls as the Runner's Grip grows, a learnable single-variable tell
 
+**Outcome:** adopted
+
 **Source:** code inspection during the Corp AI planning audit (no debug log)
-**Reproduction:** none written yet (no pending test). The deterministic check under Reproduction can become `tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js`. Checked at `376f32c`, 2026-09-25.
+**Reproduction:** `tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js` (`node tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js`); fails at `3c25455`, 2026-10-09 (2-point agenda: 0.12 at Grip 4 vs 0.13 at Grip 0). Moved to the green suite unchanged as `tests/agenda-bluff-probability-tracks-runner-grip-size.test.js`; passes with `node tests/agenda-bluff-probability-tracks-runner-grip-size.test.js`.
+
+## Resolution
+
+Implemented from `3c25455`.
+
+- `ai_corp.js` `_shouldBluffAgendaServer()`: removed the `runnerPressure` term, so the stored probability is `clamp(0.22 / points + 0.02, 0.05, 0.18)` and no longer moves with Grip size. Eligibility guards (lone advanceable hidden agenda, Corp-winning score, winning breach) are unchanged. This is the ticket's proposed fix.
+- Classification: objective oracle (principles.md §5 invariant), so no F4 gate; `## Acceptance gate` added as N/A. No plan was needed: one function with one caller (`_deceptionPostureActive()`), the diagnosis held under validation (reproduction reproduced the ticket's table exactly), and no green expectation changed.
+- Reproduction written first, failed at `3c25455`, then moved unchanged from `tests/pending/` to `tests/agenda-bluff-probability-tracks-runner-grip-size.test.js` (18 cases: 1–3 points × Grip 0–20). The only line changed in the move is the `// Run with:` path comment; assertions are identical.
+- Docs: [architecture: baits, bluffs and deterrence](../../corp-ai/architecture.md#baits-bluffs-and-deterrence) now states the bluff probability's inputs.
+- PR review: the reproduction's success summary is now gated by `VERBOSE`; its assertions remain unchanged.
+- Validation (2026-10-09): `node tests/agenda-bluff-probability-tracks-runner-grip-size.test.js` passes all 18 cases quietly; `node tests/corp-server-security.test.js` reports `143 regression cases passed.` unchanged; `node tests/run-all-tests.js` reports `75 test files passed.`, including `tests/corp-decision-fixtures.test.js` and `tests/decision-snapshots.test.js`.
+- Open: agenda points remain an input (out of scope, as the ticket notes, for L8.6). F4 baselines for L8.2/L8.4/L8.5 should be taken from this commit onward.
 
 ## Summary
 
@@ -66,16 +80,20 @@ variable. Any single public input has the same problem; if threat should
 matter, it belongs in L8.5's match-local feedback, which is bounded and
 checked by `bluffSingleVariableCorrelation`.
 
+## Acceptance gate
+
+N/A — deterministic fix (principle 4): `documentation/corp-ai/principles.md` §5 invariant that no bluff posture may correlate with a single observable game-state variable; with every other input fixed, the stored bluff probability must not change with public Grip size.
+
 ## Acceptance criteria
 
-- [ ] A deterministic test shows the stored probability is identical for Grip
+- [x] A deterministic test shows the stored probability is identical for Grip
       sizes 0, 8 and 16 with every other input fixed, and passes in the green
       suite (`tests/`), with its expectation unchanged.
-- [ ] Existing agenda-bluff and deception tests in
+- [x] Existing agenda-bluff and deception tests in
       `tests/corp-server-security.test.js` pass unchanged.
-- [ ] `documentation/corp-ai/architecture.md` (Baits, bluffs and deterrence)
+- [x] `documentation/corp-ai/architecture.md` (Baits, bluffs and deterrence)
       states which inputs the bluff probability uses.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] `node tests/run-all-tests.js` passes.
 
 ## Out of scope / related
 
