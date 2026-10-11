@@ -25,6 +25,7 @@ context.GetServer = card => servers.find(server => server.ice.includes(card)) ||
 context.ActiveCards = player => player === runner
   ? runner.cards.concat(runner.identityCard ? [runner.identityCard] : [])
   : [];
+context.PlayerCanLook = (player, card) => !!(card.rezzed || card.faceUp || card.knownToRunner);
 context.CheckSubType = (card, subtype) => (card.subTypes || []).includes(subtype);
 context.BreakerMatchesIce = (breaker, ice) =>
   (context.CheckSubType(breaker, 'Decoder') && context.CheckSubType(ice, 'Code Gate')) ||
