@@ -344,6 +344,9 @@ steal and on a trash from HQ the Runner can see (an accessed or known card);
 a facedown trash from HQ, like an install from HQ, passes `null` and only adds
 uncertainty (on install, to entries of the same combined type via
 `_combinedCardType()`), so the model never learns which hidden card left.
+Trash updates capture visibility before removal and update memory afterward;
+empty HQ clears all entries before a later hidden draw can contribute to an
+estimate.
 
 **Visibility checks.** Corp card reads normally go through
 `PlayerCanLook(runner, card)`, `knownToRunner` or `rezzed`: server potential,

@@ -115,6 +115,29 @@ test('an accessed (seen) card trashed from HQ is still removed by title', () => 
   cases++;
 });
 
+// Empty HQ is public information: old knowledge must not survive a hidden draw.
+test('trashing the last HQ cards clears memory before a later hidden draw', () => {
+  for (const hand of [[ID.HedgeFund], [ID.HostileTakeover], [ID.HedgeFund, ID.HostileTakeover]]) {
+    for (const accessed of [false, true]) {
+      setUpBoard({hqHand: hand});
+      run(`runner.AI.suspectedHQCards = [
+        {title: "Hedge Fund", cardType: "operation", copies: 1, uncertainty: 0},
+        {title: "Hostile Takeover", cardType: "agenda", copies: 1, uncertainty: 0.5}];
+        ${accessed ? 'accessingCard = corp.HQ.cards[0];' : ''}
+        Trash(corp.HQ.cards.slice(), false);
+        accessingCard = null;`);
+      assert.strictEqual(run('corp.HQ.cards.length'), 0, 'all cards left HQ');
+      assert.deepStrictEqual(plain(run('runner.AI.suspectedHQCards')), [], 'empty HQ clears all old knowledge');
+      run('suppressCreditDrawSound = true; Draw(corp, 1);');
+      assert.strictEqual(run('corp.HQ.cards.length'), 1, 'Corp drew a replacement');
+      assert.strictEqual(run('PlayerCanLook(runner, corp.HQ.cards[0])'), false, 'replacement remains hidden');
+      assert.deepStrictEqual(plain(run('runner.AI.suspectedHQCards')), [], 'hidden draw cannot revive old knowledge');
+      assert.strictEqual(run('runner.AI._infoHQScore()'), 0, 'old hand contributes nothing to HQ estimates');
+      cases++;
+    }
+  }
+});
+
 // 2. The estimate for an unseen ICE is identical when the hidden ICE is
 // replaced by a different ICE with the same public state.
 function unseenIceEstimate(hiddenIce, withXanadu) {

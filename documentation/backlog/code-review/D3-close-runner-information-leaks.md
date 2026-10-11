@@ -13,7 +13,9 @@ Architecture: [what the Runner AI knows](../../runner-ai/architecture.md#what-th
 
 - `Trash()` (`mechanics.js`): a card leaving HQ updates the HQ model by title
   only when `PlayerCanLook(runner, card)`; a facedown trash calls
-  `LoseInfoAboutHQCards(null)` (one fewer card, more uncertainty).
+  `LoseInfoAboutHQCards(null)` (one fewer card, more uncertainty). Visibility is
+  captured before removal and memory updated afterward, so trashing the last
+  HQ card clears all entries, regardless of its identity or visibility.
 - `IceAI()` (`runcalculator.js`): unseen ICE uses the new
   `RunCalculator._publicRezCostModifier()` (visible or lingering
   `modifyRezCost` sources other than the ICE itself, unclamped) instead of
@@ -41,12 +43,16 @@ Architecture: [what the Runner AI knows](../../runner-ai/architecture.md#what-th
 Checked with `rg -n "_icebreakerInPileNotInHandOrArray|_matchingBreakerInstalled|_breakerMatchesIce" sets/`;
 none missed (the remaining hits are in non-playable `uprising`).
 
-**Tests:** new `tests/runner-information-boundary.test.js` (9 checks, scenarios
+**Tests:** new `tests/runner-information-boundary.test.js` (15 checks, scenarios
 1–5, each with 2–3 substituted hidden cards or Stack orders, `viewAllFronts`
-asserted off); all four scenario blocks fail on `3c25455`. Harness-only fix in
+asserted off); all four scenario blocks fail on `3c25455`. PR-review coverage
+also checks single-card and multi-card HQ emptying, unseen and accessed cards,
+and a subsequent hidden draw; the empty-HQ regression fails before the timing
+fix. Harness-only fix in
 `tests/kit-matching-breaker-hook-always-returns-null.test.js`: added a
 `PlayerCanLook` stub to its stubbed globals (assertions unchanged).
-`node tests/run-all-tests.js`: 75 test files passed.
+`node tests/run-all-tests.js`: 76 test files passed after PR-review remediation
+(2026-10-11), including corp-decision fixtures and decision snapshots.
 
 Acceptance gate is N/A (deterministic information-boundary fix); no F4 run.
 
