@@ -664,8 +664,9 @@ needs.
     installed unrezzed ICE rez costs on a Corp turn), `install`/`leave` for Corp
     root cards installed during play (`createRootTracker()`, by card identity;
     fates `scored`, `stolen`, `trashedOnAccess`, `trashed`, `returned`,
-    `other`), `cardUsed` (a Corp `TriggerAbility()`) and `cardCredits`
-    (`GainCredits()` with a source card, or `TakeCredits()`). None of these
+    `other`), `cardUsed` (a Corp `TriggerAbility()`, or a Corp response or
+    automatic trigger resolving through a `DecisionPhase()` callback) and
+    `cardCredits` (`GainCredits()` with a source card, or `TakeCredits()`). None of these
     fires inside a hypothetical probe. The core
     metrics are computed from these events by a pure function:
     `winRate`, `pointsScored`, `pointsStolen`, `pointsStolenByServer.*`,

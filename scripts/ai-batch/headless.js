@@ -108,6 +108,7 @@ function createRootTracker(emit) {
         present.add(id);
         if (preexisting.has(id) || tracked.has(id)) continue;
         leaving.delete(id);
+        trashedOnAccess.delete(card);
         tracked.set(id, card);
         emit('install', {id, card: card.title, cardType: card.cardType,
           ambush: (card.subTypes || []).includes('Ambush'), server: key, serverName: server.serverName, turn});

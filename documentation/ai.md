@@ -350,6 +350,8 @@ You still implement `AIImplementBreaker` to explain how they break ice, and `AIM
 
 **`AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)`** — Called on every installed program to find a match for a given ice. Return `this` if this card can handle that ice, or `null` if not. `effectiveSubTypes` is an optional array used by Corp security planning for public subtype shifts; use it instead of mutating or retaining `iceCard.subTypes`. Runner-AI callers may omit it, so fall back to the ice's current subtypes.
 
+The Runner AI's `_matchingBreakerInstalled()` returns `null` before calling this hook when the Runner cannot look at `iceCard` (unrezzed and not exposed), and `_breakerMatchesIce()` returns `false` for such ICE, so card hooks that call either helper get no match on hidden ICE without their own visibility check.
+
 Identity effects that temporarily add a subtype must also restrict the match to
 the ICE that would receive that subtype. Rielle "Kit" Peddler uses
 `_AIFirstIceToEncounter` for both `AIModifyIceAI` and
@@ -911,6 +913,11 @@ AIIcebreakerTutor: function(installedRunnerCards) {
     return preferred ? [preferred] : [];
 },
 ```
+
+`_icebreakerInPileNotInHandOrArray(pile, installedRunnerCards)` scans a pile
+that contains cards the Runner cannot see (such as the Stack) in title order,
+so the chosen breaker depends only on the pile's contents, never its hidden
+order. A fully visible pile (the Heap) is scanned in its own order.
 
 ---
 
