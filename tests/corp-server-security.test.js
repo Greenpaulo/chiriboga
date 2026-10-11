@@ -2275,4 +2275,96 @@ test('Event Horizon pay-off tax is finite and its sacrificed layer is not charge
     corp.AI = previousAI; context.CheckTrash = previousTrash; context.CheckInstalled = previousInstalled;
   }
 });
+
+// L7.1 shared breach-consequence signal and pressure-hook semantics
+// (documentation/backlog/feature-layer-7-1-consequence-calibration.md). The
+// consequence-weighted penalty failed its F4 gate and was removed.
+const l71Agenda = (points = 2) => ({player: corp, cardType: 'agenda', agendaPoints: points});
+const l71Operation = () => ({player: corp, cardType: 'operation'});
+function l71Board(hqCards, rndCards, archivesCards = []) {
+  Object.assign(corp, {
+    HQ: {serverName: 'HQ', cards: hqCards, ice: [], root: []},
+    RnD: {serverName: 'R&D', cards: rndCards, ice: [], root: []},
+    archives: {serverName: 'Archives', cards: archivesCards, ice: [], root: []},
+    remoteServers: [],
+  });
+  servers = [corp.HQ, corp.RnD, corp.archives];
+}
+test('L7.1 scenario 2: R&D multi-access consequence is critical when a breach could win', () => {
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.RnD ? {additionalAccess: 1} : {}}];
+  l71Board([], [l71Agenda(), l71Agenda(), l71Operation(), l71Operation()]);
+  runner.agendaPoints = 5;
+  const winning = ai._breachConsequence(corp.RnD);
+  assert(Math.abs(winning.winProbability - 5 / 6) < 1e-9);
+  assert.strictEqual(winning.weight, 1, 'expected exposure covers the 2 points needed');
+  const risk = ai._centralBreachLossRisk(corp.RnD);
+  assert(risk.probability >= 0.35, 'the tactical interrupt threshold is reached');
+  runner.agendaPoints = 0;
+  assert(ai._breachConsequence(corp.RnD).weight < 1, 'far from winning, the same breach matters less');
+});
+test('L7.1 scenario 3: exhausted sources add no access; once-per-turn sources stay live on the Corp turn', () => {
+  l71Board([l71Agenda()], [l71Agenda()]);
+  const drone = card(35031); drone.power = 0;
+  const docklands = card(30013); docklands.breachedHQThisTurn = true;
+  runner.cards = [drone, docklands];
+  const rnd = ai._centralServerThreat(corp.RnD);
+  assert.strictEqual(rnd.additionalAccess, 0);
+  assert.strictEqual(rnd.penalty, 0);
+  assert.strictEqual(rnd.exhaustedSources, 1, 'Devadatta Drone with no counters reports exhausted');
+  context.playerTurn = corp;
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 1, 'Docklands is live for the next Runner turn');
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).exhaustedSources, 0);
+  context.playerTurn = runner;
+  assert.strictEqual(ai._centralServerThreat(corp.HQ).additionalAccess, 0, 'used this Runner turn');
+});
+test('L7.1 scenario 5: hidden Grip/Stack identities change nothing', () => {
+  l71Board([l71Agenda(), l71Operation()], [l71Agenda(), l71Operation()]);
+  runner.cards = [{player: runner, AICentralPressure: () => ({additionalAccess: 1})}];
+  const before = [ai._breachConsequence(corp.HQ), ai._centralServerThreat(corp.RnD).penalty];
+  runner.grip = [{get title() { throw Error('hidden grip read'); }, cardType: 'event'}];
+  runner.stack = [{get title() { throw Error('hidden stack read'); }, cardType: 'program'}];
+  assert.deepStrictEqual([ai._breachConsequence(corp.HQ), ai._centralServerThreat(corp.RnD).penalty], before);
+});
+test('L7.1 scenario 6: HQ consequence matches loss risk when insecure and survives security', () => {
+  l71Board([l71Agenda(), l71Agenda(), l71Operation(), l71Operation()], []);
+  runner.agendaPoints = 5;
+  runner.cards = [{player: runner, AICentralPressure: target => target === corp.HQ ? {additionalAccess: 1} : {}}];
+  const risk = ai._centralBreachLossRisk(corp.HQ);
+  assert.strictEqual(risk.canBreach, true);
+  assert.strictEqual(ai._breachConsequence(corp.HQ).winProbability, risk.probability);
+  const oldSecurity = ai._evaluateServerSecurity;
+  ai._evaluateServerSecurity = () => ({isSecure: true});
+  try {
+    assert.strictEqual(ai._centralBreachLossRisk(corp.HQ).probability, 0);
+    assert.strictEqual(ai._breachConsequence(corp.HQ).winProbability, risk.probability);
+  } finally { ai._evaluateServerSecurity = oldSecurity; }
+});
+test('L7.1 scenario 7: Archives inherits HQ consequence only while it is a backdoor to HQ', () => {
+  l71Board([l71Agenda(3), l71Agenda(3)], [], [l71Operation()]);
+  runner.cards = [];
+  const plain = ai._breachConsequence(corp.archives);
+  assert.strictEqual(plain.pointsExposed, 0);
+  assert.strictEqual(plain.backdoorTo, null);
+  runner.cards = [{player: runner, AIRedirectsRun: (from, to) => from === corp.archives && to === corp.HQ}];
+  const backdoor = ai._breachConsequence(corp.archives);
+  assert.strictEqual(backdoor.backdoorTo, corp.HQ);
+  assert.strictEqual(backdoor.pointsExposed, ai._breachConsequence(corp.HQ).pointsExposed);
+  assert.strictEqual(backdoor.weight, ai._breachConsequence(corp.HQ).weight);
+});
+test('L7.1 scenario 9: remote weight is 1 when a breach wins, 0 when empty, between otherwise', () => {
+  l71Board([], []);
+  const remote = {serverName: 'Server 1', cards: undefined, ice: [], root: []};
+  corp.remoteServers = [remote]; servers.push(remote);
+  assert.strictEqual(ai._breachConsequence(remote).weight, 0);
+  const agenda = l71Agenda(2); agenda.advancement = 1; remote.root = [agenda];
+  runner.agendaPoints = 2;
+  const partial = ai._breachConsequence(remote);
+  assert(partial.weight > 0 && partial.weight < 1);
+  assert.strictEqual(partial.pointsExposed, 2);
+  assert.strictEqual(partial.advancedAgenda, true);
+  runner.agendaPoints = 5;
+  const winning = ai._breachConsequence(remote);
+  assert.strictEqual(winning.winProbability, 1);
+  assert.strictEqual(winning.weight, 1);
+});
 console.log(tests + ' regression cases passed.');

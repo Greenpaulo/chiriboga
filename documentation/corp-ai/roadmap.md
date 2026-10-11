@@ -55,10 +55,16 @@ cannot price yet.
 - **Goal:** Allocate restricted credit sources (stealth, breaker-only, central-only) against actual payments instead of one scalar ceiling.
 
 ### L7.1 Consequence-calibrated central pressure
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4
-- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/feature-layer-7-1-consequence-calibration.md)
+- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/code-review/feature-layer-7-1-consequence-calibration.md)
 - **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
+
+### L7.1.1 Horizon-aware central consequence
+- **Status:** proposed
+- **Depends on:** F4, L7.1
+- **Spec:** [L7.1.1-horizon-aware-central-consequence.md](specs/L7.1.1-horizon-aware-central-consequence.md)
+- **Goal:** Find out why L7.1's consequence-weighted central penalty failed its gate (more central steals), then test a horizon-aware exposure behind a default-off option.
 
 ### L8.2 Deception legibility signals
 - **Status:** ready
@@ -120,13 +126,6 @@ cannot price yet.
 
 Shared infrastructure used by every area.
 
-### F3 Per-decision evaluation cache
-- **Status:** in-progress
-- **Depends on:** F2, F4
-- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/code-review/corp_ai_finding_11_evaluate_once_per_decision.md)
-- **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
-- **Acceptance:** Full off/on/verify comparison passed on 1,400 paired games (4,200 executions), 2026-10-09; completion follow-up awaits independent review.
-
 ### F5 Mulligan weight calibration
 - **Status:** proposed
 - **Depends on:** F4
@@ -160,6 +159,7 @@ Shared infrastructure used by every area.
 | F2 | Guarded hypothetical evaluation: remaining migrations | [corp_ai_finding_10_guarded_hypothetical](../backlog/done/corp_ai_finding_10_guarded_hypothetical.md) | [architecture: foundations](architecture.md#foundations) |
 | F4 | Seeded AI-vs-AI batch harness | [corp_ai_finding_12_seeded_batch_harness](../backlog/done/corp_ai_finding_12_seeded_batch_harness.md) | [architecture.md](architecture.md#foundations) |
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
+| F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 
