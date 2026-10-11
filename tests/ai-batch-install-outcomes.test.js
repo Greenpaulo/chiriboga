@@ -51,6 +51,20 @@ function play(script) {
 }
 const hand = (credits, cards) => ({credits, hand: cards, unrezzedIceRezCosts: []});
 
+test('central ICE observations do not create root commitments', () => {
+  const outcomes = collector('installOutcomes');
+  const state = {};
+  outcomes.onEvent({type: 'gameStart'}, state);
+  outcomes.onEvent({type: 'install', card: 'Central ICE', cardType: 'ice', server: 'hq', pressureSources: []}, state);
+  assert.strictEqual(state.installOutcomes.installs.length, 0);
+  assert.strictEqual(state.installOutcomes.active.size, 0);
+  outcomes.onEvent({type: 'install', id: 1, cardType: 'agenda', turn: 1}, state);
+  outcomes.onEvent({type: 'turnStart', side: 'runner'}, state);
+  outcomes.onEvent({type: 'leave', id: 1, fate: 'scored', turn: 2}, state);
+  assert.strictEqual(outcomes.finish(state).agendasScored, 1);
+  assert.strictEqual(outcomes.finish(state).agendaExposureTurns, 1);
+});
+
 // I0 scenario 4.
 test('installOutcomes follows a stolen and a scored agenda to their fates', () => {
   const out = play(g => {
@@ -107,6 +121,68 @@ test('assets, traps and abandoned commitments', () => {
   assert.strictEqual(out.trapTriggers, 1);
   assert.strictEqual(out.assetsTrashedBeforePayoff, 0, 'both paid off before leaving');
   assert.strictEqual(out.abandoned, 0, 'the used asset is not abandoned');
+});
+
+test('reinstalled agendas retain separate fates and exposure windows', () => {
+  const out = play(g => {
+    const agenda = {title: 'Returned agenda', cardType: 'agenda'};
+    g.corpTurn(hand(5, []));
+    g.corp.HQ.root.push(agenda); agenda.cardLocation = g.corp.HQ.root;
+    g.step(); g.runnerTurn();
+    move(agenda, g.corp.HQ.root, g.corp.HQ.cards); g.step();
+    g.corpTurn(hand(5, [])); g.runnerTurn(); // no agenda installed
+    g.corpTurn(hand(5, []));
+    move(agenda, g.corp.HQ.cards, g.corp.HQ.root); g.step(); g.runnerTurn();
+    g.corpTurn(hand(5, [])); g.runnerTurn();
+    g.corpTurn(hand(5, []));
+    move(agenda, g.corp.HQ.root, g.corp.scoreArea); g.end(5);
+  }).installOutcomes;
+  assert.strictEqual(out.agendasInstalled, 2);
+  assert.strictEqual(out.agendasScored, 1);
+  assert.strictEqual(out.installToScoreTurns, 2);
+  assert.strictEqual(out.agendaExposureTurns, 1.5);
+});
+
+test('reinstalled assets reset access fate and keep payoff per installation', () => {
+  const out = play(g => {
+    const asset = {title: 'Recurring trap', cardType: 'asset', subTypes: ['Ambush']};
+    g.corpTurn(hand(5, []));
+    g.corp.HQ.root.push(asset); asset.cardLocation = g.corp.HQ.root; g.step();
+    const id = g.tracker.idOf(asset);
+    g.emit('rez', {id, cost: 2});
+    g.emit('cardCredits', {id, credits: 3});
+    g.emit('cardUsed', {id});
+    g.tracker.trashing([asset], asset);
+    move(asset, g.corp.HQ.root, g.corp.archives.cards); g.step();
+    // Events off the board must not pay off the next installation.
+    g.emit('cardCredits', {id, credits: 10}); g.emit('cardUsed', {id});
+    move(asset, g.corp.archives.cards, g.corp.HQ.cards); g.step();
+    move(asset, g.corp.HQ.cards, g.corp.HQ.root); g.step();
+    assert.strictEqual(g.tracker.idOf(asset), id);
+    g.emit('rez', {id, cost: 4});
+    g.tracker.trashing([asset], null);
+    move(asset, g.corp.HQ.root, g.corp.archives.cards); g.end(0);
+  }).installOutcomes;
+  assert.strictEqual(out.assetsInstalled, 2);
+  assert.strictEqual(out.assetNetCredits, -3, '3 credits minus two independent rez costs');
+  assert.strictEqual(out.trapTriggers, 1);
+  assert.strictEqual(out.assetsTrashedBeforePayoff, 1, 'earlier payoff does not carry over');
+  assert.strictEqual(out.abandoned, 1, 'the second trash occurred outside access and before use');
+});
+
+test('upgrade uses belong to the active installation only', () => {
+  const out = play(g => {
+    const upgrade = {title: 'Returned upgrade', cardType: 'upgrade'};
+    g.corpTurn(hand(5, []));
+    g.corp.HQ.root.push(upgrade); upgrade.cardLocation = g.corp.HQ.root; g.step();
+    const id = g.tracker.idOf(upgrade);
+    g.emit('cardUsed', {id});
+    move(upgrade, g.corp.HQ.root, g.corp.HQ.cards); g.step();
+    move(upgrade, g.corp.HQ.cards, g.corp.HQ.root); g.step();
+    g.end(5);
+  }).installOutcomes;
+  assert.strictEqual(out.upgradesInstalled, 2);
+  assert.strictEqual(out.upgradesUsed, 1);
 });
 
 test('turn collectors count runs, insolvency, stalls and credits left', () => {

@@ -31,21 +31,22 @@ module.exports = {
       game.installOutcomes = {installs: [], active: new Map()};
       return;
     }
+    const record = io.active.get(event.id);
     if (event.type === 'install') {
-      const record = {cardType: event.cardType, ambush: event.ambush, turn: event.turn,
+      // Central ICE observations share the event type but are not root commitments.
+      if (event.cardType === 'ice') return;
+      const installed = {id: event.id, cardType: event.cardType, ambush: event.ambush, turn: event.turn,
         runnerTurns: 0, fate: null, resolvedTurn: null, used: 0, credits: 0, rezPaid: 0};
-      io.installs.push(record);
-      io.active.set(event.id, record);
+      // Keep every commitment, while card-id events address only the current one.
+      io.installs.push(installed);
+      io.active.set(event.id, installed);
     } else if (event.type === 'leave') {
-      const record = io.active.get(event.id);
       if (record) { record.fate = event.fate; record.resolvedTurn = event.turn; }
       io.active.delete(event.id);
     } else if (event.type === 'turnStart' && event.side === 'runner') {
-      for (const record of io.active.values())
-        if (record.cardType === 'agenda' && !record.fate) record.runnerTurns++;
-    } else {
-      const record = io.active.get(event.id);
-      if (!record) return; // Ignore starting roots and events outside a commitment.
+      for (const installed of io.active.values())
+        if (installed.cardType === 'agenda') installed.runnerTurns++;
+    } else if (record) {
       if (event.type === 'cardUsed') record.used++;
       else if (event.type === 'cardCredits') record.credits += event.credits;
       else if (event.type === 'rez') record.rezPaid += event.cost;
