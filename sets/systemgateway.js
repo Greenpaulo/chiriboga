@@ -3079,6 +3079,12 @@ cardSet[30038] = {
     }
 	return result;
   },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
+  },
 };
 cardSet[30039] = {
   title: "Brân 1.0",
@@ -3248,6 +3254,12 @@ cardSet[30039] = {
         }
     }
 	return result;
+  },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 cardSet[30040] = {

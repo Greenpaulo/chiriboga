@@ -18,11 +18,13 @@ Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md)
 
 How vulnerable, valuable or urgent is each server?
 
-Partly done layers: **Layer 7** (the tactical breach-loss interrupt is done;
-consequence calibration, L7.1, is open) and **Layer 8** (baiting, shared
-profiles and tag deterrence are done; L8.4 and L8.5 are required to complete
-it, L8.2 is open, L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic
-cannot price yet.
+**Layer 7**: the tactical breach-loss interrupt is done, and L7.1 is complete
+with its calibrated policy not adopted after a failed gate;
+the shared breach-consequence signal and supporting fixes remain.
+**Layer 8** is partly done (baiting, shared profiles and tag deterrence are
+done; L8.4 and L8.5 are required to complete it, L8.2 is open, L8.6 is
+optional). L9 covers run-simulation effects the per-ICE heuristic cannot
+price yet.
 
 ### L3.5.1 Value-weighted protection debt
 - **Status:** ready
@@ -53,12 +55,6 @@ cannot price yet.
 - **Depends on:** L4.1
 - **Ticket:** [feature-layer-6-1-payment-constraint-allocation.md](../backlog/feature-layer-6-1-payment-constraint-allocation.md)
 - **Goal:** Allocate restricted credit sources (stealth, breaker-only, central-only) against actual payments instead of one scalar ceiling.
-
-### L7.1 Consequence-calibrated central pressure
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/code-review/feature-layer-7-1-consequence-calibration.md)
-- **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
 
 ### L7.1.1 Horizon-aware central consequence
 - **Status:** parked
@@ -99,9 +95,9 @@ cannot price yet.
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
 
 ### L9.0 Lockout honesty
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** none
-- **Spec:** [L9.0-lockout-honesty.md](specs/L9.0-lockout-honesty.md)
+- **Ticket:** [L9.0-lockout-honesty.md](../backlog/code-review/L9.0-lockout-honesty.md)
 - **Goal:** Report an honest security verdict next to today's (bioroid click-breaks priced; "no breaker installed yet" as its own flag with a finite cost), so I2 gets a graded signal. Observation-only: no decision changes.
 
 ### L9.0.1 Adopt honest lockout
@@ -115,6 +111,7 @@ cannot price yet.
 - **Depends on:** L9.0
 - **Spec:** [L9.1-unpriceable-breakers.md](specs/L9.1-unpriceable-breakers.md)
 - **Goal:** L9 limit 1: a matching breaker the evaluator cannot price never creates a secure verdict, lockout or finite break cost; `AIBreakCost` read on breakers.
+- **Pick-up:** with the Sang Kancil/Principia bug, on a branch from L9.0; steps in [the 2026-10-09 merge plan](../plans/2026-10-09-merge-and-roadmap-order.md#5-next-l91-with-the-sang-kancil-and-principia-bug).
 
 ### L9 Run-simulation fidelity
 - **Status:** proposed
@@ -140,6 +137,7 @@ cannot price yet.
 | L7.3 | Outcome-based ordinary purge | [finding 03](../backlog/done/corp_ai_finding_03_purge_random_roll.md) | [Emergency protection and purge](architecture.md#emergency-protection-and-purge) |
 | L8.1 | Baiting with access-punishing traps | Legacy roadmap work | [Baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L8.3 | Tag-punishment deterrence | Legacy roadmap work | [Baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
+| L7.1 | Consequence-calibrated central pressure | [feature-layer-7-1-consequence-calibration](../backlog/done/feature-layer-7-1-consequence-calibration.md) | [central pressure and breach-loss risk](architecture.md#central-pressure-and-breach-loss-risk) |
 
 ## Foundations (F)
 
@@ -196,18 +194,6 @@ ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
 installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
 
-### I0 Baseline capture and decision telemetry
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [I0-baseline-capture-and-telemetry.md](../backlog/code-review/I0-baseline-capture-and-telemetry.md)
-- **Goal:** Record current install choices and outcomes before changing any policy.
-
-### I1 Unified install candidate model
-- **Status:** in-progress
-- **Depends on:** I0
-- **Ticket:** [I1-unified-install-candidate-model.md](../backlog/code-review/I1-unified-install-candidate-model.md)
-- **Goal:** Replace concatenation priority with explicit, scored candidate records, initially preserving behaviour.
-
 ### I2 ICE selection by marginal security
 - **Status:** proposed
 - **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1
@@ -261,6 +247,13 @@ I9 comes last.
 - **Depends on:** I8, F4
 - **Spec:** [I9-calibration-simulation-and-simplification.md](specs/I9-calibration-simulation-and-simplification.md)
 - **Goal:** Tune bounded weights with seeded evidence and remove superseded legacy branches.
+
+### Done
+
+| ID | Item | Delivered by | Architecture |
+|---|---|---|---|
+| I0 | Baseline capture and decision telemetry | [I0-baseline-capture-and-telemetry](../backlog/done/I0-baseline-capture-and-telemetry.md) | [architecture: install planning today](architecture.md#install-planning-today) |
+| I1 | Unified install candidate model | [I1-unified-install-candidate-model](../backlog/done/I1-unified-install-candidate-model.md) | [architecture: install planning today](architecture.md#install-planning-today) |
 
 ## Reactive commitment (R)
 

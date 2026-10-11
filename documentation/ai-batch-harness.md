@@ -623,6 +623,30 @@ The same command also compares the I1 candidate records (the
 `installCandidates` notes) with `tests/fixtures/corp-install-candidates.json`,
 kept in a separate file so the I0 baseline above stays unchanged.
 
+## Security calibration collector (L9.0)
+
+`securityCalibration` measures how well the Corp's security verdict predicts
+breaches. When it is selected, the headless runner emits one
+`securitySnapshot` event per Runner turn, at the first step of that turn
+where the Runner has clicks. The event records today's verdict (`isSecure`)
+and the honest one (`honestIsSecure`, see
+[architecture: server security evaluation](corp-ai/architecture.md#server-security-evaluation))
+for HQ, R&D, Archives when it holds cards, and every remote with root cards.
+It reads them through the uncached evaluator, so neither the security cache
+nor `evaluatorCallCount` moves. A server counts as breached when a
+successful run on it (run events carry `serverName`) happens before that
+Runner turn ends.
+
+| Metric | Meaning | Better |
+|---|---|---|
+| `securityCalibration.<verdict>.<scope>.secure` / `.insecure` | Server-turns judged secure / insecure | none |
+| `securityCalibration.<verdict>.<scope>.secureBreached` / `.insecureBreached` | Of those, server-turns breached that turn | none |
+
+`<verdict>` is `current` or `honest`; `<scope>` is `all` or `agendaRemote`
+(remotes holding an agenda). The metrics are per-game counts. The pooled
+breach rate of a group is `mean(secureBreached) / mean(secure)`, not the mean
+of per-game rates.
+
 ## Checking the F3 security cache
 
 `node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`

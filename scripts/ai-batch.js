@@ -189,7 +189,7 @@ async function playJob(job) {
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
     runnerOptions: job.runnerOptions, securityCache: job.securityCache,
-    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
+    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), securitySnapshot: job.collectors.includes('securityCalibration'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
   const record = {fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed, ok,
