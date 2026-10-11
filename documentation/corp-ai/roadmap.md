@@ -18,11 +18,13 @@ Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md)
 
 How vulnerable, valuable or urgent is each server?
 
-Partly done layers: **Layer 7** (the tactical breach-loss interrupt is done;
-consequence calibration, L7.1, is open) and **Layer 8** (baiting, shared
-profiles and tag deterrence are done; L8.4 and L8.5 are required to complete
-it, L8.2 is open, L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic
-cannot price yet.
+**Layer 7**: the tactical breach-loss interrupt is done, and L7.1 is complete
+with its calibrated policy not adopted after a failed gate;
+the shared breach-consequence signal and supporting fixes remain.
+**Layer 8** is partly done (baiting, shared profiles and tag deterrence are
+done; L8.4 and L8.5 are required to complete it, L8.2 is open, L8.6 is
+optional). L9 covers run-simulation effects the per-ICE heuristic cannot
+price yet.
 
 ### L3.5.1 Value-weighted protection debt
 - **Status:** ready
