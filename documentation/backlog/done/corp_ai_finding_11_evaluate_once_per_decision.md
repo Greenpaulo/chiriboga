@@ -175,9 +175,10 @@ Implemented from `44479ba` (uncommitted follow-up).
   Its missing-reproduction-line warning reflects this existing performance
   feature having no pending bug reproduction; its deterministic green coverage
   and formal comparison are recorded above.
-- No remaining implementation or acceptance work. The completion follow-up
-  awaits independent review; the original cache's historical review below
-  does not review these new collector/tests/comparison changes.
+- No remaining implementation or acceptance work. Before PR #32's approval,
+  the completion follow-up awaited independent review; the original cache's
+  historical review below does not review these new collector/tests/comparison
+  changes.
 - Completion follow-up accepted on CodeRabbit's approval of PR #32
   (2026-10-09); no separate ticket review.
 

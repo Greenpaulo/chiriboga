@@ -250,7 +250,15 @@ function playGame(options) {
             if (p.additionalAccess > 0 || p.persistentPressure > 0 || p.growth > 0 || p.exhausted)
               __sources.push({card: c.title, additionalAccess: p.additionalAccess, exhausted: !!p.exhausted});
           });
-          __centralIceInstall(installingCard, destination, __sources);
+          // Snapshot pressure at the decision, but count only completed installs.
+          var __args = Array.prototype.slice.call(arguments);
+          var __onInstallComplete = __args[10];
+          __args[10] = function() {
+            __centralIceInstall(installingCard, destination, __sources);
+            if (typeof __onInstallComplete === "function")
+              return __onInstallComplete.apply(this, arguments);
+          };
+          return __install.apply(this, __args);
         }
         return __install.apply(this, arguments);
       };
