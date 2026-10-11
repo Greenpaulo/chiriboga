@@ -44,7 +44,7 @@ const LEGACY_TITLES = [
   '_bestMainPhaseEconomyOption: Predictive Planogram',
   '_bestMainPhaseEconomyOption: Spin Doctor',
   '_bestMainPhaseEconomyOption: Sprint',
-  '_rankedInstallOptions: Snare!',
+  '_rankedInstallOptionsCore: Snare!',
   '_iceWorthRezzing: Inside Job',
   'Phase_Movement: Spin Doctor',
   'Phase_EOT: Clearinghouse',

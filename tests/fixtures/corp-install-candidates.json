@@ -1,0 +1,569 @@
+{
+ "advance-agenda-one-short.txt": [],
+ "corp-agenda-into-secure-remote-still-ok.txt": [
+  [
+   {
+    "card": "Send a Message",
+    "server": "Remote 0",
+    "role": "rootIntoServer",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   }
+  ]
+ ],
+ "corp-continues-send-a-message-scoring-plan.txt": [],
+ "corp-installs-agenda-in-protected-remote.txt": [
+  [
+   {
+    "card": "Hostile Takeover",
+    "server": "Remote 0",
+    "role": "rootIntoServer",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   }
+  ]
+ ],
+ "corp-installs-ice-on-naked-hq-with-agendas.txt": [
+  [
+   {
+    "card": "Ice Wall",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   },
+   {
+    "card": "Ice Wall",
+    "server": "new remote",
+    "role": "fallbackIce",
+    "band": 0,
+    "order": 1,
+    "eligible": true
+   },
+   {
+    "card": "Ice Wall",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Ice Wall",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   }
+  ]
+ ],
+ "corp-layers-breachable-agenda-remote.txt": [
+  [
+   {
+    "card": "Semak-samun",
+    "server": "Remote 1",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 0,
+    "eligible": true,
+    "reasons": [
+     "returned by _iceInstallOptions for server that needs protection",
+     "returned by _iceInstallOptions for new server"
+    ]
+   },
+   {
+    "card": "Semak-samun",
+    "server": "Remote 0",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   }
+  ]
+ ],
+ "corp-no-agenda-behind-conditional-etr-ice.txt": [
+  []
+ ],
+ "corp-no-agenda-behind-no-etr-ice.txt": [
+  []
+ ],
+ "corp-no-agenda-into-insecure-remote.txt": [
+  []
+ ],
+ "corp-protects-baker-backdoor-after-rnd-layer-blocked.txt": [
+  [
+   {
+    "card": "Empiricist",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   },
+   {
+    "card": "Mycoweb",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: not offered for the selected server"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: not offered for the selected server"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Empiricist",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Empiricist",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "Remote 0",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Empiricist",
+    "server": "Remote 0",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "Remote 0",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Empiricist",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Mycoweb",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   }
+  ]
+ ],
+ "corp-protects-hq-not-archives-stale-allocation.txt": [
+  [
+   {
+    "card": "Semak-samun",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   },
+   {
+    "card": "Karunā",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 1,
+    "eligible": true
+   },
+   {
+    "card": "Semak-samun",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Karunā",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Karunā",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Karunā",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   }
+  ]
+ ],
+ "corp-protects-hq-when-poor.txt": [
+  [
+   {
+    "card": "Semak-samun",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   },
+   {
+    "card": "Karunā",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 1,
+    "eligible": true
+   },
+   {
+    "card": "Semak-samun",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Karunā",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Karunā",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Karunā",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   }
+  ]
+ ],
+ "corp-protects-hq-when-reserve-exceeds-credits.txt": [
+  [
+   {
+    "card": "Semak-samun",
+    "server": "HQ",
+    "role": "protectionIce",
+    "band": 0,
+    "order": 0,
+    "eligible": true
+   },
+   {
+    "card": "Semak-samun",
+    "server": "Remote 0",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "new remote",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "Archives",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   },
+   {
+    "card": "Semak-samun",
+    "server": "R&D",
+    "role": "protectionIce",
+    "band": 0,
+    "order": null,
+    "eligible": false,
+    "rejection": [
+     "legacy: server not selected"
+    ],
+    "legacy": "notGenerated"
+   }
+  ]
+ ]
+}

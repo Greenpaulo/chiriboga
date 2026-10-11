@@ -56,9 +56,18 @@ collector and `install`-event tests in `tests/central-consequence-gate-setup.tes
 Departures from the plan: tests were added to the existing
 `tests/corp-server-security.test.js` harness rather than a new file.
 
+PR #39 review validation (2026-10-11): focused checks passed (150 server-security
+cases and 4 gate-setup scenarios); `node tests/run-all-tests.js` passed all 76
+test files, including corp-decision fixtures and decision snapshots. The
+install observer now records pressure-hook failures as harness errors and
+discards partial sources while still delegating to the engine. Such games
+cannot supply valid gate evidence. Server references are restored after each
+security test, including when a test throws.
+
 Next idea: [L7.1.1 Horizon-aware central consequence](../../corp-ai/specs/L7.1.1-horizon-aware-central-consequence.md)
-(proposed): first explain the failure from replays, the likely cause being a
-current-snapshot weight that discounts an agenda-free HQ that refills by draw.
+(parked): replay analysis located the regression in remote-scoring comparisons
+against HQ's protection score, rather than the proposed horizon effect.
+Retarget only with fresh evidence.
 Note for I2: its planned `consequenceWeight = 0.25 + 0.75 × weight` is the
 same mapping this gate rejected for central protection.
 

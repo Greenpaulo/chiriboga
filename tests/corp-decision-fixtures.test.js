@@ -11,6 +11,10 @@
 //         AI_LOG=1 node tests/corp-decision-fixtures.test.js  also print the AI's own reasoning
 //         VERBOSE=1 node tests/corp-decision-fixtures.test.js list passing fixtures too
 //         node tests/corp-decision-fixtures.test.js --ids     list card ids to help write fixtures
+//         node tests/corp-decision-fixtures.test.js --install-snapshots [--write]
+//                                                    compare (or rewrite) the I0 install-decision baseline,
+//                                                    tests/fixtures/corp-install-baseline.json, and the I1 candidate
+//                                                    records, tests/fixtures/corp-install-candidates.json; not part of the suite
 //         node tests/corp-decision-fixtures.test.js --stub-missing   discovery mode: auto-stub engine functions the AI needs
 //                                                    (returns false; results are NOT trustworthy until real stubs are written)
 //
@@ -20,6 +24,12 @@
 //              // EXPECT_SERVER: HQ        (checks the preferred install target)
 //              // EXPECT_CARD: Semak-samun (checks the preferred card)
 //              // SETUP: corp.creditPool=6; corp.clickTracker=3   (needed for non-debug logs, which omit them)
+//              // EXPECT_SKIPPED: R&D=layerPolicy:existingUnrezzedIceAndPoor
+//                                         (I0 telemetry: an ICE-protection walk passed over this server
+//                                          for this reason; the part after ':' is the layer-policy reason)
+//
+// Every green fixture also runs with I0 install recording on and must give the
+// same choice, logged reasons and CorpAI._random call count as without it.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -156,6 +166,16 @@ vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), c
 ['ai_corp.js', 'runcalculator.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js', 'sets/vantagepoint.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('runnerRC = new RunCalculator();', context);
+// The real DecisionSnapshots recorder (utility.js), used by the recording pass.
+const utilitySource = fs.readFileSync(path.join(root, 'utility.js'), 'utf8');
+vm.runInContext(utilitySource.slice(utilitySource.indexOf('// BEGIN DecisionSnapshots'),
+  utilitySource.indexOf('// END DecisionSnapshots')), context, {filename: 'utility.js'});
+const recorder = vm.runInContext('DecisionSnapshots', context);
+const installSnapshots = process.argv.includes('--install-snapshots');
+const snapshotFile = path.join(__dirname, 'fixtures', 'corp-install-baseline.json');
+const candidatesFile = path.join(__dirname, 'fixtures', 'corp-install-candidates.json');
+const snapshots = {};
+const candidateSnapshots = {};
 
 if (process.argv.includes('--ids')) {
   const show = (label, pred) => console.log(label + ': ' + Object.entries(context.cardSet)
@@ -180,8 +200,21 @@ const showPasses = !!process.env.VERBOSE || pending || requestedFixtures.length 
 const files = requestedFixtures.length ? requestedFixtures :
   (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort() : []);
 let passed = 0, failed = 0;
+// Why an ICE-protection walk passed over a server, as "<skipped>[:<layer policy reason>]".
+function skippedReasons(installNotes) {
+  const out = {};
+  for (const note of installNotes || [])
+    for (const trace of note.protection || [])
+      for (const row of trace.ranked)
+        if (trace.filtered && row.skipped) {
+          const reason = row.skipped + (row.skipped === 'layerPolicy' ? ':' + row.layerPolicy : '');
+          (out[row.server] = out[row.server] || []).includes(reason) || out[row.server].push(reason);
+        }
+  return out;
+}
 files.forEach(file => {
-  const src = fs.readFileSync(path.join(dir, file), 'utf8').replace(/\r/g, '');
+  // An absolute path runs a fixture from elsewhere (tests/decision-snapshots.test.js).
+  const src = fs.readFileSync(path.resolve(dir, file), 'utf8').replace(/\r/g, '');
   const directive = key => { const m = src.match(new RegExp('^//\\s*' + key + ':\\s*(.*)$', 'm')); return m ? m[1].trim() : ''; };
   const phase = directive('PHASE') || 'Phase_Main';
   const options = directive('OPTIONS').split(',').map(s => s.trim()).filter(Boolean);
@@ -190,12 +223,18 @@ files.forEach(file => {
   let baseline = null;
   // Pending fixtures remain single known-red reproductions. Green fixtures
   // also prove identical choices and logged reasons across F3 cache modes.
-  for (const cacheMode of (pending ? ['on'] : ['off', 'on', 'verify'])) {
+  for (const cacheMode of (pending ? ['on'] : ['off', 'on', 'verify', 'record'])) {
   for (let attempt = 0; attempt < 80; attempt++) {
     try {
       resetState();
+      let randomCalls = 0;
+      ai._random = () => { randomCalls++; return 1; };
       ai._securityCacheEnabled = cacheMode !== 'off';
       ai._securityCacheVerify = cacheMode === 'verify';
+      const recording = cacheMode === 'record';
+      const telemetry = [];
+      recorder.telemetry = recording ? {sink: entry => telemetry.push(entry)} : null;
+      let notes = null;
       vm.runInContext(src, context, {filename: file});
       if (directive('SETUP')) vm.runInContext(directive('SETUP'), context);
       finaliseState();
@@ -212,11 +251,18 @@ files.forEach(file => {
         context.currentPhase = {identifier, title};
         context.executingCommand = command;
         idx = ai.Choice(options.slice(), choiceType);
+        if (recording) notes = telemetry.length ? telemetry[telemetry.length - 1] : {};
       } else {
         if (typeof ai[phase] != 'function') throw new Error('Unknown PHASE ' + phase);
-        idx = cacheMode === 'off' ? ai[phase](options.slice()) :
-          ai._withSecurityCache(() => ai[phase](options.slice()));
+        const previous = recording ? recorder.BeginNotes(true) : null;
+        try {
+          idx = cacheMode === 'off' ? ai[phase](options.slice()) :
+            ai._withSecurityCache(() => ai[phase](options.slice()));
+        } finally {
+          if (recording) notes = recorder.EndNotes(previous) || {};
+        }
       }
+      recorder.telemetry = null;
       const chosen = typeof idx === 'number' ? options[idx] : JSON.stringify(idx);
       const negate = expect.startsWith('!');
       const expectedServer = directive('EXPECT_SERVER');
@@ -227,20 +273,35 @@ files.forEach(file => {
       const commandOK = negate ? chosen !== expect.slice(1) : chosen === expect;
       const serverOK = !expectedServer || chosenServer === expectedServer;
       const cardOK = !expectedCard || chosenCard === expectedCard;
-      const result = JSON.stringify([chosen, chosenServer, chosenCard, decisionMessages]);
+      const result = JSON.stringify([chosen, chosenServer, chosenCard, decisionMessages, randomCalls]);
       if (baseline === null) baseline = result;
-      assert.strictEqual(result, baseline, 'F3 choice/reasons differ in cache mode ' + cacheMode);
-      const ok = commandOK && serverOK && cardOK;
+      assert.strictEqual(result, baseline, 'F3 choice/reasons/random calls differ in mode ' + cacheMode);
+      let skippedOK = true, skippedNote = '';
+      if (recording) {
+        const skipped = skippedReasons(notes.install);
+        const expectedSkip = directive('EXPECT_SKIPPED');
+        if (expectedSkip) {
+          const [server, reason] = [expectedSkip.slice(0, expectedSkip.indexOf('=')), expectedSkip.slice(expectedSkip.indexOf('=') + 1)];
+          skippedOK = (skipped[server] || []).includes(reason);
+          if (!skippedOK) skippedNote = ', skipped ' + JSON.stringify(skipped) + ', expected ' + expectedSkip;
+        }
+        if (installSnapshots && options.includes('install')) {
+          snapshots[file] = {chosen, server: chosenServer || null, card: chosenCard || null, install: notes.install || []};
+          candidateSnapshots[file] = notes.installCandidates || [];
+        }
+      }
+      const ok = commandOK && serverOK && cardOK && skippedOK;
       const replayPath = identifier ? 'Choice ' + identifier : phase;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
       if (ok) { passed++; if (showPasses) console.log('PASS ' + file + '  (' + replayPath + ' -> ' + chosen + ')' + note); }
       else {
         const serverNote = expectedServer ? ', server ' + (chosenServer || 'none') + ', expected ' + expectedServer : '';
         const cardNote = expectedCard ? ', card ' + (chosenCard || 'none') + ', expected ' + expectedCard : '';
-        failed++; console.log('FAIL ' + file + '  (' + replayPath + ' -> ' + chosen + ', expected ' + expect + serverNote + cardNote + ')' + note);
+        failed++; console.log('FAIL ' + file + '  (' + replayPath + ' -> ' + chosen + ', expected ' + expect + serverNote + cardNote + skippedNote + ')' + note);
       }
       break;
     } catch (e) {
+      recorder.telemetry = null;
       const missing = /^(\w+) is not defined/.exec(String(e.message));
       if (missing && process.argv.includes('--stub-missing') && !(missing[1] in context)) {
         context[missing[1]] = () => false; stubbed.push(missing[1]); continue;
@@ -251,5 +312,37 @@ files.forEach(file => {
   }
   }
 });
+if (installSnapshots) {
+  // I0 install-decision baseline (documentation/ai-batch-harness.md): I1 and
+  // later items diff against it; only listed, justified deltas are expected.
+  const current = JSON.stringify(snapshots, null, 1) + '\n';
+  if (process.argv.includes('--write')) {
+    fs.writeFileSync(snapshotFile, current);
+    console.log('Wrote ' + Object.keys(snapshots).length + ' install snapshots to ' + path.relative(root, snapshotFile));
+  } else {
+    const saved = fs.existsSync(snapshotFile) ? JSON.parse(fs.readFileSync(snapshotFile, 'utf8')) : {};
+    const names = [...new Set(Object.keys(saved).concat(Object.keys(snapshots)))].sort();
+    const changed = names.filter(name => JSON.stringify(saved[name]) !== JSON.stringify(snapshots[name]));
+    changed.forEach(name => console.log('CHANGED install snapshot ' + name +
+      (saved[name] && snapshots[name] ? ' (chosen ' + saved[name].chosen + '/' + saved[name].server + '/' + saved[name].card +
+        ' -> ' + snapshots[name].chosen + '/' + snapshots[name].server + '/' + snapshots[name].card + ')' : ' (added or removed)')));
+    console.log(changed.length + ' of ' + names.length + ' install snapshots changed.');
+    if (changed.length) failed++;
+  }
+  // I1 candidate records (installCandidates notes), kept apart so the I0
+  // baseline above stays byte-identical.
+  const currentCandidates = JSON.stringify(candidateSnapshots, null, 1) + '\n';
+  if (process.argv.includes('--write')) {
+    fs.writeFileSync(candidatesFile, currentCandidates);
+    console.log('Wrote ' + Object.keys(candidateSnapshots).length + ' install candidate snapshots to ' + path.relative(root, candidatesFile));
+  } else {
+    const saved = fs.existsSync(candidatesFile) ? JSON.parse(fs.readFileSync(candidatesFile, 'utf8')) : {};
+    const names = [...new Set(Object.keys(saved).concat(Object.keys(candidateSnapshots)))].sort();
+    const changed = names.filter(name => JSON.stringify(saved[name]) !== JSON.stringify(candidateSnapshots[name]));
+    changed.forEach(name => console.log('CHANGED install candidates ' + name));
+    console.log(changed.length + ' of ' + names.length + ' install candidate snapshots changed.');
+    if (changed.length) failed++;
+  }
+}
 console.log(passed + ' passed, ' + failed + ' failed, ' + files.length + ' fixtures.');
 process.exitCode = failed ? 1 : 0;
