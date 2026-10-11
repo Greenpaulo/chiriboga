@@ -5,6 +5,8 @@
 // harness `install` event the second one reads.
 const assert = require('assert');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const {playGame} = require('../scripts/ai-batch/headless');
 const batch = require('../scripts/ai-batch');
 const centralStolen = require('../scripts/ai-batch/collectors/centralStolen');
@@ -73,6 +75,45 @@ const install = (server, pressureSources, cardType = 'ice') => ({type: 'install'
     assert.ok(installs.every(e => e.cardType === 'ice' && (e.server === 'hq' || e.server === 'rd') &&
       Array.isArray(e.pressureSources) && e.pressureSources.every(s => typeof s.additionalAccess === 'number' &&
         typeof s.exhausted === 'boolean')), 'install events carry server and normalized sources');
+  });
+
+  await scenario('4. a throwing pressure hook preserves install delegation and invalidates measurements', async () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'central-observer-'));
+    const setupFile = path.join(directory, 'setup.js');
+    const pair = pool.pairs.find(p => p.id === 'gateway');
+    const installs = [];
+    fs.writeFileSync(setupFile, `
+      var calls = 0, pressureCalls = 0;
+      var receiver = {}, installing = {player: corp, cardType: 'ice', title: 'Observer test ICE'};
+      var originalInstalled = InstalledCards, originalInstall = __install;
+      InstalledCards = function() { return [
+        {player: runner, title: 'Live pressure', AICentralPressure: function() {
+          pressureCalls++; return {additionalAccess: 1};
+        }},
+        {player: runner, title: 'Throwing pressure', AICentralPressure: function() {
+          pressureCalls++; throw new Error('pressure probe failed');
+        }}
+      ]; };
+      __install = function(card, destination, extra) {
+        calls++;
+        return this === receiver && card === installing && destination === corp.HQ && extra === 'extra';
+      };
+      var delegated = Install.call(receiver, installing, corp.HQ, 'extra');
+      InstalledCards = originalInstalled; __install = originalInstall;
+      __report = function() { return {calls: calls, pressureCalls: pressureCalls, delegated: delegated}; };
+    `);
+    try {
+      const game = await playGame({streamPrefix: '1:gateway', corpFile: pair.corp, runnerFile: pair.runner,
+        setFiles, timeoutMs: 60000, observe: true, setupFile,
+        onEvent: event => { if (event.type === 'install') installs.push(event); }});
+      assert.deepStrictEqual(game.report, {calls: 1, pressureCalls: 2, delegated: true},
+        'the real hook throws but the wrapped install still receives its receiver and all arguments');
+      assert.deepStrictEqual(game.errors, ['central install observation: pressure probe failed']);
+      assert.strictEqual(installs.length, 1);
+      assert.strictEqual(installs[0].pressureSources.length, 0, 'discard partial measurements');
+    } finally {
+      fs.rmSync(directory, {recursive: true, force: true});
+    }
   });
 
   if (failures.length) {

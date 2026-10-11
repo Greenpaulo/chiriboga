@@ -183,6 +183,8 @@ function playGame(options) {
   // normalized by the Corp AI; sources reporting nothing are omitted).
   context.__centralIceInstall = (card, server, sources) => emit('install', {card: card.title, cardType: card.cardType,
     server: serverKey(server), pressureSources: sources});
+  // Reject incomplete measurements without interrupting the engine install.
+  context.__centralPressureError = error => errors.add('central install observation: ' + error.message);
   // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
   // cards hosted on the rezzed card at that moment.
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
@@ -245,11 +247,16 @@ function playGame(options) {
         if (installingCard && installingCard.player === corp && installingCard.cardType === "ice" &&
             (destination === corp.HQ || destination === corp.RnD)) {
           var __sources = [];
-          InstalledCards(runner).forEach(function(c) {
-            var p = corp.AI._centralPressureFromCard(c, destination);
-            if (p.additionalAccess > 0 || p.persistentPressure > 0 || p.growth > 0 || p.exhausted)
-              __sources.push({card: c.title, additionalAccess: p.additionalAccess, exhausted: !!p.exhausted});
-          });
+          try {
+            InstalledCards(runner).forEach(function(c) {
+              var p = corp.AI._centralPressureFromCard(c, destination);
+              if (p.additionalAccess > 0 || p.persistentPressure > 0 || p.growth > 0 || p.exhausted)
+                __sources.push({card: c.title, additionalAccess: p.additionalAccess, exhausted: !!p.exhausted});
+            });
+          } catch (error) {
+            __sources = [];
+            __centralPressureError(error);
+          }
           __centralIceInstall(installingCard, destination, __sources);
         }
         return __install.apply(this, arguments);
