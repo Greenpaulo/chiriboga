@@ -49,6 +49,20 @@ function play(script) {
 }
 const hand = (credits, cards) => ({credits, hand: cards, unrezzedIceRezCosts: []});
 
+test('central ICE observations do not create root commitments', () => {
+  const outcomes = collector('installOutcomes');
+  const state = {};
+  outcomes.onEvent({type: 'gameStart'}, state);
+  outcomes.onEvent({type: 'install', card: 'Central ICE', cardType: 'ice', server: 'hq', pressureSources: []}, state);
+  assert.strictEqual(state.installOutcomes.installs.length, 0);
+  assert.strictEqual(state.installOutcomes.active.size, 0);
+  outcomes.onEvent({type: 'install', id: 1, cardType: 'agenda', turn: 1}, state);
+  outcomes.onEvent({type: 'turnStart', side: 'runner'}, state);
+  outcomes.onEvent({type: 'leave', id: 1, fate: 'scored', turn: 2}, state);
+  assert.strictEqual(outcomes.finish(state).agendasScored, 1);
+  assert.strictEqual(outcomes.finish(state).agendaExposureTurns, 1);
+});
+
 // I0 scenario 4.
 test('installOutcomes follows a stolen and a scored agenda to their fates', () => {
   const out = play(g => {

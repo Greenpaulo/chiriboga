@@ -33,6 +33,8 @@ module.exports = {
     }
     const record = io.active.get(event.id);
     if (event.type === 'install') {
+      // Central ICE observations share the event type but are not root commitments.
+      if (event.cardType === 'ice') return;
       const installed = {id: event.id, cardType: event.cardType, ambush: event.ambush, turn: event.turn,
         runnerTurns: 0, fate: null, resolvedTurn: null, used: 0, credits: 0, rezPaid: 0};
       // Keep every commitment, while card-id events address only the current one.
