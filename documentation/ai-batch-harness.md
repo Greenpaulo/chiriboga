@@ -584,10 +584,13 @@ under the collector's own name.
 | `unusedCreditsAtEnd` | Corp credits at game end | lower |
 
 `installOutcomes` follows only root cards installed during play (a start
-board's cards are ignored), from the headless runner's `install`, `leave`,
+board's cards are ignored until they leave and are installed again), from
+the headless runner's `install`, `leave`,
 `cardUsed`, `cardCredits` and `rez` events; passive effects (an upgrade that
 never triggers an ability) do not count as use. Empty observations are 0 for
-the means, so read them with the counts beside them.
+the means, so read them with the counts beside them. Each installation is a
+separate commitment, including reinstalls of the same card; use, credits and
+rez costs belong only to the currently active commitment.
 
 The corrected install-series baseline, with all five 2026-10-05 recovery
 options off (they are recorded in the report's `options`), is

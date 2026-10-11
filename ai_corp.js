@@ -4409,6 +4409,8 @@ class CorpAI {
       else if (row.skipped == "layerPolicy")
         rejection.push("layerPolicy:" + row.layerPolicy);
       else if (row.skipped) rejection.push(row.skipped);
+      else if (typeof row.layerPolicy == "string")
+        rejection.push("layerPolicy:" + row.layerPolicy);
       ice.forEach((card) => {
         if (
           records.some(
@@ -4606,6 +4608,10 @@ class CorpAI {
         candidates[key] = { group: row.group, server: row.server, affordable: 0, unaffordable: 0 };
       candidates[key][row.affordable ? "affordable" : "unaffordable"]++;
     });
+    protection = protection.map((trace) => ({
+      ...trace,
+      ranked: trace.ranked.map((row) => ({ ...row })),
+    }));
     this._lastProtectionTrace = protection;
     DecisionSnapshots.Note("install", {
       call: "rankedInstallOptions",

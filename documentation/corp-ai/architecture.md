@@ -479,14 +479,17 @@ does not yet compare concrete options by their outcome.
   `compatibilityOrder` (the legacy emission position), a `scoreBreakdown`
   (`legacy` group, or `titleCase:Snare!`), merged `reasons`, `eligible` and
   `rejectionReasons`, and the legacy `option` object. A pair that two groups
-  emit is one record with both reasons; the option list still contains both,
+  emit is one record with both reasons; the option list still contains both
   because `Phase_Main`'s gain-credit probe compares list lengths. ICE that the
   first filtered protection walk ranked but legacy did not offer is recorded
-  with `eligible: false` and the walk's skip reason (for example
+  with `eligible: false`, the walk's skip reason and, when no skip reason
+  exists, its recorded string-valued layer-policy verdict (for example
   `layerPolicy:existingUnrezzedIceAndPoor`), after every eligible record; it is
   never returned, so I2 can switch such candidates on deliberately. While
   recording, `_rankedInstallOptions()` notes the records as
-  `installCandidates`; otherwise it calls the core directly, so untraced play
+  `installCandidates`. Protection notes omit the private server identity
+  references used to build candidates; snapshots and telemetry receive only
+  diagnostic fields. Otherwise it calls the core directly, so untraced play
   does no extra work. `_hypotheticalServerAfterInstall(card, server, evaluate)`
   is the single builder of post-install hypothetical servers (ICE as the
   outermost layer with its install cost paid, anything else in the root; a

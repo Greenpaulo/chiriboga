@@ -65,7 +65,7 @@ function validateDeckPairs(pairs, setFiles) {
 // from its install to where it leaves the board, and emits `install` and
 // `leave` events. It reads only Corp-known or public state and never calls
 // engine functions. Cards already installed when the game starts (a start
-// board) are ignored.
+// board) are ignored until they leave and are installed again.
 function createRootTracker(emit) {
   const ids = new WeakMap();
   let next = 0;
@@ -108,10 +108,13 @@ function createRootTracker(emit) {
         present.add(id);
         if (preexisting.has(id) || tracked.has(id)) continue;
         leaving.delete(id);
+        trashedOnAccess.delete(card);
         tracked.set(id, card);
         emit('install', {id, card: card.title, cardType: card.cardType,
           ambush: (card.subTypes || []).includes('Ambush'), server: key, serverName: server.serverName, turn});
       }
+      for (const id of preexisting)
+        if (!present.has(id)) preexisting.delete(id);
       for (const [id, card] of tracked)
         if (!present.has(id)) { tracked.delete(id); leaving.set(id, {card, turn}); }
       for (const [id, entry] of leaving) {

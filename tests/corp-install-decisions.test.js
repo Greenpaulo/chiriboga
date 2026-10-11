@@ -250,6 +250,32 @@ test('I1 scenario 6: a layer-policy rejection falls through, and the rejected se
   same(reasons('HQ'), ['legacy: server not selected', 'secure']);
 });
 
+test('I1 records layer-policy verdicts below the selected server without duplicates', () => {
+  const ai = newAI();
+  const ranked = ranking();
+  const selected = ranked[2];
+  const verdicts = new Map([[corp.RnD, {allowed: false, reason: 'blockedAbove'}],
+    [remote, {allowed: false, reason: 'blockedBelow'}]]);
+  const trace = ai._protectionTrace(ranked, ranked, selected, verdicts, true);
+  const records = ai._installCandidateRecords([], [trace], [iceA]);
+  same(records.find(r => r.server === corp.RnD).rejectionReasons,
+    ['legacy: server not selected', 'layerPolicy:blockedAbove']);
+  same(records.find(r => r.server === remote).rejectionReasons,
+    ['legacy: server not selected', 'layerPolicy:blockedBelow']);
+  assert.strictEqual(trace.ranked[3].skipped, undefined);
+});
+
+test('I1 protection notes omit private live server references', () => {
+  const ai = candidateAI();
+  const previous = DS.BeginNotes(true);
+  ai._rankedInstallOptions([iceA], true);
+  const notes = DS.EndNotes(previous);
+  const rows = notes.install[0].protection.flatMap(walk => walk.ranked);
+  assert.ok(rows.length > 0);
+  assert.ok(rows.every(row => !Object.getOwnPropertyNames(row).includes('serverRef')));
+  assert.ok(ai._lastProtectionTrace.every(walk => walk.ranked.every(row => !('serverRef' in row))));
+});
+
 test('I1 scenario 6 (cost case) and 7: ICE for a server legacy did not select is recorded but never chosen', () => {
   // Nothing is affordable: legacy keeps Server 1 and offers no ICE priority-only.
   const ai = candidateAI({affordable: []});

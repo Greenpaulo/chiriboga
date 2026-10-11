@@ -28,27 +28,32 @@ module.exports = {
   onEvent(event, game) {
     const io = game.installOutcomes;
     if (event.type === 'gameStart') {
-      game.installOutcomes = {installs: new Map(), uses: new Map(), credits: new Map(), rezPaid: new Map()};
+      game.installOutcomes = {installs: [], active: new Map()};
       return;
     }
-    const add = (map, id, n) => map.set(id, (map.get(id) || 0) + n);
     if (event.type === 'install') {
-      io.installs.set(event.id, {cardType: event.cardType, ambush: event.ambush, turn: event.turn,
-        runnerTurns: 0, fate: null, resolvedTurn: null});
+      const record = {cardType: event.cardType, ambush: event.ambush, turn: event.turn,
+        runnerTurns: 0, fate: null, resolvedTurn: null, used: 0, credits: 0, rezPaid: 0};
+      io.installs.push(record);
+      io.active.set(event.id, record);
     } else if (event.type === 'leave') {
-      const record = io.installs.get(event.id);
-      if (record && !record.fate) { record.fate = event.fate; record.resolvedTurn = event.turn; }
+      const record = io.active.get(event.id);
+      if (record) { record.fate = event.fate; record.resolvedTurn = event.turn; }
+      io.active.delete(event.id);
     } else if (event.type === 'turnStart' && event.side === 'runner') {
-      for (const record of io.installs.values())
+      for (const record of io.active.values())
         if (record.cardType === 'agenda' && !record.fate) record.runnerTurns++;
-    } else if (event.type === 'cardUsed') add(io.uses, event.id, 1);
-    else if (event.type === 'cardCredits') add(io.credits, event.id, event.credits);
-    else if (event.type === 'rez' && event.id !== undefined) add(io.rezPaid, event.id, event.cost);
+    } else {
+      const record = io.active.get(event.id);
+      if (!record) return; // Ignore starting roots and events outside a commitment.
+      if (event.type === 'cardUsed') record.used++;
+      else if (event.type === 'cardCredits') record.credits += event.credits;
+      else if (event.type === 'rez') record.rezPaid += event.cost;
+    }
   },
   finish(game) {
     const io = game.installOutcomes;
-    const all = [...io.installs.entries()].map(([id, r]) => Object.assign({
-      used: io.uses.get(id) || 0, credits: io.credits.get(id) || 0, rezPaid: io.rezPaid.get(id) || 0}, r));
+    const all = io.installs;
     const agendas = all.filter(r => r.cardType === 'agenda');
     const assets = all.filter(r => r.cardType === 'asset');
     const upgrades = all.filter(r => r.cardType === 'upgrade');
