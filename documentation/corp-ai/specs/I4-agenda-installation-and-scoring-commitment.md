@@ -153,12 +153,13 @@ in the candidate. I0's committed deck pool and paired seeds, 200 games per
 deck pair, bootstrap 95% intervals. I0 must capture the corrected default;
 both arms keep the five regression gates off and hold prerequisite I-layer
 options identical. Back-fill observation-only collectors in the baseline.
-Collectors: `installOutcomes`, `stallTurns`, `corpInsolventTurns` (planned by
-I0; not implemented today). `installOutcomes` exposes
-`installOutcomes.installToScoreTurns` and `installOutcomes.agendaExposureTurns`,
-the mean per-game durations planned by I0. The proposed exports for the other
-two collectors are `stallTurns.mean` and `corpInsolventTurns.mean`; verify these
-paths when I0 lands. All duration/count metrics declare
+Collectors: `installOutcomes`, `stallTurns`, `corpInsolventTurns` (added by
+I0; definitions in `documentation/ai-batch-harness.md`). `installOutcomes`
+exposes `installOutcomes.installToScoreTurns` and
+`installOutcomes.agendaExposureTurns`, the mean per-game durations (0 when a
+game has no observation, beside the `agendasScored`/`agendasInstalled`
+counts). The other two export the per-game counts `stallTurns` and
+`corpInsolventTurns`. All duration/count metrics declare
 `lower` as better. Empty observations must be defined consistently in both
 arms and must not hide stalled or stolen agendas.
 Starts: none initially; if the pool does not exercise the option in `--quick`,
@@ -172,13 +173,13 @@ is handed off. Record their paths and provenance in this spec.
 | Guard | `pointsScored` | higher | regression at most 0.25 |
 | Guard | `pointsStolen` | lower | regression at most 0.25 |
 | Guard | `gameLength` | lower | regression at most 1.5 turns |
-| Guard | `corpInsolventTurns.mean` | lower | regression at most 0.5 turns |
+| Guard | `corpInsolventTurns` | lower | regression at most 0.5 turns |
 | Guard | `installOutcomes.installToScoreTurns` | lower | regression at most 0.5 turns |
 | Guard | `installOutcomes.agendaExposureTurns` | lower | regression at most 0.5 turns |
-| Guard | `stallTurns.mean` | lower | regression at most 0.5 turns |
+| Guard | `stallTurns` | lower | regression at most 0.5 turns |
 
 Gate command (after I0 supplies the collectors):
-`node scripts/ai-batch.js gate --corp-option agendaCommitmentPlan=true --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --improve pointsStolenByServer.remote --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns.mean=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard stallTurns.mean=0.5`
+`node scripts/ai-batch.js gate --corp-option agendaCommitmentPlan=true --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --improve pointsStolenByServer.remote --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard stallTurns=0.5`
 
 Re-grounding retains the remote-theft improvement and all three original
 0.5-turn guards. The core guards retain the shared design's preregistered

@@ -1,0 +1,11 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, n
+// EXPECT: install
+// EXPECT_SERVER: HQ
+// EXPECT_CARD: Ice Wall
+// SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=5
+// NOTE: I0 representative install fixture (naked HQ, agenda flood). HQ has no ICE and holds two agendas; R&D and Archives are already covered. An affordable ICE should go on HQ.
+RunnerTestField(30019, [], [30030,30030,30011,30020,30006,30005,30026,31033,30018,30027], [30030,30020,30011], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30059, [], [30075,30064,31077,30072,30070,30067,30075,31081,30062,30068], [31071,30070,31077,30075], [31077], [30072], [], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=true;
+corp.RnD.ice[0].rezzed=true;

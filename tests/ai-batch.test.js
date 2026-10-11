@@ -415,6 +415,11 @@ const EXTRA_DRAW = side => `
     assert.deepStrictEqual(metrics.batchMetrics([collector], games), out, 'seeded and reproducible');
     const report = value => ({poolHash: 'p', seeds: [], starts: [], collectors: [], games: [],
       batchMetrics: {'demo.mean': {value, low: value - 0.05, high: value + 0.05, games: 30}}});
+    for (const limit of ['Infinity', '-Infinity', '1e309', 'NaN', 'true', 'false', '', 'invalid'])
+      assert.throws(() => batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=' + limit])),
+        /--ceiling value must be a finite number/, limit + ' must be rejected');
+    for (const limit of ['0', '-0.1', '1e-2'])
+      assert.strictEqual(batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=' + limit])).ceiling['demo.mean'], Number(limit));
     const spec = batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=0.10']));
     const fail = batch.applyCeilingChecks({checks: []}, report(0), report(0.2), spec.ceiling);
     assert.strictEqual(fail.pass, false);

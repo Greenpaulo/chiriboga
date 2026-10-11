@@ -55,10 +55,17 @@ cannot price yet.
 - **Goal:** Allocate restricted credit sources (stealth, breaker-only, central-only) against actual payments instead of one scalar ceiling.
 
 ### L7.1 Consequence-calibrated central pressure
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4
-- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/feature-layer-7-1-consequence-calibration.md)
+- **Ticket:** [feature-layer-7-1-consequence-calibration.md](../backlog/code-review/feature-layer-7-1-consequence-calibration.md)
 - **Goal:** Weight central pressure by the actual consequence of the next breach, and own the shared breach-consequence signal (`_breachConsequence`). The tactical loss interrupt is already done (part of L7).
+
+### L7.1.1 Horizon-aware central consequence
+- **Status:** parked
+- **Depends on:** F4, L7.1
+- **Spec:** [L7.1.1-horizon-aware-central-consequence.md](specs/L7.1.1-horizon-aware-central-consequence.md)
+- **Goal:** Find out why L7.1's consequence-weighted central penalty failed its gate (more central steals), then test a horizon-aware exposure behind a default-off option.
+- **Parked because:** its first step is done and refuted the premise. L7.1 failed because HQ's protection score is also the bar for remote scoring, not because of the horizon (see the spec's Failure analysis). I2 carries the lesson; revive only as a new item about remote-scoring eligibility, with fresh evidence.
 
 ### L8.2 Deception legibility signals
 - **Status:** ready
@@ -91,11 +98,29 @@ cannot price yet.
 - **Ticket:** [feature-layer-8-card-set-audit-and-set-adoption.md](../backlog/feature-layer-8-card-set-audit-and-set-adoption.md)
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
 
+### L9.0 Lockout honesty
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [L9.0-lockout-honesty.md](specs/L9.0-lockout-honesty.md)
+- **Goal:** Report an honest security verdict next to today's (bioroid click-breaks priced; "no breaker installed yet" as its own flag with a finite cost), so I2 gets a graded signal. Observation-only: no decision changes.
+
+### L9.0.1 Adopt honest lockout
+- **Status:** proposed
+- **Depends on:** L9.0, F4
+- **Spec:** [L9.0.1-adopt-honest-lockout.md](specs/L9.0.1-adopt-honest-lockout.md)
+- **Goal:** Gated option `honestLockout`: existing scoring, rez and protection decisions read the honest verdict.
+
+### L9.1 Unpriceable breakers
+- **Status:** proposed
+- **Depends on:** L9.0
+- **Spec:** [L9.1-unpriceable-breakers.md](specs/L9.1-unpriceable-breakers.md)
+- **Goal:** L9 limit 1: a matching breaker the evaluator cannot price never creates a secure verdict, lockout or finite break cost; `AIBreakCost` read on breakers.
+
 ### L9 Run-simulation fidelity
 - **Status:** proposed
 - **Depends on:** none
 - **Spec:** [L9-run-simulation-fidelity.md](specs/L9-run-simulation-fidelity.md)
-- **Goal:** Model what the per-ICE heuristic misses, starting with breakers it cannot price (they make servers look secure when they are not); then cumulative damage, optional effects that remove later breakers, and shared strength-reducer counters.
+- **Goal:** Model what the per-ICE heuristic misses: cumulative damage, optional effects that remove later breakers, and shared strength-reducer counters.
 
 ### Done
 
@@ -119,13 +144,6 @@ cannot price yet.
 ## Foundations (F)
 
 Shared infrastructure used by every area.
-
-### F3 Per-decision evaluation cache
-- **Status:** in-progress
-- **Depends on:** F2, F4
-- **Ticket:** [corp_ai_finding_11_evaluate_once_per_decision.md](../backlog/code-review/corp_ai_finding_11_evaluate_once_per_decision.md)
-- **Goal:** Evaluate each server once per Corp decision, bypassing the cache at any hypothetical depth, without ever serving a stale or hypothetical result.
-- **Acceptance:** Full off/on/verify comparison passed on 1,400 paired games (4,200 executions), 2026-10-09; completion follow-up awaits independent review.
 
 ### F5 Mulligan weight calibration
 - **Status:** proposed
@@ -160,6 +178,7 @@ Shared infrastructure used by every area.
 | F2 | Guarded hypothetical evaluation: remaining migrations | [corp_ai_finding_10_guarded_hypothetical](../backlog/done/corp_ai_finding_10_guarded_hypothetical.md) | [architecture: foundations](architecture.md#foundations) |
 | F4 | Seeded AI-vs-AI batch harness | [corp_ai_finding_12_seeded_batch_harness](../backlog/done/corp_ai_finding_12_seeded_batch_harness.md) | [architecture.md](architecture.md#foundations) |
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
+| F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 
@@ -178,20 +197,20 @@ installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
 
 ### I0 Baseline capture and decision telemetry
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** F4
-- **Spec:** [I0-baseline-capture-and-telemetry.md](specs/I0-baseline-capture-and-telemetry.md)
+- **Ticket:** [I0-baseline-capture-and-telemetry.md](../backlog/code-review/I0-baseline-capture-and-telemetry.md)
 - **Goal:** Record current install choices and outcomes before changing any policy.
 
 ### I1 Unified install candidate model
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** I0
-- **Spec:** [I1-unified-install-candidate-model.md](specs/I1-unified-install-candidate-model.md)
+- **Ticket:** [I1-unified-install-candidate-model.md](../backlog/code-review/I1-unified-install-candidate-model.md)
 - **Goal:** Replace concatenation priority with explicit, scored candidate records, initially preserving behaviour.
 
 ### I2 ICE selection by marginal security
 - **Status:** proposed
-- **Depends on:** I1, F2, F4, L7.1
+- **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1
 - **Spec:** [I2-ice-selection-by-marginal-security.md](specs/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Choose the `(ICE, server)` pair that most improves security, using the existing evaluator.
 

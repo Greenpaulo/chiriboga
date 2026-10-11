@@ -1,6 +1,6 @@
 # I2 ICE selection by marginal security
 
-**Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** c9d80d2 (2026-10-05)
 
@@ -59,11 +59,19 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
    `futureValue`, `installCost` and `reserveCost` components. Rez affordability
    uses the evaluator's shared unrezzed-ICE budget (L1.1); ICE outside that
    budget earns no `lockout` or `breakCost`.
-4. **Consequence comes from the evaluator.** `consequenceWeight` is
+4. **Consequence comes from the evaluator and stays inside I2's ranking.**
+   For remotes and Archives, `consequenceWeight` is
    `0.25 + 0.75 × _breachConsequence(server).weight`, the breach-consequence
-   signal L7.1 (consequence-calibrated central pressure) owns and L3.5.1 also
-   consumes. I2 reads it as is, adds no weights, and install planning must
-   not invent its own.
+   signal L7.1 owns and L3.5.1 also consumes; I2 reads it as is and install
+   planning must not invent its own. For HQ and R&D it is 1 (unweighted);
+   weighting the centrals needs its own gated option. The weight multiplies
+   only I2's candidate score: it must never feed `_protectionScore()` or any
+   value another decision compares against. *(2026-10-09, from L7.1's failure
+   analysis in `specs/L7.1.1-horizon-aware-central-consequence.md`: weighting
+   HQ's protection score moved the remote-scoring bar in `_isAScoringServer()`
+   and `_scoringWindow()` and caused the whole regression, `centralStolen.points`
+   +0.048 [+0.011, +0.085]; weighting only the ICE-target ranking was neutral,
+   +0.007 [−0.021, +0.036], and gave no improvement on the centrals.)*
 5. **Generalise the critical-breach check, do not duplicate it.**
    `_criticalBreachDefenseAction()` reads `lossRiskAfter` from I2's candidate
    evaluation (computed through the shared helper) instead of its own
@@ -158,9 +166,10 @@ control and back-fill observation-only collectors.
 I0 supplies the control/pool and insolvency collector; its successful-run
 observations remain available for diagnosis.
 Collectors: `strandedUnrezzedIceCost`, `corpInsolventTurns`
-(planned, not implemented today). Proposed exported metric paths below
-must be verified when these collectors land; each declares its better
-direction.
+(`corpInsolventTurns` added by I0, defined in
+`documentation/ai-batch-harness.md`; `strandedUnrezzedIceCost` is planned by
+this item, and its exported path must be verified when it lands). Each
+declares its better direction.
 Starts: none initially. If `--quick` changes no game, build real-game-derived
 start boards, record their provenance and add a separate gate command before
 hand-off; all commands must pass.
@@ -179,11 +188,11 @@ cached timing. The security-selection policy remains strategic and gated.
 | Guard | `pointsScored` | higher | regression at most 0.25 |
 | Guard | `pointsStolen` | lower | regression at most 0.25 |
 | Guard | `gameLength` | lower | regression at most 1.5 |
-| Guard | `corpInsolventTurns.mean` | lower | regression at most 0.5 |
+| Guard | `corpInsolventTurns` | lower | regression at most 0.5 |
 | Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
 
 Gate command (after the collector setup exists):
-`node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns.mean=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
+`node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --better gameLength=lower`
 
 ## Things to consider
 

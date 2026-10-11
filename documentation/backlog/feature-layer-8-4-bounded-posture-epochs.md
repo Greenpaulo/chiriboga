@@ -1,23 +1,25 @@
 # L8.4 Bounded posture epochs
-**Outcome:** blocked — full F4 gate waits for the Grip-size agenda-bluff bug fix.
+**Outcome:** implementation complete; full F4 gate pending.
 
 **Roadmap item:** L8.4 · **Depends on:** F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 **Verified against code:** 3c25455 (2026-10-09)
 
-## Additional blocker
-The full gate must not run until [agenda-bluff-probability-tracks-runner-grip-size](../bugs/agenda-bluff-probability-tracks-runner-grip-size.md)
-is fixed (being fixed on its own branch): every epoch reevaluation re-draws the
-Grip-dependent bluff probability, so the baseline and candidate would carry
-that defect into `bluffSingleVariableCorrelation`.
+## Gate prerequisite update
+
+The [Grip-size agenda-bluff fix](../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md)
+is now included from main. PR #43 conflict resolution preserves its probability
+in both lifetime and epoch modes, with the green reproduction covering both.
+The full F4 gate has not been run; the earlier correlation-ceiling concern below
+still applies.
 
 ## Resolution
 
 Implemented from `23d6052` (plan commit; code base `3c25455`), following the
 approved plan.
 
-**Gate:** pending F4 — `postureEpochs` defaults to off. Waits for the Grip-size
-bug above; the ticket stays in `backlog/` until then.
+**Gate:** pending F4 — `postureEpochs` defaults to off. The ticket stays in
+`backlog/` until the gate is evaluated.
 
 **Gate command:** `node scripts/ai-batch.js gate --corp-option postureEpochs=true --collector postureDecisionsPerEpoch --collector postureLockedPastHorizon --collector bluffSingleVariableCorrelation --ceiling bluffSingleVariableCorrelation.max=0.10 --guard winRate=0.02 --guard pointsStolen=0.2 --guard pointsScored=0.2 --max postureDecisionsPerEpoch.violations=0 --max postureLockedPastHorizon.count=0`
 
@@ -93,7 +95,7 @@ Proposed at `3c25455`, 2026-10-09. **Approved.**
      This is shared F4 work (L8.2 and L8.5 need it too); the plan adds it here
      as its first consumer.
   2. **The Grip-size bug is an unrecorded gate dependency.** The ticket says to
-     fix [agenda-bluff-probability-tracks-runner-grip-size](../bugs/agenda-bluff-probability-tracks-runner-grip-size.md)
+     fix [agenda-bluff-probability-tracks-runner-grip-size](../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md)
      before measuring, but it is still open in `bugs/` with no reproduction,
      and L8.4 lists only F4. With epochs every reevaluation re-draws that
      Grip-dependent probability, so the correlation ceiling would measure the
@@ -249,7 +251,7 @@ Gate command: `node scripts/ai-batch.js gate --corp-option postureEpochs=true
   The metric is the largest absolute Spearman correlation over each applicable
   outcome/variable pair in the batch, with a bootstrap 95% CI. Decisions
   stopped by a safety guard are excluded, because guards may depend on state.
-- The shipped agenda-bluff probability already fails this rule for Grip size: [`documentation/bugs/agenda-bluff-probability-tracks-runner-grip-size.md`](../bugs/agenda-bluff-probability-tracks-runner-grip-size.md). Fix it before measuring the baseline, or the baseline carries the defect.
+- At design time, the agenda-bluff probability failed this rule for Grip size: [`documentation/bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md`](../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md). The fix is now included in both modes; generate a fresh baseline before measuring.
 
 ## Acceptance criteria
 - [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.

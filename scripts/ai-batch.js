@@ -490,8 +490,11 @@ function gateSpec(args) {
     for (const name of OUTCOME_METRICS)
       better[name] = metricsLib.CORE_DIRECTIONS[name] === 'higher' ? 'lower' : 'higher';
   Object.assign(better, parseAssignments(args.better, '--better'));
-  return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max'),
-    ceiling: parseAssignments(args.ceiling || [], '--ceiling')};
+  const ceiling = parseAssignments(args.ceiling || [], '--ceiling');
+  for (const [name, limit] of Object.entries(ceiling))
+    if (typeof limit !== 'number' || !Number.isFinite(limit))
+      throw new Error(`--ceiling value must be a finite number: ${name}=${limit}`);
+  return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max'), ceiling};
 }
 
 // Ceiling checks: a batch-level metric (collector finishBatch) whose candidate
