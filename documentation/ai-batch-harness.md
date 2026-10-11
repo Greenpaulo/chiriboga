@@ -586,8 +586,10 @@ under the collector's own name.
 `installOutcomes` follows only root cards installed during play (a start
 board's cards are ignored), from the headless runner's `install`, `leave`,
 `cardUsed`, `cardCredits` and `rez` events; passive effects (an upgrade that
-never triggers an ability) do not count as use. Empty observations are 0 for
-the means, so read them with the counts beside them.
+never triggers an ability) do not count as use. Each reinstallation is a
+separate commitment with its own fate, exposure, use, credits and rez costs;
+card events outside a tracked installation are ignored. Empty observations
+are 0 for the means, so read them with the counts beside them.
 
 The corrected install-series baseline, with all five 2026-10-05 recovery
 options off (they are recorded in the report's `options`), is
@@ -597,6 +599,11 @@ options off (they are recorded in the report's `options`), is
 node scripts/ai-batch.js --collector corpInsolventTurns --collector installOutcomes --collector stallTurns \
   --collector successfulRunsByServer --collector unusedCreditsAtEnd --out <file>
 ```
+
+That report predates the PR #34 reinstallation fixes: its `installOutcomes`
+metrics can undercount repeated installations and misattribute their fates or
+payoff. Keep it as historical evidence; comparisons using these metrics need
+a matching control generated with the corrected collector and tracker.
 
 A later item that needs another collector back-fills it by re-running this
 command with that collector added, at its own base commit. The baseline's
