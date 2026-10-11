@@ -21,6 +21,12 @@ See [architecture: known limits](../architecture.md#known-limits) and [server se
 - **Route state.** Carry a small route state through `_evaluateServerSecurity()`'s per-ICE loop: Grip size after damage taken so far (limit 2), breakers still installed (limit 3), and reducer counters still unspent (limit 4). For limits 3 and 4 the Runner chooses the cheaper option (pay to break the trash subroutine, or run the inner ICE without that breaker; spend counters where they save most), using the same finite-use allocation idea as L4.1.
 - Keep the evaluation read-only (no counters, credits or run state changed) and inside the existing hypothetical guards.
 - Document `AIBreakCost` in `documentation/ai.md`.
+- `AIBreakCost` belongs to the installed Runner breaker and prices its own
+  mechanism. L9.0's ICE-owned `AIClickBreakable` separately declares native
+  click-break eligibility, priced by the honest evaluator. Follow L9.1's
+  overlap contract: compare feasible native, breaker and mixed routes under
+  shared budgets, charge each subroutine once, and preserve unknown costs
+  when a matching breaker remains unpriced.
 
 ## Safety and information boundary
 - Only public, installed Runner cards and public pile sizes; never Grip identities.
