@@ -50,7 +50,7 @@ Not F4-gated: each limit has a deterministic oracle (scenario 8, and scenario 1'
 - Related bug: [`documentation/bugs/sang-kancil-and-principia-priced-as-unbreakable.md`](../../bugs/sang-kancil-and-principia-priced-as-unbreakable.md).
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] Every test scenario above is covered by a deterministic test asserting its specified verdict or cost, plus the logged reason where the scenario defines one. Scenario 6 asserts identical evaluation results after hidden Grip substitutions; scenario 7 asserts unchanged counters, credits and run state, including on a throwing hook; scenario 8 asserts mandatory-cost equality with the exhaustive oracle for scenarios 3–5.
 - [ ] Decision snapshots are identical to the recorded baseline except for deltas listed and justified in the Resolution.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
