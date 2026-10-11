@@ -21,6 +21,12 @@ See [architecture: known limits](../architecture.md#known-limits) and [server se
 - **Route state.** Carry a small route state through `_evaluateServerSecurity()`'s per-ICE loop: Grip size after damage taken so far (limit 2), breakers still installed (limit 3), and reducer counters still unspent (limit 4). For limits 3 and 4 the Runner chooses the cheaper option (pay to break the trash subroutine, or run the inner ICE without that breaker; spend counters where they save most), using the same finite-use allocation idea as L4.1.
 - Keep the evaluation read-only (no counters, credits or run state changed) and inside the existing hypothetical guards.
 - Document `AIBreakCost` in `documentation/ai.md`.
+- L9.0 implements ICE-owned `AIBreakCost` for native self-breaking costs.
+  L9.1 extends the same hook to installed Runner breakers to price their own
+  mechanism; the hook's owner determines the option it prices. Follow L9.1's
+  overlap contract: compare feasible native, breaker and mixed routes under
+  shared budgets, charge each subroutine once, and preserve unknown costs
+  when a matching breaker remains unpriced.
 
 ## Safety and information boundary
 - Only public, installed Runner cards and public pile sizes; never Grip identities.
@@ -50,7 +56,7 @@ Not F4-gated: each limit has a deterministic oracle (scenario 8, and scenario 1'
 - Related bug: [`documentation/bugs/sang-kancil-and-principia-priced-as-unbreakable.md`](../../bugs/sang-kancil-and-principia-priced-as-unbreakable.md).
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] Every test scenario above is covered by a deterministic test asserting its specified verdict or cost, plus the logged reason where the scenario defines one. Scenario 6 asserts identical evaluation results after hidden Grip substitutions; scenario 7 asserts unchanged counters, credits and run state, including on a throwing hook; scenario 8 asserts mandatory-cost equality with the exhaustive oracle for scenarios 3–5.
 - [ ] Decision snapshots are identical to the recorded baseline except for deltas listed and justified in the Resolution.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
