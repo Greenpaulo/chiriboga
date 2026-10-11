@@ -179,12 +179,19 @@ function playGame(options) {
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
   // A Corp ICE install on HQ or R&D, with each installed Runner card's public
-  // central pressure on that server at that moment (AICentralPressure,
+  // central pressure measured when the install was requested (AICentralPressure,
   // normalized by the Corp AI; sources reporting nothing are omitted).
+  // Emit only after installation and its responses complete.
   context.__centralIceInstall = (card, server, sources) => emit('install', {card: card.title, cardType: card.cardType,
     server: serverKey(server), pressureSources: sources});
   // Reject incomplete measurements without interrupting the engine install.
-  context.__centralPressureError = error => errors.add('central install observation: ' + error.message);
+  context.__centralPressureError = error => {
+    let message;
+    try {
+      message = error && typeof error.message === 'string' ? error.message : String(error);
+    } catch (_) { message = 'unprintable thrown value'; }
+    errors.add('central install observation: ' + message);
+  };
   // A paid rez (Rez() pays through SpendCredits with "rezzing"), with the
   // cards hosted on the rezzed card at that moment.
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
@@ -257,7 +264,15 @@ function playGame(options) {
             __sources = [];
             __centralPressureError(error);
           }
-          __centralIceInstall(installingCard, destination, __sources);
+          var __installArgs = Array.prototype.slice.call(arguments);
+          var __onInstallComplete = __installArgs[10];
+          __installArgs[10] = function() {
+            try { __centralIceInstall(installingCard, destination, __sources); }
+            catch (error) { __centralPressureError(error); }
+            if (typeof __onInstallComplete === "function")
+              return __onInstallComplete.apply(this, arguments);
+          };
+          return __install.apply(this, __installArgs);
         }
         return __install.apply(this, arguments);
       };
