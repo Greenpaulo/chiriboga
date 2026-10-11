@@ -1,6 +1,6 @@
 # I2 ICE selection by marginal security
 
-**Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** c9d80d2 (2026-10-05)
 
