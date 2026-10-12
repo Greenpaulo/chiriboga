@@ -169,7 +169,7 @@ function compareReports(baseline, candidate, gate = {}) {
   const hashed = pairs.filter(([b, c]) => b.logHash && c.logHash);
   const changedGames = hashed.filter(([b, c]) => b.logHash !== c.logHash).length;
   const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length ||
-    Object.keys(gate.ceiling || {}).length;
+    Object.keys(gate.ceiling || {}).length || (gate.noWorse || []).length;
   if (gated && hashed.length)
     checks.push({name: 'option effect', kind: 'changed', pass: changedGames > 0,
       why: changedGames ? undefined : 'no game differs from the baseline'});

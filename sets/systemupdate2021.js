@@ -4589,6 +4589,7 @@ cardSet[31054] = {
 				  "using",
 				  this,
 				  function () {
+                    if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
 					AddTags(1, function() {
 					  //damage can be prevented
 					  Damage("net", 3, true, function(cardsTrashed) {}, this);

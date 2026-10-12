@@ -115,7 +115,7 @@ before viewing candidate gate results.
 | Item | Option | Current recorded check | Plan direction |
 |---|---|---|---|
 | L8.4 | `postureEpochs` | Measured `bluffSingleVariableCorrelation.max` candidate ≤ baseline; passed 0.229 ≤ 0.329 | Settled for L8.4; retain its recorded gate and evidence |
-| L8.5 | `matchLocalPostureFeedback` | Candidate bootstrap 95% CI upper bound ≤ 0.10 | Propose no worse than matching control, with weight bounds, exploration floors and performance guards retained |
+| L8.5 | `matchLocalPostureFeedback` | Correlation is report-only; deterministic information integrity/reachability, hard adaptation bounds and performance guards | Owner-approved redesign after the original full gate failed (2026-10-12); source ticket retains original values, intervals and failure chronology |
 | L8.2 | `deceptionLegibility` | Candidate bootstrap 95% CI upper bound ≤ 0.10; shape total-variation distance ≤ 0.05 | Retain 0.10 pending re-grounding and feasibility evidence; do not assume profile parity removes the allocation tell |
 | I2 | `iceMarginalSecurity` | Updated source spec proposes paired 95% difference guards for posture correlation and realized ICE-count correlations (all unrevealed agenda/trap remotes and active-posture subset); 0.02 absolute-rho margins provisional pending control-only calibration | Different from L8.4's measured-value rule: adds uncertainty checks but permits a small increase; F11 provides harness support. Freeze justified tolerances before candidate results; retain improvement/performance checks and refresh the matching control |
 | I3 | `remoteRoles` | No explicit correlation guard | Add a no-worse-than-matching-control correlation guard alongside the existing non-inferiority checks |
@@ -130,9 +130,9 @@ The exported metric is `bluffSingleVariableCorrelation.max`.
 
 Re-ground L8.2 and L8.5 through `.agents/skills/reground-spec/SKILL.md`.
 L8.2 still carries `376f32c (2026-09-25)`; L8.5 was re-grounded at
-`484edd3 (2026-10-12)`, with an unapproved implementation plan retaining
-its recorded ceiling. The proposed L8.5 gate revision still requires a source
-decision before implementation. In particular:
+`04fbe4c (2026-10-12)`. Its plan and gate revision were then approved:
+measured candidate correlation maximum must be no worse than a fresh matching
+baseline, with both intervals reported for context. In particular:
 
 - Replace L8.2's open Grip-size-bug claim/link with the merged fix in
   `documentation/bugs/done/agenda-bluff-probability-tracks-runner-grip-size.md`.
@@ -167,12 +167,17 @@ I2 ranking, never in HQ/R&D protection scores used as remote-scoring bars.
 **Source synchronization audit (2026-10-12).** L8.4's settled gate and I2's
 proposed paired guards are reflected in their source documents. L8.2 retains
 the table's current ceiling, with re-grounding/feasibility work pending.
-L8.5's no-worse proposal, I3's additional correlation guard and I9's tighter
-combined-policy ceiling have not been adopted into their source gates.
+L8.5's original no-worse requirement was approved before candidate results.
+After its full run failed that check, the owner approved a gate redesign:
+correlation is diagnostic, with deterministic information integrity/reachability,
+hard adaptation bounds and unchanged performance guards. The source ticket
+records the original failed command, measurements and post-result timing. I3's additional correlation guard and I9's
+tighter combined-policy ceiling remain unadopted proposals.
 Each affected open ticket/spec now links this section from **Read first**;
-the Corp roadmap also directs pickup here. Pending reconciliation notes in
-L8.2, L8.5, I3 and I9 distinguish proposals from current requirements. No
-threshold or statistic is changed by this discoverability update.
+the Corp roadmap also directs pickup here. Reconciliation notes distinguish proposals from current requirements. The
+discoverability update itself changed no threshold; the later explicit L8.5
+approval changed its correlation statistic/threshold. The subsequent
+post-result L8.5 redesign is separately recorded above and in its ticket.
 
 **Separate deception valuation follow-up (2026-10-12).**
 [L8.8](../corp-ai/specs/L8.8-marginal-deception-value.md) is proposed after

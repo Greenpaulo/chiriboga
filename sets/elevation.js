@@ -5433,10 +5433,8 @@ cardSet[35024] = {
       var cardRef = this;
       var cardToInstall = params.card;
       
-      //Move the card from heap to grip temporarily for the install process
-      //This is needed because Install expects cards to be in a valid location
-      MoveCard(cardToInstall, runner.grip);
-      
+      //Install accepts the Heap as its source and restores that location if
+      //the installation is cancelled or its recalculated cost cannot be paid.
       //Bring the card sprite to the front so it's visible during install
       //This fixes z-index issues when installing from heap
       if (cardToInstall.renderer && cardToInstall.renderer.sprite && cardToInstall.renderer.sprite.parent) {

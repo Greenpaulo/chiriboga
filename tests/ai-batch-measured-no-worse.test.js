@@ -1,0 +1,27 @@
+// Measured-value rules deliberately differ from confidence-bound guards.
+const assert = require('assert');
+const {parseArgs, gateSpec, applyNoWorseChecks} = require('../scripts/ai-batch');
+const {compareReports} = require('../scripts/ai-batch/metrics');
+const metric = 'bluffSingleVariableCorrelation.max';
+const report = (value, low = 0.1, high = 0.9) => ({batchMetrics: {[metric]: {value, low, high, games: 20}}});
+const result = () => ({checks: [], pass: null});
+const check = (baseline, candidate) => applyNoWorseChecks(result(), baseline, candidate, [metric]);
+assert(check(report(0.3), report(0.2)).pass, 'overlapping intervals do not veto a better measured value');
+assert(check(report(0.3), report(0.3)).pass, 'exact equality passes');
+assert.strictEqual(check(report(0.3), report(0.31)).pass, false, 'a small measured regression fails');
+assert.strictEqual(check({}, report(0.2)).pass, false, 'missing baseline fails');
+assert.strictEqual(check(report(0.3), {}).pass, false, 'missing candidate fails');
+assert.strictEqual(check(report(0.3), report(NaN)).pass, false, 'nonfinite values fail');
+assert.strictEqual(check(report(0.3), report(0.2, NaN)).pass, false, 'missing intervals fail');
+const empty = report(0.2); empty.batchMetrics[metric].games = 0;
+assert.strictEqual(check(report(0.3), empty).pass, false, 'empty batches fail');
+const existing = {checks: [{name: 'other', pass: false}], pass: false};
+assert.strictEqual(applyNoWorseChecks(existing, report(0.3), report(0.2), [metric]).pass, false);
+const parsed = parseArgs(['gate', '--no-worse', metric, '--no-worse', 'other.max']);
+assert.deepStrictEqual(gateSpec(parsed).noWorse, [metric, 'other.max']);
+const meta = {poolHash: 'same', seeds: [1], starts: [], collectors: []};
+const game = {ok: true, deckPairId: 'test', seed: 1, metrics: {}, logHash: 'same'};
+const a = {meta, games: [game]}, b = {meta, games: [{...game}]};
+const unchanged = compareReports(a, b, {noWorse: [metric]});
+assert(unchanged.checks.some(c => c.kind === 'changed' && !c.pass), 'measured-only gate requires changed games');
+console.log('Measured no-worse gate checks passed.');

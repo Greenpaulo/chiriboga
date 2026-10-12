@@ -1,0 +1,34 @@
+Diagnostic excerpts: zwicky-magdalene seed 24 install-cost stall
+Date: 2026-10-12. Starting commit: 04fbe4c; uncommitted L8.5 implementation present.
+Pool: core-v1, sets systemgateway/systemupdate2021/elevation.
+Corp: Zwicky Supermodernism.js; Runner: Magdalene CBB.js.
+Exact stream prefix: 24:zwicky-magdalene; feedback off (baseline).
+Command: node scripts/ai-batch.js replay --pairs zwicky-magdalene --seeds 24
+Instrumented with temporary wrappers around RunnerAI._computeChoice, console errors and Log.
+Wrappers observe state only; initial diagnostic stops after twenty repeated install choices.
+Also replayed against HEAD-only JavaScript supplied through a read-only source overlay.
+Both current and HEAD-only replays show the same sequence and failed payment:
+Runner spent one click
+Runner drew 2 cards
+Runner discarded "Principia"
+"Install 1 program or hardware" triggered
+Echelon trashed
+Runner spent one credit
+Before trash: Principia pending, InstallCost=1, Runner credits=1.
+After Echelon trash: Principia pending, InstallCost=2, Runner credits=1.
+Runner Install offers commands [trash,n]; selected command n, selected option {}.
+Runner could not pay 1 remaining credit
+Subsequent state: Principia pending, InstallCost=2, Runner credits=0.
+Runner could not pay 2 remaining credits
+Repeated Runner Install command/select choices make no game-state progress.
+Pending test minimal reconstruction: two installed Echelons plus one installed Principia;
+Magdalene offers a discarded second Principia with one Runner credit.
+After real trash/response resolution, CheckCredits=false but Enumerate.n returns one choice.
+Focused command: node tests/pending/runner-install-cost-increases-after-trash.test.js
+FAIL: Runner install must not offer an unaffordable continuation after trashing a discount source
+1 !== 0
+Timer probe: node scripts/ai-batch.js replay --pairs zwicky-magdalene --seeds 24 --timeout 2
+Instrumented probe returned exit 1: no winner, timeout after 2 s, Corp 5-0 Runner, 7 turns.
+The probe observed 175 failed payments; final message: Runner could not pay 2 remaining credits.
+The timer does fire. Repeated callbacks defeat the no-callback watchdog and the default timeout is 900 s.
+No production fix applied. This is an excerpt/diagnostic record, not a full game dump.

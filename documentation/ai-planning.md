@@ -210,6 +210,11 @@ Rules for form 2:
   batch (for example `bluffSingleVariableCorrelation.max`): `--ceiling
   <metric>=<n>` requires the candidate's interval upper bound to be at most
   `n` ([ai-batch-harness.md](ai-batch-harness.md#for-agents-adding-a-metric)).
+- **Measured no-worse rows** use `--no-worse <metric>` for a batch metric:
+  the measured candidate value must be at most the measured fresh matching
+  baseline. Preregister this statistic explicitly; both arms' 95% intervals
+  are context, not a paired confidence-bound guard or statistical
+  non-inferiority claim. F11's proposed paired guards remain distinct.
 - **Latency is not a standard guard** (F9 proposes a deterministic work guard
   in its place). `gate` may reuse a cached baseline
   timed on a differently loaded machine, so a latency guard is only meaningful

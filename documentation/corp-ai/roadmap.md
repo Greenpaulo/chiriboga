@@ -78,7 +78,7 @@ price yet.
 ### L8.5 Match-local public outcome feedback
 - **Status:** in-progress
 - **Depends on:** F4
-- **Ticket:** [feature-layer-8-5-match-local-public-outcome-feedback.md](../backlog/feature-layer-8-5-match-local-public-outcome-feedback.md)
+- **Ticket:** [feature-layer-8-5-match-local-public-outcome-feedback.md](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md)
 - **Goal:** Adjust later posture weights from public outcomes within the current game. Required to complete Layer 8.
 
 ### L8.6 Outcome-calibrated bluff telemetry

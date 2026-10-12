@@ -2042,8 +2042,39 @@ Corp turn, after a public boundary (the server was run, Runner credits or
 breakers changed, the root's advancement changed, or either side reached match
 point). Repeated evaluator calls never reroll. `AIPunishesAccess(server)` is
 unchanged: its signature and contract are the same with the option on or off,
-and posture epochs add no card-facing hook. Layer 8.5 adds match-local
-feedback from public outcomes.
+and posture epochs add no card-facing hook.
+
+L8.5 records committed public actions through the engine's
+`RecordPublicPostureEvent(action, card, server, amount)` and the AI's
+`_recordPublicPostureEvent(action, server, card, amount)`. The per-game
+`_publicPostureHistory` contains opaque card/server ids, Corp turn, action,
+amount, acting side and turn side; it contains no live objects or card identities.
+It includes installed roots/ICE, ICE rezzes, advancements placed by all engine
+counter-placement paths, run declarations, actual encounters/accesses, actual
+trap effects and completed scores/steals. Access is distinct from a successful
+run; a declined optional trap effect is not a firing. The gameplay notification
+adds no AI card hook and never changes the `AIPunishesAccess` contract.
+
+With `matchLocalPostureFeedback` on, later shapes use the shared twelve-script
+distribution and `_postureScriptWeights`. Multipliers stay within 0.8–1.2;
+each normalized script retains probability at least 0.015. Only cached active
+postures exposed during a real Runner turn supply learning samples. Their
+class uses actual visible ICE count and advancement counters, including whether
+advancement was delayed, rather than a private agenda/trap label. At the next
+Corp turn, an ignored surviving root reinforces its visible depth/delay; a
+challenged root modestly favors deeper or delayed shapes. Ten prior exposure
+equivalents limit any one sample's multiplier change below 0.02; repeated runs
+on a root during one turn remain one sample. `_postureOutcomeCounts` retains
+the response totals and `_postureFeedbackReasons` explains weight updates.
+
+Newly profiled cards use current weights. Installed profiles refresh only when
+an actual later active L8.4 commitment is rolled, once per card/epoch. With
+epochs disabled, installed shapes retain their lifetime cache. Public events
+and turn notifications ignore hypothetical probes. All memory belongs to the
+AI instance and resets with a new game. Feedback off retains the existing
+shape choices, caches and random draw counts; the public record remains available
+for later legibility work. The adoption gate and current default are recorded
+in the L8.5 ticket.
 
 ### 5.11 Emergency Protection Draw — `AIEmergencyDraw`
 

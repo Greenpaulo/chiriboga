@@ -24,7 +24,7 @@ async function scenario(mode) {
         for (var step = 0; step < 60 && !predicate(); step++) {
           EnumeratePhase();
           if (currentPhase.Enumerate.trigger && currentPhase.Enumerate.trigger().length) choose('trigger');
-          else if (currentPhase.Enumerate.continue) choose('continue');
+          else if (currentPhase.Enumerate.continue && currentPhase.Enumerate.continue().length) choose('continue');
           else choose('n');
         }
         check(predicate(), 'resolution reaches optional step');

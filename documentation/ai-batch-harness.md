@@ -323,6 +323,17 @@ Gate: passed
 - `--ceiling <metric>=<n>` checks a batch-level metric (a collector's
   `finishBatch`; see "For agents adding a metric"): it fails unless the
   candidate's 95% interval upper bound is at most `n`.
+- `--no-worse <metric>` compares measured batch values, requiring candidate
+  at most its fresh matching baseline. Both arms' intervals are printed for
+  context; this is an exact measured-value rule, not a paired confidence-bound
+  guard or evidence of statistical non-inferiority. Missing/nonfinite values
+  or intervals and empty batches fail. Use it only when the source gate
+  explicitly requires this statistic. L8.5 now retains correlation as a
+  diagnostic under its owner-approved post-result gate redesign.
+
+All collected batch metrics print with both arms' intervals, even without
+`--ceiling` or `--no-worse`. Metrics without an acceptance check are labelled
+`[diagnostic]` and do not affect the gate result.
 
 Every ticket's gate is written in one fixed form with exactly one flag per
 row; see [ai-planning.md: Writing a gate](ai-planning.md#writing-a-gate).
@@ -334,6 +345,13 @@ file, so any code change plays a fresh baseline. If you ran a pending gate
 yourself, paste the output into Codex with `$implement-ticket <ticket>`. It
 records the result and switches the option on only if the output says
 `Gate: passed`.
+
+Add `--fresh` to a `gate` command to replay both baseline and candidate,
+bypassing local and committed report caches. The new reports are written to
+the normal local cache. This keeps the same pool, options and seeds, so game
+results should repeat; it does not draw a new sample. Use `--seeds 201-400`
+(or another range) for a different paired sample, and `--pool <file>` to
+select another deck pool.
 
 `--quick` plays 50 seeds per pair (about 5 minutes) and marks the result
 "indicative only". It can never pass a gate, but it is how a ticket proves its
@@ -585,6 +603,18 @@ reach collectors as `posture` events (`kind` `bait`/`bluff`/`profile`,
 `isAgenda`, `reason`, `expired`, `corpTurn` and the public variables in
 `publicVars`), emitted through `CorpAI._postureTelemetry`, which the harness
 sets only when observing a game.
+
+L8.5 also emits `kind: weights`, `action: weights` events containing the
+twelve scripts' ids, multipliers and normalized probabilities, with an initial
+observation after `gameStart` and subsequent observations on feedback updates
+and candidate profile selection. `postureScriptWeights` records per-script
+minimum/maximum weights and probabilities and counts absolute-bound, floor,
+normalization and movement-above-0.02 violations. Missing weight telemetry
+also fails this invariant check. Movement is measured between observations;
+this collector does not count exposures or prove telemetry completeness.
+The deterministic feedback tests verify one matching observation per
+settled exposure and the actual per-exposure multiplier change. Weight observations consume no randomness and are excluded from
+the existing correlation collector's posture/profile choice samples.
 
 ## Install-series collectors and baselines (I0)
 

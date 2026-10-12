@@ -503,13 +503,51 @@ later Corp turn; with no reason the posture is reused. Otherwise it is rerolled
 at the current probability and may stay the same. Within an epoch, on the
 Runner's turn and after F3 cache clears, the stored result is reused without
 calling `_random`. Grip size, HQ size and Corp credits are never reasons.
-`_remoteDeceptionProfile()` stays lifetime: it chooses a shape, not whether a
-card is postured. With the option off the lifetime caches are unchanged.
+`_remoteDeceptionProfile()` stays lifetime under the epoch option alone: it
+chooses a shape, not whether a card is postured. L8.5's separate feedback option
+can refresh it at a later active commitment. With the epoch option off the
+lifetime activation caches are unchanged.
 `_postureTelemetryEvent()` feeds the F4 posture collectors through a
 harness-only sink and never affects a decision.
 
-**Current gaps:** public outcomes do not feed back into later postures
-(L8.5). Explicitly disabling `postureEpochs` restores lifetime posture caches.
+**Match-local feedback (L8.5, option `matchLocalPostureFeedback`, initially
+default off pending its adoption gate).** The engine's
+`RecordPublicPostureEvent()` sends committed visible events to
+`_recordPublicPostureEvent()`. `_publicPostureHistory` contains only opaque
+ids and scalar event fields, including acting side and turn side; it records
+installs, ICE rezzes, all advancement placement paths, runs, actual encounters
+and accesses, actual paid/automatic trap effects and completed scores/steals.
+Successful runs do not imply accesses. Optional trap offers/declines and
+prevented scores/steals do not emit those outcomes. Originating server ids
+remain stable after a remote is destroyed or display indices change.
+
+`_publicPostureTurnBegins()` snapshots cached active postures at a real Runner
+turn's beginning and settles them at the following Corp turn. Their classes
+come from visible depth/counters, not payload identity. Removed roots do not
+count as ignored. Each root/Runner-turn exposure contributes at most one
+sample, even when challenged repeatedly. `_postureOutcomeCounts` keeps the
+public response totals separately from decaying protection-run pressure.
+`_postureScriptWeights` are shared across agendas/traps and bounded to
+0.8–1.2; the twelve-script normalized distribution retains a 0.015 exploration
+floor per script. Ten prior exposure-equivalents limit one update below 0.02.
+Ignored shapes reinforce their observed depth/delay; challenged shapes favor
+deeper or delayed alternatives. Structured `_postureFeedbackReasons` and
+weight telemetry explain the changes. No hidden Runner identities enter the
+record or adaptation, and hypothetical events are excluded.
+
+New cards use current weights. Existing shapes refresh only when
+`_epochPosture()` rolls a later active commitment, never on reuse or a cache
+clear. With epochs off, feedback affects only newly profiled cards. Feedback
+off preserves prior choices and random consumption while retaining the public
+record. A new `CorpAI` resets all match memory. The L8.5 acceptance contract combines deterministic public-input,
+payload-independent sampler and feedback-reachability tests with hard
+adaptation bounds and batch performance guards. Correlation against a fresh
+matching control is report-only diagnostic evidence following the owner-approved
+post-result redesign; it does not establish statistical non-inferiority or
+benefit against learning humans.
+
+**Current gaps:** legibility signals (L8.2) remain open. Explicitly disabling
+`postureEpochs` restores lifetime activation commitments.
 
 ## Install planning today
 

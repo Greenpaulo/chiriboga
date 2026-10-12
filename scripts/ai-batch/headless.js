@@ -522,6 +522,7 @@ function playGame(options) {
   if (roots) roots.start(run('corp'));
   emit('gameStart', {fixtureId: fixture ? fixture.id : null, corpIdentity: run('corp.identityCard.title'),
     runnerIdentity: run('runner.identityCard.title')});
+  if (options.observe) run('corp.AI._postureWeightTelemetry("baseline")');
   if (errors.size) { done(); return finished; }
   try {
     if (fixture) run('ChangePhase(phases.corpActionMain); Main();');
