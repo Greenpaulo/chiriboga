@@ -1147,8 +1147,10 @@ not these hooks.
 - `AIBypassesOutermostIce(server)` returns whether this card can skip the next
   outermost ice once during the run.
 - `AIBypassesOneIce(iceCard, server, iceIndex)` returns whether a once-per-run
-  bypass can target that ice. The evaluator spends it on the layer with the
-  highest mandatory break cost.
+  bypass can target that ice. The evaluator first targets a proven mandatory
+  lockout, then a layer with unknown mandatory pricing, then the highest known
+  mandatory break cost. Unknown layers retain their zero lower bounds for
+  aggregation, but those bounds are not used as their bypass-ranking price.
 - `AIRedirectsRun(fromServer, toServer)` returns whether a run through the
   first server can become a run on the second, bypassing the destination's ice.
 
