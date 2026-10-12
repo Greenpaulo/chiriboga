@@ -30,7 +30,7 @@ in card-sets.md.
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
-| `elevation` | playable | 82 | 76 | 6 | 0 | 2 | 55 / 64 | false / false | yes |
+| `elevation` | playable | 82 | 76 | 6 | 0 | 0 | 55 / 64 | false / false | yes |
 | `vantagepoint` | in-progress | 66 | 66 | 0 | 0 | 0 | 60 / 62 | true / true | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
@@ -53,7 +53,7 @@ None.
 
 ## Incomplete playable sets
 
-- `elevation`: 6 missing, 0 with scaffold markers and 2 missing a required AI hook (listed below).
+- `elevation`: 6 missing, 0 with scaffold markers and 0 missing a required AI hook (listed below).
 
 ## Gaps in playable and in-progress sets
 
@@ -73,8 +73,6 @@ None.
 - 35060 Next Big Thing: no definition
 - 35065 Bigger Picture: no definition
 - 35066 IP Enforcement: no definition
-- 35020 Sang Kancil: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 35032 Principia: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
 ### `vantagepoint` (sets/vantagepoint.js)
 

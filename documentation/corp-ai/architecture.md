@@ -83,7 +83,10 @@ are matched against ICE subtypes through `AIMatchingBreakerInstalled` and
 by estimated cost, read from their `AIImplementBreaker` hooks, with card-text
 patterns as a fallback; pump and break batches round to whole activations.
 Hosted counter contributions are evaluated separately. Public installed-breaker
-counts are prepared on a fresh Corp-owned calculator.
+counts are prepared on a fresh Corp-owned calculator. Sang Kancil and
+Principia expose their legal pump/break costs through `AIImplementBreaker`;
+Sang Kancil's pump discount uses the public active Run event, without reading
+the Runner's prospective event.
 
 **Subroutine classification.** The Corp's own ICE, including unrezzed ICE, is
 classified through a Corp-owned calculator and `AIImplementIce`.
@@ -120,7 +123,14 @@ outermost relevant ICE remain per plan. The context never enters the
 per-decision cache or crosses into another real or hypothetical evaluation. When an enabled Runner
 provider reports positive `AIRunRestrictedCredits(server)`, each funded ICE
 plan uses the shared run calculator to allocate those credits across restricted
-payments and finite reruns. Empty providers retain scalar evaluation. The
+payments and finite reruns, provided its breakers have ordinary known prices.
+Supported multi-step strength-modification/payment nodes can still be priced
+by the complete calculator even when the scalar activation probe cannot price
+one encounter; `_probeBreakerPrice()` records that as `fullRouteSupported`.
+Unsupported unknown prices and breaker-owned `AIBreakCost` use the per-layer
+resource planner; the maximum restricted-credit report is retained as an optimistic
+`restrictedCreditUpperBound`, so an unsupported calculator route cannot prove
+security. This bound does not certify a legal restricted-payment sequence. Empty providers retain scalar evaluation. The
 planner uses `AIWithRunContext` to restore run state and guard the security
 cache. `AIPreferredUpgradeServer(legalServers)` overrides the generic upgrade
 placement target, including a `null` result that holds the card.
@@ -129,8 +139,8 @@ placement target, including a `null` result that holds the card.
 carries `honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`,
 `honestBreakCost`, `noBreakerLockout` and `honestReasons`. No decision reads
 them yet; L9.0.1 adopts them behind an option, and `isSecure`,
-`hasHardLockout`, `reasons` and every cost above are computed exactly as
-before. For the chosen rez plan, `_honestLayerOptions()` lists each layer's
+`hasHardLockout`, `reasons` and the cost fields retain their existing
+meaning, with the L9.1 unknown-price correction applied to both verdicts. For the chosen rez plan, `_honestLayerOptions()` lists each layer's
 ways through as credits plus clicks: today's mandatory cost when finite, the
 ICE's own click-break declared by `AIBreakCost` (bioroids), and, when no
 matching breaker is installed, `_breakerAbsentCost()`: installing the
@@ -140,9 +150,42 @@ Grip). `_honestRouteVerdict()` picks one option per layer, so the route fits
 the Runner's click budget (projected clicks, less one to run outside a run).
 Clicks spent breaking cannot also be clicked for credits (1 credit per click).
 Defensive upgrades and global ETR covering every projected run stay honest
-lockouts; the restricted-credit route copies today's verdict. The
+lockouts; the supported exact restricted-credit route copies today's verdict. The
 `securityCalibration` collector compares both verdicts with next-turn
 breaches.
+
+**Unknown breaker prices (L9.1).** `_breakerPrice()` distinguishes known costs,
+unknown pricing and explicit rules-based inability. It consults breaker-owned
+`AIBreakCost` before the standard activation probe, retaining
+`_breakerActivationCost()` as the numeric compatibility interface. All eligible
+installed matches are inspected; a known alternative is an upper bound and
+cannot hide an unknown cheaper breaker. The text fallback requires a real
+break-price pattern; it no longer invents two credits per subroutine. Hook
+exceptions and malformed costs are unknown, while explicit fixed-strength
+inability and absence of a matching breaker keep their lockouts. Prices are
+cached only within one `_securityEvaluationContext()`.
+
+`unpricedBreakers` names the unknowns and both reason lists explain them.
+`totalMandatoryBreakCost`, `totalBreakCost`, `honestMandatoryBreakCost` and
+`honestBreakCost` are `null` when the respective total depends on an unknown.
+The explicit `knownMandatoryBreakCost`, `knownBreakCost`,
+`honestKnownMandatoryBreakCost` and `honestKnownBreakCost` fields retain
+optimistic lower bounds from priced parts; affordability and rez-plan ranking
+use these bounds internally rather than inventing a total. Other priced layers,
+defensive upgrades and global ETR can establish security independently.
+Once-per-run bypass selection prioritizes proven mandatory lockouts, then
+unknown mandatory prices, then the highest known mandatory cost. This
+conservative ordering avoids treating an unknown layer as free; it does not
+claim to know the optimal target among unknown prices.
+
+Breaker-owned prices carry exact credits, clicks and per-type counter costs.
+The route planner keeps a Pareto frontier for each counter-usage state, checking
+shared resources across ICE and repeated attempts. Today's route uses breaker
+and native payment alternatives; the honest route additionally compares ICE
+self-break and mixed native/breaker routes. Mandatory passage and full avoidance
+prices are evaluated separately. Pricing guards restore payment fields,
+run/encounter state and the private calculator's overridden method after throws.
+The Runner calculator still requires `AIImplementBreaker`.
 
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent
@@ -776,11 +819,11 @@ Security is a per-ICE heuristic, not a complete run simulation. It does not yet
 model cumulative damage across encounters, optional effects that disable later
 breakers, or shared strength-reducer counters across several ICE (L9), or exact
 allocation of restricted credit sources across payments (L6.1).
-`AIImplementBreaker` pricing probes support the standard `ImplementIcebreaker`
-activation path; breakers using another mechanism are priced as unable to
-break, which makes servers look secure when they are not. That is L9's first
-priority (bug ticket
-[sang-kancil-and-principia-priced-as-unbreakable.md](../bugs/sang-kancil-and-principia-priced-as-unbreakable.md)).
+L9.1 closes limit 1 (unpriceable installed breakers): unknown pricing can no
+longer prove security or create a lockout, and affected totals are explicitly
+unknown. Sang Kancil and Principia have real standard pricing hooks from the
+[preceding fix](../bugs/code-review/sang-kancil-and-principia-priced-as-unbreakable.md).
+Bumi 1.0's missing Runner-side click-break implementation remains outside L9.1.
 The security tests load the real AI classes and card definitions with
 deterministic engine helpers; they do not replace playing the game in the
 browser.

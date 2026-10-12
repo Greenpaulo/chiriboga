@@ -21,6 +21,15 @@ card declare post-rez spending for economy and ICE-rez planning.
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
+
+**Deception input ownership.** [L8.8 Marginal deception value](L8.8-marginal-deception-value.md)
+proposes a shared marginal concealment contract and a separate private
+mechanical-payoff breakdown. It is not a dependency of this item: retain the
+shared design's bounded placeholder unless L8.8 has been adopted and this
+item's own gate validates its consumer. Do not invent an independent payoff
+conversion, count the same effect twice, or feed private trap payoff into
+ordinary postured ICE ranking. I5 owns any justified `trapValue` conversion;
+I2's equivalent-board substitution invariant remains authoritative.
 Value components, in the design note's units and bounds (`economyValue`,
 `trapValue`, `installCost`, `reserveCost`, `opportunityCost`):
 

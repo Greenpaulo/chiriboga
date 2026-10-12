@@ -196,7 +196,10 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
 - Search is a depth-first stack with best-cost pruning, capped at 1000 loops.
   `Directions()` collects `IceAct()` moves (`AIImplementBreaker`) from active
   cards and the bonus breaker, rejects unused pumps and expands subroutine
-  choices; `ValidateEncounterPoint()` applies effects (ETR and `misc_serious`
+  choices. Sang Kancil and Principia supply their standard pump/break moves
+  through `AIImplementBreaker`. Sang Kancil's reduced pump cost applies to an
+  active Run event or the prospective Run event in `rc.runEvent`.
+  `ValidateEncounterPoint()` applies effects (ETR and `misc_serious`
   end complete paths; `AIIceSpecificEffect` expands); `EncounterOptions()` adds
   `AIEncounterOptions` from active cards and the run event.
 - `PointCost()` weights credits spent 0.6, lost 0.7, clicks 0.8, virus

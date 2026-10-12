@@ -4820,8 +4820,12 @@ cardSet[36058] = {
   AIMandatoryPassCost: function (breaker, server, iceIndex, ai, evaluationContext) {
     // The ETR can be paid off; lacking a killer is not a hard lockout.
     if (ai._hostedBreakContribution(this) > 0) return 0;
-    var breakCost = breaker ? ai._breakerActivationCost(
-      this, breaker, 1, server, iceIndex, evaluationContext) : Infinity;
+    var price = breaker ? ai._breakerPrice(
+      this, breaker, 1, server, iceIndex, evaluationContext) : null;
+    //Resource-priced breaker alternatives are combined by the route planner;
+    //this scalar hook may only compare an ordinary credit price with paying 3.
+    var breakCost = price && price.status == "priced" && price.clicks == 0 &&
+      !Object.values(price.counters).some(amount => amount > 0) ? price.credits : Infinity;
     return Math.min(3, breakCost);
   },
   AIRunExtraRuns: function (server) {
@@ -5307,7 +5311,7 @@ cardSet[36065] = {
     var outside = credits.temporaryCredits + credits.recurringCredits + credits.badPublicityCredits;
     if (outside < 1) return 0;
     var cost = corp.AI._evaluateServerSecurity(server).totalMandatoryBreakCost;
-    if (cost < 1) return 0;
+    if (cost === null || !isFinite(cost) || cost < 1) return 0;
     // Four damage is credible only where passing the ICE requires payment.
     // Otherwise this is not a substitute for a stopping defender.
     return Math.min(4, cost);
