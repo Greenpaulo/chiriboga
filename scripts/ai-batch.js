@@ -191,7 +191,7 @@ async function playJob(job) {
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
     runnerOptions: job.runnerOptions, securityCache: job.securityCache,
-    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
+    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), securitySnapshot: job.collectors.includes('securityCalibration'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
   const record = {fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed, ok,
@@ -515,11 +515,14 @@ function applyCeilingChecks(result, baseline, candidate, ceiling) {
 // Hard checks: a condition that must hold in every candidate game, not on average.
 function applyMaxChecks(result, candidate, max) {
   for (const [name, limit] of Object.entries(max)) {
-    const games = candidate.games.filter(g => g.ok);
-    const over = games.filter(g => (g.metrics[name] || 0) > limit);
-    const known = games.some(g => name in g.metrics);
+    const games = candidate.games;
+    const measured = g => g.metrics && Number.isFinite(g.metrics[name]);
+    const missing = games.filter(g => !measured(g));
+    const over = games.filter(g => measured(g) && g.metrics[name] > limit);
+    const known = games.length > 0 && !missing.length;
     result.checks.push({name, kind: 'max', tolerance: limit, pass: known && !over.length,
-      why: !known ? 'unknown metric' : over.length ? over.length + ' games exceed it, e.g. ' + over[0].deckPairId + ' seed ' + over[0].seed : undefined});
+      why: missing.length ? missing.length + ' games have no finite metric' :
+        !known ? 'unknown metric' : over.length ? over.length + ' games exceed it, e.g. ' + over[0].deckPairId + ' seed ' + over[0].seed : undefined});
   }
   if (result.checks.length) result.pass = result.checks.every(c => c.pass);
   return result;

@@ -5,6 +5,8 @@
 **Source log:** none. Found by the F4 baseline run (`zwicky-magdalene` seeds 68 and 139); replay with `node scripts/ai-game.js --seed 68:zwicky-magdalene --corp "Zwicky Supermodernism.js" --runner "Magdalene CBB.js" --tail 30`.
 **Reproduction:** `tests/pending/scrounge-unaffordable-program-stalls-game.test.js` — `node tests/pending/scrounge-unaffordable-program-stalls-game.test.js` (fails at `44479ba`, confirmed 2026-10-09; promoted unchanged to `tests/scrounge-unaffordable-program-stalls-game.test.js`)
 
+**Merged:** PR #32; workflow reconciled with `node scripts/ticket.js move` on 2026-10-11.
+
 ## Resolution
 
 Implemented from `44479ba`, 2026-10-09, on

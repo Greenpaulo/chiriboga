@@ -6,6 +6,8 @@
 **Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`
 **Verified against code:** 3c25455 (2026-10-09)
 
+**Merged:** PR #36; workflow reconciled with `node scripts/ticket.js move` on 2026-10-11.
+
 ## Resolution
 
 Implemented from `3c25455`, following the approved plan (no deviations).

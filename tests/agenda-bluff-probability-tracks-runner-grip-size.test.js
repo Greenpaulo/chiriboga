@@ -90,7 +90,7 @@ for (const postureEpochs of [false, true]) {
       ai._postureEpochRecords = new WeakMap();
       ai._random = () => 0.5;
       ai._shouldBluffAgendaServer(remote);
-      const stored = (postureEpochs ? ai._postureEpochRecords : ai._agendaBluffDecisions).get(remote);
+      const stored = postureEpochs ? ai._postureEpochRecords.get(remote).get(agenda) : ai._agendaBluffDecisions.get(remote);
       assert.ok(stored && stored.card === agenda, 'bluff decision was not stored for ' + points + '-point agenda');
       return stored.probability;
     });

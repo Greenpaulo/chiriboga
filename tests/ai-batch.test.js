@@ -405,6 +405,22 @@ const EXTRA_DRAW = side => `
     assert.strictEqual(ok.pass, true);
   });
 
+  await scenario('--max fails when any candidate game lacks a finite measurement', () => {
+    const check = games => batch.applyMaxChecks({checks: []}, {games}, {'x.violations': 0});
+    const measured = {ok: true, metrics: {'x.violations': 0}};
+    assert.strictEqual(check([measured]).pass, true, 'zero is a measured value');
+    for (const ok of [true, false]) {
+      for (const missing of [undefined, null, {}, {'x.violations': undefined}, {'x.violations': NaN}]) {
+        const result = check([measured, {ok, metrics: missing}]);
+        assert.strictEqual(result.pass, false, 'every game must supply the requested measurement');
+        assert.match(result.checks[0].why, /1 games have no finite metric/);
+      }
+    }
+    assert.strictEqual(check([]).pass, false, 'an empty batch is not evidence');
+    assert.strictEqual(check([{ok: false, metrics: {'x.violations': 2}}]).pass, false,
+      'a failed game with a measurement is still checked against the limit');
+  });
+
   await scenario('5c. batch metrics bootstrap over games; --ceiling checks the candidate upper bound', async () => {
     const collector = {name: 'demo', samples: g => g.values, finishBatch: perGame => ({mean: [].concat(...perGame).reduce((a, b) => a + b, 0) /
       Math.max(1, [].concat(...perGame).length)}), batchResamples: 100};

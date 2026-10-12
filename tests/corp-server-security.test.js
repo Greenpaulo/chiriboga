@@ -2310,11 +2310,46 @@ test('posture epochs: repeated calls in one epoch consume no extra randomness', 
   for (let i = 0; i < 4; i++) assert.strictEqual(ai._shouldBaitServer(remote), true);
   context.playerTurn = runner; //Runner-turn queries reuse too
   assert.strictEqual(ai._shouldBaitServer(remote), true);
-  const record = ai._postureEpochRecords.get(remote);
+  const record = ai._postureEpochRecords.get(remote).get(remote.root[0]);
   assert.deepStrictEqual([...record.reevaluationReasons], ['install']);
   assert.strictEqual(record.selectedScript, 'bait');
   assert.deepStrictEqual(events.filter(e => e.action === 'roll').map(e => e.reason), ['install']);
   assert.strictEqual(events.filter(e => e.action === 'reuse').length, 5);
+});
+test('posture epochs: multiple roots keep independent advancement commitments and horizons', () => {
+  const events = postureEpochs();
+  const first = card(30045), second = card(30045);
+  first.AITurnsInstalled = second.AITurnsInstalled = 0;
+  const remote = {ice: [etr()], root: [first, second]};
+  const profile = {targetIce: 1, openingAdvances: 1, delayTurns: 0};
+  ai._cardDeceptionProfiles.set(first, profile); ai._cardDeceptionProfiles.set(second, profile);
+  ai._random = scripted([0, 0, 0.99, 0.9]); //bait for two turns; neutral for three
+  assert.strictEqual(ai._deceptionAdvancementTarget(first, remote, 4), 1);
+  assert.strictEqual(ai._deceptionAdvancementTarget(second, remote, 4), 4);
+  remote.root.reverse(); //root order does not change either commitment
+  assert.strictEqual(ai._deceptionAdvancementTarget(second, remote, 4), 4);
+  assert.strictEqual(ai._deceptionAdvancementTarget(first, remote, 4), 1);
+  assert.strictEqual(ai._shouldBaitServer(remote), false, 'server query uses its first eligible root');
+  ai._postureEpoch = 3;
+  ai._random = scripted([0.99, 0]);
+  assert.strictEqual(ai._deceptionAdvancementTarget(first, remote, 4), 4, 'first horizon expires');
+  assert.strictEqual(ai._deceptionAdvancementTarget(second, remote, 4), 4, 'second commitment stays locked');
+  ai._postureEpoch = 4;
+  ai._random = scripted([0, 0]);
+  assert.strictEqual(ai._deceptionAdvancementTarget(second, remote, 4), 1, 'second horizon expires independently');
+  assert.strictEqual(ai._deceptionAdvancementTarget(first, remote, 4), 4);
+  const rolls = events.filter(e => e.action === 'roll');
+  assert.strictEqual(rolls.length, 4);
+  assert.notStrictEqual(rolls[0].cardId, rolls[1].cardId);
+  assert.deepStrictEqual(rolls.map(e => e.reason), ['install', 'install', 'horizonExpired', 'horizonExpired']);
+});
+test('posture epochs: an ineligible or absent requested root cannot borrow another trap posture', () => {
+  postureEpochs();
+  const remote = trapServer();
+  ai._random = scripted([]);
+  assert.strictEqual(ai._deceptionPostureActive(card(30045), remote), false);
+  const visible = card(30045); visible.rezzed = true; remote.root.push(visible);
+  assert.strictEqual(ai._deceptionPostureActive(visible, remote), false);
 });
 test('posture epochs: a new Corp turn permits at most one reevaluation', () => {
   postureEpochs();
@@ -2325,11 +2360,11 @@ test('posture epochs: a new Corp turn permits at most one reevaluation', () => {
   runner.creditPool = 10; //public Runner pressure changed
   ai._random = scripted([0, 0]);
   assert.strictEqual(ai._shouldBaitServer(remote), true);
-  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['runnerPressure']);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).get(remote.root[0]).reevaluationReasons], ['runnerPressure']);
   runner.creditPool = 20; //more boundaries in the same epoch: no second decision
   ai._notePostureChallenge(remote);
   assert.strictEqual(ai._shouldBaitServer(remote), true);
-  assert.strictEqual(ai._postureEpochRecords.get(remote).epochId, 2);
+  assert.strictEqual(ai._postureEpochRecords.get(remote).get(remote.root[0]).epochId, 2);
 });
 test('posture epochs: a material threat change can abandon a bait', () => {
   const events = postureEpochs();
@@ -2340,7 +2375,7 @@ test('posture epochs: a material threat change can abandon a bait', () => {
   ai._postureEpoch = 2;
   ai._random = scripted([0.99, 0]);
   assert.strictEqual(ai._shouldBaitServer(remote), false);
-  const record = ai._postureEpochRecords.get(remote);
+  const record = ai._postureEpochRecords.get(remote).get(remote.root[0]);
   assert.deepStrictEqual([...record.reevaluationReasons], ['challenged']);
   assert.strictEqual(record.previousScript, 'bait');
   assert.strictEqual(record.selectedScript, 'neutral');
@@ -2356,7 +2391,7 @@ test('posture epochs: irrelevant state changes do not reroll', () => {
   runner.grip.push({}, {}, {}); corp.HQ.cards = [{}, {}]; corp.creditPool = 3;
   runner.creditPool = 4; //same credit band as 0
   assert.strictEqual(ai._shouldBaitServer(remote), true);
-  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['install']);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).get(remote.root[0]).reevaluationReasons], ['install']);
   assert.strictEqual(events.filter(e => e.action === 'roll').length, 1);
   assert.strictEqual(events.pop().action, 'reuse');
 });
@@ -2365,7 +2400,7 @@ test('posture epochs: a posture is reevaluated once its commitment horizon expir
   const remote = trapServer();
   ai._random = scripted([0, 0.9]); //bait, horizon 1 + 3 = 4
   ai._shouldBaitServer(remote);
-  assert.strictEqual(ai._postureEpochRecords.get(remote).commitmentHorizon, 4);
+  assert.strictEqual(ai._postureEpochRecords.get(remote).get(remote.root[0]).commitmentHorizon, 4);
   for (const epoch of [2, 3]) {
     ai._postureEpoch = epoch;
     assert.strictEqual(ai._shouldBaitServer(remote), true);
@@ -2373,7 +2408,7 @@ test('posture epochs: a posture is reevaluated once its commitment horizon expir
   ai._postureEpoch = 4;
   ai._random = scripted([0.99, 0]);
   assert.strictEqual(ai._shouldBaitServer(remote), false);
-  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['horizonExpired']);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).get(remote.root[0]).reevaluationReasons], ['horizonExpired']);
   assert.strictEqual(events.filter(e => e.action === 'reuse' && e.expired).length, 0, 'never locked past horizon');
 });
 test('posture epochs: advancement and match point are agenda-bluff boundaries', () => {
@@ -2386,12 +2421,12 @@ test('posture epochs: advancement and match point are agenda-bluff boundaries', 
   ai._postureEpoch = 2;
   ai._random = scripted([0, 0.9]);
   assert.strictEqual(ai._shouldBluffAgendaServer(remote), true);
-  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['stakes']);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).get(remote.root[0]).reevaluationReasons], ['stakes']);
   corp.agendaPoints = 5; //match point, and scoring this 1-pointer still does not win
   ai._postureEpoch = 3;
   ai._random = scripted([0.99, 0]);
   assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
-  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['matchPoint']);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).get(remote.root[0]).reevaluationReasons], ['matchPoint']);
 });
 test('posture epochs: clearing the security cache does not start a new epoch', () => {
   postureEpochs();
@@ -2408,7 +2443,7 @@ test('posture epochs: clearing the security cache does not start a new epoch', (
   ai._securityCacheEnabled = enabled;
   assert.strictEqual(ai._postureEpoch, 2, 'a Corp turn start is one epoch');
   assert.strictEqual(ai._shouldBaitServer(remote), true); //no reason holds: no randomness
-  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).reevaluationReasons], ['install']);
+  assert.deepStrictEqual([...ai._postureEpochRecords.get(remote).get(remote.root[0]).reevaluationReasons], ['install']);
 });
 test('posture epochs off: the lifetime caches behave as before', () => {
   const remote = trapServer();
@@ -2460,6 +2495,88 @@ test('posture epochs on: agenda bluff supports variable ice depth and never risk
   assert.strictEqual(ai._shouldBluffAgendaServer(remote), false);
 });
 
+// L9.0 lockout honesty: honest fields sit beside today's, which stay unchanged.
+const honest = srv => Object.getPrototypeOf(ai)._evaluateServerSecurityUncached.call(ai, srv);
+test('L9.0: Eli 1.0 click-break is not an honest lockout; today\'s verdict unchanged', () => {
+  context.playerTurn = corp; runner.creditPool = 10; // 4 clicks next turn, 3 to break with
+  const eli = card(31043); eli.rezzed = true;
+  const result = honest(server([eli]));
+  assert.strictEqual(result.isSecure, true); assert.strictEqual(result.hasHardLockout, true);
+  assert.strictEqual(result.honestIsSecure, false); assert.strictEqual(result.honestLockout, false);
+  assert.strictEqual(result.honestMandatoryBreakCost, 2, 'two clicks at one credit each');
+  assert.ok(result.honestReasons.includes('Eli 1.0 can be broken by spending clicks'), result.honestReasons);
+});
+test('L9.0: one click to break with does not pass Eli 1.0\'s two ETR subroutines', () => {
+  runner.clickTracker = 2; runner.creditPool = 0; // one click runs, one is left
+  const eli = card(31043); eli.rezzed = true;
+  const result = honest(server([eli]));
+  assert.strictEqual(result.honestIsSecure, true); assert.strictEqual(result.honestLockout, false);
+  assert.ok(result.honestReasons.some(reason => /^honest route needs 0 credits and 2 clicks; Runner has 1 credits and 1 clicks/.test(reason)),
+    result.honestReasons);
+});
+test('L9.0: Eli permits a breaker-only route with one available click', () => {
+  runner.clickTracker = 2; runner.creditPool = 10;
+  const eli = card(31043); eli.rezzed = true;
+  const result = honest(server([eli]));
+  assert.strictEqual(result.honestIsSecure, false);
+  assert.strictEqual(result.honestLockout, false);
+  assert.strictEqual(result.honestMandatoryBreakCost, 6, 'five credits plus the install click');
+});
+test('L9.0: Heap estimates reject breakers forbidden by ICE restrictions', () => {
+  const wall = etr();
+  const srv = server([wall]);
+  const candidate = {cardType: 'program', subTypes: ['Icebreaker', 'AI'], installCost: 0};
+  runner.heap = [candidate];
+  const previousActivationCost = ai._breakerActivationCost;
+  ai._breakerActivationCost = () => 0;
+  try {
+    const estimate = () => ai._breakerAbsentCost(wall, 1, srv, 0, ai._securityEvaluationContext(srv));
+    assert.strictEqual(estimate().credits, 0, 'an unrestricted AI is eligible');
+    wall.cannotBreakUsingAIPrograms = true;
+    assert.strictEqual(estimate().credits, 4, 'forbidden AI uses the public fallback');
+    wall.cannotBreakUsingAIPrograms = false;
+    wall.canOnlyBreakUsingFracter = true;
+    wall.subTypes = ['Barrier', 'Code Gate'];
+    candidate.subTypes = ['Icebreaker', 'Decoder'];
+    assert.strictEqual(estimate().credits, 4, 'effective subtype does not waive Fracter restriction');
+    candidate.subTypes = ['Icebreaker', 'Fracter'];
+    assert.strictEqual(estimate().credits, 0, 'a legal Fracter remains eligible');
+  } finally { ai._breakerActivationCost = previousActivationCost; }
+});
+test('L9.0: a missing breaker is noBreakerLockout with a finite public estimate', () => {
+  context.playerTurn = corp; runner.creditPool = 30;
+  const barrier = etr();
+  let result = honest(server([barrier]));
+  assert.strictEqual(result.isSecure, true); assert.strictEqual(result.hasHardLockout, true);
+  assert.strictEqual(result.noBreakerLockout, true); assert.strictEqual(result.honestLockout, false);
+  assert.strictEqual(result.honestMandatoryBreakCost, 5, 'assumed install 3 + 1 per subroutine + install click');
+  assert.strictEqual(result.honestIsSecure, false);
+  assert.ok(result.honestReasons.includes('Regression ice has no matching breaker installed yet'), result.honestReasons);
+  runner.heap = [card(31008)]; // a public Killer does not match a Barrier
+  assert.strictEqual(honest(server([barrier])).honestMandatoryBreakCost, 5);
+  runner.grip = [];
+  result = honest(server([barrier]));
+  assert.strictEqual(result.honestLockout, true, 'nothing to install from an empty Grip');
+  assert.strictEqual(result.honestIsSecure, true);
+});
+test('L9.0: click-break and paid layers share one click budget', () => {
+  context.playerTurn = corp; runner.creditPool = 0; runner.cards = [card(31008)];
+  const eli = card(31043); eli.rezzed = true;
+  const sentry = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Sentry'], strength: 2});
+  let result = honest(server([sentry, eli]));
+  assert.strictEqual(result.honestIsSecure, false, '2 clicks break Eli, 1 click gains the Mimic credit');
+  assert.strictEqual(result.honestMandatoryBreakCost, 3);
+  context.playerTurn = runner; runner.clickTracker = 3; // 2 clicks after the run click
+  result = honest(server([sentry, eli]));
+  assert.strictEqual(result.honestIsSecure, true, 'no click left to gain the credit');
+});
+test('L9.0: hidden Grip and Stack identities do not change the honest verdict', () => {
+  runner.creditPool = 30;
+  const before = JSON.stringify(honest(server([etr()])), (k, v) => (v === Infinity ? 'Inf' : v));
+  runner.grip = [card(31008), card(31008), {}, {}, {}]; runner.stack = Array(40).fill(card(31008));
+  const after = JSON.stringify(honest(server([etr()])), (k, v) => (v === Infinity ? 'Inf' : v));
+  assert.strictEqual(after, before);
+});
 test('I1 hypothetical new remote evaluates like a real empty remote', () => {
   context.NewServer = (name, isCentral) => Object.assign({isServer: true, root: [], ice: [], serverName: name}, isCentral ? {cards: []} : {});
   const hq = {serverName: 'HQ', cards: [], ice: [], root: []};

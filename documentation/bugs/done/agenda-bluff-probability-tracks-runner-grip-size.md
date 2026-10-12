@@ -5,6 +5,8 @@
 **Source:** code inspection during the Corp AI planning audit (no debug log)
 **Reproduction:** `tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js` (`node tests/pending/agenda-bluff-probability-tracks-runner-grip-size.test.js`); fails at `3c25455`, 2026-10-09 (2-point agenda: 0.12 at Grip 4 vs 0.13 at Grip 0). Moved to the green suite unchanged as `tests/agenda-bluff-probability-tracks-runner-grip-size.test.js`; passes with `node tests/agenda-bluff-probability-tracks-runner-grip-size.test.js`.
 
+**Merged:** PR #35; workflow reconciled with `node scripts/ticket.js move` on 2026-10-11.
+
 ## Resolution
 
 Implemented from `3c25455`.

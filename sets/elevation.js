@@ -3632,6 +3632,12 @@ cardSet[35041] = {
   AIRezReasons: function() {
     return { facecheck: true, program_trash: true, damage: true };
   },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
+  },
 };
 
 //Card 26: Mahkota Langit Grid

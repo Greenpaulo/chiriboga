@@ -125,6 +125,25 @@ planner uses `AIWithRunContext` to restore run state and guard the security
 cache. `AIPreferredUpgradeServer(legalServers)` overrides the generic upgrade
 placement target, including a `null` result that holds the card.
 
+**Honest verdict (L9.0, observation only).** Beside today's fields the result
+carries `honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`,
+`honestBreakCost`, `noBreakerLockout` and `honestReasons`. No decision reads
+them yet; L9.0.1 adopts them behind an option, and `isSecure`,
+`hasHardLockout`, `reasons` and every cost above are computed exactly as
+before. For the chosen rez plan, `_honestLayerOptions()` lists each layer's
+ways through as credits plus clicks: today's mandatory cost when finite, the
+ICE's own click-break declared by `AIBreakCost` (bioroids), and, when no
+matching breaker is installed, `_breakerAbsentCost()`: installing the
+cheapest matching icebreaker in the Heap, else
+`CORP_AI_NO_BREAKER_ASSUMED_COST`, plus the install click (none with an empty
+Grip). `_honestRouteVerdict()` picks one option per layer, so the route fits
+the Runner's click budget (projected clicks, less one to run outside a run).
+Clicks spent breaking cannot also be clicked for credits (1 credit per click).
+Defensive upgrades and global ETR covering every projected run stay honest
+lockouts; the restricted-credit route copies today's verdict. The
+`securityCalibration` collector compares both verdicts with next-turn
+breaches.
+
 **Root defences, global ETR and lethality (L2, L2.1).** `_hasDefensiveUpgrade()`
 reads `AIPreventBreach` on root and active Corp cards. Trace- or psi-dependent
 prevention (for example Ash or Caprice Nisei, neither currently implemented)
@@ -431,14 +450,17 @@ its F4 gate).** With the option on, `_shouldBaitServer()` and
 `_shouldBluffAgendaServer()` run their winning-breach guards first, then call
 `_epochPosture()`, which keeps one record per server root card (epoch id,
 selected script `bait`/`bluff`/`neutral`, commitment horizon, reevaluation
-reasons). The epoch counter `_postureEpoch` advances once per Corp turn in
+reasons). Records use nested WeakMaps keyed by server and card identity.
+Advancement queries select the specific eligible trap, so multiple root cards
+keep independent commitments even when their order changes; server-wide bait
+queries use the first eligible trap. The epoch counter `_postureEpoch` advances once per Corp turn in
 `_prepareProtectionPrioritiesForCorpTurn()`. The roll happens at the first
 query after install; the commitment horizon is two or three Corp turns, drawn
 at roll time. `_postureReevaluationReasons()` compares the public boundary
 from `_postureBoundary()` (runs on the server counted by
 `_notePostureChallenge()` from `MakeRun()`, Runner credit band and breaker
 count, root advancement, match point) once, at the first posture query of a
-later Corp turn; with no reason the posture is reused, otherwise it is rerolled
+later Corp turn; with no reason the posture is reused. Otherwise it is rerolled
 at the current probability and may stay the same. Within an epoch, on the
 Runner's turn and after F3 cache clears, the stored result is reused without
 calling `_random`. Grip size, HQ size and Corp credits are never reasons.

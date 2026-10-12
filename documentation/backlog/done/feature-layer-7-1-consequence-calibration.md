@@ -6,6 +6,8 @@
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
 **Verified against code:** 143ac4f (2026-10-09)
 
+**Merged:** PR #37; workflow reconciled with `node scripts/ticket.js move` on 2026-10-11.
+
 ## Resolution
 
 Implemented from `5f09697` (plan approved 2026-10-09).
