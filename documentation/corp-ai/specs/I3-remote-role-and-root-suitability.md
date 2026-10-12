@@ -1,7 +1,7 @@
 # I3 Remote role and root suitability
 
 **Roadmap item:** I3 · **Depends on:** I2, F4, L8.4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
@@ -100,6 +100,8 @@ revise stale deception assumptions safely.
    (design note edge case 1).
 
 ## Acceptance gate
+**Reconciliation pending:** The linked plan proposes an additional no-worse-than-matching-control `bluffSingleVariableCorrelation.max` guard alongside the non-inferiority checks below. This source gate has not adopted that proposal. Before implementation or candidate results, re-ground the design, replace the stale I0 control with a fresh matching control, and specify measured batch maxima versus a paired-interval rule, its required harness support and any preregistered margin. The plan alone does not add the guard.
+
 Non-inferiority gate (I3 mainly makes I4 and I5 possible): candidate
 `this.options.remoteRoles` on against I0's baseline, with the standard guards
 (design note) and:

@@ -1,7 +1,7 @@
 # F11 Paired batch-metric guards
 
 **Roadmap item:** F11 · **Depends on:** F4 · **Sets:** none
-**Read first:** `documentation/ai-principles.md`, `documentation/ai-batch-harness.md`, `documentation/ai-planning.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/ai-batch-harness.md`, `documentation/ai-planning.md`, [deception gate reconciliation](../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
 **Verified against code:** e33a91b (2026-10-12)
 
 ## Goal

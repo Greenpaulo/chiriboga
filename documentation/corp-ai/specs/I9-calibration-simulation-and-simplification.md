@@ -1,7 +1,7 @@
 # I9 Calibration, simulation and simplification
 
 **Roadmap item:** I9 · **Depends on:** I8, F4 · **Sets:** none
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
@@ -60,6 +60,8 @@ single observable game-state variable beyond its documented bounded inputs.
    decision fixtures pass.
 
 ## Acceptance gate
+**Reconciliation pending:** The linked plan proposes an absolute 0.10 ceiling on the combined policy, stricter than the recorded 0.20 threshold below. It has not been adopted in this spec. Before implementation or candidate results, reconcile outcome/variable coverage, install-role coverage, documented bounded-input exceptions and the fresh matching control; explicitly preregister any replacement threshold here. Do not treat intermediate no-worse gates as satisfying a combined-policy absolute target.
+
 Against I0's baseline, with every I option on (candidate) and the calibrated
 coefficients:
 

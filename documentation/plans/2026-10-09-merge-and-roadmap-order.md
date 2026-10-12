@@ -128,8 +128,11 @@ measured-value check as proof of statistical non-inferiority. Any stronger
 paired-interval rule needs its own preregistered threshold and harness support.
 The exported metric is `bluffSingleVariableCorrelation.max`.
 
-Re-ground L8.2 and L8.5 through `.agents/skills/reground-spec/SKILL.md`;
-both still carry `376f32c (2026-09-25)` verification stamps. In particular:
+Re-ground L8.2 and L8.5 through `.agents/skills/reground-spec/SKILL.md`.
+L8.2 still carries `376f32c (2026-09-25)`; L8.5 was re-grounded at
+`484edd3 (2026-10-12)`, with an unapproved implementation plan retaining
+its recorded ceiling. The proposed L8.5 gate revision still requires a source
+decision before implementation. In particular:
 
 - Replace L8.2's open Grip-size-bug claim/link with the merged fix in
   `documentation/bugs/done/agenda-bluff-probability-tracks-runner-grip-size.md`.
@@ -160,6 +163,16 @@ margins need control-only feasibility/calibration evidence before freezing;
 L8.4's settled measured-value evidence and the other source gates remain
 unchanged. Preserve the L7.1 rule: consequence weighting belongs only in
 I2 ranking, never in HQ/R&D protection scores used as remote-scoring bars.
+
+**Source synchronization audit (2026-10-12).** L8.4's settled gate and I2's
+proposed paired guards are reflected in their source documents. L8.2 retains
+the table's current ceiling, with re-grounding/feasibility work pending.
+L8.5's no-worse proposal, I3's additional correlation guard and I9's tighter
+combined-policy ceiling have not been adopted into their source gates.
+Each affected open ticket/spec now links this section from **Read first**;
+the Corp roadmap also directs pickup here. Pending reconciliation notes in
+L8.2, L8.5, I3 and I9 distinguish proposals from current requirements. No
+threshold or statistic is changed by this discoverability update.
 
 **Separate deception valuation follow-up (2026-10-12).**
 [L8.8](../corp-ai/specs/L8.8-marginal-deception-value.md) is proposed after

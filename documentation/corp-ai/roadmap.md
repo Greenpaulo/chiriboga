@@ -5,6 +5,12 @@ spec file (`proposed`); how finished work behaves lives in
 [architecture.md](architecture.md); rules live in [principles.md](principles.md).
 Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md).
 
+Before picking up L8.2, L8.5, I2, I3, I9 or their F11 measurement support, read
+the [deception gate reconciliation](../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation).
+That section separates recorded source gates from proposed revisions;
+reconcile any proposal in the source ticket/spec before implementation and
+before viewing candidate gate results. The historical merge order is a snapshot.
+
 - `node scripts/roadmap.js next` lists items whose dependencies are all `done`.
 - `node scripts/roadmap.js list` prints every item with its status.
 - `node scripts/roadmap.js gates` lists items with an acceptance gate by what is
@@ -70,7 +76,7 @@ price yet.
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
 
 ### L8.5 Match-local public outcome feedback
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4
 - **Ticket:** [feature-layer-8-5-match-local-public-outcome-feedback.md](../backlog/feature-layer-8-5-match-local-public-outcome-feedback.md)
 - **Goal:** Adjust later posture weights from public outcomes within the current game. Required to complete Layer 8.
