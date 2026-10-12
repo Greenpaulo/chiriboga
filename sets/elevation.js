@@ -4767,9 +4767,13 @@ cardSet[35020] = {
   },
   
   //AI code
-  AIImplementIcebreaker: function() {
-    //Cost to break one subroutine
-    return { breakCost: 1, boostCost: 3, boostAmount: 2 };
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    var runEventActive = this.runEventIsActive() ||
+      (rc.runEvent && CheckCardType(rc.runEvent, ["event"]) && CheckSubType(rc.runEvent, "Run"));
+    return result.concat(rc.ImplementIcebreaker(
+      point, this, cardStrength, iceAI, iceStrength, ["Code Gate"],
+      runEventActive ? 1 : 3, 2, 1, 1, creditsLeft
+    ));
   },
 };
 
@@ -5058,8 +5062,11 @@ cardSet[35032] = {
   },
   
   //AI code
-  AIImplementIcebreaker: function() {
-    return { breakCost: 1, boostCost: 2, boostAmount: 2 };
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    return result.concat(rc.ImplementIcebreaker(
+      point, this, cardStrength, iceAI, iceStrength, ["Barrier"],
+      2, 2, 1, 1, creditsLeft
+    ));
   },
 };
 

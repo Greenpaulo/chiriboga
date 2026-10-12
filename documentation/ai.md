@@ -194,6 +194,13 @@ Standard icebreakers have a subtype like `Barrier`, `Code Gate`, or `Sentry` and
 
 You implement this via `AIImplementBreaker`, a function the run calculator calls once per breaker for each piece of ice it is evaluating. Your job inside this function is simple: **describe how this breaker can handle this specific piece of ice, and at what cost**. The run calculator will work out the rest.
 
+Sang Kancil and Principia use this hook for their standard one-credit breaks
+and +2 strength boosts (3 credits for Sang Kancil, 2 for Principia). Sang Kancil
+reduces its boost cost to 1 credit while a Run event is active, or when
+`rc.runEvent` is an event with the Run subtype in the Runner's hypothetical
+calculation. Corp pricing uses its own calculator and receives that discount
+only from an active public Run event.
+
 #### How the result array works
 
 The function receives a `result` array (initially empty) and must return it with your card's options appended. The pattern is always:

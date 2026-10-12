@@ -83,7 +83,10 @@ are matched against ICE subtypes through `AIMatchingBreakerInstalled` and
 by estimated cost, read from their `AIImplementBreaker` hooks, with card-text
 patterns as a fallback; pump and break batches round to whole activations.
 Hosted counter contributions are evaluated separately. Public installed-breaker
-counts are prepared on a fresh Corp-owned calculator.
+counts are prepared on a fresh Corp-owned calculator. Sang Kancil and
+Principia expose their legal pump/break costs through `AIImplementBreaker`;
+Sang Kancil's pump discount uses the public active Run event, without reading
+the Runner's prospective event.
 
 **Subroutine classification.** The Corp's own ICE, including unrezzed ICE, is
 classified through a Corp-owned calculator and `AIImplementIce`.
