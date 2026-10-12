@@ -168,7 +168,8 @@ function compareReports(baseline, candidate, gate = {}) {
   // candidate played differently. Reports without log hashes skip the check.
   const hashed = pairs.filter(([b, c]) => b.logHash && c.logHash);
   const changedGames = hashed.filter(([b, c]) => b.logHash !== c.logHash).length;
-  const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length;
+  const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length ||
+    Object.keys(gate.ceiling || {}).length;
   if (gated && hashed.length)
     checks.push({name: 'option effect', kind: 'changed', pass: changedGames > 0,
       why: changedGames ? undefined : 'no game differs from the baseline'});
@@ -186,4 +187,36 @@ function compareReports(baseline, candidate, gate = {}) {
     pass: checks.length ? checks.every(c => c.pass) : null};
 }
 
-module.exports = {CORE_DIRECTIONS, coreMetrics, flattenCollector, aggregate, bootstrap, compareReports, isTimingMetric, seededRandom};
+// Batch-level collector metrics. A collector with samples(game) keeps per-game
+// data in each record (record.samples[name]); finishBatch(perGameSamples)
+// turns the pooled samples of the whole batch into a number or an object of
+// numbers. The interval resamples games (decisions within a game are not
+// independent): `batchResamples` (default 200) seeded resamples, 2.5% and
+// 97.5% percentiles. Returns {<flat metric>: {value, low, high, games}}.
+function batchMetrics(collectors, games) {
+  const out = {};
+  const ok = games.filter(g => g.ok);
+  for (const c of collectors) {
+    if (typeof c.finishBatch !== 'function') continue;
+    const perGame = ok.map(g => (g.samples && g.samples[c.name]) || []);
+    const point = flattenCollector(c.name, c.finishBatch(perGame));
+    const resamples = c.batchResamples || 200;
+    const random = seededRandom('f4-batch:' + c.name);
+    const draws = {};
+    for (const name in point) draws[name] = [];
+    for (let r = 0; r < resamples && perGame.length; r++) {
+      const sample = [];
+      for (let i = 0; i < perGame.length; i++) sample.push(perGame[Math.floor(random() * perGame.length)]);
+      const value = flattenCollector(c.name, c.finishBatch(sample));
+      for (const name in point) draws[name].push(value[name] || 0);
+    }
+    for (const name in point) {
+      const sorted = draws[name].sort((a, b) => a - b);
+      const at = q => sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))] : point[name];
+      out[name] = {value: round(point[name]), low: round(at(0.025)), high: round(at(0.975)), games: perGame.length};
+    }
+  }
+  return out;
+}
+
+module.exports = {CORE_DIRECTIONS, coreMetrics, flattenCollector, aggregate, bootstrap, compareReports, isTimingMetric, seededRandom, batchMetrics};

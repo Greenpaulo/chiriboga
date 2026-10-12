@@ -206,6 +206,10 @@ Rules for form 2:
 - **Hard checks** are conditions that must hold in every game, not on average.
   Express them as a collector metric counting violations, checked with
   `--max <metric>=<n>`.
+- **Ceiling rows** bound a batch-level metric that exists only over the whole
+  batch (for example `bluffSingleVariableCorrelation.max`): `--ceiling
+  <metric>=<n>` requires the candidate's interval upper bound to be at most
+  `n` ([ai-batch-harness.md](ai-batch-harness.md#for-agents-adding-a-metric)).
 - **Latency is not a standard guard** (F9 proposes a deterministic work guard
   in its place). `gate` may reuse a cached baseline
   timed on a differently loaded machine, so a latency guard is only meaningful

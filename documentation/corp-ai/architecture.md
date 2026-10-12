@@ -411,8 +411,8 @@ learn the AI's patterns (see `principles.md` §5).
   a tagged Runner facing a live tag punishment is genuinely at more risk.
 
 **Status:** Layer 8 is only partly done. Baiting (L8.1), the shared agenda/trap
-profiles and tag deterrence (L8.3) are implemented. Bounded posture epochs
-(L8.4) and match-local outcome feedback (L8.5) are required to complete it;
+profiles, tag deterrence (L8.3) and bounded posture epochs (L8.4) are
+implemented. Match-local outcome feedback (L8.5) is required to complete it;
 legibility signals (L8.2) remain open; telemetry (L8.6) is optional and parked.
 
 **Baiting (L8.1).** Facedown access-punishing cards expose
@@ -445,8 +445,32 @@ protection relief when the Runner is tagged and the Corp holds an affordable
 card declaring `AITagPunishment` (for example Retribution in `systemgateway.js`
 and Unleash in `vantagepoint.js`); it never changes deterministic security.
 
-**Current gaps:** postures are cached for the card's lifetime (L8.4) and public
-outcomes do not feed back into later postures (L8.5).
+**Bounded posture epochs (L8.4, option `postureEpochs`, default on after
+its revised F4 gate passed).** With the option on, `_shouldBaitServer()` and
+`_shouldBluffAgendaServer()` run their winning-breach guards first, then call
+`_epochPosture()`, which keeps one record per server root card (epoch id,
+selected script `bait`/`bluff`/`neutral`, commitment horizon, reevaluation
+reasons). Records use nested WeakMaps keyed by server and card identity.
+Advancement queries select the specific eligible trap, so multiple root cards
+keep independent commitments even when their order changes; server-wide bait
+queries use the first eligible trap. The epoch counter `_postureEpoch` advances once per Corp turn in
+`_prepareProtectionPrioritiesForCorpTurn()`. The roll happens at the first
+query after install; the commitment horizon is two or three Corp turns, drawn
+at roll time. `_postureReevaluationReasons()` compares the public boundary
+from `_postureBoundary()` (runs on the server counted by
+`_notePostureChallenge()` from `MakeRun()`, Runner credit band and breaker
+count, root advancement, match point) once, at the first posture query of a
+later Corp turn; with no reason the posture is reused. Otherwise it is rerolled
+at the current probability and may stay the same. Within an epoch, on the
+Runner's turn and after F3 cache clears, the stored result is reused without
+calling `_random`. Grip size, HQ size and Corp credits are never reasons.
+`_remoteDeceptionProfile()` stays lifetime: it chooses a shape, not whether a
+card is postured. With the option off the lifetime caches are unchanged.
+`_postureTelemetryEvent()` feeds the F4 posture collectors through a
+harness-only sink and never affects a decision.
+
+**Current gaps:** public outcomes do not feed back into later postures
+(L8.5). Explicitly disabling `postureEpochs` restores lifetime posture caches.
 
 ## Install planning today
 

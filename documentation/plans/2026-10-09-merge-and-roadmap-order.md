@@ -6,8 +6,9 @@ track that follows. It is a snapshot: once these branches merge, trust
 
 ## 1. Merge order
 
-Status reconciled against GitHub on 2026-10-11. Rows marked merged are
-complete; the remaining PRs are #40, #42 and #43, all targeting `main`.
+Status reconciled against GitHub on 2026-10-11 and updated from the owner’s
+confirmation on 2026-10-12: PRs #40 and #42 are merged and L9.0 is done.
+Rows marked merged are complete; the remaining PR is #43, targeting `main`.
 The original ordering is retained below for context. Do not merge
 `scratch/l7-1-failure-analysis`.
 
@@ -19,16 +20,28 @@ The original ordering is retained below for context. Do not merge
 | 4 | `roadmap/L7.1.1-failure-analysis` | `19d76e4` | Why L7.1 failed; I2 spec updated with the lesson; L7.1.1 parked (doc only). Based on #3 | Merged (PR #39); L7.1.1 remains parked |
 | 5 | `roadmap/I0-baseline-capture-and-telemetry` | `eddf683` | I0: install telemetry, collectors, F4 baseline | Merged (PR #34); I0 ticket moved to done |
 | 6 | `roadmap/I1-unified-install-candidate-model` | `2db37e7` | I1: install candidate records, no choice changes. Based on #5 | Merged (PR #38); I1 ticket moved to done |
-| 7 | `roadmap/L9.0-lockout-honesty-spec` | PR #40 | L9.0, L9.0.1 and L9.1 specs; I2 depends on L9.0 and L9.1; CodeRabbit fix to L9.0.1 scenario 1 (doc only) | Open (PR #40); spec changes also included in #42 |
-| 7a | `roadmap/L9.0-lockout-honesty` | PR #42 | L9.0 implemented (observation only, in code-review). Contains #5 and #7 | Open (PR #42), targeting `main`; current main merged into the PR branch |
-| 8 | `roadmap/feature-layer-8-4-bounded-posture-epochs` | `aaa8f65` | L8.4 `postureEpochs` option, default off | Open (PR #43), targeting `main`. Run its full F4 gate; #1 is now merged. The `--quick` run failed the bluff-correlation ceiling (0.342 vs 0.10), which is driven by ICE count; the ceiling may need revisiting |
+| 7 | `roadmap/L9.0-lockout-honesty-spec` | PR #40 | L9.0, L9.0.1 and L9.1 specs; I2 depends on L9.0 and L9.1; CodeRabbit fix to L9.0.1 scenario 1 (doc only) | Merged (PR #40); spec changes also included in #42 |
+| 7a | `roadmap/L9.0-lockout-honesty` | PR #42 | L9.0 implemented (observation only, done). Contains #5 and #7 | Merged (PR #42); L9.0 is done |
+| 8 | `roadmap/feature-layer-8-4-bounded-posture-epochs` | `aaa8f65` | L8.4 `postureEpochs` option, default on | Ready to merge (PR #43), targeting `main`: code review passed per owner; revised full gate passed; ticket moved to done. Correlation 0.229 ≤ baseline 0.329; all performance guards and epoch hard checks passed |
 | 9 | `docs/merge-and-roadmap-order` | — | This file | Merged (PR #41) |
 
 The merged Scrounge fix (PR #32) also still had its ticket in code-review;
 it has now been moved to done. All six ticket moves used
 `node scripts/ticket.js move <ticket> done`, updating roadmap links and
 removing cleared generated blockers. L7.1 is complete with its failed option
-removed, not adopted. L9.0 remains in code-review until PR #42 is merged.
+removed, not adopted. L9.0 is done following the merge of PR #42.
+
+**L8.4 update (2026-10-12).** The owner confirmed code review passed. The
+1,400-paired-game run changed 320 games, with no failed games. L8.4's approved
+correlation requirement is measured candidate no worse than measured baseline,
+replacing its absolute ceiling: 0.229 [0.163, 0.307] versus
+0.329 [0.253, 0.413], PASS. Both epoch hard checks were zero and all three
+performance guards passed. `postureEpochs` now defaults to on; an explicit
+`false` retains lifetime caching. The ticket is in
+`documentation/backlog/done/feature-layer-8-4-bounded-posture-epochs.md`.
+PR #43 still needs merging; this update does not record it as merged.
+Absolute deception thresholds and their consistency across L8.2/L8.5/I9 remain
+separate roadmap work involving ICE allocation (I2) and remote roles (I3).
 
 **Line endings.** `ai_corp.js` mixes CRLF and LF. Before committing a change
 to it, compare `git diff --stat` with `git diff --ignore-cr-at-eol --stat`;
@@ -60,7 +73,7 @@ they must match.
 | Step | Item | Gate | Why this order |
 |---|---|---|---|
 | 1 | ~~Update the I2 spec with the L7.1 findings; park L7.1.1~~ | Doc only | Merged in PR #39; L7.1.1 remains parked |
-| 2 | **L9.0** Lockout honesty — in code-review (PR #42) | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Supplies I2's honest fields; L9.1 is also required |
+| 2 | ~~L9.0 Lockout honesty~~ — done (PR #42 merged) | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Supplies I2's honest fields; L9.1 is also required |
 | 3 | **L9.1** Unpriceable breakers (L9 limit 1) | None | Required before I2: an installed matching breaker with an unknown price must not create false lockout or break-cost values. Split L9's priority slice into its own item |
 | 4 | **I2** ICE selection by marginal security | F4 | Depends on I1, F2, F4, L7.1, L9.0, L9.1. Reads the honest fields behind its own option |
 | 5 | **L9.0.1** Adopt honest lockout | F4 | Lets existing scoring, rez and protection decisions use the honest verdict. Can run in parallel with I2; gate them separately |
@@ -91,9 +104,8 @@ Not started. Do them together on one branch: in the playable sets, Sang Kancil
 and Principia are the only breakers the evaluator cannot price, so fixing
 them first makes L9.1's snapshot deltas easy to attribute.
 
-1. Branch from `roadmap/L9.0-lockout-honesty` (or from `main` once PR #42 has
-   merged). L9.1 depends on L9.0, so `roadmap.js next` will not list it until
-   L9.0 is `done`.
+1. Branch from `main`: PR #42 has merged and L9.0 is done, satisfying
+   L9.1’s L9.0 dependency.
 2. Bug first: `documentation/bugs/sang-kancil-and-principia-priced-as-unbreakable.md`
    (implement-ticket). Write its pending reproduction, then give both cards a
    real `AIImplementBreaker` and delete the dead `AIImplementIcebreaker` (and its

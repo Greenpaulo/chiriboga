@@ -317,7 +317,12 @@ Gate: passed
 - `--side runner` marks a Runner item. Directions are Corp-centred by default
   (a higher `winRate` is better), and this flips them for the outcome metrics.
 - `--max <metric>=<n>` is a hard check: it fails if any single candidate game
-  exceeds `n`, for conditions that must always hold rather than on average.
+  exceeds `n` or lacks a finite measurement, including failed games. An empty
+  batch fails too. Use this for conditions that must always hold rather than
+  on average.
+- `--ceiling <metric>=<n>` checks a batch-level metric (a collector's
+  `finishBatch`; see "For agents adding a metric"): it fails unless the
+  candidate's 95% interval upper bound is at most `n`.
 
 Every ticket's gate is written in one fixed form with exactly one flag per
 row; see [ai-planning.md: Writing a gate](ai-planning.md#writing-a-gate).
@@ -561,6 +566,25 @@ game), finish(game)}` and optional `directions`, and lists it in its gate
 command with `--collector <name>`. [collectors/runs.js](../scripts/ai-batch/collectors/runs.js)
 is the example. Details are in
 [architecture: Foundations](corp-ai/architecture.md#foundations).
+
+**Batch-level metrics.** Some metrics only exist over the whole batch (a
+correlation pooled over every decision, for example). Such a collector also
+exports `samples(game)`, whose JSON value is kept in each game record as
+`samples.<name>`, and `finishBatch(perGameSamples)`, which returns a number
+or an object of numbers. The report's `batchMetrics` holds each one as
+`{value, low, high, games}`: the interval resamples games (decisions within a
+game are not independent), `batchResamples` times (default 200) with a seeded
+stream. A gate checks one with `--ceiling <metric>=<n>`: it passes only when
+the candidate's interval upper bound is at most `n`; the baseline value is
+printed for context. [collectors/bluffSingleVariableCorrelation.js](../scripts/ai-batch/collectors/bluffSingleVariableCorrelation.js)
+is the example.
+
+**Posture events.** The Corp AI's bait, agenda-bluff and profile decisions
+reach collectors as `posture` events (`kind` `bait`/`bluff`/`profile`,
+`action` `roll`/`reuse`/`guard`/`profile`, `cardId`, `epoch`, `postured`,
+`isAgenda`, `reason`, `expired`, `corpTurn` and the public variables in
+`publicVars`), emitted through `CorpAI._postureTelemetry`, which the harness
+sets only when observing a game.
 
 ## Install-series collectors and baselines (I0)
 

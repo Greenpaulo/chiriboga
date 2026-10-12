@@ -77,26 +77,30 @@ const etr = () => ice(['End the run.'], [[['endTheRun']]]);
 const verbose = !!process.env.VERBOSE;
 const gripSizes = [0, 4, 8, 12, 16, 20];
 let cases = 0;
-for (const points of [1, 2, 3]) {
-  const probabilities = gripSizes.map(size => {
-    corp.agendaPoints = 0; runner.agendaPoints = 0; runner.tags = 0;
-    runner.grip = Array.from({length: size}, () => ({}));
-    const agenda = {player: corp, cardType: 'agenda', agendaPoints: points, canBeAdvanced: true};
-    const remote = server([etr()]);
-    remote.root.push(agenda);
-    ai._agendaBluffDecisions = new WeakMap();
-    ai._random = () => 0.5;
-    ai._shouldBluffAgendaServer(remote);
-    const stored = ai._agendaBluffDecisions.get(remote);
-    assert.ok(stored && stored.card === agenda, 'bluff decision was not stored for ' + points + '-point agenda');
-    return stored.probability;
-  });
-  if (verbose) console.log(points + ' points: ' + probabilities.map(p => p.toFixed(3)).join(' '));
-  gripSizes.forEach((size, i) => {
-    assert.strictEqual(probabilities[i], probabilities[0],
-      points + '-point agenda bluff probability changed with Grip size ' + size + ': ' +
-      probabilities[i] + ' vs ' + probabilities[0] + ' at Grip 0');
-    cases++;
-  });
+for (const postureEpochs of [false, true]) {
+  ai.options.postureEpochs = postureEpochs;
+  for (const points of [1, 2, 3]) {
+    const probabilities = gripSizes.map(size => {
+      corp.agendaPoints = 0; runner.agendaPoints = 0; runner.tags = 0;
+      runner.grip = Array.from({length: size}, () => ({}));
+      const agenda = {player: corp, cardType: 'agenda', agendaPoints: points, canBeAdvanced: true};
+      const remote = server([etr()]);
+      remote.root.push(agenda);
+      ai._agendaBluffDecisions = new WeakMap();
+      ai._postureEpochRecords = new WeakMap();
+      ai._random = () => 0.5;
+      ai._shouldBluffAgendaServer(remote);
+      const stored = postureEpochs ? ai._postureEpochRecords.get(remote).get(agenda) : ai._agendaBluffDecisions.get(remote);
+      assert.ok(stored && stored.card === agenda, 'bluff decision was not stored for ' + points + '-point agenda');
+      return stored.probability;
+    });
+    if (verbose) console.log(points + ' points: ' + probabilities.map(p => p.toFixed(3)).join(' '));
+    gripSizes.forEach((size, i) => {
+      assert.strictEqual(probabilities[i], probabilities[0],
+        points + '-point agenda bluff probability changed with Grip size ' + size + ': ' +
+        probabilities[i] + ' vs ' + probabilities[0] + ' at Grip 0');
+      cases++;
+    });
+  }
 }
 if (verbose) console.log(cases + ' agenda-bluff Grip-size cases passed.');

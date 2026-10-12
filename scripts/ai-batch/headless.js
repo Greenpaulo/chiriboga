@@ -275,6 +275,9 @@ function playGame(options) {
   };
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
+  // Corp AI bait/bluff/profile posture decisions (CorpAI._postureTelemetryEvent).
+  context.__posture = event => emit('posture', JSON.parse(JSON.stringify(event)));
+
   // A Corp ICE install on HQ or R&D, with each installed Runner card's public
   // central pressure measured when the install was requested (AICentralPressure,
   // normalized by the Corp AI; sources reporting nothing are omitted).
@@ -379,6 +382,7 @@ function playGame(options) {
       };
       var __mulliganFn = Mulligan;
       Mulligan = function() { __mulligan(activePlayer === corp ? "corp" : "runner"); return __mulliganFn.apply(this, arguments); };
+      corp.AI._postureTelemetry = __posture;
       // I0: card use, credits from a card and trashes; never during an AI probe.
       var __trashFn = Trash;
       Trash = function(cards) {

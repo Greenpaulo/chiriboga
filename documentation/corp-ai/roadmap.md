@@ -22,8 +22,8 @@ How vulnerable, valuable or urgent is each server?
 with its calibrated policy not adopted after a failed gate;
 the shared breach-consequence signal and supporting fixes remain.
 **Layer 8** is partly done (baiting, shared profiles and tag deterrence are
-done; L8.4 and L8.5 are required to complete it, L8.2 is open, L8.6 is
-optional). L9 covers run-simulation effects the per-ICE heuristic cannot
+done, including L8.4 bounded epochs; L8.5 is required to complete it,
+L8.2 is open, L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic cannot
 price yet.
 
 ### L3.5.1 Value-weighted protection debt
@@ -69,12 +69,6 @@ price yet.
 - **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/feature-layer-8-2-remote-deception-profiles.md)
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
 
-### L8.4 Bounded posture epochs
-- **Status:** ready
-- **Depends on:** F4
-- **Ticket:** [feature-layer-8-4-bounded-posture-epochs.md](../backlog/feature-layer-8-4-bounded-posture-epochs.md)
-- **Goal:** Replace lifetime bait/bluff postures with epoch-bounded ones that can be reconsidered at meaningful boundaries. Required to complete Layer 8.
-
 ### L8.5 Match-local public outcome feedback
 - **Status:** ready
 - **Depends on:** F4
@@ -93,12 +87,6 @@ price yet.
 - **Depends on:** none
 - **Ticket:** [feature-layer-8-card-set-audit-and-set-adoption.md](../backlog/feature-layer-8-card-set-audit-and-set-adoption.md)
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
-
-### L9.0 Lockout honesty
-- **Status:** in-progress
-- **Depends on:** none
-- **Ticket:** [L9.0-lockout-honesty.md](../backlog/code-review/L9.0-lockout-honesty.md)
-- **Goal:** Report an honest security verdict next to today's (bioroid click-breaks priced; "no breaker installed yet" as its own flag with a finite cost), so I2 gets a graded signal. Observation-only: no decision changes.
 
 ### L9.0.1 Adopt honest lockout
 - **Status:** proposed
@@ -138,6 +126,8 @@ price yet.
 | L8.1 | Baiting with access-punishing traps | Legacy roadmap work | [Baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L8.3 | Tag-punishment deterrence | Legacy roadmap work | [Baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L7.1 | Consequence-calibrated central pressure | [feature-layer-7-1-consequence-calibration](../backlog/done/feature-layer-7-1-consequence-calibration.md) | [central pressure and breach-loss risk](architecture.md#central-pressure-and-breach-loss-risk) |
+| L8.4 | Bounded posture epochs | [feature-layer-8-4-bounded-posture-epochs](../backlog/done/feature-layer-8-4-bounded-posture-epochs.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
+| L9.0 | Lockout honesty | [L9.0-lockout-honesty](../backlog/done/L9.0-lockout-honesty.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 
 ## Foundations (F)
 
