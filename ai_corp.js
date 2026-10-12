@@ -2870,11 +2870,14 @@ class CorpAI {
   //can wait and spend themselves on any one encounter.
   _oneShotIceBypassTarget(server, eligibleIce, evaluationContext) {
     if (!server || !server.ice) return null;
+    if (!evaluationContext)
+      evaluationContext = this._securityEvaluationContext(server);
     var activeCards = evaluationContext
       ? evaluationContext.runnerActiveCards
       : ActiveCards(runner);
     var best = null;
     var bestCost = -1;
+    var bestRank = -1;
     for (var iceIndex = 0; iceIndex < server.ice.length; iceIndex++) {
       var iceCard = server.ice[iceIndex];
       if (eligibleIce && eligibleIce.indexOf(iceCard) < 0) continue;
@@ -2907,21 +2910,17 @@ class CorpAI {
           evaluationContext.oneShotBypassAvailable.set(iceCard, available);
       }
       if (!available) continue;
-      var cost = evaluationContext
-        ? this._securityIcePlanInputs(
-            iceCard,
-            server,
-            iceIndex,
-            evaluationContext,
-          ).mandatoryCost
-        : this._estimateBreakCost(
-            iceCard,
-            this._matchingBreakerForIce(iceCard, server, iceIndex),
-            true,
-          );
-      if (best == null || cost > bestCost) {
+      var inputs = this._securityIcePlanInputs(
+        iceCard, server, iceIndex, evaluationContext);
+      var cost = inputs.mandatoryCost;
+      //Unknown prices cannot be ranked by their optimistic zero lower bound.
+      //Remove proven lockouts first, then unpriced layers, then priced costs.
+      //This is a conservative bypass choice, not an estimate of unknown cost.
+      var rank = inputs.unpricedMandatory.length ? 1 : cost == Infinity ? 2 : 0;
+      if (best == null || rank > bestRank || (rank == bestRank && cost > bestCost)) {
         best = iceCard;
         bestCost = cost;
+        bestRank = rank;
       }
     }
     return best;

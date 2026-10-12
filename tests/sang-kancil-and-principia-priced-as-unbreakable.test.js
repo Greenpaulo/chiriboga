@@ -1,4 +1,4 @@
-// Run with: node tests/pending/sang-kancil-and-principia-priced-as-unbreakable.test.js
+// Run with: node tests/sang-kancil-and-principia-priced-as-unbreakable.test.js
 // Real AI classes/card definitions, with deterministic public-board engine helpers.
 const assert = require('assert');
 const fs = require('fs');

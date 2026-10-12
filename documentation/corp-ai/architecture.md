@@ -173,6 +173,10 @@ The explicit `knownMandatoryBreakCost`, `knownBreakCost`,
 optimistic lower bounds from priced parts; affordability and rez-plan ranking
 use these bounds internally rather than inventing a total. Other priced layers,
 defensive upgrades and global ETR can establish security independently.
+Once-per-run bypass selection prioritizes proven mandatory lockouts, then
+unknown mandatory prices, then the highest known mandatory cost. This
+conservative ordering avoids treating an unknown layer as free; it does not
+claim to know the optimal target among unknown prices.
 
 Breaker-owned prices carry exact credits, clicks and per-type counter costs.
 The route planner keeps a Pareto frontier for each counter-usage state, checking

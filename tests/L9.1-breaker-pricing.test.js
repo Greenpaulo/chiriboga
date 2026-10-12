@@ -200,6 +200,39 @@ test('priced alternative does not hide an unknown matching breaker', () => {
   const result = ai._evaluateServerSecurity(server([etr()]));
   unknown(result); reachable(result);
 });
+for (const reverse of [false, true]) test('one-shot bypass prefers unknown pricing in either ICE order ' + reverse, () => {
+  const unpriced = etr(); unpriced.title = 'Unknown wall';
+  const priced = ice(['End the run.'], [[['endTheRun']]], {title: 'Priced sentry', subTypes: ['Sentry']});
+  runner.cards = [fracter(), {player: runner, cardType: 'program', subTypes: ['Icebreaker', 'Killer'],
+    AIBreakCost: () => ({credits: 4, clicks: 0})}, {player: runner, AIBypassesOneIce: () => true}];
+  const target = server(reverse ? [priced, unpriced] : [unpriced, priced]);
+  const evaluationContext = ai._securityEvaluationContext(target);
+  assert.strictEqual(ai._securityIcePlanInputs(unpriced, target, target.ice.indexOf(unpriced), evaluationContext).mandatoryCost, 0,
+    'the optimistic lower bound remains zero');
+  assert.strictEqual(ai._oneShotIceBypassTarget(target, target.ice, evaluationContext), unpriced);
+  assert.strictEqual(ai._oneShotIceBypassTarget(target), unpriced);
+  const result = ai._evaluateServerSecurity(target);
+  assert.strictEqual(result.totalMandatoryBreakCost, 4);
+  assert.strictEqual(result.honestMandatoryBreakCost, 4);
+  assert.deepStrictEqual(Array.from(result.unpricedBreakers), []);
+});
+test('one-shot bypass prioritizes proven inability over unknown pricing', () => {
+  const unpriced = etr();
+  const incapable = ice(['End the run.'], [[['endTheRun']]], {subTypes: ['Sentry']});
+  runner.cards = [fracter(), {player: runner, AIBypassesOneIce: () => true}];
+  const target = server([unpriced, incapable]);
+  assert.strictEqual(ai._oneShotIceBypassTarget(target), incapable);
+  const result = ai._evaluateServerSecurity(target);
+  unknown(result); reachable(result);
+});
+test('one-shot bypass still selects the highest known mandatory cost', () => {
+  const cheaper = etr(); const expensive = etr();
+  runner.cards = [fracter({AIBreakCost: wall => ({credits: wall === expensive ? 5 : 2, clicks: 0})}),
+    {player: runner, AIBypassesOneIce: () => true}];
+  const target = server([cheaper, expensive]);
+  assert.strictEqual(ai._oneShotIceBypassTarget(target), expensive);
+  assert.strictEqual(ai._evaluateServerSecurity(target).totalMandatoryBreakCost, 2);
+});
 test('an independent priced layer still establishes security', () => {
   runner.cards = [fracter(), {title: 'Priced killer', player: runner, cardType: 'program',
     subTypes: ['Icebreaker', 'Killer'], AIBreakCost: () => ({credits: 100, clicks: 0})}];
