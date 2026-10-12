@@ -1561,6 +1561,50 @@ AIBreakCost: function (iceCard, subroutineCount, server) {
 },
 ```
 
+**Breaker-owned `AIBreakCost` (L9.1).** An installed Runner breaker may declare
+this same hook to price mechanisms not represented by `AIImplementBreaker`.
+The Corp consults it before the standard probe, with the breaker as `this`:
+`AIBreakCost(iceCard, subroutineCount, server)`. Return the **total** price for
+exactly that many remaining subroutines, including activation and any strength
+increase: `{credits, clicks, counters}`. Credits and clicks are required finite,
+non-negative numbers. Optional `counters` maps public counter names to finite,
+non-negative amounts consumed on this breaker, e.g. `{power: 1}`. Omit it when
+no counters are spent. Returning `null`, invalid data, or throwing means
+**unknown price**, not inability. Do not declare an unaffordable route as a
+zero cost: report the real costs; the planner checks the resources.
+
+```js
+//Example: a matching installed breaker spending one power counter per break.
+AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (!CheckSubType(iceCard, "Barrier")) return null;
+    return { credits: 0, clicks: 0, counters: { power: subroutineCount } };
+},
+```
+
+Unlike ICE-owned linear self-break prices, breaker prices are queried for the
+exact requested count, including partial native/breaker combinations. The
+planner checks shared clicks and this breaker's counters across ICE and
+finite reruns, charging each broken subroutine through its selected mechanism.
+It compares full avoidance routes separately from mandatory passage routes.
+
+Use only the installed public rig, public counters/resources, the Corp-known
+ICE and supplied prospective server. Do not inspect Grip or Stack identities,
+mutate cards, pay costs, or require a live encounter. Pricing runs under guarded
+public run context and restores public payment fields and run/encounter state,
+including after exceptions. The Runner's `RunCalculator` continues to use
+`AIImplementBreaker`; this declaration does not implement Runner planning.
+
+Both Corp verdicts carry `unpricedBreakers` (unique titles) and explain
+`unpriced breaker <title>` in their reasons. Cost totals depending on unknown
+pricing are `null`; a known native route does not make the unknown cheapest
+cost finite. Never coerce these totals to zero or subtract them as candidate
+deltas. `knownMandatoryBreakCost`, `knownBreakCost`,
+`honestKnownMandatoryBreakCost` and `honestKnownBreakCost` are explicitly
+optimistic lower bounds from independently priced portions. Only those bounds,
+or an independent defence, may establish security while a price is unknown.
+Missing installed matches and explicitly proved fixed-strength inability keep
+their existing lockout behaviour.
+
 ---
 
 ### 5.4 ICE Install Decisions
@@ -1587,7 +1631,9 @@ and payoff conditions; it must not inspect hidden Runner information.
 
 **`AIDefensiveValue(server)`**
 
-Return a numeric value representing how much protection this upgrade provides to `server`. Higher values make the AI more likely to install it. Return `0` to decline:
+Return a numeric value representing how much protection this upgrade provides to `server`.
+If using security cost totals, reject `null` (unknown) and non-finite totals
+before calculating a value; Shackleton follows this rule. Higher values make the AI more likely to install it. Return `0` to decline:
 
 ```js
 // Manegarm Skunkworks: strong defensive upgrade
@@ -2181,7 +2227,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AITriggerInPaidWindow()` | function | Declare a useful legal paid ability in the current window |
 | `AITriggerAfterTactics` | boolean | Delay an `AITriggerWhenCan` setup action until kills, scoring, defense and priority installs are considered |
 | `AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` | function | Price a mandatory ICE passage when ETR subroutines have payment alternatives |
-| `AIBreakCost(iceCard, subroutineCount, server)` | function | `{credits, clicks}` to break that many subroutines on `iceCard` with the ICE's own Runner ability (bioroids), or `null`; read by the honest security verdict (§5.3) |
+| `AIBreakCost(iceCard, subroutineCount, server)` | function | ICE: linear native `{credits, clicks}` costs for the honest verdict. Installed breaker: exact `{credits, clicks, counters}` costs for both verdicts; `null` means unknown (§5.3) |
 | `AIETRTrashesSelf` | boolean | A declared global ETR consumes its own ICE layer |
 | `AIRunExtraRuns(server)` | function | Public self-consuming ICE defense requires an additional ordinary run; see Batch 12 contracts below |
 | `AIRunSuccessfulDamage(server)` | function | Public available hand damage after a successful run |
@@ -2355,7 +2401,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   against a potentially winning breach or to save an agenda on the Runner's
   last click. `AIGlobalETRUses(server)` shares that one-use policy with Corp
   security planning. `AIMandatoryPassCost(breaker, server, iceIndex, ai,
-  evaluationContext)` returns the cheaper of paying three or breaking the ETR;
+  evaluationContext)` returns the cheaper of paying three or a credit-only
+  breaker price. Breaker clicks/counters remain separate route alternatives;
   `_securityIcePlanInputs` consumes it. `AIETRTrashesSelf` excludes the consumed
   layer from repeated-route taxes.
   `AIRunExtraRuns(server)` returns one when its public, installed, rezzed,
@@ -2460,6 +2507,18 @@ if (!runner.AI || runner.AI.rc !== rc) {
   It forecasts passing ICE and finite reruns, leaving optional access/trash
   costs out of Corp security. Generic outside credits and payment-only
   supplements remain separate; security uses the actual route's feasibility.
+  L9.1 retains exact calculator pricing for supported multi-step
+  strength-modification routes (such as Corsair): the scalar probe records
+  emitted `StrModify` points as `fullRouteSupported`, without inventing a scalar
+  price. Missing or unsupported pricing cannot turn an infeasible calculator
+  route into security. A feasible calculator route remains a legal witness;
+  its unknown totals stay unknown when an unsupported breaker is also present.
+  Breaker-owned `AIBreakCost` uses the per-layer planner because the Runner
+  calculator does not understand that contract. The scalar/resource planner retains the
+  maximum public supplemental credit report as `restrictedCreditUpperBound`: an
+  optimistic affordability bound, not a claim that an actual restricted-payment
+  route is feasible. Unknown cost totals remain `null`. Lethal outside-payment
+  damage retains the pool-only safety check.
   It enumerates preparation credits with their click costs, preserving separate
   clicks for run initiation, paid click abilities and repeats. Survival uses
   public Grip size and installed prevention; hidden Grip identities, proposed

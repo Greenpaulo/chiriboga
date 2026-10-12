@@ -168,19 +168,24 @@ recorded here. Verify the count and confirm the cause before raising an item.
 
 ## 5. Next: L9.1 with the Sang Kancil and Principia bug
 
-Not started. Do them together on one branch: in the playable sets, Sang Kancil
-and Principia are the only breakers the evaluator cannot price, so fixing
-them first makes L9.1's snapshot deltas easy to attribute.
+Sang Kancil/Principia is implemented in `3803c98` and its ticket is in
+`code-review/`. L9.1 is re-grounded at that commit and implemented on the same
+branch; its resolution and review status are recorded in
+[`documentation/backlog/code-review/L9.1-unpriceable-breakers.md`](../backlog/code-review/L9.1-unpriceable-breakers.md).
+Both fixes remain on `bug/sang-kancil-and-principia-priced-as-unbreakable`.
+Sang Kancil and Principia were the only unpriceable breakers in the playable
+sets before the card fix. L9.1 now protects the generic unknown-price case,
+with no change to the recorded decision snapshots or fixtures.
 
 1. Branch from `main`: PR #42 has merged and L9.0 is done, satisfying
    L9.1’s L9.0 dependency.
-2. Bug first: `documentation/bugs/sang-kancil-and-principia-priced-as-unbreakable.md`
+2. Bug first: `documentation/bugs/code-review/sang-kancil-and-principia-priced-as-unbreakable.md`
    (implement-ticket). Write its pending reproduction, then give both cards a
    real `AIImplementBreaker` and delete the dead `AIImplementIcebreaker` (and its
    `LEGACY_UNDOCUMENTED` entry). Check printed install cost and strength against
    card data; the comment headers disagree with the objects.
 3. Then L9.1: re-ground and raise (`node scripts/roadmap.js raise L9.1`), then
-   implement-ticket. Spec: `documentation/corp-ai/specs/L9.1-unpriceable-breakers.md`.
+   implement-ticket. Raised ticket: `documentation/backlog/code-review/L9.1-unpriceable-breakers.md`.
    Its Current behaviour item 4 notes that L9.0's honest path has the same gap:
    an unpriced matching breaker yields `honestLockout`.
 4. Reuse L9.0's hook: `AIBreakCost` (`documentation/ai.md` §5.3) is read on ICE

@@ -95,9 +95,9 @@ price yet.
 - **Goal:** Gated option `honestLockout`: existing scoring, rez and protection decisions read the honest verdict.
 
 ### L9.1 Unpriceable breakers
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** L9.0
-- **Spec:** [L9.1-unpriceable-breakers.md](specs/L9.1-unpriceable-breakers.md)
+- **Ticket:** [L9.1-unpriceable-breakers.md](../backlog/code-review/L9.1-unpriceable-breakers.md)
 - **Goal:** L9 limit 1: a matching breaker the evaluator cannot price never creates a secure verdict, lockout or finite break cost; `AIBreakCost` read on breakers.
 - **Pick-up:** with the Sang Kancil/Principia bug, on a branch from L9.0; steps in [the 2026-10-09 merge plan](../plans/2026-10-09-merge-and-roadmap-order.md#5-next-l91-with-the-sang-kancil-and-principia-bug).
 
