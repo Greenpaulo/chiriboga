@@ -75,11 +75,13 @@ they must match.
 | 0 | ~~L8.4 merge~~ — done (PR #43 merged) | Revised full gate passed | Bounded posture epochs are merged; continue with the Sang Kancil/Principia bug and L9.1 |
 | 1 | ~~Update the I2 spec with the L7.1 findings; park L7.1.1~~ | Doc only | Merged in PR #39; L7.1.1 remains parked |
 | 2 | ~~L9.0 Lockout honesty~~ — done (PR #42 merged) | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Supplies I2's honest fields; L9.1 is also required |
-| 3 | **Sang Kancil/Principia bug, then L9.1** Unpriceable breakers (L9 limit 1) | Bug regression; L9.1 has no F4 gate | Required before I2: an installed matching breaker with an unknown price must not create false lockout or break-cost values. See §5 |
-| 4 | **I2** ICE selection by marginal security | F4; proposed correlation guard below | Depends on I1, F2, F4, L7.1, L9.0, L9.1. Re-ground with L8.4's completed epochs and correlation evidence; reads the honest fields behind its own option |
-| 4b | **L8.5, then L8.2** | Separate F4 gates; reconcile thresholds below first | L8.5 owns public history and bounded feedback; L8.2 reads its Corp-action record. Can proceed alongside I2, with separate controls |
-| 5 | **L9.0.1** Adopt honest lockout | F4 | Lets existing scoring, rez and protection decisions use the honest verdict. Can run in parallel with I2; gate them separately |
-| 6 | **I3**, then the remaining install track | Per spec; proposed I3 correlation guard below | I3 requires I2, F4 and L8.4. This working order also finishes L8.2 before I3; that is a sequencing preference, not a recorded roadmap dependency |
+| 3 | **Finish review of Sang Kancil/Principia and L9.1** Unpriceable breakers (L9 limit 1) | Bug regression; L9.1 has no F4 gate | Both are implemented on this branch and their tickets remain in code-review. Complete review and move them to done; L9.1 is a formal I2 prerequisite. See §5 |
+| 4 | **L8.5** Match-local public outcome feedback | F4; re-ground and reconcile its source gate first | Next policy ticket: owns public history and bounded posture feedback. Must be done before L8.2; validate the proposed gate change before implementation |
+| 5 | **L8.2** Deception legibility signals | Separate F4 gate; re-ground design and gate feasibility first | Reads L8.5's Corp-action record. Prefer adopting it before I2's final gate so I2 is measured with legibility enabled; this is a sequencing preference, not a formal I2 dependency |
+| 6 | **F11** Paired batch-metric guards | Harness tests; no policy-adoption gate | Formal I2 prerequisite: must be done before I2 hand-off. Can be completed earlier alongside L8.5/L8.2; supplies reusable paired guards, not consumer tolerances |
+| 7 | **I2** ICE selection by marginal security | F4; proposed correlation guards below | Depends on I1, F2, F4, L7.1, L9.0, L9.1 and F11. Planned order gates it against adopted L8.2 with a fresh matching control; calibrate and freeze guard tolerances before candidate results |
+| 7a | **L9.0.1** Adopt honest lockout | Separate F4 gate | Lets existing scoring, rez and protection decisions use the honest verdict. Can proceed alongside this sequence; refresh controls after any decision-changing adoption |
+| 8 | **I3**, then the remaining install track | Per spec; proposed I3 correlation guard below | I3 requires I2, F4 and L8.4. This working order also finishes L8.2 before I3; that is a sequencing preference, not a recorded roadmap dependency |
 
 I2 depends on L9.1 in both the roadmap and its spec (included in PR #42). L9.0's
 honest fields alone do not correct unpriceable installed breakers; I2 must
@@ -115,7 +117,7 @@ before viewing candidate gate results.
 | L8.4 | `postureEpochs` | Measured `bluffSingleVariableCorrelation.max` candidate ≤ baseline; passed 0.229 ≤ 0.329 | Settled for L8.4; retain its recorded gate and evidence |
 | L8.5 | `matchLocalPostureFeedback` | Candidate bootstrap 95% CI upper bound ≤ 0.10 | Propose no worse than matching control, with weight bounds, exploration floors and performance guards retained |
 | L8.2 | `deceptionLegibility` | Candidate bootstrap 95% CI upper bound ≤ 0.10; shape total-variation distance ≤ 0.05 | Retain 0.10 pending re-grounding and feasibility evidence; do not assume profile parity removes the allocation tell |
-| I2 | `iceMarginalSecurity` | No explicit correlation guard | Add a no-worse-than-matching-control correlation guard alongside the existing improvement and performance checks |
+| I2 | `iceMarginalSecurity` | Updated source spec proposes paired 95% difference guards for posture correlation and realized ICE-count correlations (all unrevealed agenda/trap remotes and active-posture subset); 0.02 absolute-rho margins provisional pending control-only calibration | Different from L8.4's measured-value rule: adds uncertainty checks but permits a small increase; F11 provides harness support. Freeze justified tolerances before candidate results; retain improvement/performance checks and refresh the matching control |
 | I3 | `remoteRoles` | No explicit correlation guard | Add a no-worse-than-matching-control correlation guard alongside the existing non-inferiority checks |
 | I9 | Combined install policy | At least 2,000 bait/bluff decisions; CI upper bound ≤ 0.20 for non-input variables; documented-input bucket rates within 0.05 of formula; extend collector to roles | Proposed destination: absolute 0.10 on the combined policy. Reconcile scope and bounded-input exceptions before adopting it; this is stricter than the current spec |
 
@@ -146,10 +148,26 @@ both still carry `376f32c (2026-09-25)` verification stamps. In particular:
   revise the design or preregister a no-worse gate before implementation;
   keep the absolute combined-policy target as unresolved work for I9.
 
-Re-ground I2 before raising it too: its scenario 8 still describes lifetime
-postures “until L8.4”. Preserve the L7.1 lesson that consequence weighting
-belongs only in I2's ranking, never in the HQ/R&D protection scores used as
-remote-scoring bars.
+**I2 reconciliation update (2026-10-12).** The source spec is re-grounded
+against `e33a91b`: scenario 8 now follows authoritative posture epochs.
+Active agenda/trap postures share ordinary ranking and a common consequence
+weight; true stakes remain available to safety. Realized ICE-count collectors
+are planned alongside the existing posture-roll collector, with coverage
+limits stated. [F11](../backlog/F11-paired-batch-metric-guards.md) is raised
+for reusable paired batch guards and is an I2 dependency. These are documented
+requirements, not implemented behavior or gate evidence. The provisional
+margins need control-only feasibility/calibration evidence before freezing;
+L8.4's settled measured-value evidence and the other source gates remain
+unchanged. Preserve the L7.1 rule: consequence weighting belongs only in
+I2 ranking, never in HQ/R&D protection scores used as remote-scoring bars.
+
+**Separate deception valuation follow-up (2026-10-12).**
+[L8.8](../corp-ai/specs/L8.8-marginal-deception-value.md) is proposed after
+adopted I2, not added to I2's prerequisites. It separates a shared marginal
+concealment input from private mechanical trap payoff, with its own F4 gate.
+I2 retains its symmetric placeholder. Record L8.2 ordering and refresh matching
+controls for any later adoption; this proposal does not change the source
+items' existing gates or establish benefit against tell-learning humans.
 
 Not yet an item: the evaluator's Runner credit ceiling appears too low
 (provisional: 19 of 115 sampled breaches of "secure" servers). The evaluation

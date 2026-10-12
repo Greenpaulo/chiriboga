@@ -88,6 +88,12 @@ price yet.
 - **Ticket:** [feature-layer-8-card-set-audit-and-set-adoption.md](../backlog/feature-layer-8-card-set-audit-and-set-adoption.md)
 - **Goal:** Every access- or tag-punishing card in scope declares `AIPunishesAccess` or `AITagPunishment`.
 
+### L8.8 Marginal deception value
+- **Status:** proposed
+- **Depends on:** I2, F2, F4, F11, L8.4, L8.7
+- **Spec:** [L8.8-marginal-deception-value.md](specs/L8.8-marginal-deception-value.md)
+- **Goal:** Separately gate a shared marginal concealment value in adopted I2 ICE ranking, keeping private trap payoff distinct and agenda/trap substitution intact. Later consumers adopt through their own gates; this is not an I2 prerequisite.
+
 ### L9.0.1 Adopt honest lockout
 - **Status:** proposed
 - **Depends on:** L9.0, F4
@@ -157,6 +163,12 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
+### F11 Paired batch-metric guards
+- **Status:** ready
+- **Depends on:** F4
+- **Ticket:** [F11-paired-batch-metric-guards.md](../backlog/F11-paired-batch-metric-guards.md)
+- **Goal:** Guard pooled collector metrics against a matching control using paired game resampling, reusable by I2 and later deception gates.
+
 ### Done
 
 | ID | Item | Delivered by | Architecture |
@@ -186,7 +198,7 @@ I9 comes last.
 
 ### I2 ICE selection by marginal security
 - **Status:** proposed
-- **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1
+- **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11
 - **Spec:** [I2-ice-selection-by-marginal-security.md](specs/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Choose the `(ICE, server)` pair that most improves security, using the existing evaluator.
 
