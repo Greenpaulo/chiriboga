@@ -1,5 +1,5 @@
 # L8.4 Bounded posture epochs
-**Outcome:** implementation complete; full F4 gate pending.
+**Outcome:** adopted — revised F4 gate passed; posture epochs enabled by default.
 
 **Roadmap item:** L8.4 · **Depends on:** F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`
@@ -7,23 +7,34 @@
 
 ## Gate prerequisite update
 
-The [Grip-size agenda-bluff fix](../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md)
+The [Grip-size agenda-bluff fix](../../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md)
 is now included from main. PR #43 conflict resolution preserves its probability
 in both lifetime and epoch modes, with the green reproduction covering both.
-The full F4 gate has not been run; the earlier correlation-ceiling concern below
-still applies.
+A full 1,400-paired-game F4 run has now been reported (see below). The
+absolute correlation ceiling is replaced by a baseline-relative no-regression
+requirement on the measured batch value. The reported run passes that revised
+requirement.
 
 ## Resolution
 
 Implemented from `23d6052` (plan commit; code base `3c25455`), following the
 approved plan.
 
-**Gate:** pending F4 — `postureEpochs` defaults to off. The ticket stays in
-`backlog/` until the gate is evaluated.
+**Gate:** passed — `postureEpochs` now defaults to on. The full-run evidence
+below passes the user-approved measured-value correlation criterion and all
+reported performance guards and hard checks. Code review passed, as confirmed
+by the user on 2026-10-12. Default activation changes only
+`CorpAI.DEFAULT_OPTIONS.postureEpochs`; explicit `false` preserves the legacy
+path.
 
-**Gate command:** `node scripts/ai-batch.js gate --corp-option postureEpochs=true --collector postureDecisionsPerEpoch --collector postureLockedPastHorizon --collector bluffSingleVariableCorrelation --ceiling bluffSingleVariableCorrelation.max=0.10 --guard winRate=0.02 --guard pointsStolen=0.2 --guard pointsScored=0.2 --max postureDecisionsPerEpoch.violations=0 --max postureLockedPastHorizon.count=0`
 
-- **AI (`ai_corp.js`):** option `postureEpochs` (default `false`) in
+**Gate command:** `node scripts/ai-batch.js gate --corp-option postureEpochs=true --collector postureDecisionsPerEpoch --collector postureLockedPastHorizon --collector bluffSingleVariableCorrelation --guard winRate=0.02 --guard pointsStolen=0.2 --guard pointsScored=0.2 --max postureDecisionsPerEpoch.violations=0 --max postureLockedPastHorizon.count=0`
+
+The gate command above records the pre-activation setup (default off). After
+activation, rerunning `--corp-option postureEpochs=true` compares two enabled
+arms; use the recorded pre-activation reports for this acceptance evidence.
+
+- **AI (`ai_corp.js`):** option `postureEpochs` (default `true` after gate acceptance) in
   `CorpAI.DEFAULT_OPTIONS`. On: `_shouldBaitServer()` and
   `_shouldBluffAgendaServer()` keep their safety guards first, then call
   `_epochPosture()` (records `{epochId, selectedScript, commitmentHorizon,
@@ -49,7 +60,7 @@ approved plan.
   that file rather than a new one, to reuse its harness); scenario 5 and the
   collector and `--ceiling` tests in `tests/ai-batch.test.js` (5c–5e).
 - **Docs:** `documentation/ai.md` §5.10 (no new card-facing hook),
-  [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence),
+  [architecture: baits, bluffs and deterrence](../../corp-ai/architecture.md#baits-bluffs-and-deterrence),
   `documentation/corp-ai/principles.md` §3, `documentation/ai-batch-harness.md`
   and `documentation/ai-planning.md` (ceiling rows).
 
@@ -59,14 +70,64 @@ only, cannot pass a gate]`. Guards and both hard checks passed;
 `bluffSingleVariableCorrelation.max` was baseline 0.314 [0.197, 0.498],
 candidate 0.197 [0.165, 0.342], so the ceiling failed.
 
-**New finding: the 0.10 ceiling may be out of reach for L8.4.** In both arms the
+**Historical finding: the 0.10 ceiling may be out of reach for L8.4.** In both arms the
 largest pair is `isAgenda` × the server's ICE count (baseline ρ 0.314 over 118
 postured decisions, candidate 0.197 over 243). Among postured servers, agendas
 sit behind more ICE than traps. That comes from install and protection policy
 (the profile depth and scoring-remote choice), not from epoch timing. The
 Grip-size bug fix will not remove it. If the full gate fails only on this row,
-the correlation belongs to L8.2 (legibility) or I3 (remote roles) rather than to
-L8.4. The threshold was set before any result and has not been changed here.
+the remaining tell needs investigation across deception profiles, ICE allocation
+(I2) and remote roles (I3). L8.4 does not own all of these policies. The original
+threshold was set before results; the explicitly approved revision below
+replaces it for L8.4 only.
+
+
+## Acceptance-gate revision (2026-10-12)
+
+User-approved change: L8.4 requires **no worse than baseline** on
+`bluffSingleVariableCorrelation.max`, rather than an absolute 0.10 (or 0.30)
+ceiling. This is a deliberate relaxation of the original acceptance gate.
+Epoch timing owns bounded commitment and reevaluation, not the entire policy
+that allocates ICE or selects remote roles. A reduction is welcome but is not
+required by the revised no-regression criterion.
+
+Compare the measured batch values: **candidate must be less than or equal to
+baseline**. Keep each arm's 95% interval for context; a paired difference
+interval is not an additional acceptance requirement. This does not claim
+statistically established non-inferiority. The harness currently implements
+batch ceilings, not a baseline-relative batch guard, so evaluate this row
+manually from the reports alongside the automated checks below.
+
+Decision counts, agenda/trap proportions and initial-roll versus reevaluation
+breakdowns are useful diagnostics, not additional blockers for this agreed
+gate. The metric describes the strongest recorded single-variable correlation;
+it does not establish overall bluff guessability.
+
+**Full run reported by the user:** 1,400 paired games, zero failed games in
+either arm, 320 games changed. Baseline cache
+`.ai-batch-cache/baseline-70deaf97ac5f303b.json`; candidate cache
+`.ai-batch-cache/candidate-d952cbd7685a1595.json`.
+
+| Metric | Baseline | Candidate | Reported comparison |
+|---|---|---|---|
+| `bluffSingleVariableCorrelation.max` | 0.329 [0.253, 0.413] | 0.229 [0.163, 0.307] | PASS: measured candidate 0.229 ≤ baseline 0.329 |
+| `winRate` | 0.371 | 0.382 | +0.011 [−0.001, +0.024]; guard passed |
+| `pointsStolen` | 5.886 | 5.835 | −0.051 [−0.102, +0.001]; guard passed |
+| `pointsScored` | 3.908 | 3.949 | +0.041 [−0.016, +0.095]; guard passed |
+| `postureDecisionsPerEpoch.violations` | 0 | 0 | Hard check passed |
+| `postureLockedPastHorizon.count` | 0 | 0 | Hard check passed |
+
+The reported command used `--ceiling bluffSingleVariableCorrelation.max=0.30`
+and failed only that ceiling. Under the user-approved revised criterion,
+the correlation row passes, as do all reported automated guards and hard checks.
+
+Absolute deception limits belong to combined-policy acceptance in I9, with I2
+and I3 responsible for measuring their effects on public tells. I9 currently
+specifies 0.20 with documented-input exceptions, while L8.2/L8.5 retain 0.10;
+reconciling those standards remains separate work. This revision changes only
+L8.4 and does not silently adopt I9's looser threshold or exempt the ICE-count
+tell. No additional correlation check is required before default activation;
+the usual implementation review and final regression checks still apply.
 
 ## Implementation plan
 
@@ -95,7 +156,7 @@ Proposed at `3c25455`, 2026-10-09. **Approved.**
      This is shared F4 work (L8.2 and L8.5 need it too); the plan adds it here
      as its first consumer.
   2. **The Grip-size bug is an unrecorded gate dependency.** The ticket says to
-     fix [agenda-bluff-probability-tracks-runner-grip-size](../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md)
+     fix [agenda-bluff-probability-tracks-runner-grip-size](../../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md)
      before measuring, but it is still open in `bugs/` with no reproduction,
      and L8.4 lists only F4. With epochs every reevaluation re-draws that
      Grip-dependent probability, so the correlation ceiling would measure the
@@ -177,7 +238,7 @@ Proposed at `3c25455`, 2026-10-09. **Approved.**
 Preserve one stable bait or bluff decision during an AI planning window without permanently committing an installed card to a stale posture. Today a trap or agenda stays locked to the posture it rolled on install for the rest of the game.
 
 ## Current behaviour
-See [architecture: baits, bluffs and deterrence](../corp-ai/architecture.md#baits-bluffs-and-deterrence). Verified details: three lifetime caches, all `WeakMap`s created in the `CorpAI` constructor and never cleared during a game:
+See [architecture: baits, bluffs and deterrence](../../corp-ai/architecture.md#baits-bluffs-and-deterrence). Verified details: three lifetime caches, all `WeakMap`s created in the `CorpAI` constructor and never cleared during a game:
 
 - `_shouldBaitServer(server)` rolls once per server and trap card and stores `{card, probability, roll, bait}` in `_serverBaitDecisions`;
 - `_shouldBluffAgendaServer(server)` rolls once per server and agenda and stores `{card, probability, roll, bluff}` in `_agendaBluffDecisions`;
@@ -220,19 +281,19 @@ Starts: none (if the `--quick` run shows no changed game, add boards from real l
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
-| Ceiling | `bluffSingleVariableCorrelation.max` | lower | candidate interval upper bound at most 0.10 |
+| Guard | `bluffSingleVariableCorrelation.max` | lower | measured candidate batch value ≤ measured baseline batch value |
 | Guard | `winRate` | higher | regression at most 0.02 |
 | Guard | `pointsStolen` | lower | regression at most 0.2 |
 | Guard | `pointsScored` | higher | regression at most 0.2 |
 | Hard check | `postureDecisionsPerEpoch.violations` | — | at most 0 in every candidate game |
 | Hard check | `postureLockedPastHorizon.count` | — | at most 0 in every candidate game |
 
-No Improve row: the item only has to bound posture lifetime without regressions while keeping postures unlearnable.
+No Improve row: the item must bound posture lifetime without regressions, including no worsening of the recorded single-variable correlation. The absolute end-state deception target is outside this item’s gate.
 
-Gate command: `node scripts/ai-batch.js gate --corp-option postureEpochs=true
+Gate command (compare recorded batch values manually for the correlation row): `node scripts/ai-batch.js gate --corp-option postureEpochs=true
 --collector postureDecisionsPerEpoch --collector postureLockedPastHorizon
 --collector bluffSingleVariableCorrelation
---ceiling bluffSingleVariableCorrelation.max=0.10 --guard winRate=0.02
+--guard winRate=0.02
 --guard pointsStolen=0.2 --guard pointsScored=0.2
 --max postureDecisionsPerEpoch.violations=0 --max postureLockedPastHorizon.count=0`
 
@@ -251,16 +312,17 @@ Gate command: `node scripts/ai-batch.js gate --corp-option postureEpochs=true
   The metric is the largest absolute Spearman correlation over each applicable
   outcome/variable pair in the batch, with a bootstrap 95% CI. Decisions
   stopped by a safety guard are excluded, because guards may depend on state.
-- At design time, the agenda-bluff probability failed this rule for Grip size: [`documentation/bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md`](../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md). The fix is now included in both modes; generate a fresh baseline before measuring.
+- At design time, the agenda-bluff probability failed this rule for Grip size: [`documentation/bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md`](../../bugs/code-review/agenda-bluff-probability-tracks-runner-grip-size.md). The fix is now included in both modes; generate a fresh baseline before measuring.
 
 ## Acceptance criteria
 - [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [x] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
+- [x] The behaviour change was evaluated behind a default-off AI option; the accepted option now defaults to on (named in the Resolution).
+- [x] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
 - [x] Collector `postureDecisionsPerEpoch` is built and tested.
 - [x] Collector `postureLockedPastHorizon` is built and tested.
-- [x] Collector `bluffSingleVariableCorrelation` (unless L8.5 or L8.2 already added it) is built and tested, with the batch-level metric and `--ceiling` gate check it needs.
+- [x] Collector `bluffSingleVariableCorrelation` is built and tested with batch-level samples and absolute-ceiling support.
+- [x] Evaluate the revised measured-value no-regression check for `bluffSingleVariableCorrelation.max`: candidate 0.229 ≤ baseline 0.329; PASS on the reported full run.
 - [x] The gate setup is ready: a `--quick` run of the gate command reports at least one game changed by the option.
 - [x] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
-- [x] `node tests/run-all-tests.js` passes (72 of 74 files in this worktree; `flipped-identity` and `vantagepoint-integration` need local card art the worktree lacks).
+- [x] `node tests/run-all-tests.js` passes: 80 test files, including `tests/corp-decision-fixtures.test.js` and `tests/decision-snapshots.test.js`, with `postureEpochs` enabled by default (2026-10-12).

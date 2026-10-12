@@ -8089,5 +8089,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   committedAgendaReserveBypass: false,
   emptyArchivesRunPressure: false,
   valuelessServerDebtReset: false,
-  postureEpochs: false,
+  postureEpochs: true,
 });

@@ -411,8 +411,8 @@ learn the AI's patterns (see `principles.md` §5).
   a tagged Runner facing a live tag punishment is genuinely at more risk.
 
 **Status:** Layer 8 is only partly done. Baiting (L8.1), the shared agenda/trap
-profiles and tag deterrence (L8.3) are implemented. Bounded posture epochs
-(L8.4) and match-local outcome feedback (L8.5) are required to complete it;
+profiles, tag deterrence (L8.3) and bounded posture epochs (L8.4) are
+implemented. Match-local outcome feedback (L8.5) is required to complete it;
 legibility signals (L8.2) remain open; telemetry (L8.6) is optional and parked.
 
 **Baiting (L8.1).** Facedown access-punishing cards expose
@@ -445,8 +445,8 @@ protection relief when the Runner is tagged and the Corp holds an affordable
 card declaring `AITagPunishment` (for example Retribution in `systemgateway.js`
 and Unleash in `vantagepoint.js`); it never changes deterministic security.
 
-**Bounded posture epochs (L8.4, option `postureEpochs`, default off pending
-its F4 gate).** With the option on, `_shouldBaitServer()` and
+**Bounded posture epochs (L8.4, option `postureEpochs`, default on after
+its revised F4 gate passed).** With the option on, `_shouldBaitServer()` and
 `_shouldBluffAgendaServer()` run their winning-breach guards first, then call
 `_epochPosture()`, which keeps one record per server root card (epoch id,
 selected script `bait`/`bluff`/`neutral`, commitment horizon, reevaluation
@@ -469,9 +469,8 @@ card is postured. With the option off the lifetime caches are unchanged.
 `_postureTelemetryEvent()` feeds the F4 posture collectors through a
 harness-only sink and never affects a decision.
 
-**Current gaps:** with `postureEpochs` off (the default), postures are cached
-for the card's lifetime; public outcomes do not feed back into later postures
-(L8.5).
+**Current gaps:** public outcomes do not feed back into later postures
+(L8.5). Explicitly disabling `postureEpochs` restores lifetime posture caches.
 
 ## Install planning today
 

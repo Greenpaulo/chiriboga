@@ -1983,7 +1983,7 @@ that agenda to win immediately.
 
 Profiles (the shape) are cached for the card's lifetime. The bait/bluff
 activation decision is too, unless the Corp AI option `postureEpochs` (L8.4,
-default off until its F4 gate passes) is on: then the decision is kept for a
+default on after its revised F4 gate passed) is on: then the decision is kept for a
 bounded epoch of two or three Corp turns and reconsidered, at most once per
 Corp turn, after a public boundary (the server was run, Runner credits or
 breakers changed, the root's advancement changed, or either side reached match
