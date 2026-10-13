@@ -161,6 +161,8 @@ function resolveStarts(list, ranges) {
 
 function loadCollectors(names) {
   return names.map(name => {
+    if (typeof name !== 'string' || !/^[A-Za-z][A-Za-z0-9]*$/.test(name))
+      throw new Error(`Invalid collector name: ${name}`);
     const file = path.join(__dirname, 'ai-batch', 'collectors', name + '.js');
     if (!fs.existsSync(file)) throw new Error(`Unknown collector: ${name} (expected ${path.relative(root, file)})`);
     const collector = require(file);
@@ -472,13 +474,22 @@ function printComparison(result, quick, only = null, reports = []) {
     lines.push(`  ${name.padEnd(36)} ${m.baseline.toFixed(3).padStart(8)}  ${m.candidate.toFixed(3).padStart(9)}  ${fmt(m.difference).padStart(10)}` +
       `  [${fmt(m.low)}, ${fmt(m.high)}]${m.direction ? ' (' + m.direction + ' is better)' : ''}`);
   }
+  const pooledFmt = value => Number(value.toPrecision(10)).toString();
   const batchLine = m => m ? `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]` : 'missing';
   const batchMetrics = {...result.batchMetrics};
   for (const name of new Set(reports.flatMap(report => Object.keys(report.batchMetrics || {}))))
-    batchMetrics[name] = {baseline: reports[0].batchMetrics?.[name], candidate: reports[1].batchMetrics?.[name]};
-  for (const [name, m] of Object.entries(batchMetrics))
+    batchMetrics[name] = batchMetrics[name] || {baseline: reports[0].batchMetrics?.[name], candidate: reports[1].batchMetrics?.[name]};
+  for (const [name, m] of Object.entries(batchMetrics)) {
+    if ('resamples' in m || m.why) {
+      lines.push(`  ${name.padEnd(36)} paired batch: ` + (m.why ? `invalid (${m.why})` :
+        `baseline ${pooledFmt(m.baseline)} candidate ${pooledFmt(m.candidate)} difference ${pooledFmt(m.difference)}` +
+        ` 95% interval [${pooledFmt(m.low)}, ${pooledFmt(m.high)}] (${m.direction || 'undeclared'} is better; ` +
+        `${m.resamples} resamples; ${m.droppedGames} dropped pairs)`));
+      continue;
+    }
     lines.push(`  ${name.padEnd(36)} batch: baseline ${batchLine(m.baseline)}  candidate ${batchLine(m.candidate)}` +
       (result.checks.some(check => check.name === name) ? '' : ' [diagnostic]'));
+  }
   for (const c of result.checks)
     lines.push(`  ${c.pass ? 'PASS' : 'FAIL'} ${c.kind} ${c.name}${c.tolerance !== undefined ? (c.kind === 'max' || c.kind === 'ceiling' ? ' at most ' : ' tolerance ') + c.tolerance : ''}${c.why ? ' (' + c.why + ')' : ''}`);
   if (result.pass !== null) lines.push(`Gate: ${result.pass && !quick ? 'passed' : quick ? 'indicative only' : 'failed'}`);
@@ -504,6 +515,15 @@ function gateSpec(args) {
   return {guard, improve: args.improve, better, max: parseAssignments(args.max, '--max'), ceiling, noWorse: args.noWorse || []};
 }
 
+// Legacy reports can contain diagnostic-only collectors unavailable locally.
+// Resolve only collectors needed to reconstruct requested pooled statistics.
+function comparisonCollectors(report, spec) {
+  const requested = [...Object.keys(spec.guard || {}), ...(spec.improve || [])];
+  return loadCollectors((report.collectors || []).filter(collector => requested.some(name =>
+    (name === collector || name.startsWith(collector + '.')) &&
+    !report.games.some(game => game.ok && Object.prototype.hasOwnProperty.call(game.metrics, name)))));
+}
+
 // Ceiling checks: a batch-level metric (collector finishBatch) whose candidate
 // 95% interval upper bound must not exceed n. Baseline values are printed for
 // context only.
@@ -511,7 +531,7 @@ function applyCeilingChecks(result, baseline, candidate, ceiling) {
   for (const [name, limit] of Object.entries(ceiling || {})) {
     const m = candidate.batchMetrics && candidate.batchMetrics[name];
     const b = baseline.batchMetrics && baseline.batchMetrics[name];
-    (result.batchMetrics = result.batchMetrics || {})[name] = {baseline: b || null, candidate: m || null};
+    (result.batchMetrics = result.batchMetrics || {})[name] ||= {baseline: b || null, candidate: m || null};
     result.checks.push({name, kind: 'ceiling', tolerance: limit, pass: Boolean(m) && m.high <= limit,
       why: !m ? 'unknown batch metric' : m.high > limit ? 'candidate interval upper bound ' + m.high : undefined});
   }
@@ -519,14 +539,14 @@ function applyCeilingChecks(result, baseline, candidate, ceiling) {
   return result;
 }
 
-// Exact measured-value comparison, deliberately distinct from F11's proposed
+// Exact measured-value comparison, deliberately distinct from F11's
 // paired confidence-bound guards. Missing or nonfinite reports fail closed.
 function applyNoWorseChecks(result, baseline, candidate, names) {
   for (const name of names || []) {
     const b = baseline.batchMetrics && baseline.batchMetrics[name];
     const c = candidate.batchMetrics && candidate.batchMetrics[name];
     const valid = m => m && ['value', 'low', 'high', 'games'].every(k => Number.isFinite(m[k])) && m.games > 0;
-    (result.batchMetrics = result.batchMetrics || {})[name] = {baseline: b || null, candidate: c || null};
+    (result.batchMetrics = result.batchMetrics || {})[name] ||= {baseline: b || null, candidate: c || null};
     result.checks.push({name, kind: 'measured no-worse', pass: Boolean(valid(b) && valid(c) && c.value <= b.value),
       why: !valid(b) || !valid(c) ? 'missing or nonfinite batch metric' :
         c.value > b.value ? 'candidate maximum exceeds matching baseline' : undefined});
@@ -674,7 +694,7 @@ async function main() {
   if (args.compare) {
     const [a, b] = args.compare.map(f => JSON.parse(fs.readFileSync(f, 'utf8')));
     const spec = gateSpec(args);
-    const result = applyNoWorseChecks(applyCeilingChecks(applyMaxChecks(metricsLib.compareReports(a, b, spec), b, spec.max), a, b, spec.ceiling), a, b, spec.noWorse);
+    const result = applyNoWorseChecks(applyCeilingChecks(applyMaxChecks(metricsLib.compareReports(a, b, spec, comparisonCollectors(a, spec)), b, spec.max), a, b, spec.ceiling), a, b, spec.noWorse);
     printComparison(result, a.quick || b.quick, null, [a, b]);
     process.exitCode = result.pass === false ? 1 : 0;
     return;
@@ -697,7 +717,7 @@ async function main() {
       reports.push(report);
     }
     const spec = gateSpec(args);
-    const result = applyNoWorseChecks(applyCeilingChecks(applyMaxChecks(metricsLib.compareReports(reports[0], reports[1], spec), reports[1], spec.max),
+    const result = applyNoWorseChecks(applyCeilingChecks(applyMaxChecks(metricsLib.compareReports(reports[0], reports[1], spec, loadCollectors(candidateConfig.collectorNames)), reports[1], spec.max),
       reports[0], reports[1], spec.ceiling), reports[0], reports[1], spec.noWorse);
     printComparison(result, candidateConfig.quick, args.all ? null : result.checks.map(c => c.name), reports);
     process.exitCode = result.pass === false || candidateConfig.quick ? 1 : 0;

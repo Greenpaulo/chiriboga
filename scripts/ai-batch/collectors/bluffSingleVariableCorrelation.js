@@ -44,7 +44,7 @@ function spearman(xs, ys) {
 }
 
 // Largest |rho| over every outcome/variable pair in the pooled samples.
-function maxCorrelation(samples) {
+function correlationStats(samples) {
   const groups = {postured: [], isAgenda: [], targetIce: [], openingAdvances: [], delayTurns: []};
   for (const s of samples) {
     if (s.k === 'p') {
@@ -56,17 +56,19 @@ function maxCorrelation(samples) {
       groups.delayTurns.push([s.delayTurns, s.v]);
     }
   }
-  let max = 0;
+  let max = 0, defined = 0;
   for (const rows of Object.values(groups)) {
     if (rows.length < 3) continue;
     const outcome = rows.map(r => r[0]);
     for (let j = 0; j < VARIABLES.length; j++) {
       const rho = spearman(outcome, rows.map(r => r[1][j]));
-      if (rho !== null) max = Math.max(max, Math.abs(rho));
+      if (rho !== null) { defined++; max = Math.max(max, Math.abs(rho)); }
     }
   }
-  return max;
+  return {max, defined};
 }
+
+const maxCorrelation = samples => correlationStats(samples).max;
 
 module.exports = {
   name: 'bluffSingleVariableCorrelation',
@@ -89,6 +91,19 @@ module.exports = {
   // Per-game data kept in the report for the batch metric.
   samples(game) {
     return game.postureSamples || [];
+  },
+  validateBatch(perGame) {
+    if (!perGame.every(Array.isArray)) return 'correlation samples must be arrays';
+    const rows = perGame.flat();
+    for (const row of rows) {
+      if (!row || !['p', 'f'].includes(row.k) || !Array.isArray(row.v) ||
+          row.v.length !== VARIABLES.length || !row.v.every(Number.isFinite))
+        return 'invalid correlation sample columns';
+      if (row.k === 'p' ? ![0, 1].includes(row.postured) || ![0, 1].includes(row.isAgenda) :
+          !['targetIce', 'openingAdvances', 'delayTurns'].every(key => Number.isFinite(row[key])))
+        return 'invalid correlation outcome';
+    }
+    return correlationStats(rows).defined > 0 || 'no usable correlation columns (insufficient or constant samples)';
   },
   finishBatch(perGame) {
     return {max: maxCorrelation([].concat(...perGame))};

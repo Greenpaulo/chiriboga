@@ -320,6 +320,12 @@ Gate: passed
   exceeds `n` or lacks a finite measurement, including failed games. An empty
   batch fails too. Use this for conditions that must always hold rather than
   on average.
+- `--guard <metric>=<tolerance>` and `--improve <metric>` also accept pooled
+  collector metrics. They recompute the statistic on matched successful games
+  and shared game-index bootstrap draws. A guard requires the oriented paired
+  interval's lower bound strictly above `-tolerance`; an improvement requires
+  it strictly above zero. Thresholds use unrounded values. Missing samples,
+  undefined statistics or any invalid bootstrap draw fail the check.
 - `--ceiling <metric>=<n>` checks a batch-level metric (a collector's
   `finishBatch`; see "For agents adding a metric"): it fails unless the
   candidate's 95% interval upper bound is at most `n`.
@@ -331,9 +337,12 @@ Gate: passed
   explicitly requires this statistic. L8.5 now retains correlation as a
   diagnostic under its owner-approved post-result gate redesign.
 
-All collected batch metrics print with both arms' intervals, even without
+Pooled guards and improvements print matched baseline/candidate values, their
+paired difference and 95% interval, direction, resample count and dropped pairs.
+Other collected batch metrics print both arms' separate intervals, even without
 `--ceiling` or `--no-worse`. Metrics without an acceptance check are labelled
-`[diagnostic]` and do not affect the gate result.
+`[diagnostic]` and do not affect the gate result. Absolute ceilings and measured
+no-worse checks keep using the original separate-arm report statistics.
 
 Every ticket's gate is written in one fixed form with exactly one flag per
 row; see [ai-planning.md: Writing a gate](ai-planning.md#writing-a-gate).
@@ -592,10 +601,48 @@ exports `samples(game)`, whose JSON value is kept in each game record as
 or an object of numbers. The report's `batchMetrics` holds each one as
 `{value, low, high, games}`: the interval resamples games (decisions within a
 game are not independent), `batchResamples` times (default 200) with a seeded
-stream. A gate checks one with `--ceiling <metric>=<n>`: it passes only when
-the candidate's interval upper bound is at most `n`; the baseline value is
-printed for context. [collectors/bluffSingleVariableCorrelation.js](../scripts/ai-batch/collectors/bluffSingleVariableCorrelation.js)
+stream. An absolute `--ceiling <metric>=<n>` passes only when the candidate's
+interval upper bound is at most `n`. `--guard` and `--improve` instead recompute
+both arms on matched successful games using the same sampled game indices;
+these check a paired difference interval, never separate interval endpoints.
+Collector `directions` or `--better` must declare higher/lower. Per-game metrics
+retain precedence when a requested name is present in game metrics.
+
+For paired checks, samples must be present in every retained game and contain
+no nonfinite numbers. A cohort consisting entirely of empty arrays/null samples
+is missing data. `finishBatch` must return consistent nonempty numeric columns,
+all finite on the original cohort and every draw. The optional
+`validateBatch(perGameSamples)` must return exactly `true` for usable data, or a
+reason string (other results fail). Use it whenever a numeric result could mask
+an undefined statistic or insufficient coverage. The correlation collector
+validates its columns and requires at least one defined outcome/public-variable
+correlation: constant columns are ignored individually, but an entirely
+undefined maximum cannot pass. The validator runs on both original cohorts and
+every resample; invalid draws fail the whole comparison rather than being
+silently omitted. Keep validators and statistics pure and independent of game
+state and policy randomness. `batchResamples` is a positive integer (default
+200); the paired bootstrap uses its own fixed seeded stream. Separate-arm
+report diagnostics, ceilings and measured no-worse checks retain their existing
+semantics, including diagnostic correlation zeros. [collectors/bluffSingleVariableCorrelation.js](../scripts/ai-batch/collectors/bluffSingleVariableCorrelation.js)
 is the example.
+
+**Baseline-only precision calibration.** An identical-policy, matching-seed
+comparison is an identity sanity check; it does not estimate independent-cohort
+noise. `calibrateReports(first, second, collectors)` in
+[scripts/ai-batch/calibration.js](../scripts/ai-batch/calibration.js) is a separate
+API for two baseline reports with matching pool hash, starts, collectors,
+effective options and code hash, and disjoint seed cohorts. Resolve collector
+definitions from the trusted repository; never execute definitions embedded in
+reports. It independently resamples successful games within each
+`(fixtureId, deckPairId)` stratum, retaining each arm's original stratum game
+counts, and recomputes the pooled statistic. Both arms must have the same
+successful strata. It reports independent-cohort differences/intervals, cohort
+sizes and failures; it returns no adoption verdict. Consumers must account for
+cohort-size/composition differences and preregister their coverage, sample sizes
+and margins. Calibration evidence belongs to each consumer; F11 chooses no
+margin. Adoption `gate` and `--compare` still require matching seeds and retain
+the changed-option-effect check. Disjoint reports must never be routed through
+an adoption gate as matched observations.
 
 **Posture events.** The Corp AI's bait, agenda-bluff and profile decisions
 reach collectors as `posture` events (`kind` `bait`/`bluff`/`profile`,

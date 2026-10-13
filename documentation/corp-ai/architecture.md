@@ -839,6 +839,21 @@ needs.
     since an option that changes nothing passes every guard. `gate` reuses a cached or committed report whose key
     (code hash of every loaded file, pool, seeds, fixtures, collectors and
     options) matches.
+  - *Paired pooled metrics (F11).* `compareReports()` also accepts collector
+    definitions for requested pooled guards and improvements. It recomputes
+    `finishBatch()` on matched successful games and identical game-index draws
+    in both arms, returning raw pooled values, difference, 95% interval,
+    direction, resample count and symmetric dropped-key counts. Pooled checks
+    use unrounded strict thresholds. Missing/nonfinite data and invalid draws
+    fail closed; optional `validateBatch()` declares collector-specific
+    validity. The correlation collector requires at least one usable column
+    pair, rather than treating an entirely undefined correlation as evidence.
+    Existing separate-arm diagnostics, ceilings, measured no-worse checks and
+    per-game guards keep their semantics. Both CLI paths resolve needed
+    collectors through the trusted loader. `calibrateReports()` in
+    `scripts/ai-batch/calibration.js` separately resamples disjoint same-policy
+    baseline cohorts independently within deck-pair/fixture strata; it returns
+    no adoption verdict and does not relax matching seeds in adoption checks.
   - *Failed games.* A game fails when it logs an engine error, times out, or
     stalls: the main loop takes no step for 10 s while the event loop is idle
     (for example after "No valid commands available"). Failed games are listed
