@@ -445,6 +445,24 @@ const EXTRA_DRAW = side => `
     assert.strictEqual(missing.checks[0].why, 'unknown batch metric');
   });
 
+  await scenario('batch diagnostics print both intervals without imposing a no-worse gate', () => {
+    const report = (value, logHash) => ({poolHash: 'diagnostic-test', seeds: [1], starts: [], collectors: ['demo'],
+      games: [{ok: true, deckPairId: 'test', seed: 1, logHash, metrics: {winRate: 1, 'weights.violations': 0}}],
+      batchMetrics: {'demo.max': {value, low: value - 0.05, high: value + 0.05, games: 1}}});
+    const baseline = path.join(tmp, 'diagnostic-baseline.json'), candidate = path.join(tmp, 'diagnostic-candidate.json');
+    fs.writeFileSync(baseline, JSON.stringify(report(0.1, 'baseline')));
+    fs.writeFileSync(candidate, JSON.stringify(report(0.3, 'candidate')));
+    const args = ['--compare', baseline, candidate, '--max', 'weights.violations=0', '--guard', 'winRate=0.02'];
+    const diagnostic = cli(args);
+    assert.strictEqual(diagnostic.status, 0, diagnostic.out);
+    assert.match(diagnostic.out, /demo.max\s+batch: baseline 0.100 \[0.050, 0.150\]\s+candidate 0.300 \[0.250, 0.350\] \[diagnostic\]/);
+    assert.doesNotMatch(diagnostic.out, /(?:PASS|FAIL).*demo.max/);
+    assert.match(diagnostic.out, /Gate: passed/);
+    const strict = cli([...args, '--no-worse', 'demo.max']);
+    assert.notStrictEqual(strict.status, 0, strict.out);
+    assert.match(strict.out, /FAIL measured no-worse demo.max/);
+  });
+
   await scenario('5d. posture collectors: violations, horizon locks and single-variable correlation', async () => {
     const perEpoch = require('../scripts/ai-batch/collectors/postureDecisionsPerEpoch');
     const locked = require('../scripts/ai-batch/collectors/postureLockedPastHorizon');
@@ -607,6 +625,19 @@ const EXTRA_DRAW = side => `
     assert.ok(/0 changed by the options/.test(first.out) && /PASS guard winRate/.test(first.out), first.out);
     assert.ok(/FAIL changed option effect/.test(first.out) && /Gate: failed/.test(first.out), first.out);
     assert.notStrictEqual(first.status, 0, first.out);
+    assert.strictEqual(batch.parseArgs(['gate', '--fresh', '--games', '2']).fresh, true);
+    const readCachedGames = () => fs.readdirSync(path.join(tmp, 'cache'))
+      .filter(file => file.endsWith('.json')).sort().map(file => {
+        const report = JSON.parse(fs.readFileSync(path.join(tmp, 'cache', file), 'utf8'));
+        return {key: report.key, seeds: report.seeds, games: report.games.map(g => [g.seed, g.logHash, g.decisionHash])};
+      });
+    const beforeFresh = readCachedGames();
+    const fresh = cli([...args, '--fresh']);
+    assert.match(fresh.out, /baseline: playing 2 games/);
+    assert.match(fresh.out, /candidate: playing 2 games/);
+    assert.doesNotMatch(fresh.out, /: reusing/);
+    assert.strictEqual(fresh.status, first.status, fresh.out);
+    assert.deepStrictEqual(readCachedGames(), beforeFresh, '--fresh replays the same seeds and preserves game results and cache keys');
     const second = cli(args);
     assert.ok(/baseline: reusing/.test(second.out) && /candidate: reusing/.test(second.out), second.out);
     // Simulate an incomplete cached report written by the old worker lifecycle.

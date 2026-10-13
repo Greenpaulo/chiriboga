@@ -8,6 +8,15 @@ const CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE = 1;
 //icebreakers (3) plus 1 credit per subroutine, and the install click.
 const CORP_AI_NO_BREAKER_ASSUMED_COST = {install: 3, perSubroutine: 1};
 
+// Shared public shapes: all twelve scripts have positive baseline mass.
+const CORP_AI_POSTURE_SCRIPTS = Object.freeze([1, 2, 3].flatMap((depth, i) =>
+  [1, 2].flatMap((advances, j) => [1, 0].map((delay) => Object.freeze({
+    id: "d" + depth + "a" + advances + "t" + delay,
+    targetIce: depth, openingAdvances: advances, delayTurns: delay,
+    base: [0.3, 0.48, 0.22][i] * [0.55, 0.45][j] * (delay ? 0.3 : 0.7),
+  }))),
+));
+
 class CorpAI {
   //**CORP UTILITY FUNCTIONS**
   _log(message) {
@@ -1465,6 +1474,133 @@ class CorpAI {
     return Math.max(0.08, Math.min(0.35, frequency));
   }
 
+  //Only committed engine events enter this record. Export opaque ids and
+  //scalars, never card/server objects or identities (even after an access).
+  _recordPublicPostureEvent(action, server, card, amount = 1) {
+    if (!server || (typeof AIHypothetical !== "undefined" && AIHypothetical.depth > 0)) return;
+    if (!this._publicPostureServerIds.has(server))
+      this._publicPostureServerIds.set(server, ++this._publicPostureServerCount);
+    if (card && !this._publicPostureCardIds.has(card))
+      this._publicPostureCardIds.set(card, ++this._publicPostureCardCount);
+    var event = {
+      turn: this._publicPostureTurn || this._postureEpoch,
+      side: ["runInitiated", "iceEncountered", "access", "agendaStolen", "ignored"].includes(action) ? "runner" : "corp",
+      turnSide: typeof playerTurn !== "undefined" && typeof runner !== "undefined" && playerTurn == runner ? "runner" : "corp",
+      action: action, amount: amount,
+      serverId: this._publicPostureServerIds.get(server),
+      cardId: card ? this._publicPostureCardIds.get(card) : null,
+    };
+    this._publicPostureHistory.push(event);
+    //Scores often occur on the Corp turn, after the last Runner exposure was
+    //settled. Keep their public shape outcome without inventing a new sample.
+    if (card && (action == "agendaScored" || action == "agendaStolen") &&
+        !this._publicPostureExposures.has(card) && typeof server.cards === "undefined") {
+      var shape = this._publicPostureShape(server, card);
+      var counts = this._postureOutcomeCounts[shape];
+      counts[action] = (counts[action] || 0) + amount;
+    }
+    for (var [root, exposure] of this._publicPostureExposures) {
+      if (exposure.server != server || (card && card != root && action != "iceEncountered" && action != "iceRezzed")) continue;
+      exposure.outcomes[action] = (exposure.outcomes[action] || 0) + amount;
+    }
+  }
+
+  //A shape class uses only the remote's visible layers and counters, not its
+  //private payload or the target shape picked during a hypothetical install.
+  _publicPostureShape(server, card) {
+    var advances = Math.max(0, Counters(card, "advancement") || 0);
+    return "d" + Math.max(1, Math.min(3, server.ice.length)) +
+      "a" + Math.max(1, Math.min(2, advances)) + "t" + (advances == 0 ? 1 : 0);
+  }
+
+  //Called at actual turn transitions, before turn-begin effects. A posture
+  //must be installed for a real Runner turn to be an ignored exposure.
+  _publicPostureTurnBegins(side) {
+    if ((typeof AIHypothetical !== "undefined" && AIHypothetical.depth > 0) || this._publicPostureSide == side) return;
+    this._publicPostureSide = side;
+    if (side == "corp") {
+      this._settlePublicPostureExposures();
+      this._publicPostureTurn++;
+      return;
+    }
+    this._publicPostureExposures.clear();
+    for (var server of corp.remoteServers || []) {
+      if (!server.ice.length) continue;
+      for (var card of server.root) {
+        if (PlayerCanLook(runner, card)) continue;
+        var records = this._postureEpochRecords.get(server);
+        var epoch = records && records.get(card);
+        var lifetime = this._serverBaitDecisions.get(server) || this._agendaBluffDecisions.get(server);
+        var active = this.options.postureEpochs ? epoch && epoch.selectedScript != "neutral" :
+          lifetime && lifetime.card == card && (lifetime.bait || lifetime.bluff);
+        if (!active) continue;
+        this._publicPostureExposures.set(card, {
+          server: server, script: this._publicPostureShape(server, card), outcomes: {},
+        });
+      }
+    }
+  }
+
+  _settlePublicPostureExposures() {
+    for (var [card, exposure] of this._publicPostureExposures) {
+      var challenged = (exposure.outcomes.runInitiated || 0) > 0;
+      var survives = (corp.remoteServers || []).includes(exposure.server) && exposure.server.root.includes(card);
+      if (!challenged && !survives) continue; //overwritten/removed is not ignored
+      if (!challenged) this._recordPublicPostureEvent("ignored", exposure.server, card);
+      var totals = this._postureOutcomeCounts[exposure.script];
+      for (var action in exposure.outcomes)
+        totals[action] = (totals[action] || 0) + exposure.outcomes[action];
+      totals.exposures = (totals.exposures || 0) + 1;
+      if (!this.options.matchLocalPostureFeedback) continue;
+      //Ten prior exposure-equivalents, bounded evidence and a 0.02 maximum
+      //step. Many runs in one turn are still one challenge, never ten samples.
+      this._postureFeedbackSamples++;
+      var step = 0.2 / (10 + this._postureFeedbackSamples);
+      for (var script of CORP_AI_POSTURE_SCRIPTS) {
+        var observed = CORP_AI_POSTURE_SCRIPTS.find((shape) => shape.id == exposure.script);
+        var direction = challenged ? (script.targetIce >= 2 || script.delayTurns ? 1 : -1) :
+          (script.targetIce == observed.targetIce && script.delayTurns == observed.delayTurns ? 1 : -1);
+        this._postureScriptWeights[script.id] = Math.max(0.8, Math.min(1.2,
+          this._postureScriptWeights[script.id] + direction * step));
+      }
+      var reason = {turn: this._publicPostureTurn, script: exposure.script,
+        reason: challenged ? "challenged" : "ignored", step: step};
+      this._postureFeedbackReasons.push(reason);
+      this._log("Posture feedback " + reason.reason + " " + reason.script + " (bounded prior step " + step + ")");
+      this._postureWeightTelemetry(reason.reason);
+    }
+    this._publicPostureExposures.clear();
+  }
+
+  _postureScriptDistribution() {
+    var scripts = CORP_AI_POSTURE_SCRIPTS.map((script) => ({
+      id: script.id, targetIce: script.targetIce, openingAdvances: script.openingAdvances,
+      delayTurns: script.delayTurns, weight: this._postureScriptWeights[script.id],
+      probability: script.base * this._postureScriptWeights[script.id],
+    }));
+    var total = scripts.reduce((sum, script) => sum + script.probability, 0);
+    scripts.forEach((script) => script.probability /= total);
+    return scripts;
+  }
+
+  _postureWeightTelemetry(reason) {
+    this._postureTelemetryEvent({kind: "weights", action: "weights", reason: reason,
+      scripts: this._postureScriptDistribution()}, null);
+  }
+
+  _weightedPostureValue(scripts, field, roll) {
+    var total = scripts.reduce((sum, script) => sum + script.probability, 0);
+    var values = [];
+    scripts.forEach((script) => { if (!values.includes(script[field])) values.push(script[field]); });
+    var threshold = roll * total;
+    for (var value of values) {
+      threshold -= scripts.filter((script) => script[field] == value)
+        .reduce((sum, script) => sum + script.probability, 0);
+      if (threshold < 0) return value;
+    }
+    return values[values.length - 1];
+  }
+
   //Agendas and access traps draw from the same visible posture distribution.
   //This describes public action shape, not card identity or tactical value.
   _remoteDeceptionProfile(card) {
@@ -1484,6 +1620,15 @@ class CorpAI {
       openingAdvances: advanceRoll < 0.55 ? 1 : 2,
       delayTurns: delayRoll < 0.3 ? 1 : 0,
     };
+    if (this.options.matchLocalPostureFeedback) {
+      var scripts = this._postureScriptDistribution();
+      profile.targetIce = this._weightedPostureValue(scripts, "targetIce", depthRoll);
+      scripts = scripts.filter((script) => script.targetIce == profile.targetIce);
+      profile.openingAdvances = this._weightedPostureValue(scripts, "openingAdvances", advanceRoll);
+      scripts = scripts.filter((script) => script.openingAdvances == profile.openingAdvances);
+      profile.delayTurns = this._weightedPostureValue(scripts, "delayTurns", delayRoll);
+      this._postureWeightTelemetry("profile");
+    }
     this._cardDeceptionProfiles.set(card, profile);
     this._postureTelemetryEvent({
       kind: "profile",
@@ -1710,6 +1855,13 @@ class CorpAI {
       boundary: this._postureBoundary(server, card),
     };
     records.set(card, record);
+    //Option-on shape refresh is tied to an actual later active commitment,
+    //never a reuse, hypothetical query or mere change of Corp turn.
+    if (this.options.matchLocalPostureFeedback && postured && previous !== null &&
+        !(typeof AIHypothetical !== "undefined" && AIHypothetical.depth > 0)) {
+      this._cardDeceptionProfiles.delete(card);
+      this._remoteDeceptionProfile(card);
+    }
     this._log(
       "Posture " +
         kind +
@@ -3319,7 +3471,7 @@ class CorpAI {
     //Existing hosted/native pass mechanisms remain available independently.
     if (inputs.mandatoryCost < Infinity && !inputs.resourcePricing)
       inputs.currentOptions.push({credits: inputs.mandatoryCost, clicks: 0});
-    if (typeof iceCard.AIMandatoryPassCost == "function" && inputs.mandatoryCost < Infinity)
+    if (inputs.resourcePricing && typeof iceCard.AIMandatoryPassCost == "function" && inputs.mandatoryCost < Infinity)
       inputs.currentOptions.push({credits: inputs.mandatoryCost, clicks: 0});
     if (inputs.bypassCost < Infinity)
       inputs.currentOptions.push({credits: inputs.bypassCost, clicks: 0});
@@ -8099,6 +8251,22 @@ class CorpAI {
     this._postureCardIds = new WeakMap();
     this._postureCardCount = 0;
     this._postureTelemetry = null;
+    this._publicPostureHistory = [];
+    this._publicPostureServerIds = new WeakMap();
+    this._publicPostureCardIds = new WeakMap();
+    this._publicPostureServerCount = 0;
+    this._publicPostureCardCount = 0;
+    this._publicPostureTurn = 0;
+    this._publicPostureSide = null;
+    this._publicPostureExposures = new Map();
+    this._postureScriptWeights = {};
+    this._postureOutcomeCounts = {};
+    CORP_AI_POSTURE_SCRIPTS.forEach((script) => {
+      this._postureScriptWeights[script.id] = 1;
+      this._postureOutcomeCounts[script.id] = {};
+    });
+    this._postureFeedbackSamples = 0;
+    this._postureFeedbackReasons = [];
     this._hiddenThreatProfilesByFaction = new Map();
     this._random = Math.random;
     this._decisionRandomState = null;
@@ -8401,4 +8569,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   emptyArchivesRunPressure: false,
   valuelessServerDebtReset: false,
   postureEpochs: true,
+  matchLocalPostureFeedback: true,
 });

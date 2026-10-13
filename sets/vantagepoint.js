@@ -3190,6 +3190,7 @@ cardSet[36038] = {
   trashCost: 3,
   storedFaceUp: false,
   _resolveAccessEffect: function () {
+    if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
     LoseCredits(runner, 1);
     if (CheckTags(1)) Damage("net", 1, true);
   },

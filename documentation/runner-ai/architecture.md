@@ -262,6 +262,11 @@ Before running is considered: when tagged, the grip card with the highest
 remove-tag action is taken whenever offered. The playable event with the highest
 `AIPlayWhenCan` (and `AIWouldPlay`, if defined) is played. In the Runner Install
 phase, an installed program whose `AIOkToTrash()` is true is trashed for room.
+The engine's `Install` phase offers successful continuation only when current
+credits and MU suffice. If trashing changes affordability, further program
+trashes remain available, alongside an unsuccessful-install exit that returns
+the uninstalled card to its source and resumes the parent phase without paying
+credits or firing install-success responses. Completed trashes remain committed.
 
 **priorityEcon.** The worth-keeping card with the highest `AIEconomyInstall()`
 or `AIEconomyPlay` suppresses drawing, can suppress running, and prompts

@@ -1,4 +1,4 @@
-// Run with: node tests/pending/L9.1-unpriceable-breakers.test.js
+// Run with: node tests/L9.1-unpriceable-breakers.test.js
 // Real AI classes/card definitions, with deterministic public-board engine helpers.
 const assert = require('assert');
 const fs = require('fs');

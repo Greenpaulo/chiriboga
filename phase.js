@@ -115,6 +115,7 @@ phaseTemplates.standardResponse = {
       Log("Encountering " + GetTitle(attackedServer.ice[approachIce], true));
       encountering = true;
       encounteredIce = attackedServer.ice[approachIce]; //store reference to the ice being encountered
+      RecordPublicPostureEvent("iceEncountered", encounteredIce, attackedServer);
 	  //first the automatic triggers
       AutomaticTriggers("automaticOnEncounter", [attackedServer.ice[approachIce]]);
 	  //then the Enumerate ones
@@ -1569,6 +1570,7 @@ phases.runAccessingCard = {
       SetHistoryThumbnail(accessingCard.imageFile, "Access");
     } else SetHistoryThumbnail("Corp_back.png", "Access");
     accessingCard.renderer.ToggleZoom();
+    RecordPublicPostureEvent("access", accessingCard, attackedServer);
 
     AutomaticTriggers("automaticOnAccess", [accessingCard]); //special case in CheckCallback allows for this to work even when card not active
     this.chosenString = "chosen";
@@ -2011,6 +2013,9 @@ function ChangePhase(src, skipInit = false) {
 
   if (currentPhase.identifier == "Corp 1.1") playerTurn = corp;
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
+  if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1") &&
+      corp.AI && typeof corp.AI._publicPostureTurnBegins === "function")
+    corp.AI._publicPostureTurnBegins(playerTurn == corp ? "corp" : "runner");
   
   if (!rewinding) {
 	  if (playerTurn != oldTurn || currentPhase.identifier == "Runner Mulligan") {

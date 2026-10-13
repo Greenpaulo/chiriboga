@@ -46,6 +46,84 @@ The broad L9.1 unpriceable-breaker evaluator change and stale printed-value
 comments remain outside this fix. The user's existing merge-plan edits were
 left untouched. No code deviations from the approved plan.
 
+## Benchmark swing investigation — 2026-10-12 (recorded 2026-10-13)
+
+The pre-merge Startup comparison showed a large fall in **Corp** win rate.
+This benchmark changes both AIs: the new hooks correct Corp pricing **and**
+give the Runner calculator legal break paths it previously could not produce.
+Consequently, a fall in Corp wins can reflect restored Runner capability.
+
+The saved baseline was clean commit `8a5b04a`; the initial candidate was clean
+commit `6d7fac6`, which also contains the subsequent L9.1 evaluator changes.
+An additional batch at `3803c98` isolated this ticket's card-hook fix. All
+batches used the Startup pool
+`tests/fixtures/ai-batch/deck-pool-startup-format.json`, seeds 1–200 per pair
+(1,000 games total), with no failed games.
+
+| Deck pair | Baseline Corp wins | Isolated fix Corp wins | Change |
+| --- | ---: | ---: | ---: |
+| btl-ryo | 77.0% | 77.0% | 0.0 pp |
+| zwicky-topan | 51.0% | 51.0% | 0.0 pp |
+| zwicky-hiram | 56.0% | 53.5% | −2.5 pp |
+| pd-zahya | 47.0% | 25.0% | −22.0 pp |
+| pd-muslihaT | 43.5% | 24.5% | −19.0 pp |
+
+The two large swings are against Runner decks containing one Sang Kancil;
+Hiram contains three Principia and the other two Runner decks contain neither.
+The isolated fix reproduces every deck's win rate from the initial candidate.
+Pooled Corp wins fall from 54.9% to 46.2% (paired 95% interval for the change:
+−10.9 to −6.6 percentage points). Comparing `3803c98` against `6d7fac6` changes
+only 12 games, with zero net win-rate change: the later changes do not account
+for the headline decline. Equal win rates alone do not establish identical
+decisions or logs.
+
+**Paired replay evidence:** selected the first three baseline-Corp-win to
+fixed-Runner-win flips by seed for each Sang deck: Zahya seeds **1, 4, 8** and
+MuslihaT seeds **4, 6, 11**. The real headless batch harness used the same decks,
+set list and `seed:deckPairId` random streams. All 12 untouched baseline/fixed
+replays matched the saved reports' winners and log hashes. In every pair, the
+first changed decision belonged to the Runner.
+
+Temporary diagnostic setups at `3803c98` then enabled the fix separately for
+each AI. Corp-only suppressed Sang/Principia `IceAct` paths only on
+`runner.AI.rc`, retaining the hooks for Corp-owned calculators. Runner-only
+temporarily hid the installed breakers' hooks during Corp security evaluation
+and direct breaker activation-cost calls, restoring them in `finally` and
+retaining Runner hook support. Other card hooks and gameplay abilities were
+unchanged. All 24 replays completed without errors.
+
+| Hook support | Corp wins in these six losses | Runner wins |
+| --- | ---: | ---: |
+| Baseline | 6 | 0 |
+| Corp fix only | 6 | 0 |
+| Runner fix only | 0 | 6 |
+| Both fixed | 0 | 6 |
+
+Concrete first divergences:
+
+- Zahya seed 1, turn 5: plays Jailbreak rather than drawing, pays Sang's
+  discounted 1-credit +2 strength pump and 1-credit break through Sleipnir,
+  and reaches HQ.
+- Zahya seed 4, turn 13: plays Tailgate into HQ and breaks Scatter Field;
+  the baseline instead runs R&D and lets Sleipnir end the run.
+- MuslihaT seed 4, turn 6: legally spends a temporary bad-publicity credit to
+  break Flyswatter's end-the-run subroutine, enabling successful-run benefits;
+  the baseline lets the subroutine fire.
+- MuslihaT seed 6, turn 6: runs Remote 1 rather than drawing, pays Sang's
+  ordinary 3-credit pump and 1-credit break through Sleipnir, and steals
+  Send a Message. The benefit is not limited to discounted Run events.
+
+**Conclusion:** restored Runner break paths suffice to explain all six sampled
+losses. The evidence supports correcting a baseline that benefited from an
+impaired Runner, rather than reverting legal breaker support to preserve Corp
+win rate. The recommendation was to merge the reviewed fix and refresh both
+benchmark baselines on the clean, tested, committed target build. These six
+selected losses are not a random sample and do not prove that every changed
+game has the same cause, that all later Corp choices are optimal, or that the
+Principia-specific swing has been independently explained. The later changes'
+measured Corp mean decision latency increase (4.079 to 5.458 ms) is a separate
+performance concern, not evidence for the cause of these outcome swings.
+
 ## Implementation plan
 
 Proposed at `8a5b04a`, 2026-10-12. **Approved 2026-10-12.**

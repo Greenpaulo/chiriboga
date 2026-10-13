@@ -1,7 +1,7 @@
 # I2 ICE selection by marginal security
 
-**Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
+**Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../deception-gates.md)
 **Verified against code:** e33a91b (2026-10-12)
 
 Prerequisites I1, F2, F4, L7.1 and L9.0 are done. L9.1 is implemented
@@ -288,7 +288,7 @@ corrected control with epochs and all listed collectors; the earlier I0
 control predates this default and cannot serve as the matching baseline.
 I0 supplies the pool and insolvency collector; its successful-run
 observations remain available for diagnosis. Follow the merge plan's
-[control refresh and sequencing guidance](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation):
+[control refresh and sequencing guidance](../deception-gates.md):
 the implementing agent chooses and records the order before any I2 gate
 run, including `--quick`, using current adoption status and readiness.
 Prefer L8.2 adoption before I2's final gate when practical; if proceeding
@@ -300,7 +300,7 @@ landing during evaluation invalidates the later item's control and gate;
 refresh both rather than sharing an older parallel-development baseline.
 This sequencing preference is not an additional L8.2 dependency for I2.
 Collectors: `strandedUnrezzedIceCost`, `corpInsolventTurns`,
-`bluffSingleVariableCorrelation`, `realizedIceByRootType` (new, defined below),
+`bluffSingleVariableCorrelation`, `realizedIceByRootType` (delivered by F12, contract below),
 `installOutcomes` (diagnostic trap triggers)
 (`corpInsolventTurns` added by I0, defined in
 `documentation/ai-batch-harness.md`; `strandedUnrezzedIceCost` is planned by
@@ -340,7 +340,9 @@ consumes the delivered support. Resampling must join matching successful
 game pairs, recompute each arm's pooled `finishBatch()` per draw and form
 candidate minus control intervals, with usable samples in both arms.
 
-**Realized defense coverage (I2-owned collector).** Add
+**Realized defense coverage (F12-owned collector).** Consume
+[F12](../../backlog/F12-realized-defense-measurement.md), extracted on 2026-10-13 before L8.2;
+I2 retains its policy guards and consumer-specific calibration. Use
 `realizedIceByRootType` using passive harness snapshots at the start of each
 Runner turn, after Corp installs and responses finish. Include every remote
 with an agenda or access-punishing trap, whether postured or not, including
@@ -365,7 +367,7 @@ that realized ICE count is unpredictive.
 
 **Tolerance calibration before freezing the adoption gate.** The three correlation guards
 below use **0.02 absolute rho as a provisional planning value**, not a frozen
-or empirically justified tolerance. After F11 and the I2 collector setup are
+or empirically justified tolerance. After F11 and F12 are
 available, collect epoch-enabled control-only reports with identical policy,
 pool and collectors on preregistered disjoint seed cohorts. Use independent
 game resampling within deck pairs for these calibration differences; never
@@ -412,8 +414,8 @@ samples are incomplete setup, not evidence that the policy passed.
 | Guard | `corpInsolventTurns` | lower | regression at most 0.5 |
 | Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
 | Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 absolute rho against matching control (provisional until calibration) |
-| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.02 absolute rho (provisional until calibration) |
-| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.02 absolute rho (provisional until calibration) |
+| Guard | `realizedIceByRootType.allCountCorrelation` | lower | candidate-minus-control 95% interval upper bound strictly below 0.02 absolute rho (provisional until calibration) |
+| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | candidate-minus-control 95% interval upper bound strictly below 0.02 absolute rho (provisional until calibration) |
 
 Planned gate command (after F11 and the new collectors exist and the
 calibration above freezes the tolerances; it cannot pass on today's harness):
@@ -467,7 +469,7 @@ calibration above freezes the tolerances; it cannot pass on today's harness):
 - [ ] I0's `corpInsolventTurns` collector is verified and back-filled without changing baseline decisions.
 - [ ] L9.1 and F11 are `done` before I2 moves to code-review; implementation without completed review does not satisfy either dependency.
 - [ ] The existing `bluffSingleVariableCorrelation` collector is validated for epoch observations and I2 uses F11's delivered paired batch guards; an absolute ceiling is not substituted.
-- [ ] `realizedIceByRootType` is implemented and tested against scenario 17, with usable agenda/trap observations, repeatable game-clustered pooled statistics and both realized-count guards passing. A green posture-roll guard alone does not prove realized ICE count is unpredictive, and green count guards do not prove ICE identity/strength or multivariable unpredictability.
+- [ ] F12's `realizedIceByRootType` is consumed and validated against scenario 17, with usable agenda/trap observations, repeatable game-clustered pooled statistics and both realized-count guards passing. A green posture-roll guard alone does not prove realized ICE count is unpredictive, and green count guards do not prove ICE identity/strength or multivariable unpredictability.
 - [ ] Before adoption tolerances are frozen, control-only calibration evidence records intervals and widths, usable counts, commands and chosen sample size for all three correlation metrics; tolerances are justified and frozen before any candidate adoption evidence.
 - [ ] The implementing agent records the L8.2/I2 ordering decision and its reason before the first gate run; the Resolution records whether evidence predates or includes adopted L8.2, effective options in both arms, and any control/gate refresh after decision-changing prerequisite merges.
 - [ ] If any deception guard fails, the Resolution records the failed-gate disposition above; handing the tell to L8.2/I9 never substitutes for passing I2's guards.

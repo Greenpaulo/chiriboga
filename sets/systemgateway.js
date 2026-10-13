@@ -3619,6 +3619,7 @@ cardSet[30045] = {
     },
     Resolve: function () {
 	  //damage can be prevented
+      if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
 	  Damage("net", 2 + this.advancement, true);
     },
   },

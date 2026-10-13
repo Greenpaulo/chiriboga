@@ -1,7 +1,7 @@
 # I3 Remote role and root suitability
 
 **Roadmap item:** I3 · **Depends on:** I2, F4, L8.4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../deception-gates.md)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
@@ -42,6 +42,18 @@ item's own gate validates its consumer. Do not invent an independent payoff
 conversion, count the same effect twice, or feed private trap payoff into
 ordinary postured ICE ranking. I5 owns any justified `trapValue` conversion;
 I2's equivalent-board substitution invariant remains authoritative.
+
+**Related investigations (2026-10-13).** Prefer reading
+[L8.9](L8.9-observable-defense-parity.md)'s post-I2 attribution and any adopted
+repair before freezing
+placement suitability; it is a sequencing preference, not a prerequisite. The
+"tempting server" scenario below is a strategic choice whose concealment cost
+must be measured in this item's reconciled gate, not a guarantee of agenda/trap
+placement parity. [L8.10](L8.10-trap-play-value.md) supplies private mechanics
+and diagnostics to I5; it does not own placement or change this item's policy.
+[I3.1](I3.1-deck-game-plan-profile.md) later records starting-deck signals only;
+this item and I4/I5 do not wait for a game-plan consumer.
+
 Initial roles:
 
 - `scoring`: agenda advancement and scoring;
@@ -100,6 +112,8 @@ revise stale deception assumptions safely.
    (design note edge case 1).
 
 ## Acceptance gate
+**Reconciliation pending:** The linked plan proposes an additional no-worse-than-matching-control `bluffSingleVariableCorrelation.max` guard alongside the non-inferiority checks below. This source gate has not adopted that proposal. Before implementation or candidate results, re-ground the design, replace the stale I0 control with a fresh matching control, and specify measured batch maxima versus a paired-interval rule, its required harness support and any preregistered margin. The plan alone does not add the guard.
+
 Non-inferiority gate (I3 mainly makes I4 and I5 possible): candidate
 `this.options.remoteRoles` on against I0's baseline, with the standard guards
 (design note) and:

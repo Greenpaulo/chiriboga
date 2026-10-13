@@ -90,7 +90,10 @@ function test(name, body) {
   ai._hasReachedCorpMainPhase = false;
   Object.assign(ai.options, {secureScoringServerGate: false,
     serverAtRiskInstallOverride: false, committedAgendaReserveBypass: false,
-    emptyArchivesRunPressure: false, valuelessServerDebtReset: false, postureEpochs: false});
+    emptyArchivesRunPressure: false, valuelessServerDebtReset: false, postureEpochs: false,
+    //Legacy security/L8.4 fixtures isolate their original policies. L8.5's
+    //feedback-on sampling and commitment refreshes have dedicated tests.
+    matchLocalPostureFeedback: false});
   try { body(); } catch (error) { console.log('FAIL ' + name); throw error; }
   finally {
     for (const [key, descriptor] of Object.entries(originalServers)) {
