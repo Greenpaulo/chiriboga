@@ -255,8 +255,8 @@ implementation must re-check those rulings and the general recovery path; this t
 - [Illumination's overlapping installs](../illumination-overlapping-installs-stalls-game.md)
   also cause failed payments, but this game uses Magdalene and a changing
   installed-breaker discount, not overlapping Illumination offers.
-- [Scrounge's empty install prompt](../done/scrounge-unaffordable-program-stalls-game.md)
-  and [Humanoid Resources' sequencing bug](../done/humanoid-resources-install-stalls-game.md)
+- [Scrounge's empty install prompt](scrounge-unaffordable-program-stalls-game.md)
+  and [Humanoid Resources' sequencing bug](humanoid-resources-install-stalls-game.md)
   have separate completed fixes.
 - Harness detection of unchanged game state, payment-error classification and
   an independent worker deadline are separate infrastructure concerns.

@@ -1,6 +1,6 @@
 # I5 Asset, ambush and economy value
 
-**Roadmap item:** I5 · **Depends on:** I3, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Roadmap item:** I5 · **Depends on:** I3, L8.10, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 376f32c (2026-09-25)
 
@@ -30,6 +30,26 @@ item's own gate validates its consumer. Do not invent an independent payoff
 conversion, count the same effect twice, or feed private trap payoff into
 ordinary postured ICE ranking. I5 owns any justified `trapValue` conversion;
 I2's equivalent-board substitution invariant remains authoritative.
+
+**Trap evidence prerequisite (2026-10-13).**
+[L8.10](L8.10-trap-play-value.md) owns the read-only mechanics and opportunity/access
+diagnostics. It is a prerequisite, not an adopted trap-value policy. This item
+owns conversion into `trapValue`: before raising, define the response horizon,
+conversion/units, calibrated probability source, uncertainty fallback and domain
+of validity from that evidence. Do not treat severity as damage, access probability
+or credits. If the evidence supports no conversion, explicitly keep trap payoff
+diagnostic in the initial asset-value scope and record the limitation before
+implementation; do not ship a guessed probability. Reuse `AIReserveCredits`,
+with paid costs and reserved liquidity accounted for once.
+
+Before raising, also reconcile the gate below against a fresh matching control
+and define tell coverage for root class conditioned on public Grip size, credits,
+turn, root age and shape, plus applicable realized-defense guards. Timing/spending
+may change; exact equality of every observable is not the acceptance criterion.
+Preserve I2's equivalent active-posture ordinary ICE decisions. Metric paths,
+sample coverage, margins and commands must be frozen before candidate results;
+this note does not silently amend the recorded adoption thresholds below.
+
 Value components, in the design note's units and bounds (`economyValue`,
 `trapValue`, `installCost`, `reserveCost`, `opportunityCost`):
 
@@ -93,6 +113,8 @@ with the standard guards (design note) and:
   gate against a baseline that includes the earlier one's option on.
 
 ## Acceptance criteria
+- [ ] L8.10 is done; record the supported trap conversion/model or explicitly scoped diagnostic-only fallback before raising.
+- [ ] Reconcile the matching control and tell/defense gate coverage described above before implementation and candidate results.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.

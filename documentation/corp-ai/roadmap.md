@@ -100,18 +100,30 @@ price yet.
 - **Spec:** [L8.8-marginal-deception-value.md](specs/L8.8-marginal-deception-value.md)
 - **Goal:** Separately gate a shared marginal concealment value in adopted I2 ICE ranking, keeping private trap payoff distinct and agenda/trap substitution intact. Later consumers adopt through their own gates; this is not an I2 prerequisite.
 
+### L8.9 Observable-defense parity investigation
+- **Status:** proposed
+- **Depends on:** I2, F4, L8.4
+- **Spec:** [L8.9-observable-defense-parity.md](specs/L8.9-observable-defense-parity.md)
+- **Goal:** Passively attribute agenda/trap ICE-count differences to placement, posture, allocation or lifecycle effects after I2. Any repair needs a separate spec and gate; prefer findings before I3 freezes its design.
+
+### L8.10 Trap mechanics and play-value diagnostics
+- **Status:** proposed
+- **Depends on:** L8.7, I1, F2, F4
+- **Spec:** [L8.10-trap-play-value.md](specs/L8.10-trap-play-value.md)
+- **Goal:** Declare trap mechanics and measure play/access opportunities without changing decisions. Supplies I5's evidence; I5 owns any later payoff conversion and adoption. Independent of L8.8's concealment research.
+
 ### L9.0.1 Adopt honest lockout
 - **Status:** proposed
 - **Depends on:** L9.0, F4
 - **Spec:** [L9.0.1-adopt-honest-lockout.md](specs/L9.0.1-adopt-honest-lockout.md)
 - **Goal:** Gated option `honestLockout`: existing scoring, rez and protection decisions read the honest verdict.
 
-### L9.1 Unpriceable breakers
-- **Status:** in-progress
-- **Depends on:** L9.0
-- **Ticket:** [L9.1-unpriceable-breakers.md](../backlog/code-review/L9.1-unpriceable-breakers.md)
-- **Goal:** L9 limit 1: a matching breaker the evaluator cannot price never creates a secure verdict, lockout or finite break cost; `AIBreakCost` read on breakers.
-- **Pick-up:** with the Sang Kancil/Principia bug, on a branch from L9.0; steps in [the 2026-10-09 merge plan](../plans/2026-10-09-merge-and-roadmap-order.md#5-next-l91-with-the-sang-kancil-and-principia-bug).
+### L10 Sampled breach capability research
+- **Status:** parked
+- **Depends on:** L9.0, L9.1, L5.1, F2, F4
+- **Spec:** [L10-sampled-breach-probability.md](specs/L10-sampled-breach-probability.md)
+- **Goal:** Investigate hidden-state breach capability before considering any risk consumer.
+- **Parked because:** the hidden-state/route model is undefined and the original draft confused feasibility with actual next-turn breaches. Requires a rewritten model, isolated sampling RNG and suitable validation; not an I4 prerequisite.
 
 ### L9 Run-simulation fidelity
 - **Status:** proposed
@@ -140,6 +152,7 @@ price yet.
 | L7.1 | Consequence-calibrated central pressure | [feature-layer-7-1-consequence-calibration](../backlog/done/feature-layer-7-1-consequence-calibration.md) | [central pressure and breach-loss risk](architecture.md#central-pressure-and-breach-loss-risk) |
 | L8.4 | Bounded posture epochs | [feature-layer-8-4-bounded-posture-epochs](../backlog/done/feature-layer-8-4-bounded-posture-epochs.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L9.0 | Lockout honesty | [L9.0-lockout-honesty](../backlog/done/L9.0-lockout-honesty.md) | [server security evaluation](architecture.md#server-security-evaluation) |
+| L9.1 | Unpriceable breakers | [L9.1-unpriceable-breakers](../backlog/done/L9.1-unpriceable-breakers.md) | [Corp architecture](architecture.md#server-security-evaluation) |
 
 ## Foundations (F)
 
@@ -197,8 +210,8 @@ baselines must capture the corrected policy rather than the old unconditional
 behaviors.
 I0 → I1 → I2 → I3 run in order: I2 (ICE selection) is the first intentional
 policy change and I3 decides what each remote is for. I4 (agendas) and I5
-(assets) then run in parallel; I6 (upgrades) follows I3 and I4. I7.1 compares
-ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
+(assets, after L8.10 mechanics/diagnostics) then run in parallel; I6 (upgrades)
+follows I3 and I4. I7.1 compares ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
 installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
 
@@ -214,6 +227,12 @@ I9 comes last.
 - **Spec:** [I3-remote-role-and-root-suitability.md](specs/I3-remote-role-and-root-suitability.md)
 - **Goal:** Decide what each remote is for before comparing root cards.
 
+### I3.1 Deck game-plan profile
+- **Status:** proposed
+- **Depends on:** I3, F4
+- **Spec:** [I3.1-deck-game-plan-profile.md](specs/I3.1-deck-game-plan-profile.md)
+- **Goal:** Record explainable starting-deck composition and mechanic evidence without changing decisions. Lower priority than core install planning; later consumers need a demonstrated decision gap and their own gate.
+
 ### I4 Agenda installation and scoring commitment
 - **Status:** proposed
 - **Depends on:** I3, F4
@@ -222,7 +241,7 @@ I9 comes last.
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed
-- **Depends on:** I3, F4
+- **Depends on:** I3, L8.10, F4
 - **Spec:** [I5-asset-ambush-and-economy-value.md](specs/I5-asset-ambush-and-economy-value.md)
 - **Goal:** Compare root assets by expected board value instead of hook-chosen indices.
 

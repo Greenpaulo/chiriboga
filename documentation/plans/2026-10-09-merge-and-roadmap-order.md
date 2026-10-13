@@ -72,22 +72,23 @@ they must match.
 
 | Step | Item | Gate | Why this order |
 |---|---|---|---|
-| 0 | ~~L8.4 merge~~ — done (PR #43 merged) | Revised full gate passed | Bounded posture epochs are merged; continue with the Sang Kancil/Principia bug and L9.1 |
+| 0 | ~~L8.4 merge~~ — done (PR #43 merged) | Revised full gate passed | Bounded posture epochs are merged; Sang Kancil/Principia and L9.1 are also done as of 2026-10-13 |
 | 1 | ~~Update the I2 spec with the L7.1 findings; park L7.1.1~~ | Doc only | Merged in PR #39; L7.1.1 remains parked |
 | 2 | ~~L9.0 Lockout honesty~~ — done (PR #42 merged) | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Supplies I2's honest fields; L9.1 is also required |
-| 3 | **Finish review of Sang Kancil/Principia and L9.1** Unpriceable breakers (L9 limit 1) | Bug regression; L9.1 has no F4 gate | Both are implemented on this branch and their tickets remain in code-review. Complete review and move them to done; L9.1 is a formal I2 prerequisite. See §5 |
+| 3 | ~~Sang Kancil/Principia and L9.1~~ — done | Bug regression; L9.1 has no F4 gate | Both tickets are now in done; L9.1 satisfies this I2 prerequisite. Historical implementation notes are retained in §5 |
 | 4 | **L8.5** Match-local public outcome feedback | F4; re-ground and reconcile its source gate first | Next policy ticket: owns public history and bounded posture feedback. Must be done before L8.2; validate the proposed gate change before implementation |
 | 5 | **L8.2** Deception legibility signals | Separate F4 gate; re-ground design and gate feasibility first | Reads L8.5's Corp-action record. Prefer adopting it before I2's final gate so I2 is measured with legibility enabled; this is a sequencing preference, not a formal I2 dependency |
 | 6 | **F11** Paired batch-metric guards | Harness tests; no policy-adoption gate | Formal I2 prerequisite: must be done before I2 hand-off. Can be completed earlier alongside L8.5/L8.2; supplies reusable paired guards, not consumer tolerances |
 | 7 | **I2** ICE selection by marginal security | F4; proposed correlation guards below | Depends on I1, F2, F4, L7.1, L9.0, L9.1 and F11. Planned order gates it against adopted L8.2 with a fresh matching control; calibrate and freeze guard tolerances before candidate results |
 | 7a | **L9.0.1** Adopt honest lockout | Separate F4 gate | Lets existing scoring, rez and protection decisions use the honest verdict. Can proceed alongside this sequence; refresh controls after any decision-changing adoption |
-| 8 | **I3**, then the remaining install track | Per spec; proposed I3 correlation guard below | I3 requires I2, F4 and L8.4. This working order also finishes L8.2 before I3; that is a sequencing preference, not a recorded roadmap dependency |
+| 7b | **L8.9** Observable-defense parity investigation | Passive identity checks; no policy adoption | After I2 supplies realized-defense observations, attribute placement/allocation/lifecycle differences. Prefer its findings before I3 freezes suitability; it is not a formal I3 prerequisite |
+| 8 | **I3**, then the remaining install track | Per spec; proposed I3 correlation guard below | I3 requires I2, F4 and L8.4. I5 additionally requires L8.10 mechanics/diagnostics. This working order finishes L8.2 before I3 as a sequencing preference |
 
 I2 depends on L9.1 in both the roadmap and its spec (included in PR #42). L9.0's
 honest fields alone do not correct unpriceable installed breakers; I2 must
 wait for L9.1's correction before scoring candidates.
 
-**L8.5 → L8.2 (checked 2026-10-12).** The roadmap lists L8.5 as ready,
+**L8.5 → L8.2 (status refreshed 2026-10-13).** The roadmap lists L8.5 as in-progress (code-review),
 depending only on F4. L8.2 depends on F4 and L8.5; its generated blocker means
 L8.5 must be **done** before L8.2 can proceed. Neither depends on I2 and I2
 depends on neither. L8.5 is more than a history collector: it also changes
@@ -187,6 +188,36 @@ I2 retains its symmetric placeholder. Record L8.2 ordering and refresh matching
 controls for any later adoption; this proposal does not change the source
 items' existing gates or establish benefit against tell-learning humans.
 
+**Prospective-spec review (2026-10-13).** The retained ideas remain specs
+(proposed or explicitly parked), not raised tickets or adopted policies:
+
+- [L8.9](../corp-ai/specs/L8.9-observable-defense-parity.md) is now an
+  observation-only investigation after I2, rather than a bundle of speculative
+  parity fixes. I2 retains collector ownership and its source gate. Prefer
+  attribution before I3 freezes placement; any repair needs its own spec/gate.
+- [L8.10](../corp-ai/specs/L8.10-trap-play-value.md) consolidates the trap drafts
+  into mechanics and passive play/access diagnostics. It depends on L8.7, I1,
+  F2 and F4 and can proceed alongside the earlier track. Schedule the L8.7
+  playable-card audit and L8.10 before I5; I5 now formally depends on L8.10
+  and owns any payoff conversion/adoption. Neither blocks I2 or I3, nor depends
+  on L8.8's unresolved shared-concealment model. Reuse existing reservations.
+- I3's tempting-server example and I5's future trap consumer need scoped tell
+  checks and fresh matching controls. Exact equality of all visible play across
+  changed games is not required; private trap payoff still cannot leak into
+  equivalent active-posture ordinary ICE ranking. Their recorded gates remain
+  unchanged until explicitly reconciled in their source specs before results.
+- [I3.1](../corp-ai/specs/I3.1-deck-game-plan-profile.md) is lower-priority,
+  observation-only work after I3. It is not a prerequisite for I4/I5 or the
+  remaining install track, and has no decision consumer in scope.
+- [L10](../corp-ai/specs/L10-sampled-breach-probability.md) is linked as parked
+  research. Hidden-state capability and actual next-turn breach occurrence
+  need different models/validation. It adds no dependency to the install
+  sequence; do not implement or raise it without rewriting the model.
+
+The three observation items require hash/RNG identity checks, not strategic
+improvement gates. Their measurements may motivate separately gated policy;
+none changes L8.4's settled gate or grants adoption to an I-layer consumer.
+
 Not yet an item: the evaluator's Runner credit ceiling appears too low
 (provisional: 19 of 115 sampled breaches of "secure" servers). The evaluation
 artefact, code revision and sample-selection method for this count are not
@@ -202,26 +233,28 @@ recorded here. Verify the count and confirm the cause before raising an item.
   The worktrees for this session's branches are detached, so they no longer
   block `git checkout`.
 
-## 5. Next: L9.1 with the Sang Kancil and Principia bug
+## 5. Completed: L9.1 with the Sang Kancil and Principia bug
 
-Sang Kancil/Principia is implemented in `3803c98` and its ticket is in
-`code-review/`. L9.1 is re-grounded at that commit and implemented on the same
-branch; its resolution and review status are recorded in
-[`documentation/backlog/code-review/L9.1-unpriceable-breakers.md`](../backlog/code-review/L9.1-unpriceable-breakers.md).
-Both fixes remain on `bug/sang-kancil-and-principia-priced-as-unbreakable`.
+Status refreshed on 2026-10-13: both tickets are in `done/`. L9.1's resolution
+and review evidence are in
+[L9.1-unpriceable-breakers.md](../backlog/done/L9.1-unpriceable-breakers.md).
+The Sang Kancil/Principia card fix was implemented in `3803c98`; its completed
+review is in [the bug ticket](../bugs/done/sang-kancil-and-principia-priced-as-unbreakable.md).
+The following implementation order is retained as historical context, not a
+request to repeat the work or raise L9.1 again.
 Sang Kancil and Principia were the only unpriceable breakers in the playable
 sets before the card fix. L9.1 now protects the generic unknown-price case,
 with no change to the recorded decision snapshots or fixtures.
 
 1. Branch from `main`: PR #42 has merged and L9.0 is done, satisfying
    L9.1’s L9.0 dependency.
-2. Bug first: `documentation/bugs/code-review/sang-kancil-and-principia-priced-as-unbreakable.md`
+2. Bug first: `documentation/bugs/done/sang-kancil-and-principia-priced-as-unbreakable.md`
    (implement-ticket). Write its pending reproduction, then give both cards a
    real `AIImplementBreaker` and delete the dead `AIImplementIcebreaker` (and its
    `LEGACY_UNDOCUMENTED` entry). Check printed install cost and strength against
    card data; the comment headers disagree with the objects.
 3. Then L9.1: re-ground and raise (`node scripts/roadmap.js raise L9.1`), then
-   implement-ticket. Raised ticket: `documentation/backlog/code-review/L9.1-unpriceable-breakers.md`.
+   implement-ticket. Raised ticket: `documentation/backlog/done/L9.1-unpriceable-breakers.md`.
    Its Current behaviour item 4 notes that L9.0's honest path has the same gap:
    an unpriced matching breaker yields `honestLockout`.
 4. Reuse L9.0's hook: `AIBreakCost` (`documentation/ai.md` §5.3) is read on ICE

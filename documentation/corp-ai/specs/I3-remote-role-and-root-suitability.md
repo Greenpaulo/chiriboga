@@ -42,6 +42,17 @@ item's own gate validates its consumer. Do not invent an independent payoff
 conversion, count the same effect twice, or feed private trap payoff into
 ordinary postured ICE ranking. I5 owns any justified `trapValue` conversion;
 I2's equivalent-board substitution invariant remains authoritative.
+
+**Related investigations (2026-10-13).** Prefer reading
+[L8.9](L8.9-observable-defense-parity.md)'s post-I2 attribution before freezing
+placement suitability; it is a sequencing preference, not a prerequisite. The
+"tempting server" scenario below is a strategic choice whose concealment cost
+must be measured in this item's reconciled gate, not a guarantee of agenda/trap
+placement parity. [L8.10](L8.10-trap-play-value.md) supplies private mechanics
+and diagnostics to I5; it does not own placement or change this item's policy.
+[I3.1](I3.1-deck-game-plan-profile.md) later records starting-deck signals only;
+this item and I4/I5 do not wait for a game-plan consumer.
+
 Initial roles:
 
 - `scoring`: agenda advancement and scoring;
