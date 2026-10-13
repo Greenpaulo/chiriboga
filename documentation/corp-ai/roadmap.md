@@ -5,11 +5,11 @@ spec file (`proposed`); how finished work behaves lives in
 [architecture.md](architecture.md); rules live in [principles.md](principles.md).
 Statuses, IDs and commands are defined in [../ai-planning.md](../ai-planning.md).
 
-Before picking up L8.2, L8.5, I2, I3, I9 or their F11 measurement support, read
-the [deception gate reconciliation](../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation).
+Before picking up L8.2, L8.5, I2, I3, I9 or their F11/F12 measurement support, read
+the [deception gate reconciliation](deception-gates.md).
 That section separates recorded source gates from proposed revisions;
 reconcile any proposal in the source ticket/spec before implementation and
-before viewing candidate gate results. The historical merge order is a snapshot.
+before viewing candidate gate results. The roadmap table below owns the current sequence.
 
 - `node scripts/roadmap.js next` lists items whose dependencies are all `done`.
 - `node scripts/roadmap.js list` prints every item with its status.
@@ -19,6 +19,30 @@ before viewing candidate gate results. The historical merge order is a snapshot.
   dependencies; add `--fix` to refresh their generated headers.
 - `tests/ai-roadmaps.test.js` fails if a status, link, dependency or generated
   blocker header disagrees with the tickets.
+
+## Current implementation order
+
+Updated 2026-10-13. This is the preferred sequence for the deception/install
+track; item dependencies below remain the formal blockers. Completed merge work
+is recorded in the done tables and the historical merge plan.
+
+| Order | Item | Next step / adoption evidence |
+|---|---|---|
+| 1 | [L8.5](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md) | Revised full gate passed; finish code review and adoption |
+| 2 | [F11](../backlog/F11-paired-batch-metric-guards.md) | Paired pooled guards and improvement checks; measurement tests |
+| 3 | [F12](../backlog/F12-realized-defense-measurement.md) | Shared realized ICE-count collector, identity checks and control-only calibration |
+| 4 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
+| 5 | [I2](specs/I2-ice-selection-by-marginal-security.md) | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
+| 6 | [L8.9](specs/L8.9-observable-defense-parity.md) | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
+| 7 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
+
+F11/F12 can proceed while L8.5 awaits review. L8.2-before-I2 and L8.9-before-I3
+are sequencing preferences rather than additional formal dependencies. Do not
+adopt a later policy using a control predating an adopted prerequisite.
+[L9.0.1](specs/L9.0.1-adopt-honest-lockout.md) can proceed alongside this track
+with its own gate; refresh affected controls after adoption. Complete L8.7's
+card audit and L8.10 mechanics/diagnostics before I5 (its formal dependency).
+L8.8 remains separately gated after I2; it is not an I2 prerequisite.
 
 ## Server security (L)
 
@@ -71,7 +95,7 @@ price yet.
 
 ### L8.2 Deception legibility signals
 - **Status:** ready
-- **Depends on:** F4, L8.5
+- **Depends on:** F4, L8.5, F11, F12
 - **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/feature-layer-8-2-remote-deception-profiles.md)
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
 
@@ -100,11 +124,11 @@ price yet.
 - **Spec:** [L8.8-marginal-deception-value.md](specs/L8.8-marginal-deception-value.md)
 - **Goal:** Separately gate a shared marginal concealment value in adopted I2 ICE ranking, keeping private trap payoff distinct and agenda/trap substitution intact. Later consumers adopt through their own gates; this is not an I2 prerequisite.
 
-### L8.9 Observable-defense parity investigation
+### L8.9 Observable-defense parity
 - **Status:** proposed
-- **Depends on:** I2, F4, L8.4
+- **Depends on:** I2, F4, F11, F12, L8.4
 - **Spec:** [L8.9-observable-defense-parity.md](specs/L8.9-observable-defense-parity.md)
-- **Goal:** Passively attribute agenda/trap ICE-count differences to placement, posture, allocation or lifecycle effects after I2. Any repair needs a separate spec and gate; prefer findings before I3 freezes its design.
+- **Goal:** Attribute the remaining agenda/trap ICE-count tell after I2, then implement and strategically gate a supported repair in the same ticket before I3 freezes its design.
 
 ### L8.10 Trap mechanics and play-value diagnostics
 - **Status:** proposed
@@ -188,6 +212,12 @@ Shared infrastructure used by every area.
 - **Ticket:** [F11-paired-batch-metric-guards.md](../backlog/F11-paired-batch-metric-guards.md)
 - **Goal:** Guard pooled collector metrics against a matching control using paired game resampling, reusable by I2 and later deception gates.
 
+### F12 Realized defense measurement
+- **Status:** ready
+- **Depends on:** F4, F11, L8.4
+- **Ticket:** [F12-realized-defense-measurement.md](../backlog/F12-realized-defense-measurement.md)
+- **Goal:** Passively measure agenda/trap ICE-count correlation and distribution distance; supply shared observations and control-only calibration before L8.2 and I2.
+
 ### Done
 
 | ID | Item | Delivered by | Architecture |
@@ -217,7 +247,7 @@ I9 comes last.
 
 ### I2 ICE selection by marginal security
 - **Status:** proposed
-- **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11
+- **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12
 - **Spec:** [I2-ice-selection-by-marginal-security.md](specs/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Choose the `(ICE, server)` pair that most improves security, using the existing evaluator.
 

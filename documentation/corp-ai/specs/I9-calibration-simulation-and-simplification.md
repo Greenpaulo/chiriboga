@@ -1,7 +1,7 @@
 # I9 Calibration, simulation and simplification
 
 **Roadmap item:** I9 · **Depends on:** I8, F4 · **Sets:** none
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../deception-gates.md)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal

@@ -1,7 +1,7 @@
 # I3 Remote role and root suitability
 
 **Roadmap item:** I3 · **Depends on:** I2, F4, L8.4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../deception-gates.md)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
@@ -44,7 +44,8 @@ ordinary postured ICE ranking. I5 owns any justified `trapValue` conversion;
 I2's equivalent-board substitution invariant remains authoritative.
 
 **Related investigations (2026-10-13).** Prefer reading
-[L8.9](L8.9-observable-defense-parity.md)'s post-I2 attribution before freezing
+[L8.9](L8.9-observable-defense-parity.md)'s post-I2 attribution and any adopted
+repair before freezing
 placement suitability; it is a sequencing preference, not a prerequisite. The
 "tempting server" scenario below is a strategic choice whose concealment cost
 must be measured in this item's reconciled gate, not a guarantee of agenda/trap

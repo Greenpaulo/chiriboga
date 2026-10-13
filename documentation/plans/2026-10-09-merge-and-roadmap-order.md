@@ -1,8 +1,9 @@
 # Merge and roadmap order (2026-10-09)
 
-A working plan for the branches open on 2026-10-09 and the Corp AI install
-track that follows. It is a snapshot: once these branches merge, trust
-`node scripts/roadmap.js next` and the roadmaps over this file.
+Historical record of the branches open on 2026-10-09, completed merges and
+subsequent gate decisions. For current work use the
+[Corp roadmap](../corp-ai/roadmap.md#current-implementation-order) and
+[Deception gates](../corp-ai/deception-gates.md).
 
 ## 1. Merge order
 
@@ -70,43 +71,21 @@ they must match.
 
 ## 3. Roadmap order after the merges
 
-| Step | Item | Gate | Why this order |
-|---|---|---|---|
-| 0 | ~~L8.4 merge~~ — done (PR #43 merged) | Revised full gate passed | Bounded posture epochs are merged; Sang Kancil/Principia and L9.1 are also done as of 2026-10-13 |
-| 1 | ~~Update the I2 spec with the L7.1 findings; park L7.1.1~~ | Doc only | Merged in PR #39; L7.1.1 remains parked |
-| 2 | ~~L9.0 Lockout honesty~~ — done (PR #42 merged) | None (observation only) | Adds an honest verdict next to today's, plus the `securityCalibration` collector. No decision changes. Supplies I2's honest fields; L9.1 is also required |
-| 3 | ~~Sang Kancil/Principia and L9.1~~ — done | Bug regression; L9.1 has no F4 gate | Both tickets are now in done; L9.1 satisfies this I2 prerequisite. Historical implementation notes are retained in §5 |
-| 4 | **L8.5** Match-local public outcome feedback | F4; re-ground and reconcile its source gate first | Next policy ticket: owns public history and bounded posture feedback. Must be done before L8.2; validate the proposed gate change before implementation |
-| 5 | **L8.2** Deception legibility signals | Separate F4 gate; re-ground design and gate feasibility first | Reads L8.5's Corp-action record. Prefer adopting it before I2's final gate so I2 is measured with legibility enabled; this is a sequencing preference, not a formal I2 dependency |
-| 6 | **F11** Paired batch-metric guards | Harness tests; no policy-adoption gate | Formal I2 prerequisite: must be done before I2 hand-off. Can be completed earlier alongside L8.5/L8.2; supplies reusable paired guards, not consumer tolerances |
-| 7 | **I2** ICE selection by marginal security | F4; proposed correlation guards below | Depends on I1, F2, F4, L7.1, L9.0, L9.1 and F11. Planned order gates it against adopted L8.2 with a fresh matching control; calibrate and freeze guard tolerances before candidate results |
-| 7a | **L9.0.1** Adopt honest lockout | Separate F4 gate | Lets existing scoring, rez and protection decisions use the honest verdict. Can proceed alongside this sequence; refresh controls after any decision-changing adoption |
-| 7b | **L8.9** Observable-defense parity investigation | Passive identity checks; no policy adoption | After I2 supplies realized-defense observations, attribute placement/allocation/lifecycle differences. Prefer its findings before I3 freezes suitability; it is not a formal I3 prerequisite |
-| 8 | **I3**, then the remaining install track | Per spec; proposed I3 correlation guard below | I3 requires I2, F4 and L8.4. I5 additionally requires L8.10 mechanics/diagnostics. This working order finishes L8.2 before I3 as a sequencing preference |
-
-I2 depends on L9.1 in both the roadmap and its spec (included in PR #42). L9.0's
-honest fields alone do not correct unpriceable installed breakers; I2 must
-wait for L9.1's correction before scoring candidates.
-
-**L8.5 → L8.2 (status refreshed 2026-10-13).** The roadmap lists L8.5 as in-progress (code-review),
-depending only on F4. L8.2 depends on F4 and L8.5; its generated blocker means
-L8.5 must be **done** before L8.2 can proceed. Neither depends on I2 and I2
-depends on neither. L8.5 is more than a history collector: it also changes
-posture selection through bounded match-local feedback, so it needs its own
-gate. L8.4 is now merged, satisfying this plan's sequencing preference;
-L8.5 has no formal L8.4 dependency.
-
-Parallel development does not permit a shared stale gate baseline. Before
-each gate, capture a fresh matching control on the revision being evaluated,
-with prerequisite options identical in both arms and only the item's option
-changed. Reconcile this with each spec's I0-baseline wording when re-grounding.
-If another decision-changing item lands during evaluation, refresh the later
-item's control and gate. Prefer landing L8.2 before I2's final gate when
-practical, so I2's allocation change is measured with legibility already
-enabled; otherwise record that I2's evidence predates legibility and evaluate
-L8.2 against the adopted I2 policy. Gate L9.0.1 separately on the same basis.
+The current table has moved to the
+[Corp roadmap](../corp-ai/roadmap.md#current-implementation-order), which is the
+single source for the agreed implementation sequence. Current gate guidance
+lives in [Deception gates](../corp-ai/deception-gates.md); acceptance gates belong
+to the individual source tickets/specs. This historical plan is not required
+pickup reading.
 
 ### Deception gate reconciliation before implementation
+
+Current guidance has moved to [Deception gates](../corp-ai/deception-gates.md).
+The dated evidence below preserves how earlier decisions were made; its old
+ordering, proposals and workflow scopes are superseded by the roadmap and
+current source tickets/specs.
+
+#### Historical reconciliation evidence
 
 The table distinguishes requirements currently recorded in tickets/specs from
 the proposed direction for this plan. Updating this file does not amend those
@@ -193,7 +172,7 @@ items' existing gates or establish benefit against tell-learning humans.
 
 - [L8.9](../corp-ai/specs/L8.9-observable-defense-parity.md) is now an
   observation-only investigation after I2, rather than a bundle of speculative
-  parity fixes. I2 retains collector ownership and its source gate. Prefer
+  parity fixes. F12 owns the shared collector; I2 retains its source gate. Prefer
   attribution before I3 freezes placement; any repair needs its own spec/gate.
 - [L8.10](../corp-ai/specs/L8.10-trap-play-value.md) consolidates the trap drafts
   into mechanics and passive play/access diagnostics. It depends on L8.7, I1,
@@ -265,3 +244,11 @@ with no change to the recorded decision snapshots or fixtures.
 6. Known gap left open by L9.0: Bumi 1.0 has no Runner-side
    `AIImplementBreaker`, so the Runner AI cannot click-break it. Recorded in the
    L9.0 ticket; not part of L9.1.
+
+## Consolidation update (2026-10-13)
+
+The owner-approved order is maintained in the Corp roadmap, including F11/F12
+before L8.2 and L8.9 before I3. L8.9 now owns investigation and a supported
+repair in one ticket; its old observation-only scope recorded above is historical.
+F12 owns the realized-defense collector extracted from I2. Current measurement
+and gate requirements live in Deception gates and the source tickets/specs.

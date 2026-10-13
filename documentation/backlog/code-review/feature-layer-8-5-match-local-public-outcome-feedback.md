@@ -3,7 +3,7 @@
 **Outcome:** adopted — implementation complete and revised F4 gate passed; ready for code review in the same PR as the completed engine repair. Feedback remains default-off during review.
 
 **Roadmap item:** L8.5 · **Depends on:** F4 · **Sets:** none
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, [deception gate reconciliation](../../plans/2026-10-09-merge-and-roadmap-order.md#deception-gate-reconciliation-before-implementation)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, [deception gate reconciliation](../../corp-ai/deception-gates.md)
 **Verified against code:** 04fbe4c (2026-10-12)
 **Reproduction:** `tests/pending/match-local-public-outcome-feedback.test.js` — fails at 484edd3, 2026-10-12 (missing public event recorder and match-local history).
 
@@ -79,7 +79,7 @@ overlay reproduced the same failure, establishing that it predates L8.5.
 The worker was stopped, so this attempt provides no gate metrics or adoption
 evidence. A two-second replay probe confirms the normal timeout does fire;
 continued callbacks bypass the no-callback watchdog and the default timeout
-is 900 seconds. See the [engine ticket](../../bugs/code-review/runner-install-cost-increases-after-trash.md)
+is 900 seconds. See the [engine ticket](../../bugs/done/runner-install-cost-increases-after-trash.md)
 and its original pending reproduction. No seed/pair was excluded and no gate
 threshold changed. Feedback remained off; the gate-ready criterion was unticked for that attempt.
 
@@ -243,7 +243,7 @@ threshold, gate flag or AI option default changed.
 ## Related engine repair — complete, included in the same PR
 
 The engine fix is implemented and recorded in
-[Runner install cost increases after trashing a discount source](../../bugs/code-review/runner-install-cost-increases-after-trash.md),
+[Runner install cost increases after trashing a discount source](../../bugs/done/runner-install-cost-increases-after-trash.md),
 originally reproduced on baseline `zwicky-magdalene` seed 24. The repaired
 fresh baseline replay completes normally (Corp 7–0 Runner, 10 turns,
 `logHash 82ca07d82291`), with the unchanged pool/seed and feedback off.
