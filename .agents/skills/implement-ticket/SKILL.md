@@ -163,9 +163,16 @@ Proposed at `<sha>`, <date>. **Awaiting approval.**
 - **Docs:** `ai.md`, roadmap or other documentation updates.
 ```
 
-Then stop and present the plan. Continue only after the user approves, in this
-conversation or a new one that says the plan is approved. Change the status
-line to `**Approved <date>.**`, and revise the plan first if the user amends it.
+At every plan-approval stop, give the user a TL;DR in the final response:
+summarize the proposed changes, the main risk or invariant, and how success
+will be checked in a short paragraph or at most three brief bullets. Link the
+full plan in the ticket for reference, but make the approval request
+self-contained; do not require the user to read the full plan. Apply this to
+revised plans too. Then ask for approval and stop.
+
+Continue only after the user approves, in this conversation or a new one that
+says the plan is approved. Change the status line to `**Approved <date>.**`,
+and revise the plan first if the user amends it.
 
 ## 5. Implement
 

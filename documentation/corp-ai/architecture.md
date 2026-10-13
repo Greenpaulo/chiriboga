@@ -165,6 +165,29 @@ exceptions and malformed costs are unknown, while explicit fixed-strength
 inability and absence of a matching breaker keep their lockouts. Prices are
 cached only within one `_securityEvaluationContext()`.
 
+Breaker matching retains complete lists, including empty results, per ICE in
+that same public-board context. The matching pass also shares each card's
+ability availability across ICE. These records are discarded on a server or
+hypothetical-depth change; fresh board contexts observe changed hosting and
+ability suppression. Returned lists are copied so callers cannot alter the
+cached alternatives. The engine's global ability checks remain uncached.
+
+The standard `AIImplementBreaker` probe does not receive the requested break
+count. Its validated scalar activation alternatives are also cached in that
+context, per ICE and breaker, so another count can use
+`_breakerActivationModelPrice()` without repeating the hook or its state
+snapshot. Every count still minimizes across all activation alternatives;
+the cheapest alternative can change with the count. Only completed, restored
+probes publish these observations. Throws retry normally, and fresh contexts
+and different hypothetical depths do not share them. Hook accessors,
+count-bearing `AIBreakCost`, text fallback and full calculator routes retain
+their guarded probes. Every actual probe still restores public descriptors
+and encounter/run state; the observation cache stores no calculator points.
+The guard captures fresh own-key and descriptor arrays for every actual probe,
+then restores each descriptor directly. It removes added keys, including
+symbols and non-enumerable properties, without invoking getters. Snapshots are
+never shared across probes or boards.
+
 `unpricedBreakers` names the unknowns and both reason lists explain them.
 `totalMandatoryBreakCost`, `totalBreakCost`, `honestMandatoryBreakCost` and
 `honestBreakCost` are `null` when the respective total depends on an unknown.

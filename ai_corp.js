@@ -2321,13 +2321,36 @@ class CorpAI {
 
   _matchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
     if (!iceCard) return [];
+    // Matching observes one public board. Keep all alternatives, including an
+    // empty list; callers must not be able to mutate the cached collection.
+    var matchingState = null;
+    if (evaluationContext) {
+      matchingState = evaluationContext.breakerMatchingState;
+      if (!matchingState || matchingState.depth !== this._hypotheticalDepth ||
+          matchingState.server !== server) {
+        matchingState = evaluationContext.breakerMatchingState = {
+          depth: this._hypotheticalDepth, server: server,
+          lists: new Map(), abilities: new Map(),
+        };
+      }
+      if (matchingState.lists.has(iceCard))
+        return matchingState.lists.get(iceCard).concat([]);
+    }
     var installed = evaluationContext
       ? evaluationContext.runnerActiveCards
       : ActiveCards(runner);
     var matches = [];
     for (var i = 0; i < installed.length; i++) {
       var card = installed[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      if (card.player != runner) continue;
+      var hasAbilities;
+      if (matchingState && matchingState.abilities.has(card))
+        hasAbilities = matchingState.abilities.get(card);
+      else {
+        hasAbilities = CheckHasAbilities(card);
+        if (matchingState) matchingState.abilities.set(card, hasAbilities);
+      }
+      if (!hasAbilities) continue;
       if (
         typeof card.AIHostedBreakContribution == "function" ||
         card.host == iceCard
@@ -2382,6 +2405,7 @@ class CorpAI {
           !matches.includes(match))
         matches.push(match);
     }
+    if (matchingState) matchingState.lists.set(iceCard, matches.concat([]));
     return matches;
   }
 
@@ -2726,15 +2750,37 @@ class CorpAI {
 
   _computeBreakerPrice(iceCard, breaker, count, server, iceIndex, evaluationContext) {
     var price;
-    try {
+    var models = evaluationContext ? evaluationContext.breakerActivationModels : null;
+    var cached = models && models.get(iceCard);
+    cached = cached && cached.get(breaker);
+    // Inspect hook descriptors without invoking accessors outside the guard.
+    var hook = cached && Object.getOwnPropertyDescriptor(breaker, "AIImplementBreaker");
+    var declaredHook = cached && Object.getOwnPropertyDescriptor(breaker, "AIBreakCost");
+    var capture;
+    if (cached && hook && hook.value === cached.hook &&
+        (!declaredHook || ("value" in declaredHook && typeof declaredHook.value != "function")) &&
+        cached.server === server && cached.depth === this._hypotheticalDepth)
+      price = this._breakerActivationModelPrice(cached.model, count);
+    else try {
+      capture = {};
       price = this._withBreakerPricingState(breaker, iceCard, server, () => {
         if (typeof breaker.AIBreakCost == "function") {
           var declared = breaker.AIBreakCost.call(breaker, iceCard, count, server);
           if (!declared || typeof declared != "object") return {status: "unknown"};
           return Object.assign({}, declared, {status: "priced"});
         }
-        return this._probeBreakerPrice(iceCard, breaker, count, server, iceIndex, evaluationContext);
+        return this._probeBreakerPrice(iceCard, breaker, count, server, iceIndex, evaluationContext, capture);
       });
+      // Publish only after the hook and both state guards restore successfully.
+      // Keep scalar observations, never calculator points or live card shells.
+      hook = Object.getOwnPropertyDescriptor(breaker, "AIImplementBreaker");
+      if (evaluationContext && evaluationContext.breakerPrices && capture.model &&
+          hook && typeof hook.value == "function") {
+        if (!models) models = evaluationContext.breakerActivationModels = new Map();
+        if (!models.has(iceCard)) models.set(iceCard, new Map());
+        models.get(iceCard).set(breaker, {model: capture.model,
+          hook: hook.value, server: server, depth: this._hypotheticalDepth});
+      }
     } catch (error) { return {status: "unknown"}; }
     if (price.status != "priced") return price;
     if (typeof price.credits != "number" || !isFinite(price.credits) || price.credits < 0 ||
@@ -2750,19 +2796,45 @@ class CorpAI {
       counters: Object.assign({}, counters), breaker: breaker};
   }
 
+  //The standard hook receives no requested break count. Preserve every
+  //activation alternative, since a different count can make another cheapest.
+  _breakerActivationModelPrice(model, count) {
+    var best = Infinity;
+    for (var activation of model.activations)
+      best = Math.min(best, activation.pump +
+        Math.ceil(count / activation.breakAmount) * activation.breakCost);
+    return {status: model.invalid ? "unknown" : isFinite(best) ? "priced" : model.implemented ? "incapable" : "unknown",
+      credits: best, clicks: 0, counters: {}, fullRouteSupported: model.fullRouteSupported};
+  }
+
   //Restore public payment fields even if a faulty hook throws after changing them.
   //The standard calculator probe is private to the Corp and its method is restored.
   _withBreakerPricingState(breaker, iceCard, server, evaluate) {
     var encounter = AIIceEncounterSaveState();
     var objects = Array.from(new Set([runner, corp, breaker, iceCard].concat(ActiveCards(null))));
-    var saved = objects.map(object => Object.getOwnPropertyDescriptors(object));
+    // Fresh descriptors for every probe, without materializing and converting
+    // a second dictionary of descriptors during restoration. Never read getters.
+    var saved = objects.map(object => {
+      var keys = Reflect.ownKeys(object);
+      var descriptors = new Array(keys.length);
+      for (var i = 0; i < keys.length; i++)
+        descriptors[i] = Object.getOwnPropertyDescriptor(object, keys[i]);
+      return {keys: keys, descriptors: descriptors};
+    });
     return this._withHypothetical(() => {}, () => AIWithRunContext(server, evaluate), () => {
       AIIceEncounterRestoreState(encounter);
-      objects.forEach((object, index) => {
-        for (var key of Object.keys(object))
-          if (!Object.prototype.hasOwnProperty.call(saved[index], key)) delete object[key];
-        Object.defineProperties(object, saved[index]);
-      });
+      for (var i = 0; i < objects.length; i++) {
+        var object = objects[i], snapshot = saved[i];
+        var currentKeys = Reflect.ownKeys(object);
+        for (var k = 0; k < currentKeys.length; k++) {
+          var key = currentKeys[k];
+          // Unchanged objects have the same key order. A hook may add, remove
+          // or reorder keys; only those mismatches need a membership search.
+          if (key !== snapshot.keys[k] && !snapshot.keys.includes(key)) delete object[key];
+        }
+        for (var j = 0; j < snapshot.keys.length; j++)
+          Object.defineProperty(object, snapshot.keys[j], snapshot.descriptors[j]);
+      }
     });
   }
 
@@ -2773,6 +2845,7 @@ class CorpAI {
     server,
     iceIndex,
     evaluationContext,
+    activationCapture,
   ) {
     var rc = evaluationContext ? null : this._securityRunCalculator();
     var baseIceAI = this._securityIceAI(
@@ -2795,6 +2868,7 @@ class CorpAI {
       );
     if (rc && iceAI && typeof breaker.AIImplementBreaker == "function") {
       var best = Infinity;
+      var activations = [];
       var implemented = false;
       var invalid = false;
       var previousImplement = Object.getOwnPropertyDescriptor(rc, "ImplementIcebreaker");
@@ -2841,10 +2915,9 @@ class CorpAI {
               ? Math.ceil(gap / pumpAmount) * pumpCost
               : Infinity
             : 0;
-        best = Math.min(
-          best,
-          pump + Math.ceil(count / breakAmount) * breakCost,
-        );
+        best = Math.min(best, pump + Math.ceil(count / breakAmount) * breakCost);
+        if (activationCapture)
+          activations.push({pump: pump, breakCost: breakCost, breakAmount: breakAmount});
         return [];
       };
       var point = {
@@ -2877,11 +2950,13 @@ class CorpAI {
         if (previousModify) Object.defineProperty(rc, "StrModify", previousModify);
         else delete rc.StrModify;
       }
-      return {status: invalid ? "unknown" : isFinite(best) ? "priced" : implemented ? "incapable" : "unknown",
-        credits: best, clicks: 0, counters: {},
+      var model = {activations: activations, invalid: invalid, implemented: implemented,
         fullRouteSupported: !invalid && Array.isArray(returned) && modificationPoints.some(point =>
           returned.includes(point) && isFinite(point.runner_credits_spent) && point.runner_credits_spent >= 0 &&
           isFinite(point.runner_clicks_spent) && point.runner_clicks_spent >= 0)};
+      if (activationCapture) activationCapture.model = model;
+      return {status: invalid ? "unknown" : isFinite(best) ? "priced" : implemented ? "incapable" : "unknown",
+        credits: best, clicks: 0, counters: {}, fullRouteSupported: model.fullRouteSupported};
     }
     var text = (breaker.cardText || "").replace(/<[^>]*>/g, "");
     var breakMatch =
@@ -3409,7 +3484,9 @@ class CorpAI {
       requiredSubroutineIndices: new Map(),
       mandatorySubroutineIndices: new Map(),
       matchingBreakers: new Map(),
+      breakerMatchingState: null,
       breakerPrices: new Map(),
+      breakerActivationModels: new Map(),
       oneShotBypassAvailable: new Map(),
       icePlanInputs: new Map(),
     };
