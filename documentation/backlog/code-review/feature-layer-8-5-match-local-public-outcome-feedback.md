@@ -11,6 +11,10 @@
 
 Implemented from 04fbe4c (2026-10-12).
 
+PR #45 review follow-up (2026-10-13): corrected the promoted reproduction's
+run-command header to `tests/match-local-public-outcome-feedback.test.js`;
+its body and assertions remain unchanged.
+
 The public recorder is independent of feedback and keeps committed gameplay
 events with stable opaque ids and scalar metadata. Engine instrumentation
 distinguishes run initiation, encounters and accesses; covers installs,

@@ -472,7 +472,8 @@ function printComparison(result, quick, only = null, reports = []) {
     lines.push(`  ${name.padEnd(36)} ${m.baseline.toFixed(3).padStart(8)}  ${m.candidate.toFixed(3).padStart(9)}  ${fmt(m.difference).padStart(10)}` +
       `  [${fmt(m.low)}, ${fmt(m.high)}]${m.direction ? ' (' + m.direction + ' is better)' : ''}`);
   }
-  const batchLine = m => m ? `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]` : 'missing';
+  const batchLine = m => m && ['value', 'low', 'high'].every(k => Number.isFinite(m[k])) ?
+    `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]` : 'unavailable';
   const batchMetrics = {...result.batchMetrics};
   for (const name of new Set(reports.flatMap(report => Object.keys(report.batchMetrics || {}))))
     batchMetrics[name] = {baseline: reports[0].batchMetrics?.[name], candidate: reports[1].batchMetrics?.[name]};

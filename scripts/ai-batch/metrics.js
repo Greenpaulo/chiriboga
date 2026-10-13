@@ -133,6 +133,9 @@ function compareReports(baseline, candidate, gate = {}) {
     if (JSON.stringify(baseline[field]) !== JSON.stringify(candidate[field]))
       throw new Error(`Reports differ in ${field}; only the AI options may differ`);
   }
+  const pairSet = report => [...new Set(report.pairs || [])].sort();
+  if (JSON.stringify(pairSet(baseline)) !== JSON.stringify(pairSet(candidate)))
+    throw new Error('Reports differ in pairs; only the AI options may differ');
   const byKey = new Map(baseline.games.map(g => [gameKey(g), g]));
   const pairs = [];
   let dropped = 0;
@@ -170,6 +173,8 @@ function compareReports(baseline, candidate, gate = {}) {
   const changedGames = hashed.filter(([b, c]) => b.logHash !== c.logHash).length;
   const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length ||
     Object.keys(gate.ceiling || {}).length || (gate.noWorse || []).length;
+  if (gated && !pairs.length)
+    checks.push({name: 'usable pairs', kind: 'paired', pass: false, why: 'no successful matching game pairs'});
   if (gated && hashed.length)
     checks.push({name: 'option effect', kind: 'changed', pass: changedGames > 0,
       why: changedGames ? undefined : 'no game differs from the baseline'});

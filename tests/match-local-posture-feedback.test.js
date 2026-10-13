@@ -5,10 +5,10 @@ const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const json = value => JSON.parse(JSON.stringify(value));
-let passed = 0;
+let passed = 0, failed = 0;
 function test(name, body) {
   try { body(); passed++; if (process.env.VERBOSE) console.log('PASS ' + name); }
-  catch (error) { console.error('FAIL ' + name); throw error; }
+  catch (error) { failed++; console.error('FAIL ' + name + ': ' + (error.stack || error)); }
 }
 function world(on = true, seed = 123) {
   const corp = {HQ: {cards: [], ice: [], root: []}, RnD: {cards: [], ice: [], root: []},
@@ -481,4 +481,5 @@ test('correlation collector accepts adapted shape rolls without counting weight 
   assert.strictEqual(samples.filter(s => s.k === 'p').length, 2);
 });
 
-console.log(passed + ' public outcome feedback cases passed.');
+console.log(passed + ' passed, ' + failed + ' failed public outcome feedback cases.');
+if (failed) process.exitCode = 1;
