@@ -515,7 +515,7 @@ lifetime activation caches are unchanged.
 harness-only sink and never affects a decision.
 
 **Match-local feedback (L8.5, option `matchLocalPostureFeedback`, revised adoption
-gate passed; default off during code review).** The engine's
+gate passed; default on).** The engine's
 `RecordPublicPostureEvent()` sends committed visible events to
 `_recordPublicPostureEvent()`. `_publicPostureHistory` contains only opaque
 ids and scalar event fields, including acting side and turn side; it records

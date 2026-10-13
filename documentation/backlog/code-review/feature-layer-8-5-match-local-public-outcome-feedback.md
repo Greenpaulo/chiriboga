@@ -1,6 +1,6 @@
 # L8.5 Match-local public outcome feedback
 
-**Outcome:** adopted — implementation complete and revised F4 gate passed; ready for code review in the same PR as the completed engine repair. Feedback remains default-off during review.
+**Outcome:** adopted — revised F4 gate passed and PR #45 approved; feedback now defaults on for merge.
 
 **Roadmap item:** L8.5 · **Depends on:** F4 · **Sets:** none
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, [deception gate reconciliation](../../corp-ai/deception-gates.md)
@@ -14,6 +14,24 @@ Implemented from 04fbe4c (2026-10-12).
 PR #45 review follow-up (2026-10-13): corrected the promoted reproduction's
 run-command header to `tests/match-local-public-outcome-feedback.test.js`;
 its body and assertions remain unchanged.
+
+Owner-authorized activation (2026-10-13), from `b77fc47`: enabled
+`matchLocalPostureFeedback` after the recorded revised gate passed and PR #45
+received approval on that commit. Only the default changes; the candidate
+behaviour is the same explicit option-on behaviour exercised by the gate.
+Earlier default-off statements below describe the pre-activation review stage.
+The legacy security/L8.4 test harness now explicitly disables feedback so its
+fixed random draws and lifetime-profile assertions continue to test that
+original policy. No existing assertion or fixture expectation was changed;
+dedicated L8.5 tests continue exercising feedback-on behaviour.
+Activation validation: both focused feedback tests passed (25 and 2 cases),
+legacy security/F6 tests passed (172 and 173 cases), and
+`node tests/run-all-tests.js` passed all 88 test files, including Corp decision
+fixtures and decision snapshots. No 1,000-game gate was rerun for the default
+flip; acceptance uses the recorded owner-supplied revised gate result.
+The recorded `gate` command is historical: after activation, rerun an off/on
+comparison with separate plain batches explicitly setting the option to
+`false` and `true`, because `gate` uses current defaults for its baseline.
 
 The public recorder is independent of feedback and keeps committed gameplay
 events with stable opaque ids and scalar metadata. Engine instrumentation
@@ -63,7 +81,7 @@ Acceptance audit (2026-10-12): 25 public outcome feedback cases and
 including `tests/corp-decision-fixtures.test.js` and
 `tests/decision-snapshots.test.js`.
 
-**Gate:** passed — `matchLocalPostureFeedback`; complete owner-supplied revised F4 output and report paths are recorded below. Implementation is ready for code review alongside the completed engine repair in the same PR; feedback remains default-off during review.
+**Gate:** passed — `matchLocalPostureFeedback` now defaults to on; complete owner-supplied revised F4 output and report paths are recorded below. Owner authorized activation after PR #45 approval.
 
 **Gate command:** `node scripts/ai-batch.js gate --fresh --jobs 3 --pool tests/fixtures/ai-batch/deck-pool.json --games 200 --corp-option matchLocalPostureFeedback=true --collector postureScriptWeights --collector bluffSingleVariableCorrelation --max postureScriptWeights.violations=0 --guard pointsStolen=0.2 --guard pointsScored=0.2 --guard winRate=0.02`
 
@@ -340,9 +358,9 @@ adoption. Review the completed engine repair and L8.5 together in the same PR.
 
 ## Acceptance criteria
 - [x] All nine scenarios are covered by deterministic tests of their applicable contracts: probabilities, choices, structured reasons, resets and public event records.
-- [x] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [x] The behaviour change was introduced behind a default-off AI option and enabled after the revised gate passed and review completed (named in the Resolution).
 - [x] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
-- [x] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the thresholds met. Feedback remains default-off during code review; enabling it is deferred until review is complete.
+- [x] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the thresholds met. Feedback now defaults on after review and owner-authorized activation.
 - [x] Collector `postureScriptWeights` is built and tested for per-script extrema, normalized probabilities, absolute bounds, 0.02 movement limits and missing telemetry.
 - [x] Deterministic information-integrity tests compare all twelve sampler probabilities for matched agenda/trap histories.
 - [x] Deterministic reachability tests demonstrate settled feedback changes a later shape choice and respect commitment boundaries.

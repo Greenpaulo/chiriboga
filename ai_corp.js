@@ -8569,5 +8569,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   emptyArchivesRunPressure: false,
   valuelessServerDebtReset: false,
   postureEpochs: true,
-  matchLocalPostureFeedback: false,
+  matchLocalPostureFeedback: true,
 });

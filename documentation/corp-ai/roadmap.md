@@ -28,7 +28,7 @@ is recorded in the done tables and the historical merge plan.
 
 | Order | Item | Next step / adoption evidence |
 |---|---|---|
-| 1 | [L8.5](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md) | Revised full gate passed; finish code review and adoption |
+| 1 | [L8.5](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md) | Revised gate and PR review passed; feedback defaults on; merge and run post-merge adoption |
 | 2 | [F11](../backlog/F11-paired-batch-metric-guards.md) | Paired pooled guards and improvement checks; measurement tests |
 | 3 | [F12](../backlog/F12-realized-defense-measurement.md) | Shared realized ICE-count collector, identity checks and control-only calibration |
 | 4 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | Re-ground and freeze the tell-reduction gate, then implement and adopt |

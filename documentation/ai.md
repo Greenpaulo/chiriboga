@@ -2057,7 +2057,8 @@ trap effects and completed scores/steals. Access is distinct from a successful
 run; a declined optional trap effect is not a firing. The gameplay notification
 adds no AI card hook and never changes the `AIPunishesAccess` contract.
 
-With `matchLocalPostureFeedback` on, later shapes use the shared twelve-script
+With `matchLocalPostureFeedback` on (the default after its revised adoption
+gate passed), later shapes use the shared twelve-script
 distribution and `_postureScriptWeights`. Multipliers stay within 0.8–1.2;
 each normalized script retains probability at least 0.015. Only cached active
 postures exposed during a real Runner turn supply learning samples. Their
