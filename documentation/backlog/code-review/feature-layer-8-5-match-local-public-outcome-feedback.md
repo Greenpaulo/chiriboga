@@ -33,6 +33,40 @@ The recorded `gate` command is historical: after activation, rerun an off/on
 comparison with separate plain batches explicitly setting the option to
 `false` and `true`, because `gate` uses current defaults for its baseline.
 
+PR #45 activation review follow-up (2026-10-13): inspected the actual revised
+full-gate reports named below. Both record code hash `cb6aee9824df4faa`,
+1,400 games, zero failures and `quick: false`. Their effective Corp options
+are identical except `matchLocalPostureFeedback`: baseline `false`, candidate
+`true`; both retain the adopted prerequisite `postureEpochs: true`.
+The reports were created on 2026-10-12, before the default flip in `d07e67d`;
+`b77fc47` still has the feedback default set to `false`. Rechecking the saved
+reports with the following command passes the changed-option check, all three
+performance guards and the zero-violation maximum:
+
+`node scripts/ai-batch.js --compare .ai-batch-cache/baseline-7cf7378f77934ac4.json .ai-batch-cache/candidate-0501a969b2ef96ac.json --max postureScriptWeights.violations=0 --guard pointsStolen=0.2 --guard pointsScored=0.2 --guard winRate=0.02`
+
+This validates the recorded pre-activation off/on evidence; it is not a fresh
+batch run. The default flip does not invalidate that comparison. Future
+comparisons must explicitly disable feedback in the control, as noted above.
+
+Mechanical ticket check (2026-10-13):
+`node scripts/ticket.js check documentation/backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md`
+exited 0. Result lines (omitting the changed-file inventory and review link):
+
+```text
+WARN Reproduction changed outside its expectations (1 lines removed, 1 added); the Resolution should explain why.
+PASS Reproduction passes.
+PASS Full suite: 88 test files passed.
+PASS Gate: passed — `matchLocalPostureFeedback` now defaults to on; complete owner-supplied revised F4 output and report paths are recorded below. Owner authorized activation after PR #45 approval. (matchLocalPostureFeedback defaults to true)
+Ticket check passed.
+```
+
+The warning is the previously documented run-command header correction;
+reproduction assertions are unchanged. The full suite includes Corp decision
+fixtures and decision snapshots. Focused feedback tests also passed (25 and
+2 cases); `git diff --check` passed. This review follow-up keeps the ticket
+in `code-review/`.
+
 The public recorder is independent of feedback and keeps committed gameplay
 events with stable opaque ids and scalar metadata. Engine instrumentation
 distinguishes run initiation, encounters and accesses; covers installs,

@@ -36,7 +36,8 @@ is recorded in the done tables and the historical merge plan.
 | 6 | [L8.9](specs/L8.9-observable-defense-parity.md) | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
 | 7 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
-F11/F12 can proceed while L8.5 awaits review. L8.2-before-I2 and L8.9-before-I3
+F11/F12 can proceed alongside L8.5's remaining post-merge adoption.
+L8.2-before-I2 and L8.9-before-I3
 are sequencing preferences rather than additional formal dependencies. Do not
 adopt a later policy using a control predating an adopted prerequisite.
 [L9.0.1](specs/L9.0.1-adopt-honest-lockout.md) can proceed alongside this track
