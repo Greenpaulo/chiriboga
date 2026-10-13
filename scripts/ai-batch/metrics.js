@@ -177,27 +177,32 @@ function compareReports(baseline, candidate, gate = {}, collectors = []) {
     const selected = [...requested].filter(name => !metrics[name] &&
       (name === collector.name || name.startsWith(collector.name + '.')));
     if (!selected.length || typeof collector.finishBatch !== 'function') continue;
-    try {
-      if (!baseline.collectors?.includes(collector.name)) throw new Error('batch collector not declared in reports');
-      if (!pairs.length) throw new Error('no successful game pairs');
-      const arms = [0, 1].map(arm => pairs.map(pair => {
-        const samples = pair[arm].samples;
-        if (!samples || !Object.prototype.hasOwnProperty.call(samples, collector.name))
-          throw new Error(`missing samples for ${collector.name} at ${gameKey(pair[arm])}`);
-        return samples[collector.name];
-      }));
-      const values = pooledComparison(collector, arms, draw => {
-        const indices = Array.from({length: pairs.length}, () => Math.floor(draw() * pairs.length));
-        return arms.map(arm => indices.map(i => arm[i]));
-      });
-      for (const name of selected) {
-        if (!values[name]) throw new Error(`unknown batch metric ${name}`);
-        const m = values[name], direction = directions[name] || null;
-        batchComparisons[name] = {...m, direction, pairedGames: pairs.length, droppedGames: dropped,
-          improvement: orientDifference(m, direction)};
+    // Optional trusted views keep undefined columns from poisoning unrelated
+    // statistics. Each view uses the same seeded game-index draws.
+    for (const group of collector.forMetrics ? selected.map(name => [name]) : [selected]) {
+      try {
+        if (!baseline.collectors?.includes(collector.name)) throw new Error('batch collector not declared in reports');
+        if (!pairs.length) throw new Error('no successful game pairs');
+        const arms = [0, 1].map(arm => pairs.map(pair => {
+          const samples = pair[arm].samples;
+          if (!samples || !Object.prototype.hasOwnProperty.call(samples, collector.name))
+            throw new Error(`missing samples for ${collector.name} at ${gameKey(pair[arm])}`);
+          return samples[collector.name];
+        }));
+        const view = collector.forMetrics ? collector.forMetrics(group) : collector;
+        const values = pooledComparison(view, arms, draw => {
+          const indices = Array.from({length: pairs.length}, () => Math.floor(draw() * pairs.length));
+          return arms.map(arm => indices.map(i => arm[i]));
+        });
+        for (const name of group) {
+          if (!values[name]) throw new Error(`unknown batch metric ${name}`);
+          const m = values[name], direction = directions[name] || null;
+          batchComparisons[name] = {...m, direction, pairedGames: pairs.length, droppedGames: dropped,
+            improvement: orientDifference(m, direction)};
+        }
+      } catch (error) {
+        for (const name of group) batchComparisons[name] = {why: error.message};
       }
-    } catch (error) {
-      for (const name of selected) batchComparisons[name] = {why: error.message};
     }
   }
   // Gate: a guarded metric must not admit a regression beyond its tolerance;
@@ -297,6 +302,38 @@ function batchMetrics(collectors, games) {
   for (const c of collectors) {
     if (typeof c.finishBatch !== 'function') continue;
     const perGame = ok.map(g => (g.samples && g.samples[c.name]) || []);
+    // Opt-in strict diagnostics preserve legacy diagnostic/ceiling semantics.
+    // A defined distance may still be reported when another column (rho) is
+    // undefined, but no unusable cohort or draw receives a success interval.
+    if (c.strictBatchDiagnostics) {
+      const columns = c.metricNames.map(name => `${c.name}.${name}`);
+      const results = Object.fromEntries(columns.map(name => {
+        const view = c.forMetrics ? c.forMetrics([name]) : c;
+        let value = null, why = null;
+        try {
+          const raw = flattenCollector(c.name, view.finishBatch(perGame));
+          value = Number.isFinite(raw[name]) ? raw[name] : null;
+        } catch (_) { /* undefined point values remain null */ }
+        try { evaluateBatch(view, perGame); }
+        catch (error) { why = error.message; }
+        return [name, {view, value, why, invalidDraws: 0, draws: []}];
+      }));
+      const resamples = c.batchResamples || 200, random = seededRandom('f4-batch:' + c.name);
+      const usable = Object.entries(results).filter(([, result]) => !result.why);
+      if (usable.length) for (let r = 0; r < resamples; r++) {
+        const sample = Array.from({length: perGame.length}, () => perGame[Math.floor(random() * perGame.length)]);
+        for (const [name, result] of usable) try {
+          result.draws.push(evaluateBatch(result.view, sample)[name]);
+        } catch (error) { result.invalidDraws++; result.why ||= error.message; }
+      }
+      for (const name of columns) {
+        const result = results[name], sorted = result.draws.sort((a, b) => a - b);
+        out[name] = {value: result.value, low: result.why ? null : sorted[Math.floor(0.025 * resamples)],
+          high: result.why ? null : sorted[Math.ceil(0.975 * resamples) - 1],
+          games: perGame.length, valid: !result.why, why: result.why, invalidDraws: result.invalidDraws, resamples};
+      }
+      continue;
+    }
     const point = flattenCollector(c.name, c.finishBatch(perGame));
     const resamples = c.batchResamples || 200;
     const random = seededRandom('f4-batch:' + c.name);

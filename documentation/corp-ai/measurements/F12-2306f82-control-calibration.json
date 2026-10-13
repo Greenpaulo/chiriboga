@@ -1,0 +1,4787 @@
+{
+  "kind": "F12 passive measurement evidence",
+  "coverageRules": {
+    "commitmentsPerClass": 10,
+    "gamesPerClass": 5,
+    "knownPostureFraction": 0.9
+  },
+  "identity": {
+    "pass": true,
+    "expected": 1400,
+    "successfulPairs": 1400,
+    "mismatches": [],
+    "failures": []
+  },
+  "sameSeedStatistics": {
+    "realizedIceByRootType.allCountCorrelation": {
+      "baseline": 0.22406525510460695,
+      "candidate": 0.22406525510460695,
+      "difference": 0,
+      "low": 0,
+      "high": 0,
+      "resamples": 200,
+      "direction": "lower",
+      "pairedGames": 1400,
+      "droppedGames": 0,
+      "improvement": {
+        "mean": 0,
+        "low": 0,
+        "high": 0
+      }
+    },
+    "realizedIceByRootType.posturedCountCorrelation": {
+      "why": "insufficient known posture coverage (need 90%)"
+    },
+    "realizedIceByRootType.allCountDistance": {
+      "baseline": 0.20778810554998356,
+      "candidate": 0.20778810554998356,
+      "difference": 0,
+      "low": 0,
+      "high": 0,
+      "resamples": 200,
+      "direction": "lower",
+      "pairedGames": 1400,
+      "droppedGames": 0,
+      "improvement": {
+        "mean": 0,
+        "low": 0,
+        "high": 0
+      }
+    },
+    "realizedIceByRootType.posturedCountDistance": {
+      "why": "insufficient known posture coverage (need 90%)"
+    }
+  },
+  "calibration": {
+    "kind": "independent calibration",
+    "metrics": {
+      "realizedIceByRootType.allCountCorrelation": {
+        "status": "valid",
+        "baseline": 0.22406525510460695,
+        "candidate": 0.2568226171650291,
+        "difference": 0.032757362060422124,
+        "low": -0.02150838087453863,
+        "high": 0.09068820518606907,
+        "resamples": 200,
+        "direction": "lower",
+        "improvement": {
+          "mean": -0.032757362060422124,
+          "low": -0.09068820518606907,
+          "high": 0.02150838087453863
+        }
+      },
+      "realizedIceByRootType.posturedCountCorrelation": {
+        "status": "insufficient or invalid",
+        "why": "insufficient known posture coverage (need 90%)"
+      },
+      "realizedIceByRootType.allCountDistance": {
+        "status": "valid",
+        "baseline": 0.20778810554998356,
+        "candidate": 0.2329173218950611,
+        "difference": 0.025129216345077532,
+        "low": -0.010237730380328547,
+        "high": 0.06882155890864394,
+        "resamples": 200,
+        "direction": "lower",
+        "improvement": {
+          "mean": -0.025129216345077532,
+          "low": -0.06882155890864394,
+          "high": 0.010237730380328547
+        }
+      },
+      "realizedIceByRootType.posturedCountDistance": {
+        "status": "insufficient or invalid",
+        "why": "insufficient known posture coverage (need 90%)"
+      }
+    },
+    "status": "insufficient or invalid"
+  },
+  "cohorts": {
+    "off": {
+      "sha": "2306f82",
+      "dirty": true,
+      "codeHash": "44f57510eaa411dc",
+      "poolHash": "0ee4865c35412106",
+      "pairs": [
+        "pd-tao",
+        "btl-kit",
+        "neh-zahya",
+        "pe-steve",
+        "gateway",
+        "zwicky-magdalene",
+        "leo-topan"
+      ],
+      "seeds": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "101",
+        "102",
+        "103",
+        "104",
+        "105",
+        "106",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "116",
+        "117",
+        "118",
+        "119",
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134",
+        "135",
+        "136",
+        "137",
+        "138",
+        "139",
+        "140",
+        "141",
+        "142",
+        "143",
+        "144",
+        "145",
+        "146",
+        "147",
+        "148",
+        "149",
+        "150",
+        "151",
+        "152",
+        "153",
+        "154",
+        "155",
+        "156",
+        "157",
+        "158",
+        "159",
+        "160",
+        "161",
+        "162",
+        "163",
+        "164",
+        "165",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "184",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200"
+      ],
+      "options": {
+        "corp": {
+          "secureScoringServerGate": false,
+          "serverAtRiskInstallOverride": false,
+          "committedAgendaReserveBypass": false,
+          "emptyArchivesRunPressure": false,
+          "valuelessServerDebtReset": false,
+          "postureEpochs": true,
+          "matchLocalPostureFeedback": false
+        },
+        "runner": {}
+      },
+      "command": "node scripts/ai-batch.js --pool tests/fixtures/ai-batch/deck-pool.json --seeds 1-200 --collector realizedIceByRootType --defense-observer off --jobs 2 --out .ai-batch-cache/f12-2306f82-validated/off-1-200.json",
+      "games": 1400,
+      "failures": 0,
+      "defenseObserver": "off",
+      "metrics": {
+        "realizedIceByRootType.allCountCorrelation": {
+          "value": null,
+          "low": null,
+          "high": null,
+          "games": 1400,
+          "valid": false,
+          "why": "insufficient all agenda coverage (need 10 commitments / 5 games)",
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.posturedCountCorrelation": {
+          "value": null,
+          "low": null,
+          "high": null,
+          "games": 1400,
+          "valid": false,
+          "why": "insufficient postured agenda coverage (need 10 commitments / 5 games)",
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.allCountDistance": {
+          "value": null,
+          "low": null,
+          "high": null,
+          "games": 1400,
+          "valid": false,
+          "why": "insufficient all agenda coverage (need 10 commitments / 5 games)",
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.posturedCountDistance": {
+          "value": null,
+          "low": null,
+          "high": null,
+          "games": 1400,
+          "valid": false,
+          "why": "insufficient postured agenda coverage (need 10 commitments / 5 games)",
+          "invalidDraws": 0,
+          "resamples": 200
+        }
+      },
+      "diagnostics": {
+        "all": {
+          "distance": null,
+          "signedCorrelation": null,
+          "correlation": null,
+          "histograms": {
+            "agenda": {},
+            "trap": {}
+          },
+          "classes": {
+            "agenda": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            },
+            "trap": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            }
+          },
+          "prevalence": {
+            "agenda": null,
+            "trap": null
+          }
+        },
+        "postured": {
+          "distance": null,
+          "signedCorrelation": null,
+          "correlation": null,
+          "histograms": {
+            "agenda": {},
+            "trap": {}
+          },
+          "classes": {
+            "agenda": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            },
+            "trap": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            }
+          },
+          "prevalence": {
+            "agenda": null,
+            "trap": null
+          }
+        },
+        "revealed": {
+          "distance": null,
+          "signedCorrelation": null,
+          "correlation": null,
+          "histograms": {
+            "agenda": {},
+            "trap": {}
+          },
+          "classes": {
+            "agenda": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            },
+            "trap": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            }
+          },
+          "prevalence": {
+            "agenda": null,
+            "trap": null
+          }
+        },
+        "firstCommitment": {
+          "distance": null,
+          "signedCorrelation": null,
+          "correlation": null,
+          "histograms": {
+            "agenda": {},
+            "trap": {}
+          },
+          "classes": {
+            "agenda": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            },
+            "trap": {
+              "observations": 0,
+              "games": 0,
+              "roots": 0,
+              "commitments": 0,
+              "servers": 0
+            }
+          },
+          "prevalence": {
+            "agenda": null,
+            "trap": null
+          }
+        },
+        "coverage": {
+          "observations": 0,
+          "headline": 0,
+          "knownPostureFraction": 0,
+          "unknownPosture": 0,
+          "unknownSafety": 0,
+          "games": 0
+        },
+        "breakdowns": {
+          "deckPair": {},
+          "multiRoot": {},
+          "rootAge": {},
+          "revelation": {},
+          "posture": {},
+          "safety": {}
+        },
+        "lifecycle": {
+          "installs": 0,
+          "leaves": 0
+        },
+        "errors": []
+      }
+    },
+    "first": {
+      "sha": "2306f82",
+      "dirty": true,
+      "codeHash": "44f57510eaa411dc",
+      "poolHash": "0ee4865c35412106",
+      "pairs": [
+        "pd-tao",
+        "btl-kit",
+        "neh-zahya",
+        "pe-steve",
+        "gateway",
+        "zwicky-magdalene",
+        "leo-topan"
+      ],
+      "seeds": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51",
+        "52",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57",
+        "58",
+        "59",
+        "60",
+        "61",
+        "62",
+        "63",
+        "64",
+        "65",
+        "66",
+        "67",
+        "68",
+        "69",
+        "70",
+        "71",
+        "72",
+        "73",
+        "74",
+        "75",
+        "76",
+        "77",
+        "78",
+        "79",
+        "80",
+        "81",
+        "82",
+        "83",
+        "84",
+        "85",
+        "86",
+        "87",
+        "88",
+        "89",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99",
+        "100",
+        "101",
+        "102",
+        "103",
+        "104",
+        "105",
+        "106",
+        "107",
+        "108",
+        "109",
+        "110",
+        "111",
+        "112",
+        "113",
+        "114",
+        "115",
+        "116",
+        "117",
+        "118",
+        "119",
+        "120",
+        "121",
+        "122",
+        "123",
+        "124",
+        "125",
+        "126",
+        "127",
+        "128",
+        "129",
+        "130",
+        "131",
+        "132",
+        "133",
+        "134",
+        "135",
+        "136",
+        "137",
+        "138",
+        "139",
+        "140",
+        "141",
+        "142",
+        "143",
+        "144",
+        "145",
+        "146",
+        "147",
+        "148",
+        "149",
+        "150",
+        "151",
+        "152",
+        "153",
+        "154",
+        "155",
+        "156",
+        "157",
+        "158",
+        "159",
+        "160",
+        "161",
+        "162",
+        "163",
+        "164",
+        "165",
+        "166",
+        "167",
+        "168",
+        "169",
+        "170",
+        "171",
+        "172",
+        "173",
+        "174",
+        "175",
+        "176",
+        "177",
+        "178",
+        "179",
+        "180",
+        "181",
+        "182",
+        "183",
+        "184",
+        "185",
+        "186",
+        "187",
+        "188",
+        "189",
+        "190",
+        "191",
+        "192",
+        "193",
+        "194",
+        "195",
+        "196",
+        "197",
+        "198",
+        "199",
+        "200"
+      ],
+      "options": {
+        "corp": {
+          "secureScoringServerGate": false,
+          "serverAtRiskInstallOverride": false,
+          "committedAgendaReserveBypass": false,
+          "emptyArchivesRunPressure": false,
+          "valuelessServerDebtReset": false,
+          "postureEpochs": true,
+          "matchLocalPostureFeedback": false
+        },
+        "runner": {}
+      },
+      "command": "node scripts/ai-batch.js --pool tests/fixtures/ai-batch/deck-pool.json --seeds 1-200 --collector realizedIceByRootType --defense-observer on --jobs 2 --out .ai-batch-cache/f12-2306f82-validated/on-1-200.json",
+      "games": 1400,
+      "failures": 0,
+      "defenseObserver": "on",
+      "metrics": {
+        "realizedIceByRootType.allCountCorrelation": {
+          "value": 0.22406525510460695,
+          "low": 0.1760146033358824,
+          "high": 0.2621075877431085,
+          "games": 1400,
+          "valid": true,
+          "why": null,
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.posturedCountCorrelation": {
+          "value": 0.17948161468615906,
+          "low": null,
+          "high": null,
+          "games": 1400,
+          "valid": false,
+          "why": "insufficient known posture coverage (need 90%)",
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.allCountDistance": {
+          "value": 0.20778810554998356,
+          "low": 0.17806582065878573,
+          "high": 0.23861110426575327,
+          "games": 1400,
+          "valid": true,
+          "why": null,
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.posturedCountDistance": {
+          "value": 0.21907293333165373,
+          "low": null,
+          "high": null,
+          "games": 1400,
+          "valid": false,
+          "why": "insufficient known posture coverage (need 90%)",
+          "invalidDraws": 0,
+          "resamples": 200
+        }
+      },
+      "diagnostics": {
+        "all": {
+          "distance": 0.20778810554998356,
+          "signedCorrelation": 0.22406525510460695,
+          "correlation": 0.22406525510460695,
+          "histograms": {
+            "agenda": {
+              "0": 125,
+              "1": 3839,
+              "2": 2020,
+              "3": 558,
+              "4": 143,
+              "5": 16,
+              "6": 4
+            },
+            "trap": {
+              "0": 665,
+              "1": 1460,
+              "2": 636,
+              "3": 169,
+              "4": 9,
+              "5": 10,
+              "6": 2
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 6705,
+              "games": 1269,
+              "roots": 4035,
+              "commitments": 4037,
+              "servers": 1895
+            },
+            "trap": {
+              "observations": 2951,
+              "games": 499,
+              "roots": 715,
+              "commitments": 742,
+              "servers": 633
+            }
+          },
+          "prevalence": {
+            "agenda": 0.6943869096934548,
+            "trap": 0.30561309030654515
+          }
+        },
+        "postured": {
+          "distance": 0.21907293333165373,
+          "signedCorrelation": 0.17948161468615906,
+          "correlation": 0.17948161468615906,
+          "histograms": {
+            "agenda": {
+              "0": 2,
+              "1": 273,
+              "2": 119,
+              "3": 22,
+              "4": 7
+            },
+            "trap": {
+              "0": 124,
+              "1": 267,
+              "2": 145,
+              "3": 25,
+              "5": 2
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 423,
+              "games": 301,
+              "roots": 353,
+              "commitments": 353,
+              "servers": 320
+            },
+            "trap": {
+              "observations": 563,
+              "games": 270,
+              "roots": 326,
+              "commitments": 330,
+              "servers": 310
+            }
+          },
+          "prevalence": {
+            "agenda": 0.4290060851926978,
+            "trap": 0.5709939148073022
+          }
+        },
+        "revealed": {
+          "distance": 0.7450980392156863,
+          "signedCorrelation": 0.6542891826974195,
+          "correlation": 0.6542891826974195,
+          "histograms": {
+            "agenda": {
+              "1": 98,
+              "2": 49,
+              "3": 24,
+              "4": 4,
+              "5": 3
+            },
+            "trap": {
+              "0": 342,
+              "1": 70,
+              "2": 35,
+              "3": 12
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 178,
+              "games": 116,
+              "roots": 155,
+              "commitments": 155,
+              "servers": 125
+            },
+            "trap": {
+              "observations": 459,
+              "games": 118,
+              "roots": 131,
+              "commitments": 134,
+              "servers": 132
+            }
+          },
+          "prevalence": {
+            "agenda": 0.2794348508634223,
+            "trap": 0.7205651491365777
+          }
+        },
+        "firstCommitment": {
+          "distance": 0.40537494483307035,
+          "signedCorrelation": 0.29326729629340464,
+          "correlation": 0.29326729629340464,
+          "histograms": {
+            "agenda": {
+              "0": 57,
+              "1": 2424,
+              "2": 1163,
+              "3": 300,
+              "4": 78,
+              "5": 11,
+              "6": 4
+            },
+            "trap": {
+              "0": 311,
+              "1": 270,
+              "2": 126,
+              "3": 30,
+              "4": 2,
+              "5": 2,
+              "6": 1
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 4037,
+              "games": 1269,
+              "roots": 4035,
+              "commitments": 4037,
+              "servers": 1895
+            },
+            "trap": {
+              "observations": 742,
+              "games": 499,
+              "roots": 715,
+              "commitments": 742,
+              "servers": 633
+            }
+          },
+          "prevalence": {
+            "agenda": 0.8447373927599916,
+            "trap": 0.15526260724000837
+          }
+        },
+        "coverage": {
+          "observations": 10293,
+          "headline": 9656,
+          "knownPostureFraction": 0.8577050538525269,
+          "unknownPosture": 1374,
+          "unknownSafety": 6938,
+          "games": 1329
+        },
+        "breakdowns": {
+          "deckPair": {
+            "btl-kit": {
+              "distance": 0.3353365384615385,
+              "signedCorrelation": 0.34313447924063506,
+              "correlation": 0.34313447924063506,
+              "histograms": {
+                "agenda": {
+                  "1": 342,
+                  "2": 189,
+                  "3": 61,
+                  "4": 12,
+                  "5": 8
+                },
+                "trap": {
+                  "0": 279,
+                  "1": 339,
+                  "2": 152,
+                  "3": 61,
+                  "4": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 612,
+                  "games": 174,
+                  "roots": 458,
+                  "commitments": 458,
+                  "servers": 238
+                },
+                "trap": {
+                  "observations": 832,
+                  "games": 134,
+                  "roots": 167,
+                  "commitments": 170,
+                  "servers": 157
+                }
+              },
+              "prevalence": {
+                "agenda": 0.42382271468144045,
+                "trap": 0.5761772853185596
+              }
+            },
+            "gateway": {
+              "distance": 0.1175546650836054,
+              "signedCorrelation": 0.08971549313071812,
+              "correlation": 0.08971549313071812,
+              "histograms": {
+                "agenda": {
+                  "1": 485,
+                  "2": 422,
+                  "3": 149,
+                  "4": 61,
+                  "5": 2,
+                  "6": 4
+                },
+                "trap": {
+                  "1": 145,
+                  "2": 118,
+                  "3": 20,
+                  "5": 3,
+                  "6": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1123,
+                  "games": 191,
+                  "roots": 621,
+                  "commitments": 621,
+                  "servers": 258
+                },
+                "trap": {
+                  "observations": 288,
+                  "games": 89,
+                  "roots": 105,
+                  "commitments": 105,
+                  "servers": 94
+                }
+              },
+              "prevalence": {
+                "agenda": 0.7958894401133948,
+                "trap": 0.20411055988660523
+              }
+            },
+            "leo-topan": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 10,
+                  "1": 645,
+                  "2": 308,
+                  "3": 59,
+                  "4": 29,
+                  "5": 6
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1057,
+                  "games": 184,
+                  "roots": 549,
+                  "commitments": 551,
+                  "servers": 277
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            },
+            "neh-zahya": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "1": 514,
+                  "2": 162,
+                  "3": 42,
+                  "4": 4
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 722,
+                  "games": 175,
+                  "roots": 517,
+                  "commitments": 517,
+                  "servers": 260
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            },
+            "pd-tao": {
+              "distance": 0.19788494024705003,
+              "signedCorrelation": 0.17573850848688588,
+              "correlation": 0.17573850848688588,
+              "histograms": {
+                "agenda": {
+                  "1": 660,
+                  "2": 348,
+                  "3": 89,
+                  "4": 5
+                },
+                "trap": {
+                  "0": 113,
+                  "1": 273,
+                  "2": 159,
+                  "3": 29,
+                  "4": 4
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1102,
+                  "games": 197,
+                  "roots": 712,
+                  "commitments": 712,
+                  "servers": 326
+                },
+                "trap": {
+                  "observations": 578,
+                  "games": 99,
+                  "roots": 99,
+                  "commitments": 107,
+                  "servers": 103
+                }
+              },
+              "prevalence": {
+                "agenda": 0.655952380952381,
+                "trap": 0.34404761904761905
+              }
+            },
+            "pe-steve": {
+              "distance": 0.3613816485872742,
+              "signedCorrelation": 0.3634357944602022,
+              "correlation": 0.3634357944602022,
+              "histograms": {
+                "agenda": {
+                  "1": 661,
+                  "2": 300,
+                  "3": 64,
+                  "4": 6,
+                  "5": 2
+                },
+                "trap": {
+                  "0": 615,
+                  "1": 773,
+                  "2": 242,
+                  "3": 71,
+                  "4": 4,
+                  "5": 7
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1033,
+                  "games": 176,
+                  "roots": 612,
+                  "commitments": 612,
+                  "servers": 275
+                },
+                "trap": {
+                  "observations": 1712,
+                  "games": 177,
+                  "roots": 344,
+                  "commitments": 360,
+                  "servers": 279
+                }
+              },
+              "prevalence": {
+                "agenda": 0.37632058287795994,
+                "trap": 0.6236794171220401
+              }
+            },
+            "zwicky-magdalene": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 115,
+                  "1": 630,
+                  "2": 340,
+                  "3": 118,
+                  "4": 30,
+                  "5": 1
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1234,
+                  "games": 190,
+                  "roots": 721,
+                  "commitments": 721,
+                  "servers": 304
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            }
+          },
+          "multiRoot": {
+            "false": {
+              "distance": 0.28926428646909813,
+              "signedCorrelation": 0.29939394892350385,
+              "correlation": 0.29939394892350385,
+              "histograms": {
+                "agenda": {
+                  "0": 121,
+                  "1": 3634,
+                  "2": 1893,
+                  "3": 501,
+                  "4": 128,
+                  "5": 18,
+                  "6": 2
+                },
+                "trap": {
+                  "0": 995,
+                  "1": 1442,
+                  "2": 619,
+                  "3": 156,
+                  "4": 6,
+                  "5": 10
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 6297,
+                  "games": 1231,
+                  "roots": 3781,
+                  "commitments": 3783,
+                  "servers": 1822
+                },
+                "trap": {
+                  "observations": 3228,
+                  "games": 480,
+                  "roots": 687,
+                  "commitments": 712,
+                  "servers": 610
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6611023622047244,
+                "trap": 0.3388976377952756
+              }
+            },
+            "true": {
+              "distance": 0.0666841690732476,
+              "signedCorrelation": 0.04673807513016421,
+              "correlation": 0.04673807513016421,
+              "histograms": {
+                "agenda": {
+                  "0": 4,
+                  "1": 303,
+                  "2": 176,
+                  "3": 81,
+                  "4": 19,
+                  "5": 1,
+                  "6": 2
+                },
+                "trap": {
+                  "0": 12,
+                  "1": 88,
+                  "2": 52,
+                  "3": 25,
+                  "4": 3,
+                  "6": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 586,
+                  "games": 256,
+                  "roots": 426,
+                  "commitments": 426,
+                  "servers": 260
+                },
+                "trap": {
+                  "observations": 182,
+                  "games": 71,
+                  "roots": 77,
+                  "commitments": 79,
+                  "servers": 71
+                }
+              },
+              "prevalence": {
+                "agenda": 0.7630208333333334,
+                "trap": 0.23697916666666666
+              }
+            }
+          },
+          "rootAge": {
+            "0": {
+              "distance": 0.40493426489272694,
+              "signedCorrelation": 0.2894529686921894,
+              "correlation": 0.2894529686921894,
+              "histograms": {
+                "agenda": {
+                  "0": 57,
+                  "1": 2511,
+                  "2": 1205,
+                  "3": 320,
+                  "4": 81,
+                  "5": 14,
+                  "6": 4
+                },
+                "trap": {
+                  "0": 309,
+                  "1": 269,
+                  "2": 126,
+                  "3": 30,
+                  "4": 2,
+                  "5": 2,
+                  "6": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 4192,
+                  "games": 1287,
+                  "roots": 4190,
+                  "commitments": 4192,
+                  "servers": 1938
+                },
+                "trap": {
+                  "observations": 739,
+                  "games": 498,
+                  "roots": 714,
+                  "commitments": 739,
+                  "servers": 630
+                }
+              },
+              "prevalence": {
+                "agenda": 0.8501318191036301,
+                "trap": 0.1498681808963699
+              }
+            },
+            "1": {
+              "distance": 0.3264725585307175,
+              "signedCorrelation": 0.31176714607123707,
+              "correlation": 0.31176714607123707,
+              "histograms": {
+                "agenda": {
+                  "0": 31,
+                  "1": 745,
+                  "2": 360,
+                  "3": 88,
+                  "4": 22,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 227,
+                  "1": 278,
+                  "2": 116,
+                  "3": 30,
+                  "4": 1,
+                  "5": 3,
+                  "6": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1247,
+                  "games": 778,
+                  "roots": 1247,
+                  "commitments": 1247,
+                  "servers": 958
+                },
+                "trap": {
+                  "observations": 656,
+                  "games": 463,
+                  "roots": 634,
+                  "commitments": 656,
+                  "servers": 581
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6552811350499211,
+                "trap": 0.3447188649500788
+              }
+            },
+            "2": {
+              "distance": 0.269602469332386,
+              "signedCorrelation": 0.30886061725302083,
+              "correlation": 0.30886061725302083,
+              "histograms": {
+                "agenda": {
+                  "0": 17,
+                  "1": 340,
+                  "2": 178,
+                  "3": 58,
+                  "4": 13,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 158,
+                  "1": 251,
+                  "2": 98,
+                  "3": 26,
+                  "4": 2,
+                  "5": 3
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 607,
+                  "games": 465,
+                  "roots": 607,
+                  "commitments": 607,
+                  "servers": 540
+                },
+                "trap": {
+                  "observations": 538,
+                  "games": 399,
+                  "roots": 520,
+                  "commitments": 538,
+                  "servers": 490
+                }
+              },
+              "prevalence": {
+                "agenda": 0.5301310043668123,
+                "trap": 0.4698689956331878
+              }
+            },
+            "3": {
+              "distance": 0.2394892556835877,
+              "signedCorrelation": 0.3119646050140197,
+              "correlation": 0.3119646050140197,
+              "histograms": {
+                "agenda": {
+                  "0": 8,
+                  "1": 171,
+                  "2": 109,
+                  "3": 38,
+                  "4": 11,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 115,
+                  "1": 207,
+                  "2": 86,
+                  "3": 24,
+                  "4": 4,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 338,
+                  "games": 285,
+                  "roots": 338,
+                  "commitments": 338,
+                  "servers": 322
+                },
+                "trap": {
+                  "observations": 437,
+                  "games": 336,
+                  "roots": 422,
+                  "commitments": 437,
+                  "servers": 409
+                }
+              },
+              "prevalence": {
+                "agenda": 0.43612903225806454,
+                "trap": 0.5638709677419355
+              }
+            },
+            "4": {
+              "distance": 0.29223013764791117,
+              "signedCorrelation": 0.32925327624771933,
+              "correlation": 0.32925327624771933,
+              "histograms": {
+                "agenda": {
+                  "0": 6,
+                  "1": 76,
+                  "2": 82,
+                  "3": 30,
+                  "4": 7,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 66,
+                  "1": 163,
+                  "2": 74,
+                  "3": 24,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 202,
+                  "games": 178,
+                  "roots": 202,
+                  "commitments": 202,
+                  "servers": 198
+                },
+                "trap": {
+                  "observations": 328,
+                  "games": 268,
+                  "roots": 322,
+                  "commitments": 328,
+                  "servers": 314
+                }
+              },
+              "prevalence": {
+                "agenda": 0.38113207547169814,
+                "trap": 0.6188679245283019
+              }
+            },
+            "5": {
+              "distance": 0.34181452962838965,
+              "signedCorrelation": 0.3773830419943219,
+              "correlation": 0.3773830419943219,
+              "histograms": {
+                "agenda": {
+                  "0": 3,
+                  "1": 39,
+                  "2": 46,
+                  "3": 21,
+                  "4": 6,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 38,
+                  "1": 107,
+                  "2": 48,
+                  "3": 13
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 116,
+                  "games": 106,
+                  "roots": 116,
+                  "commitments": 116,
+                  "servers": 116
+                },
+                "trap": {
+                  "observations": 206,
+                  "games": 172,
+                  "roots": 203,
+                  "commitments": 206,
+                  "servers": 201
+                }
+              },
+              "prevalence": {
+                "agenda": 0.36024844720496896,
+                "trap": 0.639751552795031
+              }
+            },
+            "6": {
+              "distance": 0.392139303482587,
+              "signedCorrelation": 0.4254865520438328,
+              "correlation": 0.4254865520438328,
+              "histograms": {
+                "agenda": {
+                  "0": 1,
+                  "1": 25,
+                  "2": 31,
+                  "3": 13,
+                  "4": 5
+                },
+                "trap": {
+                  "0": 24,
+                  "1": 75,
+                  "2": 28,
+                  "3": 7
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 75,
+                  "games": 71,
+                  "roots": 75,
+                  "commitments": 75,
+                  "servers": 75
+                },
+                "trap": {
+                  "observations": 134,
+                  "games": 112,
+                  "roots": 132,
+                  "commitments": 134,
+                  "servers": 132
+                }
+              },
+              "prevalence": {
+                "agenda": 0.3588516746411483,
+                "trap": 0.6411483253588517
+              }
+            },
+            "7": {
+              "distance": 0.402020202020202,
+              "signedCorrelation": 0.4052311669572044,
+              "correlation": 0.4052311669572044,
+              "histograms": {
+                "agenda": {
+                  "0": 1,
+                  "1": 15,
+                  "2": 22,
+                  "3": 6,
+                  "4": 1
+                },
+                "trap": {
+                  "0": 19,
+                  "1": 56,
+                  "2": 20,
+                  "3": 4
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 45,
+                  "games": 44,
+                  "roots": 45,
+                  "commitments": 45,
+                  "servers": 45
+                },
+                "trap": {
+                  "observations": 99,
+                  "games": 86,
+                  "roots": 99,
+                  "commitments": 99,
+                  "servers": 99
+                }
+              },
+              "prevalence": {
+                "agenda": 0.3125,
+                "trap": 0.6875
+              }
+            },
+            "8": {
+              "distance": 0.31098901098901094,
+              "signedCorrelation": 0.2847221125541428,
+              "correlation": 0.2847221125541428,
+              "histograms": {
+                "agenda": {
+                  "0": 1,
+                  "1": 8,
+                  "2": 13,
+                  "3": 3,
+                  "4": 1
+                },
+                "trap": {
+                  "0": 10,
+                  "1": 36,
+                  "2": 19,
+                  "3": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 26,
+                  "games": 25,
+                  "roots": 26,
+                  "commitments": 26,
+                  "servers": 26
+                },
+                "trap": {
+                  "observations": 70,
+                  "games": 61,
+                  "roots": 70,
+                  "commitments": 70,
+                  "servers": 70
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2708333333333333,
+                "trap": 0.7291666666666666
+              }
+            },
+            "9": {
+              "distance": 0.2805194805194805,
+              "signedCorrelation": 0.2072268554987939,
+              "correlation": 0.2072268554987939,
+              "histograms": {
+                "agenda": {
+                  "1": 5,
+                  "2": 8,
+                  "3": 1
+                },
+                "trap": {
+                  "0": 7,
+                  "1": 27,
+                  "2": 16,
+                  "3": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 14,
+                  "games": 14,
+                  "roots": 14,
+                  "commitments": 14,
+                  "servers": 14
+                },
+                "trap": {
+                  "observations": 55,
+                  "games": 48,
+                  "roots": 55,
+                  "commitments": 55,
+                  "servers": 55
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2028985507246377,
+                "trap": 0.7971014492753623
+              }
+            },
+            "10": {
+              "distance": 0.44976076555023925,
+              "signedCorrelation": 0.3724167448709665,
+              "correlation": 0.3724167448709665,
+              "histograms": {
+                "agenda": {
+                  "1": 2,
+                  "2": 7,
+                  "3": 2
+                },
+                "trap": {
+                  "0": 7,
+                  "1": 17,
+                  "2": 11,
+                  "3": 3
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 11,
+                  "games": 11,
+                  "roots": 11,
+                  "commitments": 11,
+                  "servers": 11
+                },
+                "trap": {
+                  "observations": 38,
+                  "games": 33,
+                  "roots": 38,
+                  "commitments": 38,
+                  "servers": 38
+                }
+              },
+              "prevalence": {
+                "agenda": 0.22448979591836735,
+                "trap": 0.7755102040816326
+              }
+            },
+            "11": {
+              "distance": 0.6000000000000001,
+              "signedCorrelation": 0.46666612113939604,
+              "correlation": 0.46666612113939604,
+              "histograms": {
+                "agenda": {
+                  "2": 5,
+                  "3": 2
+                },
+                "trap": {
+                  "0": 5,
+                  "1": 13,
+                  "2": 10,
+                  "3": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 7,
+                  "games": 7,
+                  "roots": 7,
+                  "commitments": 7,
+                  "servers": 7
+                },
+                "trap": {
+                  "observations": 30,
+                  "games": 27,
+                  "roots": 30,
+                  "commitments": 30,
+                  "servers": 30
+                }
+              },
+              "prevalence": {
+                "agenda": 0.1891891891891892,
+                "trap": 0.8108108108108109
+              }
+            },
+            "12": {
+              "distance": 0.6923076923076923,
+              "signedCorrelation": 0.18684822063313042,
+              "correlation": 0.18684822063313042,
+              "histograms": {
+                "agenda": {
+                  "2": 1
+                },
+                "trap": {
+                  "0": 5,
+                  "1": 11,
+                  "2": 8,
+                  "3": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                },
+                "trap": {
+                  "observations": 26,
+                  "games": 24,
+                  "roots": 26,
+                  "commitments": 26,
+                  "servers": 26
+                }
+              },
+              "prevalence": {
+                "agenda": 0.037037037037037035,
+                "trap": 0.9629629629629629
+              }
+            },
+            "13": {
+              "distance": 0.7333333333333333,
+              "signedCorrelation": 0.2683281572999748,
+              "correlation": 0.2683281572999748,
+              "histograms": {
+                "agenda": {
+                  "2": 1
+                },
+                "trap": {
+                  "0": 3,
+                  "1": 7,
+                  "2": 4,
+                  "3": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                },
+                "trap": {
+                  "observations": 15,
+                  "games": 14,
+                  "roots": 15,
+                  "commitments": 15,
+                  "servers": 15
+                }
+              },
+              "prevalence": {
+                "agenda": 0.0625,
+                "trap": 0.9375
+              }
+            },
+            "14": {
+              "distance": 0.5555555555555556,
+              "signedCorrelation": 0.314970394174356,
+              "correlation": 0.314970394174356,
+              "histograms": {
+                "agenda": {
+                  "2": 1
+                },
+                "trap": {
+                  "0": 3,
+                  "1": 2,
+                  "2": 4
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                },
+                "trap": {
+                  "observations": 9,
+                  "games": 9,
+                  "roots": 9,
+                  "commitments": 9,
+                  "servers": 9
+                }
+              },
+              "prevalence": {
+                "agenda": 0.1,
+                "trap": 0.9
+              }
+            },
+            "15": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 2,
+                  "1": 3,
+                  "2": 2,
+                  "3": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 8,
+                  "games": 8,
+                  "roots": 8,
+                  "commitments": 8,
+                  "servers": 8
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "16": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 2,
+                  "1": 1,
+                  "2": 1,
+                  "3": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 5,
+                  "games": 5,
+                  "roots": 5,
+                  "commitments": 5,
+                  "servers": 5
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "17": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 2,
+                  "1": 1,
+                  "3": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 4,
+                  "games": 4,
+                  "roots": 4,
+                  "commitments": 4,
+                  "servers": 4
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "18": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 1,
+                  "1": 2,
+                  "3": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 4,
+                  "games": 4,
+                  "roots": 4,
+                  "commitments": 4,
+                  "servers": 4
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "19": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 1,
+                  "1": 1,
+                  "3": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 3,
+                  "games": 3,
+                  "roots": 3,
+                  "commitments": 3,
+                  "servers": 3
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "20": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 1,
+                  "1": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "21": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 1,
+                  "1": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "22": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 1,
+                  "1": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            }
+          },
+          "revelation": {
+            "false": {
+              "distance": 0.20778810554998356,
+              "signedCorrelation": 0.22406525510460695,
+              "correlation": 0.22406525510460695,
+              "histograms": {
+                "agenda": {
+                  "0": 125,
+                  "1": 3839,
+                  "2": 2020,
+                  "3": 558,
+                  "4": 143,
+                  "5": 16,
+                  "6": 4
+                },
+                "trap": {
+                  "0": 665,
+                  "1": 1460,
+                  "2": 636,
+                  "3": 169,
+                  "4": 9,
+                  "5": 10,
+                  "6": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 6705,
+                  "games": 1269,
+                  "roots": 4035,
+                  "commitments": 4037,
+                  "servers": 1895
+                },
+                "trap": {
+                  "observations": 2951,
+                  "games": 499,
+                  "roots": 715,
+                  "commitments": 742,
+                  "servers": 633
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6943869096934548,
+                "trap": 0.30561309030654515
+              }
+            },
+            "true": {
+              "distance": 0.7450980392156863,
+              "signedCorrelation": 0.6542891826974195,
+              "correlation": 0.6542891826974195,
+              "histograms": {
+                "agenda": {
+                  "1": 98,
+                  "2": 49,
+                  "3": 24,
+                  "4": 4,
+                  "5": 3
+                },
+                "trap": {
+                  "0": 342,
+                  "1": 70,
+                  "2": 35,
+                  "3": 12
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 178,
+                  "games": 116,
+                  "roots": 155,
+                  "commitments": 155,
+                  "servers": 125
+                },
+                "trap": {
+                  "observations": 459,
+                  "games": 118,
+                  "roots": 131,
+                  "commitments": 134,
+                  "servers": 132
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2794348508634223,
+                "trap": 0.7205651491365777
+              }
+            }
+          },
+          "posture": {
+            "neutral": {
+              "distance": 0.23479938486852742,
+              "signedCorrelation": 0.1997280380957626,
+              "correlation": 0.1997280380957626,
+              "histograms": {
+                "agenda": {
+                  "0": 27,
+                  "1": 2100,
+                  "2": 819,
+                  "3": 164,
+                  "4": 28,
+                  "5": 2,
+                  "6": 1
+                },
+                "trap": {
+                  "0": 506,
+                  "1": 1079,
+                  "2": 432,
+                  "3": 126,
+                  "4": 7,
+                  "5": 7
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 3141,
+                  "games": 1056,
+                  "roots": 2032,
+                  "commitments": 2033,
+                  "servers": 1321
+                },
+                "trap": {
+                  "observations": 2157,
+                  "games": 441,
+                  "roots": 596,
+                  "commitments": 615,
+                  "servers": 545
+                }
+              },
+              "prevalence": {
+                "agenda": 0.5928652321630804,
+                "trap": 0.4071347678369196
+              }
+            },
+            "unrolled": {
+              "distance": 0.676829268292683,
+              "signedCorrelation": 0.6302816480672411,
+              "correlation": 0.6302816480672411,
+              "histograms": {
+                "agenda": {
+                  "1": 251,
+                  "2": 127,
+                  "3": 56,
+                  "4": 16,
+                  "5": 2
+                },
+                "trap": {
+                  "0": 111,
+                  "1": 43,
+                  "2": 10
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 452,
+                  "games": 273,
+                  "roots": 398,
+                  "commitments": 398,
+                  "servers": 283
+                },
+                "trap": {
+                  "observations": 164,
+                  "games": 44,
+                  "roots": 47,
+                  "commitments": 49,
+                  "servers": 48
+                }
+              },
+              "prevalence": {
+                "agenda": 0.7337662337662337,
+                "trap": 0.2662337662337662
+              }
+            },
+            "unknown": {
+              "distance": 0.3829398112331734,
+              "signedCorrelation": 0.284252580424485,
+              "correlation": 0.284252580424485,
+              "histograms": {
+                "agenda": {
+                  "0": 61,
+                  "1": 628,
+                  "2": 336,
+                  "3": 96,
+                  "4": 24,
+                  "5": 3,
+                  "6": 2
+                },
+                "trap": {
+                  "0": 121,
+                  "1": 94,
+                  "2": 46,
+                  "3": 17,
+                  "4": 1,
+                  "6": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1150,
+                  "games": 751,
+                  "roots": 1082,
+                  "commitments": 1082,
+                  "servers": 860
+                },
+                "trap": {
+                  "observations": 281,
+                  "games": 209,
+                  "roots": 239,
+                  "commitments": 241,
+                  "servers": 233
+                }
+              },
+              "prevalence": {
+                "agenda": 0.803633822501747,
+                "trap": 0.19636617749825297
+              }
+            },
+            "active": {
+              "distance": 0.21907293333165373,
+              "signedCorrelation": 0.17948161468615906,
+              "correlation": 0.17948161468615906,
+              "histograms": {
+                "agenda": {
+                  "0": 2,
+                  "1": 273,
+                  "2": 119,
+                  "3": 22,
+                  "4": 7
+                },
+                "trap": {
+                  "0": 124,
+                  "1": 267,
+                  "2": 145,
+                  "3": 25,
+                  "5": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 423,
+                  "games": 301,
+                  "roots": 353,
+                  "commitments": 353,
+                  "servers": 320
+                },
+                "trap": {
+                  "observations": 563,
+                  "games": 270,
+                  "roots": 326,
+                  "commitments": 330,
+                  "servers": 310
+                }
+              },
+              "prevalence": {
+                "agenda": 0.4290060851926978,
+                "trap": 0.5709939148073022
+              }
+            },
+            "expired": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {},
+                "trap": {
+                  "0": 145,
+                  "1": 47,
+                  "2": 38,
+                  "3": 13,
+                  "4": 1,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                },
+                "trap": {
+                  "observations": 245,
+                  "games": 72,
+                  "roots": 79,
+                  "commitments": 80,
+                  "servers": 78
+                }
+              },
+              "prevalence": {
+                "agenda": 0,
+                "trap": 1
+              }
+            },
+            "safetyStopped": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 35,
+                  "1": 685,
+                  "2": 668,
+                  "3": 244,
+                  "4": 72,
+                  "5": 12,
+                  "6": 1
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1717,
+                  "games": 733,
+                  "roots": 994,
+                  "commitments": 994,
+                  "servers": 851
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            }
+          },
+          "safety": {
+            "unknown": {
+              "distance": 0.29420064459273365,
+              "signedCorrelation": 0.27294712229472745,
+              "correlation": 0.27294712229472745,
+              "histograms": {
+                "agenda": {
+                  "0": 88,
+                  "1": 2976,
+                  "2": 1281,
+                  "3": 316,
+                  "4": 68,
+                  "5": 7,
+                  "6": 3
+                },
+                "trap": {
+                  "0": 883,
+                  "1": 1253,
+                  "2": 525,
+                  "3": 156,
+                  "4": 9,
+                  "5": 8,
+                  "6": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 4739,
+                  "games": 1242,
+                  "roots": 3206,
+                  "commitments": 3208,
+                  "servers": 1725
+                },
+                "trap": {
+                  "observations": 2836,
+                  "games": 484,
+                  "roots": 685,
+                  "commitments": 711,
+                  "servers": 612
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6256105610561056,
+                "trap": 0.37438943894389437
+              }
+            },
+            "allowedAtLastQuery": {
+              "distance": 0.21482835437253675,
+              "signedCorrelation": 0.18027133149661675,
+              "correlation": 0.18027133149661675,
+              "histograms": {
+                "agenda": {
+                  "0": 2,
+                  "1": 276,
+                  "2": 120,
+                  "3": 22,
+                  "4": 7
+                },
+                "trap": {
+                  "0": 124,
+                  "1": 277,
+                  "2": 146,
+                  "3": 25,
+                  "5": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 427,
+                  "games": 304,
+                  "roots": 356,
+                  "commitments": 356,
+                  "servers": 323
+                },
+                "trap": {
+                  "observations": 574,
+                  "games": 273,
+                  "roots": 329,
+                  "commitments": 333,
+                  "servers": 313
+                }
+              },
+              "prevalence": {
+                "agenda": 0.42657342657342656,
+                "trap": 0.5734265734265734
+              }
+            },
+            "stopped": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 35,
+                  "1": 685,
+                  "2": 668,
+                  "3": 244,
+                  "4": 72,
+                  "5": 12,
+                  "6": 1
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1717,
+                  "games": 733,
+                  "roots": 994,
+                  "commitments": 994,
+                  "servers": 851
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            }
+          }
+        },
+        "lifecycle": {
+          "installs": 9603,
+          "leaves": 8319
+        },
+        "errors": []
+      }
+    },
+    "second": {
+      "sha": "2306f82",
+      "dirty": true,
+      "codeHash": "44f57510eaa411dc",
+      "poolHash": "0ee4865c35412106",
+      "pairs": [
+        "pd-tao",
+        "btl-kit",
+        "neh-zahya",
+        "pe-steve",
+        "gateway",
+        "zwicky-magdalene",
+        "leo-topan"
+      ],
+      "seeds": [
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "206",
+        "207",
+        "208",
+        "209",
+        "210",
+        "211",
+        "212",
+        "213",
+        "214",
+        "215",
+        "216",
+        "217",
+        "218",
+        "219",
+        "220",
+        "221",
+        "222",
+        "223",
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+        "237",
+        "238",
+        "239",
+        "240",
+        "241",
+        "242",
+        "243",
+        "244",
+        "245",
+        "246",
+        "247",
+        "248",
+        "249",
+        "250",
+        "251",
+        "252",
+        "253",
+        "254",
+        "255",
+        "256",
+        "257",
+        "258",
+        "259",
+        "260",
+        "261",
+        "262",
+        "263",
+        "264",
+        "265",
+        "266",
+        "267",
+        "268",
+        "269",
+        "270",
+        "271",
+        "272",
+        "273",
+        "274",
+        "275",
+        "276",
+        "277",
+        "278",
+        "279",
+        "280",
+        "281",
+        "282",
+        "283",
+        "284",
+        "285",
+        "286",
+        "287",
+        "288",
+        "289",
+        "290",
+        "291",
+        "292",
+        "293",
+        "294",
+        "295",
+        "296",
+        "297",
+        "298",
+        "299",
+        "300",
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306",
+        "307",
+        "308",
+        "309",
+        "310",
+        "311",
+        "312",
+        "313",
+        "314",
+        "315",
+        "316",
+        "317",
+        "318",
+        "319",
+        "320",
+        "321",
+        "322",
+        "323",
+        "324",
+        "325",
+        "326",
+        "327",
+        "328",
+        "329",
+        "330",
+        "331",
+        "332",
+        "333",
+        "334",
+        "335",
+        "336",
+        "337",
+        "338",
+        "339",
+        "340",
+        "341",
+        "342",
+        "343",
+        "344",
+        "345",
+        "346",
+        "347",
+        "348",
+        "349",
+        "350",
+        "351",
+        "352",
+        "353",
+        "354",
+        "355",
+        "356",
+        "357",
+        "358",
+        "359",
+        "360",
+        "361",
+        "362",
+        "363",
+        "364",
+        "365",
+        "366",
+        "367",
+        "368",
+        "369",
+        "370",
+        "371",
+        "372",
+        "373",
+        "374",
+        "375",
+        "376",
+        "377",
+        "378",
+        "379",
+        "380",
+        "381",
+        "382",
+        "383",
+        "384",
+        "385",
+        "386",
+        "387",
+        "388",
+        "389",
+        "390",
+        "391",
+        "392",
+        "393",
+        "394",
+        "395",
+        "396",
+        "397",
+        "398",
+        "399",
+        "400"
+      ],
+      "options": {
+        "corp": {
+          "secureScoringServerGate": false,
+          "serverAtRiskInstallOverride": false,
+          "committedAgendaReserveBypass": false,
+          "emptyArchivesRunPressure": false,
+          "valuelessServerDebtReset": false,
+          "postureEpochs": true,
+          "matchLocalPostureFeedback": false
+        },
+        "runner": {}
+      },
+      "command": "node scripts/ai-batch.js --pool tests/fixtures/ai-batch/deck-pool.json --seeds 201-400 --collector realizedIceByRootType --defense-observer on --jobs 2 --out .ai-batch-cache/f12-2306f82-validated/on-201-400.json",
+      "games": 1400,
+      "failures": 1,
+      "defenseObserver": "on",
+      "metrics": {
+        "realizedIceByRootType.allCountCorrelation": {
+          "value": 0.2568226171650291,
+          "low": 0.21724638892786466,
+          "high": 0.29802987035883566,
+          "games": 1399,
+          "valid": true,
+          "why": null,
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.posturedCountCorrelation": {
+          "value": 0.22910595024084057,
+          "low": null,
+          "high": null,
+          "games": 1399,
+          "valid": false,
+          "why": "insufficient known posture coverage (need 90%)",
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.allCountDistance": {
+          "value": 0.2329173218950611,
+          "low": 0.205372264691889,
+          "high": 0.2654431477788231,
+          "games": 1399,
+          "valid": true,
+          "why": null,
+          "invalidDraws": 0,
+          "resamples": 200
+        },
+        "realizedIceByRootType.posturedCountDistance": {
+          "value": 0.21955846843739218,
+          "low": null,
+          "high": null,
+          "games": 1399,
+          "valid": false,
+          "why": "insufficient known posture coverage (need 90%)",
+          "invalidDraws": 0,
+          "resamples": 200
+        }
+      },
+      "diagnostics": {
+        "all": {
+          "distance": 0.2329173218950611,
+          "signedCorrelation": 0.2568226171650291,
+          "correlation": 0.2568226171650291,
+          "histograms": {
+            "agenda": {
+              "0": 69,
+              "1": 3675,
+              "2": 2057,
+              "3": 668,
+              "4": 102,
+              "5": 31
+            },
+            "trap": {
+              "0": 734,
+              "1": 1445,
+              "2": 633,
+              "3": 175,
+              "4": 28,
+              "5": 1
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 6602,
+              "games": 1277,
+              "roots": 4092,
+              "commitments": 4094,
+              "servers": 1825
+            },
+            "trap": {
+              "observations": 3016,
+              "games": 471,
+              "roots": 690,
+              "commitments": 715,
+              "servers": 609
+            }
+          },
+          "prevalence": {
+            "agenda": 0.686421293408193,
+            "trap": 0.31357870659180703
+          }
+        },
+        "postured": {
+          "distance": 0.21955846843739218,
+          "signedCorrelation": 0.22910595024084057,
+          "correlation": 0.22910595024084057,
+          "histograms": {
+            "agenda": {
+              "0": 1,
+              "1": 285,
+              "2": 126,
+              "3": 30,
+              "4": 4
+            },
+            "trap": {
+              "0": 118,
+              "1": 273,
+              "2": 119,
+              "3": 18,
+              "4": 5
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 446,
+              "games": 341,
+              "roots": 387,
+              "commitments": 387,
+              "servers": 355
+            },
+            "trap": {
+              "observations": 533,
+              "games": 253,
+              "roots": 304,
+              "commitments": 307,
+              "servers": 294
+            }
+          },
+          "prevalence": {
+            "agenda": 0.45556690500510727,
+            "trap": 0.5444330949948928
+          }
+        },
+        "revealed": {
+          "distance": 0.6592178770949721,
+          "signedCorrelation": 0.6153079906868553,
+          "correlation": 0.6153079906868553,
+          "histograms": {
+            "agenda": {
+              "1": 124,
+              "2": 82,
+              "3": 20,
+              "4": 2
+            },
+            "trap": {
+              "0": 236,
+              "1": 77,
+              "2": 33,
+              "3": 12
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 228,
+              "games": 129,
+              "roots": 189,
+              "commitments": 189,
+              "servers": 146
+            },
+            "trap": {
+              "observations": 358,
+              "games": 111,
+              "roots": 116,
+              "commitments": 118,
+              "servers": 116
+            }
+          },
+          "prevalence": {
+            "agenda": 0.3890784982935154,
+            "trap": 0.6109215017064846
+          }
+        },
+        "firstCommitment": {
+          "distance": 0.4461067022864776,
+          "signedCorrelation": 0.31460769455920695,
+          "correlation": 0.31460769455920695,
+          "histograms": {
+            "agenda": {
+              "0": 46,
+              "1": 2349,
+              "2": 1246,
+              "3": 373,
+              "4": 65,
+              "5": 15
+            },
+            "trap": {
+              "0": 327,
+              "1": 234,
+              "2": 120,
+              "3": 29,
+              "4": 5
+            }
+          },
+          "classes": {
+            "agenda": {
+              "observations": 4094,
+              "games": 1277,
+              "roots": 4092,
+              "commitments": 4094,
+              "servers": 1825
+            },
+            "trap": {
+              "observations": 715,
+              "games": 471,
+              "roots": 690,
+              "commitments": 715,
+              "servers": 609
+            }
+          },
+          "prevalence": {
+            "agenda": 0.8513204408400915,
+            "trap": 0.1486795591599085
+          }
+        },
+        "coverage": {
+          "observations": 10204,
+          "headline": 9618,
+          "knownPostureFraction": 0.8538157621127054,
+          "unknownPosture": 1406,
+          "unknownSafety": 6981,
+          "games": 1320
+        },
+        "breakdowns": {
+          "deckPair": {
+            "btl-kit": {
+              "distance": 0.315018315018315,
+              "signedCorrelation": 0.2997707466835811,
+              "correlation": 0.2997707466835811,
+              "histograms": {
+                "agenda": {
+                  "1": 377,
+                  "2": 211,
+                  "3": 71,
+                  "4": 7,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 258,
+                  "1": 324,
+                  "2": 175,
+                  "3": 56,
+                  "4": 6
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 667,
+                  "games": 179,
+                  "roots": 499,
+                  "commitments": 499,
+                  "servers": 230
+                },
+                "trap": {
+                  "observations": 819,
+                  "games": 129,
+                  "roots": 162,
+                  "commitments": 166,
+                  "servers": 152
+                }
+              },
+              "prevalence": {
+                "agenda": 0.4488559892328398,
+                "trap": 0.5511440107671601
+              }
+            },
+            "gateway": {
+              "distance": 0.12147344397193363,
+              "signedCorrelation": 0.0544688924715642,
+              "correlation": 0.0544688924715642,
+              "histograms": {
+                "agenda": {
+                  "1": 546,
+                  "2": 426,
+                  "3": 176,
+                  "4": 30,
+                  "5": 11
+                },
+                "trap": {
+                  "1": 102,
+                  "2": 98,
+                  "3": 9,
+                  "4": 4
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1189,
+                  "games": 183,
+                  "roots": 664,
+                  "commitments": 664,
+                  "servers": 246
+                },
+                "trap": {
+                  "observations": 213,
+                  "games": 58,
+                  "roots": 76,
+                  "commitments": 76,
+                  "servers": 64
+                }
+              },
+              "prevalence": {
+                "agenda": 0.848074179743224,
+                "trap": 0.15192582025677603
+              }
+            },
+            "leo-topan": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 2,
+                  "1": 497,
+                  "2": 315,
+                  "3": 101,
+                  "4": 19
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 934,
+                  "games": 180,
+                  "roots": 545,
+                  "commitments": 547,
+                  "servers": 252
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            },
+            "neh-zahya": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "1": 568,
+                  "2": 156,
+                  "3": 52,
+                  "4": 3,
+                  "5": 2
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 781,
+                  "games": 183,
+                  "roots": 563,
+                  "commitments": 563,
+                  "servers": 277
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            },
+            "pd-tao": {
+              "distance": 0.22139561459895724,
+              "signedCorrelation": 0.1653204758733649,
+              "correlation": 0.1653204758733649,
+              "histograms": {
+                "agenda": {
+                  "1": 668,
+                  "2": 308,
+                  "3": 83,
+                  "4": 16,
+                  "5": 2
+                },
+                "trap": {
+                  "0": 134,
+                  "1": 306,
+                  "2": 143,
+                  "3": 60,
+                  "4": 6,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1077,
+                  "games": 196,
+                  "roots": 686,
+                  "commitments": 686,
+                  "servers": 311
+                },
+                "trap": {
+                  "observations": 650,
+                  "games": 107,
+                  "roots": 107,
+                  "commitments": 117,
+                  "servers": 116
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6236247828604516,
+                "trap": 0.37637521713954836
+              }
+            },
+            "pe-steve": {
+              "distance": 0.34656529187513085,
+              "signedCorrelation": 0.3723455128332777,
+              "correlation": 0.3723455128332777,
+              "histograms": {
+                "agenda": {
+                  "1": 559,
+                  "2": 305,
+                  "3": 71,
+                  "4": 2
+                },
+                "trap": {
+                  "0": 578,
+                  "1": 790,
+                  "2": 250,
+                  "3": 62,
+                  "4": 12
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 937,
+                  "games": 178,
+                  "roots": 594,
+                  "commitments": 594,
+                  "servers": 264
+                },
+                "trap": {
+                  "observations": 1692,
+                  "games": 177,
+                  "roots": 345,
+                  "commitments": 356,
+                  "servers": 277
+                }
+              },
+              "prevalence": {
+                "agenda": 0.35640928109547354,
+                "trap": 0.6435907189045265
+              }
+            },
+            "zwicky-magdalene": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 67,
+                  "1": 584,
+                  "2": 418,
+                  "3": 134,
+                  "4": 27,
+                  "5": 15
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1245,
+                  "games": 190,
+                  "roots": 729,
+                  "commitments": 729,
+                  "servers": 279
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            }
+          },
+          "multiRoot": {
+            "false": {
+              "distance": 0.28394465180047296,
+              "signedCorrelation": 0.30619607785930975,
+              "correlation": 0.30619607785930975,
+              "histograms": {
+                "agenda": {
+                  "0": 67,
+                  "1": 3462,
+                  "2": 1931,
+                  "3": 618,
+                  "4": 98,
+                  "5": 19
+                },
+                "trap": {
+                  "0": 945,
+                  "1": 1445,
+                  "2": 627,
+                  "3": 170,
+                  "4": 19
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 6195,
+                  "games": 1239,
+                  "roots": 3820,
+                  "commitments": 3822,
+                  "servers": 1750
+                },
+                "trap": {
+                  "observations": 3206,
+                  "games": 452,
+                  "roots": 664,
+                  "commitments": 687,
+                  "servers": 588
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6589724497393894,
+                "trap": 0.34102755026061055
+              }
+            },
+            "true": {
+              "distance": 0.18978252718410202,
+              "signedCorrelation": 0.09852727865185922,
+              "correlation": 0.09852727865185922,
+              "histograms": {
+                "agenda": {
+                  "0": 2,
+                  "1": 337,
+                  "2": 208,
+                  "3": 70,
+                  "4": 6,
+                  "5": 12
+                },
+                "trap": {
+                  "0": 25,
+                  "1": 77,
+                  "2": 39,
+                  "3": 17,
+                  "4": 9,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 635,
+                  "games": 265,
+                  "roots": 474,
+                  "commitments": 474,
+                  "servers": 269
+                },
+                "trap": {
+                  "observations": 168,
+                  "games": 74,
+                  "roots": 79,
+                  "commitments": 79,
+                  "servers": 74
+                }
+              },
+              "prevalence": {
+                "agenda": 0.7907845579078456,
+                "trap": 0.20921544209215442
+              }
+            }
+          },
+          "rootAge": {
+            "0": {
+              "distance": 0.445592875167379,
+              "signedCorrelation": 0.3083446128457676,
+              "correlation": 0.3083446128457676,
+              "histograms": {
+                "agenda": {
+                  "0": 46,
+                  "1": 2453,
+                  "2": 1311,
+                  "3": 389,
+                  "4": 67,
+                  "5": 15
+                },
+                "trap": {
+                  "0": 324,
+                  "1": 232,
+                  "2": 120,
+                  "3": 29,
+                  "4": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 4281,
+                  "games": 1289,
+                  "roots": 4279,
+                  "commitments": 4281,
+                  "servers": 1859
+                },
+                "trap": {
+                  "observations": 710,
+                  "games": 469,
+                  "roots": 688,
+                  "commitments": 710,
+                  "servers": 604
+                }
+              },
+              "prevalence": {
+                "agenda": 0.8577439390903626,
+                "trap": 0.14225606090963736
+              }
+            },
+            "1": {
+              "distance": 0.3344743331769975,
+              "signedCorrelation": 0.3392165776065134,
+              "correlation": 0.3392165776065134,
+              "histograms": {
+                "agenda": {
+                  "0": 18,
+                  "1": 703,
+                  "2": 397,
+                  "3": 124,
+                  "4": 15,
+                  "5": 6
+                },
+                "trap": {
+                  "0": 219,
+                  "1": 258,
+                  "2": 119,
+                  "3": 26,
+                  "4": 6
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1263,
+                  "games": 773,
+                  "roots": 1263,
+                  "commitments": 1263,
+                  "servers": 933
+                },
+                "trap": {
+                  "observations": 628,
+                  "games": 442,
+                  "roots": 610,
+                  "commitments": 628,
+                  "servers": 556
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6679005817028028,
+                "trap": 0.33209941829719725
+              }
+            },
+            "2": {
+              "distance": 0.26913475444884616,
+              "signedCorrelation": 0.32642291384592215,
+              "correlation": 0.32642291384592215,
+              "histograms": {
+                "agenda": {
+                  "0": 4,
+                  "1": 326,
+                  "2": 185,
+                  "3": 61,
+                  "4": 10,
+                  "5": 3
+                },
+                "trap": {
+                  "0": 149,
+                  "1": 257,
+                  "2": 102,
+                  "3": 27,
+                  "4": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 589,
+                  "games": 455,
+                  "roots": 589,
+                  "commitments": 589,
+                  "servers": 521
+                },
+                "trap": {
+                  "observations": 540,
+                  "games": 399,
+                  "roots": 526,
+                  "commitments": 540,
+                  "servers": 495
+                }
+              },
+              "prevalence": {
+                "agenda": 0.5217006200177148,
+                "trap": 0.4782993799822852
+              }
+            },
+            "3": {
+              "distance": 0.22073578595317725,
+              "signedCorrelation": 0.3118734016226392,
+              "correlation": 0.3118734016226392,
+              "histograms": {
+                "agenda": {
+                  "0": 1,
+                  "1": 154,
+                  "2": 94,
+                  "3": 43,
+                  "4": 3,
+                  "5": 4
+                },
+                "trap": {
+                  "0": 99,
+                  "1": 241,
+                  "2": 86,
+                  "3": 30,
+                  "4": 4
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 299,
+                  "games": 252,
+                  "roots": 299,
+                  "commitments": 299,
+                  "servers": 285
+                },
+                "trap": {
+                  "observations": 460,
+                  "games": 350,
+                  "roots": 449,
+                  "commitments": 460,
+                  "servers": 430
+                }
+              },
+              "prevalence": {
+                "agenda": 0.3939393939393939,
+                "trap": 0.6060606060606061
+              }
+            },
+            "4": {
+              "distance": 0.2906340057636887,
+              "signedCorrelation": 0.3284460071887351,
+              "correlation": 0.3284460071887351,
+              "histograms": {
+                "agenda": {
+                  "1": 71,
+                  "2": 63,
+                  "3": 24,
+                  "4": 1,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 64,
+                  "1": 190,
+                  "2": 69,
+                  "3": 21,
+                  "4": 3
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 160,
+                  "games": 141,
+                  "roots": 160,
+                  "commitments": 160,
+                  "servers": 157
+                },
+                "trap": {
+                  "observations": 347,
+                  "games": 273,
+                  "roots": 341,
+                  "commitments": 347,
+                  "servers": 329
+                }
+              },
+              "prevalence": {
+                "agenda": 0.3155818540433925,
+                "trap": 0.6844181459566075
+              }
+            },
+            "5": {
+              "distance": 0.22580645161290325,
+              "signedCorrelation": 0.28032832937987595,
+              "correlation": 0.28032832937987595,
+              "histograms": {
+                "agenda": {
+                  "1": 45,
+                  "2": 37,
+                  "3": 16,
+                  "5": 1
+                },
+                "trap": {
+                  "0": 48,
+                  "1": 98,
+                  "2": 52,
+                  "3": 18,
+                  "4": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 99,
+                  "games": 90,
+                  "roots": 99,
+                  "commitments": 99,
+                  "servers": 99
+                },
+                "trap": {
+                  "observations": 217,
+                  "games": 184,
+                  "roots": 215,
+                  "commitments": 217,
+                  "servers": 212
+                }
+              },
+              "prevalence": {
+                "agenda": 0.31329113924050633,
+                "trap": 0.6867088607594937
+              }
+            },
+            "6": {
+              "distance": 0.24353283330782186,
+              "signedCorrelation": 0.28731789344532244,
+              "correlation": 0.28731789344532244,
+              "histograms": {
+                "agenda": {
+                  "1": 20,
+                  "2": 17,
+                  "3": 9,
+                  "4": 1
+                },
+                "trap": {
+                  "0": 30,
+                  "1": 63,
+                  "2": 35,
+                  "3": 9,
+                  "4": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 47,
+                  "games": 46,
+                  "roots": 47,
+                  "commitments": 47,
+                  "servers": 47
+                },
+                "trap": {
+                  "observations": 139,
+                  "games": 120,
+                  "roots": 138,
+                  "commitments": 139,
+                  "servers": 136
+                }
+              },
+              "prevalence": {
+                "agenda": 0.25268817204301075,
+                "trap": 0.7473118279569892
+              }
+            },
+            "7": {
+              "distance": 0.37330827067669164,
+              "signedCorrelation": 0.34765038130103604,
+              "correlation": 0.34765038130103604,
+              "histograms": {
+                "agenda": {
+                  "1": 9,
+                  "2": 12,
+                  "3": 7
+                },
+                "trap": {
+                  "0": 19,
+                  "1": 45,
+                  "2": 25,
+                  "3": 4,
+                  "4": 2
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 28,
+                  "games": 28,
+                  "roots": 28,
+                  "commitments": 28,
+                  "servers": 28
+                },
+                "trap": {
+                  "observations": 95,
+                  "games": 86,
+                  "roots": 95,
+                  "commitments": 95,
+                  "servers": 94
+                }
+              },
+              "prevalence": {
+                "agenda": 0.22764227642276422,
+                "trap": 0.7723577235772358
+              }
+            },
+            "8": {
+              "distance": 0.32723112128146453,
+              "signedCorrelation": 0.3211345258245876,
+              "correlation": 0.3211345258245876,
+              "histograms": {
+                "agenda": {
+                  "1": 7,
+                  "2": 6,
+                  "3": 6
+                },
+                "trap": {
+                  "0": 10,
+                  "1": 37,
+                  "2": 17,
+                  "3": 4,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 19,
+                  "games": 19,
+                  "roots": 19,
+                  "commitments": 19,
+                  "servers": 19
+                },
+                "trap": {
+                  "observations": 69,
+                  "games": 65,
+                  "roots": 69,
+                  "commitments": 69,
+                  "servers": 69
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2159090909090909,
+                "trap": 0.7840909090909091
+              }
+            },
+            "9": {
+              "distance": 0.3155844155844156,
+              "signedCorrelation": 0.3048446591540086,
+              "correlation": 0.3048446591540086,
+              "histograms": {
+                "agenda": {
+                  "1": 5,
+                  "2": 4,
+                  "3": 5
+                },
+                "trap": {
+                  "0": 6,
+                  "1": 31,
+                  "2": 12,
+                  "3": 6
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 14,
+                  "games": 14,
+                  "roots": 14,
+                  "commitments": 14,
+                  "servers": 14
+                },
+                "trap": {
+                  "observations": 55,
+                  "games": 52,
+                  "roots": 55,
+                  "commitments": 55,
+                  "servers": 55
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2028985507246377,
+                "trap": 0.7971014492753623
+              }
+            },
+            "10": {
+              "distance": 0.3629343629343629,
+              "signedCorrelation": 0.26578171866129474,
+              "correlation": 0.26578171866129474,
+              "histograms": {
+                "agenda": {
+                  "1": 2,
+                  "2": 3,
+                  "3": 2
+                },
+                "trap": {
+                  "0": 1,
+                  "1": 23,
+                  "2": 8,
+                  "3": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 7,
+                  "games": 7,
+                  "roots": 7,
+                  "commitments": 7,
+                  "servers": 7
+                },
+                "trap": {
+                  "observations": 37,
+                  "games": 36,
+                  "roots": 37,
+                  "commitments": 37,
+                  "servers": 37
+                }
+              },
+              "prevalence": {
+                "agenda": 0.1590909090909091,
+                "trap": 0.8409090909090909
+              }
+            },
+            "11": {
+              "distance": 0.23333333333333334,
+              "signedCorrelation": 0.17745614452538314,
+              "correlation": 0.17745614452538314,
+              "histograms": {
+                "agenda": {
+                  "1": 2,
+                  "2": 2,
+                  "3": 1
+                },
+                "trap": {
+                  "0": 1,
+                  "1": 18,
+                  "2": 8,
+                  "3": 3
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 5,
+                  "games": 5,
+                  "roots": 5,
+                  "commitments": 5,
+                  "servers": 5
+                },
+                "trap": {
+                  "observations": 30,
+                  "games": 30,
+                  "roots": 30,
+                  "commitments": 30,
+                  "servers": 30
+                }
+              },
+              "prevalence": {
+                "agenda": 0.14285714285714285,
+                "trap": 0.8571428571428571
+              }
+            },
+            "12": {
+              "distance": 0.07142857142857142,
+              "signedCorrelation": 0.04219026223415361,
+              "correlation": 0.04219026223415361,
+              "histograms": {
+                "agenda": {
+                  "1": 2,
+                  "2": 1,
+                  "3": 1
+                },
+                "trap": {
+                  "1": 12,
+                  "2": 4,
+                  "3": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 4,
+                  "games": 4,
+                  "roots": 4,
+                  "commitments": 4,
+                  "servers": 4
+                },
+                "trap": {
+                  "observations": 21,
+                  "games": 21,
+                  "roots": 21,
+                  "commitments": 21,
+                  "servers": 21
+                }
+              },
+              "prevalence": {
+                "agenda": 0.16,
+                "trap": 0.84
+              }
+            },
+            "13": {
+              "distance": 0.7,
+              "signedCorrelation": 0.6277666039945969,
+              "correlation": 0.6277666039945969,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "1": 7,
+                  "2": 3
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 10,
+                  "games": 10,
+                  "roots": 10,
+                  "commitments": 10,
+                  "servers": 10
+                }
+              },
+              "prevalence": {
+                "agenda": 0.16666666666666666,
+                "trap": 0.8333333333333334
+              }
+            },
+            "14": {
+              "distance": 0.8,
+              "signedCorrelation": 0.7937253933193772,
+              "correlation": 0.7937253933193772,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "1": 4,
+                  "2": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 5,
+                  "games": 5,
+                  "roots": 5,
+                  "commitments": 5,
+                  "servers": 5
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2857142857142857,
+                "trap": 0.7142857142857143
+              }
+            },
+            "15": {
+              "distance": 0.8,
+              "signedCorrelation": 0.7937253933193772,
+              "correlation": 0.7937253933193772,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "1": 4,
+                  "2": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 5,
+                  "games": 5,
+                  "roots": 5,
+                  "commitments": 5,
+                  "servers": 5
+                }
+              },
+              "prevalence": {
+                "agenda": 0.2857142857142857,
+                "trap": 0.7142857142857143
+              }
+            },
+            "16": {
+              "distance": 0.5,
+              "signedCorrelation": 0.7071067811865476,
+              "correlation": 0.7071067811865476,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "1": 1,
+                  "2": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                }
+              },
+              "prevalence": {
+                "agenda": 0.5,
+                "trap": 0.5
+              }
+            },
+            "17": {
+              "distance": 0.5,
+              "signedCorrelation": 0.7071067811865476,
+              "correlation": 0.7071067811865476,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "1": 1,
+                  "2": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                }
+              },
+              "prevalence": {
+                "agenda": 0.5,
+                "trap": 0.5
+              }
+            },
+            "18": {
+              "distance": 0.5,
+              "signedCorrelation": 0.5,
+              "correlation": 0.5,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "2": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6666666666666666,
+                "trap": 0.3333333333333333
+              }
+            },
+            "19": {
+              "distance": 0.5,
+              "signedCorrelation": 0.5,
+              "correlation": 0.5,
+              "histograms": {
+                "agenda": {
+                  "2": 1,
+                  "4": 1
+                },
+                "trap": {
+                  "2": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 2,
+                  "games": 2,
+                  "roots": 2,
+                  "commitments": 2,
+                  "servers": 2
+                },
+                "trap": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6666666666666666,
+                "trap": 0.3333333333333333
+              }
+            },
+            "20": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "5": 1
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            }
+          },
+          "revelation": {
+            "false": {
+              "distance": 0.2329173218950611,
+              "signedCorrelation": 0.2568226171650291,
+              "correlation": 0.2568226171650291,
+              "histograms": {
+                "agenda": {
+                  "0": 69,
+                  "1": 3675,
+                  "2": 2057,
+                  "3": 668,
+                  "4": 102,
+                  "5": 31
+                },
+                "trap": {
+                  "0": 734,
+                  "1": 1445,
+                  "2": 633,
+                  "3": 175,
+                  "4": 28,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 6602,
+                  "games": 1277,
+                  "roots": 4092,
+                  "commitments": 4094,
+                  "servers": 1825
+                },
+                "trap": {
+                  "observations": 3016,
+                  "games": 471,
+                  "roots": 690,
+                  "commitments": 715,
+                  "servers": 609
+                }
+              },
+              "prevalence": {
+                "agenda": 0.686421293408193,
+                "trap": 0.31357870659180703
+              }
+            },
+            "true": {
+              "distance": 0.6592178770949721,
+              "signedCorrelation": 0.6153079906868553,
+              "correlation": 0.6153079906868553,
+              "histograms": {
+                "agenda": {
+                  "1": 124,
+                  "2": 82,
+                  "3": 20,
+                  "4": 2
+                },
+                "trap": {
+                  "0": 236,
+                  "1": 77,
+                  "2": 33,
+                  "3": 12
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 228,
+                  "games": 129,
+                  "roots": 189,
+                  "commitments": 189,
+                  "servers": 146
+                },
+                "trap": {
+                  "observations": 358,
+                  "games": 111,
+                  "roots": 116,
+                  "commitments": 118,
+                  "servers": 116
+                }
+              },
+              "prevalence": {
+                "agenda": 0.3890784982935154,
+                "trap": 0.6109215017064846
+              }
+            }
+          },
+          "posture": {
+            "active": {
+              "distance": 0.21955846843739218,
+              "signedCorrelation": 0.22910595024084057,
+              "correlation": 0.22910595024084057,
+              "histograms": {
+                "agenda": {
+                  "0": 1,
+                  "1": 285,
+                  "2": 126,
+                  "3": 30,
+                  "4": 4
+                },
+                "trap": {
+                  "0": 118,
+                  "1": 273,
+                  "2": 119,
+                  "3": 18,
+                  "4": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 446,
+                  "games": 341,
+                  "roots": 387,
+                  "commitments": 387,
+                  "servers": 355
+                },
+                "trap": {
+                  "observations": 533,
+                  "games": 253,
+                  "roots": 304,
+                  "commitments": 307,
+                  "servers": 294
+                }
+              },
+              "prevalence": {
+                "agenda": 0.45556690500510727,
+                "trap": 0.5444330949948928
+              }
+            },
+            "neutral": {
+              "distance": 0.24064630746257304,
+              "signedCorrelation": 0.2167735190630785,
+              "correlation": 0.2167735190630785,
+              "histograms": {
+                "agenda": {
+                  "0": 2,
+                  "1": 1990,
+                  "2": 838,
+                  "3": 186,
+                  "4": 28,
+                  "5": 9
+                },
+                "trap": {
+                  "0": 534,
+                  "1": 1066,
+                  "2": 467,
+                  "3": 130,
+                  "4": 15,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 3053,
+                  "games": 1056,
+                  "roots": 2008,
+                  "commitments": 2008,
+                  "servers": 1285
+                },
+                "trap": {
+                  "observations": 2213,
+                  "games": 419,
+                  "roots": 580,
+                  "commitments": 598,
+                  "servers": 527
+                }
+              },
+              "prevalence": {
+                "agenda": 0.5797569312571211,
+                "trap": 0.42024306874287887
+              }
+            },
+            "unknown": {
+              "distance": 0.4252136752136752,
+              "signedCorrelation": 0.30431595938244016,
+              "correlation": 0.30431595938244016,
+              "histograms": {
+                "agenda": {
+                  "0": 46,
+                  "1": 642,
+                  "2": 346,
+                  "3": 108,
+                  "4": 19,
+                  "5": 9
+                },
+                "trap": {
+                  "0": 142,
+                  "1": 96,
+                  "2": 43,
+                  "3": 23,
+                  "4": 8
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1170,
+                  "games": 728,
+                  "roots": 1121,
+                  "commitments": 1121,
+                  "servers": 843
+                },
+                "trap": {
+                  "observations": 312,
+                  "games": 215,
+                  "roots": 251,
+                  "commitments": 253,
+                  "servers": 240
+                }
+              },
+              "prevalence": {
+                "agenda": 0.7894736842105263,
+                "trap": 0.21052631578947367
+              }
+            },
+            "unrolled": {
+              "distance": 0.6077240940877304,
+              "signedCorrelation": 0.4626805653502671,
+              "correlation": 0.4626805653502671,
+              "histograms": {
+                "agenda": {
+                  "0": 2,
+                  "1": 272,
+                  "2": 183,
+                  "3": 54,
+                  "4": 4,
+                  "5": 5
+                },
+                "trap": {
+                  "0": 74,
+                  "1": 28,
+                  "2": 14,
+                  "3": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 520,
+                  "games": 303,
+                  "roots": 440,
+                  "commitments": 440,
+                  "servers": 319
+                },
+                "trap": {
+                  "observations": 121,
+                  "games": 47,
+                  "roots": 48,
+                  "commitments": 48,
+                  "servers": 48
+                }
+              },
+              "prevalence": {
+                "agenda": 0.8112324492979719,
+                "trap": 0.18876755070202808
+              }
+            },
+            "safetyStopped": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 18,
+                  "1": 610,
+                  "2": 646,
+                  "3": 309,
+                  "4": 49,
+                  "5": 8
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1640,
+                  "games": 723,
+                  "roots": 959,
+                  "commitments": 959,
+                  "servers": 818
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            },
+            "expired": {
+              "distance": 0.9435897435897437,
+              "signedCorrelation": 0.12781506393081435,
+              "correlation": 0.12781506393081435,
+              "histograms": {
+                "agenda": {
+                  "3": 1
+                },
+                "trap": {
+                  "0": 102,
+                  "1": 59,
+                  "2": 23,
+                  "3": 11
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1,
+                  "games": 1,
+                  "roots": 1,
+                  "commitments": 1,
+                  "servers": 1
+                },
+                "trap": {
+                  "observations": 195,
+                  "games": 65,
+                  "roots": 70,
+                  "commitments": 71,
+                  "servers": 70
+                }
+              },
+              "prevalence": {
+                "agenda": 0.00510204081632653,
+                "trap": 0.9948979591836735
+              }
+            }
+          },
+          "safety": {
+            "allowedAtLastQuery": {
+              "distance": 0.21304578241117195,
+              "signedCorrelation": 0.2240318379391761,
+              "correlation": 0.2240318379391761,
+              "histograms": {
+                "agenda": {
+                  "0": 1,
+                  "1": 286,
+                  "2": 126,
+                  "3": 30,
+                  "4": 4
+                },
+                "trap": {
+                  "0": 119,
+                  "1": 286,
+                  "2": 125,
+                  "3": 18,
+                  "4": 5
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 447,
+                  "games": 342,
+                  "roots": 388,
+                  "commitments": 388,
+                  "servers": 356
+                },
+                "trap": {
+                  "observations": 553,
+                  "games": 258,
+                  "roots": 311,
+                  "commitments": 314,
+                  "servers": 299
+                }
+              },
+              "prevalence": {
+                "agenda": 0.447,
+                "trap": 0.553
+              }
+            },
+            "unknown": {
+              "distance": 0.2911242247105625,
+              "signedCorrelation": 0.27314412134295457,
+              "correlation": 0.27314412134295457,
+              "histograms": {
+                "agenda": {
+                  "0": 50,
+                  "1": 2903,
+                  "2": 1367,
+                  "3": 349,
+                  "4": 51,
+                  "5": 23
+                },
+                "trap": {
+                  "0": 851,
+                  "1": 1236,
+                  "2": 541,
+                  "3": 169,
+                  "4": 23,
+                  "5": 1
+                }
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 4743,
+                  "games": 1232,
+                  "roots": 3274,
+                  "commitments": 3275,
+                  "servers": 1666
+                },
+                "trap": {
+                  "observations": 2821,
+                  "games": 461,
+                  "roots": 662,
+                  "commitments": 683,
+                  "servers": 590
+                }
+              },
+              "prevalence": {
+                "agenda": 0.6270491803278688,
+                "trap": 0.3729508196721312
+              }
+            },
+            "stopped": {
+              "distance": null,
+              "signedCorrelation": null,
+              "correlation": null,
+              "histograms": {
+                "agenda": {
+                  "0": 18,
+                  "1": 610,
+                  "2": 646,
+                  "3": 309,
+                  "4": 49,
+                  "5": 8
+                },
+                "trap": {}
+              },
+              "classes": {
+                "agenda": {
+                  "observations": 1640,
+                  "games": 723,
+                  "roots": 959,
+                  "commitments": 959,
+                  "servers": 818
+                },
+                "trap": {
+                  "observations": 0,
+                  "games": 0,
+                  "roots": 0,
+                  "commitments": 0,
+                  "servers": 0
+                }
+              },
+              "prevalence": {
+                "agenda": 1,
+                "trap": 0
+              }
+            }
+          }
+        },
+        "lifecycle": {
+          "installs": 9887,
+          "leaves": 8537
+        },
+        "errors": []
+      }
+    }
+  },
+  "limits": [
+    "No AI policy adopted or consumer margin selected.",
+    "Invalid cohort/draw statistics fail closed; no invalid draws are replaced with zero or omitted.",
+    "Exposure and first-commitment diagnostics describe survival differences, not causal allocation.",
+    "TV plug-in bias is visible through class/bin counts and independent-cohort precision; no debiasing claim."
+  ],
+  "reports": [
+    {
+      "path": ".ai-batch-cache/f12-2306f82-validated/off-1-200.json",
+      "sha256": "90fb71b94030950512a38b9a41e14c42e427a05f9906eb2e726c738f8fbaa506"
+    },
+    {
+      "path": ".ai-batch-cache/f12-2306f82-validated/on-1-200.json",
+      "sha256": "f998482ef62614badabc532eaf83c4c079b937f783befe13b5eefe195d093987"
+    },
+    {
+      "path": ".ai-batch-cache/f12-2306f82-validated/on-201-400.json",
+      "sha256": "c0bd8f349345522edc4e68337c1fc391618a65926b271ddc0d5f42345c399d25"
+    }
+  ],
+  "seed257Probe": {
+    "baselineKnownFailure": true,
+    "commands": [
+      "node scripts/ai-batch.js --pairs btl-kit --seeds 257-257 --collector realizedIceByRootType --defense-observer off --jobs 1 --out .ai-batch-cache/f12-2306f82-validated/probe-off-257.json",
+      "node scripts/ai-batch.js --pairs btl-kit --seeds 257-257 --collector realizedIceByRootType --defense-observer on --jobs 1 --out .ai-batch-cache/f12-2306f82-validated/probe-on-257.json"
+    ],
+    "results": [
+      {
+        "mode": "off",
+        "codeHash": "44f57510eaa411dc",
+        "game": {
+          "fixtureId": null,
+          "deckPairId": "btl-kit",
+          "seed": "257",
+          "ok": false,
+          "winner": null,
+          "reason": "stalled",
+          "turns": 17,
+          "corpPoints": 2,
+          "runnerPoints": 6,
+          "logHash": "5ca72f317fb9",
+          "ms": 13096,
+          "errors": [
+            "stalled: no main-loop step for 10 s after: Null command"
+          ],
+          "decisionHash": "a2abc578f89b8de85fcfb978daf7de81899affd8"
+        }
+      },
+      {
+        "mode": "on",
+        "codeHash": "44f57510eaa411dc",
+        "game": {
+          "fixtureId": null,
+          "deckPairId": "btl-kit",
+          "seed": "257",
+          "ok": false,
+          "winner": null,
+          "reason": "stalled",
+          "turns": 17,
+          "corpPoints": 2,
+          "runnerPoints": 6,
+          "logHash": "5ca72f317fb9",
+          "ms": 13132,
+          "errors": [
+            "stalled: no main-loop step for 10 s after: Null command"
+          ],
+          "decisionHash": "a2abc578f89b8de85fcfb978daf7de81899affd8"
+        }
+      }
+    ],
+    "limit": "The failed-only CLI saves its report, then printSummary throws on missing aggregate metrics; tracked separately."
+  }
+}

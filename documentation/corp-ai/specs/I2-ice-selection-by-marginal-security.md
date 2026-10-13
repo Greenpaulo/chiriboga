@@ -11,6 +11,10 @@ batch-metric guard support and must also be `done` before I2 hand-off.
 
 ## Goal
 
+Use F12's shared [realized-defense measurement](../../ai-batch-harness.md#realized-defense-measurement-f12)
+definitions, readiness rules and control calibration; do not build a competing
+collector. I2 retains ownership of its security objective and regression margins.
+
 Choose the `(ICE, server)` pair that most improves security, weighted by what a
 breach would cost, using the existing security evaluator rather than input-card
 order. This is the first intentional policy change on the I1 candidate
@@ -341,7 +345,7 @@ game pairs, recompute each arm's pooled `finishBatch()` per draw and form
 candidate minus control intervals, with usable samples in both arms.
 
 **Realized defense coverage (F12-owned collector).** Consume
-[F12](../../backlog/F12-realized-defense-measurement.md), extracted on 2026-10-13 before L8.2;
+[F12](../../backlog/code-review/F12-realized-defense-measurement.md), extracted on 2026-10-13 before L8.2;
 I2 retains its policy guards and consumer-specific calibration. Use
 `realizedIceByRootType` using passive harness snapshots at the start of each
 Runner turn, after Corp installs and responses finish. Include every remote

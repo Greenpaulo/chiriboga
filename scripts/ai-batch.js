@@ -22,6 +22,7 @@
 //   --corp-option <name>=<value>  set corp.AI.options.<name> (repeatable; unknown names fail)
 //   --runner-option <name>=<value>
 //   --security-cache off|on|verify  F3 comparison only; defaults to the game's setting
+//   --defense-observer off|on|throw  F12 identity checks; defaults to on when its collector is selected
 //   --collector <name>            scripts/ai-batch/collectors/<name>.js (repeatable)
 //   --jobs <n>                    parallel processes (default: CPUs - 2)
 //   --fresh                       gate: replay both arms, bypassing all report caches
@@ -46,7 +47,8 @@ const metricsLib = require('./ai-batch/metrics');
 
 const DEFAULT_POOL = path.join(root, 'tests/fixtures/ai-batch/deck-pool.json');
 const CACHE_DIR = process.env.AI_BATCH_CACHE ? path.resolve(process.env.AI_BATCH_CACHE) : path.join(root, '.ai-batch-cache');
-const HARNESS_FILES = ['scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js'];
+const HARNESS_FILES = ['scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js', 'scripts/ai-batch/realized-defense.js',
+  'scripts/ai-batch/calibration.js', 'scripts/ai-batch/collectors/bluffSingleVariableCorrelation.js'];
 const CODE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js',
   'checks.js', 'mechanics.js', 'utility.js', 'decks.js', 'runcalculator.js', 'ai_corp.js', 'ai_runner.js'];
 
@@ -190,12 +192,20 @@ async function playJob(job) {
   const states = collectors.map(() => ({seed: job.seed, deckPairId: job.deckPairId, fixtureId: job.fixtureId}));
   const onEvent = event => {
     events.push(event);
-    collectors.forEach((c, i) => c.onEvent(Object.freeze(Object.assign({}, event)), states[i]));
+    collectors.forEach((c, i) => {
+      try { c.onEvent(Object.freeze(Object.assign({}, event)), states[i]); }
+      catch (error) {
+        if (c.name !== 'realizedIceByRootType') throw error;
+        (states[i].errors ||= []).push(String(error.message || error));
+      }
+    });
   };
   const game = await playGame({
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
     runnerOptions: job.runnerOptions, securityCache: job.securityCache,
+    realizedDefenseSnapshot: job.collectors.includes('realizedIceByRootType') && job.defenseObserver !== 'off',
+    defenseObserver: job.defenseObserver,
     evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), securitySnapshot: job.collectors.includes('securityCalibration'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
@@ -205,6 +215,9 @@ async function playJob(job) {
     decisionHash: sha1(JSON.stringify(events.filter(e => e.type === 'decision')
       .map(e => [e.n, e.side, e.identifier, e.choiceType, e.options, e.chosen])))};
   if (ok) {
+    collectors.forEach((c, i) => {
+      if (c.name === 'realizedIceByRootType') (states[i].errors ||= []).push(...game.defenseErrors);
+    });
     record.metrics = metricsLib.coreMetrics(events);
     collectors.forEach((c, i) => Object.assign(record.metrics, metricsLib.flattenCollector(c.name, c.finish(states[i]))));
     collectors.forEach((c, i) => {
@@ -232,7 +245,7 @@ function runBatch(config) {
         jobs.push({fixtureId: start ? start.id : null, start: start ? start.file : null, deckPairId: pair.id,
           corp: pair.corp, runner: pair.runner, seed, setFiles: config.setFiles, timeoutMs: config.timeoutMs,
           corpOptions: config.corpOptions, runnerOptions: config.runnerOptions, collectors: config.collectorNames,
-          securityCache: config.securityCache});
+          securityCache: config.securityCache, defenseObserver: config.defenseObserver});
   const total = jobs.length;
   const games = [];
   let effective = null;
@@ -314,6 +327,8 @@ function buildConfig(args, overrides = {}) {
   }
   if (args['security-cache'] && !['off', 'on', 'verify'].includes(args['security-cache']))
     throw new Error('--security-cache must be off, on or verify');
+  if (args['defense-observer'] && !['off', 'on', 'throw'].includes(args['defense-observer']))
+    throw new Error('--defense-observer must be off, on or throw');
   const collectorNames = args.collector.slice().sort();
   const collectors = loadCollectors(collectorNames);
   const starts = resolveStarts([...new Set([...args.start, ...taggedStarts(args.startTag || [])])], poolInfo.ranges);
@@ -325,6 +340,7 @@ function buildConfig(args, overrides = {}) {
     collectorNames, directions: Object.assign({}, ...collectors.map(c => c.directions || {})),
     jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
     quick: Boolean(args.quick), securityCache: args['security-cache'],
+    defenseObserver: args['defense-observer'] || 'on',
   }, overrides);
   validateDeckPairs(config.pairs, config.setFiles);
   return config;
@@ -360,7 +376,7 @@ function budgetSeeds(args, starts, pairs) {
 function reportKey(config) {
   return sha1(JSON.stringify([codeHash(config.setFiles, config.collectorNames), config.poolInfo.hash,
     config.pairs.map(p => p.id), config.seeds, config.starts.map(s => s.hash), config.collectorNames,
-    config.corpOptions, config.runnerOptions, config.securityCache])).slice(0, 16);
+    config.corpOptions, config.runnerOptions, config.securityCache, config.defenseObserver])).slice(0, 16);
 }
 
 // Validate option names before playing any game: unknown names are errors.
@@ -391,6 +407,7 @@ async function batch(config, command) {
     sha: git('rev-parse --short HEAD'), dirty: dirtyText === null ? null : dirtyText.length > 0,
     codeHash: codeHash(config.setFiles, config.collectorNames), key: reportKey(config),
     securityCache: config.securityCache, command, createdAt: new Date().toISOString(), wallMs,
+    defenseObserver: config.defenseObserver,
     pool: {file: config.poolInfo.file, id: config.poolInfo.pool.id, sets: config.poolInfo.pool.sets},
     poolHash: config.poolInfo.hash, pairs: config.pairs.map(p => p.id), seeds: config.seeds,
     starts: config.starts.map(s => ({id: s.id, hash: s.hash})), collectors: config.collectorNames,
@@ -400,6 +417,8 @@ async function batch(config, command) {
       reason: g.reason, errors: g.errors})),
     aggregates: metricsLib.aggregate(games),
     batchMetrics: metricsLib.batchMetrics(loadCollectors(config.collectorNames), games),
+    batchDiagnostics: Object.fromEntries(loadCollectors(config.collectorNames).filter(c => c.summarize)
+      .map(c => [c.name, c.summarize(games.filter(g => g.ok).map(g => g.samples[c.name]))])),
     games,
   };
 }
@@ -475,7 +494,8 @@ function printComparison(result, quick, only = null, reports = []) {
       `  [${fmt(m.low)}, ${fmt(m.high)}]${m.direction ? ' (' + m.direction + ' is better)' : ''}`);
   }
   const pooledFmt = value => Number(value.toPrecision(10)).toString();
-  const batchLine = m => m ? `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]` : 'missing';
+  const batchLine = m => !m ? 'missing' : m.valid === false ? `invalid (${m.why}; ${m.invalidDraws} invalid draws)` :
+    `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]`;
   const batchMetrics = {...result.batchMetrics};
   for (const name of new Set(reports.flatMap(report => Object.keys(report.batchMetrics || {}))))
     batchMetrics[name] = batchMetrics[name] || {baseline: reports[0].batchMetrics?.[name], candidate: reports[1].batchMetrics?.[name]};
@@ -532,8 +552,9 @@ function applyCeilingChecks(result, baseline, candidate, ceiling) {
     const m = candidate.batchMetrics && candidate.batchMetrics[name];
     const b = baseline.batchMetrics && baseline.batchMetrics[name];
     (result.batchMetrics = result.batchMetrics || {})[name] ||= {baseline: b || null, candidate: m || null};
-    result.checks.push({name, kind: 'ceiling', tolerance: limit, pass: Boolean(m) && m.high <= limit,
-      why: !m ? 'unknown batch metric' : m.high > limit ? 'candidate interval upper bound ' + m.high : undefined});
+    result.checks.push({name, kind: 'ceiling', tolerance: limit,
+      pass: Boolean(m) && m.valid !== false && Number.isFinite(m.high) && m.high <= limit,
+      why: !m ? 'unknown batch metric' : m.valid === false ? m.why : m.high > limit ? 'candidate interval upper bound ' + m.high : undefined});
   }
   if (result.checks.length) result.pass = result.checks.every(c => c.pass);
   return result;
@@ -578,6 +599,8 @@ function replayGame(config, options) {
     setFiles: config.setFiles, timeoutMs: config.timeoutMs, start: start ? start.file : null,
     corpOptions: options.corp, runnerOptions: options.runner, securityCache: config.securityCache,
     telemetry: true, observe: true, fullLog: true,
+    realizedDefenseSnapshot: config.collectorNames.includes('realizedIceByRootType') && config.defenseObserver !== 'off',
+    defenseObserver: config.defenseObserver,
     testOption: process.env.AI_BATCH_TEST_OPTION});
 }
 

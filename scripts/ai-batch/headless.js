@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const crypto = require('crypto');
+const {createRealizedDefenseTracker} = require('./realized-defense');
 
 const root = path.resolve(__dirname, '..', '..');
 const ENGINE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js',
@@ -137,6 +138,21 @@ function playGame(options) {
   const onEvent = options.onEvent || (() => {});
   const emit = (type, data) => onEvent(Object.assign({type}, data));
   const roots = options.observe ? createRootTracker(emit) : null;
+  const defenseErrors = [];
+  let defenseStarted = false;
+  const defense = options.realizedDefenseSnapshot ? createRealizedDefenseTracker(emit) : null;
+  const defenseSafe = action => {
+    if (!defense) return;
+    try {
+      if (options.defenseObserver === 'throw') throw new Error('injected realized observer failure');
+      action();
+    } catch (error) {
+      const reason = String(error.message || error);
+      if (defenseErrors.includes(reason)) return;
+      defenseErrors.push(reason);
+      try { emit('realizedDefenseError', {reason}); } catch (_) { /* gameplay must proceed */ }
+    }
+  };
   const stub = new Proxy(function() {}, {
     get: (target, key) => key === Symbol.toPrimitive ? () => 0 : key === 'length' ? 0 : stub,
     apply: () => stub, construct: () => stub,
@@ -219,6 +235,7 @@ function playGame(options) {
       seen.run = null;
     }
     if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), false);
+    defenseSafe(() => defense.observe(run('corp'), Math.ceil(turns / 2)));
   };
   // Corp-known state when a Corp turn begins (I0 stall and insolvency collectors).
   const corpTurnState = () => JSON.parse(JSON.stringify(run(`({credits: corp.creditPool,
@@ -251,6 +268,7 @@ function playGame(options) {
         honestLockout: r.honestLockout, noBreakerLockout: r.noBreakerLockout};
     })`)));
   let snapshotPending = false;
+  let defenseSnapshotPending = false;
   context.__stop = () => {
     if (result) return true;
     observe();
@@ -261,11 +279,18 @@ function playGame(options) {
       if (options.observe) emit('turnStart', side === 'corp' ? {side, turn: Math.ceil(turns / 2), corp: corpTurnState()} :
         {side, turn: Math.ceil(turns / 2)});
       snapshotPending = Boolean(options.securitySnapshot) && side === 'runner';
+      defenseSnapshotPending = Boolean(defense) && side === 'runner';
     }
     // The Runner's clicks are granted after its turn begins.
     if (snapshotPending && !seen.run && run('runner.clickTracker') > 0) {
       snapshotPending = false;
       emit('securitySnapshot', {turn: Math.ceil(turns / 2), servers: securitySnapshot()});
+    }
+    // F12 observes settled turn-begin responses, immediately before the first
+    // action. Granted clicks alone can still be inside a turn-begin response.
+    if (defenseSnapshotPending && !seen.run && run('currentPhase === phases.runnerActionMain')) {
+      defenseSnapshotPending = false;
+      defenseSafe(() => defense.snapshot(run('corp'), Math.ceil(turns / 2)));
     }
     return false;
   };
@@ -276,7 +301,10 @@ function playGame(options) {
   context.__runSuccessful = () => { if (seen.run) seen.run.success = true; };
   context.__mulligan = side => emit('mulligan', {side});
   // Corp AI bait/bluff/profile posture decisions (CorpAI._postureTelemetryEvent).
-  context.__posture = event => emit('posture', JSON.parse(JSON.stringify(event)));
+  context.__posture = event => {
+    if (defense && run('AIHypothetical.depth') === 0) defenseSafe(() => defense.onPosture(event));
+    emit('posture', JSON.parse(JSON.stringify(event)));
+  };
 
   // A Corp ICE install on HQ or R&D, with each installed Runner card's public
   // central pressure measured when the install was requested (AICentralPressure,
@@ -424,6 +452,33 @@ function playGame(options) {
       };
     `);
   }
+  if (defense) {
+    context.__defenseObserve = () => {
+      if (defenseStarted) defenseSafe(() => defense.observe(run('corp'), Math.ceil(turns / 2)));
+    };
+    // Track committed moves even if a leave and reinstall happen in one step.
+    // Do not sample temporary boards produced by hypothetical evaluation.
+    run(`var defenseMoveTriggers = MoveCardTriggers;
+      MoveCardTriggers = function() {
+        var value = defenseMoveTriggers.apply(this, arguments);
+        if (AIHypothetical.depth === 0) __defenseObserve();
+        return value;
+      };`);
+    context.__defenseQuery = (kind, server, card, value) => defenseSafe(() =>
+      defense.onQuery(kind, server, card, value, run('corp')));
+    run(`var defenseBluffQuery = corp.AI._shouldBluffAgendaServer;
+      corp.AI._shouldBluffAgendaServer = function(server) {
+        var value = defenseBluffQuery.apply(this, arguments);
+        if (AIHypothetical.depth === 0) __defenseQuery('bluff', server, null, value);
+        return value;
+      };
+      var defenseBaitQuery = corp.AI._shouldBaitServer;
+      corp.AI._shouldBaitServer = function(server, card) {
+        var value = defenseBaitQuery.apply(this, arguments);
+        if (AIHypothetical.depth === 0) __defenseQuery('bait', server, card, value);
+        return value;
+      };`);
+  }
   if (options.securityCache !== undefined) {
     if (!['off', 'on', 'verify'].includes(options.securityCache)) throw new Error('Invalid security-cache mode');
     run(`corp.AI._securityCacheEnabled = ${options.securityCache !== 'off'};
@@ -493,6 +548,7 @@ function playGame(options) {
       corpPoints: run('AgendaPoints(corp)'), runnerPoints: run('AgendaPoints(runner)'),
       logLines, logHash: hash.digest('hex').slice(0, 12), errors: [...errors],
       options: effectiveOptions,
+      defenseErrors,
     }, typeof context.__report === 'function' ? {report: JSON.parse(JSON.stringify(context.__report()))} : {});
     if (options.tail) summary.tail = logTail.slice(-options.tail);
     if (fullLog) summary.log = fullLog;
@@ -520,6 +576,8 @@ function playGame(options) {
   seen.runnerScored = run('runner.scoreArea.length');
   seen.stolenLocations = run('agendaStolenLocations.length');
   if (roots) roots.start(run('corp'));
+  defenseStarted = true;
+  defenseSafe(() => defense.start(run('corp'), Math.ceil(turns / 2)));
   emit('gameStart', {fixtureId: fixture ? fixture.id : null, corpIdentity: run('corp.identityCard.title'),
     runnerIdentity: run('runner.identityCard.title')});
   if (options.observe) run('corp.AI._postureWeightTelemetry("baseline")');
@@ -534,4 +592,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, root};
+module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};
