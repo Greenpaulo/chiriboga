@@ -829,6 +829,28 @@ needs.
     `gameLength`, `decisionLatencyMs.<side>.mean|p95|max` and
     `mulliganRate.<side>`. A fixture start counts only points that change hands
     during play.
+  - *Realized defense measurement (F12).* `createRealizedDefenseTracker()` is
+    harness-only: stable server/root/installation IDs, start-root censoring and
+    committed movement tracking support settled Runner-action-boundary
+    snapshots without calling security/posture/safety evaluators. Existing
+    epoch/lifetime cache fields, real guard/roll/reuse events and passive query
+    return capture supply labels (including silent failures and lifetime reuse);
+    unknown state and expired commitments remain explicit. Observation failures
+    invalidate measurement without affecting gameplay. The
+    `realizedIceByRootType` collector reports unrevealed all-root and known-active
+    posture subsets using absolute Spearman rho and exact-bin total variation,
+    plus signed rho, histograms, coverage and first-commitment/lifecycle
+    diagnostics separately from numeric gate columns. Ten distinct commitments
+    and five games per class/population, plus 90% known posture coverage, are
+    frozen readiness rules. All draws must validate; undefined statistics never
+    become zero-filled intervals. F12 opts into `strictBatchDiagnostics` for
+    separate-arm validity and invalid-draw counts; existing legacy diagnostic
+    semantics remain available. F11 owns paired pooled comparison and
+    independent stratified calibration. `observationIdentity()` checks full
+    off/on batches for matching game outcomes and decision/gameplay hashes.
+    The [harness guide](../ai-batch-harness.md#realized-defense-measurement-f12)
+    records observer switches, evidence commands and interpretation limits;
+    I2/L8.2/L8.9 consume this shared collector with their own frozen gates.
   - *Collectors.* A consumer adds
     `scripts/ai-batch/collectors/<name>.js` exporting `{name, onEvent(event,
     game), finish(game)}` and optional `directions`. `game` is a per-game
