@@ -249,7 +249,7 @@ var CardRenderer = {
       }, this);
     }
 
-    UpdateVisibility(forceHidden = false) {
+    UpdateVisibility(forceHidden = false, dimmed = false) {
       if (forceHidden || (this.hideWhenZero && !this.address[this.key])) {
         this.sprite.visible = false;
         this.richText.visible = false;
@@ -257,6 +257,11 @@ var CardRenderer = {
         this.sprite.visible = true;
         this.richText.visible = true;
       }
+      //Dim (but keep visible) counters on the card being read so
+      //the enlarged printed text stays readable; restored per-frame by caller.
+      var dimAlpha = dimmed ? 0.3 : 1.0;
+      this.sprite.alpha = dimAlpha;
+      this.richText.alpha = dimAlpha;
     }
 
     Update() {
@@ -2120,7 +2125,8 @@ var CardRenderer = {
 				this.counters[i],
 				choosingSubroutines,
 				relevantIce
-			  )
+			  ),
+			  pixi_shouldDimCounterWhileReadingZoom(this.counters[i])
 			);
 			this.counters[i].sprite.parent.addChild(this.counters[i].sprite);
 			this.counters[i].richText.parent.addChild(this.counters[i].richText);
@@ -2336,6 +2342,17 @@ function pixi_shouldHideCounterDuringSubroutineChoice(
     choosingSubroutines &&
     counter.key == "advancement" &&
     counter.address === relevantIce
+  );
+}
+
+//Translucency (not hiding) for reading zoom: any counter on the card
+//currently zoomed for reading renders at reduced alpha so the enlarged
+//printed text stays readable. Counters on other cards stay fully opaque.
+function pixi_shouldDimCounterWhileReadingZoom(counter) {
+  return (
+    !!counter.address &&
+    !!counter.address.renderer &&
+    counter.address.renderer.zoomed === true
   );
 }
 
