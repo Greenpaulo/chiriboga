@@ -1,4 +1,4 @@
-// Run with: node tests/pending/match-local-public-outcome-feedback.test.js
+// Run with: node tests/match-local-public-outcome-feedback.test.js
 // L8.5 feature reproduction: real CorpAI, public event record and game reset.
 const assert = require('assert');
 const fs = require('fs');

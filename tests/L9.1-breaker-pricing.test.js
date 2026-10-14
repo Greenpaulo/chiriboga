@@ -360,6 +360,17 @@ test('Event Horizon native payment does not erase breaker counter costs', () => 
   assert.strictEqual(result.honestIsSecure, true);
   assert.strictEqual(result.totalMandatoryBreakCost, 3);
 });
+for (const resourcePricing of [false, true]) test('native passage appears once with resource pricing ' + resourcePricing, () => {
+  if (resourcePricing) runner.cards = [{title: 'Priced killer', player: runner, cardType: 'program',
+    subTypes: ['Icebreaker', 'Killer'], AIBreakCost: () => ({credits: 1, clicks: 1})}];
+  const horizon = card(36058); horizon.rezzed = true;
+  const target = server([horizon]);
+  const inputs = ai._securityIcePlanInputs(horizon, target, 0, ai._securityEvaluationContext(target));
+  assert.strictEqual(inputs.resourcePricing, resourcePricing);
+  assert.strictEqual(inputs.mandatoryCost, 3);
+  assert.strictEqual(inputs.currentOptions.filter(option => option.credits === 3 && option.clicks === 0).length, 1,
+    'the native passage payment must be constructed exactly once');
+});
 test('forbidden breaker type cannot become an unknown escape', () => {
   runner.cards = [{title: 'Unknown killer', player: runner, cardType: 'program', subTypes: ['Icebreaker', 'Killer']}];
   runner.grip = [];
