@@ -65,6 +65,12 @@ try {
       assert.match(output.stdout, /Gate: failed/);
     }
   }
+  const invalidBatch = {...valid, ...report(null)};
+  Object.assign(invalidBatch.batchMetrics[metric], {valid: false, why: 'undefined sample', invalidDraws: 3});
+  const invalidOutput = compare(invalidBatch);
+  assert.strictEqual(invalidOutput.status, 1, invalidOutput.stderr);
+  assert.match(invalidOutput.stdout, /candidate invalid \(undefined sample; 3 invalid draws\)/);
+  assert.match(invalidOutput.stdout, /Gate: failed/);
   for (const flags of [['--no-worse', metric], ['--ceiling', metric + '=1']]) {
     const output = compare({...valid, games: []}, flags);
     assert.strictEqual(output.status, 1, output.stderr);

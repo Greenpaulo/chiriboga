@@ -8,10 +8,16 @@ and gate-revision evidence remains in the
 
 ## Measurement and adoption
 
-[F11](../backlog/F11-paired-batch-metric-guards.md) supplies generic paired
-pooled `--guard` and `--improve` checks. [F12](../backlog/F12-realized-defense-measurement.md)
+[F11](../backlog/code-review/F11-paired-batch-metric-guards.md) supplies generic paired
+pooled `--guard` and `--improve` checks. [F12](../backlog/code-review/F12-realized-defense-measurement.md)
 owns passive `realizedIceByRootType` observations and control-only calibration.
 The existing posture/profile collector does not alone measure the realized tell.
+
+F12's current-default control calibration has usable all-root rho/TV, while
+postured statistics fail the frozen 90% known-label requirement (about 85.8% and
+85.4% observed). Read its evidence before freezing consumer gates; unavailable
+postured guards cannot be treated as zeros or passed. Current controls have
+L8.5 feedback off, as in the branch's defaults; regenerate after activation.
 
 Use actual Runner-turn ICE-count distributions of unrevealed agenda/trap roots:
 `allCountDistance` is their total-variation distance; `posturedCountDistance`
@@ -24,7 +30,7 @@ strength or multivariable tells, or success against a learning human.
 | Item | Acceptance scope / remaining reconciliation |
 |---|---|
 | L8.4 | Settled: measured posture-correlation maximum 0.229 ≤ control 0.329; do not retroactively change its gate |
-| L8.5 | Revised full gate passed; correlation report-only, information/reachability and adaptation hard checks plus performance guards; finish review/adoption |
+| L8.5 | Merged; revised full gate passed with correlation report-only, information/reachability and adaptation hard checks plus performance guards; feedback remains off in current defaults |
 | L8.2 | Must reduce the count tell: proposed paired 95% upper bound of candidate-minus-control `allCountDistance` < 0, plus subset/correlation/performance guards and existing 0.05 shape-overlap check |
 | I2 | Consume F12 with its existing proposed count-rho and posture guards; 0.02 rho margins remain provisional pending calibration; retain security improvement/performance checks |
 | L8.9 | Investigate residual mechanisms, implement a supported repair in the same ticket, then require actual count-distance reduction and strategic safety guards |

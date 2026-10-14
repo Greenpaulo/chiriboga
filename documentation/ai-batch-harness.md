@@ -663,6 +663,95 @@ The deterministic feedback tests verify one matching observation per
 settled exposure and the actual per-exposure multiplier change. Weight observations consume no randomness and are excluded from
 the existing correlation collector's posture/profile choice samples.
 
+## Realized defense measurement (F12)
+
+Select `--collector realizedIceByRootType` to observe every remote agenda or
+declared trap (`Ambush` or an `AIPunishesAccess` function, without calling it).
+Agenda classification takes precedence. A dedicated passive snapshot runs once
+per Runner turn at the first action phase, after turn-begin responses settle.
+It does not use the security snapshot or any policy evaluator. Harness truth
+never feeds AI decisions, and no hidden Runner identities are read.
+
+Samples retain stable server/root IDs, a new commitment ID for each install,
+actual integer ICE count, revelation, multi-root status, age, cached script,
+horizon expiry and last observed safety-query status. Roots on a start board
+are left-censored, with unknown installation age. Committed movement wrappers
+capture leaves/reinstalls even within one main-loop step; hypotheticals are
+excluded. Safety stops take precedence over cached scripts. Expired commitments
+are separate from active ones; a cache without an observation in the current
+installation remains unknown. `allowedAtLastQuery` does not claim current
+safety. Missing cached state remains unknown rather than being treated as
+neutral. Tracker/collector errors invalidate observations while gameplay
+continues.
+
+Passive wrappers retain returns of bait/bluff queries the AI already made;
+they never initiate a query. This includes silent eligibility/severity failures
+and lifetime reuse without an event. Newer guard events override older query
+evidence; a later successful query can clear an obsolete guard. Cached positive
+scripts become unknown when current structural eligibility, root count or the
+latest observed return contradicts activity. Samples retain that return and
+root-count context separately. The observer also works without posture-event
+telemetry, leaving unobserved safety unknown rather than enabling telemetry on
+the AI just to fill labels.
+
+The four lower-direction pooled metrics are absolute Spearman
+`allCountCorrelation`/`posturedCountCorrelation` and total-variation
+`allCountDistance`/`posturedCountDistance`. Headline observations are unrevealed
+roots; postured observations have a known active commitment. Counts use exact
+nonnegative integer bins. TV is one half the sum of per-bin absolute differences
+between normalized agenda and trap distributions: identical distributions give
+zero, disjoint support gives one. Signed rho, histograms, class prevalence and
+root/commitment/server/game coverage are in `batchDiagnostics.realizedIceByRootType`,
+along with revelation, deck pair, age, multi-root, posture/safety breakdowns and
+first-observation-per-commitment diagnostics. Repeated roots and shared servers
+are clustered by game, not treated as independent evidence. These statistics
+do not establish causal allocation or absence of other tells.
+
+Readiness rules are frozen in the collector: ten distinct commitments and five
+contributing games per class in each population, and at least 90% known posture
+labels in the unrevealed population. Repeated draws of the same original game
+do not manufacture coverage. Missing classes, undefined correlations and
+observation errors fail closed. TV can be diagnostically zero when rho is
+undefined; rho fails closed while TV can retain a valid comparison interval.
+The optional trusted collector `forMetrics(names)` view validates only requested
+columns without changing their sample name or definitions. All original
+cohorts and every bootstrap draw must validate. Invalid draws invalidate the
+whole interval; none are replaced by zero or discarded. Separate-arm F12
+diagnostics opt into `strictBatchDiagnostics`, reporting null interval bounds,
+reasons and invalid-draw counts. Legacy collectors retain their diagnostic
+semantics. Pooled F11 `gate`/`--compare` reconstruct all four metrics from these
+samples with the existing matched-game and option-effect requirements.
+
+For observation identity only, `--defense-observer off|on|throw` controls this
+harness observer without changing AI options. Its value is recorded and part
+of cache provenance; default is `on` when this collector is selected. The `throw`
+mode injects observer failure for deterministic tests. Disabled or failed
+observations cannot pass measurement checks.
+
+`node scripts/ai-batch/defense-evidence.js --jobs 3 --out .ai-batch-cache/f12-2306f82`
+collects the preregistered full committed pool: observer off and on on seeds
+1–200, then a second on cohort on seeds 201–400, all with current default
+options. It checks winner/turn/log/decision identity, same-seed statistical
+identity, and F11 independent, deck-pair-stratified control calibration. It
+writes raw batch reports and `evidence.json` with commands, report hashes,
+effective options, class/bin coverage and validity/precision limits. `--reuse`
+recomputes the evidence from those three existing reports without playing games.
+Calibration may be insufficient; that is reported explicitly and supplies no
+adoption verdict or consumer tolerance. Plug-in TV has finite-sample bias;
+class/bin counts and independent-cohort widths expose its limits, without a
+debiasing or human-exploitation claim. Any expanded sampling/starts must be
+preregistered separately. Refresh controls after prerequisite policy changes.
+
+The [recorded F12 control calibration](corp-ai/measurements/F12-2306f82-control-calibration.json)
+passes all 1,400 observer-identity pairs. All-root TV is 0.207788/0.232917 and
+absolute rho 0.224065/0.256823 for seeds 1–200/201–400. Postured statistics are
+insufficient: known posture coverage 85.7705%/85.3816% is below the frozen 90%
+rule. The second cohort has one independently reproduced observer-off/on
+stall (BTL/Kit seed 257); calibration retains failure evidence and uses 1,399
+successful games with that stratum's reduced count. No consumer margin or
+policy adoption follows from this calibration. Lifecycle totals include all
+tracked remote root cards; metric class counts cover agendas and declared traps.
+
 ## Install-series collectors and baselines (I0)
 
 Corp roadmap I0 added these observation-only collectors. Every metric is per

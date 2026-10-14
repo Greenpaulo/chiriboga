@@ -26,18 +26,17 @@ Updated 2026-10-13. This is the preferred sequence for the deception/install
 track; item dependencies below remain the formal blockers. Completed merge work
 is recorded in the done tables and the historical merge plan.
 
-| Order | Item | Next step / adoption evidence |
-|---|---|---|
-| 1 | [L8.5](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md) | Revised gate and PR review passed; feedback defaults on; merge and run post-merge adoption |
-| 2 | [F11](../backlog/code-review/F11-paired-batch-metric-guards.md) | Paired pooled guards and improvement checks; measurement tests |
-| 3 | [F12](../backlog/F12-realized-defense-measurement.md) | Shared realized ICE-count collector, identity checks and control-only calibration |
-| 4 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
-| 5 | [I2](specs/I2-ice-selection-by-marginal-security.md) | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
-| 6 | [L8.9](specs/L8.9-observable-defense-parity.md) | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
-| 7 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
+| Order | Item | Status | Next step / adoption evidence |
+|---|---|---|---|
+| — | [L8.5](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | done (merged) | Revised full gate passed; merge complete |
+| — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
+| 2 | [F12](../backlog/code-review/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
+| 3 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready (blocked on F12) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
+| 4 | [I2](specs/I2-ice-selection-by-marginal-security.md) | proposed | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
+| 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
+| 6 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
-F11/F12 can proceed alongside L8.5's remaining post-merge adoption.
-L8.2-before-I2 and L8.9-before-I3
+F11 is done, satisfying F12's dependency. L8.2-before-I2 and L8.9-before-I3
 are sequencing preferences rather than additional formal dependencies. Do not
 adopt a later policy using a control predating an adopted prerequisite.
 [L9.0.1](specs/L9.0.1-adopt-honest-lockout.md) can proceed alongside this track
@@ -53,7 +52,7 @@ How vulnerable, valuable or urgent is each server?
 with its calibrated policy not adopted after a failed gate;
 the shared breach-consequence signal and supporting fixes remain.
 **Layer 8** is partly done (baiting, shared profiles and tag deterrence are
-done, including L8.4 bounded epochs; L8.5 is required to complete it,
+done, including L8.4 bounded epochs and L8.5 public outcome feedback;
 L8.2 is open, L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic cannot
 price yet.
 
@@ -99,12 +98,6 @@ price yet.
 - **Depends on:** F4, L8.5, F11, F12
 - **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/feature-layer-8-2-remote-deception-profiles.md)
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
-
-### L8.5 Match-local public outcome feedback
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [feature-layer-8-5-match-local-public-outcome-feedback.md](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md)
-- **Goal:** Adjust later posture weights from public outcomes within the current game. Required to complete Layer 8.
 
 ### L8.6 Outcome-calibrated bluff telemetry
 - **Status:** parked
@@ -178,6 +171,7 @@ price yet.
 | L8.4 | Bounded posture epochs | [feature-layer-8-4-bounded-posture-epochs](../backlog/done/feature-layer-8-4-bounded-posture-epochs.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L9.0 | Lockout honesty | [L9.0-lockout-honesty](../backlog/done/L9.0-lockout-honesty.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 | L9.1 | Unpriceable breakers | [L9.1-unpriceable-breakers](../backlog/done/L9.1-unpriceable-breakers.md) | [Corp architecture](architecture.md#server-security-evaluation) |
+| L8.5 | Match-local public outcome feedback | [feature-layer-8-5-match-local-public-outcome-feedback](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 
 ## Foundations (F)
 
@@ -207,17 +201,17 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
-### F11 Paired batch-metric guards
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [F11-paired-batch-metric-guards.md](../backlog/code-review/F11-paired-batch-metric-guards.md)
-- **Goal:** Guard pooled collector metrics against a matching control using paired game resampling, reusable by I2 and later deception gates.
-
 ### F12 Realized defense measurement
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4, F11, L8.4
-- **Ticket:** [F12-realized-defense-measurement.md](../backlog/F12-realized-defense-measurement.md)
+- **Ticket:** [F12-realized-defense-measurement.md](../backlog/code-review/F12-realized-defense-measurement.md)
 - **Goal:** Passively measure agenda/trap ICE-count correlation and distribution distance; supply shared observations and control-only calibration before L8.2 and I2.
+
+### F13 Seeded stall diagnostics and failed-batch reporting
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [F13-seeded-stall-diagnostics.md](specs/F13-seeded-stall-diagnostics.md)
+- **Goal:** Diagnose the observer-independent BTL/Kit seed-257 null-command stall and keep failed-only batch reports printable. Found during F12 control calibration; no seed-specific policy workaround.
 
 ### Done
 
@@ -229,6 +223,7 @@ Shared infrastructure used by every area.
 | F4 | Seeded AI-vs-AI batch harness | [corp_ai_finding_12_seeded_batch_harness](../backlog/done/corp_ai_finding_12_seeded_batch_harness.md) | [architecture.md](architecture.md#foundations) |
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
 | F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
+| F11 | Paired batch-metric guards | [F11-paired-batch-metric-guards](../backlog/done/F11-paired-batch-metric-guards.md) | [architecture: Foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 
