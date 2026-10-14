@@ -29,15 +29,14 @@ is recorded in the done tables and the historical merge plan.
 | Order | Item | Status | Next step / adoption evidence |
 |---|---|---|---|
 | — | [L8.5](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | done (merged) | Revised full gate passed; merge complete |
-| 1 | [F11](../backlog/code-review/F11-paired-batch-metric-guards.md) | in-progress (code review) | Complete review of paired pooled guards and improvement checks |
+| — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
 | 2 | [F12](../backlog/code-review/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
-| 3 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready (blocked on F11, F12) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
+| 3 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready (blocked on F12) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
 | 4 | [I2](specs/I2-ice-selection-by-marginal-security.md) | proposed | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
 | 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
 | 6 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
-F12 is authorized to proceed stacked on F11's implementation while F11 is in
-code review; its formal dependency remains until F11 is done. L8.2-before-I2 and L8.9-before-I3
+F11 is done, satisfying F12's dependency. L8.2-before-I2 and L8.9-before-I3
 are sequencing preferences rather than additional formal dependencies. Do not
 adopt a later policy using a control predating an adopted prerequisite.
 [L9.0.1](specs/L9.0.1-adopt-honest-lockout.md) can proceed alongside this track
@@ -202,12 +201,6 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
-### F11 Paired batch-metric guards
-- **Status:** in-progress
-- **Depends on:** F4
-- **Ticket:** [F11-paired-batch-metric-guards.md](../backlog/code-review/F11-paired-batch-metric-guards.md)
-- **Goal:** Guard pooled collector metrics against a matching control using paired game resampling, reusable by I2 and later deception gates.
-
 ### F12 Realized defense measurement
 - **Status:** in-progress
 - **Depends on:** F4, F11, L8.4
@@ -230,6 +223,7 @@ Shared infrastructure used by every area.
 | F4 | Seeded AI-vs-AI batch harness | [corp_ai_finding_12_seeded_batch_harness](../backlog/done/corp_ai_finding_12_seeded_batch_harness.md) | [architecture.md](architecture.md#foundations) |
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
 | F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
+| F11 | Paired batch-metric guards | [F11-paired-batch-metric-guards](../backlog/done/F11-paired-batch-metric-guards.md) | [architecture: Foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 
