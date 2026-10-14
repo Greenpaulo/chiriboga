@@ -495,7 +495,8 @@ function printComparison(result, quick, only = null, reports = []) {
   }
   const pooledFmt = value => Number(value.toPrecision(10)).toString();
   const batchLine = m => !m ? 'missing' : m.valid === false ? `invalid (${m.why}; ${m.invalidDraws} invalid draws)` :
-    `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]`;
+    ['value', 'low', 'high'].every(k => Number.isFinite(m[k])) ?
+      `${m.value.toFixed(3)} [${m.low.toFixed(3)}, ${m.high.toFixed(3)}]` : 'unavailable';
   const batchMetrics = {...result.batchMetrics};
   for (const name of new Set(reports.flatMap(report => Object.keys(report.batchMetrics || {}))))
     batchMetrics[name] = batchMetrics[name] || {baseline: reports[0].batchMetrics?.[name], candidate: reports[1].batchMetrics?.[name]};

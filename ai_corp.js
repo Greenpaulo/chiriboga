@@ -3471,7 +3471,7 @@ class CorpAI {
     //Existing hosted/native pass mechanisms remain available independently.
     if (inputs.mandatoryCost < Infinity && !inputs.resourcePricing)
       inputs.currentOptions.push({credits: inputs.mandatoryCost, clicks: 0});
-    if (typeof iceCard.AIMandatoryPassCost == "function" && inputs.mandatoryCost < Infinity)
+    if (inputs.resourcePricing && typeof iceCard.AIMandatoryPassCost == "function" && inputs.mandatoryCost < Infinity)
       inputs.currentOptions.push({credits: inputs.mandatoryCost, clicks: 0});
     if (inputs.bypassCost < Infinity)
       inputs.currentOptions.push({credits: inputs.bypassCost, clicks: 0});
@@ -8569,5 +8569,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   emptyArchivesRunPressure: false,
   valuelessServerDebtReset: false,
   postureEpochs: true,
-  matchLocalPostureFeedback: false,
+  matchLocalPostureFeedback: true,
 });

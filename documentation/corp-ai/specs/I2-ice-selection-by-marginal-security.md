@@ -418,8 +418,8 @@ samples are incomplete setup, not evidence that the policy passed.
 | Guard | `corpInsolventTurns` | lower | regression at most 0.5 |
 | Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
 | Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 absolute rho against matching control (provisional until calibration) |
-| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.02 absolute rho (provisional until calibration) |
-| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.02 absolute rho (provisional until calibration) |
+| Guard | `realizedIceByRootType.allCountCorrelation` | lower | candidate-minus-control 95% interval upper bound strictly below 0.02 absolute rho (provisional until calibration) |
+| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | candidate-minus-control 95% interval upper bound strictly below 0.02 absolute rho (provisional until calibration) |
 
 Planned gate command (after F11 and the new collectors exist and the
 calibration above freezes the tolerances; it cannot pass on today's harness):

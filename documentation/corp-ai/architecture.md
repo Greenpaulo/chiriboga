@@ -454,8 +454,8 @@ learn the AI's patterns (see `principles.md` §5).
   a tagged Runner facing a live tag punishment is genuinely at more risk.
 
 **Status:** Layer 8 is only partly done. Baiting (L8.1), the shared agenda/trap
-profiles, tag deterrence (L8.3) and bounded posture epochs (L8.4) are
-implemented. Match-local outcome feedback (L8.5) is required to complete it;
+profiles, tag deterrence (L8.3), bounded posture epochs (L8.4) and
+match-local outcome feedback (L8.5) are implemented;
 legibility signals (L8.2) remain open; telemetry (L8.6) is optional and parked.
 
 **Baiting (L8.1).** Facedown access-punishing cards expose
@@ -514,8 +514,8 @@ lifetime activation caches are unchanged.
 `_postureTelemetryEvent()` feeds the F4 posture collectors through a
 harness-only sink and never affects a decision.
 
-**Match-local feedback (L8.5, option `matchLocalPostureFeedback`, initially
-default off pending its adoption gate).** The engine's
+**Match-local feedback (L8.5, option `matchLocalPostureFeedback`, revised adoption
+gate passed; default on).** The engine's
 `RecordPublicPostureEvent()` sends committed visible events to
 `_recordPublicPostureEvent()`. `_publicPostureHistory` contains only opaque
 ids and scalar event fields, including acting side and turn side; it records
