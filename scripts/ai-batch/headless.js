@@ -147,7 +147,9 @@ function playGame(options) {
       if (options.defenseObserver === 'throw') throw new Error('injected realized observer failure');
       action();
     } catch (error) {
-      const reason = String(error.message || error);
+      let reason = 'Unknown realized observer failure';
+      try { reason = String(error == null ? error : (error.message || error)); }
+      catch (_) { /* thrown values may also have unsafe getters or coercion */ }
       if (defenseErrors.includes(reason)) return;
       defenseErrors.push(reason);
       try { emit('realizedDefenseError', {reason}); } catch (_) { /* gameplay must proceed */ }

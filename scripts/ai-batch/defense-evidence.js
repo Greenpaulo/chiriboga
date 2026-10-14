@@ -34,6 +34,8 @@ function observationIdentity(first, second) {
 }
 
 function measurementEvidence(off, first, second) {
+  for (const [label, report, expected] of [['off', off, 'off'], ['first', first, 'on'], ['second', second, 'on']])
+    if (report.defenseObserver !== expected) throw Error(`Expected ${label} report defenseObserver to be '${expected}'`);
   const identity = observationIdentity(off, first);
   const identityMetrics = compareReports(first, first,
     {guard: Object.fromEntries(Object.keys(collector.directions).map(name => [name, 0.01]))}, [collector]);

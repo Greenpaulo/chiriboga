@@ -10,7 +10,7 @@ const collector = require('../scripts/ai-batch/collectors/realizedIceByRootType'
 const {batchMetrics, compareReports} = require('../scripts/ai-batch/metrics');
 const {calibrateReports} = require('../scripts/ai-batch/calibration');
 const batch = require('../scripts/ai-batch');
-const {observationIdentity} = require('../scripts/ai-batch/defense-evidence');
+const {observationIdentity, measurementEvidence} = require('../scripts/ai-batch/defense-evidence');
 let passed = 0;
 const failures = [];
 async function check(name, test) {
@@ -275,6 +275,23 @@ const clone = value => JSON.parse(JSON.stringify(value));
     assert.throws(() => observationIdentity(first, {...first, codeHash: 'changed'}), /codeHash/);
   });
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'realized-defense-'));
+  await check('measurement evidence requires off/on/on observer arms', () => {
+    const first = report(cohort([0, 1], [0, 1]));
+    Object.assign(first, {defenseObserver: 'on', pairs: ['pair'], failures: [],
+      batchMetrics: batchMetrics([collector], first.games), batchDiagnostics: {}});
+    const off = {...clone(first), defenseObserver: 'off'}, second = clone(first);
+    second.seeds = second.seeds.map(n => n + 100);
+    for (const game of second.games) { game.seed += 100; game.samples[collector.name].gameId += ':second'; }
+    assert.strictEqual(measurementEvidence(off, first, second).identity.pass, true);
+    for (const [index, label] of [[0, 'off'], [1, 'first'], [2, 'second']]) {
+      for (const mode of [undefined, 'throw', index === 0 ? 'on' : 'off']) {
+        const arms = [clone(off), clone(first), clone(second)];
+        arms[index].defenseObserver = mode;
+        assert.throws(() => measurementEvidence(...arms), new RegExp(`Expected ${label} report defenseObserver`));
+      }
+    }
+    assert.throws(() => measurementEvidence(off, off, second), /Expected first report defenseObserver/);
+  });
   await check('gate and --compare reconstruct all four pooled metrics', () => {
     const fair = report(cohort([0, 1], [0, 1], 200)), tell = report(cohort([1, 1], [0, 0], 200));
     for (const [label, r] of [['baseline', tell], ['candidate', fair]]) {
@@ -313,17 +330,28 @@ const clone = value => JSON.parse(JSON.stringify(value));
       __report = function() { return {corpDraws: defenseTestCorpDraws, runnerDraws: defenseTestRunnerDraws,
         engineDraws: defenseTestEngineDraws, mapWrites: defenseTestMapWrites, weakWrites: defenseTestWeakWrites}; };`);
     const records = [];
-    for (const mode of ['off', 'on', 'throw', 'sinkThrow']) {
+    for (const mode of ['off', 'on', 'throw', 'sinkThrow', 'sinkNull', 'sinkUndefined', 'sinkUnsafe']) {
       const events = [];
       const game = await playGame({streamPrefix: '1:gateway', corpFile: pair.corp, runnerFile: pair.runner,
         setFiles, timeoutMs: 120000, observe: true, telemetry: true, setupFile: setup,
         realizedDefenseSnapshot: mode !== 'off', defenseObserver: mode, onEvent: event => {
           events.push(event);
           if (mode === 'sinkThrow' && event.type === 'realizedDefenseSnapshot') throw Error('snapshot sink failed');
+          if (mode.startsWith('sink') && mode !== 'sinkThrow' &&
+              ['realizedDefenseSnapshot', 'realizedDefenseError'].includes(event.type)) {
+            if (mode === 'sinkNull') throw null;
+            if (mode === 'sinkUndefined') throw undefined;
+            throw {get message() { throw Error('unsafe error getter'); }};
+          }
         }});
       assert.ok(game.winner); assert.deepStrictEqual(game.errors, []);
       if (mode === 'on') assert.ok(events.some(event => event.type === 'realizedDefenseSnapshot'));
-      if (['throw', 'sinkThrow'].includes(mode)) assert.ok(game.defenseErrors.length);
+      if (mode === 'throw' || mode.startsWith('sink')) {
+        const reason = {sinkNull: 'null', sinkUndefined: 'undefined', sinkUnsafe: 'Unknown realized observer failure'}[mode];
+        assert.ok(game.defenseErrors.length);
+        if (reason) assert.ok(game.defenseErrors.includes(reason));
+        assert.ok(events.some(event => event.type === 'realizedDefenseError'));
+      }
       records.push({winner: game.winner, turns: game.turns, logHash: game.logHash, report: game.report,
         decisions: events.filter(e => e.type === 'decision').map(e => [e.n, e.side, e.identifier, e.choiceType, e.options, e.chosen])});
     }
