@@ -29,7 +29,7 @@ is recorded in the done tables and the historical merge plan.
 | Order | Item | Next step / adoption evidence |
 |---|---|---|
 | 1 | [L8.5](../backlog/code-review/feature-layer-8-5-match-local-public-outcome-feedback.md) | Revised gate and PR review passed; feedback defaults on; merge and run post-merge adoption |
-| 2 | [F11](../backlog/F11-paired-batch-metric-guards.md) | Paired pooled guards and improvement checks; measurement tests |
+| 2 | [F11](../backlog/code-review/F11-paired-batch-metric-guards.md) | Paired pooled guards and improvement checks; measurement tests |
 | 3 | [F12](../backlog/F12-realized-defense-measurement.md) | Shared realized ICE-count collector, identity checks and control-only calibration |
 | 4 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
 | 5 | [I2](specs/I2-ice-selection-by-marginal-security.md) | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
@@ -208,9 +208,9 @@ Shared infrastructure used by every area.
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
 ### F11 Paired batch-metric guards
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4
-- **Ticket:** [F11-paired-batch-metric-guards.md](../backlog/F11-paired-batch-metric-guards.md)
+- **Ticket:** [F11-paired-batch-metric-guards.md](../backlog/code-review/F11-paired-batch-metric-guards.md)
 - **Goal:** Guard pooled collector metrics against a matching control using paired game resampling, reusable by I2 and later deception gates.
 
 ### F12 Realized defense measurement

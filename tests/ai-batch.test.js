@@ -463,6 +463,69 @@ const EXTRA_DRAW = side => `
     assert.match(strict.out, /FAIL measured no-worse demo.max/);
   });
 
+  await scenario('F11 pooled guards and improvements reach both CLI paths', () => {
+    const f11cli = args => cli(args, {AI_BATCH_CACHE: path.join(tmp, 'f11-cache')});
+    const corr = require('../scripts/ai-batch/collectors/bluffSingleVariableCorrelation');
+    const name = corr.name + '.max';
+    const report = fair => {
+      const rows = Array.from({length: 6}, (_, i) => ({k: 'p', postured: fair ? i % 2 : Number(i >= 3),
+        isAgenda: 0, v: corr.VARIABLES.map(() => i)}));
+      const value = corr.finishBatch([rows]).max;
+      return {poolHash: 'f11-cli', seeds: [1], starts: [], collectors: [corr.name],
+        games: [{ok: true, seed: 1, deckPairId: 'test', logHash: fair ? 'changed' : 'base',
+          metrics: {}, samples: {[corr.name]: rows}}],
+        batchMetrics: {[name]: {value, low: value, high: value, games: 1}}};
+    };
+    const baseline = path.join(tmp, 'f11-baseline.json'), candidate = path.join(tmp, 'f11-candidate.json');
+    fs.writeFileSync(baseline, JSON.stringify(report(false)));
+    fs.writeFileSync(candidate, JSON.stringify(report(true)));
+    for (const checks of [['--guard', name + '=0.02'], ['--improve', name]]) {
+      const result = f11cli(['--compare', baseline, candidate, ...checks, '--ceiling', name + '=1']);
+      assert.strictEqual(result.status, 0, result.out);
+      assert.match(result.out, /paired batch: baseline.*candidate.*difference.*95% interval/);
+      assert.match(result.out, /lower is better; 200 resamples; 0 dropped pairs/);
+      assert.match(result.out, /Gate: passed/);
+    }
+    const identity = f11cli(['--compare', baseline, baseline, '--improve', name]);
+    assert.strictEqual(identity.status, 1, identity.out);
+    assert.match(identity.out, /FAIL improve/);
+    for (const checks of [['--guard', name + '=0.02'], ['--improve', name]]) {
+      const gate = f11cli(['gate', '--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--quick',
+        '--corp-option', TEST_OPTION + '=true', '--collector', corr.name, ...checks]);
+      assert.strictEqual(gate.status, 1, gate.out);
+      assert.match(gate.out, /paired batch:/);
+      assert.doesNotMatch(gate.out, /unknown metric|Unknown collector/);
+      assert.match(gate.out, /Gate: indicative only/);
+    }
+    // Synthetic cached reports exercise passing pooled statistics in gate's
+    // orchestration. These are test data, never game evidence for adoption.
+    const cache = path.join(tmp, 'f11-cache');
+    for (const file of fs.readdirSync(cache).filter(file => file.endsWith('.json'))) {
+      const cached = JSON.parse(fs.readFileSync(path.join(cache, file), 'utf8'));
+      if (JSON.stringify(cached.collectors) !== JSON.stringify([corr.name])) continue;
+      const synthetic = report(Boolean(cached.options.corp[TEST_OPTION]));
+      cached.games.forEach(game => {
+        game.ok = true; game.samples = synthetic.games[0].samples; game.logHash = synthetic.games[0].logHash;
+      });
+      cached.batchMetrics = synthetic.batchMetrics;
+      fs.writeFileSync(path.join(cache, file), JSON.stringify(cached));
+    }
+    for (const checks of [['--guard', name + '=0.02'], ['--improve', name]]) {
+      const gate = f11cli(['gate', '--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--quick',
+        '--corp-option', TEST_OPTION + '=true', '--collector', corr.name, ...checks]);
+      assert.strictEqual(gate.status, 1, gate.out);
+      assert.match(gate.out, /PASS (guard|improve) bluffSingleVariableCorrelation.max/);
+      assert.match(gate.out, /paired batch:/);
+      assert.match(gate.out, /Gate: indicative only/);
+    }
+    const unsafe = {...report(false), collectors: ['../metrics']};
+    fs.writeFileSync(baseline, JSON.stringify(unsafe));
+    fs.writeFileSync(candidate, JSON.stringify(unsafe));
+    const invalidName = f11cli(['--compare', baseline, candidate, '--improve', '../metrics.max']);
+    assert.strictEqual(invalidName.status, 2, invalidName.out);
+    assert.match(invalidName.out, /Invalid collector name/);
+  });
+
   await scenario('5d. posture collectors: violations, horizon locks and single-variable correlation', async () => {
     const perEpoch = require('../scripts/ai-batch/collectors/postureDecisionsPerEpoch');
     const locked = require('../scripts/ai-batch/collectors/postureLockedPastHorizon');
@@ -587,8 +650,11 @@ const EXTRA_DRAW = side => `
   await scenario('9. telemetry and observation change no decision and consume no randomness', async () => {
     const quiet = await game({telemetry: false, observe: false, setupFile: setupFile('record', RECORD)});
     let decisions = 0;
-    const loud = await game({onEvent: e => { if (e.type === 'decision') decisions++; }, setupFile: setupFile('record', RECORD)});
+    const corr = require('../scripts/ai-batch/collectors/bluffSingleVariableCorrelation');
+    const collectorState = {};
+    const loud = await game({onEvent: e => { corr.onEvent(e, collectorState); if (e.type === 'decision') decisions++; }, setupFile: setupFile('record', RECORD)});
     assert.ok(decisions > 0, 'telemetry recorded decisions');
+    corr.finishBatch([corr.samples(collectorState)]);
     assert.strictEqual(loud.logHash, quiet.logHash);
     assert.deepStrictEqual(loud.report, quiet.report, 'same AI-stream consumption');
   });

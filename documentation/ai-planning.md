@@ -214,7 +214,20 @@ Rules for form 2:
   the measured candidate value must be at most the measured fresh matching
   baseline. Preregister this statistic explicitly; both arms' 95% intervals
   are context, not a paired confidence-bound guard or statistical
-  non-inferiority claim. F11's proposed paired guards remain distinct.
+  non-inferiority claim. F11's paired pooled guards remain distinct.
+- **Paired pooled rows** use `--guard <metric>=<tolerance>` or `--improve
+  <metric>` for a collector's pooled statistic, with a declared direction.
+  F11 recomputes both arms from matching successful game pairs with shared
+  bootstrap game indices. Guards require the oriented 95% lower bound strictly
+  above `-tolerance`; improvements require it strictly above zero. Undefined
+  original statistics or bootstrap draws fail closed. These rows do not amend
+  existing source gates or replace L8.4's settled measured maximum check.
+- **Control-only calibration** is separate from adoption. Matching-seed identity
+  checks test the measurement code, not noise. Disjoint baseline seed cohorts
+  use the independent deck-pair/fixture-stratified bootstrap described in
+  [ai-batch-harness.md](ai-batch-harness.md#for-agents-adding-a-metric); freeze
+  consumer-specific coverage, sample sizes and margins before seeing candidate
+  results. Adoption reports still require matching seeds.
 - **Latency is not a standard guard** (F9 proposes a deterministic work guard
   in its place). `gate` may reuse a cached baseline
   timed on a differently loaded machine, so a latency guard is only meaningful
