@@ -1319,7 +1319,8 @@ class RunCalculator {
     var spentOutside = icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0;
     var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit,
       icePoint.restrictedCreditsSpent || 0, remainingPrevention, Number(spentOutside),
-      icePoint.persistents.filter(p => p.action === "breakIncome").map(p => p.use.title).join(",")].join(":");
+      icePoint.persistents.filter(p => p.action === "breakIncome")
+        .map(p => this.precalculated.activeCards.indexOf(p.use)).sort((a, b) => a - b).join(",")].join(":");
     var routes = data.continuationCache.get(cacheKey);
     if (!routes) {
       var future = new RunCalculator();

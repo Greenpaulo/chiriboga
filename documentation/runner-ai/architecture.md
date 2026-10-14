@@ -449,4 +449,6 @@ Public successful-run benefits use `ServerSuccessfulRunPrevented(server)`,
 which queries rezzed, enabled upgrades through `AIPreventsSuccessfulRun`.
 Crisium Grid and Flagship both declare that capability. Finite-run continuation
 caches distinguish remaining meat-damage prevention and consumed outside-credit
-damage opportunities as well as credit, click and damage budgets.
+damage opportunities as well as credit, click and damage budgets. Consumed
+break-income sources are keyed by card object identity within the active-card
+snapshot, independent of persistent order; same-title copies remain distinct.

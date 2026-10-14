@@ -352,6 +352,39 @@ async function main() {
   c.currentPhase = c.phases.runEnds; c.currentPhase.Init();
   assert(c.removedFromGame.includes(prevented));
 
+  // Same-title income sources can have different per-instance gains. Reusing
+  // the continuation for the other spent copy must not change the run budget.
+  reset(); card(36004, c.runner.rig.programs);
+  const rebateA = card(36003, c.runner.rig.hardware);
+  const rebateB = card(36003, c.runner.rig.hardware);
+  rebateA.AIRunBreakCreditGain = () => 1;
+  rebateB.AIRunBreakCreditGain = () => 2;
+  card(31077, c.corp.HQ.ice).rezzed = true;
+  const cacheStop = card(31077, c.corp.HQ.ice); cacheStop.rezzed = true;
+  run('this.cacheRC = new RunCalculator(); cacheRC.suppressOutput = true; cacheRC._runnerPlanning = true;');
+  c.cacheRC.Calculate(c.corp.HQ, 3, 10, 0, 0, 0, false, null);
+  const continuationData = {server: c.corp.HQ, clickLimit: 3, poolCreditLimit: 10,
+    otherCredits: 0, damageLimit: 0, tagLimit: 0};
+  function afterUsing(sources) {
+    const point = c.cacheRC.EmptyPoint(0);
+    point.persistents = sources.map(use => ({use, action: 'breakIncome'}));
+    return c.cacheRC._finiteRunContinuations(continuationData, point, cacheStop);
+  }
+  const afterA = afterUsing([rebateA]);
+  const afterB = afterUsing([rebateB]);
+  assert(afterA.length && afterB.length, 'both continuations are feasible');
+  const reserve = paths => Math.min(...paths.map(route => route.runner_credits_reserved));
+  assert.strictEqual(reserve(afterB) - reserve(afterA), 1,
+    'the remaining copy determines the future payment budget');
+  assert.strictEqual(continuationData.continuationCache.size, 2,
+    'same-title copies require distinct continuation entries');
+  afterUsing([rebateA, rebateB]);
+  afterUsing([rebateB, rebateA]);
+  assert.strictEqual(continuationData.continuationCache.size, 3,
+    'the same spent-source set shares an entry regardless of order');
+  assert.strictEqual(rebateA.usedThisTurn, false);
+  assert.strictEqual(rebateB.usedThisTurn, false);
+
   // Finite-repeat continuation carries the spent once-per-turn rebate.
   for (const pool of [1, 2]) {
     reset(); card(36004, c.runner.rig.programs); card(36003, c.runner.rig.hardware);
