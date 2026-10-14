@@ -23,7 +23,7 @@ Local `bench/` and `~/bench/` copies remain working copies; additional artifacts
 outside the archive need separate backup. Root `.gitignore` excludes `bench/`.
 
 This investigation is tracked separately from the F4 harness in
-[its review ticket](../backlog/code-review/corp_ai_regression_investigation.md).
+[its review ticket](../backlog/done/corp_ai_regression_investigation.md).
 
 The owner runs batches. These documents and archived scripts do not authorize
 an agent to start or poll a batch. The option implementation and its completed

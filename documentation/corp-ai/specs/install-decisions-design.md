@@ -78,6 +78,12 @@ receive them.
 
 I0 must record the corrected default and effective options before collecting
 the install-series baseline; I1's compatibility path must preserve that policy.
+I0's baseline (done 2026-10-09, all five options `false` in its recorded
+options) is the F4 report
+[`tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json`](../../../tests/fixtures/ai-batch/baselines/core-v1-64507f63a8bb962a.json)
+with the I0 collectors, and the install-decision snapshots
+[`tests/fixtures/corp-install-baseline.json`](../../../tests/fixtures/corp-install-baseline.json);
+see [ai-batch-harness.md](../../ai-batch-harness.md#install-series-collectors-and-baselines-i0).
 I9 must compare its combined policy against the corrected baseline, not inherit
 old-tip strength claims. Do not turn a legacy gate on just to satisfy an old
 fixture: those fixtures now explicitly request the historical policy.
@@ -237,17 +243,14 @@ starting):
 
 - `_criticalBreachDefenseAction()` already scores post-install risk per ICE: it
   subtracts the install cost from `corp.creditPool`, pushes the ICE onto
-  `risk.server.ice`, calls `_centralBreachLossRisk()` and restores in a manual
-  `try/finally`. I2 moves this onto the shared helper and makes the critical
-  check read I2's candidate evaluation instead of running a second one.
-- `_iceInstallScore()` pushes a fake `{ice: [ice], root: []}` remote onto
-  `corp.remoteServers` with no guard; it is reachable only through
-  `_bestIceToInstall()`, which nothing calls. I2 deletes both.
-- `Phase_Main`'s "just need a tiny bit more cash" probe adds credits and compares
-  two `_rankedInstallOptions()` arrays with `<` (string coercion). It now
-  restores credits and hypothetical depth in `finally`; it still uses a manual
-  probe rather than `_withHypothetical()`. F2 owns that migration; I7.1 replaces
-  the decision.
+  `risk.server.ice`, calls `_centralBreachLossRisk()` and restores through
+  `_withHypothetical()` (F2). I2 makes the critical check read I2's candidate
+  evaluation instead of running a second one.
+- The uncalled `_iceInstallScore()`/`_bestIceToInstall()` pair was deleted by
+  F2.
+- `Phase_Main`'s "just need a tiny bit more cash" probe adds credits through
+  `_withHypothetical()` and compares install-option counts (F2 fixed the
+  mechanics); I7.1 replaces the decision.
 - `_ordinaryPurgeOutcome()` already uses `_withHypothetical()` and is the model
   to follow.
 
@@ -308,15 +311,15 @@ legacy relative order.
 | --- | --- | --- |
 | `securityGain` | 0 to 8 | `8 × securityDelta × consequenceWeight` (I2, I6) |
 | `securityDelta` | 0 to 1 | `0.6 × lockout + 0.25 × breakCost + 0.15 × bypass` |
-| `lockout` | 0, 0.7 or 1 | 1 if the server goes from not secure to a hard lockout, 0.7 to a soft credit lockout, per `_evaluateServerSecurity()` after the L1.1 rez budget |
-| `breakCost` | 0 to 1 | increase in `totalMandatoryBreakCost` divided by `max(1, runnerCredits)`, capped at 1 |
+| `lockout` | 0, 0.7 or 1 | 1 if the server goes from not secure to a hard lockout, 0.7 to a soft credit lockout, per `_evaluateServerSecurity()` after the L1.1 rez budget. I2 specializes this to `honestLockout`/`honestIsSecure`, including soft click/resource limits, behind its own option; other consumers retain their specified verdict |
+| `breakCost` | 0 to 1 | increase in `totalMandatoryBreakCost` divided by `max(1, runnerCredits)`, capped at 1. I2 uses finite known `honestMandatoryBreakCost` deltas instead; unknown/non-finite costs earn no numeric delta and lockout is scored separately |
 | `bypass` | 0 to 1 | decrease in `structuralRisk + publicThreatRisk`, capped at 1 |
-| `consequenceWeight` | 0.25 to 1 | `0.25 + 0.75 × breachConsequence`, where `breachConsequence` (0 to 1) is `_breachConsequence(server).weight`, the evaluator signal L7.1 owns (L3.5.1 also consumes it); install planning adds no weighting of its own |
+| `consequenceWeight` | 0.25 to 1 | Remotes and Archives: `0.25 + 0.75 × breachConsequence`, where `breachConsequence` (0 to 1) is `_breachConsequence(server).weight`, the evaluator signal L7.1 owns (L3.5.1 also consumes it). Active bait/bluff remotes: common weight 1 for agenda and trap, constrained by the current-epoch `targetIce` count cap and I2's ordinary-ranking substitution invariant for equivalent mechanics, costs and reserves (true stakes remain authoritative for safety). HQ and R&D: 1 unless a separately gated option weights them. Used only inside candidate scores, never in `_protectionScore()` (L7.1's failure analysis); install planning adds no further weighting beyond the explicit I2 posture exception |
 | `futureValue` | 0 to 1 | delayed or bluff value of ICE that cannot be rezzed in the projected budget (it earns no `lockout` or `breakCost`) |
 | `scoringValue` | 0 to 8 | I4: `2 × agendaPoints × planCompletion`, where `planCompletion` is 1 when the completion plan finishes with no exposed Runner turn, 0.5 with one, and 0 otherwise |
 | `economyValue` | -4 to 8 | I5: expected return over expected lifetime minus install, rez and activation costs (clicks at `CLICK_VALUE`) |
 | `trapValue` | 0 to 4 | I5: punishment severity times the probability of attracting a run; never feeds `securityGain` |
-| `deceptionValue` | 0 to 1 | bounded input from the existing deception profiles (`_deceptionInstallDistance()`, `_remoteDeceptionProfile()`) |
+| `deceptionValue` | 0 to 1 | bounded symmetric placeholder from the existing deception profiles (`_deceptionInstallDistance()`, `_remoteDeceptionProfile()`). [L8.8](L8.8-marginal-deception-value.md) separately proposes a shared marginal concealment input after I2 adoption; private trap payoff remains with `trapValue`, and overlapping `futureValue` must be removed on adoption. No helper or evaluated-payoff model exists yet |
 | `installCost` | -8 to 0 | `-min(8, actualInstallCost)`; `actualInstallCost` is also recorded separately in `scoreBreakdown` for diagnostics, but only this bounded component enters the score |
 | `reserveCost` | -6 to 0 | credits that must stay available for existing rez obligations (the L1.1 shared unrezzed-ICE budget) and for post-rez spending that cards declare with `AIReserveCredits` (read through `_reserveCreditsForCard()`), counted only when spending now pushes the Corp below them |
 | `opportunityCost` | -4 to 0 | clicks beyond the first at `CLICK_VALUE`, plus I3's value of a role the install displaces (for example the only scoring remote) |

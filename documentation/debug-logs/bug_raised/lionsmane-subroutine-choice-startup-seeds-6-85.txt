@@ -1,0 +1,36 @@
+Diagnostic record, 2026-10-08, c47f80d with working-tree changes.
+This is an archived diagnostic excerpt, not a full game debug dump.
+
+Batch: node scripts/ai-batch.js --pool tests/fixtures/ai-batch/deck-pool-startup-format.json --pairs jin-anarch,haas-crim,wey-anarch --out /tmp/startup-bad-publicity-full.json
+Result: 600 games, 598 completed, 2 failed.
+Failures: jin-anarch seeds 6 and 85, Cannot read properties of undefined (reading 'length').
+
+Both seeds were replayed independently with playGame:
+streamPrefix: 6:jin-anarch or 85:jin-anarch
+corpFile: [Startup] Going to School.js
+runnerFile: [Startup] High Pressure Ryo.js
+setFiles: sets/systemgateway.js, sets/elevation.js, sets/vantagepoint.js
+timeoutMs: 30000
+
+Instrumentation wrapped RunnerAI._internalChoiceDetermination with an async
+try/await/catch, recording the choice state and rethrowing the original error.
+Wrappers around phases.runSubroutines.Enumerate.trigger and Resolve.trigger
+recorded counter changes without modifying the underlying return values.
+Both seeds showed the same boundary:
+phase: Run Subroutines
+ice: Lionsmane
+subroutine at AI entry and rejection: 4
+offered choices: [{id:1,label:Jack out},{id:0,label:Take 2 net damage}]
+modeled sr: [[[netDamage,netDamage]],[[payCredits,payCredits,payCredits],[netDamage,netDamage]],[[endTheRun],[netDamage,netDamage]]]
+Recent Resolve.trigger counter changes: 0->1, 1->2, 2->3, 3->4.
+
+TypeError: Cannot read properties of undefined (reading 'length')
+    at RunnerAI._internalChoiceDetermination (ai_runner.js:1672:37)
+    at RunnerAI._computeChoice (ai_runner.js:2882:9)
+    at RunnerAI.SelectChoice (ai_runner.js:2941:9)
+    at MakeChoice (command.js:805:18)
+    at Execute (command.js:36:5)
+
+The focused pending reproduction reconstructs this AI choice boundary using
+the real RunnerAI method and Lionsmane AIImplementIce hook. It independently
+fails with the same TypeError; it does not reproduce the preceding counter drift.

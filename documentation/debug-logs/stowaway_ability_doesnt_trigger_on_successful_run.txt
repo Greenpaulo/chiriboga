@@ -1,0 +1,406 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Hiram “0mission” Svensson: Shadow of the Past,1 Mutual Favor,2 Carmen,3 Creative Commission,3 VRcation,3 DZMZ Optimizer,2 Unity,2 Jailbreak,2 Overclock,3 Sure Gamble,1 Clean Getaway,3 Maglectric Rapid (748 Mod),3 Ritual,2 GAMEDRAGON™ Pro,2 Principia,3 Methuselah,2 Touchstone,3 Read-Write Share,2 Sipa,3 Stowaway]
+[AU Co.: The Gold Standard in Clones,1 Longevity Serum,3 Hansei Review,2 Anoetic Void,3 Spin Doctor,3 Offworld Office,3 Orbital Superiority,3 Regolith Mining License,3 Tithe,2 Whitespace,3 Hedge Fund,3 Sericulture Expansion,2 Byte!,3 Phật Gioan Baotixita,2 Empiricist,3 Semak-samun,3 Measured Response,1 Flyswatter,3 Lamplighter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 4.75; fresh-hand expectation 4.98
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Hedge Fund,Sericulture Expansion,Semak-samun,Orbital Superiority,Phật Gioan Baotixita]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Creative Commission,Maglectric Rapid (748 Mod),Stowaway,Stowaway,Ritual]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 3 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Sericulture Expansion,Offworld Office,Phật Gioan Baotixita,Orbital Superiority]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Creative Commission,Maglectric Rapid (748 Mod),Stowaway,Stowaway,Ritual]
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Regolith Mining License accessed
+Runner spent 3 credits
+Regolith Mining License trashed
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Whitespace accessed
+Run ends
+Runner spent one click
+Runner spent one credit
+Runner installed Maglectric Rapid (748 Mod)
+Look at the top card of R&D triggered
+Hiram “0mission” Svensson: Shadow of the Past looks at the top card of R&D
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Sericulture Expansion,Offworld Office,Phật Gioan Baotixita,Orbital Superiority]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [Stowaway,Stowaway,Ritual]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Orbital Superiority,Tithe,Offworld Office,Phật Gioan Baotixita,Sericulture Expansion]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [Stowaway,Stowaway,Ritual]
+Runner spent one click
+Played Ritual
+Runner drew 3 cards
+Runner spent one click
+Runner spent 2 credits
+Runner installed Touchstone
+Look at the top card of R&D triggered
+Hiram “0mission” Svensson: Shadow of the Past looks at the top card of R&D
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Orbital Superiority,Tithe,Offworld Office,Phật Gioan Baotixita,Sericulture Expansion]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Stowaway,Stowaway,Methuselah,Sure Gamble]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Petty Cash,Offworld Office,Sericulture Expansion,Orbital Superiority,Phật Gioan Baotixita]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Stowaway,Stowaway,Methuselah,Sure Gamble]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+1 credit placed on Touchstone
+Runner gained 9 credits
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 4 credits
+Runner installed Methuselah
+Look at the top card of R&D triggered
+Hiram “0mission” Svensson: Shadow of the Past looks at the top card of R&D
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Petty Cash,Offworld Office,Sericulture Expansion,Orbital Superiority,Phật Gioan Baotixita]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Stowaway,Stowaway,DZMZ Optimizer,Ritual]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Orbital Superiority,Phật Gioan Baotixita,Offworld Office,Sericulture Expansion,Petty Cash]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Stowaway,Stowaway,DZMZ Optimizer,Ritual]
+Runner spent one click
+Played Ritual
+1 credit placed on Touchstone
+Runner drew 3 cards
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+Look at the top card of R&D triggered
+Hiram “0mission” Svensson: Shadow of the Past looks at the top card of R&D
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played VRcation
+Runner drew 4 cards
+Runner lost no clicks
+Runner discarded Methuselah
+Runner discarded Stowaway
+Runner discarded Stowaway
+Runner discarded Sipa
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Orbital Superiority,Phật Gioan Baotixita,Offworld Office,Sericulture Expansion,Petty Cash]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 5 card(s) in hand: [Stowaway,Touchstone,Sure Gamble,Unity,Maglectric Rapid (748 Mod)]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Offworld Office,Phật Gioan Baotixita,Orbital Superiority,Sericulture Expansion,Offworld Office]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 5 card(s) in hand: [Stowaway,Touchstone,Sure Gamble,Unity,Maglectric Rapid (748 Mod)]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+1 credit placed on Touchstone
+Runner gained 9 credits
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 17 credit(s) and 5 card(s) in hand: [Offworld Office,Phật Gioan Baotixita,Orbital Superiority,Sericulture Expansion,Offworld Office]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Stowaway,Touchstone,Unity,Maglectric Rapid (748 Mod)]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 18 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Offworld Office,Phật Gioan Baotixita,Orbital Superiority]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Stowaway,Touchstone,Unity,Maglectric Rapid (748 Mod)]
+Runner spent one click
+Runner installed Stowaway
+Runner spent one click
+Runner spent 3 credits
+Runner installed Unity
+Runner spent one click
+Run initiated attacking R&D
+You may trash hardware from your grip to place 2[c] triggered
+Touchstone trashed
+Look at the top card of R&D triggered
+Hiram “0mission” Svensson: Shadow of the Past looks at the top card of R&D
+2 credits placed on Methuselah
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Whitespace
+Encountering Whitespace
+Using Unity:
+Runner spent one credit from Methuselah
+Subroutine The Runner loses 3[c]. broken
+Using Unity:
+Runner spent one credit from Methuselah
+Subroutine If the Runner has 6[c] or less, end the run. broken
+Approaching R&D
+Run successful
+Measured Response accessed
+Runner spent 3 credits from Touchstone
+Measured Response trashed
+Run ends
+Runner spent one click
+Run initiated attacking R&D
+You may trash hardware from your grip to place 2[c] triggered
+Maglectric Rapid (748 Mod) trashed
+Look at the top card of R&D triggered
+Hiram “0mission” Svensson: Shadow of the Past looks at the top card of R&D
+2 credits placed on Methuselah
+Approaching outermost piece of ice protecting R&D
+Encountering Whitespace
+Using Unity:
+Runner spent one credit from Methuselah
+Subroutine The Runner loses 3[c]. broken
+Using Unity:
+Runner spent one credit from Methuselah
+Subroutine If the Runner has 6[c] or less, end the run. broken
+Approaching R&D
+Run successful
+Hansei Review accessed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 16 credit(s) and 5 card(s) in hand: [Offworld Office,Sericulture Expansion,Offworld Office,Phật Gioan Baotixita,Orbital Superiority]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for R&D
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: [1.3857142857142848]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 5 card(s) in hand: [Phật Gioan Baotixita,Offworld Office,Offworld Office,Sericulture Expansion,Orbital Superiority]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 0 card(s) in hand: []
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Longevity Serum]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(36017, [30020,35026,30030,35026,30021,36020,36024,36024,36023,30030,36021,35019], [30029,30015,30021,30021,30026,36023,30011,35014,30028,35032,36022,35032,30030,30028,36022,35026,30029,35027,35019,30022,30022,30020,35027,30020,36022,30015,36020], [], [35019,36021,36020,30022,30026], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [30075,30071,35081,35078,30048], [35081,35050,35079,35049,30071,30075,35078,30075,30068,30073,30050,30068,30053,30071,35052,35051,30048,30074,30053,35081,35050,30073,30067,30048,30050,30053,35054,35080,35049,35080,35051,35054,35078], [35051,30067,30067,35049,30068], [], [30074], [35054,30073], [[30044,35080,35052]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[10].hostedCards = [];
+runner.stack[14].hostedCards = [];
+runner.stack[24].hostedCards = [];
+runner.heap[10].host=null;
+runner.heap[11].host=null;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[1].host=null;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[3].host=null;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.ice[0].hostedCards = [];
+InstanceCardsPush(36024,corp.RnD.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.RnD.ice[0];
+corp.RnD.ice[0].hostedCards[0].faceUp=true;
+corp.RnD.ice[0].hostedCards[0].host=corp.RnD.ice[0];
+corp.remoteServers[0].root[0].advancement=1;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.remoteServers[0].root[0].AICardsDiscarded=[];
+corp.remoteServers[0].root[0].AIScoringPlanCommitted=true;
+corp.RnD.AISuccessfulRuns=4;
+
+Version reference: Wed Oct 07 2026 09:01:43 GMT+0100 (British Summer Time)

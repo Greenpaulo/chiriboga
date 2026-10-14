@@ -9,7 +9,8 @@ const {spawnSync} = require('child_process');
 const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems} = require('../scripts/ticket.js');
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
+  outcomeLine, failedGateResult, outcomeProblem} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -93,6 +94,27 @@ assert(!reproductionExpectationsMatch('tests/example.test.js', reproductionBefor
 const fixtureExpectations = ['// EXPECT: install', '// EXPECT_CARD: Hedge Fund'];
 assert(!reproductionExpectationsMatch('tests/fixtures/example.txt', fixtureExpectations,
   fixtureExpectations.slice().reverse()), 'ticket.js rejects reordered fixture EXPECT lines');
+
+assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --start-tag hosted-card-on-ice --budget 1400`'), [],
+  'ticket.js accepts --start-tag naming tags a committed board has');
+assert.strictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --start-tag no-such-tag`').length, 1,
+  'ticket.js rejects --start-tag naming tags no board has');
+// A failed gate: the option must be gone, and the Outcome line is read.
+assert.strictEqual(outcomeLine('# T\n\n**Outcome:** not adopted — gate failed\n'), 'not adopted — gate failed');
+assert.strictEqual(outcomeLine('# T\n'), undefined, 'a ticket without an Outcome line has none');
+assert.strictEqual(failedGateResult('x', 'false')[0], 'FAIL', 'a failed option still in the code fails the check');
+assert.strictEqual(failedGateResult('x', undefined)[0], 'PASS', 'a removed failed option passes');
+for (const code of ['if (this.options.x) act();', 'if (this.options["x"]) act();', 'const {x} = this.options;']) {
+  assert.strictEqual(failedGateResult('x', undefined, code)[0], 'FAIL', 'a branch without its default is still present');
+}
+assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.extra) act();')[0], 'PASS',
+  'similarly named options do not count as the removed option');
+assert.strictEqual(outcomeProblem(undefined, 'failed — `x` removed')[0], 'FAIL');
+assert.strictEqual(outcomeProblem('adopted', 'failed — `x` removed')[0], 'FAIL');
+assert.strictEqual(outcomeProblem('blocked — follow-up', 'failed — `x` removed')[0], 'FAIL');
+assert.strictEqual(outcomeProblem('not adopted — gate failed', 'failed — `x` removed'), null);
+assert.strictEqual(outcomeProblem(undefined, 'pending F4')[0], 'WARN');
+assert.strictEqual(outcomeProblem('adopted', 'passed — `x`'), null);
 
 for (const [before, after] of [
   ["expect(choice).toBe('install');", "expect(choice).toBe('gain');"],

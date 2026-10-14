@@ -18,6 +18,9 @@ context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.AllottedClicks = () => 4;
 vm.createContext(context);
+// AI utilities used by card helpers (guarded hypothetical wrappers).
+const runnerSource = fs.readFileSync(path.join(root, 'ai_runner.js'), 'utf8');
+vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), context);
 ['config.js', 'sets/creationandcontrol.js', 'sets/vantagepoint.js', 'ai_corp.js'].forEach(file =>
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {};', context);

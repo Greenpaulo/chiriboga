@@ -32,13 +32,15 @@ async function scenario(name, fn) {
 }
 
 const gateway = pool.pairs.find(p => p.id === 'gateway');
+// A no-op Corp option the harness adds for its own tests (AI_BATCH_TEST_OPTION).
+const TEST_OPTION = 'harnessTestOption';
 const game = (extra = {}) => playGame(Object.assign({streamPrefix: '1:gateway', corpFile: gateway.corp,
-  runnerFile: gateway.runner, setFiles, timeoutMs: 120000, observe: true, telemetry: true}, extra));
+  runnerFile: gateway.runner, setFiles, timeoutMs: 120000, observe: true, telemetry: true, testOption: TEST_OPTION}, extra));
 
 function cli(args, env = {}) {
   const result = spawnSync(process.execPath, [script, ...args], {encoding: 'utf8',
     timeout: 180000,
-    env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache')}, env)});
+    env: Object.assign({}, process.env, {AI_BATCH_CACHE: path.join(tmp, 'cache'), AI_BATCH_TEST_OPTION: TEST_OPTION}, env)});
   return {status: result.status, out: (result.stdout || '') + (result.stderr || '')};
 }
 
@@ -83,6 +85,154 @@ const EXTRA_DRAW = side => `
 `;
 
 (async () => {
+  await scenario('F3 collector distinguishes requests from work and filters main commands', () => {
+    const collector = require('../scripts/ai-batch/collectors/evaluatorCallCount');
+    const state = {};
+    collector.onEvent({type: 'gameStart'}, state);
+    const event = {type: 'decision', side: 'corp', identifier: 'Corp 2.2', choiceType: 'command',
+      securityEvaluation: {requests: 12, computations: 3}};
+    collector.onEvent(event, state);
+    collector.onEvent(Object.assign({}, event, {securityEvaluation: {requests: 8, computations: 1}}), state);
+    for (const change of [{side: 'runner'}, {identifier: 'Corp 2.1'}, {choiceType: 'select'}])
+      collector.onEvent(Object.assign({}, event, change), state);
+    assert.deepStrictEqual(collector.finish(state), {mainDecisions: 2, requests: 20, computations: 4,
+      requestsPerMainDecision: 10, computationsPerMainDecision: 2});
+    assert.throws(() => collector.onEvent(Object.assign({}, event, {securityEvaluation: null}), state), /Missing/);
+    assert.throws(() => collector.finish(state), /Missing/);
+  });
+  await scenario('F3 gate fails on changed decisions, missing evidence, poor savings or latency', () => {
+    const report = (computations, ms) => ({poolHash: 'pool', seeds: [1], starts: [], collectors: ['evaluatorCallCount'],
+      failures: [], pairs: ['gateway'], codeHash: 'same-code', games: [{deckPairId: 'gateway', seed: 1, ok: true, logHash: 'same', decisionHash: 'choices',
+        metrics: {'evaluatorCallCount.mainDecisions': 2, 'evaluatorCallCount.computationsPerMainDecision': computations,
+          'decisionLatencyMs.corp.mean': ms}}]});
+    const off = report(10, 10), on = report(4, 3), verify = report(10, 11);
+    off.securityCache = 'off'; on.securityCache = 'on'; verify.securityCache = 'verify';
+    assert(batch.checkSecurityCacheGate(off, on, verify).pass);
+    for (const arm of [0, 1, 2]) {
+      for (const metric of ['evaluatorCallCount.computationsPerMainDecision', 'decisionLatencyMs.corp.mean']) {
+        for (const value of [undefined, null, NaN, Infinity, -Infinity]) {
+          const reports = [off, on, verify].map(r => JSON.parse(JSON.stringify(r)));
+          reports[arm].games[0].metrics[metric] = value;
+          assert.strictEqual(batch.checkSecurityCacheGate(...reports).pass, false,
+            `${reports[arm].securityCache} arm must reject ${metric}=${value}`);
+        }
+      }
+    }
+    for (const change of [r => {r.games[0].decisionHash = 'changed';}, r => {r.games[0].logHash = 'changed';},
+      r => {r.quick = true;}, r => {r.games[0].ok = false;}, r => {r.games = [];},
+      r => {r.games[0].metrics['evaluatorCallCount.computationsPerMainDecision'] = 6;},
+      r => {r.games[0].metrics['decisionLatencyMs.corp.mean'] = 11;},
+      r => {r.games[0].metrics['evaluatorCallCount.mainDecisions'] = 0;}]) {
+      const bad = JSON.parse(JSON.stringify(on)); change(bad);
+      assert(!batch.checkSecurityCacheGate(off, bad, verify).pass);
+    }
+    verify.games[0].decisionHash = 'bad verification';
+    assert(!batch.checkSecurityCacheGate(off, on, verify).pass);
+  });
+  await scenario('F3 instrumented cache modes preserve real Gateway choices', async () => {
+    const results = [];
+    for (const mode of ['off', 'on', 'verify']) {
+      const events = [];
+      const result = await game({securityCache: mode, evaluatorTelemetry: true, onEvent: e => events.push(e)});
+      assert(result.winner); assert.deepStrictEqual(result.errors, []);
+      const choices = events.filter(e => e.type === 'decision').map(e =>
+        [e.side, e.identifier, e.choiceType, Array.from(e.options), e.chosen]);
+      const main = events.filter(e => e.type === 'decision' && e.side === 'corp' && e.identifier === 'Corp 2.2' && e.choiceType === 'command');
+      assert(main.length > 0);
+      const totals = main.reduce((s, e) => ({requests: s.requests + e.securityEvaluation.requests,
+        computations: s.computations + e.securityEvaluation.computations}), {requests: 0, computations: 0});
+      results.push({hash: result.logHash, choices, totals});
+    }
+    assert.deepStrictEqual(results[0].choices, results[1].choices);
+    assert.deepStrictEqual(results[0].choices, results[2].choices);
+    assert.strictEqual(results[0].hash, results[1].hash);
+    assert.strictEqual(results[0].hash, results[2].hash);
+    assert(results[1].totals.computations < results[0].totals.computations);
+    assert.deepStrictEqual(results[0].totals, results[2].totals);
+  });
+
+  await scenario('missing deck definitions fail before games; pair ids must be unique', () => {
+    const invalidDeck = setupFile('missing-cards', 'registerPrecon(' + JSON.stringify({
+      identity: '99999', cards: {'99998': 3},
+    }) + ');');
+    const invalidFile = path.relative(path.join(root, 'precons'), invalidDeck);
+    const testPool = Object.assign({}, pool, {pairs: [gateway,
+      {id: 'missing', corp: invalidFile, runner: gateway.runner}]});
+    const file = path.join(tmp, 'missing-pool.json');
+    fs.writeFileSync(file, JSON.stringify(testPool));
+    const missing = /cards 99999, 99998 have no definition in the loaded sets/;
+    assert.throws(() => batch.buildConfig(batch.parseArgs(['--pool', file])), missing);
+    const selectedArgs = batch.parseArgs(['--pool', file, '--pairs', gateway.id]);
+    assert.throws(() => batch.buildConfig(selectedArgs, {pairs: [testPool.pairs[1]]}), missing,
+      'overridden pairs must be validated even when the selected pool pair is valid');
+    assert.throws(() => batch.buildConfig(selectedArgs, {setFiles: []}), /have no definition in the loaded sets/,
+      'overridden sets must supply the selected decks');
+    assert.deepStrictEqual(batch.buildConfig(batch.parseArgs(['--pool', file]), {pairs: [gateway]}).pairs,
+      [gateway], 'valid overrides replace invalid pool pairs before validation');
+    assert.throws(() => game({corpFile: invalidFile}), missing,
+      'direct headless games also explain missing definitions');
+    const result = cli(['--pool', file, '--seeds', '1-1']);
+    assert.strictEqual(result.status, 2, result.out);
+    assert.match(result.out, missing);
+    assert.ok(!/games,/.test(result.out), 'validation happens before batch progress');
+    const selected = batch.buildConfig(batch.parseArgs(['--pool', file, '--pairs', gateway.id]));
+    assert.deepStrictEqual(selected.pairs, [gateway], 'unselected missing decks do not block a batch');
+    fs.writeFileSync(file, JSON.stringify(Object.assign({}, pool, {pairs: [gateway, gateway]})));
+    assert.throws(() => batch.loadPool(file), /Duplicate deck pair id in pool: gateway/);
+  });
+
+  await scenario('CLI value options require operands, including both comparison reports', () => {
+    for (const option of ['--budget', '--pool', '--games', '--seeds', '--pairs', '--jobs', '--timeout', '--out',
+      '--side', '--start', '--start-tag', '--corp-option', '--runner-option', '--collector', '--guard',
+      '--improve', '--better', '--max', '--compare']) {
+      for (const suffix of [[], ['--quick']]) {
+        assert.throws(() => batch.parseArgs([option, ...suffix]), new RegExp(option + ' needs an operand'));
+      }
+    }
+    for (const suffix of [[], ['--quick']]) {
+      assert.throws(() => batch.parseArgs(['--compare', 'baseline.json', ...suffix]), /--compare needs an operand/);
+    }
+    const parsed = batch.parseArgs(['--compare', 'baseline.json', 'candidate.json', '--budget', '1400',
+      '--start-tag', 'hosted-card-on-ice', '--start-tag', 'unrezzed-ice']);
+    assert.deepStrictEqual(parsed.compare, ['baseline.json', 'candidate.json']);
+    assert.strictEqual(parsed.budget, '1400');
+    assert.deepStrictEqual(parsed.startTag, ['hosted-card-on-ice', 'unrezzed-ice']);
+    const invalid = cli(['--budget']);
+    assert.strictEqual(invalid.status, 2, invalid.out);
+    assert.match(invalid.out, /--budget needs an operand/);
+  });
+
+  await scenario('replay diff distinguishes equal, changed and failed comparisons and cleans up', () => {
+    const childProcess = require('child_process');
+    const original = childProcess.spawnSync;
+    let dir;
+    try {
+      for (const result of [
+        {status: 0, stdout: ''}, {status: 1, stdout: '-baseline\n+candidate\n'},
+        {status: null, error: new Error('spawn diff ENOENT')},
+        {status: 2, stderr: 'cannot read file'}, {status: null, signal: 'SIGTERM'},
+      ]) {
+        childProcess.spawnSync = (command, args, options) => {
+          assert.strictEqual(command, 'diff');
+          assert.deepStrictEqual(args, ['-U2', 'baseline.log', 'candidate.log']);
+          dir = options.cwd;
+          assert.strictEqual(fs.readFileSync(path.join(dir, 'baseline.log'), 'utf8'), 'baseline\n');
+          assert.strictEqual(fs.readFileSync(path.join(dir, 'candidate.log'), 'utf8'), 'candidate\n');
+          return result;
+        };
+        if (result.status === 0 || result.status === 1) {
+          assert.strictEqual(batch.diffLogs(['baseline'], ['candidate']),
+            result.status === 0 ? 'Logs are identical.' : result.stdout);
+        } else {
+          assert.throws(() => batch.diffLogs(['baseline'], ['candidate']), /diff failed: (spawn diff ENOENT|cannot read file|signal SIGTERM)/);
+        }
+        assert.ok(!fs.existsSync(dir), 'temporary logs are removed even on failure');
+      }
+    } finally {
+      childProcess.spawnSync = original;
+    }
+  });
+
   await scenario('1. identical runs give identical reports (ignoring timing)', async () => {
     const outs = [1, 2].map(i => path.join(tmp, `repro-${i}.json`));
     for (const out of outs) {
@@ -119,6 +269,57 @@ const EXTRA_DRAW = side => `
     }
   });
 
+  await scenario('SIGSEGV retries the identical job once and rejects a repeated crash', () => {
+    const baselineOut = path.join(tmp, 'retry-baseline.json');
+    const args = ['--pairs', 'gateway', '--seeds', '1-3', '--jobs', '2'];
+    const baseline = cli([...args, '--out', baselineOut]);
+    assert.strictEqual(baseline.status, 0, baseline.out);
+    for (const repeat of [false, true]) {
+      const attempts = path.join(tmp, 'retry-attempts-' + repeat + '.jsonl');
+      const preload = setupFile('worker-segv-' + repeat, `
+        const fs = require('fs');
+        const attempts = ${JSON.stringify(attempts)};
+        if (process.argv.includes('--worker')) {
+          process.prependListener('message', job => {
+            if (job.seed !== '1') return;
+            const first = !fs.existsSync(attempts);
+            fs.appendFileSync(attempts, JSON.stringify(job) + '\\n');
+            if (first || ${repeat}) process.exit(77);
+          });
+        } else {
+          // Simulate a native signal in the parent without crashing Node itself.
+          const cp = require('child_process');
+          const fork = cp.fork;
+          cp.fork = function(...args) {
+            const child = fork.apply(this, args);
+            const emit = child.emit;
+            child.emit = function(event, ...values) {
+              if (event === 'exit' && values[0] === 77) values = [null, 'SIGSEGV'];
+              return emit.call(this, event, ...values);
+            };
+            return child;
+          };
+        }
+      `);
+      const out = path.join(tmp, 'worker-segv-' + repeat + '.json');
+      const result = cli([...args, '--out', out], {NODE_OPTIONS: '--require ' + JSON.stringify(preload)});
+      assert.match(result.out, /signal SIGSEGV\); retrying once in a fresh worker/);
+      const dispatched = fs.readFileSync(attempts, 'utf8').trim().split('\n').map(JSON.parse);
+      assert.strictEqual(dispatched.length, 2, 'at most one retry');
+      assert.deepStrictEqual(dispatched[1], dispatched[0], 'retry preserves the entire job');
+      if (repeat) {
+        assert.strictEqual(result.status, 2, result.out);
+        assert.match(result.out, /signal SIGSEGV\) after retry/);
+        assert.ok(!fs.existsSync(out), 'a repeated crash must not publish an incomplete report');
+      } else {
+        assert.strictEqual(result.status, 0, result.out);
+        assert.deepStrictEqual(stable(JSON.parse(fs.readFileSync(out, 'utf8'))).games,
+          stable(JSON.parse(fs.readFileSync(baselineOut, 'utf8'))).games,
+          'all games retain their seeded results, including completed sibling games');
+      }
+    }
+  });
+
   await scenario('2. an extra Corp AI draw leaves the engine and Runner streams unchanged', async () => {
     const base = await game({setupFile: setupFile('record', RECORD)});
     const extra = await game({setupFile: setupFile('corp-extra', RECORD + EXTRA_DRAW('corp'))});
@@ -139,12 +340,12 @@ const EXTRA_DRAW = side => `
 
   await scenario('4. AI options: set per run, recorded, unknown names fail, comparison keys', async () => {
     const out = path.join(tmp, 'option.json');
-    const r = cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--corp-option', 'evidenceBasedHostedCardRez=true', '--out', out]);
+    const r = cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--corp-option', TEST_OPTION + '=true', '--out', out]);
     assert.strictEqual(r.status, 0, r.out);
     const report = JSON.parse(fs.readFileSync(out, 'utf8'));
-    assert.strictEqual(report.options.corp.evidenceBasedHostedCardRez, true);
+    assert.strictEqual(report.options.corp[TEST_OPTION], true);
     const defaults = await game();
-    assert.strictEqual(defaults.options.corp.evidenceBasedHostedCardRez, false, 'the option is off in other runs');
+    assert.strictEqual(defaults.options.corp[TEST_OPTION], false, 'the option is off in other runs');
     const unknown = cli(['--pairs', 'gateway', '--seeds', '1-1', '--corp-option', 'noSuchOption=true', '--out', path.join(tmp, 'x.json')]);
     assert.notStrictEqual(unknown.status, 0);
     assert.ok(/Unknown corp AI option: noSuchOption/.test(unknown.out), unknown.out);
@@ -204,6 +405,177 @@ const EXTRA_DRAW = side => `
     assert.strictEqual(ok.pass, true);
   });
 
+  await scenario('--max fails when any candidate game lacks a finite measurement', () => {
+    const check = games => batch.applyMaxChecks({checks: []}, {games}, {'x.violations': 0});
+    const measured = {ok: true, metrics: {'x.violations': 0}};
+    assert.strictEqual(check([measured]).pass, true, 'zero is a measured value');
+    for (const ok of [true, false]) {
+      for (const missing of [undefined, null, {}, {'x.violations': undefined}, {'x.violations': NaN}]) {
+        const result = check([measured, {ok, metrics: missing}]);
+        assert.strictEqual(result.pass, false, 'every game must supply the requested measurement');
+        assert.match(result.checks[0].why, /1 games have no finite metric/);
+      }
+    }
+    assert.strictEqual(check([]).pass, false, 'an empty batch is not evidence');
+    assert.strictEqual(check([{ok: false, metrics: {'x.violations': 2}}]).pass, false,
+      'a failed game with a measurement is still checked against the limit');
+  });
+
+  await scenario('5c. batch metrics bootstrap over games; --ceiling checks the candidate upper bound', async () => {
+    const collector = {name: 'demo', samples: g => g.values, finishBatch: perGame => ({mean: [].concat(...perGame).reduce((a, b) => a + b, 0) /
+      Math.max(1, [].concat(...perGame).length)}), batchResamples: 100};
+    const games = Array.from({length: 30}, (_, i) => ({ok: true, samples: {demo: [i % 3 === 0 ? 1 : 0, 0]}}));
+    const out = metrics.batchMetrics([collector], games);
+    assert.strictEqual(out['demo.mean'].games, 30);
+    assert.ok(out['demo.mean'].low <= out['demo.mean'].value && out['demo.mean'].value <= out['demo.mean'].high);
+    assert.deepStrictEqual(metrics.batchMetrics([collector], games), out, 'seeded and reproducible');
+    const report = value => ({poolHash: 'p', seeds: [], starts: [], collectors: [], games: [],
+      batchMetrics: {'demo.mean': {value, low: value - 0.05, high: value + 0.05, games: 30}}});
+    for (const limit of ['Infinity', '-Infinity', '1e309', 'NaN', 'true', 'false', '', 'invalid'])
+      assert.throws(() => batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=' + limit])),
+        /--ceiling value must be a finite number/, limit + ' must be rejected');
+    for (const limit of ['0', '-0.1', '1e-2'])
+      assert.strictEqual(batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=' + limit])).ceiling['demo.mean'], Number(limit));
+    const spec = batch.gateSpec(batch.parseArgs(['--ceiling', 'demo.mean=0.10']));
+    const fail = batch.applyCeilingChecks({checks: []}, report(0), report(0.2), spec.ceiling);
+    assert.strictEqual(fail.pass, false);
+    assert.ok(/upper bound 0.25/.test(fail.checks[0].why), fail.checks[0].why);
+    assert.strictEqual(batch.applyCeilingChecks({checks: []}, report(0.2), report(0.04), spec.ceiling).pass, true);
+    const missing = batch.applyCeilingChecks({checks: []}, report(0), {games: []}, spec.ceiling);
+    assert.strictEqual(missing.checks[0].why, 'unknown batch metric');
+  });
+
+  await scenario('batch diagnostics print both intervals without imposing a no-worse gate', () => {
+    const report = (value, logHash) => ({poolHash: 'diagnostic-test', seeds: [1], starts: [], collectors: ['demo'],
+      games: [{ok: true, deckPairId: 'test', seed: 1, logHash, metrics: {winRate: 1, 'weights.violations': 0}}],
+      batchMetrics: {'demo.max': {value, low: value - 0.05, high: value + 0.05, games: 1}}});
+    const baseline = path.join(tmp, 'diagnostic-baseline.json'), candidate = path.join(tmp, 'diagnostic-candidate.json');
+    fs.writeFileSync(baseline, JSON.stringify(report(0.1, 'baseline')));
+    fs.writeFileSync(candidate, JSON.stringify(report(0.3, 'candidate')));
+    const args = ['--compare', baseline, candidate, '--max', 'weights.violations=0', '--guard', 'winRate=0.02'];
+    const diagnostic = cli(args);
+    assert.strictEqual(diagnostic.status, 0, diagnostic.out);
+    assert.match(diagnostic.out, /demo.max\s+batch: baseline 0.100 \[0.050, 0.150\]\s+candidate 0.300 \[0.250, 0.350\] \[diagnostic\]/);
+    assert.doesNotMatch(diagnostic.out, /(?:PASS|FAIL).*demo.max/);
+    assert.match(diagnostic.out, /Gate: passed/);
+    const strict = cli([...args, '--no-worse', 'demo.max']);
+    assert.notStrictEqual(strict.status, 0, strict.out);
+    assert.match(strict.out, /FAIL measured no-worse demo.max/);
+  });
+
+  await scenario('F11 pooled guards and improvements reach both CLI paths', () => {
+    const f11cli = args => cli(args, {AI_BATCH_CACHE: path.join(tmp, 'f11-cache')});
+    const corr = require('../scripts/ai-batch/collectors/bluffSingleVariableCorrelation');
+    const name = corr.name + '.max';
+    const report = fair => {
+      const rows = Array.from({length: 6}, (_, i) => ({k: 'p', postured: fair ? i % 2 : Number(i >= 3),
+        isAgenda: 0, v: corr.VARIABLES.map(() => i)}));
+      const value = corr.finishBatch([rows]).max;
+      return {poolHash: 'f11-cli', seeds: [1], starts: [], collectors: [corr.name],
+        games: [{ok: true, seed: 1, deckPairId: 'test', logHash: fair ? 'changed' : 'base',
+          metrics: {}, samples: {[corr.name]: rows}}],
+        batchMetrics: {[name]: {value, low: value, high: value, games: 1}}};
+    };
+    const baseline = path.join(tmp, 'f11-baseline.json'), candidate = path.join(tmp, 'f11-candidate.json');
+    fs.writeFileSync(baseline, JSON.stringify(report(false)));
+    fs.writeFileSync(candidate, JSON.stringify(report(true)));
+    for (const checks of [['--guard', name + '=0.02'], ['--improve', name]]) {
+      const result = f11cli(['--compare', baseline, candidate, ...checks, '--ceiling', name + '=1']);
+      assert.strictEqual(result.status, 0, result.out);
+      assert.match(result.out, /paired batch: baseline.*candidate.*difference.*95% interval/);
+      assert.match(result.out, /lower is better; 200 resamples; 0 dropped pairs/);
+      assert.match(result.out, /Gate: passed/);
+    }
+    const identity = f11cli(['--compare', baseline, baseline, '--improve', name]);
+    assert.strictEqual(identity.status, 1, identity.out);
+    assert.match(identity.out, /FAIL improve/);
+    for (const checks of [['--guard', name + '=0.02'], ['--improve', name]]) {
+      const gate = f11cli(['gate', '--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--quick',
+        '--corp-option', TEST_OPTION + '=true', '--collector', corr.name, ...checks]);
+      assert.strictEqual(gate.status, 1, gate.out);
+      assert.match(gate.out, /paired batch:/);
+      assert.doesNotMatch(gate.out, /unknown metric|Unknown collector/);
+      assert.match(gate.out, /Gate: indicative only/);
+    }
+    // Synthetic cached reports exercise passing pooled statistics in gate's
+    // orchestration. These are test data, never game evidence for adoption.
+    const cache = path.join(tmp, 'f11-cache');
+    for (const file of fs.readdirSync(cache).filter(file => file.endsWith('.json'))) {
+      const cached = JSON.parse(fs.readFileSync(path.join(cache, file), 'utf8'));
+      if (JSON.stringify(cached.collectors) !== JSON.stringify([corr.name])) continue;
+      const synthetic = report(Boolean(cached.options.corp[TEST_OPTION]));
+      cached.games.forEach(game => {
+        game.ok = true; game.samples = synthetic.games[0].samples; game.logHash = synthetic.games[0].logHash;
+      });
+      cached.batchMetrics = synthetic.batchMetrics;
+      fs.writeFileSync(path.join(cache, file), JSON.stringify(cached));
+    }
+    for (const checks of [['--guard', name + '=0.02'], ['--improve', name]]) {
+      const gate = f11cli(['gate', '--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--quick',
+        '--corp-option', TEST_OPTION + '=true', '--collector', corr.name, ...checks]);
+      assert.strictEqual(gate.status, 1, gate.out);
+      assert.match(gate.out, /PASS (guard|improve) bluffSingleVariableCorrelation.max/);
+      assert.match(gate.out, /paired batch:/);
+      assert.match(gate.out, /Gate: indicative only/);
+    }
+    const unsafe = {...report(false), collectors: ['../metrics']};
+    fs.writeFileSync(baseline, JSON.stringify(unsafe));
+    fs.writeFileSync(candidate, JSON.stringify(unsafe));
+    const invalidName = f11cli(['--compare', baseline, candidate, '--improve', '../metrics.max']);
+    assert.strictEqual(invalidName.status, 2, invalidName.out);
+    assert.match(invalidName.out, /Invalid collector name/);
+  });
+
+  await scenario('5d. posture collectors: violations, horizon locks and single-variable correlation', async () => {
+    const perEpoch = require('../scripts/ai-batch/collectors/postureDecisionsPerEpoch');
+    const locked = require('../scripts/ai-batch/collectors/postureLockedPastHorizon');
+    const corr = require('../scripts/ai-batch/collectors/bluffSingleVariableCorrelation');
+    const vars = (grip, turn) => ({turn, corpCredits: 5, runnerCredits: 5, gripSize: grip, hqSize: 5, rootCount: 1,
+      iceCount: 1, deepestCentralIce: 1, corpPoints: 0, runnerPoints: 0});
+    const events = [
+      {type: 'posture', kind: 'bait', action: 'roll', cardId: 1, epoch: 2, postured: 1, isAgenda: 0, publicVars: vars(1, 2)},
+      {type: 'posture', kind: 'bait', action: 'roll', cardId: 1, epoch: 2, postured: 0, isAgenda: 0, publicVars: vars(2, 2)},
+      {type: 'posture', kind: 'bluff', action: 'roll', cardId: 2, epoch: 2, postured: 1, isAgenda: 1, publicVars: vars(3, 2)},
+      {type: 'posture', kind: 'bait', action: 'reuse', cardId: 1, epoch: 3, corpTurn: 1, expired: 1, publicVars: vars(4, 3)},
+      {type: 'posture', kind: 'bait', action: 'reuse', cardId: 1, epoch: 3, corpTurn: 0, expired: 0, publicVars: vars(4, 3)},
+      {type: 'posture', kind: 'bluff', action: 'guard', cardId: 2, epoch: 3, publicVars: vars(9, 3)},
+      {type: 'posture', kind: 'profile', action: 'profile', profile: {targetIce: 2, openingAdvances: 1, delayTurns: 0}, publicVars: vars(5, 1)},
+    ];
+    const state = {};
+    for (const e of events) [perEpoch, locked, corr].forEach(c => c.onEvent(e, state));
+    assert.deepStrictEqual(perEpoch.finish(state), {violations: 1, rolls: 3});
+    assert.deepStrictEqual(locked.finish(state), {count: 1});
+    assert.deepStrictEqual(corr.finish(state), {decisions: 4}, 'guard stops and reuses are excluded');
+    assert.strictEqual(corr.spearman([1, 2, 3, 4], [10, 20, 30, 40]), 1);
+    assert.strictEqual(corr.spearman([1, 2, 3, 4], [4, 3, 2, 1]), -1);
+    assert.strictEqual(corr.spearman([1, 1, 1, 1], [1, 2, 3, 4]), null, 'a constant column has no correlation');
+    // Posture tracking Grip size exactly is a perfect single-variable tell.
+    const tell = Array.from({length: 40}, (_, i) => ({k: 'p', postured: i < 20 ? 1 : 0, isAgenda: 0,
+      v: corr.VARIABLES.map(name => name === 'gripSize' ? i : 3)}));
+    assert.ok(corr.finishBatch([tell]).max > 0.8);
+    const fair = Array.from({length: 40}, (_, i) => ({k: 'p', postured: i % 2, isAgenda: 0,
+      v: corr.VARIABLES.map(name => name === 'gripSize' ? Math.floor(i / 2) : 3)}));
+    assert.ok(corr.finishBatch([fair]).max < 0.1, String(corr.finishBatch([fair]).max));
+  });
+
+  await scenario('5e. posture epochs: seeded games reproduce the same epoch sequence', async () => {
+    const play = async () => {
+      const seen = [];
+      const g = await game({corpOptions: {postureEpochs: true}, onEvent: e => { if (e.type === 'posture') seen.push(e); }});
+      return {g, seen};
+    };
+    const a = await play(), b = await play();
+    assert.ok(a.seen.length > 0, 'the game reaches posture or profile decisions');
+    assert.deepStrictEqual(a.seen, b.seen);
+    assert.strictEqual(a.g.logHash, b.g.logHash);
+    const perEpoch = require('../scripts/ai-batch/collectors/postureDecisionsPerEpoch');
+    const locked = require('../scripts/ai-batch/collectors/postureLockedPastHorizon');
+    const state = {};
+    for (const e of a.seen) { perEpoch.onEvent(e, state); locked.onEvent(e, state); }
+    assert.strictEqual(perEpoch.finish(state).violations, 0);
+    assert.strictEqual(locked.finish(state).count, 0);
+  });
+
   await scenario('6. a collector receives the events and its metric reaches the report and comparison', async () => {
     const seen = new Set();
     const g = await game({onEvent: e => seen.add(e.type)});
@@ -216,6 +588,19 @@ const EXTRA_DRAW = side => `
     assert.ok('runs.successful' in metrics.compareReports(report, report).metrics);
     const unknown = cli(['--pairs', 'gateway', '--seeds', '1-1', '--collector', 'noSuchCollector', '--out', path.join(tmp, 'x.json')]);
     assert.ok(/Unknown collector: noSuchCollector/.test(unknown.out), unknown.out);
+  });
+
+  await scenario('expanded directories and tagged starts each get one share of the budget', () => {
+    const dir = path.join(root, 'tests/fixtures/ai-batch/starts');
+    const tagged = batch.taggedStarts(['hosted-card-on-ice']);
+    const onlyDirectory = batch.buildConfig(batch.parseArgs(['--start', dir, '--budget', '1400']));
+    const overlap = batch.buildConfig(batch.parseArgs(['--start', dir, '--start-tag', 'hosted-card-on-ice', '--budget', '1400']));
+    assert.ok(tagged.length, 'the tag selects a committed board');
+    assert.deepStrictEqual(overlap.starts, onlyDirectory.starts, 'tag overlap does not duplicate expanded boards');
+    assert.deepStrictEqual(overlap.seeds, onlyDirectory.seeds, 'budget allocation follows unique boards');
+    const file = tagged[0];
+    assert.strictEqual(batch.resolveStarts([file, path.relative(root, file)], overlap.poolInfo.ranges).length, 1,
+      'relative and absolute paths resolve to the same file');
   });
 
   await scenario('7. --start begins from a fixture board, runs to PlayerWin and is reproducible', async () => {
@@ -265,8 +650,11 @@ const EXTRA_DRAW = side => `
   await scenario('9. telemetry and observation change no decision and consume no randomness', async () => {
     const quiet = await game({telemetry: false, observe: false, setupFile: setupFile('record', RECORD)});
     let decisions = 0;
-    const loud = await game({onEvent: e => { if (e.type === 'decision') decisions++; }, setupFile: setupFile('record', RECORD)});
+    const corr = require('../scripts/ai-batch/collectors/bluffSingleVariableCorrelation');
+    const collectorState = {};
+    const loud = await game({onEvent: e => { corr.onEvent(e, collectorState); if (e.type === 'decision') decisions++; }, setupFile: setupFile('record', RECORD)});
     assert.ok(decisions > 0, 'telemetry recorded decisions');
+    corr.finishBatch([corr.samples(collectorState)]);
     assert.strictEqual(loud.logHash, quiet.logHash);
     assert.deepStrictEqual(loud.report, quiet.report, 'same AI-stream consumption');
   });
@@ -294,7 +682,7 @@ const EXTRA_DRAW = side => `
   await scenario('gate: baseline reuse and --quick', async () => {
     assert.strictEqual(batch.resolveSeeds(batch.parseArgs(['--quick'])).length, 50);
     assert.strictEqual(batch.resolveSeeds(batch.parseArgs([])).length, 200);
-    const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', 'evidenceBasedHostedCardRez=true',
+    const args = ['gate', '--pairs', 'gateway', '--seeds', '1-2', '--jobs', '2', '--corp-option', TEST_OPTION + '=true',
       '--guard', 'winRate=1'];
     const first = cli(args);
     assert.ok(/baseline: playing 2 games/.test(first.out) && /candidate: playing 2 games/.test(first.out), first.out);
@@ -303,6 +691,19 @@ const EXTRA_DRAW = side => `
     assert.ok(/0 changed by the options/.test(first.out) && /PASS guard winRate/.test(first.out), first.out);
     assert.ok(/FAIL changed option effect/.test(first.out) && /Gate: failed/.test(first.out), first.out);
     assert.notStrictEqual(first.status, 0, first.out);
+    assert.strictEqual(batch.parseArgs(['gate', '--fresh', '--games', '2']).fresh, true);
+    const readCachedGames = () => fs.readdirSync(path.join(tmp, 'cache'))
+      .filter(file => file.endsWith('.json')).sort().map(file => {
+        const report = JSON.parse(fs.readFileSync(path.join(tmp, 'cache', file), 'utf8'));
+        return {key: report.key, seeds: report.seeds, games: report.games.map(g => [g.seed, g.logHash, g.decisionHash])};
+      });
+    const beforeFresh = readCachedGames();
+    const fresh = cli([...args, '--fresh']);
+    assert.match(fresh.out, /baseline: playing 2 games/);
+    assert.match(fresh.out, /candidate: playing 2 games/);
+    assert.doesNotMatch(fresh.out, /: reusing/);
+    assert.strictEqual(fresh.status, first.status, fresh.out);
+    assert.deepStrictEqual(readCachedGames(), beforeFresh, '--fresh replays the same seeds and preserves game results and cache keys');
     const second = cli(args);
     assert.ok(/baseline: reusing/.test(second.out) && /candidate: reusing/.test(second.out), second.out);
     // Simulate an incomplete cached report written by the old worker lifecycle.
@@ -310,7 +711,7 @@ const EXTRA_DRAW = side => `
       .filter(file => file.endsWith('.json'));
     const baselineFile = cached.find(file => {
       const report = JSON.parse(fs.readFileSync(file, 'utf8'));
-      return report.options.corp.evidenceBasedHostedCardRez === false;
+      return report.options.corp[TEST_OPTION] === false;
     });
     assert.ok(baselineFile, 'the baseline was cached');
     const baseline = JSON.parse(fs.readFileSync(baselineFile, 'utf8'));
@@ -321,6 +722,47 @@ const EXTRA_DRAW = side => `
     const quick = cli(['gate', '--pairs', 'gateway', '--quick', '--seeds', '1-2', '--jobs', '2', '--guard', 'winRate=1']);
     assert.ok(/indicative only/.test(quick.out), quick.out);
     assert.notStrictEqual(quick.status, 0, 'a quick run cannot pass a gate');
+  });
+
+  await scenario('replay plays the batch game with its full log, and --diff shows only differing lines', async () => {
+    const out = path.join(tmp, 'replay-batch.json');
+    assert.strictEqual(cli(['--pairs', 'gateway', '--seeds', '1-1', '--jobs', '1', '--out', out]).status, 0);
+    const batchGame = JSON.parse(fs.readFileSync(out, 'utf8')).games[0];
+    const one = cli(['replay', '--pairs', 'gateway', '--seeds', '1']);
+    assert.strictEqual(one.status, 0, one.out);
+    assert.ok(one.out.includes('logHash ' + batchGame.logHash), 'replay reproduces the batch game: ' + one.out.split('\n')[0]);
+    assert.ok(one.out.split('\n').length > 50, 'the full log is printed');
+    const same = cli(['replay', '--pairs', 'gateway', '--seeds', '1', '--diff']);
+    assert.ok(/Logs are identical/.test(same.out), same.out.slice(0, 300));
+    const bad = cli(['replay', '--pairs', 'gateway', '--seeds', '1-2']);
+    assert.notStrictEqual(bad.status, 0);
+  });
+
+  await scenario('failed replays exit non-zero and retain diagnostics, including either diff side', () => {
+    const source = readFixture(path.join(root, 'tests/fixtures/corp-decisions/corp-draw-ok-when-hq-secure.txt')).code;
+    const file = path.join(tmp, 'failed-replay.txt');
+    const args = ['replay', '--pairs', 'gateway', '--seeds', '1', '--start', file,
+      '--corp-option', TEST_OPTION + '=true'];
+    for (const [condition, diff] of [
+      ['true', false], ['corp.AI.options.' + TEST_OPTION, true], ['!corp.AI.options.' + TEST_OPTION, true],
+    ]) {
+      fs.writeFileSync(file, source + '\nLog("replay log retained");\nif (' + condition + ') throw new Error("replay regression diagnostic");\n');
+      const result = cli([...args, ...(diff ? ['--diff'] : [])]);
+      assert.strictEqual(result.status, 1, result.out.slice(0, 500));
+      assert.match(result.out, /replay regression diagnostic/, 'fixture errors remain available');
+      assert.ok(result.out.includes(diff ? 'candidate:' : 'game:'), 'game summary remains available');
+      if (diff) {
+        const summaries = result.out.split('\n').slice(0, 2);
+        assert.match(summaries[0], /baseline \(options off\):/);
+        const baselineFails = condition.startsWith('!');
+        assert.strictEqual(summaries[0].includes('errors:'), baselineFails, 'only the intended baseline fails');
+        assert.strictEqual(summaries[1].includes('errors:'), !baselineFails, 'only the intended candidate fails');
+      }
+      else assert.ok(result.out.split('\n').slice(1).includes('replay log retained'), 'the diagnostic log is printed after the summary');
+    }
+    const timeout = cli(['replay', '--pairs', 'gateway', '--seeds', '1', '--timeout', '0.001']);
+    assert.strictEqual(timeout.status, 1, timeout.out.slice(0, 500));
+    assert.match(timeout.out, /no winner \(timeout/);
   });
 
   fs.rmSync(tmp, {recursive: true, force: true});

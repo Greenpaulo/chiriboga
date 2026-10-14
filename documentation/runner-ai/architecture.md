@@ -74,7 +74,9 @@ restore state through hooks in `_commonRunCalculationChecksAsync()`.
 `cachedCosts` are rebuilt whenever run is offered; `_calculateRunPathPieceEnd()`
 overwrites a server's cost after every path calculation, complete or exit
 strategy, with whatever offsets it used. `_getCachedCost(server)` calculates
-only for servers missing from `runsEverCalculated` (never cleared).
+only for servers missing from `runsEverCalculated`. Cost reads and path publication
+clear both `cachedCosts` and `runsEverCalculated` when the Runner click count
+changes, so card decisions cannot reuse a pre-action click budget.
 `cachedBestPath`, `cachedComplete` and `cachedPathServer` hold the latest path;
 `_cachedOrBestRun(server, startIceIdx)` reuses it for the same server, else
 calculates a complete run with `_calculateBestExitStrategy()` as fallback.
@@ -131,6 +133,13 @@ worth-keeping count when cached potential is below 2) and tags (min(clicks, half
 the pool) minus current tags). If a click would remain after the run, grip
 cards' `AIGripRunPotential(server)` add potential (after caching).
 
+Complete-run planning against public self-consuming defenses such as Event
+Horizon reserves another run click and calculates the follow-up through a local
+ICE overlay. Each attempt receives fresh bad-publicity credits. Unspent
+first-attempt bad-publicity credits expire; `_finiteRunContinuations()` removes
+them from the next pool budget and includes them in `runner_credits_reserved`
+for outer `ValidPoint()` validation. Credit losses consume permanent credits.
+
 **Choosing.** Each potential gets `0.2 * this._random() - 0.1` of jitter, one
 roll per server per decision (`serverList` is rebuilt once per
 `_internalChoiceDetermination()`). **Randomness (D2):** all Runner AI policy
@@ -176,11 +185,23 @@ ability is used with a `chooseServer` follow-up; otherwise the basic run.
   ICE are guessed from advancement and Corp credits (Pharos, Hortum, Ice Wall,
   or a Sentry with net damage plus pay-or-ETR); ICE behind the first unseen one
   are assumed weaker. Active cards' `AIModifyIceAI(iceAI, startIceIdx)` adjust
-  the result.
+  the result. Rielle "Kit" Peddler shares `_AIFirstIceToEncounter` between that
+  modifier and `AIMatchingBreakerInstalled`, so an installed Decoder covers the
+  first ICE that would actually be encountered, including a rezzed inner ICE
+  behind an unrezzed outer one.
+  Stick and Poke retains its added net-damage row throughout the active
+  encounter after its once-per-turn use, and removes it from the model when
+  the actual row is removed. Broken flags are applied after modifiers have
+  aligned the modeled rows with the actual subroutines. Prospective prepended
+  rows carry `srActualOffset` so printed broken flags skip the predicted row;
+  live encounters keep offset zero because the added row exists on the ICE.
 - Search is a depth-first stack with best-cost pruning, capped at 1000 loops.
   `Directions()` collects `IceAct()` moves (`AIImplementBreaker`) from active
   cards and the bonus breaker, rejects unused pumps and expands subroutine
-  choices; `ValidateEncounterPoint()` applies effects (ETR and `misc_serious`
+  choices. Sang Kancil and Principia supply their standard pump/break moves
+  through `AIImplementBreaker`. Sang Kancil's reduced pump cost applies to an
+  active Run event or the prospective Run event in `rc.runEvent`.
+  `ValidateEncounterPoint()` applies effects (ETR and `misc_serious`
   end complete paths; `AIIceSpecificEffect` expands); `EncounterOptions()` adds
   `AIEncounterOptions` from active cards and the run event.
 - `PointCost()` weights credits spent 0.6, lost 0.7, clicks 0.8, virus
@@ -247,6 +268,11 @@ That check uses the complete current route and its remaining pool/run credits
 and clicks after rebates, plus public steal costs and steal prohibitions.
 Unknown agendas and routes needing preparation do not override the opportunity. In the Runner Install
 phase, an installed program whose `AIOkToTrash()` is true is trashed for room.
+The engine's `Install` phase offers successful continuation only when current
+credits and MU suffice. If trashing changes affordability, further program
+trashes remain available, alongside an unsuccessful-install exit that returns
+the uninstalled card to its source and resumes the parent phase without paying
+credits or firing install-success responses. Completed trashes remain committed.
 
 **priorityEcon.** The worth-keeping card with the highest `AIEconomyInstall()`
 or `AIEconomyPlay` suppresses drawing, can suppress running, and prompts
@@ -304,7 +330,9 @@ costs under 0.8, and otherwise switches to an exit strategy.
   bypass); else continue or pass. With no path at all it triggers any ability.
 - **Run Subroutines.** Choices come from the `alt` on the first node for the
   next ICE; without one, `IceAI()` is re-read and an end-the-run option is
-  picked, else one without a tag.
+  picked, else one without a tag. Model branches map through offered `srChoice`
+  identifiers when present; positional indexes must fit the legal menu.
+  Missing model rows return the first offered choice without throwing.
 
 ## Access decisions
 
@@ -326,8 +354,13 @@ uncertainty; `_infoHQScore()` sums copies × (1 − uncertainty). `phase.js` cal
 `GainInfoAboutHQCards(cards)` with HQ cards accessed in a breach; `MoveCard`
 calls `GainInfoAboutHQCard(card)` for a visible card entering HQ.
 `LoseInfoAboutHQCards(card, cardType)` decrements a title on rez, play, score,
-steal and trash, and on install from HQ adds uncertainty to entries of the same
-combined type (`_combinedCardType()`).
+steal and on a trash from HQ the Runner can see (an accessed or known card);
+a facedown trash from HQ, like an install from HQ, passes `null` and only adds
+uncertainty (on install, to entries of the same combined type via
+`_combinedCardType()`), so the model never learns which hidden card left.
+Trash updates capture visibility before removal and update memory afterward;
+empty HQ clears all entries before a later hidden draw can contribute to an
+estimate.
 
 **Visibility checks.** Corp card reads normally go through
 `PlayerCanLook(runner, card)`, `knownToRunner` or `rezzed`: server potential,
@@ -338,24 +371,25 @@ handling in the run calculator. Unseen cards are modelled from advancement,
 Corp credits, faction and identity. `PlayerCanLook()` returns true for every
 card while the debug flag `viewAllFronts` is on.
 
-**Reads of information a human Runner could not know:**
+**Helpers that enforce the boundary themselves** (so card hooks need not):
 
-- `Trash()` in `mechanics.js` calls `LoseInfoAboutHQCards(card)` for any card
-  trashed from HQ, passing its identity even when it leaves HQ facedown, so the
-  AI removes exactly that title from its HQ model.
-- `IceAI()` for unseen ICE computes `RezCost(ice) - ice.rezCost` from the hidden
-  card; a cost modifier that depends on the hidden card's identity or subtype
-  changes the guess.
-- `CalculatePieceBegin()` compares every root card's title with Hokusai Grid
-  when no unadvanced unseen card is present, including advanced unseen cards
-  (no practical effect, since Hokusai Grid cannot be advanced).
-- `_icebreakerInPileNotInHandOrArray()` scans the pile it is given; card hooks
-  (`AIWorthKeeping`, `AIIcebreakerTutor`) pass the Stack. Contents follow from
-  the decklist, but which of several matches is returned depends on hidden Stack
-  order, and bonus-breaker ranking evaluates that card.
-- `_matchingBreakerInstalled()` and `_breakerMatchesIce()` read ICE subtypes
-  without a visibility check; every caller in `ai_runner.js` checks first, some
-  card callers do not.
+- `_matchingBreakerInstalled()` returns `null`, and `_breakerMatchesIce()`
+  returns `false`, for ICE the Runner cannot look at (unrezzed and not
+  exposed or otherwise known). This also covers every on-card
+  `AIMatchingBreakerInstalled` reached through `_matchingBreakerInstalled()`.
+- For unseen ICE, `IceAI()` takes its rez-cost adjustment from
+  `RunCalculator._publicRezCostModifier()`: the sum of `modifyRezCost` effects
+  from other sources the Runner can see (or lingering effects), never the
+  hidden ICE's own effect or printed cost (unclamped).
+- `_icebreakerInPileNotInHandOrArray()` scans a pile containing any card the
+  Runner cannot see (the Stack) in title order, so a tutor's or
+  `AIWorthKeeping` choice depends only on the pile's contents. Fully visible
+  piles (the Heap) keep their order.
+- `CalculatePieceBegin()` checks only known root cards for Hokusai Grid (the
+  title comparison itself is D1's scope).
+
+**Remaining reads of information a human Runner could not know:**
+
 - `Print()` logs strength-change and bypass target titles through `GetTitle()`
   without hiding (log output only).
 
@@ -410,3 +444,9 @@ Contracts are in `documentation/ai.md`, which has no entry yet for
 | `AIReducesTrashCost` | `CalculatePieceBegin()` | Trash-cost discount |
 | `AIAccessTriggerPriority`, `AIBreachReplacementValue` | Run Accessing, Run 5.1 | Access and breach choices |
 | `AIDefensiveValue` | `_serverIsProtected()` | Visible root defence |
+
+Public successful-run benefits use `ServerSuccessfulRunPrevented(server)`,
+which queries rezzed, enabled upgrades through `AIPreventsSuccessfulRun`.
+Crisium Grid and Flagship both declare that capability. Finite-run continuation
+caches distinguish remaining meat-damage prevention and consumed outside-credit
+damage opportunities as well as credit, click and damage budgets.

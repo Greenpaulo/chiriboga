@@ -1,7 +1,7 @@
 # I9 Calibration, simulation and simplification
 
 **Roadmap item:** I9 · **Depends on:** I8, F4 · **Sets:** none
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../deception-gates.md)
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
@@ -20,9 +20,9 @@ See [architecture.md: install planning today](../architecture.md#install-plannin
 ## Design
 Metrics, all from F4's core set or collectors earlier items added:
 `pointsScored`, `pointsStolen` and `pointsStolenByServer`,
-`installToScoreTurns`, `agendaExposureTurns`, `assetNetCredits`,
-`trapTriggers`, `strandedUnrezzedIceCost`, `corpInsolventTurns`,
-`installOutcomes` (abandoned plans), `decisionLatencyMs`, and
+`installOutcomes.installToScoreTurns`, `.agendaExposureTurns`, `.assetNetCredits`,
+`.trapTriggers`, `strandedUnrezzedIceCost`, `corpInsolventTurns`,
+`installOutcomes.abandoned` (abandoned plans), `decisionLatencyMs`, and
 `bluffSingleVariableCorrelation` (defined in the L8.4 ticket and added by
 whichever of L8.2, L8.4 or L8.5 lands first; I9 extends it).
 
@@ -60,6 +60,8 @@ single observable game-state variable beyond its documented bounded inputs.
    decision fixtures pass.
 
 ## Acceptance gate
+**Reconciliation pending:** The linked plan proposes an absolute 0.10 ceiling on the combined policy, stricter than the recorded 0.20 threshold below. It has not been adopted in this spec. Before implementation or candidate results, reconcile outcome/variable coverage, install-role coverage, documented bounded-input exceptions and the fresh matching control; explicitly preregister any replacement threshold here. Do not treat intermediate no-worse gates as satisfying a combined-policy absolute target.
+
 Against I0's baseline, with every I option on (candidate) and the calibrated
 coefficients:
 
@@ -67,7 +69,7 @@ coefficients:
   (`winRate`, `pointsScored`, `pointsStolen`, `gameLength`,
   `decisionLatencyMs`, `corpInsolventTurns`).
 - **Improvement:** at least one of `pointsStolen` (falls), `pointsScored`
-  (rises) or `assetNetCredits` (rises) has an interval excluding zero in the
+  (rises) or `installOutcomes.assetNetCredits` (rises) has an interval excluding zero in the
   improving direction.
 - **Deception confidence threshold:** over at least 2,000 bait/bluff decisions,
   for every observable variable that is not a documented bounded input of the

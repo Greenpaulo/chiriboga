@@ -17,10 +17,16 @@ See [architecture: known limits](../architecture.md#known-limits) and [server se
 5. **Restricted credits.** Owned by L6.1 (payment-constraint allocation); listed here only so the limits section has one owner per row.
 
 ## Design
-- **Priority: unpriceable breakers.** Separate "no matching breaker" from "matching breaker, price unknown". `_breakerActivationCost()` reports whether it priced the breaker. An unpriced matching breaker is conservatively treated as reachable: while its price remains unknown it cannot make the server secure, contribute a hard lockout or add a finite mandatory break cost. `reasons` records "unpriced breaker <title>" so the gap is visible in logs. Add a declarative hook, `AIBreakCost(iceCard, subroutineCount, server)`, returning `{credits, clicks, counters}`, for breakers whose mechanism does not go through `ImplementIcebreaker` (click-to-break, counter-spending, conditional costs), consulted before the probe. A future numeric fallback may replace the reachable treatment only after tests prove it is a lower bound on actual cost for every breaker to which it applies. This slice can be raised on its own (as L9.1) ahead of the rest.
+- **Priority: unpriceable breakers.** Separate "no matching breaker" from "matching breaker, price unknown". `_breakerActivationCost()` reports whether it priced the breaker. An unpriced matching breaker is conservatively treated as reachable: while its price remains unknown it cannot make the server secure, contribute a hard lockout or add a finite mandatory break cost. `reasons` records "unpriced breaker <title>" so the gap is visible in logs. Read the declarative hook `AIBreakCost(iceCard, subroutineCount, server)` (added on self-breaking ICE by L9.0), returning `{credits, clicks, counters}`, for breakers whose mechanism does not go through `ImplementIcebreaker` (click-to-break, counter-spending, conditional costs), consulted before the probe. A future numeric fallback may replace the reachable treatment only after tests prove it is a lower bound on actual cost for every breaker to which it applies. This slice is split out as [L9.1](../../backlog/code-review/L9.1-unpriceable-breakers.md); the rest of this item starts at limit 2.
 - **Route state.** Carry a small route state through `_evaluateServerSecurity()`'s per-ICE loop: Grip size after damage taken so far (limit 2), breakers still installed (limit 3), and reducer counters still unspent (limit 4). For limits 3 and 4 the Runner chooses the cheaper option (pay to break the trash subroutine, or run the inner ICE without that breaker; spend counters where they save most), using the same finite-use allocation idea as L4.1.
 - Keep the evaluation read-only (no counters, credits or run state changed) and inside the existing hypothetical guards.
 - Document `AIBreakCost` in `documentation/ai.md`.
+- L9.0 implements ICE-owned `AIBreakCost` for native self-breaking costs.
+  L9.1 extends the same hook to installed Runner breakers to price their own
+  mechanism; the hook's owner determines the option it prices. Follow L9.1's
+  overlap contract: compare feasible native, breaker and mixed routes under
+  shared budgets, charge each subroutine once, and preserve unknown costs
+  when a matching breaker remains unpriced.
 
 ## Safety and information boundary
 - Only public, installed Runner cards and public pile sizes; never Grip identities.
@@ -50,7 +56,7 @@ Not F4-gated: each limit has a deterministic oracle (scenario 8, and scenario 1'
 - Related bug: [`documentation/bugs/sang-kancil-and-principia-priced-as-unbreakable.md`](../../bugs/sang-kancil-and-principia-priced-as-unbreakable.md).
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] Every test scenario above is covered by a deterministic test asserting its specified verdict or cost, plus the logged reason where the scenario defines one. Scenario 6 asserts identical evaluation results after hidden Grip substitutions; scenario 7 asserts unchanged counters, credits and run state, including on a throwing hook; scenario 8 asserts mandatory-cost equality with the exhaustive oracle for scenarios 3–5.
 - [ ] Decision snapshots are identical to the recorded baseline except for deltas listed and justified in the Resolution.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.

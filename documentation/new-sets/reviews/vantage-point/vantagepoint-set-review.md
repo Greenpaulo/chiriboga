@@ -126,11 +126,22 @@ this cross-batch defect in addition to their independently reported findings.
   generated **315 seeded decks**, three for every legal identity in each
   configured VP-containing format, checking size, influence, copy limits, side,
   identity exclusion, set legality and Corp agenda points. Zero mismatches.
-- **Full games:** [eight seeded headless games](vantagepoint-headless-smoke.json)
-  using all four Vantage Point identities and legal generated Startup decks
-  reached winners with **zero recorded engine errors**. Resuming on the unchanged
-  production snapshot reproduced all eight game log hashes, winners and results. This smoke sample is not
-  a win-rate benchmark, exhaustive card exposure or a browser playthrough.
+- **Full games (corrected 2026-10-08):** the [original eight-game record](vantagepoint-headless-smoke.json)
+  does not support the original zero-error/legal-deck claim: all four alternate
+  games used agenda 36026 as Runner identity and had empty Runner decks; the
+  alternate seed-1 tail also contains an ignored Witch Hunt engine error.
+  [The corrected eight-game run](vantagepoint-headless-smoke-2026-10-08.json)
+  uses Runner identity 36009 (Vic) instead, validates each generated Startup deck,
+  and captures engine errors across the game, including errors outside the tail.
+  All eight games reached winners; the four Hiram games passed and all four Vic
+  games failed the stricter smoke check. Each Vic game logged an unsupported
+  `.corpAbilities` serialization diagnostic; seeds 3 and 4 also logged Witch Hunt
+  automatic-trigger phase-change errors. These findings remain open for the
+  next set integration review; fixing production serialization/trigger mechanics
+  is outside this PR-comment remediation. The corrected run uses the merged
+  2026-10-08 base, so it does not revalidate the original production snapshot.
+  This sample is not a win-rate benchmark, exhaustive card exposure or a browser
+  playthrough. The set verdict remains **Changes required**.
 - **Cross-batch mechanics:** batch reports/probes cover strength modifiers with
   Corsair/Tungsten, source exhaustion with Shackleton, finite Event Horizon stops,
   public prevention, installed global defenses, access/protection restrictions,
@@ -156,7 +167,7 @@ use the pinned executable or activate Node 20.19.0 first.
 | `node tests/deckbuild-format-pool.test.js` | Passed; included in full run and original explicit shared check. |
 | `node tests/decklauncher-identity-change.test.js` | Passed; included in full run and original explicit shared check. |
 | `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-set-integration.js` | Passed: 66 definitions; 315 legal seeded decks; zero numeric-field differences. |
-| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-headless-smoke.js` | 8 games, 0 failed; JSON results retained. |
+| `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-headless-smoke.js` | Corrected 2026-10-08 run: 8 games, 4 failed (exit 1); separate JSON retained. Original zero-failure result invalidated as explained above. |
 | `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-bad-publicity-fund.js` | **Expected red**: four current balance/loss mismatches; outside green suite. |
 | `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-access.cjs` | Four current access decisions reproduced. |
 | `node documentation/new-sets/reviews/vantage-point/probes/vantagepoint-batch2-strategy.cjs` | Destination/reveal and lethal/survivable observations reproduced. |
@@ -181,3 +192,27 @@ worktree; independent re-review follows each repair. The original dated full
 implementation tracker remains in history, with a further dated post-review
 snapshot preserving the repair queue and review links. Nothing is committed,
 merged, pushed or enabled by this continued audit.
+
+## PR #23 evidence corrections — 2026-10-08
+
+Accepted all four review findings: coordinated tracker ownership explicitly in
+both skills, corrected the alternate Runner identity with setup legality checks,
+made logged engine errors fail smoke games, and repaired the final manifest's
+retained paths/hashes. Original smoke JSON remains unchanged as historical
+counterevidence. The final manifest now fingerprints the merged remediation
+snapshot, including the new smoke results; it does not renew batch approval.
+Earlier manifests remain historical. Production changed in the base branch;
+independent batch revalidation is still required before any readiness verdict.
+
+Focused validation: `node tests/vantagepoint-review-smoke.test.js`,
+`node tests/agent-skills.test.js`, and
+`node tests/decklauncher-identity-dropdown.test.js` passed. The smoke regression
+uses the retained Witch Hunt error as a false-green counterexample, checks errors
+outside the tail, runs both legal setup paths, and rejects identity 36026.
+
+Final remediation verification on Node 20.19.0: `node tests/run-all-tests.js`
+passed **66 test files**, including Corp decision fixtures and decision snapshots.
+`git diff --check` passed for remediation edits; base-merge whitespace checks
+account for existing CRLF files with `core.whitespace=cr-at-eol`; the imported
+base debug log `documentation/debug-logs/bug_raised/startup-pd-muslihat-seed-25.log`
+retains its original trailing space verbatim.

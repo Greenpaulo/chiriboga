@@ -1,4 +1,19 @@
 //MECHANICS
+//Public posture observation is passive and absent for players without this AI.
+//Resolve the server here only when recording, so existing callers/test stubs
+//without the recorder retain their former dependencies.
+function RecordPublicPostureEvent(action, card = null, server = null, amount = 1) {
+  if (!corp.AI || typeof corp.AI._recordPublicPostureEvent !== "function") return;
+  if (!server && card) {
+    server = GetServer(card);
+    //Access traps can fire from a central's cards, not just its root.
+    if (!server) server = [corp.HQ, corp.RnD, corp.archives]
+      .find((central) => central && central.cards == card.cardLocation);
+  }
+  if (!server) return;
+  if (action == "installed") action = server.ice.includes(card) ? "iceInstalled" : "rootInstalled";
+  corp.AI._recordPublicPostureEvent(action, server, card, amount);
+}
 //These are GAME MECHANIC functions, performing acts that are like physical movements, these take inputs that make sense in terms of the game e.g. card object, server object, integer value, player reference.
 //These functions make no validity/legality checks or payments, and they Log the result. Usually nothing is returned but that's not a requirement.
 
@@ -12,6 +27,10 @@ function MakeRun(server) {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
+  RecordPublicPostureEvent("runInitiated", null, server);
+  //Corp AI posture epochs treat a run on the server as a boundary (L8.4)
+  if (corp.AI && typeof corp.AI._notePostureChallenge === "function")
+    corp.AI._notePostureChallenge(server);
   Log("Run initiated attacking " + server.serverName);
   GainCredits(runner, corp.badPublicity, "bad publicity"); //(Nisei 2021 1.2)
   AutomaticTriggers("automaticOnRunBegins", [server]); //(Nisei 2021 1.3)
@@ -61,6 +80,7 @@ function Advance(card) {
   PlaySound('advance');
   if (typeof card.advancement === "undefined") card.advancement = 0;
   card.advancement++;
+  RecordPublicPostureEvent("advancementPlaced", card);
   Log("Card advanced");
   AutomaticTriggers("automaticOnAdvance", [card]);
   //Also fire responseOnAdvance for triggers that may cause phase changes (e.g. Oaktown + Zwicky)
@@ -78,6 +98,7 @@ function PlaceAdvancement(card, num) {
   if (num < 1) return;
   if (typeof card.advancement === "undefined") card.advancement = num;
   else card.advancement += num;
+  RecordPublicPostureEvent("advancementPlaced", card, null, num);
   if (num == 1) Log("1 advancement token placed on " + GetTitle(card, true));
   else Log(num + " advancement tokens placed on " + GetTitle(card, true));
   UpdateCounters();
@@ -378,6 +399,7 @@ function Rez(card, ignoreAllCosts=false, onRezResolve=null, context=null, allowC
   }
   //all costs paid? rez it.	
   card.rezzed = true;
+  if (card.cardType == "ice" && typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("iceRezzed", card);
   card.renderer.FaceUp(); //in case Render is not forthcoming
   Log("Corp rezzed " + GetTitle(card, true));
   var finishRez = function(cardsTrashed) {
@@ -550,8 +572,9 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	for (var i=0; i<cards.length; i++) {
 	  var card = cards[i];
 	  card.host = null;
-	  if (runner.AI != null && card.cardLocation == corp.HQ.cards)
-	    runner.AI.LoseInfoAboutHQCards(card);
+	  //Capture visibility in HQ before moving the card can change what the Runner sees.
+	  var leavingHQ = card.cardLocation == corp.HQ.cards;
+	  var knownHQCard = leavingHQ && PlayerCanLook(runner, card) ? card : null;
 	  //if the currently encountered ice is trashed, it's no longer being encountered
 	  if (GetApproachEncounterIce() == card) {
 	    encountering = false;
@@ -559,6 +582,10 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	  }
 	  //now move it
 	  MoveCard(card, PlayerTrashPile(card.player));
+	  if (runner.AI != null && leavingHQ) {
+	    //Update after removal so empty HQ clears memory, including an unseen final card.
+	    runner.AI.LoseInfoAboutHQCards(knownHQCard);
+	  }
 	  if (card.player == runner) card.faceUp = true;
 	  Log(GetTitle(card, true) + " trashed");
 	}
@@ -602,7 +629,7 @@ function TrashAccessedCard(canBePrevented) {
 }
 
 /**
- * Install a card.<br/>Makes no checks and spends no clicks, but provides opportunity to trash cards (if relevant), and spends the relevant credit cost.<br/>Logs the result.
+ * Install a card.<br/>Rechecks Runner affordability and provides opportunity to trash cards (if relevant), then spends the relevant credit cost. Action callbacks handle clicks.<br/>Logs the result.
  *
  * @method Install
  * @param {Card} installingCard card to install
@@ -610,9 +637,9 @@ function TrashAccessedCard(canBePrevented) {
  * @param {Boolean} [ignoreAllCosts] if set to true, no costs will be paid (except those already paid)
  * @param {int} [position] insert ice at the given position (null will install outermost)
  * @param {Boolean} [returnToPhase] if set to true, phase after install will be what currentPhase was before install (rather than currentPhase.next)
- * @param {function} [onInstallResolve] fires if the install is not cancelled
+ * @param {function} [onInstallResolve] commits the install attempt if not voluntarily cancelled (including payment failure)
  * @param {Object} [context] for onInstallResolve (and onCancelResolve, if relevant)
- * @param {function} [onCancelResolve] fires if the install is cancelled
+ * @param {function} [onCancelResolve] cleans up if the install is cancelled or fails before payment
  * @param {function} [onPaymentComplete] fires once the credits (if any) are paid
  * @param {Boolean} [allowCancel] whether to allow cancelling the install
  * @param {function} [onInstallComplete] fires after the card is installed and all install responses finish
@@ -642,12 +669,40 @@ function Install(
   installingCard.renderer.destinationPosition.x = installingCard.renderer.sprite.x;
   installingCard.renderer.destinationPosition.y = installingCard.renderer.sprite.y;
   var host = null;
+  var installCommitted = false;
+  var installResolved = false;
+  var commitInstall = function() {
+    if (installCommitted) return;
+    installCommitted = true;
+    //This callback commits action costs, not successful installation.
+    if (typeof onInstallResolve === "function") onInstallResolve.call(context);
+  };
+  var canPayInstall = function() {
+    return CheckCredits(installingCard.player,
+      InstallCost(installingCard, destination, ignoreAllCosts, position),
+      "installing", installingCard);
+  };
 
   //initialise second part of install as a callback in case a server creation is required first
   var installCommonHandler = function() {
 	  var installDestination = InstallDestination(installingCard, destination);
+      var failInstall = function() {
+        if (installResolved) return;
+        installResolved = true;
+        commitInstall();
+        MoveCard(installingCard, oldLocation);
+        Log(PlayerName(installingCard.player) + " could not complete installation of " + GetTitle(installingCard, true));
+        IncrementPhase(returnToPhase);
+        //Existing callers use this callback for uninstalled-card cleanup.
+        if (typeof onCancelResolve === "function") onCancelResolve.call(context);
+        Render();
+      };
 	  var installTrashPhase = {
 		Enumerate: {
+          continue: function() {
+            return installingCard.player == runner && !canPayInstall()
+              ? [{label: "End unsuccessful install", button: "End unsuccessful install"}] : [];
+          },
 		  trash: function () {
 			if (installDestination == runner.rig.resources) return [];
 			if (installDestination == runner.rig.hardware) return [];
@@ -709,7 +764,8 @@ function Install(
 			  }
 			  return [{}];
 			} else if (installingCard.player == runner) {
-			  //only check to do here is make sure enough available MU (sufficient programs trashed)
+              if (!canPayInstall()) return [];
+			  //Make sure enough MU is available after trashing.
 			  if (
 				installingCard.cardType == "program" &&
 				typeof (installingCard.memoryCost !== "undefined")
@@ -726,6 +782,9 @@ function Install(
 		  },
 		},
 		Resolve: {
+          continue: function() {
+            if (installingCard.player == runner && !canPayInstall()) failInstall();
+          },
 		  //see Nisei CR 1.5 8.5.13 for steps of installing (e.g. trash, pay, trigger "when installed")
 		  trash: function (params) {
 			var storedServer = GetServerByArray(installDestination); //as above, see below
@@ -736,15 +795,23 @@ function Install(
 				  if (GetServerByArray(installDestination) == null)
 					corp.remoteServers.splice(serverIndex, 0, storedServer);
 				}
-				currentPhase.Cancel = undefined; //once trashing begins there is no going back
-				delete currentPhase.Cancel; //remove the variable completely
+                //Capture the install phase: nested trash responses may change currentPhase.
+                delete installTrashPhase.Cancel; //once trashing begins there is no going back
 				Render();
 			}, context);
 		  },
 		  n: function () {
-			//card will be installed, callback fires
-			if (typeof onInstallResolve === "function")
-			  onInstallResolve.call(context);
+            if (installResolved) return;
+            //Recheck before any payment, even if a stale continuation is resolved.
+            if (installingCard.player == runner && !canPayInstall()) {
+              failInstall();
+              return;
+            }
+            commitInstall();
+            if (installingCard.player == runner && !canPayInstall()) {
+              failInstall();
+              return;
+            }
 			//if clicks were spent, it was done before trash (or as part of callback) so no need to SpendClicks here
 			// DRBO6- Bling needs to know what costs were paid so we are making it global
       /*SpendCredits(
@@ -753,6 +820,7 @@ function Install(
 			  "installing",
 			  installingCard,
       */
+      installResolved = true;
       intended.installCostPaid = InstallCost(installingCard, destination, ignoreAllCosts, position);
       SpendCredits(
         installingCard.player,
@@ -777,6 +845,7 @@ function Install(
 				  }
 				}
 				MoveCard(installingCard, installDestination, position); //if position not specified, this uses .push (i.e. ice will be installed outermost)
+                if (installingCard.player == corp) RecordPublicPostureEvent("installed", installingCard);
 				if (runner.AI != null && oldLocation == corp.HQ.cards)
 				  runner.AI.LoseInfoAboutHQCards(null, installingCard.cardType); //one less card in corp hand
 				if (host != null) installingCard.host = host;
@@ -1394,7 +1463,7 @@ function SpendCredits(
     //decision is needed; spend it and then handle any pool remainder.
     var usablePoolCredits = canUsePool ? player.creditPool : 0;
     var minimumHostedSpend = Math.max(0, num - usablePoolCredits);
-    var maximumHostedSpend = Math.min(num, sources[0].credits);
+    var maximumHostedSpend = sources.length == 1 ? Math.min(num, sources[0].credits) : 0;
     if (
       temporary < 1 && sources.length == 1 &&
       minimumHostedSpend > 0 &&
@@ -1795,7 +1864,9 @@ function Score(card, afterScore, context) {
   OpportunityForAvoidPrevent(runner, "responsePreventableScore", [], function () {
     if (intended.score == null) return;
     PlaySound('agendaScore');
+    var postureScoreServer = GetServer(intended.score);
     MoveCard(intended.score, corp.scoreArea);
+    RecordPublicPostureEvent("agendaScored", intended.score, postureScoreServer);
     intended.score.faceUp = true;
     if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(intended.score);
 	var historyBreak = {
@@ -1837,6 +1908,7 @@ function Score(card, afterScore, context) {
 function Steal() {
   intended.steal = accessingCard; //if callback sets this to null, the steal will not happen
   OpportunityForAvoidPrevent(corp, "responsePreventableSteal", [], function () {
+    var postureStealServer = intended.steal ? GetServer(intended.steal) || attackedServer : null;
     ResolveAccess();
     if (intended.steal == null) return;
     PlaySound('agendaSteal');
@@ -1847,6 +1919,7 @@ function Steal() {
 	agendaStolenLocations.push(stolenFromString); //for testing/balancing AIs
 	
     MoveCard(intended.steal, runner.scoreArea);
+    RecordPublicPostureEvent("agendaStolen", intended.steal, postureStealServer);
     intended.steal.faceUp = true;
     if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(intended.steal);
     Log(GetTitle(intended.steal, true) + " stolen");
@@ -2046,6 +2119,7 @@ function Reveal(card, callback, context, playerToRevealTo, skipHumanInput=false)
 function AddCounters(card, counter, num = 1) {
   if (typeof card[counter] === "undefined") card[counter] = 0;
   card[counter] += num;
+  if (counter == "advancement" && num > 0) RecordPublicPostureEvent("advancementPlaced", card, null, num);
   if (num == 1)
     Log("1 " + counter + " counter placed on " + GetTitle(card, true));
   else Log(num + " " + counter + " counters placed on " + GetTitle(card, true));

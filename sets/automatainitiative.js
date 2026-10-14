@@ -468,7 +468,7 @@ cardSet[34021] = {
     //Only useful for R&D runs
     if (server !== corp.RnD) return 0;
     //Check for Crisium Grid
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     
     //Value based on hand size and potential
     var handSize = runner.grip.length;

@@ -51,6 +51,21 @@ class RunCalculator {
   // misc_serious e.g. install another ice inward (like endTheRun, paths that fire these will be avoided)
   // strengthenAllIce gives every ice on the route +1 strength for the remainder of the run
   //encounterEffects is an array of OR arrays of effects
+  //rez cost modification of a piece of ice the knowledge player cannot see, from public effects only:
+  //sums modifyRezCost triggers from other sources the player can look at (or lingering effects),
+  //ignoring the hidden ice's own triggers and unclamped (the printed rez cost is hidden)
+  _publicRezCostModifier(ice, knowledgePlayer = runner) {
+    var ret = 0;
+    var triggerList = ChoicesActiveTriggers("modifyRezCost");
+    for (var i = 0; i < triggerList.length; i++) {
+      var source = triggerList[i].card;
+      if (source == ice) continue;
+      if (!lingeringEffects.includes(source) && !PlayerCanLook(knowledgePlayer, source)) continue;
+      ret += source.modifyRezCost.Resolve.call(source, ice);
+    }
+    return ret;
+  }
+
   IceAI(ice, maxCorpCred, assumeWeakerUnknown = false, incomplete = false, startIceIdx = -1, knowledgePlayer = runner) {
     var result = {
       ice: ice,
@@ -69,7 +84,7 @@ class RunCalculator {
     var iceKnown = PlayerCanLook(knowledgePlayer, ice);
     if (!iceKnown) {
       //unknown ice
-	  var extraRezCost = RezCost(ice) - ice.rezCost; //this isn't cheating because we only check the bonus cost (easy way of summarising any card effects)
+	  var extraRezCost = this._publicRezCostModifier(ice, knowledgePlayer); //public effects only (the hidden card's own effects and printed cost are not read)
       //advanceable ice assumptions
 	  var advCounters = Counters(ice, "advancement");
 	  if (advCounters > 0) {
@@ -116,12 +131,8 @@ class RunCalculator {
     if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
       //ice is known, calculate specifics
       //start with basic details
-	  //we need to pretend it's an encounter
-	  var stored = AIIceEncounterSaveState();
-	  AIIceEncounterModifyState(ice);
-      result.strength = this._baseStrength(ice);
-	  //then restore reality
-	  AIIceEncounterRestoreState(stored);
+	  //we need to pretend it's an encounter (reality is restored afterwards)
+      result.strength = AIWithIceEncounter(ice, () => this._baseStrength(ice));
       result.sr = [];
       result.subTypes = [].concat(ice.subTypes);
 
@@ -135,10 +146,6 @@ class RunCalculator {
         }
       }
 
-      //blank out subroutines that are already broken
-      for (var i = 0; i < ice.subroutines.length && i < result.sr.length; i++) {
-        if (ice.subroutines[i].broken) result.sr[i] = [[]];
-      }
     }
 	
 	//passive effects (assuming Runner only for now)
@@ -148,6 +155,15 @@ class RunCalculator {
 		result = activeCards[i].AIModifyIceAI.call(activeCards[i],result,startIceIdx);
 	  }
 	}
+
+    // Prospective prepended rows have no actual subroutine or broken flag yet.
+    // Live encounter rows use the actual indexes (offset zero).
+    if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice))) {
+      var actualOffset = result.srActualOffset || 0;
+      for (var i = 0; i < ice.subroutines.length && i + actualOffset < result.sr.length; i++) {
+        if (ice.subroutines[i].broken) result.sr[i + actualOffset] = [[]];
+      }
+    }
 
     return result;
   }
@@ -1061,8 +1077,8 @@ class RunCalculator {
 		  var mightHitHokusai = false;
 		  if (numUnknownCardsInRoot > 0) mightHitHokusai = true;
 		  else {
-			for (var i = 0; i < data.server.root.length; i++) {
-			  if (data.server.root[i].title == "Hokusai Grid") {
+			for (var i = 0; i < knownCardsInRoot.length; i++) {
+			  if (knownCardsInRoot[i].title == "Hokusai Grid") {
 				  mightHitHokusai = true;
 				  break;
 			  }
@@ -1288,18 +1304,29 @@ class RunCalculator {
     var firstDamage = this.TotalDamage(this.TotalEffect(icePoint));
     var futureOther = this._poolOnly ? 0 : (corp.badPublicity || 0);
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
-    var futurePool = data.poolCreditLimit - firstPoolSpent;
+    // Before a run, bad-publicity credits are included in the pool budget.
+    // Unspent temporary credits expire; credit losses consume permanent credits.
+    var expiredCredits = attackedServer || this._continuationRun ? 0 : Math.max(0,
+      futureOther - Math.max(0, icePoint.runner_credits_spent - data.otherCredits));
+    var futurePool = data.poolCreditLimit - firstPoolSpent - expiredCredits;
     var futureDamage = data.damageLimit - firstDamage;
     // Different break paths often leave identical continuation budgets. Cache
     // only within this synchronous board snapshot, never across game actions.
     if (!data.continuationCache) data.continuationCache = new Map();
-    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit, icePoint.restrictedCreditsSpent || 0, icePoint.persistents.filter(p => p.action === "breakIncome").map(p => p.use.title).join(",")].join(":");
+    var rawMeat = (icePoint.creditSpendDamage || 0) * Number(icePoint.runner_credits_spent > 0) +
+      icePoint.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
+    var remainingPrevention = Math.max(0, this._meatDamagePrevention - rawMeat);
+    var spentOutside = icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0;
+    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit,
+      icePoint.restrictedCreditsSpent || 0, remainingPrevention, Number(spentOutside),
+      icePoint.persistents.filter(p => p.action === "breakIncome").map(p => p.use.title).join(",")].join(":");
     var routes = data.continuationCache.get(cacheKey);
     if (!routes) {
       var future = new RunCalculator();
       future.suppressOutput = true;
       future._runnerPlanning = true;
       future._securityPlanning = this._securityPlanning;
+      future._continuationRun = true; // fresh bad-publicity credits are in otherCredits
       future._ignoredIce = new Set(this._ignoredIce);
       future._ignoredIce.add(defender);
       future._breakIncomeUsed = new Set(this._breakIncomeUsed || []);
@@ -1309,10 +1336,8 @@ class RunCalculator {
       future._creditPolicyBranch = !!this._poolOnly;
       future._poolOnly = !!this._poolOnly;
       future._creditDamageIgnored = new Set(this._creditDamageIgnored || []);
-      var rawMeat = (icePoint.creditSpendDamage || 0) * Number(icePoint.runner_credits_spent > 0) +
-        icePoint.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
-      future._meatPreventionOverride = Math.max(0, this._meatDamagePrevention - rawMeat);
-      if (icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0)
+      future._meatPreventionOverride = remainingPrevention;
+      if (spentOutside)
         for (var source of this._creditSpendSources) future._creditDamageIgnored.add(source.card);
       routes = future.Calculate(data.server, futureClicks, futurePool, futureOther,
         futureDamage, data.tagLimit, false, null);
@@ -1322,7 +1347,7 @@ class RunCalculator {
       var last = route[route.length - 1];
       var result = this.CopyPoint(icePoint);
       result.iceIdx = -1;
-      result.runner_credits_reserved = (last.runner_credits_reserved || 0) +
+      result.runner_credits_reserved = expiredCredits + (last.runner_credits_reserved || 0) +
         Math.max(0, last.runner_credits_spent - (last.paymentPoolOnly ? 0 : futureOther) - (last.restrictedCreditsPaid || 0)) + last.runner_credits_lost;
       result.runner_clicks_spent += 1 + last.runner_clicks_spent;
       result.virus_counters_spent += last.virus_counters_spent;

@@ -148,7 +148,7 @@ const code = ['ai_corp.js', 'ai_runner.js', 'runcalculator.js', 'utility.js', 'm
   .map(f => fs.readFileSync(path.join(root, f), 'utf8'))
   .concat(fs.readdirSync(path.join(root, 'sets')).map(f => fs.readFileSync(path.join(root, 'sets', f), 'utf8')))
   // The F4 harness is described in Foundations.
-  .concat(['scripts/ai-game.js', 'scripts/ai-batch.js', 'scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js']
+  .concat(['scripts/ai-game.js', 'scripts/ai-batch.js', 'scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js', 'scripts/ai-batch/calibration.js']
     .map(f => fs.readFileSync(path.join(root, f), 'utf8')))
   .join('\n');
 let nameCount = 0;

@@ -290,7 +290,7 @@ cardSet[31004] = {
 	  //archives only
 	  if (server == corp.archives) { 
 		  //require successful run
-		  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		  if (ServerSuccessfulRunPrevented(server)) return 0;
 		  //only play if there are cards worth retrieving from heap
 		  if (this.SharedPreferredCard()) 
 		  return 1.5; //arbitrary, for getting that important card install
@@ -1350,14 +1350,14 @@ cardSet[31019] = {
   //indicate bonus to accesses (when active)
   AIAdditionalAccess: function(server) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
       if (server != corp.HQ) return 0;
       return 2;
   },
   //don't define AIWouldPlay for run events, instead use AIRunEventExtraPotential(server,potential) and return float (0 to not play)
   AIRunEventExtraPotential: function(server,potential) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
 	  //use HQ with no unrezzed ice
 	  if (server == corp.HQ) {
 		var unrezzedIceThisServer = 0;
@@ -1818,7 +1818,7 @@ cardSet[31023] = {
   AIRunAbilityExtraPotential: function(server,potential) {
 	  if (server == corp.archives) {
 		//require successful run
-		if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		if (ServerSuccessfulRunPrevented(server)) return 0;
 		//this works because in the AI, HQ potential is calculated and stored before Archives is calculated
 		var HQpotential = runner.AI._getCachedPotential(corp.HQ);
 		if (HQpotential > potential) {
@@ -1985,7 +1985,7 @@ cardSet[31024] = {
   AIRunExtraPotential: function(server,potential) {
 	  if (!this.madeSuccessfulRunOnChosenServerThisTurn && server == this.chosenServer) {
 		//require successful run
-		if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+		if (ServerSuccessfulRunPrevented(server)) return 0;
 		//Runner AI knows that this will prevent usual breach so this will probably be the full potential (except e.g. Red Team combo)
 	    //the choice of 1.5 is to prevent the AI from considering it a worthless run
 		return 1.5;
@@ -2185,41 +2185,42 @@ cardSet[31026] = {
     automatic: true,
     availableWhenInactive: true,
   },
+  _AIFirstIceToEncounter: function(iceCard,startIceIdx) {
+	var server = GetServer(iceCard);
+	if (!server) return false;
+	var rezzedIceInServer = 0;
+	for (var i=startIceIdx; i>-1; i--) {
+		if (server.ice[i].rezzed) rezzedIceInServer++;
+	}
+	if (iceCard.rezzed || rezzedIceInServer < 1) {
+		//Walk inwards from startIceIdx. This is first if it is reached before
+		//any other rezzed ice; unrezzed outer ice is assumed to stay unrezzed.
+		for (var i=startIceIdx; i>-1; i--) {
+			if (server.ice[i] == iceCard) return true;
+			if (server.ice[i].rezzed) return false;
+		}
+	}
+	return false;
+  },
   AIModifyIceAI: function(iceAI,startIceIdx) {
 	if (!this.usedThisTurn || iceAI.ice == this.affectedCard) {
-		//If this ice is rezzed and is the next the Runner will encounter, add Code Gate.
-		//It's important to check rezzed here because if it is left unrezzed then the cached run needs to correctly understand the next ice is going 
-		// to be Code Gated and if the ice is rezzed (or no ice in the server are rezzed) then recalculation will include this effect for that instead.
-		//The affectedCard check is also important for mid-encounter
-		var server = GetServer(iceAI.ice);
-		if (server) {
-			var rezzedIceInServer = 0;
-			for (var i=startIceIdx; i>-1; i--) {
-				if (server.ice[i].rezzed) rezzedIceInServer++;
-			}
-			if (iceAI.ice.rezzed || rezzedIceInServer < 1) {
-				//walk inwards from startIceIdx. If this is reached before any other rezzed ice, Code Gate it.
-				for (var i=startIceIdx; i>-1; i--) {
-					if (server.ice[i] == iceAI.ice) {
-						if (!iceAI.subTypes.includes("Code Gate")) iceAI.subTypes.push("Code Gate");
-						return iceAI;
-					}
-					else if (server.ice[i].rezzed) {
-						return iceAI;
-					}
-				}
-			}
+		//The affectedCard check is important for mid-encounter.
+		if (this._AIFirstIceToEncounter(iceAI.ice,startIceIdx)) {
+			if (!iceAI.subTypes.includes("Code Gate")) iceAI.subTypes.push("Code Gate");
 		}
 	}
 	return iceAI;
   },
-  AIMatchingBreakerInstalled: function (iceCard) {
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
 	//returns a matching breaker installed, or null
 	//true if a Decoder is installed, iceCard is outermost ice, and the ability hasn't been used this turn
+	//Corp security already matches ordinary breakers against effectiveSubTypes;
+	//this identity only needs to proxy the Runner AI's raw-subtype query.
+	if (Array.isArray(effectiveSubTypes)) return null;
 	if (this.usedThisTurn) return null;
 	var server = GetServer(iceCard);
 	if (!server) return null;
-	if (server.ice.indexOf(iceCard) !== server.length-1) return null;
+	if (!this._AIFirstIceToEncounter(iceCard,server.ice.length-1)) return null;
 	//pretend the ice is code gate (restore afterwards)
 	var wasntCodeGate = !iceCard.subTypes.includes("Code Gate");
 	if (wasntCodeGate) iceCard.subTypes.push("Code Gate");
@@ -2417,7 +2418,7 @@ cardSet[31029] = {
   //indicate bonus to accesses (when active)
   AIAdditionalAccess: function(server) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
       if (server != corp.RnD) return 0;
       return 2;
   },
@@ -2426,7 +2427,7 @@ cardSet[31029] = {
 	  //use The Maker's Eye only for R&D with no unrezzed ice
 	  if (server == corp.RnD) {
 	    //require successful run
-	    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	    if (ServerSuccessfulRunPrevented(server)) return 0;
 		var unrezzedIceThisServer = 0;
 		for (var i = 0; i < server.ice.length; i++) {
 		  if (!server.ice[i].rezzed) unrezzedIceThisServer++;
@@ -2460,10 +2461,10 @@ cardSet[31030] = {
 	if (htsi) {
 		//for Atman the strength match is important so we need to take into account potential encounter effects
 		//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
-		var stored = AIIceEncounterSaveState();
-		AIIceEncounterModifyState(htsi);
-		var X = Strength(htsi) - Strength(this);
-		AIIceEncounterRestoreState(stored);
+		var atman = this;
+		var X = AIWithIceEncounter(htsi, function () {
+			return Strength(htsi) - Strength(atman);
+		});
 	} else {
 		//ice are unknown, choose the strength needed for RC to consider it valid
 		var outermostUnknownIceInHighestPotentialServer = null;
@@ -2602,13 +2603,12 @@ cardSet[31030] = {
 	//returns a matching breaker installed, or null
 	//for Atman the strength match is important so we need to take into account potential encounter effects
 	//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
-	var strengthMatches = false;
-	var stored = AIIceEncounterSaveState();
+	var atman = this;
 	//state will not be modified if there is an issue (e.g. server not found)
 	//in which case can't continue with strength check because can't pretend encounter with no server yet
-	if (!AIIceEncounterModifyState(iceCard)) return null;
-	strengthMatches = CheckStrength(this);
-	AIIceEncounterRestoreState(stored);
+	var strengthMatches = AIWithIceEncounter(iceCard, function (entered) {
+		return entered && CheckStrength(atman);
+	});
 	if (strengthMatches) return this;
 	return null;
   },
@@ -2767,11 +2767,10 @@ cardSet[31031] = {
 	if ((effectiveSubTypes || iceCard.subTypes || []).includes(this.chosenWord)) {
 		//for Chameleon the strength check is important so we need to take into account potential encounter effects
 		//so we store encounter state, pretend we're encountering the ice, check strength, then restore state
-		var sufficientStrength = false;
-		var stored = AIIceEncounterSaveState();
-		AIIceEncounterModifyState(iceCard);
-		sufficientStrength = CheckStrength(this);
-		AIIceEncounterRestoreState(stored);
+		var chameleon = this;
+		var sufficientStrength = AIWithIceEncounter(iceCard, function () {
+			return CheckStrength(chameleon);
+		});
 		if (sufficientStrength) return this;
 	}
 	return null;
@@ -3295,7 +3294,7 @@ cardSet[31037] = {
   //don't define AIWouldPlay for run events, instead use AIRunEventExtraPotential(server,potential) and return float (0 to not play)
   AIRunEventExtraPotential: function(server,potential) {
 	//require successful run
-	if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0; // don't use
+	if (ServerSuccessfulRunPrevented(server)) return 0; // don't use
 	//not worth it if run is expensive for no benefit (the 0.5 and 4 are arbitrary)
 	if ( potential < 0.5 && (server.ice.length > 0 || Credits(runner) > 4) ) return 0;
 	//use Dirty Laundry only if there are no unrezzed ice
@@ -3758,6 +3757,12 @@ cardSet[31043] = {
     }
 	return result;
   },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
+  },
 };
 
 cardSet[31044] = {
@@ -3995,6 +4000,12 @@ cardSet[31045] = {
   AIWorthwhileIce: function(server, purpose) {
 	  //worthwhile only if there is a rezzed bioroid ice that isn't a Ravana 1.0
 	  return (this.SharedChoicesCards().length > 0);
+  },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 
@@ -4578,6 +4589,7 @@ cardSet[31054] = {
 				  "using",
 				  this,
 				  function () {
+                    if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
 					AddTags(1, function() {
 					  //damage can be prevented
 					  Damage("net", 3, true, function(cardsTrashed) {}, this);
@@ -6377,6 +6389,9 @@ cardSet[31079] = {
 		if (attackedServer == GetServer(this)) return 1;
 		return 0;
     },
+  },
+  AIPreventsSuccessfulRun: function (server) {
+    return GetServer(this) == server;
   },
   AIDefensiveValue: function(server) {
 	//don't install in a new server

@@ -30,11 +30,18 @@ const context = {
   PlayClickCost: (card) => card.subTypes.includes('Double') ? 2 : 1,
   RezCost: (card) => card.rezCost + (card.modifyRezCost ? card.modifyRezCost.Resolve.call(card, card) : 0),
 };
+const testStubs = {...context};
 vm.createContext(context);
-for (const file of ['config.js', 'sets/vantagepoint.js', 'mechanics.js', 'ai_corp.js', 'runcalculator.js'])
+for (const file of ['config.js', 'sets/vantagepoint.js', 'mechanics.js', 'utility.js', 'ai_runner.js', 'ai_corp.js', 'runcalculator.js'])
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file});
+Object.assign(context, testStubs);
+context.CheckCredits = (player, amount) => player.creditPool >= amount;
+context.CheckRez = (card, types) => types.includes(card.cardType) && !card.rezzed;
+context.AdvancementRequirement = (card) => card.advancementRequirement;
+context.activePlayer = corp;
 vm.runInContext('this.testAI = new CorpAI(); this.testRC = new RunCalculator();', context);
 const ai = context.testAI;
+corp.AI = ai;
 const rc = context.testRC;
 ai._log = () => {};
 ai._clicksLeft = () => corp.clickTracker;
@@ -135,7 +142,7 @@ assert.strictEqual(rc.TotalEffect(complete(unrelatedBreak)).tag || 0, 0);
 
 //Flood the Market consumes exactly three credits and two clicks, once.
 const flood = context.cardSet[36053];
-const agenda = {title: 'Target', cardType: 'agenda', canBeAdvanced: true, advancement: 0};
+const agenda = {title: 'Target', cardType: 'agenda', canBeAdvanced: true, advancement: 0, advancementRequirement: 3};
 corp.remoteServers = [
   {root: [agenda], ice: [{}]}, {root: [{}], ice: [{}]}, {root: [{}], ice: [{}]},
 ];
@@ -183,16 +190,75 @@ hype.disabled = true;
 assert.strictEqual(ai._potentialAdvancementDirections({...starting, handCards: []}, options).some((p) => p.using === hype), false, 'disabled upgrades contribute no counters');
 hype.disabled = false;
 hype.agendaScoredOrStolenThisTurn = false;
-const paidUpgrade = ai._potentialAdvancementDirections({...starting, corpCredits: 6, handCards: []}, options).find((p) => p.using === hype);
-assert.strictEqual(paidUpgrade.corpCredits, 0, 'unrezzed upgrade pays exactly six credits');
+context.playerTurn = corp;
+const paidUpgrade = ai._potentialAdvancementDirections({...starting, corpCredits: 8, handCards: []}, options).find((p) => p.using === hype);
+assert.strictEqual(paidUpgrade.corpCredits, 2, 'unrezzed upgrade pays exactly six credits');
 hype.rezzed = true;
 const rezzedUpgrade = ai._potentialAdvancementDirections({...starting, corpCredits: 0, handCards: []}, options).find((p) => p.using === hype);
 assert.strictEqual(rezzedUpgrade.corpCredits, 0, 'rezzed upgrade never pays rez costs again');
+hype.rezzed = false;
+//Full rez policy must see simulated resources and counters, not the live board.
+assert.strictEqual(ai._potentialAdvancementDirections({...starting, corpCredits: 6, handCards: []}, options).some((p) => p.using === hype), false, 'rez leaves too few credits to finish the agenda');
+assert.strictEqual(ai._potentialAdvancementDirections({...starting, corpCredits: 8, corpClicks: 3, handCards: []}, options).some((p) => p.using === hype), false, 'ordinary clicks suffice without paying for the upgrade');
+assert.strictEqual(ai._potentialAdvancementDirections({...starting, corpCredits: 8, advancementSoFar: 1, handCards: []}, options).some((p) => p.using === hype), false, 'simulated advancement makes the paid upgrade unnecessary');
+const originalRezUsability = hype.RezUsability;
+hype.RezUsability = () => false;
+assert.strictEqual(ai._potentialAdvancementDirections({...starting, corpCredits: 8, handCards: []}, options).some((p) => p.using === hype), false, 'policy rejection removes the upgrade from the plan');
+hype.rezzed = true;
+assert(ai._potentialAdvancementDirections({...starting, corpCredits: 0, handCards: []}, options).some((p) => p.using === hype), 'already rezzed upgrades bypass rez policy');
+hype.rezzed = false;
+context.activePlayer = runner;
+const liveState = [corp.creditPool, corp.clickTracker, agenda.advancement, context.activePlayer];
+hype.RezUsability = () => {
+  assert.deepStrictEqual([corp.creditPool, corp.clickTracker, agenda.advancement, context.activePlayer], [8, 2, 1, corp]);
+  assert.strictEqual(context.AIHypothetical.depth, 1);
+  throw new Error('rez probe failure');
+};
+assert.throws(() => ai._potentialAdvancementDirections({...starting, corpCredits: 8, advancementSoFar: 1, handCards: []}, options), /rez probe failure/);
+assert.deepStrictEqual([corp.creditPool, corp.clickTracker, agenda.advancement, context.activePlayer], liveState, 'exception restores every simulated field');
+assert.strictEqual(context.AIHypothetical.depth, 0);
+delete agenda.advancement;
+assert.throws(() => ai._potentialAdvancementDirections({...starting, corpCredits: 8, advancementSoFar: 1, handCards: []}, options), /rez probe failure/);
+assert.strictEqual(Object.hasOwn(agenda, 'advancement'), false, 'probe restores an absent advancement property');
+agenda.advancement = 0;
+hype.RezUsability = originalRezUsability;
+context.activePlayer = corp;
+assert.deepStrictEqual([corp.creditPool, corp.clickTracker, agenda.advancement], liveState.slice(0, 3));
+//The final command gate independently rechecks a supplied advancement plan.
+const selectionAI = vm.runInContext('new CorpAI()', context);
+selectionAI._log = () => {};
+selectionAI._sufficientEconomy = () => true;
+selectionAI.Phase_PostAction = (choices) => choices.indexOf('n');
+selectionAI._isFullyAdvanceableAgenda = (card) => card === agenda;
+selectionAI._isFullyAdvanceableHostileAsset = () => false;
+selectionAI._criticalBreachDefenseAction = () => -1;
+selectionAI._obsoleteBluff = () => false;
+selectionAI._advancementLimit = () => 3;
+selectionAI._deceptionAdvancementTarget = (card, server, limit) => limit;
+selectionAI._protectionScore = () => 10;
+selectionAI._potentialAdvancement = (card, limit, thisTurn, hand, clicks, output) => {
+  if (output) output.push(hype);
+  return 3;
+};
+context.CheckSubType = () => false;
+context.FullCheckPlay = () => false;
+corp.HQ.cards = [];
+hype.RezUsability = () => false;
+corp.creditPool = 8;
+const selectionOptions = ['rez', 'advance', 'n'];
+assert.strictEqual(selectionAI.Phase_Main(selectionOptions), 1, 'unusable planned upgrade falls back to ordinary advancement');
+assert.strictEqual(selectionAI.preferred.cardToRez, undefined);
+hype.RezUsability = () => true;
+//Affordability is still required by the real FullCheckRez.
+corp.creditPool = 8;
+selectionAI.preferred = null;
+assert.strictEqual(selectionAI.Phase_Main(selectionOptions), 0, 'usable planned upgrade is rezzed');
+assert.strictEqual(selectionAI.preferred.cardToRez, hype);
+corp.creditPool = liveState[0];
+hype.RezUsability = originalRezUsability;
 //Actual command selection banks the free rez in post-action and Runner EOT.
 context.CheckCredits = (player, amount) => player.creditPool >= amount;
 context.CheckRez = (card, types) => types.includes(card.cardType) && !card.rezzed;
-context.FullCheckRez = (card, types) => context.CheckRez(card, types) &&
-  context.CheckCredits(corp, context.RezCost(card)) && card.RezUsability.call(card);
 context.executingCommand = '';
 hype.rezzed = false;
 hype.agendaScoredOrStolenThisTurn = true;

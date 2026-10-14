@@ -128,19 +128,33 @@ const gameKey = g => [g.fixtureId || '', g.deckPairId, g.seed].join('|');
 // options may differ.
 const COMPARABLE_FIELDS = ['poolHash', 'seeds', 'starts', 'collectors'];
 
-function compareReports(baseline, candidate, gate = {}) {
+function compareReports(baseline, candidate, gate = {}, collectors = []) {
   for (const field of COMPARABLE_FIELDS) {
     if (JSON.stringify(baseline[field]) !== JSON.stringify(candidate[field]))
       throw new Error(`Reports differ in ${field}; only the AI options may differ`);
   }
-  const byKey = new Map(baseline.games.map(g => [gameKey(g), g]));
+  const pairSet = report => [...new Set(report.pairs || [])].sort();
+  if (JSON.stringify(pairSet(baseline)) !== JSON.stringify(pairSet(candidate)))
+    throw new Error('Reports differ in pairs; only the AI options may differ');
+  const indexGames = games => {
+    const map = new Map();
+    for (const game of games) {
+      const key = gameKey(game);
+      if (map.has(key)) throw new Error(`Duplicate game key: ${key}`);
+      map.set(key, game);
+    }
+    return map;
+  };
+  const bases = indexGames(baseline.games), candidates = indexGames(candidate.games);
   const pairs = [];
   let dropped = 0;
-  for (const game of candidate.games) {
-    const base = byKey.get(gameKey(game));
-    if (base && base.ok && game.ok) pairs.push([base, game]); else dropped++;
+  for (const key of new Set([...bases.keys(), ...candidates.keys()])) {
+    const base = bases.get(key), game = candidates.get(key);
+    if (base && game && base.ok && game.ok) pairs.push([base, game]); else dropped++;
   }
-  const directions = Object.assign({}, CORE_DIRECTIONS, baseline.directions || {}, gate.better || {});
+  pairs.sort((a, b) => gameKey(a[0]).localeCompare(gameKey(b[0])));
+  const directions = Object.assign({}, CORE_DIRECTIONS, baseline.directions || {},
+    ...collectors.map(c => c.directions || {}), gate.better || {});
   const names = [...new Set(pairs.flatMap(([b, c]) => [...Object.keys(b.metrics), ...Object.keys(c.metrics)]))].sort();
   const metrics = {};
   for (const name of names) {
@@ -160,6 +174,35 @@ function compareReports(baseline, candidate, gate = {}) {
       direction, improvement: oriented && {mean: round(oriented.mean), low: round(oriented.low), high: round(oriented.high)},
     };
   }
+  const batchComparisons = {};
+  const requested = new Set([...Object.keys(gate.guard || {}), ...(gate.improve || [])]);
+  for (const collector of collectors) {
+    const selected = [...requested].filter(name => !metrics[name] &&
+      (name === collector.name || name.startsWith(collector.name + '.')));
+    if (!selected.length || typeof collector.finishBatch !== 'function') continue;
+    try {
+      if (!baseline.collectors?.includes(collector.name)) throw new Error('batch collector not declared in reports');
+      if (!pairs.length) throw new Error('no successful game pairs');
+      const arms = [0, 1].map(arm => pairs.map(pair => {
+        const samples = pair[arm].samples;
+        if (!samples || !Object.prototype.hasOwnProperty.call(samples, collector.name))
+          throw new Error(`missing samples for ${collector.name} at ${gameKey(pair[arm])}`);
+        return samples[collector.name];
+      }));
+      const values = pooledComparison(collector, arms, draw => {
+        const indices = Array.from({length: pairs.length}, () => Math.floor(draw() * pairs.length));
+        return arms.map(arm => indices.map(i => arm[i]));
+      });
+      for (const name of selected) {
+        if (!values[name]) throw new Error(`unknown batch metric ${name}`);
+        const m = values[name], direction = directions[name] || null;
+        batchComparisons[name] = {...m, direction, pairedGames: pairs.length, droppedGames: dropped,
+          improvement: orientDifference(m, direction)};
+      }
+    } catch (error) {
+      for (const name of selected) batchComparisons[name] = {why: error.message};
+    }
+  }
   // Gate: a guarded metric must not admit a regression beyond its tolerance;
   // an improved metric needs its oriented interval above zero.
   const checks = [];
@@ -168,22 +211,115 @@ function compareReports(baseline, candidate, gate = {}) {
   // candidate played differently. Reports without log hashes skip the check.
   const hashed = pairs.filter(([b, c]) => b.logHash && c.logHash);
   const changedGames = hashed.filter(([b, c]) => b.logHash !== c.logHash).length;
-  const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length;
+  const gated = Object.keys(gate.guard || {}).length || (gate.improve || []).length || Object.keys(gate.max || {}).length ||
+    Object.keys(gate.ceiling || {}).length || (gate.noWorse || []).length;
+  if (gated && !pairs.length)
+    checks.push({name: 'usable pairs', kind: 'paired', pass: false, why: 'no successful matching game pairs'});
   if (gated && hashed.length)
     checks.push({name: 'option effect', kind: 'changed', pass: changedGames > 0,
       why: changedGames ? undefined : 'no game differs from the baseline'});
   for (const [name, tolerance] of Object.entries(gate.guard || {})) {
-    const m = metrics[name];
-    if (!m || !m.improvement) { checks.push({name, kind: 'guard', pass: false, why: m ? 'no direction declared' : 'unknown metric'}); continue; }
-    checks.push({name, kind: 'guard', tolerance, pass: m.improvement.low > -tolerance});
+    const m = batchComparisons[name] || metrics[name];
+    if (!m || !m.improvement) { checks.push({name, kind: 'guard', pass: false, why: m ? m.why || 'no direction declared' : 'unknown metric'}); continue; }
+    checks.push({name, kind: 'guard', tolerance, pass: (!batchComparisons[name] ||
+      (Number.isFinite(tolerance) && tolerance >= 0)) && m.improvement.low > -tolerance});
   }
   for (const name of gate.improve || []) {
-    const m = metrics[name];
-    if (!m || !m.improvement) { checks.push({name, kind: 'improve', pass: false, why: m ? 'no direction declared' : 'unknown metric'}); continue; }
+    const m = batchComparisons[name] || metrics[name];
+    if (!m || !m.improvement) { checks.push({name, kind: 'improve', pass: false, why: m ? m.why || 'no direction declared' : 'unknown metric'}); continue; }
     checks.push({name, kind: 'improve', pass: m.improvement.low > 0});
   }
-  return {pairedGames: pairs.length, droppedGames: dropped, changedGames: hashed.length ? changedGames : null, metrics, checks,
+  return {pairedGames: pairs.length, droppedGames: dropped, changedGames: hashed.length ? changedGames : null, metrics, batchMetrics: batchComparisons, checks,
     pass: checks.length ? checks.every(c => c.pass) : null};
 }
 
-module.exports = {CORE_DIRECTIONS, coreMetrics, flattenCollector, aggregate, bootstrap, compareReports, isTimingMetric, seededRandom};
+// Positive oriented differences always mean better. Unknown directions never pass.
+function orientDifference(m, direction) {
+  if (!['higher', 'lower'].includes(direction)) return null;
+  return direction === 'higher' ? {mean: m.difference, low: m.low, high: m.high} :
+    {mean: -m.difference, low: -m.high, high: -m.low};
+}
+
+function evaluateBatch(collector, samples) {
+  const finiteSamples = value => {
+    if (typeof value === 'number') return Number.isFinite(value);
+    if (value === undefined) return false;
+    if (value && typeof value === 'object') return Object.values(value).every(finiteSamples);
+    return true;
+  };
+  if (!samples.length || samples.every(sample => sample == null || (Array.isArray(sample) && !sample.length)) || !finiteSamples(samples)) throw new Error('missing or nonfinite batch samples');
+  if (collector.validateBatch) {
+    const valid = collector.validateBatch(samples);
+    if (valid !== true) throw new Error(typeof valid === 'string' ? valid : 'invalid batch samples');
+  }
+  const values = flattenCollector(collector.name, collector.finishBatch(samples));
+  if (!Object.keys(values).length || !Object.values(values).every(Number.isFinite))
+    throw new Error('missing or nonfinite batch statistic');
+  return values;
+}
+
+// Caller supplies shared paired draws or explicitly independent stratified draws.
+// Invalid draws fail the whole comparison: dropping them biases the interval.
+function pooledComparison(collector, arms, sampleArms, seed = 'f11-paired') {
+  const points = arms.map(arm => evaluateBatch(collector, arm));
+  const names = Object.keys(points[0]).sort();
+  const sameNames = value => JSON.stringify(Object.keys(value).sort()) === JSON.stringify(names);
+  if (!sameNames(points[1])) throw new Error('batch statistic columns differ');
+  const resamples = collector.batchResamples === undefined ? 200 : collector.batchResamples;
+  if (!Number.isInteger(resamples) || resamples < 1) throw new Error('invalid batch resample count');
+  const random = seededRandom(seed + ':' + collector.name);
+  const differences = Object.fromEntries(names.map(name => [name, []]));
+  for (let r = 0; r < resamples; r++) {
+    const values = sampleArms(random).map(arm => evaluateBatch(collector, arm));
+    if (!values.every(sameNames)) throw new Error('batch statistic columns differ in resample');
+    for (const name of names) {
+      const difference = values[1][name] - values[0][name];
+      if (!Number.isFinite(difference)) throw new Error('nonfinite batch difference');
+      differences[name].push(difference);
+    }
+  }
+  const out = {};
+  for (const name of names) {
+    const sorted = differences[name].sort((a, b) => a - b);
+    const difference = points[1][name] - points[0][name];
+    if (!Number.isFinite(difference)) throw new Error('nonfinite batch difference');
+    out[name] = {baseline: points[0][name], candidate: points[1][name],
+      difference, low: sorted[Math.floor(0.025 * resamples)],
+      high: sorted[Math.ceil(0.975 * resamples) - 1], resamples};
+  }
+  return out;
+}
+
+// Batch-level collector metrics. A collector with samples(game) keeps per-game
+// data in each record (record.samples[name]); finishBatch(perGameSamples)
+// turns the pooled samples of the whole batch into a number or an object of
+// numbers. The interval resamples games (decisions within a game are not
+// independent): `batchResamples` (default 200) seeded resamples, 2.5% and
+// 97.5% percentiles. Returns {<flat metric>: {value, low, high, games}}.
+function batchMetrics(collectors, games) {
+  const out = {};
+  const ok = games.filter(g => g.ok);
+  for (const c of collectors) {
+    if (typeof c.finishBatch !== 'function') continue;
+    const perGame = ok.map(g => (g.samples && g.samples[c.name]) || []);
+    const point = flattenCollector(c.name, c.finishBatch(perGame));
+    const resamples = c.batchResamples || 200;
+    const random = seededRandom('f4-batch:' + c.name);
+    const draws = {};
+    for (const name in point) draws[name] = [];
+    for (let r = 0; r < resamples && perGame.length; r++) {
+      const sample = [];
+      for (let i = 0; i < perGame.length; i++) sample.push(perGame[Math.floor(random() * perGame.length)]);
+      const value = flattenCollector(c.name, c.finishBatch(sample));
+      for (const name in point) draws[name].push(value[name] || 0);
+    }
+    for (const name in point) {
+      const sorted = draws[name].sort((a, b) => a - b);
+      const at = q => sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))] : point[name];
+      out[name] = {value: round(point[name]), low: round(at(0.025)), high: round(at(0.975)), games: perGame.length};
+    }
+  }
+  return out;
+}
+
+module.exports = {CORE_DIRECTIONS, coreMetrics, flattenCollector, aggregate, bootstrap, compareReports, isTimingMetric, seededRandom, batchMetrics, pooledComparison, orientDifference};

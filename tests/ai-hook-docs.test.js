@@ -14,7 +14,7 @@ const LEGACY_UNDOCUMENTED = [
   'AIAccessTriggerPriority', 'AIBreachReplacementValue',
   'AIBreaksRegardlessOfStrength', 'AIBypassCost', 'AICardsDiscarded',
   'AIChooseBestInstall', 'AIDrawTrigger', 'AIEncounterOptions',
-  'AIGripRunPotential', 'AIHostedDoesNotPreventRez', 'AIImplementIcebreaker',
+  'AIGripRunPotential', 'AIHostedDoesNotPreventRez',
   'AILimitPerDeck', 'AIPerformRun', 'AIPlayBeforeRun', 'AIPlayForInstall',
   'AIPlayPriority', 'AIPlayToRemoveTags', 'AIPlayedWithCost', 'AIPriority',
   'AIRezReasons', 'AIRunEventDiscount', 'AIRushToFinish',

@@ -24,7 +24,55 @@ function AIIceEncounterRestoreState(stored) {
 	attackedServer = stored.attackedServer;
 	approachIce = stored.approachIce;
 }
-  
+
+//Guarded hypothetical evaluation (Corp roadmap F2). Every planning probe that
+//temporarily changes game state goes through one of these, so state is restored
+//even if evaluate throws, and AIHypothetical.depth is above 0 while the changed
+//board is evaluated (the Corp security cache is bypassed at any depth).
+var AIHypothetical = { depth: 0 };
+function AIWithHypothetical(apply, evaluate, restore) {
+	AIHypothetical.depth++;
+	try {
+		apply();
+		return evaluate();
+	} finally {
+		restore();
+		AIHypothetical.depth--;
+	}
+}
+//evaluate with a prospective run on server (sets attackedServer only; a
+//context without the engine's run globals evaluates unchanged, still guarded)
+function AIWithRunContext(server, evaluate) {
+	var hasRunState = typeof attackedServer != "undefined";
+	var stored = hasRunState ? attackedServer : null;
+	return AIWithHypothetical(
+		function () {
+			if (hasRunState) attackedServer = server;
+		},
+		evaluate,
+		function () {
+			if (hasRunState) attackedServer = stored;
+		},
+	);
+}
+//evaluate as if iceCard were being encountered. evaluate receives false, with
+//the encounter state unchanged, when iceCard is not in a server.
+function AIWithIceEncounter(iceCard, evaluate) {
+	var stored = AIIceEncounterSaveState();
+	var entered = false;
+	return AIWithHypothetical(
+		function () {
+			entered = AIIceEncounterModifyState(iceCard);
+		},
+		function () {
+			return evaluate(entered);
+		},
+		function () {
+			AIIceEncounterRestoreState(stored);
+		},
+	);
+}
+
 
 //actual class
 class RunnerAI {
@@ -91,11 +139,6 @@ class RunnerAI {
   }
 
   _rootKnownToContainCopyOfCard(server, title) {
-    // Older run-benefit hooks query Crisium by title; include public cards
-    // with the same success-prevention capability in that existing contract.
-    if (title == "Crisium Grid" && typeof ServerSuccessfulRunPrevented == "function" &&
-        ServerSuccessfulRunPrevented(server)) return true;
-
 	  if (!server) return false;
 	  for (var j = 0; j < server.root.length; j++) {
 		if (PlayerCanLook(runner, server.root[j])) {
@@ -179,11 +222,11 @@ class RunnerAI {
   }
 
   //check if a breaker matches ice, including strength check for fixed-strength breakers
+  //only ice the Runner can see can match (unrezzed, unexposed ice reveals nothing)
   _breakerMatchesIce(breakerCard, iceCard) {
+	  if (!PlayerCanLook(runner, iceCard)) return false;
 	  if (breakerCard.AIFixedStrength) {
-		  var strToCompare = 3; //common strength
-		  if (PlayerCanLook(runner,iceCard)) strToCompare = Strength(iceCard);
-		  if (Strength(breakerCard) < strToCompare) return false;
+		  if (Strength(breakerCard) < Strength(iceCard)) return false;
 	  }
 	  var ret = BreakerMatchesIce(breakerCard, iceCard);
 	  return ret;
@@ -191,7 +234,9 @@ class RunnerAI {
 
   //check if a matching type breaker is installed (or AI)
   //returns the matching breaker or null if none found
+  //returns null for ice the Runner cannot see (enforces the information boundary for card hooks too)
   _matchingBreakerInstalled(iceCard,excludeIcebreakers=[]) {
+    if (!PlayerCanLook(runner, iceCard)) return null;
     var possibleBreakers = ActiveCards(runner);
     for (var i = 0; i < possibleBreakers.length; i++) {
 	  var breakerCard = possibleBreakers[i];
@@ -227,8 +272,18 @@ class RunnerAI {
     return result;
   }
 
+  // Costs depend on available clicks, including click-break and tag budgets.
+  _invalidateCostsForClickChange() {
+    if (this.cachedCostsClickCount !== runner.clickTracker) {
+      this.cachedCosts = [];
+      this.runsEverCalculated = [];
+      this.cachedCostsClickCount = runner.clickTracker;
+    }
+  }
+
   //get cached complete run cost or Infinity
   _getCachedCost(server) {
+    this._invalidateCostsForClickChange();
     if (!this.runsEverCalculated.includes(server))
       this._calculateBestCompleteRun(server, 0, 0, 0, 0);
     var result = Infinity;
@@ -719,6 +774,7 @@ class RunnerAI {
 	return data;
   }
   _calculateRunPathPieceEnd(data) {
+    this._invalidateCostsForClickChange();
     this.cachedBestPath = null; //by default assume no paths were found
     this.cachedComplete = !data.incomplete;
 	this.cachedPathServer = data.server;
@@ -860,6 +916,13 @@ class RunnerAI {
   //returns the first card found fulfilling this description (or an AI if needed, or null if none found)
   //note that the AI will search first for what it considers to be higher priority cards so the override might not be followed in order
   _icebreakerInPileNotInHandOrArray(pileToCheck,installedRunnerCards) {
+    //a pile with cards the Runner cannot see (e.g. the Stack) has hidden order: scan it in title order
+    //so the choice depends only on its contents (fully visible piles such as the Heap keep their order)
+    if (pileToCheck.some(function (card) { return !PlayerCanLook(runner, card); })) {
+      pileToCheck = pileToCheck.concat([]).sort(function (a, b) {
+        return a.title < b.title ? -1 : a.title > b.title ? 1 : 0;
+      });
+    }
     var essentialBreakerTypesNotInHandOrArray =
       this._essentialBreakerTypesNotInHandOrArray(installedRunnerCards);
 	if (essentialBreakerTypesNotInHandOrArray.length > 1) {
@@ -1676,7 +1739,8 @@ console.log(this.preferred);
                 var modelChoice = p.alt[i].choiceIdx;
                 var mapped = optionList.findIndex(option => option.srChoice === modelChoice);
                 if (mapped >= 0) return mapped;
-                if (!optionList.some(option => typeof option.srChoice != "undefined")) return modelChoice;
+                if (!optionList.some(option => typeof option.srChoice != "undefined") &&
+                    Number.isInteger(modelChoice) && modelChoice >= 0 && modelChoice < optionList.length) return modelChoice;
               }
             }
             console.error(
@@ -1690,11 +1754,13 @@ console.log(this.preferred);
         GetApproachEncounterIce(),
         AvailableCredits(corp)
       ).sr[subroutine - 1];
+      // Missing/stale model data cannot justify an index outside the legal menu.
+      if (!Array.isArray(sroptions)) return 0;
       for (var i = 0; i < sroptions.length; i++) {
         if (sroptions[i].includes("endTheRun")) {
           var mappedETR = optionList.findIndex(option => option.srChoice === i);
           if (mappedETR >= 0) return mappedETR;
-          if (!optionList.some(option => typeof option.srChoice != "undefined")) return i;
+          if (!optionList.some(option => typeof option.srChoice != "undefined") && i < optionList.length) return i;
         }
       }
       this._log("No etr found, avoiding tags");
@@ -1702,7 +1768,7 @@ console.log(this.preferred);
         if (!sroptions[i].includes("tag")) {
           var mappedSafe = optionList.findIndex(option => option.srChoice === i);
           if (mappedSafe >= 0) return mappedSafe;
-          if (!optionList.some(option => typeof option.srChoice != "undefined")) return i;
+          if (!optionList.some(option => typeof option.srChoice != "undefined") && i < optionList.length) return i;
         }
       }
       //console.log("no good!");

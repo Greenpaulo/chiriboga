@@ -25,7 +25,7 @@ Why the workflow is set up this way is explained in
 | 2. Fix | Codex, new chat | `$implement-ticket <ticket>` | The reproduction confirmed, the fix, and the ticket in `code-review/` (or a plan to approve first) |
 | 3. Check | Terminal | `node scripts/ticket.js check <ticket>` | PASS/WARN/FAIL lines, the changed files and a review link |
 | 4. Review | GitHub (CodeRabbit) | Commit, push and open a PR whose description names each ticket under review and pastes its check output | Inline findings, and a "Ticket review evidence and move" pre-merge check giving each ticket's verdict and move command (rules in `.coderabbit.yaml`) |
-| 5. Finish | Codex, then terminal | `$address-pr-review <PR>` for any findings, on the same PR; once CodeRabbit approves, merge the PR, then run each ticket's post-merge move command and commit the ticket move | The ticket in `done/`, or back in the open ticket root with a generated blocker when review passes but its gate is pending |
+| 5. Finish | Codex, then terminal | `$address-pr-review <PR>` for any findings, on the same PR; once CodeRabbit approves, merge the PR, then run `node scripts/ticket.js move <ticket> done` (or `open` if its gate is pending) and commit and push the ticket move; see [After merging](#after-merging) | The ticket in `done/`, or back in the open ticket root with a generated blocker when review passes but its gate is pending |
 | Gate (fallback) | Terminal | Only if Codex handed off with `**Gate:** pending F4` because the gate could not finish in its session: run the `**Gate command:**` from the ticket's Resolution (about 15–20 min), then `$implement-ticket <ticket>` with the output | The result recorded and the option switched on if it passed |
 | Card batch | Codex, new chat | `$implement-card-batch` | One batch done and the tracker updated; see the [operator guide](new-sets/card-set-agent-operator-guide.md#after-every-batch) |
 | Card batch review | Codex, fresh chat | `$review-card-batch <set> <batch>` | Independent per-card AI evidence and verdict; incomplete batches reopened for repair |
@@ -41,6 +41,60 @@ ticket. A ticket goes to `remediation/` only when you decide the approach
 itself must be redone rather than fixed on the PR. Then add the reasons to the
 ticket before moving it, because `implement-ticket` works from what the
 ticket records.
+
+### After merging
+
+On your updated, clean `main` checkout after merging the PR, refresh the
+beginner and startup AI baselines with:
+
+```sh
+node scripts/post-merge.js
+```
+
+This runs `refresh-ai-baseline.js --format beginner` followed by
+`refresh-ai-baseline.js --format startup` (1,000 games each). Reports stay in
+the ignored `bench/` directory. If a refresh fails, the command stops;
+any earlier successful refresh remains in place.
+
+For a PR with an approved, completed ticket, include its path:
+
+```sh
+node scripts/post-merge.js --move documentation/bugs/code-review/<ticket>.md
+```
+
+The ticket moves to `done/` only after both refreshes succeed. The command
+does not commit or push. For multiple tickets, refresh once with this command
+and move the remaining tickets directly:
+
+```sh
+node scripts/ticket.js move documentation/bugs/code-review/<ticket>.md done
+```
+
+For a backlog ticket, use `documentation/backlog/code-review/<ticket>.md`.
+The ticket command moves the file, rebases its links, updates its linked roadmap item
+and refreshes generated blockers. If it asks you to fill a Done-table
+Architecture cell, add the relevant `architecture.md` section link before
+committing.
+
+Use `open` instead of `done` when review passed but the ticket's gate is still
+pending. A failed gate whose option and branch were removed closes as `done`
+with its `**Outcome:** not adopted` record; the follow-up ticket stays open.
+Tickets with changes still required stay in `code-review/` until those findings
+are addressed. CodeRabbit's "Ticket review evidence and move" check gives the
+per-ticket verdict and command.
+
+After moving all completed tickets from the PR, validate and commit the moves
+and the documentation updates the script made:
+
+```sh
+node tests/ai-roadmaps.test.js
+git add documentation/
+git commit -m "Close reviewed tickets after merge"
+git push
+```
+
+Review the staged changes before committing so the commit includes only the
+intended cleanup. Merging a PR does not move its tickets automatically.
 
 ### Prompt for Claude chat
 

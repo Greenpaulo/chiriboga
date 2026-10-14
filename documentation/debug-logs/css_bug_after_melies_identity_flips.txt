@@ -1,0 +1,170 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Dewi Subrotoputri: Pedagogical Dhalang,1 Botulus,2 Fermenter,3 Creative Commission,3 DZMZ Optimizer,1 Conduit,2 Echelon,2 Unity,2 Telework Contract,3 Overclock,2 Scrounge,1 Rising Tide,2 Clean Getaway,2 Illumination,3 Ritual,3 Madani,1 Azimat,1 Chromatophores,1 Devadatta Drone,3 Principia,3 Knickknack O'Brian,3 Read-Write Share,1 Stowaway]
+[Méliès U: Only the Brightest,2 Brân 1.0,2 Manegarm Skunkworks,1 Longevity Serum,3 Anoetic Void,2 Spin Doctor,2 Send a Message,3 Regolith Mining License,3 Hedge Fund,3 Proprionegation,3 Empiricist,3 Semak-samun,3 Peer Review,3 Mitra Aman,3 Petty Cash,3 Lotus Haze,2 ezaM,2 Knowledge Seeker,2 Lionsmane,3 The Red Room,1 Event Horizon]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 2.25; fresh-hand expectation 4.03
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Petty Cash,ezaM,Semak-samun,Anoetic Void,Brân 1.0]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Principia,Ritual,DZMZ Optimizer,Azimat,Telework Contract]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+Secretly set Méliès U triggered
+AI: I don't have code to handle this situation: [Secretly set Méliès U,Corp 3.3,continue,[{department:HQ,label:Tenure Floors (HQ),command:continue},{department:R&D,label:Subsurface Labs (R&D),command:continue},{department:Archives,label:Disposal Grounds (Archives),command:continue}]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Anoetic Void,Petty Cash,Anoetic Void,Brân 1.0]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Principia,Ritual,DZMZ Optimizer,Azimat,Telework Contract]
+Runner spent one click
+Runner spent one credit
+Runner installed Telework Contract
+9 credits loaded onto Telework Contract
+Runner spent one click
+Runner spent 2 credits
+Runner installed DZMZ Optimizer
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Botulus
+1 virus counter placed on Botulus
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 4 card(s) in hand: [Anoetic Void,Petty Cash,Anoetic Void,Brân 1.0]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Principia,Ritual,Azimat]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [11.725]
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 1 agenda(s) - protection score penalized
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 3.375 vs 3.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+Secretly set Méliès U triggered
+AI: I don't have code to handle this situation: [Secretly set Méliès U,Corp 3.3,continue,[{department:HQ,label:Tenure Floors (HQ),command:continue},{department:R&D,label:Subsurface Labs (R&D),command:continue},{department:Archives,label:Disposal Grounds (Archives),command:continue}]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 3 card(s) in hand: [Anoetic Void,Petty Cash,Anoetic Void]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [Principia,Ritual,Azimat]
+1 virus counter placed on Botulus
+Runner spent one click
+Played Ritual
+Runner drew 3 cards
+Runner spent one click
+Runner installed Read-Write Share
+Read-Write Share: host a card from the grip to draw 1 card? triggered
+Runner drew a card
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: Rez cost not worth it, need to save it for Brân 1.0 in Remote 0
+Corp did not rez ice
+Approaching R&D
+Run successful
+Méliès U: Only the Brightest flipped to Tenure Floors
+Brân 1.0 accessed
+Run ends
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Longevity Serum]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(35023, [35026], [30029,35026,30022,35025,36022,35009,35028,30029,35033,35028,35032,30007,35026,35032,35030,30029,30024,35031,35014,36024,36022,30026,30026,35014,35025,30027,35028,35004,30007,35033,30025,30020,30020,35004,30025], [35032,35029,30020,35033], [30027,30022,36022], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(36036, [], [35081,35055,30069,30075,30069,35052,30071,36039,35081,36040,36040,30075,30042,35048,30053,36058,36041,36037,30050,36045,35056,36037,36045,35054,30075,35052,35055,36045,30053,36037,30071,35048,30071,35056,35056,35048,35055,35052,35054,36041,30042,30039], [30050,35081,30050], [], [35054], [36039], [[30044,30039]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[2].installedProgramThisTurn=true;
+runner.stack[4].hostedCards = [];
+runner.stack[20].hostedCards = [];
+runner.rig.resources[0].credits=9;
+runner.rig.hardware[0].installedProgramThisTurn=true;
+runner.rig.programs[0].hostedCards = [];
+InstanceCardsPush(30022,runner.rig.programs[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = runner.rig.programs[0];
+runner.rig.programs[0].hostedCards[0].installedProgramThisTurn=true;
+runner.rig.programs[0].hostedCards[0].host=runner.rig.programs[0];
+runner.rig.programs[0].hostedCards[0].notInstalled=true;
+corp.RnD.ice[0].hostedCards = [];
+InstanceCardsPush(30004,corp.RnD.ice[0].hostedCards,1,cardBackTexturesRunner,glowTextures,strengthTextures)[0].host = corp.RnD.ice[0];
+corp.RnD.ice[0].hostedCards[0].faceUp=true;
+corp.RnD.ice[0].hostedCards[0].virus=2;
+corp.RnD.ice[0].hostedCards[0].host=corp.RnD.ice[0];
+corp.RnD.cards[41].knownToRunner=true;
+corp.remoteServers[0].root[0].AITurnsInstalled=1;
+corp.remoteServers[0].root[0].AICardsDiscarded=[];
+corp.remoteServers[0].root[0].AIScoringPlanCommitted=true;
+corp.RnD.AISuccessfulRuns=1;
+
+Version reference: Thu Oct 08 2026 12:15:15 GMT+0100 (British Summer Time)

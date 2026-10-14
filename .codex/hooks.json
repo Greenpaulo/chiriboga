@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$(git rev-parse --show-toplevel)/scripts/agent-hooks/verify-on-stop.js\"",
+            "command": "bash -c 'export NVM_DIR=\"$HOME/.nvm\"; . \"$NVM_DIR/nvm.sh\" >/dev/null 2>&1; nvm use 20 >/dev/null 2>&1; node \"$(git rev-parse --show-toplevel)/scripts/agent-hooks/verify-on-stop.js\"'",
             "timeout": 120,
             "statusMessage": "Running regression suite"
           }

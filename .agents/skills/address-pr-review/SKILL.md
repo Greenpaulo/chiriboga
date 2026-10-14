@@ -76,7 +76,7 @@ scope.
 - Preserve the repository rules for pending reproductions, AI hooks, generated
   documentation and large-file access.
 
-## 4. Verify and hand off
+## 4. Verify and report
 
 - Run the focused tests for the affected behavior, then
   `node tests/run-all-tests.js` after relevant code or test changes. Run
@@ -91,9 +91,9 @@ scope.
   documentation fix, verify that the PR head is the commit containing the
   remediation. For a finding that required no change, verify the current head
   so the reply cites current evidence.
-- Summarize accepted, adapted, rejected and obsolete comments, including the
-  evidence for anything not implemented. Report validation commands and any
-  residual risk.
+- In the final chat reply, briefly summarize the outcome, validation and any
+  deferred findings or residual risk. Do not post a separate PR handoff or
+  summary comment; keep GitHub replies specific to unresolved review threads.
 - Do not request a new review, dismiss a submitted review, or merge the PR
   unless the user separately asks for that external action.
 

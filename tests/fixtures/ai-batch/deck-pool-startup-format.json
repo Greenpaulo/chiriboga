@@ -1,0 +1,35 @@
+{
+  "id": "startup-v1",
+  "sets": [
+    "systemgateway",
+    "elevation",
+    "vantagepoint"
+  ],
+  "pairs": [
+    {
+      "id": "btl-ryo",
+      "corp": "[Startup] De Profundis (3-0 Worlds 2026).js",
+      "runner": "[Startup] High Pressure Ryo.js"
+    },
+    {
+      "id": "pd-muslihaT",
+      "corp": "[Startup] The Two Remotes Problem.js",
+      "runner": "[Startup] Smear Campaign 3.0.js"
+    },
+    {
+      "id": "zwicky-hiram",
+      "corp": "Zwift Deth 1st@Uppsala CTK Startup.js",
+      "runner": "[Startup] Old Man is Proud of his Sourdough Starter.js"
+    },
+    {
+      "id": "zwicky-topan",
+      "corp": "Rushy Zwycky.js",
+      "runner": "[Startup] They Are Huge With It.js"
+    },
+    {
+      "id": "pd-zahya",
+      "corp": "[Startup] The Two Remotes Problem.js",
+      "runner": "Hare Song [Startup].js"
+    }
+  ]
+}

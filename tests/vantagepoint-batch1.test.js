@@ -94,6 +94,23 @@ function history(chain) {
   assert.strictEqual(chain.Enumerate().length, 1);
 }
 async function main() {
+  // Costs published by the winning-run probe must not survive click gains or
+  // spends. Eli can be clicked through only while two break clicks remain.
+  reset();
+  card(31043, c.corp.HQ.ice).rezzed = true;
+  c.runner.creditPool = 0;
+  c.runner.clickTracker = 1;
+  c.runner.AI._calculateBestCompleteRun(c.corp.HQ, 0, 0, 0, 0, null);
+  assert.strictEqual(c.runner.AI._getCachedCost(c.corp.HQ), Infinity);
+  c.runner.clickTracker = 4;
+  assert(Number.isFinite(c.runner.AI._getCachedCost(c.corp.HQ)), 'click gain refreshes an infeasible cached route');
+  c.runner.clickTracker = 1;
+  assert.strictEqual(c.runner.AI._getCachedCost(c.corp.HQ), Infinity, 'click spend invalidates a feasible cached route');
+  // Publishing another server first must also discard costs from older clicks.
+  c.runner.clickTracker = 4;
+  c.runner.AI._calculateBestCompleteRun(c.corp.RnD, 0, 0, 0, 0, null);
+  assert(Number.isFinite(c.runner.AI._getCachedCost(c.corp.HQ)), 'publication cannot stamp an old server cost as fresh');
+
   reset();
   const chains = [card(36001, c.runner.grip), card(36001, c.runner.grip)];
   success(c.corp.HQ); success(c.corp.RnD);

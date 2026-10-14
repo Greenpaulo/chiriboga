@@ -601,7 +601,7 @@ cardSet[35014] = {
   //AI: use for easy runs where success is likely
   AIRunEventExtraPotential: function(server, potential) {
     //Requires successful run - don't use if Crisium Grid is known
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     //Only use if there are no unrezzed ice (to ensure success)
     for (var i = 0; i < server.ice.length; i++) {
       if (!server.ice[i].rezzed) return 0; //unrezzed ice might end the run
@@ -729,7 +729,7 @@ cardSet[35016] = {
     
     //Check for Crisium Grid on Archives - doesn't prevent redirect (happens before success)
     //But if HQ has Crisium, success won't be declared there
-    if (runner.AI._rootKnownToContainCopyOfCard(corp.HQ, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(corp.HQ)) return 0;
     
     //Get HQ potential
     var HQpotential = runner.AI._getCachedPotential(corp.HQ);
@@ -809,6 +809,13 @@ cardSet[35004] = {
     var installChoices = ChoicesArrayInstall(runner.heap, false, function(card) {
       return CheckCardType(card, ["program"]);
     });
+
+    //Costs or the Heap may have changed since Enumerate. Resolve as much as
+    //possible: skip an impossible install, but still offer the optional step.
+    if (installChoices.length === 0) {
+      this.responseOnInstall.Resolve.call(this, {});
+      return;
+    }
     
     //**AI code for install choice
     if (runner.AI != null && installChoices.length > 1) {
@@ -3118,14 +3125,17 @@ function humanoidResourcesInstall(cardRef, installCount) {
     choices,
     function(params) {
       if (params.card !== null) {
-        Install(params.card, params.server);
-        installCount++;
-        //Continue to next install or operation
-        if (installCount < 2) {
-          humanoidResourcesInstall(cardRef, installCount);
-        } else {
-          humanoidResourcesPlayOp(cardRef);
-        }
+        //Wait for payment and all install responses before offering the next step.
+        Install(params.card, params.server, false, null, true, undefined, cardRef,
+          function() {
+            humanoidResourcesInstall(cardRef, installCount);
+          }, undefined, true, function() {
+            if (installCount + 1 < 2) {
+              humanoidResourcesInstall(cardRef, installCount + 1);
+            } else {
+              humanoidResourcesPlayOp(cardRef);
+            }
+          });
       } else {
         //Skipped install, move to operation
         humanoidResourcesPlayOp(cardRef);
@@ -3145,8 +3155,9 @@ function humanoidResourcesPlayOp(cardRef) {
   for (var i = 0; i < corp.HQ.cards.length; i++) {
     var card = corp.HQ.cards[i];
     if (card.cardType === "operation") {
-      //Check if playable (cost check)
-      if (AvailableCredits(corp, "playing", card) >= PlayCost(card)) {
+      //This ability pays no action click, but play restrictions still apply.
+      if (AvailableCredits(corp, "playing", card) >= PlayCost(card) &&
+          (typeof card.Enumerate !== "function" || card.Enumerate.call(card).length > 0)) {
         //No button property - card will show as clickable card, not footer button
         opChoices.push({ card: card, label: card.title });
       }
@@ -3620,6 +3631,12 @@ cardSet[35041] = {
   },
   AIRezReasons: function() {
     return { facecheck: true, program_trash: true, damage: true };
+  },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 
@@ -4598,7 +4615,7 @@ cardSet[35017] = {
   AIRunEventExtraPotential: function(server, potential) {
     if (server !== corp.HQ) return 0;
     //Require successful run
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     //Value depends on Corp's credits - at 3+ credits, we get 6 credits for 1 tag
     var corpCreds = Math.min(3, Credits(corp));
     var netGain = (corpCreds * 2) - 0; //0 play cost
@@ -4750,9 +4767,13 @@ cardSet[35020] = {
   },
   
   //AI code
-  AIImplementIcebreaker: function() {
-    //Cost to break one subroutine
-    return { breakCost: 1, boostCost: 3, boostAmount: 2 };
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    var runEventActive = this.runEventIsActive() ||
+      (rc.runEvent && CheckCardType(rc.runEvent, ["event"]) && CheckSubType(rc.runEvent, "Run"));
+    return result.concat(rc.ImplementIcebreaker(
+      point, this, cardStrength, iceAI, iceStrength, ["Code Gate"],
+      runEventActive ? 1 : 3, 2, 1, 1, creditsLeft
+    ));
   },
 };
 
@@ -5041,8 +5062,11 @@ cardSet[35032] = {
   },
   
   //AI code
-  AIImplementIcebreaker: function() {
-    return { breakCost: 1, boostCost: 2, boostAmount: 2 };
+  AIImplementBreaker: function(rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    return result.concat(rc.ImplementIcebreaker(
+      point, this, cardStrength, iceAI, iceStrength, ["Barrier"],
+      2, 2, 1, 1, creditsLeft
+    ));
   },
 };
 
@@ -5122,8 +5146,10 @@ cardSet[35031] = {
   },
   
   //AI code
+  //Power counters are placed only on install, so none left means spent.
   AICentralPressure: function(server) {
-    if (server !== corp.RnD || Counters(this, "power") < 1) return {};
+    if (server !== corp.RnD) return {};
+    if (Counters(this, "power") < 1) return { exhausted: true };
     return { additionalAccess: 1 };
   },
   AIWorthKeeping: function(installedRunnerCards, spareMU) {
@@ -5329,7 +5355,7 @@ cardSet[35025] = {
   //AI code
   AIRunEventExtraPotential: function(server, potential) {
     if (server !== corp.RnD) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
     //Value based on installable cards in grip
     var installableCount = 0;
     for (var i = 0; i < runner.grip.length; i++) {
@@ -5407,10 +5433,8 @@ cardSet[35024] = {
       var cardRef = this;
       var cardToInstall = params.card;
       
-      //Move the card from heap to grip temporarily for the install process
-      //This is needed because Install expects cards to be in a valid location
-      MoveCard(cardToInstall, runner.grip);
-      
+      //Install accepts the Heap as its source and restores that location if
+      //the installation is cancelled or its recalculated cost cannot be paid.
       //Bring the card sprite to the front so it's visible during install
       //This fixes z-index issues when installing from heap
       if (cardToInstall.renderer && cardToInstall.renderer.sprite && cardToInstall.renderer.sprite.parent) {

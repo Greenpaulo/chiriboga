@@ -360,7 +360,7 @@ cardSet[36004] = {
         return false;
       return (
         typeof card.canUseCredits !== "function" ||
-        card.canUseCredits("using", null)
+        card.canUseCredits("using", corsair)
       );
     });
   },
@@ -811,6 +811,15 @@ cardSet[36008] = {
     availableWhenInactive: true,
   },
   AIModifyIceAI: function (iceAI, startIceIdx) {
+    // Once used, the actual added row still exists until this encounter ends.
+    // Default ICE models already describe every actual row; printed models do not.
+    if (this.modifiedIce === iceAI.ice && this.addedSubroutine &&
+        iceAI.ice.subroutines.includes(this.addedSubroutine)) {
+      if (typeof iceAI.ice.AIImplementIce === "function")
+        iceAI.sr.unshift([["netDamage"]]);
+      else iceAI.sr[iceAI.ice.subroutines.indexOf(this.addedSubroutine)] = [["netDamage"]];
+      return iceAI;
+    }
     if (this.usedThisTurn) return iceAI;
     var server = GetServer(iceAI.ice);
     if (!server) return iceAI;
@@ -819,6 +828,7 @@ cardSet[36008] = {
         // The run calculator has no draw token, so retain the immediately
         // flatline-relevant net damage as the conservative route effect.
         iceAI.sr.unshift([["netDamage"]]);
+        iceAI.srActualOffset = (iceAI.srActualOffset || 0) + 1;
         return iceAI;
       }
       if (server.ice[i].rezzed) return iceAI;
@@ -961,9 +971,10 @@ cardSet[36010] = {
         corp,
         choices,
         function (params) {
-          if (params.derez) Derez(params.card);
-          else AddBadPublicity(1);
-          finish();
+          if (params.derez) {
+            Derez(params.card);
+            finish();
+          } else BadPublicity(1, finish);
         },
         "Kompromat",
         "Derez ice protecting " + ServerName(attackedServer) + "?",
@@ -1095,13 +1106,13 @@ cardSet[36012] = {
   },
   AIAdditionalAccess: function (server) {
     if (server != corp.HQ) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid"))
+    if (ServerSuccessfulRunPrevented(server))
       return 0;
     return 2;
   },
   AIRunEventExtraPotential: function (server) {
     if (server != corp.HQ) return 0;
-    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid"))
+    if (ServerSuccessfulRunPrevented(server))
       return 0;
     return 0.5 * runner.AI._additionalHQAccessValue(this);
   },
@@ -1248,10 +1259,10 @@ cardSet[36015] = {
   runningWithThis: false,
   _stealthCreditCards: function (planningServer) {
     var baker = this;
-    var storedAttackedServer = attackedServer;
-    if (planningServer && attackedServer === null)
-      attackedServer = planningServer;
-    try {
+    //outside a run, a planning server supplies the prospective run context
+    var runServer =
+      planningServer && attackedServer === null ? planningServer : attackedServer;
+    return AIWithRunContext(runServer, function () {
       return InstalledCards(runner).filter(function (card) {
         if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
           return false;
@@ -1260,9 +1271,7 @@ cardSet[36015] = {
           card.canUseCredits("using", baker)
         );
       });
-    } finally {
-      attackedServer = storedAttackedServer;
-    }
+    });
   },
   responseOnRunnerTurnBegins: {
     Resolve: function () {
@@ -3216,6 +3225,7 @@ cardSet[36038] = {
   trashCost: 3,
   storedFaceUp: false,
   _resolveAccessEffect: function () {
+    if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
     LoseCredits(runner, 1);
     if (CheckTags(1)) Damage("net", 1, true);
   },
@@ -4767,7 +4777,9 @@ cardSet[36057] = {
     if (corp.badPublicity < 1 || corp.RnD.cards.length < 2 || Credits(corp) < RezCost(this)) return -1;
     return 0; // strongest empty protected remote, or a new server if none
   },
-  AIRezWhenCan: function () { return corp.badPublicity > 0 && corp.RnD.cards.length > 1; },
+  AIRezWhenCan: function () {
+    return !attackedServer && corp.badPublicity > 0 && corp.RnD.cards.length > 1;
+  },
   AIEconomyCard: true,
 };
 
@@ -4831,7 +4843,8 @@ cardSet[36058] = {
     },
   ],
   AITriggerInPaidWindow: function () {
-    return !!attackedServer && attackedServer == GetServer(this) && approachIce < 0 &&
+    return !!attackedServer && attackedServer == GetServer(this) &&
+      (approachIce < 0 || (currentPhase.identifier == "Run 4.5" && approachIce == 0)) &&
       this.AIGlobalETRUses(attackedServer) > 0;
   },
   AIGlobalETRUses: function (server) {
@@ -4843,8 +4856,12 @@ cardSet[36058] = {
   AIMandatoryPassCost: function (breaker, server, iceIndex, ai, evaluationContext) {
     // The ETR can be paid off; lacking a killer is not a hard lockout.
     if (ai._hostedBreakContribution(this) > 0) return 0;
-    var breakCost = breaker ? ai._breakerActivationCost(
-      this, breaker, 1, server, iceIndex, evaluationContext) : Infinity;
+    var price = breaker ? ai._breakerPrice(
+      this, breaker, 1, server, iceIndex, evaluationContext) : null;
+    //Resource-priced breaker alternatives are combined by the route planner;
+    //this scalar hook may only compare an ordinary credit price with paying 3.
+    var breakCost = price && price.status == "priced" && price.clicks == 0 &&
+      !Object.values(price.counters).some(amount => amount > 0) ? price.credits : Infinity;
     return Math.min(3, breakCost);
   },
   AIRunExtraRuns: function (server) {
@@ -5330,7 +5347,7 @@ cardSet[36065] = {
     var outside = credits.temporaryCredits + credits.recurringCredits + credits.badPublicityCredits;
     if (outside < 1) return 0;
     var cost = corp.AI._evaluateServerSecurity(server).totalMandatoryBreakCost;
-    if (cost < 1) return 0;
+    if (cost === null || !isFinite(cost) || cost < 1) return 0;
     // Four damage is credible only where passing the ICE requires payment.
     // Otherwise this is not a substitute for a stopping defender.
     return Math.min(4, cost);
@@ -5340,7 +5357,9 @@ cardSet[36065] = {
     var useful = servers.filter(function (server) {
       return !server.root.some(card => CheckSubType(card, "Region")) && grid.AIDefensiveValue(server) > 0;
     });
-    return useful.length ? corp.AI._serverToProtect(useful) : null;
+    if (!useful.length) return null;
+    var target = corp.AI._serverToProtect(false, false, server => useful.includes(server));
+    return useful.includes(target) ? target : useful[0];
   },
   AILimitPerServer: function () { return 1; },
   AIRezWhenCan: function () {

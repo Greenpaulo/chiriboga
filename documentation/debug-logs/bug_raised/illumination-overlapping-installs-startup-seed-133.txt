@@ -1,0 +1,32 @@
+AI batch investigation: Illumination overlapping installations
+Captured 2026-10-07; archived 2026-10-08 at c47f80d (working tree modified).
+Source: excerpts recorded during headless replay and local inspector of a running worker.
+This is a diagnostic evidence record, not a complete saved-game/debug dump.
+Stream prefix: 133:wey-shaper
+Corp: [Startup] De Profundis (3-0 Worlds 2026).js
+Runner: [Startup] Reg Mag.js
+Loaded sets: systemgateway, elevation, vantagepoint.
+
+Headless replay excerpt (2.5-second diagnostic timeout):
+Runner spent one click
+Played "Illumination"
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Corp spent 4 credits
+Corp rezzed Event Horizon protecting R&D at position 0
+Encountering Event Horizon protecting R&D at position 0
+Approaching R&D
+Run successful
+Runner spent 3 credits
+Runner installed Principia
+Replay result: timeout after 2.5 s; turns=2; steps=22104; winner=null.
+
+Live inspector observation from the same stream prefix:
+phase=Trash Before Install; Runner credits=0; installed rig=Azimat, Principia, Telework Contract.
+steps=1593071; last 15 console-error entries all: Runner could not pay 2 remaining credits.
+
+Focused reproduction on 2026-10-08:
+node tests/pending/illumination-overlapping-installs-stalls-game.test.js
+FAIL: Illumination must wait for install completion before offering another install.
+Premature prompt: pendingInstalls=[Principia]; credits=3; choices=[Unity, cost=2].
+The focused reproduction is a minimal reconstruction, not a saved full-game board.

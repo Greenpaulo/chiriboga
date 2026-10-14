@@ -1110,8 +1110,11 @@ cardSet[30013] = {
       return 1;
   },
   //Public, out-of-run description for Corp central-security planning.
+  //Once per turn, reset when the Runner's turn begins: outside the Runner's
+  //turn the use is live again for the next breach, so it is never exhausted.
   AICentralPressure: function(server) {
-      if (server != corp.HQ || this.breachedHQThisTurn) return {};
+      if (server != corp.HQ) return {};
+      if (this.breachedHQThisTurn && playerTurn == runner) return {};
       return { additionalAccess: 1 };
   },
   //install before run if the server is HQ and Docklands is in worthkeeping
@@ -1586,7 +1589,7 @@ cardSet[30018] = {
   //install before run if this server is central and hasn't been run this turn
   AIInstallBeforeRun: function(server,potential,useRunEvent,runCreditCost,runClickCost) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
 	  if (typeof server.cards !== "undefined") {
 		var alreadyRunThisTurn = false;
 		if (server == corp.HQ)
@@ -1604,7 +1607,7 @@ cardSet[30018] = {
   },
   AIRunAbilityExtraPotential: function(server,potential) {
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
 	  //might get a little credit from this (the 0.5 is arbitrary)
 	  if (!this.runHQ && server == corp.HQ)
 		return 0.5;
@@ -2063,7 +2066,7 @@ cardSet[30024] = {
   AIRunAbilityExtraPotential: function(server,potential) {
 	  if (server == corp.RnD) {
 		//require successful run
-		if (runner.AI._rootKnownToContainCopyOfCard(corp.RnD, "Crisium Grid")) return 0; // don't use
+		if (ServerSuccessfulRunPrevented(corp.RnD)) return 0; // don't use
 		//extra potential the deeper you can dig (except cards already known)
 		var conduitDepth = Counters(this, "virus") + 1;
 		//ignore top card as it is not 'bonus'
@@ -2410,7 +2413,7 @@ cardSet[30028] = {
   AIAdditionalAccess: function(server) {
       if (server != corp.HQ && server != corp.RnD) return 0;
 	  //require successful run
-	  if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0;
+	  if (ServerSuccessfulRunPrevented(server)) return 0;
       return 1;
   },
   //don't define AIWouldPlay for run events, instead use AIRunEventExtraPotential(server,potential) and return float (0 to not play)
@@ -2418,7 +2421,7 @@ cardSet[30028] = {
 	  //use Jailbreak only for HQ and R&D with no unrezzed ice
 	  if (server == corp.HQ || server == corp.RnD) {
 	    //require successful run
-	    if (runner.AI._rootKnownToContainCopyOfCard(server, "Crisium Grid")) return 0; //don't use
+	    if (ServerSuccessfulRunPrevented(server)) return 0; //don't use
 		var unrezzedIceThisServer = 0;
 		for (var i = 0; i < server.ice.length; i++) {
 		  if (!server.ice[i].rezzed) unrezzedIceThisServer++;
@@ -3076,6 +3079,12 @@ cardSet[30038] = {
     }
 	return result;
   },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
+  },
 };
 cardSet[30039] = {
   title: "Brân 1.0",
@@ -3245,6 +3254,12 @@ cardSet[30039] = {
         }
     }
 	return result;
+  },
+  //Lose [click]: Break 1 subroutine on this ice. Read by the Corp's security
+  //evaluator (L9.0) as the price of passing this ice without a breaker.
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 cardSet[30040] = {
@@ -3604,6 +3619,7 @@ cardSet[30045] = {
     },
     Resolve: function () {
 	  //damage can be prevented
+      if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
 	  Damage("net", 2 + this.advancement, true);
     },
   },

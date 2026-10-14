@@ -215,9 +215,16 @@ function section(text, heading) {
 }
 
 function greenPathFor(pending) {
-  if (pending.startsWith('tests/pending/')) return 'tests/' + pending.slice('tests/pending/'.length);
-  if (pending.startsWith('tests/fixtures/corp-decisions-pending/'))
-    return 'tests/fixtures/corp-decisions/' + pending.slice('tests/fixtures/corp-decisions-pending/'.length);
+  for (const [pendingRoot, greenRoot] of [
+    ['tests/pending/', 'tests/'],
+    ['tests/fixtures/corp-decisions-pending/', 'tests/fixtures/corp-decisions/'],
+  ]) {
+    if (!pending.startsWith(pendingRoot)) continue;
+    const relative = path.relative(path.resolve(root, pendingRoot), path.resolve(root, pending));
+    if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative))
+      return null;
+    return greenRoot + relative.split(path.sep).join('/');
+  }
   return null;
 }
 
@@ -352,8 +359,38 @@ function gateSetupProblems(text) {
       if (token === '--start' && !fs.existsSync(path.join(root, value)))
         problems.push('Gate command names start board ' + value + ', which does not exist.');
     });
+    const tags = tokens.filter((t, i) => tokens[i - 1] === '--start-tag' && !t.includes('<'));
+    if (tags.length && !startBoardsTagged(tags).length)
+      problems.push('Gate command selects start boards tagged ' + tags.join(', ') + ', but no board in tests/fixtures/ai-batch/starts/ has them.');
   }
   return problems;
+}
+
+// Start boards whose TAGS line (scripts/start-board.js) has every given tag.
+function startBoardsTagged(tags) {
+  const dir = path.join(root, 'tests/fixtures/ai-batch/starts');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter(f => f.endsWith('.txt')).filter(f => {
+    const line = (fs.readFileSync(path.join(dir, f), 'utf8').match(/^\/\/ TAGS:(.*)$/m) || [])[1] || '';
+    const has = line.split(',').map(t => t.trim());
+    return tags.every(t => has.includes(t));
+  });
+}
+
+// The ticket's state in one line (ai-planning.md, "When a gate fails").
+const outcomeLine = text => (text.match(/^\*\*Outcome:\*\*\s*(.+)$/m) || [])[1];
+// A failed idea is removed, not left switched off.
+const failedGateResult = (option, setting, code = '') => setting ||
+  new RegExp('\\b' + option + '\\b').test(code) ?
+  ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
+  ['PASS', 'Gate failed and ' + option + ' has been removed.'];
+
+// A failed gate must explicitly record non-adoption, even when its code is gone.
+function outcomeProblem(outcome, gate) {
+  if (/^failed\b/i.test(gate || '') && !/^not adopted\b/i.test(outcome || ''))
+    return ['FAIL', 'Gate failed: **Outcome:** must record not adopted — <why>.'];
+  if (!outcome) return ['WARN', 'No **Outcome:** line under the title (adopted | not adopted — <why> | blocked — <what>).'];
+  return null;
 }
 
 function check(ticket) {
@@ -372,10 +409,22 @@ function check(ticket) {
   else if (!base) report('FAIL', 'Resolution does not start with "Implemented from <sha>".');
   else if (git('cat-file', '-e', base + '^{commit}').status !== 0) report('FAIL', 'Unknown commit ' + base + '.');
 
+  const outcome = outcomeLine(text);
+  const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
+  const outcomeIssue = outcomeProblem(outcome, gate);
+  if (outcomeIssue) report(...outcomeIssue);
+  const notAdopted = outcome && /^not adopted\b/i.test(outcome);
+
   const reproLine = (text.match(/^\*\*Reproduction:\*\*(.*)$/m) || [])[1] || '';
   const pending = (reproLine.match(/`(tests\/[^`]+)`/) || [])[1];
   const green = pending && greenPathFor(pending);
-  if (!pending) {
+  if (notAdopted) {
+    if (!pending) report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
+    else if (!green) report('FAIL', 'Not adopted, but reproduction ' + pending + ' is not a pending path.');
+    else if (!fs.existsSync(path.join(root, pending)))
+      report('FAIL', 'Not adopted, but pending reproduction ' + pending + ' does not exist.');
+    else report('PASS', 'Not adopted: its reproduction stays pending under the follow-up ticket; reproduction checks skipped.');
+  } else if (!pending) {
     report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
   } else if (!green) {
     report('WARN', 'Reproduction ' + pending + ' is not a pending path; reproduction checks skipped.');
@@ -424,21 +473,23 @@ function check(ticket) {
 
   // Gated tickets (documentation/ai-planning.md, "Acceptance gates") ship behind
   // a default-off AI option until their applicable gate evidence is recorded.
-  if (criteria && /behind an AI option/.test(criteria)) {
-    const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
+  if (gate || (criteria && /behind an AI option/.test(criteria))) {
     const option = gate && (gate.match(/`(\w+)`/) || [])[1];
     const code = ['ai_corp.js', 'ai_runner.js'].map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n');
     const setting = option && (code.match(new RegExp('\\b' + option + '\\s*:\\s*(true|false)\\b')) || [])[1];
     const passed = gate && /^passed\b/i.test(gate);
+    const failed = gate && /^failed\b/i.test(gate);
     if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');
     else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
+    else if (failed) report(...failedGateResult(option, setting, code));
     else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
     else if (!passed) report('WARN', 'Gate not passed; ' + option + ' defaults to off: ' + gate);
     else report(setting === 'true' ? 'PASS' : 'WARN', 'Gate: ' + gate + ' (' + option + ' defaults to ' + setting + ')');
     // The gate's setup is part of the ticket: every collector and start board
     // its gate commands name must exist before review.
-    for (const problem of gateSetupProblems(text)) report('FAIL', problem);
+    // A not-adopted ticket's gate is history; its boards may have been rebuilt or dropped since.
+    if (!notAdopted) for (const problem of gateSetupProblems(text)) report('FAIL', problem);
   }
 
   for (const [level, message] of results) console.log(level.padEnd(4) + ' ' + message);
@@ -466,7 +517,7 @@ function check(ticket) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems};
+  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
