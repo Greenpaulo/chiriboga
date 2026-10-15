@@ -90,14 +90,60 @@ test('wiring: per-frame path dims and restores alpha', () => {
     rendererSource.includes('pixi_shouldDimCounterWhileReadingZoom(this.counters[i])'),
     'the per-frame counter update must apply the reading-zoom dim rule'
   );
-  assert(
-    rendererSource.includes('UpdateVisibility(forceHidden = false, dimmed = false)'),
-    'UpdateVisibility must accept the dim flag'
-  );
-  assert(
-    rendererSource.includes('var dimAlpha = dimmed ? 0.3 : 1.0;'),
-    'dimmed counters must render translucently and restore full opacity otherwise'
-  );
+});
+
+// Behavioural coverage for Counter.UpdateVisibility: extract the method body
+// and run it against sprite/richText stubs. The full per-frame UpdateCounters
+// path needs PIXI, so the call-site wiring assertion above stays.
+function loadUpdateVisibility() {
+  const marker = 'UpdateVisibility(forceHidden = false, dimmed = false) {';
+  const start = rendererSource.indexOf(marker);
+  assert(start >= 0, 'expected UpdateVisibility(forceHidden, dimmed) in cardrenderer');
+  let depth = 1;
+  let i = start + marker.length;
+  for (; i < rendererSource.length && depth > 0; i++) {
+    if (rendererSource[i] === '{') depth++;
+    else if (rendererSource[i] === '}') depth--;
+  }
+  assert.strictEqual(depth, 0, 'UpdateVisibility body must be balanced');
+  const body = rendererSource.slice(start + marker.length, i - 1);
+  return new Function('forceHidden', 'dimmed', body);
+}
+const updateVisibility = loadUpdateVisibility();
+
+function stubCounter(address) {
+  return {
+    address,
+    key: 'advancement',
+    hideWhenZero: false,
+    sprite: { visible: true, alpha: 1.0 },
+    richText: { visible: true, alpha: 1.0 },
+  };
+}
+
+test('behaviour: dimmed zoomed counter stays visible at reduced alpha', () => {
+  const counter = stubCounter(zoomedIce);
+  updateVisibility.call(counter, false, true);
+  assert.strictEqual(counter.sprite.visible, true, 'dimmed counter must stay visible');
+  assert.strictEqual(counter.richText.visible, true, 'dimmed counter text must stay visible');
+  assert.strictEqual(counter.sprite.alpha, 0.3, 'dimmed icon must render translucently');
+  assert.strictEqual(counter.richText.alpha, 0.3, 'dimmed number must render translucently');
+});
+
+test('behaviour: unzoomed counter restores full opacity', () => {
+  const counter = stubCounter(unzoomedIce);
+  updateVisibility.call(counter, false, true);
+  updateVisibility.call(counter, false, false);
+  assert.strictEqual(counter.sprite.visible, true);
+  assert.strictEqual(counter.sprite.alpha, 1.0, 'unzoomed icon must restore full opacity');
+  assert.strictEqual(counter.richText.alpha, 1.0, 'unzoomed number must restore full opacity');
+});
+
+test('behaviour: forced hiding still hides even while dimmed', () => {
+  const counter = stubCounter(zoomedIce);
+  updateVisibility.call(counter, true, true);
+  assert.strictEqual(counter.sprite.visible, false, 'forceHidden must take precedence over dim');
+  assert.strictEqual(counter.richText.visible, false, 'forceHidden must hide the number too');
 });
 
 if (failures) {

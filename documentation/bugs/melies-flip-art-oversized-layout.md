@@ -32,5 +32,19 @@ N/A — deterministic fix (principle 4): the Méliès U department faces render 
 - [ ] A browser/manual check confirms the flip face fills the template and R&D/ice/remotes don't shift on flip.
 - [ ] `node tests/run-all-tests.js` passes.
 
+## Review note (PR #50, CodeRabbit — not applied)
+PR review suggested replacing the WEBP-dimension assertions with a
+reproduction exercising `_showIdentityFace` and the flip texture's effective
+rendered bounds, so the test validates layout behaviour rather than one asset
+fix. Deliberately deferred: the ticket's acceptance gate pins the pending
+reproduction's expectation ("expectation unchanged"), and the size assertion
+*is* the deterministic acceptance criterion for the cheapest proposed fix
+(resize `36036-0/1/2.webp` to 300x420, matching Dewi's 35023-0.jpg
+precedent). The reviewer's caveat stands — a pipeline-side fix
+(scale-normalising in `_showIdentityFace`/texture loading) could satisfy the
+rendered-bounds intent while leaving these assertions red. If that fix is
+chosen instead, update this ticket's acceptance criterion first, then adjust
+the reproduction to exercise the pipeline.
+
 ## Out of scope / related
 - Separate, real AI bug from the same log kept as-is: `documentation/bugs/melies-secret-department-choice-ignored.md` (Corp AI ignores the secret department choice; its pending test fails `0 !== 1`). Not a hallucination — verified by `node tests/pending/melies-secret-department-choice-ignored.test.js`.

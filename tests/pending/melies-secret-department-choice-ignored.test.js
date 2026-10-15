@@ -67,8 +67,10 @@ test('bug: CorpAI.Choice ignores the stored department and falls back to index 0
   assert.strictEqual(expected, 1, 'test setup: the stored preference should be R&D (index 1)');
   logged.length = 0;
   const chosen = ai.Choice(choices, 'select');
-  assert.ok(logged.some(line => line.includes("I don't have code to handle this situation")),
-    'expected the unhandled-situation fallback log, got: ' + JSON.stringify(logged));
+  // NOTE (PR #50 review): no assertion on the "I don't have code to handle
+  // this situation" fallback log — it fires only on the buggy path, so it
+  // would fail once the fix returns the stored preference before the
+  // fallback. The selection assertion below is the pinned expectation.
   assert.strictEqual(chosen, expected,
     'Choice fell through to the index-0 fallback (HQ) instead of the stored R&D preference');
 });
