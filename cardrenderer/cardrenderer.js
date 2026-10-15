@@ -852,13 +852,14 @@ var CardRenderer = {
             } else this.trashCostSprite.visible = false;
           }
           if (this.strengthSprite != null) {
-            //icebreaker
+            //icebreaker: non-ICE cards face the viewer (table rotation is
+            //viewer-relative, netting upright), so the number stays unrotated
+            //for both viewers
             this.strengthSprite.x = -108;
             this.strengthSprite.y = 78;
             this.strengthText.x = -7;
             this.strengthText.y = 0;
-            if (viewingPlayer == runner) this.strengthText.rotation = 0;
-            else this.strengthText.rotation = Math.PI;
+            this.strengthText.rotation = 0;
           }
           this.glowSprite.texture = this.glowTextures.unzoomed;
           if (!showFace) {
@@ -1430,7 +1431,8 @@ var CardRenderer = {
             this.card.storedPosition.y = this.y;
             this.card.destinationPosition.x = this.x;
             this.card.destinationPosition.y = this.y;
-            if (this.card.card.player == corp)
+            //dropped cards face the viewer, like all non-ICE cards
+            if (viewingPlayer == corp)
               this.card.destinationRotation = Math.PI;
             else this.card.destinationRotation = 0;
           }

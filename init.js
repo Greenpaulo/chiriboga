@@ -469,11 +469,15 @@ function ResizeCallback() {
 }
 
 //sub-helper function used in RenderCards
+//All non-ICE cards face the viewer (like other digital TCGs): local rotation
+//is viewer-relative (0 when viewing as runner, 180 when viewing as corp) so
+//the stage flip leaves every card upright. Installed ICE keeps its sideways
+//orientation via the RotateNoTint modifier which runs after this.
 function RenderCard(card, modifier, i) {
   card.renderer.SetRotation(0); //reset target rotation pre-render (e.g. in case it has moved from hand and kept an extra rotation effect)
   if (IsFaceUp(card)) card.renderer.FaceUp(Strength(card));
   else card.renderer.FaceDown();
-  if (card.player == corp) card.renderer.SetRotation(180);
+  if (viewingPlayer == corp) card.renderer.SetRotation(180);
   card.renderer.canView = PlayerCanLook(viewingPlayer, card);
   if (card.renderer.zoomed) zoomedCards.push(card);
   modifier(card, i);
@@ -500,13 +504,16 @@ function RenderCards(cards, modifier) {
 }
 
 //helper functions for tinting facedown cards
+//Face-up cards face the viewer (viewer-relative, matching RenderCard); facedown
+//cards lie sideways, also viewer-relative (90 when viewing as runner, 270 when
+//viewing as corp) to match installed ICE.
 function TintAndRotateIfFaceDown(card, i) {
   if (IsFaceUp(card)) {
-    if (card.player == corp) card.renderer.SetRotation(180);
+    if (viewingPlayer == corp) card.renderer.SetRotation(180);
     else card.renderer.SetRotation(0);
     card.renderer.Tint(0, 0, 100);
   } else {
-    if (card.player == corp) card.renderer.SetRotation(270);
+    if (viewingPlayer == corp) card.renderer.SetRotation(270);
     else card.renderer.SetRotation(90);
     card.renderer.Tint(0, 0, 90 + 10 * Math.sin(2.0 * i));
   }
@@ -551,7 +558,7 @@ function FanHand(player) {
   for (var i = 0; i < handOfCards.length; i++) {
     var rotAmt = -totalFanRotation * 0.5 + fanIterator * i;
     var offsetY = -350 * Math.cos(1.7 * rotAmt * (Math.PI / 180)) + 300;
-    if (player == corp) rotAmt += 180;
+    if (viewingPlayer == corp) rotAmt += 180; //hands face the viewer, like all non-ICE cards
     handOfCards[i].renderer.SetRotation(rotAmt);
     var nonViewingHandOffsetY = 35;
     if (player == corp) {
@@ -850,7 +857,7 @@ function Render() {
     hostingX
   );
   var stolenCascade = new CardRenderer.Cascade(
-    RenderCards(runner.scoreArea, ZeroRotationNoTint),
+    RenderCards(runner.scoreArea, NoTint), //base rotation already faces the viewer
     (viewingPlayer==corp?-1:1)*scoreAreaXStep,
     -spreadYStep,
     hostingX
@@ -1369,7 +1376,6 @@ function Render() {
     var gridRowStart = 0;
     var cardsPerGridRow = Math.floor(w / gridViewXStep);
     while (gridRowStart < uniqueGrid.length) {
-	  var gridPlayer = null; //the player whose cards are in the grid
       var gridViewRowCards = [];
       for (
         var i = gridRowStart;
@@ -1377,14 +1383,10 @@ function Render() {
         i++
       ) {
         gridViewRowCards.push(uniqueGrid[i]);
-		gridPlayer = uniqueGrid[i].player;
       }
+	  //Grid cards face the viewer: base rotation in RenderCard is already
+	  //viewer-relative (0 as runner, 180 as corp), so no per-owner override.
 	  var gridViewModifier = FaceUpNoTint;
-	  if ( gridPlayer == corp && viewingPlayer == runner ) {
-		  gridViewModifier = ZeroRotationNoTint;
-	  } else if ( gridPlayer == runner && viewingPlayer == corp ) {
-		  gridViewModifier = PiRotationNoTint;
-	  }
       var gridViewCascade = new CardRenderer.Cascade(
         RenderCards(gridViewRowCards, gridViewModifier),
         gridViewXStep,
