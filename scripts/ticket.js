@@ -387,11 +387,12 @@ const failedGateResult = (option, setting, code = '') => {
   const keys = ["'" + option + "'", '"' + option + '"', '`' + option + '`'];
   const accessed = tokens.some((token, i) => token === 'options' && (
     (['.', '?.'].includes(tokens[i + 1]) && tokens[i + 2] === option) ||
-    (tokens[i + 1] === '[' && keys.includes(tokens[i + 2]))));
+    (tokens[i + 1] === '[' && keys.includes(tokens[i + 2])) ||
+    (tokens[i + 1] === '?.' && tokens[i + 2] === '[' && keys.includes(tokens[i + 3]))));
   const structure = tokens.map(token => keys.includes(token) ? option :
     /^['"`]/.test(token) ? '' : token).join(' ');
   const destructured = new RegExp('\\{[^{}]*\\b' + option +
-    '\\b[^{}]*\\}\\s*=\\s*(?:\\w+\\s*\\.\\s*)*options\\b')
+    '\\b[^{}]*\\}\\s*=\\s*(?:\\w+\\s*(?:\\?\\.|\\.)\\s*)*options\\b')
     .test(structure);
   return setting || accessed || destructured ?
     ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :

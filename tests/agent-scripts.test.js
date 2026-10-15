@@ -104,8 +104,14 @@ assert.strictEqual(outcomeLine('# T\n\n**Outcome:** not adopted — gate failed\
 assert.strictEqual(outcomeLine('# T\n'), undefined, 'a ticket without an Outcome line has none');
 assert.strictEqual(failedGateResult('x', 'false')[0], 'FAIL', 'a failed option still in the code fails the check');
 assert.strictEqual(failedGateResult('x', undefined)[0], 'PASS', 'a removed failed option passes');
-for (const code of ['if (this.options.x) act();', 'if (this.options["x"]) act();', 'const {x} = this.options;']) {
-  assert.strictEqual(failedGateResult('x', undefined, code)[0], 'FAIL', 'a branch without its default is still present');
+for (const code of [
+  'if (this.options.x) act();', 'if (this.options["x"]) act();', 'const {x} = this.options;',
+  'if (this.options?.x) act();', 'if (this.options?.["x"]) act();',
+  "if (options?.['x']) act();", 'if (options?.[`x`]) act();',
+  'const {x} = this?.options;', 'const {x: enabled} = app?.ai.options;',
+]) {
+  assert.strictEqual(failedGateResult('x', undefined, code)[0], 'FAIL',
+    'a branch without its default is still present: ' + code);
 }
 assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.extra) act();')[0], 'PASS',
   'similarly named options do not count as the removed option');
