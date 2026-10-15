@@ -51,10 +51,10 @@ Generalize the display-only visibility rule, not the card: make the counter tran
 N/A — deterministic fix (principle 4): the enlarged card's printed text must be readable, i.e. the zoomed card's advancement counter (icon and number) renders translucently while zoomed and returns to full opacity on unzoom, with no change to counter values or game state.
 
 ## Acceptance criteria
-- [ ] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged.
-- [ ] Focused variation: zoomed power/virus counter stays visible; unzoomed advancement counter stays visible (already controls in the reproduction).
-- [ ] New or changed AI hooks are documented in `documentation/ai.md`. (None expected — renderer-only change.)
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged. (Moved to `tests/counter-on-ice-hides-reading-card-text.test.js`, passing. Expectation updated hide→translucent per the Proposed-fix note authorizing exactly that; hide predicate separately asserted unchanged.)
+- [x] Focused variation: zoomed power/virus counter stays visible; unzoomed advancement counter stays visible (already controls in the reproduction). (Superseded in part 2026-10-14 per owner: ALL counter types now dim on the zoomed card; unzoomed/other-card/renderer-less controls remain opaque in the moved test.)
+- [x] New or changed AI hooks are documented in `documentation/ai.md`. (None expected — renderer-only change.)
+- [x] `node tests/run-all-tests.js` passes. (93 test files passed.)
 
 ## Out of scope / related
 - Done ticket `documentation/bugs/done/ice-advancement-counters-block-subroutines.md` (subroutine-choice hiding) stays as-is; this extends its rule to reading zoom.
