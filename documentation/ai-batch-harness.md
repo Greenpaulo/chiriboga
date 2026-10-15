@@ -680,8 +680,11 @@ capture leaves/reinstalls even within one main-loop step; hypotheticals are
 excluded. Safety stops take precedence over cached scripts. Expired commitments
 are separate from active ones; a cache without an observation in the current
 installation remains unknown. `allowedAtLastQuery` does not claim current
-safety. Missing cached state remains unknown rather than being treated as
-neutral. Tracker/collector errors invalidate observations while gameplay
+safety. No activation record means `unrolled`: the AI has not selected a
+deception commitment, including before its first query. This does not establish
+safety, which remains unknown without evidence. A cached record without usable
+query/event evidence remains unknown rather than being treated as neutral.
+Tracker/collector errors invalidate observations while gameplay
 continues.
 
 Passive wrappers retain returns of bait/bluff queries the AI already made;

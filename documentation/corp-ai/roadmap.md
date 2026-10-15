@@ -30,7 +30,7 @@ is recorded in the done tables and the historical merge plan.
 |---|---|---|---|
 | — | [L8.5](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | done (merged) | Revised full gate passed; merge complete |
 | — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
-| 2 | [F12](../backlog/code-review/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
+| 2 | [F12](../backlog/done/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
 | 3 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready (blocked on F12) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
 | 4 | [I2](specs/I2-ice-selection-by-marginal-security.md) | proposed | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
 | 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
@@ -94,7 +94,7 @@ price yet.
 - **Parked because:** its first step is done and refuted the premise. L7.1 failed because HQ's protection score is also the bar for remote scoring, not because of the horizon (see the spec's Failure analysis). I2 carries the lesson; revive only as a new item about remote-scoring eligibility, with fresh evidence.
 
 ### L8.2 Deception legibility signals
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** F4, L8.5, F11, F12
 - **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/feature-layer-8-2-remote-deception-profiles.md)
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
@@ -201,12 +201,6 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
-### F12 Realized defense measurement
-- **Status:** in-progress
-- **Depends on:** F4, F11, L8.4
-- **Ticket:** [F12-realized-defense-measurement.md](../backlog/code-review/F12-realized-defense-measurement.md)
-- **Goal:** Passively measure agenda/trap ICE-count correlation and distribution distance; supply shared observations and control-only calibration before L8.2 and I2.
-
 ### F13 Seeded stall diagnostics and failed-batch reporting
 - **Status:** proposed
 - **Depends on:** F4
@@ -224,6 +218,7 @@ Shared infrastructure used by every area.
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
 | F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
 | F11 | Paired batch-metric guards | [F11-paired-batch-metric-guards](../backlog/done/F11-paired-batch-metric-guards.md) | [architecture: Foundations](architecture.md#foundations) |
+| F12 | Realized defense measurement | [F12-realized-defense-measurement](../backlog/done/F12-realized-defense-measurement.md) | [architecture: Foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 

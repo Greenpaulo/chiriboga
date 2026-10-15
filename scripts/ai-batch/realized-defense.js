@@ -54,10 +54,13 @@ function createRealizedDefenseTracker(emit) {
     // An expired script can remain cached until a later query. Report it, but
     // do not claim that the stale commitment is a known active posture.
     const structurallyIneligible = Boolean(card.faceUp || card.rezzed || card.knownToRunner) ||
-      card.cardType === 'agenda' && server.root.length !== 1;
+      (card.cardType === 'agenda' || ai?.options?.deceptionLegibility) && server.root.length !== 1;
     const staleActive = cached && (structurallyIneligible || queryCurrent && (!query.postured || query.rootCount !== server.root.length));
-    const effective = safety === 'stopped' ? 'safetyStopped' : !(query || event) ? 'unknown' : !record ?
-      'unrolled' : horizonExpired ? 'expired' : staleActive ? 'unknown' : cached ? 'active' : 'neutral';
+    // Activation requires a stored roll in both epoch and lifetime modes.
+    // No record establishes "not selected yet", even before the first query;
+    // it says nothing about whether a later query would pass the safety guard.
+    const effective = safety === 'stopped' ? 'safetyStopped' : !record ? 'unrolled' :
+      !(query || event) ? 'unknown' : horizonExpired ? 'expired' : staleActive ? 'unknown' : cached ? 'active' : 'neutral';
     return {posture: effective, cachedPostured: cached, horizonExpired,
       safety, epochId: record?.epochId ?? null, lastQueryEpoch: query?.epoch ?? event?.epoch ?? null,
       lastQueryResult: query?.postured ?? null, lastQueryRootCount: query?.rootCount ?? null};

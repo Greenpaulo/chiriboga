@@ -305,7 +305,7 @@ function playGame(options) {
   // Corp AI bait/bluff/profile posture decisions (CorpAI._postureTelemetryEvent).
   context.__posture = event => {
     if (defense && run('AIHypothetical.depth') === 0) defenseSafe(() => defense.onPosture(event));
-    emit('posture', JSON.parse(JSON.stringify(event)));
+    emit('posture', {...JSON.parse(JSON.stringify(event)), hypothetical: run('AIHypothetical.depth') > 0});
   };
 
   // A Corp ICE install on HQ or R&D, with each installed Runner card's public

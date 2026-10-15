@@ -828,7 +828,8 @@ needs.
     snapshots without calling security/posture/safety evaluators. Existing
     epoch/lifetime cache fields, real guard/roll/reuse events and passive query
     return capture supply labels (including silent failures and lifetime reuse);
-    unknown state and expired commitments remain explicit. Observation failures
+    roots with no activation record are `unrolled` without inferring safety;
+    unknown cached state and expired commitments remain explicit. Observation failures
     invalidate measurement without affecting gameplay. The
     `realizedIceByRootType` collector reports unrevealed all-root and known-active
     posture subsets using absolute Spearman rho and exact-bin total variation,
