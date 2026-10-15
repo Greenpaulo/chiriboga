@@ -39,8 +39,8 @@ is recorded in the done tables and the historical merge plan.
 F11 is done, satisfying F12's dependency. L8.2-before-I2 and L8.9-before-I3
 are sequencing preferences rather than additional formal dependencies. Do not
 adopt a later policy using a control predating an adopted prerequisite.
-[L9.0.1](specs/L9.0.1-adopt-honest-lockout.md) can proceed alongside this track
-with its own gate; refresh affected controls after adoption. Complete L8.7's
+[L9.0.1](../backlog/code-review/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
+[L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md) proposes separate consumer gates; refresh affected controls after any adoption. Complete L8.7's
 card audit and L8.10 mechanics/diagnostics before I5 (its formal dependency).
 L8.8 remains separately gated after I2; it is not an I2 prerequisite.
 
@@ -131,10 +131,16 @@ price yet.
 - **Goal:** Declare trap mechanics and measure play/access opportunities without changing decisions. Supplies I5's evidence; I5 owns any later payoff conversion and adoption. Independent of L8.8's concealment research.
 
 ### L9.0.1 Adopt honest lockout
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** L9.0, F4
-- **Spec:** [L9.0.1-adopt-honest-lockout.md](specs/L9.0.1-adopt-honest-lockout.md)
-- **Goal:** Gated option `honestLockout`: existing scoring, rez and protection decisions read the honest verdict.
+- **Ticket:** [L9.0.1-adopt-honest-lockout.md](../backlog/code-review/L9.0.1-adopt-honest-lockout.md)
+- **Goal:** Global adoption experiment not adopted after its failed gate; await independent review of cleanup. L9.0.2 proposes isolated consumer gates.
+
+### L9.0.2 Consumer-specific honest security adoption
+- **Status:** proposed
+- **Depends on:** L9.0, L9.1, F4
+- **Spec:** [L9.0.2-consumer-specific-honest-security.md](specs/L9.0.2-consumer-specific-honest-security.md)
+- **Goal:** Independently gate local honest-verdict consumers against one fresh control; follow the rejected L9.0.1 experiment without inferring combined effects.
 
 ### L10 Sampled breach capability research
 - **Status:** parked

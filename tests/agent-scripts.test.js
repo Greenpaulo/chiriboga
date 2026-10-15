@@ -109,6 +109,14 @@ for (const code of ['if (this.options.x) act();', 'if (this.options["x"]) act();
 }
 assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.extra) act();')[0], 'PASS',
   'similarly named options do not count as the removed option');
+assert.strictEqual(failedGateResult('honestLockout', undefined,
+  'result.honestLockout = result.hasHardLockout;')[0], 'PASS',
+  'an observation field is not a remaining AI option');
+assert.strictEqual(failedGateResult('honestLockout', undefined,
+  'const {honestLockout} = result;')[0], 'PASS',
+  'destructuring a result field is not reading an option');
+assert.strictEqual(failedGateResult('x', undefined, '"const {x} = this.options;"')[0], 'PASS',
+  'an opaque diagnostic string is not an option access');
 assert.strictEqual(outcomeProblem(undefined, 'failed — `x` removed')[0], 'FAIL');
 assert.strictEqual(outcomeProblem('adopted', 'failed — `x` removed')[0], 'FAIL');
 assert.strictEqual(outcomeProblem('blocked — follow-up', 'failed — `x` removed')[0], 'FAIL');
