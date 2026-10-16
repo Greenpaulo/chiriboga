@@ -1,0 +1,21 @@
+[
+  {
+    "case": "CR4 last-click winning access",
+    "withChain": "play",
+    "withoutChain": "run"
+  },
+  {
+    "case": "TT1 opposing income",
+    "breakerId": 31006,
+    "runnerComplete": true,
+    "corpSecure": true,
+    "totalMandatoryBreakCost": 2
+  },
+  {
+    "case": "TT1 opposing income",
+    "breakerId": 36004,
+    "runnerComplete": true,
+    "corpSecure": false,
+    "totalMandatoryBreakCost": 1
+  }
+]

@@ -272,8 +272,18 @@ class RunnerAI {
     return result;
   }
 
+  // Costs depend on available clicks, including click-break and tag budgets.
+  _invalidateCostsForClickChange() {
+    if (this.cachedCostsClickCount !== runner.clickTracker) {
+      this.cachedCosts = [];
+      this.runsEverCalculated = [];
+      this.cachedCostsClickCount = runner.clickTracker;
+    }
+  }
+
   //get cached complete run cost or Infinity
   _getCachedCost(server) {
+    this._invalidateCostsForClickChange();
     if (!this.runsEverCalculated.includes(server))
       this._calculateBestCompleteRun(server, 0, 0, 0, 0);
     var result = Infinity;
@@ -764,6 +774,7 @@ class RunnerAI {
 	return data;
   }
   _calculateRunPathPieceEnd(data) {
+    this._invalidateCostsForClickChange();
     this.cachedBestPath = null; //by default assume no paths were found
     this.cachedComplete = !data.incomplete;
 	this.cachedPathServer = data.server;
@@ -1194,6 +1205,48 @@ class RunnerAI {
 	return bestpath;
   }
   
+  // A discretionary expiring play cannot displace a known winning steal.
+  // Use only public installed agendas and an ordinary run possible right now.
+  async _winningRunBeforeOpportunity() {
+    var activeCards = ActiveCards(runner);
+    var choices = currentPhase.Enumerate.run();
+    for (var choice of choices) {
+      var server = choice.server;
+      if (this._breachWouldBePrevented(activeCards, server)) continue;
+      for (var agenda of server.root) {
+        if (!PlayerCanLook(runner, agenda) || !CheckCardType(agenda, ["agenda"]) ||
+            AgendaPoints(runner) + AgendaPointsForCard(agenda, runner) < AgendaPointsToWin()) continue;
+        var previousServer = attackedServer;
+        var cost;
+        try {
+          attackedServer = server;
+          if (CardEffectsForbid("steal", agenda)) continue;
+          cost = StealCost(agenda);
+        } finally {
+          attackedServer = previousServer;
+        }
+        if (cost.clicks > runner.clickTracker - 1) continue;
+        var path = await this._commonRunCalculationChecksAsync(server, null, null, false);
+        if (!path || !path.length) continue;
+        // Steal costs are paid after the run's breaks and rebates. Recurring
+        // breaker credits may fund the route, but are not promised for stealing.
+        for (var candidate of this.rc.paths.slice().reverse()) {
+          var last = candidate[candidate.length - 1];
+          var other = (last.paymentPoolOnly ? 0 : this.rc.baseOtherCredits) +
+            (last.restrictedCreditsPaid || 0);
+          var remainingPool = this.rc.basePoolCredits - last.runner_credits_lost -
+            (last.runner_credits_reserved || 0) - Math.max(0, last.runner_credits_spent - other);
+          var remainingClicks = runner.clickTracker - 1 - last.runner_clicks_spent;
+          if (remainingPool >= cost.credits && remainingClicks >= cost.clicks) {
+            this.cachedBestPath = candidate;
+            return server;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   //basic pre-checks e.g. don't install over a unique, or console over a console, don't install resources when tagged
   _passBasicWastefulInstallCheck(cardToInstall) {
 	if (this._uniqueCopyAlreadyInstalled(cardToInstall)) return false;
@@ -1949,6 +2002,12 @@ console.log(this.preferred);
 		    }
 		}
         if (cardToPlay) {
+          if (optionList.includes("run")) {
+            var winningServer = await this._winningRunBeforeOpportunity();
+            if (winningServer) return this._returnPreference(optionList, "run", {
+              serverToRun: winningServer,
+            });
+          }
           this._log("there is a card I would play with a window of opportunity");
 		  return this._returnPreference(optionList, "play", {
 			cardToPlay: cardToPlay,

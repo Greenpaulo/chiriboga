@@ -45,7 +45,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**1 complete, 12 outstanding** (`12 Pending`, `0 In progress`, `0 Blocked`).
+**2 complete, 11 outstanding** (`11 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -53,7 +53,7 @@ Agents must refresh these counts whenever a batch status changes.
 
 | Batch | Card IDs    | Status   | Owner / started          | Notes/blocker                                                              |
 | ----: | ----------- | -------- | ------------------------ | -------------------------------------------------------------------------- |
-| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](reviews/vantage-point/vantagepoint-batch-1.md). |
+| 1 | 36001–36004 | Complete | Codex / 2026-10-06 | Independent re-review Pass: CR1–CR4 and TT1 resolved; all four cards have contrasting strategic evidence, including affected shared consumers. All 51 regression files and 12 new independent scenarios pass. See [review and remediation](reviews/vantage-point/vantagepoint-batch-1.md). |
 | 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](reviews/vantage-point/vantagepoint-batch-2.md). |
 | 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](reviews/vantage-point/vantagepoint-batch-3.md). |
 | 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](reviews/vantage-point/vantagepoint-batch-4.md). |
@@ -100,6 +100,10 @@ Do not remove an older entry if later work revisits one of its cards.
 
 | 13 | 36061–36066 | 2026-10-06 | Codex | `tests/vantagepoint-batch13.test.js`; `tests/corp-server-security.test.js`; full `node tests/run-all-tests.js` | Repaired the reopened Corsair/Shackleton public-security gap using complete restricted-payment routes. Same-board opposing planner tests cover lethal/survivable damage, prevention, source exhaustion, finite reruns, click preparation, funded hidden ICE and read-only/private-information constraints. All 50 files pass, including Corp decision fixtures and decision snapshots. |
 
+| 1 | 36001–36004 | 2026-10-06 | Codex | `tests/vantagepoint-batch1.test.js`; `tests/vantagepoint-integration.test.js`; `tests/vantagepoint-batch13.test.js`; full `node tests/run-all-tests.js` | Repaired CR1–CR3 successful-run dispatch, publicity prevention and known winning-agenda targets; sacrifice-aware expiring play, harmless-subroutine event choices, real pool rebate and opposing once-per-turn/finite-repeat income modelling. All 51 files pass on Node 20.19.0, including Corp decision fixtures and decision snapshots; all required syntax/format/deck/identity/diff checks pass. Separate batch 1 and affected shared-consumer re-review required. |
+
+| 1 | 36001–36004 | 2026-10-06 | Codex | `tests/vantagepoint-batch1.test.js`; `tests/vantagepoint-batch13.test.js`; `tests/corp-server-security.test.js`; full `node tests/run-all-tests.js` | CR4: affordable publicly known winning steals precede discretionary expiring plays; route rebates can fund later steal costs. TT1: public break income activates complete Corp route planning with ordinary or restricted breakers. Real command/card/server and opposing route tests cover declines, resource clocks, privacy and finite repeats. All 51 files pass on Node 20.19.0; syntax/format/deck/identity/hook-doc/diff checks pass. Independent re-review remains required. |
+
 ## Batch-review log
 
 Independent review evidence is separate from implementation completion history.
@@ -120,6 +124,8 @@ Verdicts apply to the linked snapshot-specific reports; repairs require re-revie
 | 11 | 36051–36055 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-11.md) |
 | 12 | 36056–36060 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-12.md) |
 | 13 | 36061–36066 | 2026-10-06 | Pass | [Report](reviews/vantage-point/vantagepoint-batch-13.md) |
+| 1 | 36001–36004 | 2026-10-06 | Changes required (remediation re-review) | [Report: CR4 and TT1](reviews/vantage-point/vantagepoint-batch-1.md#independent-remediation-re-review--2026-10-06) |
+| 1 | 36001–36004 | 2026-10-06 | Pass (second remediation re-review) | [Report: CR1–CR4 and TT1 resolved](reviews/vantage-point/vantagepoint-batch-1.md#second-independent-remediation-re-review--2026-10-06) |
 
 ## Set-wide review status
 
@@ -129,6 +135,10 @@ Reviewed all 66 cards in the recorded 13 batches: 12 batches require repairs,
 gaps; both defects and missing essential coverage must be resolved before Pass.
 All 50 regression test files passed and eight headless games completed without
 engine errors; these results do not supersede the demonstrated rules/AI defects.
+
+Batch 1 subsequently passed independent remediation re-review on 2026-10-06;
+11 batches still require repairs. The historical set-wide verdict above is not
+renewed by that batch result or by passing batch13 shared-consumer regressions.
 
 The [pre-review implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves the original full completion log. The

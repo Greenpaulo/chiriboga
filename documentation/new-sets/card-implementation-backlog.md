@@ -105,6 +105,14 @@ include engine dispatch/reward crashes, missing draw/click/damage models, illega
 upgrade placement and missed immediate win/kill alternatives. The shared
 bad-publicity fund/loss abstraction also needs repair. Remaining per-card and
 manual coverage gaps are explicit in the reports; no new limitation is accepted.
+Batch 1 repairs (36001–36004, CR1–CR4, TT1 and named strategic coverage) completed
+on 2026-10-06 with all 51 regression files passing. Its independent [second re-review](reviews/vantage-point/vantagepoint-batch-1.md#second-independent-remediation-re-review--2026-10-06)
+now records **Pass**, including affected run-calculator consumers, Runner
+winning-steal priority and ordinary Corp income routes. Twelve new independent
+scenarios and batch13 shared-consumer regressions pass; this does not renew
+batch13's snapshot verdict or the set-wide review. Batch 2 is the next
+implementation repair; 11 batches remain reopened.
+No new limitation is accepted; shared finding S1 remains open.
 The [post-review snapshot](history/vantagepoint-2026-10-06-reviewed.md) preserves
 the repair queue, review log and original completion history.
 

@@ -1,0 +1,80 @@
+[
+  {
+    "case": "simultaneous winning threats / paid steal",
+    "publicity": 0,
+    "selected": "play"
+  },
+  {
+    "case": "simultaneous winning threats / paid steal",
+    "publicity": 1,
+    "selected": "run"
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 0,
+    "pool": 1,
+    "feasible": false,
+    "corpSecure": true
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 0,
+    "pool": 2,
+    "feasible": true,
+    "corpSecure": false
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 0,
+    "pool": 3,
+    "feasible": true,
+    "corpSecure": false
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 1,
+    "pool": 1,
+    "feasible": false,
+    "corpSecure": true
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 1,
+    "pool": 2,
+    "feasible": true,
+    "corpSecure": false
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 1,
+    "pool": 3,
+    "feasible": true,
+    "corpSecure": false
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 2,
+    "pool": 1,
+    "feasible": false,
+    "corpSecure": true
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 2,
+    "pool": 2,
+    "feasible": false,
+    "corpSecure": true
+  },
+  {
+    "case": "three ordinary-breaker barriers",
+    "strength": 2,
+    "pool": 3,
+    "feasible": true,
+    "corpSecure": false
+  },
+  {
+    "case": "live restricted reduction then pool break and cleanup",
+    "sourceCredits": 0,
+    "pool": 0
+  }
+]

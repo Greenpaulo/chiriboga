@@ -74,7 +74,9 @@ restore state through hooks in `_commonRunCalculationChecksAsync()`.
 `cachedCosts` are rebuilt whenever run is offered; `_calculateRunPathPieceEnd()`
 overwrites a server's cost after every path calculation, complete or exit
 strategy, with whatever offsets it used. `_getCachedCost(server)` calculates
-only for servers missing from `runsEverCalculated` (never cleared).
+only for servers missing from `runsEverCalculated`. Cost reads and path publication
+clear both `cachedCosts` and `runsEverCalculated` when the Runner click count
+changes, so card decisions cannot reuse a pre-action click budget.
 `cachedBestPath`, `cachedComplete` and `cachedPathServer` hold the latest path;
 `_cachedOrBestRun(server, startIceIdx)` reuses it for the same server, else
 calculates a complete run with `_calculateBestExitStrategy()` as fallback.
@@ -260,7 +262,11 @@ The AI mulligans (option 0) when `this.cardsWorthKeeping` is empty, else keeps
 Before running is considered: when tagged, the grip card with the highest
 `AIPlayToRemoveTags()` that passes `FullCheckPlay` is played, else the basic
 remove-tag action is taken whenever offered. The playable event with the highest
-`AIPlayWhenCan` (and `AIWouldPlay`, if defined) is played. In the Runner Install
+`AIPlayWhenCan` (and `AIWouldPlay`, if defined) is played, unless a legal
+ordinary run can immediately win by stealing a publicly known installed agenda.
+That check uses the complete current route and its remaining pool/run credits
+and clicks after rebates, plus public steal costs and steal prohibitions.
+Unknown agendas and routes needing preparation do not override the opportunity. In the Runner Install
 phase, an installed program whose `AIOkToTrash()` is true is trashed for room.
 The engine's `Install` phase offers successful continuation only when current
 credits and MU suffice. If trashing changes affordability, further program
@@ -443,4 +449,6 @@ Public successful-run benefits use `ServerSuccessfulRunPrevented(server)`,
 which queries rezzed, enabled upgrades through `AIPreventsSuccessfulRun`.
 Crisium Grid and Flagship both declare that capability. Finite-run continuation
 caches distinguish remaining meat-damage prevention and consumed outside-credit
-damage opportunities as well as credit, click and damage budgets.
+damage opportunities as well as credit, click and damage budgets. Consumed
+break-income sources are keyed by card object identity within the active-card
+snapshot, independent of persistent order; same-title copies remain distinct.

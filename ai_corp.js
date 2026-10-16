@@ -3671,8 +3671,9 @@ class CorpAI {
   _restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext) {
     if (typeof RunCalculator == "undefined" || !AIWithRunContext(server, () =>
         evaluationContext.runnerActiveCards.some(card => CheckHasAbilities(card) &&
-          typeof card.AIRunRestrictedCredits == "function" &&
-          card.AIRunRestrictedCredits.call(card, server) > 0))) return null;
+          (typeof card.AIRunRestrictedCredits == "function" &&
+          card.AIRunRestrictedCredits.call(card, server) > 0 ||
+          typeof card.AIRunBreakCreditGain == "function")))) return null;
     var unpricedMandatory = [];
     var unpricedAvoidance = [];
     var unsupportedMandatory = [];
@@ -3749,7 +3750,7 @@ class CorpAI {
       routeFeasible: !!last,
       restrictedCreditsPaid: last ? last.restrictedCreditsPaid || 0 : 0,
       routeDamage: last ? best.rc.TotalDamage(best.rc.TotalEffect(last)) : 0,
-      reasons: [last ? "restricted-credit route is feasible" : "no feasible restricted-credit route"]
+      reasons: [last ? "resource-aware route is feasible" : "no feasible resource-aware route"]
         .concat(Array.from(new Set(unpricedMandatory.concat(unpricedAvoidance))).map(title => "unpriced breaker " + title)),
       rezCost: eligibleIce.reduce((total, card) => total + (card.rezzed ? 0 : Math.max(0, RezCost(card))), 0),
     };
