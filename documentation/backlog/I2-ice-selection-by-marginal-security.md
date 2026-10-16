@@ -21,6 +21,19 @@ Implemented from `15d485d` (phase A only; phase B not started).
 - `_breachHazard()` picks the table's `single` (0–1 ICE) or `multi` (2+ ICE)
   row from the server's ICE count, so a hypothetical install that adds the
   second ICE moves the server to the `multi` row automatically.
+- L8.2 was not adopted (its gate failed; PR #55 closes it), so the L8.2/I2
+  ordering decision is: I2 does not wait for L8.2, and its control needs no
+  L8.2 policy. PR #55 does keep a passive observer correction: roots with no
+  activation record are labelled `unrolled`, which raised known posture labels
+  from about 86% to about 99.6% in L8.2's control runs. **First step of phase
+  B:** after PR #55 is merged, merge `main` into this branch, then run a
+  control-only pool batch with `realizedIceByRootType` and check F12's
+  readiness rule (≥90% known posture labels, ≥10 commitments and ≥5 games per
+  class). If the pool meets it, move the
+  `realizedIceByRootType.posturedCountCorrelation` guard back onto the pool
+  command and drop the `i2-posture` start boards and their criterion. Record
+  that before any phase B gate result exists. If the pool still fails the
+  rule, keep the posture command as written.
 
 **What changed (observation-only).**
 - **M4.** `AIApproachDefense(server, context)` on Manegarm Skunkworks and
