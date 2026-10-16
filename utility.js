@@ -3872,16 +3872,21 @@ function TurnEventCount(name) {
  * @param [Object] parameters to pass to Resolve
  * @returns {Params[]} array of {card,label} where card[callbackName] is defined
  */
+// Owner of the currently resolving automatic effect, for trash attribution.
+var automaticTriggerSource = null;
 function AutomaticTriggers(callbackName, parameters = []) {
   //store current phase to ensure that the automatics are only doing what they're allowed
   var startingPhase = currentPhase;
   //any relevant triggers (assume automatic for now, if you want player choice use TriggeredResponsePhase)
   var triggerList = ChoicesActiveTriggers(callbackName);
   for (var i = 0; i < triggerList.length; i++) {
-    triggerList[i].card[callbackName].Resolve.apply(
-      triggerList[i].card,
-      parameters,
-    );
+    var previousSource = automaticTriggerSource;
+    automaticTriggerSource = triggerList[i].card;
+    try {
+      triggerList[i].card[callbackName].Resolve.apply(triggerList[i].card, parameters);
+    } finally {
+      automaticTriggerSource = previousSource;
+    }
     //if phase has changed then the trigger shouldn't have been automatic
     if (currentPhase != startingPhase) {
       LogError(

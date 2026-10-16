@@ -92,6 +92,15 @@ No engine phase fires `responseOnRunnerTurnEnds` or `responseOnCorpTurnEnds`
 (checked 2026-10-16). Implement "when your turn ends" with the matching
 `*DiscardEnds` hook, which fires at the point both conditions trigger.
 
+`responseOnCorpActionCompletes: { Enumerate, Resolve, text }` fires once per
+Corp action, when the Corp first passes the post-action window; it receives a
+copy of `corp.actionsTakenThisTurn` (completed actions, oldest first). Compare
+actions with `SameCorpAction(a, b)` (CR 5.2.5: same basic action, or same
+ability on the same card). Setting `corp.restrictedNextAction = {excluded}`
+hides those actions from the next Corp action; it clears once an action is
+taken. `CorpHasDifferentActionAvailable(excluded, extraClicks)` is a read-only
+legality check (MirrorMorph).
+
 ### Run
 
 ```js
@@ -216,7 +225,7 @@ abilities: [{
   text: "[click]: ...",
   Enumerate: function() {
     if (!this.rezzed) return [];
-    if (!CheckClicks(corp, 1)) return [];
+    if (!CheckActionClicks(corp, 1)) return [];
     return [{}];
   },
   Resolve: function() { SpendClicks(corp, 1); /* effect */ },
@@ -772,7 +781,7 @@ responseOnCorpTurnBegins: { Resolve: function() { this.usedThisTurn = false; }, 
 abilities: [{
   text: "[click]: Effect.",
   Enumerate: function() {
-    if (!this.rezzed || this.usedThisTurn || !CheckClicks(corp, 1)) return [];
+    if (!this.rezzed || this.usedThisTurn || !CheckActionClicks(corp, 1)) return []; // CheckActionClicks marks a main-phase click ability
     return [{}];
   },
   Resolve: function() { SpendClicks(corp, 1); this.usedThisTurn = true; /* effect */ },
@@ -781,9 +790,15 @@ abilities: [{
 
 ### On-trash optional effect (Calvin / Nanoetching pattern)
 
+Record the card's rezzed/installed state in an `availableWhenInactive`
+`automaticOnWouldTrash`, because the response fires after the card is in
+Archives. See `sets/downfall.js` 26033 for the full version.
+
 ```js
 responseOnTrash: {
-  Enumerate: function() {
+  availableWhenInactive: true,
+  Enumerate: function(cards, trashingPlayer) {
+    if (!cards.includes(this) || trashingPlayer != runner || !this._wasRezzedWhenTrashed) return [];
     return [{ id: 1, label: "Do X", button: "Do X" }, { id: 0, label: "Skip", button: "Pass" }];
   },
   Resolve: function(params) { if (params && params.id === 1) { /* effect */ } },
