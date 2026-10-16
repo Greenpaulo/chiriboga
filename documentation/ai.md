@@ -951,7 +951,7 @@ AIRunAbilityExtraPotential: function(server, potential) {
 
 **`AIRunExtraPotential(server, potential)`**
 
-Return a passive extra potential value for simply running `server` when this card is installed (without needing to use an ability):
+Return a passive extra potential value for simply running `server` when this card is installed (without needing to use an ability). Lingering effects with `player: runner` are consulted too, e.g. Climactic Showdown's breach bonus after the card leaves the game:
 
 ```js
 // Conduit: passively benefits from R&D runs (gain virus counters)
@@ -2587,6 +2587,33 @@ if (!runner.AI || runner.AI.rc !== rc) {
   consumes `agendaPointsForPlayer(player)` so score totals, Runner known-agenda
   potential and Corp breach-loss estimates value this agenda as one Runner point
   and two Corp points, preserving the printed metadata.
+
+### Downfall Batch 2 card hooks
+
+- Utae uses `AIImplementBreaker`. While its once-per-run X break is unused on
+  the planned route (`rc.PersistentsUse`), each X from 1 to the subroutine
+  count is a branch costing X; the branch records `{use: Utae}` so later ice
+  cannot reuse it. Afterwards, with 3+ installed virtual resources, it offers
+  the 1[c] break. The X break selects subroutines first, then pays X once; its
+  "pay and break" option carries `alt: "continue"` so the run-path executor
+  stops after the planned subroutines.
+- Climactic Showdown chooses its server and the Corp's response inline: the
+  Runner picks the server whose cheapest public ice is dearest (facedown ice
+  counts as 3, centrals win ties); the Corp trashes its cheapest protecting
+  ice when that costs 3 or less, otherwise it allows the bonus. The bonus is a
+  Runner lingering effect (`player: runner`) with `AIRunExtraPotential`; the
+  Runner run selector includes such lingering effects with its active cards
+  when adding passive run potential.
+- Trickster Taka uses `AIRunPoolCreditOffset` (hosted credits pay for programs
+  on any run) and `AIEconomyInstall`. At turn end the AI takes the tag only
+  when untagged with at least 2 credits; otherwise it trashes Taka.
+- Fencer Fueno uses `AIEconomyInstall`; its `canUseCredits` lets the real
+  trash/steal cost checks see its credits after a successful run. The AI pays
+  1[c] at turn end when it can.
+- The Nihilist uses `AIWorthKeeping` (a virus program installed or in Grip)
+  and `AIPreferredInstallChoice`. At turn start the AI triggers only when the
+  Nihilist itself hosts 2 virus counters and removes those; the Corp AI trashes
+  the top of R&D while R&D holds more than 5 cards.
 
 
 ---

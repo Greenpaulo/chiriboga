@@ -468,15 +468,168 @@ cardSet[26005] = {
   memoryCost: 1,
   strength: 1,
   strengthBoost: 0,
+  usedThisRun: false,
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
       return 0;
     },
   },
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.usedThisRun = false;
+    },
+    automatic: true,
+  },
+  VirtualResourceCount: function () {
+    return runner.rig.resources.filter(function (card) {
+      return CheckSubType(card, "Virtual");
+    }).length;
+  },
+  CanBreakCodeGate: function () {
+    if (!CheckEncounter()) return false;
+    if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return false;
+    return CheckStrength(this);
+  },
+  // X is chosen by selecting the subroutines before paying; nothing changes
+  // between the choice and the single X-credit payment.
+  ChooseXSubroutines: function (selected) {
+    var affordable = AvailableCredits(runner, "using", this);
+    var choices = ChoicesEncounteredSubroutines().filter(function (choice) {
+      return !selected.includes(choice.subroutine);
+    });
+    if (selected.length >= affordable || choices.length < 1) {
+      this.PayXAndBreak(selected);
+      return;
+    }
+    for (var i = 0; i < choices.length; i++)
+      choices[i].label = "(Utae) Break another subroutine. -> " + choices[i].label;
+    choices.push({
+      label: "Pay " + selected.length + "[c] and break",
+      button: "Pay " + selected.length + "[c]",
+      alt: "continue",
+    });
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        if (params.subroutine) this.ChooseXSubroutines(selected.concat([params.subroutine]));
+        else this.PayXAndBreak(selected);
+      },
+      "Utae",
+      "Break X code gate subroutines",
+      this,
+    );
+  },
+  PayXAndBreak: function (selected) {
+    this.usedThisRun = true;
+    SpendCredits(
+      runner,
+      selected.length,
+      "using",
+      this,
+      function () {
+        for (var i = 0; i < selected.length; i++) Break(selected[i]);
+      },
+      this,
+    );
+  },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break X code gate subroutines (once per run).",
+      Enumerate: function () {
+        if (this.usedThisRun) return [];
+        if (!this.CanBreakCodeGate()) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        this.ChooseXSubroutines([params.subroutine]);
+      },
+    },
+    {
+      text: "Break 1 code gate subroutine.",
+      Enumerate: function () {
+        if (this.VirtualResourceCount() < 3) return [];
+        if (!this.CanBreakCodeGate()) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "+1 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return []; //interface usability, as Corroder
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 1);
+          },
+          this,
+        );
+      },
+    },
   ],
+  // Interface uses the first enumerated break ability: X-break while unused,
+  // otherwise the 1[c] break when 3+ virtual resources are installed.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (!iceAI.subTypes.includes("Code Gate")) return result;
+    if (cardStrength < iceStrength) {
+      if (creditsLeft >= 1) {
+        var pumped = rc.StrModify(this, this, point, 1);
+        pumped.runner_credits_spent += 1;
+        result.push(pumped);
+      }
+      return result;
+    }
+    if (!this.usedThisRun && !rc.PersistentsUse(point, this)) {
+      for (var x = 1; x <= Math.min(iceAI.sr.length, creditsLeft); x++) {
+        var breaks = rc.SrBreak(this, iceAI, point, x);
+        for (var i = 0; i < breaks.length; i++) {
+          breaks[i].runner_credits_spent += x;
+          breaks[i].persistents = breaks[i].persistents.concat([{ use: this }]);
+        }
+        result = result.concat(breaks);
+      }
+    } else if (this.VirtualResourceCount() >= 3) {
+      result = result.concat(
+        rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Code Gate"], 1, 1, 1, 1, creditsLeft),
+      );
+    }
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
 };
 
 //Climactic Showdown (26006)
@@ -490,7 +643,118 @@ cardSet[26006] = {
   cardType: "resource",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  ServersProtectedByIce: function () {
+    return ChoicesExistingServers().filter(function (choice) {
+      return choice.server.ice.length > 0;
+    });
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      var showdown = this;
+      RemoveFromGame(this);
+      var choices = this.ServersProtectedByIce();
+      if (choices.length < 1) return;
+      if (runner.AI != null) choices = [this.ChooseServerForAI(choices)];
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          showdown.OfferIceTrash(params.server);
+        },
+        "Climactic Showdown",
+        "Choose a server protected by ice",
+        this,
+      );
+    },
+    automatic: true,
+  },
+  OfferIceTrash: function (server) {
+    var showdown = this;
+    var choices = ChoicesArrayCards(server.ice);
+    for (var i = 0; i < choices.length; i++) choices[i].label = "Trash " + GetTitle(choices[i].card);
+    choices.push({ label: "Do not trash ice", button: "Decline" });
+    if (corp.AI != null) choices = [this.CorpChoiceForAI(choices)];
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (params.card) Trash(params.card, true);
+        else showdown.AddBreachBonus();
+      },
+      "Climactic Showdown",
+      "Trash 1 piece of ice protecting " + ServerName(server) + "?",
+      this,
+    );
+  },
+  // The bonus outlives this card, which is already removed from the game.
+  AddBreachBonus: function () {
+    AddLingeringEffect({
+      title: "Climactic Showdown",
+      player: runner,
+      breachingNow: false,
+      modifyBreachAccess: {
+        Resolve: function () {
+          if (attackedServer != corp.HQ && attackedServer != corp.RnD) return 0;
+          return 2;
+        },
+      },
+      automaticOnBreach: {
+        Resolve: function (server) {
+          if (server == corp.HQ || server == corp.RnD) this.breachingNow = true;
+        },
+      },
+      responseOnRunEnds: {
+        Resolve: function () {
+          if (this.breachingNow) RemoveLingeringEffect(this);
+        },
+        automatic: true,
+      },
+      responseOnRunnerDiscardEnds: {
+        Resolve: function () {
+          RemoveLingeringEffect(this);
+        },
+        automatic: true,
+      },
+      // 0.5 potential per additional access, as other access boosters.
+      AIRunExtraPotential: function (server) {
+        if (server != corp.HQ && server != corp.RnD) return 0;
+        return 1.0;
+      },
+    });
+  },
+  // Runner AI: the Corp sacrifices its cheapest ice, so pick the server whose
+  // cheapest public ice is dearest (facedown ice is valued as 3), centrals first.
+  ChooseServerForAI: function (choices) {
+    var score = function (server) {
+      var cheapest = Infinity;
+      for (var i = 0; i < server.ice.length; i++) {
+        var ice = server.ice[i];
+        cheapest = Math.min(cheapest, PlayerCanLook(runner, ice) ? RezCost(ice) : 3);
+      }
+      return cheapest + (typeof server.cards !== "undefined" ? 0.5 : 0);
+    };
+    var best = choices[0];
+    for (var i = 1; i < choices.length; i++) if (score(choices[i].server) > score(best.server)) best = choices[i];
+    return best;
+  },
+  // Corp AI: two extra central accesses outweigh losing cheap ice.
+  CorpChoiceForAI: function (choices) {
+    var best = null;
+    for (var i = 0; i < choices.length; i++) {
+      if (choices[i].card && (!best || RezCost(choices[i].card) < RezCost(best.card))) best = choices[i];
+    }
+    if (best && RezCost(best.card) <= 3) return best;
+    return choices[choices.length - 1];
+  },
+  AIWorthKeeping: function () {
+    return this.ServersProtectedByIce().length > 0;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    if (this.ServersProtectedByIce().length < 1) return -1;
+    return 0;
+  },
 };
 
 //Fencer Fueno (26007)
@@ -506,7 +770,66 @@ cardSet[26007] = {
   cardType: "resource",
   subTypes: ["Companion", "Virtual"],
   installCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  hostedCreditsUsable: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      PlaceCredits(this, 1);
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      PlaceCredits(this, 1);
+    },
+    automatic: true,
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      this.hostedCreditsUsable = true;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.hostedCreditsUsable = false;
+    },
+    automatic: true,
+  },
+  canUseCredits: function (doing, card) {
+    return this.hostedCreditsUsable && attackedServer !== null;
+  },
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () {
+      if (!CheckCounters(this, "credits", 3)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var choices = [];
+      if (CheckCredits(runner, 1)) choices.push({ pay: true, label: "Pay 1[c]", button: "Pay 1[c]" });
+      choices.push({ pay: false, label: "Trash Fencer Fueno", button: "Trash" });
+      // AI: keep the stash; paying matches the next turn's drip.
+      if (runner.AI != null) choices = [choices[0]];
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          if (params.pay) SpendCredits(runner, 1);
+          else Trash(this, true);
+        },
+        "Fencer Fueno",
+        "Pay 1[c] or trash Fencer Fueno",
+        this,
+      );
+    },
+    text: "Fencer Fueno: Pay 1[c] or trash (3+ hosted credits)",
+  },
+  AIEconomyInstall: function () {
+    return 2;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //The Nihilist (26008)
@@ -521,7 +844,109 @@ cardSet[26008] = {
   cardType: "resource",
   subTypes: ["Connection", "Seedy"],
   installCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  // Tracked while inactive: an earlier virus install this turn uses up the "first time".
+  virusInstalledThisTurn: false,
+  responseOnInstall: {
+    Resolve: function (card) {
+      if (!card || card.player != runner || !CheckCardType(card, ["program"]) || !CheckSubType(card, "Virus")) return;
+      if (this.virusInstalledThisTurn) return;
+      this.virusInstalledThisTurn = true;
+      if (CheckInstalled(this)) AddCounters(this, "virus", 2);
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerDiscardEnds: {
+    Resolve: function () {
+      this.virusInstalledThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpDiscardEnds: {
+    Resolve: function () {
+      this.virusInstalledThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  CardsWithVirusCounters: function () {
+    return InstalledCards(runner).filter(function (card) {
+      return Counters(card, "virus") > 0;
+    });
+  },
+  responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      var total = 0;
+      var hosts = this.CardsWithVirusCounters();
+      for (var i = 0; i < hosts.length; i++) total += Counters(hosts[i], "virus");
+      if (total < 2) return [];
+      // AI: spend only this card's own counters, which have no other use.
+      if (runner.AI != null) return Counters(this, "virus") >= 2 ? [{ use: true }] : [];
+      return [
+        { use: true, label: "Remove 2 virus counters" },
+        { use: false, label: "Do not remove counters", button: "Decline" },
+      ];
+    },
+    Resolve: function (params) {
+      if (!params.use) return;
+      this.RemoveVirusCounters(2);
+    },
+    text: "The Nihilist: Remove 2 virus counters",
+  },
+  RemoveVirusCounters: function (remaining) {
+    if (remaining < 1) {
+      this.OfferDraw();
+      return;
+    }
+    var choices = ChoicesArrayCards(this.CardsWithVirusCounters());
+    for (var i = 0; i < choices.length; i++) choices[i].label = "Remove 1 virus counter from " + GetTitle(choices[i].card);
+    if (runner.AI != null) {
+      var own = this;
+      choices = [choices.find(function (choice) { return choice.card == own; }) || choices[0]];
+    }
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        RemoveCounters(params.card, "virus", 1);
+        this.RemoveVirusCounters(remaining - 1);
+      },
+      "The Nihilist",
+      "Remove a virus counter",
+      this,
+    );
+  },
+  OfferDraw: function () {
+    var choices = [];
+    if (corp.RnD.cards.length > 0) choices.push({ trash: true, label: "Trash the top card of R&D", button: "Trash" });
+    choices.push({ trash: false, label: "Let the Runner draw 2 cards", button: "Allow draw" });
+    // Corp AI: mill unless R&D is short enough for decking to matter.
+    if (corp.AI != null) choices = [corp.RnD.cards.length > 5 ? choices[0] : choices[choices.length - 1]];
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        if (params.trash) Trash(corp.RnD.cards[corp.RnD.cards.length - 1], true);
+        else Draw(runner, 2);
+      },
+      "The Nihilist",
+      "Trash the top card of R&D, or the Runner draws 2 cards",
+      this,
+    );
+  },
+  AIWorthKeeping: function () {
+    var cards = InstalledCards(runner).concat(runner.grip);
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i] != this && CheckCardType(cards[i], ["program"]) && CheckSubType(cards[i], "Virus")) return true;
+    }
+    return false;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
 };
 
 //Trickster Taka (26009)
@@ -537,7 +962,58 @@ cardSet[26009] = {
   cardType: "resource",
   subTypes: ["Companion", "Stealth", "Virtual"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      PlaceCredits(this, 1);
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      PlaceCredits(this, 1);
+    },
+    automatic: true,
+  },
+  canUseCredits: function (doing, card) {
+    return doing == "using" && attackedServer !== null && !!card && CheckCardType(card, ["program"]);
+  },
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () {
+      if (!CheckCounters(this, "credits", 3)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var choices = [
+        { tag: true, label: "Take 1 tag", button: "Take tag" },
+        { tag: false, label: "Trash Trickster Taka", button: "Trash" },
+      ];
+      // AI: keep it only if untagged and able to clear the tag next turn.
+      if (runner.AI != null) choices = [runner.tags < 1 && Credits(runner) >= 2 ? choices[0] : choices[1]];
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          if (params.tag) AddTags(1);
+          else Trash(this, true);
+        },
+        "Trickster Taka",
+        "Take 1 tag or trash Trickster Taka",
+        this,
+      );
+    },
+    text: "Trickster Taka: Take 1 tag or trash (3+ hosted credits)",
+  },
+  // Hosted credits pay for breakers and other program abilities on any run.
+  AIRunPoolCreditOffset: function (server, runEventCardToUse) {
+    return this.credits || 0;
+  },
+  AIEconomyInstall: function () {
+    return 2;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Az McCaffrey: Mechanical Prodigy (26010)

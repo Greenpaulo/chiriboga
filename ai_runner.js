@@ -2092,9 +2092,11 @@ console.log(this.preferred);
 		if (breachPrevented) this.serverList[i].potential = 0; //reset potential due to no breach
 
 		//consider potential of this server
-		for (var j = 0; j < activeCards.length; j++) {
-			if (typeof activeCards[j].AIRunExtraPotential == 'function' && (activeCards[j].AIBreachNotRequired || !breachPrevented)) {
-			  this.serverList[i].potential += activeCards[j].AIRunExtraPotential.call(activeCards[j],this.serverList[i].server,this.serverList[i].potential);
+		//(Runner lingering effects, e.g. Climactic Showdown, count as passive sources)
+		var potentialSources = activeCards.concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
+		for (var j = 0; j < potentialSources.length; j++) {
+			if (typeof potentialSources[j].AIRunExtraPotential == 'function' && (potentialSources[j].AIBreachNotRequired || !breachPrevented)) {
+			  this.serverList[i].potential += potentialSources[j].AIRunExtraPotential.call(potentialSources[j],this.serverList[i].server,this.serverList[i].potential);
 			}
 		}
 		
