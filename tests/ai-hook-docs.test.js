@@ -13,7 +13,7 @@ const aiDoc = fs.readFileSync(path.join(root, 'documentation', 'ai.md'), 'utf8')
 const LEGACY_UNDOCUMENTED = [
   'AIAccessTriggerPriority', 'AIBreachReplacementValue',
   'AIBreaksRegardlessOfStrength', 'AIBypassCost', 'AICardsDiscarded',
-  'AIChooseBestInstall', 'AIDrawTrigger', 'AIEncounterOptions',
+  'AIChooseBestInstall', 'AIDrawTrigger',
   'AIGripRunPotential', 'AIHostedDoesNotPreventRez',
   'AILimitPerDeck', 'AIPerformRun', 'AIPlayBeforeRun', 'AIPlayForInstall',
   'AIPlayPriority', 'AIPlayToRemoveTags', 'AIPlayedWithCost', 'AIPriority',

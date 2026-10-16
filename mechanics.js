@@ -2155,6 +2155,15 @@ function RemoveCounters(card, counter, num = 1) {
 function Trace(baseStrength, callback, context) {
   traceStrength = baseStrength;
   Log("Trace initiated");
+  //Interrupt window before either player raises strength (e.g. Flip Switch
+  //reduces the base trace strength to 0).
+  TriggeredResponsePhase(playerTurn, "responseOnTraceInitiated", [baseStrength], function () {
+    TraceStrengthDecisions(baseStrength, callback, context);
+  }, "Trace Initiated");
+}
+
+//Corp then Runner strength decisions once the base trace strength is final.
+function TraceStrengthDecisions(baseStrength, callback, context) {
   var corpChoices = [
     { num: 0, label: "Continue without increasing trace strength" },
   ];
@@ -2236,7 +2245,7 @@ function Trace(baseStrength, callback, context) {
     corpChoices,
     decisionCallbackA,
 	"Trace[" + baseStrength + "]",
-    "Increase trace strength (from " + baseStrength + ")",
+    "Increase trace strength (from " + traceStrength + ")",
     this,
 	"trace",
   );

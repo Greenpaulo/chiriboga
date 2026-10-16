@@ -1,7 +1,7 @@
 # Vantage Point review evidence and remediation
 
 Start with the [full-set review](vantagepoint-set-review.md), which links all 13
-batch reports and records shared finding S1. The [active tracker](../../current-set-implementation.md)
+batch reports and records shared finding S1. The [set record](../../records/vantagepoint.md)
 contains the separate optimisation queue. After implementation moves to another
 set, follow the backlog's Vantage Point **Set record** link instead. The original [completion history](../../history/vantagepoint-2026-10-06.md)
 and [post-review snapshot](../../history/vantagepoint-2026-10-06-reviewed.md)

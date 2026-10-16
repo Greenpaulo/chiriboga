@@ -18,11 +18,12 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | Pending | Next implementation set, selected by the user on 2026-10-16. |
+| `downfall` | In progress | Next implementation set, selected by the user on 2026-10-16. |
 
-Downfall is next. The next implementation invocation archives Vantage Point
-and prepares Downfall before implementing one batch; this workflow change does
-not itself start card work.
+Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
+[immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
+and [set report](reviews/vantage-point/vantagepoint-set-review.md). Outstanding
+review/optimisation work continues there independently.
 
 ## 1. Missing card definitions
 
@@ -54,11 +55,6 @@ Runner cards:
 | 26007 | Fencer Fueno                     | Hosted-credit and turn triggers absent |
 | 26008 | The Nihilist                     | Virus/draw triggers absent             |
 | 26009 | Trickster Taka                   | Hosted-credit and turn triggers absent |
-| 26010 | Az McCaffrey: Mechanical Prodigy | Identity discount absent               |
-| 26011 | Always Have a Backup Plan        | Empty event effect                     |
-| 26012 | Blueberry! Diesel                | Empty event effect                     |
-| 26013 | Flip Switch                      | Abilities absent                       |
-| 26014 | Lucky Charm                      | Prevention ability absent              |
 | 26015 | Masterwork (v37)                 | Console abilities absent               |
 | 26017 | “Baklan” Bochkin                 | Encounter/counter ability absent       |
 | 26018 | The Class Act                    | Draw abilities absent                  |

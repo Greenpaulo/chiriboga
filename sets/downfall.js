@@ -545,6 +545,7 @@ cardSet[26009] = {
 cardSet[26010] = {
   title: "Az McCaffrey: Mechanical Prodigy",
   imageFile: "26010.png",
+  elo: 1521,
   player: runner,
   faction: "Criminal",
   cardType: "identity",
@@ -552,6 +553,43 @@ cardSet[26010] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 1,
+  //The opportunity is used by the first qualifying install even if that install
+  //ignores costs or the discount was not needed.
+  installedQualifyingCardThisTurn: false,
+  _qualifiesForDiscount: function (card) {
+    if (!card || card.player != runner) return false;
+    if (CheckCardType(card, ["hardware"])) return true;
+    return (
+      CheckCardType(card, ["resource"]) &&
+      (CheckSubType(card, "Job") || CheckSubType(card, "Connection"))
+    );
+  },
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (this.installedQualifyingCardThisTurn) return 0;
+      if (CheckInstalled(card)) return 0;
+      if (this._qualifiesForDiscount(card)) return -1;
+      return 0;
+    },
+  },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (this._qualifiesForDiscount(card))
+        this.installedQualifyingCardThisTurn = true;
+    },
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.installedQualifyingCardThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.installedQualifyingCardThisTurn = false;
+    },
+    automatic: true,
+  },
 };
 
 //Always Have a Backup Plan (26011)
@@ -559,14 +597,132 @@ cardSet[26010] = {
 cardSet[26011] = {
   title: "Always Have a Backup Plan",
   imageFile: "26011.png",
+  elo: 1312,
   player: runner,
   faction: "Criminal",
   influence: 3,
   cardType: "event",
   subTypes: ["Run"],
   playCost: 2,
+  //No engine run cost is additional at present; later additional-cost-to-run
+  //effects must waive themselves while secondRun is true.
+  runningWithThis: false,
+  firstRun: false,
+  firstRunSuccessful: false,
+  lastEncounteredIce: null,
+  pendingRunServer: null,
+  secondRun: false,
+  bypassIce: null,
+  _reset: function () {
+    this.runningWithThis = false;
+    this.firstRun = false;
+    this.firstRunSuccessful = false;
+    this.lastEncounteredIce = null;
+    this.pendingRunServer = null;
+    this.secondRun = false;
+    this.bypassIce = null;
+  },
+  Enumerate: function () {
+    return ChoicesExistingServers();
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this._reset();
+    this.runningWithThis = true;
+    this.firstRun = true;
+    MakeRun(params.server);
+  },
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (this.runningWithThis && this.firstRun) this.lastEncounteredIce = ice;
+    },
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (this.runningWithThis && this.firstRun) this.firstRunSuccessful = true;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Enumerate: function () {
+      if (!this.runningWithThis || !this.firstRun || this.firstRunSuccessful)
+        return [];
+      var server = attackedServer;
+      if (!server) return [];
+      //a remote server may no longer exist
+      var exists = ChoicesExistingServers().some(function (choice) {
+        return choice.server == server;
+      });
+      if (!exists) return [];
+      var choices = [
+        { server: server, label: "Run " + ServerName(server) + " again", button: "Run again" },
+        { server: null, label: "Do not run again", button: "Continue" },
+      ];
+      if (runner.AI) return [this.AIWouldRunAgain(server) ? choices[0] : choices[1]];
+      return choices;
+    },
+    Resolve: function (params) {
+      this.firstRun = false;
+      this.pendingRunServer = params.server;
+    },
+    text: "You may run the attacked server again",
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function (postCleanupCallbacks) {
+      if (!this.runningWithThis) return;
+      if (this.pendingRunServer) {
+        var nextServer = this.pendingRunServer;
+        var bypassIce = this.lastEncounteredIce;
+        this._reset();
+        this.runningWithThis = true;
+        this.secondRun = true;
+        this.bypassIce = bypassIce;
+        postCleanupCallbacks.push(function () {
+          MakeRun(nextServer);
+        });
+      } else this._reset();
+    },
+  },
+  responseOnEncounter: {
+    Enumerate: function () {
+      if (!this.runningWithThis || !this.secondRun || !this.bypassIce) return [];
+      if (attackedServer.ice[approachIce] != this.bypassIce) return [];
+      return [{ alt: "backupplan_bypass", label: "Bypass " + GetTitle(this.bypassIce, true) }];
+    },
+    Resolve: function () {
+      Bypass();
+    },
+    text: "Bypass the last ice encountered during the first run",
+  },
+  //AI: the bypass is a second chance after an unsuccessful run, so prefer it
+  //against servers worth running that have ice capable of stopping the run.
+  AIRunEventExtraPotential: function (server, potential) {
+    if (server.ice.length < 1) return 0;
+    if (potential > 1.5) return 0.05;
+    if (potential > 0.5 && runner.AI._currentOverDraw() > runner.AI._maxOverDraw())
+      return 0.01;
+    return 0;
+  },
+  //Uses the run calculator with the second-run bypass applied.
+  AIWouldRunAgain: function (server) {
+    var stored = { secondRun: this.secondRun, bypassIce: this.bypassIce };
+    this.secondRun = true;
+    this.bypassIce = this.lastEncounteredIce;
+    var path = null;
+    try {
+      path = runner.AI._calculateBestCompleteRun(server, 0, 0, 0, 0, null, server.ice.length - 1);
+    } finally {
+      this.secondRun = stored.secondRun;
+      this.bypassIce = stored.bypassIce;
+    }
+    if (!path || path.length < 1) return false;
+    return runner.AI._getCachedPotential(server) > 0;
+  },
+  AIEncounterOptions: function (iceIdx, iceAI) {
+    if (!this.secondRun || !this.bypassIce || iceAI.ice != this.bypassIce) return [];
+    return [{
+      effects: [],
+      persistents: [{ use: this, target: iceAI.ice, iceIdx: iceIdx, action: "bypass", alt: "backupplan_bypass" }],
+    }];
   },
 };
 
@@ -575,6 +731,7 @@ cardSet[26011] = {
 cardSet[26012] = {
   title: "Blueberry!™ Diesel",
   imageFile: "26012.png",
+  elo: 1412,
   player: runner,
   faction: "Criminal",
   influence: 2,
@@ -582,8 +739,49 @@ cardSet[26012] = {
   subTypes: [],
   playCost: 0,
   Resolve: function (params) {
-    // TODO: Implement effect
+    //the top of the stack is the end of the array
+    var top = runner.stack.slice(-2).reverse();
+    if (top.length < 1) {
+      Draw(runner, 2);
+      return;
+    }
+    var choices = top.map(function (card) {
+      return { card: card, label: "Add " + GetTitle(card) + " to the bottom of your stack" };
+    });
+    choices.push({ card: null, label: "Leave both on top", button: "Continue" });
+    if (runner.AI) choices = [choices[this.AIBottomChoice(choices)]];
+    DecisionPhase(
+      runner,
+      choices,
+      function (choice) {
+        if (choice.card && runner.stack.includes(choice.card)) {
+          MoveCard(choice.card, runner.stack, 0);
+          Log("Runner added 1 card to the bottom of the stack");
+        }
+        Draw(runner, 2);
+      },
+      "Blueberry!™ Diesel",
+      "You may add 1 card to the bottom of your stack",
+      this,
+    );
   },
+  //Bottom a card the Runner already has enough of; otherwise keep both.
+  AIBottomChoice: function (choices) {
+    var keepIndex = choices.length - 1;
+    var have = InstalledCards(runner).concat(runner.grip);
+    for (var i = 0; i < keepIndex; i++) {
+      var card = choices[i].card;
+      if (card.unique && runner.AI._copyOfCardExistsIn(card.title, have, [card])) return i;
+      if (CheckSubType(card, "Console") && have.some(function (c) {
+        return c != card && CheckSubType(c, "Console") && CheckInstalled(c);
+      })) return i;
+    }
+    return keepIndex;
+  },
+  AIWouldPlay: function () {
+    return runner.stack.length > 0;
+  },
+  AIPlayToDraw: 2,
 };
 
 //Flip Switch (26013)
@@ -594,13 +792,74 @@ cardSet[26012] = {
 cardSet[26013] = {
   title: "Flip Switch",
   imageFile: "26013.png",
+  elo: 1428,
   player: runner,
   faction: "Criminal",
   influence: 1,
   cardType: "hardware",
   subTypes: [],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  _usable: function () {
+    return playerTurn == runner && CheckInstalled(this) && CheckTrash(this);
+  },
+  abilities: [
+    {
+      text: "[trash]: Jack out.",
+      alt: "flipswitch_jackout",
+      Enumerate: function () {
+        if (!this._usable()) return [];
+        if (attackedServer === null) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        Trash(this, false, function () {
+          if (attackedServer !== null) JackOut();
+        }, this);
+      },
+    },
+    {
+      text: "[trash]: Remove 1 tag.",
+      alt: "flipswitch_removetag",
+      Enumerate: function () {
+        if (!this._usable()) return [];
+        if (runner.tags < 1) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        Trash(this, false, function () {
+          RemoveTags(1);
+        }, this);
+      },
+    },
+  ],
+  responseOnTraceInitiated: {
+    Enumerate: function (baseStrength) {
+      if (!this._usable()) return [];
+      if (traceStrength < 1) return [];
+      //response windows require every listed trigger, so offer a decline
+      var choices = [
+        { use: true, label: "Trash Flip Switch: reduce the base trace strength to 0" },
+        { use: false, label: "Do not use Flip Switch", button: "Continue" },
+      ];
+      if (runner.AI) return [this.AIWouldZeroTrace() ? choices[0] : choices[1]];
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params.use) return;
+      Trash(this, false, function () {
+        traceStrength = 0;
+        Log("Base trace strength reduced to 0");
+      }, this);
+    },
+    text: "Flip Switch: you may reduce the base trace strength to 0",
+  },
+  //AI: zero a trace the Runner could not otherwise beat without paying.
+  AIWouldZeroTrace: function () {
+    return traceStrength > Link();
+  },
+  AITriggerToRemoveTags: function () {
+    return "flipswitch_removetag";
+  },
 };
 
 //Lucky Charm (26014)
@@ -608,13 +867,65 @@ cardSet[26013] = {
 cardSet[26014] = {
   title: "Lucky Charm",
   imageFile: "26014.png",
+  elo: 1451,
   player: runner,
   faction: "Criminal",
   influence: 2,
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //tracked while inactive because the condition is about the Runner's turn
+  madeSuccessfulRunOnHQThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.madeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.madeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      //the engine passes no parameters; the run is still attacking its server
+      if (attackedServer == corp.HQ) this.madeSuccessfulRunOnHQThisTurn = true;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //EndTheRun is called only by Corp card abilities (subroutines and other
+  //Corp effects), so every preventable end-the-run qualifies.
+  responsePreventableEndRun: {
+    Enumerate: function () {
+      if (!CheckInstalled(this)) return [];
+      if (!this.madeSuccessfulRunOnHQThisTurn) return [];
+      if (attackedServer === null || !intended.endRun) return [];
+      //response windows require every listed trigger, so offer a decline
+      var choices = [
+        { use: true, label: "Remove Lucky Charm from the game: prevent the run from ending" },
+        { use: false, label: "Do not use Lucky Charm", button: "Continue" },
+      ];
+      if (runner.AI) return [this.AIWouldPreventEndRun() ? choices[0] : choices[1]];
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params.use) return;
+      RemoveFromGame(this);
+      intended.endRun = false;
+      Log("Lucky Charm prevents the run from ending");
+    },
+    text: "Lucky Charm: you may prevent the run from ending",
+  },
+  //AI: keep the run going when the attacked server is worth reaching.
+  AIWouldPreventEndRun: function () {
+    return runner.AI._getCachedPotential(attackedServer) > 0;
+  },
 };
 
 //Masterwork (v37) (26015)
