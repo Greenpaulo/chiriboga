@@ -65,6 +65,25 @@ function measurementEvidence(off, first, second, supplementalCollectors = []) {
       'TV plug-in bias is visible through class/bin counts and independent-cohort precision; no debiasing claim.']};
 }
 
+// Every pair x seed x start has exactly one game record, and the failures list
+// matches the failed games. Returns the number of failed games.
+function checkGameRecords(report, file) {
+  const key = game => JSON.stringify([game.fixtureId || null, game.deckPairId, String(game.seed)]);
+  const expected = new Set(((report.starts || []).length ? report.starts : [{id: null}]).flatMap(start =>
+    (report.pairs || []).flatMap(pair => (report.seeds || []).map(seed => key({fixtureId: start.id, deckPairId: pair, seed})))));
+  const actual = new Set();
+  for (const game of report.games || []) {
+    const id = key(game);
+    if (!expected.has(id) || actual.has(id) || typeof game.ok !== 'boolean')
+      throw Error('Control report has invalid or duplicate game records: ' + file);
+    actual.add(id);
+  }
+  const failures = (report.games || []).filter(game => !game.ok).length;
+  if (actual.size !== expected.size || !Array.isArray(report.failures) || report.failures.length !== failures)
+    throw Error('Control report is incomplete or inconsistent: ' + file);
+  return failures;
+}
+
 // A game failure is a recorded observation, not a missing batch. Independent
 // control calibration already accounts for failed games by deck-pair stratum.
 // Process errors, stale files and incomplete reports must still stop the run.
@@ -81,19 +100,8 @@ function runControlBatch(args, output, invoke = spawnSync) {
       !same(report.starts, config.starts.map(start => ({id: start.id, hash: start.hash}))) ||
       !same(report.collectors, config.collectorNames) || report.defenseObserver !== config.defenseObserver)
     throw Error('Control batch did not save a fresh matching report: ' + output);
-  const key = game => JSON.stringify([game.fixtureId || null, game.deckPairId, String(game.seed)]);
-  const expected = new Set((report.starts.length ? report.starts : [{id: null}]).flatMap(start =>
-    report.pairs.flatMap(pair => report.seeds.map(seed => key({fixtureId: start.id, deckPairId: pair, seed})))));
-  const actual = new Set();
-  for (const game of report.games || []) {
-    const id = key(game);
-    if (!expected.has(id) || actual.has(id) || typeof game.ok !== 'boolean')
-      throw Error('Control report has invalid or duplicate game records: ' + output);
-    actual.add(id);
-  }
-  const failures = report.games.filter(game => !game.ok).length;
-  if (actual.size !== expected.size || !Array.isArray(report.failures) || report.failures.length !== failures ||
-      result.status !== (failures ? 1 : 0)) throw Error('Control report is incomplete or inconsistent: ' + output);
+  const failures = checkGameRecords(report, output);
+  if (result.status !== (failures ? 1 : 0)) throw Error('Control report is incomplete or inconsistent: ' + output);
   if (failures) console.log(`Retained completed control report with ${failures} failed game(s); calibration will report the missing games.`);
   return report;
 }
@@ -120,6 +128,7 @@ function checkControlReport(args, report, file, collectors) {
       problems.push('games without ' + sampled.name + ' samples');
   }
   if (problems.length) throw Error('Control report does not match the requested measurement (' + problems.join('; ') + '): ' + file);
+  checkGameRecords(report, file);
 }
 
 function main() {

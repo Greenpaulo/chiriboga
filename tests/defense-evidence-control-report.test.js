@@ -66,12 +66,16 @@ try {
       [r => { delete r.games[0].samples.postureShapeByCardClass; }, /without postureShapeByCardClass samples/],
       [r => { r.options.corp.postureEpochs = false; }, /Corp option postureEpochs=true not used/],
       [r => { r.defenseObserver = 'off'; }, /cohort or observer differs/],
-      [r => { r.seeds = ['1']; }, /cohort or observer differs/]]) {
+      [r => { r.seeds = ['1']; }, /cohort or observer differs/],
+      [r => { r.games.pop(); }, /incomplete or inconsistent/],
+      [r => { r.games[1] = Object.assign({}, r.games[0]); }, /invalid or duplicate/],
+      [r => { r.games[1].ok = false; }, /incomplete or inconsistent/]]) {
       const value = good(); alter(value);
       assert.throws(() => check(value), why);
     }
     // A failed game has no samples and is reported by calibration, not rejected here.
     const failedGame = good(); failedGame.games[0].ok = false; delete failedGame.games[0].samples;
+    failedGame.failures = [{deckPairId: 'gateway', seed: failedGame.games[0].seed, reason: 'known stall'}];
     check(failedGame);
   });
 } finally { fs.rmSync(directory, {recursive: true, force: true}); }
