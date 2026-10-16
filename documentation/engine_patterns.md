@@ -787,3 +787,26 @@ Subroutine payment menus may attach `srChoice` to each option to identify the
 corresponding `AIImplementIce` OR branch. `RunnerAI` matches that stable index
 when unaffordable choices disappear. Keep the model branch order consistent and
 do not override its selected branch with an unconditional inline preference.
+
+
+## Downfall additional play costs and trash attribution
+
+`additionalPlayCostTrash: true` on an event uses its `Enumerate()` selected
+`params.card` as an unpreventable additional play cost. `Play()` pays normal
+credit/click costs through its existing callback, then finishes that trash and
+its responses before firing `automaticOnPlay` or resolving the event. Cancelling
+before payment does not trash the selected card. The card's Enumerate must
+restrict choices to legal, trashable targets (Isolation: installed resources).
+
+`Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashingPlayer)`
+accepts an optional explicit effect controller. Otherwise it captures the
+currently resolving automatic source's owner, the callback context's owner,
+or the active player before response/prevention windows change priority.
+`AutomaticTriggers()` restores its scoped source in `finally`, including
+nested effects. The captured actor survives prevention recursion.
+`automaticOnTrash` and `responseOnTrash` receive `(cards, trashingPlayer,
+directlyTrashed)`: the first array includes hosted casualties; the third
+contains the directly selected cards after prevention. Existing one-argument
+callbacks remain compatible. Demolisher uses the actor and direct-card array
+to distinguish Runner trashes from Corp sacrifices and collateral host cleanup.
+Callers that make another player trash a card must pass that player explicitly.

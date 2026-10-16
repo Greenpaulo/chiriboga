@@ -489,7 +489,7 @@ class RunnerAI {
     this.suspectedHQCards = []; //each is a { title, cardType, copies, uncertainty } object
 
     //teach the AI about cards (in order of priority, best first or better order of play)
-    this.economyPlay = ["Sure Gamble", "Creative Commission", "Wildcat Strike"]; //cards which can be played to gain credits
+    this.economyPlay = ["Sure Gamble", "Creative Commission", "Wildcat Strike", "Isolation"]; //cards which can be played to gain credits
 	//cards which can be installed to increase maximum hand size
 	this.maxHandIncreasers = ["T400 Memory Diamond"];
 
@@ -2723,6 +2723,10 @@ console.log(this.preferred);
 				  this._log("there's one I would play");
 				  return this._returnPreference(optionList, "play", {
 					cardToPlay: cardToPlay,
+                    nextPrefs: typeof cardToPlay.AIPreferredPlayChoice === "function" ? {
+                      title: "Playing " + cardToPlay.title,
+                      index: cardToPlay.AIPreferredPlayChoice(ctpChoices)
+                    } : null,
 				  });
 			  }
             }

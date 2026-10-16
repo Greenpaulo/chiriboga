@@ -2755,3 +2755,49 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
+
+
+### Downfall batch 1 card hooks
+
+- Isolation uses `AIWouldPlay`, `AIWorthKeeping` and `AIPreferredPlayChoice(choices)`
+  to cash out a legal installed resource whose `AIOkToTrash()` returns true.
+  It returns -1 for live resources or no target. Its `AIEconomyPlay: 2` informs
+  the Runner's priority-economy preparation; the existing `economyPlay` title
+  list now includes Isolation for ordinary income selection. That real consumer
+  propagates the selected play-choice index into the follow-up decision, after
+  checking credit/click legality. This retains the existing economy policy's
+  scope rather than enabling every legacy Runner economy declaration.
+- Demolisher uses `AIWorthKeeping`, `AIWastefulToInstall` and
+  `AIEconomyInstall()` (priority 1) to install an affordable console when none
+  is installed. Its passive `modifyTrashCost` reaches the shared `TrashCost`
+  evaluator directly; the once-per-turn credit is awarded after an actual
+  Runner trash, never counted as permanent run funding.
+- Chisel uses `AISpecialBreaker`, `AIMatchingBreakerInstalled`,
+  `AIPreferredInstallChoice`, `AIWorthKeeping` and `AIOkToTrash` for legal host
+  installation and retention. Target ranking uses only visible ICE stats,
+  avoids duplicate Chisels and known cards that disable hosted programs or
+  prevent strength reduction. `AIModifyIceAI` models its pending encounter:
+  remove subroutines only if strength is already zero and trash is legal;
+  otherwise lower strength by one. Do not lower again after the live trigger
+  resolves. `iceAI.knownToEvaluator` identifies genuine stats, including the
+  Corp's own ICE during its security calculations; a hidden synthetic zero
+  cannot be interpreted as trashable ICE. On-encounter costs remain represented.
+  `AIReducesIceStrength` reports only the pending counter (0 or 1) for Corp
+  shortcut pricing: existing counters are already included in `Strength()`.
+  Both hooks are read-only with respect to the board and safe outside runs.
+- Stargate uses `AIWorthKeeping`, `AIWastefulToInstall`,
+  `AIPreferredInstallChoice` and `AIInstallBeforeRun` to install one copy with
+  enough MU, credits and clicks for the selected R&D run. The install-before-run
+  hook reserves the run's direct costs. `AIRunAbilityExtraPotential` returns
+  `max(0, 1.6 - potential)` only for unspent, useful R&D activations without
+  successful-run suppression: its reward replaces the access value.
+  `AIBreachNotRequired` allows its reveal/trash reward to survive breach
+  prevention; `AIBreachReplacementValue: 2` supplies the real replacement
+  selector. Its reveal decision sets the Runner's existing preferred index to
+  the highest ELO legal revealed target. It never reads unrevealed deck contents
+  to rank a run, install or activation. Target competition, Archives follow-up
+  and immediate agenda-steal comparisons remain optimisation work.
+
+`tests/downfall-integration.test.js` exercises real Runner commands, follow-up
+selection, Corp security and run-calculator consumers, plus resource, timing,
+hidden-information, prevention and cleanup cases.

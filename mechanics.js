@@ -528,9 +528,10 @@ function Uninstall(card, destination, afterUninstall = null, context = null) {
  * @param {Boolean} canBePrevented true if can be prevented, false if not (e.g. is a cost)
  * @param {function(cardsTrashed)} [afterTrashing] called after trashing is complete with parameter cardsTrashed
  * @param {Object} [context] for afterTrashing
+ * @param {Player} [trashingPlayer] effect controller; defaults to automatic source, context owner or active player
  * @param {Object} [fromDamage] to fire damage callbacks
  */
-function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
+function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashingPlayer) {
   //if a single card is passed, make it an array with one element so that the function can run as normal
   if (!Array.isArray(cards)) {
 	cards = [cards];
@@ -541,11 +542,17 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 		afterTrashing.call(context, cards);
 	  return;
   }
+  // Capture the initiator before prevention/response windows change priority.
+  if (typeof trashingPlayer === "undefined") {
+    var source = typeof automaticTriggerSource !== "undefined" && automaticTriggerSource;
+    trashingPlayer = source ? source.player : context && context.player ? context.player : activePlayer;
+  }
+  var directlyTrashed = Array.isArray(cards) ? cards.slice() : [cards];
   if (canBePrevented) {
     intended.trash = cards;
 	//currently giving whoever's turn it is priority...not sure this is always going to be right
     OpportunityForAvoidPrevent(playerTurn, "responsePreventableTrash", [], function () {
-      Trash(intended.trash, false, afterTrashing, context);
+      Trash(intended.trash, false, afterTrashing, context, fromDamage, trashingPlayer);
     }, "About to Trash");
 	return;
   }
@@ -590,7 +597,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	  Log(GetTitle(card, true) + " trashed");
 	}
 	//first the automatic triggers
-	AutomaticTriggers("automaticOnTrash", [cards]);
+	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed]);
     if (fromDamage) {
 	  AutomaticTriggers("automaticOnTakeDamage", [fromDamage.damage, fromDamage.damageType]);
     }
@@ -605,7 +612,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	  secondCallbackName="responseOnTakeDamage";
 	  secondEnumerateParams=[fromDamage.damage, fromDamage.damageType];		
 	}
-	TriggeredResponsePhase(playerTurn, "responseOnTrash", [cards], function() {
+	TriggeredResponsePhase(playerTurn, "responseOnTrash", [cards, trashingPlayer, directlyTrashed], function() {
 	  if (typeof afterTrashing === "function") {
 		afterTrashing.call(context, cards);
 	  }
@@ -1030,6 +1037,14 @@ function Play(card, onPlayResolve, context) {
 		AutomaticTriggers("automaticOnPlay", [card]);
 		card.Resolve.call(card, params);
 	};
+    // A selected trash additional cost is paid before the event is played.
+    // Keep the normal payment callback first so cancelling never trashes it.
+    if (card.additionalPlayCostTrash) {
+      var resolveAfterCosts = finishResolve;
+      finishResolve = function () {
+        Trash(params.card, false, resolveAfterCosts, card);
+      };
+    }
     //card will be played, callback fires
     if (typeof onPlayResolve === "function") onPlayResolve.call(context, finishResolve);
 	else finishResolve();
