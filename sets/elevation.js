@@ -9048,6 +9048,17 @@ cardSet[35057] = {
   deckSize: 45,
   influenceLimit: 15,
   flipped: false,
+  _showIdentityFace: function () {
+    this.imageFile = this.flipped ? "35057-0.jpg" : "35057.png";
+    if (typeof this.renderer !== "undefined" && typeof cardRenderer !== "undefined") {
+      var texture = cardRenderer.LoadTexture("images/" + ChangeImageFileToJPG(this.imageFile));
+      this.renderer.frontTexture = texture;
+      this.renderer.loresTexture = texture;
+      this.renderer.hiresTexture = null;
+      if (this.renderer.dummy) this.renderer.dummy.texture = texture;
+      if (typeof this.renderer.SetTextureToFront == "function") this.renderer.SetTextureToFront();
+    }
+  },
   operationPlayedThisTurn: false,
   _resetTurn: function () { this.operationPlayedThisTurn = false; },
   responseOnCorpTurnBegins: { Resolve: function () { this._resetTurn(); }, automatic: true },
@@ -9064,6 +9075,7 @@ cardSet[35057] = {
       if (!this.flipped && this.operationPlayedThisTurn) {
         GainCredits(corp, 1, "", this);
         this.flipped = true;
+        this._showIdentityFace();
         Log(this.title + " flipped to its reverse side");
       }
     },
@@ -9073,10 +9085,16 @@ cardSet[35057] = {
     Resolve: function () {
       if (this.flipped && (attackedServer == corp.HQ || attackedServer == corp.RnD)) {
         this.flipped = false;
+        this._showIdentityFace();
         Log(this.title + " flipped to its front side");
       }
     },
     automatic: true,
+  },
+  AIOperationPlayClickGain: function (operation, thisTurn, playedInPlan) {
+    if (!thisTurn || !this.flipped || this.operationPlayedThisTurn || playedInPlan ||
+        operation.player != corp || operation.cardType != "operation") return 0;
+    return 1;
   },
 };
 
@@ -9112,14 +9130,30 @@ cardSet[35058] = {
       var choices = ChoicesArrayInstall(corp.HQ.cards, true);
       if (corp.AI) {
         var index = corp.AI._bestInstallOption(choices, false);
-        return index < 0 ? [] : [choices[index]];
+        if (index >= 0) return [choices[index]];
+        // The action planner can withhold installs outside the action phase.
+        // A free, revealed install still has a useful baseline route here.
+        var useful = choices.filter(function (choice) {
+          if (choice.card.cardType == "agenda") return choice.server &&
+            choice.server.ice.length > 0 && !choice.server.root.some(function (card) {
+              return card.cardType == "agenda" || card.cardType == "asset";
+            });
+          if (choice.card.cardType == "asset") return choice.server == null &&
+            RezCost(choice.card) <= Credits(corp);
+          return choice.card.cardType == "ice" && choice.server &&
+            choice.server.cards && RezCost(choice.card) <= Credits(corp);
+        });
+        useful.sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });
+        return useful.length ? [useful[0]] : [];
       }
+      if (choices.length) choices.push({decline: true, label: "Decline", button: "Decline"});
       return choices;
     },
     Resolve: function (params) {
       this.installPending = false;
       if (!params.card || !corp.HQ.cards.includes(params.card)) return;
       Reveal(params.card, function () {
+        params.card.knownToRunner = true;
         Install(params.card, params.server, true, null, true,
           null, this, null, null, false);
       }, this);
@@ -9155,7 +9189,10 @@ cardSet[35059] = {
   agenda: 0,
   responseOnScored: {
     Resolve: function () {
-      if (intended.score == this) AddCounters(this, "agenda", 2 * Math.max(0, this.advancement - 3));
+      if (intended.score != this) return;
+      var advancement = typeof intended.scoreAdvancement == "number" ? intended.scoreAdvancement : Counters(this, "advancement");
+      var requirement = typeof intended.scoreAdvancementRequirement == "number" ? intended.scoreAdvancementRequirement : AdvancementRequirement(this);
+      AddCounters(this, "agenda", 2 * Math.max(0, advancement - requirement));
     },
     automatic: true,
   },
@@ -9175,9 +9212,11 @@ cardSet[35059] = {
         useful.sort(function (a, b) { return b.card.elo - a.card.elo; });
         return useful.length ? [useful[0]] : [];
       }
+      choices.push({decline: true, label: "Decline", button: "Decline"});
       return choices;
     },
     Resolve: function (params) {
+      if (params.decline) return;
       RemoveCounters(this, "agenda", 1);
       // Search shuffles before the selected card is put on top.
       Shuffle(corp.RnD.cards);
@@ -9220,8 +9259,9 @@ cardSet[35060] = {
     if (corp.AI) {
       var choice = done;
       if (corp.HQ.cards.length > MaxHandSize(corp)) {
-        var index = corp.AI._bestDiscardOption(choices.slice(0, -1));
-        if (index >= 0) choice = choices[index];
+        var discardChoices = choices.slice(0, -1);
+        var index = corp.AI._bestDiscardOption(discardChoices);
+        if (index >= 0) choice = discardChoices[index];
       }
       corp.AI.preferred = {title: this.title, option: choice};
     }
@@ -9276,12 +9316,71 @@ cardSet[35065] = {
   },
   Resolve: function (params) {
     if (params.tags == -1) { AddTags(1); return; }
-    var lost = Math.min(runner.creditPool, 5 * params.tags);
-    LoseCredits(runner, lost);
-    GainCredits(corp, lost, "", this);
-    RemoveTags(params.tags);
+    RemoveTags(params.tags, function () {
+      var lost = LoseCredits(runner, 5 * params.tags);
+      GainCredits(corp, lost, "", this);
+    }, this);
   },
   AIWouldPlay: function () { return runner.tags > 0; },
   AITagPunishment: 1,
   AIPlayWhenCan: 1,
+};
+
+cardSet[35066] = {
+  title: "IP Enforcement",
+  imageFile: "35066.png",
+  elo: 1484,
+  player: corp,
+  faction: "NBN",
+  influence: 5,
+  cardType: "operation",
+  subTypes: ["Gray Ops"],
+  playCost: 0,
+  trashCost: 5,
+  _printedPoints: function (card) {
+    var definition = card.cardDefinition || (card.setNumber && cardSet[card.setNumber]);
+    return definition ? definition.agendaPoints : card.agendaPoints;
+  },
+  Enumerate: function () {
+    var source = this;
+    var choices = ChoicesArrayInstall(runner.scoreArea, false, function (card) {
+      return card.player == corp && card.cardType == "agenda" &&
+        source._printedPoints(card) >= 0 && source._printedPoints(card) <= runner.tags;
+    });
+    if (corp.AI && choices.length) {
+      // Recover the largest stolen agenda, preferring an existing empty remote.
+      choices.sort(function (a, b) {
+        var pointDifference = source._printedPoints(b.card) - source._printedPoints(a.card);
+        if (pointDifference) return pointDifference;
+        function protection(choice) {
+          if (!choice.server) return -1;
+          if (choice.server.root.some(function (card) { return card.cardType == "agenda" || card.cardType == "asset"; })) return -2;
+          return choice.server.ice.length;
+        }
+        return protection(b) - protection(a);
+      });
+      return [choices[0]];
+    }
+    return choices;
+  },
+  payAdditionalPlayCosts: function (params, callback) {
+    RemoveTags(this._printedPoints(params.card), callback, this);
+  },
+  Resolve: function (params) {
+    if (!params.card || !runner.scoreArea.includes(params.card)) return;
+    var agenda = params.card;
+    var printedPoints = this._printedPoints(agenda);
+    Install(agenda, params.server, false, null, true, null, this, null,
+      function () {
+        // CR 1.13.13: counters leave the host after installation costs are paid.
+        ClearAllCounters(agenda);
+        ResetProperties(agenda);
+        agenda.agendaPoints = printedPoints;
+      }, false, function () {
+        if (runner.tags > 0 && CheckInstalled(agenda)) AddCounters(agenda, "advancement", 1);
+      });
+  },
+  command: "install",
+  AIWouldPlay: function () { return this.Enumerate().length > 0; },
+  AIPlayWhenCan: 2,
 };

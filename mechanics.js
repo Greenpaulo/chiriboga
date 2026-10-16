@@ -1027,8 +1027,13 @@ function Play(card, onPlayResolve, context) {
 		}
 		if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(card);
 		Log('Played "' + GetTitle(card, true) + '"');
-		AutomaticTriggers("automaticOnPlay", [card]);
-		card.Resolve.call(card, params);
+		var beginEffect = function () {
+		  AutomaticTriggers("automaticOnPlay", [card]);
+		  card.Resolve.call(card, params);
+		};
+		if (typeof card.payAdditionalPlayCosts == "function")
+		  card.payAdditionalPlayCosts.call(card, params, beginEffect);
+		else beginEffect();
 	};
     //card will be played, callback fires
     if (typeof onPlayResolve === "function") onPlayResolve.call(context, finishResolve);
@@ -1873,6 +1878,9 @@ function Score(card, afterScore, context) {
     if (intended.score == null) return;
     PlaySound('agendaScore');
     var postureScoreServer = GetServer(intended.score);
+    // Dividends uses the state before scoring removes server modifiers.
+    intended.scoreAdvancement = Counters(intended.score, "advancement");
+    intended.scoreAdvancementRequirement = AdvancementRequirement(intended.score);
     MoveCard(intended.score, corp.scoreArea);
     RecordPublicPostureEvent("agendaScored", intended.score, postureScoreServer);
     intended.score.faceUp = true;
@@ -1901,6 +1909,8 @@ function Score(card, afterScore, context) {
     var responsePhase = TriggeredResponsePhase(playerTurn, "responseOnScored", [], function () {
       intended.score.advancement = 0;
       intended.score = null;
+      delete intended.scoreAdvancement;
+      delete intended.scoreAdvancementRequirement;
 	  currentPhase.historyBreak = historyBreak;
 	  AddHistoryBreakIfRequired(corp);
       if (typeof afterScore === "function") afterScore.call(context);
