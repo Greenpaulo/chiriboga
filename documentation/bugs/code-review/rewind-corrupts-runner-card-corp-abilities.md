@@ -1,7 +1,21 @@
 # Engine: rewinding with Rotary installed crashes the Corp ability scan
 
+**Outcome:** adopted
+
 **Source log:** `documentation/debug-logs/bug_raised/typerror_after_running_r&d.txt`
-**Reproduction:** `tests/pending/rewind-restores-corp-abilities.test.js` — `node tests/pending/rewind-restores-corp-abilities.test.js` (fails at `60fa0d7`, 2026-10-16)
+**Reproduction:** `tests/pending/rewind-restores-corp-abilities.test.js` — `node tests/pending/rewind-restores-corp-abilities.test.js` (fails at `60fa0d7`, 2026-10-16); green at `tests/rewind-restores-corp-abilities.test.js` — `node tests/rewind-restores-corp-abilities.test.js`
+
+## Resolution
+Implemented from `60fa0d7`. Added `"corpAbilities"` to `replicationCodeBlacklist`
+in `utility.js`, as proposed. No plan was written: the change adds one entry to
+a constant whose only consumer is `ReplicationCode`, matching how `abilities`
+and `runnerAbilities` are already handled; no AI choice changes. The
+reproduction moved to `tests/` with its assertions unchanged. It runs a real
+headless game with `sets/vantagepoint.js` loaded, because `_headless-board.js`
+loads only the trusted sets and Rotary is in Vantage Point.
+`node tests/run-all-tests.js`: 93 of 95 pass; `flipped-identity` and
+`vantagepoint-integration` fail only because the worktree has no `images/`
+(gitignored card art).
 
 ## Summary
 After a rewind while the Runner has Rotary installed, the game throws
@@ -49,9 +63,9 @@ array items — it would hide other serialisation gaps rather than fix this one.
 N/A — deterministic fix (principle 4): a restored state must keep every card's printed abilities usable.
 
 ## Acceptance criteria
-- [ ] The reproduction passes and has moved into the green suite
+- [x] The reproduction passes and has moved into the green suite
       (`tests/`), expectation unchanged.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] `node tests/run-all-tests.js` passes.
 
 ## Out of scope / related
 - Line 83, `Valid option with undefined label:` for Rotary's breach choice, is a separate logging warning.
