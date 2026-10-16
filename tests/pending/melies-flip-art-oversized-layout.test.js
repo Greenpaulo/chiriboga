@@ -61,7 +61,7 @@ test('control: base identity art is standard size', () => {
   assert.deepStrictEqual(dims, STANDARD, 'images/36036.jpg should be 300x420');
 });
 
-for (const face of ['images/36036-0.webp', 'images/36036-1.webp', 'images/36036-2.webp']) {
+for (const face of ['images/36036-0.jpg', 'images/36036-1.jpg', 'images/36036-2.jpg']) {
   test('bug: ' + face + ' matches standard card-art size', () => {
     const dims = webpDimensions(fs.readFileSync(path.join(root, face)), face);
     assert.deepStrictEqual(dims, STANDARD,
@@ -77,7 +77,7 @@ test('bug: flip texture is covered by the fixed card mask', () => {
   const m = rendererSource.match(/this\.defaultMaskDimensions\s*=\s*\{\s*x:\s*(-?\d+),\s*y:\s*(-?\d+),\s*w:\s*(\d+),\s*h:\s*(\d+)/);
   assert(m, 'expected defaultMaskDimensions in cardrenderer');
   const maskW = Number(m[3]), maskH = Number(m[4]);
-  const dims = webpDimensions(fs.readFileSync(path.join(root, 'images/36036-0.webp')), '36036-0');
+  const dims = webpDimensions(fs.readFileSync(path.join(root, 'images/36036-0.jpg')), '36036-0');
   // At scale 0.5 the sprite is dims*0.5 px; the mask window is fixed maskW*maskH.
   const visibleFraction = (maskW * maskH) / ((dims.width * 0.5) * (dims.height * 0.5));
   assert(visibleFraction > 0.9,

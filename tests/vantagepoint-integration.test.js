@@ -1672,9 +1672,9 @@ assert.strictEqual(meliesU.imageFile, '36036.png');
 assert.strictEqual(loadedIdentityTexture, 'images/36036.jpg');
 assert(identityFaceUpdates >= 3, '36036 refreshes its renderer when its face changes');
 for (const mapping of [
-  ['HQ', '36036-0.webp'],
-  ['R&D', '36036-1.webp'],
-  ['Archives', '36036-2.webp'],
+  ['HQ', '36036-0.jpg'],
+  ['R&D', '36036-1.jpg'],
+  ['Archives', '36036-2.jpg'],
 ]) {
   meliesU._setDepartment.call(meliesU, mapping[0]);
   meliesU._flipToDepartment.call(meliesU);
