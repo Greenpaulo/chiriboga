@@ -1,20 +1,26 @@
 # I2 ICE selection by marginal security
-**Outcome:** blocked — phase A delivered; phase B blocked because the breach-hazard reliability check failed (see Resolution)
+**Outcome:** in progress — phase A done; phase B next in this ticket (owner decision 2026-10-16)
 
 **Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../../corp-ai/deception-gates.md)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../corp-ai/deception-gates.md)
 **Verified against code:** 15d485d (2026-10-16)
-
-## Additional blocker
-
-Phase B cannot start: the preregistered held-out reliability check of the
-breach-hazard table failed (phase A Resolution). The owner decides whether to
-redesign M2 (for example a different estimator, cells or rule) or proceed
-without it. Remove this section when that decision is recorded.
 
 ## Resolution
 
 Implemented from `15d485d` (phase A only; phase B not started).
+
+**Owner decisions (2026-10-16), after phase A.**
+- The breach-hazard table is accepted as calibrated (option 1 of three
+  offered): its held-out reliability check failed narrowly (below), but phase
+  B only compares options with it, and phase B's own F4 gate decides adoption.
+  The check's rule is not rewritten. If phase B's gate fails, a better M2
+  (different cells or estimator) is the follow-up.
+- No split: phase B continues in this ticket, on the same branch, as soon as
+  phase A is committed; it does not wait for a phase-A merge.
+- Phase B uses horizon `H = 1`, because the next-turn check failed.
+- `_breachHazard()` picks the table's `single` (0–1 ICE) or `multi` (2+ ICE)
+  row from the server's ICE count, so a hypothetical install that adds the
+  second ICE moves the server to the `multi` row automatically.
 
 **What changed (observation-only).**
 - **M4.** `AIApproachDefense(server, context)` on Manegarm Skunkworks and
@@ -105,9 +111,12 @@ prevention (out of scope). None missed.
 **Gate:** pending F4 — `iceMarginalSecurity` (phase B; not implemented, so no option exists yet).
 
 **Open.** Phase B, its gate setup and the empty-Archives disposition are
-untouched. Architecture: [server security evaluation](../../corp-ai/architecture.md#server-security-evaluation).
+untouched. Architecture: [server security evaluation](../corp-ai/architecture.md#server-security-evaluation).
 
-## Implementation plan
+## Implementation plan (phase A, done)
+
+Phase B needs its own `## Implementation plan` (plan gate: it changes a shared
+decision heuristic); this approved plan covers phase A only.
 
 Proposed at `15d485d`, 2026-10-16, for **phase A only** (phase B is a later
 pickup). **Approved 2026-10-16.**
@@ -200,14 +209,14 @@ F12 delivered the `realizedIceByRootType` collector and a control calibration.
 Choose the `(ICE, server)` pair that most reduces the agenda points the Runner
 is expected to steal, net of the ICE's cost, instead of the first affordable
 ICE in input-card order for one pre-chosen server. I2 is the first consumer of
-the shared [scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16):
+the shared [scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16):
 it builds the shared measurements M1, M2 and M4 (phase A, observation-only),
 then ranks ICE with them behind its own option (phase B).
 
 **Why this design.** Turning a security measurement into a shared yes/no gate
-has twice made the Corp weaker: [`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+has twice made the Corp weaker: [`fa1182c`](../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote") and the
-[L9.0.1 gate failure](../done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](done/L9.0.1-adopt-honest-lockout.md#resolution)
 (global honest verdict: winRate −0.029, pointsScored −0.282, pointsStolen
 +0.176; remote theft fell while central theft rose). The owner's 2026-10-14
 playtests saw agendas held in HQ and agendas left in weak remotes. The redesign
@@ -215,7 +224,7 @@ asks "how many points do I expect to lose?" in real units: a graded breach
 margin (M1), a measured breach probability per margin (M2), and points at
 stake. The previous draft's uncalibrated `securityDelta` weights
 (0.6/0.25/0.15), soft-lockout 0.7, ×8 scale, `consequenceWeight` floor and
-`futureValue` are **not** used by I2. Per [principle 6](../../corp-ai/principles.md#6-shared-measurements-consumer-owned-decisions),
+`futureValue` are **not** used by I2. Per [principle 6](../corp-ai/principles.md#6-shared-measurements-consumer-owned-decisions),
 M1/M2/M4 are shared; only I2's ranking consumes them here. I3 and I4 adopt
 them through their own options and gates.
 
@@ -249,7 +258,7 @@ the honest fields; only the harness `securitySnapshot` and the
 `securityCalibration` collector do. `_addHonestVerdict()` picks one route with
 `_honestRouteVerdict(layers, credits, clickBudget, clickCredits)` but stores
 only its total. Unknown breaker prices give `null` costs; an unpassable route
-gives `Infinity`. [L9.0.2](../../corp-ai/specs/L9.0.2-consumer-specific-honest-security.md)
+gives `Infinity`. [L9.0.2](../corp-ai/specs/L9.0.2-consumer-specific-honest-security.md)
 proposes separate per-consumer honest options (`honestIceLayerAdmission`,
 `honestCriticalRez`).
 
@@ -271,7 +280,7 @@ from `_rankedInstallOptions(corp.HQ.cards, true)` on an at-risk central and
 reads `_centralBreachLossRisk()` (zero when compatibility `isSecure` holds),
 installing when risk ≥ 0.35 falls by ≥ 0.15.
 
-See [architecture.md: install planning today](../../corp-ai/architecture.md#install-planning-today).
+See [architecture.md: install planning today](../corp-ai/architecture.md#install-planning-today).
 
 ## Design
 
@@ -283,7 +292,9 @@ See [architecture.md: install planning today](../../corp-ai/architecture.md#inst
 | B | I2's ranking reads M1/M2 behind `this.options.iceMarginalSecurity` | Yes, option on only | F4 gate (`## Acceptance gate`) |
 
 Phase B may not start until phase A is merged and its reliability check has
-passed. Phase A ships no option: nothing reads its outputs, so there is
+passed. (Owner decision 2026-10-16: phase B starts once phase A is committed
+on this branch, and the table is accepted despite the failed check; see
+Resolution.) Phase A ships no option: nothing reads its outputs, so there is
 nothing to switch. Identity is shown, as L9.0 did, by comparing the commit
 before phase A with phase A's head.
 
@@ -412,7 +423,7 @@ it beside the table and defines `CORP_AI_POINT_VALUE`. Only I9 retunes it.
      stake and row.
    - Remotes with stake > 0 use the `agendaRemote` row, others `otherRemote`.
 4. **Expected points stolen** over horizon `H` (`CORP_AI_RISK_HORIZON_RUNNER_TURNS`,
-   2; 1 if the next-turn check failed), with `h_t = _breachHazard(s, t)`:
+   2; 1 if the next-turn check failed — it failed, so `H = 1`), with `h_t = _breachHazard(s, t)`:
    remotes and Archives (one-shot) `P × (1 − Π(1 − h_t))`; HQ and R&D
    (repeatable) `P × Σ h_t`.
 5. **Score** (credit-equivalents, recorded in `scoreBreakdown`):
@@ -604,7 +615,7 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
   (ai-planning: latency is not a standard guard because `gate` may reuse a
   baseline timed on another machine).
 - `winRate` 0.03 and `pointsScored` 0.25 keep the install track's tolerances
-  ([design note](../../corp-ai/specs/install-decisions-design.md#acceptance-gates)), not the
+  ([design note](../corp-ai/specs/install-decisions-design.md#acceptance-gates)), not the
   0.02/0.2 defaults.
 
 **Before the first gate run (freeze, then never change).**
@@ -620,7 +631,7 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
    class). If no real-log boards can meet it, I2 cannot gate; record that here
    and ask the owner. Do not invent boards to reach coverage.
 3. Record the L8.2/I2 ordering decision per the
-   [deception-gates control refresh guidance](../../corp-ai/deception-gates.md). Any
+   [deception-gates control refresh guidance](../corp-ai/deception-gates.md). Any
    decision-changing merge (L8.2, L9.0.2) during evaluation invalidates the
    control; refresh it.
 

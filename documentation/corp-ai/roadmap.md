@@ -32,7 +32,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
 | — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Passive measurement and observer identity evidence delivered; all-root calibration usable, postured coverage insufficient |
 | 1 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready | Re-ground and freeze the tell-reduction gate, then implement and adopt |
-| 2 | [I2](../backlog/code-review/I2-ice-selection-by-marginal-security.md) | in-progress | Phase A (observation-only M1/M2/M4) in progress; phase B: marginal ICE allocation, fresh control with adopted L8.2 and calibrated count guards |
+| 2 | [I2](../backlog/I2-ice-selection-by-marginal-security.md) | in-progress | Phase A (observation-only M1/M2/M4) done; phase B (marginal ICE allocation behind `iceMarginalSecurity`) next in the same ticket |
 | 3 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
 | 4 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
@@ -241,7 +241,7 @@ I9 comes last.
 ### I2 ICE selection by marginal security
 - **Status:** in-progress
 - **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12
-- **Ticket:** [I2-ice-selection-by-marginal-security.md](../backlog/code-review/I2-ice-selection-by-marginal-security.md)
+- **Ticket:** [I2-ice-selection-by-marginal-security.md](../backlog/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Publish graded breach measurements (margin, breach hazard, approach-time upgrades), then choose the `(ICE, server)` pair that most reduces expected points stolen.
 
 ### I3 Remote role and root suitability
