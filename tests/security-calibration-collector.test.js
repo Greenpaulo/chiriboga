@@ -49,4 +49,45 @@ test('every metric has a declared direction and flattens to numbers', () => {
   const flat = flattenCollector(collector.name, play([{type: 'gameStart'}]));
   assert.deepStrictEqual(Object.keys(flat).sort(), Object.keys(collector.directions).sort());
 });
+const playSamples = events => {
+  const game = {};
+  for (const event of events) collector.onEvent(Object.freeze(event), game);
+  return {finish: collector.finish(game), samples: collector.samples(game)};
+};
+// I2 snapshot fields: kind, margin buckets (now and next turn) and a signature.
+const i2 = (serverName, kind, bucket, bucket2, signature, extra = {}) => Object.assign(
+  server(serverName, bucket === 'lockout', bucket === 'lockout' || bucket.startsWith('<') || bucket.startsWith('-'),
+    kind === 'agendaRemote'), {kind, bucket, bucket2, signature, iceCount: 1, approachDefense: false}, extra);
+
+test('I2: kind x bucket rows, next-turn rows only for unchanged servers, lockout and unknown kept', () => {
+  const {finish, samples} = playSamples([
+    {type: 'gameStart'},
+    snapshot([i2('Server 1', 'agendaRemote', 'lockout', 'lockout', 'a', {approachDefense: true}),
+      i2('HQ', 'hq', '2..4', '5..9', 'h', {iceCount: 2}), i2('R&D', 'rd', 'unknown', 'unknown', 'r')]),
+    {type: 'run', server: 'hq', serverName: 'HQ', success: true},
+    {type: 'turnEnd', side: 'runner'},
+    snapshot([i2('Server 1', 'agendaRemote', 'lockout', 'lockout', 'a'),
+      i2('HQ', 'hq', '-3..-1', '0..1', 'h2'), i2('R&D', 'rd', 'unknown', 'unknown', 'r')]),
+    {type: 'run', server: 'rd', serverName: 'R&D', success: true},
+    {type: 'gameEnd', winner: 'runner', turns: 2},
+  ]);
+  assert.deepStrictEqual(samples.rows, [
+    ['agendaRemote', 'lockout', 1, 0, 1], ['hq', '2..4', 2, 1, 0], ['rd', 'unknown', 1, 0, 0],
+    ['agendaRemote', 'lockout', 1, 0, 0], ['hq', '-3..-1', 1, 0, 0], ['rd', 'unknown', 1, 1, 0],
+  ]);
+  // HQ changed its ICE, so only Server 1 and R&D carry a next-turn prediction.
+  assert.deepStrictEqual(samples.next, [['agendaRemote', 'lockout', 0], ['rd', 'unknown', 1]]);
+  const summary = collector.summarize([samples, samples]);
+  assert.deepStrictEqual(summary.cells.hq, {'2..4': {turns: 2, breached: 2}, '-3..-1': {turns: 2, breached: 0}});
+  assert.deepStrictEqual(summary.cells.agendaRemote.lockout, {turns: 4, breached: 0});
+  assert.deepStrictEqual(summary.next.rd.unknown, {turns: 2, breached: 2});
+  // Existing per-game outputs are unchanged by the new rows.
+  assert.deepStrictEqual(finish.honest.all, {secure: 3, secureBreached: 0, insecure: 3, insecureBreached: 2});
+  assert.deepStrictEqual(finish.current.agendaRemote, {secure: 2, secureBreached: 0, insecure: 0, insecureBreached: 0});
+});
+
+test('I2: snapshots without kind (older harness) add no rows', () => {
+  const {samples} = playSamples([{type: 'gameStart'}, snapshot([server('HQ', true, true)]), {type: 'gameEnd'}]);
+  assert.deepStrictEqual(samples, {rows: [], next: []});
+});
 console.log(tests + ' securityCalibration cases passed.');

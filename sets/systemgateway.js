@@ -3463,6 +3463,13 @@ cardSet[30042] = {
     }
     return false;
   },
+  //Approach-time cost for the honest security route (pure). Mirrors AIWouldTrigger
+  //for the evaluated server: a lethal breach is not stopped.
+  AIApproachDefense: function (server) {
+    if (!server) return null;
+    if (corp.AI._potentialDamageOnBreach(server) > runner.grip.length) return null;
+    return {runnerOptions: [{credits: 5, clicks: 0}, {credits: 0, clicks: 2}], corpEndsRunUses: 0};
+  },
 };
 cardSet[30043] = {
   title: "Jinteki: Restoring Humanity",
@@ -3846,8 +3853,8 @@ cardSet[30050] = {
   //Whenever the Runner approaches this server, you may pay 2[c] and trash 2 cards from HQ.
   //If you do, end the run.
   //"The Runner approaches the server at step 4 of a run, and it is the final deciding factor for determining the success of a run." (see also run timing in FAQ)
-  AIWouldTrigger: function () {
-    var thisServer = GetServer(this);
+  AIWouldTrigger: function (server) {
+    var thisServer = server || GetServer(this);
 	//don't trigger if there is an ambush intalled in server
 	if (corp.AI._isAmbush(thisServer)) return false; //don't trigger
     //don't trigger if there are no other cards in this server
@@ -3935,6 +3942,17 @@ cardSet[30050] = {
     if (!server || !server.root || !server.root.includes(this)) return 0;
     if (!this.AIWouldTrigger()) return 0;
     return 2;
+  },
+  //Approach-time defence for the honest security route (pure): each use costs
+  //2[c] and two non-agenda HQ cards. spendableCredits already excludes the
+  //server's ICE rez plan.
+  AIApproachDefense: function (server, context) {
+    if (!server || !this.AIWouldTrigger(server)) return null;
+    var credits = context && typeof context.spendableCredits == "number"
+      ? context.spendableCredits : Credits(corp);
+    var discards = corp.HQ.cards.length - corp.AI._agendasInHand();
+    var uses = Math.max(0, Math.min(Math.floor(credits / 2), Math.floor(discards / 2)));
+    return {runnerOptions: [], corpEndsRunUses: uses};
   },
 };
 cardSet[30051] = {

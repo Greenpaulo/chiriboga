@@ -7,6 +7,39 @@ const CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE = 1;
 //has not shown yet: the median install cost of the playable sets' typed
 //icebreakers (3) plus 1 credit per subroutine, and the install click.
 const CORP_AI_NO_BREAKER_ASSUMED_COST = {install: 3, perSubroutine: 1};
+//I2 M2: measured probability that the stock Runner AI breaches a server in one
+//Runner turn, by server kind, public ICE count (single: 0-1, multi: 2+; the
+//calibration found one-ICE and multi-ICE servers differ at equal margin) and
+//breach-margin bucket (_breachMarginBucket).
+//Derived by scripts/ai-batch/breach-hazard-table.js from
+//documentation/corp-ai/measurements/I2-15d485d-breach-hazard-calibration.json;
+//tests/breach-hazard-table.test.js keeps the two equal. Observation-only until
+//a consumer adopts it through its own gate.
+const CORP_AI_BREACH_HAZARD_TABLE = Object.freeze({
+  agendaRemote: Object.freeze({
+    single: Object.freeze({"lockout": 0.0498, "<=-4": 0.0498, "-3..-1": 0.0498, "0..1": 0.093, "2..4": 0.2015, "5..9": 0.2415, ">=10": 0.2689, "unknown": 0.2228}),
+    multi: Object.freeze({"lockout": 0.015, "<=-4": 0.015, "-3..-1": 0.0409, "0..1": 0.0488, "2..4": 0.1339, "5..9": 0.2063, ">=10": 0.2445, "unknown": 0.1661}),
+  }),
+  otherRemote: Object.freeze({
+    single: Object.freeze({"lockout": 0.0134, "<=-4": 0.0134, "-3..-1": 0.0134, "0..1": 0.0265, "2..4": 0.0718, "5..9": 0.1294, ">=10": 0.1523, "unknown": 0.1249}),
+    multi: Object.freeze({"lockout": 0.0097, "<=-4": 0.0097, "-3..-1": 0.0108, "0..1": 0.0313, "2..4": 0.0499, "5..9": 0.0872, ">=10": 0.1086, "unknown": 0.0742}),
+  }),
+  hq: Object.freeze({
+    single: Object.freeze({"lockout": 0.0232, "<=-4": 0.0232, "-3..-1": 0.0232, "0..1": 0.0678, "2..4": 0.1066, "5..9": 0.1539, ">=10": 0.1539, "unknown": 0.1331}),
+    multi: Object.freeze({"lockout": 0.0091, "<=-4": 0.0091, "-3..-1": 0.0232, "0..1": 0.0425, "2..4": 0.0952, "5..9": 0.1269, ">=10": 0.1408, "unknown": 0.104}),
+  }),
+  rd: Object.freeze({
+    single: Object.freeze({"lockout": 0.0499, "<=-4": 0.0499, "-3..-1": 0.0499, "0..1": 0.1016, "2..4": 0.1913, "5..9": 0.2085, ">=10": 0.2104, "unknown": 0.1925}),
+    multi: Object.freeze({"lockout": 0.0133, "<=-4": 0.0133, "-3..-1": 0.0557, "0..1": 0.1346, "2..4": 0.2103, "5..9": 0.2451, ">=10": 0.2451, "unknown": 0.2061}),
+  }),
+  archives: Object.freeze({
+    single: Object.freeze({"lockout": 0.123, "<=-4": 0.123, "-3..-1": 0.123, "0..1": 0.123, "2..4": 0.123, "5..9": 0.123, ">=10": 0.1516, "unknown": 0.1377}),
+    multi: Object.freeze({"lockout": 0.0537, "<=-4": 0.0537, "-3..-1": 0.0537, "0..1": 0.0537, "2..4": 0.0537, "5..9": 0.0537, ">=10": 0.0537, "unknown": 0.0537}),
+  }),
+});
+//Credit-equivalents per agenda point (cost to advance and install), from the
+//same calibration file. Only I9 retunes it.
+const CORP_AI_POINT_VALUE = 4.4;
 
 // Shared public shapes: all twelve scripts have positive baseline mass.
 const CORP_AI_POSTURE_SCRIPTS = Object.freeze([1, 2, 3].flatMap((depth, i) =>
@@ -4158,7 +4191,7 @@ class CorpAI {
       result.isSecure = result.hasHardLockout || !bestPlan.breakerRouteFeasible;
     else result.isSecure = result.hasHardLockout || result.totalMandatoryBreakCost > result.runnerCredits;
     this._addHonestVerdict(result, bestPlan, effectiveCredits, server,
-      serverLockout, globalETRUses);
+      serverLockout, globalETRUses, bestCards);
     result.knownMandatoryBreakCost = result.totalMandatoryBreakCost;
     result.knownBreakCost = result.totalBreakCost;
     result.honestKnownMandatoryBreakCost = result.honestMandatoryBreakCost;
@@ -4182,16 +4215,49 @@ class CorpAI {
   //in both; L9.0.1 will adopt the other honest corrections for decisions.
   //honestLockout survives the click-break and "no breaker yet" corrections;
   //noBreakerLockout marks a layer today locked only by a missing breaker.
-  _addHonestVerdict(result, plan, credits, server, serverLockout, globalETRUses) {
+  _addHonestVerdict(result, plan, credits, server, serverLockout, globalETRUses, planIce) {
     result.honestReasons = [];
     result.noBreakerLockout = false;
+    result.honestRoute = null;
+    //I2 M4: approach-time root defences join the honest route only.
+    var approach = this._approachDefenses(server, planIce);
+    result.approachDefense = approach.active;
+    if (approach.corpEndsRunUses > 0) {
+      globalETRUses += approach.corpEndsRunUses;
+      if (globalETRUses >= this._projectedRunnerRuns(server)) {
+        serverLockout = true;
+        result.honestReasons.push("approach defence ends " + approach.corpEndsRunUses + " runs");
+      }
+    }
+    var evaluatingActiveRun = typeof attackedServer != "undefined" && attackedServer == server;
+    var clicks = this._projectedRunnerClicks();
+    var clickBudget = evaluatingActiveRun ? clicks : Math.max(0, clicks - 1);
+    var clickCredits = Math.min(credits.clickCredits, result.runnerCredits);
+    result.honestClickBudget = clickBudget;
+    result.honestClickCredits = clickCredits;
     if (!plan.honestLayers) {
       //The restricted-credit route already plans with the full RunCalculator.
-      result.honestReasons = result.reasons.filter(reason => reason.startsWith("unpriced breaker "));
-      result.honestLockout = result.hasHardLockout;
-      result.honestIsSecure = result.isSecure;
+      result.honestRestrictedRoute = true;
+      result.honestReasons = result.reasons.filter(reason => reason.startsWith("unpriced breaker "))
+        .concat(result.honestReasons);
+      result.honestLockout = result.hasHardLockout || serverLockout;
+      result.honestIsSecure = result.isSecure || result.honestLockout;
       result.honestMandatoryBreakCost = result.totalMandatoryBreakCost;
       result.honestBreakCost = result.totalBreakCost;
+      var restrictedCost = result.totalMandatoryBreakCost;
+      if (approach.active && !result.honestIsSecure && typeof restrictedCost == "number" && isFinite(restrictedCost)) {
+        //The calculator's route has no click split: price it as one credit layer.
+        var restrictedLayers = [];
+        var restrictedRepeats = 1 + (serverLockout ? 0 : globalETRUses);
+        for (var restrictedRepeat = 0; restrictedRepeat < restrictedRepeats; restrictedRepeat++)
+          restrictedLayers.push({card: null, options: [{credits: restrictedCost, clicks: 0}]}, ...approach.layers);
+        var restrictedVerdict = this._honestRouteVerdict(restrictedLayers, result.runnerCredits, clickBudget, clickCredits);
+        var restrictedRoute = restrictedVerdict.feasible || restrictedVerdict.cheapest;
+        result.honestRestrictedRoute = false;
+        result.honestRoute = restrictedRoute ? {credits: restrictedRoute.credits, clicks: restrictedRoute.clicks} : null;
+        result.honestMandatoryBreakCost = restrictedRoute ? restrictedRoute.total : Infinity;
+        result.honestIsSecure = !restrictedVerdict.feasible;
+      }
       return;
     }
     var layers = [];
@@ -4220,15 +4286,17 @@ class CorpAI {
         repeats += globalETRUses;
       for (var r = 0; r < repeats; r++) layers.push(layer);
     }
+    //Approach costs come after the innermost ICE, once per pass of the route.
+    for (var approachLayer of approach.layers) {
+      var approachRepeats = 1 + (globalETRUses > 0 && !serverLockout ? globalETRUses : 0);
+      for (var r = 0; r < approachRepeats; r++) layers.push(approachLayer);
+    }
     result.honestLockout = serverLockout || layerLockout;
-    var evaluatingActiveRun = typeof attackedServer != "undefined" && attackedServer == server;
-    var clicks = this._projectedRunnerClicks();
-    var clickBudget = evaluatingActiveRun ? clicks : Math.max(0, clicks - 1);
     var verdict = result.honestLockout
       ? {feasible: null, cheapest: null}
-      : this._honestRouteVerdict(layers, result.runnerCredits, clickBudget,
-        Math.min(credits.clickCredits, result.runnerCredits));
+      : this._honestRouteVerdict(layers, result.runnerCredits, clickBudget, clickCredits);
     var route = verdict.feasible || verdict.cheapest;
+    if (route) result.honestRoute = {credits: route.credits, clicks: route.clicks};
     result.honestMandatoryBreakCost = route ? route.total : Infinity;
     result.honestBreakCost = route
       ? Math.max(route.total, isFinite(result.totalBreakCost) ? result.totalBreakCost : 0)
@@ -4242,8 +4310,11 @@ class CorpAI {
           repeats += globalETRUses;
         for (var repeat = 0; repeat < repeats; repeat++) fullLayers.push(layer);
       }
-      var fullVerdict = this._honestRouteVerdict(fullLayers, result.runnerCredits, clickBudget,
-        Math.min(credits.clickCredits, result.runnerCredits));
+      for (var approachLayer of approach.layers) {
+        var approachRepeats = 1 + (globalETRUses > 0 && !serverLockout ? globalETRUses : 0);
+        for (var repeat = 0; repeat < approachRepeats; repeat++) fullLayers.push(approachLayer);
+      }
+      var fullVerdict = this._honestRouteVerdict(fullLayers, result.runnerCredits, clickBudget, clickCredits);
       var fullRoute = fullVerdict.feasible || fullVerdict.cheapest;
       result.honestBreakCost = fullRoute ? fullRoute.total : Infinity;
     }
@@ -4252,6 +4323,111 @@ class CorpAI {
       result.honestReasons.push("honest route needs " + route.credits + " credits and " +
         route.clicks + " clicks; Runner has " + result.runnerCredits + " credits and " +
         clickBudget + " clicks to break with");
+  }
+
+  //I2 M4: root cards' AIApproachDefense results for the honest route. A rezzed
+  //card counts; an unrezzed one only when its rez can be funded together with
+  //the chosen ICE rez plan (as _hasDefensiveUpgrade requires affordability).
+  _approachDefenses(server, planIce) {
+    var ret = {layers: [], corpEndsRunUses: 0, active: false};
+    if (!server || !server.root) return ret;
+    var funded = (planIce || []).filter(card => !card.rezzed);
+    var defenders = [];
+    for (var card of server.root) {
+      if (typeof card.AIApproachDefense != "function") continue;
+      if (!card.rezzed) {
+        if (!this._canFundRezPlan(funded.concat([card]))) continue;
+        funded.push(card);
+      }
+      defenders.push(card);
+    }
+    if (!defenders.length) return ret;
+    var spendable = Math.max(0, Credits(corp) -
+      funded.reduce((total, card) => total + Math.max(0, RezCost(card)), 0));
+    for (var card of defenders) {
+      var defense = card.AIApproachDefense.call(card, server, {spendableCredits: spendable});
+      if (!defense) continue;
+      var options = (defense.runnerOptions || []).map(option =>
+        ({credits: Math.max(0, option.credits || 0), clicks: Math.max(0, option.clicks || 0)}));
+      if (options.length) {
+        ret.layers.push({card: card, options: options});
+        ret.active = true;
+      }
+      var uses = Number(defense.corpEndsRunUses);
+      if (isFinite(uses) && uses > 0) {
+        ret.corpEndsRunUses += Math.floor(uses);
+        ret.active = true;
+      }
+    }
+    return ret;
+  }
+
+  //I2 M1: the Runner's spare credit-equivalents (CLICK_VALUE 1) after paying the
+  //honest route; negative is the shortfall. -Infinity for an honest lockout (or
+  //no restricted-credit route); null when a breaker is unpriced, with
+  //upperBound from the known part. Outside those, margin >= 0 exactly when
+  //honestIsSecure is false.
+  _breachMargin(server, evaluation) {
+    if (!evaluation) evaluation = this._evaluateServerSecurity(server);
+    var credits = evaluation.runnerCredits;
+    if (evaluation.honestLockout) return {margin: -Infinity, upperBound: -Infinity};
+    if (evaluation.honestMandatoryBreakCost === null) {
+      var known = evaluation.honestKnownMandatoryBreakCost;
+      return {margin: null, upperBound: typeof known == "number" ? credits - known : null};
+    }
+    var margin;
+    var route = evaluation.honestRoute;
+    if (route) {
+      var creditSlack = credits - Math.min(route.clicks, evaluation.honestClickCredits) - route.credits;
+      var clickSlack = evaluation.honestClickBudget - route.clicks;
+      margin = clickSlack >= 0 ? creditSlack : Math.min(creditSlack, 0) + clickSlack;
+    } else if (evaluation.honestRestrictedRoute && isFinite(evaluation.honestMandatoryBreakCost)) {
+      margin = credits - evaluation.honestMandatoryBreakCost;
+      //The calculator's own feasibility is authoritative on this path.
+      margin = evaluation.honestIsSecure ? Math.min(-1, margin) : Math.max(0, margin);
+    } else margin = -Infinity;
+    return {margin: margin, upperBound: margin};
+  }
+
+  //I2 M2 bucket of a breach margin (preregistered).
+  _breachMarginBucket(margin) {
+    if (margin === null || typeof margin == "undefined") return "unknown";
+    if (margin == -Infinity) return "lockout";
+    if (margin <= -4) return "<=-4";
+    if (margin <= -1) return "-3..-1";
+    if (margin <= 1) return "0..1";
+    if (margin <= 4) return "2..4";
+    if (margin <= 9) return "5..9";
+    return ">=10";
+  }
+
+  //I2 M2 table row of a server from public state. A remote with an installed
+  //root card uses the agendaRemote row (its type is hidden); consumers that
+  //know a stake pass their own kind.
+  _breachKind(server) {
+    if (server == corp.HQ) return "hq";
+    if (server == corp.RnD) return "rd";
+    if (server == corp.archives) return "archives";
+    return server && server.root && server.root.length ? "agendaRemote" : "otherRemote";
+  }
+
+  //Public click-for-credit floor of the Runner's next turn.
+  _projectedRunnerIncome() {
+    return Math.max(0, (typeof AllottedClicks == "function" ? AllottedClicks(runner) : 4) - 1);
+  }
+
+  //I2 M2: probability of a successful run on the server in Runner turn
+  //runnerTurnsAhead (1 = next), from CORP_AI_BREACH_HAZARD_TABLE (row by kind
+  //and the server's ICE count). Later turns
+  //move the margin by projected income; turns are never treated as independent.
+  _breachHazard(server, runnerTurnsAhead, evaluation, kind) {
+    var turns = Math.max(1, runnerTurnsAhead || 1);
+    var margin = this._breachMargin(server, evaluation).margin;
+    if (margin !== null && isFinite(margin))
+      margin += (turns - 1) * this._projectedRunnerIncome();
+    var rows = CORP_AI_BREACH_HAZARD_TABLE[kind || this._breachKind(server)];
+    var iceCount = server && server.ice ? server.ice.length : 0;
+    return rows[iceCount >= 2 ? "multi" : "single"][this._breachMarginBucket(margin)];
   }
 
   //Security evaluation is used repeatedly while scoring possible actions. Keep

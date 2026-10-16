@@ -155,6 +155,28 @@ lockouts; the supported exact restricted-credit route copies today's verdict. Th
 `securityCalibration` collector compares both verdicts with next-turn
 breaches.
 
+**Breach margin, hazard and approach defences (I2 phase A, observation
+only).** `_approachDefenses()` reads the root-card hook `AIApproachDefense`
+(Manegarm Skunkworks, Anoetic Void) for the honest route only: a rezzed card
+counts, an unrezzed one only when `_canFundRezPlan()` can fund it with the
+chosen ICE rez plan. Its `runnerOptions` become one extra layer after the
+innermost ICE, repeated with the route under global ETR, and its
+`corpEndsRunUses` add to the server's global ETR uses (covering
+`_projectedRunnerRuns()` is an honest lockout). `_hasDefensiveUpgrade()` and
+the compatibility fields ignore it. `_addHonestVerdict()` also records
+`honestRoute`, `honestClickBudget`, `honestClickCredits` and `approachDefense`.
+`_breachMargin()` turns them into the Runner's spare credit-equivalents after
+the route (`-Infinity` for an honest lockout, `null` with an `upperBound` for
+unknown pricing); outside those, a non-negative margin means the honest
+verdict is not secure. `_breachHazard()` looks up the probability of a
+successful run in one Runner turn in `CORP_AI_BREACH_HAZARD_TABLE` by server
+kind (`_breachKind()`) and margin bucket (`_breachMarginBucket()`), adding
+`_projectedRunnerIncome()` per later turn. The table and
+`CORP_AI_POINT_VALUE` are measured by
+`scripts/ai-batch/breach-hazard-table.js` from `securityCalibration` samples
+(evidence in `measurements/I2-15d485d-breach-hazard-calibration.json`). No
+decision reads any of them yet; I2 phase B is the first planned consumer.
+
 **Global adoption rejected (L9.0.1).** The experiment switched all existing
 security consumers to the honest verdict. Its paired core-v1 gate failed:
 points stolen rose by 0.176 per game, points scored fell by 0.282 and Corp win

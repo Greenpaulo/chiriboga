@@ -265,9 +265,19 @@ function playGame(options) {
       return s.cards ? s != corp.archives || s.cards.length > 0 : s.root.length > 0;
     }).map(function (s) {
       var r = corp.AI._evaluateServerSecurityUncached(s);
-      return {serverName: s.serverName, agenda: !s.cards && s.root.some(function (c) { return c.cardType == "agenda"; }),
+      var agenda = !s.cards && s.root.some(function (c) { return c.cardType == "agenda"; });
+      // I2: breach margin, its hazard buckets now and one Runner turn later.
+      var m = corp.AI._breachMargin(s, r);
+      var later = m.margin === null ? null : m.margin + corp.AI._projectedRunnerIncome();
+      return {serverName: s.serverName, agenda: agenda,
         isSecure: r.isSecure, hasHardLockout: r.hasHardLockout, honestIsSecure: r.honestIsSecure,
-        honestLockout: r.honestLockout, noBreakerLockout: r.noBreakerLockout};
+        honestLockout: r.honestLockout, noBreakerLockout: r.noBreakerLockout,
+        kind: s == corp.HQ ? "hq" : s == corp.RnD ? "rd" : s == corp.archives ? "archives" : agenda ? "agendaRemote" : "otherRemote",
+        margin: isFinite(m.margin) ? m.margin : null, upperBound: isFinite(m.upperBound) ? m.upperBound : null,
+        bucket: corp.AI._breachMarginBucket(m.margin), bucket2: corp.AI._breachMarginBucket(later),
+        iceCount: s.ice.length, publicThreatRisk: r.publicThreatRisk, approachDefense: !!r.approachDefense,
+        signature: JSON.stringify([s.ice.map(function (c) { return [c.title, !!c.rezzed]; }),
+          s.root.map(function (c) { return [c.title, !!c.rezzed]; })])};
     })`)));
   let snapshotPending = false;
   let defenseSnapshotPending = false;

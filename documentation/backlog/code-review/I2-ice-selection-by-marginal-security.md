@@ -1,8 +1,194 @@
 # I2 ICE selection by marginal security
+**Outcome:** blocked — phase A delivered; phase B blocked because the breach-hazard reliability check failed (see Resolution)
 
 **Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../deception-gates.md)
-**Verified against code:** 60fa0d7 (2026-10-16)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../../corp-ai/deception-gates.md)
+**Verified against code:** 15d485d (2026-10-16)
+
+## Additional blocker
+
+Phase B cannot start: the preregistered held-out reliability check of the
+breach-hazard table failed (phase A Resolution). The owner decides whether to
+redesign M2 (for example a different estimator, cells or rule) or proceed
+without it. Remove this section when that decision is recorded.
+
+## Resolution
+
+Implemented from `15d485d` (phase A only; phase B not started).
+
+**What changed (observation-only).**
+- **M4.** `AIApproachDefense(server, context)` on Manegarm Skunkworks and
+  Anoetic Void (`sets/systemgateway.js`, at the bottom with their AI hooks),
+  documented in `documentation/ai.md` 5.5. Void's `AIWouldTrigger` takes an
+  optional `server` (existing no-argument callers unchanged). `_approachDefenses()`
+  feeds `_addHonestVerdict()` only: runner options are a layer after the
+  innermost ICE, Corp end-the-run uses add to global ETR. Compatibility fields
+  and `_hasDefensiveUpgrade()` unchanged.
+- **M1.** `_addHonestVerdict()` records `honestRoute`, `honestClickBudget`,
+  `honestClickCredits`, `approachDefense`; `_breachMargin()` per the spec.
+- **M2.** `_breachMarginBucket()`, `_breachKind()`, `_projectedRunnerIncome()`,
+  `_breachHazard()`, `CORP_AI_BREACH_HAZARD_TABLE` and `CORP_AI_POINT_VALUE`
+  (4.4) at the top of `ai_corp.js`.
+- **Calibration.** `securitySnapshot` (headless.js) emits `kind`, `margin`,
+  `upperBound`, `bucket`, `bucket2`, `iceCount`, `publicThreatRisk`,
+  `approachDefense` and a server `signature`; `securityCalibration` keeps
+  per-game rows through `samples()` and pooled cells through `summarize()`
+  (its `finish()` metrics are unchanged). `scripts/ai-batch/breach-hazard-table.js`
+  builds the table and runs the checks.
+
+**Departures from the spec / plan.**
+- Manegarm's hook returns `null` when the breach would be lethal (its own
+  `AIWouldTrigger` policy). Void's credits are `spendableCredits` after the ICE
+  rez plan (plan, approved). The restricted-credit path gets M4 through a
+  single priced route layer and its margin is clamped to the calculator's own
+  feasibility (plan, approved).
+- Scenario 2's "one with neither is honestly locked out": in M1 terms the
+  route is infeasible (`honestIsSecure` true, negative margin), not
+  `honestLockout`; the test asserts that.
+- The AI's default `_breachKind()` uses public state: a remote with any root
+  card uses the `agendaRemote` row. The table itself is measured on true
+  agenda remotes (harness-only), as the spec allows.
+- One-ICE check differed (below), so, as the spec requires, the table is split
+  by public ICE count: `single` (0–1 ICE; the spec's "1" group also takes
+  0-ICE servers, which need a row) and `multi` (2+). Next-turn rows carry no
+  ICE count, so the next-turn check uses the unsplit table.
+- Thin-cell rule: the thinnest cell merges first, into its thinner neighbour.
+
+**Calibration** (`documentation/corp-ai/measurements/I2-15d485d-breach-hazard-calibration.json`,
+raw reports kept locally; built on the phase-A working tree over `15d485d`,
+game play identical to `15d485d` per the identity run). Pool `core-v1`
+(7 pairs), default options, `--collector securityCalibration`; fit seeds
+1001–1400 (2,800 games), held-out 1401–1600 (1,400 games), 0 failures.
+`POINT_VALUE` 4.4 over 67 agenda copies.
+- **Reliability check: failed.** Unsplit table: count-weighted MAE 0.0063
+  (limit 0.05) but 7 cells with ≥100 held-out server-turns miss their
+  game-clustered 95% interval (largest: `agendaRemote >=10` predicted 0.260,
+  observed 0.299 [0.278, 0.320]; `hq 5..9` 0.147 vs 0.136 [0.127, 0.145]).
+  Split table rerun: MAE 0.0071, 7 of 47 checked cells miss
+  (e.g. `agendaRemote:multi >=10` 0.245 vs 0.294 [0.261, 0.329]). One miss in
+  each run is a zero-event cell whose bootstrap interval is [0, 0]. The misses
+  are a few points, mostly where isotonic pooling or the fit/held-out
+  difference exceeds narrow large-cell intervals; the rule does not allow for
+  the prediction's own sampling error. Per the spec, **phase B is blocked**.
+- **Next-turn check: failed** (MAE 0.0287; 15 cells miss). Turn-2 hazard at
+  `margin + income` overpredicts systematically (e.g. `otherRemote >=10`
+  0.146 vs 0.076). If phase B proceeds it uses horizon 1.
+- **One-ICE split: differs** in 9 kind × bucket cells (e.g. `rd 5..9`
+  one-ICE 0.174 vs multi 0.260; `agendaRemote 2..4` 0.192 vs 0.141).
+
+**Identity run.** I0's F4 configuration
+(`node scripts/ai-batch.js --jobs 4 --collector corpInsolventTurns --collector installOutcomes --collector stallTurns --collector successfulRunsByServer --collector unusedCreditsAtEnd --collector securityCalibration`,
+7 pairs × 200 seeds) at `15d485d` (clean worktree) and at the phase-A working
+tree: 1,400 of 1,400 games identical in `winner`, `turns`, `logHash` and
+`decisionHash`; 0 failures either side. Decision snapshots are identical to the
+recorded baseline (`tests/decision-snapshots.test.js` and
+`tests/corp-decision-fixtures.test.js` pass unchanged). Corp
+`decisionLatencyMs` mean 6.53 → 6.49 ms, p95 32.8 → 32.5 ms (no measurable
+change).
+
+**Tests.** `tests/corp-server-security.test.js` (scenarios 1–3, 6),
+`tests/L9.1-unpriceable-breakers.test.js` (unknown margin and `upperBound`),
+`tests/security-calibration-collector.test.js` (scenario 4),
+new `tests/breach-hazard-table.test.js` (scenario 5). New
+`tests/breach-margin-invariant.js` checks the M1 invariant on every security
+evaluation in the security, L9.1 pricing and L9.1 unpriceable suites
+(all L9.0/L9.1 fixtures). On real games the invariant also held exactly:
+1,185 of 1,185 honest-insecure server-turns in a 21-game smoke run had
+non-negative margins.
+
+**Audit (playable sets).** Corp approach-time root costs: Manegarm Skunkworks
+and Anoetic Void (System Gateway), both updated. System Update 2021, Elevation
+and Vantage Point have none; Maintenance Access (Elevation) and Baker (Vantage
+Point) hook server approach but are Runner cards; Flagship is breach
+prevention (out of scope). None missed.
+
+**Gate:** pending F4 — `iceMarginalSecurity` (phase B; not implemented, so no option exists yet).
+
+**Open.** Phase B, its gate setup and the empty-Archives disposition are
+untouched. Architecture: [server security evaluation](../../corp-ai/architecture.md#server-security-evaluation).
+
+## Implementation plan
+
+Proposed at `15d485d`, 2026-10-16, for **phase A only** (phase B is a later
+pickup). **Approved 2026-10-16.**
+
+- **Validation:** Current behaviour re-checked at `15d485d` (no `*.js` change
+  since `60fa0d7`): `_addHonestVerdict()`, `_honestRouteVerdict()`,
+  `_hasDefensiveUpgrade()`, `_globalETRUses()`, `_projectedRunnerRuns()`,
+  `_canFundRezPlan()` match the text; the honest fields are read only by
+  `headless.js` `securitySnapshot` and `securityCalibration`, so phase A
+  cannot move a decision. `_breachMargin`, `_breachHazard`,
+  `_projectedRunnerIncome`, `AIApproachDefense` and both constants do not exist.
+  Gate classification: phase A's oracle is objective (observation-only
+  identity, log/decision-hash parity); phase B stays F4-gated as written.
+  Approach-time audit of the playable sets: only Manegarm Skunkworks and
+  Anoetic Void (System Gateway) are Corp root approach effects; Maintenance
+  Access (Elevation) and Baker (Vantage Point) also hook server approach but
+  are Runner cards. Where I disagree or the spec is underspecified:
+  1. **Manegarm is conditional in this engine.** Its `AIWouldTrigger` declines
+     when `_potentialDamageOnBreach()` exceeds the Grip (the Corp prefers the
+     lethal breach). Its hook returns `null` in that case, computed from the
+     `server` argument (the existing `AIWouldTrigger` reads `attackedServer`).
+  2. **Void's credits compete with the ICE rez plan.** "Spendable credits" is
+     `Credits(corp)` minus the chosen plan's unrezzed ICE rez cost and the rez
+     cost of counted unrezzed root defences, passed to the hook as
+     `AIApproachDefense(server, {spendableCredits})` (Void's own 2-credit
+     reserve is the use cost, so it is not subtracted again).
+  3. **Restricted-credit path.** That path has no honest layers and its
+     `RunCalculator` route exposes no click split. M1 there is
+     `C − honestMandatoryBreakCost` when the route is feasible, and
+     `−Infinity` when no route exists (cost is `Infinity`; bucket `lockout`).
+     M4 on that path: `corpEndsRunUses` lockout applies; `runnerOptions` are
+     appended as a second layer after a single `{credits: cost, clicks: 0}`
+     route layer. This path is rare; the M1 invariant test covers it.
+- **Approach:**
+  1. `AIApproachDefense(server, context)` on Manegarm and Void, placed with
+     their AI hooks; pure. Document in `ai.md` 5.5.
+  2. `_approachDefenses(server, plan)` in `ai_corp.js`: collects hook results
+     for root cards (rezzed, or unrezzed and `_canFundRezPlan(planUnrezzedIce
+     + [card])`). `_addHonestVerdict()` appends one `{card, options:
+     runnerOptions}` layer after the innermost ICE (repeated under global ETR
+     like ICE layers) and adds `corpEndsRunUses` to `globalETRUses` for the
+     honest route only (covering `_projectedRunnerRuns()` → `honestLockout`).
+     Compatibility fields and `_hasDefensiveUpgrade()` untouched.
+     `_addHonestVerdict()` also records `honestRoute {credits, clicks}`,
+     `honestClickBudget`, `honestClickCredits`, `approachDefense` (bool).
+  3. `_breachMargin(server, evaluation)` → `{margin, upperBound}` per the spec;
+     `_projectedRunnerIncome()`; `_breachHazard(server, turnsAhead,
+     evaluation)` table lookup by kind × bucket. Kind from public state:
+     `agendaRemote` = remote with an installed root card (the AI cannot see
+     whether it is an agenda; phase B's common stake handles agenda/trap).
+     The collector uses the true root type, as the spec allows.
+  4. `CORP_AI_BREACH_HAZARD_TABLE` and `CORP_AI_POINT_VALUE` frozen at the top
+     of `ai_corp.js`.
+  5. `securitySnapshot` adds `kind`, `margin`, `upperBound`, `iceCount`,
+     `publicThreatRisk`, `approachDefense`; `securityCalibration` adds
+     `byBucket[kind][bucket] = {turns, breached}` (existing outputs unchanged).
+  6. `scripts/ai-batch/breach-hazard-table.js`: report(s) → table (isotonic per
+     kind, cells under 200 merged with a neighbour), POINT_VALUE from the pool's
+     Corp decks, and the held-out reliability, next-turn and one-ICE checks.
+  7. Runs: fit seeds 1001–1400 and held-out 1401–1600 on the committed pool,
+     default options, `--collector securityCalibration`. Commit report, table
+     and provenance to `documentation/corp-ai/measurements/I2-<sha>-breach-hazard-calibration.json`.
+  Rejected: calling Manegarm's existing `AIWouldTrigger` from the evaluator
+  (reads the live `attackedServer`); a hook with no context (Void would
+  double-spend the ICE rez plan's credits).
+- **Tests:** new `tests/corp-breach-margin.test.js` (scenarios 1–3, 6, incl.
+  the margin/`honestIsSecure` invariant over the L9.0/L9.1 fixtures),
+  extend `tests/security-calibration-collector.test.js` (scenario 4), new
+  `tests/breach-hazard-table.test.js` (scenario 5, constant equals script
+  output). No existing expectation changes.
+- **Risk:** M4 shifts the `honest` collector group on Manegarm/Void boards
+  (observation only). Evaluator cost rises slightly (one hook pass per root
+  card); measured as Corp `decisionLatencyMs` in the identity run. Identity:
+  I0's F4 configuration with `--collector securityCalibration` at `15d485d`
+  (git worktree) and at phase A's head, 7 pairs × 200 seeds; every per-game
+  `winner`, `turns`, `logHash`, `decisionHash` must match, and decision
+  snapshots must equal the baseline. If the reliability check fails, phase A
+  still hands off with the evidence and phase B is recorded as blocked.
+- **Docs:** `ai.md` 5.5 (new hook; `tests/ai-hook-docs.test.js`),
+  `architecture.md` honest-security section (M1/M2/M4 observation fields),
+  roadmap entry, this ticket's Resolution.
 
 All formal prerequisites are `done` as of 2026-10-16. L7.1 closed **not
 adopted**: its `_breachConsequence()` signal exists and is tested but no
@@ -14,14 +200,14 @@ F12 delivered the `realizedIceByRootType` collector and a control calibration.
 Choose the `(ICE, server)` pair that most reduces the agenda points the Runner
 is expected to steal, net of the ICE's cost, instead of the first affordable
 ICE in input-card order for one pre-chosen server. I2 is the first consumer of
-the shared [scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16):
+the shared [scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16):
 it builds the shared measurements M1, M2 and M4 (phase A, observation-only),
 then ranks ICE with them behind its own option (phase B).
 
 **Why this design.** Turning a security measurement into a shared yes/no gate
 has twice made the Corp weaker: [`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote") and the
-[L9.0.1 gate failure](../../backlog/done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](../done/L9.0.1-adopt-honest-lockout.md#resolution)
 (global honest verdict: winRate −0.029, pointsScored −0.282, pointsStolen
 +0.176; remote theft fell while central theft rose). The owner's 2026-10-14
 playtests saw agendas held in HQ and agendas left in weak remotes. The redesign
@@ -29,7 +215,7 @@ asks "how many points do I expect to lose?" in real units: a graded breach
 margin (M1), a measured breach probability per margin (M2), and points at
 stake. The previous draft's uncalibrated `securityDelta` weights
 (0.6/0.25/0.15), soft-lockout 0.7, ×8 scale, `consequenceWeight` floor and
-`futureValue` are **not** used by I2. Per [principle 6](../principles.md#6-shared-measurements-consumer-owned-decisions),
+`futureValue` are **not** used by I2. Per [principle 6](../../corp-ai/principles.md#6-shared-measurements-consumer-owned-decisions),
 M1/M2/M4 are shared; only I2's ranking consumes them here. I3 and I4 adopt
 them through their own options and gates.
 
@@ -63,7 +249,7 @@ the honest fields; only the harness `securitySnapshot` and the
 `securityCalibration` collector do. `_addHonestVerdict()` picks one route with
 `_honestRouteVerdict(layers, credits, clickBudget, clickCredits)` but stores
 only its total. Unknown breaker prices give `null` costs; an unpassable route
-gives `Infinity`. [L9.0.2](L9.0.2-consumer-specific-honest-security.md)
+gives `Infinity`. [L9.0.2](../../corp-ai/specs/L9.0.2-consumer-specific-honest-security.md)
 proposes separate per-consumer honest options (`honestIceLayerAdmission`,
 `honestCriticalRez`).
 
@@ -85,7 +271,7 @@ from `_rankedInstallOptions(corp.HQ.cards, true)` on an at-risk central and
 reads `_centralBreachLossRisk()` (zero when compatibility `isSecure` holds),
 installing when risk ≥ 0.35 falls by ≥ 0.15.
 
-See [architecture.md: install planning today](../architecture.md#install-planning-today).
+See [architecture.md: install planning today](../../corp-ai/architecture.md#install-planning-today).
 
 ## Design
 
@@ -418,7 +604,7 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
   (ai-planning: latency is not a standard guard because `gate` may reuse a
   baseline timed on another machine).
 - `winRate` 0.03 and `pointsScored` 0.25 keep the install track's tolerances
-  ([design note](install-decisions-design.md#acceptance-gates)), not the
+  ([design note](../../corp-ai/specs/install-decisions-design.md#acceptance-gates)), not the
   0.02/0.2 defaults.
 
 **Before the first gate run (freeze, then never change).**
@@ -434,7 +620,7 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
    class). If no real-log boards can meet it, I2 cannot gate; record that here
    and ask the owner. Do not invent boards to reach coverage.
 3. Record the L8.2/I2 ordering decision per the
-   [deception-gates control refresh guidance](../deception-gates.md). Any
+   [deception-gates control refresh guidance](../../corp-ai/deception-gates.md). Any
    decision-changing merge (L8.2, L9.0.2) during evaluation invalidates the
    control; refresh it.
 
@@ -474,10 +660,10 @@ Missing samples are incomplete setup, not a pass.
 
 **Phase A**
 
-- [ ] `AIApproachDefense` is implemented for Manegarm Skunkworks and Anoetic Void, placed with the cards' AI hooks, documented in `documentation/ai.md`, and the playable sets are audited for other approach-time root costs (listed in the Resolution).
-- [ ] `_breachMargin()`, `_breachHazard()`, `_projectedRunnerIncome()`, `CORP_AI_BREACH_HAZARD_TABLE` and `CORP_AI_POINT_VALUE` exist; scenarios 1–6 pass.
-- [ ] The calibration report, table and provenance are committed under `documentation/corp-ai/measurements/`, and the held-out reliability, next-turn and one-ICE checks are recorded with their outcome.
-- [ ] Identity run (observation-only invariant, as L9.0): I0's F4 configuration with `--collector securityCalibration` at the commit before phase A and at phase A's head gives identical per-game `winner`, `turns`, `logHash` and `decisionHash` on every pair, and decision snapshots are identical to the recorded baseline. Corp `decisionLatencyMs` change is recorded.
+- [x] `AIApproachDefense` is implemented for Manegarm Skunkworks and Anoetic Void, placed with the cards' AI hooks, documented in `documentation/ai.md`, and the playable sets are audited for other approach-time root costs (listed in the Resolution).
+- [x] `_breachMargin()`, `_breachHazard()`, `_projectedRunnerIncome()`, `CORP_AI_BREACH_HAZARD_TABLE` and `CORP_AI_POINT_VALUE` exist; scenarios 1–6 pass.
+- [x] The calibration report, table and provenance are committed under `documentation/corp-ai/measurements/`, and the held-out reliability, next-turn and one-ICE checks are recorded with their outcome.
+- [x] Identity run (observation-only invariant, as L9.0): I0's F4 configuration with `--collector securityCalibration` at the commit before phase A and at phase A's head gives identical per-game `winner`, `turns`, `logHash` and `decisionHash` on every pair, and decision snapshots are identical to the recorded baseline. Corp `decisionLatencyMs` change is recorded.
 
 **Phase B**
 

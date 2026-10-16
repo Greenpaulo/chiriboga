@@ -59,6 +59,7 @@ vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), c
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
+const marginInvariant = require('./breach-margin-invariant')(ai); // I2 M1 on every evaluation
 const card = id => Object.assign({}, context.cardSet[id]);
 const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', player: corp,
   rezzed: true, rezCost: 1, strength: 3, subTypes: ['Barrier'],
@@ -2723,4 +2724,119 @@ test('L7.1 boards restore original server references and absent properties', () 
     if (descriptor) assert.strictEqual(corp[key], descriptor.value, key + ' reference restored');
   }
 });
+
+// I2 phase A: breach margin (M1), approach-time defences (M4), breach hazard (M2).
+const plain = value => JSON.parse(JSON.stringify(value)); // vm objects have another realm's prototype
+const compat = result => [result.isSecure, result.hasHardLockout, result.totalMandatoryBreakCost];
+const rootServer = (rootCards, iceCards = []) => {
+  const result = {ice: iceCards, root: rootCards, serverName: 'Remote 1'}; servers = [result]; return result;
+};
+test('I2 M1: priced and click-break routes give the defined margin', () => {
+  context.playerTurn = corp; runner.creditPool = 10;
+  const eli = card(31043); eli.rezzed = true;
+  const srv = server([eli]);
+  const result = honest(srv);
+  const breach = ai._breachMargin(srv, result);
+  // Eli: two clicks; three clicks to break with, 10 credits plus 3 click-credits.
+  assert.deepStrictEqual(plain(result.honestRoute), {credits: 0, clicks: 2});
+  assert.strictEqual(breach.margin, result.runnerCredits - Math.min(2, result.honestClickCredits));
+  context.playerTurn = runner; runner.clickTracker = 2; runner.creditPool = 0; // one click to break with
+  const short = ai._breachMargin(srv, honest(srv));
+  assert.strictEqual(short.margin, -1, 'clickSlack -1 with no spare credits');
+  runner.grip = []; runner.creditPool = 30;
+  const locked = ai._breachMargin(server([etr()]), honest(server([etr()])));
+  assert.strictEqual(locked.margin, -Infinity, 'honest lockout');
+});
+test('I2 M4: Manegarm Skunkworks costs clicks, credits or locks; compatibility unchanged', () => {
+  corp.identityCard = {title: 'Regression ID'};
+  const manegarm = () => Object.assign(card(30042), {rezzed: true});
+  const verdicts = () => [honest(rootServer([manegarm()])), honest(rootServer([]))];
+  context.playerTurn = corp; runner.creditPool = 0;
+  let [withDefense, without] = verdicts();
+  assert.deepStrictEqual(compat(withDefense), compat(without));
+  assert.strictEqual(withDefense.approachDefense, true);
+  assert.deepStrictEqual(plain(withDefense.honestRoute), {credits: 0, clicks: 2}, 'two spare clicks pay');
+  assert.strictEqual(withDefense.honestIsSecure, false);
+  context.playerTurn = runner; runner.clickTracker = 2; runner.creditPool = 10;
+  [withDefense, without] = verdicts();
+  assert.deepStrictEqual(compat(withDefense), compat(without));
+  assert.deepStrictEqual(plain(withDefense.honestRoute), {credits: 5, clicks: 0}, 'one spare click pays 5 credits');
+  assert.strictEqual(withDefense.honestIsSecure, false);
+  runner.creditPool = 0;
+  [withDefense, without] = verdicts();
+  assert.deepStrictEqual(compat(withDefense), compat(without));
+  assert.strictEqual(withDefense.honestIsSecure, true, 'neither clicks nor credits');
+  assert.ok(ai._breachMargin(rootServer([manegarm()]), withDefense).margin < 0);
+  assert.strictEqual(without.honestIsSecure, false);
+  // Unrezzed and unfundable with the ICE plan: no effect.
+  runner.creditPool = 10; corp.creditPool = 1;
+  const unrezzed = Object.assign(card(30042), {rezzed: false});
+  const unfunded = honest(rootServer([unrezzed]));
+  assert.strictEqual(unfunded.approachDefense, false);
+  assert.deepStrictEqual(plain(unfunded.honestRoute), plain(honest(rootServer([])).honestRoute));
+  corp.creditPool = 2;
+  assert.strictEqual(honest(rootServer([unrezzed])).approachDefense, true, 'fundable unrezzed card counts');
+});
+test('I2 M4: Anoetic Void uses follow its AIWouldTrigger, Corp credits and HQ size', () => {
+  corp.identityCard = {title: 'Regression ID'};
+  context.playerTurn = corp; runner.creditPool = 30;
+  const asset = {title: 'Regression asset', cardType: 'asset', player: corp, rezzed: false};
+  const voidCard = () => Object.assign(card(30050), {rezzed: true});
+  corp.HQ.root = corp.HQ.root || [];
+  const hand = (cards, agendas = 0) => {
+    corp.HQ.cards = Array.from({length: cards}, (_, i) => ({title: 'card ' + i, cardType: i < agendas ? 'agenda' : 'operation'}));
+  };
+  const uses = (srv) => voidCard().AIApproachDefense.call(srv.root[0], srv, {spendableCredits: corp.creditPool});
+  hand(10); corp.creditPool = 20;
+  let srv = rootServer([voidCard(), asset]);
+  assert.strictEqual(uses(srv).corpEndsRunUses, 5);
+  let result = honest(srv);
+  assert.strictEqual(result.honestLockout, true, '5 uses cover 4 projected runs');
+  assert.strictEqual(result.hasHardLockout, false, 'compatibility ignores M4');
+  assert.strictEqual(ai._breachMargin(srv, result).margin, -Infinity);
+  corp.creditPool = 3; // one use: the route repeats once
+  const manegarm = Object.assign(card(30042), {rezzed: true});
+  const single = honest(rootServer([manegarm])).honestMandatoryBreakCost;
+  result = honest(rootServer([voidCard(), manegarm]));
+  assert.strictEqual(result.honestLockout, false);
+  assert.ok(result.honestMandatoryBreakCost > single, 'one Void use makes the Runner pay Manegarm twice');
+  corp.creditPool = 20;
+  hand(3, 2); // one non-agenda card
+  assert.strictEqual(uses(rootServer([voidCard(), asset])), null);
+  hand(10);
+  assert.strictEqual(uses(rootServer([voidCard()])), null, 'fewer than 2 cards in the server');
+  const ambush = {title: 'Regression ambush', cardType: 'asset', subTypes: ['Ambush'], player: corp};
+  assert.strictEqual(uses(rootServer([voidCard(), ambush])), null, 'ambush in the server');
+  assert.strictEqual(honest(rootServer([voidCard(), ambush])).approachDefense, false);
+  hand(10); corp.creditPool = 5;
+  assert.strictEqual(uses(rootServer([voidCard(), asset])).corpEndsRunUses, 2, 'credits limit uses');
+});
+test('I2 M2: breach hazard is non-decreasing in margin and turn 2 adds projected income', () => {
+  const kinds = ['agendaRemote', 'otherRemote', 'hq', 'rd', 'archives'];
+  const margins = [-Infinity, -6, -4, -3, -1, 0, 1, 2, 4, 5, 9, 10, 20];
+  const table = vm.runInContext('CORP_AI_BREACH_HAZARD_TABLE', context);
+  const original = ai._breachMargin;
+  try {
+    for (const kind of kinds) for (const ice of [[], [{}], [{}, {}]]) {
+      let previous = -1;
+      for (const margin of margins) {
+        ai._breachMargin = () => ({margin, upperBound: margin});
+        const hazard = ai._breachHazard({ice}, 1, {}, kind);
+        assert.ok(hazard >= previous, kind + ' hazard falls at margin ' + margin);
+        assert.ok(hazard >= 0 && hazard <= 1);
+        previous = hazard;
+      }
+    }
+    assert.strictEqual(ai._projectedRunnerIncome(), 3, 'four clicks, one to run');
+    ai._breachMargin = () => ({margin: -3, upperBound: -3});
+    assert.strictEqual(ai._breachHazard({ice: []}, 2, {}, 'hq'), table.hq.single['0..1']);
+    assert.strictEqual(ai._breachHazard({ice: [{}, {}]}, 2, {}, 'hq'), table.hq.multi['0..1'], 'two ICE use the multi row');
+    assert.strictEqual(ai._breachHazard({ice: []}, 1, {}, 'hq'), table.hq.single['-3..-1']);
+    ai._breachMargin = () => ({margin: -Infinity, upperBound: -Infinity});
+    assert.strictEqual(ai._breachHazard({ice: []}, 2, {}, 'hq'), table.hq.single.lockout);
+    ai._breachMargin = () => ({margin: null, upperBound: 4});
+    assert.strictEqual(ai._breachHazard({ice: []}, 2, {}, 'hq'), table.hq.single.unknown);
+  } finally { ai._breachMargin = original; }
+});
+assert.ok(marginInvariant.checks > 0, 'I2 margin invariant was exercised');
 console.log(tests + ' regression cases passed.');
