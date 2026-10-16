@@ -27,7 +27,9 @@ const definitionFile = field('Definition file');
 const metadataFile = field('Metadata file');
 const packCode = field('Pack code');
 
-const batches = [...tracker.matchAll(/^\|\s*(\d+)\s*\|\s*(\d+)\s*[–-]\s*(\d+)\s*\|\s*([A-Za-z ]+?)\s*\|/gm)]
+// Optimisation has its own queue; automatic briefing selects implementation only.
+const implementationQueue = tracker.split(/^## Batch queue\s*$/m)[1]?.split(/^## /m)[0] || "";
+const batches = [...implementationQueue.matchAll(/^\|\s*(\d+)\s*\|\s*(\d+)\s*[–-]\s*(\d+)\s*\|\s*([A-Za-z ]+?)\s*\|/gm)]
   .map(m => ({n: Number(m[1]), first: Number(m[2]), last: Number(m[3]), status: m[4]}));
 const requested = process.argv[2] ? Number(process.argv[2]) : null;
 const batch = requested !== null

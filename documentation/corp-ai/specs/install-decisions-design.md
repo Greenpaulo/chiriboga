@@ -329,6 +329,35 @@ worth something in proportion to what is at stake; everything else adds.
 `consequenceWeight` never reaches zero so an empty server still gains bounded
 value from a lockout.
 
+#### Candidate breach-probability input
+
+[I4's candidate](I4-agenda-installation-and-scoring-commitment.md#things-to-consider)
+would expose an estimated next-turn breach probability from
+`_evaluateServerSecurity()` or a nearby helper, using `securityCalibration`
+counts by verdict and scope (all servers with stakes, and agenda remotes).
+The collector does not yet provide full server-type buckets; those would
+need an observation-only extension before a lookup by server type is possible.
+This is a measurement, not a replacement
+for `isSecure`: introduce it observation-only with an option-on/off identity
+run, following [L9.0](../../backlog/done/L9.0-lockout-honesty.md#resolution),
+before any consumer reads it behind that consumer's own option and gate.
+These rates describe the aggressive, frequently running stock Runner AI;
+humans may breach more or less often. Sample support and extrapolation from
+one Runner turn to an exposure window need validation.
+
+The existing `scoringValue` owns I4's completion value, so probability is a
+candidate input there, not a new additive component. Its present fixed
+`planCompletion` formula does not use probability; adoption would require an
+explicit revision of that formula and its conversion to credit-equivalents,
+bounds and calibration, plus reconciliation with the "only product" rule
+above if expected-value multiplication is proposed. This note changes none
+of those rules or coefficients. L7.1's `_breachConsequence` owns severity
+(how bad); the probability estimate owns likelihood (how likely). Count each
+effect once, respecting the [L8.8 ownership table](L8.8-marginal-deception-value.md#distinguish-mechanisms-and-prevent-double-counting),
+and do not add another consequence reward or penalty alongside the owning
+component. Comparing the cost of waiting with exposure risk is the purpose;
+a fresh shared yes/no threshold would lose that comparison.
+
 ## Acceptance gates
 
 Every item that changes what the Corp does (I2 to I9) is gated under

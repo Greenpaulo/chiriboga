@@ -31,7 +31,7 @@ in card-sets.md.
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
 | `elevation` | playable | 82 | 76 | 6 | 0 | 0 | 55 / 64 | false / false | yes |
-| `vantagepoint` | in-progress | 66 | 66 | 0 | 0 | 0 | 60 / 62 | true / true | no |
+| `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
@@ -90,7 +90,8 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
 | `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
-| **Total** | 92 | 35 | 25 | 32 | 6 |
+| `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
+| **Total** | 115 | 55 | 25 | 35 | 7 |
 
 **Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
 
@@ -100,6 +101,7 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30033 Smartware Distributor
 - 30034 Verbal Plasticity
 - 31038 Prepaid VoicePAD
+- 36011 Sell Out
 
 **Intent hook and `AIWorthKeeping` (candidates for W5: the hand-written check may duplicate a shared need):**
 
@@ -115,6 +117,11 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 35011 Rent Rioters
 - 35022 Open Market
 - 35034 Side Hustle
+- 36003 The Tungsten Tailor
+- 36007 Nurse Hạnh
+- 36016 Underdome Irregulars
+- 36020 Methuselah
+- 36021 Touchstone
 
 **Neither hook nor subtype fallback (discarded first):**
 
@@ -150,3 +157,6 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 35017 Transfer of Wealth
 - 35025 Illumination
 - 35029 Azimat
+- 36005 Lampades
+- 36011 Sell Out
+- 36012 Tailgate
