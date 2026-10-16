@@ -249,7 +249,7 @@ var CardRenderer = {
       }, this);
     }
 
-    UpdateVisibility(forceHidden = false) {
+    UpdateVisibility(forceHidden = false, dimmed = false) {
       if (forceHidden || (this.hideWhenZero && !this.address[this.key])) {
         this.sprite.visible = false;
         this.richText.visible = false;
@@ -257,6 +257,11 @@ var CardRenderer = {
         this.sprite.visible = true;
         this.richText.visible = true;
       }
+      //Dim (but keep visible) counters on the card being read so
+      //the enlarged printed text stays readable; restored per-frame by caller.
+      var dimAlpha = dimmed ? 0.3 : 1.0;
+      this.sprite.alpha = dimAlpha;
+      this.richText.alpha = dimAlpha;
     }
 
     Update() {
@@ -847,13 +852,14 @@ var CardRenderer = {
             } else this.trashCostSprite.visible = false;
           }
           if (this.strengthSprite != null) {
-            //icebreaker
+            //icebreaker: non-ICE cards face the viewer (table rotation is
+            //viewer-relative, netting upright), so the number stays unrotated
+            //for both viewers
             this.strengthSprite.x = -108;
             this.strengthSprite.y = 78;
             this.strengthText.x = -7;
             this.strengthText.y = 0;
-            if (viewingPlayer == runner) this.strengthText.rotation = 0;
-            else this.strengthText.rotation = Math.PI;
+            this.strengthText.rotation = 0;
           }
           this.glowSprite.texture = this.glowTextures.unzoomed;
           if (!showFace) {
@@ -1425,7 +1431,8 @@ var CardRenderer = {
             this.card.storedPosition.y = this.y;
             this.card.destinationPosition.x = this.x;
             this.card.destinationPosition.y = this.y;
-            if (this.card.card.player == corp)
+            //dropped cards face the viewer, like all non-ICE cards
+            if (viewingPlayer == corp)
               this.card.destinationRotation = Math.PI;
             else this.card.destinationRotation = 0;
           }
@@ -2120,7 +2127,8 @@ var CardRenderer = {
 				this.counters[i],
 				choosingSubroutines,
 				relevantIce
-			  )
+			  ),
+			  pixi_shouldDimCounterWhileReadingZoom(this.counters[i])
 			);
 			this.counters[i].sprite.parent.addChild(this.counters[i].sprite);
 			this.counters[i].richText.parent.addChild(this.counters[i].richText);
@@ -2336,6 +2344,17 @@ function pixi_shouldHideCounterDuringSubroutineChoice(
     choosingSubroutines &&
     counter.key == "advancement" &&
     counter.address === relevantIce
+  );
+}
+
+//Translucency (not hiding) for reading zoom: any counter on the card
+//currently zoomed for reading renders at reduced alpha so the enlarged
+//printed text stays readable. Counters on other cards stay fully opaque.
+function pixi_shouldDimCounterWhileReadingZoom(counter) {
+  return (
+    !!counter.address &&
+    !!counter.address.renderer &&
+    counter.address.renderer.zoomed === true
   );
 }
 

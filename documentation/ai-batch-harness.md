@@ -188,6 +188,26 @@ supplements the full regression suite and any ticket-specific strategic gate.
 See the [completed investigation handoff](corp-ai-regression/gated-fix-handoff.md)
 for the evidence and remaining scoring deficit against the historical H0 build.
 
+### Fresh main-versus-checkout timing comparison
+
+```sh
+node scripts/compare-ai-main.js --format startup
+```
+
+This runs local `main` first in a temporary detached worktree, then the current
+checkout including uncommitted changes, then prints the paired comparison,
+including decision latency. Both runs use seeds 1–200 and the same worker count.
+It does not switch the current checkout, fetch main, or replace accepted baselines.
+Reports are retained in `bench/startup/paired-main/<unique-run>/main.json` and
+`candidate.json`; the temporary main worktree is removed after success or failure.
+The deck pool and precons must match main, otherwise the command stops before
+playing games rather than compare different inputs.
+
+Use `--jobs 4` to pin concurrency. `--seeds 1-3` permits a small diagnostic run;
+it is not a full acceptance benchmark. Omitting `--format startup` selects the
+beginner pool and `bench/paired-main/`. Sequential runs reduce stale-baseline
+machine-load differences; changing load between runs can still affect timings.
+
 ### Refreshing the accepted baseline after a merge
 
 Both `refresh-ai-baseline.js` and `compare-ai-branch.js` default to the beginner
