@@ -22,7 +22,7 @@ before viewing candidate gate results. The roadmap table below owns the current 
 
 ## Current implementation order
 
-Updated 2026-10-13. This is the preferred sequence for the deception/install
+Updated 2026-10-16. This is the preferred sequence for the deception/install
 track; item dependencies below remain the formal blockers. Completed merge work
 is recorded in the done tables and the historical merge plan.
 
@@ -30,14 +30,15 @@ is recorded in the done tables and the historical merge plan.
 |---|---|---|---|
 | — | [L8.5](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | done (merged) | Revised full gate passed; merge complete |
 | — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
-| 2 | [F12](../backlog/done/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
-| 3 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready (blocked on F12) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
-| 4 | [I2](specs/I2-ice-selection-by-marginal-security.md) | proposed | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
-| 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
-| 6 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
+| — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Passive measurement and observer identity evidence delivered; all-root calibration usable, postured coverage insufficient |
+| 1 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready | Re-ground and freeze the tell-reduction gate, then implement and adopt |
+| 2 | [I2](specs/I2-ice-selection-by-marginal-security.md) | proposed | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
+| 3 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
+| 4 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
-F11 is done, satisfying F12's dependency. L8.2-before-I2 and L8.9-before-I3
-are sequencing preferences rather than additional formal dependencies. Do not
+F11 and F12 are done, satisfying L8.2's remaining formal dependencies. L8.2
+is next in this track; its gate reconciliation and calibration work remain.
+L8.2-before-I2 and L8.9-before-I3 are sequencing preferences rather than additional formal dependencies. Do not
 adopt a later policy using a control predating an adopted prerequisite.
 [L9.0.1](../backlog/done/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
 [L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md) proposes separate consumer gates; refresh affected controls after any adoption. Complete L8.7's
