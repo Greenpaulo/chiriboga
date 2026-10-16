@@ -255,24 +255,26 @@ class CorpAI {
 
   //Public, active cards can expose a generic server-redirection hook. The
   //wording fallback keeps older implementations useful without title checks.
-  _archivesIsBackdoorToHQ() {
-    var activeCards = ActiveCards(runner);
-    for (var i = 0; i < activeCards.length; i++) {
-      var card = activeCards[i];
+  _archivesIsBackdoorTo(server) {
+    for (var card of ActiveCards(runner)) {
       if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (
-        typeof card.AIRedirectsRun == "function" &&
-        card.AIRedirectsRun.call(card, corp.archives, corp.HQ)
-      )
-        return true;
-      var text = (card.cardText || "").toString().toLowerCase();
-      if (
-        text.indexOf("run archives") > -1 &&
-        text.indexOf("attacked server to hq") > -1
-      )
-        return true;
+      if (typeof card.AIRedirectsRun == "function") {
+        if (card.AIRedirectsRun.call(card, corp.archives, server)) return true;
+      } else if (server == corp.HQ) {
+        var text = (card.cardText || "").toString().toLowerCase();
+        if (text.indexOf("run archives") > -1 && text.indexOf("attacked server to hq") > -1) return true;
+      }
     }
     return false;
+  }
+
+  _archivesIsBackdoorToHQ() {
+    return this._archivesIsBackdoorTo(corp.HQ);
+  }
+
+  _archivesBackdoorDestinations() {
+    return [corp.HQ, corp.RnD].filter(server => server == corp.HQ ?
+      this._archivesIsBackdoorToHQ() : this._archivesIsBackdoorTo(server));
   }
 
   //Read a declarative, public-board description of the value a Runner card
@@ -482,6 +484,29 @@ class CorpAI {
   //Fair, order-agnostic probability that accessing accessCount cards of
   //server.cards yields at least pointsNeeded agenda points. The Corp may count
   //its own server's contents but never uses the engine's hidden card order.
+  // Public resource bound for a terminal bonus breach. Only Corp-owned contents
+  // are counted; combinations do not consult HQ/R&D order or Runner private cards.
+  _terminalCentralAccessAffordable(server, accessCount, pool, clicks) {
+    if (pool < 0 || clicks < 0) return false;
+    var needed = AgendaPointsToWin() - AgendaPoints(runner);
+    var states = [{count: 0, points: 0, credits: 0, clicks: 0}];
+    return AIWithRunContext(server, () => {
+      for (var card of server.cards) {
+        if (!CheckCardType(card, ["agenda"]) || CardEffectsForbid("steal", card)) continue;
+        var cost = StealCost(card);
+        for (var state of states.slice()) {
+          var next = {count: state.count + 1,
+            points: state.points + AgendaPointsForCard(card, runner),
+            credits: state.credits + cost.credits, clicks: state.clicks + cost.clicks};
+          if (next.count > accessCount || next.credits > pool || next.clicks > clicks) continue;
+          if (next.points >= needed) return true;
+          states.push(next);
+        }
+      }
+      return false;
+    });
+  }
+
   _centralWinProbability(server, accessCount, pointsNeeded) {
     if (!server || !server.cards || server.cards.length < 1) return 0;
     if (accessCount < 1) return 0;
@@ -571,12 +596,14 @@ class CorpAI {
       ret.winProbability,
       Math.min(1, ret.pointsExposed / Math.max(1, pointsNeeded)),
     );
-    if (server == corp.archives && this._archivesIsBackdoorToHQ()) {
-      var hq = this._breachConsequence(corp.HQ);
-      if (hq.weight > ret.weight) {
-        ret = hq;
-        ret.backdoorTo = corp.HQ;
-      } else ret.backdoorTo = corp.HQ;
+    if (server == corp.archives) {
+      for (var destination of this._archivesBackdoorDestinations()) {
+        var consequence = this._breachConsequence(destination);
+        if (consequence.weight > ret.weight) {
+          ret = consequence;
+          ret.backdoorTo = destination;
+        } else if (!ret.backdoorTo) ret.backdoorTo = destination;
+      }
     }
     return ret;
   }
@@ -668,13 +695,15 @@ class CorpAI {
         }) < this._protectionScore(corp.RnD, {})
       ) {
         if (
-          this._archivesIsBackdoorToHQ() &&
+          this._archivesIsBackdoorTo(corp.HQ) &&
           this._protectionScore(corp.archives, {}) <
             this._protectionScore(corp.HQ, {})
         )
           preferredServer = corp.archives;
         else preferredServer = corp.HQ;
-      } else preferredServer = corp.RnD;
+      } else preferredServer = this._archivesIsBackdoorTo(corp.RnD) &&
+        this._protectionScore(corp.archives, {}) < this._protectionScore(corp.RnD, {}) ?
+        corp.archives : corp.RnD;
     }
     if (
       upgrade &&
@@ -3669,10 +3698,16 @@ class CorpAI {
   }
 
   _restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext) {
-    if (typeof RunCalculator == "undefined" || !AIWithRunContext(server, () =>
+    if (typeof RunCalculator == "undefined") return null;
+    var conditionalTags = eligibleIce.some(ice =>
+      (this._iceSubroutineEffects(ice, evaluationContext.iceAIs ? evaluationContext : undefined) || []).some(sr =>
+        sr.some(branch => branch.some(effect => typeof effect == "object" &&
+          (effect.ifTags !== undefined || effect.perTag)))));
+    if (!conditionalTags && !AIWithRunContext(server, () =>
         evaluationContext.runnerActiveCards.some(card => CheckHasAbilities(card) &&
-          typeof card.AIRunRestrictedCredits == "function" &&
-          card.AIRunRestrictedCredits.call(card, server) > 0))) return null;
+          ((typeof card.AIRunRestrictedCredits == "function" &&
+            card.AIRunRestrictedCredits.call(card, server) > 0) ||
+            card.AIRunOrderedDraw === true)))) return null;
     var unpricedMandatory = [];
     var unpricedAvoidance = [];
     var unsupportedMandatory = [];
@@ -4279,7 +4314,9 @@ class CorpAI {
     }
     //new servers have a score of 1 (because they are empty)
     if (server == null) return 1;
-    var archivesIsBackdoorToHQ = this._archivesIsBackdoorToHQ();
+    var backdoorDestinations = options.ignoreBackdoorFromArchives ? [] : this._archivesBackdoorDestinations();
+    var archivesIsBackdoorToHQ = backdoorDestinations.includes(corp.HQ);
+    var archivesIsBackdoor = backdoorDestinations.length > 0;
     if (options.ignoreBackdoorFromArchives) archivesIsBackdoorToHQ = false;
     //for 'protecting' check we build a score considering how much ice and how effective the ice is
     var ret = 0;
@@ -4310,23 +4347,17 @@ class CorpAI {
       //Archives uses the recent, state-aware pressure model below instead of a
       //permanent lifetime counter. Backdoor runs retain HQ's historical signal.
       if (
-        (server != corp.archives || archivesIsBackdoorToHQ) &&
+        (server != corp.archives || archivesIsBackdoor) &&
         typeof server.AISuccessfulRuns !== "undefined"
       )
         successfulRuns = server.AISuccessfulRuns;
-      //if archives is a backdoor to HQ, consider successful runs on HQ
-      if (
-        server == corp.archives &&
-        archivesIsBackdoorToHQ &&
-        corp.HQ.AISuccessfulRuns !== "undefined"
-      ) {
-        if (corp.HQ.AISuccessfulRuns > successfulRuns)
-          successfulRuns = corp.HQ.AISuccessfulRuns;
+      if (server == corp.archives) for (var destination of backdoorDestinations) {
+        successfulRuns = Math.max(successfulRuns, destination.AISuccessfulRuns || 0);
       }
       if (successfulRuns > 0) ret -= Math.round(Math.sqrt(successfulRuns));
     }
     //if it is archives we will deprioritise protection (if it is not a backdoor into HQ)
-    if (server == corp.archives && !archivesIsBackdoorToHQ) {
+    if (server == corp.archives && !archivesIsBackdoor) {
       ret += 3; //archives (the 3 is arbitrary)
       ret -= this._serverRunPressure(server, securityEvaluation).penalty;
     }
@@ -4357,13 +4388,17 @@ class CorpAI {
         ret += corp.HQ.cards.length - this._agendaPointsInServer(corp.HQ) - 2.5;
       }
     }
+    if (server == corp.archives && archivesIsBackdoor) {
+      ret -= Math.max(...backdoorDestinations.map(destination => this._centralServerThreat(destination).penalty));
+      if (!archivesIsBackdoorToHQ) ret -= this._breachConsequence(server).weight;
+    }
     //Central multi-access and alternative central win conditions make the
     //relevant central more urgent than an equivalently defended remote.
     if (server == corp.HQ || server == corp.RnD)
       ret -= this._centralServerThreat(server).penalty;
     if (options.returnArchivesLowerScoreForHQIfBackdoor) {
       //if it is HQ we will return the lowest protection of either HQ or Archives
-      if (server == corp.HQ && archivesIsBackdoorToHQ) {
+      if (backdoorDestinations.includes(server)) {
         var archivesProt = this._protectionScore(corp.archives, options);
         if (archivesProt < ret) ret = archivesProt;
       }
@@ -4584,7 +4619,7 @@ class CorpAI {
     //An empty Archives is valueless only when there is no direct access stake,
     //route into HQ, public successful-run reward, or recent observed pressure.
     if (server !== corp.archives) return false;
-    if (this._archivesIsBackdoorToHQ()) return false;
+    if (this._archivesBackdoorDestinations().length) return false;
     for (var i = 0; i < corp.archives.cards.length; i++) {
       if (CheckCardType(corp.archives.cards[i], ["agenda"])) return false;
     }
@@ -5195,7 +5230,7 @@ class CorpAI {
   _serverHasStakes(server, securityEvaluation) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
     if (server == corp.archives) {
-      if (this._archivesIsBackdoorToHQ()) return true;
+      if (this._archivesBackdoorDestinations().length) return true;
       if (this._agendasInServer(corp.archives) > 0) return true;
       return this._serverRunPressure(corp.archives, securityEvaluation).penalty > 0;
     }

@@ -19,7 +19,7 @@ resource.AIModifyIceAI.call(resource, model, 0);
 try {
   assert.strictEqual(model.sr.length, ice.subroutines.length,
     'Stick and Poke must model its added subroutine during the active encounter');
-  assert.deepStrictEqual(Array.from(model.sr[0][0]), ['netDamage']);
+  assert.deepStrictEqual(Array.from(model.sr[0][0]), ['netDamage', 'drawCard']);
   assert.ok(model.sr[2][1].includes('endTheRun'), 'Event Horizon final row stays aligned');
   console.log('Stick and Poke active encounter model passed.');
 } catch (error) {

@@ -285,17 +285,21 @@ outermost-only bypasses use `AIBypassesOneIce` and `AIBypassesOutermostIce`
 While one of those public bypasses is live, single-ICE agenda remotes take a
 bounded protection penalty; multi-ICE servers keep their inner layer. Server
 redirects use `AIRedirectsRun` plus a wording fallback (the former Sneakdoor
-Beta title check is gone); the Corp asks only about Archives-to-HQ redirects
-(`_archivesIsBackdoorToHQ()`). Cards updated: Femme Fatale and Sneakdoor Beta
+Beta title check is gone). `_archivesIsBackdoorTo(server)` evaluates both HQ
+and R&D for consequence, protection, upgrade placement, Archives value and
+stakes; `_archivesIsBackdoorToHQ()` remains the HQ convenience wrapper. Cards updated: Femme Fatale and Sneakdoor Beta
 (`systemupdate2021.js`), Fransofia Ward and Maintenance Access (`elevation.js`).
 Egret, Chromatophores and Rielle "Kit" Peddler already exposed enough subtype
 hooks and needed no change.
 
 **Out-of-run redirects.** A redirect paid by a run-only credit source must be
 detected during Corp planning. Baker's `AIRedirectsRun` evaluates its stealth
-credit sources in the prospective Archives-run context and restores the real
-`attackedServer` in `try/finally` (card-local today; item F2 migrates it to a
-shared guarded helper).
+credit sources in the prospective Archives-run context through the shared
+`AIWithRunContext`/`AIWithHypothetical` guards. It reserves one legal Stealth
+credit and checks a public surviving origin/destination route, including finite
+reruns and projected preparation clicks; Corp planning never reads Grip or Stack
+identities. The guards restore live server context and source counters even
+when evaluation throws.
 
 ## Public threat memory
 

@@ -126,6 +126,13 @@ class RunnerAI {
   }
   
   AIPreserveOutsideCredits(doing, card, amount) {
+    // Ordinary trash must use the pool when hosted funding is indispensable
+    // for a public winning follow-up. SpendCredits consumes this same policy.
+    if (currentPhase.identifier == "Run Accessing" && doing == "paying trash costs" &&
+        amount > 0 && runner.creditPool >= amount &&
+        CreditPoolCanBeUsed(runner, "spend", doing, card) &&
+        !this._accessPaymentPreservesWinningRun(this._accessTrashPayment(amount, false)) &&
+        this._accessPaymentPreservesWinningRun({pool: amount})) return true;
     if (!attackedServer || typeof OutsideCreditDamageSources != "function" ||
         OutsideCreditDamageSources(attackedServer).length < 1) return false;
     // Follow the real route's source allocation when it is for this server.
@@ -270,6 +277,13 @@ class RunnerAI {
         return this.cachedPotentials[i].potential;
     }
     return result;
+  }
+
+  // Value from an ordinary breach, excluding events and active run abilities.
+  _getCachedBreachPotential(server) {
+    var entry = this.cachedPotentials.find(value => value.server == server);
+    if (!entry) return 0;
+    return entry.breachPotential === undefined ? entry.potential : entry.breachPotential;
   }
 
   //get cached complete run cost or Infinity
@@ -755,10 +769,19 @@ class RunnerAI {
 	data.otherCredits = AvailableCredits(runner) - runner.creditPool + data.otherCreditOffset; //sources other than credit pool
     data.damageLimit = runner.grip.length + data.damageOffset; //(this gets updated during the run calculation if data.clicks is used up)
     //this works because potentials are calculated before costs in (optionList.includes("run")). Note the false here prevents an infinite loop
-    if (this._getCachedPotential(data.server) < 2.0)
+    // A supported immediate win may spend useful Grip cards. Retention is a
+    // soft preference for ordinary routes, independent of tactical survival.
+    data.terminalGoal = !!this._evaluatingWinningRun ||
+      (attackedServer == data.server && !!this._publicWinningAgenda(data.server));
+    this.rc.terminalGoal = data.terminalGoal;
+    this.rc.terminalStealCost = !this._evaluatingWinningRun && attackedServer == data.server && data.terminalGoal ?
+      StealCost(this._publicWinningAgenda(data.server)) : null;
+    if (!data.terminalGoal && this._getCachedPotential(data.server) < 2.0)
       data.damageLimit -= this.cardsWorthKeeping.length; //the 2.0 is arbitrary but basically don't risk stuff for lowish potential
     if (data.damageLimit < 0) data.damageLimit = 0;
-	data.tagLimit =
+	// Post-run cleanup cannot displace a supported immediate winning steal.
+	// Infinity also prevents ValidPoint from recomputing a cleanup budget.
+	data.tagLimit = data.terminalGoal ? Infinity :
       Math.min(data.clicks, Math.floor(data.poolCredits * 0.5)) - runner.tags; //allow 1 tag for each click+2[c] remaining (pool only atm) but less if tagged (this gets updated during the run calculation)
     if (data.tagLimit < 0) data.tagLimit = 0;
 	return data;
@@ -1194,6 +1217,146 @@ class RunnerAI {
 	return bestpath;
   }
   
+  // Discretionary plays and ordinary run potential cannot displace a known winning steal.
+  // Use only public installed agendas and an ordinary run possible right now.
+  _publicWinningAgenda(server) {
+    if (this._breachWouldBePrevented(ActiveCards(runner), server)) return null;
+    return this._publicBreachAgendaCandidates(server).find(agenda => PlayerCanLook(runner, agenda) &&
+      CheckCardType(agenda, ["agenda"]) &&
+      AgendaPoints(runner) + AgendaPointsForCard(agenda, runner) >= AgendaPointsToWin() &&
+      !CardEffectsForbid("steal", agenda)) || null;
+  }
+
+  _publicBreachAgendaCandidates(server, candidateOnly = false) {
+    var candidates = server.root.slice();
+    for (var card of ActiveCards(runner)) {
+      if (typeof card.AIWinningBreachAgenda !== "function") continue;
+      var agenda = card.AIWinningBreachAgenda.call(card, server, candidateOnly);
+      if (agenda && candidates.indexOf(agenda) < 0) candidates.push(agenda);
+    }
+    return candidates;
+  }
+
+  async _winningRunBeforeOpportunity() {
+    var activeCards = ActiveCards(runner);
+    var choices = currentPhase.Enumerate.run();
+    for (var choice of choices) {
+      var server = choice.server;
+      if (this._breachWouldBePrevented(activeCards, server)) continue;
+      for (var agenda of this._publicBreachAgendaCandidates(server)) {
+        if (!PlayerCanLook(runner, agenda) || !CheckCardType(agenda, ["agenda"]) ||
+            AgendaPoints(runner) + AgendaPointsForCard(agenda, runner) < AgendaPointsToWin()) continue;
+        var previousState = AIIceEncounterSaveState();
+        var previousWinningRun = this._evaluatingWinningRun;
+        var cost;
+        try {
+          attackedServer = server; encountering = false; approachIce = -1;
+          if (CardEffectsForbid("steal", agenda)) continue;
+          cost = StealCost(agenda);
+          if (cost.clicks > runner.clickTracker - 1) continue;
+          this._evaluatingWinningRun = true;
+          var path = await this._commonRunCalculationChecksAsync(server, null, null, false);
+          if (!path || !path.length) continue;
+          // Steal costs are paid after the run's breaks and rebates. Recurring
+          // breaker credits may fund the route, but are not promised for stealing.
+          for (var candidate of this.rc.paths.slice().reverse()) {
+            var last = candidate[candidate.length - 1];
+            var other = (last.paymentPoolOnly ? 0 : this.rc.baseOtherCredits) +
+              (last.restrictedCreditsPaid || 0);
+            var remainingPool = this.rc.basePoolCredits - last.runner_credits_lost -
+              (last.runner_credits_reserved || 0) - Math.max(0, last.runner_credits_spent - other);
+            var remainingClicks = runner.clickTracker - 1 - last.runner_clicks_spent;
+            if (remainingPool >= cost.credits && remainingClicks >= cost.clicks) {
+              this.cachedBestPath = candidate;
+              return server;
+            }
+          }
+        } finally {
+          this._evaluatingWinningRun = previousWinningRun;
+          AIIceEncounterRestoreState(previousState);
+        }
+      }
+    }
+    return null;
+  }
+
+  // Evaluate only public winning agendas and installed resources. Independent
+  // calculators leave the live run path/cost caches intact. Temporary run
+  // credits expire before the next run and cannot form part of its reserve.
+  _accessPaymentPreservesWinningRun(payment) {
+    if (runner.clickTracker < 1 || playerTurn != runner) return true;
+    var targets = [];
+    for (var server of corp.remoteServers) {
+      for (var agenda of server.root) {
+        if (agenda != accessingCard && PlayerCanLook(runner, agenda) &&
+            CheckCardType(agenda, ["agenda"]) &&
+            AgendaPoints(runner) + AgendaPointsForCard(agenda, runner) >= AgendaPointsToWin())
+          targets.push({server: server, agenda: agenda});
+      }
+    }
+    if (!targets.length) return true;
+    var old = AIIceEncounterSaveState();
+    var pool = runner.creditPool;
+    var temporary = runner.temporaryCredits;
+    var hosted = new Map();
+    for (var spend of payment.hosted || []) hosted.set(spend.card, spend.card.credits);
+    var feasible = (target) => {
+      attackedServer = target.server; encountering = false; approachIce = -1;
+      runner.temporaryCredits = Math.max(0, corp.badPublicity || 0);
+      if (this._breachWouldBePrevented(ActiveCards(runner), target.server) ||
+          CardEffectsForbid("steal", target.agenda)) return false;
+      var cost = StealCost(target.agenda);
+      if (runner.clickTracker - 1 < cost.clicks) return false;
+      var rc = new RunCalculator();
+      rc._runnerPlanning = true; rc.suppressOutput = true; rc.terminalGoal = true;
+      var paths = rc.Calculate(target.server, runner.clickTracker - 1, runner.creditPool,
+        AvailableCredits(runner) - runner.creditPool, runner.grip.length,
+        Infinity, false, null);
+      return paths.some(function (path) {
+        var last = path[path.length - 1];
+        var other = (last.paymentPoolOnly ? 0 : rc.baseOtherCredits) + (last.restrictedCreditsPaid || 0);
+        var remainingPool = rc.basePoolCredits - last.runner_credits_lost -
+          (last.runner_credits_reserved || 0) - Math.max(0, last.runner_credits_spent - other);
+        return remainingPool >= cost.credits &&
+          runner.clickTracker - 1 - last.runner_clicks_spent >= cost.clicks;
+      });
+    };
+    try {
+      runner.temporaryCredits = 0;
+      var available = targets.filter(feasible);
+      if (!available.length) return true;
+      runner.creditPool -= payment.pool || 0;
+      for (var spend of payment.hosted || []) spend.card.credits -= spend.amount;
+      return available.some(feasible);
+    } finally {
+      runner.creditPool = pool; runner.temporaryCredits = temporary;
+      for (var entry of hosted) entry[0].credits = entry[1];
+      AIIceEncounterRestoreState(old);
+    }
+  }
+
+  // Mirror SpendCredits and runAccessingCard: source eligibility uses the
+  // engine payment reason, distinct from the Corp click-to-trash action.
+  _accessTrashPayment(amount, preservePool) {
+    var pool = 0;
+    var remaining = amount;
+    var canUsePool = CreditPoolCanBeUsed(runner, "spend", "paying trash costs", accessingCard);
+    if (canUsePool && preservePool) {
+      pool = Math.min(remaining, runner.creditPool); remaining -= pool;
+    }
+    remaining -= Math.min(remaining, Math.max(0, runner.temporaryCredits || 0));
+    var hosted = [];
+    for (var source of ActiveCards(runner)) {
+      if (remaining > 0 && source.credits > 0 && typeof source.canUseCredits == "function" &&
+          source.canUseCredits("paying trash costs", accessingCard)) {
+        var spend = Math.min(remaining, source.credits);
+        hosted.push({card: source, amount: spend}); remaining -= spend;
+      }
+    }
+    if (canUsePool) pool += Math.min(remaining, Math.max(0, runner.creditPool - pool));
+    return {pool: pool, hosted: hosted};
+  }
+
   //basic pre-checks e.g. don't install over a unique, or console over a console, don't install resources when tagged
   _passBasicWastefulInstallCheck(cardToInstall) {
 	if (this._uniqueCopyAlreadyInstalled(cardToInstall)) return false;
@@ -1215,6 +1378,75 @@ class RunnerAI {
 	return true;
   }
 
+  // Carry one legal destination through command choice and install choice.
+  // Explicit card preferences retain their veto/hosting contract.
+  _preferredInstallChoice(card, choices = ChoicesCardInstall(card)) {
+    if (!choices.length) return -1;
+    if (typeof card.AIPreferredInstallChoice == "function") {
+      var preferred = card.AIPreferredInstallChoice.call(card, choices);
+      return preferred >= 0 && preferred < choices.length ? preferred : -1;
+    }
+    var best = -1, bestCost = Infinity, bestValue = -Infinity;
+    for (var i = 0; i < choices.length; i++) {
+      var host = choices[i].host;
+      // Avoid multiplying a publicly exposed resource loss by hosting on it.
+      if (host && host.player == runner && host.cardType == "resource" && runner.tags > 0) continue;
+      var cost = InstallCost(card, host);
+      var value = host && typeof host.AIHostedInstallValue == "function" ?
+        host.AIHostedInstallValue.call(host, card) : 0;
+      if (cost < bestCost || (cost == bestCost && value > bestValue)) {
+        best = i; bestCost = cost; bestValue = value;
+      }
+    }
+    return best;
+  }
+
+  // Evaluate a passive install without firing gameplay triggers or updating
+  // live route caches. Own zones/resources are restored even if a hook throws.
+  _runAfterInstall(card, host, server, runEvent = null) {
+    var gripIndex = runner.grip.indexOf(card);
+    if (gripIndex < 0 || runner.clickTracker < 2) return null;
+    var destination = host ? host.hostedCards : runner.rig[card.cardType == "program" ? "programs" :
+      card.cardType == "hardware" ? "hardware" : "resources"];
+    var cost = InstallCost(card, host);
+    var old = {location: card.cardLocation, host: card.host, pool: runner.creditPool,
+      clicks: runner.clickTracker, server: attackedServer, keeping: this.cardsWorthKeeping};
+    var counters = typeof card.AIHypotheticalInstallCounters == "function" ?
+      card.AIHypotheticalInstallCounters.call(card) : {};
+    var oldCounters = new Map(Object.keys(counters).map(key => [key,
+      Object.getOwnPropertyDescriptor(card, key)]));
+    try {
+      runner.grip.splice(gripIndex, 1); destination.push(card);
+      for (var key of Object.keys(counters)) card[key] = counters[key];
+      card.cardLocation = destination; card.host = host;
+      runner.creditPool -= cost; runner.clickTracker--;
+      this.cardsWorthKeeping = old.keeping.filter(kept => kept != card);
+      attackedServer = null;
+      var data = this._calculateRunPathPieceBegin({server: server, poolCreditOffset: 0,
+        otherCreditOffset: 0, clickOffset: -1, damageOffset: 0});
+      var rc = new RunCalculator(); rc.suppressOutput = true; rc._runnerPlanning = true; rc.runEvent = runEvent;
+      var paths = rc.Calculate(server, data.clicks, data.poolCredits, data.otherCredits,
+        data.damageLimit, data.tagLimit, false, null);
+      return paths.length ? paths[paths.length - 1] : null;
+    } finally {
+      destination.splice(destination.indexOf(card), 1); runner.grip.splice(gripIndex, 0, card);
+      for (var entry of oldCounters) {
+        if (entry[1]) Object.defineProperty(card, entry[0], entry[1]);
+        else delete card[entry[0]];
+      }
+      card.cardLocation = old.location;
+      if (old.host === undefined) delete card.host; else card.host = old.host;
+      runner.creditPool = old.pool; runner.clickTracker = old.clicks; attackedServer = old.server;
+      this.cardsWorthKeeping = old.keeping;
+    }
+  }
+
+  _installHost(card) {
+    var choices = ChoicesCardInstall(card);
+    var index = this._preferredInstallChoice(card, choices);
+    return index < 0 ? null : choices[index].host;
+  }
+
   //specify skipIBI to prevent infinite loop
   _commonCardToInstallChecks(cardToInstall, skipIBI=false) {
 	  if (cardToInstall) {
@@ -1226,10 +1458,8 @@ class RunnerAI {
 		//this doesn't check costs
 		else if (choices.length < 1) canBeInstalled = false;
 		//this checks credits, mu, available hosts, etc.
-		else if (
-		  typeof cardToInstall.AIPreferredInstallChoice == "function"
-		) {
-		  if (cardToInstall.AIPreferredInstallChoice(choices) < 0)
+		else {
+		  if (this._preferredInstallChoice(cardToInstall, choices) < 0)
 			canBeInstalled = false; //card AI code deemed it unworthy
 		}
 		if (canBeInstalled && !this._wastefulToInstall(cardToInstall)) {
@@ -1364,6 +1594,19 @@ console.log(this.preferred);
     //some callbacks fire regardless of whether a decision needs to be made (so AI can keep track of phases)
     this._phaseCallback(optionList, choiceType);
 
+    // Apply target policy at the real play decision, including plays selected
+    // by economy/draw branches that did not provide a next-phase preference.
+    var playingCard = currentPhase.context;
+    if (choiceType == "select" && playingCard && playingCard.player == runner &&
+        currentPhase.title == "Playing " + GetTitle(playingCard, true) &&
+        typeof playingCard.AIPreferredPlayChoice == "function") {
+      var targetIndex = playingCard.AIPreferredPlayChoice.call(playingCard, optionList);
+      if (targetIndex >= 0 && targetIndex < optionList.length) {
+        this.preferred = null;
+        return targetIndex;
+      }
+    }
+
     //check for preferreds
     var ret = -1;
     if (this.preferred !== null) {
@@ -1416,6 +1659,7 @@ console.log(this.preferred);
             data = [
 			  { prop: "card", key: "cardToTrigger" },
 			  { prop: "alt", key: "abilityAlt" },
+              { prop: "ability", key: "abilityToTrigger" },
 			];
           else if (cmd == "play") data = [{ prop: "card", key: "cardToPlay" }];
           else if (cmd == "install")
@@ -1545,6 +1789,27 @@ console.log(this.preferred);
 	  return this._indexOfBestDiscardOption(optionList);
     }
 
+    // Legal terminal steals precede discretionary basic/event tag cleanup.
+    if (optionList.includes("run")) {
+      var winningServer = await this._winningRunBeforeOpportunity();
+      if (winningServer) return this._returnPreference(optionList, "run", {
+        serverToRun: winningServer,
+      });
+    }
+    if (optionList.includes("trigger")) {
+      for (var trigger of ChoicesTriggerableAbilities(runner, "click")) {
+        if (typeof trigger.card.AIRunAbilityPlan !== "function") continue;
+        var terminalPlan = trigger.card.AIRunAbilityPlan.call(trigger.card);
+        if (terminalPlan && terminalPlan.winningAgenda) {
+          this.cachedBestPath = terminalPlan.path; this.cachedComplete = true;
+          this.cachedPathServer = terminalPlan.originServer;
+          return this._returnPreference(optionList, "trigger", {
+            cardToTrigger: trigger.card, abilityToTrigger: trigger.ability,
+          });
+        }
+      }
+    }
+
 	if (runner.tags > 0) {
 		//check for events that could be played to remove tags (ranked by number of tags removed, 0 to not play)
 		if (optionList.includes("play")) {
@@ -1568,6 +1833,27 @@ console.log(this.preferred);
 			  });
 			}
 		}
+        // Installed tag-removal abilities precede the basic two-credit action.
+        // Enumerate enforces costs and once-per-turn limits; the hook decides
+        // whether its additional effects make it preferable to basic cleanup.
+        if (optionList.includes("trigger")) {
+          var tagAbilities = ChoicesTriggerableAbilities(runner);
+          var tagAbility = null;
+          var tagsRemoved = 0;
+          for (var ta = 0; ta < tagAbilities.length; ta++) {
+            var abilityCard = tagAbilities[ta].card;
+            if (typeof abilityCard.AITriggerToRemoveTags !== "function") continue;
+            var removal = abilityCard.AITriggerToRemoveTags.call(abilityCard, tagAbilities[ta].ability);
+            if (removal > tagsRemoved) {
+              tagsRemoved = removal;
+              tagAbility = tagAbilities[ta];
+            }
+          }
+          if (tagAbility) return this._returnPreference(optionList, "trigger", {
+            cardToTrigger: tagAbility.card,
+            abilityToTrigger: tagAbility.ability,
+          });
+        }
 		//check for the basic remove tag action
 		if (optionList.includes("remove")) {
 		  //by default use the basic remove tag action
@@ -1636,7 +1922,10 @@ console.log(this.preferred);
 			  //priority > 2: card trigger preferred over trash cost
 			  if (highestPriorityTriggerValue > 2) prioritiseTriggerCard = highestPriorityTriggerCard;
 			  //priority 2: trash cost
-			  else if (optionList.includes("trash")) return optionList.indexOf("trash");
+			  else if (optionList.includes("trash") &&
+              this._accessPaymentPreservesWinningRun(this._accessTrashPayment(TrashCost(accessingCard),
+                this.AIPreserveOutsideCredits("paying trash costs", accessingCard, TrashCost(accessingCard)))))
+            return optionList.indexOf("trash");
 			  //priority > 1: card trigger preferred over any trigger
 			  else if (highestPriorityTriggerValue > 1) prioritiseTriggerCard = highestPriorityTriggerCard;
 			  //priority 1: any trigger
@@ -2098,6 +2387,7 @@ console.log(this.preferred);
 			}
 		}
 		
+        this.serverList[i].breachPotential = this.serverList[i].potential;
 	    //extra potential from best run event or ability (if any)
 		var runEventOrAbilityBestExtraPotential = 0;
 		this.serverList[i].useRunEvent = null; //by default don't use a run event
@@ -2142,6 +2432,7 @@ console.log(this.preferred);
         this.cachedPotentials.push({
           server: this.serverList[i].server,
           potential: this.serverList[i].potential,
+          breachPotential: this.serverList[i].breachPotential,
         }); //store potential for other use (costs are cached in _calculateRunPath)
         //console.log(this.cachedPotentials[this.cachedPotentials.length-1].server.serverName+": "+this.cachedPotentials[this.cachedPotentials.length-1].potential);
 			
@@ -2260,7 +2551,15 @@ console.log(this.preferred);
         }
 
         //and calculate best path
-		var bestpath = await this._commonRunCalculationChecksAsync(this.serverList[i].server,this.serverList[i].useRunEvent,this.serverList[i].bonusBreaker,false); //the false is for foresight, i.e. run now not later
+        var ability = this.serverList[i].useRunAbility;
+        var plan = ability && typeof ability.AIRunAbilityPlan == "function" ?
+          ability.AIRunAbilityPlan.call(ability, this.serverList[i].server) : null;
+        var bestpath;
+        if (ability && typeof ability.AIRunAbilityPlan == "function") {
+          bestpath = plan ? plan.path : null;
+          if (plan) bestpath[bestpath.length - 1].cost = plan.calculator.PathCost(bestpath);
+        } else bestpath = await this._commonRunCalculationChecksAsync(this.serverList[i].server,
+          this.serverList[i].useRunEvent, this.serverList[i].bonusBreaker, false);
         this.serverList[i].bestpath = bestpath;
 		this.serverList[i].bestcost = Infinity;
         if (bestpath && bestpath.length > 0) {
@@ -2432,7 +2731,7 @@ console.log(this.preferred);
         var runClickCost = endPoint.runner_clicks_spent;
 
         //maybe install or play something first? (as long as can still complete the run after using the click)
-		//we are ignoring the lost card (i.e. lower max damage) for now
+		//Recalculate the intended run after installation, including the lost Grip card.
         if (runClickCost < runner.clickTracker - 1) {
 			var brHighestPriority = 0;
 			if (optionList.includes("install")) {
@@ -2446,19 +2745,17 @@ console.log(this.preferred);
 					var ibrPriority = ibrCard.AIInstallBeforeRun.call(ibrCard,this.serverList[0].server,this.serverList[0].potential,this.serverList[0].useRunEvent,runCreditCost,runClickCost);
 					if (ibrPriority > brHighestPriority) {
 					  if (!this._wastefulToInstall(ibrCard)) {
-						  if (runCreditCost <= AvailableCredits(runner) - InstallCost(ibrCard)) {
-							  var ibrChoices = ChoicesCardInstall(ibrCard);
-							  if (ibrChoices.length > 0) {
-								  var ibrIsValidInstall = false;
-								  if (typeof ibrCard.AIPreferredInstallChoice == "undefined") ibrIsValidInstall = true;
-								  else if (ibrCard.AIPreferredInstallChoice.call(ibrCard,ibrChoices) > -1) ibrIsValidInstall = true;
-								  if (ibrIsValidInstall) {
-									cardToInstall = ibrCard;
-									brHighestPriority = ibrPriority;
-								  }
-							  }
-							  
-						  }
+                          var ibrChoices = ChoicesCardInstall(ibrCard);
+                          var ibrChoice = this._preferredInstallChoice(ibrCard, ibrChoices);
+                          if (ibrChoice > -1) {
+                            var host = ibrChoices[ibrChoice].host;
+                            if (runCreditCost <= AvailableCredits(runner) - InstallCost(ibrCard, host) &&
+                                this._runAfterInstall(ibrCard, host, this.serverList[0].server,
+                                  this.serverList[0].useRunEvent)) {
+                              cardToInstall = ibrCard;
+                              brHighestPriority = ibrPriority;
+                            }
+                          }
 					  }
 					}
 				  }
@@ -2469,8 +2766,8 @@ console.log(this.preferred);
 				this._log("I should install "+cardToInstall.title+" before running");
 				return this._returnPreference(optionList, "install", {
 				  cardToInstall: cardToInstall,
-				  hostToInstallTo: null,
-				}); //assumes unhosted cards for now
+				  hostToInstallTo: this._installHost(cardToInstall),
+				});
 			  }
 			}
 			if (optionList.includes("play")) {
@@ -2635,8 +2932,8 @@ console.log(this.preferred);
 			  this._log("there is a card I would install for draw");
 			  return this._returnPreference(optionList, "install", {
 				cardToInstall: cardToInstall,
-				hostToInstallTo: null,
-			  }); //assumes unhosted cards for now
+				hostToInstallTo: this._installHost(cardToInstall),
+			  });
 			}
 		  }
 		  
@@ -2817,7 +3114,7 @@ console.log(this.preferred);
 		  } else if (optionList.includes("install") && this._passBasicWastefulInstallCheck(card)) {
 			//install
 			var canBeInstalled = true;
-			var installDestination = null; //directly to rig (no host)
+			var installDestination = this._installHost(card);
 			var choices = ChoicesCardInstall(card);
 			if (!CheckInstall(card)) canBeInstalled = false;
 			//this doesn't check costs
