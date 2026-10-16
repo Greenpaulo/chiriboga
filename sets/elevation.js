@@ -46,6 +46,7 @@ cardSet[35005] = {
       //if no cards in root, X=0, Corp trivially satisfies condition by trashing nothing
       if (cardsInRoot === 0) {
         //intended.endRun stays true, run ends normally
+        Log("Shred: no cards in the root of the attacked server, so the Corp trashes 0 cards from HQ and the run ends");
         return;
       }
       
