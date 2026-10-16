@@ -2884,9 +2884,9 @@ cardSet[36036] = {
     return "Disposal Grounds";
   },
   _departmentImageFile: function () {
-    if (this.department == "HQ") return "36036-0.webp";
-    if (this.department == "R&D") return "36036-1.webp";
-    return "36036-2.webp";
+    if (this.department == "HQ") return "36036-0.jpg";
+    if (this.department == "R&D") return "36036-1.jpg";
+    return "36036-2.jpg";
   },
   _showIdentityFace: function (imageFile) {
     this.imageFile = imageFile;
