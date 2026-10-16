@@ -320,7 +320,7 @@ cardSet[36004] = {
   AIUsesStealthCredits: true,
   _stealthCreditCards: function () {
     var corsair = this;
-    return InstalledCards(runner).filter(function (card) {
+    return ActiveCards(runner).filter(function (card) {
       if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
         return false;
       return (
@@ -518,7 +518,7 @@ cardSet[36005] = {
   },
   _stealthCreditCards: function () {
     var lampades = this;
-    return InstalledCards(runner).filter(function (card) {
+    return ActiveCards(runner).filter(function (card) {
       if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
         return false;
       return (
@@ -531,6 +531,25 @@ cardSet[36005] = {
     return this._stealthCreditCards().reduce(function (total, card) {
       return total + card.credits;
     }, 0);
+  },
+  // Use the same allocation for hypothetical evaluation and live AI payment.
+  _stealthPaymentPlan: function (amount) {
+    var flexibility = function (source) {
+      if (typeof source.canUseCredits !== "function") return 2;
+      if (source.canUseCredits("", null)) return 2;
+      return source.canUseCredits("using", null) ? 1 : 0;
+    };
+    var sources = this._stealthCreditCards();
+    sources.sort(function (a, b) {
+      return flexibility(a) - flexibility(b) || Math.min(amount, b.credits) - Math.min(amount, a.credits);
+    });
+    var plan = [];
+    for (var source of sources) {
+      var spend = Math.min(amount, source.credits);
+      if (spend > 0) plan.push({card: source, amount: spend});
+      amount -= spend;
+    }
+    return plan;
   },
   _spendStealthCredits: function (amount, callback) {
     var lampades = this;
@@ -558,7 +577,10 @@ cardSet[36005] = {
     }
     if (choices.length < 1) return;
     if (runner.AI) {
-      choices = [choices[choices.length - 1]];
+      var payment = this._stealthPaymentPlan(amount)[0];
+      choices = [choices.find(function (choice) {
+        return choice.card == payment.card && choice.amount == payment.amount;
+      })];
     }
     var spendFromChoice = function (params) {
       SpendHostedCredits(runner, params.card, params.amount, function () {
@@ -603,8 +625,38 @@ cardSet[36005] = {
       },
     },
   ],
-  AIInstallBeforeRun: function () {
-    return 1;
+  // Evaluate source eligibility in the intended run context, using public
+  // targets/counts only. Archives agendas provide draw, but cannot be trashed.
+  _usefulAccessSetup: function (server) {
+    var old = AIIceEncounterSaveState();
+    return AIWithHypothetical(() => {
+      attackedServer = server; encountering = false; approachIce = -1;
+    }, () => {
+      var available = this._availableStealthCredits();
+      var targets = server.root.concat(server == corp.archives ? [] : server.cards || []);
+      for (var target of targets) {
+        if (!PlayerCanLook(runner, target) || !CheckTrash(target)) continue;
+        var cost = this._printedAccessCost(target);
+        if (typeof cost == "number" && cost <= available &&
+            (TrashCost(target) > cost || !CheckCardType(target, ["asset", "upgrade"]))) return true;
+      }
+      // Unknown accesses offer denial only when the ability has legal funding.
+      return available > 0 && targets.some(target => !PlayerCanLook(runner, target));
+    }, () => {
+      AIIceEncounterRestoreState(old);
+    });
+  },
+  AIHypotheticalInstallCounters: function () {
+    return {power: 3};
+  },
+  AIWastefulToInstall: function () {
+    if (InstalledCards(runner).some(card => card.title == this.title && Counters(card, "power") > 0)) return true;
+    if (MemoryUnits() - InstalledMemoryCost() < this.memoryCost) return true;
+    return ![corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers)
+      .some(server => this._usefulAccessSetup(server));
+  },
+  AIInstallBeforeRun: function (server) {
+    return this._usefulAccessSetup(server) ? 1 : 0;
   },
   AIOkToTrash: function () {
     return !CheckCounters(this, "power", 1);
@@ -612,8 +664,12 @@ cardSet[36005] = {
   AIAccessTriggerPriority: function (optionList) {
     var printedCost = this._printedAccessCost(accessingCard);
     if (typeof printedCost !== "number") return 0;
-    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost)
+    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost) {
+      if (runner.AI && !runner.AI._accessPaymentPreservesWinningRun({
+        hosted: this._stealthPaymentPlan(printedCost),
+      })) return 0;
       return 3;
+    }
     return 0;
   },
   AIReducesTrashCost: function (card) {
@@ -1104,7 +1160,18 @@ cardSet[36013] = {
   },
   AIPreferredInstallChoice: function () {
     if (MemoryUnits() - InstalledMemoryCost() >= 2) return -1;
+    // An untagged Runner must retain the basic cleanup click and pool credits.
+    // Already-tagged installations add no tag and can supply urgent memory.
+    if (runner.tags < 1 && (runner.clickTracker < 2 || runner.creditPool < 2)) return -1;
     return 0;
+  },
+  AIInstallBeforeInstall: function (card) {
+    return CheckCardType(card, ["program"]) &&
+      card.memoryCost > MemoryUnits() - InstalledMemoryCost() &&
+      card.memoryCost <= MemoryUnits() - InstalledMemoryCost() + this.memoryUnits &&
+      this.AIPreferredInstallChoice() >= 0 &&
+      runner.clickTracker >= 2 + (runner.tags < 1 ? 1 : 0) &&
+      runner.creditPool >= InstallCost(card) + (runner.tags < 1 ? 2 : 0);
   },
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
     return spareMU < 2;
@@ -1132,10 +1199,13 @@ cardSet[36014] = {
   responseOnBreach: {
     Enumerate: function (server) {
       if (server != corp.HQ && server != corp.RnD) return [];
-      return [
+      var choices = [
         { use: true, label: "Take 1 tag to access 1 additional card" },
         { use: false, label: "Continue without taking a tag", button: "Continue" },
       ];
+      if (runner.AI) runner.AI.preferred = {title: this.title,
+        option: choices[this._takeTagForAccess(server) ? 0 : 1]};
+      return choices;
     },
     Resolve: function (params) {
       if (!params.use) return;
@@ -1190,17 +1260,144 @@ cardSet[36014] = {
       },
     },
   ],
+  _takeTagForAccess: function (server) {
+    if (server != corp.HQ && server != corp.RnD) return false;
+    if (server.cards.length < 2) return false;
+    var baseAccess = this._baseAccessCount(server);
+    if (server.cards.length <= baseAccess) return false; // no new central card
+    if (ServerAccessLimit(server) <= baseAccess) return false;
+    var winning = this._extraWinningAgenda(server);
+    if (!winning && server == corp.RnD && runner.AI &&
+        runner.AI._countNewCardsThatWouldBeAccessedInRnD(baseAccess + 1) <=
+        runner.AI._countNewCardsThatWouldBeAccessedInRnD(baseAccess)) return false;
+    var inRun = attackedServer == server;
+    var clicks = runner.clickTracker - (inRun ? 0 : 1);
+    if (clicks < 0) return false;
+    var rc = new RunCalculator(); rc.suppressOutput = true; rc._runnerPlanning = true;
+    rc._tagAccessProbe = true; rc.terminalGoal = !!winning;
+    return AIWithRunContext(server, function () {
+      rc.terminalStealCost = winning ? StealCost(winning) : null;
+      var usablePool = CreditPoolCanBeUsed(runner) ? Credits(runner) : 0;
+      var paths = rc.Calculate(server, clicks, usablePool,
+        AvailableCredits(runner) - usablePool + (inRun ? 0 : (corp.badPublicity || 0) - (runner.temporaryCredits || 0)), runner.grip.length,
+        winning ? Infinity : Math.max(0, Math.min(clicks, Math.floor(runner.creditPool / 2)) - runner.tags),
+        false, null, inRun ? approachIce : undefined);
+      return paths.some(function (path) {
+        var last = path[path.length - 1];
+        var other = (last.paymentPoolOnly ? 0 : rc.baseOtherCredits) + (last.restrictedCreditsPaid || 0);
+        var pool = rc.basePoolCredits - last.runner_credits_lost - (last.runner_credits_reserved || 0) -
+          Math.max(0, last.runner_credits_spent - other);
+        var left = clicks - last.runner_clicks_spent;
+        if (winning) {
+          return true; // the complete route already reserves the steal payment
+        }
+        var tags = runner.tags + (rc.TotalEffect(last).tag || 0) + 1;
+        return left >= tags && pool >= 2 * tags;
+      });
+    });
+  },
+  _baseAccessCount: function (server) {
+    var total = 1;
+    for (var source of ActiveCards(runner)) {
+      if (source == this) continue;
+      if (typeof source.AIAdditionalAccess == "function") total += source.AIAdditionalAccess.call(source, server);
+      else if (attackedServer == server && source.modifyBreachAccess)
+        total += source.modifyBreachAccess.Resolve.call(source);
+    }
+    return Math.min(total, ServerAccessLimit(server));
+  },
+  _extraWinningAgenda: function (server) {
+    if (server != corp.HQ && server != corp.RnD) return null;
+    if (ServerAccessLimit(server) <= 1) return null;
+    var baseAccess = this._baseAccessCount(server);
+    if (server.cards.length <= baseAccess || ServerAccessLimit(server) <= baseAccess) return null;
+    var candidates = server == corp.RnD ? [server.cards[server.cards.length - baseAccess - 1]] :
+      (server.cards.length == baseAccess + 1 ? server.cards : []);
+    for (var card of candidates) {
+      if (card && PlayerCanLook(runner, card) && CheckCardType(card, ["agenda"]) &&
+          AgendaPoints(runner) + AgendaPointsForCard(card, runner) >= AgendaPointsToWin() &&
+          !CardEffectsForbid("steal", card)) return card;
+    }
+    return null;
+  },
+  AIWinningBreachAgenda: function (server, candidateOnly) {
+    // A composed-route caller validates access and resources on its own route.
+    // Ordinary callers still require a safe, funded run through this server.
+    return candidateOnly || this._takeTagForAccess(server) ? this._extraWinningAgenda(server) : null;
+  },
   AITriggerWhenCan: true,
-  AIAdditionalAccess: function (server) {
+  AITriggerAfterTactics: true,
+  AIAdditionalAccess: function (server, rc, point) {
     if (server != corp.HQ && server != corp.RnD) return 0;
-    return 1;
+    if (rc && point) return point.breachTagsByCard && point.breachTagsByCard.get(this) > 0 ? 1 : 0;
+    return this._takeTagForAccess(server) ? 1 : 0;
+  },
+  AIRunExtraPotential: function (server) {
+    // HQ's generic access collector already assigns this value there.
+    return server == corp.RnD && this._takeTagForAccess(server) ? 0.5 : 0;
+  },
+  AIRunBreachTags: function (server, rc, point) {
+    if (rc._tagAccessProbe || (server != corp.HQ && server != corp.RnD)) return 0;
+    if (rc._securityPlanning) return this._publicTagAccess(server, rc, point) ? 1 : 0;
+    var baseAccess = this._baseAccessCount(server);
+    if (server.cards.length <= baseAccess || ServerAccessLimit(server) <= baseAccess) return 0;
+    var winning = this._extraWinningAgenda(server);
+    if (!winning && server == corp.RnD && runner.AI &&
+        runner.AI._countNewCardsThatWouldBeAccessedInRnD(baseAccess + 1) <=
+        runner.AI._countNewCardsThatWouldBeAccessedInRnD(baseAccess)) return 0;
+    var other = (point.paymentPoolOnly ? 0 : rc.baseOtherCredits) + (point.restrictedCreditsPaid || 0);
+    var pool = rc.basePoolCredits - point.runner_credits_lost - (point.runner_credits_reserved || 0) -
+      Math.max(0, point.runner_credits_spent - other);
+    var clicks = rc.baseClicks - point.runner_clicks_spent;
+    if (winning) {
+      var cost = AIWithRunContext(server, function () { return StealCost(winning); });
+      // A terminal goal already reserves the steal payment in the completed point.
+      var balance = rc.CreditBalance(point);
+      return balance.pool + balance.other >= (rc.terminalStealCost ? 0 : cost.credits) &&
+        clicks >= (rc.terminalStealCost ? 0 : cost.clicks) ? 1 : 0;
+    }
+    var tags = runner.tags + (rc.TotalEffect(point).tag || 0) + 1;
+    return clicks >= tags && pool >= 2 * tags ? 1 : 0;
+  },
+  _publicTagAccess: function (server, rc, point) {
+    if (server != corp.HQ && server != corp.RnD) return false;
+    var baseAccess = 1;
+    if (corp.AI) for (var source of InstalledCards(runner)) {
+      if (source != this) baseAccess += corp.AI._centralPressureFromCard(source, server).additionalAccess;
+    }
+    if (server.cards.length <= baseAccess || ServerAccessLimit(server) <= baseAccess) return false;
+    var clicks = corp.AI ? corp.AI._projectedRunnerClicks() : runner.clickTracker;
+    clicks -= attackedServer == server ? 0 : 1;
+    var pool = runner.creditPool;
+    var tags = runner.tags + 1;
+    if (rc && point) {
+      var other = (point.paymentPoolOnly ? 0 : rc.baseOtherCredits) + (point.restrictedCreditsPaid || 0);
+      pool = rc.basePoolCredits - point.runner_credits_lost - (point.runner_credits_reserved || 0) -
+        Math.max(0, point.runner_credits_spent - other);
+      clicks = rc.baseClicks - point.runner_clicks_spent;
+      tags += rc.TotalEffect(point).tag || 0;
+    }
+    if (clicks >= tags && pool >= 2 * tags) return true;
+    // The Corp can count its own contents, never their hidden access order.
+    return !!corp.AI && corp.AI._terminalCentralAccessAffordable(server, baseAccess + 1, pool, clicks);
   },
   AICentralPressure: function (server) {
-    if (server != corp.HQ && server != corp.RnD) return {};
-    return { additionalAccess: 1 };
+    return this._publicTagAccess(server) ? {additionalAccess: 1} : {};
   },
   AIInstallBeforeRun: function (server) {
-    return server == corp.HQ || server == corp.RnD ? 1 : 0;
+    if (runner.clickTracker < 2) return 0;
+    var oldPool = runner.creditPool, oldClicks = runner.clickTracker;
+    var index = runner.grip.indexOf(this);
+    var rotary = this;
+    return AIWithHypothetical(function () {
+      runner.creditPool -= InstallCost(rotary); runner.clickTracker--;
+      if (index >= 0) runner.grip.splice(index, 1);
+    }, function () {
+      return rotary._takeTagForAccess(server) ? 1 : 0;
+    }, function () {
+      runner.creditPool = oldPool; runner.clickTracker = oldClicks;
+      if (index >= 0) runner.grip.splice(index, 0, rotary);
+    });
   },
   AIWorthKeeping: function () {
     return true;
@@ -1228,7 +1425,7 @@ cardSet[36015] = {
     var runServer =
       planningServer && attackedServer === null ? planningServer : attackedServer;
     return AIWithRunContext(runServer, function () {
-      return InstalledCards(runner).filter(function (card) {
+      return ActiveCards(runner).filter(function (card) {
         if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1)
           return false;
         return (
@@ -1268,14 +1465,16 @@ cardSet[36015] = {
         { server: corp.HQ, label: "Pay 1 stealth credit and approach HQ" },
         { server: corp.RnD, label: "Pay 1 stealth credit and approach R&D" },
       ];
+      choices.push({server: null, label: "Continue approaching Archives", button: "Continue"});
       if (runner.AI) {
-        var hqPotential = runner.AI._getCachedPotential(corp.HQ);
-        var rndPotential = runner.AI._getCachedPotential(corp.RnD);
-        return [hqPotential >= rndPotential ? choices[0] : choices[1]];
+        var plan = this._redirectPlan(true);
+        var best = choices.find(function (choice) { return choice.server == (plan ? plan.server : null); });
+        runner.AI.preferred = {title: this.title, option: best};
       }
       return choices;
     },
     Resolve: function (params) {
+      if (!params.server) return;
       var baker = this;
       var creditChoices = ChoicesArrayCards(this._stealthCreditCards());
       var spendAndRedirect = function (creditParams) {
@@ -1284,6 +1483,13 @@ cardSet[36015] = {
           Log("Attacked server changed to " + ServerName(params.server));
         }, baker);
       };
+      if (runner.AI && creditChoices.length > 1) {
+        var plan = this._redirectPlan(true, params.server);
+        var firstSource = this._orderedStealthSources()[0];
+        var preferredCredit = creditChoices.find(function (choice) { return plan && choice.card == plan.source; }) ||
+          creditChoices.find(function (choice) { return choice.card == firstSource; });
+        runner.AI.preferred = {title: this.title, option: preferredCredit};
+      }
       if (creditChoices.length == 1) spendAndRedirect(creditChoices[0]);
       else
         DecisionPhase(
@@ -1304,30 +1510,155 @@ cardSet[36015] = {
     automatic: true,
   },
   AIRedirectsRun: function (fromServer, toServer) {
-    return (
-      !this.usedThisTurn &&
-      fromServer == corp.archives &&
-      (toServer == corp.HQ || toServer == corp.RnD) &&
-      this._stealthCreditCards(fromServer).length > 0
-    );
+    if (fromServer != corp.archives || (toServer != corp.HQ && toServer != corp.RnD)) return false;
+    if (this.usedThisTurn && playerTurn != corp) return false;
+    if (!this._stealthCreditCards(fromServer).length) return false;
+    return !corp.AI || this._publicRedirectPossible(toServer);
+  },
+  _publicRedirectPossible: function (server) {
+    // Public capability bound: reserve one Stealth credit before pricing the
+    // origin route. The Corp may inspect its ICE, never Runner Grip identities.
+    var budget = corp.creditPool;
+    var eligible = corp.archives.ice.slice().reverse().concat(server.ice.slice().reverse()).filter(function (ice) {
+      if (ice.rezzed) return true;
+      var cost = RezCost(ice);
+      if (cost > budget) return false;
+      budget -= cost; return true;
+    });
+    var outsideRun = attackedServer === null || playerTurn == corp;
+    var sources = this._orderedStealthSources();
+    return sources.some(function (source) {
+      var original = source.credits;
+      return AIWithHypothetical(function () { source.credits--; }, function () {
+        return AIWithRunContext(corp.archives, function () {
+          var clicks = corp.AI._projectedRunnerClicks() - 1;
+          for (var gains = 0; gains <= clicks; gains++) {
+            var rc = new RunCalculator(); rc.suppressOutput = true;
+            rc._securityPlanning = {eligibleIce: new Set(eligible),
+              damageSources: OutsideCreditDamageSources(corp.archives),
+              temporaryCredits: corp.badPublicity || 0};
+            rc._approachServer = server;
+            rc._redirectPaymentDamage = rc._securityPlanning.damageSources.reduce(function (sum, damage) {
+              return sum + damage.damage;
+            }, 0);
+            var paths = rc.Calculate(corp.archives, clicks - gains, runner.creditPool + gains,
+              AvailableCredits(runner) - runner.creditPool + (outsideRun ? corp.badPublicity || 0 : 0),
+              runner.grip.length, Infinity, false, null);
+            if (paths.length) return true;
+          }
+          return false;
+        });
+      }, function () { source.credits = original; });
+    });
+  },
+  _orderedStealthSources: function () {
+    var baker = this;
+    return AIWithRunContext(corp.archives, function () { return baker._stealthCreditCards(corp.archives); })
+      .map(function (source, index) {
+      var outside = AIWithRunContext(null, function () {
+        return typeof source.canUseCredits !== "function" || source.canUseCredits("using", baker);
+      });
+      return {source: source, outside: outside, index: index};
+    }).sort(function (a, b) { return Number(a.outside) - Number(b.outside) || a.index - b.index; })
+      .map(function (entry) { return entry.source; });
+  },
+  _redirectPlan: function (live, onlyServer) {
+    if (!runner.AI || (!live && this.usedThisTurn)) return null;
+    var best = null;
+    var archiveValue = runner.AI._getCachedBreachPotential(corp.archives);
+    var sources = this._orderedStealthSources();
+    for (var server of [corp.HQ, corp.RnD]) {
+      if (onlyServer && server != onlyServer) continue;
+      var potential = runner.AI._getCachedBreachPotential(server);
+      var candidates = AIWithRunContext(server, function () {
+        return runner.AI._publicBreachAgendaCandidates(server, true).slice();
+      });
+      if (server == corp.RnD && server.cards.length) candidates.push(server.cards[server.cards.length - 1]);
+      if (server == corp.HQ && server.cards.length == 1) candidates.push(server.cards[0]);
+      var winning = AIWithRunContext(server, function () {
+        return candidates.find(function (agenda) {
+          return agenda && PlayerCanLook(runner, agenda) && CheckCardType(agenda, ["agenda"]) &&
+            AgendaPoints(runner) + AgendaPointsForCard(agenda, runner) >= AgendaPointsToWin() &&
+            !CardEffectsForbid("steal", agenda);
+        });
+      });
+      for (var source of sources) {
+        var original = source.credits;
+        var plan = AIWithHypothetical(function () { source.credits--; }, function () {
+          return AIWithRunContext(corp.archives, function () {
+            var rc = new RunCalculator(); rc.suppressOutput = true; rc._runnerPlanning = true;
+            rc._approachServer = server;
+            rc._redirectPaymentDamage = OutsideCreditDamageSources(corp.archives)
+              .reduce(function (sum, damage) { return sum + damage.damage; }, 0);
+            rc.terminalGoal = !!winning;
+            rc.terminalStealCost = winning ? AIWithRunContext(server, function () { return StealCost(winning); }) : null;
+            var clicks = runner.clickTracker - (live ? 0 : 1);
+            var pool = CreditPoolCanBeUsed(runner) ? Credits(runner) : 0;
+            var paths = rc.Calculate(corp.archives, clicks, pool,
+              AvailableCredits(runner) - pool + (live ? 0 : (corp.badPublicity || 0) - (runner.temporaryCredits || 0)), runner.grip.length,
+              winning ? Infinity : Math.max(0, Math.min(clicks, Math.floor(pool / 2)) - runner.tags),
+              false, null, live ? -1 : undefined);
+            if (!paths.length) return null;
+            var path = paths[paths.length - 1];
+            var paid = path[path.length - 1];
+            if (winning) {
+              // Candidate discovery promises no route. Verify that this paid
+              // route actually accepts its optional access and guarantees the
+              // known card, after all finite continuations and steal payments.
+              var guaranteed = AIWithRunContext(server, function () {
+                if (runner.AI._breachWouldBePrevented(ActiveCards(runner), server)) return false;
+                if (server.cards.indexOf(winning) < 0) return true; // root agenda
+                var access = Math.min(ServerAccessLimit(server), 1 + ActiveCards(runner).reduce(function (sum, card) {
+                  return sum + (typeof card.AIAdditionalAccess == "function" ?
+                    card.AIAdditionalAccess.call(card, server, rc, paid) : 0);
+                }, 0));
+                return server == corp.HQ ? access >= server.cards.length :
+                  server.cards.length - server.cards.indexOf(winning) <= access;
+              });
+              if (!guaranteed) return null;
+            }
+            // Record the prepaid restricted payment for ordinary run-cost ranking;
+            // both amounts cancel in remaining-pool accounting, with no second spend.
+            paid.runner_credits_spent++; paid.restrictedCreditsPaid = (paid.restrictedCreditsPaid || 0) + 1;
+            delete paid.cost;
+            var routePotential = potential;
+            // Reuse the planner's existing 0.5 value per useful additional
+            // central access when the skipped-ICE route unlocks optional access.
+            if (potential > 0) {
+              var ordinaryAccess = server == corp.HQ ? runner.AI._additionalHQAccessValue() :
+                InstalledCards(runner).reduce(function (total, source) {
+                  return total + (typeof source.AIAdditionalAccess == "function" ? source.AIAdditionalAccess.call(source, server) : 0);
+                }, 0);
+              var routeAccess = InstalledCards(runner).reduce(function (total, source) {
+                return total + (typeof source.AIAdditionalAccess == "function" ?
+                  source.AIAdditionalAccess.call(source, server, rc, paid) : 0);
+              }, 0);
+              routePotential += 0.5 * Math.max(0, Math.min(server.cards.length - 1, routeAccess) - ordinaryAccess);
+            }
+            return {server: server, originServer: corp.archives, source: source,
+              winningAgenda: winning || null, potential: routePotential,
+              path: path, calculator: rc};
+          });
+        }, function () { source.credits = original; });
+        if (plan && !onlyServer && !winning && plan.potential <= archiveValue) plan = null;
+        if (plan && (!best || (winning && !best.winningAgenda) ||
+            (!!winning == !!best.winningAgenda && plan.potential > best.potential))) best = plan;
+        // Preserve run-only-before-flexible preference among feasible payments.
+        if (plan) break;
+      }
+    }
+    return best;
   },
   AIRunAbilityExtraPotential: function (server, potential) {
-    if (server != corp.archives || this.usedThisTurn) return 0;
-    if (this._stealthCreditCards(server).length < 1) return 0;
-    var redirectedPotential = Math.max(
-      runner.AI._getCachedPotential(corp.HQ),
-      runner.AI._getCachedPotential(corp.RnD),
-    );
-    return Math.max(0, redirectedPotential - potential);
+    if (server != corp.archives) return 0;
+    var plan = this._redirectPlan(false);
+    return plan ? Math.max(0, plan.potential - potential) : 0;
+  },
+  AIRunAbilityPlan: function (server) {
+    return !server || server == corp.archives ? this._redirectPlan(false) : null;
   },
   AIWouldTrigger: function () {
-    if (this.usedThisTurn || this._stealthCreditCards().length < 1) return false;
-    return (
-      Math.max(
-        runner.AI._getCachedPotential(corp.HQ),
-        runner.AI._getCachedPotential(corp.RnD),
-      ) > 0
-    );
+    return !!this._redirectPlan(false);
   },
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
     return spareMU >= 1;
@@ -1416,6 +1747,10 @@ cardSet[36017] = {
     var topCard = corp.RnD.cards[corp.RnD.cards.length - 1];
     topCard.knownToRunner = true;
     Log(GetTitle(this) + " looks at the top card of R&D");
+    if (!runner.AI) {
+      DecisionPhase(runner, [{card: topCard, label: "Look at " + GetTitle(topCard, true),
+        button: "Continue"}], function () {}, "Looking at the top of R&D", this.title, this);
+    }
   },
   responseOnInstall: {
     Enumerate: function (card) {
@@ -1449,6 +1784,11 @@ cardSet[36017] = {
       this._lookAtTopOfRnD();
     },
     text: "Look at the top card of R&D",
+  },
+  AIWinningBreachAgenda: function (server) {
+    if (server != corp.RnD || server.cards.length < 1) return null;
+    var top = server.cards[server.cards.length - 1];
+    return top.knownToRunner && CheckCardType(top, ["agenda"]) ? top : null;
   },
 };
 
@@ -1510,13 +1850,15 @@ cardSet[36018] = {
       choices.push({server: null, label: "Do not run", button: "Continue"});
       if (runner.AI && choices.length > 1) {
         var bestChoice = choices[choices.length - 1];
-        var bestPotential = 0;
+        var bestPotential = 0, bestWinning = false;
         for (var i = 0; i < choices.length - 1; i++) {
-          var potential = runner.AI._getCachedPotential(choices[i].server);
-          if (potential > bestPotential) {
-            bestPotential = potential;
-            bestChoice = choices[i];
-          }
+          var server = choices[i].server;
+          if (server.root.length < 1 || ServerSuccessfulRunPrevented(server)) continue;
+          var winning = !!AIWithRunContext(server, function () { return runner.AI._publicWinningAgenda(server); });
+          var potential = runner.AI._getCachedPotential(server);
+          if (bestWinning && !winning || winning == bestWinning && potential <= bestPotential) continue;
+          var route = runner.AI._followupRunPaths(server).length > 0;
+          if (route) { bestPotential = potential; bestWinning = winning; bestChoice = choices[i]; }
         }
         return [bestChoice];
       }
@@ -1551,12 +1893,20 @@ cardSet[36018] = {
   },
   AIRunEventExtraCredits: 4,
   AIRunEventModify: function () {
-    this.storedAIRunnerCreditPool = runner.creditPool;
+    this.storedAIState = {pool: runner.creditPool, credits: this.credits,
+      running: this.runningWithThis, index: runner.resolvingCards.indexOf(this)};
     runner.creditPool = this.playCost;
+    this.credits = 4;
+    this.runningWithThis = true;
+    if (this.storedAIState.index < 0) runner.resolvingCards.push(this);
   },
   AIRunEventRestore: function () {
-    runner.creditPool = this.storedAIRunnerCreditPool;
-    this.storedAIRunnerCreditPool = null;
+    var state = this.storedAIState;
+    runner.creditPool = state.pool;
+    this.credits = state.credits;
+    this.runningWithThis = state.running;
+    if (state.index < 0) runner.resolvingCards.splice(runner.resolvingCards.indexOf(this), 1);
+    delete this.storedAIState;
   },
   AIWorthKeeping: function () {
     return true;
@@ -1639,22 +1989,43 @@ cardSet[36019] = {
     automatic: true,
   },
   AIPreferredPlayChoice: function (choices) {
-    var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(
-      runner.stack,
-      InstalledCards(runner),
-    );
-    var preferredServer = null;
-    if (runner.AI.serverList && runner.AI.serverList.length > 0)
-      preferredServer = runner.AI.serverList[0].server;
+    var ai = runner.AI;
+    var best = -1, bestPotential = -Infinity, bestCost = Infinity;
+    var mandatory = currentPhase.context == this && currentPhase.title == "Playing " + GetTitle(this, true);
     for (var i = 0; i < choices.length; i++) {
-      if (
-        (!preferredCard || choices[i].card == preferredCard) &&
-        (!preferredServer || choices[i].server == preferredServer)
-      )
-        return i;
+      var choice = choices[i];
+      if (ai._installWouldExceedMU(choice.card)) continue;
+      var oldRC = ai.rc, prepared = false;
+      try {
+        if (typeof choice.card.AIPrepareHypotheticalForRC == "function") {
+          prepared = true;
+          choice.card.AIPrepareHypotheticalForRC.call(choice.card, choice.host);
+        }
+        ai.rc = new RunCalculator(); ai.rc.suppressOutput = true; ai.rc.runEvent = this;
+        var data = ai._calculateRunPathPieceBegin({server: choice.server,
+          poolCreditOffset: -PlayCost(this), otherCreditOffset: corp.badPublicity,
+          clickOffset: -1, damageOffset: -1});
+        var paths = ai.rc.Calculate(choice.server, data.clicks, data.poolCredits, data.otherCredits,
+          data.damageLimit, data.tagLimit, false, {card: choice.card, host: choice.host},
+          choice.server.ice.length - 1);
+        if (!paths.length) continue;
+        var potential = ai._getCachedPotential(choice.server);
+        if (potential <= 0) continue;
+        var cost = ai.rc.PathCost(paths[paths.length - 1]);
+        if (potential > bestPotential || (potential == bestPotential && cost < bestCost)) {
+          best = i; bestPotential = potential; bestCost = cost;
+        }
+      } finally {
+        try {
+          if (prepared && typeof choice.card.AIRestoreHypotheticalFromRC == "function")
+            choice.card.AIRestoreHypotheticalFromRC.call(choice.card);
+        } finally { ai.rc = oldRC; }
+      }
     }
-    return choices.length > 0 ? 0 : -1;
+    // A changed target still resolves through an actual legal event choice.
+    return best > -1 ? best : (mandatory && choices.length ? 0 : -1);
   },
+  AITutorStartsRun: true,
   AIIcebreakerTutor: function () {
     return runner.stack.filter(function (card) {
       return CheckCardType(card, ["program"]) &&
@@ -1695,12 +2066,7 @@ cardSet[36020] = {
       if (runner.AI) {
         var trashChoices = choices.slice(0, choices.length - 1);
         var index = runner.AI._indexOfBestDiscardOption(trashChoices);
-        var runCost = runner.AI._getCachedCost(attackedServer);
-        if (
-          index > -1 &&
-          (runCost > AvailableCredits(runner) ||
-            !runner.AI.cardsWorthKeeping.includes(trashChoices[index].card))
-        )
+        if (index > -1 && this._expendableHardware().includes(trashChoices[index].card))
           return [trashChoices[index]];
         return [choices[choices.length - 1]];
       }
@@ -1725,21 +2091,39 @@ cardSet[36020] = {
   AIRunPoolCreditOffset: function () {
     return this.credits;
   },
-  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost) {
-    if (runCreditCost <= AvailableCredits(runner)) return 0;
-    for (var i = 0; i < runner.grip.length; i++) {
-      if (runner.grip[i] != this && CheckCardType(runner.grip[i], ["hardware"]))
-        return 2;
-    }
-    return 0;
+  _expendableHardware: function () {
+    var hardware = runner.grip.filter(function (card) {
+      return card != this && card.title != this.title &&
+        CheckCardType(card, ["hardware"]) && CheckTrash(card);
+    }, this);
+    var keeping = runner.AI._cardsWorthKeeping(hardware);
+    return hardware.filter(function (card) { return !keeping.includes(card); });
   },
-  AIEconomyInstall: 2,
+  AIRunStartCreditPlan: function (server, runEvent, bonusBreaker) {
+    var selectFuel = function () {
+      var fuel = this._expendableHardware();
+      if (!fuel.length) return null;
+      var choices = fuel.map(function (card) { return {card: card}; });
+      return {card: choices[runner.AI._indexOfBestDiscardOption(choices)].card, credits: 2};
+    }.bind(this);
+    if (!bonusBreaker) return selectFuel();
+    // Fuel is evaluated after the tutor's installation, including its MU use.
+    var installed = runner.rig.programs;
+    return AIWithHypothetical(function () { installed.push(bonusBreaker.card); }, selectFuel,
+      function () { installed.pop(); });
+  },
+  AIEconomyInstall: function () {
+    // Three expendable cards yield six run credits for a four-credit install
+    // and an action. One fuel card alone never repays this investment.
+    if (!CheckCredits(runner, InstallCost(this), "installing", this) || runner.clickTracker < 2)
+      return 0;
+    return this._expendableHardware().length * 2 > InstallCost(this) ? 2 : 0;
+  },
+  AIWouldInstall: function () {
+    return this.AIEconomyInstall() > 0;
+  },
   AIWorthKeeping: function () {
-    for (var i = 0; i < runner.grip.length; i++) {
-      if (runner.grip[i] != this && CheckCardType(runner.grip[i], ["hardware"]))
-        return true;
-    }
-    return false;
+    return this._expendableHardware().length > 0;
   },
 };
 
@@ -1787,6 +2171,9 @@ cardSet[36021] = {
   },
   AIRunPoolCreditOffset: function () {
     return this.credits;
+  },
+  AIRunEventCreditGain: function (server, runEvent) {
+    return runEvent && !this.playedEventThisTurn ? 1 : 0;
   },
   AIEconomyInstall: 2,
   AIWorthKeeping: function () {

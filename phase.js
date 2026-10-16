@@ -1723,6 +1723,7 @@ phases.runEnds.Resolve.n = function () {
         "Runner loses " + runner.temporaryCredits + " unspent temporary credits"
       );
     runner.temporaryCredits = 0;
+    runner.temporaryPoolCredits = 0;
     attackedServer = null;
     approachIce = -1;
     encountering = false;

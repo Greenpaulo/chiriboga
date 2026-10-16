@@ -2741,6 +2741,9 @@ function AddTempBonusClicks(player, amount) {
  * @param {any[]} array the array to shuffle
  */
 function Shuffle(array) {
+  // A learned R&D card is no longer locatable after its deck is shuffled.
+  if (array == corp.RnD.cards)
+    for (var card of array) card.knownToRunner = false;
   var currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -2771,6 +2774,15 @@ function PublicMeatDamagePrevention() {
   return InstalledCards(runner).reduce(function (sum, card) {
     if (!CheckHasAbilities(card) || typeof card.AIMeatDamagePrevention != "function") return sum;
     return sum + Math.max(0, card.AIMeatDamagePrevention.call(card));
+  }, 0);
+}
+
+// Free finite net prevention available to both public run planners. Paid or
+// conditional prevention must not promise this budget without its costs.
+function PublicNetDamagePrevention() {
+  return InstalledCards(runner).reduce(function (sum, card) {
+    if (!CheckHasAbilities(card) || typeof card.AINetDamagePrevention != "function") return sum;
+    return sum + Math.max(0, card.AINetDamagePrevention.call(card));
   }, 0);
 }
 
@@ -3398,7 +3410,7 @@ function InstallDestination(installingCard, destination = null) {
 }
 
 /**
- * Gets the available credit pool for a player, including bad publicity but not recurring credits.<br/>Nothing is logged.
+ * Gets the available credit pool for a player, including pool-equivalent Stimhack credits, excluding the bad-publicity fund and recurring credits.<br/>Nothing is logged.
  *
  * @method Credits
  * @param {Player} player to get credit pool for
@@ -3406,7 +3418,7 @@ function InstallDestination(installingCard, destination = null) {
  */
 function Credits(player) {
   if (player == corp) return corp.creditPool;
-  if (player == runner) return runner.creditPool + runner.temporaryCredits;
+  if (player == runner) return runner.creditPool + (runner.temporaryPoolCredits || 0);
 }
 
 /**
@@ -3456,7 +3468,8 @@ function AvailableCredits(player, doing = "", card = null) {
   var availableCred = 0;
   if (CreditPoolCanBeUsed(player, "spend", doing, card))
     availableCred += player.creditPool;
-  if (player == runner) availableCred += runner.temporaryCredits;
+  if (player == runner) availableCred += runner.temporaryCredits -
+    (CreditPoolCanBeUsed(player, "spend", doing, card) ? 0 : (runner.temporaryPoolCredits || 0));
   var activeCards = ActiveCards(player);
   for (var i = 0; i < activeCards.length; i++) {
     if (typeof activeCards[i].credits !== "undefined") {
@@ -4638,9 +4651,19 @@ function BreakerMatchesIce(breakerCard, iceCard) {
  * @method UpdateCounters
  */
 function UpdateCounters() {
-  runner.creditPool += runner.temporaryCredits;
-  cardRenderer.UpdateCounters(); //this should be the only place in all the code this is called. Other calls should be just to UpdateCounters (not cardRenderer.)
-  runner.creditPool -= runner.temporaryCredits;
+  var pool = runner.creditPool;
+  try {
+    runner.creditPool += runner.temporaryPoolCredits || 0;
+    if (typeof countersUI != "undefined" && countersUI.credits && countersUI.credits.runner) {
+      var counter = countersUI.credits.runner;
+      counter.postfix = runner.temporaryCredits > (runner.temporaryPoolCredits || 0) ?
+        " +" + (runner.temporaryCredits - (runner.temporaryPoolCredits || 0)) + " fund" : "";
+      // Fund spending can change the label without changing the pool counter.
+      if (counter.richText && (!counter.incrementers || !counter.incrementers.length))
+        counter.richText.text = (counter.prefix || "") + runner.creditPool + counter.postfix;
+    }
+    cardRenderer.UpdateCounters();
+  } finally { runner.creditPool = pool; }
 }
 
 /**

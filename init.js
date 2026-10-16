@@ -205,6 +205,7 @@ function Init() {
   //Runner
   runner.identityCard = null;
   runner.creditPool = 0;
+  runner.temporaryPoolCredits = 0; //pool-equivalent temporary credits (Stimhack)
   runner.temporaryCredits = 0; //generated at start of run, removed at end of run (e.g. from bad publicity)
   runner.clickTracker = 0;
   runner.tempBonusClicks = 0; //one-time bonus clicks for next turn
@@ -650,7 +651,7 @@ function Render() {
 		}
 		return ret;
 	}
-	var carddivs = '<div id="text-render-lists"><div id="runner-field"><h1>Runner ('+runner.creditPool+' credits)</h1>';
+	var carddivs = '<div id="text-render-lists"><div id="runner-field"><h1>Runner ('+Credits(runner)+' credits; '+(runner.temporaryCredits-(runner.temporaryPoolCredits||0))+' fund)</h1>';
 	carddivs += '<div id="runner-identity">';
 	carddivs += '<h4>'+cardToOutputString(runner.identityCard)+'</h4>';
 	if (typeof runner.identityCard.setAsideCards != 'undefined') carddivs += pileToOutputString(runner.identityCard.setAsideCards, false); //false collapses non-sequential duplicates

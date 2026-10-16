@@ -731,11 +731,11 @@ AIRunEventRestore: function(server) {
 },
 ```
 
-Aircheck uses the same paired-hook pattern to model its inaccessible Runner
-credit pool. It temporarily sets `runner.creditPool` to its play cost, which is
-then subtracted by the normal run-event calculation, leaving zero pool credits
-for the hypothetical run. `AIRunEventExtraCredits` supplies its hosted credits
-separately, and `AIRunEventRestore` restores the exact stored pool value.
+Aircheck uses paired hooks to activate its finite hosted Stealth source and
+pool lock during the forecast. The play cost is paid before that lock; the
+common calculator avoids counting both the active source and its scalar bonus.
+`AIRunEventRestore` restores its exact prior balance, activity, resolving-zone
+membership and Runner pool.
 
 **`AIRunEventExtraCredits`** (a plain number)
 
@@ -2219,6 +2219,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunEventModify(server)` | function | Temporarily modify game state for run calc |
 | `AIRunEventRestore(server)` | function | Restore state after run calc |
 | `AIRunEventExtraCredits` | number | Credits this run event provides |
+| `AIRunStartCreditPlan(server, runEvent, bonusBreaker)` | function | Runner-only forecast of expendable Grip fuel loading hosted credits at run start; guarded by shared consumer |
+| `AITutorStartsRun` | boolean | Tutor installs for free and initiates its run with the event action (Beta Build) |
 | `AIRunPoolCreditOffset(server, runEventCardToUse)` | function | Public generic run-credit offset (Methuselah, Touchstone, Cezve, Ken Tenma); safe with a null event; restricted payments use `AIRunRestrictedCredits` |
 | `AIRunRestrictedCredits(server)` | function | Nonnegative public credits available only for explicitly modelled restricted payments; shared providers report a maximum, not a sum |
 | `AIMeatDamagePrevention()` | function | Nonnegative currently usable public one-shot meat-damage prevention capacity |
@@ -2755,3 +2757,418 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
+
+### Vantage Point batch 2 repair
+
+- Lampades `AIInstallBeforeRun(server)` requires legal usable stealth and a
+  useful intended access: public savings/denial or a funded unknown access.
+  `AIWastefulToInstall()` applies the same criteria across servers to generic
+  install selection, declining available powered duplicates and MU pressure.
+  Checks use prospective run context and public access counts, restore that
+  context even on exceptions, and never inspect concealed card identities.
+- `AIHypotheticalInstallCounters()` returns a read-only object mapping counter
+  property names to their totals immediately after installation. Lampades returns
+  `{power: 3}`. `_runAfterInstall` applies these values for its independent route
+  calculation without firing gameplay triggers, then restores each original
+  property descriptor (including absence) on success or exception. This hook is
+  for deterministic starting counters, not arbitrary on-install effects.
+- Immediate public wins precede basic/event tag removal as well as passive setup
+  and expiring plays. Terminal route evaluation omits discretionary trash while
+  retaining mandatory approach effects and additional steal costs. Follow-up
+  access reserves apply the same terminal tag policy through independent
+  calculators; actual payments preserve indispensable sources. Live replanning
+  derives the goal from a still-public, legal winning agenda and reserves its
+  pool-only steal payment/clicks. Changed legality/resources can invalidate it;
+  ordinary routes retain finite tag cleanup and Grip-retention preferences.
+
+
+- `AIHostedInstallValue(card)` is a read-only hook on an installed Runner host.
+  Return the marginal public benefit of hosting this legal installation (zero
+  if none). Hackerspace returns the additional maximum hand slots from completing
+  its Companion/Connection pair. Runner `_preferredInstallChoice` preserves an
+  explicit `AIPreferredInstallChoice` veto/index; otherwise it ranks legal
+  destinations by install cost, then this benefit, excluding exposed tagged
+  resource hosts. Draw, pre-run and generic keep/install consumers carry the
+  selected host through `SelectChoice`. No card-title list is involved.
+- Hackerspace's `AIWorthKeeping`/`AIWastefulToInstall` require enough prospective
+  discounts to repay setup, or a Companion/Connection pair with immediate hand
+  pressure. `AIInstallBeforeInstall` orders a funded, click-budgeted setup before
+  its eligible resources; it does not assume cards can be rehosted after install.
+- Nurse Hạnh's `AIWorthKeeping`, `AIInstallBeforeRun`, `AIDrawInstall` and
+  `AIWastefulToInstall` use public facedown Archives count and finite own Stack
+  count. Draw setup requires time for installation and a run, projected hosted
+  hand space and an affordable survivable Archives route. `AIRunExtraPotential`
+  values actual usable draw slots; it makes the installed Nurse's draw opportunity
+  an action-selection benefit instead of merely making installation eligible.
+  Ordinary run selection checks `_winningRunBeforeOpportunity` first: legally
+  enumerated ordinary runs to public agendas that win immediately outrank this
+  passive draw benefit. The check includes complete route payments/rebates,
+  remaining clicks, additional steal costs and public breach/steal restrictions.
+  It evaluates the route in a prospective run context (including run-only credit
+  sources and last-click damage budgets), restored in `finally`. Its guarded
+  `_evaluatingWinningRun` context uses the actual survivable Grip budget,
+  independent of `AIWorthKeeping` preferences or cold/stale potential caches.
+  Ordered damage peaks, finite draw/prevention and real payments still constrain
+  survival. The guarded terminal calculation passes an unlimited tag limit so
+  `ValidPoint` cannot impose post-run removal costs on an immediate winning
+  steal. This relaxes cleanup preference only: damage, end-the-run effects,
+  payments, clicks and public steal/breach restrictions remain in the complete
+  route model. Ordinary routes retain finite tag cleanup and their keep-card
+  preference. The context is
+  restored on success, decline and exceptions. It installs no
+  hypothetical cards or run events; the selected funded route enters the normal
+  run cache for subsequent server/encounter choices. Infeasible or concealed
+  winning targets leave normal potential and preparation decisions available.
+- `AIRunBreachDraw(server)` returns the number of cards a public active Runner
+  card will draw at breach before accesses. `CalculatePieceBegin` calls it on
+  installed cards, after checking public breach replacements, to append ordered
+  `drawCard` effects after successful-run damage and before access threats.
+  Nurse returns at most two, only for a group of at least two facedown Archives
+  cards. Read only public counts; never inspect concealed card identities/order.
+- `AIRunOrderedDraw: true` is a boolean declaration that independent per-ICE
+  security costs cannot express this card's ordered resource effect. Corp
+  `_restrictedPaymentPlanOutcome` selects the complete public route calculator
+  for Nurse and Stick and Poke, alongside restricted payments and break income.
+  Both planners therefore evaluate finite Stack capacity and damage-before-draw.
+- `AIEncounterEffects` is an array of ordered effect strings on a **live inserted
+  subroutine**. `IceAI` inserts it into the printed ICE description before
+  masking broken subroutines. Stick and Poke uses `['netDamage', 'drawCard']`;
+  a broken or bypassed subroutine provides neither damage nor draw. This is
+  public encounter data, not an extra ability or a resolution callback.
+- `AIModifyIceAI(iceAI, startIceIdx, rc)` now receives the calculating instance
+  as an optional third argument. Existing two-argument hooks remain valid.
+  Stick and Poke adds the ordered subroutine only on the first predicted
+  encounter, unless its public once-per-turn state or the finite-continuation
+  overlay already consumed it. Live inserted subroutines use the property above;
+  direct hook calls also add the live ordered row when a printed model omits it.
+  Generic ICE models replace that row rather than duplicating it, and predicted
+  rows increment `srActualOffset` so broken printed rows stay aligned.
+- `drawCard` replenishes one Grip slot only while public Stack capacity remains.
+  `DamageResources` tracks damage peaks before replenishment as well as final
+  hand loss; draw cannot reverse an earlier flatline. Point costs still value
+  gross damage, since replacing a damaged card does not recover that card.
+  Finite reruns carry depleted Stack/Grip and consumed first-encounter state;
+  payment-policy branches retain those overlays. Existing finite meat prevention
+  is consumed before the corresponding draw. Source-sensitive payment damage
+  records the first payment's position among ordered encounter effects, so a
+  later Shackleton payment uses the already replenished hand.
+  `AINetDamagePrevention()` returns
+  a public, finite count of **free**, unconditional net prevention available now;
+  `PublicNetDamagePrevention`, `TotalEffect` and `DamageResources` consume it
+  once, before each prevented damage's following draw. It must be read-only,
+  valid outside runs, and exclude paid/conditional or already-used prevention.
+  Finite reruns carry its remaining budget, and payment branches retain the
+  override. The permanent fixture exercises the corresponding actual engine
+  prevention response as well as both public planners. No current playable card
+  supplies free net prevention; this hook does not promise legacy paid Net Shield
+  or Feedback Filter credits without modelling their costs.
+- Runner `_runAfterInstall` evaluates a passive installation with its selected
+  host, credit/click cost, lost Grip card, public passive effects and a separate
+  calculator. It fires no gameplay triggers, keeps live route caches untouched,
+  and restores own zones, host/location and resources in `finally`. The pre-run
+  consumer requires the intended route to remain complete before returning an
+  install command. Stick and Poke's `AIWorthKeeping`/`AIWastefulToInstall` retain
+  it for a useful free paired hand-space benefit or available free net prevention,
+  with finite draw capacity, rather than
+  paying a click for mandatory damage/cycling alone. `AIInstallBeforeRun` also
+  declines an already-used or exhausted draw opportunity.
+- `AIAccessTriggerPriority(optionList)` is a read-only access-window hook
+  called on legally triggerable Runner cards by the real access command selector.
+  Return zero to decline; positive values rank triggers: above 3 precedes steal,
+  above 2 precedes ordinary trash, above 1 precedes other triggers, and above zero
+  precedes leaving the card. The hook may inspect the currently accessed card,
+  own public resources and the supplied legal command list, not concealed Corp
+  cards. Lampades returns 3 when its trash saves pool credits or is the only
+  trash option, and zero when preserving power/stealth is preferable.
+- Lampades `AIAccessTriggerPriority` preserves finite power/stealth when ordinary
+  trash is cheaper, and uses the ability when ordinary trash is unavailable or
+  more expensive, provided the actual hosted-credit allocation preserves an
+  affordable publicly known winning follow-up steal. `_stealthPaymentPlan(amount)`
+  supplies the same least-flexible-first allocation to both the priority hook
+  and recursive payment. `AIReducesTrashCost` remains eligibility-sensitive.
+- Runner `_accessPaymentPreservesWinningRun({pool, hosted})` evaluates independent
+  complete routes to public winning remote agendas before and after a proposed
+  payment (`hosted` is an array of `{card, amount}`). It accounts for remaining
+  clicks, route payments/rebates, additional steal costs and public breach/steal
+  restrictions. Current-run temporary credits expire before the next run.
+  Hypothetical credits and encounter context are restored even on exceptions;
+  live route/cost caches are never changed. It reads no concealed Corp or Stack
+  identities and promises no future draws, installs or source replenishment.
+- Ordinary access trash also uses this reserve evaluation. `_accessTrashPayment`
+  mirrors `SpendCredits` source allocation using `"paying trash costs"` for
+  both `CreditPoolCanBeUsed` and hosted `canUseCredits` checks, matching actual
+  access enumeration/resolution and trash-only sources such as Azimat. The
+  access selector and reserve policy use that same reason; `"trashing"` is the
+  separate Corp click-to-trash payment. `AIPreserveOutsideCredits(doing, card,
+  amount)` prefers an affordable pool payment when spending hosted funding would
+  eliminate the winning opportunity; the actual payment consumer follows that
+  choice. If both ordinary trash and the ability destroy every currently funded
+  public winning route, the access selector leaves the card. Plentiful funding,
+  hidden/nonwinning agendas and expired follow-up clicks retain normal valuation.
+
+Permanent real command/card/host/server, payment, breach and opposing-planner
+acceptance is in `tests/vantagepoint-batch2.test.js`; hook-level integration is
+supplementary. Shared install consumers also affect other batches' pre-run
+preparation, and ordered route resources affect the earlier Corsair/Tailor and
+batch13 finite-payment evidence; independently revalidate them after this repair.
+
+### Vantage Point batch 3 repair
+
+`AITriggerToRemoveTags(ability)` returns the number of tags an installed Runner
+ability should remove in preference to the basic remove action (0 to decline).
+The Runner command selector consumes it after immediate winning runs and
+removal events, before basic cleanup. Legal trigger enumeration enforces costs,
+once-per-turn use and timing; the hook evaluates mandatory side effects. The
+selected card and ability both reach the actual trigger selector. It
+uses Runner-visible information only. Vic saves one credit even with a full
+Grip or empty Stack (Runner draws stop when the Stack is empty).
+
+`AIRunBreachTags(server, rc, point)` returns nonnegative tags from an installed Runner
+card's intended optional breach effect. `CalculatePieceEnd` appends these tags
+only to the final complete, unreplaced breach, after finite reruns, and validates
+actual remaining route cleanup resources. `point` contains the complete route
+resource use before optional tags; the hook can decline the bonus rather than
+turning an otherwise legal run into a lockout. Rotary's access model and actual
+breach choice share an independent route calculation: take useful extra access
+when tags can be cleared, or when a legally known extra agenda wins with funded
+steal costs. A `_tagAccessProbe` calculator excludes the effect under evaluation
+and leaves live AI path caches intact. Corp security calls use only public
+resource budgets. Rotary uses the projected next-turn clock on the Corp turn
+and the remaining live clock during a run. For terminal extra access, the Corp
+counts affordable combinations of its own HQ/R&D contents without consulting
+hidden order or Runner private cards; ordinary bonus access still needs cleanup.
+`AICentralPressure` expresses this opportunity bound rather than certainty about
+which hidden central card the Runner will access. Rotary's
+Corp trash trigger uses `AITriggerAfterTactics` so kills, scoring and defense
+precede discretionary denial.
+
+`AIWinningBreachAgenda(server, candidateOnly = false)` returns a Runner-visible agenda whose access is
+guaranteed by this active card's planned breach effect, or null. The Runner's
+`_publicBreachAgendaCandidates` feeds it to the immediate-win command selector
+and terminal run budget; costs, legality and survival remain checked by the
+ordinary run calculator. Rotary exposes a known second R&D card, or a known
+agenda in a two-card HQ that the extra access covers, only after a feasible
+independent route and steal-budget check. This read-only hook must not expose
+concealed identities or merely probable accesses.
+
+The optional `candidateOnly` flag separates known-card discovery from route
+validation. Baker passes `true` through `_publicBreachAgendaCandidates` so Rotary
+can identify its extra winning card without requiring a run through destination
+ICE. That result is only a candidate: Baker's independent paid route reserves
+the Stealth payment and steal costs, validates survival and finite reruns, then
+checks the completed point's accepted `AIAdditionalAccess(server, rc, point)`
+against central size/order and `ServerAccessLimit`. Only guaranteed, funded
+access becomes `winningAgenda`. Default/ordinary callers retain Rotary's safe
+ordinary-route check. This read-only mode uses only Runner-visible identities;
+HQ coverage must include every central card, and R&D uses the known card's depth.
+`RunCalculator.CopyPoint` preserves `runner_credits_reserved` when optional tags
+copy the completed point, so terminal steal credits remain reserved exactly once.
+It also preserves that point's payment policy and outside-credit damage source;
+a destination breach must not reapply the origin's damage when adding its tag.
+
+Sell Out uses `AIPreferredPlayChoice(choices)` and `AIWouldPlay()` to sacrifice
+only resources whose `AIOkToTrash()` explicitly approves, retaining useful
+hosted cards. Underdome's `AIOkToTrash()` approves a no-rez resource on the last
+click. Its `AIDrawInstall()` and `AIPreferredInstallChoice()` require useful
+hand space/tag removal and an observed public rez this turn. An uncommitted
+cached run opportunity is insufficient: run first, then install after observing
+a rez, while a remaining click and credit still allow the payoff.
+Borrowed Goods' install-choice and `AIInstallBeforeInstall(card)` preserve tag
+cleanup clicks/credits for untagged Runners; already-tagged installs add no tag.
+Baker's live redirect choice compares the same ordinary-breach destination
+and Archives potentials as its run-ability planner, then verifies a funded,
+survivable complete continuation. It retains Archives on ordinary ties or when
+both paid destinations are unsafe.
+`_getCachedBreachPotential(server)` reads the value cached before active run
+events/abilities, preventing Baker's own redirect bonus (or a held Tailgate)
+from being mistaken for the value of staying in Archives. Its Stealth
+source selection spends run-only fuel before flexible credits. Kompromat uses
+restored Corp security/loss hypotheticals to compare funded re-rez defense with
+permanent bad-publicity funding; success-prevented runs receive no reward value.
+
+`AIPreferredPlayChoice(choices)` is also consumed at the actual Runner `Playing`
+decision via its card context. This covers economy and draw commands that do
+not carry a next-phase target preference. The legal current choices, not a
+cached enumeration, determine the index. Sell Out's contrasting two-resource
+regression verifies that a correct play decision also chooses the expendable
+target and preserves the useful engine.
+
+
+### Vantage Point batch 3 continuation repair
+
+`AIRunAbilityPlan(server?)` returns `null` to decline, or
+`{originServer, server, path, calculator, winningAgenda, potential, source}`.
+`path` is a complete, currently feasible route produced by the returned
+independent Run Calculator, with the initiation click removed from its starting budget.
+`originServer` is the server whose ICE the path traverses; `server` is its final
+breach destination. `winningAgenda` is null or a Runner-visible agenda guaranteed
+by that breach whose steal wins, with its costs reserved and all survival and
+legality checks satisfied. `source` is the reserved restricted-credit card.
+The real command selector calls the no-argument form on legal click abilities
+before discretionary cleanup/setup and selects a verified terminal plan's card
+and ability. Ordinary run-ability costing calls the server form on the selected
+ability, carrying its complete path into the ranked server choice. The hook is
+read-only, uses Runner-legally-visible information, and restores prospective
+resources and server context in `finally`; it must not update live route caches.
+Baker implements it, and its live redirect and payment choices use the same
+calculation with remaining live resources, with no extra run click charged.
+
+Baker reserves exactly one legal Stealth credit before calculating Archives ICE,
+then models the destination's successful-run/breach effects and steal costs.
+This prevents that credit being promised for both breaking Archives and redirecting.
+The payment happens at Archives, so only Archives' outside-credit punishment
+applies to it; destination punishment applies to subsequent destination payments.
+Independent outside-first/pool-only policies remain available. Finite destination
+reruns traverse destination ICE, carry remaining prevention/resources and do not
+reuse Baker. Its public `AIRedirectsRun` capability reserves the same payment,
+checks a public surviving origin/destination route (including preparation clicks),
+and resets once-per-turn eligibility when planning the next Runner turn. Corp
+consequence, upgrade placement, protection, Archives valuation and stakes consider
+both HQ and R&D destinations. They use Corp-owned contents and public Runner
+resources without reading hidden access order or Grip/Stack identities.
+
+Rotary combines existing access sources before identifying a guaranteed extra
+winning card, avoids spending a tag when other sources already cover the central,
+and prices its setup click/three credits before promising a bonus. Borrowed Goods'
+`AIInstallBeforeInstall(card)` additionally requires enough MU, clicks and pool
+credits for the program and tag cleanup; ordinary installation still allows
+already-tagged Runners without another tag.
+
+Rotary's final-route tag hook reads the completed point's remaining resources
+rather than simulating another run through destination ICE. This also preserves
+optional access on a paid Baker redirect: scarce cleanup resources decline the
+tag, while a funded skipped-ICE continuation and its actual breach choice agree.
+The Corp replay harness loads the real public prevention, outside-credit damage
+and access-limit/success helpers needed for these public route queries; existing
+fixture and snapshot expectations remain intact.
+
+`AIAdditionalAccess(server, rc?, point?)` may read a supplied completed route.
+Rotary returns its conditional bonus from `point.breachTagsByCard`, the
+calculator's per-card record of optional tags actually accepted on that route;
+without those arguments it retains the ordinary prospective-run contract.
+Baker compares ordinary versus complete-route access and applies the Runner
+planner's existing 0.5 value per new central access. Rotary's `AIRunExtraPotential`
+adds that same value for useful R&D access (HQ already has the generic access
+collector), preserving resource/known-card declines and avoiding double counting.
+
+### Vantage Point batch 4 remediation
+
+`AITutorStartsRun` is a boolean on a Runner event with `AIIcebreakerTutor`.
+It means resolving the event installs the tutor target ignoring costs and starts
+its run as one action (Beta Build). Runner candidate discovery allows the last
+click, validates free installation/MU/host, and ranks breakers against each
+server. `_commonRunCalculationChecksAsync` uses this tutor as its run event:
+one play cost, one initiating click, one Grip card; no separate install cost or
+preparation clicks. Install-choice policies receive one extra hypothetical click
+for their separate-install assumption, restored in `finally`. The chosen
+card/host/server travels in `nextPrefs.playChoice` and is matched against actual
+legal play options before `AIPreferredPlayChoice`; changed options fall back to
+the current card policy. Ordinary tutors keep their separate setup budget.
+All event/breaker modify hooks are restored in nested `finally` guards, including
+calculator exceptions and previous `rc.runEvent` state.
+
+Hiram exposes `AIWinningBreachAgenda(server)` only for the legitimately learned
+current R&D top agenda. It never learns a replacement top or reads a hidden
+card's type. This feeds existing ordinary immediate-win precedence and live
+terminal survival/steal reserves. Its human look is a Runner decision containing
+the learned card, without flipping it faceup or disclosing its name publicly.
+
+Methuselah's `AIEconomyInstall()` returns 2 only when three expendable hardware
+cards can repay the full four-credit installation and action, it is affordable,
+and a run click remains. `AIWouldInstall()` uses the same policy so a generic
+install does not bypass the decline. `AIWorthKeeping()` retains a console with
+expendable fuel; `_expendableHardware()` uses the real hand-valuation consumer,
+excluding copies of Methuselah. The run-begin discard preserves hardware valued
+for installation. Existing `AIRunPoolCreditOffset()` describes only credits
+already hosted; future fuel is modelled only through the guarded run-start contract below.
+
+Aircheck's optional remote response probes a fresh independent run calculator
+with its remaining hosted credits, a refreshed publicity fund and zero initiating
+click cost. Empty, unsuccessful, unaffordable or unsafe routes decline. The
+calculator and prospective run context are restored. The follow-up starts only
+after the engine's run cleanup callbacks have resolved.
+
+Bad-publicity funding remains in `runner.temporaryCredits`; the pool-equivalent
+subset (Stimhack) is tracked by `runner.temporaryPoolCredits`. `Credits()` and
+credit loss include only that subset, while `AvailableCredits()` and payments
+include the outside fund. Pool locks apply to Stimhack as well as ordinary pool
+credits. Payments consume the fund before the pool-equivalent subset; cleanup
+empties both. Prospective Runner budgets place bad-publicity and hosted-source
+offsets in outside credits; live Runner/Corp budgets respect pool locks.
+
+`AIRunStartCreditPlan(server, runEvent, bonusBreaker)` is a Runner-only read-only
+hook returning `{card, credits}` for a Grip card sacrificed at run start to load
+the source's numeric `credits`, or `null` to decline. Methuselah returns the same
+expendable hardware its live run-begin selector chooses and two credits. When a
+tutor is planned, fuel valuation includes its installed program's MU use.
+`_commonRunCalculationChecksAsync` temporarily removes the fuel from Grip and
+loads the source, so both damage survival and restricted stealth payments use the
+actual post-start resources. The hook is never called by Corp security (Grip
+contents are private). Exact Grip position, source credits, bonus-breaker scratch
+state and prospective `attackedServer` restore on success or exception. Generic
+source offsets subtract funding already counted by `AvailableCredits`, preventing
+double counting when the prospective run makes hosted sources usable. The hook
+is read-only; only the guarded shared consumer applies the forecast.
+
+### Vantage Point batch 4 continuation: source funding and terminal reserves
+
+`AIRunPoolCreditGain(server, runEventCardToUse)` returns a non-negative number
+of ordinary pool credits gained by playing the proposed run event. Ken uses it
+for his first Run event. The Runner's common run calculation adds this gain only
+to an unlocked pool; it cannot become hosted or publicity funding under a pool
+lock. The hook is read-only and does not trigger the actual gain. Corp security
+never forecasts a hidden event. Ken's old `AIRunPoolCreditOffset` was migrated;
+Cezve, Touchstone and Methuselah retain that hook for their existing hosted
+balances, without double counting the engine's generic availability.
+
+`AIRunEventCreditGain(server, runEventCardToUse)` returns a non-negative number
+of credits placed on **this source** by playing the proposed event. Touchstone
+returns one before its first event of the turn. Runner
+`_prepareRunStartCredits` loads that source temporarily, preserving its payment
+restrictions and Stealth identity, and restores its balance in `finally`.
+The hook is read-only, Runner-only and never used to infer private events by the
+Corp. It forecasts no income on a free follow-up run. Actual income still comes
+from the card's normal play trigger.
+
+`AIRunStartCreditPlan` now shares `_prepareRunStartCredits` and
+`_restoreRunStartCredits` between ordinary initial planning and
+`_followupRunPaths`. The latter uses a fresh publicity fund, current hosted
+balances, no initiating click/event cost and no event refill. Fuel is removed
+from Grip for survival checks and restored to its exact position after every
+probe. Aircheck ranks feasible known terminal wins ahead of ordinary cached
+potential; an unsafe or unfunded candidate receives no terminal priority.
+
+Required Stealth discovery uses `ActiveCards(runner)`, including resolving
+Run events. Aircheck's paired hypothetical hooks activate the actual event with
+four hosted credits and its pool lock, then restore its activity, balance,
+resolving-zone membership and pool. The common calculator subtracts credits
+already counted by that active source from the scalar event bonus. The play
+cost is paid before the lock, rather than charged to an inaccessible pool.
+Corp complete-route pricing also runs for publicly funded `AIUsesStealthCredits`
+consumers even when their source is unrestricted and `AIRunRestrictedCredits`
+therefore returns zero. Empty/inactive sources do not activate that path.
+
+`RunCalculator.CreditBalance(point, pool, other)` shares credit validation:
+`terminalCreditsReserved` is the generic-payable portion of
+`runner_credits_reserved`; the remainder reserves permanent pool spending on
+finite continuations. Required-only supplements offset only actual required
+payments. Terminal credits consume remaining unrestricted outside credits before
+pool credits and trigger outside-credit damage with normal timing/prevention.
+Copying a point retains this distinction. Finite reruns expire the old fund,
+refresh publicity and carry installed hosted sources at their remaining balances;
+source balances and identities form part of continuation caching and restore
+after nested calculation. Event-hosted credits expire instead of refilling.
+
+Ordinary winning discovery, Hiram, live run recalculation, optional-access
+preservation, Rotary's initial/completed/live access decisions and Baker's paid
+redirect all validate the same complete terminal reserve. Rotary and Baker use
+fresh publicity before a run and the remaining actual fund during a run.
+Generic hand-overflow play no longer starts an unplanned Run event: those cards
+must pass run planning, or a separate explicit `AIWouldPlay` policy for another
+purpose. This prevents the fallback from bypassing affordability/safety checks.
+
+`AIUsesStealthCredits` is a boolean capability on a Runner card which makes
+required Stealth payments. Corsair, Lampades and Baker use it. Corp complete-route
+pricing checks the flag together with an eligible public funded Stealth source;
+it is a request to validate actual finite payments, not an extra credit grant.
+The flag and source discovery expose only active public information to the Corp.

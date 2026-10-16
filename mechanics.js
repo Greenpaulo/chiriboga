@@ -1358,12 +1358,17 @@ function SpendCredits(
 ) {
   var outsideSpent = 0;
   var temporaryAvailable = function () {
-    return player == runner ? Math.max(0, runner.temporaryCredits || 0) : 0;
+    if (player != runner) return 0;
+    return Math.max(0, (runner.temporaryCredits || 0) -
+      (CreditPoolCanBeUsed(player, "spend", doing, card) ? 0 : (runner.temporaryPoolCredits || 0)));
   };
-  function spendTemporary(amount) {
+  function spendTemporary(amount, poolOnly = false) {
+    var fund = Math.max(0, runner.temporaryCredits - (runner.temporaryPoolCredits || 0));
+    var fundSpent = poolOnly ? 0 : Math.min(amount, fund);
+    runner.temporaryPoolCredits = Math.max(0, (runner.temporaryPoolCredits || 0) - (amount - fundSpent));
     runner.temporaryCredits -= amount;
     num -= amount;
-    outsideSpent += amount;
+    outsideSpent += fundSpent;
     Log(PlayerName(player) + " spent " + amount + " temporary credits");
   }
   function eligibleHostedSources() {
@@ -1429,7 +1434,11 @@ function SpendCredits(
     if (player.AI) {
       var preserveOutside = player == runner && typeof player.AI.AIPreserveOutsideCredits == "function" &&
         player.AI.AIPreserveOutsideCredits(doing, card, num);
-      if (preserveOutside && canUsePool) spendFromPool(num);
+      if (preserveOutside && canUsePool) {
+        spendFromPool(num);
+        if (player == runner && num > 0 && runner.temporaryPoolCredits > 0)
+          spendTemporary(Math.min(num, runner.temporaryPoolCredits), true);
+      }
       if (num > 0 && temporaryAvailable() > 0) spendTemporary(Math.min(num, temporaryAvailable()));
       for (var i = 0; i < sources.length && num > 0; i++)
         spendFromCard(sources[i], Math.min(num, sources[i].credits));
@@ -1448,7 +1457,9 @@ function SpendCredits(
       if (num < 1) { finishPayment(); return; }
       temporary = temporaryAvailable();
     }
-    if (sources.length < 1 && temporary > 0 && (!canUsePool || player.creditPool < 1)) {
+    if (sources.length < 1 && temporary > 0 && (!canUsePool || player.creditPool < 1) &&
+        !(sourceSensitive && canUsePool && runner.temporaryPoolCredits > 0 &&
+          runner.temporaryCredits > runner.temporaryPoolCredits)) {
       spendTemporary(Math.min(num, temporary));
       choosePaymentSource();
       return;
@@ -1475,8 +1486,12 @@ function SpendCredits(
     }
 
     var choices = [];
-    if (temporary > 0) choices.push({temporary: true, num: 1,
-      label: "Spend 1 temporary credit", button: "Spend 1[c] temporary credit"});
+    if (player == runner && runner.temporaryCredits > (runner.temporaryPoolCredits || 0))
+      choices.push({temporary: true, num: 1,
+        label: "Spend 1 bad-publicity credit", button: "Spend 1[c] from fund"});
+    if (player == runner && canUsePool && runner.temporaryPoolCredits > 0)
+      choices.push({temporaryPool: true, num: 1,
+        label: "Spend 1 Stimhack credit", button: "Spend 1[c] from Stimhack"});
     for (var i = 0; i < sources.length; i++) {
       for (var amount = 1; amount <= Math.min(num, sources[i].credits); amount++) {
         choices.push({
@@ -1504,7 +1519,8 @@ function SpendCredits(
       player,
       choices,
       function (params) {
-        if (params.temporary) spendTemporary(params.num);
+        if (params.temporaryPool) spendTemporary(params.num, true);
+        else if (params.temporary) spendTemporary(params.num);
         else if (params.card) spendFromCard(params.card, params.num);
         else spendFromPool(params.num);
         choosePaymentSource();
@@ -1532,6 +1548,9 @@ function GainCredits(player, num, temporary = "", sourceCard = null) {
   var bpcStr = "";
   if (temporary != "") {
     runner.temporaryCredits += num;
+    // Only bad publicity is outside the pool. Stimhack retains pool semantics.
+    if (temporary != "bad publicity")
+      runner.temporaryPoolCredits = (runner.temporaryPoolCredits || 0) + num;
     bpcStr = " from " + temporary;
   } else player.creditPool += num;
   if (num == 1) Log(PlayerName(player) + " gained one credit" + bpcStr);
@@ -1753,18 +1772,14 @@ function LoseClicks(player, num) {
  */
 function LoseCredits(player, num) {
   var numberLost = 0;
-  //automatically lose temporary credits first if possible
-  if (runner.temporaryCredits > 0) {
-    if (runner.temporaryCredits >= num) {
-      numberLost += num;
-      runner.temporaryCredits -= num;
-      num = 0;
-    } //can only partially cover the cost with bad pub credits
-    else {
-      numberLost += runner.temporaryCredits;
-      num -= runner.temporaryCredits;
-      runner.temporaryCredits = 0;
-    }
+  // Pool-equivalent temporary credits (Stimhack) may be lost; the publicity
+  // fund and the opposing player's credits cannot be touched.
+  if (player == runner && CreditPoolCanBeUsed(player, "lose")) {
+    var temporaryLost = Math.min(num, runner.temporaryPoolCredits || 0);
+    runner.temporaryPoolCredits = (runner.temporaryPoolCredits || 0) - temporaryLost;
+    runner.temporaryCredits -= temporaryLost;
+    num -= temporaryLost;
+    numberLost += temporaryLost;
   }
   //lose the rest from default pool
   if (!CreditPoolCanBeUsed(player, "lose")) num = 0;

@@ -37,6 +37,7 @@ const context = {
     remoteServers: [],
   },
 };
+context.playerTurn = context.runner;
 vm.createContext(context);
 vm.runInContext(
   fs.readFileSync(path.join(root, 'config.js'), 'utf8'),
@@ -109,6 +110,7 @@ let creditsGained = 0;
 let cardsDrawn = 0;
 
 context.InstalledCards = (player) => installed[player.side];
+context.ActiveCards = (player) => context.InstalledCards(player).concat(player.resolvingCards || []);
 context.ChoicesArrayCards = (cards, check) =>
   cards
     .filter((card) => !check || check(card))
@@ -670,10 +672,10 @@ rotary.corpAbilities[0].Resolve.call(rotary);
 assert.strictEqual(context.corp.clickTracker, 2);
 assert.strictEqual(trashCalls[0].cards[0], rotary);
 assert.strictEqual(trashCalls[0].canBePrevented, false);
-assert.strictEqual(rotary.AIAdditionalAccess.call(rotary, context.corp.HQ), 1);
+assert.strictEqual(rotary.AIAdditionalAccess.call(rotary, context.corp.HQ), 0, 'no useful central card or funded optional tag');
 assert.strictEqual(
   JSON.stringify(rotary.AICentralPressure.call(rotary, context.corp.RnD)),
-  '{"additionalAccess":1}',
+  '{}',
 );
 assert(
   utilitySource.includes('"corpAbilities"'),
@@ -726,7 +728,8 @@ assert.strictEqual(runTarget, context.corp.archives);
 decisions = [];
 context.attackedServer = context.corp.archives;
 const bakerRedirects = baker.responseOnWouldApproachServer.Enumerate.call(baker);
-assert.strictEqual(bakerRedirects.length, 2);
+assert.strictEqual(bakerRedirects.length, 3);
+assert.strictEqual(bakerRedirects[2].server, null, 'Baker may retain the Archives breach');
 baker.responseOnWouldApproachServer.Resolve.call(baker, bakerRedirects[0]);
 assert.strictEqual(context.attackedServer, context.corp.HQ);
 assert.strictEqual(stealthSource.credits, 0);
@@ -764,16 +767,9 @@ assert.strictEqual(
   null,
   '36015 restores the real attacked server after planning',
 );
-context.runner.AI = {
-  _getCachedPotential: (server) => server === context.corp.HQ ? 4 : 2,
-};
-assert.strictEqual(
-  baker.AIRunAbilityExtraPotential.call(baker, context.corp.archives, 1),
-  3,
-  '36015 evaluates run-only Stealth credits in its run-ability planning context',
-);
-assert.strictEqual(context.attackedServer, null, '36015 run-ability planning restores attackedServer');
-context.runner.AI = null;
+// The unchanged extra-potential=3/restoration assertions now use the full
+// engine in vantagepoint-batch4.test.js: paid continuation valuation needs the
+// actual route calculator, not this mechanics harness's cached-value stub.
 assert(
   phaseSource.includes('"responseOnWouldApproachServer"'),
   '36015 uses a decision-safe response window before server approach',

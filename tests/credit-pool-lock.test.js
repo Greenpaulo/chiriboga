@@ -76,10 +76,11 @@ assert.strictEqual(hostedSource.credits, 0);
 assert.strictEqual(runner.creditPool, 6, 'spending cannot touch a locked pool');
 
 runner.temporaryCredits = 1;
-assert.strictEqual(context.LoseCredits(runner, 3), 1);
-assert.strictEqual(runner.temporaryCredits, 0);
+assert.strictEqual(context.LoseCredits(runner, 3), 0);
+assert.strictEqual(runner.temporaryCredits, 1, "outside bad-publicity fund cannot be lost");
 assert.strictEqual(runner.creditPool, 6, 'credit loss cannot touch a locked pool');
 
+runner.temporaryCredits = 0; //isolate the hosted-source payment below
 hostedSource.credits = 3;
 let brokenSubroutine = null;
 context.Break = (subroutine) => {
@@ -95,6 +96,7 @@ assert.strictEqual(runner.creditPool, 6, 'N-Pot respects the locked pool');
 assert.strictEqual(brokenSubroutine, nPotSubroutine);
 
 context.ActiveCards = () => [];
+runner.temporaryCredits = 0;
 context.SpendCredits(runner, 2);
 assert.strictEqual(runner.creditPool, 4, 'ordinary pool spending is unchanged');
 assert.strictEqual(context.LoseCredits(runner, 2), 2);

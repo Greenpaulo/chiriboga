@@ -808,7 +808,7 @@ cardSet[31013] = {
     automatic: true,
     availableWhenInactive: true,
   },
-  AIRunPoolCreditOffset: function(server,runEventCardToUse) {
+  AIRunPoolCreditGain: function(server,runEventCardToUse) {
 	  if (runEventCardToUse && !this.playedRunEventThisTurn) return 1; //1 bonus credit
 	  return 0; //no bonus credit
   },

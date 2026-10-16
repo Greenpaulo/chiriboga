@@ -45,7 +45,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**1 complete, 12 outstanding** (`12 Pending`, `0 In progress`, `0 Blocked`).
+**2 complete, 11 outstanding** (`11 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -53,10 +53,10 @@ Agents must refresh these counts whenever a batch status changes.
 
 | Batch | Card IDs    | Status   | Owner / started          | Notes/blocker                                                              |
 | ----: | ----------- | -------- | ------------------------ | -------------------------------------------------------------------------- |
-| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](reviews/vantage-point/vantagepoint-batch-1.md). |
+| 1 | 36001–36004 | Pending | — | Parked: original batch 1 branch has a latency regression. Only explicitly required prerequisites are carried on this branch; the batch is not accepted here. See [unstack record](unstack-2026-10-16.md). |
 | 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](reviews/vantage-point/vantagepoint-batch-2.md). |
 | 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](reviews/vantage-point/vantagepoint-batch-3.md). |
-| 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](reviews/vantage-point/vantagepoint-batch-4.md). |
+| 4 | 36017–36020 | Complete | Codex / 2026-10-15 | Rebuilt independently on main (2026-10-16), with required shared prerequisites and the expensive Corp break-income route trigger excluded. Implementation retained; independent re-review required for this snapshot. See [original evidence](reviews/vantage-point/vantagepoint-batch-4.md) and [unstack record](unstack-2026-10-16.md). |
 | 5 | 36021–36025 | Pending | — | Changes required: Economy/hosting decisions require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-5.md). |
 | 6 | 36026–36030 | Pending | — | Changes required: Click steal cost and central defense choices require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-6.md). |
 | 7 | 36031–36035 | Pending | — | Changes required: Pass restriction and paid-defense/tactical choices require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-7.md). |
@@ -100,6 +100,9 @@ Do not remove an older entry if later work revisits one of its cards.
 
 | 13 | 36061–36066 | 2026-10-06 | Codex | `tests/vantagepoint-batch13.test.js`; `tests/corp-server-security.test.js`; full `node tests/run-all-tests.js` | Repaired the reopened Corsair/Shackleton public-security gap using complete restricted-payment routes. Same-board opposing planner tests cover lethal/survivable damage, prevention, source exhaustion, finite reruns, click preparation, funded hidden ICE and read-only/private-information constraints. All 50 files pass, including Corp decision fixtures and decision snapshots. |
 
+| 4 | 36017–36020 | 2026-10-14 | Codex | `tests/vantagepoint-batch4.test.js`; `tests/credit-pool-lock.test.js`; set integration; affected batch 2/3/13 and Corp-security regressions; full `node tests/run-all-tests.js` | C4-1–C4-4/S1: callable full-cost economy/fuel forecast, exact one-action tutor plan and actual last-click winning steal, safe remaining-credit remote, guarded restoration, private known-top look/shuffle invalidation and distinct publicity/Stimhack funding. All 94 files pass, including Corp fixtures and decision snapshots; required shared checks pass. Independent complete-matrix/shared-consumer re-review required. |
+| 4 | 36017–36020 | 2026-10-15 | Codex | `tests/vantagepoint-batch4.test.js`; set integration; affected batch 1/2/3/12/13, credit/payment/security/hypothetical suites; full `node tests/run-all-tests.js` | C4-5–C4-8: actual active-event Stealth discovery, shared zero-click fuel forecasting, winning remote precedence, generic terminal reserves and finite source carryover, actual Rotary/Baker/optional-payment wins and source damage, explicit Ken pool income/Touchstone hosted gain. All 94 files pass, including Corp fixtures and decision snapshots; required shared checks pass. Independent full matrix/shared-consumer re-review required; no new limitation or verdict/playability change. |
+
 ## Batch-review log
 
 Independent review evidence is separate from implementation completion history.
@@ -120,6 +123,8 @@ Verdicts apply to the linked snapshot-specific reports; repairs require re-revie
 | 11 | 36051–36055 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-11.md) |
 | 12 | 36056–36060 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-12.md) |
 | 13 | 36061–36066 | 2026-10-06 | Pass | [Report](reviews/vantage-point/vantagepoint-batch-13.md) |
+
+| 4 | 36017–36020 | 2026-10-14 | Changes required (independent remediation re-review) | [Report: C4-1–C4-4 accepted; complete matrix, C4-5–C4-8 and 37 observations; all 94 files pass](reviews/vantage-point/vantagepoint-batch-4.md#independent-remediation-re-review--2026-10-14) |
 
 ## Set-wide review status
 
@@ -175,3 +180,12 @@ Before replacing the active set:
    or overlaps.
 5. Update the **Implementation notes** row to the new set's notes file.
 6. Leave the generic `implement-card-batch` skill unchanged.
+
+## Independent branch state — 2026-10-16
+
+This branch contains batch 4 and required shared prerequisites. Earlier
+batch completion/review claims do not carry over automatically. The reports
+and completion entries above describe their recorded original snapshots;
+independent re-review is required after this extraction. Batch 1 remains parked.
+The [four exact pre-unstack tracker snapshots](history/unstack-2026-10-16/README.md)
+preserve the original cumulative state. See the [extraction record](unstack-2026-10-16.md).
