@@ -33,7 +33,9 @@ cardSet[36001] = {
     availableWhenInactive: true,
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
+    Resolve: function () {
+      //automatic triggers are resolved without arguments; the run's server is attackedServer
+      var server = attackedServer;
       if (server == corp.HQ) this.madeSuccessfulRunOnHQThisTurn = true;
       else if (server == corp.RnD) this.madeSuccessfulRunOnRnDThisTurn = true;
       else if (server == corp.archives)
@@ -1986,8 +1988,9 @@ cardSet[36024] = {
     return card.player == corp && CheckCardType(card, ["ice"]);
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
-      if (this.host && GetServer(this.host) == server) GainCredits(runner, 2, "", this);
+    Resolve: function () {
+      //automatic triggers are resolved without arguments; the run's server is attackedServer
+      if (this.host && GetServer(this.host) == attackedServer) GainCredits(runner, 2, "", this);
     },
     automatic: true,
   },

@@ -178,12 +178,11 @@ let activeCards = new Set();
 context.CheckActive = (card) => activeCards.has(card);
 
 const chainReaction = context.cardSet[36001];
-chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.HQ);
-chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction, context.corp.RnD);
-chainReaction.responseOnRunSuccessful.Resolve.call(
-  chainReaction,
-  context.corp.archives,
-);
+// The engine resolves automatic run triggers with no arguments; the server is attackedServer.
+for (const server of [context.corp.HQ, context.corp.RnD, context.corp.archives]) {
+  context.attackedServer = server;
+  chainReaction.responseOnRunSuccessful.Resolve.call(chainReaction);
+}
 assert.strictEqual(chainReaction.Enumerate.call(chainReaction).length, 1);
 chainReaction.responseOnRunnerTurnBegins.Resolve.call(chainReaction);
 assert.strictEqual(
@@ -1124,9 +1123,11 @@ creditsGained = 0;
 stowaway.host = passedIce;
 assert.strictEqual(stowaway.installOnlyOn.call(stowaway, passedIce), true);
 assert.strictEqual(stowaway.installOnlyOn.call(stowaway, sipa), false);
-stowaway.responseOnRunSuccessful.Resolve.call(stowaway, context.corp.HQ);
+context.attackedServer = context.corp.HQ;
+stowaway.responseOnRunSuccessful.Resolve.call(stowaway);
 assert.strictEqual(creditsGained, 2);
-stowaway.responseOnRunSuccessful.Resolve.call(stowaway, remote);
+context.attackedServer = remote;
+stowaway.responseOnRunSuccessful.Resolve.call(stowaway);
 assert.strictEqual(creditsGained, 2, '36024 only pays for its host server');
 assert.strictEqual(stowaway.AIRunExtraPotential.call(stowaway, context.corp.HQ), 0.6);
 assert.strictEqual(stowaway.AIBreachNotRequired, true);
