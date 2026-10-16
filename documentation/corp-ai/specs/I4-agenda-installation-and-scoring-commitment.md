@@ -192,6 +192,29 @@ improvement gate, not an ungated deterministic fix.
 
 ## Things to consider
 
+- **Candidate breach-probability input.** Consider exposing an empirical
+  next-turn breach probability from `_evaluateServerSecurity()` or a helper
+  beside it, using the `securityCalibration` counts by verdict and scope
+  (all servers with stakes, and agenda remotes). Full server-type buckets
+  are not collected today and would require an observation-only extension.
+  [L9.0's audit](../../backlog/done/L9.0-lockout-honesty.md#current-behaviour)
+  found 8.0% breached among secure verdicts versus 23.1% among insecure ones
+  (700 games, servers with stakes): informative, but not a guarantee.
+  I4 could use this measurement in its exposure-window and completion logic
+  to compare the cost of waiting in HQ with breach risk after installation;
+  this is a candidate alternative to the ordinary security threshold above,
+  not an adopted change to that design or its hard game-losing-steal guard.
+  Follow the [score discipline note](install-decisions-design.md#candidate-breach-probability-input)
+  for ownership and formula limits. Add it observation-only first, following
+  [L9.0's identity-run pattern](../../backlog/done/L9.0-lockout-honesty.md#resolution),
+  with an option-on/off identity run; it must not replace `isSecure` or change
+  any existing consumer. Only then may I4 consume it behind I4's own option
+  and gate. Calibration describes the aggressive, frequently running stock
+  Runner AI only; a human may breach more or less often. Probability owns how
+  likely a breach is; L7.1's `_breachConsequence` owns how bad it is, and must
+  not be counted again. A next-turn rate does not establish a multi-turn
+  probability: validate horizon handling and sample support before adoption.
+  This idea leaves I4's dependency on I3, and I3's on I2, unchanged.
 - The "derelict remote" edge case (design note) affects whether an existing
   1-ICE remote is considered for agendas; I3 owns the role, I4 the plan.
 - The in-hand winning line pre-empted by the critical-central interrupt

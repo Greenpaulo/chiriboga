@@ -77,7 +77,25 @@ human, not by single decisions:
   a player profile;
 - any telemetry is opt-in, anonymous and passive.
 
-## 6. Corp principle debt
+## 6. Shared measurements, consumer-owned decisions
+
+Following [shared principle 8](../ai-principles.md#8-heuristics-are-bounded-and-calibrated-with-evidence),
+shared evaluators should publish graded measurements in real units (credits,
+clicks, turns, points or probabilities), leaving each decision to combine them
+in the [design note's common units](specs/install-decisions-design.md#score-discipline)
+without uncalibrated coefficients, with each effect counted by one
+[owning component](specs/L8.8-marginal-deception-value.md#distinguish-mechanisms-and-prevent-double-counting).
+Changing a shared verdict's meaning moves all its consumers at once, as the
+[`fa1182c` regression](../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+and [L9.0.1 gate failure](../backlog/code-review/L9.0.1-adopt-honest-lockout.md#resolution)
+illustrate; agenda retention is an inferred mechanism, not established causality.
+If a shared signal must change meaning, split adoption by consumer behind
+separate options and gates, following the [regression findings](../corp-ai-regression/findings.md#evidence-for-gating-at-the-fixed-tip-b52d451)
+and [L9.0.2 proposal](specs/L9.0.2-consumer-specific-honest-security.md#design).
+Hard safety guards, including a steal that would win the game, legitimately
+remain boolean.
+
+## 7. Corp principle debt
 
 Existing card-title special cases in `ai_corp.js` are tracked as item P1 in
 [roadmap.md](roadmap.md); `tests/corp-ai-card-titles.test.js` allowlists them

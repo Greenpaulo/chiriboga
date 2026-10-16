@@ -10,21 +10,22 @@ User-facing prompts and operating instructions are in
 Do not run multiple agents against this tracker or its definition file at the
 same time. `Complete` records implementation, not independent strategic review.
 Use `$review-card-batch <set> <batch>` to audit completed batches; the reviewer
-links snapshot-specific reports in a separate batch-review log and reopens
-confirmed gaps for repair. See the operator guide for arguments and recovery.
+links snapshot-specific reports in a separate batch-review log and queues
+findings for `optimise-card-batch`. Reviews never reopen implementation. See the operator guide for arguments and recovery.
 
 ## Active set
 
 | Field                         | Value                                    |
 | ----------------------------- | ---------------------------------------- |
 | Status                        | Active                                   |
+| Implementation status         | Implemented                              |
 | Set name                      | Vantage Point                            |
 | Registry key                  | `vantagepoint`                           |
 | Pack code                     | `vp`                                     |
 | Definition file               | `sets/vantagepoint.js`                   |
 | Metadata file                 | `carddata/carddata.json`                 |
 | Card range                    | `36001–36066`                            |
-| Registry state during batches | follows `documentation/card-sets.md` (Vantage Point: in-progress, hidden and untested) |
+| Registry state during batches | follows `documentation/card-sets.md` (Vantage Point: playable; hidden and untested are false) |
 | Focused integration test      | `tests/vantagepoint-integration.test.js` |
 | Implementation notes          | `documentation/new-sets/vantage-point-implementation-notes.md` |
 | Review directory              | `documentation/new-sets/reviews/vantage-point` |
@@ -39,33 +40,42 @@ report that no current set has been selected.
 3. Never skip a `Blocked` batch silently. If it is the first outstanding batch,
    report its blocker unless the user explicitly authorizes another batch.
 4. Implement exactly one batch per skill invocation.
-5. If all batches are `Complete`, report that the set-wide review is next.
+5. If all batches are `Complete` and implementation integration checks pass,
+   mark the set `Implemented` and `playable` independently of review. The next
+   invocation archives this tracker and selects the next queued set under the
+   operator guide's transition procedure, then implements its first batch.
+   Review/optimisation never holds this queue open. If no next set is recorded,
+   report that a set selection is needed; do not choose one arbitrarily.
 
 Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**1 complete, 12 outstanding** (`12 Pending`, `0 In progress`, `0 Blocked`).
+**13 complete, 0 outstanding** (`0 Pending`, `0 In progress`, `0 Blocked`).
+
+Implementation is complete. Optimisation status is tracked separately below.
 
 Agents must refresh these counts whenever a batch status changes.
 
 ## Batch queue
 
-| Batch | Card IDs    | Status   | Owner / started          | Notes/blocker                                                              |
-| ----: | ----------- | -------- | ------------------------ | -------------------------------------------------------------------------- |
-| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](reviews/vantage-point/vantagepoint-batch-1.md). |
-| 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](reviews/vantage-point/vantagepoint-batch-2.md). |
-| 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](reviews/vantage-point/vantagepoint-batch-3.md). |
-| 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](reviews/vantage-point/vantagepoint-batch-4.md). |
-| 5 | 36021–36025 | Pending | — | Changes required: Economy/hosting decisions require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-5.md). |
-| 6 | 36026–36030 | Pending | — | Changes required: Click steal cost and central defense choices require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-6.md). |
-| 7 | 36031–36035 | Pending | — | Changes required: Pass restriction and paid-defense/tactical choices require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-7.md). |
-| 8 | 36036–36040 | Pending | — | Changes required: Identity, damage, target ordering and upgrade-placement decisions require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-8.md). |
-| 9 | 36041–36045 | Pending | — | Changes required: Tutor and post-rez choices miss immediate kill alternatives. See [independent review](reviews/vantage-point/vantagepoint-batch-9.md). |
-| 10 | 36046–36050 | Pending | — | Changes required: Magistrate useful rez windows ignored. See [independent review](reviews/vantage-point/vantagepoint-batch-10.md). |
-| 11 | 36051–36055 | Pending | — | Changes required: Scapegoat loses critical breaker; shared bad-publicity credit-loss defect. See [independent review](reviews/vantage-point/vantagepoint-batch-11.md). |
-| 12 | 36056–36060 | Pending | — | Changes required: Meat damage modelled as net; prevention/security consequences. See [independent review](reviews/vantage-point/vantagepoint-batch-12.md). |
-|    13 | 36061–36066 | Complete | Codex / 2026-10-06 | Repaired Corp restricted-credit route assessment; both planners agree on survivability, source exhaustion and finite-repeat/prevention budgets. All 50 test files pass. See [repair evidence](vantage-point-implementation-notes.md#batch-13-corp-restricted-payment-repair-2026-10-06). Separate set-wide review is next. |
+Implementation status only; review findings must not reopen these rows.
+
+| Batch | Card IDs | Status | Owner / started | Notes/blocker |
+| ----: | -------- | ------ | --------------- | ------------- |
+| 1 | 36001–36004 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 2 | 36005–36008 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 3 | 36009–36016 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 4 | 36017–36020 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 5 | 36021–36025 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 6 | 36026–36030 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 7 | 36031–36035 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 8 | 36036–36040 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 9 | 36041–36045 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 10 | 36046–36050 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 11 | 36051–36055 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 12 | 36056–36060 | Complete | — | Implemented; outstanding review findings are in the optimisation queue below. |
+| 13 | 36061–36066 | Complete | Codex / 2026-10-06 | Implemented and repaired; independent evidence retained in the review log. Revalidate after relevant shared changes. |
 
 When claiming a batch, record the agent/extension name and current date in
 `Owner / started`. When blocked, put the actionable reason in `Notes/blocker`.
@@ -121,21 +131,64 @@ Verdicts apply to the linked snapshot-specific reports; repairs require re-revie
 | 12 | 36056–36060 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-12.md) |
 | 13 | 36061–36066 | 2026-10-06 | Pass | [Report](reviews/vantage-point/vantagepoint-batch-13.md) |
 
+## Optimisation queue
+
+**12 Pending, 0 In progress, 0 Blocked, 0 Awaiting review, 1 Pass.**
+
+Select/resume work with `$optimise-card-batch Vantage Point <batch>`; without a
+batch, resume In progress, otherwise the first Pending. Do not silently skip a
+first outstanding Blocked entry. A repair ends Awaiting review; independent
+`review-card-batch` assigns Pass or queues further work. Implementation and
+playability remain separate. Revalidate historic Pass evidence against current
+consumers before reusing it.
+
+| Batch | Card IDs | Status | Owner / started | Findings/evidence |
+| ----: | -------- | ------ | --------------- | ----------------- |
+| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](reviews/vantage-point/vantagepoint-batch-1.md). |
+| 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](reviews/vantage-point/vantagepoint-batch-2.md). |
+| 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](reviews/vantage-point/vantagepoint-batch-3.md). |
+| 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](reviews/vantage-point/vantagepoint-batch-4.md). |
+| 5 | 36021–36025 | Pending | — | Changes required: Economy/hosting decisions require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-5.md). |
+| 6 | 36026–36030 | Pending | — | Changes required: Click steal cost and central defense choices require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-6.md). |
+| 7 | 36031–36035 | Pending | — | Changes required: Pass restriction and paid-defense/tactical choices require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-7.md). |
+| 8 | 36036–36040 | Pending | — | Changes required: Identity, damage, target ordering and upgrade-placement decisions require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-8.md). |
+| 9 | 36041–36045 | Pending | — | Changes required: Tutor and post-rez choices miss immediate kill alternatives. See [independent review](reviews/vantage-point/vantagepoint-batch-9.md). |
+| 10 | 36046–36050 | Pending | — | Changes required: Magistrate useful rez windows ignored. See [independent review](reviews/vantage-point/vantagepoint-batch-10.md). |
+| 11 | 36051–36055 | Pending | — | Changes required: Scapegoat loses critical breaker; shared bad-publicity credit-loss defect. See [independent review](reviews/vantage-point/vantagepoint-batch-11.md). |
+| 12 | 36056–36060 | Pending | — | Changes required: Meat damage modelled as net; prevention/security consequences. See [independent review](reviews/vantage-point/vantagepoint-batch-12.md). |
+| 13 | 36061–36066 | Pass | — | Current recorded Pass; revalidate affected consumers after shared repairs. [Report](reviews/vantage-point/vantagepoint-batch-13.md). |
+
+## Optimisation log
+
+Append dated repair evidence here; independent review verdicts stay in the
+batch-review log. No optimisation passes recorded under the new workflow yet.
+
+## Workflow migration — 2026-10-16
+
+All 13 original implementation completions are retained. The twelve review
+repair rows moved to the optimisation queue; no defect or review verdict was
+closed by this migration. Vantage Point is playable by explicit user decision
+under the two-stage workflow. The [pre-migration tracker](history/vantagepoint-2026-10-16-before-workflow-split.md)
+preserves the previous queue and status. This is not a new rules/strategy sign-off.
+
 ## Set-wide review status
 
 **Changes required** — [full set report](reviews/vantage-point/vantagepoint-set-review.md).
 Reviewed all 66 cards in the recorded 13 batches: 12 batches require repairs,
 1 passed, 0 inconclusive. A failing batch may also retain named evidence
 gaps; both defects and missing essential coverage must be resolved before Pass.
-All 50 regression test files passed and eight headless games completed without
-engine errors; these results do not supersede the demonstrated rules/AI defects.
+The original review recorded 50 passing regression files. Its initial headless
+claim was superseded by the [2026-10-08 correction](reviews/vantage-point/README.md#pr-23-corrections--2026-10-08):
+four games passed and four failed with recorded engine errors. Those findings
+remain open; availability is a separate user decision.
 
 The [pre-review implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves the original full completion log. The
 [post-review snapshot](history/vantagepoint-2026-10-06-reviewed.md) preserves this
-repair queue and review log. Keep completion history append-only through repairs
-and archive the updated tracker again before selecting another set. Use
-`implement-card-batch` for repairs and independent batch/set review for sign-off.
+historical repair queue and review log. Keep completion history append-only
+and archive this tracker before selecting another set (Downfall is queued next). Use
+`optimise-card-batch` for repairs and independent batch/set review for sign-off.
+The review verdict does not block playability or the next implementation set.
 
 ## Required shared verification
 
@@ -154,24 +207,10 @@ If shared engine files change, run their relevant regression suites too.
 
 ## Changing the active set
 
-Only change this section when the current set has completed its separate
-set-wide review or the user explicitly changes priorities.
-
-Before replacing the active set:
-
-1. Archive the entire tracker, including batch boundaries, completion log,
-   batch-review log (if present) and set-wide review state, under
-   `documentation/new-sets/history/<registry-key>-<YYYY-MM-DD>.md`. Adjust relative
-   Markdown links and label the snapshot with its date and review status. Never
-   overwrite an existing snapshot; add a suffix when archiving twice on one date.
-   Keep the linked implementation notes and review reports in place.
-2. Link the archive and final review report from
-   `documentation/new-sets/card-implementation-backlog.md`, preserving the final
-   completion summary, unresolved findings and explicitly accepted limitations.
-3. Replace every value in **Active set**, the status summary, batch queue,
-   completion log and verification commands. Reset the set-wide review status
-   and remove the previous set’s live review/archive links after preserving them.
-4. Verify the new batches cover every intended card exactly once without gaps
-   or overlaps.
-5. Update the **Implementation notes** row to the new set's notes file.
-6. Leave the generic `implement-card-batch` skill unchanged.
+Transition after implementation completes; review and optimisation may remain
+outstanding. Follow the operator guide's **Change to the next implementation
+set** procedure. Preserve a dated immutable history snapshot and a maintained
+`records/<registry-key>.md` copy with both queues, complete logs, verification
+commands, notes and review links. Link both from the backlog before replacing
+this tracker. Continue optimisation in that record after the next set becomes
+active. Never overwrite old snapshots or invent batch boundaries.

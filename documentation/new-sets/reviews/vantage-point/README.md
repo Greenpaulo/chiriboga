@@ -2,15 +2,16 @@
 
 Start with the [full-set review](vantagepoint-set-review.md), which links all 13
 batch reports and records shared finding S1. The [active tracker](../../current-set-implementation.md)
-selects the next reopened batch. The original [completion history](../../history/vantagepoint-2026-10-06.md)
+contains the separate optimisation queue. After implementation moves to another
+set, follow the backlog's Vantage Point **Set record** link instead. The original [completion history](../../history/vantagepoint-2026-10-06.md)
 and [post-review snapshot](../../history/vantagepoint-2026-10-06-reviewed.md)
 remain archived separately. Current verdict: **Changes required**; batches 1–12
 need repairs and batch 13 must be revalidated after relevant shared changes.
 
 ## Repair and re-review
 
-1. Invoke `$implement-card-batch` to repair the next reopened batch. Its
-   remediation instructions require reading that batch's linked report, related
+1. Invoke `$optimise-card-batch Vantage Point` to repair the next queued
+   optimisation batch. Its remediation instructions require reading that batch's linked report, related
    set findings, evidence gaps and acceptance criteria. Reproduce each required
    finding against current code before choosing a repair.
 2. Add meaningful permanent regression tests for correct behavior and address
@@ -22,12 +23,13 @@ need repairs and batch 13 must be revalidated after relevant shared changes.
    verdict. Run the required full regression suite before handoff.
 4. Invoke `$review-card-batch` for that repaired batch. Only independent review
    can record its new verdict. Repeat for the remaining batches, then invoke
-   `$review-card-set` for the final readiness verdict and shared integration audit.
+   `$review-card-set` for the set-wide optimisation verdict and shared integration audit.
 
-For example: “Use implement-card-batch to repair the next reopened Vantage Point
+For example: “Use optimise-card-batch to repair the next queued Vantage Point
 batch,” followed by “Use review-card-batch to independently review Vantage Point
 batch 1.” These skills locate evidence through the tracker's **Review directory**
-and linked reports; a separate remediation skill is unnecessary.
+and linked reports. Implementation completion and playability do not wait for
+this optimisation/review cycle.
 
 ## What to retain
 

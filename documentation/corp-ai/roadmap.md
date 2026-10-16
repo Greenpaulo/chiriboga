@@ -30,7 +30,7 @@ is recorded in the done tables and the historical merge plan.
 |---|---|---|---|
 | — | [L8.5](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | done (merged) | Revised full gate passed; merge complete |
 | — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
-| 2 | [F12](../backlog/code-review/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
+| 2 | [F12](../backlog/done/F12-realized-defense-measurement.md) | in-progress (code review; stacked on F11) | Review shared collector and identity evidence; all-root calibration usable, postured coverage insufficient |
 | 3 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready (blocked on F12) | Re-ground and freeze the tell-reduction gate, then implement and adopt |
 | 4 | [I2](specs/I2-ice-selection-by-marginal-security.md) | proposed | Marginal ICE allocation; fresh control with adopted L8.2 and calibrated count guards |
 | 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
@@ -39,7 +39,7 @@ is recorded in the done tables and the historical merge plan.
 F11 is done, satisfying F12's dependency. L8.2-before-I2 and L8.9-before-I3
 are sequencing preferences rather than additional formal dependencies. Do not
 adopt a later policy using a control predating an adopted prerequisite.
-[L9.0.1](../backlog/code-review/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
+[L9.0.1](../backlog/done/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
 [L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md) proposes separate consumer gates; refresh affected controls after any adoption. Complete L8.7's
 card audit and L8.10 mechanics/diagnostics before I5 (its formal dependency).
 L8.8 remains separately gated after I2; it is not an I2 prerequisite.
@@ -130,12 +130,6 @@ price yet.
 - **Spec:** [L8.10-trap-play-value.md](specs/L8.10-trap-play-value.md)
 - **Goal:** Declare trap mechanics and measure play/access opportunities without changing decisions. Supplies I5's evidence; I5 owns any later payoff conversion and adoption. Independent of L8.8's concealment research.
 
-### L9.0.1 Adopt honest lockout
-- **Status:** in-progress
-- **Depends on:** L9.0, F4
-- **Ticket:** [L9.0.1-adopt-honest-lockout.md](../backlog/code-review/L9.0.1-adopt-honest-lockout.md)
-- **Goal:** Global adoption experiment not adopted after its failed gate; await independent review of cleanup. L9.0.2 proposes isolated consumer gates.
-
 ### L9.0.2 Consumer-specific honest security adoption
 - **Status:** proposed
 - **Depends on:** L9.0, L9.1, F4
@@ -178,6 +172,7 @@ price yet.
 | L9.0 | Lockout honesty | [L9.0-lockout-honesty](../backlog/done/L9.0-lockout-honesty.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 | L9.1 | Unpriceable breakers | [L9.1-unpriceable-breakers](../backlog/done/L9.1-unpriceable-breakers.md) | [Corp architecture](architecture.md#server-security-evaluation) |
 | L8.5 | Match-local public outcome feedback | [feature-layer-8-5-match-local-public-outcome-feedback](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
+| L9.0.1 | Adopt honest lockout | [L9.0.1-adopt-honest-lockout](../backlog/done/L9.0.1-adopt-honest-lockout.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 
 ## Foundations (F)
 
@@ -207,12 +202,6 @@ Shared infrastructure used by every area.
 - **Spec:** [F9-ai-work-budget-and-fair-timing.md](specs/F9-ai-work-budget-and-fair-timing.md)
 - **Goal:** Guard every gate with a deterministic count of the work each AI decision does, track it across baselines to catch slowdown creep, and add `gate --fresh` for fair wall-clock comparisons.
 
-### F12 Realized defense measurement
-- **Status:** in-progress
-- **Depends on:** F4, F11, L8.4
-- **Ticket:** [F12-realized-defense-measurement.md](../backlog/code-review/F12-realized-defense-measurement.md)
-- **Goal:** Passively measure agenda/trap ICE-count correlation and distribution distance; supply shared observations and control-only calibration before L8.2 and I2.
-
 ### F13 Seeded stall diagnostics and failed-batch reporting
 - **Status:** proposed
 - **Depends on:** F4
@@ -230,6 +219,7 @@ Shared infrastructure used by every area.
 | F10 | Real-board start library for gates | [F10-real-board-start-library](../backlog/done/F10-real-board-start-library.md) | [architecture: foundations](architecture.md#foundations) |
 | F3 | Per-decision evaluation cache | [corp_ai_finding_11_evaluate_once_per_decision](../backlog/done/corp_ai_finding_11_evaluate_once_per_decision.md) | [architecture: foundations](architecture.md#foundations) |
 | F11 | Paired batch-metric guards | [F11-paired-batch-metric-guards](../backlog/done/F11-paired-batch-metric-guards.md) | [architecture: Foundations](architecture.md#foundations) |
+| F12 | Realized defense measurement | [F12-realized-defense-measurement](../backlog/done/F12-realized-defense-measurement.md) | [architecture: Foundations](architecture.md#foundations) |
 
 ## Install decisions (I)
 
