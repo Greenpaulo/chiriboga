@@ -2280,6 +2280,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIAdvanceCreditGain(thisTurn, advancedInPlan)` | function | Read-only credit income from the next basic advance, consumed by advancement and economy planners |
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
+| `AIDrawAbility` | number | Cards drawn by this card's click ability; the Corp prefers it to the basic draw when it draws more than 1 |
 
 ### Vantage Point Batch 5 card hooks
 
@@ -2587,6 +2588,39 @@ if (!runner.AI || runner.AI.rc !== rc) {
   consumes `agendaPointsForPlayer(player)` so score totals, Runner known-agenda
   potential and Corp breach-loss estimates value this agenda as one Runner point
   and two Corp points, preserving the printed metadata.
+
+### Downfall Batch 7 card hooks
+
+- MirrorMorph: Endless Iteration uses the engine's Corp action record
+  (`corp.actionsTakenThisTurn`, compared with `SameCorpAction` per CR 5.2.5)
+  and `responseOnCorpActionCompletes`, fired once when the Corp first passes
+  the post-action window. Its inline AI choice takes the extra different
+  action whenever `CorpHasDifferentActionAvailable` finds one with the covered
+  click, otherwise gains 1[c]; the following main-phase decision is the normal
+  `Phase_Main` over action options already filtered by
+  `corp.restrictedNextAction`. It does not plan action order to meet the
+  trigger condition.
+- Architect Deployment Test has no hook. Its inline AI choice ranks every
+  install option of the looked-at cards with `_bestInstallOption(options,
+  false)` and installs and rezzes that card at the chosen destination, or
+  declines when no option is ranked.
+- Calvin B4L3Y uses `AIWorthInstalling` (non-scoring remote, only one copy,
+  only with hand room and R&D above 3 cards), `AIRezWhenCan`,
+  `AIAvoidInstallingOverThis` and `AIDrawAbility: 2`. `_drawAbilityCard`
+  consumes `AIDrawAbility` wherever the Corp would take the basic draw
+  (including emergency ICE recovery) and never draws R&D to 0. Its trash
+  response draws unless R&D has 2 or fewer cards.
+- Nanoetching Matrix uses `AIWorthInstalling`, `AIRezWhenCan` and
+  `AIAvoidInstallingOverThis`; the existing click-economy regex now sets a
+  trigger preference for the matching card, so another click ability (such as
+  Calvin's) is not used by mistake. Its trash response always gains.
+- Hagen uses `AIImplementIce`: `misc_serious` for the program trash only
+  while a trashable non-decoder/fracter/killer program is installed (as for
+  Rototurret), then `endTheRun`. Its strength reduction is a normal
+  `modifyStrength`, so rezzed Hagen is priced at its reduced strength; while
+  unrezzed it shows printed strength 6, like every other strength-modifying ICE.
+- Calvin and Nanoetching trash responses read the `trashingPlayer` argument of
+  `responseOnTrash` and fire only when the Runner trashes the rezzed asset.
 
 
 ---

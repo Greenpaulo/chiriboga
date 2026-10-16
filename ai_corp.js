@@ -4676,10 +4676,24 @@ class CorpAI {
     for (var i = 0; i < activeCards.length; i++) {
       var abilityChoices = ChoicesAbility(activeCards[i], true); //the true is 'click abilities only' (we are in main action phase)
       for (var j = 0; j < abilityChoices.length; j++) {
-        if (regexp.test(abilityChoices[j].label)) return true;
+        if (regexp.test(abilityChoices[j].label)) return activeCards[i];
       }
     }
-    return false;
+    return null;
+  }
+
+  //An active card whose click ability draws more cards than the basic draw
+  //action (AIDrawAbility), leaving R&D nonempty.
+  _drawAbilityCard(optionList) {
+    if (!optionList.includes("trigger")) return null;
+    var triggerables = ChoicesTriggerableAbilities(corp, "click");
+    for (var i = 0; i < triggerables.length; i++) {
+      var card = triggerables[i].card;
+      if (typeof card.AIDrawAbility == "number" && card.AIDrawAbility > 1 &&
+          corp.RnD.cards.length > card.AIDrawAbility)
+        return card;
+    }
+    return null;
   }
 
   _rezzableNonIceCards() {
@@ -4882,9 +4896,12 @@ class CorpAI {
     //if a click economy ability exists, use that
     if (optionList.indexOf("trigger") > -1) {
       var regexp = new RegExp(/(gain|take)\s*\d*\s*\[c\]/, "gmi");
-      if (this._clickAbilityLikeAvailable(regexp)) {
+      var economyAbilityCard = this._clickAbilityLikeAvailable(regexp);
+      if (economyAbilityCard) {
         this._log("a click ability could provide economy");
-        return optionList.indexOf("trigger");
+        return this._returnPreference(optionList, "trigger", {
+          cardToTrigger: economyAbilityCard,
+        });
       }
     }
 
@@ -5092,7 +5109,14 @@ class CorpAI {
           this._log("But no I don't want to draw right now");
         }
       }
-      if (drawIsOK) return optionList.indexOf("draw");
+      if (drawIsOK) {
+        var drawAbilityCard = this._drawAbilityCard(optionList);
+        if (drawAbilityCard)
+          return this._returnPreference(optionList, "trigger", {
+            cardToTrigger: drawAbilityCard,
+          });
+        return optionList.indexOf("draw");
+      }
     }
 
     //last resort - click for cred
@@ -7464,6 +7488,13 @@ class CorpAI {
       return this._returnPreference(optionList, "install", {
         cardToInstall: recovery.handDrawCard,
         serverToInstallTo: null,
+      });
+    }
+    var drawAbilityCard = this._drawAbilityCard(optionList);
+    if (drawAbilityCard) {
+      this._log("Using a draw ability to find ICE for the critical server");
+      return this._returnPreference(optionList, "trigger", {
+        cardToTrigger: drawAbilityCard,
       });
     }
     if (optionList.includes("draw")) {

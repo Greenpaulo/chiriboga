@@ -1063,17 +1063,65 @@ cardSet[26030] = {
   // TODO: Add abilities or responseOn triggers
 };
 
+// Batch 7 (26031–26035) ELO: Trash or Busto ranking, 2026-10-16.
+
 //MirrorMorph: Endless Iteration (26031)
 // If the first, second, and third actions you take on your turn are each different from one another, when the third action completes, you may gain 1[c] or take another different action, paying [click] less.
 cardSet[26031] = {
   title: "MirrorMorph: Endless Iteration",
   imageFile: "26031.png",
+  elo: 1607,
   player: corp,
   faction: "Haas-Bioroid",
   cardType: "identity",
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
+  //CR 5.2.5: actions differ when initiated by different basic actions or card abilities.
+  _firstThreeActionsDiffer: function () {
+    var actions = corp.actionsTakenThisTurn || [];
+    if (actions.length != 3 || corp.actionsCompletedThisTurn != 3) return false;
+    return (
+      !SameCorpAction(actions[0], actions[1]) &&
+      !SameCorpAction(actions[0], actions[2]) &&
+      !SameCorpAction(actions[1], actions[2])
+    );
+  },
+  responseOnCorpActionCompletes: {
+    Enumerate: function () {
+      if (!this._firstThreeActionsDiffer()) return [];
+      var gainChoice = { id: 0, label: "Gain 1[c]", button: "Gain 1[c]" };
+      var actionChoice = {
+        id: 1,
+        label: "Take another different action, paying [click] less",
+        button: "Take another action",
+      };
+      var declineChoice = { id: 2, label: "Do nothing", button: "Pass" };
+      var excluded = corp.actionsTakenThisTurn.slice();
+      var actionLegal = CorpHasDifferentActionAvailable(excluded, 1);
+      //**AI code: an extra action is worth at least the click-for-credit it replaces
+      if (corp.AI != null) return [actionLegal ? actionChoice : gainChoice];
+      var ret = [gainChoice];
+      if (actionLegal) ret.push(actionChoice);
+      ret.push(declineChoice);
+      return ret;
+    },
+    Resolve: function (params) {
+      if (!params) return;
+      if (params.id === 0) GainCredits(corp, 1, "", this);
+      else if (params.id === 1) {
+        //Paying [click] less: one click of the next action is covered here,
+        //and that action must differ from the first three.
+        corp.restrictedNextAction = {
+          excluded: corp.actionsTakenThisTurn.slice(),
+          source: this,
+        };
+        corp.clickTracker += 1;
+        Log("MirrorMorph: the Corp takes another different action, paying [click] less");
+      }
+    },
+    text: "MirrorMorph: Endless Iteration",
+  },
 };
 
 //Architect Deployment Test (26032)
@@ -1081,6 +1129,7 @@ cardSet[26031] = {
 cardSet[26032] = {
   title: "Architect Deployment Test",
   imageFile: "26032.png",
+  elo: 1566,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 0,
@@ -1088,7 +1137,73 @@ cardSet[26032] = {
   subTypes: ["Research"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  _installAndRez: function (card, server) {
+    Install(card, server, true, null, true, null, this, null, null, false, function () {
+      if (CheckCardType(card, ["ice", "asset", "upgrade"]) && !card.rezzed && CheckInstalled(card))
+        Rez(card, true, null, null, false);
+    });
+  },
+  responseOnScored: {
+    Enumerate: function () {
+      if (intended.score != this || corp.RnD.cards.length < 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var count = Math.min(5, corp.RnD.cards.length);
+      //R&D's top card is the last element; list the looked-at cards top first
+      var cards = corp.RnD.cards.slice(corp.RnD.cards.length - count).reverse();
+      Log("Corp looks at the top " + count + " cards of R&D");
+      var installable = cards.filter(function (card) {
+        return ChoicesCardInstall(card).length > 0;
+      });
+      var choices = ChoicesArrayCards(installable);
+      var declineChoice = { id: 0, card: null, label: "Install nothing", button: "Install nothing" };
+      choices.push(declineChoice);
+      //Only the human Corp needs the cards visible while choosing.
+      if (!corp.AI) for (var i = 0; i < cards.length; i++) cards[i].faceUp = true;
+      //**AI code: the shared install ranking picks the card and destination, more willingly since it is free
+      var aiPlan = null;
+      if (corp.AI) {
+        var installOptions = [];
+        for (var j = 0; j < installable.length; j++)
+          installOptions = installOptions.concat(ChoicesCardInstall(installable[j]));
+        var best = installOptions.length > 0 ? corp.AI._bestInstallOption(installOptions, false) : -1;
+        aiPlan = best > -1 ? installOptions[best] : null;
+        choices = [aiPlan ? choices[installable.indexOf(aiPlan.card)] : declineChoice];
+      }
+      DecisionPhase(
+        corp,
+        choices,
+        function (params) {
+          for (var i = 0; i < cards.length; i++) cards[i].faceUp = false;
+          if (!params || !params.card || !installable.includes(params.card)) {
+            Log("Corp chose not to install a card");
+            return;
+          }
+          var card = params.card;
+          if (aiPlan && aiPlan.card == card) {
+            this._installAndRez(card, aiPlan.server);
+            return;
+          }
+          DecisionPhase(
+            corp,
+            ChoicesCardInstall(card),
+            function (installParams) {
+              this._installAndRez(installParams.card, installParams.server);
+            },
+            this.title,
+            "Choose where to install the card",
+            this,
+            "install",
+          );
+        },
+        this.title,
+        "You may install and rez 1 card, ignoring all costs",
+        this,
+      );
+    },
+    text: "Architect Deployment Test: look at the top 5 cards of R&D",
+  },
 };
 
 //Calvin B4L3Y (26033)
@@ -1097,6 +1212,7 @@ cardSet[26032] = {
 cardSet[26033] = {
   title: "Calvin B4L3Y",
   imageFile: "26033.png",
+  elo: 1469,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 1,
@@ -1106,6 +1222,7 @@ cardSet[26033] = {
   trashCost: 3,
   unique: true,
   usedThisTurn: false,
+  _wasRezzedWhenTrashed: false,
   responseOnCorpTurnBegins: {
     Resolve: function () {
       this.usedThisTurn = false;
@@ -1118,7 +1235,7 @@ cardSet[26033] = {
       Enumerate: function () {
         if (!this.rezzed) return [];
         if (this.usedThisTurn) return [];
-        if (!CheckClicks(corp, 1)) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
         return [{}];
       },
       Resolve: function () {
@@ -1128,19 +1245,47 @@ cardSet[26033] = {
       },
     },
   ],
+  //An unrezzed asset's ability is inactive, so remember its state before it moves.
+  automaticOnWouldTrash: {
+    Resolve: function (cards) {
+      if (cards.includes(this)) this._wasRezzedWhenTrashed = this.rezzed && CheckInstalled(this);
+    },
+    availableWhenInactive: true,
+  },
   responseOnTrash: {
-    Enumerate: function () {
-      return [
-        { id: 1, label: "Draw 2 cards", button: "Draw 2" },
-        { id: 0, label: "Do not draw", button: "Pass" },
-      ];
+    Enumerate: function (cards, trashingPlayer) {
+      if (!cards || !cards.includes(this)) return [];
+      if (trashingPlayer != runner || !this._wasRezzedWhenTrashed) return [];
+      var drawChoice = { id: 1, label: "Draw 2 cards", button: "Draw 2" };
+      var passChoice = { id: 0, label: "Do not draw", button: "Pass" };
+      //**AI code: draw unless it would empty R&D
+      if (corp.AI != null) return [corp.RnD.cards.length > 2 ? drawChoice : passChoice];
+      return [drawChoice, passChoice];
     },
     Resolve: function (params) {
-      if (params && params.id === 1) {
-        Draw(corp, 2);
-      }
+      this._wasRezzedWhenTrashed = false;
+      if (params && params.id === 1) Draw(corp, 2);
     },
     text: "Calvin B4L3Y trashed: draw 2 cards?",
+    availableWhenInactive: true,
+  },
+  AIDrawAbility: 2,
+  AIRezWhenCan: function () {
+    return true;
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    var installed = InstalledCards(corp);
+    for (var i = 0; i < installed.length; i++) {
+      if (installed[i] != this && GetTitle(installed[i]) == GetTitle(this)) return -1;
+    }
+    if (corp.RnD.cards.length < 4) return -1;
+    //Draw engine for a short hand; its trash cost and reward both tax the Runner
+    if (PlayerHand(corp).length > MaxHandSize(corp) - 2) return -1;
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
   },
 };
 
@@ -1150,6 +1295,7 @@ cardSet[26033] = {
 cardSet[26034] = {
   title: "Nanoetching Matrix",
   imageFile: "26034.png",
+  elo: 1487,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 2,
@@ -1158,6 +1304,7 @@ cardSet[26034] = {
   rezCost: 0,
   trashCost: 3,
   usedThisTurn: false,
+  _wasRezzedWhenTrashed: false,
   responseOnCorpTurnBegins: {
     Resolve: function () {
       this.usedThisTurn = false;
@@ -1170,7 +1317,7 @@ cardSet[26034] = {
       Enumerate: function () {
         if (!this.rezzed) return [];
         if (this.usedThisTurn) return [];
-        if (!CheckClicks(corp, 1)) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
         return [{}];
       },
       Resolve: function () {
@@ -1180,19 +1327,40 @@ cardSet[26034] = {
       },
     },
   ],
+  //An unrezzed asset's ability is inactive, so remember its state before it moves.
+  automaticOnWouldTrash: {
+    Resolve: function (cards) {
+      if (cards.includes(this)) this._wasRezzedWhenTrashed = this.rezzed && CheckInstalled(this);
+    },
+    availableWhenInactive: true,
+  },
   responseOnTrash: {
-    Enumerate: function () {
-      return [
-        { id: 1, label: "Gain 2 credits", button: "Gain 2[c]" },
-        { id: 0, label: "Do not gain credits", button: "Pass" },
-      ];
+    Enumerate: function (cards, trashingPlayer) {
+      if (!cards || !cards.includes(this)) return [];
+      if (trashingPlayer != runner || !this._wasRezzedWhenTrashed) return [];
+      var gainChoice = { id: 1, label: "Gain 2 credits", button: "Gain 2[c]" };
+      var passChoice = { id: 0, label: "Do not gain credits", button: "Pass" };
+      //**AI code: free credits
+      if (corp.AI != null) return [gainChoice];
+      return [gainChoice, passChoice];
     },
     Resolve: function (params) {
-      if (params && params.id === 1) {
-        GainCredits(corp, 2, "", this);
-      }
+      this._wasRezzedWhenTrashed = false;
+      if (params && params.id === 1) GainCredits(corp, 2, "", this);
     },
     text: "Nanoetching Matrix trashed: gain 2[c]?",
+    availableWhenInactive: true,
+  },
+  AIRezWhenCan: function () {
+    return true;
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    //Repeatable click economy at no rez cost: worth a non-scoring remote
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
   },
 };
 
@@ -1203,6 +1371,7 @@ cardSet[26034] = {
 cardSet[26035] = {
   title: "Hagen",
   imageFile: "26035.png",
+  elo: 1649,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 3,
@@ -1210,17 +1379,27 @@ cardSet[26035] = {
   subTypes: ["Barrier", "Destroyer"],
   rezCost: 4,
   strength: 6,
+  _installedIcebreakers: function () {
+    var installed = InstalledCards(runner);
+    var count = 0;
+    for (var i = 0; i < installed.length; i++) {
+      if (CheckCardType(installed[i], ["program"]) && CheckSubType(installed[i], "Icebreaker")) count++;
+    }
+    return count;
+  },
+  _trashablePrograms: function () {
+    return ChoicesInstalledCards(runner, function (card) {
+      if (!CheckCardType(card, ["program"]) || !CheckTrash(card)) return false;
+      return !(
+        CheckSubType(card, "Decoder") ||
+        CheckSubType(card, "Fracter") ||
+        CheckSubType(card, "Killer")
+      );
+    });
+  },
   modifyStrength: {
     Resolve: function (card) {
-      if (card == this) {
-        var breakers = 0;
-        for (var i = 0; i < runner.rig.programs.length; i++) {
-          if (CheckSubType(runner.rig.programs[i], "Icebreaker")) {
-            breakers++;
-          }
-        }
-        return -breakers;
-      }
+      if (card == this) return -this._installedIcebreakers();
       return 0;
     },
   },
@@ -1228,33 +1407,22 @@ cardSet[26035] = {
     {
       text: "Trash 1 installed program that is not a decoder, fracter, or killer.",
       Resolve: function () {
-        var choices = ChoicesInstalledCards(runner, function (card) {
-          if (!CheckCardType(card, ["program"])) return false;
-          if (
-            CheckSubType(card, "Decoder") ||
-            CheckSubType(card, "Fracter") ||
-            CheckSubType(card, "Killer")
-          ) {
-            return false;
-          }
-          return true;
-        });
-        if (choices.length > 0) {
-          DecisionPhase(
-            corp,
-            choices,
-            function (params) {
-              if (params && params.card) {
-                Log("Hagen trashes " + GetTitle(params.card));
-                Trash(params.card, true);
-              }
-            },
-            "Hagen",
-            "Choose a non-icebreaker program to trash",
-            this,
-            "trash",
-          );
-        }
+        var choices = this._trashablePrograms();
+        if (choices.length < 1) return;
+        DecisionPhase(
+          corp,
+          choices,
+          function (params) {
+            if (params && params.card) {
+              Log("Hagen trashes " + GetTitle(params.card));
+              Trash(params.card, true);
+            }
+          },
+          "Hagen",
+          "Choose a program that is not a decoder, fracter or killer to trash",
+          this,
+          "trash",
+        );
       },
       visual: { y: 102, h: 32 },
     },
@@ -1267,7 +1435,11 @@ cardSet[26035] = {
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["trashProgram"]], [["endTheRun"]]];
+    result.sr = [];
+    //Like Rototurret, a program trash is serious, but only an eligible program can be lost
+    if (this._trashablePrograms().length > 0) result.sr.push([["misc_serious"]]);
+    else result.sr.push([[]]); //blank keeps subroutine indices aligned
+    result.sr.push([["endTheRun"]]);
     return result;
   },
 };
