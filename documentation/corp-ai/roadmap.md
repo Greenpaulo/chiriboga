@@ -30,15 +30,15 @@ is recorded in the done tables and the historical merge plan.
 |---|---|---|---|
 | — | [L8.5](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | done (merged) | Revised full gate passed; merge complete |
 | — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
-| — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Passive measurement and observer identity evidence delivered; all-root calibration usable, postured coverage insufficient |
-| 1 | [L8.2](../backlog/feature-layer-8-2-remote-deception-profiles.md) | ready | Re-ground and freeze the tell-reduction gate, then implement and adopt |
-| 2 | [I2](../backlog/I2-ice-selection-by-marginal-security.md) | in-progress | Phase A (observation-only M1/M2/M4) done; phase B (marginal ICE allocation behind `iceMarginalSecurity`) next in the same ticket |
-| 3 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
-| 4 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
+| — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Shared collector and identity evidence delivered; L8.2 records fresh usable controls after its passive-label correction |
+| 3 | [L8.2](../backlog/code-review/feature-layer-8-2-remote-deception-profiles.md) | not adopted | Full gate failed; policy removed. Retain observer/collector repairs and recorded failure evidence |
+| 4 | [I2](../backlog/I2-ice-selection-by-marginal-security.md) | in-progress | Phase A (observation-only M1/M2/M4) done; phase B (marginal ICE allocation behind `iceMarginalSecurity`) next in the same ticket |
+| 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
+| 6 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
-F11 and F12 are done, satisfying L8.2's remaining formal dependencies. L8.2
-is next in this track; its gate reconciliation and calibration work remain.
-L8.2-before-I2 and L8.9-before-I3 are sequencing preferences rather than additional formal dependencies. Do not
+F11 and F12 are done. L8.2 was not adopted (full gate failed; policy removed),
+so I2 no longer waits on it; its observer/collector repairs stay. L8.9-before-I3
+is a sequencing preference rather than an additional formal dependency. Do not
 adopt a later policy using a control predating an adopted prerequisite.
 [L9.0.1](../backlog/done/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
 [L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md) proposes separate consumer gates; refresh affected controls after any adoption. Complete L8.7's
@@ -95,9 +95,10 @@ price yet.
 - **Parked because:** its first step is done and refuted the premise. L7.1 failed because HQ's protection score is also the bar for remote scoring, not because of the horizon (see the spec's Failure analysis). I2 carries the lesson; revive only as a new item about remote-scoring eligibility, with fresh evidence.
 
 ### L8.2 Deception legibility signals
-- **Status:** ready
+- **Status:** in-progress
+- **Disposition after review:** Park this failed strategy. The 2026-10-15 full gate did not demonstrate all-root count-distance improvement and failed correlation, active-subset rho, win-rate and overlap guards. The policy was removed; review closes the rejected experiment. L8.9 owns attribution before any replacement.
 - **Depends on:** F4, L8.5, F11, F12
-- **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/feature-layer-8-2-remote-deception-profiles.md)
+- **Ticket:** [feature-layer-8-2-remote-deception-profiles.md](../backlog/code-review/feature-layer-8-2-remote-deception-profiles.md)
 - **Goal:** Base bluff legibility on generic public signals a human reads. The shared profiles themselves are done (see architecture).
 
 ### L8.6 Outcome-calibrated bluff telemetry

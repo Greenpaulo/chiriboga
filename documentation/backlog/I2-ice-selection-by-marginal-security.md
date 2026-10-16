@@ -26,7 +26,9 @@ Implemented from `15d485d` (phase A only; phase B not started).
   L8.2 policy. PR #55 does keep a passive observer correction: roots with no
   activation record are labelled `unrolled`, which raised known posture labels
   from about 86% to about 99.6% in L8.2's control runs. **First step of phase
-  B:** after PR #55 is merged, merge `main` into this branch, then run a
+  B:** PR #55's branch (`backlog/feature-layer-8-2-remote-deception-profiles`)
+  is already merged into this branch (2026-10-16, while #55 awaits review;
+  merge it again after any further review fixes). Run a
   control-only pool batch with `realizedIceByRootType` and check F12's
   readiness rule (≥90% known posture labels, ≥10 commitments and ≥5 games per
   class). If the pool meets it, move the
