@@ -746,6 +746,17 @@ If the run event gives the runner extra credits to spend during the run (like Ov
 AIRunEventExtraCredits: 5,
 ```
 
+**`AIBreachReplacementValue`** (a plain number)
+
+For a card with `specialOnInsteadOfBreaching`. At Run 5.1 the Runner AI picks
+the offered replacement with the highest value instead of breaching; a
+replacement whose `Enumerate` returns `[{required: true}]` leaves no breach
+option. Chastushka, Retrieval Run and Khusyuk use `2`.
+
+```js
+AIBreachReplacementValue: 2, // medium priority
+```
+
 ---
 
 ### 4.8 Access Boosters
@@ -2219,6 +2230,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunEventModify(server)` | function | Temporarily modify game state for run calc |
 | `AIRunEventRestore(server)` | function | Restore state after run calc |
 | `AIRunEventExtraCredits` | number | Credits this run event provides |
+| `AIBreachReplacementValue` | number | Priority of this card's breach replacement at Run 5.1 |
 | `AIRunPoolCreditOffset(server, runEventCardToUse)` | function | Public generic run-credit offset (Methuselah, Touchstone, Cezve, Ken Tenma); safe with a null event; restricted payments use `AIRunRestrictedCredits` |
 | `AIRunRestrictedCredits(server)` | function | Nonnegative public credits available only for explicitly modelled restricted payments; shared providers report a maximum, not a sum |
 | `AIMeatDamagePrevention()` | function | Nonnegative currently usable public one-shot meat-damage prevention capacity |
@@ -2588,6 +2600,25 @@ if (!runner.AI || runner.AI.rc !== rc) {
   potential and Corp breach-loss estimates value this agenda as one Runner point
   and two Corp points, preserving the printed metadata.
 
+
+### Downfall Batch 5 card hooks
+
+- Lat: Ethical Freelancer and Supercorridor offer their optional
+  end-of-turn draw or gain through an inline `Enumerate` preference: the AI
+  always takes it.
+- In the Groove uses `AIPlayWhenCan` with `AIWouldPlay`: it is played on the
+  first click only when at least two grip cards the AI wants (printed install
+  cost 1 or more) are installable and affordable with the clicks left. Its
+  install trigger gains 1[c] when the AI is short of credits or hand space,
+  otherwise draws.
+- Khusyuk uses `AIRunEventExtraPotential` (R&D only, `0.4 × (X − 1)` for the
+  best X of 2 or more) and `AIBreachReplacementValue`. Inline preferences pick
+  the cost with the most installed cards and access an agenda first, then a
+  card it can trash and still keep 3[c].
+- Spec Work uses `AIWouldPlay`, `AIPreferredPlayChoice`, `AIEconomyPlay` and
+  `AIPlayToDraw`. It trashes only a program marked `AIOkToTrash`, a
+  non-icebreaker costing 1[c] or less, or an icebreaker another installed
+  breaker duplicates; otherwise it is not played.
 
 ---
 
