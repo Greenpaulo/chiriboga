@@ -111,6 +111,9 @@ automaticOnSubroutineFiring:   { Resolve }                 // an unbroken sub st
 An automatic `responseOnEncounter` receives no parameters; use
 `automaticOnEncounter` when the effect needs the encountered ice argument.
 
+Ice derezzed during its encounter ("Baklan" Bochkin) stays encountered but its
+subroutines no longer fire: `phases.runSubroutines` skips unrezzed ice.
+
 ### Trace
 
 ```js
@@ -699,6 +702,22 @@ usedThisTurn: false,
 responseOnCorpTurnBegins:   { Resolve: function() { this.usedThisTurn = false; }, automatic: true },
 responseOnRunnerTurnBegins: { Resolve: function() { this.usedThisTurn = false; }, automatic: true },
 // in Enumerate: if (this.usedThisTurn) return [];
+```
+
+Use this card-local guard for the card's own once-per-turn uses. When "the first
+time each turn" refers to a game event (you install hardware, you would draw),
+the event may have happened before the card became active. Check the engine's
+turn counter instead: `TurnEventCount(name)` is 1 during the first such event,
+and `ChangePhase` clears every count when a turn begins. Recorded names:
+`"runnerHardwareInstall"` (in `Install`, before install triggers),
+`"runnerDraw"` and `"corpDraw"` (in `Draw`, before cards move). Record a new
+event with `RecordTurnEvent(name)` at its single engine call site.
+
+```js
+responseOnInstall: { Enumerate: function (card) {
+  if (!CheckCardType(card, ["hardware"]) || TurnEventCount("runnerHardwareInstall") != 1) return [];
+  return [{}];
+}, Resolve: function () { Draw(runner, 1); } },
 ```
 
 ### Ice weakens itself each encounter (Sandstone pattern)

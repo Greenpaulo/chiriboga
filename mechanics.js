@@ -894,6 +894,8 @@ function Install(
 				}
 				var finishInstall = function(cardsTrashed) {
 				  //install done, card becomes active
+				  if (installingCard.player == runner && installingCard.cardType == "hardware")
+					RecordTurnEvent("runnerHardwareInstall");
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
 				  
@@ -1245,6 +1247,7 @@ function Draw(player, num=1, afterDraw, context) {
   }
   num += ModifyingTriggers("modifyDraw", player, -num); //lower limit of -num means the total will not be any lower than zero
   if (num < 1) return 0;
+  RecordTurnEvent(player == corp ? "corpDraw" : "runnerDraw");
   var cards = [];
   //draw for corp (lose if impossible)
   if (player == corp) {

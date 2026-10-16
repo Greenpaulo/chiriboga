@@ -239,12 +239,25 @@ cardSet[26016] = {
     availableWhenInactive: true,
   },
 
+  //Subroutines this program broke during the current encounter
+  brokenThisEncounter: [],
+  automaticOnEncounter: {
+    Resolve: function () {
+      this.brokenThisEncounter = [];
+    },
+  },
+
   //Helper function to check if ice is fully broken and trigger credit gain
+  //This program fully breaks the ice only if it broke every subroutine (CR 6.5.7b)
   _checkFullyBroken: function () {
     if (this.hasFullyBrokenThisTurn) return; //Already triggered this turn
     if (!CheckEncounter()) return;
-    //Check if all subroutines are broken
-    if (!CheckUnbrokenSubroutines()) {
+    var ice = attackedServer.ice[approachIce];
+    var cardRef = this;
+    var allBrokenByThis = ice.subroutines.every(function (sr) {
+      return sr.broken && cardRef.brokenThisEncounter.includes(sr);
+    });
+    if (allBrokenByThis) {
       //Ice is fully broken!
       this.hasFullyBrokenThisTurn = true;
       GainCredits(runner, 2, "", this);
@@ -275,6 +288,7 @@ cardSet[26016] = {
           "using",
           this,
           function () {
+            cardRef.brokenThisEncounter = cardRef.brokenThisEncounter.concat([params.subroutine]);
             Break(params.subroutine);
             //Check if ice is now fully broken
             cardRef._checkFullyBroken();
@@ -308,10 +322,11 @@ cardSet[26016] = {
     },
   ],
 
-  //Reset strength boost when encounter ends
+  //Reset strength boost and break tracking when encounter ends
   responseOnEncounterEnds: {
     Resolve: function () {
       this.strengthBoost = 0;
+      this.brokenThisEncounter = [];
     },
     automatic: true,
   },
@@ -1418,7 +1433,80 @@ cardSet[26015] = {
   cardType: "hardware",
   subTypes: ["Console"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  //The first time each turn you install a piece of hardware, draw 1 card.
+  //TurnEventCount includes installs made before this console was active.
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (!card || card.player != runner || !CheckCardType(card, ["hardware"])) return [];
+      if (TurnEventCount("runnerHardwareInstall") != 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      Draw(runner, 1);
+    },
+    text: "Masterwork (v37): Draw 1 card",
+  },
+  //Whenever a run begins, you may install 1 piece of hardware from your grip, paying 1[c] more.
+  extraCostCard: null,
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (card == this.extraCostCard) return 1;
+      return 0;
+    },
+    automatic: true,
+  },
+  _runInstallChoices: function () {
+    var ret = [];
+    for (var i = 0; i < runner.grip.length; i++) {
+      if (!CheckCardType(runner.grip[i], ["hardware"])) continue;
+      this.extraCostCard = runner.grip[i]; //so affordability includes the extra 1[c]
+      ret = ret.concat(ChoicesCardInstall(runner.grip[i]));
+    }
+    this.extraCostCard = null;
+    return ret;
+  },
+  responseOnRunBegins: {
+    Enumerate: function () {
+      var choices = this._runInstallChoices();
+      if (choices.length < 1) return [];
+      var decline = {card: null, label: "Continue without install", button: "Continue without install"};
+      if (runner.AI) return [this._aiRunInstallChoice(choices) || decline];
+      return choices.concat([decline]);
+    },
+    Resolve: function (params) {
+      if (!params.card) return;
+      var cardRef = this;
+      var clearExtraCost = function () {
+        cardRef.extraCostCard = null;
+      };
+      this.extraCostCard = params.card;
+      Install(params.card, params.host || null, false, null, true, undefined, this,
+        clearExtraCost, clearExtraCost, true, clearExtraCost);
+    },
+    text: "Masterwork (v37): You may install 1 piece of hardware",
+  },
+  //AI: install hardware it would keep anyway, if the planned run stays affordable after paying
+  _aiRunInstallChoice: function (choices) {
+    if (!runner.AI.cachedBestPath || runner.AI.cachedPathServer != attackedServer) return null;
+    var path = runner.AI.cachedBestPath;
+    var runCreditCost = 0;
+    if (path.length > 0)
+      runCreditCost = path[path.length - 1].runner_credits_spent + path[path.length - 1].runner_credits_lost;
+    var worthKeeping = runner.AI._cardsInHandWorthKeeping();
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      if (!worthKeeping.includes(card)) continue;
+      if (typeof card.AIPreferredInstallChoice == "function" && card.AIPreferredInstallChoice([choices[i]]) < 0) continue;
+      this.extraCostCard = card;
+      var cost = InstallCost(card, choices[i].host || null);
+      this.extraCostCard = null;
+      if (AvailableCredits(runner, "installing", card) - cost < runCreditCost) continue;
+      return choices[i];
+    }
+    return null;
+  },
 };
 
 //“Baklan” Bochkin (26017)
@@ -1433,7 +1521,64 @@ cardSet[26017] = {
   cardType: "resource",
   subTypes: ["Connection"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  power: 0,
+  //The first time you encounter a piece of ice during each run, place 1 power counter on this resource.
+  encounteredThisRun: false,
+  automaticOnRunBegins: {
+    Resolve: function () {
+      this.encounteredThisRun = false;
+    },
+  },
+  automaticOnEncounter: {
+    Resolve: function () {
+      if (this.encounteredThisRun) return;
+      this.encounteredThisRun = true;
+      AddCounters(this, "power", 1);
+    },
+  },
+  //[trash], X hosted power counters: Derez the ice you are encountering if its strength is X or less. Take 1 tag.
+  //Only X equal to the ice's strength is offered: the card is trashed either way, so a larger X gains nothing.
+  abilities: [
+    {
+      text: "Derez the ice you are encountering. Take 1 tag.",
+      alt: "baklan_derez",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        var ice = GetApproachEncounterIce();
+        if (!ice || !ice.rezzed) return [];
+        var x = Math.max(0, Strength(ice));
+        if (!CheckCounters(this, "power", x)) return [];
+        return [{id: x, label: "Remove " + x + " power counter" + (x == 1 ? "" : "s"), button: "Derez"}];
+      },
+      Resolve: function (params) {
+        var ice = GetApproachEncounterIce();
+        var x = params.id;
+        RemoveCounters(this, "power", x);
+        Trash(this, false, function () {
+          if (ice && ice.rezzed && Strength(ice) <= x) Derez(ice);
+          AddTags(1);
+        }, this);
+      },
+    },
+  ],
+  //AI: a one-shot derez acts like a bypass of the encountered ice, costing this card and a tag
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (rc.PersistentsUse(point, this)) return result; //already trashed earlier in this run
+    var counters = Counters(this, "power");
+    if (!this.encounteredThisRun || !attackedServer) counters++; //the first encounter of the run adds one first
+    if (Math.max(0, iceStrength) > counters) return result;
+    if (runner.AI && runner.AI._getCachedPotential(server) < 1.5) return result; //save it for valuable runs
+    var pointCopy = rc.CopyPoint(point);
+    pointCopy.persistents = pointCopy.persistents.concat([
+      {use: this, target: iceAI.ice, iceIdx: point.iceIdx, action: "bypass", alt: "baklan_derez"},
+    ]);
+    pointCopy.effects = pointCopy.effects.concat([["tag", "misc_moderate"]]);
+    return result.concat([pointCopy]);
+  },
+  AIWorthKeeping: function () {
+    return true; //cheap, accumulates a single-use answer to ice
+  },
 };
 
 //The Class Act (26018)
@@ -1448,7 +1593,101 @@ cardSet[26018] = {
   cardType: "resource",
   subTypes: ["Connection", "Ritzy"],
   installCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //When a discard phase ends, if you installed this resource this turn, draw 4 cards.
+  installedThisTurn: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) this.installedThisTurn = true;
+    },
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.installedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.installedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () {
+      if (!this.installedThisTurn) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      Draw(runner, 4);
+    },
+    text: "The Class Act: Draw 4 cards",
+  },
+  responseOnCorpDiscardEnds: {
+    Enumerate: function () {
+      if (!this.installedThisTurn) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      Draw(runner, 4);
+    },
+    text: "The Class Act: Draw 4 cards",
+  },
+  //Interrupt -> The first time each turn you would draw any number of cards, look at the top X cards
+  //of your stack. Add 1 of those cards to the bottom of your stack. X is the number you would draw plus 1.
+  //Draw moves the cards before its responses, so this resolves as the equivalent choice afterwards:
+  //the drawn cards plus the new top card of the stack. Choosing a drawn card swaps it for that top card.
+  //With no card left in the stack, every looked-at card would be drawn anyway, so nothing changes.
+  responseOnCardsDrawn: {
+    Enumerate: function (cards) {
+      if (TurnEventCount("runnerDraw") != 1) return [];
+      if (!cards || cards.length < 1 || cards[0].player != runner) return [];
+      if (runner.stack.length < 1) return [];
+      var looked = cards.filter(function (card) {
+        return runner.grip.includes(card);
+      });
+      if (looked.length < cards.length) return []; //a drawn card already left the grip
+      looked.push(runner.stack[runner.stack.length - 1]);
+      var choices = ChoicesArrayCards(looked);
+      choices.forEach(function (choice) {
+        choice.label = "Bottom of stack: " + GetTitle(choice.card, true);
+        choice.button = choice.label;
+      });
+      if (runner.AI) return [choices[this._aiBottomIndex(looked)]];
+      return choices;
+    },
+    Resolve: function (params) {
+      var top = runner.stack[runner.stack.length - 1];
+      MoveCard(params.card, runner.stack, 0); //bottom of the stack
+      if (params.card != top) MoveCard(top, runner.grip);
+      Log("The Class Act: a card was added to the bottom of the stack");
+    },
+    text: "The Class Act: Add 1 card to the bottom of your stack",
+  },
+  //AI: send the least useful card to the bottom
+  _aiBottomIndex: function (cards) {
+    var keep = runner.AI._cardsWorthKeeping(cards);
+    var alreadyHave = InstalledCards(runner).concat(runner.grip);
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].unique && runner.AI._copyOfCardExistsIn(cards[i].title, alreadyHave, [cards[i]])) return i;
+    }
+    for (var i = 0; i < cards.length; i++) {
+      if (!keep.includes(cards[i])) return i;
+    }
+    var lowest = 0;
+    for (var i = 1; i < cards.length; i++) {
+      if ((cards[i].elo || 1500) < (cards[lowest].elo || 1500)) lowest = i;
+    }
+    return lowest;
+  },
+  AIDrawInstall: function () {
+    return 2; //four cards at the end of the turn
+  },
+  AIWorthKeeping: function () {
+    return runner.grip.length < 4;
+  },
 };
 
 //Lat: Ethical Freelancer (26019)

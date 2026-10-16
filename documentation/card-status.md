@@ -26,7 +26,7 @@ in card-sets.md.
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | in-progress | 65 | 65 | 0 | 25 | 0 | 21 / 61 | true / true | no |
+| `downfall` | in-progress | 65 | 65 | 0 | 22 | 0 | 23 / 61 | true / true | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
@@ -68,9 +68,6 @@ None.
 ### `downfall` (sets/downfall.js)
 
 - 26004 Stargate: 1 scaffold marker(s)
-- 26015 Masterwork (v37): 1 scaffold marker(s)
-- 26017 “Baklan” Bochkin: 1 scaffold marker(s)
-- 26018 The Class Act: 1 scaffold marker(s)
 - 26020 In the Groove: 1 scaffold marker(s)
 - 26021 Khusyuk: 1 scaffold marker(s)
 - 26025 Pelangi: 1 scaffold marker(s)
