@@ -1606,7 +1606,8 @@ function TakeCredits(player, card, num) {
  * @method RemoveTags
  * @param {int} num number of tags to remove
  */
-function RemoveTags(num) {
+function RemoveTags(num, afterRemoval, context) {
+  var tagsBefore = runner.tags;
   if (runner.tags >= num) {
     if (num > 0) PlaySound('removeTag');
     runner.tags -= num;
@@ -1617,6 +1618,13 @@ function RemoveTags(num) {
     runner.tags = 0
   }
   UpdateCounters();
+  var removed = tagsBefore - runner.tags;
+  if (removed > 0) {
+    AutomaticTriggers("automaticOnRemoveTags", [removed]);
+    TriggeredResponsePhase(playerTurn, "responseOnRemoveTags", [removed], function () {
+      if (typeof afterRemoval == "function") afterRemoval.call(context);
+    }, "Tags removed");
+  } else if (typeof afterRemoval == "function") afterRemoval.call(context);
 }
 
 /**

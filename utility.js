@@ -4244,6 +4244,8 @@ function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
           !card[abilitiesProperty][i].availableFromHQ) continue;
       if (card[abilitiesProperty][i].availableFromHQ && card.cardLocation !== corp.HQ.cards)
         continue;
+      if (card.player === corp && card.cardLocation === runner.scoreArea &&
+          !card[abilitiesProperty][i].availableInRunnerScoreArea) continue;
       checkedClick = false;
       checkedAccess = false;
       var choices = card[abilitiesProperty][i].Enumerate.call(card);
@@ -4354,6 +4356,16 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
       if (hqCard.abilities && hqCard.abilities.some(function (ability) {
         return ability.availableFromHQ;
       }) && activeCards.indexOf(hqCard) < 0) activeCards.push(hqCard);
+    }
+  }
+
+  // Printed Corp abilities that remain usable on stolen agendas.
+  if (player === corp) {
+    for (var scoreIndex = 0; scoreIndex < runner.scoreArea.length; scoreIndex++) {
+      var stolen = runner.scoreArea[scoreIndex];
+      if (stolen.player === corp && stolen.abilities && stolen.abilities.some(function (ability) {
+        return ability.availableInRunnerScoreArea;
+      }) && activeCards.indexOf(stolen) < 0) activeCards.push(stolen);
     }
   }
 
