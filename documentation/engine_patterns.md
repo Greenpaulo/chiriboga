@@ -111,6 +111,26 @@ automaticOnSubroutineFiring:   { Resolve }                 // an unbroken sub st
 An automatic `responseOnEncounter` receives no parameters; use
 `automaticOnEncounter` when the effect needs the encountered ice argument.
 
+### Trace
+
+```js
+responseOnTraceInitiated: { Enumerate(baseStrength), Resolve } // before the Corp raises strength
+```
+
+`Trace` opens this window (first priority to `playerTurn`) after setting the
+global `traceStrength` and before either player raises strength; a response
+may change `traceStrength` (Flip Switch sets it to 0). With no response the
+trace continues synchronously.
+
+### Response windows
+
+Every enumerated trigger in a response window must be resolved before the
+window can pass, so an optional effect must offer its own decline choice
+(for example `{use: false, label: "Do not use", button: "Continue"}`) and ignore
+it in `Resolve`. `responseOnRunSuccessful` receives no parameters; read
+`attackedServer`. A played run event stays in `runner.resolvingCards`, and so
+stays active, until the post-action window moves it to the heap.
+
 ### Breach
 
 ```js

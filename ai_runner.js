@@ -1568,8 +1568,28 @@ console.log(this.preferred);
 			  });
 			}
 		}
-		//check for the basic remove tag action
-		if (optionList.includes("remove")) {
+		//check for installed cards that can be triggered to remove tags without a click (e.g. Flip Switch)
+		//their paid abilities are offered in paid ability windows, not as action-phase click abilities
+		var freeTagRemoverAvailable = false;
+		var tagRemovers = ActiveCards(runner);
+		for (var i = 0; i < tagRemovers.length; i++) {
+			if (typeof tagRemovers[i].AITriggerToRemoveTags != "function") continue;
+			var tagAlt = tagRemovers[i].AITriggerToRemoveTags.call(tagRemovers[i]);
+			if (!tagAlt) continue;
+			var matchesAlt = function (a) { return a.alt == tagAlt; };
+			if (!ChoicesAbility(tagRemovers[i]).some(matchesAlt)) continue;
+			freeTagRemoverAvailable = true;
+			var limitTo = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+			if (optionList.includes("trigger") && ChoicesAbility(tagRemovers[i], limitTo).some(matchesAlt)) {
+				this._log("there is a card I would trigger to remove tags");
+				return this._returnPreference(optionList, "trigger", {
+					cardToTrigger: tagRemovers[i],
+					abilityAlt: tagAlt,
+				});
+			}
+		}
+		//check for the basic remove tag action (unless a free remover can be used in the next paid ability window)
+		if (optionList.includes("remove") && !freeTagRemoverAvailable) {
 		  //by default use the basic remove tag action
 		  return optionList.indexOf("remove");
 		}

@@ -2198,6 +2198,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIHostedBreakContribution(ice)` | function | Return how many subroutines this hosted card can currently break for free |
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
 | `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description |
+| `AITriggerToRemoveTags()` | function | Return the alt of a paid ability that removes tags without a click, or falsy |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
@@ -2617,6 +2618,46 @@ if (!runner.AI || runner.AI.rc !== rc) {
 
 
 ---
+
+### Downfall Batch 3 card hooks
+
+- `AITriggerToRemoveTags()` returns the `alt` of a paid ability on an installed
+  Runner card that removes tags without a click, or a falsy value. The Runner
+  AI's tagged branch triggers that ability whenever the current window offers
+  it (paid ability windows; the action phase lists click abilities only) and,
+  while such an ability is usable, skips the basic click-and-credits remove
+  action so the next paid window removes the tag for free. Read-only. Flip
+  Switch returns `"flipswitch_removetag"`.
+- `AIEncounterOptions(iceIdx, iceAI)` (previously undocumented, used by Inside
+  Job) returns an array of `{effects, persistents}` options that the run
+  calculator adds at the encounter with ice index `iceIdx`; it is read for
+  active cards and for the hypothetical run event. A persistent
+  `{use: card, target, iceIdx, action, alt}` makes the AI choose the offered
+  trigger or option whose `alt` matches during that encounter, so the card's
+  `responseOnEncounter` choice must carry the same `alt`. Return `[]` when the
+  option does not apply. Read-only.
+- Always Have a Backup Plan uses `AIRunEventExtraPotential` and
+  `AIEncounterOptions`. During its second run (or while evaluating one) the
+  encounter options add a bypass persistent for the last ice encountered in the
+  first run. `AIWouldRunAgain(server)` is the card's own run-end helper: it
+  temporarily applies that bypass, asks `_calculateBestCompleteRun` for a
+  complete path from the outermost ice, restores the state, and requires a
+  positive cached potential. The run-end response returns the AI's single
+  choice, so the AI declines when other ice still stops the run.
+- Blueberry!™ Diesel uses `AIPlayToDraw: 2` and `AIWouldPlay` (not into an empty
+  stack). `AIBottomChoice(choices)` is its own resolution helper: it returns the
+  index of a top card that duplicates an installed or held unique card, or a
+  console while one is installed, and otherwise the final "leave both" choice.
+- Flip Switch's `AIWouldZeroTrace()` is read during its
+  `responseOnTraceInitiated` enumeration: it zeroes a trace whose current base
+  strength exceeds the Runner's link and otherwise returns the decline choice.
+  Jack-out has no AI policy (see the batch notes).
+- Lucky Charm's `AIWouldPreventEndRun()` is read during its
+  `responsePreventableEndRun` enumeration: it prevents the end of a run on a
+  server with positive cached potential and otherwise returns the decline
+  choice.
+- Az McCaffrey needs no hook: `modifyInstallCost` reaches `InstallCost`, so AI
+  install affordability and choices see the discount.
 
 ## 8. Step-by-Step Worked Example
 
