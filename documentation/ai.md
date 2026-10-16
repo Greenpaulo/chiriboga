@@ -2198,6 +2198,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIHostedBreakContribution(ice)` | function | Return how many subroutines this hosted card can currently break for free |
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
 | `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description |
+| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes |
+| `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select}` when this card's ability can install the grip card more cheaply than the basic install action |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
@@ -2587,6 +2589,46 @@ if (!runner.AI || runner.AI.rc !== rc) {
   consumes `agendaPointsForPlayer(player)` so score totals, Runner known-agenda
   potential and Corp breach-loss estimates value this agenda as one Runner point
   and two Corp points, preserving the printed metadata.
+
+### Downfall Batch 6 card hooks
+
+- Gauss uses `AIImplementBreaker` with its +2 pump. Its install bonus is a
+  `modifyStrength` effect, so the Run Calculator reads it through the card's
+  current strength until the turn's discard step ends.
+- Pelangi uses `AIEncounterAbility(rc, result, point, iceAI)`, consumed by
+  `rc.IceAct` for every active card. Before any other action on an ice, it adds
+  one point per breaker type (Fracter, Decoder, Killer) the ice lacks, spending
+  one virus counter (`virus_counters_spent`). Each point carries two
+  persistents: `{use, target, iceIdx, addSubTypes}`, which `IceAct` applies to
+  later breaker steps on that ice, then `{use, iceIdx, alt: "pelangi_<subtype>"}`,
+  which path resolution matches against the subtype choice after triggering.
+  `rc.PersistentsUse` keeps it to one use per route. After it resolves,
+  `AIModifyIceAI` adds the applied subtype to the live model, because `IceAI()`
+  reads printed subtypes. Corp route planning sees it through the same
+  `IceAct` call; per-breaker price probes do not include it.
+- The Artist uses `AIEconomyTrigger: 3` with `AIWouldTrigger` returning false
+  once its credit ability is used, so the economy trigger never falls through to
+  the install ability. `AIInstallDiscountAbility(card, host)` is read by
+  `RunnerAI.CommandChoice`: when the chosen command is a basic install and the
+  option list includes `trigger`, the largest offered discount replaces the
+  install with a trigger preference `{cardToTrigger, abilityAlt}`. The offer's
+  `select()` records the target, and the ability's `Enumerate` then lists only
+  that card. Offers must check that the ability can be used now.
+- Direct Access uses `AIRunEventModify`/`AIRunEventRestore` to blank both
+  identities while its run is calculated. `AIRunEventExtraPotential` returns
+  0.2 for a worthwhile run only when the Corp identity has run-time effects and
+  the Runner identity does not. Its optional shuffle-back is chosen with a
+  normal title/option preference.
+- Rejig uses `AIWouldPlay` and `AIPreferredPlayChoice(choices)`. It returns an
+  installed card whose `AIOkToTrash` is true, then installs the grip program or
+  hardware with the largest saving that is affordable after the discount and
+  not wasteful. A returned card with an install trigger can be reinstalled to
+  refresh it. The install choice is narrowed to the planned card.
+- Whistleblower chooses through a normal title/option preference. It names a
+  known agenda reachable on this breach (remote root, face-up Archives, or a
+  certain HQ card) that has a steal cost, preferring the most agenda points;
+  otherwise it declines and stays installed.
+- Rezeki uses `AIEconomyInstall`.
 
 
 ---

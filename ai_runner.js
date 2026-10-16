@@ -647,6 +647,20 @@ class RunnerAI {
     //console.log(currentPhase.identifier);
   }
 
+  //an active card's ability may install the same grip card more cheaply (AIInstallDiscountAbility)
+  _installDiscountAbility(card, host) {
+    var best = null;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var source = activeCards[i];
+      if (typeof source.AIInstallDiscountAbility != "function" || !CheckHasAbilities(source)) continue;
+      var offer = source.AIInstallDiscountAbility.call(source, card, host || null);
+      if (offer && offer.discount > 0 && (!best || offer.discount > best.offer.discount))
+        best = { card: source, offer: offer };
+    }
+    return best;
+  }
+
   //sets this.preferred to prefs and returns indexOf cmd in optionList
   //don't forget to return the result!
   _returnPreference(optionList, cmd, prefs) {
@@ -2966,6 +2980,18 @@ console.log(this.preferred);
 							}
 						  }
 					}
+				}
+			}
+			//or installed through an active card's cheaper install ability (e.g. The Artist)
+			if (ret == optionList.indexOf("install") && inputOptionList.includes("trigger") && this.preferred &&
+				this.preferred.command == "install" && typeof this.preferred.cardToInstall != 'undefined') {
+				var discounted = this._installDiscountAbility(this.preferred.cardToInstall, this.preferred.hostToInstallTo);
+				if (discounted) {
+					if (typeof discounted.offer.select == "function") discounted.offer.select();
+					ret = this._returnPreference(inputOptionList, "trigger", {
+						cardToTrigger: discounted.card,
+						abilityAlt: discounted.offer.alt,
+					});
 				}
 			}
 			//if option is not in list, choose 0 and give error
