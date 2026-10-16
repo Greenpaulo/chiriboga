@@ -45,7 +45,7 @@ Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
 ## Status summary
 
-**1 complete, 12 outstanding** (`12 Pending`, `0 In progress`, `0 Blocked`).
+**2 complete, 11 outstanding** (`11 Pending`, `0 In progress`, `0 Blocked`).
 
 Agents must refresh these counts whenever a batch status changes.
 
@@ -53,8 +53,8 @@ Agents must refresh these counts whenever a batch status changes.
 
 | Batch | Card IDs    | Status   | Owner / started          | Notes/blocker                                                              |
 | ----: | ----------- | -------- | ------------------------ | -------------------------------------------------------------------------- |
-| 1 | 36001–36004 | Pending | — | Changes required: Successful-run dispatch/reward crashes; winning agenda target missed. See [independent review](reviews/vantage-point/vantagepoint-batch-1.md). |
-| 2 | 36005–36008 | Pending | — | Changes required: Stick and Poke draw omitted from survivable routes; remaining contrasts recorded. See [independent review](reviews/vantage-point/vantagepoint-batch-2.md). |
+| 1 | 36001–36004 | Pending | — | Parked: original batch 1 branch has a latency regression. Only explicitly required prerequisites are carried on this branch; the batch is not accepted here. See [unstack record](unstack-2026-10-16.md). |
+| 2 | 36005–36008 | Complete | Codex / 2026-10-14 | Rebuilt independently on main (2026-10-16), with required shared prerequisites and the expensive Corp break-income route trigger excluded. Implementation retained; independent re-review required for this snapshot. See [original evidence](reviews/vantage-point/vantagepoint-batch-2.md) and [unstack record](unstack-2026-10-16.md). |
 | 3 | 36009–36016 | Pending | — | Changes required: Reward and play-choice crashes; ignored identity/tag/tactical choices. See [independent review](reviews/vantage-point/vantagepoint-batch-3.md). |
 | 4 | 36017–36020 | Pending | — | Changes required: Ignored economy hook; Beta Build target/click budgets; Aircheck safety and shared credit loss. See [independent review](reviews/vantage-point/vantagepoint-batch-4.md). |
 | 5 | 36021–36025 | Pending | — | Changes required: Economy/hosting decisions require repair. See [independent review](reviews/vantage-point/vantagepoint-batch-5.md). |
@@ -100,6 +100,14 @@ Do not remove an older entry if later work revisits one of its cards.
 
 | 13 | 36061–36066 | 2026-10-06 | Codex | `tests/vantagepoint-batch13.test.js`; `tests/corp-server-security.test.js`; full `node tests/run-all-tests.js` | Repaired the reopened Corsair/Shackleton public-security gap using complete restricted-payment routes. Same-board opposing planner tests cover lethal/survivable damage, prevention, source exhaustion, finite reruns, click preparation, funded hidden ICE and read-only/private-information constraints. All 50 files pass, including Corp decision fixtures and decision snapshots. |
 
+| 2 | 36005–36008 | 2026-10-06 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/11/12/13 and Corp-security/payment tests; full `node tests/run-all-tests.js` | Repaired C2-1–C2-3: ordered finite damage/draw, destination-aware hosted installation and post-install route safety. Actual command/card/host/server, breach, recursive payment, prevention, finite rerun, privacy and restoration contrasts cover every card. All 52 files pass on Node 20.19.0, including Corp decision fixtures and decision snapshots; required syntax/format/deck/identity/hook-doc/diff checks pass. Independent batch 2 and affected shared-consumer re-review required. |
+| 2 | 36005–36008 | 2026-10-06 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/11/12/13, Corp-security/payment tests; full `node tests/run-all-tests.js` | C2-4: public complete-route reserve evaluation shares the actual Lampades allocation and ordinary trash payment policy. Real command/card/payment contrasts cover scarce/plentiful stealth, positive/free trash, unaffordable trash, steal costs, flexible sources, hidden/nonwinning targets, expired clicks and exception/cache restoration. C2-1–C2-3 remain supported. All 52 files pass on Node 20.19.0, including Corp decision fixtures and decision snapshots; required syntax/format/deck/identity/hook-doc/diff checks pass. Independent re-review required. |
+| 2 | 36005–36008 | 2026-10-06 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/11/12/13, Corp-security/payment tests; full `node tests/run-all-tests.js` | C2-4 actual phase payment: reserve policy, ordinary allocator and selector share the engine trash reason and recognize Azimat. Real legal command/card/ability/phase resolution preserves winning stealth reserves; temporary/free/unsafe/no-Lampades/steal-click/locked-pool contrasts and C2-1–C2-3 pass. All 52 files pass on Node 20.19.0, including Corp decision fixtures and decision snapshots; required checks pass. Independent re-review required. |
+| 2 | 36005–36008 | 2026-10-06 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/11/12/13, Corp-security/payment tests; full `node tests/run-all-tests.js` | C2-5: ordinary run/server immediate-win precedence, complete prospective run context, real win/draw/restriction/resource contrasts and exception restoration. C2-1–C2-4 retained. All 52 files pass on Node 20.19.0, including Corp decision fixtures and decision snapshots; required checks pass. Independent batch 2 and affected shared-consumer re-review required. |
+| 2 | 36005–36008 | 2026-10-07 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/11/12/13, Corp-security/payment tests; full `node tests/run-all-tests.js` | C2-6: guarded immediate-win survival budget ignores soft Grip retention and cached potential. Real fresh/repeated command/card/server tests cover scarce credits/clicks, expendable controls, expiring denial, lethal/illegal/unaffordable/hidden declines, finite ordered draw and exception restoration. C2-1–C2-5 retained. All 52 files pass on Node 20.19.0, including Corp decision fixtures and decision snapshots; required checks pass. Independent re-review required. |
+| 2 | 36005–36008 | 2026-10-07 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/11/12/13, security/payment tests; full `node tests/run-all-tests.js` | C2-7: immediate winning steals ignore post-run tag cleanup under the existing tactical guard. Cold/repeated scarce/funded boards and legal expiring-play alternatives select the win; real AI Funhouse tags and access steal reach seven points. Lethal/ETR/steal-cost and nonwinning contrasts, exception/state cleanup and real ordinary tag rejection pass. C2-1–C2-6 retained; all 52 files and required checks pass. Independent re-review required. |
+| 2 | 36005–36008 | 2026-10-14 | Codex | `tests/vantagepoint-batch2.test.js`; `tests/vantagepoint-integration.test.js`; affected batch 1/13 and security/payment tests; full `node tests/run-all-tests.js` | C2-8 ordered conditional tags, finite reruns/payment forks and opposing security; C2-9 terminal precedence, reserves/actual payment, optional-trash and live recalculation; C2-10 funded useful Lampades setup and restored install counters. C2-1–C2-7 retained. All 52 files and required checks pass; independent matrix/shared-consumer re-review required. |
+
 ## Batch-review log
 
 Independent review evidence is separate from implementation completion history.
@@ -120,6 +128,15 @@ Verdicts apply to the linked snapshot-specific reports; repairs require re-revie
 | 11 | 36051–36055 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-11.md) |
 | 12 | 36056–36060 | 2026-10-06 | Changes required | [Report](reviews/vantage-point/vantagepoint-batch-12.md) |
 | 13 | 36061–36066 | 2026-10-06 | Pass | [Report](reviews/vantage-point/vantagepoint-batch-13.md) |
+
+| 2 | 36005–36008 | 2026-10-06 | Changes required (current-snapshot re-review) | [Report: C2-1 revalidated, C2-2 and C2-3 reproduced](reviews/vantage-point/vantagepoint-batch-2.md#independent-current-snapshot-re-review--2026-10-06) |
+| 2 | 36005–36008 | 2026-10-06 | Changes required (remediation re-review) | [Report: C2-1–C2-3 resolved; C2-4 decisive stealth reserve](reviews/vantage-point/vantagepoint-batch-2.md#independent-remediation-re-review--2026-10-06) |
+| 2 | 36005–36008 | 2026-10-06 | Changes required (second remediation re-review) | [Report: actual-phase payment contract and Azimat allocation](reviews/vantage-point/vantagepoint-batch-2.md#second-independent-remediation-re-review--2026-10-06) |
+| 2 | 36005–36008 | 2026-10-06 | Changes required (third remediation re-review) | [Report: C2-1–C2-4 resolved; C2-5 immediate win displaced by Archives draw](reviews/vantage-point/vantagepoint-batch-2.md#third-independent-remediation-re-review--2026-10-06) |
+| 2 | 36005–36008 | 2026-10-06 | Changes required (fourth remediation re-review) | [Report: C2-1–C2-5 retained; C2-6 survivable win rejected by Grip retention](reviews/vantage-point/vantagepoint-batch-2.md#fourth-independent-remediation-re-review--2026-10-06) |
+| 2 | 36005–36008 | 2026-10-07 | Changes required (fifth remediation re-review) | [Report: C2-1–C2-6 resolved; C2-7 tagged immediate win rejected](reviews/vantage-point/vantagepoint-batch-2.md#fifth-independent-remediation-re-review--2026-10-07) |
+| 2 | 36005–36008 | 2026-10-07 | Changes required (sixth re-review; consolidated audit) | [Report: coverage matrix, C2-8–C2-10 and one repair handoff](reviews/vantage-point/vantagepoint-batch-2.md#sixth-independent-remediation-re-review--2026-10-07) |
+| 2 | 36005–36008 | 2026-10-14 | Pass (seventh remediation re-review; strategic audit) | [Report: full matrix and C2-1–C2-10 accepted; 50/52 suite with unrelated documentation failures](reviews/vantage-point/vantagepoint-batch-2.md#seventh-independent-remediation-re-review--2026-10-14) |
 
 ## Set-wide review status
 
@@ -175,3 +192,12 @@ Before replacing the active set:
    or overlaps.
 5. Update the **Implementation notes** row to the new set's notes file.
 6. Leave the generic `implement-card-batch` skill unchanged.
+
+## Independent branch state — 2026-10-16
+
+This branch contains batch 2 and required shared prerequisites. Earlier
+batch completion/review claims do not carry over automatically. The reports
+and completion entries above describe their recorded original snapshots;
+independent re-review is required after this extraction. Batch 1 remains parked.
+The [four exact pre-unstack tracker snapshots](history/unstack-2026-10-16/README.md)
+preserve the original cumulative state. See the [extraction record](unstack-2026-10-16.md).

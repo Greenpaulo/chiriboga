@@ -33,7 +33,8 @@ cardSet[36001] = {
     availableWhenInactive: true,
   },
   responseOnRunSuccessful: {
-    Resolve: function (server) {
+    Resolve: function () {
+      var server = attackedServer;
       if (server == corp.HQ) this.madeSuccessfulRunOnHQThisTurn = true;
       else if (server == corp.RnD) this.madeSuccessfulRunOnRnDThisTurn = true;
       else if (server == corp.archives)
@@ -65,10 +66,9 @@ cardSet[36001] = {
     }
 
     if (runner.AI != null) {
+      var event = this;
       choices.sort(function (a, b) {
-        var aScore = a.card.rezzed ? 100 + (a.card.trashCost || 0) : 0;
-        var bScore = b.card.rezzed ? 100 + (b.card.trashCost || 0) : 0;
-        return bScore - aScore;
+        return event._corpTargetValue(b.card) - event._corpTargetValue(a.card);
       });
       this._trashCorpCards(
         choices.slice(0, requiredCount).map(function (choice) {
@@ -122,13 +122,8 @@ cardSet[36001] = {
     if (runnerCards.length > 0) {
       if (corp.AI != null) {
         var preferred = runnerCards[0];
-        for (var i = 0; i < runnerCards.length; i++) {
-          if (
-            (runnerCards[i].card.installCost || 0) >
-            (preferred.card.installCost || 0)
-          ) {
-            preferred = runnerCards[i];
-          }
+        if (typeof corp.AI._bestTrashOption === "function") {
+          preferred = runnerCards[corp.AI._bestTrashOption(runnerCards)];
         }
         corp.AI.preferred = {
           title: "Chain Reaction",
@@ -147,14 +142,42 @@ cardSet[36001] = {
       );
     }
   },
+  _winningAgenda: function (card) {
+    return PlayerCanLook(runner, card) && CheckCardType(card, ["agenda"]) &&
+      Counters(card, "advancement") >= AdvancementRequirement(card) &&
+      AgendaPoints(corp) + AgendaPointsForCard(card, corp) >= globalProperties.agendaPointsToWin;
+  },
+  _corpTargetValue: function (card) {
+    // Never consult the identity or printed costs of an unknown facedown card.
+    if (!PlayerCanLook(runner, card)) return Counters(card, "advancement");
+    if (this._winningAgenda(card)) return Infinity;
+    if (CheckCardType(card, ["agenda"]))
+      return Counters(card, "advancement") + AgendaPointsForCard(card, corp);
+    return (card.rezCost || 0) + (card.trashCost || 0) + Counters(card, "credits");
+  },
+  AIPlayWhenCan: 2,
   AIWouldPlay: function () {
-    if (
-      !this.madeSuccessfulRunOnHQThisTurn ||
-      !this.madeSuccessfulRunOnRnDThisTurn ||
-      !this.madeSuccessfulRunOnArchivesThisTurn
-    )
-      return false;
-    return ChoicesInstalledCards(corp, CheckTrash).length >= 1;
+    if (this.Enumerate().length === 0) return false;
+    var event = this;
+    var targets = ChoicesInstalledCards(corp, CheckTrash).map(function (c) { return c.card; });
+    if (targets.some(function (card) { return event._winningAgenda(card); })) return true;
+    targets.sort(function (a, b) { return event._corpTargetValue(b) - event._corpTargetValue(a); });
+    var gain = targets.slice(0, 2).reduce(function (sum, card) {
+      return sum + event._corpTargetValue(card);
+    }, 0);
+    var losses = ChoicesInstalledCards(runner, CheckTrash);
+    // Avoid sacrificing our only matching breaker for ordinary economy denial.
+    for (var i = 0; i < losses.length; i++) {
+      var card = losses[i].card;
+      if (CheckSubType(card, "Icebreaker") && InstalledCards(corp).some(function (ice) {
+        return CheckCardType(ice, ["ice"]) && PlayerCanLook(runner, ice) &&
+          runner.AI._matchingBreakerInstalled(ice) === card;
+      })) return false;
+    }
+    var loss = losses.reduce(function (max, choice) {
+      return Math.max(max, (choice.card.installCost || 0) + Counters(choice.card, "credits") + Counters(choice.card, "virus"));
+    }, 0);
+    return gain > loss + PlayCost(this);
   },
   AIWorthKeeping: function () {
     return true;
@@ -532,6 +555,25 @@ cardSet[36005] = {
       return total + card.credits;
     }, 0);
   },
+  // Use the same allocation for hypothetical evaluation and live AI payment.
+  _stealthPaymentPlan: function (amount) {
+    var flexibility = function (source) {
+      if (typeof source.canUseCredits !== "function") return 2;
+      if (source.canUseCredits("", null)) return 2;
+      return source.canUseCredits("using", null) ? 1 : 0;
+    };
+    var sources = this._stealthCreditCards();
+    sources.sort(function (a, b) {
+      return flexibility(a) - flexibility(b) || Math.min(amount, b.credits) - Math.min(amount, a.credits);
+    });
+    var plan = [];
+    for (var source of sources) {
+      var spend = Math.min(amount, source.credits);
+      if (spend > 0) plan.push({card: source, amount: spend});
+      amount -= spend;
+    }
+    return plan;
+  },
   _spendStealthCredits: function (amount, callback) {
     var lampades = this;
     if (amount < 1) {
@@ -558,7 +600,10 @@ cardSet[36005] = {
     }
     if (choices.length < 1) return;
     if (runner.AI) {
-      choices = [choices[choices.length - 1]];
+      var payment = this._stealthPaymentPlan(amount)[0];
+      choices = [choices.find(function (choice) {
+        return choice.card == payment.card && choice.amount == payment.amount;
+      })];
     }
     var spendFromChoice = function (params) {
       SpendHostedCredits(runner, params.card, params.amount, function () {
@@ -603,8 +648,38 @@ cardSet[36005] = {
       },
     },
   ],
-  AIInstallBeforeRun: function () {
-    return 1;
+  // Evaluate source eligibility in the intended run context, using public
+  // targets/counts only. Archives agendas provide draw, but cannot be trashed.
+  _usefulAccessSetup: function (server) {
+    var old = AIIceEncounterSaveState();
+    return AIWithHypothetical(() => {
+      attackedServer = server; encountering = false; approachIce = -1;
+    }, () => {
+      var available = this._availableStealthCredits();
+      var targets = server.root.concat(server == corp.archives ? [] : server.cards || []);
+      for (var target of targets) {
+        if (!PlayerCanLook(runner, target) || !CheckTrash(target)) continue;
+        var cost = this._printedAccessCost(target);
+        if (typeof cost == "number" && cost <= available &&
+            (TrashCost(target) > cost || !CheckCardType(target, ["asset", "upgrade"]))) return true;
+      }
+      // Unknown accesses offer denial only when the ability has legal funding.
+      return available > 0 && targets.some(target => !PlayerCanLook(runner, target));
+    }, () => {
+      AIIceEncounterRestoreState(old);
+    });
+  },
+  AIHypotheticalInstallCounters: function () {
+    return {power: 3};
+  },
+  AIWastefulToInstall: function () {
+    if (InstalledCards(runner).some(card => card.title == this.title && Counters(card, "power") > 0)) return true;
+    if (MemoryUnits() - InstalledMemoryCost() < this.memoryCost) return true;
+    return ![corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers)
+      .some(server => this._usefulAccessSetup(server));
+  },
+  AIInstallBeforeRun: function (server) {
+    return this._usefulAccessSetup(server) ? 1 : 0;
   },
   AIOkToTrash: function () {
     return !CheckCounters(this, "power", 1);
@@ -612,8 +687,12 @@ cardSet[36005] = {
   AIAccessTriggerPriority: function (optionList) {
     var printedCost = this._printedAccessCost(accessingCard);
     if (typeof printedCost !== "number") return 0;
-    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost)
+    if (!optionList.includes("trash") || TrashCost(accessingCard) > printedCost) {
+      if (runner.AI && !runner.AI._accessPaymentPreservesWinningRun({
+        hosted: this._stealthPaymentPlan(printedCost),
+      })) return 0;
       return 3;
+    }
     return 0;
   },
   AIReducesTrashCost: function (card) {
@@ -673,8 +752,43 @@ cardSet[36006] = {
       return hasCompanion && hasConnection ? 2 : 0;
     },
   },
+  _setupTargets: function () {
+    var seen = new Set();
+    return runner.grip.filter(function (card) {
+      if (!this._hostableCard(card) || seen.has(card.title) ||
+          (runner.AI && runner.AI._uniqueCopyAlreadyInstalled(card))) return false;
+      seen.add(card.title);
+      return true;
+    }, this);
+  },
+  AIHostedInstallValue: function (card) {
+    if (!this._hostableCard(card)) return 0;
+    var before = this.modifyMaxHandSize.Resolve.call(this, runner);
+    var companion = CheckSubType(card, "Companion");
+    var connection = CheckSubType(card, "Connection");
+    for (var hosted of this.hostedCards) {
+      companion = companion || CheckSubType(hosted, "Companion");
+      connection = connection || CheckSubType(hosted, "Connection");
+    }
+    return (companion && connection ? 2 : 0) - before;
+  },
   AIWorthKeeping: function () {
-    return true;
+    var targets = this._setupTargets();
+    var discounts = targets.filter(card => InstallCost(card) > 0).length;
+    var pair = targets.some(card => CheckSubType(card, "Companion")) &&
+      targets.some(card => CheckSubType(card, "Connection"));
+    return discounts >= this.installCost ||
+      (pair && runner.grip.length - 1 - targets.length >= MaxHandSize(runner));
+  },
+  AIWastefulToInstall: function () {
+    return !this.AIWorthKeeping();
+  },
+  AIInstallBeforeInstall: function (card) {
+    if (!this._hostableCard(card) || !this.AIWorthKeeping()) return false;
+    var targets = this._setupTargets();
+    var totalCost = InstallCost(this);
+    for (var target of targets) totalCost += Math.max(0, InstallCost(target) - 1);
+    return runner.clickTracker >= 1 + targets.length && runner.creditPool >= totalCost;
   },
   AIOkToTrash: function () {
     return this.hostedCards.length < 1;
@@ -699,7 +813,16 @@ cardSet[36007] = {
       if (cards.length >= 2) Draw(runner, 2);
     },
   },
+  AIRunOrderedDraw: true,
+  AIRunBreachDraw: function (server) {
+    if (server != corp.archives || corp.archives.cards.filter(card => !card.faceUp).length < 2) return 0;
+    return Math.min(2, runner.stack.length);
+  },
+  AIRunExtraPotential: function (server) {
+    return Math.min(this.AIRunBreachDraw(server), Math.max(0, MaxHandSize(runner) - runner.grip.length));
+  },
   AIWorthKeeping: function () {
+    if (runner.stack.length < 2) return false;
     return corp.archives.cards.filter(function (card) {
       return !card.faceUp;
     }).length >= 2;
@@ -708,8 +831,15 @@ cardSet[36007] = {
     if (server != corp.archives) return 0;
     return this.AIWorthKeeping() ? 2 : 0;
   },
+  AIWastefulToInstall: function () {
+    return this.AIDrawInstall() == 0;
+  },
   AIDrawInstall: function () {
-    return this.AIWorthKeeping() ? 2 : 0;
+    if (!this.AIWorthKeeping() || runner.clickTracker < 2) return 0;
+    var host = runner.AI._installHost(this);
+    var extraSpace = host && typeof host.AIHostedInstallValue == "function" ? host.AIHostedInstallValue(this) : 0;
+    if (runner.grip.length - 1 + 2 > MaxHandSize(runner) + extraSpace) return 0;
+    return runner.AI._runAfterInstall(this, host, corp.archives) ? 2 : 0;
   },
 };
 
@@ -748,6 +878,7 @@ cardSet[36008] = {
       this.modifiedIce = ice;
       this.addedSubroutine = {
         text: "Do 1 net damage. The Runner draws 1 card.",
+        AIEncounterEffects: ["netDamage", "drawCard"],
         Resolve: function () {
           Damage(
             "net",
@@ -775,36 +906,54 @@ cardSet[36008] = {
     automatic: true,
     availableWhenInactive: true,
   },
-  AIModifyIceAI: function (iceAI, startIceIdx) {
-    // Once used, the actual added row still exists until this encounter ends.
-    // Default ICE models already describe every actual row; printed models do not.
+  AIRunOrderedDraw: true,
+  AIModifyIceAI: function (iceAI, startIceIdx, rc) {
+    // The live row is already inserted by the calculator; direct hook callers
+    // can supply a printed model which still needs that row.
     if (this.modifiedIce === iceAI.ice && this.addedSubroutine &&
         iceAI.ice.subroutines.includes(this.addedSubroutine)) {
-      if (typeof iceAI.ice.AIImplementIce === "function")
-        iceAI.sr.unshift([["netDamage"]]);
-      else iceAI.sr[iceAI.ice.subroutines.indexOf(this.addedSubroutine)] = [["netDamage"]];
+      var index = iceAI.ice.subroutines.indexOf(this.addedSubroutine);
+      var effects = [this.addedSubroutine.AIEncounterEffects.slice()];
+      if (iceAI.sr.length < iceAI.ice.subroutines.length) iceAI.sr.splice(index, 0, effects);
+      else iceAI.sr[index] = effects;
       return iceAI;
     }
-    if (this.usedThisTurn) return iceAI;
+    if (this.usedThisTurn || (rc && rc._firstEncounterUsed)) return iceAI;
     var server = GetServer(iceAI.ice);
     if (!server) return iceAI;
+    // Exactly one predicted encounter. Unknown ICE is considered using the
+    // calculator's public generic threat; never inspect its identity or cost.
     for (var i = startIceIdx; i > -1; i--) {
-      if (server.ice[i] == iceAI.ice) {
-        // The run calculator has no draw token, so retain the immediately
-        // flatline-relevant net damage as the conservative route effect.
-        iceAI.sr.unshift([["netDamage"]]);
+      var candidate = server.ice[i];
+      if (rc && rc._ignoredIce.has(candidate)) continue;
+      if (rc && rc._securityPlanning) {
+        if (!rc._securityPlanning.eligibleIce.has(candidate)) continue;
+      } else if (!candidate.rezzed && PlayerCanLook(runner, candidate) &&
+          AvailableCredits(corp) < RezCost(candidate)) continue;
+      if (candidate == iceAI.ice) {
+        iceAI.sr.unshift([["netDamage", "drawCard"]]);
         iceAI.srActualOffset = (iceAI.srActualOffset || 0) + 1;
-        return iceAI;
       }
-      if (server.ice[i].rezzed) return iceAI;
+      break;
     }
     return iceAI;
   },
   AIInstallBeforeRun: function () {
+    if (!this.AIWorthKeeping() || this.usedThisTurn) return 0;
     return 2;
   },
   AIWorthKeeping: function () {
-    return true;
+    if (runner.stack.length < 1) return false;
+    // This mandatory damage/cycle is useful as a free Companion completing
+    // a hand-space pair. Otherwise retain the card as damage protection in
+    // Grip instead of paying a click merely to replace it at an encounter.
+    if (typeof PublicNetDamagePrevention == "function" && PublicNetDamagePrevention() > 0) return true;
+    return InstalledCards(runner).some(function (host) {
+      return typeof host.AIHostedInstallValue == "function" && host.AIHostedInstallValue(this) > 0;
+    }, this);
+  },
+  AIWastefulToInstall: function () {
+    return !this.AIWorthKeeping();
   },
 };
 
@@ -3613,10 +3762,8 @@ cardSet[36042] = {
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    var effects = [];
-    for (var i = 0; i < runner.tags; i++) effects.push("netDamage");
-    for (var j = 0; j < runner.tags; j++) effects.push("tag");
-    result.sr = [[effects], [["tag"]]];
+    // Both quantities use the tag count when this subroutine begins.
+    result.sr = [[[{perTag: ["netDamage"]}, {perTag: ["tag"]}]], [["tag"]]];
     return result;
   },
 };
