@@ -32,8 +32,8 @@ is recorded in the done tables and the historical merge plan.
 | — | [F11](../backlog/done/F11-paired-batch-metric-guards.md) | done | Paired pooled guards and improvement checks delivered |
 | — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Shared collector and identity evidence delivered; L8.2 records fresh usable controls after its passive-label correction |
 | 3 | [L8.2](../backlog/code-review/feature-layer-8-2-remote-deception-profiles.md) | not adopted | Full gate failed; policy removed. Retain observer/collector repairs and recorded failure evidence |
-| 4 | [I2](../backlog/I2-ice-selection-by-marginal-security.md) | in-progress | Phase A (observation-only M1/M2/M4) done; phase B (marginal ICE allocation behind `iceMarginalSecurity`) next in the same ticket |
-| 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
+| 4 | [I2](../backlog/I2-ice-selection-by-marginal-security.md) | in-progress | Phase B behind `iceMarginalSecurity` (off); gate run 1 failed (central theft, bluff-guard width); fix 3 ungated; gate run 2 next — see the ticket's Hand-off |
+| 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | After I2 adoption, measure the residual tell once: park if small (owner decision 2026-10-16), else attribute, repair and gate |
 | 6 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
 F11 and F12 are done. L8.2 was not adopted (full gate failed; policy removed),
@@ -244,6 +244,12 @@ I9 comes last.
 - **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12
 - **Ticket:** [I2-ice-selection-by-marginal-security.md](../backlog/I2-ice-selection-by-marginal-security.md)
 - **Goal:** Publish graded breach measurements (margin, breach hazard, approach-time upgrades), then choose the `(ICE, server)` pair that most reduces expected points stolen.
+
+### I2.1 Empty-Archives reward valuation
+- **Status:** proposed
+- **Depends on:** I2
+- **Spec:** [I2.1-empty-archives-reward-valuation.md](specs/I2.1-empty-archives-reward-valuation.md)
+- **Goal:** Value public non-agenda rewards from successful empty-Archives runs as a bounded I2 score component, so Archives is protected only when those rewards outweigh the ICE.
 
 ### I3 Remote role and root suitability
 - **Status:** proposed

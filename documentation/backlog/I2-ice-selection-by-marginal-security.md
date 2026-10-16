@@ -1,13 +1,118 @@
 # I2 ICE selection by marginal security
-**Outcome:** in progress — phase A done; phase B next in this ticket (owner decision 2026-10-16)
+**Outcome:** in progress — phase B gate run 1 failed; fix 3 implemented, ungated; gate run 2 next (see Hand-off)
 
 **Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../corp-ai/deception-gates.md)
 **Verified against code:** 15d485d (2026-10-16)
 
+## Hand-off (2026-10-16): start here
+
+**Where I2 is.** Phase A done. Phase B implemented behind
+`iceMarginalSecurity` (default off), option-off identity proven (before fix
+3, which changes only option-on code). `node tests/run-all-tests.js` passes
+after fix 3 (98 files, 2026-10-16). Gate run 1 (seeds 1–400) **failed** on two rows
+(Resolution). Diagnosis found the cause; the owner approved fix 3 and it is
+implemented but **not gated**. All of this is uncommitted on branch
+`backlog/I2-ice-selection-by-marginal-security-2` (files below).
+
+**What gate run 1 showed.** Strong on the item's purpose: `pointsStolen`
+−0.120 [−0.230, −0.009] (improve row passed), `winRate` +0.034,
+`pointsScored` +0.306, ICE-count tell down (`allCountCorrelation` 0.242 →
+0.147, `posturedCountCorrelation` 0.203 → 0.055). Failed rows:
+`centralStolen.points` +0.109 [−0.005, +0.224] (tolerance 0.2) and
+`bluffSingleVariableCorrelation.max` −0.0375 [−0.0918, +0.0350] (tolerance
+0.02; the estimate improves, but 400 seeds per pair cannot rule out +0.02).
+
+**Diagnosis** (diagnostic collector `iceInstallsByServer`, seeds 1–100, 700
+games per arm, not gate evidence). Option on, R&D and HQ got their first ICE
+later (turn 1.3 → 2.2 / 2.4; games where R&D never got ICE 4 → 34) while
+empty remotes got it earlier (4.5 → 2.8); R&D ICE strength and cost were
+unchanged. R&D theft 1.94 → 2.42, successful R&D runs 3.40 → 4.29. Cause:
+the pre-I3 designated empty remote scored HQ's best agenda (often 3 points)
+as if already installed, while H = 1 dropped centrals' repeat weight.
+
+**Fix 3 (owner-approved 2026-10-16, ungated).** (1)
+`CORP_AI_I2_HORIZON_RUNNER_TURNS = 2`: the next-turn hazard is held for both
+turns (no income drift, which is what failed the next-turn calibration
+check); `_marginalIceStolen()` gives HQ/R&D `stake × turns × h` and one-shot
+servers `stake × (1 − (1 − h)^turns)`. (2) The designated empty remote's
+stake counts one turn fewer when no click remains after the ICE to install
+the agenda this turn (`exposureTurns`). This replaces the owner's 2026-10-16
+`H = 1` decision. Test: "I2 gate run 2: centrals keep their repeat weight…"
+in `tests/corp-server-security.test.js`.
+
+**Fix 3 sample** (fresh seeds 401–500, 700 games per arm, not gate
+evidence): central theft 3.85 → 3.72 (paired −0.131 [−0.344, +0.074]), HQ
+theft 1.86 → 1.37, `pointsStolen` 5.91 → 5.82, win rate 0.351 → 0.384,
+`pointsScored` 3.90 → 4.24. **But R&D is still protected late:** R&D theft
+2.00 → 2.36, successful R&D runs 3.51 → 4.36, R&D first ICE turn 1.3 → 2.0,
+games with no R&D ICE 4 → 40. Central theft now falls only because HQ
+improves more than R&D worsens.
+
+**Next steps, in order.**
+1. *Optional, recommended (about 10 minutes):* find why R&D still loses
+   early. Replay a few games from the sample where R&D never got ICE with
+   `node scripts/ai-batch.js replay --pairs <id> --seeds <n> --corp-option
+   iceMarginalSecurity=true --diff` and read the turn-1/2 `installCandidates`
+   scores (R&D's `stake`, `hazardBefore`, `hazardAfter` against the empty
+   remote's). Likely suspects: R&D's `pointsExposed` (agenda density × one
+   access) is small early, and the `rd` table row may change little for one
+   layer. Any further fix needs owner approval and must stay general (no
+   per-server constant).
+2. Run `node tests/run-all-tests.js` again if anything changed after this hand-off.
+3. Gate run 2 on **fresh seeds**, the frozen gate otherwise unchanged:
+   `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --seeds 401-800 --collector centralStolen --collector corpInsolventTurns --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --collector evaluatorCallCount --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard centralStolen.points=0.2 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05 --better gameLength=lower`
+   (about 30 minutes; run it from a separate worktree with a copy of the
+   working tree so other work can continue, launched once in the
+   background). Do not reuse seeds 1–400 or 401–500 for the decision.
+4. **Owner decision before run 2:** the bluff guard failed on width at 400
+   seeds per pair. Either accept that risk again, or raise the sample for
+   run 2 (the ticket's original 1,000 per pair takes about 75 minutes). Do
+   not change its tolerance.
+5. If run 2 passes: set `iceMarginalSecurity: true` in
+   `CorpAI.DEFAULT_OPTIONS`, record the evidence and `**Gate:** passed`,
+   update `documentation/corp-ai/architecture.md`, move the ticket with
+   `node scripts/ticket.js move <ticket> code-review` and run
+   `node scripts/ticket.js check`. If it fails: follow "Failure disposition"
+   below (not adopted; keep phase A, the collectors, the identity proof).
+
+**After I2: the I2 → L8.9 → I3 → I4 path.**
+- **L8.9 (observable-defense parity)**, owner decision 2026-10-16: once I2 is
+  adopted, take one control measurement of the remaining tell (default
+  options, which then include I2; `--collector realizedIceByRootType`, full
+  pool). If the residual tell is small, park L8.9 with that evidence and go
+  straight to I3; if it is still large, do L8.9 first as its spec says. Its
+  place before I3 is a sequencing preference, not a dependency, and gate
+  run 1 already cut the tell by about 40% (all roots) and 70% (postured).
+- **I3 (remote role and root suitability)** depends on I2, F4, L8.4.
+  Re-ground its spec first (`.agents/skills/reground-spec/SKILL.md`). I3
+  replaces I2's pre-I3 rules in `_iceStake()` (the designated empty scoring
+  remote) and fix 3's `exposureTurns` delay with its persistent scoring-remote
+  role and the agendas expected there.
+- **I4 (agenda installation and scoring commitment)** depends on I3.
+- **I2.1 (empty-Archives reward valuation)** is `proposed`, after I2; I2 keeps
+  the empty-Archives exclusion.
+- Any adopted I2 changes where agendas sit, so M2 needs recalibrating (I9).
+
+**Uncommitted files.** `ai_corp.js`, `scripts/ai-batch/headless.js`
+(`iceInstall`, `iceRez` events; `iceInstalled` from a between-step board scan,
+which replaced the Install wrapper the diagnostic samples above used, because
+that wrapper broke `tests/central-consequence-gate-setup.test.js`), new collectors
+`scripts/ai-batch/collectors/strandedUnrezzedIceCost.js` and
+`iceInstallsByServer.js`, `tests/corp-server-security.test.js`,
+`tests/ai-batch-install-outcomes.test.js`, new fixture
+`tests/fixtures/corp-decisions/i2-baker-backdoor-marginal-security.txt`,
+`documentation/ai-batch-harness.md`, `documentation/corp-ai/architecture.md`,
+`documentation/corp-ai/roadmap.md`,
+`documentation/corp-ai/specs/install-decisions-design.md`, new
+`documentation/corp-ai/specs/I2.1-empty-archives-reward-valuation.md` and
+`documentation/corp-ai/measurements/I2-343b2be-posture-coverage.json`, and
+this ticket. Gate and sample reports are local only (`.ai-batch-cache/`,
+session scratch); the numbers above are the record.
+
 ## Resolution
 
-Implemented from `15d485d` (phase A only; phase B not started).
+Implemented from `15d485d` (phase A). Phase B implemented from `343b2be`.
 
 **Owner decisions (2026-10-16), after phase A.**
 - The breach-hazard table is accepted as calibrated (option 1 of three
@@ -125,8 +230,262 @@ prevention (out of scope). None missed.
 
 **Gate:** pending F4 — `iceMarginalSecurity` (phase B; not implemented, so no option exists yet).
 
-**Open.** Phase B, its gate setup and the empty-Archives disposition are
-untouched. Architecture: [server security evaluation](../corp-ai/architecture.md#server-security-evaluation).
+**Phase B first step: posture coverage (2026-10-16, before any phase B code
+or result).** PR #55's branch is merged here (`343b2be`). Control-only pool
+batch at `343b2be`, default options, seeds 1–200, `--collector
+realizedIceByRootType`: 1,400 games, 0 failures; known posture labels 99.66%
+(33 unknown of 9,672 unrevealed observations); postured agenda/trap 360/312
+commitments in 309/268 games; `validateBatch` passes for
+`posturedCountCorrelation` and `allCountCorrelation`
+([evidence](../corp-ai/measurements/I2-343b2be-posture-coverage.json)). The pool
+meets F12's readiness rule, so the
+`realizedIceByRootType.posturedCountCorrelation=0.05` guard is on the pool
+command, and the posture command, its `i2-posture` boards and their criterion
+are dropped (`## Acceptance gate`). This also removes the replay
+snapshot-saving work the boards needed.
+
+**Phase B: what changed** (option `iceMarginalSecurity`, default off; plan
+approved 2026-10-16).
+- `CorpAI.DEFAULT_OPTIONS.iceMarginalSecurity = false`.
+- With the option on, `_rankedInstallOptionsCore()` builds both ICE groups
+  (protection, new-server fallback) from `_marginalIceInstallOptions()`
+  instead of `_serverToProtect(…, targetIsEligible)`: every
+  `_rankedServersToProtect()` row that is not `_nothingWorthProtecting()` and
+  whose `_iceLayerPolicy()` allows a layer, with that server's legacy
+  `_iceInstallOptions()` list (now optionally tagged with its legacy group).
+  Sort: legacy group, then `_marginalIceScore()`, then walk order. Option off,
+  both paths are the legacy code.
+- `_iceStake()`, `_isAgendaOrTrap()`, `_meanAgendaPoints()`,
+  `_highestAgendaPointsInHQ()`, `_marginalIceBefore()`,
+  `_detachedRemoteEvaluation()`, `_marginalHazard()` (H = 1),
+  `_marginalIceScore()`; `scoreBreakdown` fields `stake`, `kind`,
+  `hazardBefore`, `hazardAfter`, `stolenBefore`, `stolenAfter`,
+  `rawRiskReduction`, `riskReduction`, `installCost`, `plannedRezCost`,
+  `score`. I1 records for these options are band 1 and carry the breakdown;
+  the snapshot trace adds `score`.
+- Option-independent refactors (decision-identical): `_hazardForMargin()`
+  split out of `_breachHazard()`; the evaluator records `plannedRezIce`;
+  `_criticalBreachDefenseAction()` evaluates candidates through
+  `_hypotheticalServerAfterInstall()`.
+- Harness: observation-only `iceInstall` / `iceRez` events
+  (`scripts/ai-batch/headless.js`) and the `strandedUnrezzedIceCost`
+  collector (`credits`), documented in `documentation/ai-batch-harness.md`.
+- Empty-Archives disposition: exclusion kept; follow-up
+  [I2.1](../corp-ai/specs/I2.1-empty-archives-reward-valuation.md) filed as
+  `proposed` with an F4 gate; the design note's gap row now names it.
+
+**Phase B: departures from the plan / spec.**
+- Plan item 5: the critical interrupt shares the hypothetical builder but not
+  I2's memoised evaluation. It measures `_centralBreachLossRisk()`, not M1/M2,
+  so reusing I2's result would change its oracle; scenario 20 asserts the
+  shared builder and an unchanged pick instead.
+- Scenario 8: the honest model lets the Runner find a missing breaker while
+  the Grip holds cards, so the lockout board has an empty Grip.
+- Scenario 16's band-2 part asserts that centrals (the interrupt's only
+  targets) are never posture-capped (validation 2).
+- Scenario 17: no declared-reserve term exists (validation 3), so there is no
+  reserve difference to log.
+- Scenario 18: new green fixture
+  `tests/fixtures/corp-decisions/i2-baker-backdoor-marginal-security.txt`
+  (the Baker board with the option on, all cache modes).
+- Test isolation: earlier cases in `tests/corp-server-security.test.js` leave
+  instance stubs over prototype methods (`_evaluateServerSecurity` among
+  them); the phase B board helper removes them before each case.
+
+**Phase B: tests.** `tests/corp-server-security.test.js`: option default,
+scenarios 7–20 and "ordinary ICE generation does not call the filtered
+`_serverToProtect`" (176 → 192 cases). `tests/ai-batch-install-outcomes.test.js`:
+scripted `strandedUnrezzedIceCost` case and real-engine `iceInstall`/`iceRez`
+wrapper checks (paid install, free rez). Scenario 21: decision snapshots and
+corp-decision fixtures pass unchanged with the option off.
+
+**Phase B: cards.** No card hook is added or changed; I2 reads existing
+hooks (`AIWorthwhileIce`, and M4's `AIApproachDefense` through the
+evaluator). No card in the playable sets needs an update.
+
+**Phase B: verification before the gate.** `node tests/run-all-tests.js`:
+98 test files passed. Option-off identity: the full pool (seeds 1–200,
+`--collector realizedIceByRootType`) at the phase B working tree matches the
+`343b2be` coverage report on `winner`, `turns`, `logHash` and `decisionHash`
+for 1,400 of 1,400 games, 0 failures. Quick gate (`--quick`, 350 games, not
+evidence): `PASS changed option effect`. Indicative only: `pointsStolen`
++0.137 [−0.186, +0.466], `centralStolen.points` +0.354 [+0.011, +0.700].
+
+**Gate command:** `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --games 400 --collector centralStolen --collector corpInsolventTurns --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --collector evaluatorCallCount --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard centralStolen.points=0.2 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05 --better gameLength=lower`
+
+**Gate run 1 (2026-10-16): failed** — `iceMarginalSecurity` defaults to off.
+Command above, run in a separate worktree of the phase B tree over `343b2be`.
+Committed pool (7 pairs: pd-tao, btl-kit, neh-zahya, pe-steve, gateway,
+zwicky-magdalene, leo-topan), paired seeds 1–400, 2,800 games per arm; 1
+baseline game failed, so 2,799 pairs; 2,706 changed by the option. Baseline
+→ candidate, difference [bootstrap 95%]:
+
+| Check | Metric | Baseline | Candidate | Difference | Result |
+|---|---|---|---|---|---|
+| Improve | `pointsStolen` | 5.980 | 5.860 | −0.120 [−0.230, −0.009] | PASS |
+| Guard 0.03 | `winRate` | 0.357 | 0.392 | +0.034 [+0.011, +0.057] | PASS |
+| Guard 0.25 | `pointsScored` | 3.898 | 4.204 | +0.306 [+0.180, +0.434] | PASS |
+| Guard 0.2 | `centralStolen.points` | 3.755 | 3.864 | +0.109 [−0.005, +0.224] | **FAIL** |
+| Guard 1.5 | `gameLength` | 15.362 | 14.722 | −0.640 [−0.888, −0.392] | PASS |
+| Guard 0.5 | `corpInsolventTurns` | 1.474 | 1.619 | +0.144 [+0.054, +0.235] | PASS |
+| Guard 1 | `strandedUnrezzedIceCost.credits` | 1.837 | 1.970 | +0.133 [+0.021, +0.245] | PASS |
+| Guard 0.02 | `bluffSingleVariableCorrelation.max` | 0.2469 | 0.2094 | −0.0375 [−0.0918, +0.0350] | **FAIL** |
+| Guard 0.05 | `realizedIceByRootType.allCountCorrelation` | 0.2419 | 0.1474 | −0.0945 [−0.1337, −0.0555] | PASS |
+| Guard 0.05 | `realizedIceByRootType.posturedCountCorrelation` | 0.2033 | 0.0553 | −0.1480 [−0.2158, −0.0870] | PASS |
+
+Diagnostics: `allCountDistance` 0.221 → 0.148, `posturedCountDistance`
+0.213 → 0.185. Output ends `Gate: failed`.
+
+Reading: the central-theft guard fails on a real direction (central theft
+up, remote theft down by more), the pattern this ticket's design was meant
+to avoid. The bluff guard fails on width: its point estimate improves, and
+at 400 seeds per pair its interval is wider than the 0.02 tolerance allows.
+**Owner decision (2026-10-16):** do not close as not adopted yet; diagnose
+where ICE moved between servers before deciding a fix. Any rerun uses fresh
+seeds (not 1–400).
+
+**Open.** See Hand-off. Architecture: [server security evaluation](../corp-ai/architecture.md#server-security-evaluation),
+[install planning today](../corp-ai/architecture.md#install-planning-today).
+
+## Implementation plan (phase B)
+
+Proposed at `343b2be`, 2026-10-16. **Approved 2026-10-16**, amended by the
+owner: gate at 400 seeds per pair (2,800 games per arm) and no separate
+control-calibration cohorts (see `## Acceptance gate`).
+
+- **Classification:** strategic preference (which legal ICE/server pair is
+  better) → F4 gated behind `iceMarginalSecurity`, default off. Ungated
+  parts: none that change a choice; the option-independent refactors below
+  must be decision-identical.
+- **Validation** (where the design does not match code at `343b2be`):
+  1. *Bands.* I1 assigns only band 0 (compatibility) and band 3 (win); the
+     records are telemetry, and `_rankedInstallOptions()` still returns legacy
+     list order to `_bestInstallOption()`. Phase B therefore has to reorder
+     the real option list, not only records. Per the design note's band rule,
+     protection ICE becomes the first class migrated to band 1 and is ranked
+     only within its class; class/group positions in
+     `_rankedInstallOptionsCore()` stay as they are. "Band 2" is the existing
+     `_criticalBreachDefenseAction()` interrupt, not a record band.
+  2. *Posture cap already exists.* `_NoMoreProtectionForThisServer()` drops a
+     postured remote from `_rankedServersToProtect()` once `ice.length >=
+     targetIce` (equivalent to the spec's `ice.length + 1 <= targetIce`), from
+     the authoritative `_deceptionPostureActive()` read. No new cap code;
+     scenario 16 asserts it with the option on. The band-2 override is
+     unreachable for remotes today: the critical interrupt only covers HQ and
+     R&D, which carry no posture. Scenario 16's band-2 part asserts that the
+     cap never touches the interrupt; a remote band-2 path is I4's, not I2's.
+  3. *`reserveCost` and extra-click `opportunityCost` do not exist* (only
+     `_reserveCreditsForCard()` in a reserve list). An ICE install always
+     costs exactly one click, so `opportunityCost` is 0 by construction.
+     Proposal: omit both terms rather than invent them; cross-action costs
+     are I7.1's. Score = `riskReduction − installCost − plannedRezCost`.
+  4. *Rez plan not exposed.* The evaluator picks `bestCards` but returns only
+     totals and reasons. Add one observation-only result field
+     (`rezPlanIce`, the planned unrezzed ICE); compatibility and honest fields
+     unchanged.
+  5. *Shared hypothetical.* `_hypotheticalServerAfterInstall()` has no
+     production caller; `_criticalBreachDefenseAction()` runs its own inline
+     `_withHypothetical()` with the same charge (`ice.length`, outermost
+     layer). Step 7 becomes an option-independent refactor: the critical path
+     calls the shared helper (decision-identical, checked below); with the
+     option on it reuses I2's memoised after-evaluation for the same
+     `(card, server)` in the same decision. Thresholds unchanged.
+  6. *`AIWorthwhileIce` rejections* sit in the low-priority
+     (`_notAffordableIce`) group and are still offered when `!priorityOnly`.
+     To keep admission and "may reject but not order" honest, sort key is
+     `(legacy group: affordable before low-priority, score,
+     compatibilityOrder)`. Departure from step 6's "score, then
+     compatibilityOrder": without it a card-rejected ICE could outrank every
+     worthwhile one on an evaluator that does not know why it was rejected.
+  7. *`_protectionInstallsThisTurn`.* Legacy uses it as a soft preference
+     (first insecure server not protected this turn). With the option on that
+     preference is replaced by the marginal score: a second same-turn layer
+     is re-evaluated on the live server after the first install, so its value
+     falls naturally. Recording (`_recordProtectionInstall()`, debt aging)
+     stays authoritative and unchanged. Reading step 8 this way is a
+     judgement call; flagging it.
+  8. *Row switch can make raw reduction negative.* `_breachHazard()` picks
+     `single`/`multi` from `server.ice.length`, and some `multi` cells sit
+     above `single` ones (e.g. `rd 5..9` 0.260 vs 0.174), so a second layer
+     that does not change the bucket can raise predicted hazard. Clamp
+     `riskReduction` to its stated bound `[0, POINT_VALUE × pointsToWin]` and
+     log the unclamped value in `scoreBreakdown`.
+  9. *H = 1* collapses step 4's two formulas to `P × h_1` for every server.
+  10. *Mean agenda points.* No deck-list helper exists. Add
+      `_meanAgendaPoints()` over the Corp's own agenda cards in all zones
+      (the Corp's own deck list, not hidden Runner state), memoised per game.
+  11. *Baker interim.* Roadmap still lists L3.5.2's Baker play-test as
+      failing ("Interim until I1–I2"). Scenario 18 covers the committed
+      fixture; the play-test is not claimed fixed unless its board also
+      passes with the option on.
+- **Approach:**
+  1. `CorpAI.DEFAULT_OPTIONS.iceMarginalSecurity = false` (the batch CLI
+     validates names against this object).
+  2. New `_marginalIceCandidates(cards, priorityOnly, economyCheck)`:
+     servers = `_rankedServersToProtect()` entries (including the `null` new
+     remote when legacy admits it) not `_nothingWorthProtecting()` and with
+     `_iceLayerPolicy().allowed`; ICE = exactly the legacy
+     `_iceInstallOptions(server, …)` list for that server. Per decision,
+     memoise the before-evaluation per server and the after-evaluation per
+     pair via `_hypotheticalServerAfterInstall()`.
+  3. `_iceStake(server)`: step 3 rules. Common agenda/trap stake
+     `_meanAgendaPoints()` (also active bait/bluff posture); pre-I3 designated
+     scoring remote gets HQ's highest agenda points; centrals use
+     `_breachConsequence().pointsExposed`; all capped at points to win. Kind
+     passed explicitly: stake > 0 → `agendaRemote`, else `otherRemote`.
+     Stake feeds only this score (never `_protectionScore()`,
+     `_isAScoringServer()`, `_scoringWindow()`).
+  4. `_marginalIceScore(pair)`: `stolen = P × h_1`; unknown rules from step 5
+     (needs a pure `margin → hazard` lookup split out of `_breachHazard()`,
+     identity-preserving, so `upperBound` can be used without coercing
+     `null`). `scoreBreakdown`: `stake`, `hazardBefore`, `hazardAfter`,
+     `rawRiskReduction`, `riskReduction`, `installCost`, `plannedRezCost`,
+     `score`; option reason string names server, margins and score.
+  5. In `_rankedInstallOptionsCore()`, with the option on: the protection
+     group (5884) offers existing-server pairs in I2 order; the new-server
+     fallback (6042) offers `null`-server pairs in I2 order, or, when an
+     empty protected remote exists, the same I2 list. Neither calls
+     `_serverToProtect(…, targetIsEligible)`; option off, both paths are
+     byte-for-byte legacy. `_serverToProtect()` stays for its other callers
+     (upgrades, card hooks, debug).
+  6. `_installCandidateRecords()`: option on, protection-ICE records carry
+     `band: 1` and the I2 `scoreBreakdown`.
+  7. Collector `strandedUnrezzedIceCost` (`credits`, lower): sum of install
+     costs of ICE instances never rezzed between install and game end or
+     leaving play, from the existing `install`/`rez`/`leave` events (as
+     `installOutcomes` uses).
+  8. Empty-Archives disposition: keep the exclusion; file a `proposed`
+     roadmap follow-up with a spec and gate for non-agenda reward valuation,
+     and update the design note's gap reference. Not implemented in I2.
+  - *Rejected:* scoring inside `_serverToProtect()` (it returns one server;
+    I2 compares pairs across servers); a new posture cap (duplicates
+    `_NoMoreProtectionForThisServer()`); dropping legacy group order (see 6).
+- **Tests:** new `tests/I2-ice-marginal-security.test.js`, option on,
+  scenarios 7–20, each asserting the choice and the logged reason /
+  `scoreBreakdown` ordering (not numbers); scenario 21 is the existing
+  decision-snapshot and corp-decision fixture suites, unchanged. Unit tests
+  for `_iceStake()`, the hazard lookup split (identical to `_breachHazard()`
+  on all table cells), the clamp, and `null` handling. Collector test with
+  scripted install/rez/leave events. Option default-off check beside the
+  existing defaults test.
+- **Risk:** option on changes ordinary protection server and ICE choice
+  everywhere, which the gate measures. Option off: the refactors (critical
+  path via shared helper, hazard lookup split, `rezPlanIce` field) must be
+  decision-identical; check with the snapshot/fixture suites and a 1,400-game
+  option-off pool run compared on `winner`, `turns`, `logHash`,
+  `decisionHash` with the coverage report already recorded at `343b2be`.
+  Cost: one before-evaluation per allowed server plus one hypothetical per
+  pair per decision; watch `evaluatorCallCount` in the quick run.
+- **Gate setup, then gate:** after the full suite passes: (a) `--quick`
+  gate run, record its first line; (b) full gate (400 seeds per pair, 5,600
+  games, about 25 minutes), run in a separate worktree so other work can
+  continue, launched once in the background with completion notification. If it cannot finish in the session, hand off
+  `**Gate:** pending F4` with the ready command.
+- **Docs:** `documentation/corp-ai/architecture.md` install-planning section
+  (option-on behaviour); `documentation/ai-batch-harness.md` for the new
+  collector; `documentation/ai.md` only if a hook contract changes (none
+  planned: `AIWorthwhileIce` keeps its contract); roadmap follow-up for
+  empty-Archives; design-note gap reference.
 
 ## Implementation plan (phase A, done)
 
@@ -553,19 +912,16 @@ Corp could not know.
 
 ## Acceptance gate
 F4 gate. Option `iceMarginalSecurity` (Corp AI), off in the baseline and on
-in the candidate. Committed deck pool, paired seeds, 1,000 games per deck pair
+in the candidate. Committed deck pool, paired seeds 1–400, 400 games per deck pair
 (see "Sample size" below), bootstrap 95% intervals.
 Collectors: `centralStolen`, `corpInsolventTurns`, `strandedUnrezzedIceCost`
 (adds `strandedUnrezzedIceCost.credits`: credits spent installing ICE never
 rezzed before game end, defined in this ticket),
 `bluffSingleVariableCorrelation`, `realizedIceByRootType`, `installOutcomes`,
 `evaluatorCallCount`.
-Starts: pool command none; posture command `--start-tag i2-posture` (boards
-this ticket builds with `scripts/start-board.js`). No human logs exist for
-these; build them from benchmark game logs (`node scripts/ai-batch.js replay`
-for a pool seed where a posture is active, then `start-board.js --snapshot`).
-If replay cannot save a log with decision snapshots, adding that output is
-part of this ticket.
+Starts: none. (The `i2-posture` start-board command was dropped on
+2026-10-16, before any phase B code or gate result: the pool now meets F12's
+readiness rule; see Resolution.)
 
 Pool command:
 
@@ -580,20 +936,11 @@ Pool command:
 | Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
 | Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 |
 | Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
-
-Gate command: `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --games 1000 --collector centralStolen --collector corpInsolventTurns --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --collector evaluatorCallCount --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard centralStolen.points=0.2 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --better gameLength=lower`
-
-Posture command:
-
-| Check | Metric | Better | Threshold |
-|---|---|---|---|
-| Guard | `winRate` | higher | regression at most 0.03 |
-| Guard | `pointsStolen` | lower | regression at most 0.25 |
 | Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
 
-Gate command: `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --start-tag i2-posture --budget 2800 --collector realizedIceByRootType --guard winRate=0.03 --guard pointsStolen=0.25 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+Gate command: `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --games 400 --collector centralStolen --collector corpInsolventTurns --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --collector evaluatorCallCount --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard centralStolen.points=0.2 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05 --better gameLength=lower`
 
-Both commands must pass. Both arms keep the five legacy regression options off
+The command must pass. Both arms keep the five legacy regression options off
 and every other option at its default (`postureEpochs` and
 `matchLocalPostureFeedback` are `true`); record effective options in both
 arms. `evaluatorCallCount.computationsPerMainDecision` and
@@ -601,14 +948,20 @@ arms. `evaluatorCallCount.computationsPerMainDecision` and
 
 **Expected effect.** I2 only reallocates ICE among servers the legacy policy
 already admits, so it should not move `winRate` measurably; I4 is the
-win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
-1,400-pair interval half-width was 0.13 points; at 7,000 pairs it is about
-0.06, so a true −0.1 passes with roughly 90% probability.
+win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game (an
+estimate, not a measurement). L9.0.1's 1,400-pair interval half-width was
+0.13 points; at 2,800 pairs it is about 0.09, so a true −0.14 or larger
+passes with roughly 80% probability, and a true −0.1 more often fails to be
+shown than not. A gain too small to show at this size is recorded as not
+adopted, not as a regression.
 
 **Changes from the previous gate, and why.**
 
-- **Sample size 200 → 1,000 per pair.** Needed for the count guard (below) and
-  gives the improvement row the power above. About 40 minutes per arm.
+- **Sample size 200 → 400 per pair** (owner decision 2026-10-16, replacing
+  this ticket's earlier 1,000: 14,000 gate games plus 14,000 calibration
+  games was too long). About 12 minutes per arm. Guards still need their
+  paired interval to rule out a regression beyond tolerance, so a noisier
+  sample can fail a guard but cannot pass one it should not.
 - **`realizedIceByRootType.allCountCorrelation` tolerance 0.02 → 0.05.** F12's
   independent control calibration at 1,400 games per arm put
   control-minus-control at +0.033 [−0.022, +0.091]. Even scaled to 7,000
@@ -617,15 +970,20 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
   baseline tell is the largest residual increase this item accepts (owner
   accepted 2026-10-16; holding 0.02 would need about 4,000 seeds per pair).
   The common agenda/trap stake (step 3) should keep this guard from failing.
-- **Postured-count guard moved to a start-board command.** On the pool it
-  fails closed: F12 measured known posture labels at 85.8%/85.4%, below its
-  frozen 90% readiness rule. That is a coverage limit, not noise, and more pool
-  games do not fix it. The guard is kept on real-game-derived boards with
-  active agenda and trap postures, tolerance 0.05 for the same reason as above.
+- **Postured-count guard on the pool, tolerance 0.05.** F12 measured known
+  posture labels at 85.8%/85.4%, below its frozen 90% readiness rule, so an
+  earlier draft moved this guard to `i2-posture` start boards. PR #55's
+  `unrolled` observer correction fixed the coverage: a control-only pool run at
+  `343b2be` gives 99.66% known labels and 360/312 agenda/trap postured
+  commitments in 309/268 games
+  ([evidence](../corp-ai/measurements/I2-343b2be-posture-coverage.json)), so
+  per the owner decision the guard is back on the pool and the posture command
+  and its boards are dropped (2026-10-16, before any phase B result).
+  Tolerance 0.05 for the same reason as above.
 - **`centralStolen.points` guard added** (standard 0.2 points tolerance): the
   L7.1 and L9.0.1 failures both bought remote safety with central theft.
 - **`pointsStolen` guard dropped from the pool command**: the improve row on the
-  same metric is stricter. It stays as a guard on the posture command.
+  same metric is stricter.
 - **Latency check replaced** by the diagnostic `evaluatorCallCount`
   (ai-planning: latency is not a standard guard because `gate` may reuse a
   baseline timed on another machine).
@@ -635,16 +993,12 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
 
 **Before the first gate run (freeze, then never change).**
 
-1. Control-only calibration: two disjoint control cohorts (seeds 2001–3000
-   and 3001–4000, default options) with independent deck-pair-stratified
-   bootstrap. For `allCountCorrelation` and `bluffSingleVariableCorrelation.max`,
-   the control-minus-control interval half-width must be at most half the row's
-   tolerance; if not, increase `--games` for both, never the tolerance. Commit
-   the evidence to `documentation/corp-ai/measurements/`.
-2. Posture boards: a control-only run on `i2-posture` must meet F12's
-   readiness rule (≥90% known posture labels, ≥10 commitments and ≥5 games per
-   class). If no real-log boards can meet it, I2 cannot gate; record that here
-   and ask the owner. Do not invent boards to reach coverage.
+1. Control-only calibration cohorts: dropped (owner decision 2026-10-16).
+   The paired guard intervals already carry the noise; the cohorts only
+   checked the tolerances and would not change the verdict.
+2. Posture coverage: met on seeds 1–200 at `343b2be` (Resolution); the
+   collector's readiness check fails closed in the gate if a 400-seed arm
+   misses it. Do not invent boards to reach coverage.
 3. Record the L8.2/I2 ordering decision per the
    [deception-gates control refresh guidance](../corp-ai/deception-gates.md). Any
    decision-changing merge (L8.2, L9.0.2) during evaluation invalidates the
@@ -693,16 +1047,16 @@ Missing samples are incomplete setup, not a pass.
 
 **Phase B**
 
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`.
-- [ ] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
-- [ ] The `i2-posture` start boards are built from benchmark game logs with `scripts/start-board.js`, each `NOTE` naming its source, and meet F12's readiness rule on a control-only run.
-- [ ] The pre-gate calibration evidence and the L8.2/I2 ordering decision are recorded before the first gate run.
-- [ ] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
+- [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [x] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [x] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`.
+- [x] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
+- [x] Posture-label coverage is checked on the pool before any phase B result: it meets F12's readiness rule, so the posture guard is on the pool command and the `i2-posture` boards are dropped (owner decision 2026-10-16; [evidence](../corp-ai/measurements/I2-343b2be-posture-coverage.json)).
+- [x] The posture-coverage evidence and the L8.2/I2 ordering decision are recorded before the first gate run (calibration cohorts dropped by the owner).
+- [x] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
 - [ ] Applicable gate evidence is recorded in the Resolution. For F4: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; an improvement interval's lower bound must be above zero. Only then is the option switched on by default.
-- [ ] The empty-Archives reward-valuation gap is disposed of as described above.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [x] The empty-Archives reward-valuation gap is disposed of as described above.
+- [x] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
+- [x] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.

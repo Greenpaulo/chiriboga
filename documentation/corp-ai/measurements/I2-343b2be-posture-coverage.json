@@ -1,0 +1,43 @@
+{
+  "purpose": "I2 phase B first step (owner decision 2026-10-16): control-only pool check of F12's frozen readiness rule for realizedIceByRootType.posturedCountCorrelation, recorded before any phase B code or gate result.",
+  "commit": "343b2be",
+  "dirty": false,
+  "command": "node scripts/ai-batch.js --collector realizedIceByRootType --out .ai-batch-cache/i2-posture-coverage-343b2be.json",
+  "reportSha256": "eccfdd2ba231871b10e28bc564caf8fa6d28eea5b5f1c146db45a29a57edc014",
+  "codeHash": "461d20524fabc7b0",
+  "poolHash": "0ee4865c35412106",
+  "pairs": ["pd-tao", "btl-kit", "neh-zahya", "pe-steve", "gateway", "zwicky-magdalene", "leo-topan"],
+  "seeds": "1-200",
+  "starts": [],
+  "corpOptions": {
+    "secureScoringServerGate": false,
+    "serverAtRiskInstallOverride": false,
+    "committedAgendaReserveBypass": false,
+    "emptyArchivesRunPressure": false,
+    "valuelessServerDebtReset": false,
+    "postureEpochs": true,
+    "matchLocalPostureFeedback": true
+  },
+  "games": 1400,
+  "failures": 0,
+  "readinessRule": {"knownPostureFraction": 0.9, "commitmentsPerClass": 10, "gamesPerClass": 5},
+  "coverage": {
+    "observations": 10308,
+    "headline": 9672,
+    "knownPostureFraction": 0.9965880893300249,
+    "unknownPosture": 33,
+    "gamesWithObservations": 1329
+  },
+  "postured": {
+    "agenda": {"observations": 428, "commitments": 360, "games": 309},
+    "trap": {"observations": 518, "commitments": 312, "games": 268},
+    "countCorrelation": 0.2076383535394023
+  },
+  "all": {
+    "agenda": {"observations": 6729, "commitments": 4051, "games": 1269},
+    "trap": {"observations": 2943, "commitments": 746, "games": 501},
+    "countCorrelation": 0.2292471511825517
+  },
+  "validateBatch(['posturedCountCorrelation','allCountCorrelation'])": true,
+  "result": "Pool meets F12's readiness rule. Per the owner decision, the posturedCountCorrelation guard moves onto the pool gate command and the i2-posture start boards and their criterion are dropped."
+}

@@ -212,13 +212,22 @@ function playGame(options) {
 
   let result = null, turns = 0, lastTurn = null;
   // Observed state, compared at every main-loop step and at the win.
-  const seen = {corpScored: 0, runnerScored: 0, stolenLocations: 0, run: null};
+  const seen = {corpScored: 0, runnerScored: 0, stolenLocations: 0, run: null, ice: new WeakSet()};
   const emitRun = () => emit('run', {server: seen.run.server, serverName: seen.run.serverName, success: seen.run.success});
   const serverKey = server => {
     if (!server) return 'remote';
     return SERVER_KEYS[server.serverName] || 'remote';
   };
+  // ICE seen on the board; newly seen ICE is a completed install. Start-board
+  // ICE is marked at game start without an event.
+  const scanIce = emitNew => {
+    const corp = run('corp');
+    for (const server of [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers))
+      for (const card of server.ice || [])
+        if (!seen.ice.has(card)) { seen.ice.add(card); if (emitNew) context.__iceInstalled(card, server); }
+  };
   const observe = () => {
+    if (options.observe) scanIce(true);
     const corpScore = run('corp.scoreArea');
     for (; seen.corpScored < corpScore.length; seen.corpScored++) {
       const card = corpScore[seen.corpScored];
@@ -337,6 +346,24 @@ function playGame(options) {
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
     id: roots ? roots.idOf(card) : undefined,
     hosted: (card.hostedCards || []).map(h => ({title: h.title, exempt: Boolean(h.AIHostedDoesNotPreventRez)}))});
+  // I2: Corp ICE install payments and completed ICE rezzes (paid or free:
+  // Rez() completes through Rez(card, true)), for strandedUnrezzedIceCost.
+  context.__iceInstall = (card, cost) => emit('iceInstall', {id: roots ? roots.idOf(card) : undefined, card: card.title, cost});
+  context.__iceRez = card => emit('iceRez', {id: roots ? roots.idOf(card) : undefined, card: card.title});
+  // I2 diagnostic: where a Corp ICE install landed, by server kind (harness
+  // truth for remote roots; never read by the AI). Found by scanIce() between
+  // steps, so the engine's Install() is not wrapped for it.
+  context.__iceInstalled = (card, server) => {
+    let kind = serverKey(server);
+    if (kind === 'remote') {
+      const root = (server && server.root) || [];
+      const trap = c => (c.subTypes || []).includes('Ambush') || typeof c.AIPunishesAccess === 'function';
+      kind = root.some(c => c.cardType === 'agenda') ? 'agendaRemote' : root.some(trap) ? 'trapRemote' :
+        root.length ? 'otherRemote' : 'emptyRemote';
+    }
+    emit('iceInstalled', {card: card.title, server: kind, iceCount: server && server.ice ? server.ice.length : 0,
+      turn: Math.ceil(turns / 2), rezCost: Number(card.rezCost) || 0, strength: Number(card.strength) || 0});
+  };
   if (options.telemetry) context.__decision = entry => {
     const counts = entry.side === 'corp' && context.__securityDecisionCounts;
     emit('decision', counts ? Object.assign({}, entry, {securityEvaluation: Object.assign({}, counts)}) : entry);
@@ -391,7 +418,13 @@ function playGame(options) {
       var __spendCredits = SpendCredits;
       SpendCredits = function(player, num, doing, card) {
         if (player === corp && doing === "rezzing" && card) __rez(card, num);
+        if (player === corp && doing === "installing" && card && card.cardType === "ice") __iceInstall(card, num);
         return __spendCredits.apply(this, arguments);
+      };
+      var __rezFn = Rez;
+      Rez = function(card, ignoreAllCosts) {
+        if (ignoreAllCosts && card && card.player === corp && card.cardType === "ice" && !card.rezzed) __iceRez(card);
+        return __rezFn.apply(this, arguments);
       };
       var __install = Install;
       Install = function(installingCard, destination) {
@@ -588,6 +621,7 @@ function playGame(options) {
   seen.runnerScored = run('runner.scoreArea.length');
   seen.stolenLocations = run('agendaStolenLocations.length');
   if (roots) roots.start(run('corp'));
+  if (options.observe) scanIce(false);
   defenseStarted = true;
   defenseSafe(() => defense.start(run('corp'), Math.ceil(turns / 2)));
   emit('gameStart', {fixtureId: fixture ? fixture.id : null, corpIdentity: run('corp.identityCard.title'),

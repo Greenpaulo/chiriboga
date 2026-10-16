@@ -2838,5 +2838,316 @@ test('I2 M2: breach hazard is non-decreasing in margin and turn 2 adds projected
     assert.strictEqual(ai._breachHazard({ice: []}, 2, {}, 'hq'), table.hq.single.unknown);
   } finally { ai._breachMargin = original; }
 });
+// I2 phase B (iceMarginalSecurity), scenarios 7-20: orderings and logged
+// scoreBreakdown fields, not numbers. The protection walk is stubbed to a
+// fixed row order (phase B reads its rows, not its scores) unless a scenario
+// needs the real walk.
+const i2Agenda = (points = 2) => ({player: corp, cardType: 'agenda', agendaPoints: points, title: 'Regression agenda'});
+const i2Trap = () => ({player: corp, cardType: 'asset', subTypes: ['Ambush'], title: 'Regression trap', rezCost: 0});
+const i2Ice = (title, subType, extra = {}) => Object.assign(
+  ice(['End the run.'], [[['endTheRun']]], {subTypes: [subType], strength: 3}),
+  {title, cardType: 'ice', rezzed: false, rezCost: 2}, extra);
+const i2Fracter = () => ({player: runner, title: 'Text fracter', strength: 3, subTypes: ['Icebreaker', 'Fracter'],
+  cardText: '1 credit: Break 1 barrier subroutine. 1 credit: +1 strength.'});
+const i2Remote = (name, root, iceCards = []) => ({serverName: name, root, ice: iceCards});
+function i2Board({hq = [], rnd = [], archives = [], remotes = [], scored = []} = {}) {
+  // Earlier cases leave instance stubs over prototype methods; phase B reads the real ones.
+  const proto = Object.getPrototypeOf(ai);
+  for (const key of Object.keys(ai))
+    if (typeof proto[key] == 'function' && !['_log', '_random'].includes(key)) delete ai[key];
+  context.NewServer = (name, isCentral) => Object.assign({isServer: true, root: [], ice: [], serverName: name}, isCentral ? {cards: []} : {});
+  Object.assign(corp, {HQ: {serverName: 'HQ', cards: hq, ice: [], root: []},
+    RnD: {serverName: 'R&D', cards: rnd, ice: [], root: []},
+    archives: {serverName: 'Archives', cards: archives, ice: [], root: []}, remoteServers: remotes});
+  corp.scoreArea = scored;
+  servers = [corp.HQ, corp.RnD, corp.archives].concat(remotes);
+  context.playerTurn = corp;
+}
+function i2Rank(cards, order, {priorityOnly = false, economy = true, explicit = null, walk = 'stub'} = {}) {
+  const original = ai._rankedServersToProtect;
+  ai.options.iceMarginalSecurity = true;
+  if (walk == 'stub')
+    ai._rankedServersToProtect = () => order.map((srv, index) =>
+      ({server: srv, security: srv ? ai._evaluateServerSecurity(srv) : null, order: index}));
+  try { return ai._marginalIceInstallOptions(cards, priorityOnly, economy, {}, explicit); }
+  finally { ai._rankedServersToProtect = original; ai.options.iceMarginalSecurity = false; }
+}
+const i2Name = option => option.cardToInstall.title + '@' + (option.serverToInstallTo ? option.serverToInstallTo.serverName : 'new remote');
+const i2Pick = (options, card, srv) => options.find(o => o.cardToInstall === card && o.serverToInstallTo === srv);
+const i2Order = options => Array.from(options, i2Name); // main-realm array
+const i2Score = (options, card, srv) => i2Pick(options, card, srv).iceMarginalScore;
+test('I2 phase B: option defaults off', () => {
+  assert.strictEqual(vm.runInContext('CorpAI.DEFAULT_OPTIONS.iceMarginalSecurity', context), false);
+});
+test('I2 scenario 7: against a public Fracter only, a Code Gate outranks an efficiently broken Barrier', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({remotes: [remote]});
+  const wall = i2Ice('Wall', 'Barrier'), gate = i2Ice('Gate', 'Code Gate');
+  const options = i2Rank([wall, gate], [remote]);
+  assert.deepStrictEqual(i2Order(options), ['Gate@Remote 1', 'Wall@Remote 1']);
+  assert.ok(i2Score(options, gate, remote).riskReduction > i2Score(options, wall, remote).riskReduction);
+  assert.strictEqual(i2Score(options, wall, remote).riskReduction, 0, 'a 1-credit break leaves the margin bucket');
+});
+test('I2 scenario 8: ETR ICE that locks the Runner out outranks stronger ICE that leaves a route', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 10;
+  runner.grip = []; // no cards to find a Killer with: honest lockout without one
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({remotes: [remote]});
+  const big = i2Ice('Big wall', 'Barrier', {strength: 6}), sentry = i2Ice('Sentry', 'Sentry', {strength: 1});
+  const options = i2Rank([big, sentry], [remote]);
+  assert.deepStrictEqual(i2Order(options), ['Sentry@Remote 1', 'Big wall@Remote 1']);
+  const lock = i2Score(options, sentry, remote), route = i2Score(options, big, remote);
+  assert.ok(lock.hazardAfter < route.hazardAfter);
+  assert.ok(lock.riskReduction > route.riskReduction);
+});
+test('I2 scenario 9: a second layer on a bypassed one-ICE remote outranks deepening a lower-stake HQ', () => {
+  runner.cards = [i2Fracter(), {player: runner, AIBypassesOutermostIce: () => true}]; runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()], [Object.assign(etr(), {cardType: 'ice'})]);
+  const hqCards = [i2Agenda(), {cardType: 'operation'}, {cardType: 'operation'}, {cardType: 'operation'}, {cardType: 'operation'}];
+  i2Board({hq: hqCards, remotes: [remote]});
+  corp.HQ.ice = [Object.assign(etr(), {cardType: 'ice', subTypes: ['Code Gate']})];
+  const gate = i2Ice('Gate', 'Code Gate');
+  const options = i2Rank([gate], [corp.HQ, remote]);
+  assert.deepStrictEqual(i2Order(options), ['Gate@Remote 1', 'Gate@HQ']);
+  assert.ok(i2Score(options, gate, remote).stake > i2Score(options, gate, corp.HQ).stake);
+});
+test('I2 scenario 10: ICE outside the rez budget, or with only optional punishment, earns no risk reduction', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({remotes: [remote]});
+  const gate = i2Ice('Gate', 'Code Gate', {rezCost: 5});
+  const punisher = Object.assign(ice(['Trash 1 program.'], [[['misc_moderate']]]),
+    {title: 'Punisher', cardType: 'ice', rezzed: false, rezCost: 1, subTypes: ['Sentry']});
+  corp.creditPool = 3;
+  let options = i2Rank([gate, punisher], [remote]);
+  const unfunded = i2Score(options, gate, remote);
+  assert.strictEqual(unfunded.riskReduction, 0);
+  assert.strictEqual(unfunded.plannedRezCost, 0, 'not in the after-state rez plan');
+  assert.strictEqual(unfunded.hazardAfter, unfunded.hazardBefore);
+  assert.strictEqual(i2Score(options, punisher, remote).riskReduction, 0);
+  corp.creditPool = 20;
+  options = i2Rank([gate], [remote]);
+  assert.ok(i2Score(options, gate, remote).riskReduction > 0, 'funded, the same ICE counts');
+  assert.strictEqual(i2Score(options, gate, remote).plannedRezCost, 5);
+});
+test('I2 scenario 11: effective subtypes and targeted bypass act on the hypothetical exactly as on installed ICE', () => {
+  const gate = i2Ice('Gate', 'Code Gate'), wall = i2Ice('Wall', 'Barrier'), sentry = i2Ice('Sentry', 'Sentry');
+  runner.cards = [i2Fracter(), {player: runner, AIEffectiveIceSubtypes: target => target === gate ? {add: ['Barrier']} : null},
+    {player: runner, AIBypassesIce: target => target === sentry ? 1 : false}];
+  runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()], [Object.assign(etr(), {cardType: 'ice', subTypes: ['Sentry']})]);
+  i2Board({remotes: [remote]});
+  const options = i2Rank([gate, wall, sentry], [remote]);
+  for (const card of [gate, wall, sentry]) {
+    const breakdown = i2Score(options, card, remote);
+    const credits = corp.creditPool;
+    remote.ice.push(card); corp.creditPool -= 1;
+    try {
+      const margin = ai._breachMargin(remote, ai._evaluateServerSecurity(remote));
+      const value = margin.margin === null ? margin.upperBound : margin.margin;
+      assert.strictEqual(breakdown.hazardAfter, ai._hazardForMargin('agendaRemote', 2, value), card.title);
+    } finally { remote.ice.pop(); corp.creditPool = credits; }
+  }
+  assert.strictEqual(remote.ice.length, 1, 'the board is restored');
+});
+test('I2 scenario 12: hidden Grip substitution changes no candidate', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({remotes: [remote], hq: [i2Agenda(3), {cardType: 'operation'}]});
+  const cards = [i2Ice('Gate', 'Code Gate'), i2Ice('Wall', 'Barrier')];
+  const run = () => plain(i2Rank(cards, [corp.HQ, remote]).map(o => [i2Name(o), o.iceMarginalScore]));
+  runner.grip = [{title: 'Grip A', cardType: 'event'}, {title: 'Grip B', cardType: 'program', subTypes: ['Icebreaker', 'Decoder']}];
+  const first = run();
+  runner.grip = [{title: 'Grip C', cardType: 'resource'}, {title: 'Grip D', cardType: 'program', subTypes: ['Icebreaker', 'Killer']}];
+  assert.deepStrictEqual(run(), first);
+});
+test('I2 scenario 13: at equal margin the ICE goes to the higher stake, and only the stake moves it', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const asset = () => ({player: corp, cardType: 'asset', title: 'Regression asset'});
+  const a = i2Remote('Remote A', [i2Agenda()]), b = i2Remote('Remote B', [asset()]);
+  i2Board({remotes: [a, b]});
+  const gate = i2Ice('Gate', 'Code Gate');
+  let options = i2Rank([gate], [b, a]);
+  assert.deepStrictEqual(i2Order(options), ['Gate@Remote A', 'Gate@Remote B']);
+  assert.strictEqual(i2Score(options, gate, a).hazardBefore === null, false);
+  assert.strictEqual(i2Score(options, gate, b).stake, 0);
+  [a.root, b.root] = [b.root, a.root];
+  options = i2Rank([gate], [b, a]);
+  assert.deepStrictEqual(i2Order(options), ['Gate@Remote B', 'Gate@Remote A']);
+  // A breachable 3-point remote outranks low-density R&D behind the same ICE.
+  runner.creditPool = 0; // the Runner's next-turn clicks fund the break
+  const rndCards = [i2Agenda(3)].concat(Array.from({length: 9}, () => ({cardType: 'operation'})));
+  const remote = i2Remote('Remote 1', [i2Agenda(3)], [Object.assign(etr(), {cardType: 'ice'})]);
+  i2Board({rnd: rndCards, remotes: [remote]});
+  corp.RnD.ice = [Object.assign(etr(), {cardType: 'ice'})];
+  options = i2Rank([gate], [corp.RnD, remote]);
+  assert.deepStrictEqual(i2Order(options), ['Gate@Remote 1', 'Gate@R&D']);
+  assert.ok(i2Score(options, gate, remote).hazardBefore > vm.runInContext('CORP_AI_BREACH_HAZARD_TABLE', context).agendaRemote.single.lockout,
+    'the Runner can break the remote next turn');
+});
+test('I2 scenario 14: before I3 only the designated empty scoring remote earns stake, while HQ holds an agenda', () => {
+  const designated = i2Remote('Remote 1', []), other = i2Remote('Remote 2', []);
+  i2Board({hq: [i2Agenda(3), i2Agenda(1)], remotes: [designated, other]});
+  assert.strictEqual(ai._iceStake(designated, designated), 3, 'the highest-point agenda in HQ');
+  assert.strictEqual(ai._iceStake(other, designated), 0);
+  corp.HQ.cards = [{cardType: 'operation'}];
+  assert.strictEqual(ai._iceStake(designated, designated), 0, 'no agenda in HQ, no stake');
+  corp.HQ.cards = [i2Agenda(3)];
+  assert.strictEqual(ai._iceStake(null, null), 3, 'the new remote when no scoring remote exists');
+  runner.agendaPoints = 5;
+  assert.strictEqual(ai._iceStake(designated, designated), 2, 'capped at the points the Runner needs');
+  // Through the ranking: designation comes from _scoringServers().
+  runner.agendaPoints = 0; runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  ai._scoringServers = () => [designated];
+  try {
+    const gate = i2Ice('Gate', 'Code Gate');
+    const options = i2Rank([gate], [other, designated]);
+    assert.deepStrictEqual(i2Order(options), ['Gate@Remote 1', 'Gate@Remote 2']);
+    assert.strictEqual(i2Score(options, gate, other).stake, 0);
+  } finally { delete ai._scoringServers; }
+});
+test('I2 gate run 2: centrals keep their repeat weight; an empty remote counts from when its agenda can go in', () => {
+  const horizon = vm.runInContext('CORP_AI_I2_HORIZON_RUNNER_TURNS', context);
+  const repeat = ai._marginalIceStolen({stake: 1, repeatable: true, exposureTurns: horizon}, 0.3);
+  const once = ai._marginalIceStolen({stake: 1, repeatable: false, exposureTurns: horizon}, 0.3);
+  assert.ok(Math.abs(repeat - horizon * 0.3) < 1e-12, 'repeatable: every turn can steal');
+  assert.ok(Math.abs(once - (1 - Math.pow(0.7, horizon))) < 1e-12, 'one-shot: at least one breach');
+  assert.ok(repeat > once);
+  assert.strictEqual(ai._marginalIceStolen({stake: 1, repeatable: true, exposureTurns: horizon}, null), null);
+  const designated = i2Remote('Remote 1', []), loaded = i2Remote('Remote 2', [i2Agenda(3)]);
+  i2Board({hq: [i2Agenda(3)], rnd: [i2Agenda(2), {cardType: 'operation'}], remotes: [designated, loaded]});
+  const exposure = srv => ai._marginalIceBefore(srv, ai._evaluateServerSecurity(srv), designated);
+  ai._clicksLeft = () => 1; // the ICE takes the last click
+  try {
+    assert.strictEqual(exposure(designated).exposureTurns, horizon - 1, 'its agenda goes in next Corp turn');
+    assert.strictEqual(exposure(loaded).exposureTurns, horizon, 'an installed agenda is exposed now');
+    assert.strictEqual(exposure(corp.RnD).exposureTurns, horizon);
+    assert.strictEqual(exposure(corp.RnD).repeatable, true);
+    ai._clicksLeft = () => 2;
+    assert.strictEqual(exposure(designated).exposureTurns, horizon, 'a click remains to install it this turn');
+  } finally { delete ai._clicksLeft; }
+});
+test('I2 scenario 15: unknown pricing never becomes a number', () => {
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({remotes: [remote]});
+  const table = vm.runInContext('CORP_AI_BREACH_HAZARD_TABLE', context);
+  ai._breachMargin = () => ({margin: null, upperBound: 4});
+  try {
+    assert.strictEqual(ai._marginalHazard('agendaRemote', 1, {}, false), null, 'before: unknown');
+    assert.strictEqual(ai._marginalHazard('agendaRemote', 1, {}, true), table.agendaRemote.single['2..4'], 'after: upperBound');
+    ai._breachMargin = () => ({margin: null, upperBound: null});
+    assert.strictEqual(ai._marginalHazard('agendaRemote', 1, {}, true), null);
+  } finally { delete ai._breachMargin; }
+  const gate = i2Ice('Gate', 'Code Gate');
+  const unknownBefore = ai._marginalIceScore(gate, remote, {stake: 2, kind: 'agendaRemote', repeatable: false, exposureTurns: 2, hazard: null});
+  assert.strictEqual(unknownBefore.stolenBefore, null);
+  assert.strictEqual(unknownBefore.riskReduction, 0);
+  ai._marginalHazard = (kind, count, evaluation, allowUpperBound) => allowUpperBound ? null : 0.2;
+  try {
+    const unknownAfter = ai._marginalIceScore(gate, remote, {stake: 2, kind: 'agendaRemote', repeatable: false, exposureTurns: 2, hazard: 0.2});
+    assert.strictEqual(unknownAfter.stolenAfter, null);
+    assert.strictEqual(unknownAfter.riskReduction, 0);
+  } finally { delete ai._marginalHazard; }
+});
+test('I2 scenario 16: posture cap below, at and above target; epoch change; neutral script; centrals uncapped', () => {
+  runner.identityCard = {faction: 'Anarch', title: 'Regression runner ID'}; // the real walk reads it
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const layer = () => Object.assign(etr(), {cardType: 'ice'});
+  const remote = i2Remote('Remote 1', [i2Trap()], [layer()]);
+  i2Board({remotes: [remote]});
+  let target = 2;
+  ai._deceptionProtectionTarget = srv => srv === remote ? target : null;
+  try {
+    const offered = () => i2Rank([i2Ice('Gate', 'Code Gate')], null, {walk: 'real'})
+      .some(o => o.serverToInstallTo === remote);
+    assert.strictEqual(offered(), true, 'one layer below a two-layer target');
+    remote.ice.push(layer());
+    assert.strictEqual(offered(), false, 'at the cap no ordinary layer');
+    remote.ice.push(layer());
+    assert.strictEqual(offered(), false, 'above the cap');
+    target = 4;
+    assert.strictEqual(offered(), true, 'a new epoch target is read, never cached');
+    target = null;
+    assert.strictEqual(offered(), true, 'a neutral script removes the cap');
+    target = 0;
+    assert.strictEqual(ai._NoMoreProtectionForThisServer(corp.RnD), false, 'the critical interrupt targets carry no posture');
+  } finally { delete ai._deceptionProtectionTarget; }
+});
+test('I2 scenario 17: agenda/trap and agenda-point substitutions change no component or choice', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const cards = [i2Ice('Gate', 'Code Gate'), i2Ice('Wall', 'Barrier')];
+  const run = (root, scored) => {
+    const remote = i2Remote('Remote 1', [root]);
+    i2Board({remotes: [remote], hq: [{cardType: 'operation'}], scored});
+    return plain(i2Rank(cards, [corp.HQ, remote]).map(o => [i2Name(o), o.iceMarginalScore]));
+  };
+  const agendaBoard = run(i2Agenda(2), [i2Agenda(3)]);
+  assert.deepStrictEqual(run(i2Trap(), [i2Agenda(3), i2Agenda(2)]), agendaBoard, 'agenda swapped for a trap');
+  assert.deepStrictEqual(run(i2Agenda(3), [i2Agenda(2)]), agendaBoard, 'agenda points varied');
+});
+test('I2 scenario 18: if the top-ranked server has no useful ICE, another allowed server gets it', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({rnd: [{cardType: 'operation'}, {cardType: 'operation'}], remotes: [remote]});
+  const gate = i2Ice('Gate', 'Code Gate');
+  const options = i2Rank([gate], [corp.RnD, remote]);
+  assert.strictEqual(i2Name(options[0]), 'Gate@Remote 1');
+  assert.strictEqual(i2Score(options, gate, corp.RnD).riskReduction, 0, 'R&D holds no agenda points');
+});
+test('I2 scenario 19: empty Archives without agendas or an HQ backdoor stays excluded', () => {
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  i2Board({archives: []});
+  const gate = i2Ice('Gate', 'Code Gate');
+  assert.ok(!i2Rank([gate], [corp.archives, corp.HQ]).some(o => o.serverToInstallTo === corp.archives));
+  corp.archives.cards = [i2Agenda()];
+  assert.ok(i2Rank([gate], [corp.archives, corp.HQ]).some(o => o.serverToInstallTo === corp.archives),
+    'an agenda in Archives makes it protectable');
+});
+test('I2 scenario 20: the critical interrupt evaluates through the shared hypothetical and picks the same ICE', () => {
+  i2Board({});
+  const weak = i2Ice('Weak', 'Barrier'), strong = i2Ice('Strong', 'Code Gate');
+  const picks = [];
+  ai._rankedInstallOptions = () => [{cardToInstall: weak, serverToInstallTo: corp.RnD}, {cardToInstall: strong, serverToInstallTo: corp.RnD}];
+  ai._centralBreachLossRisk = srv => ({server: srv, probability: srv.ice.includes(strong) ? 0.1 : srv.ice.includes(weak) ? 0.5 : 0.9});
+  ai._returnPreference = (list, preference, option) => { picks.push(option.cardToInstall.title); return 0; };
+  const shared = Object.getPrototypeOf(ai)._hypotheticalServerAfterInstall;
+  let sharedCalls = 0;
+  ai._hypotheticalServerAfterInstall = function(...args) { sharedCalls++; return shared.apply(this, args); };
+  try {
+    for (const on of [false, true]) {
+      ai.options.iceMarginalSecurity = on;
+      ai._criticalBreachDefenseAction(['install', 'gain']);
+    }
+  } finally {
+    ai.options.iceMarginalSecurity = false;
+    for (const key of ['_rankedInstallOptions', '_centralBreachLossRisk', '_returnPreference', '_hypotheticalServerAfterInstall']) delete ai[key];
+  }
+  assert.deepStrictEqual(picks, ['Strong', 'Strong']);
+  assert.strictEqual(sharedCalls, 4, 'every candidate goes through the shared builder');
+  assert.deepStrictEqual(corp.RnD.ice, []);
+});
+test('I2 phase B: ordinary ICE generation does not call the filtered _serverToProtect', () => {
+  runner.identityCard = {faction: 'Anarch', title: 'Regression runner ID'}; // the real walk reads it
+  runner.cards = [i2Fracter()]; runner.creditPool = 6;
+  const remote = i2Remote('Remote 1', [i2Agenda()]);
+  i2Board({remotes: [remote]});
+  const gate = i2Ice('Gate', 'Code Gate');
+  corp.HQ.cards = [gate];
+  corp.resolvingCards = []; corp.clickTracker = 3;
+  const original = Object.getPrototypeOf(ai)._serverToProtect;
+  let filtered = 0;
+  ai._serverToProtect = function(...args) { if (args[2]) filtered++; return original.apply(this, args); };
+  try {
+    ai.options.iceMarginalSecurity = true;
+    const options = ai._rankedInstallOptions([gate]);
+    const protection = options.filter(o => o.AIProtectionInstall);
+    assert.ok(protection.length > 0 && protection.every(o => o.iceMarginalScore), 'protection ICE carries its score');
+    assert.strictEqual(filtered, 0);
+    ai.options.iceMarginalSecurity = false;
+    ai._rankedInstallOptions([gate]);
+    assert.ok(filtered > 0, 'the legacy path still uses it');
+  } finally { ai.options.iceMarginalSecurity = false; delete ai._serverToProtect; }
+});
 assert.ok(marginInvariant.checks > 0, 'I2 margin invariant was exercised');
 console.log(tests + ' regression cases passed.');

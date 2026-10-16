@@ -73,7 +73,7 @@ receive them.
 | `secureScoringServerGate` | I4 owns safe agenda destinations and scoring plans; I3/I6 consume scoring-server suitability. The PR 19 winning-steal concern is tracked in I4. |
 | `serverAtRiskInstallOverride` | I2 owns whether another ICE layer buys useful security; I7.1 compares that install with credits/draw, and I7.2/I8 account for competing scoring plans. |
 | `committedAgendaReserveBypass` | I4 owns completion/commitment; I7.2 compares advancement with defense/economy; I8 sequences costs across clicks. |
-| `emptyArchivesRunPressure` | I2 owns protection-install admission, and L3.5.1 consumes the same valueless predicate for aging. L7.1 supplies agenda/backdoor breach consequences, but does not yet design valuation of non-agenda rewards from empty Archives runs. That reward/admission calibration remains an explicit gap. |
+| `emptyArchivesRunPressure` | I2 owns protection-install admission, and L3.5.1 consumes the same valueless predicate for aging. L7.1 supplies agenda/backdoor breach consequences, but does not yet design valuation of non-agenda rewards from empty Archives runs. That reward/admission calibration remains an explicit gap, owned by [I2.1](I2.1-empty-archives-reward-valuation.md) (I2 keeps the exclusion). |
 | `valuelessServerDebtReset` | L3.5.1 owns aging/reset semantics. Its individual regression evidence is inconclusive; it was gated to reproduce the combined recovered build. |
 
 I0 must record the corrected default and effective options before collecting

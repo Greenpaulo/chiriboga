@@ -40,6 +40,10 @@ const CORP_AI_BREACH_HAZARD_TABLE = Object.freeze({
 //Credit-equivalents per agenda point (cost to advance and install), from the
 //same calibration file. Only I9 retunes it.
 const CORP_AI_POINT_VALUE = 4.4;
+//I2 phase B horizon in Runner turns (gate run 2). The next-turn hazard is held
+//for every turn, with no projected-income drift (the drifted next-turn check
+//failed calibration), so repeatable centrals keep their repeat weight.
+const CORP_AI_I2_HORIZON_RUNNER_TURNS = 2;
 
 // Shared public shapes: all twelve scripts have positive baseline mass.
 const CORP_AI_POSTURE_SCRIPTS = Object.freeze([1, 2, 3].flatMap((depth, i) =>
@@ -4115,6 +4119,8 @@ class CorpAI {
     result.totalBreakCost = bestPlan.totalBreakCost;
     result.totalMandatoryBreakCost = bestPlan.totalMandatoryBreakCost;
     result.reasons = result.reasons.concat(bestPlan.reasons);
+    //Unrezzed ICE the chosen plan rezzes (I2 charges its rez cost).
+    result.plannedRezIce = unrezzedIce.filter((card) => bestCards.indexOf(card) > -1);
     for (var i = 0; i < unrezzedIce.length; i++) {
       if (bestCards.indexOf(unrezzedIce[i]) < 0)
         result.reasons.push(
@@ -4429,8 +4435,14 @@ class CorpAI {
     var margin = this._breachMargin(server, evaluation).margin;
     if (margin !== null && isFinite(margin))
       margin += (turns - 1) * this._projectedRunnerIncome();
-    var rows = CORP_AI_BREACH_HAZARD_TABLE[kind || this._breachKind(server)];
     var iceCount = server && server.ice ? server.ice.length : 0;
+    return this._hazardForMargin(kind || this._breachKind(server), iceCount, margin);
+  }
+
+  //M2 table cell: row by kind and ICE count (0-1 single, 2+ multi), cell by
+  //margin bucket.
+  _hazardForMargin(kind, iceCount, margin) {
+    var rows = CORP_AI_BREACH_HAZARD_TABLE[kind];
     return rows[iceCount >= 2 ? "multi" : "single"][this._breachMarginBucket(margin)];
   }
 
@@ -5345,7 +5357,9 @@ class CorpAI {
   }
 
   //used in _rankedInstallOptions
-  _iceInstallOptions(serverToInstallTo, cards, priorityOnly) {
+  //tagGroup marks each option's legacy group (iceGroup 0 affordable, 1 low
+  //priority) for I2's ranking.
+  _iceInstallOptions(serverToInstallTo, cards, priorityOnly, tagGroup = false) {
     var ret = [];
     //only create new empty protected remotes when there will be corp clicks to use them (e.g. not during Ansel firing) and not while a HVT is installed
     var permitNewEmpty = false;
@@ -5359,6 +5373,7 @@ class CorpAI {
           serverToInstallTo: serverToInstallTo,
         });
       }
+      var affordableCount = ret.length;
       if (!priorityOnly) {
         var notAffordableIce = this._notAffordableIce(serverToInstallTo, cards);
         for (var i = 0; i < notAffordableIce.length; i++) {
@@ -5368,8 +5383,209 @@ class CorpAI {
           });
         }
       }
+      if (tagGroup)
+        ret.forEach((option, index) => (option.iceGroup = index < affordableCount ? 0 : 1));
     }
     return ret;
+  }
+
+  //I2 phase B (iceMarginalSecurity): protection ICE for every server the
+  //legacy walk could have picked (same _rankedServersToProtect rows, so the
+  //posture cap and _NoMoreProtectionForThisServer hold; same empty-Archives
+  //exclusion and layer policy; same per-server ICE list), ranked by legacy
+  //group, then marginal score, then walk order. servers: an explicit list
+  //instead of the walk. Returns fresh options; scores are memoised in memo for
+  //one ranking.
+  _marginalIceInstallOptions(cards, priorityOnly, economyCheck, memo, servers = null) {
+    if (!memo.entries) {
+      memo.entries = this._rankedServersToProtect(false).filter(
+        (entry) =>
+          !this._nothingWorthProtecting(entry.server, entry.security) &&
+          this._iceLayerPolicy(entry.server, economyCheck, entry.security).allowed,
+      );
+      memo.byServer = new Map();
+      memo.designated = this._scoringServers(this._emptyProtectedRemotes())[0] || null;
+    }
+    var entries = servers
+      ? servers.map(
+          (server) =>
+            memo.entries.find((entry) => entry.server == server) || { server: server, security: null },
+        )
+      : memo.entries;
+    var candidates = [];
+    entries.forEach((entry) => {
+      if (!memo.byServer.has(entry.server))
+        memo.byServer.set(
+          entry.server,
+          this._marginalIceServerCandidates(entry, cards, priorityOnly, memo.designated),
+        );
+      candidates = candidates.concat(memo.byServer.get(entry.server));
+    });
+    var order = candidates.map((candidate, index) => ({ candidate: candidate, index: index }));
+    order.sort(
+      (a, b) =>
+        a.candidate.group - b.candidate.group ||
+        b.candidate.breakdown.score - a.candidate.breakdown.score ||
+        a.index - b.index,
+    );
+    return order.map((row) => ({
+      cardToInstall: row.candidate.card,
+      serverToInstallTo: row.candidate.server,
+      iceMarginalScore: row.candidate.breakdown,
+    }));
+  }
+
+  _marginalIceServerCandidates(entry, cards, priorityOnly, designated) {
+    var server = entry.server;
+    var options = this._iceInstallOptions(server, cards, priorityOnly, true);
+    if (options.length < 1) return [];
+    var before = this._marginalIceBefore(server, entry.security, designated);
+    return options.map((option) => ({
+      card: option.cardToInstall,
+      server: server,
+      group: option.iceGroup,
+      breakdown: this._marginalIceScore(option.cardToInstall, server, before),
+    }));
+  }
+
+  //Stake P(s): agenda points expected through the server per breach, capped at
+  //the points the Runner needs. Agendas and traps share one stake (the mean
+  //agenda points in the Corp's own deck) so ICE never tells them apart.
+  //Before I3, only the designated next scoring remote (first scoring empty
+  //remote, else the new remote) has an empty-remote stake, and only while HQ
+  //holds an agenda.
+  _iceStake(server, designated) {
+    var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
+    var stake = 0;
+    if (server == corp.HQ || server == corp.RnD || server == corp.archives)
+      stake = this._breachConsequence(server).pointsExposed;
+    else if (server && server.root.some((card) => this._isAgendaOrTrap(card)))
+      stake = this._meanAgendaPoints();
+    else if (server == designated) stake = this._highestAgendaPointsInHQ();
+    return Math.min(stake, pointsNeeded);
+  }
+
+  _isAgendaOrTrap(card) {
+    return (
+      CheckCardType(card, ["agenda"]) ||
+      CheckSubType(card, "Ambush") ||
+      typeof card.AIPunishesAccess == "function"
+    );
+  }
+
+  //Mean printed points per agenda across the Corp's own cards in every zone.
+  _meanAgendaPoints() {
+    var zones = [corp.HQ.cards, corp.RnD.cards, corp.archives.cards, corp.scoreArea, runner.scoreArea];
+    corp.remoteServers.forEach((server) => zones.push(server.root));
+    var total = 0;
+    var count = 0;
+    zones.forEach((zone) =>
+      (zone || []).forEach((card) => {
+        if (card.player != corp || !CheckCardType(card, ["agenda"])) return;
+        total += Number(card.agendaPoints) || 0;
+        count++;
+      }),
+    );
+    return count > 0 ? total / count : 0;
+  }
+
+  _highestAgendaPointsInHQ() {
+    return corp.HQ.cards.reduce(
+      (best, card) =>
+        CheckCardType(card, ["agenda"]) ? Math.max(best, Number(card.agendaPoints) || 0) : best,
+      0,
+    );
+  }
+
+  _marginalIceBefore(server, security, designated) {
+    var stake = this._iceStake(server, designated);
+    var central = server == corp.HQ || server == corp.RnD || server == corp.archives;
+    var kind = central ? this._breachKind(server) : stake > 0 ? "agendaRemote" : "otherRemote";
+    var evaluation = server
+      ? security || this._evaluateServerSecurity(server)
+      : this._detachedRemoteEvaluation();
+    //A designated empty remote's stake is an agenda still in HQ: it is exposed
+    //only from the Runner turn after it can be installed (this turn if a click
+    //remains after the ICE, else next Corp turn).
+    var pending =
+      !central && stake > 0 && !(server && server.root.some((card) => this._isAgendaOrTrap(card)));
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    return {
+      stake: stake,
+      kind: kind,
+      repeatable: server == corp.HQ || server == corp.RnD,
+      exposureTurns: pending && this._clicksLeft() < 2 ? horizon - 1 : horizon,
+      hazard: this._marginalHazard(kind, server ? server.ice.length : 0, evaluation, false),
+    };
+  }
+
+  //Expected points stolen over the exposure turns at a constant per-turn
+  //hazard: repeatable centrals stake x turns x hazard, one-shot servers
+  //stake x P(at least one breach).
+  _marginalIceStolen(before, hazard) {
+    if (hazard === null) return null;
+    if (before.repeatable) return before.stake * before.exposureTurns * hazard;
+    return before.stake * (1 - Math.pow(1 - hazard, before.exposureTurns));
+  }
+
+  //Security of an empty remote that is never added to corp.remoteServers.
+  _detachedRemoteEvaluation() {
+    var target = NewServer("Hypothetical remote", false);
+    target.AIHypothetical = true;
+    return this._withHypothetical(
+      () => {},
+      () => this._evaluateServerSecurity(target),
+      () => {},
+    );
+  }
+
+  //Next-turn M2 hazard, held over the horizon. null when unknown. Only the
+  //after-state may fall back to upperBound: a conservative bound on the drop,
+  //since hazard rises with margin. An unknown before-state measures nothing.
+  _marginalHazard(kind, iceCount, evaluation, allowUpperBound) {
+    var margin = this._breachMargin(null, evaluation);
+    var value = margin.margin;
+    if (value === null && allowUpperBound) value = margin.upperBound;
+    if (value === null || typeof value == "undefined") return null;
+    return this._hazardForMargin(kind, iceCount, value);
+  }
+
+  //Credit-equivalent score of installing card on server (null: new remote):
+  //POINT_VALUE x expected points no longer stolen, bounded to [0, POINT_VALUE
+  //x points to win], minus the install cost and, when the after-state's rez
+  //plan includes the ICE, its rez cost.
+  _marginalIceScore(card, server, before) {
+    var after = this._hypotheticalServerAfterInstall(card, server, (target) => {
+      var evaluation = this._evaluateServerSecurity(target);
+      return {
+        hazard: this._marginalHazard(before.kind, target.ice.length, evaluation, true),
+        planned: (evaluation.plannedRezIce || []).indexOf(card) > -1,
+      };
+    });
+    var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
+    var stolenBefore = this._marginalIceStolen(before, before.hazard);
+    var stolenAfter = this._marginalIceStolen(before, after.hazard);
+    var rawRiskReduction =
+      stolenBefore === null || stolenAfter === null
+        ? 0
+        : CORP_AI_POINT_VALUE * (stolenBefore - stolenAfter);
+    var riskReduction = Math.min(CORP_AI_POINT_VALUE * pointsNeeded, Math.max(0, rawRiskReduction));
+    var installCost = server ? server.ice.length : 0;
+    var plannedRezCost = after.planned ? RezCost(card) : 0;
+    return {
+      stake: before.stake,
+      kind: before.kind,
+      exposureTurns: before.exposureTurns,
+      hazardBefore: before.hazard,
+      hazardAfter: after.hazard,
+      stolenBefore: stolenBefore,
+      stolenAfter: stolenAfter,
+      rawRiskReduction: rawRiskReduction,
+      riskReduction: riskReduction,
+      installCost: installCost,
+      plannedRezCost: plannedRezCost,
+      score: riskReduction - installCost - plannedRezCost,
+    };
   }
 
   _serverHasStakes(server, securityEvaluation) {
@@ -5551,7 +5767,7 @@ class CorpAI {
         server: option.serverToInstallTo,
         kind: option.cardToInstall ? option.cardToInstall.cardType : null,
         role: group,
-        band: group == "win" ? 3 : 0,
+        band: group == "win" ? 3 : option.iceMarginalScore ? 1 : 0,
         compatibilityOrder: i,
         groupIndex: groupIndex,
         inGroupIndex: inGroupIndex,
@@ -5565,6 +5781,8 @@ class CorpAI {
         rejectionReasons: [],
         option: option,
       });
+      if (option.iceMarginalScore)
+        Object.assign(records[records.length - 1].scoreBreakdown, option.iceMarginalScore);
     }
     //ICE legacy did not offer to a server its protection walk ranked:
     //recorded for diagnostics (and for I2), never returned.
@@ -5619,6 +5837,7 @@ class CorpAI {
     };
     if (record.reasons.length > 1) row.reasons = record.reasons;
     if (!record.eligible) row.rejection = record.rejectionReasons;
+    if (record.band == 1) row.score = Math.round(record.scoreBreakdown.score * 1000) / 1000;
     if (record.scoreBreakdown.legacy != record.role)
       row.legacy = record.scoreBreakdown.legacy;
     return row;
@@ -5880,13 +6099,33 @@ class CorpAI {
     //An economy check used to prioritise whether to install ice (the 4 is arbitrary)
     var iceInstallEconomyCheck = this._sufficientEconomy(false, 4);
 
+    //I2 (iceMarginalSecurity): rank protection ICE across every admitted
+    //server instead of the one _serverToProtect() picks.
+    var marginalIceMemo = {};
+    if (this.options.iceMarginalSecurity) {
+      var marginalIceOptions = this._marginalIceInstallOptions(
+        cards,
+        priorityOnly,
+        iceInstallEconomyCheck,
+        marginalIceMemo,
+      );
+      for (var i = 0; i < marginalIceOptions.length; i++) {
+        marginalIceOptions[i].reason =
+          "returned by _iceInstallOptions for server that needs protection";
+        marginalIceOptions[i].AIProtectionInstall = true;
+      }
+      ret = ret.concat(marginalIceOptions);
+    }
+
     //Find out if any servers need protection. If so, we will choose an ice card if possible.
-    var serverToInstallTo = this._serverToProtect(
-      false,
-      false,
-      (server, security) =>
-        this._iceLayerPolicy(server, iceInstallEconomyCheck, security),
-    );
+    var serverToInstallTo = this.options.iceMarginalSecurity
+      ? undefined
+      : this._serverToProtect(
+          false,
+          false,
+          (server, security) =>
+            this._iceLayerPolicy(server, iceInstallEconomyCheck, security),
+        );
 
     //Too poor? Do not spend frivolously on new layers. A breachable server
     //with something to lose is not frivolous to reinforce.
@@ -6038,7 +6277,31 @@ class CorpAI {
     //If no protected empty remote exists, let's make one if prudent
     //otherwise just add ice to whatever server needs it most
     serverToInstallTo = null;
-    if (emptyProtectedRemotes.length > 0)
+    if (this.options.iceMarginalSecurity) {
+      //Same admission as below: the ranked walk when an empty protected remote
+      //exists (it then has no new-remote row), else a new remote if prudent.
+      var newServerIce = [];
+      if (emptyProtectedRemotes.length > 0)
+        newServerIce = this._marginalIceInstallOptions(
+          cards,
+          priorityOnly,
+          iceInstallEconomyCheck,
+          marginalIceMemo,
+        );
+      else if (iceInstallEconomyCheck)
+        newServerIce = this._marginalIceInstallOptions(
+          cards,
+          priorityOnly,
+          iceInstallEconomyCheck,
+          marginalIceMemo,
+          [null],
+        );
+      for (var i = 0; i < newServerIce.length; i++) {
+        newServerIce[i].reason = "returned by _iceInstallOptions for new server";
+        newServerIce[i].AIProtectionInstall = true;
+      }
+      ret = ret.concat(newServerIce);
+    } else if (emptyProtectedRemotes.length > 0)
       serverToInstallTo = this._serverToProtect(
         false,
         false,
@@ -6047,7 +6310,10 @@ class CorpAI {
       );
     //but don't create a new server if the above economy check failed
     //because we might be saving to afford better ice in critical server
-    if (serverToInstallTo != null || iceInstallEconomyCheck) {
+    if (
+      !this.options.iceMarginalSecurity &&
+      (serverToInstallTo != null || iceInstallEconomyCheck)
+    ) {
       var iceInstallOptions = this._iceInstallOptions(
         serverToInstallTo,
         cards,
@@ -7689,19 +7955,10 @@ class CorpAI {
           !CheckCardType(option.cardToInstall, ["ice"])
         )
           continue;
-        var installCost = risk.server.ice.length;
-        var originalCredits = corp.creditPool;
-        var originalIce = risk.server.ice.slice();
-        var postInstallRisk = this._withHypothetical(
-          () => {
-            corp.creditPool -= installCost;
-            risk.server.ice.push(option.cardToInstall);
-          },
-          () => this._centralBreachLossRisk(risk.server),
-          () => {
-            risk.server.ice.splice(0, risk.server.ice.length, ...originalIce);
-            corp.creditPool = originalCredits;
-          },
+        var postInstallRisk = this._hypotheticalServerAfterInstall(
+          option.cardToInstall,
+          risk.server,
+          (target) => this._centralBreachLossRisk(target),
         );
         if (postInstallRisk.probability < bestPostInstallRisk) {
           bestInstall = option;
@@ -8750,4 +9007,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   valuelessServerDebtReset: false,
   postureEpochs: true,
   matchLocalPostureFeedback: true,
+  iceMarginalSecurity: false,
 });
