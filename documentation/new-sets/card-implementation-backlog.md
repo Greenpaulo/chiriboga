@@ -8,6 +8,22 @@ Set-level counts and missing or unfinished cards are generated in
 `documentation/card-status.md`; this file records confirmed mechanic gaps and
 audit notes that a script cannot detect.
 
+## Implementation set queue
+
+`implement-card-batch` moves to the first Pending set here once the active set
+is Implemented. Review/optimisation does not block that transition. Use metadata
+and registry values to prepare the next tracker; never infer priority from the
+order of the availability table. A user-requested different set takes precedence.
+
+| Set (registry key) | Status | Notes |
+| ------------------ | ------ | ----- |
+| `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
+| `downfall` | Pending | Next implementation set, selected by the user on 2026-10-16. |
+
+Downfall is next. The next implementation invocation archives Vantage Point
+and prepares Downfall before implementing one batch; this workflow change does
+not itself start card work.
+
 ## 1. Missing card definitions
 
 Missing definitions, unfinished scaffold placeholders and per-set counts are
@@ -86,20 +102,23 @@ cards into generated decks.
 `sets/vantagepoint.js` contains structural definitions and exact, dated ELO
 values for all 66 cards. The pre-review tracker recorded all 13 batches (36001–36066) as
 implemented and behavior tested. This is an implementation status, not an
-independent rules/strategy sign-off. Vantage Point remains `in-progress`, hidden
-and untested per `documentation/card-sets.md`; independent review and the
-set-wide review demonstrate necessary rules/AI repairs; see the report below.
+independent rules/strategy sign-off. Vantage Point is playable by user decision
+on 2026-10-16 under the two-stage workflow. Review findings remain open as
+required repairs for demonstrated baseline gameplay, baseline AI and integration
+defects, alongside optional deeper strategic improvements in the optimisation
+queue; this does not assert review approval.
 
-Vantage Point is the active batched implementation. Its live queue, ownership,
-status summary and append-only completion log are maintained in
-`documentation/new-sets/current-set-implementation.md`. The `implement-card-batch` skill must
-update that tracker after every status transition and completed batch.
+**Set record:** [active tracker](current-set-implementation.md), with separate
+implementation and optimisation queues, ownership, verification and logs. On
+transition, replace this link with `records/vantagepoint.md` and retain a dated
+history link. `implement-card-batch` handles new implementation only;
+`optimise-card-batch` handles the review/repair cycle.
 
 The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves all batch boundaries and the full append-only completion log before
 final review. Future snapshots must retain later repair/review evidence before
 the active tracker is replaced; do not overwrite older snapshots. The [2026-10-06 full set review](reviews/vantage-point/vantagepoint-set-review.md) has verdict
-**Changes required**. Twelve batches are reopened for supported defects; batch 13
+**Changes required**. Twelve batches are queued for optimisation for supported defects; batch 13
 has current passing evidence requiring revalidation after shared repairs. Findings
 include engine dispatch/reward crashes, missing draw/click/damage models, illegal
 upgrade placement and missed immediate win/kill alternatives. The shared
@@ -113,8 +132,9 @@ finite continuation planning. The Runner budgets encounters and a fresh ordinary
 run after each sacrifice, using only visible defenses. It assumes the Corp
 will spend them even when the private Corp policy would decline. Continuations
 use the currently installed rig and the existing run calculator's static-board
-assumptions; they do not search intervening draw/install actions. Strategic
-support is required during each batch; final review verifies it.
+assumptions; they do not search intervening draw/install actions. Usable
+baseline support is required during implementation; stronger strategic evidence
+is developed and independently checked through optimisation/review.
 
 No repository-wide rules-text comparison has yet been completed for the other
 registered definitions. A lack of `TODO` does not prove a card is complete.
@@ -130,7 +150,7 @@ now follows complete restricted-payment routes with source exhaustion, preventio
 and finite-repeat/click budgets. Both real planners have same-board contrasting
 coverage; all 50 test files pass. See the [repair evidence](vantage-point-implementation-notes.md#batch-13-corp-restricted-payment-repair-2026-10-06).
 No new accepted limitation is recorded. Independent batch/set-wide review remains
-separate; playability flags are unchanged.
+separate; Vantage Point was made playable on 2026-10-16, with findings retained.
 
 ## 3. Confirmed AI hook gaps
 

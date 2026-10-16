@@ -1,273 +1,173 @@
-# Running a Card-Set Implementation with Coding Agents
+# Running Card-Set Implementation and Optimisation
 
-This is the user-facing procedure for implementing a large card set through
-Codex, Claude Code, Cline or another repository-aware coding agent. The
-`implement-card-batch` skill contains the technical instructions; this document
-explains exactly what the user should do and say.
+The workflow has two independent stages. Implementation delivers working rules
+and usable baseline AI, marks the set implemented and playable, and moves on.
+Optional optimisation strengthens strategy and repairs review findings, bugs
+and edge cases through an optimise/review cycle. Review approval is not a
+prerequisite for implementation completion or playability.
 
 ## Files and responsibilities
 
-| File                                       | Purpose                                                            | Normally edited by           |
-| ------------------------------------------ | ------------------------------------------------------------------ | ---------------------------- |
-| `current-set-implementation.md`            | Active set, batch queue, ownership, status and completion evidence | Setup agent and batch agents |
-| `.agents/skills/implement-card-batch/SKILL.md` | Set-agnostic one-batch instructions for any coding agent       | Maintainers only             |
-| `.agents/skills/review-card-batch/SKILL.md` | Independent strategic AI review of an implemented batch | Maintainers only |
-| `.agents/skills/review-card-set/SKILL.md` | Full-set review coordinating batch evidence and readiness checks | Maintainers only |
-| `reviews/<set-slug>/<registry-key>-batch-<n>.md` | Per-card review evidence, findings and verdict for a specific code snapshot | Batch-review agents |
-| `history/<registry-key>-<YYYY-MM-DD>.md` | Dated full tracker snapshots, retaining batch boundaries and completion/review history | Setup/final-review agents |
-| `reviews/<set-slug>/<registry-key>-set-review.md` | Final set-wide evidence, unresolved findings and readiness verdict | Final-review agents |
-| `card-implementation-backlog.md`           | Long-term unfinished work and archived set-level status            | Batch/final-review agents    |
-| `new-set-integration-guide.md`             | Definition of done for adding a complete set                       | Maintainers only             |
+| File | Purpose |
+| ---- | ------- |
+| `current-set-implementation.md` | Active implementation set, exact batches, verification, separate implementation/optimisation queues and logs |
+| `.agents/skills/implement-card-batch/SKILL.md` | Implement one new batch, including baseline AI and tests; transition to a queued next set when needed |
+| `.agents/skills/optimise-card-batch/SKILL.md` | Improve one implemented batch and repair supported findings |
+| `.agents/skills/review-card-batch/SKILL.md` | Independently audit strategy and mechanics; update optimisation status |
+| `.agents/skills/review-card-set/SKILL.md` | Independently audit all batches and cross-batch integration |
+| `records/<registry-key>.md` | Maintained set record after implementation moves on, retaining paths, batch boundaries, both queues, verification and logs |
+| `history/<registry-key>-<date>.md` | Immutable dated tracker snapshots; never overwrite an old snapshot |
+| `reviews/<set-slug>/` | Snapshot-specific reports, probes and results |
+| `card-implementation-backlog.md` | Ordered implementation set queue, Set record links and outstanding work |
+| `new-set-integration-guide.md` | Mechanics, baseline AI and implementation integration requirements |
+| `../card-sets.md` | Playability decisions, matched by registry flags |
 
-The checked-out repository is the shared handoff. Agents do not need earlier
-chat transcripts when they can read these files and the current worktree.
+The repository is the handoff; earlier chat transcripts are unnecessary. Preserve
+unrelated work. Never run implementation, optimisation or review concurrently
+against the same set file, consumers or record. Agents do not commit automatically.
 
-## Before starting
+## Implement one batch
 
-1. Open the repository root as the agent's VS Code workspace.
-2. Confirm `documentation/new-sets/current-set-implementation.md` names the intended
-   active set and its file paths are correct.
-3. Check that no other agent is currently working on the definition file or
-   tracker.
-4. Preserve or commit any unrelated work according to your normal Git workflow.
-   Agents are instructed not to commit automatically.
-
-Never run two batch agents concurrently. They could both claim the same row or
-overwrite the shared set file even if their intended card ranges differ.
-
-## Implement one batch with Codex
-
-Start a new Codex chat in the repository and type:
+In a fresh repository chat:
 
 ```text
 $implement-card-batch
 ```
 
-Plain English such as "implement the next card batch" also triggers the skill.
-That instruction authorizes one batch only. Codex will read the current-set
-tracker, resume an interrupted batch or claim the next pending batch, implement
-and test it, and update the queue and completion log.
+Plain English such as “implement the next card batch” works too. Other agents
+can read `.agents/skills/implement-card-batch/SKILL.md` directly. The agent resumes
+an In progress implementation batch, otherwise claims the first Pending batch,
+implements rules and working baseline AI, tests and records completion, then
+stops. A first outstanding Blocked batch requires its recorded dependency to be
+resolved or an explicit priority change.
 
-## Implement one batch with another agent
+Inspect the diff, queue, completion evidence and test results after each batch.
+`Complete` means gameplay and baseline AI are implemented; it does not certify
+strong strategic review. Baseline support accounts for direct effects, legal
+timing/targets and required resources using existing evaluator contracts.
+Deeper competing-plan comparisons, synergies and opponent-response planning
+are queued for optimisation. No review is required between implementation batches.
+If interrupted, use the same prompt to resume the In progress row; do not reset
+it while another agent is still working.
 
-Agents that do not load `.agents/skills/` automatically can be pointed at the
-skill file directly. Start a new agent chat in the same repository and paste:
+After the last batch, the agent runs the integration guide's implementation
+checks, marks **Implementation status** `Implemented`, records `playable` in
+`documentation/card-sets.md`, sets `hidden: false` and `untested: false` together,
+regenerates card status and verifies the final changes. This workflow authorizes
+that availability change without waiting for independent review. Failed
+implementation checks stay visible and must be resolved before claiming completion.
+Review findings discovered later enter optimisation, including rules bugs.
+
+## Change to the next implementation set
+
+On the next `$implement-card-batch` invocation after implementation completes:
+
+1. Select the first Pending entry in the backlog's **Implementation set queue**.
+   An explicitly named next set takes precedence. If none is selected, ask for
+   the next set; do not infer priorities from registry order. Inactive means
+   paused: do not resume or select another set without the user's instruction.
+2. Save the entire old tracker as a new immutable dated snapshot in `history/`,
+   adding a suffix if the filename exists. Preserve boundaries, both queues,
+   completion, optimisation and review logs, set-wide verdict and verification.
+3. Save a maintained copy as `records/<registry-key>.md`. Adjust relative Markdown
+   links in both copies for their new directories, and retain linked notes and
+   evidence. If a maintained record already exists, reconcile its newer
+   optimisation/review evidence rather than overwriting it. The backlog's
+   **Set record** link must point to this maintained copy. Link the snapshot and
+   set report too. Update other current operational links that pointed to the
+   outgoing active tracker, including the availability table and review index;
+   immutable historical records keep their original provenance.
+4. Prepare the new tracker using local metadata, registry and integration guide:
+   set name/key/pack, exact IDs, definition and metadata files, notes, review
+   directory, integration test and required shared commands. Preserve existing
+   implementations. Inspect unfinished mechanics to choose sensible batches,
+   usually 6–8 ordinary or 4–6 complex cards, without gaps or overlaps. Inspect
+   existing definitions and tests before crediting any already implemented range.
+   Initialise **Implementation status** `In progress`, both queues and logs;
+   mark the selected set In progress in the backlog. Keep its availability
+   in-progress, hidden and untested until implementation checks pass.
+5. Implement exactly one batch of the new set, then stop. Setup does not consume
+   a second batch, and no review/optimisation of the previous set is required.
+
+For setup only, say “Prepare the tracker for <set>; do not implement cards.”
+To pause, set Status Inactive and preserve the queues and logs. To change
+priorities mid-set, explicitly name the replacement; archive the interrupted
+record first. Never erase outstanding implementation or optimisation work.
+
+## Optimise and review an implemented batch
+
+Use separate chats for implementation and independent review:
 
 ```text
-Read .agents/skills/implement-card-batch/SKILL.md and follow it.
-```
-
-The skill is tool-neutral. The extension must be able to read
-and edit the workspace and run terminal commands. If it operates in a different
-clone, its tracker and prior batch edits will not be shared until Git changes
-are transferred.
-
-## After every batch
-
-Do not rely only on the agent's chat response. Inspect the repository:
-
-1. Open `documentation/new-sets/current-set-implementation.md`.
-2. Confirm the batch is `Complete`, the summary counts changed and a completion
-   log row names focused tests. If it is `Blocked` or `In progress`, read the
-   recorded reason before starting another agent.
-3. Review the changed cards and focused tests in the diff.
-4. Confirm the agent reported all required shared tests passing.
-5. Optionally commit the reviewed batch so it becomes a clean recovery point.
-
-Then open a fresh chat and use the same one-line prompt for the next batch. A
-fresh chat keeps context smaller; the tracker supplies continuity.
-
-## Review a completed batch's AI support
-
-Use a fresh chat for the independent check:
-
-```text
+$optimise-card-batch Vantage Point 5
 $review-card-batch Vantage Point 5
 ```
 
-The skill accepts the set name, registry key or pack code and a batch number.
-`$review-card-batch 5` uses the active set. Without a number it selects the earliest
-completed batch without a current passing review. An archived set needs preserved
-batch boundaries; the agent will ask for exact IDs if those records are missing.
-It never substitutes the active set's numbering for a different set.
+Both accept set name, registry key or pack code. A number alone uses the active
+set. Optimisation with no batch resumes In progress, otherwise the first Pending
+optimisation entry. Review with no batch selects the earliest implemented batch
+without current passing evidence. Explicit sets resolve through the backlog's
+Set record link, so optimisation of an earlier set continues after implementation
+moves on. Never reinterpret another set's batch number using the active queue.
+Missing preserved boundaries require exact IDs or a mapping from the user.
 
-The reviewer audits every card's strategic choices through real selectors and
-planners, including competing actions, resource/scoring budgets, targets and the
-opposing AI. It records a per-card verdict and reproducible findings under
-`documentation/new-sets/reviews/`. It runs focused and full regression checks,
-but green tests alone do not establish strong strategy. Reviews are tied to the
-reviewed source/test snapshot; changed consumers require rechecking the evidence.
+Optimisation assesses every card's strategy and establishes a concrete work
+list from supported findings and decision gaps. It improves strategy through
+real selectors/planners and adds permanent regressions. Mechanics revalidation
+follows defects, changed behaviour and affected interactions, rather than
+repeating the original implementation checklist. It runs
+focused/shared/full verification, appends remediation evidence and marks the row
+Awaiting review. Missing essential evidence is part of the work. Shared repairs
+identify other batches needing revalidation. The optimiser preserves independent
+verdicts; only review can assign Pass.
 
-The review does not repair code. A **Changes required** verdict reopens the active
-batch as `Pending`, or `Blocked` for a precise dependency beyond that batch.
-`$implement-card-batch` picks up reopened work under its usual selection rule,
-then the repaired batch is reviewed again. The implementation agent reads the
-linked batch report and related findings in the set report, reproduces each
-required defect, adds permanent decision-level regression coverage, and appends
-remediation evidence without changing the independent verdict. Missing essential
-coverage listed in the report is part of the repair work. Shared repairs also
-identify other batches whose passing evidence needs revalidation. An **Inconclusive** verdict identifies
-the missing evidence and does not count as review approval. Review history is
-separate from the append-only implementation completion log.
+| Optimisation status | Meaning |
+| ------------------- | ------- |
+| Not requested | No optimisation currently queued |
+| Pending | Findings, improvements or evidence checks queued |
+| In progress | Claimed work, with owner and date |
+| Blocked | Precise unresolved dependency recorded |
+| Awaiting review | Optimisation pass completed; independent review needed |
+| Pass | Sufficient independent evidence for the reviewed code snapshot |
 
-You can review earlier batches while the last batch is still pending, one chat
-at a time. For an existing set, start with the earliest completed batch and work
-through the queue. For new batches, review after implementation and before moving
-on. Never run a reviewer while an agent is editing the same set file or tracker.
+Changes required queues Pending repairs (or a precise Blocked dependency).
+Inconclusive queues Pending evidence work with an exact criterion. Neither
+automatically changes implementation status or availability. Baseline gameplay,
+baseline AI and integration defects are required repairs; label them explicitly
+in the report and queue, and use bug tickets when separate work is needed.
+Preserve historical completion rows/logs and track outstanding defects separately.
+Deeper strategic improvements remain optional. Review history stays separate
+from append-only completion and optimisation logs. Previously passing evidence needs revalidation when its
+consumers change. Reviewers use unchanged code and do not repair it.
 
-## Resume an interrupted batch
+## Review the whole implemented set
 
-If a session ends while a row remains `In progress`, do not reset it to
-`Pending`. Start a new chat and use the normal one-line prompt. The next agent is required to resume the first in-progress batch.
-
-If you know another agent is still actively working, wait for it instead of
-starting a second session.
-
-## Handle a blocked batch
-
-Read the blocker in the queue. If you can supply the missing ruling or approve
-the necessary scope, start a new chat with the normal prompt plus that one fact. For example:
-
-```text
-$implement-card-batch
-For the blocked card, use the ruling that <concise ruling or decision>.
-```
-
-Do not manually mark the row complete. The agent resolving the blocker must run
-the tests, change the status and append the completion evidence.
-
-## Perform the final set-wide review
-
-Completing every batch does not automatically make the set production-ready.
-Check that every completed batch has a passing strategic review for the current
-code and that repairs or inconclusive reviews have been resolved. The final
-review still checks interactions across batches and overall integration.
-The review must produce evidence for the whole set, rather than another
-implementation-completion claim:
-
-1. **Coverage and rules:** account for every intended card, metadata mapping,
-   image path and ELO value; compare implemented mechanics with card text and
-   current rulings. Exercise timing, cancellation, prevention, restrictions and
-   turn/run/encounter cleanup. Record which checks are automated and which are
-   manual, including anything not verified.
-2. **Strategic AI:** verify current passing batch-review evidence for every
-   card. Exercise real selectors and planners with competing actions, resource
-   budgets and opposing-side decisions. Recheck evidence affected by later
-   shared-engine or AI changes; a hook's existence is insufficient.
-3. **Cross-batch interactions:** test shared payment, prevention, hosting,
-   access, run-continuation and scoring mechanics together where applicable,
-   including interactions with already playable sets. Record the scenarios and
-   results so another reviewer can reproduce them.
-4. **Integration and regression:** check legal formats and launcher defaults,
-   generate legal Runner and Corp decks in every applicable format, run focused
-   and shared integration tests, and finish with `node tests/run-all-tests.js`,
-   including Corp decision fixtures and decision snapshots. Pending known-red
-   reproductions remain outside the green suite.
-5. **Recorded verdict:** write `reviews/<set-slug>/<registry-key>-set-review.md` with the
-   reviewed commit, dirty-worktree state, source/test hashes, per-card evidence
-   or links to current batch reports, cross-batch results, commands/results,
-   manual checks, findings and a verdict of **Pass**, **Changes required** or
-   **Inconclusive**. Preserve earlier review history. Missing evidence means
-   Inconclusive; confirmed defects mean Changes required. Reopen affected
-   batches with actionable findings, update tracker counts and the backlog,
-   and retain the append-only completion log. A repair requires re-review.
-
-A Pass supports a recommendation to mark the set playable. Changing registry
-status/flags is a separate action; unresolved blockers or unverified checks must
-remain visible, and limitations require explicit user acceptance.
-
-Start a separate chat and use:
+After implementation, optionally run:
 
 ```text
 $review-card-set Vantage Point
 ```
 
-Without a set argument, the skill uses the active tracker. It establishes missing
-current batch reviews using `review-card-batch`, then checks cross-batch mechanics
-and integration and records the final verdict. Independent reviewers may audit
-disjoint batches while one coordinator owns the tracker and shared verification;
-production code stays unchanged throughout the review. Repairs are handed back
-to `implement-card-batch`, followed by re-review. The review does not enable the
-set or silently accept limitations.
+This establishes current per-card and batch evidence, audits cross-batch rules,
+AI, legal decks, integration and actual manual coverage, runs verification and
+records Pass, Changes required or Inconclusive. Its evidence standard is
+unchanged; the verdict describes optimisation readiness independently of the
+playability decision. Independent batch agents may work on disjoint reports
+while a coordinator owns the set record and shared verification. No production
+edits run alongside review.
 
-## Change to a different active set
+Findings go to the set's optimisation queue, with baseline defects marked as
+required repairs rather than optional improvements. Separately ticketed defects
+follow the ticket workflow. For batch repairs, follow with
+`$optimise-card-batch <set> <batch>` and `$review-card-batch <set> <batch>` until
+passing; re-run set review for remaining cross-batch findings. Implementation of
+the next set can proceed without waiting for these reviews or repairs.
 
-Do this only after archiving the old set's final state, or when explicitly
-pausing it to change priorities. You can update the tracker manually using the
-checklist below, or ask an agent to prepare it.
+## Recurring workflow
 
-### Exact setup prompt
-
-```text
-Prepare documentation/new-sets/current-set-implementation.md for <SET DISPLAY NAME>
-using pack code <PACK CODE>, registry key <REGISTRY KEY>, definition file
-<SET FILE>, and card range <FIRST ID>-<LAST ID>.
-
-Read documentation/new-sets/card-set-agent-operator-guide.md and
-documentation/new-sets/new-set-integration-guide.md. Inspect the metadata and card text,
-archive the entire previous tracker under documentation/new-sets/history/ with
-its batch boundaries and complete implementation/review logs. Preserve existing
-snapshots, adjust relative Markdown links, and link the archive and final review
-from the backlog. Create sensible
-reviewable batches based on card complexity, reset the completion log, add the
-correct set-specific verification commands, and validate that every intended
-card ID is covered exactly once without gaps or overlaps. Do not implement any
-cards in this setup task.
-```
-
-Replace every angle-bracketed value before sending it.
-
-### Tracker fields that must change
-
-In `documentation/new-sets/current-set-implementation.md`, update all of these together:
-
-- `Status` (`Active` or `Inactive`);
-- set display name;
-- registry key from `setRegistry.availableSets`;
-- legacy NetrunnerDB pack code;
-- definition and metadata file paths;
-- exact intended card range;
-- registry state expected during implementation;
-- focused integration-test path;
-- review directory, recorded explicitly for the selected set;
-- status-summary counts;
-- every row in the batch queue;
-- completion log, reset to its empty placeholder after archiving;
-- batch-review log and set-wide review state/links, reset for the new set;
-- set-specific syntax and test commands.
-
-Before replacing the previous tracker contents, save a dated full snapshot in
-`documentation/new-sets/history/<registry-key>-<YYYY-MM-DD>.md`, including the
-entire completion log, batch boundaries, review log and final review state.
-Never overwrite an existing snapshot; add a suffix if necessary. Adjust relative
-Markdown links, keep linked notes/reports in place, and link the snapshot and
-final report from `documentation/new-sets/card-implementation-backlog.md` with a
-summary of unresolved findings and explicitly accepted limitations. The next
-set starts with an empty live log; the previous set's evidence stays in history.
-
-### Choosing batches
-
-- Use roughly 6–8 straightforward cards per batch.
-- Use roughly 4–6 cards when identities, hosting, access replacement,
-  prevention, redirects or complex Corp decisions are involved.
-- Prefer faction or mechanic boundaries, but split a complex faction.
-- Cover every intended ID exactly once.
-- Never use overlapping ranges.
-
-## Pause without selecting another set
-
-Set the tracker's `Status` to `Inactive`, preserve the current queue/log in the
-backlog or an archived tracker, and do not leave a different set implied by old
-paths. The skill will stop safely when the tracker is inactive.
-
-## Minimal recurring workflow
-
-For ordinary operation, the whole user loop is:
-
-1. Ensure no other agent is running.
-2. Open a new chat.
-3. Type `$implement-card-batch`.
-4. Review the diff, tracker entry and tests.
-5. Optionally commit.
-6. Repeat until all batches are complete.
-7. Run the separate final-review prompt.
+1. Run `$implement-card-batch`, inspect the diff and evidence, and repeat until
+   the set is Implemented and playable.
+2. Record the next set in the implementation queue; the next implementation
+   invocation preserves this set and starts one batch of the next.
+3. Independently schedule set/batch review and optional optimise/review cycles
+   against explicit sets. Preserve open findings across every transition.

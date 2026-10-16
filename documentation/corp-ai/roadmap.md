@@ -22,7 +22,7 @@ before viewing candidate gate results. The roadmap table below owns the current 
 
 ## Current implementation order
 
-Updated 2026-10-15. This is the preferred sequence for the deception/install
+Updated 2026-10-16. This is the preferred sequence for the deception/install
 track; item dependencies below remain the formal blockers. Completed merge work
 is recorded in the done tables and the historical merge plan.
 
@@ -36,10 +36,11 @@ is recorded in the done tables and the historical merge plan.
 | 5 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | Attribute the residual tell, implement a supported repair in this ticket, and gate actual reduction |
 | 6 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground placement against L8.9 findings/adopted repair; fresh control and separate policy gates |
 
-F11 is done, satisfying F12's dependency. L8.2-before-I2 and L8.9-before-I3
-are sequencing preferences rather than additional formal dependencies. Do not
+F11 and F12 are done. L8.2 was not adopted (full gate failed; policy removed),
+so I2 no longer waits on it; its observer/collector repairs stay. L8.9-before-I3
+is a sequencing preference rather than an additional formal dependency. Do not
 adopt a later policy using a control predating an adopted prerequisite.
-[L9.0.1](../backlog/code-review/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
+[L9.0.1](../backlog/done/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
 [L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md) proposes separate consumer gates; refresh affected controls after any adoption. Complete L8.7's
 card audit and L8.10 mechanics/diagnostics before I5 (its formal dependency).
 L8.8 remains separately gated after I2; it is not an I2 prerequisite.
@@ -131,12 +132,6 @@ price yet.
 - **Spec:** [L8.10-trap-play-value.md](specs/L8.10-trap-play-value.md)
 - **Goal:** Declare trap mechanics and measure play/access opportunities without changing decisions. Supplies I5's evidence; I5 owns any later payoff conversion and adoption. Independent of L8.8's concealment research.
 
-### L9.0.1 Adopt honest lockout
-- **Status:** in-progress
-- **Depends on:** L9.0, F4
-- **Ticket:** [L9.0.1-adopt-honest-lockout.md](../backlog/code-review/L9.0.1-adopt-honest-lockout.md)
-- **Goal:** Global adoption experiment not adopted after its failed gate; await independent review of cleanup. L9.0.2 proposes isolated consumer gates.
-
 ### L9.0.2 Consumer-specific honest security adoption
 - **Status:** proposed
 - **Depends on:** L9.0, L9.1, F4
@@ -179,6 +174,7 @@ price yet.
 | L9.0 | Lockout honesty | [L9.0-lockout-honesty](../backlog/done/L9.0-lockout-honesty.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 | L9.1 | Unpriceable breakers | [L9.1-unpriceable-breakers](../backlog/done/L9.1-unpriceable-breakers.md) | [Corp architecture](architecture.md#server-security-evaluation) |
 | L8.5 | Match-local public outcome feedback | [feature-layer-8-5-match-local-public-outcome-feedback](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
+| L9.0.1 | Adopt honest lockout | [L9.0.1-adopt-honest-lockout](../backlog/done/L9.0.1-adopt-honest-lockout.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 
 ## Foundations (F)
 
