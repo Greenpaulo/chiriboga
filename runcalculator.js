@@ -313,6 +313,13 @@ class RunCalculator {
 
   IceAct(card, iceAI, point, server) {
     var result = []; //array of points (directions)
+    //subtypes gained earlier in this encounter (persistents with addSubTypes, e.g. Pelangi)
+    var persistentsSoFar = point.persistents || [];
+    for (var i = 0; i < persistentsSoFar.length; i++) {
+      var gained = persistentsSoFar[i];
+      if (gained.addSubTypes && gained.target == iceAI.ice && gained.iceIdx == point.iceIdx)
+        iceAI = Object.assign({}, iceAI, { subTypes: iceAI.subTypes.concat(gained.addSubTypes) });
+    }
 
     var iceStrength = iceAI.strength;
     for (var i = 0; i < point.card_str_mods.length; i++) {
@@ -332,6 +339,10 @@ class RunCalculator {
 	if (typeof card.AIImplementBreaker == "function") {
 		result = card.AIImplementBreaker.call(card,this,result,point,server,cardStrength,iceAI,iceStrength,clicksLeft,creditsLeft);
 	}
+    //non-breaker encounter abilities that change how breakers apply (e.g. Pelangi)
+    if (typeof card.AIEncounterAbility == "function") {
+      result = card.AIEncounterAbility.call(card, this, result, point, iceAI);
+    }
     return result;
   }
 

@@ -26,7 +26,7 @@ in card-sets.md.
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | in-progress | 65 | 65 | 0 | 20 | 0 | 26 / 61 | true / true | no |
+| `downfall` | in-progress | 65 | 65 | 0 | 16 | 0 | 30 / 61 | true / true | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
@@ -68,10 +68,6 @@ None.
 ### `downfall` (sets/downfall.js)
 
 - 26004 Stargate: 1 scaffold marker(s)
-- 26025 Pelangi: 1 scaffold marker(s)
-- 26028 Direct Access: 1 scaffold marker(s)
-- 26029 Rejig: 1 scaffold marker(s)
-- 26030 Whistleblower: 1 scaffold marker(s)
 - 26032 Architect Deployment Test: 1 scaffold marker(s)
 - 26038 Cold Site Server: 1 scaffold marker(s)
 - 26040 Project Yagi-Uda: 1 scaffold marker(s)

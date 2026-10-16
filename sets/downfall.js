@@ -2136,14 +2136,21 @@ cardSet[26024] = {
   memoryCost: 1,
   strength: 1,
   strengthBoost: 0,
-  installedTurnBonus: true,
-  responseOnRunnerTurnEnds: {
+  installedTurnBonus: false,
+  //When you install this program, it gets +3 strength for the remainder of the turn.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) this.installedTurnBonus = true;
+    },
+  },
+  //The turn ends after its discard step.
+  responseOnRunnerDiscardEnds: {
     Resolve: function () {
       this.installedTurnBonus = false;
     },
     automatic: true,
   },
-  responseOnCorpTurnEnds: {
+  responseOnCorpDiscardEnds: {
     Resolve: function () {
       this.installedTurnBonus = false;
     },
@@ -2268,7 +2275,148 @@ cardSet[26025] = {
   subTypes: ["Virus"],
   installCost: 1,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  //the subtype effect currently applied (a lingering effect, so it outlasts this program)
+  encounterEffect: null,
+  //When you install this program, place 2 virus counters on it.
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "virus", 2);
+    },
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  //Every ice subtype in the card pool; the breaker-matching subtypes first.
+  IceSubTypeChoices: function () {
+    var first = ["Barrier", "Code Gate", "Sentry"];
+    if (!this._pooledIceSubTypes) {
+      var pooled = [];
+      for (var id in cardSet) {
+        var def = cardSet[id];
+        if (def && def.cardType == "ice" && def.subTypes) pooled = pooled.concat(def.subTypes);
+      }
+      this._pooledIceSubTypes = pooled;
+    }
+    var others = [];
+    var add = function (card) {
+      if (!card || card.cardType != "ice" || !card.subTypes) return;
+      for (var i = 0; i < card.subTypes.length; i++) {
+        var st = card.subTypes[i];
+        if (!first.includes(st) && !others.includes(st)) others.push(st);
+      }
+    };
+    add({ cardType: "ice", subTypes: this._pooledIceSubTypes });
+    InstalledCards(corp).forEach(add);
+    return first.concat(others.sort());
+  },
+  abilities: [
+    {
+      text: "Hosted virus counter: The encountered ice gains a subtype for the remainder of this encounter.",
+      Enumerate: function () {
+        if (this.usedThisTurn) return [];
+        if (!CheckEncounter()) return [];
+        if (!CheckCounters(this, "virus", 1)) return [];
+        var ice = GetApproachEncounterIce();
+        if (!ice) return [];
+        //choosing a subtype the ice already has would change nothing
+        return this.IceSubTypeChoices()
+          .filter(function (st) {
+            return !CheckSubType(ice, st);
+          })
+          .map(function (st) {
+            return { subType: st, label: st, alt: "pelangi_" + st };
+          });
+      },
+      Resolve: function (params) {
+        this.usedThisTurn = true;
+        RemoveCounters(this, "virus", 1);
+        var effect = {
+          ice: GetApproachEncounterIce(),
+          subType: params.subType,
+          modifySubTypes: {
+            Resolve: function (card) {
+              if (card == this.ice) return { add: [this.subType] };
+              return {};
+            },
+            automatic: true,
+          },
+          responseOnEncounterEnds: {
+            Resolve: function () {
+              RemoveLingeringEffect(this);
+            },
+            automatic: true,
+          },
+          responseOnRunEnds: {
+            Resolve: function () {
+              RemoveLingeringEffect(this);
+            },
+            automatic: true,
+          },
+        };
+        this.encounterEffect = effect;
+        AddLingeringEffect(effect);
+        Log(GetTitle(effect.ice, true) + " gains " + params.subType + " for the remainder of this encounter");
+      },
+    },
+  ],
+  //Live encounters: the Run Calculator reads printed subtypes, so add the applied one.
+  AIModifyIceAI: function (iceAI, startIceIdx) {
+    var effect = this.encounterEffect;
+    if (!effect || !lingeringEffects.includes(effect) || iceAI.ice != effect.ice) return iceAI;
+    if (!iceAI.subTypes.includes(effect.subType))
+      iceAI.subTypes = iceAI.subTypes.concat([effect.subType]);
+    return iceAI;
+  },
+  //Run Calculator: before any other action on this ice, spend a counter so an
+  //installed breaker's type applies. Once per turn, so once per route.
+  AIEncounterAbility: function (rc, result, point, iceAI) {
+    if (this.usedThisTurn || !CheckCounters(this, "virus", 1)) return result;
+    if (rc.PersistentsUse(point, this)) return result;
+    if (point.sr_broken.length > 0) return result;
+    for (var i = 0; i < point.card_str_mods.length; i++) {
+      if (point.card_str_mods[i].iceIdx == point.iceIdx) return result;
+    }
+    var breakerTypes = { Fracter: "Barrier", Decoder: "Code Gate", Killer: "Sentry" };
+    var breakers = rc.precalculated.activeCards.concat(rc.bonusBreaker ? [rc.bonusBreaker.card] : []);
+    var gained = [];
+    for (var j = 0; j < breakers.length; j++) {
+      if (!CheckSubType(breakers[j], "Icebreaker")) continue;
+      for (var type in breakerTypes) {
+        var st = breakerTypes[type];
+        if (CheckSubType(breakers[j], type) && !iceAI.subTypes.includes(st) && !gained.includes(st))
+          gained.push(st);
+      }
+    }
+    for (var k = 0; k < gained.length; k++) {
+      var p = rc.CopyPoint(point);
+      p.virus_counters_spent += 1;
+      //the first persistent triggers the ability, the second picks the subtype
+      p.persistents = p.persistents.concat([
+        { use: this, target: iceAI.ice, iceIdx: point.iceIdx, addSubTypes: [gained[k]] },
+        { use: this, iceIdx: point.iceIdx, alt: "pelangi_" + gained[k] },
+      ]);
+      result.push(p);
+    }
+    return result;
+  },
+  AIOkToTrash: function () {
+    return !CheckCounters(this, "virus", 1);
+  },
+  AIWastefulToInstall: function () {
+    return runner.rig.programs.some(function (card) {
+      return card.title == "Pelangi" && CheckCounters(card, "virus", 1);
+    });
+  },
 };
 
 //The Artist (26027)
@@ -2286,12 +2434,15 @@ cardSet[26027] = {
   unique: true,
   usedCreditThisTurn: false,
   usedInstallThisTurn: false,
+  //true while listing grip installs; the chosen card keeps the discount while it installs
   _discountActive: false,
+  _discountCard: null,
+  //AI: the card to install, set by AIInstallDiscountAbility
+  _aiInstallTarget: null,
   responseOnRunnerTurnBegins: {
     Resolve: function () {
       this.usedCreditThisTurn = false;
       this.usedInstallThisTurn = false;
-      this._discountActive = false;
     },
     automatic: true,
   },
@@ -2299,28 +2450,31 @@ cardSet[26027] = {
     Resolve: function () {
       this.usedCreditThisTurn = false;
       this.usedInstallThisTurn = false;
-      this._discountActive = false;
     },
     automatic: true,
   },
   modifyInstallCost: {
     Resolve: function (card) {
-      if (
-        this._discountActive &&
-        card &&
-        CheckCardType(card, ["program", "hardware"])
-      ) {
-        return -1;
-      }
+      if (!card || !CheckCardType(card, ["program", "hardware"])) return 0;
+      if (this._discountActive && runner.grip.includes(card)) return -1;
+      if (card == this._discountCard) return -1;
       return 0;
     },
+  },
+  InstallChoices: function () {
+    this._discountActive = true;
+    var choices = ChoicesHandInstall(runner, false, function (card) {
+      return CheckCardType(card, ["program", "hardware"]);
+    });
+    this._discountActive = false;
+    return choices;
   },
   abilities: [
     {
       text: "[click]: Gain 2[c].",
       Enumerate: function () {
         if (this.usedCreditThisTurn) return [];
-        if (!CheckClicks(runner, 1)) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
         return [{}];
       },
       Resolve: function () {
@@ -2331,25 +2485,59 @@ cardSet[26027] = {
     },
     {
       text: "[click]: Install 1 program or piece of hardware from your grip, paying 1[c] less.",
+      alt: "artist_install",
       Enumerate: function () {
         if (this.usedInstallThisTurn) return [];
-        if (!CheckClicks(runner, 1)) return [];
-        var choices = ChoicesHandInstall(runner, function (card) {
-          return CheckCardType(card, ["program", "hardware"]);
-        });
+        if (!CheckActionClicks(runner, 1)) return [];
+        var choices = this.InstallChoices();
+        var target = this._aiInstallTarget;
+        if (runner.AI != null && target) {
+          var targeted = choices.filter(function (choice) {
+            return choice.card == target.card && (choice.host || null) == target.host;
+          });
+          if (targeted.length > 0) return targeted;
+        }
         return choices;
       },
       Resolve: function (params) {
         SpendClicks(runner, 1);
         this.usedInstallThisTurn = true;
-        var cardRef = this;
-        cardRef._discountActive = true;
-        Install(params.card, params.host, false, null, true, function () {
-          cardRef._discountActive = false;
-        });
+        this._aiInstallTarget = null;
+        var artist = this;
+        var finish = function () {
+          artist._discountCard = null;
+        };
+        this._discountCard = params.card;
+        Install(params.card, params.host, false, null, true, null, this, finish, null, false, finish);
       },
     },
   ],
+  //AI: click for 2 credits beats the basic action; the install ability is
+  //used through AIInstallDiscountAbility instead of as economy.
+  AIEconomyTrigger: 3,
+  AIWouldTrigger: function () {
+    return !this.usedCreditThisTurn;
+  },
+  AIInstallDiscountAbility: function (card, host) {
+    if (this.usedInstallThisTurn || !CheckCardType(card, ["program", "hardware"])) return null;
+    if (!runner.grip.includes(card) || !CheckActionClicks(runner, 1)) return null;
+    host = host || null;
+    var listed = this.InstallChoices().some(function (choice) {
+      return choice.card == card && (choice.host || null) == host;
+    });
+    if (!listed) return null;
+    var artist = this;
+    return {
+      alt: "artist_install",
+      discount: 1,
+      select: function () {
+        artist._aiInstallTarget = { card: card, host: host };
+      },
+    };
+  },
+  AIEconomyInstall: function () {
+    return 1;
+  },
 };
 
 //Direct Access (26028)
@@ -2364,8 +2552,83 @@ cardSet[26028] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 1,
+  //true from resolution until the run-end ability resolves (also set for AI run hypotheticals)
+  blankingIdentities: false,
+  Enumerate: function () {
+    return ChoicesExistingServers();
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.blankingIdentities = true;
+    MakeRun(params.server);
+  },
+  //While you are resolving this event, each player's identity loses all abilities.
+  modifyHasAbilities: {
+    Resolve: function (card) {
+      if (!this.blankingIdentities) return true;
+      return card != corp.identityCard && card != runner.identityCard;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //When that run ends, you may shuffle this event into your stack.
+  responseOnRunEnds: {
+    Enumerate: function () {
+      if (!this.blankingIdentities) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var choices = [
+        { shuffle: true, label: "Shuffle Direct Access into your stack", button: "Shuffle into stack" },
+        { shuffle: false, label: "Decline", button: "Decline" },
+      ];
+      if (runner.AI != null)
+        runner.AI.preferred = { title: "Direct Access", option: choices[this.ShufflesBackForAI() ? 0 : 1] };
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          //the event finishes resolving with this ability
+          this.blankingIdentities = false;
+          if (params.shuffle && this.cardLocation == runner.resolvingCards) {
+            MoveCard(this, runner.stack);
+            Shuffle(runner.stack);
+            Log("Direct Access shuffled into the stack");
+          }
+        },
+        "Direct Access",
+        "Shuffle Direct Access into your stack?",
+        this,
+      );
+    },
+    text: "Shuffle Direct Access into your stack",
+  },
+  ShufflesBackForAI: function () {
+    return true;
+  },
+  //AI: the run calculator sees both identities blank while modelling this run
+  AIRunEventModify: function (server) {
+    this._storedBlanking = this.blankingIdentities;
+    this.blankingIdentities = true;
+  },
+  AIRunEventRestore: function (server) {
+    this.blankingIdentities = this._storedBlanking;
+  },
+  //Identities with run-time effects; printed link is not an ability.
+  IdentityHasRunEffects: function (identity) {
+    if (!identity) return false;
+    for (var key in identity) {
+      if (typeof identity[key] != "object" || identity[key] === null) continue;
+      if (/^(responseOn|automaticOn|modify|interruptOn)/.test(key)) return true;
+    }
+    return false;
+  },
+  AIRunEventExtraPotential: function (server, potential) {
+    if (ServerSuccessfulRunPrevented(server)) return 0;
+    if (potential < 0.5) return 0;
+    //worth 1 credit only when it blanks a Corp identity without blanking a Runner one
+    if (!this.IdentityHasRunEffects(corp.identityCard)) return 0;
+    if (this.IdentityHasRunEffects(runner.identityCard)) return 0;
+    return 0.2;
   },
 };
 
@@ -2381,8 +2644,106 @@ cardSet[26029] = {
   cardType: "event",
   subTypes: ["Mod"],
   playCost: 0,
+  rejigDiscount: 0,
+  rejigInstalling: null,
+  _aiPlan: null,
+  //As an additional cost to play this event, add 1 installed program or piece of hardware to your grip.
+  Enumerate: function () {
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program", "hardware"]);
+    });
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    var rejig = this;
+    //X is the printed install cost of the returned card
+    var discount = Number(params.card.installCost) || 0;
+    Uninstall(params.card, runner.grip, function () {
+      rejig.rejigDiscount = discount;
+      var choices = ChoicesHandInstall(runner, false, function (card) {
+        return CheckCardType(card, ["program", "hardware"]);
+      });
+      var plan = rejig._aiPlan;
+      rejig._aiPlan = null;
+      if (choices.length < 1) {
+        rejig.rejigDiscount = 0;
+        Log("Rejig: no program or hardware can be installed");
+        return;
+      }
+      if (runner.AI != null && plan) {
+        var planned = choices.filter(function (choice) {
+          return choice.card == plan.installCard;
+        });
+        if (planned.length > 0) choices = planned;
+      }
+      var finish = function () {
+        rejig.rejigDiscount = 0;
+        rejig.rejigInstalling = null;
+      };
+      DecisionPhase(
+        runner,
+        choices,
+        function (installParams) {
+          rejig.rejigInstalling = installParams.card;
+          Install(installParams.card, installParams.host, false, null, true, null, rejig, finish, null, false, finish);
+        },
+        "Rejig",
+        "Install 1 program or piece of hardware, paying " + discount + "[c] less",
+        rejig,
+        "install",
+      );
+    });
+  },
+  //Install 1 program or piece of hardware from your grip, paying X[c] less.
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (this.rejigDiscount < 1 || !card || !CheckCardType(card, ["program", "hardware"])) return 0;
+      if (this.rejigInstalling ? card == this.rejigInstalling : runner.grip.includes(card))
+        return -this.rejigDiscount;
+      return 0;
+    },
+  },
+  //AI: return a spent or obsolete card and install the most expensive useful
+  //card that fits; reinstalling the returned card itself refreshes install effects.
+  ChooseAIPlan: function () {
+    var best = null;
+    var returns = this.Enumerate();
+    var credits = AvailableCredits(runner, "installing");
+    for (var i = 0; i < returns.length; i++) {
+      var back = returns[i].card;
+      if (typeof back.AIOkToTrash != "function" || !back.AIOkToTrash.call(back)) continue;
+      var discount = Number(back.installCost) || 0;
+      var targets = runner.grip.filter(function (card) {
+        return CheckCardType(card, ["program", "hardware"]);
+      });
+      if (back.automaticOnInstall) targets.push(back);
+      for (var j = 0; j < targets.length; j++) {
+        var target = targets[j];
+        if (target != back) {
+          if (runner.AI._wastefulToInstall(target)) continue;
+          if (typeof target.AIPreferredInstallChoice == "function" &&
+              target.AIPreferredInstallChoice(ChoicesCardInstall(target, true)) < 0) continue;
+        }
+        var cost = target == back ? discount : InstallCost(target);
+        if (Math.max(0, cost - discount) > credits) continue;
+        var saving = Math.min(cost, discount);
+        if (saving < 1) continue;
+        if (!best || saving > best.saving) best = { returnCard: back, installCard: target, saving: saving };
+      }
+    }
+    return best;
+  },
+  AIWouldPlay: function () {
+    this._aiPlan = this.ChooseAIPlan();
+    return this._aiPlan != null;
+  },
+  AIPreferredPlayChoice: function (choices) {
+    var plan = this._aiPlan || this.ChooseAIPlan();
+    if (!plan) return -1;
+    this._aiPlan = plan;
+    for (var i = 0; i < choices.length; i++) {
+      if (choices[i].card == plan.returnCard) return i;
+    }
+    return -1;
   },
 };
 
@@ -2397,7 +2758,122 @@ cardSet[26030] = {
   cardType: "resource",
   subTypes: ["Connection"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //Whenever you make a successful run, you may trash this resource to choose a card name.
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (!CheckTrash(this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var whistleblower = this;
+      var choices = this.AgendaNameChoices();
+      choices.push({ name: null, label: "Decline", button: "Decline" });
+      if (runner.AI != null) {
+        var name = this.ChooseAIName(attackedServer);
+        var preferred = choices[choices.length - 1];
+        for (var i = 0; i < choices.length; i++) {
+          if (choices[i].name == name) preferred = choices[i];
+        }
+        runner.AI.preferred = { title: "Whistleblower", option: preferred };
+      }
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          if (!params.name) return;
+          var name = params.name;
+          Trash(this, false, function () {
+            Log("Whistleblower names " + name);
+            AddLingeringEffect(whistleblower.NamedStealEffect(name));
+          });
+        },
+        "Whistleblower",
+        "Trash Whistleblower to choose a card name?",
+        this,
+      );
+    },
+    text: "Trash Whistleblower to choose a card name",
+  },
+  //Only agendas can be stolen, so only agenda names are offered.
+  AgendaNameChoices: function () {
+    var names = [];
+    for (var id in cardSet) {
+      var card = cardSet[id];
+      if (card && card.cardType == "agenda" && !names.includes(card.title)) names.push(card.title);
+    }
+    return names.sort().map(function (name) {
+      return { name: name, label: name };
+    });
+  },
+  //The next time this run you access an agenda with the chosen name, steal it,
+  //ignoring all costs. (You are no longer accessing it.)
+  NamedStealEffect: function (name) {
+    return {
+      title: "Whistleblower",
+      chosenName: name,
+      pending: null,
+      used: false,
+      automaticOnAccess: {
+        Resolve: function (card) {
+          if (this.used || !card || card.cardType != "agenda" || card.title != this.chosenName) return;
+          this.used = true;
+          this.pending = card;
+        },
+      },
+      responseOnAccess: {
+        Enumerate: function () {
+          if (!this.pending || this.pending != accessingCard) return [];
+          return [{}];
+        },
+        Resolve: function () {
+          this.pending = null;
+          if (CardEffectsForbid("steal", accessingCard)) {
+            Log(GetTitle(accessingCard, true) + " cannot be stolen");
+            return;
+          }
+          Steal();
+        },
+        text: "Steal the named agenda, ignoring all costs",
+      },
+      responseOnRunEnds: {
+        Resolve: function () {
+          RemoveLingeringEffect(this);
+        },
+        automatic: true,
+      },
+    };
+  },
+  //AI: name a known agenda this breach can reach when its steal costs matter.
+  KnownReachableAgendas: function (server) {
+    var known = [];
+    if (!server) return known;
+    var cards = (server.root || []).concat(server == corp.archives ? server.cards : []);
+    for (var i = 0; i < cards.length; i++) {
+      var card = cards[i];
+      if (card.cardType == "agenda" && (card.faceUp || card.knownToRunner)) known.push(card);
+    }
+    if (server == corp.HQ) {
+      runner.AI.suspectedHQCards.forEach(function (entry) {
+        if (entry.cardType != "agenda" || entry.uncertainty > 0) return;
+        var card = corp.HQ.cards.find(function (c) {
+          return c.title == entry.title;
+        });
+        if (card) known.push(card);
+      });
+    }
+    return known;
+  },
+  ChooseAIName: function (server) {
+    var best = null;
+    var known = this.KnownReachableAgendas(server);
+    for (var i = 0; i < known.length; i++) {
+      var cost = StealCost(known[i]);
+      if (cost.credits < 1 && cost.clicks < 1) continue;
+      if (!best || (known[i].agendaPoints || 0) > (best.agendaPoints || 0)) best = known[i];
+    }
+    return best ? best.title : null;
+  },
 };
 
 //MirrorMorph: Endless Iteration (26031)
