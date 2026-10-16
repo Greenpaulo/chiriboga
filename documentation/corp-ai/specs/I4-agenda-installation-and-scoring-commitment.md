@@ -304,8 +304,9 @@ title cases into the new scoring").
 | `AIIsScoringUpgrade` | boolean, unchanged | Not read by I4. It conflates requirement reduction (SanSan), one-shot counters (Hype Machine), score riders (Malapert, via `AIWouldRezBeforeScore`), steal deterrence (AMAZE) and Perfect Recall. I6 retires it once each card's effect is covered by `AIScoringSupport`, `AIFastAdvanceCounters`, score-time hooks or I2's M4 |
 | `AIFastAdvance` | boolean, unchanged | Not read by I4 |
 
-Title cases to migrate (no [P1](../../backlog/corp_ai_finding_13_legacy_title_lists.md)
-row is tagged I4; these are P1-owned rows M3 depends on):
+Title cases to migrate ([P1](../../backlog/corp_ai_finding_13_legacy_title_lists.md)
+rows `_advancementLimit` and `_potentialAdvancementDirections` are tagged I4
+(owner decision 2026-10-16); the rest of P1 stays later work):
 
 - `_advancementLimit`: SanSan City Grid → `AIScoringSupport` (P1 row
   "`_advancementLimit`", which already requires keeping the unrezzed plan).

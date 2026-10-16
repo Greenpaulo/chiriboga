@@ -209,16 +209,21 @@ it beside the table and defines `CORP_AI_POINT_VALUE`. Only I9 retunes it.
 3. **Stake** `P(s)`, agenda points expected through the server per breach,
    capped at the points the Runner needs to win:
    - HQ, R&D: `_breachConsequence(s).pointsExposed` (agenda density × accesses).
-   - Archives and remotes: agenda points installed there
-     (`pointsExposed`; Archives includes its HQ backdoor via `_breachConsequence`).
+   - Archives: `pointsExposed` (includes its HQ backdoor via `_breachConsequence`).
+   - Remotes whose root holds an agenda or a trap (Ambush or Hostile),
+     postured or not: a common stake, the mean points per agenda in the
+     Corp's deck list, and the `agendaRemote` row. Owner decision
+     (2026-10-16): hide the agenda/trap ICE-count tell, because a trap can win
+     the game too. Whether a trap is worth installing at all is I5's
+     `trapValue`, not I2's. True stakes remain for band-2 safety and
+     diagnostics only.
    - Before I3: the one designated next scoring remote (first of
      `_scoringServers(_emptyProtectedRemotes())`, else the new remote) gets
      the points of the highest-point agenda in HQ when HQ holds one; every
      other empty remote has stake 0. I3 replaces this with its
      scoring-remote role and the agendas expected there within the horizon.
-   - Active bait/bluff posture: a common stake, the mean points per agenda in
-     the Corp's deck list, and the `agendaRemote` row for agenda and trap
-     roots alike. True stakes remain for band-2 safety and diagnostics only.
+   - Active bait/bluff posture on an empty or other remote: the same common
+     stake and row.
    - Remotes with stake > 0 use the `agendaRemote` row, others `otherRemote`.
 4. **Expected points stolen** over horizon `H` (`CORP_AI_RISK_HORIZON_RUNNER_TURNS`,
    2; 1 if the next-turn check failed), with `h_t = _breachHazard(s, t)`:
@@ -344,7 +349,11 @@ rezzed before game end, defined in this ticket),
 `bluffSingleVariableCorrelation`, `realizedIceByRootType`, `installOutcomes`,
 `evaluatorCallCount`.
 Starts: pool command none; posture command `--start-tag i2-posture` (boards
-this ticket builds with `scripts/start-board.js`).
+this ticket builds with `scripts/start-board.js`). No human logs exist for
+these; build them from benchmark game logs (`node scripts/ai-batch.js replay`
+for a pool seed where a posture is active, then `start-board.js --snapshot`).
+If replay cannot save a log with decision snapshots, adding that output is
+part of this ticket.
 
 Pool command:
 
@@ -393,9 +402,9 @@ win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
   control-minus-control at +0.033 [−0.022, +0.091]. Even scaled to 7,000
   games the half-width is about 0.025, so 0.02 would fail an unchanged policy
   about half the time, which measures noise, not I2. 0.05 against a 0.22
-  baseline tell is the largest residual increase this item accepts (an owner
-  question). The guard is kept, not dropped: outside a posture, true stakes
-  give trap remotes no ICE value, so this is the guard most likely to fail.
+  baseline tell is the largest residual increase this item accepts (owner
+  accepted 2026-10-16; holding 0.02 would need about 4,000 seeds per pair).
+  The common agenda/trap stake (step 3) should keep this guard from failing.
 - **Postured-count guard moved to a start-board command.** On the pool it
   fails closed: F12 measured known posture labels at 85.8%/85.4%, below its
   frozen 90% readiness rule. That is a coverage limit, not noise, and more pool
@@ -476,7 +485,7 @@ Missing samples are incomplete setup, not a pass.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`.
 - [ ] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
-- [ ] The `i2-posture` start boards are built from real logs with `scripts/start-board.js`, each `NOTE` naming its source, and meet F12's readiness rule on a control-only run.
+- [ ] The `i2-posture` start boards are built from benchmark game logs with `scripts/start-board.js`, each `NOTE` naming its source, and meet F12's readiness rule on a control-only run.
 - [ ] The pre-gate calibration evidence and the L8.2/I2 ordering decision are recorded before the first gate run.
 - [ ] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
 - [ ] Applicable gate evidence is recorded in the Resolution. For F4: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; an improvement interval's lower bound must be above zero. Only then is the option switched on by default.

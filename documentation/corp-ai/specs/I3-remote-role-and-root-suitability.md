@@ -201,7 +201,9 @@ deck pool, paired seeds, 200 games per deck pair, bootstrap 95% intervals.
 Collectors: `remoteRoles` (adds `remoteRoles.scoringRemoteSwitches` and
 `remoteRoles.scoringRemoteOccupiedTurns`, report-only, defined in this ticket),
 `realizedIceByRootType` (F12).
-Starts: boards this ticket builds with `scripts/start-board.js` from real logs,
+Starts: boards this ticket builds with `scripts/start-board.js` from benchmark
+game logs (`ai-batch.js replay` of a pool seed reaching this state; no human
+logs exist),
 tagged `scoring-remote`: the Corp has a protected remote with no root, an
 agenda in HQ and an economy asset in HQ.
 
