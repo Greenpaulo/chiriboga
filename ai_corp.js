@@ -1629,16 +1629,6 @@ class CorpAI {
       profile.delayTurns = this._weightedPostureValue(scripts, "delayTurns", delayRoll);
       this._postureWeightTelemetry("profile");
     }
-    if (this.options.deceptionLegibility) {
-      var centralDepth = Math.max(
-        ((corp.HQ && corp.HQ.ice) || []).length,
-        ((corp.RnD && corp.RnD.ice) || []).length,
-      );
-      var offset = profile.targetIce - 2;
-      profile.targetIce = Math.max(1, Math.min(3, centralDepth + offset));
-      this._legibilityNote("relativeDepth", {centralDepth: centralDepth,
-        offset: offset, targetIce: profile.targetIce});
-    }
     this._cardDeceptionProfiles.set(card, profile);
     this._postureTelemetryEvent({
       kind: "profile",
@@ -1660,12 +1650,6 @@ class CorpAI {
 
   _deceptionPostureActive(card, server) {
     if (!card || !server) return false;
-    if (this.options.deceptionLegibility &&
-        (typeof server.cards !== "undefined" || !server.root ||
-          server.root.length != 1 || server.root[0] != card)) {
-      this._legibilityNote("ineligibleRoot", {rootCount: (server.root || []).length});
-      return false;
-    }
     if (CheckCardType(card, ["agenda"]))
       return this._shouldBluffAgendaServer(server);
     if (typeof card.AIPunishesAccess == "function")
@@ -1682,11 +1666,10 @@ class CorpAI {
     if (!profile) return normalTarget;
     var age = Math.max(0, card.AITurnsInstalled || 0);
     var current = Math.max(0, Counters(card, "advancement"));
-    var target = age < profile.delayTurns ? current : age == profile.delayTurns
-      ? Math.min(normalTarget, profile.openingAdvances) : normalTarget;
-    this._legibilityNote("advancementCadence", {age: age, target: target,
-      openingAdvances: profile.openingAdvances, delayTurns: profile.delayTurns});
-    return target;
+    if (age < profile.delayTurns) return current;
+    if (age == profile.delayTurns)
+      return Math.min(normalTarget, profile.openingAdvances);
+    return normalTarget;
   }
 
   _deceptionProtectionTarget(server) {
@@ -1694,75 +1677,7 @@ class CorpAI {
     var card = server.root[0];
     if (!this._deceptionPostureActive(card, server)) return null;
     var profile = this._remoteDeceptionProfile(card);
-    if (!profile) return null;
-    return this.options.deceptionLegibility
-      ? this._legibilityProtectionTarget(server, card, profile) : profile.targetIce;
-  }
-
-  _legibilityNote(reason, details = {}) {
-    if (this.options.deceptionLegibility && typeof DecisionSnapshots !== "undefined" &&
-        typeof DecisionSnapshots.Note == "function")
-      DecisionSnapshots.Note("deceptionLegibility", Object.assign({reason: reason}, details));
-  }
-
-  //Top-up memory is separate from the base shape. Repeated planning queries
-  //never raise it twice, and hypothetical queries cannot consume the raise.
-  _legibilityProtectionTarget(server, card, profile) {
-    var commitment = this.options.postureEpochs
-      ? this._postureEpochRecords.get(server)?.get(card)
-      : this._agendaBluffDecisions.get(server) || this._serverBaitDecisions.get(server);
-    var serverId = this._publicPostureServerIds.get(server);
-    var cardId = this._publicPostureCardIds.get(card);
-    var installation = null;
-    for (var event of this._publicPostureHistory)
-      if (event.action == "rootInstalled" && event.serverId == serverId && event.cardId == cardId)
-        installation = event;
-    var state = this._legibilityProtectionState.get(server);
-    var same = state && state.card == card && state.profile == profile &&
-      state.commitment == commitment && state.installation == installation;
-    var target = Math.min(3, profile.targetIce + (same && state.raised ? 1 : 0));
-    if (typeof AIHypothetical !== "undefined" && AIHypothetical.depth > 0) {
-      this._legibilityNote("hypothetical", {targetIce: target});
-      return target;
-    }
-    if (!same) {
-      state = {card: card, profile: profile, commitment: commitment,
-        installation: installation, raised: false};
-      this._legibilityProtectionState.set(server, state);
-    }
-    if (state.raised) {
-      this._legibilityNote("topUpAlreadyApplied", {targetIce: target});
-      return target;
-    }
-    if (profile.targetIce >= 3 || server.ice.length < profile.targetIce) {
-      this._legibilityNote(profile.targetIce >= 3 ? "depthCap" : "belowTarget", {targetIce: target});
-      return target;
-    }
-    var turns = this.options.legibilityTopUpTurns;
-    //Invalid settings use the documented two-turn policy, never a zero-turn
-    //shortcut. The current incomplete Corp turn does not qualify.
-    if (!Number.isInteger(turns) || turns < 1) turns = 2;
-    var currentTurn = this._publicPostureTurn;
-    for (var turn = currentTurn - turns; turn < currentTurn; turn++) {
-      var elsewhere = false;
-      for (var event of this._publicPostureHistory) {
-        if (event.turn != turn || event.action != "iceInstalled" ||
-            event.side != "corp" || event.turnSide != "corp") continue;
-        if (serverId !== undefined && event.serverId == serverId) {
-          this._legibilityNote("sameServerIce", {turn: turn, targetIce: target});
-          return target;
-        }
-        elsewhere = true;
-      }
-      if (turn < 1 || !elsewhere) {
-        this._legibilityNote("historyIncomplete", {turn: turn, targetIce: target});
-        return target;
-      }
-    }
-    state.raised = true;
-    target = Math.min(3, profile.targetIce + 1);
-    this._legibilityNote("topUp", {completedTurns: turns, targetIce: target});
-    return target;
+    return profile ? profile.targetIce : null;
   }
 
   //Roll once for this installed trap, then retain the posture. Re-evaluating a
@@ -2013,7 +1928,6 @@ class CorpAI {
   }
 
   _postureGuardStop(kind, server, card) {
-    this._legibilityNote("tacticalSafety", {posture: kind});
     this._postureTelemetryEvent(
       { kind: kind, action: "guard" },
       server,
@@ -8332,7 +8246,6 @@ class CorpAI {
     this._serverBaitDecisions = new WeakMap();
     this._agendaBluffDecisions = new WeakMap();
     this._cardDeceptionProfiles = new WeakMap();
-    this._legibilityProtectionState = new WeakMap();
     //L8.4 posture epochs: per-server records, the Corp-turn epoch counter and
     //public run counts (option postureEpochs). _postureTelemetry is a
     //harness-only sink (scripts/ai-batch/headless.js).
@@ -8661,6 +8574,4 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   valuelessServerDebtReset: false,
   postureEpochs: true,
   matchLocalPostureFeedback: true,
-  deceptionLegibility: false,
-  legibilityTopUpTurns: 2,
 });

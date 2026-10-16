@@ -456,7 +456,7 @@ learn the AI's patterns (see `principles.md` §5).
 **Status:** Layer 8 is only partly done. Baiting (L8.1), the shared agenda/trap
 profiles, tag deterrence (L8.3), bounded posture epochs (L8.4) and
 match-local outcome feedback (L8.5) are implemented;
-legibility signals (L8.2) remain open; telemetry (L8.6) is optional and parked.
+legibility signals (L8.2) were tested and not adopted after their gate failed; telemetry (L8.6) is optional and parked.
 
 **Baiting (L8.1).** Facedown access-punishing cards expose
 `AIPunishesAccess(server)`. `_calculateBaitFrequency()` uses bounded
@@ -475,6 +475,24 @@ one-turn-delayed advancement. The profile feeds scoring-remote selection
 (`_deceptionInstallDistance()`), how many layers are added, and early
 advancement (`_deceptionAdvancementTarget()`). Profiles never create naked
 agenda servers and are disabled when a breach could win.
+
+**Rejected legibility strategy (L8.2, 2026-10-15).** The tested strategy
+restricted both payload classes to lone-root remotes, sampled depth relative
+to HQ/R&D protection and allowed a public-history top-up. The 1,400-pair full
+gate changed 211 games with no game failures, but did not demonstrate reduced
+all-root count TV (difference -0.005246, 95% interval [-0.012018, 0.001788]).
+The public-variable correlation maximum rose from 0.250379 to 0.701795;
+active-subset rho, win-rate and shape-overlap checks also failed. Holding the
+random draw fixed while increasing central depth makes the relative rule's
+remote target increase by construction. That matches the proposed rule and
+explains its conflict with the correlation guard; the combined gate does not
+isolate each signal's causal contribution. The policy, settings, memory and
+option-only green tests were removed. Do not retry the same relative-depth
+formula or relax its gate after these results. Passive measurement, reporting
+and control-calibration evidence remain useful. See the
+[L8.2 failure record](../backlog/code-review/feature-layer-8-2-remote-deception-profiles.md);
+[L8.9](specs/L8.9-observable-defense-parity.md) already owns attribution before
+a supported replacement is selected.
 
 **Agenda bluff probability.** `_shouldBluffAgendaServer()` rolls once per
 remote and agenda (cached in `_agendaBluffDecisions`) with probability
