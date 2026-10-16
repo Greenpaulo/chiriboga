@@ -29,7 +29,9 @@ For example: “Use optimise-card-batch to repair the next queued Vantage Point
 batch,” followed by “Use review-card-batch to independently review Vantage Point
 batch 1.” These skills locate evidence through the tracker's **Review directory**
 and linked reports. Implementation completion and playability do not wait for
-this optimisation/review cycle.
+optional strategic improvements. Demonstrated baseline gameplay, baseline AI
+and integration defects remain required repairs, even when coordinated through
+this queue; completion history and the human playability decision stay separate.
 
 ## What to retain
 

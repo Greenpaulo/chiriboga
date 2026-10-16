@@ -14,9 +14,11 @@ or change playability flags. Temporary reproduction probes and review documents
 are allowed. Report the set, exact IDs, implementation status and review scope.
 
 This review is independent of implementation completion and playability. Keep
-its strategic evidence standard; queue findings for optional optimisation,
-including gameplay bugs and edge cases. A Changes required or Inconclusive
-verdict does not reopen implementation or prevent moving to another set.
+its strategic evidence standard; queue deeper strategic findings for optional
+optimisation. Baseline gameplay, baseline AI and integration failures are
+required implementation defects, even when discovered after completion. A
+`Changes required` or `Inconclusive` verdict alone does not reopen implementation
+or prevent moving to another set; a demonstrated baseline defect requires repair.
 
 ## Establish per-card evidence
 
@@ -96,12 +98,17 @@ The coordinator appends batch review results to this set record's separate
 review log and updates its **Optimisation queue**: affected batches Pending (or
 Blocked for a precise dependency), repaired batches needing review Awaiting
 review, and batches with current passing evidence Pass. Clear inactive owners
-and refresh optimisation counts. Never reopen the implementation queue or alter
-implementation completion/history, another set's active tracker, or availability.
+and refresh optimisation counts. Record baseline gameplay, baseline AI and
+integration defects explicitly as required repairs in the linked report and queue;
+track them in bug tickets when they need separate work. The optimisation queue
+may coordinate these repairs, but must not make them optional. Preserve dated
+implementation completion/history, another set's active tracker, and availability.
 Update the set-wide review status/report link and backlog. For a non-active set,
 use its maintained record; preserve immutable historical snapshots.
 
-Repairs go through `optimise-card-batch` and require independent re-review.
+Batch repairs go through `optimise-card-batch` and require independent re-review;
+separately ticketed defects follow the ticket workflow. Baseline defects remain
+required until repaired and verified, regardless of the historical Complete row.
 Pass certifies the reviewed optimisation evidence; it is not a playability gate.
 Do not enable or disable the set. Keep unresolved findings and evidence gaps
 visible even when the set is already playable or implementation moves on.

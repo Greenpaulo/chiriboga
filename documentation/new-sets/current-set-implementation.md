@@ -11,7 +11,11 @@ Do not run multiple agents against this tracker or its definition file at the
 same time. `Complete` records implementation, not independent strategic review.
 Use `$review-card-batch <set> <batch>` to audit completed batches; the reviewer
 links snapshot-specific reports in a separate batch-review log and queues
-findings for `optimise-card-batch`. Reviews never reopen implementation. See the operator guide for arguments and recovery.
+findings for `optimise-card-batch`. Baseline gameplay, baseline AI and integration
+defects are required repairs, tracked separately from historical completion;
+deeper strategic improvements remain optional. Review verdicts alone do not
+reopen implementation or change playability. See the operator guide for
+arguments and recovery.
 
 ## Active set
 

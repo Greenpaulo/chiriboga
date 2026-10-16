@@ -7,7 +7,10 @@ description: Strengthen strategic AI decisions and repair supported review findi
 
 Improve how the AI plays an already usable batch and repair supported defects.
 Assess every card's strategy, then work to a concrete repair/improvement scope.
-This stage is optional for implementation completion and playability.
+Strategic improvements are optional for implementation completion and playability.
+Baseline gameplay, baseline AI and integration defects are required repairs,
+even when this skill coordinates them after implementation. Preserve their
+required status and acceptance criteria until repaired and verified.
 
 Check `git status` and preserve unrelated work. Never run alongside edits to the
 same set, consumers or record. Do not commit, push, discard work or change

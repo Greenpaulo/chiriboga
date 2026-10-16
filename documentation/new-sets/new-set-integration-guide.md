@@ -219,7 +219,12 @@ After all batches and implementation integration checks pass, mark the set
 Implemented and playable before independent review. The next invocation moves
 to the next explicitly queued set under the operator guide. Preserve the old
 tracker in history and a maintained set record so optimisation can continue
-without changing the new active set. Review findings never reopen implementation.
+without changing the new active set. Review verdicts alone do not reopen
+implementation. Demonstrated baseline gameplay, baseline AI and integration
+defects require repair and verification through the batch repair or ticket
+workflow; preserve completion history and record outstanding defects separately.
+Deeper strategic improvements remain optional, and playability remains a separate
+human decision.
 
 At minimum, check the structural fields relevant to the card type:
 

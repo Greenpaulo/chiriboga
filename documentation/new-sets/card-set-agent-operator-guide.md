@@ -132,10 +132,12 @@ verdicts; only review can assign Pass.
 
 Changes required queues Pending repairs (or a precise Blocked dependency).
 Inconclusive queues Pending evidence work with an exact criterion. Neither
-changes the implementation queue, implementation completion or availability.
-Report bugs and their impact candidly; optional optimisation is not permission
-to hide defects. Review history stays separate from append-only completion and
-optimisation logs. Previously passing evidence needs revalidation when its
+automatically changes implementation status or availability. Baseline gameplay,
+baseline AI and integration defects are required repairs; label them explicitly
+in the report and queue, and use bug tickets when separate work is needed.
+Preserve historical completion rows/logs and track outstanding defects separately.
+Deeper strategic improvements remain optional. Review history stays separate
+from append-only completion and optimisation logs. Previously passing evidence needs revalidation when its
 consumers change. Reviewers use unchanged code and do not repair it.
 
 ## Review the whole implemented set
@@ -154,7 +156,9 @@ playability decision. Independent batch agents may work on disjoint reports
 while a coordinator owns the set record and shared verification. No production
 edits run alongside review.
 
-Findings go to the set's optimisation queue. Follow with
+Findings go to the set's optimisation queue, with baseline defects marked as
+required repairs rather than optional improvements. Separately ticketed defects
+follow the ticket workflow. For batch repairs, follow with
 `$optimise-card-batch <set> <batch>` and `$review-card-batch <set> <batch>` until
 passing; re-run set review for remaining cross-batch findings. Implementation of
 the next set can proceed without waiting for these reviews or repairs.

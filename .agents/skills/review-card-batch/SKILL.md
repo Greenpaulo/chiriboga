@@ -154,13 +154,19 @@ Update only the selected batch's **Optimisation queue** row. Changes required
 becomes `Pending`, or `Blocked` for a precise dependency beyond the batch; Pass
 becomes `Pass`; Inconclusive becomes `Pending` with the exact evidence needed.
 Clear inactive ownership, but never overwrite another agent's active claim.
-Record implementation/rules defects as well as AI gaps here, with their impact.
-Keep implementation queue rows `Complete`, implementation status, completion
-history and playability unchanged. Refresh optimisation counts separately.
+Record baseline gameplay, baseline AI and integration defects explicitly as
+required repairs, with their impact and acceptance criteria; use bug tickets
+when separate work is needed. The queue coordinates these repairs without
+making them optional. Deeper strategic improvements remain optional.
+Preserve historical `Complete` rows and completion history; record outstanding
+baseline defects separately so completion is not read as current correctness.
+Keep playability unchanged and refresh optimisation counts separately.
 
 Report verdict, strongest findings, evidence limits and report path. Repairs go
 through `$optimise-card-batch <set> <batch>`, followed by independent re-review.
-Review is optional for implementation completion and playability; a failing
-review remains visible but does not send cards back to initial implementation.
+Independent strategic review is optional for implementation completion and
+playability. A failing verdict alone does not reopen implementation; demonstrated
+baseline defects require repair and verification through the batch repair or
+ticket workflow, followed by independent re-review.
 Batch reviews can run before set implementation finishes, without production
 edits in parallel. Set review still audits cross-batch mechanics and integration.

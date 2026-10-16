@@ -104,7 +104,9 @@ values for all 66 cards. The pre-review tracker recorded all 13 batches (36001â€
 implemented and behavior tested. This is an implementation status, not an
 independent rules/strategy sign-off. Vantage Point is playable by user decision
 on 2026-10-16 under the two-stage workflow. Review findings remain open as
-optimisation work, including gameplay bugs; this does not assert review approval.
+required repairs for demonstrated baseline gameplay, baseline AI and integration
+defects, alongside optional deeper strategic improvements in the optimisation
+queue; this does not assert review approval.
 
 **Set record:** [active tracker](current-set-implementation.md), with separate
 implementation and optimisation queues, ownership, verification and logs. On
