@@ -4,7 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const batch = require('../scripts/ai-batch');
-const {runControlBatch} = require('../scripts/ai-batch/defense-evidence');
+const {runControlBatch, checkControlReport} = require('../scripts/ai-batch/defense-evidence');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'defense-control-report-'));
 const output = path.join(directory, 'report.json');
 const args = ['scripts/ai-batch.js', '--pairs', 'gateway', '--seeds', '1-2',
@@ -49,6 +49,30 @@ try {
     assert.throws(() => runControlBatch(args, output, () => ({status: 2})), /Batch exited 2/);
     assert.throws(() => runControlBatch(args, output, () => ({status: null, error: Error('timeout')})), /timeout/);
     assert.throws(() => runControlBatch(args, output, saved(() => {}, 1)), /inconsistent/);
+  });
+  test('loaded controls must match requested collectors, Corp options and samples', () => {
+    const shape = require('../scripts/ai-batch/collectors/postureShapeByCardClass');
+    const realized = require('../scripts/ai-batch/collectors/realizedIceByRootType');
+    const reuseArgs = args.concat(['--collector', 'postureShapeByCardClass', '--corp-option', 'postureEpochs=true']);
+    const reuseConfig = batch.buildConfig(batch.parseArgs(reuseArgs.slice(1)));
+    const good = () => Object.assign(report(), {collectors: reuseConfig.collectorNames,
+      options: {corp: {postureEpochs: true}, runner: {}},
+      games: config.seeds.map(seed => ({fixtureId: null, deckPairId: 'gateway', seed, ok: true,
+        samples: {realizedIceByRootType: {}, postureShapeByCardClass: {}}}))});
+    const check = value => checkControlReport(reuseArgs, value, 'reused.json', [realized, shape]);
+    check(good());
+    for (const [alter, why] of [
+      [r => { r.collectors = ['realizedIceByRootType']; }, /missing collector postureShapeByCardClass/],
+      [r => { delete r.games[0].samples.postureShapeByCardClass; }, /without postureShapeByCardClass samples/],
+      [r => { r.options.corp.postureEpochs = false; }, /Corp option postureEpochs=true not used/],
+      [r => { r.defenseObserver = 'off'; }, /cohort or observer differs/],
+      [r => { r.seeds = ['1']; }, /cohort or observer differs/]]) {
+      const value = good(); alter(value);
+      assert.throws(() => check(value), why);
+    }
+    // A failed game has no samples and is reported by calibration, not rejected here.
+    const failedGame = good(); failedGame.games[0].ok = false; delete failedGame.games[0].samples;
+    check(failedGame);
   });
 } finally { fs.rmSync(directory, {recursive: true, force: true}); }
 console.log(`${passed} passed, ${failed} failed`);

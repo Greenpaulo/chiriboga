@@ -98,6 +98,30 @@ function runControlBatch(args, output, invoke = spawnSync) {
   return report;
 }
 
+// Evidence may only come from controls run with this measurement's cohort,
+// observer, explicit Corp options and collectors. --reuse skips the batch run,
+// so every loaded report is checked here, and every successful game must carry
+// a sample for each sampled collector.
+function checkControlReport(args, report, file, collectors) {
+  const config = require('../ai-batch').buildConfig(require('../ai-batch').parseArgs(args.slice(1)));
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const corp = (report.options && report.options.corp) || {};
+  const problems = [];
+  if (report.kind !== 'ai-batch-report' || report.poolHash !== config.poolInfo.hash ||
+      !same(report.pairs, config.pairs.map(pair => pair.id)) || !same(report.seeds, config.seeds) ||
+      !same(report.starts, config.starts.map(start => ({id: start.id, hash: start.hash}))) ||
+      report.defenseObserver !== config.defenseObserver) problems.push('cohort or observer differs');
+  const missing = config.collectorNames.filter(name => !(report.collectors || []).includes(name));
+  if (missing.length) problems.push('missing collector ' + missing.join(', '));
+  const options = Object.entries(config.corpOptions).filter(([name, value]) => corp[name] !== value);
+  if (options.length) problems.push('Corp option ' + options.map(([name, value]) => name + '=' + value).join(', ') + ' not used');
+  for (const sampled of collectors.filter(c => typeof c.samples === 'function' && config.collectorNames.includes(c.name))) {
+    if ((report.games || []).some(game => game.ok && !(game.samples && game.samples[sampled.name])))
+      problems.push('games without ' + sampled.name + ' samples');
+  }
+  if (problems.length) throw Error('Control report does not match the requested measurement (' + problems.join('; ') + '): ' + file);
+}
+
 function main() {
   const argv = process.argv.slice(2);
   const value = (flag, fallback) => { const at = argv.indexOf(flag); return at < 0 ? fallback : argv[at + 1]; };
@@ -122,6 +146,7 @@ function main() {
     runControlBatch(args, files[index]);
   }
   const reports = files.map(file => JSON.parse(fs.readFileSync(file, 'utf8')));
+  reports.forEach((report, index) => checkControlReport(commands[index], report, files[index], [collector, ...extras]));
   const evidence = measurementEvidence(...reports, extras);
   evidence.reports = files.map(file => ({path: file, sha256: crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')}));
   const output = path.join(directory, 'evidence.json');
@@ -143,4 +168,4 @@ function main() {
   process.exitCode = evidence.identity.pass ? 0 : 1;
 }
 if (require.main === module) main();
-module.exports = {observationIdentity, measurementEvidence, runControlBatch};
+module.exports = {observationIdentity, measurementEvidence, runControlBatch, checkControlReport};
