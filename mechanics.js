@@ -1301,6 +1301,7 @@ function Draw(player, num=1, afterDraw, context) {
 function SpendClicks(player, num) {
   if (num < 1) return;
   player.clickTracker -= num;
+  player.clicksSpentThisTurn = ClicksSpentThisTurn(player) + num;
   if (num == 1) Log(PlayerName(player) + " spent one click");
   else Log(PlayerName(player) + " spent " + num + " clicks");
 }

@@ -1695,6 +1695,7 @@ cardSet[26018] = {
 cardSet[26019] = {
   title: "Lat: Ethical Freelancer",
   imageFile: "26019.png",
+  elo: 1766,
   player: runner,
   faction: "Shaper",
   cardType: "identity",
@@ -1702,6 +1703,22 @@ cardSet[26019] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 1,
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () {
+      if (runner.grip.length != corp.HQ.cards.length) return [];
+      var choices = [
+        { id: 1, label: "Draw 1 card", button: "Draw 1" },
+        { id: 0, label: "Do not draw", button: "Pass" },
+      ];
+      //**AI code: an extra card at the end of the turn is always useful
+      if (runner.AI != null) return [choices[0]];
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params && params.id === 1) Draw(runner, 1);
+    },
+    text: "Lat: Draw 1 card?",
+  },
 };
 
 //In the Groove (26020)
@@ -1710,15 +1727,89 @@ cardSet[26019] = {
 cardSet[26020] = {
   title: "In the Groove",
   imageFile: "26020.png",
+  elo: 1477,
   player: runner,
   faction: "Shaper",
   influence: 4,
   cardType: "event",
   subTypes: ["Priority"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  grooveActive: false,
+  Enumerate: function () {
+    if (ClicksSpentThisTurn(runner) > 0) return [];
+    return [{}];
   },
+  Resolve: function (params) {
+    this.grooveActive = true;
+  },
+  // The lingering effect lives on this card, which is in the heap by then.
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (!this.grooveActive || !card || card.player != runner) return [];
+      if (!(card.installCost >= 1)) return [];
+      var choices = [
+        { id: 0, label: "Draw 1 card", button: "Draw 1" },
+        { id: 1, label: "Gain 1[c]", button: "Gain 1[c]" },
+      ];
+      //**AI code
+      if (runner.AI != null) return [choices[this._grooveChoice()]];
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params && params.id === 1) GainCredits(runner, 1, "", this);
+      else Draw(runner, 1);
+    },
+    text: "In the Groove: Draw 1 card or gain 1[c]",
+    availableWhenInactive: true,
+  },
+  responseOnRunnerDiscardEnds: {
+    Resolve: function () {
+      this.grooveActive = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.grooveActive = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  // Grip cards with a printed cost of 1 or more the AI wants installed and
+  // can pay for this turn, cheapest first.
+  _grooveInstalls: function () {
+    var installs = [];
+    var keeping = runner.AI ? runner.AI._cardsInHandWorthKeeping() : [];
+    for (var i = 0; i < keeping.length; i++) {
+      var card = keeping[i];
+      if (card.cardType == "event" || !(card.installCost >= 1)) continue;
+      if (!CheckInstall(card) || ChoicesCardInstall(card).length < 1) continue;
+      installs.push(card);
+    }
+    installs.sort(function (a, b) {
+      return InstallCost(a) - InstallCost(b);
+    });
+    var credits = AvailableCredits(runner);
+    var affordable = [];
+    for (var j = 0; j < installs.length && affordable.length < runner.clickTracker - 1; j++) {
+      var cost = InstallCost(installs[j]);
+      if (cost > credits) break;
+      credits -= cost;
+      affordable.push(installs[j]);
+    }
+    return affordable;
+  },
+  _grooveChoice: function () {
+    if (runner.AI._currentOverDraw() + 1 > runner.AI._maxOverDraw()) return 1;
+    if (Credits(runner) < 4) return 1;
+    return 0;
+  },
+  AIWouldPlay: function () {
+    // Costs a click; it pays off from the second triggering install.
+    return this._grooveInstalls().length >= 2;
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Khusyuk (26021)
@@ -1726,14 +1817,186 @@ cardSet[26020] = {
 cardSet[26021] = {
   title: "Khusyuk",
   imageFile: "26021.png",
+  elo: 1491,
   player: runner,
   faction: "Shaper",
   influence: 2,
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  runningWithThis: false,
+  breachReplacementQueued: false,
+  restrictAccessToSetAside: false,
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.runningWithThis = true;
+    this.breachReplacementQueued = false;
+    MakeRun(corp.RnD);
+  },
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      this.breachReplacementQueued = this.runningWithThis && server === corp.RnD;
+    },
+  },
+  specialOnInsteadOfBreaching: {
+    Enumerate: function () {
+      return this.breachReplacementQueued ? [{ required: true }] : [];
+    },
+    Resolve: function () {
+      this.breachReplacementQueued = false;
+      var counts = this._khusyukCostCounts();
+      var choices = [];
+      var costs = Object.keys(counts).map(Number).sort(function (a, b) {
+        return a - b;
+      });
+      for (var i = 0; i < costs.length; i++) {
+        var x = Math.min(6, counts[costs[i]]);
+        choices.push({
+          id: costs[i],
+          x: x,
+          label: costs[i] + "[c] (" + x + " card" + (x == 1 ? "" : "s") + ")",
+          button: costs[i] + "[c]",
+        });
+      }
+      if (choices.length < 1) {
+        // No installed card has a printed cost above 0, so X is 0.
+        Log(GetTitle(this) + ": no cards set aside");
+        return;
+      }
+      //**AI code: the cost with the most installed cards
+      if (runner.AI != null) {
+        var best = choices[0];
+        for (var j = 1; j < choices.length; j++) {
+          if (choices[j].x > best.x) best = choices[j];
+        }
+        choices = [best];
+      }
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          this.KhusyukSetAsideAndAccess(params.x);
+        },
+        "Khusyuk",
+        "Choose an install cost",
+        this,
+      );
+    },
+  },
+  // Printed install costs above 0 of installed Runner cards, with how many share each.
+  _khusyukCostCounts: function () {
+    var counts = {};
+    var installed = InstalledCards(runner);
+    for (var i = 0; i < installed.length; i++) {
+      var cost = installed[i].installCost;
+      if (typeof cost === "number" && cost > 0) counts[cost] = (counts[cost] || 0) + 1;
+    }
+    return counts;
+  },
+  // The set-aside cards stay on top of R&D, faceup, until they are shuffled in.
+  KhusyukSetAsideAndAccess: function (x) {
+    var setAside = corp.RnD.cards.slice(-Math.min(x, corp.RnD.cards.length)).reverse();
+    if (setAside.length < 1) return;
+    for (var i = 0; i < setAside.length; i++) {
+      setAside[i].faceUp = true;
+      setAside[i].knownToRunner = true;
+    }
+    Log(
+      "Set aside " +
+        setAside
+          .map(function (card) {
+            return GetTitle(card, true);
+          })
+          .join(", "),
+    );
+    var khusyuk = this;
+    var choices = ChoicesArrayCards(setAside);
+    //**AI code
+    if (runner.AI != null) choices = [choices[this._khusyukAccessChoice(choices)]];
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        khusyuk.restrictAccessToSetAside = true;
+        khusyuk.setAsideCards = setAside;
+        // The breach replacement resolves inside Run 6.4, whose automatic
+        // triggers have already fired: return there without re-initialising it.
+        phases.runAccessingCard.next = {
+          player: runner,
+          title: "Run: End",
+          identifier: "Run 6.4",
+          Init: function () {
+            phases.runAccessingCard.next = phases.runEnds;
+            khusyuk.restrictAccessToSetAside = false;
+            khusyuk.KhusyukShuffleIn();
+            ChangePhase(phases.runEnds, true);
+          },
+        };
+        accessingCard = params.card;
+        phases.runAccessingCard.requireHumanInput = true;
+        ChangePhase(phases.runAccessingCard);
+      },
+      "Khusyuk",
+      "Access 1 of the set-aside cards",
+      this,
+    );
+  },
+  KhusyukShuffleIn: function () {
+    if (!this.setAsideCards) return;
+    for (var i = 0; i < this.setAsideCards.length; i++) {
+      if (this.setAsideCards[i].cardLocation == corp.RnD.cards) this.setAsideCards[i].faceUp = false;
+    }
+    this.setAsideCards = null;
+    Shuffle(corp.RnD.cards);
+    // Positions in R&D are no longer known.
+    for (var j = 0; j < corp.RnD.cards.length; j++) corp.RnD.cards[j].knownToRunner = false;
+    Log("The set-aside cards are shuffled into R&D");
+  },
+  // Only the chosen set-aside card is accessed: no R&D root or further cards.
+  modifyAccessCardAllowed: {
+    Resolve: function (card) {
+      return this.restrictAccessToSetAside ? 1 : 0;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  // Not responseOnRunEnds: its automatic triggers fire before breach replacements.
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      if (phases.runAccessingCard.next != phases.runEnds) phases.runAccessingCard.next = phases.runEnds;
+      this.KhusyukShuffleIn();
+      this.runningWithThis = false;
+      this.breachReplacementQueued = false;
+      this.restrictAccessToSetAside = false;
+    },
+    availableWhenInactive: true,
+  },
+  // Agendas first (most points), then a card worth trashing, otherwise the first.
+  _khusyukAccessChoice: function (choices) {
+    var best = 0;
+    var bestScore = -Infinity;
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      var score = 0;
+      if (CheckCardType(card, ["agenda"])) score = 100 + AgendaPointsForCard(card, runner);
+      else if (typeof card.trashCost !== "undefined" && TrashCost(card) <= Credits(runner) - 3) score = 10 - TrashCost(card);
+      if (score > bestScore) {
+        bestScore = score;
+        best = i;
+      }
+    }
+    return best;
+  },
+  AIBreachReplacementValue: 2,
+  AIRunEventExtraPotential: function (server, potential) {
+    if (server != corp.RnD || corp.RnD.cards.length < 2) return 0;
+    if (ServerSuccessfulRunPrevented(server)) return 0;
+    var counts = this._khusyukCostCounts();
+    var x = 0;
+    for (var cost in counts) x = Math.max(x, Math.min(6, counts[cost]));
+    x = Math.min(x, corp.RnD.cards.length);
+    // Choosing 1 of X cards instead of the top card.
+    if (x < 2) return 0;
+    return 0.4 * (x - 1);
   },
 };
 
@@ -1743,6 +2006,7 @@ cardSet[26021] = {
 cardSet[26022] = {
   title: "Spec Work",
   imageFile: "26022.png",
+  elo: 1585,
   player: runner,
   faction: "Shaper",
   influence: 1,
@@ -1750,16 +2014,60 @@ cardSet[26022] = {
   subTypes: ["Job"],
   playCost: 1,
   Enumerate: function () {
-    return ChoicesArrayCards(runner.rig.programs);
+    var choices = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]) && CheckTrash(card);
+    });
+    //**AI code: only the program it is willing to trash
+    if (runner.AI != null && choices.length > 0) {
+      var index = this.AIPreferredPlayChoice(choices);
+      return index > -1 ? [choices[index]] : [];
+    }
+    return choices;
   },
   Resolve: function (params) {
-    if (params && params.card) {
-      Log(GetTitle(this) + " trashes " + GetTitle(params.card));
-      Trash(params.card, false);
-    }
-    GainCredits(runner, 4, "", this);
-    Draw(runner, 2);
+    var specWork = this;
+    // Trashing is a cost, so it cannot be prevented.
+    Trash(
+      params.card,
+      false,
+      function () {
+        GainCredits(runner, 4, "", specWork);
+        Draw(runner, 2);
+      },
+      this,
+    );
   },
+  // A program marked OK to trash, otherwise a non-icebreaker costing 1 or less,
+  // otherwise an icebreaker another installed breaker duplicates.
+  AIPreferredPlayChoice: function (choices) {
+    var cheapest = -1;
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      if (typeof card.AIOkToTrash === "function" && card.AIOkToTrash.call(card)) return i;
+      if (!CheckSubType(card, "Icebreaker") && InstallCost(card) <= 1) {
+        if (cheapest < 0 || InstallCost(card) < InstallCost(choices[cheapest].card)) cheapest = i;
+      }
+    }
+    if (cheapest > -1) return cheapest;
+    for (var j = 0; j < choices.length; j++) {
+      var breaker = choices[j].card;
+      if (!CheckSubType(breaker, "Icebreaker")) continue;
+      var duplicated = InstalledCards(runner).some(function (other) {
+        if (other == breaker || !CheckSubType(other, "Icebreaker")) return false;
+        if (other.title == breaker.title) return true;
+        return ["Fracter", "Decoder", "Killer"].some(function (type) {
+          return CheckSubType(breaker, type) && CheckSubType(other, type);
+        });
+      });
+      if (duplicated) return j;
+    }
+    return -1;
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AIEconomyPlay: 2,
+  AIPlayToDraw: 2,
 };
 
 //Supercorridor (26023)
@@ -1770,6 +2078,7 @@ cardSet[26022] = {
 cardSet[26023] = {
   title: "Supercorridor",
   imageFile: "26023.png",
+  elo: 1295,
   player: runner,
   faction: "Shaper",
   influence: 2,
@@ -1784,15 +2093,17 @@ cardSet[26023] = {
       return 0;
     },
   },
-  responseOnRunnerTurnEnds: {
+  // "When your turn ends" triggers with "when your discard phase ends" (Runner 2.3).
+  responseOnRunnerDiscardEnds: {
     Enumerate: function () {
-      if (runner.creditPool == corp.creditPool) {
-        return [
-          { id: 1, label: "Gain 2 credits", button: "Gain 2[c]" },
-          { id: 0, label: "Do not gain credits", button: "Pass" },
-        ];
-      }
-      return [];
+      if (runner.creditPool != corp.creditPool) return [];
+      var choices = [
+        { id: 1, label: "Gain 2 credits", button: "Gain 2[c]" },
+        { id: 0, label: "Do not gain credits", button: "Pass" },
+      ];
+      //**AI code: always take the credits
+      if (runner.AI != null) return [choices[0]];
+      return choices;
     },
     Resolve: function (params) {
       if (params && params.id === 1) {

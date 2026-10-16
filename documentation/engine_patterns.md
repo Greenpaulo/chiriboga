@@ -84,7 +84,13 @@ responseOnCorpTurnBegins:  { Enumerate?, Resolve, text?, automatic? }
 responseOnRunnerTurnBegins:{ Resolve, automatic: true }
 responseOnCorpTurnEnds:    { Resolve, automatic: true }
 responseOnRunnerTurnEnds:  { Resolve, automatic: true }
+responseOnRunnerDiscardEnds: { Enumerate?, Resolve, text?, automatic? } // Runner 2.3
+responseOnCorpDiscardEnds:   { Enumerate?, Resolve, text?, automatic? } // Corp 3.3
 ```
+
+No engine phase fires `responseOnRunnerTurnEnds` or `responseOnCorpTurnEnds`
+(checked 2026-10-16). Implement "when your turn ends" with the matching
+`*DiscardEnds` hook, which fires at the point both conditions trigger.
 
 ### Run
 
@@ -143,6 +149,14 @@ automaticOnArchivesCardsTurnedFaceUp: { Resolve } // receives the facedown cards
 The Archives hook fires once while the server is breached, before access
 choices are enumerated. It does not fire when no facedown Archives cards were
 turned faceup.
+
+`specialOnInsteadOfBreaching: { Enumerate, Resolve }` replaces a breach
+(Chastushka, Retrieval Run, Khusyuk); `Enumerate` returns `[{required: true}]`
+for a mandatory replacement. It resolves after the engine has entered Run 6.4,
+whose automatic `responseOnRunEnds` triggers have already fired, so keep the
+replacement's state out of those triggers and clean up in
+`automaticOnRunEndCleanup`. Khusyuk shows how to access a card from inside the
+replacement without re-initialising Run 6.4.
 
 ### Install / Rez / Trash
 
@@ -260,6 +274,7 @@ SpendClicks(player, n);
 GainClicks(player, n);
 CheckClicks(player, n); // alias CheckActionClicks
 PlayClickCost(card); // 1 normally, 2 for Double, including active modifiers
+ClicksSpentThisTurn(player); // reset with allotted clicks; lost clicks are not spent ("first [click]" checks)
 ```
 
 ### Cards / Zones
@@ -802,6 +817,9 @@ modifyInstallCost: {
 | ----- | ---------------------- | ------ |
 | 26001 | Isolation              | ✅     |
 | 26002 | Demolisher             | ✅     |
+| 26019 | Lat: Ethical Freelancer | ✅    |
+| 26020 | In the Groove          | ✅     |
+| 26021 | Khusyuk                | ✅     |
 | 26022 | Spec Work              | ✅     |
 | 26023 | Supercorridor          | ✅     |
 | 26024 | Gauss                  | ✅     |
