@@ -1389,6 +1389,11 @@ phases.runSubroutines = {
         return [];
       }
       var approachedIce = attackedServer.ice[approachIce];
+      //ice derezzed during the encounter (e.g. "Baklan" Bochkin) has no active subroutines
+      if (!approachedIce.rezzed) {
+        subroutine = -1;
+        return [];
+      }
       //loop through skipping broken subroutines
       for (; subroutine < approachedIce.subroutines.length; subroutine++) {
         //non-broken subroutine? trigger and resolve.
@@ -2013,6 +2018,8 @@ function ChangePhase(src, skipInit = false) {
 
   if (currentPhase.identifier == "Corp 1.1") playerTurn = corp;
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
+  if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
+    turnEventCounts = {};
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1") &&
       corp.AI && typeof corp.AI._publicPostureTurnBegins === "function")
     corp.AI._publicPostureTurnBegins(playerTurn == corp ? "corp" : "runner");

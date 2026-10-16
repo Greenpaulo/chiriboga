@@ -3840,6 +3840,20 @@ function ChoicesActiveTriggers(callbackName, player = null) {
 }
 
 /**
+ * Counts of public events this turn, for "the first time each turn" conditions.
+ * They include events that happened before the reacting card became active.
+ * ChangePhase clears them when a turn begins.
+ */
+var turnEventCounts = {};
+function RecordTurnEvent(name) {
+  turnEventCounts[name] = (turnEventCounts[name] || 0) + 1;
+  return turnEventCounts[name];
+}
+function TurnEventCount(name) {
+  return turnEventCounts[name] || 0;
+}
+
+/**
  * Fire active triggers with the given callback name (assumes all are automatic).<br/>Returns the triggers fired.<br/>Nothing is logged.
  * @method AutomaticTriggers
  * @param {String} callbackName name of the callback property
