@@ -138,7 +138,8 @@ placement target, including a `null` result that holds the card.
 **Honest verdict (L9.0, observation only).** Beside today's fields the result
 carries `honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`,
 `honestBreakCost`, `noBreakerLockout` and `honestReasons`. No decision reads
-them yet; L9.0.1 adopts them behind an option, and `isSecure`,
+them in production. L9.0.1's global-adoption experiment was not adopted after
+its failed gate; `isSecure`,
 `hasHardLockout`, `reasons` and the cost fields retain their existing
 meaning, with the L9.1 unknown-price correction applied to both verdicts. For the chosen rez plan, `_honestLayerOptions()` lists each layer's
 ways through as credits plus clicks: today's mandatory cost when finite, the
@@ -153,6 +154,14 @@ Defensive upgrades and global ETR covering every projected run stay honest
 lockouts; the supported exact restricted-credit route copies today's verdict. The
 `securityCalibration` collector compares both verdicts with next-turn
 breaches.
+
+**Global adoption rejected (L9.0.1).** The experiment switched all existing
+security consumers to the honest verdict. Its paired core-v1 gate failed:
+points stolen rose by 0.176 per game, points scored fell by 0.282 and Corp win
+rate fell by 2.9 percentage points. The owner rejected the global switch; its
+option and branch were removed, leaving L9.0's observation-only calculations
+and collector intact. [L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md)
+proposes independently gated local consumers. This does not adopt any of them.
 
 **Unknown breaker prices (L9.1).** `_breakerPrice()` distinguishes known costs,
 unknown pricing and explicit rules-based inability. It consults breaker-owned

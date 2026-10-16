@@ -380,10 +380,24 @@ function startBoardsTagged(tags) {
 // The ticket's state in one line (ai-planning.md, "When a gate fails").
 const outcomeLine = text => (text.match(/^\*\*Outcome:\*\*\s*(.+)$/m) || [])[1];
 // A failed idea is removed, not left switched off.
-const failedGateResult = (option, setting, code = '') => setting ||
-  new RegExp('\\b' + option + '\\b').test(code) ?
-  ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
-  ['PASS', 'Gate failed and ' + option + ' has been removed.'];
+const failedGateResult = (option, setting, code = '') => {
+  //A removed option may share its name with an existing evaluation field.
+  //Inspect option accesses, ignoring comments and opaque string contents.
+  const tokens = reproductionTokens(code);
+  const keys = ["'" + option + "'", '"' + option + '"', '`' + option + '`'];
+  const accessed = tokens.some((token, i) => token === 'options' && (
+    (['.', '?.'].includes(tokens[i + 1]) && tokens[i + 2] === option) ||
+    (tokens[i + 1] === '[' && keys.includes(tokens[i + 2])) ||
+    (tokens[i + 1] === '?.' && tokens[i + 2] === '[' && keys.includes(tokens[i + 3]))));
+  const structure = tokens.map(token => keys.includes(token) ? option :
+    /^['"`]/.test(token) ? '' : token).join(' ');
+  const destructured = new RegExp('\\{[^{}]*\\b' + option +
+    '\\b[^{}]*\\}\\s*=\\s*(?:\\w+\\s*(?:\\?\\.|\\.)\\s*)*options\\b')
+    .test(structure);
+  return setting || accessed || destructured ?
+    ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
+    ['PASS', 'Gate failed and ' + option + ' has been removed.'];
+};
 
 // A failed gate must explicitly record non-adoption, even when its code is gone.
 function outcomeProblem(outcome, gate) {
