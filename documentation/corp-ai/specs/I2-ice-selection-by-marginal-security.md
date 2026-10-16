@@ -1,485 +1,486 @@
 # I2 ICE selection by marginal security
 
 **Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`, [deception gate reconciliation](../deception-gates.md)
-**Verified against code:** e33a91b (2026-10-12)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../deception-gates.md)
+**Verified against code:** 60fa0d7 (2026-10-16)
 
-Prerequisites I1, F2, F4, L7.1 and L9.0 are done. L9.1 is implemented
-but remains in `documentation/backlog/code-review/`; I2 cannot move to
-code-review until L9.1 is `done`. F11 separately owns the missing paired
-batch-metric guard support and must also be `done` before I2 hand-off.
+All formal prerequisites are `done` as of 2026-10-16. L7.1 closed **not
+adopted**: its `_breachConsequence()` signal exists and is tested but no
+production decision reads it. F11 delivered paired pooled batch-metric guards;
+F12 delivered the `realizedIceByRootType` collector and a control calibration.
 
 ## Goal
 
-Use F12's shared [realized-defense measurement](../../ai-batch-harness.md#realized-defense-measurement-f12)
-definitions, readiness rules and control calibration; do not build a competing
-collector. I2 retains ownership of its security objective and regression margins.
+Choose the `(ICE, server)` pair that most reduces the agenda points the Runner
+is expected to steal, net of the ICE's cost, instead of the first affordable
+ICE in input-card order for one pre-chosen server. I2 is the first consumer of
+the shared [scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16):
+it builds the shared measurements M1, M2 and M4 (phase A, observation-only),
+then ranks ICE with them behind its own option (phase B).
 
-Choose the `(ICE, server)` pair that most improves security, weighted by what a
-breach would cost, using the existing security evaluator rather than input-card
-order. This is the first intentional policy change on the I1 candidate
-framework.
+**Why this design.** Turning a security measurement into a shared yes/no gate
+has twice made the Corp weaker: [`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+("never score into an insecure remote") and the
+[L9.0.1 gate failure](../../backlog/done/L9.0.1-adopt-honest-lockout.md#resolution)
+(global honest verdict: winRate −0.029, pointsScored −0.282, pointsStolen
++0.176; remote theft fell while central theft rose). The owner's 2026-10-14
+playtests saw agendas held in HQ and agendas left in weak remotes. The redesign
+asks "how many points do I expect to lose?" in real units: a graded breach
+margin (M1), a measured breach probability per margin (M2), and points at
+stake. The previous draft's uncalibrated `securityDelta` weights
+(0.6/0.25/0.15), soft-lockout 0.7, ×8 scale, `consequenceWeight` floor and
+`futureValue` are **not** used by I2. Per [principle 6](../principles.md#6-shared-measurements-consumer-owned-decisions),
+M1/M2/M4 are shared; only I2's ranking consumes them here. I3 and I4 adopt
+them through their own options and gates.
 
 ## Current behaviour
 
 For ordinary protection, `_iceInstallOptions()` lists affordable ICE in
 input-card order, then low-priority ICE when `priorityOnly` is false, for the
 one server `_serverToProtect(false, false, targetIsEligible)` picks; the
-predicate (L3.5.2's interim bridge) now calls `_iceLayerPolicy()`, whose
-`allowed` result `_shouldInstallIceLayer()` also wraps. The low-priority group
-includes ICE rejected by `AIWorthwhileIce(server, "install")`, not just ICE
-too expensive to rez; `_iceInCardsCommon()` still applies its combined
-install/existing-unrezzed-cost admission check. No ICE is compared with
-another by its effect. A separate path offers ICE for a new remote.
+predicate (L3.5.2's interim bridge) calls `_iceLayerPolicy()`, whose `allowed`
+result `_shouldInstallIceLayer()` also wraps. The low-priority group includes
+ICE rejected by `AIWorthwhileIce(server, "install")`; `_iceInCardsCommon()`
+applies a combined install/existing-unrezzed-cost admission check. No ICE is
+compared with another by its effect. A separate path offers ICE for a new
+remote; when an empty protected remote exists it re-runs `_serverToProtect()`.
+`serverAtRiskInstallOverride` (the final admission OR term) defaults to
+`false`. Empty Archives without an HQ backdoor is excluded by
+`_nothingWorthProtecting()` while `emptyArchivesRunPressure` is `false`.
 
-I1's `_installCandidateRecords()` preserves legacy ordering and records
-unoffered `(ICE, server)` pairs as ineligible diagnostics; it does not yet
-score their marginal security. `_hypotheticalServerAfterInstall()` already
-exists: it subtracts install cost, adds the outermost layer and restores
-credits and the original array through `_withHypothetical()`, or evaluates a
-detached `AIHypothetical` remote without registering it.
+I1's `_installCandidateRecords()` preserves legacy ordering, records unoffered
+pairs as ineligible diagnostics (`band`, `compatibilityOrder`,
+`scoreBreakdown`, `eligible`, `rejectionReasons`) and scores nothing.
+`_hypotheticalServerAfterInstall()` adds the ICE as the outermost layer,
+subtracts install cost and restores through `_withHypothetical()`, or
+evaluates a detached `AIHypothetical` remote.
 
-`postureEpochs` defaults to `true`. Bait/bluff commitments are reevaluated at
-the first posture query of a later Corp turn after a meaningful boundary,
-and may retain the same script. `_remoteDeceptionProfile()` still caches the
-profile shape for the card's lifetime; the active posture is not lifetime-bound.
+`_evaluateServerSecurityUncached()` returns the compatibility verdict
+(`isSecure`, `hasHardLockout`, `totalMandatoryBreakCost`) that decisions read,
+plus L9.0's observation-only honest fields (`honestIsSecure`, `honestLockout`,
+`honestMandatoryBreakCost`, `honestKnownMandatoryBreakCost`). No decision reads
+the honest fields; only the harness `securitySnapshot` and the
+`securityCalibration` collector do. `_addHonestVerdict()` picks one route with
+`_honestRouteVerdict(layers, credits, clickBudget, clickCredits)` but stores
+only its total. Unknown breaker prices give `null` costs; an unpassable route
+gives `Infinity`. [L9.0.2](L9.0.2-consumer-specific-honest-security.md)
+proposes separate per-consumer honest options (`honestIceLayerAdmission`,
+`honestCriticalRez`).
 
-L9.0 adds observation-only `honestIsSecure`, `honestLockout` and honest cost
-fields alongside the compatibility verdict; it does not switch existing
-decisions to them. L9.1's implementation now reports unknown breaker prices
-as `null` cost fields and prevents them from fabricating secure verdicts in
-either model. Unknown cost must not become numeric security gain through
-JavaScript coercion in I2's new scorer.
+`securityCalibration` buckets each server-turn only by verdict
+(`current`/`honest` × `all`/`agendaRemote`): secure or not, breached or not.
 
-The final `serverAtRisk` admission override in `_shouldInstallIceLayer()` is
-now behind `serverAtRiskInstallOverride`, default `false`. Earlier uses of
-`serverAtRisk` and downstream affordability checks remain. I2 owns the
-replacement decision: whether an extra layer buys enough security to justify
-its install/rez cost, including the opportunity cost to scoring. Do not
-silently restore the old final OR term while removing the eligibility bridge.
+Approach-time root defences are invisible to the evaluator. Manegarm Skunkworks
+(Runner pays [click][click] or 5[c] on approach, else the run ends) and
+Anoetic Void (Corp may pay 2[c] and trash 2 HQ cards to end the run; its
+`AIWouldTrigger` declines with an ambush in the server, fewer than 2 cards in
+the server, or fewer than 2 non-agenda HQ cards) have only `AIDefensiveValue`
+(install preference) and `responseOnApproachServer`. `_hasDefensiveUpgrade()`
+reads only the boolean `AIPreventBreach` (no Corp root in the playable sets
+declares it) and sets compatibility `hasHardLockout`. Both cards are in the
+pool's PD, Gateway and LEO Corp decks.
 
-Archives admission also depends on `_nothingWorthProtecting()`. With
-`emptyArchivesRunPressure=false`, empty Archives without a backdoor into HQ
-is excluded even when public rewards or recent runs produce pressure. I2's
-proposal to enumerate every ranked server must preserve that baseline with
-its option off; any change to this exclusion must be explicit, reasoned and
-measured with its option on. The pressure machinery remains in ranking.
-
-Two pieces of hypothetical ICE scoring already exist:
-
-- `_criticalBreachDefenseAction()` scores post-install risk for each ICE on
-  the at-risk central: it subtracts the install cost from `corp.creditPool`,
-  pushes the ICE onto `server.ice`, reads `_centralBreachLossRisk()` and
-  restores through `_withHypothetical()` (F2), installing the best ICE when the loss probability
-  (at least `CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD`) falls by
-  `CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT`.
-- The older, uncalled `_iceInstallScore()`/`_bestIceToInstall()` pair was
-  deleted by F2 as dead code (2026-10-02).
+`_criticalBreachDefenseAction()` hypothetically installs each affordable ICE
+from `_rankedInstallOptions(corp.HQ.cards, true)` on an at-risk central and
+reads `_centralBreachLossRisk()` (zero when compatibility `isSecure` holds),
+installing when risk ≥ 0.35 falls by ≥ 0.15.
 
 See [architecture.md: install planning today](../architecture.md#install-planning-today).
 
 ## Design
 
-1. Evaluate I1 candidates for every strategically relevant server
-   `_rankedServersToProtect()` lists, instead of one server chosen in advance.
-   Listing alone does not make a pair `eligible`: preserve legality,
-   install affordability, empty-Archives admission and posture constraints.
-2. Evaluate each candidate through I1's existing
-   `_hypotheticalServerAfterInstall()` with the ICE as the new outermost layer, including the detached
-   server for a new remote.
-3. Score with the design note's `securityGain` (lockout, break cost, bypass),
-   `futureValue`, `installCost` and `reserveCost` components. Rez affordability
-   uses the evaluator's shared unrezzed-ICE budget (L1.1); ICE outside that
-   budget earns no `lockout` or `breakCost`.
-   **Use the honest verdict for I2's marginal score behind
-   `iceMarginalSecurity`**: `honestLockout` for hard lockout,
-   `honestIsSecure` without hard lockout for soft resource lockout (including
-   click limits), and `honestMandatoryBreakCost` for mandatory cost gain.
-   This explicitly specializes the shared design's compatibility-field
-   formula; it is not a global adoption of L9.0.1. Compute cost deltas only
-   from finite, known before/after values; handle lockout separately and
-   record unknown/non-finite costs rather than coercing them into a gain.
-   Keep compatibility fields and all unrelated consumers unchanged.
-4. **Consequence comes from the evaluator and stays inside I2's ranking.**
-   For remotes and Archives, `consequenceWeight` is
-   `0.25 + 0.75 × _breachConsequence(server).weight`, the breach-consequence
-   signal L7.1 owns and L3.5.1 also consumes; read it unchanged outside
-   an active bait/bluff posture. For HQ and R&D it is 1 (unweighted);
-   weighting the centrals needs its own gated option. The weight multiplies
-   only I2's candidate score: it must never feed `_protectionScore()` or any
-   value another decision compares against. **An active bait/bluff posture
-   uses a common `consequenceWeight = 1` for both agendas and traps**, within
-   the same profile-conditioned ICE-count envelope defined below. This
-   deliberately replaces the previous draft's true-weight rule for postured
-   servers: private root type or agenda points must not separate ordinary
-   ICE ranking, layer admission or allocation between otherwise equivalent
-   postured boards with equivalent costs and defensive mechanics. Other I2
-   components must obey the same substitution
-   invariant; neutralizing this multiplier alone is insufficient if another
-   private-root signal recreates the distinction. Keep the true consequence
-   available separately for tactical safety and diagnostics, never feed the
-   common weight back into the evaluator. A winning-breach safety override
-   remains authoritative. Outside an active posture, use true consequences;
-   the all-server realized-count guard measures that remaining risk.
-   *(2026-10-09, from L7.1's failure
-   analysis in `specs/L7.1.1-horizon-aware-central-consequence.md`: weighting
-   HQ's protection score moved the remote-scoring bar in `_isAScoringServer()`
-   and `_scoringWindow()` and caused the whole regression, `centralStolen.points`
-   +0.048 [+0.011, +0.085]; weighting only the ICE-target ranking was neutral,
-   +0.007 [−0.021, +0.036], and gave no improvement on the centrals.)*
-5. **Generalise the critical-breach check, do not duplicate it.**
-   `_criticalBreachDefenseAction()` reads `lossRiskAfter` from I2's candidate
-   evaluation (computed through the shared helper) instead of its own
-   push/pop loop; its thresholds and behaviour stay the same.
-   Compute `lossRiskAfter` through the existing `_centralBreachLossRisk()`
-   path, separately from the honest fields used for ordinary marginal scores;
-   sharing the hypothetical install does not change this safety oracle.
-6. (Done by F2: `_iceInstallScore()` and `_bestIceToInstall()` are deleted.)
-7. Same-turn multi-server allocation stays authoritative: a server already in
-   `_protectionInstallsThisTurn` keeps its current treatment.
-8. Retire `_serverToProtect(..., targetIsEligible)` from ordinary ICE-install
-   generation (design note migration step 7); the server ranking stays for
-   diagnostics.
-9. Compare marginal layer value with retained rez capacity and scoring costs.
-   The [regression handoff](../../corp-ai-regression/gated-fix-handoff.md)
-   establishes a cost to the old blanket at-risk override on the tested pool;
-   it does not establish that all extra layers are bad. Empty-Archives reward
-   valuation remains a separate gap, recorded in the shared design's
-   regression ownership table; do not equate recent runs with install value.
+### Phase boundaries
 
-Distinctions the score must respect:
+| Phase | PR | Changes decisions? | Acceptance |
+|---|---|---|---|
+| A | M1, M2, M4, calibration table, extended collector | No | Identity run (below) and reliability check |
+| B | I2's ranking reads M1/M2 behind `this.options.iceMarginalSecurity` | Yes, option on only | F4 gate (`## Acceptance gate`) |
 
-- A hard lockout is not printed strength.
-- Optional punishment raises deterrent value (`deterrence`) but never
-  `lockout`.
-- Subtype diversity counts only through public Runner capabilities and
-  effective subtype shifts.
-- A second layer can matter against outermost or one-ICE bypass even when raw
-  break cost barely changes.
-- `AIWorthwhileIce` hooks may reject or modify candidates but not set their
-  whole ordering.
-- On a server with an active bait or bluff posture, ordinary candidates must
-  satisfy `server.ice.length + 1 <= targetIce`, where `targetIce` is the
-  authoritative profile's existing 1/2/3-layer limit returned through
-  `_deceptionProtectionTarget()`. At or above that limit, offer no ordinary
-  extra layer; do not remove existing ICE. This is an ICE-count envelope,
-  not a cap on printed strength or expected break cost. I2 never rerolls or
-  independently caches a posture: read the authoritative posture before
-  hypothetical evaluation and follow it after epoch reevaluation. A neutral
-  script removes this posture-specific cap; other eligibility rules remain.
-  The lifetime profile shape is not a lifetime posture commitment. Tactical
-  safety overrides the cap when a lighter choice could enable a winning breach.
+Phase B may not start until phase A is merged and its reliability check has
+passed. Phase A ships no option: nothing reads its outputs, so there is
+nothing to switch. Identity is shown, as L9.0 did, by comparing the commit
+before phase A with phase A's head.
 
-**Observable defense scope.** Retire the previous draft's undefined
-“visible-strength envelope”; I2 does not introduce a strength cap. All ICE
-count and rezzed/unrezzed status are public. For rezzed or otherwise revealed
-ICE, identity, printed rez cost, subtypes and public strength modifiers can be
-observed; these are separate attributes, not one scalar strength measure.
-New ICE is installed unrezzed, so its hidden printed cost, subtypes and
-strength are not public observations. Candidate evaluation may use the
-Corp's own ICE properties, but the realized-count guard measures count only.
-Future constraints or guards for revealed ICE attributes need their own
-explicit definition and calibration before implementation.
+### Phase A: shared measurements (observation-only)
 
-**Root-sensitive component audit (scenario 16).** I2 migrates ICE ranking,
-not root scoring. Test the complete candidate record and final allocation,
-not just the consequence multiplier:
+**M4 approach-time defence hook.** Add a generic root-card hook
+`AIApproachDefense(server)` returning `null` or
+`{runnerOptions: [{credits, clicks}, ...], corpEndsRunUses: n}`:
 
-| Component or decision path | Root-sensitive input to audit | Active-posture rule |
-|---|---|---|
-| `securityGain`, including lockout, break cost and bypass | Root defensive effects, stakes-dependent evaluator branches, true breach consequence | Use honest security and common consequence weight; private root class/agenda points add no ordinary bonus. Keep genuine defensive mechanics fixed in equivalence tests; true stakes remain separate for safety. |
-| `futureValue` | Root-specific delayed scoring value, trap attraction, ability to fund a later rez | Use only candidate ICE, public Runner capabilities, actual common budget and shared profile; no agenda/trap-specific future payoff. Bound remains 0 to 1. |
-| `installCost` | Server depth and any applicable install mechanics | Use actual equal costs, with no root-class surcharge or discount invented by the planner. |
-| `reserveCost` and affordability/admission | `_reserveCreditsForCard()` / `AIReserveCredits`, existing rez obligations, `_sufficientEconomy()`'s root costs | Preserve real obligations; no guessed reserve based on agenda/trap class or points. Equivalence requires equal declared obligations. Test unequal obligations separately and record the resulting mechanically justified differences. |
-| `deceptionValue`, if emitted | Profile distance and root-class-specific deception payoff | Keep the shared design's 0-to-1 placeholder symmetric in the shared profile and observable shape; do not add a private-type bonus. |
-| `scoringValue` and role-displacement `opportunityCost` | Agenda points, completion plans and inferred root roles | These belong to I4 and I3 respectively and are absent from I2's ordinary ICE score. No implicit fast-advance, scoring-window or root-role bonus is introduced here. Existing forced/winning bands remain authoritative. |
-| Hooks, admission, allocation and tie-breaks | `AIWorthwhileIce`, root-sensitive legacy filters, server urgency, protection debt, `compatibilityOrder` | Audit callers as well as numeric components. With equivalent mechanics/costs and a fixed profile/random stream, no root-class/point-based priority survives outside the safety branch. |
+- `runnerOptions`: alternative costs the Runner must pay on approach to
+  continue (Manegarm: `[{credits: 5, clicks: 0}, {credits: 0, clicks: 2}]`).
+- `corpEndsRunUses`: how many approaches the Corp would actually end with its
+  own resources, following the card's own AI policy (Anoetic Void: 0 when
+  `AIWouldTrigger()` is false, else `min(floor(spendable credits / 2),
+  floor(non-agenda HQ cards / 2))`; spendable excludes its own
+  `AIReserveCredits` only once).
 
-The substitution invariant is conditional on equivalent mechanics, costs and
-reserve obligations; swapping in a mechanically different trap is not that
-oracle. Preserve those legitimate differences rather than spending reserved
-credits to manufacture equality. The realized-count guards retain all cases,
-including non-equivalent roots and safety overrides, to measure the residual
-tell. Log which input caused any permitted difference.
+Read it for each root card in `_addHonestVerdict()` only. A rezzed card counts;
+an unrezzed one counts only when its rez cost can be funded together with the
+chosen ICE rez plan (`_canFundRezPlan`), mirroring `_hasDefensiveUpgrade()`'s
+affordability rule. `runnerOptions` become one extra honest layer after the
+innermost ICE, repeated like ICE layers under global ETR. `corpEndsRunUses`
+combine with `_globalETRUses()` exactly as global ETR does: covering
+`_projectedRunnerRuns()` is an honest lockout, fewer uses repeat the route.
+Compatibility fields (`isSecure`, `hasHardLockout`, `totalMandatoryBreakCost`)
+and `_hasDefensiveUpgrade()` stay unchanged, so no decision moves. The hook
+must be pure (no state, logging or `preferred`). Document it in
+`documentation/ai.md` (section 5.5) and audit the playable sets for other
+approach-time root costs; Flagship (runs cannot be declared successful) is a
+breach-prevention effect, not an approach cost, and is out of scope.
 
-**Title cases.** Own the rows tagged I2 in the P1 ticket
-(`documentation/backlog/corp_ai_finding_13_legacy_title_lists.md`): Palisade
-in `_iceInstallScore()` is the only currently tagged I2 row, already completed
-when F2 deleted the function. Do not invent additional title migrations.
+**M1 `_breachMargin(server, evaluation)`.** From the honest route, in
+credit-equivalents (`CLICK_VALUE = 1`). `_addHonestVerdict()` additionally
+records the chosen `honestRoute {credits, clicks}`, `honestClickBudget` and
+`honestClickCredits`. With `C = runnerCredits`:
+
+- `creditSlack = C − min(route.clicks, clickCredits) − route.credits`;
+  `clickSlack = clickBudget − route.clicks`.
+- `margin = creditSlack` when `clickSlack ≥ 0`, else
+  `min(creditSlack, 0) + clickSlack`.
+- `−Infinity` for `honestLockout`; `null` when `honestMandatoryBreakCost` is
+  `null`, with `upperBound = C − honestKnownMandatoryBreakCost`. On the
+  restricted-credit path (no honest layers) use `C − honestMandatoryBreakCost`.
+
+Invariant: outside lockout and unknown cost, `margin ≥ 0` exactly when
+`honestIsSecure` is false. Positive margin is the Runner's spare after a breach.
+(The design note's "+Infinity for lockout" contradicts its own
+credits-minus-cost definition; I2 uses −Infinity.)
+
+**M2 `_breachHazard(server, runnerTurnsAhead)`.** Probability of a successful
+run on the server in one Runner turn, looked up in a checked-in table by
+server kind × margin bucket. Kinds: `agendaRemote`, `otherRemote`, `hq`, `rd`,
+`archives`. Buckets (preregistered): `lockout` (−Infinity), `≤−4`, `−3..−1`,
+`0..1`, `2..4`, `5..9`, `≥10`, `unknown` (null). Turn `t > 1` re-evaluates
+the bucket at `margin + (t − 1) × _projectedRunnerIncome()`, where
+`_projectedRunnerIncome()` is the public click-for-credit floor
+`max(0, AllottedClicks(runner) − 1)`. Never assume turns are independent of
+margin.
+
+**Calibration.** Extend `securitySnapshot` (headless.js) to emit per server
+`kind`, `margin`, `upperBound`, ICE count, `publicThreatRisk` and the M4 flag,
+and extend `securityCalibration` to count server-turns and breaches per
+`kind × bucket` (existing outputs unchanged; the `honest` group may shift on
+M4 boards, which is an observation change only). Run the committed pool with
+default options on preregistered seeds 1001–1400 per pair (fit) and 1401–1600
+(held out), disjoint from gate seeds. Build the table with a script
+(`scripts/ai-batch/breach-hazard-table.js`): within each kind, pool-adjacent
+isotonic regression (non-decreasing in margin, `lockout` lowest), merging any
+cell under 200 server-turns with its neighbour. Commit the raw report and
+derived table to
+`documentation/corp-ai/measurements/I2-<sha>-breach-hazard-calibration.json`
+with provenance (commit, pool hash, pairs, seeds, command). Expose the table to
+the AI as the frozen constant `CORP_AI_BREACH_HAZARD_TABLE` at the top of
+`ai_corp.js` (the AI runs in the browser and cannot read JSON); a test asserts
+the constant equals the table the script derives from the committed report.
+
+**Reliability check (held-out seeds, before any consumer).** Report per cell:
+predicted rate, observed rate, game-clustered 95% interval, count. Pass when
+every cell with ≥100 held-out server-turns contains its prediction in that
+interval and the count-weighted mean absolute error is ≤ 0.05. Also report:
+
+- **Next-turn check:** for servers whose ICE and root are unchanged between
+  consecutive snapshots, `breachHazard(server, 2)` predicted at turn T versus
+  breach at T+1. If it fails the same rule, phase B uses horizon 1.
+- **One-ICE split:** whether one-ICE and multi-ICE servers differ at equal
+  margin beyond their intervals (hidden one-ICE bypass is not in M1). If they
+  do, add an ICE-count split (1 / ≥2) to the table and rerun the check.
+
+If the reliability check fails, phase B is blocked; record the evidence here.
+
+**`POINT_VALUE`.** The design note names it but sets no value. Phase A
+computes it once from the pool's Corp decks as the mean over agenda copies of
+`(advancementRequirement × 2 + 1) / agendaPoints` credit-equivalents per
+point (one credit and one click per advance, one click to install), records
+it beside the table and defines `CORP_AI_POINT_VALUE`. Only I9 retunes it.
+
+### Phase B: ICE ranking (behind `iceMarginalSecurity`)
+
+1. **Candidates.** For every server in `_rankedServersToProtect()` whose
+   `_iceLayerPolicy()` allows a layer, plus the new-remote path, generate an
+   I1 record per affordable ICE. Retire `_serverToProtect(...,
+   targetIsEligible)` from ordinary generation (server ranking stays for
+   diagnostics). Admission is unchanged: I2 never offers a pair the legacy
+   layer policy, empty-Archives exclusion, legality, affordability or posture
+   cap rejects, and does not restore `serverAtRiskInstallOverride`. Whether an
+   ICE install beats a non-ICE action is I7.1's question.
+2. **Evaluate** each pair through `_hypotheticalServerAfterInstall()`
+   (detached server for a new remote), reading M1/M2 before and after.
+3. **Stake** `P(s)`, agenda points expected through the server per breach,
+   capped at the points the Runner needs to win:
+   - HQ, R&D: `_breachConsequence(s).pointsExposed` (agenda density × accesses).
+   - Archives and remotes: agenda points installed there
+     (`pointsExposed`; Archives includes its HQ backdoor via `_breachConsequence`).
+   - Before I3: the one designated next scoring remote (first of
+     `_scoringServers(_emptyProtectedRemotes())`, else the new remote) gets
+     the points of the highest-point agenda in HQ when HQ holds one; every
+     other empty remote has stake 0. I3 replaces this with its
+     scoring-remote role and the agendas expected there within the horizon.
+   - Active bait/bluff posture: a common stake, the mean points per agenda in
+     the Corp's deck list, and the `agendaRemote` row for agenda and trap
+     roots alike. True stakes remain for band-2 safety and diagnostics only.
+   - Remotes with stake > 0 use the `agendaRemote` row, others `otherRemote`.
+4. **Expected points stolen** over horizon `H` (`CORP_AI_RISK_HORIZON_RUNNER_TURNS`,
+   2; 1 if the next-turn check failed), with `h_t = _breachHazard(s, t)`:
+   remotes and Archives (one-shot) `P × (1 − Π(1 − h_t))`; HQ and R&D
+   (repeatable) `P × Σ h_t`.
+5. **Score** (credit-equivalents, recorded in `scoreBreakdown`):
+   `riskReduction = POINT_VALUE × (stolenBefore − stolenAfter)` (0 to
+   `POINT_VALUE ×` points to win), minus `installCost`, minus the ICE's rez
+   cost when the after-evaluation's rez plan includes it, minus the existing
+   bounded `reserveCost` and extra-click `opportunityCost`. Unknown cost: if
+   the before margin is `null`, `riskReduction` is 0; if only the after
+   margin is `null`, use its `upperBound` (a conservative lower bound on the
+   drop, since hazard rises with margin). Never coerce `null` to a number.
+6. **Rank** band 1 by score, then `compatibilityOrder`. Bands 3 and 2 are
+   unchanged and unscored; a game-losing breach is band 2.
+7. `_criticalBreachDefenseAction()` reads its `lossRiskAfter` from I2's
+   candidate evaluation (same hypothetical install) but keeps computing it
+   with `_centralBreachLossRisk()` and its 0.35/0.15 thresholds: a shared
+   computation, not a new oracle.
+8. Same-turn allocation in `_protectionInstallsThisTurn` stays authoritative.
+
+**Constraints kept from the previous draft.**
+
+- `_breachConsequence()` and any stake feed only I2's candidate score, never
+  `_protectionScore()`, `_isAScoringServer()` or `_scoringWindow()` (L7.1's
+  failure: weighting HQ's protection score moved the remote-scoring bar,
+  `centralStolen.points` +0.048 [+0.011, +0.085]).
+- **Posture cap.** On an actively postured remote, ordinary candidates need
+  `server.ice.length + 1 <= targetIce` from `_deceptionProtectionTarget()`;
+  at the cap offer no ordinary layer. Read the authoritative posture; never
+  reroll or cache one. A neutral script removes the cap. Band-2 safety
+  overrides it.
+- **Substitution invariant.** On equivalent postured boards (same public
+  state, profile, ICE, defensive mechanics, costs, declared reserves, random
+  stream), swapping an agenda for a trap or changing agenda points changes no
+  component, rejection, admission, allocation or choice. Real mechanical
+  differences (a declared reserve, an M4 defence) may differ and are logged.
+  I2 emits no `scoringValue`, `futureValue`, `deceptionValue` or
+  role-displacement value.
+- Optional punishment never lowers margin; unrezzable ICE adds nothing to the
+  after-margin (the L1.1 rez budget decides); effective subtypes and public
+  bypass act through the honest route; `AIWorthwhileIce` may reject or modify
+  candidates but not order them.
+
+**Title cases.** The only I2-tagged row in P1
+(`documentation/backlog/corp_ai_finding_13_legacy_title_lists.md`), Palisade
+in `_iceInstallScore()`, was completed when F2 deleted that function. M4
+replaces no title list.
 
 ## Safety and information boundary
 
-Hypothetical outermost-layer evaluation uses only public Runner capabilities
-and must not mutate live server contents or credits. Candidate evaluation must
-be unchanged when hidden Runner Grip cards are substituted. Unrezzable ICE must
-not receive active-security credit.
+Hypothetical evaluation uses only public Runner state and the Corp's own
+cards, must not mutate live servers or credits, and is unchanged when hidden
+Grip cards are substituted. The calibration table is measured against the
+stock Runner AI; it is a property of that opponent, not a rule. The collector
+may read true root types (harness-only); the AI may not read anything the
+Corp could not know.
 
 ## Test scenarios
 
-1. Against a publicly installed Fracter only, otherwise comparable Code Gate or
-   Sentry ICE outranks an efficiently broken Barrier.
-2. An affordable ETR ICE that creates a hard lockout outranks higher
-   printed-strength ICE that leaves the route open.
-3. A second affordable layer outranks deepening another server when it
-   neutralizes public outermost-bypass risk on a valuable remote, subject to
-   multi-server safety.
-4. ICE that cannot be rezzed within the projected defense budget does not
-   receive active-security credit (L1.1's shared budget, not a reimplementation).
-5. An ICE with only optional punishment increases deterrent value but does not
-   claim a lockout.
-6. Effective subtype changes and targeted bypass hooks affect hypothetical
-   results exactly as they affect installed ICE.
-7. Candidate evaluation is unchanged when hidden Runner Grip cards are
-   substituted.
-8. Bait- and bluff-postured remotes receive ICE choices within the current
-   epoch's exact ICE-count cap, using the same consequence
-   weight and ordinary ranking for equivalent agenda/trap boards. Repeated ranking and hypothetical probes neither
-   reroll nor cache a posture independently. After an authoritative epoch
-   reevaluation, ranking follows the new envelope, including ordinary ranking
-   for a neutral script; the lifetime profile shape remains unchanged.
-   Test 1-, 2- and 3-layer limits just below, at and above each cap, including
-   a winning-breach counterexample where safety overrides it.
-9. The Baker-backdoor fixture
-   (`corp-protects-baker-backdoor-after-rnd-layer-blocked.txt`) still installs
-   on Archives with the bridge removed.
-10. If the highest-urgency server has no ICE in hand that materially improves
-    its outcome, a useful candidate on another insecure server is chosen, with
-    the bridge removed.
-11. Outside active bait/bluff postures, with the same two ICE and two equally insecure servers, the ICE goes to the
-    server with the higher `breachConsequence`; changing only that signal
-    changes the choice.
-12. `_criticalBreachDefenseAction()` picks the same ICE as before on its
-    existing tests while reading I2's candidate evaluation.
-13. With the legacy at-risk override off, contrast an additional layer that
-    prevents a high-consequence breach with one that consumes scoring resources
-    without sufficient benefit. Record the competing costs and outcomes.
-14. Empty Archives without agendas or an HQ backdoor stays excluded in the
-    recovered fallback despite public run rewards. If I2 changes that policy,
-    test meaningful reward prevention against pointless extra defense and
-    measure the change separately; agenda and backdoor stakes remain eligible.
-15. Unknown breaker pricing (`null` mandatory cost) is not treated as zero or
-    Infinity to invent a break-cost improvement or a lockout. Preserve L9.1's
-    known-cost/unknown-price distinction in the recorded score components.
+**Phase A**
 
-16. Swap an agenda for a trap on otherwise equivalent actively postured
-    boards, holding public state, profile, ICE, defensive mechanics, actual
-    costs, declared reserves and random stream fixed. Assert every component
-    and path in the root-sensitive audit table, rejection reasons, ordinary
-    admission, allocation and final choice; vary agenda points independently.
-    Include `futureValue` and any emitted `deceptionValue`, and prove I2 emits
-    no `scoringValue` or role-displacement opportunity score. Separate genuine
-    reserve/defense differences and the true-stakes safety override case.
-17. Script realized-count observations with unpostured and postured roots,
-    known/revealed and unrevealed roots, zero ICE, preinstalled start-board
-    roots, root replacement, multiple roots and winning-breach overrides.
-    Repeated evaluation must not add observations or roll a new posture.
+1. M1: a priced route gives the defined margin; honest lockout gives
+   −Infinity; an unpriced breaker gives `null` with the known-part
+   `upperBound`; a click-breakable bioroid lowers margin through `clickSlack`.
+   Margin ≥ 0 iff `honestIsSecure` is false, across the L9.0/L9.1 fixtures.
+2. Manegarm: a Runner with 2 spare clicks pays clicks, one without pays 5
+   credits, one with neither is honestly locked out; an unrezzed Manegarm the
+   Corp cannot fund alongside the ICE plan has no effect; compatibility fields
+   are unchanged in every case.
+3. Anoetic Void: uses follow its `AIWouldTrigger` (ambush, fewer than 2 cards,
+   fewer than 2 non-agenda HQ cards each give 0), Corp credits and HQ size;
+   uses ≥ projected runs is an honest lockout, fewer repeat the route.
+4. Collector: scripted snapshots and runs produce correct `kind × bucket`
+   counts, including `lockout` and `unknown`; existing outputs unchanged.
+5. Table script: deterministic from a committed report; isotonic within kind;
+   thin cells merged; `CORP_AI_BREACH_HAZARD_TABLE` equals its output.
+6. `_breachHazard()` is non-decreasing in margin and uses projected income for
+   turn 2.
 
-18. A click-breakable bioroid and a missing-breaker route with an affordable
-    projected acquisition do not earn a hard-lockout gain solely because
-    compatibility `hasHardLockout` is true. I2 uses honest resource costs and
-    click limits, preserves unknown prices and changes no compatibility
-    verdict consumer with its option off.
+**Phase B** (option on; assert choice and logged reason; orderings, not numbers)
+
+7. Against a public Fracter only, comparable Code Gate or Sentry outranks an
+   efficiently broken Barrier.
+8. ETR ICE that creates an honest lockout outranks higher-strength ICE that
+   leaves a route.
+9. A second layer on a one-ICE remote under public outermost bypass outranks
+   deepening a lower-stake server.
+10. ICE outside the L1.1 rez budget, or with only optional punishment, earns no
+    risk reduction.
+11. Effective subtype changes and targeted bypass hooks affect hypothetical
+    results exactly as installed ICE.
+12. Hidden Grip substitution changes no candidate.
+13. With two servers at equal margin, the ICE goes to the higher stake;
+    changing only the stake changes the choice. A locked remote holding 3
+    points whose lockout the Runner's income will break next turn outranks
+    low-density R&D.
+14. Pre-I3 stake: the designated empty scoring remote earns stake only while
+    HQ holds an agenda; other empty remotes earn none.
+15. Unknown pricing: `null` before-margin gives 0; `null` after-margin uses
+    `upperBound`; no `null` becomes a number.
+16. Posture cap at 1, 2 and 3 layers (below, at, above), epoch reevaluation
+    and neutral script; band-2 override when a lighter choice allows a winning
+    breach.
+17. Substitution invariant on equivalent postured agenda/trap boards (all
+    record fields, admission, allocation, choice; agenda points varied
+    separately); a declared-reserve difference is logged, not hidden.
+18. Baker-backdoor fixture (`corp-protects-baker-backdoor-after-rnd-layer-blocked.txt`)
+    still installs on Archives without the bridge; if the top server has no
+    useful ICE, another allowed server gets one.
+19. Empty Archives without agendas or HQ backdoor stays excluded.
+20. `_criticalBreachDefenseAction()` picks the same ICE as before on its
+    existing tests while reading I2's evaluation.
+21. Option off: decision snapshots identical to the baseline.
 
 ## Acceptance gate
-
 F4 gate. Option `iceMarginalSecurity` (Corp AI), off in the baseline and on
-in the candidate. Committed deck pool, paired seeds, 200 games per deck
-pair, bootstrap 95% intervals. Both arms keep all five legacy regression
-gates off and prerequisite options identical. `postureEpochs=true` is the
-default in both arms, so the single gate command preserves epochs without
-explicit overrides or a two-report workaround. Capture a fresh matching
-corrected control with epochs and all listed collectors; the earlier I0
-control predates this default and cannot serve as the matching baseline.
-I0 supplies the pool and insolvency collector; its successful-run
-observations remain available for diagnosis. Follow the merge plan's
-[control refresh and sequencing guidance](../deception-gates.md):
-the implementing agent chooses and records the order before any I2 gate
-run, including `--quick`, using current adoption status and readiness.
-Prefer L8.2 adoption before I2's final gate when practical; if proceeding
-first, record the reason and the control policy in advance. Record effective
-`deceptionLegibility` and all prerequisite options in both arms. If I2 gates
-first, explicitly label its evidence as predating legibility; L8.2 must then
-use the adopted I2 policy as its control. Any decision-changing prerequisite
-landing during evaluation invalidates the later item's control and gate;
-refresh both rather than sharing an older parallel-development baseline.
-This sequencing preference is not an additional L8.2 dependency for I2.
-Collectors: `strandedUnrezzedIceCost`, `corpInsolventTurns`,
-`bluffSingleVariableCorrelation`, `realizedIceByRootType` (delivered by F12, contract below),
-`installOutcomes` (diagnostic trap triggers)
-(`corpInsolventTurns` added by I0, defined in
-`documentation/ai-batch-harness.md`; `strandedUnrezzedIceCost` is planned by
-this item, and its exported path must be verified when it lands). Each
-declares its better direction.
-Starts: none initially. If `--quick` changes no game or has insufficient
-agenda/trap observations, build real-game-derived
-start boards, record their provenance and add a separate gate command before
-hand-off; all commands must pass.
+in the candidate. Committed deck pool, paired seeds, 1,000 games per deck pair
+(see "Sample size" below), bootstrap 95% intervals.
+Collectors: `centralStolen`, `corpInsolventTurns`, `strandedUnrezzedIceCost`
+(adds `strandedUnrezzedIceCost.credits`: credits spent installing ICE never
+rezzed before game end, defined in this ticket),
+`bluffSingleVariableCorrelation`, `realizedIceByRootType`, `installOutcomes`,
+`evaluatorCallCount`.
+Starts: pool command none; posture command `--start-tag i2-posture` (boards
+this ticket builds with `scripts/start-board.js`).
 
-`strandedUnrezzedIceCost.credits` counts credits spent installing ICE never
-rezzed before game end. Its +1-credit guard and the existing improvement are
-unchanged. Core tolerances retain the shared design's preregistered
-3-percentage-point/0.25-point exceptions to today's 2-point/0.2-point defaults.
-Retain the +25% mean-latency check using fresh same-machine paired runs, not
-cached timing. The security-selection policy remains strategic and gated.
-
-**Reconciled statistic.** L8.4's settled check compares measured batch maxima
-(candidate 0.229 ≤ control 0.329), with both arms' intervals reported for
-context. It is not a paired confidence-bound non-inferiority result and must
-not be retroactively changed. I2 instead proposes a separately specified
-paired-interval rule with a positive regression margin. It adds uncertainty
-checking but permits a small increase, so it is not a strict strengthening
-of exact measured-value “no worse”. It is also not an absolute 0.10 ceiling.
-F11, baseline-only calibration and preregistration must precede adoption.
-L8.2/L8.5 source gates and I9's absolute combined-policy target still require
-their own reconciliation; this spec does not settle or amend them.
-
-**Correlation guard setup is required.** The existing collector exports
-`bluffSingleVariableCorrelation.max`, the batch-level largest absolute
-Spearman correlation across posture/profile outcomes and public variables.
-At this stamp, `scripts/ai-batch/metrics.js:compareReports()` handles paired
-differences only for per-game metrics; `scripts/ai-batch.js` supports this
-batch metric only through an absolute `--ceiling`. Paired-difference mode for
-it does **not** exist yet. F11 owns its implementation and tests; I2 only
-consumes the delivered support. Resampling must join matching successful
-game pairs, recompute each arm's pooled `finishBatch()` per draw and form
-candidate minus control intervals, with usable samples in both arms.
-
-**Realized defense coverage (F12-owned collector).** Consume
-[F12](../../backlog/code-review/F12-realized-defense-measurement.md), extracted on 2026-10-13 before L8.2;
-I2 retains its policy guards and consumer-specific calibration. Use
-`realizedIceByRootType` using passive harness snapshots at the start of each
-Runner turn, after Corp installs and responses finish. Include every remote
-with an agenda or access-punishing trap, whether postured or not, including
-roots present on start boards. Record actual ICE count and harness-only true
-root type, root commitment identity, public/revealed status, active posture
-and safety-override status. Observing a posture must not call a helper that
-rolls one. Define traps through `Ambush`/`AIPunishesAccess`, not title lists.
-For multi-root servers retain per-root observations with a multi-root label;
-state that repeated roots/turns are clustered within games, not independent.
-
-Export `realizedIceByRootType.allCountCorrelation` and
-`realizedIceByRootType.posturedCountCorrelation`: absolute Spearman rho of
-agenda-versus-trap type against actual ICE count, pooled over unrevealed
-roots in all relevant remotes and the actively postured subset respectively.
-Report sample/game counts and agenda/trap count distributions, including a
-separate revealed-root breakdown. Keep safety overrides in the main metrics
-and identify them diagnostically; do not remove difficult cases to pass.
-Missing either root type or otherwise undefined correlation fails closed.
-These metrics test a count-based tell, not ICE identity, rezzed strength or
-multivariable inference. The existing posture-roll guard does not establish
-that realized ICE count is unpredictive.
-
-**Tolerance calibration before freezing the adoption gate.** The three correlation guards
-below use **0.02 absolute rho as a provisional planning value**, not a frozen
-or empirically justified tolerance. After F11 and F12 are
-available, collect epoch-enabled control-only reports with identical policy,
-pool and collectors on preregistered disjoint seed cohorts. Use independent
-game resampling within deck pairs for these calibration differences; never
-call different seeds matching pairs or bypass gate report validation. Record
-point differences, 95% intervals and widths, usable counts, cohort sizes and
-commands. Identical-policy/same-seed comparisons check implementation
-identity and produce zero differences; they do not estimate sampling noise.
-
-Compare calibration interval upper bounds and widths with the proposed
-margin. Total width greater than 0.02 is a precision warning, not proof that
-a paired guard cannot pass: actual paired differences exploit common seeds.
-Prefer increasing games or obtaining representative samples to loosening the
-acceptable behavioral regression. Any revised tolerance needs an explicit
-policy rationale and updated rows/command before the gate or inspecting
-candidate results. Freeze that tolerance and the sample size before adoption
-runs; never relax them after seeing candidate evidence. If calibration cannot
-support a meaningful guard, I2 cannot run an adoption gate or move to
-code-review. Once frozen, pass
-only when each candidate-minus-control interval upper bound is below its
-margin, using F11's strict oriented guard.
-
-`installOutcomes.trapTriggers` is **diagnostic only**: a drop versus control
-does not independently block the gate. Record it for interpreting deception
-and trap attraction; it must not substitute for or excuse a failed guard.
-
-**Failure disposition.** Failure of the all-server realized-count guard,
-postured-count guard or posture-roll guard blocks adoption exactly like any
-other gate failure. Follow `ai-planning.md`'s failed-gate lifecycle: close
-that implementation attempt as **not adopted**, remove the failed option
-and policy branch, and park I2 or replace it with a newly scoped item backed
-by the evidence. Keep useful passive collectors. The Resolution must name
-the failing guard, control/candidate values, paired interval, frozen margin
-and this disposition. A follow-up owned by L8.2 or I9 may investigate the
-tell, but cannot waive the failed guard or authorize I2 adoption. Missing
-samples are incomplete setup, not evidence that the policy passed.
+Pool command:
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
 | Improve | `pointsStolen` | lower | interval of the improvement above 0 |
 | Guard | `winRate` | higher | regression at most 0.03 |
 | Guard | `pointsScored` | higher | regression at most 0.25 |
-| Guard | `pointsStolen` | lower | regression at most 0.25 |
+| Guard | `centralStolen.points` | lower | regression at most 0.2 |
 | Guard | `gameLength` | lower | regression at most 1.5 |
 | Guard | `corpInsolventTurns` | lower | regression at most 0.5 |
 | Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
-| Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 absolute rho against matching control (provisional until calibration) |
-| Guard | `realizedIceByRootType.allCountCorrelation` | lower | candidate-minus-control 95% interval upper bound strictly below 0.02 absolute rho (provisional until calibration) |
-| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | candidate-minus-control 95% interval upper bound strictly below 0.02 absolute rho (provisional until calibration) |
+| Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 |
+| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
 
-Planned gate command (after F11 and the new collectors exist and the
-calibration above freezes the tolerances; it cannot pass on today's harness):
-`node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --collector strandedUnrezzedIceCost --collector corpInsolventTurns --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard pointsStolen=0.25 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.02 --guard realizedIceByRootType.posturedCountCorrelation=0.02 --better realizedIceByRootType.allCountCorrelation=lower --better realizedIceByRootType.posturedCountCorrelation=lower --better gameLength=lower`
+Gate command: `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --games 1000 --collector centralStolen --collector corpInsolventTurns --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --collector evaluatorCallCount --improve pointsStolen --guard winRate=0.03 --guard pointsScored=0.25 --guard centralStolen.points=0.2 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --better gameLength=lower`
+
+Posture command:
+
+| Check | Metric | Better | Threshold |
+|---|---|---|---|
+| Guard | `winRate` | higher | regression at most 0.03 |
+| Guard | `pointsStolen` | lower | regression at most 0.25 |
+| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
+
+Gate command: `node scripts/ai-batch.js gate --corp-option iceMarginalSecurity=true --start-tag i2-posture --budget 2800 --collector realizedIceByRootType --guard winRate=0.03 --guard pointsStolen=0.25 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+
+Both commands must pass. Both arms keep the five legacy regression options off
+and every other option at its default (`postureEpochs` and
+`matchLocalPostureFeedback` are `true`); record effective options in both
+arms. `evaluatorCallCount.computationsPerMainDecision` and
+`installOutcomes.trapTriggers` are diagnostics, not rows.
+
+**Expected effect.** I2 only reallocates ICE among servers the legacy policy
+already admits, so it should not move `winRate` measurably; I4 is the
+win-rate item. The target is `pointsStolen` −0.1 to −0.2 per game. L9.0.1's
+1,400-pair interval half-width was 0.13 points; at 7,000 pairs it is about
+0.06, so a true −0.1 passes with roughly 90% probability.
+
+**Changes from the previous gate, and why.**
+
+- **Sample size 200 → 1,000 per pair.** Needed for the count guard (below) and
+  gives the improvement row the power above. About 40 minutes per arm.
+- **`realizedIceByRootType.allCountCorrelation` tolerance 0.02 → 0.05.** F12's
+  independent control calibration at 1,400 games per arm put
+  control-minus-control at +0.033 [−0.022, +0.091]. Even scaled to 7,000
+  games the half-width is about 0.025, so 0.02 would fail an unchanged policy
+  about half the time, which measures noise, not I2. 0.05 against a 0.22
+  baseline tell is the largest residual increase this item accepts (an owner
+  question). The guard is kept, not dropped: outside a posture, true stakes
+  give trap remotes no ICE value, so this is the guard most likely to fail.
+- **Postured-count guard moved to a start-board command.** On the pool it
+  fails closed: F12 measured known posture labels at 85.8%/85.4%, below its
+  frozen 90% readiness rule. That is a coverage limit, not noise, and more pool
+  games do not fix it. The guard is kept on real-game-derived boards with
+  active agenda and trap postures, tolerance 0.05 for the same reason as above.
+- **`centralStolen.points` guard added** (standard 0.2 points tolerance): the
+  L7.1 and L9.0.1 failures both bought remote safety with central theft.
+- **`pointsStolen` guard dropped from the pool command**: the improve row on the
+  same metric is stricter. It stays as a guard on the posture command.
+- **Latency check replaced** by the diagnostic `evaluatorCallCount`
+  (ai-planning: latency is not a standard guard because `gate` may reuse a
+  baseline timed on another machine).
+- `winRate` 0.03 and `pointsScored` 0.25 keep the install track's tolerances
+  ([design note](install-decisions-design.md#acceptance-gates)), not the
+  0.02/0.2 defaults.
+
+**Before the first gate run (freeze, then never change).**
+
+1. Control-only calibration: two disjoint control cohorts (seeds 2001–3000
+   and 3001–4000, default options) with independent deck-pair-stratified
+   bootstrap. For `allCountCorrelation` and `bluffSingleVariableCorrelation.max`,
+   the control-minus-control interval half-width must be at most half the row's
+   tolerance; if not, increase `--games` for both, never the tolerance. Commit
+   the evidence to `documentation/corp-ai/measurements/`.
+2. Posture boards: a control-only run on `i2-posture` must meet F12's
+   readiness rule (≥90% known posture labels, ≥10 commitments and ≥5 games per
+   class). If no real-log boards can meet it, I2 cannot gate; record that here
+   and ask the owner. Do not invent boards to reach coverage.
+3. Record the L8.2/I2 ordering decision per the
+   [deception-gates control refresh guidance](../deception-gates.md). Any
+   decision-changing merge (L8.2, L9.0.2) during evaluation invalidates the
+   control; refresh it.
+
+**Failure disposition.** Any failed row closes this attempt **not adopted**
+under ai-planning's failed-gate lifecycle: remove the option and branch, keep
+phase A (it is useful without the policy), the collectors and the boards.
+L8.2, L8.9 or I9 may investigate a count tell but cannot waive a failed guard.
+Missing samples are incomplete setup, not a pass.
 
 ## Things to consider
 
-- If correlation worsens, more varied ICE choices on traps are a follow-up
-  hypothesis to test within the same posture cap, watching
-  `installOutcomes.trapTriggers` against the matching control. The current
-  correlation collector measures posture/profile rolls and their public
-  context, not realized ICE identity or visible strength; passing it alone
-  does not prove those observable defense choices conceal card type. After
-  an adoption-gate failure, test a revised policy through a new ticket rather
-  than tuning this failed attempt against its observed gate results.
-- `deceptionValue` remains the shared design's bounded symmetric placeholder.
-  [L8.8 Marginal deception value](L8.8-marginal-deception-value.md) owns a
-  separately gated follow-up after I2 adoption: shared concealment deltas stay
-  symmetric, while private trap payoff stays outside ordinary postured ICE
-  ranking. Its proposed `_deceptionUpside()` does not exist yet. L8.8 is not
-  an I2 dependency and does not waive this item's invariants or guards.
-- **Owned open gap: empty-Archives reward valuation.** I2 planning must decide
-  whether its marginal-value comparison can cover the public reward prevented
-  by protection. Before hand-off, implement and validate that scoped policy,
-  or file and link a separate follow-up ticket with a roadmap owner and an
-  acceptance gate. Merely retaining the shared-design note is insufficient.
-  Keep the recovered exclusion while the policy remains unvalidated.
-- L4.1 (unified bypass allocation) changes the evaluator results that
-  scenarios 3 and 6 rest on. Assert orderings, not numbers, and if L4.1 lands
-  first build those fixtures on its hook format.
-- I2's explicit honest-field adoption applies only to its new marginal score
-  behind its own option. Global adoption by existing scoring, rez and
-  protection consumers remains L9.0.1's independently gated policy.
-- Protection debt versus a winning line (design note edge case 3): central ICE
-  scored by consequence must stay below the band-3 fast-advance-to-win
-  candidate.
-- Performance: every hypothetical pair costs an evaluator call. F3's cache
-  is now implemented and enabled; it can reuse real-board evaluations but
-  deliberately bypasses hypothetical results. It is not a dependency, and
-  the fresh-run latency check still applies.
+- **Under-installing.** `POINT_VALUE` anchored on the cost of advancing is a
+  low value of a point, and empty remotes earn stake only through the pre-I3
+  rule, so ranking may favour cheap ICE and loaded centrals over scoring
+  remote preparation. Admission is unchanged, so volume should be similar; the
+  `pointsScored` guard watches the scoring side.
+- **Snapshot timing.** The table is measured at Runner turn start, after
+  turn-begin income; the consumer evaluates during the Corp turn. Margins are
+  therefore slightly understated by the Runner's turn-start drip.
+- **Breach is not steal.** M2 counts successful runs; centrals with few
+  accesses overstate theft risk. Stake already multiplies by per-breach points.
+- **Recalibrate** M2 after any adoption that changes where agendas sit (I9).
+- **Empty-Archives reward valuation** (owned gap). Keep the exclusion; before
+  hand-off either implement and gate a scoped policy or file a follow-up with
+  a roadmap owner and gate, and update the design note's gap reference.
+- **L4.1** changes evaluator routes scenarios 9 and 11 rest on; assert
+  orderings, and use its hook format if it lands first.
+- **L9.0.2** arms touch the same admission and critical-defence paths; whichever
+  adopts first is part of the other's control. Phase A's M4 changes honest
+  fields L9.0.2 would read; that is a correction, but its evidence must be
+  rerun after phase A.
+- **L8.8** owns any marginal deception value after I2 adoption.
+- Every pair costs `H` hypothetical evaluations; F3's cache bypasses
+  hypotheticals. Memoize per decision if `evaluatorCallCount` rises sharply.
 
 ## Acceptance criteria
 
-- [ ] The Resolution explicitly disposes of the empty-Archives reward-valuation gap: either it links implemented behavior, focused counterexamples and gate evidence, or it links a filed follow-up ticket with remaining scope, roadmap ownership and an acceptance gate. Update the shared design's gap status and reference; "investigate later" without a ticket does not satisfy this criterion.
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice; scenarios 8 and 16 cover the exact depth cap and every root-sensitive component/path in the audit table.
-- [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`; the L3.5.2 regressions (scenarios 9 and 10) pass without it.
-- [ ] `_criticalBreachDefenseAction()` consumes I2's candidate evaluation without changing its breach-risk oracle; ordinary marginal scores explicitly use honest verdict fields and cover scenario 18.
+**Phase A**
+
+- [ ] `AIApproachDefense` is implemented for Manegarm Skunkworks and Anoetic Void, placed with the cards' AI hooks, documented in `documentation/ai.md`, and the playable sets are audited for other approach-time root costs (listed in the Resolution).
+- [ ] `_breachMargin()`, `_breachHazard()`, `_projectedRunnerIncome()`, `CORP_AI_BREACH_HAZARD_TABLE` and `CORP_AI_POINT_VALUE` exist; scenarios 1–6 pass.
+- [ ] The calibration report, table and provenance are committed under `documentation/corp-ai/measurements/`, and the held-out reliability, next-turn and one-ICE checks are recorded with their outcome.
+- [ ] Identity run (observation-only invariant, as L9.0): I0's F4 configuration with `--collector securityCalibration` at the commit before phase A and at phase A's head gives identical per-game `winner`, `turns`, `logHash` and `decisionHash` on every pair, and decision snapshots are identical to the recorded baseline. Corp `decisionLatencyMs` change is recorded.
+
+**Phase B**
+
+- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
+- [ ] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`.
 - [ ] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
-- [ ] I0's `corpInsolventTurns` collector is verified and back-filled without changing baseline decisions.
-- [ ] L9.1 and F11 are `done` before I2 moves to code-review; implementation without completed review does not satisfy either dependency.
-- [ ] The existing `bluffSingleVariableCorrelation` collector is validated for epoch observations and I2 uses F11's delivered paired batch guards; an absolute ceiling is not substituted.
-- [ ] F12's `realizedIceByRootType` is consumed and validated against scenario 17, with usable agenda/trap observations, repeatable game-clustered pooled statistics and both realized-count guards passing. A green posture-roll guard alone does not prove realized ICE count is unpredictive, and green count guards do not prove ICE identity/strength or multivariable unpredictability.
-- [ ] Before adoption tolerances are frozen, control-only calibration evidence records intervals and widths, usable counts, commands and chosen sample size for all three correlation metrics; tolerances are justified and frozen before any candidate adoption evidence.
-- [ ] The implementing agent records the L8.2/I2 ordering decision and its reason before the first gate run; the Resolution records whether evidence predates or includes adopted L8.2, effective options in both arms, and any control/gate refresh after decision-changing prerequisite merges.
-- [ ] If any deception guard fails, the Resolution records the failed-gate disposition above; handing the tell to L8.2/I9 never substitutes for passing I2's guards.
-- [ ] The Resolution records `bluffSingleVariableCorrelation.max` for the fresh epoch-enabled matching control and candidate, both arms' 95% intervals, the paired difference and its 95% interval, and the calibrated, preregistered absolute-rho tolerance used. It also records both realized-count metrics, their paired intervals, tolerances and sample counts.
-- [ ] The existing `installOutcomes` collector is verified against scripted trap-use outcomes, and the Resolution records diagnostic `installOutcomes.trapTriggers` for both arms.
-- [ ] The gate's `--quick` run changes at least one game and reaches usable correlation observations. If the pool is thin, use real-game-derived start boards with recorded provenance, focused coverage and a separate passing gate command; no-change or absent-sample runs are not a pass.
+- [ ] The `i2-posture` start boards are built from real logs with `scripts/start-board.js`, each `NOTE` naming its source, and meet F12's readiness rule on a control-only run.
+- [ ] The pre-gate calibration evidence and the L8.2/I2 ordering decision are recorded before the first gate run.
+- [ ] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
+- [ ] Applicable gate evidence is recorded in the Resolution. For F4: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; an improvement interval's lower bound must be above zero. Only then is the option switched on by default.
+- [ ] The empty-Archives reward-valuation gap is disposed of as described above.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.

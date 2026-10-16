@@ -242,13 +242,13 @@ I9 comes last.
 - **Status:** proposed
 - **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12
 - **Spec:** [I2-ice-selection-by-marginal-security.md](specs/I2-ice-selection-by-marginal-security.md)
-- **Goal:** Choose the `(ICE, server)` pair that most improves security, using the existing evaluator.
+- **Goal:** Publish graded breach measurements (margin, breach hazard, approach-time upgrades), then choose the `(ICE, server)` pair that most reduces expected points stolen.
 
 ### I3 Remote role and root suitability
 - **Status:** proposed
 - **Depends on:** I2, F4, L8.4
 - **Spec:** [I3-remote-role-and-root-suitability.md](specs/I3-remote-role-and-root-suitability.md)
-- **Goal:** Decide what each remote is for before comparing root cards.
+- **Goal:** Keep a persistent scoring remote, chosen by projected breach hazard, and charge other installs the scoring value they displace.
 
 ### I3.1 Deck game-plan profile
 - **Status:** proposed
@@ -260,7 +260,7 @@ I9 comes last.
 - **Status:** proposed
 - **Depends on:** I3, F4
 - **Spec:** [I4-agenda-installation-and-scoring-commitment.md](specs/I4-agenda-installation-and-scoring-commitment.md)
-- **Goal:** Commit an agenda only with a safe destination and a plausible scoring plan.
+- **Goal:** Install an agenda where expected points beat holding it, then advance it to a score without the global reserve stalling the plan.
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed
