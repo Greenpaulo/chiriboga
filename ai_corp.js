@@ -7251,6 +7251,20 @@ class CorpAI {
         });
       }
     }
+    // First-operation click income is finite within each search path.
+    var identity = corp.identityCard;
+    if (identity && CheckHasAbilities(identity) &&
+        typeof identity.AIOperationPlayClickGain == "function") {
+      for (var directionIndex = 0; directionIndex < ret.length; directionIndex++) {
+        var direction = ret[directionIndex];
+        if (!direction.using || direction.using.cardType != "operation" ||
+            corp.resolvingCards.includes(direction.using)) continue;
+        direction.corpClicks += identity.AIOperationPlayClickGain.call(
+          identity, direction.using, thisTurn, point.persist.includes(identity));
+        if (!direction.persist.includes(identity))
+          direction.persist = direction.persist.concat([identity]);
+      }
+    }
     return ret;
   }
 

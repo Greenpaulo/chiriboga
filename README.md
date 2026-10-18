@@ -61,20 +61,11 @@ Card art and symbols are property of Null Signal Games and used under [CC BY-ND 
 
 Working with coding agents (Codex): see [documentation/workflow.md](documentation/workflow.md) for the commands, ticket lifecycle and guardrails.
 
-## Missing Cards
+## Elevation
 
-The following Elevation cards are not yet implemented (6 cards):
-
-### NBN
-
-- **35057** - Nebula Talent Management: Making Stars (Identity - Flip)
-- **35058** - Synapse Global: Faster than Thought (Identity)
-- **35059** - Embedded Reporting (Agenda - Initiative)
-- **35060** - Next Big Thing (Agenda - Initiative)
-- **35065** - Bigger Picture (Operation - Gray Ops)
-- **35066** - IP Enforcement (Operation - Gray Ops)
-
-I'll get to these when I have a minute.
+All six previously missing NBN cards (35057–35060, 35065–35066) are implemented.
+See the [implementation record](documentation/new-sets/elevation-missing-cards-implementation.md)
+for gameplay, baseline AI evidence and queued optimisation work.
 
 ## Setup
 
