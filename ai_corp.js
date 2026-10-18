@@ -1635,7 +1635,7 @@ class CorpAI {
       action: "profile",
       isAgenda: CheckCardType(card, ["agenda"]) ? 1 : 0,
       profile: profile,
-    }, null);
+    }, null, card);
     return profile;
   }
 
@@ -1949,6 +1949,10 @@ class CorpAI {
       if (!this._postureCardIds.has(card))
         this._postureCardIds.set(card, ++this._postureCardCount);
       event.cardId = this._postureCardIds.get(card);
+      // Export an already cached shape for an actual activation; observation
+      // must never create a profile or consume policy randomness.
+      if (event.action == "roll" && event.postured)
+        event.profile = this._cardDeceptionProfiles.get(card) || null;
     }
     event.epoch = this._postureEpoch;
     event.publicVars = {

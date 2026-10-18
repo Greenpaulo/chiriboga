@@ -2036,8 +2036,10 @@ and the policy never deliberately creates a naked agenda or retains an unsafe
 agenda posture when a breach could win the game or when the Corp could score
 that agenda to win immediately.
 
-Profiles (the shape) are cached for the card's lifetime. The bait/bluff
-activation decision is too, unless the Corp AI option `postureEpochs` (L8.4,
+Profiles (the shape) are cached with the card. With match-local feedback off,
+they last for its lifetime; feedback can refresh a shape at a later active
+commitment as described below. The bait/bluff activation decision lasts for
+the card's lifetime unless the Corp AI option `postureEpochs` (L8.4,
 default on after its revised F4 gate passed) is on: then the decision is kept for a
 bounded epoch of two or three Corp turns and reconsidered, at most once per
 Corp turn, after a public boundary (the server was run, Runner credits or
@@ -2045,6 +2047,13 @@ breakers changed, the root's advancement changed, or either side reached match
 point). Repeated evaluator calls never reroll. `AIPunishesAccess(server)` is
 unchanged: its signature and contract are the same with the option on or off,
 and posture epochs add no card-facing hook.
+
+The L8.2 relative-depth/parity/top-up experiment was not adopted after its
+full gate failed. Its policy and settings have been removed. The existing
+absolute-depth sampler, advancement cadence, epoch/feedback behavior and
+`AIPunishesAccess(server)` contract remain in force. Passive measurement and
+reporting improvements from that work remain available; see the rejected-design
+record in the Corp architecture and the L8.2 ticket.
 
 L8.5 records committed public actions through the engine's
 `RecordPublicPostureEvent(action, card, server, amount)` and the AI's
