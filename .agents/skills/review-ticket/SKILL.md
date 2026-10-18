@@ -20,8 +20,10 @@ Do not modify code or tests. If something needs changing, it goes back through
 
 ## 1. Run the mechanical checks
 
-Run `node scripts/ticket.js check <ticket>`, or ask the user for its output if
-you cannot run commands. It reports:
+Obtain the final `node scripts/ticket.js check <ticket>` result. Reuse supplied
+output only after verifying that its source/tests, relevant metadata and command
+match the state being reviewed. If current evidence is unavailable, run it once,
+or ask for its output when unable to run commands. It reports:
 
 - whether the Resolution records its starting commit;
 - whether the reproduction moved into the green suite with its expectations
@@ -32,7 +34,13 @@ you cannot run commands. It reports:
   Resolution has a `**Gate:**` line naming the option and whether the option's
   default matches it (off unless the gate passed).
 
-Any FAIL is a Blocking finding. Do not repeat these checks by hand.
+Any FAIL is a Blocking finding. Do not repeat these checks by hand. This skill
+is an optional independent audit, not the normal PR review: Paul runs this
+check when opening a PR and CodeRabbit reviews on GitHub. Implementation
+already ends with a full ticket check. Do not repeat that full run merely for
+an independent audit on unchanged inputs. Use focused probes for review claims;
+after moving a ticket, run the relevant metadata check rather than another
+full suite. See `tests/README.md`.
 
 ## 2. Read the change
 

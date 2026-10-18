@@ -733,7 +733,7 @@ test('unrezzed ice share one affordable rez plan without mutating state', () => 
   assert.strictEqual(outer.rezzed, false);
   assert.deepStrictEqual(target.ice, originalIce);
 });
-if (process.env.F6_PENDING) test('three unrezzed ice are priced once each across affordable rez plans', () => {
+test('three unrezzed ice are priced once each across affordable rez plans', () => {
   const breaker = {player: runner, title: 'Text fracter', strength: 3,
     subTypes: ['Icebreaker', 'Fracter'], cardText: '1 credit: Break 1 barrier subroutine.'};
   runner.cards = [breaker]; runner.creditPool = 10;
