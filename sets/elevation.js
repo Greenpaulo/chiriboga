@@ -9209,7 +9209,7 @@ cardSet[35059] = {
           return choice.card && PlayCost(choice.card) <= Credits(corp) &&
             (!choice.card.AIWouldPlay || choice.card.AIWouldPlay.call(choice.card));
         });
-        useful.sort(function (a, b) { return b.card.elo - a.card.elo; });
+        useful.sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });
         return useful.length ? [useful[0]] : [];
       }
       choices.push({decline: true, label: "Decline", button: "Decline"});
@@ -9308,8 +9308,6 @@ cardSet[35065] = {
     if (corp.AI) {
       if (runner.creditPool < 5) return [choices[0]];
       var remove = Math.min(Math.ceil(runner.creditPool / 5), runner.tags);
-      // Preserve a tag when it costs at most a partial final transfer.
-      if (remove == runner.tags && runner.tags > 1 && runner.creditPool <= 5 * (runner.tags - 1)) remove--;
       return [choices[remove + 1]];
     }
     return choices;

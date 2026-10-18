@@ -249,6 +249,13 @@ c.ai.preferred = null;
 assert.strictEqual(c.ai.Choice(['play', 'n'], 'command'), 0);
 assert.strictEqual(c.ai.preferred.cardToPlay, bigger);
 assert.strictEqual(bigger.Enumerate()[0].tags, 2);
+for (const [tags, credits, expected] of [[2, 6, 2], [2, 10, 2], [3, 6, 2], [2, 4, -1]]) {
+  runner.tags = tags;
+  runner.creditPool = credits;
+  assert.strictEqual(bigger.Enumerate()[0].tags, expected, 'baseline transfers available credits without a tag-retention heuristic');
+}
+runner.tags = 2;
+runner.creditPool = 7;
 corp.HQ.cards = [enforcement];
 enforcement.cardLocation = corp.HQ.cards;
 stolen.cardLocation = runner.scoreArea;
@@ -304,6 +311,23 @@ c.ai.preferred = null;
 assert.strictEqual(c.ai.Choice(['trigger', 'n'], 'command'), 0);
 const usefulTutor = reporting.responseOnCorpDiscardEnds.Enumerate.call(reporting);
 assert.strictEqual(usefulTutor[c.ai.Choice(usefulTutor, 'select')].card, operation);
+// Missing ratings must not tie a rated operation or block later comparisons.
+const unratedOperation = {...operation, title: 'Unrated operation'};
+delete unratedOperation.elo;
+const lowerRatedOperation = {...operation, title: 'Lower rated operation', elo: 1500};
+for (const candidates of [
+  [unratedOperation, lowerRatedOperation, operation],
+  [lowerRatedOperation, unratedOperation, operation],
+  [operation, unratedOperation, lowerRatedOperation],
+]) {
+  corp.RnD.cards = candidates;
+  c.ai.preferred = null;
+  assert.strictEqual(c.ai.Choice(['trigger', 'n'], 'command'), 0);
+  const rankedTutor = reporting.responseOnCorpDiscardEnds.Enumerate.call(reporting);
+  assert.strictEqual(rankedTutor[c.ai.Choice(rankedTutor, 'select')].card, operation, 'highest rated affordable operation wins despite missing ratings');
+}
+corp.RnD.cards = [unratedOperation];
+assert.strictEqual(reporting.responseOnCorpDiscardEnds.Enumerate.call(reporting)[0].card, unratedOperation, 'an unrated operation remains a legal fallback');
 reporting.agenda = 0;
 assert.strictEqual(reporting.responseOnCorpDiscardEnds.Enumerate.call(reporting).length, 0);
 // Synapse's installation choice comes from the real installation planner.

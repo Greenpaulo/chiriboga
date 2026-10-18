@@ -16,6 +16,7 @@ Shared verification: card status, AI hook documentation, Eternal format, deck po
 | Date | Agent | Evidence | Handoff |
 | --- | --- | --- | --- |
 | 2026-10-16 | Codex | Both Elevation focused tests, AI hook docs, card status, format/deck/identity checks passed. | All six cards implemented with baseline AI. Final full-suite result unverified; polling stopped at the user’s request. |
+| 2026-10-18 | Codex | PR #56 review: both Elevation focused tests and AI hook docs passed on Node 20.19.0. The new missing-ELO tutor regression fails with the original comparator. Removed Bigger Picture’s unreachable branch without changing its baseline policy. | Full suite launched after code/test edits; verification pending. Log: `/private/tmp/chiriboga-pr56-review-tests.log`; exit status: `/private/tmp/chiriboga-pr56-review-tests.status` (written on completion). |
 
 ## Optimisation queue
 
@@ -35,6 +36,6 @@ Rules text and examples obtained with the batch-brief code using an in-memory El
 - Bigger Picture removes tags before transferring credits and gains exactly the result of `LoseCredits`, including a capped/blocked loss. Both modes and zero-tag removal are supported.
 - Engine evidence uses actual `Play`, `Install`, `Score`, `Draw`, `Reveal`, tag-removal responses and paid-ability phase transitions. VM evidence exercises real Corp command/target selectors, install and tutor selection, and read-only advancement search. No browser walkthrough is claimed.
 
-Verification notes: the first full run overlapped source edits and consequently failed its replay/cache-key consistency check; a second stable-source full run was started, but its result was not checked after the user requested an immediate handoff. The user may verify with `node tests/run-all-tests.js` on Node 20.19.0. Local image assets are linked from the main checkout into this temporary worktree. Shared VM test stubs were updated to model Draw/RemoveTags continuations and scoring's advancement-requirement dependency without relaxing their assertions.
+Verification notes: the original first full run overlapped source edits and failed its replay/cache-key consistency check; the subsequent original run has no collected result. A fresh `node tests/run-all-tests.js` run on Node 20.19.0 was required for the PR #56 code/test changes. It includes `tests/corp-decision-fixtures.test.js` and `tests/decision-snapshots.test.js`. At the single delayed check it was still running; per `AGENTS.md`, it remains running with the log/status paths recorded above, and no full-suite pass is claimed. Shared VM test stubs model Draw/RemoveTags continuations and scoring’s advancement-requirement dependency without relaxing their assertions.
 
-Handoff: worktree `/private/tmp/chiriboga-elevation-last-few`, branch `cards/elevation-implementation-last-few-cards`. No additional commits or pushes were made. The active set tracker was not changed. Gameplay and baseline AI are implemented; final regression verification remains pending, and no full-suite pass is claimed.
+Handoff: branch `cards/elevation-implementation-last-few-cards`. The active set tracker was not changed. Gameplay and baseline AI are implemented; strategic optimisation remains queued separately.

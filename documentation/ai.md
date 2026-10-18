@@ -2778,7 +2778,8 @@ Installation itself ignores all costs; subsequent rez costs remain payable.
 
 Embedded Reporting uses `AIOverAdvance` and `AIAdvancementLimit` to seek one
 excess advancement counter (two dividends), then the real discard-response
-selector tutors a currently affordable operation, ranked by existing ELO.
+selector tutors a currently affordable operation, ranked by existing ELO (missing
+ratings count as zero).
 Its response offers no AI option without counters or a useful operation.
 
 Next Big Thing uses `AITriggerWhenCan`; the real paid-ability selector includes
