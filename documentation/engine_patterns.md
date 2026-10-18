@@ -787,3 +787,24 @@ Subroutine payment menus may attach `srChoice` to each option to identify the
 corresponding `AIImplementIce` OR branch. `RunnerAI` matches that stable index
 when unaffordable choices disappear. Keep the model branch order consistent and
 do not override its selected branch with an unconditional inline preference.
+
+## Run initiation and reveal notifications
+
+`AdditionalRunCosts(server)` returns `{clicks, credits}` from active
+`modifyRunClickCost` and `modifyRunCreditCost` hooks (each `Resolve(server)`
+returns a nonnegative cost). These hooks must be read-only and safe during
+hypothetical run calculations. `CanPayAdditionalRunCosts(server, clicksRequired,
+creditsRequired)` reserves the initiating action/event costs as well.
+`MakeRun(server, ignoreAdditionalCosts = false)` pays additional costs before
+setting the attacked server or granting bad-publicity credits; it returns false
+if payment is impossible. Recalculating an ongoing run owes no entry costs.
+
+`Reveal(card, callback, context, playerToRevealTo, skipHumanInput,
+revealingPlayer)` emits `automaticOnReveal(card, revealingPlayer)`. The actor
+normally defaults to the active player; mandatory R&D access reveals use the
+Runner. Explicitly pass the actor for effects resolving on behalf of another
+player. Hyoubu's action passes Corp even though the revealed card is Runner-owned.
+
+`GainCredits(player, amount, temporary, sourceCard, afterGain)` optionally calls
+`afterGain` after operation/agenda credit-gain responses. Repeated instructions
+should use this callback rather than starting a decision while responses remain.

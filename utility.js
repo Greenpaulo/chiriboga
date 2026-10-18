@@ -3745,6 +3745,19 @@ function ValidateTriggerList(
  * @method ChoicesExistingServers
  * @returns {Params[]} array of {server,label}
  */
+// Costs paid before a run begins; bad-publicity credits do not exist yet.
+function AdditionalRunCosts(server) {
+  return {
+    clicks: ModifyingTriggers("modifyRunClickCost", server, 0),
+    credits: ModifyingTriggers("modifyRunCreditCost", server, 0),
+  };
+}
+function CanPayAdditionalRunCosts(server, clicksRequired = 0, creditsRequired = 0) {
+  var cost = AdditionalRunCosts(server);
+  return CheckClicks(runner, cost.clicks + clicksRequired) &&
+    CheckCredits(runner, cost.credits + creditsRequired, "initiating a run");
+}
+
 function ChoicesExistingServers() {
   var ret = [];
   ret.push({ server: corp.HQ, label: "HQ" });
@@ -4285,6 +4298,9 @@ function FullCheckPlay(card, requireActionPhase = true) {
       if (CheckCredits(card.player, playCost, "playing", card)) {
         if (typeof card.Enumerate !== "undefined") {
           var choices = card.Enumerate.call(card);
+          if (card.player == runner && CheckSubType(card, "Run")) choices = choices.filter(function (choice) {
+            return !choice.server || CanPayAdditionalRunCosts(choice.server, clicksRequired, playCost);
+          });
           if (choices.length > 0) return choices; //valid by Enumerate
         } else return [{}]; //no Enumerate, assumed valid
       }

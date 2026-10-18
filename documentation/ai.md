@@ -2755,3 +2755,33 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
+
+### Downfall batch 8
+
+- Fully Operational and Red Level Clearance declare `AIEconomyPlay`; the real
+  Corp economy selector checks normal play legality and affordability. Their
+  inline choices use the normal title/option preference consumer. Fully
+  Operational mixes draw into a small HQ when funded. Red Level chooses credits
+  and then draw or a click, while its human install mode uses legal non-agenda
+  install choices and waits for completion.
+- Cold Site Server uses `AIDefensiveValue(server)` and `AILimitPerServer` for
+  protected-remote placement, `AIRezWhenCan()` for useful Corp-turn setup,
+  and `AITriggerWhenCan` with `AITriggerAfterTactics` for spare action clicks.
+  Its enumeration requires an agenda in its own root and fewer than three
+  power counters. Active `modifyRunClickCost` and `modifyRunCreditCost` effects
+  feed both actual run initiation and the run calculator. Entry credits are
+  charged against the pre-run pool, including on incomplete routes. Mid-run
+  recalculation owes no entry costs; counters reset at the next Corp turn.
+- Hyoubu uses `AITriggerWhenCan` and `AITriggerAfterTactics` for its unused
+  first-reveal action. Enumeration selects an occupied zone without looking
+  at its contents. `Reveal` reports `automaticOnReveal(card, revealingPlayer)`;
+  only Corp reveals yield its once-per-turn income. Mandatory R&D access
+  reveals belong to the Runner.
+- Project Yagi-Uda uses `AIOverAdvance` with `AIAdvancementLimit()` of four and
+  `AITriggerInPaidWindow()` backed by legal swap enumeration. The baseline
+  policy rescues agendas or replaces approached ICE with stronger affordable
+  ICE. It reads only Corp-owned information and returns no opportunity outside
+  a run. A consumed agenda counter is removed immediately. After install and
+  hosted-card responses, the Runner's actual run calculator selects the
+  continue/jack-out option; encountered replacement ICE is skipped. Ordinary
+  remaining-path recalculation includes the new board and clears the old path.

@@ -18,11 +18,10 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | Pending | Next implementation set, selected by the user on 2026-10-16. |
+| `downfall` | In progress | Batch 8 complete and verified; other batches are maintained on separate branches. |
 
-Downfall is next. The next implementation invocation archives Vantage Point
-and prepares Downfall before implementing one batch; this workflow change does
-not itself start card work.
+Downfall is active. Vantage Point is preserved in its [maintained record](records/vantagepoint.md).
+This branch implements batch 8 only; integrate other branches before selecting the next outstanding batch.
 
 ## 1. Missing card definitions
 
@@ -39,6 +38,9 @@ for reprints rather than assuming every metadata entry needs a duplicate object.
 ## 2. Confirmed missing or incomplete mechanics
 
 ### Downfall
+
+Batch 8 (26036–26040) is complete with gameplay, baseline AI and all 95 regression test files passing; see
+[implementation notes](downfall-implementation-notes.md) for evidence and optional strategy work.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
@@ -76,9 +78,6 @@ Corp cards:
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
 | 26031 | MirrorMorph: Endless Iteration     | Identity ability absent                                          |
 | 26032 | Architect Deployment Test          | On-score effect is a commented stub                              |
-| 26038 | Cold Site Server                   | Abilities and run cost absent                                    |
-| 26039 | Hyoubu Institute: Absolute Clarity | Identity abilities absent                                        |
-| 26040 | Project Yagi-Uda                   | On-score and agenda-counter ability absent                       |
 | 26041 | Sting!                             | Score/steal damage trigger absent                                |
 | 26043 | Storgotic Resonator                | Counter placement absent; damage ability exists                  |
 | 26044 | Saisentan                          | Encounter choice and all subroutines absent; AI model is a no-op |
@@ -182,7 +181,7 @@ existing number against its dated source snapshot.
 | --------------------------- | ----------: | ----------: | ------------------: |
 | System Gateway              |          77 |          77 |                   0 |
 | System Update 2021          |          82 |          82 |                   0 |
-| Downfall                    |          65 |           0 |                  65 |
+| Downfall                    |          65 |           5 |                  60 |
 | Midnight Sun                |          12 |           7 |                   5 |
 | Parhelion                   |           4 |           0 |                   4 |
 | The Automata Initiative     |           3 |           0 |                   3 |

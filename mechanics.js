@@ -23,7 +23,11 @@ function RecordPublicPostureEvent(action, card = null, server = null, amount = 1
  * @method MakeRun
  * @param {Server} server e.g. corp.HQ or corp.remoteServers[0]
  */
-function MakeRun(server) {
+function MakeRun(server, ignoreAdditionalCosts = false) {
+  var cost = ignoreAdditionalCosts ? {clicks: 0, credits: 0} : AdditionalRunCosts(server);
+  if (!ignoreAdditionalCosts && !CanPayAdditionalRunCosts(server)) return false;
+  SpendClicks(runner, cost.clicks);
+  function beginRun() {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
@@ -50,6 +54,10 @@ function MakeRun(server) {
     }
     Render(); //to update server glow
   }, "Run Begins"); //DRBO6 - enable Knickknack by adding a trigger
+  }
+  if (cost.credits) SpendCredits(runner, cost.credits, "initiating a run", null, beginRun);
+  else beginRun();
+  return true;
 }
 
 /**
@@ -1527,8 +1535,8 @@ function SpendCredits(
  * @param {String} [temporary] set to a reason if any unused will be lost after run (e.g. "bad publicity")
  * @param {Card} [sourceCard] the operation or agenda that caused the credit gain (for The Zwicky Group)
  */
-function GainCredits(player, num, temporary = "", sourceCard = null) {
-  if (num < 1) return;
+function GainCredits(player, num, temporary = "", sourceCard = null, afterGain = null) {
+  if (num < 1) { if (afterGain) afterGain(); return; }
   var bpcStr = "";
   if (temporary != "") {
     runner.temporaryCredits += num;
@@ -1542,11 +1550,14 @@ function GainCredits(player, num, temporary = "", sourceCard = null) {
   //This is used by The Zwicky Group identity
   if (player === corp && sourceCard !== null) {
     if (CheckCardType(sourceCard, ["operation", "agenda"])) {
-      TriggeredResponsePhase(corp, "responseOnGainCreditsFromCard", [num, sourceCard], null, "Gained Credits");
+      TriggeredResponsePhase(corp, "responseOnGainCreditsFromCard", [num, sourceCard], afterGain, "Gained Credits");
+      PlayCreditGainSound(num);
+      return;
     }
   }
 
   PlayCreditGainSound(num);
+  if (afterGain) afterGain();
 }
 
 /**
@@ -2086,7 +2097,12 @@ function Expose(card) {
  * @param {Player} [playerToRevealTo] when the card is being revealed to its owner
  * @param {boolean} [skipHumanInput] for when this Continue button isn't required
  */
-function Reveal(card, callback, context, playerToRevealTo, skipHumanInput=false) {
+function Reveal(card, callback, context, playerToRevealTo, skipHumanInput=false, revealingPlayer) {
+  // Mandatory R&D access reveals are performed by the Runner; other reveals
+  // belong to the player resolving the effect. Callers may specify the actor.
+  if (typeof revealingPlayer == "undefined") revealingPlayer =
+    typeof accessingCard != "undefined" && card == accessingCard && card.cardLocation == corp.RnD.cards ? runner : activePlayer;
+  AutomaticTriggers("automaticOnReveal", [card, revealingPlayer]);
   var otherPlayer = corp;
   if (card.player == corp) otherPlayer = runner;
   if (typeof playerToRevealTo != 'undefined') otherPlayer=playerToRevealTo;
