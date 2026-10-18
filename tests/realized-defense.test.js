@@ -72,7 +72,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
     assert.ok(rows.every(r => r.leftCensored && r.rootAge === null && r.iceCount === 2 && r.multiRoot));
     assert.strictEqual(rows[0].serverId, rows[1].serverId);
     assert.notStrictEqual(rows[0].commitmentId, rows[1].commitmentId);
-    assert.ok(rows.every(r => r.posture === 'unknown' && r.safety === 'unknown'));
+    assert.ok(rows.every(r => r.posture === 'unrolled' && r.safety === 'unknown'));
     assert.deepStrictEqual(Object.keys(corp.AI).sort(), ['_deceptionPostureActive', '_evaluateServerSecurity', '_postureEpochRecords', '_random', 'options'].sort());
   });
   await check('stable server IDs, leave/reinstall commitments and reveal transitions', () => {

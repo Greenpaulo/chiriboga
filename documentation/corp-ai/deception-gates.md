@@ -1,6 +1,6 @@
 # Deception gates
 
-Current cross-ticket guidance, updated 2026-10-13. The
+Current cross-ticket guidance, updated 2026-10-15. The
 [roadmap's implementation order](roadmap.md#current-implementation-order) owns
 sequencing; each linked ticket/spec owns its acceptance gate. Historical merge
 and gate-revision evidence remains in the
@@ -8,16 +8,22 @@ and gate-revision evidence remains in the
 
 ## Measurement and adoption
 
-[F11](../backlog/code-review/F11-paired-batch-metric-guards.md) supplies generic paired
-pooled `--guard` and `--improve` checks. [F12](../backlog/code-review/F12-realized-defense-measurement.md)
+[F11](../backlog/done/F11-paired-batch-metric-guards.md) supplies generic paired
+pooled `--guard` and `--improve` checks. [F12](../backlog/done/F12-realized-defense-measurement.md)
 owns passive `realizedIceByRootType` observations and control-only calibration.
 The existing posture/profile collector does not alone measure the realized tell.
 
-F12's current-default control calibration has usable all-root rho/TV, while
-postured statistics fail the frozen 90% known-label requirement (about 85.8% and
-85.4% observed). Read its evidence before freezing consumer gates; unavailable
-postured guards cannot be treated as zeros or passed. Current controls have
-L8.5 feedback off, as in the branch's defaults; regenerate after activation.
+F12's original controls used feedback off and reported about 85.8% / 85.4%
+known posture labels, below its frozen 90% requirement. That historical result
+remains valid; the controls did not establish usable postured statistics.
+L8.2 corrected never-selected roots to the passive `unrolled` label without
+inferring safety or invoking policy evaluators, then collected fresh controls
+with epochs and feedback both on (their current defaults). Its
+[control evidence](measurements/L8.2-2dc504d-control-calibration.json) records
+1,400/1,400 identical observer-off/on games, 99.659% / 99.626% known labels,
+valid all-root/postured statistics and explicit accounting for the second
+cohort's known seed 257 stall. Later consumers still need controls matching
+whatever prerequisite policies are adopted; these controls do not adopt L8.2.
 
 Use actual Runner-turn ICE-count distributions of unrevealed agenda/trap roots:
 `allCountDistance` is their total-variation distance; `posturedCountDistance`
@@ -30,8 +36,8 @@ strength or multivariable tells, or success against a learning human.
 | Item | Acceptance scope / remaining reconciliation |
 |---|---|
 | L8.4 | Settled: measured posture-correlation maximum 0.229 ≤ control 0.329; do not retroactively change its gate |
-| L8.5 | Merged; revised full gate passed with correlation report-only, information/reachability and adaptation hard checks plus performance guards; feedback remains off in current defaults |
-| L8.2 | Must reduce the count tell: proposed paired 95% upper bound of candidate-minus-control `allCountDistance` < 0, plus subset/correlation/performance guards and existing 0.05 shape-overlap check |
+| L8.5 | Merged; revised full gate passed with correlation report-only, information/reachability and adaptation hard checks plus performance guards; feedback defaults on |
+| L8.2 | Full gate failed; policy removed, not adopted. All-root TV reduction not demonstrated; public-variable correlation, active-subset rho, win-rate and shape-overlap checks failed. Retain measurements and frozen evidence. |
 | I2 | Consume F12 with its existing proposed count-rho and posture guards; 0.02 rho margins remain provisional pending calibration; retain security improvement/performance checks |
 | L8.9 | Investigate residual mechanisms, implement a supported repair in the same ticket, then require actual count-distance reduction and strategic safety guards |
 | I3 | Reconcile scoped tell guards before implementation; use fresh adopted-policy control and preserve its own improvement/performance gate |
@@ -62,11 +68,12 @@ population/lifecycle effects without claiming causal attribution from rho/TV.
   unless the source explicitly justifies a different tolerance. Retain the
   source's additional guards and hard checks.
 
-L8.2's original 0.10 posture-correlation ceiling remains unreconciled historical
-source text, not an extra frozen rule alongside the new proposal. Verify its
-relative-depth design's deliberate central-depth dependence, shape-overlap
-collector, merged Grip-size fix, and top-up/reset behavior against L8.4 epochs.
-Finalize its complete gate table and command before implementing the policy.
+L8.2's frozen ticket gate supersedes the historical absolute 0.10 ceiling with
+its calibrated paired correlation guard. It retains the all-root TV improvement,
+active-subset and performance guards and the 0.05 shape-overlap ceiling.
+The full gate failed. The relative-depth/parity/top-up strategy and its settings
+were removed, with the evidence retained in the ticket and architecture. No
+L8.2 strategy was adopted; later controls use the unchanged adopted policy.
 L8.9 also requires passive instrumentation identity before policy changes; its
 repair design and calibrated complete command are recorded in that same ticket.
 A failed repair gate leaves the policy unadopted; investigation alone is not
