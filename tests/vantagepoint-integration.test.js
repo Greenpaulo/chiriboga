@@ -19,6 +19,7 @@ const context = {
     String(name).replace(/^(\d+)/, (digits) => digits.padStart(5, '0')).replace(/\.png$/i, '.jpg'),
   runner: {
     side: 'runner',
+    scoreArea: [],
     AI: null,
     grip: [],
     stack: [],
@@ -161,8 +162,9 @@ context.TrashCost = (card) => card.trashCost;
 context.TrashAccessedCard = (canBePrevented) => {
   trashCalls.push({cards: [context.accessingCard], canBePrevented});
 };
-context.Draw = (player, amount) => {
+context.Draw = (player, amount, callback, callbackContext) => {
   cardsDrawn += amount;
+  if (callback) callback.call(callbackContext);
 };
 context.InstallCost = (card) => card.installCost;
 context.CheckStrength = () => true;
@@ -538,8 +540,9 @@ context.CheckActionClicks = (player, amount) => player.clickTracker >= amount;
 context.SpendClicks = (player, amount) => {
   player.clickTracker -= amount;
 };
-context.RemoveTags = (amount) => {
+context.RemoveTags = (amount, callback, callbackContext) => {
   context.runner.tags = Math.max(0, context.runner.tags - amount);
+  if (callback) callback.call(callbackContext);
 };
 context.AddTags = (amount, callback, callbackContext) => {
   context.runner.tags += amount;
@@ -1972,8 +1975,9 @@ context.AddTags = (amount, callback, callbackContext) => {
   context.runner.tags += amount;
   if (callback) callback.call(callbackContext);
 };
-context.RemoveTags = (amount) => {
+context.RemoveTags = (amount, callback, callbackContext) => {
   context.runner.tags = Math.max(0, context.runner.tags - amount);
+  if (callback) callback.call(callbackContext);
 };
 context.runner.creditPool = 5;
 context.CheckCredits = (player, amount) => player.creditPool >= amount;

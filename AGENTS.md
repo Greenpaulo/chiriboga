@@ -1,6 +1,8 @@
 # Repository instructions
 
 - After relevant code or test changes, run `node tests/run-all-tests.js` before handing off.
+- Keep long test runs cheap for the agent: launch the required suite once, save stdout/stderr to a temporary log, and record its exit status separately. Prefer a completion notification or a tool wait that does not require repeated model turns. Do not poll repeatedly, run sleep/check loops, inspect processes, or send repeated “still running” updates. Continue independent work while tests run; read only the final summary and relevant failures.
+- If completion notifications are unavailable, make at most one delayed status check after at least 60 seconds. If the suite is still running, hand off explicitly as verification pending with the log/status paths and leave the run running. Do not claim completion or a passing suite until its exit status is known. Resume checking when the user asks. Do not rerun a suite merely because its result has not yet been collected; rerun only after relevant changes or a failure requiring it.
 - During iteration, focused tests are fine, but the final full run must include `tests/corp-decision-fixtures.test.js` and `tests/decision-snapshots.test.js`.
 - Pending fixtures under `tests/fixtures/corp-decisions-pending/` and pending tests under `tests/pending/` are known-red reproductions of open tickets and are not part of the green regression suite.
 - A ticket with a pending reproduction is fixed only when that reproduction passes and has been moved into the green suite (`tests/fixtures/corp-decisions/` or `tests/`). Never change its expectation to make it pass; if the expectation is wrong, record the evidence in the ticket.

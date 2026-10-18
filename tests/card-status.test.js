@@ -29,12 +29,12 @@ assert.strictEqual(playabilityMismatches([playableSet('example', [], [card('9999
   'playable sets may not contain scaffolds');
 assert.strictEqual(playabilityMismatches([playableSet('example', [card('99999')])]).length, 1,
   'playable sets may not contain missing definitions');
-const acceptedElevation = ['35057', '35058', '35059', '35060', '35065', '35066'].map(card);
-assert.deepStrictEqual(playabilityMismatches([playableSet('elevation', acceptedElevation)]), [],
-  'the explicitly accepted Elevation gaps do not fail the check');
+const completedElevation = ['35057', '35058', '35059', '35060', '35065', '35066'].map(card);
+assert.strictEqual(playabilityMismatches([playableSet('elevation', completedElevation)]).length, 1,
+  'the completed Elevation cards are no longer exempt from missing-definition checks');
 assert.strictEqual(playabilityMismatches([playableSet('elevation',
-  acceptedElevation.slice(1).concat(card('35001')))]).length, 1,
-  'replacing one accepted Elevation gap with another missing card still fails');
+  completedElevation.slice(1).concat(card('35001')))]).length, 1,
+  'any newly missing Elevation card fails the check');
 assert.strictEqual(playabilityMismatches([playableSet('elevation', [], [card('35057')])]).length, 1,
   'missing-definition exemptions do not permit scaffold placeholders');
 assert.deepStrictEqual(playabilityMismatches([
