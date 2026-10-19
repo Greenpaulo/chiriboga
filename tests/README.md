@@ -84,7 +84,8 @@ it temporarily creates repository files that other tests enumerate. If another
 test needs to mutate shared repository state, isolate its fixtures in a temporary
 directory or add it to the runner's `exclusiveFiles` set.
 
-Every run prints wall time and the ten slowest files. Save all file timings with:
+Use `--diagnose` to print wall time and the ten slowest files; normal runs
+print only failures and the summary. Save all file timings independently with:
 
 ```sh
 node tests/run-all-tests.js --timings /tmp/chiriboga-test-timings.json

@@ -687,8 +687,8 @@ does not yet compare concrete options by their outcome.
   `corp.remoteServers`), restored through `_withHypothetical()`.
   `_criticalBreachDefenseAction()` evaluates its candidate ICE through it, and
   so does I2's ranking below.
-- **I2 marginal ICE ranking (option `iceMarginalSecurity`, default off,
-  gated).** With the option on, `_rankedInstallOptionsCore()` no longer asks
+- **I2 marginal ICE ranking (option `iceMarginalSecurity`, default on
+  after its 7,000-pair F4 gate passed on seeds 1601–2600).** With the option on, `_rankedInstallOptionsCore()` no longer asks
   `_serverToProtect()` for one target. `_marginalIceInstallOptions()` offers
   ICE for every row of `_rankedServersToProtect()` (so the posture cap in
   `_NoMoreProtectionForThisServer()` still holds) that is not valueless

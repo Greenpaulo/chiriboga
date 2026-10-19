@@ -59,6 +59,8 @@ vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), c
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
+// Legacy scenarios keep their frozen policy; I2 scenarios opt in below.
+ai.options.iceMarginalSecurity = false;
 const marginInvariant = require('./breach-margin-invariant')(ai); // I2 M1 on every evaluation
 const card = id => Object.assign({}, context.cardSet[id]);
 const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', player: corp,
@@ -2876,8 +2878,8 @@ const i2Name = option => option.cardToInstall.title + '@' + (option.serverToInst
 const i2Pick = (options, card, srv) => options.find(o => o.cardToInstall === card && o.serverToInstallTo === srv);
 const i2Order = options => Array.from(options, i2Name); // main-realm array
 const i2Score = (options, card, srv) => i2Pick(options, card, srv).iceMarginalScore;
-test('I2 phase B: option defaults off', () => {
-  assert.strictEqual(vm.runInContext('CorpAI.DEFAULT_OPTIONS.iceMarginalSecurity', context), false);
+test('I2 phase B: adopted option defaults on', () => {
+  assert.strictEqual(vm.runInContext('CorpAI.DEFAULT_OPTIONS.iceMarginalSecurity', context), true);
 });
 test('I2 scenario 7: against a public Fracter only, a Code Gate outranks an efficiently broken Barrier', () => {
   runner.cards = [i2Fracter()]; runner.creditPool = 6;

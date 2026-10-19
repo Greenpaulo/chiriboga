@@ -9021,5 +9021,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   valuelessServerDebtReset: false,
   postureEpochs: true,
   matchLocalPostureFeedback: true,
-  iceMarginalSecurity: false,
+  iceMarginalSecurity: true,
 });
