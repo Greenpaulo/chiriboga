@@ -2,14 +2,15 @@
 'use strict';
 // Mechanical ticket checks and moves, so no agent spends tokens on them.
 //
-//   node scripts/ticket.js check <ticket.md>
+//   node scripts/ticket.js check <ticket.md> [--fast]
 //   node scripts/ticket.js move <ticket.md> <open|code-review|remediation|done>
 //   node scripts/ticket.js next [bugs|backlog|all]
 //   node scripts/ticket.js list
 //
+// check defaults to the full suite for PR opening; --fast is for agent handoff.
 // check verifies a fixed ticket: Resolution records its starting commit, the
 // pending reproduction moved into the green suite without changing what it
-// asserts, the reproduction and the full suite pass, and acceptance criteria are
+// asserts, the reproduction and the selected suite pass, and acceptance criteria are
 // ticked. It also prints the changed files and a GitHub compare link for review.
 //
 // move rebases the ticket's relative links, rewrites roadmap links to it, and
@@ -407,7 +408,7 @@ function outcomeProblem(outcome, gate) {
   return null;
 }
 
-function check(ticket) {
+function check(ticket, {fast = false} = {}) {
   const results = [];
   const report = (level, message) => results.push([level, message]);
   const file = rel(ticket);
@@ -476,9 +477,10 @@ function check(ticket) {
     }
   }
 
-  const suite = run(process.execPath, ['tests/run-all-tests.js']);
-  report(suite.status === 0 ? 'PASS' : 'FAIL', suite.status === 0 ? 'Full suite: ' + suite.stdout.trim() :
-    'Full suite fails:\n' + (suite.stdout + suite.stderr).trim().split('\n').slice(-25).join('\n'));
+  const suite = run(process.execPath, ['tests/run-all-tests.js', ...(fast ? ['--fast'] : [])]);
+  const suiteLabel = fast ? 'Fast suite' : 'Full suite';
+  report(suite.status === 0 ? 'PASS' : 'FAIL', suite.status === 0 ? suiteLabel + ': ' + suite.stdout.trim() :
+    suiteLabel + ' fails:\n' + (suite.stdout + suite.stderr).trim().split('\n').slice(-25).join('\n'));
 
   const criteria = section(text, '## Acceptance criteria');
   const unticked = criteria ? criteria.split('\n').filter(line => /^\s*- \[ \]/.test(line)) : [];
@@ -536,12 +538,13 @@ module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
   try {
-    if (command === 'check' && ticket) check(ticket);
+    if (command === 'check' && ticket && (!stage || stage === '--fast') && process.argv.length <= 5)
+      check(ticket, {fast: stage === '--fast'});
     else if (command === 'move' && ticket && stage) move(ticket, stage);
     else if (command === 'next' && !stage) nextTickets(ticket || 'all');
     else if (command === 'list' && !ticket) listTickets();
     else {
-      console.log('usage: node scripts/ticket.js check <ticket.md>\n' +
+      console.log('usage: node scripts/ticket.js check <ticket.md> [--fast]\n' +
         '       node scripts/ticket.js move <ticket.md> <' + STAGES.join('|') + '>\n' +
         '       node scripts/ticket.js next [bugs|backlog|all]\n' +
         '       node scripts/ticket.js list');

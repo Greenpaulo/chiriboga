@@ -12,6 +12,14 @@ for (const file of ['utility.js', 'checks.js', 'mechanics.js', 'ai_runner.js', '
 Object.assign(c, {Log: () => {}, LogError: msg => {throw Error(msg);}, PlaySound: () => {}, PlayCreditGainSound: () => {}, UpdateCounters: () => {}, Render: () => {}, GetTitle: card => card.title});
 vm.runInContext('this.ai = new CorpAI()', c);
 c.ai._log = () => {};
+// Syailendra's primary subtype must agree with canonical card data.
+const canonicalSyailendra = JSON.parse(fs.readFileSync(path.join(root, 'carddata/carddata.json'), 'utf8'))
+  .data.find(card => card.code === '35076');
+assert.ok(c.cardSet[35076], 'Syailendra should have an implemented card definition');
+assert.ok(canonicalSyailendra, 'Syailendra should exist in canonical card data');
+assert.ok(c.cardSet[35076].subTypes.length, 'Syailendra should declare a primary subtype');
+assert.strictEqual(c.cardSet[35076].subTypes[0], canonicalSyailendra.keywords.split(' - ')[0],
+  'Syailendra implementation should use its canonical primary ice subtype');
 const nebula = c.cardSet[35057];
 corp.identityCard = nebula;
 runner.identityCard = {player: runner, title: 'Test Runner', cardType: 'identity'};

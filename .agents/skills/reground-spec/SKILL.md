@@ -84,6 +84,11 @@ runs it too, by name, rather than restating it.
    Add it directly under `**Read first:**` if it is missing.
 8. **If this was to unblock a raise**, run `node scripts/roadmap.js raise
    <ID>` now and confirm it succeeds.
+9. **Validate the final documentation state.** Run the relevant roadmap
+   checks (normally `node tests/ai-roadmaps.test.js`) after all spec/ticket
+   edits and any raise. Do not run regression suites for a documentation-only
+   re-grounding, or repeat validation after each wording change. See
+   `tests/README.md` for shared test cadence.
 
 ## Report
 
