@@ -60,6 +60,22 @@ const live = put({title: 'Live engine', player: runner, cardType: 'resource', su
 assert.strictEqual(c.FullCheckPlay(isolation).length, 2);
 let ai = runner.AI; ai.rc.suppressOutput = true;
 let options = ['gain', 'play'];
+isolation.AIOrdinaryEconomyPlay = false;
+assert.strictEqual(options[await ai.CommandChoice(options)], 'gain',
+  'AIEconomyPlay and the Isolation title alone do not opt into ordinary income');
+isolation.AIOrdinaryEconomyPlay = 1;
+assert.strictEqual(options[await ai.CommandChoice(options)], 'gain', 'opt-in must be boolean true');
+isolation.AIOrdinaryEconomyPlay = true;
+isolation.title = 'Generic opted-in income';
+assert.strictEqual(options[await ai.CommandChoice(options)], 'play', 'ordinary economy opt-in works without a known title');
+assert.strictEqual(ai.preferred.cardToPlay, isolation);
+const legacyIncome = put(Object.assign(card(26001), {title: 'Sure Gamble'}), runner.grip);
+ai.preferred = null;
+assert.strictEqual(options[await ai.CommandChoice(options)], 'play');
+assert.strictEqual(ai.preferred.cardToPlay, legacyIncome, 'legacy candidates precede opted-in cards in grip order');
+c.MoveCard(legacyIncome, runner.heap);
+isolation.title = 'Isolation';
+ai.preferred = null;
 assert.strictEqual(options[await ai.CommandChoice(options)], 'play', 'real economy selector plays Isolation');
 assert.strictEqual(ai.preferred.cardToPlay, isolation);
 assert.strictEqual(ai.preferred.nextPrefs.index, 0, 'cash out the exhausted resource');
@@ -83,6 +99,7 @@ assert.strictEqual(c.FullCheckPlay(isolation), null, 'cannot pay trash cost with
 runner.rig.resources = [live]; live.cardLocation = runner.rig.resources;
 runner.creditPool = 1;
 assert.strictEqual(c.FullCheckPlay(isolation), null, 'cannot pay printed credit cost');
+assert.strictEqual(options[await ai.CommandChoice(options)], 'gain', 'ordinary income still checks affordability');
 runner.creditPool = 5; runner.clickTracker = 4;
 const cancellable = put(card(26001), runner.grip);
 let paidOnCancel = false;

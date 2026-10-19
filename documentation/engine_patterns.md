@@ -810,3 +810,28 @@ contains the directly selected cards after prevention. Existing one-argument
 callbacks remain compatible. Demolisher uses the actor and direct-card array
 to distinguish Runner trashes from Corp sacrifices and collateral host cleanup.
 Callers that make another player trash a card must pass that player explicitly.
+
+### Elevation tag removal and score-area abilities
+
+`RemoveTags(num, afterRemoval?, context?)` removes up to `num` tags, invokes
+`automaticOnRemoveTags` with the number actually removed, then opens
+`responseOnRemoveTags`. The optional continuation runs after that window;
+zero removal opens no window and immediately runs the continuation. Effects
+that continue with another decision must use this callback. Turn-trigger
+abilities that can open this window must not be marked `automatic`.
+
+An operation may define `payAdditionalPlayCosts(params, callback)`. `Play`
+calls it after the ordinary play costs and before `automaticOnPlay` or the
+operation's effect. It must pay its declared costs, then invoke `callback`;
+its enumeration must already exclude choices that cannot pay those costs.
+IP Enforcement removes tags through this contract.
+
+A Corp paid ability may declare `availableInRunnerScoreArea: true`.
+`ChoicesTriggerableAbilities(corp)` then includes that ability on a stolen Corp
+agenda. This does not activate the agenda's other abilities or triggers and
+never grants its paid ability to the Runner.
+
+`Score` snapshots `intended.scoreAdvancement` and
+`intended.scoreAdvancementRequirement` before moving the agenda out of its
+server, then clears both when score responses finish. Dividends uses this
+snapshot (CR 10.13.2), including the requirement's server modifiers.

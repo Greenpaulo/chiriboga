@@ -489,7 +489,7 @@ class RunnerAI {
     this.suspectedHQCards = []; //each is a { title, cardType, copies, uncertainty } object
 
     //teach the AI about cards (in order of priority, best first or better order of play)
-    this.economyPlay = ["Sure Gamble", "Creative Commission", "Wildcat Strike", "Isolation"]; //cards which can be played to gain credits
+    this.economyPlay = ["Sure Gamble", "Creative Commission", "Wildcat Strike"]; //legacy titles; new cards opt in via AIOrdinaryEconomyPlay
 	//cards which can be installed to increase maximum hand size
 	this.maxHandIncreasers = ["T400 Memory Diamond"];
 
@@ -2704,12 +2704,19 @@ console.log(this.preferred);
       this._log("More credits could be nice");
       //something to play?
       if (optionList.includes("play")) {
+        // Preserve legacy order, then consider explicitly opted-in grip cards.
+        var economyCandidates = [];
         for (var i = 0; i < this.economyPlay.length; i++) {
-          //if this.economyPlay[i] is found in hand, and can be played, play it
-          cardToPlay = this._copyOfCardExistsIn(
-            this.economyPlay[i],
-            runner.grip
-          );
+          var legacyCard = this._copyOfCardExistsIn(this.economyPlay[i], runner.grip);
+          if (legacyCard) economyCandidates.push(legacyCard);
+        }
+        for (var i = 0; i < runner.grip.length; i++) {
+          if (runner.grip[i].AIOrdinaryEconomyPlay === true &&
+              !economyCandidates.includes(runner.grip[i]))
+            economyCandidates.push(runner.grip[i]);
+        }
+        for (var i = 0; i < economyCandidates.length; i++) {
+          cardToPlay = economyCandidates[i];
           if (cardToPlay) {
             this._log("maybe by playing a card?");
 			var ctpChoices = FullCheckPlay(cardToPlay); //returns list of choices or null

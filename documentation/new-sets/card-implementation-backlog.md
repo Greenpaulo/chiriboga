@@ -39,6 +39,16 @@ for reprints rather than assuming every metadata entry needs a duplicate object.
 
 ## 2. Confirmed missing or incomplete mechanics
 
+### Elevation
+
+The six missing NBN definitions (35057–35060, 35065–35066) are implemented in
+the user-selected batch recorded in
+[elevation-missing-cards-implementation.md](elevation-missing-cards-implementation.md).
+Baseline tests exercise the real play, paid-ability, tutor/install selection,
+and advancement-search consumers. Independent strategic review is not yet
+requested; competing tag-punishment plans, identity flips, and tutor sequencing
+remain in the batch's optimisation queue.
+
 ### Downfall
 
 Batch 1 (26001–26004) now has working gameplay and baseline AI. Focused
@@ -190,13 +200,13 @@ existing number against its dated source snapshot.
 | Midnight Sun                |          12 |           7 |                   5 |
 | Parhelion                   |           4 |           0 |                   4 |
 | The Automata Initiative     |           3 |           0 |                   3 |
-| Elevation                   |          76 |           1 |                  75 |
+| Elevation                   |          82 |           7 |                  75 |
 | Vantage Point               |          66 |          66 |                   0 |
 | Uprising                    |           6 |           0 |                   6 |
 | Rebellion Without Rehearsal |           2 |           0 |                   2 |
 | Core Set                    |          62 |           0 |                  62 |
 | Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **510** |     **233** |             **277** |
+| **Total**                   |     **516** |     **239** |             **277** |
 
 Of the 277 omissions, 27 are identities and 250 are playable deck cards. The
 five Midnight Sun omissions are:
@@ -208,8 +218,9 @@ five Midnight Sun omissions are:
 - 33030 Stoneship Chart Room
 
 Parhelion, Automata Initiative, Uprising and Rebellion have ELO missing from
-every currently defined card. Elevation's only numeric value is on 35050 Byte!;
-it has not yet been checked against a dated Trash or Busto snapshot.
+every currently defined card. Elevation has numeric values on 35050 Byte! and
+the six newly implemented NBN cards. Only the latter six were checked against
+the dated 2026-10-16 Trash or Busto snapshot.
 
 Backfill each value from the card's exact published ELO on the
 [Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking). Do not

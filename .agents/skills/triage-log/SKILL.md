@@ -57,7 +57,11 @@ reproduction is confirmed later by `implement-ticket`.
    reason*, not because of a harness error, a missing stub or an unrelated
    assertion. If no faithful reproduction is possible, record exactly why in the
    ticket. Never weaken an expectation to obtain a reproduction.
-5. **Confirm the green suite is unaffected:** `node tests/run-all-tests.js`.
+5. **Validate the reproduction's isolation.** A new pending reproduction is
+   outside green-suite discovery. Run affected existing harness tests only if
+   shared test support changed; do not run the fast or full suite solely for
+   new pending files and ticket/log documentation. The failing reproduction
+   above is the essential evidence. Follow `tests/README.md` for test cadence.
 6. **Write the ticket** to `documentation/bugs/<slug>.md` using the template
    below.
 7. **Archive the log** to `documentation/debug-logs/bug_raised/` (`git mv` if

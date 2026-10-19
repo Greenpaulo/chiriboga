@@ -172,7 +172,7 @@ batch-review log. No optimisation passes recorded under the new workflow yet.
 All 13 original implementation completions are retained. The twelve review
 repair rows moved to the optimisation queue; no defect or review verdict was
 closed by this migration. Vantage Point is playable by explicit user decision
-under the two-stage workflow. The [pre-migration tracker](../history/vantagepoint-2026-10-16-before-workflow-split.md)
+under the two-stage workflow. The [pre-migration tracker](vantagepoint-2026-10-16-before-workflow-split.md)
 preserves the previous queue and status. This is not a new rules/strategy sign-off.
 
 ## Set-wide review status
@@ -186,9 +186,9 @@ claim was superseded by the [2026-10-08 correction](../reviews/vantage-point/REA
 four games passed and four failed with recorded engine errors. Those findings
 remain open; availability is a separate user decision.
 
-The [pre-review implementation snapshot](../history/vantagepoint-2026-10-06.md)
+The [pre-review implementation snapshot](vantagepoint-2026-10-06.md)
 preserves the original full completion log. The
-[post-review snapshot](../history/vantagepoint-2026-10-06-reviewed.md) preserves this
+[post-review snapshot](vantagepoint-2026-10-06-reviewed.md) preserves this
 historical repair queue and review log. Keep completion history append-only
 and archive this tracker before selecting another set (Downfall is queued next). Use
 `optimise-card-batch` for repairs and independent batch/set review for sign-off.

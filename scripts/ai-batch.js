@@ -169,6 +169,9 @@ function loadCollectors(names) {
     if (!fs.existsSync(file)) throw new Error(`Unknown collector: ${name} (expected ${path.relative(root, file)})`);
     const collector = require(file);
     if (collector.name !== name) throw new Error(`Collector ${file} must export name "${name}"`);
+    if (collector.strictBatchDiagnostics && (!Array.isArray(collector.metricNames) ||
+        !collector.metricNames.length || collector.metricNames.some(metric => typeof metric !== 'string' || !metric)))
+      throw new Error(`Collector ${name} must declare metricNames for strict batch diagnostics`);
     return collector;
   });
 }

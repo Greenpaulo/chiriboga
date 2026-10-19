@@ -58,8 +58,8 @@ function invoke(session = 'review-regression', runtime = {}) {
           if (command === 'git') return {status: 0, stdout: relevant ? ' M ai_corp.js\n' : ''};
           assert.strictEqual(command, installed ? pinnedNode : process.execPath, 'use the pinned Node when installed');
           assert.strictEqual(options.env.PATH.split(path.delimiter)[0], path.dirname(command), 'child scripts inherit the same Node');
-          assert.deepStrictEqual(Array.from(args), [path.join(hookRoot, 'tests/run-all-tests.js')],
-            'run the complete regression suite');
+          assert.deepStrictEqual(Array.from(args), [path.join(hookRoot, 'tests/run-all-tests.js'), '--fast'],
+            'run the fast regression suite');
           assert.strictEqual(options.cwd, hookRoot, 'run from the repository root');
           suiteRuns++;
           return {status: suitePasses ? 0 : 1, stdout: 'suite result', stderr: ''};

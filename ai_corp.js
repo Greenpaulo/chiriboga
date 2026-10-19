@@ -1635,7 +1635,7 @@ class CorpAI {
       action: "profile",
       isAgenda: CheckCardType(card, ["agenda"]) ? 1 : 0,
       profile: profile,
-    }, null);
+    }, null, card);
     return profile;
   }
 
@@ -1949,6 +1949,10 @@ class CorpAI {
       if (!this._postureCardIds.has(card))
         this._postureCardIds.set(card, ++this._postureCardCount);
       event.cardId = this._postureCardIds.get(card);
+      // Export an already cached shape for an actual activation; observation
+      // must never create a profile or consume policy randomness.
+      if (event.action == "roll" && event.postured)
+        event.profile = this._cardDeceptionProfiles.get(card) || null;
     }
     event.epoch = this._postureEpoch;
     event.publicVars = {
@@ -7245,6 +7249,20 @@ class CorpAI {
           using: blih,
           persist: point.persist,
         });
+      }
+    }
+    // First-operation click income is finite within each search path.
+    var identity = corp.identityCard;
+    if (identity && CheckHasAbilities(identity) &&
+        typeof identity.AIOperationPlayClickGain == "function") {
+      for (var directionIndex = 0; directionIndex < ret.length; directionIndex++) {
+        var direction = ret[directionIndex];
+        if (!direction.using || direction.using.cardType != "operation" ||
+            corp.resolvingCards.includes(direction.using)) continue;
+        direction.corpClicks += identity.AIOperationPlayClickGain.call(
+          identity, direction.using, thisTurn, point.persist.includes(identity));
+        if (!direction.persist.includes(identity))
+          direction.persist = direction.persist.concat([identity]);
       }
     }
     return ret;

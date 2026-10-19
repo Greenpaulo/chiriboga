@@ -1,8 +1,9 @@
-# Current Card-Set Implementation
+# Vantage Point Maintenance Record
 
-This is the canonical handoff and progress log for the one card set currently
-being implemented in batches. The `implement-card-batch` skill (`.agents/skills/implement-card-batch/SKILL.md`) reads this file to learn
-which set and batch to work on; they must not hardcode a set name themselves.
+This is the maintained Vantage Point record for completed implementation,
+independent review and optimisation. New implementation work follows the set
+marked `In progress` in the [implementation backlog](../card-implementation-backlog.md)
+and the [active tracker](../current-set-implementation.md), currently Downfall.
 
 User-facing prompts and operating instructions are in
 `documentation/new-sets/card-set-agent-operator-guide.md`.
@@ -17,11 +18,11 @@ deeper strategic improvements remain optional. Review verdicts alone do not
 reopen implementation or change playability. See the operator guide for
 arguments and recovery.
 
-## Active set
+## Set record
 
 | Field                         | Value                                    |
 | ----------------------------- | ---------------------------------------- |
-| Status                        | Active                                   |
+| Status                        | Implemented                              |
 | Implementation status         | Implemented                              |
 | Set name                      | Vantage Point                            |
 | Registry key                  | `vantagepoint`                           |
@@ -34,8 +35,8 @@ arguments and recovery.
 | Implementation notes          | `documentation/new-sets/vantage-point-implementation-notes.md` |
 | Review directory              | `documentation/new-sets/reviews/vantage-point` |
 
-If `Status` is `Inactive`, an agent must not infer or start a set. It should
-report that no current set has been selected.
+Use this record for Vantage Point maintenance; select new implementation work
+from the active tracker.
 
 ## Batch selection rule
 

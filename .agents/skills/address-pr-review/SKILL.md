@@ -78,9 +78,16 @@ scope.
 
 ## 4. Verify and report
 
-- Run the focused tests for the affected behavior, then
-  `node tests/run-all-tests.js` after relevant code or test changes. Run
-  `git diff --check` and inspect the final diff for unrelated changes.
+- Validate each repair with affected focused tests while editing. Once all
+  supported comments are addressed, run `node tests/run-all-tests.js --fast`
+  once for the combined code/test changes before committing and pushing;
+  a current passing full suite also satisfies this. Do not run a suite per
+  comment or edit. Rejected findings and prose-only changes do not require a
+  regression suite. Run targeted integration tests when a fix changes their
+  infrastructure, and full validation if it changes test selection/shared test
+  infrastructure or explicitly requires whole-suite evidence. Follow
+  `tests/README.md`; do not rerun full validation solely because review occurred.
+  Run `git diff --check` and inspect the final diff for unrelated changes.
 - If addressing the review changed files, stage only those changes, inspect the
   staged diff, commit them with a concise message, and push to the PR's head
   branch. Never include unrelated user changes, force-push, or rewrite existing

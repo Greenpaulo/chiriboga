@@ -1126,6 +1126,12 @@ not these hooks.
   `iceAI` object. It can update `iceAI.subTypes` for route-aware effects such as
   changing only the next ice that will be encountered. Existing cards that
   already expose this hook are also understood by Corp security planning.
+  `iceAI.knownToEvaluator` records `PlayerCanLook(knowledgePlayer, ice)`:
+  true means visible ICE statistics; false means strength and subroutines are
+  synthetic hidden-ICE estimates. The knowledge player defaults to the Runner
+  and is the Corp during security planning, which can see its own ICE.
+  The field is absent on early returns before visibility is evaluated (ignored
+  ICE or ICE ineligible for security planning).
   Standard engine `modifySubTypes` modifiers are consumed too, so most subtype
   cards do not need an additional AI-only hook.
   Stick and Poke also uses this hook to prepend its net-damage row when
@@ -2036,8 +2042,10 @@ and the policy never deliberately creates a naked agenda or retains an unsafe
 agenda posture when a breach could win the game or when the Corp could score
 that agenda to win immediately.
 
-Profiles (the shape) are cached for the card's lifetime. The bait/bluff
-activation decision is too, unless the Corp AI option `postureEpochs` (L8.4,
+Profiles (the shape) are cached with the card. With match-local feedback off,
+they last for its lifetime; feedback can refresh a shape at a later active
+commitment as described below. The bait/bluff activation decision lasts for
+the card's lifetime unless the Corp AI option `postureEpochs` (L8.4,
 default on after its revised F4 gate passed) is on: then the decision is kept for a
 bounded epoch of two or three Corp turns and reconsidered, at most once per
 Corp turn, after a public boundary (the server was run, Runner credits or
@@ -2045,6 +2053,13 @@ breakers changed, the root's advancement changed, or either side reached match
 point). Repeated evaluator calls never reroll. `AIPunishesAccess(server)` is
 unchanged: its signature and contract are the same with the option on or off,
 and posture epochs add no card-facing hook.
+
+The L8.2 relative-depth/parity/top-up experiment was not adopted after its
+full gate failed. Its policy and settings have been removed. The existing
+absolute-depth sampler, advancement cadence, epoch/feedback behavior and
+`AIPunishesAccess(server)` contract remain in force. Passive measurement and
+reporting improvements from that work remain available; see the rejected-design
+record in the Corp architecture and the L8.2 ticket.
 
 L8.5 records committed public actions through the engine's
 `RecordPublicPostureEvent(action, card, server, amount)` and the AI's
@@ -2191,13 +2206,14 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWastefulToInstall()` | function | Return true if installing is wasteful |
 | `AIOkToTrash()` | function | Return true if this installed card can be trashed for space |
 | `AIWorthKeeping(installed, spareMU)` | function | Return true to keep this card in hand during discard |
+| `AIOrdinaryEconomyPlay` | boolean | Opt a grip card into ordinary Runner income selection after legacy candidates, subject to normal play checks |
 | `AISpecialBreaker` | bool | Marks non-standard breakers (Trojans etc.) |
 | `AIFixedStrength` | bool | Marks breakers that can't pump strength normally |
 | `AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)` | function | Return self if this covers the given ice, else null; the optional list includes public subtype shifts |
 | `AIReducesIceStrength(ice)` | function | Return the amount this active card currently reduces the ice's strength |
 | `AIHostedBreakContribution(ice)` | function | Return how many subroutines this hosted card can currently break for free |
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
-| `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description |
+| `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description; `knownToEvaluator` distinguishes visible from synthetic statistics |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
@@ -2242,6 +2258,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
+| `AIOperationPlayClickGain(operation, thisTurn, playedInPlan)` | function | Finite identity click income from an operation in advancement search |
 | `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
 | `AIDefensiveValue(server)` | function | Numeric protection value of this upgrade |
 | `AIPreferredUpgradeServer(legalServers)` | function | Return a supplied legal server, or `null` to hold; overrides generic placement |
@@ -2757,13 +2774,23 @@ cardSet[99003] = {
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
 
 
+### Runner ordinary economy selection
+
+`AIOrdinaryEconomyPlay` (boolean, default false) explicitly opts a grip card
+into the Runner's ordinary income policy. Only `true` enables it. When that
+policy needs credits and can play, it considers legacy title candidates first,
+then opted-in cards in grip order without duplicates. `FullCheckPlay`,
+`_wastefulToPlay` and `AIWouldPlay()` still gate play; `AIPreferredPlayChoice`
+supplies the follow-up index. This read-only declaration does not itself rank
+priority economy, mutate the board, or enable legacy `AIEconomyPlay` cards.
+
 ### Downfall batch 1 card hooks
 
 - Isolation uses `AIWouldPlay`, `AIWorthKeeping` and `AIPreferredPlayChoice(choices)`
   to cash out a legal installed resource whose `AIOkToTrash()` returns true.
   It returns -1 for live resources or no target. Its `AIEconomyPlay: 2` informs
-  the Runner's priority-economy preparation; the existing `economyPlay` title
-  list now includes Isolation for ordinary income selection. That real consumer
+  the Runner's priority-economy preparation; `AIOrdinaryEconomyPlay: true`
+  opts it into ordinary income selection after legacy candidates. That consumer
   propagates the selected play-choice index into the follow-up decision, after
   checking credit/click legality. This retains the existing economy policy's
   scope rather than enabling every legacy Runner economy declaration.
@@ -2801,3 +2828,42 @@ That covers the full AI hook system. With these patterns you can add solid AI su
 `tests/downfall-integration.test.js` exercises real Runner commands, follow-up
 selection, Corp security and run-calculator consumers, plus resource, timing,
 hidden-information, prevention and cleanup cases.
+
+### Elevation missing NBN batch (35057–35060, 35065–35066)
+
+`AIOperationPlayClickGain(operation, thisTurn, playedInPlan)` is an identity hook
+consumed by `CorpAI._potentialAdvancementDirections`. Return the nonnegative
+click income from playing that operation. The search records the identity in
+its local `persist` array after the first operation and passes that fact as
+`playedInPlan`; already-resolving operations have already received their income.
+The hook must be read-only, use public identity state and Corp-owned cards, and
+work outside a run. Nebula returns one only on its reverse side, for the first
+operation of the current turn. Ordinary play still requires its full click cost;
+this hook models a subsequent gain, not a cost reduction.
+
+Synapse uses `AITriggerWhenCan` for its click/tag economy action, preserving the
+last tag after its first-removal benefit has been used. Its response enumeration
+uses the real `_bestInstallOption` consumer, with a conservative legal fallback
+for a protected empty remote agenda, an affordable-to-rez asset in a new remote,
+or affordable-to-rez central ICE when ordinary action planning withholds installs.
+Installation itself ignores all costs; subsequent rez costs remain payable.
+
+Embedded Reporting uses `AIOverAdvance` and `AIAdvancementLimit` to seek one
+excess advancement counter (two dividends), then the real discard-response
+selector tutors a currently affordable operation, ranked by existing ELO (missing
+ratings count as zero).
+Its response offers no AI option without counters or a useful operation.
+
+Next Big Thing uses `AITriggerWhenCan`; the real paid-ability selector includes
+its `availableInRunnerScoreArea` ability only for the Corp. The AI waits for room
+in HQ and at least four cards in R&D, then uses the real `_bestDiscardOption`
+consumer to shuffle excess HQ cards back. It never activates a spent counter.
+
+Bigger Picture uses `AITagPunishment`, `AIPlayWhenCan`, and `AIWouldPlay` through
+the real main-phase play policy. Its enumeration transfers useful credits,
+removing only the tags needed, or adds a tag when the Runner has fewer than five
+credits. IP Enforcement uses the same play policy (`AIPlayWhenCan`,
+`AIWouldPlay`), takes a legal stolen agenda using printed points, and prefers the
+largest agenda and an empty protected remote. Neither operation is presented
+without its required tags/targets. These are baseline policies; competing kill,
+tag-retention, tutor-sequence, and scoring plans remain optimisation work.

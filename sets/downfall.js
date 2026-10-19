@@ -338,6 +338,7 @@ cardSet[26001] = {
     return this.AIWouldPlay();
   },
   AIEconomyPlay: 2,
+  AIOrdinaryEconomyPlay: true,
 };
 
 //Demolisher (26002)
