@@ -9,6 +9,8 @@ defaults to `true`); F4 is done; I2 is proposed. I3 needs I2 phase A
 (measurements M1, M2, M4 and the M2 reliability check) and I2's phase B
 expected-points ICE consumer, which reads I3's expected future agendas.
 
+**Before design freeze:** resolve the R&D allocation finding in [I2.2](../../backlog/I2.2-rnd-protection-lateness-investigation.md) and incorporate its disposition. This is a sequencing requirement, not an additional formal dependency.
+
 ## Goal
 Name one scoring remote and keep it: the remote with the best projected
 per-turn breach hazard (M2) after investment the Corp can afford, kept across

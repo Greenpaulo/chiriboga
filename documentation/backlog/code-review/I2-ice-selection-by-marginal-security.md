@@ -2,7 +2,7 @@
 **Outcome:** adopted — phase B gate run 2 passed; `iceMarginalSecurity` defaults to on; 100 full test files passed; ready for review
 
 **Roadmap item:** I2 · **Depends on:** I1, F2, F4, L7.1, L9.0, L9.1, F11, F12 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../corp-ai/deception-gates.md)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [deception gate reconciliation](../../corp-ai/deception-gates.md)
 **Verified against code:** 15d485d (2026-10-16)
 
 ## Hand-off (2026-10-19): start here
@@ -18,8 +18,8 @@ already committed in `63fb5df`; adoption starts from `596a264`.
 **Remaining diagnostic concern:** the passing gate still redistributes central
 theft: R&D 2.109 → 2.454 points, HQ 1.750 → 1.347. Overall central theft
 3.858 → 3.800 passes its frozen guard. The earlier sample found late R&D
-protection; this run does not establish that timing is fixed. Preserve this
-finding for I3/I9 investigation; changing the ranking would need a new gate.
+protection; this run does not establish that timing is fixed. Tracked by [I2.2](../I2.2-rnd-protection-lateness-investigation.md),
+to investigate before I3 design freeze; changing the ranking would need a new gate.
 
 **Verification:** focused security, fixture and snapshot tests pass. Full
 regression verification passed after merging main: 100 test files, exit 0.
@@ -239,7 +239,7 @@ realizedIceByRootType`: 1,400 games, 0 failures; known posture labels 99.66%
 (33 unknown of 9,672 unrevealed observations); postured agenda/trap 360/312
 commitments in 309/268 games; `validateBatch` passes for
 `posturedCountCorrelation` and `allCountCorrelation`
-([evidence](../corp-ai/measurements/I2-343b2be-posture-coverage.json)). The pool
+([evidence](../../corp-ai/measurements/I2-343b2be-posture-coverage.json)). The pool
 meets F12's readiness rule, so the
 `realizedIceByRootType.posturedCountCorrelation=0.05` guard is on the pool
 command, and the posture command, its `i2-posture` boards and their criterion
@@ -273,7 +273,7 @@ approved 2026-10-16).
   (`scripts/ai-batch/headless.js`) and the `strandedUnrezzedIceCost`
   collector (`credits`), documented in `documentation/ai-batch-harness.md`.
 - Empty-Archives disposition: exclusion kept; follow-up
-  [I2.1](../corp-ai/specs/I2.1-empty-archives-reward-valuation.md) filed as
+  [I2.1](../../corp-ai/specs/I2.1-empty-archives-reward-valuation.md) filed as
   `proposed` with an F4 gate; the design note's gap row now names it.
 
 **Phase B: departures from the plan / spec.**
@@ -346,8 +346,8 @@ at 400 seeds per pair its interval is wider than the 0.02 tolerance allows.
 where ICE moved between servers before deciding a fix. Any rerun uses fresh
 seeds (not 1–400).
 
-**Open.** R&D lateness remains a diagnostic concern (Hand-off); no additional I2 policy change is included. Architecture: [server security evaluation](../corp-ai/architecture.md#server-security-evaluation),
-[install planning today](../corp-ai/architecture.md#install-planning-today).
+**Open.** R&D lateness remains a diagnostic concern (Hand-off); no additional I2 policy change is included. Architecture: [server security evaluation](../../corp-ai/architecture.md#server-security-evaluation),
+[install planning today](../../corp-ai/architecture.md#install-planning-today).
 
 ## Implementation plan (phase B)
 
@@ -585,14 +585,14 @@ F12 delivered the `realizedIceByRootType` collector and a control calibration.
 Choose the `(ICE, server)` pair that most reduces the agenda points the Runner
 is expected to steal, net of the ICE's cost, instead of the first affordable
 ICE in input-card order for one pre-chosen server. I2 is the first consumer of
-the shared [scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16):
+the shared [scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16):
 it builds the shared measurements M1, M2 and M4 (phase A, observation-only),
 then ranks ICE with them behind its own option (phase B).
 
 **Why this design.** Turning a security measurement into a shared yes/no gate
-has twice made the Corp weaker: [`fa1182c`](../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+has twice made the Corp weaker: [`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote") and the
-[L9.0.1 gate failure](done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](../done/L9.0.1-adopt-honest-lockout.md#resolution)
 (global honest verdict: winRate −0.029, pointsScored −0.282, pointsStolen
 +0.176; remote theft fell while central theft rose). The owner's 2026-10-14
 playtests saw agendas held in HQ and agendas left in weak remotes. The redesign
@@ -600,7 +600,7 @@ asks "how many points do I expect to lose?" in real units: a graded breach
 margin (M1), a measured breach probability per margin (M2), and points at
 stake. The previous draft's uncalibrated `securityDelta` weights
 (0.6/0.25/0.15), soft-lockout 0.7, ×8 scale, `consequenceWeight` floor and
-`futureValue` are **not** used by I2. Per [principle 6](../corp-ai/principles.md#6-shared-measurements-consumer-owned-decisions),
+`futureValue` are **not** used by I2. Per [principle 6](../../corp-ai/principles.md#6-shared-measurements-consumer-owned-decisions),
 M1/M2/M4 are shared; only I2's ranking consumes them here. I3 and I4 adopt
 them through their own options and gates.
 
@@ -634,7 +634,7 @@ the honest fields; only the harness `securitySnapshot` and the
 `securityCalibration` collector do. `_addHonestVerdict()` picks one route with
 `_honestRouteVerdict(layers, credits, clickBudget, clickCredits)` but stores
 only its total. Unknown breaker prices give `null` costs; an unpassable route
-gives `Infinity`. [L9.0.2](../corp-ai/specs/L9.0.2-consumer-specific-honest-security.md)
+gives `Infinity`. [L9.0.2](../../corp-ai/specs/L9.0.2-consumer-specific-honest-security.md)
 proposes separate per-consumer honest options (`honestIceLayerAdmission`,
 `honestCriticalRez`).
 
@@ -656,7 +656,7 @@ from `_rankedInstallOptions(corp.HQ.cards, true)` on an at-risk central and
 reads `_centralBreachLossRisk()` (zero when compatibility `isSecure` holds),
 installing when risk ≥ 0.35 falls by ≥ 0.15.
 
-See [architecture.md: install planning today](../corp-ai/architecture.md#install-planning-today).
+See [architecture.md: install planning today](../../corp-ai/architecture.md#install-planning-today).
 
 ## Design
 
@@ -980,7 +980,7 @@ adopted, not as a regression.
   `unrolled` observer correction fixed the coverage: a control-only pool run at
   `343b2be` gives 99.66% known labels and 360/312 agenda/trap postured
   commitments in 309/268 games
-  ([evidence](../corp-ai/measurements/I2-343b2be-posture-coverage.json)), so
+  ([evidence](../../corp-ai/measurements/I2-343b2be-posture-coverage.json)), so
   per the owner decision the guard is back on the pool and the posture command
   and its boards are dropped (2026-10-16, before any phase B result).
   Tolerance 0.05 for the same reason as above.
@@ -992,7 +992,7 @@ adopted, not as a regression.
   (ai-planning: latency is not a standard guard because `gate` may reuse a
   baseline timed on another machine).
 - `winRate` 0.03 and `pointsScored` 0.25 keep the install track's tolerances
-  ([design note](../corp-ai/specs/install-decisions-design.md#acceptance-gates)), not the
+  ([design note](../../corp-ai/specs/install-decisions-design.md#acceptance-gates)), not the
   0.02/0.2 defaults.
 
 **Before the first gate run (freeze, then never change).**
@@ -1004,7 +1004,7 @@ adopted, not as a regression.
    collector's readiness check fails closed in the gate if a 400-seed arm
    misses it. Do not invent boards to reach coverage.
 3. Record the L8.2/I2 ordering decision per the
-   [deception-gates control refresh guidance](../corp-ai/deception-gates.md). Any
+   [deception-gates control refresh guidance](../../corp-ai/deception-gates.md). Any
    decision-changing merge (L8.2, L9.0.2) during evaluation invalidates the
    control; refresh it.
 
@@ -1055,7 +1055,7 @@ Missing samples are incomplete setup, not a pass.
 - [x] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
 - [x] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`.
 - [x] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
-- [x] Posture-label coverage is checked on the pool before any phase B result: it meets F12's readiness rule, so the posture guard is on the pool command and the `i2-posture` boards are dropped (owner decision 2026-10-16; [evidence](../corp-ai/measurements/I2-343b2be-posture-coverage.json)).
+- [x] Posture-label coverage is checked on the pool before any phase B result: it meets F12's readiness rule, so the posture guard is on the pool command and the `i2-posture` boards are dropped (owner decision 2026-10-16; [evidence](../../corp-ai/measurements/I2-343b2be-posture-coverage.json)).
 - [x] The posture-coverage evidence and the L8.2/I2 ordering decision are recorded before the first gate run (calibration cohorts dropped by the owner).
 - [x] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
 - [x] Applicable gate evidence is recorded in the Resolution. For F4: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; an improvement interval's lower bound must be above zero. Only then is the option switched on by default.
