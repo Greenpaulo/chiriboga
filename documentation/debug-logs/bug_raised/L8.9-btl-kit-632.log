@@ -1,0 +1,63 @@
+Derived diagnostic excerpt from bench/L8.9-aac6ea9-stage1-diagnostics/btl-kit-632-trace-off.json
+HEAD aac6ea9 plus existing Stage 1 changes; observer off; seed 632; pair btl-kit
+logHash 17fbc4f23c6e; turns 27; errors ["stalled: no main-loop step for 10 s after: Null command"]
+Recorded error/phase trace:
+{
+  "errors": [
+    {
+      "message": "No valid commands available",
+      "stack": null,
+      "phase": "Playing Seamless Launch",
+      "identifier": "Corp 2.2"
+    },
+    {
+      "message": "Null command",
+      "stack": null,
+      "phase": "Playing Seamless Launch",
+      "identifier": "Corp 2.2"
+    }
+  ],
+  "nullCommands": [
+    {
+      "phase": "Playing Seamless Launch",
+      "identifier": "Corp 2.2",
+      "side": "corp",
+      "executingCommand": "play",
+      "commands": [],
+      "resolving": [
+        "Seamless Launch"
+      ]
+    }
+  ]
+}
+Final gameplay log lines:
+Using Gordian Blade:
+Runner spent one credit from Overclock
+Subroutine "Gain 1[c]. If there are 3 or more hosted advancement counters, instead gain 4[c]." broken
+Using Gordian Blade:
+Runner spent one credit from Overclock
+Subroutine "End the run. If there are 3 or more hosted advancement counters, instead search R&D for up to 2 cards. Add those cards to HQ, then end the run." broken
+Approaching Remote 0
+Run successful
+Clearinghouse accessed
+Run ends
+Runner spent one click
+Runner drew a card
+Using Telework Contract:
+Runner spent one click
+3 credits taken from Telework Contract
+Telework Contract trashed
+Runner spent one click
+Runner spent one credit from Prepaid VoicePAD
+Played "Creative Commission"
+Runner gained 5 credits
+Runner lost no clicks
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+ERROR No valid commands available
+ERROR Null command

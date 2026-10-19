@@ -13,6 +13,7 @@ const path = require('path');
 const vm = require('vm');
 const crypto = require('crypto');
 const {createRealizedDefenseTracker} = require('./realized-defense');
+const {observeInstallDecisions} = require('./install-attribution');
 
 const root = path.resolve(__dirname, '..', '..');
 const ENGINE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js',
@@ -246,7 +247,7 @@ function playGame(options) {
       seen.run = null;
     }
     if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), false);
-    defenseSafe(() => defense.observe(run('corp'), Math.ceil(turns / 2)));
+    defenseSafe(() => defense.observe(run('corp'), Math.ceil(turns / 2), false, run('runner')));
   };
   // Corp-known state when a Corp turn begins (I0 stall and insolvency collectors).
   const corpTurnState = () => JSON.parse(JSON.stringify(run(`({credits: corp.creditPool,
@@ -498,8 +499,19 @@ function playGame(options) {
     `);
   }
   if (defense) {
+    const attribution = observeInstallDecisions(run('corp.AI'), {
+      safe: defenseSafe, active: () => defenseStarted && run('AIHypothetical.depth') === 0,
+      tracker: defense, turn: () => Math.ceil(turns / 2), corp: () => run('corp'),
+    });
+    context.__defenseInstall = (card, server) => defenseSafe(() => attribution.request(card, server));
+    run(`var defenseInstallRequest = Install;
+      Install = function(card, server) {
+        if (AIHypothetical.depth === 0 && card && card.player === corp)
+          __defenseInstall(card, server);
+        return defenseInstallRequest.apply(this, arguments);
+      };`);
     context.__defenseObserve = () => {
-      if (defenseStarted) defenseSafe(() => defense.observe(run('corp'), Math.ceil(turns / 2)));
+      if (defenseStarted) defenseSafe(() => defense.observe(run('corp'), Math.ceil(turns / 2), false, run('runner')));
     };
     // Track committed moves even if a leave and reinstall happen in one step.
     // Do not sample temporary boards produced by hypothetical evaluation.
@@ -510,7 +522,7 @@ function playGame(options) {
         return value;
       };`);
     context.__defenseQuery = (kind, server, card, value) => defenseSafe(() =>
-      defense.onQuery(kind, server, card, value, run('corp')));
+      defense.onQuery(kind, server, card, value, run('corp'), Math.ceil(turns / 2)));
     run(`var defenseBluffQuery = corp.AI._shouldBluffAgendaServer;
       corp.AI._shouldBluffAgendaServer = function(server) {
         var value = defenseBluffQuery.apply(this, arguments);
@@ -587,6 +599,7 @@ function playGame(options) {
     clearInterval(watchdog);
     for (const handle of immediates) clearImmediate(handle);
     immediates.clear();
+    defenseSafe(() => defense.finish(run('corp'), run('runner'), Math.ceil(turns / 2)));
     const unfinished = {winner: null, reason: stalled ? 'stalled' : 'timeout after ' + options.timeoutMs / 1000 + ' s'};
     const summary = Object.assign({}, result || unfinished, {
       turns: Math.ceil(turns / 2), ms: Date.now() - started, steps,

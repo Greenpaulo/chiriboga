@@ -1,0 +1,64 @@
+Derived diagnostic excerpt from bench/L8.9-aac6ea9-stage1-diagnostics/zwicky-magdalene-576-trace-off.json
+HEAD aac6ea9 plus existing Stage 1 changes; observer off; seed 576; pair zwicky-magdalene
+logHash e5e90c59f8e8; turns 17; errors ["ReferenceError: NewRemoteServer is not defined"]
+Recorded error/phase trace:
+{
+  "errors": [
+    {
+      "message": "bestInstallOption failed to find any desired install options with this optionList:",
+      "stack": null,
+      "phase": "Humanoid Resources",
+      "identifier": "Corp 2.2*"
+    },
+    {
+      "message": "ReferenceError: NewRemoteServer is not defined",
+      "stack": "ReferenceError: NewRemoteServer is not defined\n    at Object.<anonymous> (sets/elevation.js:7798:13)\n    at DecisionPhase.decisionPhase.Resolve.<computed> [as continue] (phase.js:2155:48)\n    at ResolveChoice (command.js:96:106)\n    at command.js:807:4",
+      "phase": "Corporation's Action Phase",
+      "identifier": "Corp 2.2*"
+    },
+    {
+      "message": "Invalid choice made (0) of:",
+      "stack": null,
+      "phase": "Corporation's Action Phase",
+      "identifier": "Corp 2.2*"
+    },
+    {
+      "message": "",
+      "stack": null,
+      "phase": "Corporation's Action Phase",
+      "identifier": "Corp 2.2*"
+    }
+  ],
+  "nullCommands": []
+}
+Final gameplay log lines:
+ERROR bestInstallOption failed to find any desired install options with this optionList:
+Corp created a new remote server
+Corp installed ice protecting a remote server
+Corp spent one credit
+Played "Key Performance Indicators"
+ERROR ReferenceError: NewRemoteServer is not defined
+AI: Error executing select choice asynchronously, using arbitrary option from:
+ERROR Invalid choice made (0) of:
+ERROR 
+1 virus counter placed on Botulus
+Runner spent one click
+Run initiated attacking R&D
+"Trash another installed card to gain credits and draw" triggered
+Echelon trashed
+Runner gained 3 credits
+Runner drew a card
+Approaching outermost piece of ice protecting R&D
+Encountering Syailendra protecting R&D at position 0
+Firing "You may place 1 advancement counter on an installed card you can advance." on Syailendra protecting R&D at position 0:
+1 advancement counter placed on Syailendra protecting R&D at position 0
+Syailendra places 1 advancement counter on Syailendra protecting R&D at position 0
+Firing "The Runner loses 2[credit]." on Syailendra protecting R&D at position 0:
+Runner lost 2 credits
+Firing "Do 1 net damage." on Syailendra protecting R&D at position 0:
+Runner takes 1 net damage
+Mayfly trashed
+Approaching R&D
+Run successful
+Off the Books accessed
+Off the Books stolen

@@ -730,6 +730,190 @@ root-count context separately. The observer also works without posture-event
 telemetry, leaving unobserved safety unknown rather than enabling telemetry on
 the AI just to fill labels.
 
+### Install and lifecycle attribution (L8.9)
+
+The same F12 observer now captures install-time defense and decision evidence;
+this is passive instrumentation, not an adopted parity policy. The observer
+switch controls these records along with snapshots. `observeInstallDecisions()`
+wraps actual Corp helper returns in the harness, while a small internal
+`_installAttribution` callback reports each already-returned `AIWorthInstalling`
+result from the ranked and economy paths. This callback is not a card hook.
+It never invokes a hook, security evaluator, posture query or profile generator
+for measurement, and never sorts options or changes their objects.
+
+`realizedDefenseLifecycle` now includes harness-only `rootType` labels and:
+
+| Action | Added evidence |
+| --- | --- |
+| `install` | `iceCount` at the committed move, `requestedIceCount` before the install request, `observedIceCount`, revelation/multi-root/posture/safety labels and `placement` |
+| `leave` | Original commitment and install metadata; departure is distinct from a settled destination |
+| `endpoint` | Settled fate: scored, stolen, overwritten, trashed, returned, moved/reinstalled, game end or unknown; departure and settlement turns are separate |
+
+For pre-existing start-board roots, the original install count and request are
+null, while `observedIceCount` describes the start board. Original placement is
+not reconstructed. Overwrite requires both a replacement request and its
+committed root; unresolved locations stay unknown rather than being invented.
+
+`placement` distinguishes actual legal engine selection, command preference,
+a matching prior ranking, and unknown. A matching prior ranking is supporting
+context, not proof that ranking selected the install. Records carry the
+requested destination (zero denotes a prospective new remote), decision/choice
+IDs, chosen rank/reason when observed, observed hook output/destination pool,
+HVT classification when queried, actual offered preferences and alternatives.
+Destination evidence distinguishes membership in the legacy empty protected
+pool, queried scoring eligibility and actual legal choices. Protection
+assessments retain their caller flags and are Corp-known assessments, not
+Runner-visible strength or a claim that the last score decided placement.
+
+Comparator inputs are captured only when the comparator actually called the
+helpers. Never-compared singleton options keep explicit unknown inputs;
+Infinity, negative Infinity and NaN export as strings. Actual comparator
+windows can be zero for a destination outside the scoring-server list. The
+reported rank is the preference's position in the final legacy list, including
+higher-priority hook choices; observing comparator inputs does not imply those
+inputs determined a higher-priority hook choice. Direct command choices retain
+unknown inputs rather than replaying their evaluations.
+
+`realizedDefenseChange` records each ICE addition/removal once per server,
+with the commitments sharing that defense, and deduplicated observed posture,
+safety or epoch transitions. A cached initial state is labelled as initial;
+unrolled, unknown, expired and stopped states remain distinct. These records
+never trigger posture evaluation. Query evidence is captured only after the
+real query returns and carries the current game turn.
+
+Per-game samples retain `lifecycle` and `changes`. The collector's
+`batchDiagnostics.realizedIceByRootType.attribution` reports installation
+histograms/TV, a separate unrevealed population, deck breakdowns, route/posture/
+safety/multi-root counts, endpoint ages, server allocation totals and root-age
+exposure to those allocations. Root change exposure can count a shared layer
+for several roots; it is explicitly not a count of independent allocations.
+Unknown placement and left-censored coverage remain visible. The global installation-TV
+interval describes unrevealed installs; per-deck installation distributions and
+intervals include revealed installs as diagnostics. All 95% intervals resample
+whole games within deck pairs, including games with no
+qualifying install; insufficient classes or any invalid draw invalidate the
+interval. These descriptive intervals do not replace F11's paired adoption
+gate or establish a causal mechanism. Existing four headline metrics, their
+coverage rules and their game-clustered inference are unchanged.
+
+`node scripts/ai-batch/install-defense-summary.js <report.json> [...]` provides
+offline L8.9 diagnostics from saved observer-on reports. It emits JSON with source
+SHA-256 hashes, per-class/deck/route counts, last-snapshot distributions, actual
+ICE-change exposure, posture splits, hidden age bands and lifecycle endpoints.
+Its `install-defense-analysis.js` implementation rejects duplicate games,
+mismatched report provenance and missing/invalid F12 samples. It resamples whole
+games within deck-pair/fixture strata for 2,000 deterministic percentile draws;
+games without relevant roots remain in the sampling population. Descriptive
+intervals require five contributing games and no denominator-empty draws, without
+replacing F12 gate readiness. Last look is one snapshot per observed commitment;
+age-band rows retain repeated exposures. Game end is right censoring, endpoint
+age uses departure rather than settlement, and actual ICE additions differ from
+net gain at last look. Shared-root additions are exposure, not independent layers.
+Zero-event bootstrap intervals do not bound unseen population events. Saved
+`other` lifecycle rows lack asset/upgrade identity; routes cannot recover that
+split. This tool neither plays games nor supplies alternative adoption metrics.
+
+### Using install observations in the I tickets
+
+L8.9 delivers passive measurement; it owns no installation restriction. I3 owns
+remote roles and displaced scoring value, I4 owns agenda install/hold choices,
+and I5 owns asset/trap install/hold choices. Their specs must use these tools
+when investigating those choices, then choose their own policies and gates.
+I3.1 supplies future read-only deck-plan evidence, not a prerequisite for using
+the observer and not an implemented strategy selector.
+
+**Collect on the consumer's current baseline.** When a consumer's experiment is
+authorized, add these flags to its own batch/gate commands:
+
+```sh
+--defense-observer on \
+--collector realizedIceByRootType \
+--collector bluffSingleVariableCorrelation \
+--collector installOutcomes
+```
+
+Record effective options, pool/source hashes, starts, seeds and failures. Use
+current matched baseline/candidate arms for policy comparisons; do not treat
+L8.9's old control reports as a matching baseline after a prerequisite changes.
+Changing measurement itself requires focused coverage and observer identity.
+No new L8.9 cohort is requested by this recipe.
+
+**Analyze each arm offline.** For the saved successful L8.9 control cohorts:
+
+```sh
+node scripts/ai-batch/install-defense-summary.js \
+  bench/L8.9-aac6ea9-attribution-v2/on-1-200.json \
+  bench/L8.9-aac6ea9-attribution-v2/on-201-400.json > /tmp/install-defense-summary.json
+node scripts/ai-batch/defense-attribution.js \
+  bench/L8.9-aac6ea9-attribution-v2/on-1-200.json > /tmp/install-routes.json
+```
+
+For consumer work substitute that arm's saved reports. The summary rejects
+mixed code/options/pool provenance; analyze baseline and candidate separately,
+not as one cohort. It reports failed-game counts and uses successful whole
+games only. Route attribution also uses successful games; consult the original
+report's failures and the summary's coverage instead of inferring completion
+from a route table. Neither diagnostic grants adoption. F11/F12 comparisons
+remain the authority for the consumer's preregistered paired gate.
+
+| Question | Existing evidence to inspect |
+|---|---|
+| Which destination was offered/selected, and why? | `samples.realizedIceByRootType.lifecycle`: install `placement`, request/commit ICE counts, eligibility, ranks, observed hook/comparator results; unknown inputs stay unknown |
+| Did protection arrive later or get removed? | `changes`: per-server ICE changes and sharing commitments; summarize root exposure separately from independent server layers |
+| Did scoring, access or survival change the sample? | Settled `endpoint` events; age bands, revelation, censoring and single/multi-root splits in the summary |
+| Did installs pay off or trigger traps? | Existing `installOutcomes` payoff, scoring, exposure and trigger metrics; these are outcomes, not access probabilities |
+| Did the agenda/trap defense association change? | F12 all/postured count distance and correlation, per-deck class/game coverage; public-variable roll correlation from `bluffSingleVariableCorrelation` |
+
+Useful regressions to extend: `tests/L8.9-install-defense-attribution.test.js`,
+`tests/realized-defense.test.js` and `tests/corp-install-decisions.test.js`.
+Observer/collector changes also use `tests/integration/realized-defense.test.js`.
+
+**Shell/asset-spam and holding limits.** An unprotected remote can be a deliberate
+cheap/disposable deployment. Do not infer a bad choice from zero ICE, or demand
+matching agenda/trap counts across different plans. Report per-deck and route
+results beside pooled metrics, and establish representative shell-like coverage
+or explicitly record its absence. A hybrid is not an invalid example.
+
+Current headline snapshots cover agendas and traps; saved ordinary asset/upgrade
+lifecycle records are combined as `other`, and do not reconstruct the entire
+remote topology, ordinary-asset lifetimes or empty-remote creation rate. Existing
+`installOutcomes` aggregates do not fill that gap. They also omit a full
+denominator for held/never-installed cards, HQ entry/exit ages and deferred
+opportunities. If a consumer claims effects on asset spam, holding or deployment
+timing, scope and test the additional passive evidence before drawing that
+conclusion. Do not reconstruct absent fields from names or pretend the stored
+cohorts prove shell-plan effectiveness.
+
+The [L8.9 calibration](corp-ai/measurements/L8.9-aac6ea9-stage1-calibration.json)
+uses 2,800 versus 2,798 successful controls and retains both failed records.
+Its four noise envelopes are baseline-specific and broad; they are not universal
+I3/I5 tolerances or proof of acceptable strategic harm. The
+[delivery ticket](backlog/L8.9-observable-defense-parity.md) links the findings,
+full historical analysis and limitations.
+
+`defense-guard-calibration.js <on-1-200> <on-201-400> <on-401-800> <output.json>`
+is L8.9's Stage 1 control-only consumer of F11 calibration. It validates complete
+observer-on controls, rejects failures/duplicate games/overlapping cohorts and
+checks matching policy/pool/options before combining seeds 1–400. It compares
+that cohort with 401–800 using unchanged F12 definitions. Its preregistered guard
+rule is the larger absolute endpoint of the independent 95% difference interval,
+rounded upward to six decimals. These noise allowances do not establish acceptable
+strategic harm. The saved result contains input SHA-256 hashes, point statistics,
+intervals and frozen margins. It also prints paired win-rate sample-size planning
+scenarios; those require an assumed candidate/control Corp-win discordance rate,
+which unchanged controls cannot estimate. This script runs no games or policy.
+
+Failure exclusion is opt-in: `--complete-case` accepts fully accounted-for failed
+games only after an explicit scope decision. Every scheduled key must still be
+present; `games` and `failures` must agree, and successful samples must remain
+valid. Failed records stay in the merged report and are passed intact to F11,
+which excludes their whole-game samples from bootstrap draws. The result records
+`failureTreatment`, `scheduledGames`, successful `games`, `droppedGames`, failed
+records and per-stratum scheduled/successful/failed counts. It estimates the
+successful-game population conditional on completion; it does not prove that
+missingness is harmless. The default still rejects any failure. This exception
+neither permits replacement games nor changes paired policy-gate failure handling.
+
 The four lower-direction pooled metrics are absolute Spearman
 `allCountCorrelation`/`posturedCountCorrelation` and total-variation
 `allCountDistance`/`posturedCountDistance`. Headline observations are unrevealed
@@ -787,6 +971,11 @@ stall (BTL/Kit seed 257); calibration retains failure evidence and uses 1,399
 successful games with that stratum's reduced count. No consumer margin or
 policy adoption follows from this calibration. Lifecycle totals include all
 tracked remote root cards; metric class counts cover agendas and declared traps.
+
+`scripts/ai-batch/install-defense-summary.js <report.json> [...]` reads saved
+observer-on reports and prints install-time ICE by root class, bare-at-install
+rate by trap install route, and route counts. Pooled, read-only diagnostic; no
+game-clustered intervals.
 
 ## Install-series collectors and baselines (I0)
 

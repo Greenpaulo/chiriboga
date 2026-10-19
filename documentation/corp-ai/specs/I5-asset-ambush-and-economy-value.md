@@ -1,7 +1,7 @@
 # I5 Asset, ambush and economy value
 
 **Roadmap item:** I5 · **Depends on:** I3, L8.10, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** [L8.9 tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](../../backlog/L8.9-observable-defense-parity.md), [I3.1](I3.1-deck-game-plan-profile.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal
@@ -50,6 +50,37 @@ Preserve I2's equivalent active-posture ordinary ICE decisions. Metric paths,
 sample coverage, margins and commands must be frozen before candidate results;
 this note does not silently amend the recorded adoption thresholds below.
 
+**Measurement handoff from L8.9 (2026-10-19).** I5 owns asset/trap installation
+and holding decisions; L8.9's proposed blanket deferral without protected room
+was withdrawn and must not become a prerequisite. Its evidence identifies an
+existing route difference, not a proof that bare installs are strategically wrong.
+
+Follow the [tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets):
+collect `realizedIceByRootType`, `bluffSingleVariableCorrelation` and
+`installOutcomes` on fresh matched I5 reports. Analyze each arm separately with
+`node scripts/ai-batch/install-defense-summary.js <one-arm-report.json>` and,
+for route origins, `node scripts/ai-batch/defense-attribution.js <report.json>`.
+Inspect placement reasons and offered alternatives, install ICE, later ICE
+changes, endpoints and root age per deck/route alongside asset payoff, trap
+triggers and the declared paired gate. Extend the existing L8.9 focused tests
+rather than starting competing collector definitions. Recorded control noise
+margins are not automatic I5 harm limits or matching controls after I3 changes.
+
+Shell/asset-spam plans can justify many bare cheap roots; preserving one scoring
+room is compatible with leaving other remotes unprotected. Evaluate an actual
+counterexample and establish representative coverage or report its absence.
+Do not suppress ordinary asset tempo or trap credibility just to reduce pooled
+agenda/trap ICE differences. I3.1 can later describe deck evidence; I5 does not
+wait for it, classify plans from names/ICE density alone, or adopt a profile
+consumer without its own evidence and gate.
+
+L8.9 has no full HQ wait/never-installed denominator or ordinary-asset/upgrade
+split in saved lifecycle samples. If I5 changes waiting or asset-spam deployment,
+plan the additional passive opportunity/holding/type/topology evidence needed
+before making claims about timing, frequency or which uninstalled cards paid off.
+Keep unknown/discarded/never-installed cases visible and test observation identity.
+L8.10 remains the prerequisite for trap mechanics/opportunity and payoff modeling.
+
 Value components, in the design note's units and bounds (`economyValue`,
 `trapValue`, `installCost`, `reserveCost`, `opportunityCost`):
 
@@ -79,6 +110,12 @@ protection. Bait frequency and candidate value must not drift across repeated
 evaluator calls in one planning window.
 
 ## Test scenarios
+
+Additional evidence case: an asset-heavy/shell-like board has several legitimate
+bare disposable roots and a separate scoring remote. Compare deployment/payoff,
+trap access and scoring-room occupancy without a universal ICE requirement;
+state the coverage gaps if saved reports cannot support the comparison.
+
 1. An economy asset with no plausible payoff before access is delayed or
    assigned only disposable value.
 2. An immediately profitable asset may be installed in a weaker remote when its
@@ -113,6 +150,8 @@ with the standard guards (design note) and:
   gate against a baseline that includes the earlier one's option on.
 
 ## Acceptance criteria
+- [ ] Reuse the L8.9 collector/analysis recipe on current matching reports and record per-deck/route placement, later defense and lifetime evidence beside asset payoff/trap outcomes.
+- [ ] Cover shell/asset-spam deployment; explicitly scope and test missing holding, ordinary-asset/type and remote-topology observations when the policy claims require them.
 - [ ] L8.10 is done; record the supported trap conversion/model or explicitly scoped diagnostic-only fallback before raising.
 - [ ] Reconcile the matching control and tell/defense gate coverage described above before implementation and candidate results.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.

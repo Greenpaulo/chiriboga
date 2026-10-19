@@ -1,0 +1,7367 @@
+{
+  "kind": "L8.9 offline install/lifecycle analysis",
+  "coverage": {
+    "games": 2800,
+    "failedGames": 0,
+    "leftCensored": 0
+  },
+  "resamples": 2000,
+  "uncertainty": "95% percentile bootstrap; whole games resampled within deck-pair/fixture strata",
+  "otherSplit": "Unavailable: saved lifecycle records lack asset/upgrade type and card identity; routes are not type labels",
+  "buckets": [
+    {
+      "group": [
+        "class",
+        "other"
+      ],
+      "counts": {
+        "installs": 8811,
+        "bare": 4528,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 2061,
+        "removed": 95,
+        "endpoint:unknown": 2205,
+        "endpointAgeN": 8811,
+        "endpointAgeSum": 21697,
+        "rightCensored": 1882,
+        "missingPlacement": 110,
+        "newRemote": 4505,
+        "protectedAvailable": 3834,
+        "scoringAvailable": 2777,
+        "bareWithProtectedAvailable": 908,
+        "nonBareWithoutProtectedAvailable": 1247,
+        "endpoint:gameEnd": 1882,
+        "endpoint:trashed": 4088,
+        "endpoint:overwritten": 441,
+        "endpoint:returned": 195
+      },
+      "games": 2480,
+      "rates": {
+        "bareRate": {
+          "value": 0.5139030757008285,
+          "low": 0.5012440624293146,
+          "high": 0.5258365581607102,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.23391215526046988,
+          "low": 0.2250533168705803,
+          "high": 0.24230855602964294,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.4624900692316425,
+          "low": 2.4036995515695065,
+          "high": 2.51998652593757,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 1277,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 30,
+        "removed": 11,
+        "endpoint:unknown": 556,
+        "endpointAgeN": 1277,
+        "endpointAgeSum": 3066,
+        "rightCensored": 336,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1277,
+        "scoringAvailable": 436,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:trashed": 279,
+        "endpoint:gameEnd": 336,
+        "endpoint:overwritten": 106
+      },
+      "games": 951,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.023492560689115115,
+          "low": 0.015467904098994586,
+          "high": 0.03168155970755483,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.4009397024275647,
+          "low": 2.2521072796934867,
+          "high": 2.5589147286821707,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "btl-kit",
+        "other"
+      ],
+      "counts": {
+        "installs": 856,
+        "bare": 353,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 139,
+        "removed": 0,
+        "endpoint:unknown": 314,
+        "endpointAgeN": 856,
+        "endpointAgeSum": 1540,
+        "rightCensored": 124,
+        "missingPlacement": 0,
+        "newRemote": 352,
+        "protectedAvailable": 566,
+        "scoringAvailable": 534,
+        "bareWithProtectedAvailable": 107,
+        "nonBareWithoutProtectedAvailable": 44,
+        "endpoint:gameEnd": 124,
+        "endpoint:trashed": 404,
+        "endpoint:overwritten": 14
+      },
+      "games": 350,
+      "rates": {
+        "bareRate": {
+          "value": 0.41238317757009346,
+          "low": 0.3778705636743215,
+          "high": 0.4471830985915493,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.16238317757009346,
+          "low": 0.13937282229965156,
+          "high": 0.18549346016646848,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.7990654205607477,
+          "low": 1.671280276816609,
+          "high": 1.929559748427673,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 181,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 7,
+        "removed": 0,
+        "endpoint:unknown": 76,
+        "endpointAgeN": 181,
+        "endpointAgeSum": 356,
+        "rightCensored": 22,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 181,
+        "scoringAvailable": 62,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:trashed": 73,
+        "endpoint:gameEnd": 22,
+        "endpoint:overwritten": 10
+      },
+      "games": 140,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.03867403314917127,
+          "low": 0.012269938650306749,
+          "high": 0.06914893617021277,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.9668508287292819,
+          "low": 1.7457627118644068,
+          "high": 2.197860962566845,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "other",
+        "unknown"
+      ],
+      "counts": {
+        "installs": 2205,
+        "bare": 1382,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 369,
+        "removed": 23,
+        "endpoint:unknown": 2205,
+        "endpointAgeN": 2205,
+        "endpointAgeSum": 3046,
+        "rightCensored": 0,
+        "missingPlacement": 31,
+        "newRemote": 1382,
+        "protectedAvailable": 1182,
+        "scoringAvailable": 922,
+        "bareWithProtectedAvailable": 390,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 1518,
+      "rates": {
+        "bareRate": {
+          "value": 0.6267573696145124,
+          "low": 0.6055846422338569,
+          "high": 0.6476494751255135,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.1673469387755102,
+          "low": 0.15261044176706828,
+          "high": 0.18227272727272728,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.38140589569161,
+          "low": 1.3144908030506954,
+          "high": 1.4519823788546256,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "class",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 9034,
+        "bare": 123,
+        "seen": 8681,
+        "lastBare": 87,
+        "lastAgeSum": 5947,
+        "gainedNet": 445,
+        "added": 468,
+        "removed": 177,
+        "endpoint:stolen": 2530,
+        "endpointAgeN": 9034,
+        "endpointAgeSum": 11753,
+        "rightCensored": 473,
+        "missingPlacement": 117,
+        "newRemote": 123,
+        "protectedAvailable": 8906,
+        "scoringAvailable": 8897,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 6009,
+        "endpoint:gameEnd": 473,
+        "endpoint:overwritten": 22
+      },
+      "games": 2660,
+      "rates": {
+        "bareRate": {
+          "value": 0.013615231348239982,
+          "low": 0.011010790574763268,
+          "high": 0.01623200952277892,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.010021886879391775,
+          "low": 0.007767215395316485,
+          "high": 0.012322715647523831,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.05126137541757862,
+          "low": 0.04664891769880773,
+          "high": 0.05592789461520684,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.05180429488598627,
+          "low": 0.04728759253121202,
+          "high": 0.056419369169258105,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.300974097852557,
+          "low": 1.2689707806367205,
+          "high": 1.3338132683575146,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.6850593249625619,
+          "low": 0.6542912799358314,
+          "high": 0.7181702961170642,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 8822,
+        "bare": 0,
+        "seen": 8563,
+        "lastBare": 3,
+        "lastAgeSum": 5746,
+        "gainedNet": 417,
+        "added": 440,
+        "removed": 177,
+        "endpoint:stolen": 2467,
+        "endpointAgeN": 8822,
+        "endpointAgeSum": 11506,
+        "rightCensored": 449,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 8822,
+        "scoringAvailable": 8822,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 5884,
+        "endpoint:gameEnd": 449,
+        "endpoint:overwritten": 22
+      },
+      "games": 2660,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.0003503445054303398,
+          "low": 0,
+          "high": 0.000811500115928588,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.04869788625481724,
+          "low": 0.044326866549088774,
+          "high": 0.05331293397669766,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.04987531172069826,
+          "low": 0.04540775477524877,
+          "high": 0.05455165359699966,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.3042394014962593,
+          "low": 1.2724709597383557,
+          "high": 1.3370658135283364,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.6710265094009109,
+          "low": 0.6405417920815003,
+          "high": 0.7028624406072546,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "btl-kit",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 943,
+        "bare": 0,
+        "seen": 943,
+        "lastBare": 0,
+        "lastAgeSum": 337,
+        "gainedNet": 53,
+        "added": 53,
+        "removed": 0,
+        "endpoint:stolen": 337,
+        "endpointAgeN": 943,
+        "endpointAgeSum": 922,
+        "rightCensored": 32,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 943,
+        "scoringAvailable": 943,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 574,
+        "endpoint:gameEnd": 32
+      },
+      "games": 354,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.05620360551431601,
+          "low": 0.0423728813559322,
+          "high": 0.07026476578411406,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.05620360551431601,
+          "low": 0.0423728813559322,
+          "high": 0.07026476578411406,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.9777306468716861,
+          "low": 0.911042944785276,
+          "high": 1.050314465408805,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.35737009544008486,
+          "low": 0.29809725158562367,
+          "high": 0.42145178764897073,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 943,
+        "bare": 0,
+        "seen": 943,
+        "lastBare": 0,
+        "lastAgeSum": 337,
+        "gainedNet": 53,
+        "added": 53,
+        "removed": 0,
+        "endpoint:stolen": 337,
+        "endpointAgeN": 943,
+        "endpointAgeSum": 922,
+        "rightCensored": 32,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 943,
+        "scoringAvailable": 943,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 574,
+        "endpoint:gameEnd": 32
+      },
+      "games": 354,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.05620360551431601,
+          "low": 0.0423728813559322,
+          "high": 0.07026476578411406,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.05620360551431601,
+          "low": 0.0423728813559322,
+          "high": 0.07026476578411406,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.9777306468716861,
+          "low": 0.911042944785276,
+          "high": 1.050314465408805,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.35737009544008486,
+          "low": 0.29809725158562367,
+          "high": 0.42145178764897073,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "agenda",
+        "stolen"
+      ],
+      "counts": {
+        "installs": 2530,
+        "bare": 62,
+        "seen": 2529,
+        "lastBare": 49,
+        "lastAgeSum": 1716,
+        "gainedNet": 143,
+        "added": 160,
+        "removed": 129,
+        "endpoint:stolen": 2530,
+        "endpointAgeN": 2530,
+        "endpointAgeSum": 1716,
+        "rightCensored": 0,
+        "missingPlacement": 62,
+        "newRemote": 62,
+        "protectedAvailable": 2468,
+        "scoringAvailable": 2468,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 1611,
+      "rates": {
+        "bareRate": {
+          "value": 0.02450592885375494,
+          "low": 0.01823226317875545,
+          "high": 0.030744336569579287,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.01937524713325425,
+          "low": 0.014029618082618862,
+          "high": 0.025088200705605645,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.056544088572558326,
+          "low": 0.04809619238476954,
+          "high": 0.06558641975308642,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.06324110671936758,
+          "low": 0.054140127388535034,
+          "high": 0.07280598189689098,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.6782608695652174,
+          "low": 0.6261115602263541,
+          "high": 0.7372881355932204,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.6785290628706999,
+          "low": 0.6263647391831784,
+          "high": 0.7375857892612031,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "exposure",
+        "agenda",
+        "all"
+      ],
+      "counts": {
+        "snapshots": 14627,
+        "zero": 224,
+        "revealed": 402,
+        "multiRoot": 989,
+        "safetyStopped": 3535,
+        "installedBare": 216,
+        "lostDefense": 8
+      },
+      "games": 2656,
+      "rates": {
+        "zeroRate": {
+          "value": 0.01531414507417789,
+          "low": 0.011767944394742276,
+          "high": 0.019270333287614867,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "agenda",
+        "neutral"
+      ],
+      "counts": {
+        "snapshots": 6729,
+        "zero": 43,
+        "revealed": 1,
+        "multiRoot": 38,
+        "safetyStopped": 0,
+        "installedBare": 40,
+        "lostDefense": 3
+      },
+      "games": 2236,
+      "rates": {
+        "zeroRate": {
+          "value": 0.006390251151731312,
+          "low": 0.003290457672749028,
+          "high": 0.010168984596979213,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "routeExposure",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "snapshots": 14308,
+        "zero": 8,
+        "revealed": 402,
+        "multiRoot": 988,
+        "safetyStopped": 3405,
+        "installedBare": 0,
+        "lostDefense": 8
+      },
+      "games": 2656,
+      "rates": {
+        "zeroRate": {
+          "value": 0.0005591277606933184,
+          "low": 0.00020696791997240429,
+          "high": 0.001051377304268592,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "btl-kit",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 1280,
+        "zero": 0,
+        "revealed": 401,
+        "multiRoot": 89,
+        "safetyStopped": 216,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 354,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "exposure",
+        "agenda",
+        "hidden"
+      ],
+      "counts": {
+        "snapshots": 14225,
+        "zero": 224,
+        "revealed": 0,
+        "multiRoot": 952,
+        "safetyStopped": 3535,
+        "installedBare": 216,
+        "lostDefense": 8
+      },
+      "games": 2615,
+      "rates": {
+        "zeroRate": {
+          "value": 0.015746924428822497,
+          "low": 0.012091193823293758,
+          "high": 0.0197536108751062,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "agenda",
+        "0"
+      ],
+      "counts": {
+        "snapshots": 8344,
+        "zero": 112,
+        "revealed": 0,
+        "multiRoot": 667,
+        "safetyStopped": 1534,
+        "installedBare": 112,
+        "lostDefense": 0
+      },
+      "games": 2615,
+      "rates": {
+        "zeroRate": {
+          "value": 0.013422818791946308,
+          "low": 0.010735826296743065,
+          "high": 0.016199226305609285,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "agenda",
+        "unrolled"
+      ],
+      "counts": {
+        "snapshots": 3353,
+        "zero": 116,
+        "revealed": 401,
+        "multiRoot": 937,
+        "safetyStopped": 0,
+        "installedBare": 112,
+        "lostDefense": 4
+      },
+      "games": 1827,
+      "rates": {
+        "zeroRate": {
+          "value": 0.03459588428273188,
+          "low": 0.027819776232234653,
+          "high": 0.04169202678027997,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 1164,
+        "bare": 114,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 165,
+        "removed": 16,
+        "endpoint:gameEnd": 292,
+        "endpointAgeN": 1164,
+        "endpointAgeSum": 2503,
+        "rightCensored": 292,
+        "missingPlacement": 0,
+        "newRemote": 114,
+        "protectedAvailable": 1164,
+        "scoringAvailable": 500,
+        "bareWithProtectedAvailable": 114,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 241,
+        "endpoint:trashed": 544,
+        "endpoint:overwritten": 70,
+        "endpoint:returned": 17
+      },
+      "games": 728,
+      "rates": {
+        "bareRate": {
+          "value": 0.0979381443298969,
+          "low": 0.08051948051948052,
+          "high": 0.11538461538461539,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.14175257731958762,
+          "low": 0.12259835315645014,
+          "high": 0.1612627986348123,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.1503436426116838,
+          "low": 2.0422778257118206,
+          "high": 2.2609841827768014,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 78,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 5,
+        "removed": 0,
+        "endpoint:gameEnd": 11,
+        "endpointAgeN": 78,
+        "endpointAgeSum": 122,
+        "rightCensored": 11,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 78,
+        "scoringAvailable": 31,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 44,
+        "endpoint:trashed": 21,
+        "endpoint:overwritten": 2
+      },
+      "games": 56,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.0641025641025641,
+          "low": 0.014705882352941176,
+          "high": 0.12307692307692308,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.564102564102564,
+          "low": 1.2461538461538462,
+          "high": 1.894736842105263,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "other",
+        "gameEnd"
+      ],
+      "counts": {
+        "installs": 1882,
+        "bare": 778,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 579,
+        "removed": 16,
+        "endpoint:gameEnd": 1882,
+        "endpointAgeN": 1882,
+        "endpointAgeSum": 7613,
+        "rightCensored": 1882,
+        "missingPlacement": 11,
+        "newRemote": 775,
+        "protectedAvailable": 1073,
+        "scoringAvailable": 789,
+        "bareWithProtectedAvailable": 237,
+        "nonBareWithoutProtectedAvailable": 257
+      },
+      "games": 1139,
+      "rates": {
+        "bareRate": {
+          "value": 0.41339001062699254,
+          "low": 0.3894566971490048,
+          "high": 0.43568464730290457,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.30765143464399575,
+          "low": 0.2855631940772078,
+          "high": 0.33025027203482044,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.045164718384697,
+          "low": 3.844031830238727,
+          "high": 4.248940677966102,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "class",
+        "trap"
+      ],
+      "counts": {
+        "installs": 1488,
+        "bare": 550,
+        "seen": 1486,
+        "lastBare": 169,
+        "lastAgeSum": 5419,
+        "gainedNet": 616,
+        "added": 720,
+        "removed": 0,
+        "endpoint:gameEnd": 452,
+        "endpointAgeN": 1488,
+        "endpointAgeSum": 6412,
+        "rightCensored": 452,
+        "missingPlacement": 0,
+        "newRemote": 550,
+        "protectedAvailable": 938,
+        "scoringAvailable": 983,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 846,
+        "endpoint:trashed": 190
+      },
+      "games": 920,
+      "rates": {
+        "bareRate": {
+          "value": 0.3696236559139785,
+          "low": 0.34504567814476456,
+          "high": 0.3934649421375085,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.11372812920592194,
+          "low": 0.0973565441650548,
+          "high": 0.1304640215198386,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.414535666218035,
+          "low": 0.3904382470119522,
+          "high": 0.4394141145139814,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.4838709677419355,
+          "low": 0.46041250831669994,
+          "high": 0.5076820307281229,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.309139784946237,
+          "low": 4.139300134589502,
+          "high": 4.482130343377715,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 3.6467025572005385,
+          "low": 3.4791524265208476,
+          "high": 3.813655761024182,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "trap",
+        "Specific case"
+      ],
+      "counts": {
+        "installs": 828,
+        "bare": 550,
+        "seen": 827,
+        "lastBare": 169,
+        "lastAgeSum": 3470,
+        "gainedNet": 490,
+        "added": 582,
+        "removed": 0,
+        "endpoint:gameEnd": 274,
+        "endpointAgeN": 828,
+        "endpointAgeSum": 4109,
+        "rightCensored": 274,
+        "missingPlacement": 0,
+        "newRemote": 550,
+        "protectedAvailable": 278,
+        "scoringAvailable": 323,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 554
+      },
+      "games": 610,
+      "rates": {
+        "bareRate": {
+          "value": 0.6642512077294686,
+          "low": 0.6296728971962616,
+          "high": 0.6958174904942965,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.20435308343409916,
+          "low": 0.17660818713450294,
+          "high": 0.23178016726403824,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.592503022974607,
+          "low": 0.559074299634592,
+          "high": 0.6265508684863523,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.7028985507246377,
+          "low": 0.6709601873536299,
+          "high": 0.7338217338217338,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.96256038647343,
+          "low": 4.7540792540792545,
+          "high": 5.176749703440095,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.195888754534462,
+          "low": 3.991545893719807,
+          "high": 4.406844106463878,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "btl-kit",
+        "trap"
+      ],
+      "counts": {
+        "installs": 280,
+        "bare": 141,
+        "seen": 280,
+        "lastBare": 34,
+        "lastAgeSum": 1131,
+        "gainedNet": 172,
+        "added": 198,
+        "removed": 0,
+        "endpoint:gameEnd": 68,
+        "endpointAgeN": 280,
+        "endpointAgeSum": 1360,
+        "rightCensored": 68,
+        "missingPlacement": 0,
+        "newRemote": 141,
+        "protectedAvailable": 139,
+        "scoringAvailable": 104,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 212
+      },
+      "games": 214,
+      "rates": {
+        "bareRate": {
+          "value": 0.5035714285714286,
+          "low": 0.44363636363636366,
+          "high": 0.5625,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.12142857142857143,
+          "low": 0.08394160583941605,
+          "high": 0.15693430656934307,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.6142857142857143,
+          "low": 0.5578947368421052,
+          "high": 0.6728624535315985,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.7071428571428572,
+          "low": 0.6521739130434783,
+          "high": 0.7620689655172413,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.857142857142857,
+          "low": 4.550561797752809,
+          "high": 5.1732851985559565,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.039285714285715,
+          "low": 3.7350993377483444,
+          "high": 4.3478260869565215,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "trap",
+        "Specific case"
+      ],
+      "counts": {
+        "installs": 233,
+        "bare": 141,
+        "seen": 233,
+        "lastBare": 34,
+        "lastAgeSum": 947,
+        "gainedNet": 151,
+        "added": 175,
+        "removed": 0,
+        "endpoint:gameEnd": 55,
+        "endpointAgeN": 233,
+        "endpointAgeSum": 1139,
+        "rightCensored": 55,
+        "missingPlacement": 0,
+        "newRemote": 141,
+        "protectedAvailable": 92,
+        "scoringAvailable": 57,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 178
+      },
+      "games": 185,
+      "rates": {
+        "bareRate": {
+          "value": 0.6051502145922747,
+          "low": 0.540084388185654,
+          "high": 0.6697247706422018,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.1459227467811159,
+          "low": 0.10344827586206896,
+          "high": 0.18803418803418803,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.648068669527897,
+          "low": 0.5902255639097744,
+          "high": 0.70995670995671,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.7510729613733905,
+          "low": 0.6951219512195121,
+          "high": 0.8063063063063063,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.888412017167382,
+          "low": 4.547169811320755,
+          "high": 5.236051502145923,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.064377682403434,
+          "low": 3.729357798165138,
+          "high": 4.402597402597403,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "trap",
+        "gameEnd"
+      ],
+      "counts": {
+        "installs": 452,
+        "bare": 179,
+        "seen": 450,
+        "lastBare": 82,
+        "lastAgeSum": 1815,
+        "gainedNet": 160,
+        "added": 160,
+        "removed": 0,
+        "endpoint:gameEnd": 452,
+        "endpointAgeN": 452,
+        "endpointAgeSum": 1962,
+        "rightCensored": 452,
+        "missingPlacement": 0,
+        "newRemote": 179,
+        "protectedAvailable": 273,
+        "scoringAvailable": 340,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 385,
+      "rates": {
+        "bareRate": {
+          "value": 0.39601769911504425,
+          "low": 0.35167464114832536,
+          "high": 0.44298245614035087,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.18222222222222223,
+          "low": 0.1461187214611872,
+          "high": 0.2171945701357466,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.35555555555555557,
+          "low": 0.3098901098901099,
+          "high": 0.4004329004329004,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.35398230088495575,
+          "low": 0.3092105263157895,
+          "high": 0.39819004524886875,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.34070796460177,
+          "low": 3.9864864864864864,
+          "high": 4.710300429184549,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.033333333333333,
+          "low": 3.6921296296296298,
+          "high": 4.388286334056399,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "exposure",
+        "trap",
+        "all"
+      ],
+      "counts": {
+        "snapshots": 6889,
+        "zero": 1361,
+        "revealed": 580,
+        "multiRoot": 385,
+        "safetyStopped": 0,
+        "installedBare": 1361,
+        "lostDefense": 0
+      },
+      "games": 920,
+      "rates": {
+        "zeroRate": {
+          "value": 0.19756132965597328,
+          "low": 0.1765319815118533,
+          "high": 0.21794496487119439,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "trap",
+        "unrolled"
+      ],
+      "counts": {
+        "snapshots": 768,
+        "zero": 286,
+        "revealed": 145,
+        "multiRoot": 89,
+        "safetyStopped": 0,
+        "installedBare": 286,
+        "lostDefense": 0
+      },
+      "games": 420,
+      "rates": {
+        "zeroRate": {
+          "value": 0.3723958333333333,
+          "low": 0.31565656565656564,
+          "high": 0.428743961352657,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "routeExposure",
+        "trap",
+        "Specific case"
+      ],
+      "counts": {
+        "snapshots": 4288,
+        "zero": 1361,
+        "revealed": 491,
+        "multiRoot": 162,
+        "safetyStopped": 0,
+        "installedBare": 1361,
+        "lostDefense": 0
+      },
+      "games": 610,
+      "rates": {
+        "zeroRate": {
+          "value": 0.31739738805970147,
+          "low": 0.28609303446613643,
+          "high": 0.3456391324411629,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "btl-kit",
+        "trap"
+      ],
+      "counts": {
+        "snapshots": 1411,
+        "zero": 279,
+        "revealed": 185,
+        "multiRoot": 93,
+        "safetyStopped": 0,
+        "installedBare": 279,
+        "lostDefense": 0
+      },
+      "games": 214,
+      "rates": {
+        "zeroRate": {
+          "value": 0.19773210489014884,
+          "low": 0.15698587127158556,
+          "high": 0.2422907488986784,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "exposure",
+        "trap",
+        "hidden"
+      ],
+      "counts": {
+        "snapshots": 6309,
+        "zero": 1020,
+        "revealed": 0,
+        "multiRoot": 352,
+        "safetyStopped": 0,
+        "installedBare": 1020,
+        "lostDefense": 0
+      },
+      "games": 920,
+      "rates": {
+        "zeroRate": {
+          "value": 0.16167379933428436,
+          "low": 0.14522566779244703,
+          "high": 0.1784060054304424,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "trap",
+        "0"
+      ],
+      "counts": {
+        "snapshots": 1470,
+        "zero": 478,
+        "revealed": 0,
+        "multiRoot": 62,
+        "safetyStopped": 0,
+        "installedBare": 478,
+        "lostDefense": 0
+      },
+      "games": 915,
+      "rates": {
+        "zeroRate": {
+          "value": 0.3251700680272109,
+          "low": 0.30053547523427043,
+          "high": 0.34868421052631576,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 2118,
+        "bare": 2118,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 957,
+        "removed": 6,
+        "endpoint:trashed": 574,
+        "endpointAgeN": 2118,
+        "endpointAgeSum": 5985,
+        "rightCensored": 524,
+        "missingPlacement": 0,
+        "newRemote": 2118,
+        "protectedAvailable": 788,
+        "scoringAvailable": 1351,
+        "bareWithProtectedAvailable": 788,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 841,
+        "endpoint:gameEnd": 524,
+        "endpoint:overwritten": 179
+      },
+      "games": 1352,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.4518413597733711,
+          "low": 0.4302600472813239,
+          "high": 0.47290874524714827,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.8257790368271953,
+          "low": 2.6633475580844004,
+          "high": 2.977164605137964,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 280,
+        "bare": 280,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 95,
+        "removed": 0,
+        "endpoint:trashed": 118,
+        "endpointAgeN": 280,
+        "endpointAgeSum": 393,
+        "rightCensored": 33,
+        "missingPlacement": 0,
+        "newRemote": 280,
+        "protectedAvailable": 106,
+        "scoringAvailable": 215,
+        "bareWithProtectedAvailable": 106,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 128,
+        "endpoint:gameEnd": 33,
+        "endpoint:overwritten": 1
+      },
+      "games": 206,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.3392857142857143,
+          "low": 0.2840909090909091,
+          "high": 0.3972602739726027,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.4035714285714285,
+          "low": 1.195945945945946,
+          "high": 1.641025641025641,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "other",
+        "trashed"
+      ],
+      "counts": {
+        "installs": 4088,
+        "bare": 2139,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 796,
+        "removed": 54,
+        "endpoint:trashed": 4088,
+        "endpointAgeN": 4088,
+        "endpointAgeSum": 8453,
+        "rightCensored": 0,
+        "missingPlacement": 22,
+        "newRemote": 2119,
+        "protectedAvailable": 1366,
+        "scoringAvailable": 986,
+        "bareWithProtectedAvailable": 259,
+        "nonBareWithoutProtectedAvailable": 820
+      },
+      "games": 1711,
+      "rates": {
+        "bareRate": {
+          "value": 0.523238747553816,
+          "low": 0.506006006006006,
+          "high": 0.5405945540844367,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.19471624266144813,
+          "low": 0.18256858460791453,
+          "high": 0.20680238331678252,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.0677592954990214,
+          "low": 2.011954135154916,
+          "high": 2.1261171797418075,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "agenda",
+        "scored"
+      ],
+      "counts": {
+        "installs": 6009,
+        "bare": 38,
+        "seen": 5674,
+        "lastBare": 21,
+        "lastAgeSum": 3340,
+        "gainedNet": 226,
+        "added": 231,
+        "removed": 43,
+        "endpoint:scored": 6009,
+        "endpointAgeN": 6009,
+        "endpointAgeSum": 9015,
+        "rightCensored": 0,
+        "missingPlacement": 31,
+        "newRemote": 38,
+        "protectedAvailable": 5967,
+        "scoringAvailable": 5958,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 2353,
+      "rates": {
+        "bareRate": {
+          "value": 0.006323847561990348,
+          "low": 0.0043646130602652345,
+          "high": 0.008340147179067866,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.0037010927035600986,
+          "low": 0.002279102384291725,
+          "high": 0.0052255704581083435,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.039830807190694394,
+          "low": 0.03487757618460455,
+          "high": 0.045078358865997536,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.038442336495257114,
+          "low": 0.033698539176626824,
+          "high": 0.04345629105608893,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.5002496255616575,
+          "low": 1.4688186581037688,
+          "high": 1.5337975543478262,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.5886499823757491,
+          "low": 0.556301652892562,
+          "high": 0.6222926571579503,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "agenda",
+        "1"
+      ],
+      "counts": {
+        "snapshots": 2811,
+        "zero": 58,
+        "revealed": 0,
+        "multiRoot": 141,
+        "safetyStopped": 788,
+        "installedBare": 53,
+        "lostDefense": 5
+      },
+      "games": 1679,
+      "rates": {
+        "zeroRate": {
+          "value": 0.02063322660974742,
+          "low": 0.015384615384615385,
+          "high": 0.02626844188557035,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "trap",
+        "overwritten"
+      ],
+      "counts": {
+        "installs": 846,
+        "bare": 371,
+        "seen": 846,
+        "lastBare": 87,
+        "lastAgeSum": 3227,
+        "gainedNet": 438,
+        "added": 542,
+        "removed": 0,
+        "endpoint:overwritten": 846,
+        "endpointAgeN": 846,
+        "endpointAgeSum": 4073,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 371,
+        "protectedAvailable": 475,
+        "scoringAvailable": 453,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 654,
+      "rates": {
+        "bareRate": {
+          "value": 0.4385342789598109,
+          "low": 0.4057971014492754,
+          "high": 0.47305389221556887,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.10283687943262411,
+          "low": 0.08265424912689173,
+          "high": 0.1245674740484429,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.5177304964539007,
+          "low": 0.4837962962962963,
+          "high": 0.5512082853855006,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.640661938534279,
+          "low": 0.608139534883721,
+          "high": 0.6722783389450057,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.814420803782506,
+          "low": 4.6343713956170705,
+          "high": 5.007058823529412,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 3.814420803782506,
+          "low": 3.6343713956170705,
+          "high": 4.007058823529412,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "trap",
+        "active"
+      ],
+      "counts": {
+        "snapshots": 1146,
+        "zero": 156,
+        "revealed": 0,
+        "multiRoot": 20,
+        "safetyStopped": 0,
+        "installedBare": 156,
+        "lostDefense": 0
+      },
+      "games": 531,
+      "rates": {
+        "zeroRate": {
+          "value": 0.13612565445026178,
+          "low": 0.11243144424131626,
+          "high": 0.16062176165803108,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "trap",
+        "unknown"
+      ],
+      "counts": {
+        "snapshots": 91,
+        "zero": 23,
+        "revealed": 37,
+        "multiRoot": 30,
+        "safetyStopped": 0,
+        "installedBare": 23,
+        "lostDefense": 0
+      },
+      "games": 63,
+      "rates": {
+        "zeroRate": {
+          "value": 0.25274725274725274,
+          "low": 0.14102564102564102,
+          "high": 0.36666666666666664,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "trap",
+        "expired"
+      ],
+      "counts": {
+        "snapshots": 393,
+        "zero": 147,
+        "revealed": 257,
+        "multiRoot": 116,
+        "safetyStopped": 0,
+        "installedBare": 147,
+        "lostDefense": 0
+      },
+      "games": 126,
+      "rates": {
+        "zeroRate": {
+          "value": 0.37404580152671757,
+          "low": 0.2743589743589744,
+          "high": 0.4680365296803653,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 156,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 7,
+        "removed": 0,
+        "endpoint:trashed": 138,
+        "endpointAgeN": 156,
+        "endpointAgeSum": 321,
+        "rightCensored": 18,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 156,
+        "scoringAvailable": 156,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 18
+      },
+      "games": 143,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.04487179487179487,
+          "low": 0.013888888888888888,
+          "high": 0.08108108108108109,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.0576923076923075,
+          "low": 1.82,
+          "high": 2.2916666666666665,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "other",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 156,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 7,
+        "removed": 0,
+        "endpoint:trashed": 138,
+        "endpointAgeN": 156,
+        "endpointAgeSum": 321,
+        "rightCensored": 18,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 156,
+        "scoringAvailable": 156,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 18
+      },
+      "games": 143,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.04487179487179487,
+          "low": 0.013888888888888888,
+          "high": 0.08108108108108109,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.0576923076923075,
+          "low": 1.82,
+          "high": 2.2916666666666665,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "agenda",
+        "active"
+      ],
+      "counts": {
+        "snapshots": 998,
+        "zero": 4,
+        "revealed": 0,
+        "multiRoot": 0,
+        "safetyStopped": 0,
+        "installedBare": 4,
+        "lostDefense": 0
+      },
+      "games": 726,
+      "rates": {
+        "zeroRate": {
+          "value": 0.004008016032064128,
+          "low": 0.0009633911368015414,
+          "high": 0.00823045267489712,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 696,
+        "bare": 58,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 196,
+        "removed": 54,
+        "endpoint:trashed": 385,
+        "endpointAgeN": 696,
+        "endpointAgeSum": 2786,
+        "rightCensored": 309,
+        "missingPlacement": 0,
+        "newRemote": 35,
+        "protectedAvailable": 449,
+        "scoringAvailable": 334,
+        "bareWithProtectedAvailable": 6,
+        "nonBareWithoutProtectedAvailable": 195,
+        "endpoint:gameEnd": 309,
+        "endpoint:unknown": 2
+      },
+      "games": 571,
+      "rates": {
+        "bareRate": {
+          "value": 0.08333333333333333,
+          "low": 0.06167400881057269,
+          "high": 0.10586552217453506,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.28160919540229884,
+          "low": 0.24753867791842477,
+          "high": 0.3159379407616361,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.002873563218391,
+          "low": 3.680635838150289,
+          "high": 4.338571428571429,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 79,
+        "bare": 1,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 16,
+        "removed": 0,
+        "endpoint:trashed": 51,
+        "endpointAgeN": 79,
+        "endpointAgeSum": 238,
+        "rightCensored": 28,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 45,
+        "scoringAvailable": 70,
+        "bareWithProtectedAvailable": 1,
+        "nonBareWithoutProtectedAvailable": 34,
+        "endpoint:gameEnd": 28
+      },
+      "games": 72,
+      "rates": {
+        "bareRate": {
+          "value": 0.012658227848101266,
+          "low": 0,
+          "high": 0.04285714285714286,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.20253164556962025,
+          "low": 0.11904761904761904,
+          "high": 0.29577464788732394,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.0126582278481013,
+          "low": 2.189189189189189,
+          "high": 3.9240506329113924,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 3290,
+        "bare": 2238,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 699,
+        "removed": 2,
+        "endpoint:unknown": 534,
+        "endpointAgeN": 3290,
+        "endpointAgeSum": 6759,
+        "rightCensored": 392,
+        "missingPlacement": 0,
+        "newRemote": 2238,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 1052,
+        "endpoint:gameEnd": 392,
+        "endpoint:trashed": 2146,
+        "endpoint:overwritten": 40,
+        "endpoint:returned": 178
+      },
+      "games": 1517,
+      "rates": {
+        "bareRate": {
+          "value": 0.6802431610942249,
+          "low": 0.663323782234957,
+          "high": 0.6966397013067829,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.21246200607902735,
+          "low": 0.19807748325080105,
+          "high": 0.22707692307692307,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.054407294832827,
+          "low": 2.001220628623741,
+          "high": 2.108616504854369,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 82,
+        "bare": 72,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 9,
+        "removed": 0,
+        "endpoint:unknown": 66,
+        "endpointAgeN": 82,
+        "endpointAgeSum": 110,
+        "rightCensored": 12,
+        "missingPlacement": 0,
+        "newRemote": 72,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 10,
+        "endpoint:gameEnd": 12,
+        "endpoint:trashed": 3,
+        "endpoint:overwritten": 1
+      },
+      "games": 70,
+      "rates": {
+        "bareRate": {
+          "value": 0.8780487804878049,
+          "low": 0.8023255813953488,
+          "high": 0.9420289855072463,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.10975609756097561,
+          "low": 0.04878048780487805,
+          "high": 0.18292682926829268,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.3414634146341464,
+          "low": 1.0106382978723405,
+          "high": 1.706896551724138,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "trap",
+        "neutral"
+      ],
+      "counts": {
+        "snapshots": 4491,
+        "zero": 749,
+        "revealed": 141,
+        "multiRoot": 130,
+        "safetyStopped": 0,
+        "installedBare": 749,
+        "lostDefense": 0
+      },
+      "games": 831,
+      "rates": {
+        "zeroRate": {
+          "value": 0.1667780004453351,
+          "low": 0.14720452937013448,
+          "high": 0.18649748623413934,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "trap",
+        "1"
+      ],
+      "counts": {
+        "snapshots": 1196,
+        "zero": 250,
+        "revealed": 0,
+        "multiRoot": 52,
+        "safetyStopped": 0,
+        "installedBare": 250,
+        "lostDefense": 0
+      },
+      "games": 810,
+      "rates": {
+        "zeroRate": {
+          "value": 0.20903010033444816,
+          "low": 0.18482999128160418,
+          "high": 0.23218776194467727,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "trap",
+        "2"
+      ],
+      "counts": {
+        "snapshots": 970,
+        "zero": 128,
+        "revealed": 0,
+        "multiRoot": 45,
+        "safetyStopped": 0,
+        "installedBare": 128,
+        "lostDefense": 0
+      },
+      "games": 705,
+      "rates": {
+        "zeroRate": {
+          "value": 0.13195876288659794,
+          "low": 0.11076604554865424,
+          "high": 0.1540084388185654,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "trap",
+        "3-5"
+      ],
+      "counts": {
+        "snapshots": 1809,
+        "zero": 146,
+        "revealed": 0,
+        "multiRoot": 128,
+        "safetyStopped": 0,
+        "installedBare": 146,
+        "lostDefense": 0
+      },
+      "games": 610,
+      "rates": {
+        "zeroRate": {
+          "value": 0.08070757324488667,
+          "low": 0.06235431235431235,
+          "high": 0.10175438596491228,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "agenda",
+        "safetyStopped"
+      ],
+      "counts": {
+        "snapshots": 3535,
+        "zero": 61,
+        "revealed": 0,
+        "multiRoot": 5,
+        "safetyStopped": 3535,
+        "installedBare": 60,
+        "lostDefense": 1
+      },
+      "games": 1509,
+      "rates": {
+        "zeroRate": {
+          "value": 0.017256011315417256,
+          "low": 0.011339092872570195,
+          "high": 0.023878020713463753,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "agenda",
+        "gameEnd"
+      ],
+      "counts": {
+        "installs": 473,
+        "bare": 23,
+        "seen": 471,
+        "lastBare": 17,
+        "lastAgeSum": 887,
+        "gainedNet": 76,
+        "added": 77,
+        "removed": 5,
+        "endpoint:gameEnd": 473,
+        "endpointAgeN": 473,
+        "endpointAgeSum": 1011,
+        "rightCensored": 473,
+        "missingPlacement": 24,
+        "newRemote": 23,
+        "protectedAvailable": 449,
+        "scoringAvailable": 449,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 432,
+      "rates": {
+        "bareRate": {
+          "value": 0.048625792811839326,
+          "low": 0.02733485193621868,
+          "high": 0.06947368421052631,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.036093418259023353,
+          "low": 0.017660044150110375,
+          "high": 0.05555555555555555,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.1613588110403397,
+          "low": 0.12753036437246965,
+          "high": 0.19739696312364424,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.16279069767441862,
+          "low": 0.12863070539419086,
+          "high": 0.1978021978021978,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.1374207188160677,
+          "low": 1.884861407249467,
+          "high": 2.419624217118998,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 1.8832271762208068,
+          "low": 1.6335540838852096,
+          "high": 2.1623529411764704,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "agenda",
+        "2"
+      ],
+      "counts": {
+        "snapshots": 1332,
+        "zero": 26,
+        "revealed": 0,
+        "multiRoot": 57,
+        "safetyStopped": 433,
+        "installedBare": 24,
+        "lostDefense": 2
+      },
+      "games": 997,
+      "rates": {
+        "zeroRate": {
+          "value": 0.01951951951951952,
+          "low": 0.012145748987854251,
+          "high": 0.02737642585551331,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "agenda",
+        "3-5"
+      ],
+      "counts": {
+        "snapshots": 1344,
+        "zero": 24,
+        "revealed": 0,
+        "multiRoot": 70,
+        "safetyStopped": 536,
+        "installedBare": 23,
+        "lostDefense": 1
+      },
+      "games": 597,
+      "rates": {
+        "zeroRate": {
+          "value": 0.017857142857142856,
+          "low": 0.0076103500761035,
+          "high": 0.03014318010550113,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "trap",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 660,
+        "bare": 0,
+        "seen": 659,
+        "lastBare": 0,
+        "lastAgeSum": 1949,
+        "gainedNet": 126,
+        "added": 138,
+        "removed": 0,
+        "endpoint:gameEnd": 178,
+        "endpointAgeN": 660,
+        "endpointAgeSum": 2303,
+        "rightCensored": 178,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 660,
+        "scoringAvailable": 660,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 292,
+        "endpoint:trashed": 190
+      },
+      "games": 484,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.19119878603945373,
+          "low": 0.16176470588235295,
+          "high": 0.21884057971014492,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.20909090909090908,
+          "low": 0.1794478527607362,
+          "high": 0.23851851851851852,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.4893939393939393,
+          "low": 3.234920634920635,
+          "high": 3.7510917030567685,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 2.9575113808801214,
+          "low": 2.7134146341463414,
+          "high": 3.2119815668202767,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "btl-kit",
+        "trap",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 47,
+        "bare": 0,
+        "seen": 47,
+        "lastBare": 0,
+        "lastAgeSum": 184,
+        "gainedNet": 21,
+        "added": 23,
+        "removed": 0,
+        "endpoint:gameEnd": 13,
+        "endpointAgeN": 47,
+        "endpointAgeSum": 221,
+        "rightCensored": 13,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 47,
+        "scoringAvailable": 47,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 34
+      },
+      "games": 45,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.44680851063829785,
+          "low": 0.3090909090909091,
+          "high": 0.5957446808510638,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.48936170212765956,
+          "low": 0.34615384615384615,
+          "high": 0.6363636363636364,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.702127659574468,
+          "low": 4.113636363636363,
+          "high": 5.3076923076923075,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 3.9148936170212765,
+          "low": 3.3529411764705883,
+          "high": 4.48,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "routeExposure",
+        "trap",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "snapshots": 2601,
+        "zero": 0,
+        "revealed": 89,
+        "multiRoot": 223,
+        "safetyStopped": 0,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 483,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "trap",
+        "6+"
+      ],
+      "counts": {
+        "snapshots": 864,
+        "zero": 18,
+        "revealed": 0,
+        "multiRoot": 65,
+        "safetyStopped": 0,
+        "installedBare": 18,
+        "lostDefense": 0
+      },
+      "games": 202,
+      "rates": {
+        "zeroRate": {
+          "value": 0.020833333333333332,
+          "low": 0.009072580645161291,
+          "high": 0.03543307086614173,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "other",
+        "overwritten"
+      ],
+      "counts": {
+        "installs": 441,
+        "bare": 194,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 238,
+        "removed": 2,
+        "endpoint:overwritten": 441,
+        "endpointAgeN": 441,
+        "endpointAgeSum": 2041,
+        "rightCensored": 0,
+        "missingPlacement": 46,
+        "newRemote": 194,
+        "protectedAvailable": 196,
+        "scoringAvailable": 77,
+        "bareWithProtectedAvailable": 21,
+        "nonBareWithoutProtectedAvailable": 26
+      },
+      "games": 379,
+      "rates": {
+        "bareRate": {
+          "value": 0.4399092970521542,
+          "low": 0.39552238805970147,
+          "high": 0.48578199052132703,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.5396825396825397,
+          "low": 0.4954128440366973,
+          "high": 0.5849889624724062,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.6281179138322,
+          "low": 4.425,
+          "high": 4.836283185840708,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "age",
+        "agenda",
+        "6+"
+      ],
+      "counts": {
+        "snapshots": 394,
+        "zero": 4,
+        "revealed": 0,
+        "multiRoot": 17,
+        "safetyStopped": 244,
+        "installedBare": 4,
+        "lostDefense": 0
+      },
+      "games": 126,
+      "rates": {
+        "zeroRate": {
+          "value": 0.01015228426395939,
+          "low": 0,
+          "high": 0.028735632183908046,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "gateway",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 1322,
+        "bare": 0,
+        "seen": 1321,
+        "lastBare": 0,
+        "lastAgeSum": 1094,
+        "gainedNet": 93,
+        "added": 93,
+        "removed": 0,
+        "endpoint:scored": 892,
+        "endpointAgeN": 1322,
+        "endpointAgeSum": 2017,
+        "rightCensored": 103,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1322,
+        "scoringAvailable": 1322,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 327,
+        "endpoint:gameEnd": 103
+      },
+      "games": 386,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.07040121120363362,
+          "low": 0.056732223903177004,
+          "high": 0.08543833580980684,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.07034795763993948,
+          "low": 0.05668934240362812,
+          "high": 0.08543833580980684,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.5257186081694403,
+          "low": 1.4372230428360413,
+          "high": 1.6137071651090342,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.8281604844814534,
+          "low": 0.7448494453248812,
+          "high": 0.9146953405017921,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 1322,
+        "bare": 0,
+        "seen": 1321,
+        "lastBare": 0,
+        "lastAgeSum": 1094,
+        "gainedNet": 93,
+        "added": 93,
+        "removed": 0,
+        "endpoint:scored": 892,
+        "endpointAgeN": 1322,
+        "endpointAgeSum": 2017,
+        "rightCensored": 103,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1322,
+        "scoringAvailable": 1322,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 327,
+        "endpoint:gameEnd": 103
+      },
+      "games": 386,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.07040121120363362,
+          "low": 0.056732223903177004,
+          "high": 0.08543833580980684,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.07034795763993948,
+          "low": 0.05668934240362812,
+          "high": 0.08543833580980684,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.5257186081694403,
+          "low": 1.4372230428360413,
+          "high": 1.6137071651090342,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.8281604844814534,
+          "low": 0.7448494453248812,
+          "high": 0.9146953405017921,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "gateway",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 2415,
+        "zero": 0,
+        "revealed": 0,
+        "multiRoot": 233,
+        "safetyStopped": 672,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 386,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "gateway",
+        "other"
+      ],
+      "counts": {
+        "installs": 885,
+        "bare": 406,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 291,
+        "removed": 0,
+        "endpoint:trashed": 701,
+        "endpointAgeN": 885,
+        "endpointAgeSum": 2203,
+        "rightCensored": 131,
+        "missingPlacement": 0,
+        "newRemote": 404,
+        "protectedAvailable": 375,
+        "scoringAvailable": 272,
+        "bareWithProtectedAvailable": 50,
+        "nonBareWithoutProtectedAvailable": 154,
+        "endpoint:overwritten": 53,
+        "endpoint:gameEnd": 131
+      },
+      "games": 359,
+      "rates": {
+        "bareRate": {
+          "value": 0.45875706214689266,
+          "low": 0.42299107142857145,
+          "high": 0.4965675057208238,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.3288135593220339,
+          "low": 0.2974537037037037,
+          "high": 0.3577142857142857,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.4892655367231638,
+          "low": 2.3430167597765363,
+          "high": 2.6386363636363637,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 344,
+        "bare": 204,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 115,
+        "removed": 0,
+        "endpoint:trashed": 305,
+        "endpointAgeN": 344,
+        "endpointAgeSum": 789,
+        "rightCensored": 20,
+        "missingPlacement": 0,
+        "newRemote": 204,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 140,
+        "endpoint:gameEnd": 20,
+        "endpoint:overwritten": 19
+      },
+      "games": 262,
+      "rates": {
+        "bareRate": {
+          "value": 0.5930232558139535,
+          "low": 0.5414201183431953,
+          "high": 0.6472303206997084,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.33430232558139533,
+          "low": 0.2839506172839506,
+          "high": 0.3881019830028329,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.2936046511627906,
+          "low": 2.174698795180723,
+          "high": 2.405099150141643,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 116,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 39,
+        "removed": 0,
+        "endpoint:trashed": 95,
+        "endpointAgeN": 116,
+        "endpointAgeSum": 295,
+        "rightCensored": 17,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 116,
+        "scoringAvailable": 36,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 4,
+        "endpoint:gameEnd": 17
+      },
+      "games": 90,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.33620689655172414,
+          "low": 0.24812030075187969,
+          "high": 0.42105263157894735,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.543103448275862,
+          "low": 2.2586206896551726,
+          "high": 2.8421052631578947,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "gateway",
+        "trap"
+      ],
+      "counts": {
+        "installs": 198,
+        "bare": 0,
+        "seen": 198,
+        "lastBare": 0,
+        "lastAgeSum": 362,
+        "gainedNet": 22,
+        "added": 25,
+        "removed": 0,
+        "endpoint:overwritten": 116,
+        "endpointAgeN": 198,
+        "endpointAgeSum": 482,
+        "rightCensored": 33,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 198,
+        "scoringAvailable": 198,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 33,
+        "endpoint:trashed": 49
+      },
+      "games": 159,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.1111111111111111,
+          "low": 0.06878306878306878,
+          "high": 0.15668202764976957,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.12626262626262627,
+          "low": 0.08287292817679558,
+          "high": 0.17307692307692307,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.4343434343434343,
+          "low": 2.1666666666666665,
+          "high": 2.7157894736842105,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 1.8282828282828283,
+          "low": 1.5947368421052632,
+          "high": 2.083798882681564,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "trap",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 198,
+        "bare": 0,
+        "seen": 198,
+        "lastBare": 0,
+        "lastAgeSum": 362,
+        "gainedNet": 22,
+        "added": 25,
+        "removed": 0,
+        "endpoint:overwritten": 116,
+        "endpointAgeN": 198,
+        "endpointAgeSum": 482,
+        "rightCensored": 33,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 198,
+        "scoringAvailable": 198,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 33,
+        "endpoint:trashed": 49
+      },
+      "games": 159,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.1111111111111111,
+          "low": 0.06878306878306878,
+          "high": 0.15668202764976957,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.12626262626262627,
+          "low": 0.08287292817679558,
+          "high": 0.17307692307692307,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.4343434343434343,
+          "low": 2.1666666666666665,
+          "high": 2.7157894736842105,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 1.8282828282828283,
+          "low": 1.5947368421052632,
+          "high": 2.083798882681564,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "gateway",
+        "trap"
+      ],
+      "counts": {
+        "snapshots": 560,
+        "zero": 0,
+        "revealed": 17,
+        "multiRoot": 55,
+        "safetyStopped": 0,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 159,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 126,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 12,
+        "removed": 0,
+        "endpoint:trashed": 85,
+        "endpointAgeN": 126,
+        "endpointAgeSum": 275,
+        "rightCensored": 21,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 126,
+        "scoringAvailable": 60,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 20,
+        "endpoint:gameEnd": 21
+      },
+      "games": 115,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.09523809523809523,
+          "low": 0.047619047619047616,
+          "high": 0.1509433962264151,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.1825396825396823,
+          "low": 1.9083969465648856,
+          "high": 2.4963503649635035,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 193,
+        "bare": 193,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 88,
+        "removed": 0,
+        "endpoint:trashed": 166,
+        "endpointAgeN": 193,
+        "endpointAgeSum": 334,
+        "rightCensored": 17,
+        "missingPlacement": 0,
+        "newRemote": 193,
+        "protectedAvailable": 50,
+        "scoringAvailable": 126,
+        "bareWithProtectedAvailable": 50,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 17,
+        "endpoint:overwritten": 10
+      },
+      "games": 173,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.45595854922279794,
+          "low": 0.39037433155080214,
+          "high": 0.5228426395939086,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.7305699481865284,
+          "low": 1.4898989898989898,
+          "high": 1.9770114942528736,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "gateway",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 106,
+        "bare": 9,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 37,
+        "removed": 0,
+        "endpoint:trashed": 50,
+        "endpointAgeN": 106,
+        "endpointAgeSum": 510,
+        "rightCensored": 56,
+        "missingPlacement": 0,
+        "newRemote": 7,
+        "protectedAvailable": 83,
+        "scoringAvailable": 50,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 14,
+        "endpoint:gameEnd": 56
+      },
+      "games": 98,
+      "rates": {
+        "bareRate": {
+          "value": 0.08490566037735849,
+          "low": 0.03636363636363636,
+          "high": 0.14,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.3490566037735849,
+          "low": 0.26548672566371684,
+          "high": 0.4406779661016949,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.811320754716981,
+          "low": 4.027027027027027,
+          "high": 5.694444444444445,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "trap",
+        "trashed"
+      ],
+      "counts": {
+        "installs": 190,
+        "bare": 0,
+        "seen": 190,
+        "lastBare": 0,
+        "lastAgeSum": 377,
+        "gainedNet": 18,
+        "added": 18,
+        "removed": 0,
+        "endpoint:trashed": 190,
+        "endpointAgeN": 190,
+        "endpointAgeSum": 377,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 190,
+        "scoringAvailable": 190,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 162,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.09473684210526316,
+          "low": 0.05670103092783505,
+          "high": 0.13756613756613756,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.09473684210526316,
+          "low": 0.05670103092783505,
+          "high": 0.13756613756613756,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.9842105263157894,
+          "low": 1.5736040609137056,
+          "high": 2.466666666666667,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 1.9842105263157894,
+          "low": 1.5736040609137056,
+          "high": 2.466666666666667,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "leo-topan",
+        "other"
+      ],
+      "counts": {
+        "installs": 783,
+        "bare": 288,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 172,
+        "removed": 95,
+        "endpoint:overwritten": 79,
+        "endpointAgeN": 783,
+        "endpointAgeSum": 1578,
+        "rightCensored": 122,
+        "missingPlacement": 110,
+        "newRemote": 279,
+        "protectedAvailable": 437,
+        "scoringAvailable": 182,
+        "bareWithProtectedAvailable": 78,
+        "nonBareWithoutProtectedAvailable": 26,
+        "endpoint:gameEnd": 122,
+        "endpoint:unknown": 404,
+        "endpoint:trashed": 178
+      },
+      "games": 337,
+      "rates": {
+        "bareRate": {
+          "value": 0.367816091954023,
+          "low": 0.33045622688039455,
+          "high": 0.40657894736842104,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.21966794380587484,
+          "low": 0.19184652278177458,
+          "high": 0.2512019230769231,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.0153256704980844,
+          "low": 1.8270676691729324,
+          "high": 2.198511166253102,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 153,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 11,
+        "endpoint:overwritten": 11,
+        "endpointAgeN": 153,
+        "endpointAgeSum": 192,
+        "rightCensored": 23,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 153,
+        "scoringAvailable": 19,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 119,
+        "endpoint:gameEnd": 23
+      },
+      "games": 130,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.2549019607843137,
+          "low": 1.0239520958083832,
+          "high": 1.4906832298136645,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 167,
+        "bare": 31,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 54,
+        "removed": 54,
+        "endpoint:gameEnd": 48,
+        "endpointAgeN": 167,
+        "endpointAgeSum": 601,
+        "rightCensored": 48,
+        "missingPlacement": 0,
+        "newRemote": 22,
+        "protectedAvailable": 110,
+        "scoringAvailable": 21,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 26,
+        "endpoint:trashed": 117,
+        "endpoint:unknown": 2
+      },
+      "games": 119,
+      "rates": {
+        "bareRate": {
+          "value": 0.18562874251497005,
+          "low": 0.12337662337662338,
+          "high": 0.25161290322580643,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.32335329341317365,
+          "low": 0.25,
+          "high": 0.4011627906976744,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.5988023952095807,
+          "low": 2.936046511627907,
+          "high": 4.305882352941176,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "leo-topan",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 1177,
+        "bare": 0,
+        "seen": 1162,
+        "lastBare": 3,
+        "lastAgeSum": 1073,
+        "gainedNet": 95,
+        "added": 111,
+        "removed": 177,
+        "endpoint:scored": 649,
+        "endpointAgeN": 1177,
+        "endpointAgeSum": 1736,
+        "rightCensored": 68,
+        "missingPlacement": 5,
+        "newRemote": 0,
+        "protectedAvailable": 1172,
+        "scoringAvailable": 1172,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 438,
+        "endpoint:gameEnd": 68,
+        "endpoint:overwritten": 22
+      },
+      "games": 379,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.0025817555938037868,
+          "low": 0,
+          "high": 0.005892255892255892,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.08175559380378658,
+          "low": 0.06591500433651344,
+          "high": 0.0979020979020979,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.09430756159728122,
+          "low": 0.07741935483870968,
+          "high": 0.11101163831692032,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.4749362786745965,
+          "low": 1.3786644951140066,
+          "high": 1.5658012533572068,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.923407917383821,
+          "low": 0.834983498349835,
+          "high": 1.0087412587412588,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 1171,
+        "bare": 0,
+        "seen": 1156,
+        "lastBare": 3,
+        "lastAgeSum": 1069,
+        "gainedNet": 95,
+        "added": 111,
+        "removed": 177,
+        "endpoint:scored": 645,
+        "endpointAgeN": 1171,
+        "endpointAgeSum": 1728,
+        "rightCensored": 67,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1171,
+        "scoringAvailable": 1171,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 437,
+        "endpoint:gameEnd": 67,
+        "endpoint:overwritten": 22
+      },
+      "games": 379,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.0025951557093425604,
+          "low": 0,
+          "high": 0.0059271803556308214,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.08217993079584775,
+          "low": 0.06625980819529206,
+          "high": 0.09840425531914894,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.09479077711357814,
+          "low": 0.07792207792207792,
+          "high": 0.1116111611161116,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.475661827497865,
+          "low": 1.3802345058626466,
+          "high": 1.5664335664335665,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.9247404844290658,
+          "low": 0.8364279398762158,
+          "high": 1.0105355575065846,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "leo-topan",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 2235,
+        "zero": 8,
+        "revealed": 0,
+        "multiRoot": 197,
+        "safetyStopped": 555,
+        "installedBare": 0,
+        "lostDefense": 8
+      },
+      "games": 379,
+      "rates": {
+        "zeroRate": {
+          "value": 0.0035794183445190158,
+          "low": 0.0013192612137203166,
+          "high": 0.006593406593406593,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "other",
+        "unknown"
+      ],
+      "counts": {
+        "installs": 110,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 7,
+        "removed": 6,
+        "endpoint:overwritten": 46,
+        "endpointAgeN": 110,
+        "endpointAgeSum": 277,
+        "rightCensored": 11,
+        "missingPlacement": 110,
+        "newRemote": 0,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 31,
+        "endpoint:trashed": 22,
+        "endpoint:gameEnd": 11
+      },
+      "games": 86,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.06363636363636363,
+          "low": 0.022727272727272728,
+          "high": 0.11403508771929824,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.518181818181818,
+          "low": 2.126126126126126,
+          "high": 2.9292929292929295,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "other",
+        "unknown"
+      ],
+      "counts": {
+        "installs": 110,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 7,
+        "removed": 6,
+        "endpoint:overwritten": 46,
+        "endpointAgeN": 110,
+        "endpointAgeSum": 277,
+        "rightCensored": 11,
+        "missingPlacement": 110,
+        "newRemote": 0,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 31,
+        "endpoint:trashed": 22,
+        "endpoint:gameEnd": 11
+      },
+      "games": 86,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.06363636363636363,
+          "low": 0.022727272727272728,
+          "high": 0.11403508771929824,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.518181818181818,
+          "low": 2.126126126126126,
+          "high": 2.9292929292929295,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 171,
+        "bare": 171,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 82,
+        "removed": 6,
+        "endpoint:unknown": 154,
+        "endpointAgeN": 171,
+        "endpointAgeSum": 226,
+        "rightCensored": 15,
+        "missingPlacement": 0,
+        "newRemote": 171,
+        "protectedAvailable": 78,
+        "scoringAvailable": 116,
+        "bareWithProtectedAvailable": 78,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 15,
+        "endpoint:overwritten": 2
+      },
+      "games": 152,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.47953216374269003,
+          "low": 0.4076086956521739,
+          "high": 0.5515151515151515,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.3216374269005848,
+          "low": 1.120253164556962,
+          "high": 1.5549132947976878,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 86,
+        "bare": 86,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 17,
+        "removed": 2,
+        "endpoint:unknown": 80,
+        "endpointAgeN": 86,
+        "endpointAgeSum": 101,
+        "rightCensored": 6,
+        "missingPlacement": 0,
+        "newRemote": 86,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 6
+      },
+      "games": 78,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.19767441860465115,
+          "low": 0.11904761904761904,
+          "high": 0.2857142857142857,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.1744186046511629,
+          "low": 0.9324324324324325,
+          "high": 1.4477611940298507,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 96,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 12,
+        "removed": 16,
+        "endpoint:trashed": 39,
+        "endpointAgeN": 96,
+        "endpointAgeSum": 181,
+        "rightCensored": 19,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 96,
+        "scoringAvailable": 26,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 20,
+        "endpoint:gameEnd": 19,
+        "endpoint:unknown": 18
+      },
+      "games": 76,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.125,
+          "low": 0.06481481481481481,
+          "high": 0.19469026548672566,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.8854166666666667,
+          "low": 1.443298969072165,
+          "high": 2.380952380952381,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "agenda",
+        "overwritten"
+      ],
+      "counts": {
+        "installs": 22,
+        "bare": 0,
+        "seen": 7,
+        "lastBare": 0,
+        "lastAgeSum": 4,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:overwritten": 22,
+        "endpointAgeN": 22,
+        "endpointAgeSum": 11,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 22,
+        "scoringAvailable": 22,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 20,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 1
+        },
+        "gainedNetRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 1
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.5,
+          "low": 0.19047619047619047,
+          "high": 0.9130434782608695,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.5714285714285714,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 1
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "agenda",
+        "unknown"
+      ],
+      "counts": {
+        "snapshots": 9,
+        "zero": 0,
+        "revealed": 0,
+        "multiRoot": 6,
+        "safetyStopped": 0,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 8,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 2
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "agenda",
+        "unknown"
+      ],
+      "counts": {
+        "installs": 117,
+        "bare": 112,
+        "seen": 117,
+        "lastBare": 84,
+        "lastAgeSum": 201,
+        "gainedNet": 28,
+        "added": 28,
+        "removed": 0,
+        "endpoint:scored": 31,
+        "endpointAgeN": 117,
+        "endpointAgeSum": 247,
+        "rightCensored": 24,
+        "missingPlacement": 117,
+        "newRemote": 112,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 24,
+        "endpoint:stolen": 62
+      },
+      "games": 85,
+      "rates": {
+        "bareRate": {
+          "value": 0.9572649572649573,
+          "low": 0.9174311926605505,
+          "high": 0.9914529914529915,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.717948717948718,
+          "low": 0.6373626373626373,
+          "high": 0.7931034482758621,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.23931623931623933,
+          "low": 0.17073170731707318,
+          "high": 0.31932773109243695,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.23931623931623933,
+          "low": 0.17073170731707318,
+          "high": 0.31932773109243695,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.111111111111111,
+          "low": 1.6910569105691058,
+          "high": 2.5606060606060606,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 1.7179487179487178,
+          "low": 1.3243243243243243,
+          "high": 2.174757281553398,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "agenda",
+        "unknown"
+      ],
+      "counts": {
+        "installs": 5,
+        "bare": 0,
+        "seen": 5,
+        "lastBare": 0,
+        "lastAgeSum": 4,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:scored": 4,
+        "endpointAgeN": 5,
+        "endpointAgeSum": 8,
+        "rightCensored": 1,
+        "missingPlacement": 5,
+        "newRemote": 0,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 1
+      },
+      "games": 5,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 14
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 14
+        },
+        "gainedNetRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 14
+        },
+        "addedRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 14
+        },
+        "meanEndpointAge": {
+          "value": 1.6,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 14
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.8,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 14
+        }
+      }
+    },
+    {
+      "group": [
+        "routeExposure",
+        "agenda",
+        "unknown"
+      ],
+      "counts": {
+        "snapshots": 318,
+        "zero": 216,
+        "revealed": 0,
+        "multiRoot": 0,
+        "safetyStopped": 130,
+        "installedBare": 216,
+        "lostDefense": 0
+      },
+      "games": 85,
+      "rates": {
+        "zeroRate": {
+          "value": 0.6792452830188679,
+          "low": 0.5972222222222222,
+          "high": 0.7626459143968871,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "route",
+        "agenda",
+        "could be installed and fast-advanced to win"
+      ],
+      "counts": {
+        "installs": 95,
+        "bare": 11,
+        "seen": 1,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:stolen": 1,
+        "endpointAgeN": 95,
+        "endpointAgeSum": 0,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 11,
+        "protectedAvailable": 84,
+        "scoringAvailable": 75,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 94
+      },
+      "games": 95,
+      "rates": {
+        "bareRate": {
+          "value": 0.11578947368421053,
+          "low": 0.05555555555555555,
+          "high": 0.18269230769230768,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "gainedNetRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "leo-topan",
+        "agenda",
+        "could be installed and fast-advanced to win"
+      ],
+      "counts": {
+        "installs": 1,
+        "bare": 0,
+        "seen": 1,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:stolen": 1,
+        "endpointAgeN": 1,
+        "endpointAgeSum": 0,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1,
+        "scoringAvailable": 1,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 1,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "gainedNetRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "addedRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "meanEndpointAge": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        },
+        "meanLastSnapshotAge": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        }
+      }
+    },
+    {
+      "group": [
+        "routeExposure",
+        "agenda",
+        "could be installed and fast-advanced to win"
+      ],
+      "counts": {
+        "snapshots": 1,
+        "zero": 0,
+        "revealed": 0,
+        "multiRoot": 1,
+        "safetyStopped": 0,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 1,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 732
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "neh-zahya",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 1249,
+        "bare": 2,
+        "seen": 1111,
+        "lastBare": 0,
+        "lastAgeSum": 434,
+        "gainedNet": 16,
+        "added": 16,
+        "removed": 0,
+        "endpoint:stolen": 349,
+        "endpointAgeN": 1249,
+        "endpointAgeSum": 1152,
+        "rightCensored": 46,
+        "missingPlacement": 0,
+        "newRemote": 2,
+        "protectedAvailable": 1247,
+        "scoringAvailable": 1240,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 854,
+        "endpoint:gameEnd": 46
+      },
+      "games": 373,
+      "rates": {
+        "bareRate": {
+          "value": 0.0016012810248198558,
+          "low": 0,
+          "high": 0.004098360655737705,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.0144014401440144,
+          "low": 0.008166969147005444,
+          "high": 0.021863117870722433,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.012810248198558846,
+          "low": 0.007205764611689352,
+          "high": 0.019455252918287938,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.922337870296237,
+          "low": 0.8621794871794872,
+          "high": 0.9818611987381703,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.39063906390639064,
+          "low": 0.3383259911894273,
+          "high": 0.4473684210526316,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 1213,
+        "bare": 0,
+        "seen": 1111,
+        "lastBare": 0,
+        "lastAgeSum": 434,
+        "gainedNet": 16,
+        "added": 16,
+        "removed": 0,
+        "endpoint:stolen": 349,
+        "endpointAgeN": 1213,
+        "endpointAgeSum": 1152,
+        "rightCensored": 46,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1213,
+        "scoringAvailable": 1213,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 818,
+        "endpoint:gameEnd": 46
+      },
+      "games": 373,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.0144014401440144,
+          "low": 0.008166969147005444,
+          "high": 0.021863117870722433,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.013190436933223413,
+          "low": 0.007431874483897605,
+          "high": 0.0199501246882793,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.9497114591920858,
+          "low": 0.8896672504378283,
+          "high": 1.0098039215686274,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.39063906390639064,
+          "low": 0.3383259911894273,
+          "high": 0.4473684210526316,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "neh-zahya",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 1545,
+        "zero": 0,
+        "revealed": 0,
+        "multiRoot": 109,
+        "safetyStopped": 264,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 371,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "neh-zahya",
+        "other"
+      ],
+      "counts": {
+        "installs": 2401,
+        "bare": 1401,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 648,
+        "removed": 0,
+        "endpoint:overwritten": 213,
+        "endpointAgeN": 2401,
+        "endpointAgeSum": 7922,
+        "rightCensored": 896,
+        "missingPlacement": 0,
+        "newRemote": 1401,
+        "protectedAvailable": 1067,
+        "scoringAvailable": 772,
+        "bareWithProtectedAvailable": 337,
+        "nonBareWithoutProtectedAvailable": 270,
+        "endpoint:trashed": 924,
+        "endpoint:unknown": 308,
+        "endpoint:gameEnd": 896,
+        "endpoint:returned": 60
+      },
+      "games": 394,
+      "rates": {
+        "bareRate": {
+          "value": 0.5835068721366098,
+          "low": 0.5576923076923077,
+          "high": 0.6068481848184818,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.2698875468554769,
+          "low": 0.25268817204301075,
+          "high": 0.2866161616161616,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.2994585589337775,
+          "low": 3.157014157014157,
+          "high": 3.4365853658536585,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 911,
+        "bare": 911,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 493,
+        "removed": 0,
+        "endpoint:overwritten": 155,
+        "endpointAgeN": 911,
+        "endpointAgeSum": 4191,
+        "rightCensored": 410,
+        "missingPlacement": 0,
+        "newRemote": 911,
+        "protectedAvailable": 295,
+        "scoringAvailable": 415,
+        "bareWithProtectedAvailable": 295,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:trashed": 290,
+        "endpoint:unknown": 56,
+        "endpoint:gameEnd": 410
+      },
+      "games": 347,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.5411635565312843,
+          "low": 0.5070883315158125,
+          "high": 0.5746268656716418,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.6004390779363336,
+          "low": 4.302475780409042,
+          "high": 4.89259645464025,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 453,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 10,
+        "removed": 0,
+        "endpoint:trashed": 121,
+        "endpointAgeN": 453,
+        "endpointAgeSum": 1585,
+        "rightCensored": 232,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 453,
+        "scoringAvailable": 152,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 232,
+        "endpoint:unknown": 45,
+        "endpoint:overwritten": 55
+      },
+      "games": 253,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.02207505518763797,
+          "low": 0.00998003992015968,
+          "high": 0.036016949152542374,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.498896247240618,
+          "low": 3.1655172413793102,
+          "high": 3.8388429752066116,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 714,
+        "bare": 448,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 112,
+        "removed": 0,
+        "endpoint:unknown": 152,
+        "endpointAgeN": 714,
+        "endpointAgeSum": 1444,
+        "rightCensored": 122,
+        "missingPlacement": 0,
+        "newRemote": 448,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 266,
+        "endpoint:trashed": 386,
+        "endpoint:gameEnd": 122,
+        "endpoint:returned": 54
+      },
+      "games": 325,
+      "rates": {
+        "bareRate": {
+          "value": 0.6274509803921569,
+          "low": 0.5915279878971256,
+          "high": 0.6626016260162602,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.1568627450980392,
+          "low": 0.12968299711815562,
+          "high": 0.18507890961262555,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.022408963585434,
+          "low": 1.9078590785907859,
+          "high": 2.1444444444444444,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 245,
+        "bare": 42,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 20,
+        "removed": 0,
+        "endpoint:gameEnd": 88,
+        "endpointAgeN": 245,
+        "endpointAgeSum": 466,
+        "rightCensored": 88,
+        "missingPlacement": 0,
+        "newRemote": 42,
+        "protectedAvailable": 245,
+        "scoringAvailable": 131,
+        "bareWithProtectedAvailable": 42,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:trashed": 93,
+        "endpoint:unknown": 55,
+        "endpoint:returned": 6,
+        "endpoint:overwritten": 3
+      },
+      "games": 156,
+      "rates": {
+        "bareRate": {
+          "value": 0.17142857142857143,
+          "low": 0.124,
+          "high": 0.2245762711864407,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.08163265306122448,
+          "low": 0.04950495049504951,
+          "high": 0.11711711711711711,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.9020408163265305,
+          "low": 1.6103896103896105,
+          "high": 2.208835341365462,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "endpoint",
+        "other",
+        "returned"
+      ],
+      "counts": {
+        "installs": 195,
+        "bare": 35,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 79,
+        "removed": 0,
+        "endpoint:returned": 195,
+        "endpointAgeN": 195,
+        "endpointAgeSum": 544,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 35,
+        "protectedAvailable": 17,
+        "scoringAvailable": 3,
+        "bareWithProtectedAvailable": 1,
+        "nonBareWithoutProtectedAvailable": 144
+      },
+      "games": 175,
+      "rates": {
+        "bareRate": {
+          "value": 0.1794871794871795,
+          "low": 0.12698412698412698,
+          "high": 0.23834196891191708,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.40512820512820513,
+          "low": 0.3401015228426396,
+          "high": 0.47368421052631576,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.7897435897435896,
+          "low": 2.708542713567839,
+          "high": 2.866336633663366,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 78,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 13,
+        "removed": 0,
+        "endpoint:trashed": 34,
+        "endpointAgeN": 78,
+        "endpointAgeSum": 236,
+        "rightCensored": 44,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 74,
+        "scoringAvailable": 74,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 4,
+        "endpoint:gameEnd": 44
+      },
+      "games": 74,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.16666666666666666,
+          "low": 0.09090909090909091,
+          "high": 0.2597402597402597,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.0256410256410255,
+          "low": 2.3555555555555556,
+          "high": 3.7662337662337664,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "neh-zahya",
+        "agenda",
+        "could be installed and fast-advanced to win"
+      ],
+      "counts": {
+        "installs": 36,
+        "bare": 2,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:scored": 36,
+        "endpointAgeN": 36,
+        "endpointAgeSum": 0,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 2,
+        "protectedAvailable": 34,
+        "scoringAvailable": 27,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 36,
+      "rates": {
+        "bareRate": {
+          "value": 0.05555555555555555,
+          "low": 0,
+          "high": 0.14634146341463414,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "pd-tao",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 1385,
+        "bare": 0,
+        "seen": 1382,
+        "lastBare": 0,
+        "lastAgeSum": 918,
+        "gainedNet": 50,
+        "added": 57,
+        "removed": 0,
+        "endpoint:scored": 1032,
+        "endpointAgeN": 1385,
+        "endpointAgeSum": 1980,
+        "rightCensored": 70,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1385,
+        "scoringAvailable": 1385,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 283,
+        "endpoint:gameEnd": 70
+      },
+      "games": 397,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.0361794500723589,
+          "low": 0.026734104046242775,
+          "high": 0.04664723032069971,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.04115523465703971,
+          "low": 0.030913012221423435,
+          "high": 0.052370842179759375,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.4296028880866427,
+          "low": 1.3291970802919708,
+          "high": 1.5519005847953216,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.6642547033285094,
+          "low": 0.5688793718772306,
+          "high": 0.7799564270152506,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 1385,
+        "bare": 0,
+        "seen": 1382,
+        "lastBare": 0,
+        "lastAgeSum": 918,
+        "gainedNet": 50,
+        "added": 57,
+        "removed": 0,
+        "endpoint:scored": 1032,
+        "endpointAgeN": 1385,
+        "endpointAgeSum": 1980,
+        "rightCensored": 70,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1385,
+        "scoringAvailable": 1385,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 283,
+        "endpoint:gameEnd": 70
+      },
+      "games": 397,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.0361794500723589,
+          "low": 0.026734104046242775,
+          "high": 0.04664723032069971,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.04115523465703971,
+          "low": 0.030913012221423435,
+          "high": 0.052370842179759375,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.4296028880866427,
+          "low": 1.3291970802919708,
+          "high": 1.5519005847953216,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.6642547033285094,
+          "low": 0.5688793718772306,
+          "high": 0.7799564270152506,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "pd-tao",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 2299,
+        "zero": 0,
+        "revealed": 1,
+        "multiRoot": 274,
+        "safetyStopped": 617,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 397,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "pd-tao",
+        "other"
+      ],
+      "counts": {
+        "installs": 2235,
+        "bare": 1104,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 487,
+        "removed": 0,
+        "endpoint:trashed": 1345,
+        "endpointAgeN": 2235,
+        "endpointAgeSum": 5303,
+        "rightCensored": 378,
+        "missingPlacement": 0,
+        "newRemote": 1097,
+        "protectedAvailable": 709,
+        "scoringAvailable": 465,
+        "bareWithProtectedAvailable": 141,
+        "nonBareWithoutProtectedAvailable": 563,
+        "endpoint:unknown": 404,
+        "endpoint:gameEnd": 378,
+        "endpoint:returned": 80,
+        "endpoint:overwritten": 28
+      },
+      "games": 393,
+      "rates": {
+        "bareRate": {
+          "value": 0.49395973154362416,
+          "low": 0.46612349914236706,
+          "high": 0.5214060387561965,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.21789709172259508,
+          "low": 0.20027560863573726,
+          "high": 0.2366447985004686,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.3727069351230425,
+          "low": 2.274685816876122,
+          "high": 2.475283446712018,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 1350,
+        "bare": 884,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 304,
+        "removed": 0,
+        "endpoint:trashed": 1042,
+        "endpointAgeN": 1350,
+        "endpointAgeSum": 2893,
+        "rightCensored": 133,
+        "missingPlacement": 0,
+        "newRemote": 884,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 466,
+        "endpoint:returned": 73,
+        "endpoint:gameEnd": 133,
+        "endpoint:overwritten": 17,
+        "endpoint:unknown": 85
+      },
+      "games": 387,
+      "rates": {
+        "bareRate": {
+          "value": 0.6548148148148148,
+          "low": 0.6271439224459359,
+          "high": 0.6815384615384615,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.22518518518518518,
+          "low": 0.20302375809935205,
+          "high": 0.2501722949689869,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.142962962962963,
+          "low": 2.063364894391843,
+          "high": 2.226086956521739,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 137,
+        "bare": 137,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 64,
+        "removed": 0,
+        "endpoint:unknown": 119,
+        "endpointAgeN": 137,
+        "endpointAgeSum": 273,
+        "rightCensored": 14,
+        "missingPlacement": 0,
+        "newRemote": 137,
+        "protectedAvailable": 66,
+        "scoringAvailable": 119,
+        "bareWithProtectedAvailable": 66,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 14,
+        "endpoint:overwritten": 4
+      },
+      "games": 120,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.46715328467153283,
+          "low": 0.3795620437956204,
+          "high": 0.55,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.9927007299270072,
+          "low": 1.646153846153846,
+          "high": 2.3676470588235294,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 138,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:gameEnd": 26,
+        "endpointAgeN": 138,
+        "endpointAgeSum": 315,
+        "rightCensored": 26,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 138,
+        "scoringAvailable": 70,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 106,
+        "endpoint:overwritten": 6
+      },
+      "games": 117,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.282608695652174,
+          "low": 1.929078014184397,
+          "high": 2.6666666666666665,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "pd-tao",
+        "trap"
+      ],
+      "counts": {
+        "installs": 227,
+        "bare": 108,
+        "seen": 225,
+        "lastBare": 18,
+        "lastAgeSum": 945,
+        "gainedNet": 135,
+        "added": 151,
+        "removed": 0,
+        "endpoint:overwritten": 148,
+        "endpointAgeN": 227,
+        "endpointAgeSum": 1139,
+        "rightCensored": 79,
+        "missingPlacement": 0,
+        "newRemote": 108,
+        "protectedAvailable": 119,
+        "scoringAvailable": 84,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 79
+      },
+      "games": 198,
+      "rates": {
+        "bareRate": {
+          "value": 0.47577092511013214,
+          "low": 0.40930232558139534,
+          "high": 0.5404040404040404,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.08,
+          "low": 0.046413502109704644,
+          "high": 0.11637931034482758,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.6,
+          "low": 0.533678756476684,
+          "high": 0.6609442060085837,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.6651982378854625,
+          "low": 0.6043478260869565,
+          "high": 0.7238493723849372,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 5.0176211453744495,
+          "low": 4.6635071090047395,
+          "high": 5.372093023255814,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.2,
+          "low": 3.8527918781725887,
+          "high": 4.548245614035087,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "trap",
+        "Specific case"
+      ],
+      "counts": {
+        "installs": 178,
+        "bare": 108,
+        "seen": 177,
+        "lastBare": 18,
+        "lastAgeSum": 763,
+        "gainedNet": 117,
+        "added": 130,
+        "removed": 0,
+        "endpoint:overwritten": 117,
+        "endpointAgeN": 178,
+        "endpointAgeSum": 913,
+        "rightCensored": 61,
+        "missingPlacement": 0,
+        "newRemote": 108,
+        "protectedAvailable": 70,
+        "scoringAvailable": 35,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 61
+      },
+      "games": 160,
+      "rates": {
+        "bareRate": {
+          "value": 0.6067415730337079,
+          "low": 0.5340314136125655,
+          "high": 0.6744186046511628,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.1016949152542373,
+          "low": 0.05945945945945946,
+          "high": 0.14659685863874344,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.6610169491525424,
+          "low": 0.5898876404494382,
+          "high": 0.7298850574712644,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.7303370786516854,
+          "low": 0.6648351648351648,
+          "high": 0.7936507936507936,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 5.129213483146067,
+          "low": 4.6923076923076925,
+          "high": 5.580838323353293,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.3107344632768365,
+          "low": 3.8914285714285715,
+          "high": 4.75,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "pd-tao",
+        "trap"
+      ],
+      "counts": {
+        "snapshots": 1154,
+        "zero": 215,
+        "revealed": 50,
+        "multiRoot": 118,
+        "safetyStopped": 0,
+        "installedBare": 215,
+        "lostDefense": 0
+      },
+      "games": 198,
+      "rates": {
+        "zeroRate": {
+          "value": 0.18630849220103987,
+          "low": 0.1439153439153439,
+          "high": 0.232421875,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 397,
+        "bare": 72,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 59,
+        "removed": 0,
+        "endpoint:unknown": 94,
+        "endpointAgeN": 397,
+        "endpointAgeSum": 879,
+        "rightCensored": 95,
+        "missingPlacement": 0,
+        "newRemote": 72,
+        "protectedAvailable": 397,
+        "scoringAvailable": 189,
+        "bareWithProtectedAvailable": 72,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 95,
+        "endpoint:trashed": 200,
+        "endpoint:returned": 7,
+        "endpoint:overwritten": 1
+      },
+      "games": 191,
+      "rates": {
+        "bareRate": {
+          "value": 0.181360201511335,
+          "low": 0.14390243902439023,
+          "high": 0.2175,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.1486146095717884,
+          "low": 0.11392405063291139,
+          "high": 0.18333333333333332,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.2141057934508814,
+          "low": 2.0652173913043477,
+          "high": 2.374005305039788,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 213,
+        "bare": 11,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 60,
+        "removed": 0,
+        "endpoint:gameEnd": 110,
+        "endpointAgeN": 213,
+        "endpointAgeSum": 943,
+        "rightCensored": 110,
+        "missingPlacement": 0,
+        "newRemote": 4,
+        "protectedAvailable": 108,
+        "scoringAvailable": 87,
+        "bareWithProtectedAvailable": 3,
+        "nonBareWithoutProtectedAvailable": 97,
+        "endpoint:trashed": 103
+      },
+      "games": 157,
+      "rates": {
+        "bareRate": {
+          "value": 0.051643192488262914,
+          "low": 0.02358490566037736,
+          "high": 0.08292682926829269,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.28169014084507044,
+          "low": 0.21951219512195122,
+          "high": 0.34782608695652173,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.427230046948357,
+          "low": 3.8115942028985508,
+          "high": 5.078947368421052,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pd-tao",
+        "trap",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 49,
+        "bare": 0,
+        "seen": 48,
+        "lastBare": 0,
+        "lastAgeSum": 182,
+        "gainedNet": 18,
+        "added": 21,
+        "removed": 0,
+        "endpoint:overwritten": 31,
+        "endpointAgeN": 49,
+        "endpointAgeSum": 226,
+        "rightCensored": 18,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 49,
+        "scoringAvailable": 49,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 18
+      },
+      "games": 47,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.375,
+          "low": 0.225,
+          "high": 0.5192307692307693,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.42857142857142855,
+          "low": 0.2826086956521739,
+          "high": 0.5714285714285714,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.612244897959184,
+          "low": 3.953488372093023,
+          "high": 5.256410256410256,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 3.7916666666666665,
+          "low": 3.1666666666666665,
+          "high": 4.392857142857143,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "pe-steve",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 1377,
+        "bare": 8,
+        "seen": 1337,
+        "lastBare": 0,
+        "lastAgeSum": 1060,
+        "gainedNet": 51,
+        "added": 51,
+        "removed": 0,
+        "endpoint:stolen": 384,
+        "endpointAgeN": 1377,
+        "endpointAgeSum": 1957,
+        "rightCensored": 72,
+        "missingPlacement": 0,
+        "newRemote": 8,
+        "protectedAvailable": 1369,
+        "scoringAvailable": 1376,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 921,
+        "endpoint:gameEnd": 72
+      },
+      "games": 382,
+      "rates": {
+        "bareRate": {
+          "value": 0.005809731299927378,
+          "low": 0.0022010271460014674,
+          "high": 0.009978617248752673,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.0381451009723261,
+          "low": 0.029078014184397163,
+          "high": 0.04847537138389367,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.037037037037037035,
+          "low": 0.028179190751445087,
+          "high": 0.04716285924834193,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.421205519244735,
+          "low": 1.333793103448276,
+          "high": 1.5138888888888888,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.7928197456993269,
+          "low": 0.7034277198211625,
+          "high": 0.8894817073170732,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 1354,
+        "bare": 0,
+        "seen": 1337,
+        "lastBare": 0,
+        "lastAgeSum": 1060,
+        "gainedNet": 51,
+        "added": 51,
+        "removed": 0,
+        "endpoint:stolen": 384,
+        "endpointAgeN": 1354,
+        "endpointAgeSum": 1957,
+        "rightCensored": 72,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1354,
+        "scoringAvailable": 1354,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:scored": 898,
+        "endpoint:gameEnd": 72
+      },
+      "games": 382,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.0381451009723261,
+          "low": 0.029078014184397163,
+          "high": 0.04847537138389367,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.03766617429837518,
+          "low": 0.02865761689291101,
+          "high": 0.04786836200448766,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.4453471196454948,
+          "low": 1.3567727609178386,
+          "high": 1.5383423702556158,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.7928197456993269,
+          "low": 0.7034277198211625,
+          "high": 0.8894817073170732,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "pe-steve",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 2397,
+        "zero": 0,
+        "revealed": 0,
+        "multiRoot": 87,
+        "safetyStopped": 530,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 381,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "pe-steve",
+        "trap"
+      ],
+      "counts": {
+        "installs": 783,
+        "bare": 301,
+        "seen": 783,
+        "lastBare": 117,
+        "lastAgeSum": 2981,
+        "gainedNet": 287,
+        "added": 346,
+        "removed": 0,
+        "endpoint:overwritten": 370,
+        "endpointAgeN": 783,
+        "endpointAgeSum": 3431,
+        "rightCensored": 272,
+        "missingPlacement": 0,
+        "newRemote": 301,
+        "protectedAvailable": 482,
+        "scoringAvailable": 597,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 272,
+        "endpoint:trashed": 141
+      },
+      "games": 349,
+      "rates": {
+        "bareRate": {
+          "value": 0.384418901660281,
+          "low": 0.3520208604954368,
+          "high": 0.41836734693877553,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.14942528735632185,
+          "low": 0.12262958280657396,
+          "high": 0.17631917631917632,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.3665389527458493,
+          "low": 0.3346456692913386,
+          "high": 0.39920424403183025,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.44189016602809705,
+          "low": 0.4095940959409594,
+          "high": 0.47451456310679613,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.381864623243934,
+          "low": 4.109589041095891,
+          "high": 4.6612296110414055,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 3.8071519795657727,
+          "low": 3.5458996328029375,
+          "high": 4.082580645161291,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "trap",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 366,
+        "bare": 0,
+        "seen": 366,
+        "lastBare": 0,
+        "lastAgeSum": 1221,
+        "gainedNet": 65,
+        "added": 69,
+        "removed": 0,
+        "endpoint:overwritten": 111,
+        "endpointAgeN": 366,
+        "endpointAgeSum": 1374,
+        "rightCensored": 114,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 366,
+        "scoringAvailable": 366,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 114,
+        "endpoint:trashed": 141
+      },
+      "games": 233,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.17759562841530055,
+          "low": 0.1408839779005525,
+          "high": 0.21333333333333335,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.1885245901639344,
+          "low": 0.1523545706371191,
+          "high": 0.2248062015503876,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 3.7540983606557377,
+          "low": 3.3535911602209945,
+          "high": 4.163841807909605,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 3.3360655737704916,
+          "low": 2.942857142857143,
+          "high": 3.7386666666666666,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "pe-steve",
+        "trap"
+      ],
+      "counts": {
+        "snapshots": 3764,
+        "zero": 867,
+        "revealed": 328,
+        "multiRoot": 119,
+        "safetyStopped": 0,
+        "installedBare": 867,
+        "lostDefense": 0
+      },
+      "games": 349,
+      "rates": {
+        "zeroRate": {
+          "value": 0.23034006376195537,
+          "low": 0.19930875576036866,
+          "high": 0.2612770943175161,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "pe-steve",
+        "other"
+      ],
+      "counts": {
+        "installs": 1118,
+        "bare": 717,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 196,
+        "removed": 0,
+        "endpoint:unknown": 413,
+        "endpointAgeN": 1118,
+        "endpointAgeSum": 1966,
+        "rightCensored": 152,
+        "missingPlacement": 0,
+        "newRemote": 713,
+        "protectedAvailable": 301,
+        "scoringAvailable": 364,
+        "bareWithProtectedAvailable": 90,
+        "nonBareWithoutProtectedAvailable": 190,
+        "endpoint:gameEnd": 152,
+        "endpoint:trashed": 495,
+        "endpoint:returned": 55,
+        "endpoint:overwritten": 3
+      },
+      "games": 363,
+      "rates": {
+        "bareRate": {
+          "value": 0.6413237924865832,
+          "low": 0.6109154929577465,
+          "high": 0.6732394366197183,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.17531305903398928,
+          "low": 0.1551270815074496,
+          "high": 0.1956896551724138,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.7584973166368516,
+          "low": 1.6373831775700936,
+          "high": 1.8795180722891567,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 89,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:unknown": 85,
+        "endpointAgeN": 89,
+        "endpointAgeSum": 62,
+        "rightCensored": 4,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 89,
+        "scoringAvailable": 53,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 4
+      },
+      "games": 77,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.6966292134831461,
+          "low": 0.45555555555555555,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 95,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 7,
+        "removed": 0,
+        "endpoint:unknown": 14,
+        "endpointAgeN": 95,
+        "endpointAgeSum": 238,
+        "rightCensored": 22,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 95,
+        "scoringAvailable": 48,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:trashed": 55,
+        "endpoint:gameEnd": 22,
+        "endpoint:returned": 4
+      },
+      "games": 72,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.07368421052631578,
+          "low": 0.02727272727272727,
+          "high": 0.125,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.5052631578947366,
+          "low": 2.1627906976744184,
+          "high": 2.861111111111111,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 615,
+        "bare": 445,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 120,
+        "removed": 0,
+        "endpoint:gameEnd": 90,
+        "endpointAgeN": 615,
+        "endpointAgeSum": 1234,
+        "rightCensored": 90,
+        "missingPlacement": 0,
+        "newRemote": 445,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 170,
+        "endpoint:trashed": 410,
+        "endpoint:returned": 51,
+        "endpoint:unknown": 63,
+        "endpoint:overwritten": 1
+      },
+      "games": 306,
+      "rates": {
+        "bareRate": {
+          "value": 0.7235772357723578,
+          "low": 0.6875,
+          "high": 0.762684124386252,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.1951219512195122,
+          "low": 0.16697588126159554,
+          "high": 0.22366288492706646,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.0065040650406503,
+          "low": 1.8732638888888888,
+          "high": 2.128813559322034,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "other",
+        "returned by _upgradeInstallPreferences"
+      ],
+      "counts": {
+        "installs": 53,
+        "bare": 6,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 16,
+        "removed": 0,
+        "endpoint:trashed": 30,
+        "endpointAgeN": 53,
+        "endpointAgeSum": 258,
+        "rightCensored": 23,
+        "missingPlacement": 0,
+        "newRemote": 2,
+        "protectedAvailable": 29,
+        "scoringAvailable": 32,
+        "bareWithProtectedAvailable": 2,
+        "nonBareWithoutProtectedAvailable": 20,
+        "endpoint:gameEnd": 23
+      },
+      "games": 51,
+      "rates": {
+        "bareRate": {
+          "value": 0.11320754716981132,
+          "low": 0.034482758620689655,
+          "high": 0.2,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.3018867924528302,
+          "low": 0.18421052631578946,
+          "high": 0.42,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.867924528301887,
+          "low": 3.590909090909091,
+          "high": 6.313725490196078,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 266,
+        "bare": 266,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 53,
+        "removed": 0,
+        "endpoint:unknown": 251,
+        "endpointAgeN": 266,
+        "endpointAgeSum": 174,
+        "rightCensored": 13,
+        "missingPlacement": 0,
+        "newRemote": 266,
+        "protectedAvailable": 88,
+        "scoringAvailable": 231,
+        "bareWithProtectedAvailable": 88,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 13,
+        "endpoint:overwritten": 2
+      },
+      "games": 206,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.19924812030075187,
+          "low": 0.15254237288135594,
+          "high": 0.24727272727272728,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0.6541353383458647,
+          "low": 0.5494505494505495,
+          "high": 0.7677165354330708,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "trap",
+        "Specific case"
+      ],
+      "counts": {
+        "installs": 417,
+        "bare": 301,
+        "seen": 417,
+        "lastBare": 117,
+        "lastAgeSum": 1760,
+        "gainedNet": 222,
+        "added": 277,
+        "removed": 0,
+        "endpoint:gameEnd": 158,
+        "endpointAgeN": 417,
+        "endpointAgeSum": 2057,
+        "rightCensored": 158,
+        "missingPlacement": 0,
+        "newRemote": 301,
+        "protectedAvailable": 116,
+        "scoringAvailable": 231,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 259
+      },
+      "games": 265,
+      "rates": {
+        "bareRate": {
+          "value": 0.7218225419664268,
+          "low": 0.6763990267639902,
+          "high": 0.7673860911270983,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.2805755395683453,
+          "low": 0.23349056603773585,
+          "high": 0.32409381663113007,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.5323741007194245,
+          "low": 0.4819277108433735,
+          "high": 0.5845824411134903,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.6642685851318945,
+          "low": 0.6157635467980296,
+          "high": 0.711453744493392,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 4.932853717026379,
+          "low": 4.610849056603773,
+          "high": 5.264976958525345,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 4.220623501199041,
+          "low": 3.9138755980861246,
+          "high": 4.546511627906977,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "pe-steve",
+        "agenda",
+        "could be installed and fast-advanced to win"
+      ],
+      "counts": {
+        "installs": 23,
+        "bare": 8,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:scored": 23,
+        "endpointAgeN": 23,
+        "endpointAgeSum": 0,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 8,
+        "protectedAvailable": 15,
+        "scoringAvailable": 22,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 23,
+      "rates": {
+        "bareRate": {
+          "value": 0.34782608695652173,
+          "low": 0.16666666666666666,
+          "high": 0.5555555555555556,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "zwicky-magdalene",
+        "agenda"
+      ],
+      "counts": {
+        "installs": 1581,
+        "bare": 113,
+        "seen": 1425,
+        "lastBare": 84,
+        "lastAgeSum": 1031,
+        "gainedNet": 87,
+        "added": 87,
+        "removed": 0,
+        "endpoint:scored": 1087,
+        "endpointAgeN": 1581,
+        "endpointAgeSum": 1989,
+        "rightCensored": 82,
+        "missingPlacement": 112,
+        "newRemote": 113,
+        "protectedAvailable": 1468,
+        "scoringAvailable": 1459,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 412,
+        "endpoint:gameEnd": 82
+      },
+      "games": 389,
+      "rates": {
+        "bareRate": {
+          "value": 0.07147375079063883,
+          "low": 0.057777777777777775,
+          "high": 0.08534201954397394,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.05894736842105263,
+          "low": 0.045839210155148094,
+          "high": 0.07212205270457697,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.061052631578947365,
+          "low": 0.04951185495118549,
+          "high": 0.07343857240905971,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.05502846299810247,
+          "low": 0.044689119170984455,
+          "high": 0.06636885768985322,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.2580645161290323,
+          "low": 1.1877001921844972,
+          "high": 1.3304239401496258,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.7235087719298245,
+          "low": 0.6506456241032998,
+          "high": 0.7976437976437977,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "agenda",
+        "HVT into scoring server"
+      ],
+      "counts": {
+        "installs": 1434,
+        "bare": 0,
+        "seen": 1313,
+        "lastBare": 0,
+        "lastAgeSum": 834,
+        "gainedNet": 59,
+        "added": 59,
+        "removed": 0,
+        "endpoint:scored": 1025,
+        "endpointAgeN": 1434,
+        "endpointAgeSum": 1750,
+        "rightCensored": 59,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 1434,
+        "scoringAvailable": 1434,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 350,
+        "endpoint:gameEnd": 59
+      },
+      "games": 389,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.04493526275704494,
+          "low": 0.03437250199840128,
+          "high": 0.05660377358490566,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.041143654114365415,
+          "low": 0.03135650988411725,
+          "high": 0.051771117166212535,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.2203626220362622,
+          "low": 1.1562064156206415,
+          "high": 1.2885431400282885,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 0.6351865955826352,
+          "low": 0.5707434052757794,
+          "high": 0.7028928850664582,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckExposure",
+        "zwicky-magdalene",
+        "agenda"
+      ],
+      "counts": {
+        "snapshots": 2456,
+        "zero": 216,
+        "revealed": 0,
+        "multiRoot": 0,
+        "safetyStopped": 681,
+        "installedBare": 216,
+        "lostDefense": 0
+      },
+      "games": 388,
+      "rates": {
+        "zeroRate": {
+          "value": 0.08794788273615635,
+          "low": 0.06828282828282828,
+          "high": 0.10828025477707007,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "agenda",
+        "unknown"
+      ],
+      "counts": {
+        "installs": 112,
+        "bare": 112,
+        "seen": 112,
+        "lastBare": 84,
+        "lastAgeSum": 197,
+        "gainedNet": 28,
+        "added": 28,
+        "removed": 0,
+        "endpoint:scored": 27,
+        "endpointAgeN": 112,
+        "endpointAgeSum": 239,
+        "rightCensored": 23,
+        "missingPlacement": 112,
+        "newRemote": 112,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:stolen": 62,
+        "endpoint:gameEnd": 23
+      },
+      "games": 80,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "lastBareRate": {
+          "value": 0.75,
+          "low": 0.6697247706422018,
+          "high": 0.8220338983050848,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "gainedNetRate": {
+          "value": 0.25,
+          "low": 0.17796610169491525,
+          "high": 0.3302752293577982,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.25,
+          "low": 0.17796610169491525,
+          "high": 0.3302752293577982,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.1339285714285716,
+          "low": 1.7019230769230769,
+          "high": 2.6044776119402986,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanLastSnapshotAge": {
+          "value": 1.7589285714285714,
+          "low": 1.3416666666666666,
+          "high": 2.2393162393162394,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deck",
+        "zwicky-magdalene",
+        "other"
+      ],
+      "counts": {
+        "installs": 533,
+        "bare": 259,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 128,
+        "removed": 0,
+        "endpoint:gameEnd": 79,
+        "endpointAgeN": 533,
+        "endpointAgeSum": 1185,
+        "rightCensored": 79,
+        "missingPlacement": 0,
+        "newRemote": 259,
+        "protectedAvailable": 379,
+        "scoringAvailable": 188,
+        "bareWithProtectedAvailable": 105,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 362,
+        "endpoint:overwritten": 51,
+        "endpoint:trashed": 41
+      },
+      "games": 284,
+      "rates": {
+        "bareRate": {
+          "value": 0.48592870544090055,
+          "low": 0.4369449378330373,
+          "high": 0.5389344262295082,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.2401500938086304,
+          "low": 0.20708955223880596,
+          "high": 0.2749529190207156,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.223264540337711,
+          "low": 2.0536480686695278,
+          "high": 2.3836363636363638,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "other",
+        "AIWorthInstalling returned new server"
+      ],
+      "counts": {
+        "installs": 160,
+        "bare": 160,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 82,
+        "removed": 0,
+        "endpoint:gameEnd": 22,
+        "endpointAgeN": 160,
+        "endpointAgeSum": 394,
+        "rightCensored": 22,
+        "missingPlacement": 0,
+        "newRemote": 160,
+        "protectedAvailable": 105,
+        "scoringAvailable": 129,
+        "bareWithProtectedAvailable": 105,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:unknown": 133,
+        "endpoint:overwritten": 5
+      },
+      "games": 148,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.5125,
+          "low": 0.43558282208588955,
+          "high": 0.5906040268456376,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.4625,
+          "low": 2.1538461538461537,
+          "high": 2.7973856209150325,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "other",
+        "AIWorthInstalling returned existing server"
+      ],
+      "counts": {
+        "installs": 137,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 1,
+        "removed": 0,
+        "endpoint:unknown": 125,
+        "endpointAgeN": 137,
+        "endpointAgeSum": 281,
+        "rightCensored": 8,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 137,
+        "scoringAvailable": 20,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 4,
+        "endpoint:gameEnd": 8
+      },
+      "games": 119,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.0072992700729927005,
+          "low": 0,
+          "high": 0.024,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.051094890510949,
+          "low": 1.7538461538461538,
+          "high": 2.366906474820144,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "other",
+        "asset into non-scoring server"
+      ],
+      "counts": {
+        "installs": 137,
+        "bare": 0,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 23,
+        "removed": 0,
+        "endpoint:gameEnd": 40,
+        "endpointAgeN": 137,
+        "endpointAgeSum": 322,
+        "rightCensored": 40,
+        "missingPlacement": 0,
+        "newRemote": 0,
+        "protectedAvailable": 137,
+        "scoringAvailable": 39,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:overwritten": 40,
+        "endpoint:trashed": 41,
+        "endpoint:unknown": 16
+      },
+      "games": 87,
+      "rates": {
+        "bareRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.1678832116788321,
+          "low": 0.11627906976744186,
+          "high": 0.21897810218978103,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 2.3503649635036497,
+          "low": 2.0434782608695654,
+          "high": 2.669230769230769,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "other",
+        "direct command preference"
+      ],
+      "counts": {
+        "installs": 99,
+        "bare": 99,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 22,
+        "removed": 0,
+        "endpoint:unknown": 88,
+        "endpointAgeN": 99,
+        "endpointAgeSum": 188,
+        "rightCensored": 9,
+        "missingPlacement": 0,
+        "newRemote": 99,
+        "protectedAvailable": 0,
+        "scoringAvailable": 0,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0,
+        "endpoint:gameEnd": 9,
+        "endpoint:overwritten": 2
+      },
+      "games": 89,
+      "rates": {
+        "bareRate": {
+          "value": 1,
+          "low": 1,
+          "high": 1,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0.2222222222222222,
+          "low": 0.14130434782608695,
+          "high": 0.30851063829787234,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 1.898989898989899,
+          "low": 1.5698924731182795,
+          "high": 2.2596153846153846,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "deckRoute",
+        "zwicky-magdalene",
+        "agenda",
+        "could be installed and fast-advanced to win"
+      ],
+      "counts": {
+        "installs": 35,
+        "bare": 1,
+        "seen": 0,
+        "lastBare": 0,
+        "lastAgeSum": 0,
+        "gainedNet": 0,
+        "added": 0,
+        "removed": 0,
+        "endpoint:scored": 35,
+        "endpointAgeN": 35,
+        "endpointAgeSum": 0,
+        "rightCensored": 0,
+        "missingPlacement": 0,
+        "newRemote": 1,
+        "protectedAvailable": 34,
+        "scoringAvailable": 25,
+        "bareWithProtectedAvailable": 0,
+        "nonBareWithoutProtectedAvailable": 0
+      },
+      "games": 35,
+      "rates": {
+        "bareRate": {
+          "value": 0.02857142857142857,
+          "low": 0,
+          "high": 0.0975609756097561,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "addedRate": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        },
+        "meanEndpointAge": {
+          "value": 0,
+          "low": 0,
+          "high": 0,
+          "valid": true,
+          "invalidDraws": 0
+        }
+      }
+    },
+    {
+      "group": [
+        "posture",
+        "agenda",
+        "expired"
+      ],
+      "counts": {
+        "snapshots": 3,
+        "zero": 0,
+        "revealed": 0,
+        "multiRoot": 3,
+        "safetyStopped": 0,
+        "installedBare": 0,
+        "lostDefense": 0
+      },
+      "games": 3,
+      "rates": {
+        "zeroRate": {
+          "value": 0,
+          "low": null,
+          "high": null,
+          "valid": false,
+          "invalidDraws": 113
+        }
+      }
+    }
+  ],
+  "sources": [
+    {
+      "file": "bench/L8.9-aac6ea9-attribution-v2/on-1-200.json",
+      "sha256": "ec5b09032de7b49c3533d36f720eafa77e860e37941f76bb796955b4f57b5b5c"
+    },
+    {
+      "file": "bench/L8.9-aac6ea9-attribution-v2/on-201-400.json",
+      "sha256": "d95438b01919f47be3d354d7022856ee4381c55036703cbc9478d988b7c06551"
+    }
+  ]
+}

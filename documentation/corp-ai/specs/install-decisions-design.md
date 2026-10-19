@@ -48,6 +48,24 @@ Whenever an item introduces or changes a card-facing AI hook, update
 information sources, out-of-run safety constraints, and at least one
 card-definition example.
 
+## Measurement handoff from L8.9
+
+[L8.9](../../backlog/L8.9-observable-defense-parity.md) delivers passive installation,
+defense and lifecycle tools; it owns no admission/holding rule. I3/I4/I5 retain
+those decisions. Before changing installation policy, use the
+[tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets)
+with current matching reports and record per-deck/route placement, later defense,
+root survival and relevant payoff/score outcomes. The I3/I5 specs carry explicit
+reuse and coverage criteria. Previously calibrated noise allowances are evidence
+for their measured baseline, not automatic tolerances after policy changes.
+
+A shell/asset-spam plan is a necessary counterexample to “zero ICE means a bad
+install”: many bare disposable roots can coexist with a protected scoring room.
+I3.1 owns starting-deck composition/mechanic evidence for such plans, without
+blocking I3/I5 or introducing an automatic archetype switch. Current L8.9 data
+has limited ordinary-asset/type, remote-topology and HQ holding coverage; extend
+passive observation with identity tests when a consumer's claim needs that data.
+
 ## Corrected regression baseline and ownership
 
 The [2026-10-05 recovery](../../corp-ai-regression/gated-fix-handoff.md)

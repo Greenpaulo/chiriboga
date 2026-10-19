@@ -33,14 +33,17 @@ is recorded in the done tables and the historical merge plan.
 | — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Shared collector and identity evidence delivered; L8.2 records fresh usable controls after its passive-label correction |
 | — | [L8.2](../backlog/done/feature-layer-8-2-remote-deception-profiles.md) | not adopted (merged) | Main merged into the I2 branch; observer/collector repairs and failure evidence retained, policy removed |
 | 1 | [I2](../backlog/code-review/I2-ice-selection-by-marginal-security.md) | in-progress | Phase B gate run 2 passed (7,000 pairs, seeds 1601–2600); `iceMarginalSecurity` on; 100 full test files passed; ready for review |
-| 2 | [L8.9](specs/L8.9-observable-defense-parity.md) | proposed | After I2 review and merge, measure the residual tell once with I2 enabled: park if small (owner decision 2026-10-16), else attribute, repair and gate |
-| 3 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Re-ground the spec after the L8.9 measurement or repair; resolve [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) before freezing the design; fresh control and separate policy gates |
+| 2 | [L8.9](../backlog/L8.9-observable-defense-parity.md) | in-progress (owner authorized current I2 review branch) | Deliver passive install/lifecycle observations, offline analysis and completed control calibration; hand findings/tool usage to I3/I5 and shell-plan coverage to I3.1; no installation restriction |
+| 3 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Reuse L8.9's measurement tools and findings; re-ground the spec and resolve [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) before freezing the design; fresh control and separate policy gates |
 
 F11 and F12 are done. L8.2 was not adopted (full gate failed; policy removed),
 so I2 no longer waits on it; its observer/collector repairs stay. L8.9-before-I3
 is a sequencing preference rather than an additional formal dependency. I2 passed
 its frozen acceptance gate; the remaining R&D concern is follow-up work, not an
 additional I2 acceptance criterion. [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) owns its investigation before I3 design freeze. Do not adopt a later policy using a control predating an adopted prerequisite.
+At the owner's request (2026-10-19), the preliminary [L8.9 tell measurement](measurements/L8.9-aac6ea9-residual-tell.md)
+starts on a branch from I2's review revision. Its result is provisional until
+I2 review completes; this does not change either item's formal status or dependencies.
 [L9.0.1](../backlog/done/L9.0.1-adopt-honest-lockout.md) failed its global-adoption gate and was not adopted.
 [L9.0.2](specs/L9.0.2-consumer-specific-honest-security.md) proposes separate consumer gates; refresh affected controls after any adoption. Complete L8.7's
 card audit and L8.10 mechanics/diagnostics before I5 (its formal dependency).
@@ -114,11 +117,11 @@ price yet.
 - **Spec:** [L8.8-marginal-deception-value.md](specs/L8.8-marginal-deception-value.md)
 - **Goal:** Separately gate a shared marginal concealment value in adopted I2 ICE ranking, keeping private trap payoff distinct and agenda/trap substitution intact. Later consumers adopt through their own gates; this is not an I2 prerequisite.
 
-### L8.9 Observable-defense parity
-- **Status:** proposed
+### L8.9 Observable-defense measurement and attribution
+- **Status:** in-progress
 - **Depends on:** I2, F4, F11, F12, L8.4
-- **Spec:** [L8.9-observable-defense-parity.md](specs/L8.9-observable-defense-parity.md)
-- **Goal:** Attribute the remaining agenda/trap ICE-count tell after I2, then implement and strategically gate a supported repair in the same ticket before I3 freezes its design.
+- **Ticket:** [L8.9-observable-defense-parity.md](../backlog/L8.9-observable-defense-parity.md)
+- **Goal:** Deliver passive install/lifecycle attribution, saved-report tools and baseline-specific calibration; installation/hold policy belongs to the I tickets. The proposed bare-trap restriction was withdrawn without implementation.
 
 ### L8.10 Trap mechanics and play-value diagnostics
 - **Status:** proposed
@@ -256,13 +259,13 @@ I9 comes last.
 - **Status:** proposed
 - **Depends on:** I2, F4, L8.4
 - **Spec:** [I3-remote-role-and-root-suitability.md](specs/I3-remote-role-and-root-suitability.md)
-- **Goal:** Keep a persistent scoring remote, chosen by projected breach hazard, and charge other installs the scoring value they displace.
+- **Goal:** Keep a persistent scoring remote, chosen by projected breach hazard, and charge other installs the scoring value they displace. Reuse L8.9's placement/allocation/lifetime tools and test legitimate bare asset-spam remotes.
 
 ### I3.1 Deck game-plan profile
 - **Status:** proposed
 - **Depends on:** I3, F4
 - **Spec:** [I3.1-deck-game-plan-profile.md](specs/I3.1-deck-game-plan-profile.md)
-- **Goal:** Record explainable starting-deck composition and mechanic evidence without changing decisions. Lower priority than core install planning; later consumers need a demonstrated decision gap and their own gate.
+- **Goal:** Record explainable starting-deck composition and mechanic evidence, including shell/asset-spam, glacier and hybrid contrasts, without changing decisions. Does not block I3/I5; later consumers need their own evidence and gate.
 
 ### I4 Agenda installation and scoring commitment
 - **Status:** proposed
@@ -274,7 +277,7 @@ I9 comes last.
 - **Status:** proposed
 - **Depends on:** I3, L8.10, F4
 - **Spec:** [I5-asset-ambush-and-economy-value.md](specs/I5-asset-ambush-and-economy-value.md)
-- **Goal:** Compare root assets by expected board value instead of hook-chosen indices.
+- **Goal:** Compare root assets by expected board value instead of hook-chosen indices. Reuse L8.9's per-deck/route observations; assess shell deployment and holding coverage without a universal ICE requirement.
 
 ### I6 Upgrade selection by marginal effect
 - **Status:** proposed
