@@ -17,7 +17,7 @@ const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
 // enumerate those directories, so it must finish before any workers start.
 const exclusiveFiles = new Set(['agent-scripts.test.js']);
 const args = process.argv.slice(2);
-let tier = 'full', jobs = 2, timingsFile;
+let tier = 'full', jobs = 2, timingsFile, diagnose = false;
 let selectedTier;
 function selectTier(value) {
   if (selectedTier && selectedTier !== value) {
@@ -28,11 +28,12 @@ function selectTier(value) {
 }
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--fast' || args[i] === '--unit-only') selectTier('fast');
+  else if (args[i] === '--diagnose') diagnose = true;
   else if (args[i] === '--integration') selectTier('integration');
   else if (args[i] === '--jobs' && /^[1-9]\d*$/.test(args[i + 1] || '')) jobs = Number(args[++i]);
   else if (args[i] === '--timings' && args[i + 1] && !args[i + 1].startsWith('--')) timingsFile = args[++i];
   else {
-    console.error('Usage: node tests/run-all-tests.js [--fast | --integration | --unit-only] [--jobs N] [--timings file.json]');
+    console.error('Usage: node tests/run-all-tests.js [--fast | --integration | --unit-only] [--jobs N] [--timings file.json] [--diagnose]');
     process.exit(2);
   }
 }
@@ -93,7 +94,9 @@ function run(file) {
   if (timingsFile) fs.writeFileSync(timingsFile, JSON.stringify({tier, jobs, wallMs, tests: timings}, null, 2) + '\n');
   if (failed.length) console.log(failed.length + ' of ' + files.length + ' test files failed: ' + failed.join(', '));
   else console.log(files.length + ' ' + tier + ' test files passed.');
-  console.log('Wall time: ' + (wallMs / 1000).toFixed(2) + 's (' + jobs + ' workers). Slowest files:');
-  for (const row of timings.slice(0, 10)) console.log('  ' + (row.ms / 1000).toFixed(2) + 's  ' + row.file);
+  if (diagnose) {
+    console.log('Wall time: ' + (wallMs / 1000).toFixed(2) + 's (' + jobs + ' workers). Slowest files:');
+    for (const row of timings.slice(0, 10)) console.log('  ' + (row.ms / 1000).toFixed(2) + 's  ' + row.file);
+  }
   process.exitCode = failed.length ? 1 : 0;
 })().catch(error => { console.error(error.stack || error); process.exitCode = 1; });

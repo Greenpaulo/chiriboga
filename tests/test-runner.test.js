@@ -27,6 +27,7 @@ try {
     }, 10);`);
   let result = run(['--jobs', '2', '--timings', 'timings.json']);
   assert.strictEqual(result.status, 0, result.stdout + result.stderr);
+  assert.strictEqual(result.stdout.trim(), '3 full test files passed.', 'normal runs omit timing diagnostics even with --timings');
   const report = JSON.parse(fs.readFileSync(path.join(dir, 'timings.json'), 'utf8'));
   assert.strictEqual(report.jobs, 2);
   assert.strictEqual(report.tests.length, 3);
@@ -50,9 +51,14 @@ try {
   assert(fast.tests.some(row => row.file === 'corp-decision-fixtures.test.js'));
   assert(fast.tests.some(row => row.file === 'decision-snapshots.test.js'));
   assert(fast.tests.every(row => !row.file.startsWith('integration/')));
+  result = run(['--fast', '--diagnose']);
+  assert.strictEqual(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /Wall time: \d+\.\d{2}s \(2 workers\)\. Slowest files:/);
+  assert.match(result.stdout, /  \d+\.\d{2}s  .*\.test\.js/);
   assert.strictEqual(run(['--unit-only']).status, 0, 'legacy flag selects fast tier');
   result = run(['--jobs', '1']);
   assert.strictEqual(result.status, 1);
+  assert(!result.stdout.includes('Wall time:'), 'failed normal runs also omit timings');
   assert(result.stdout.includes('FAILED integration/ai-batch.test.js') && result.stdout.includes('integration included'));
   write('a', 'throw Error("fast test must not run in integration tier");');
   write('integration/ai-batch', '');

@@ -64,6 +64,7 @@ vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), c
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
+const marginInvariant = require('./breach-margin-invariant')(ai); // I2 M1 on every evaluation
 const card = id => Object.assign({}, context.cardSet[id]);
 const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', player: corp,
   rezzed: true, rezCost: 1, strength: 3, subTypes: ['Barrier'],
@@ -92,11 +93,17 @@ for (const brokenHook of [false, true]) {
     for (const field of ['totalMandatoryBreakCost', 'totalBreakCost',
       'honestMandatoryBreakCost', 'honestBreakCost'])
       assert.strictEqual(result[field], null, field + ' must explicitly report unknown');
+    // I2 M1: unknown pricing has no margin, only the known part's upper bound.
+    const breach = ai._breachMargin(target, result);
+    assert.strictEqual(breach.margin, null);
+    assert.strictEqual(breach.upperBound, result.runnerCredits - result.honestKnownMandatoryBreakCost);
+    assert.strictEqual(typeof breach.upperBound, 'number');
     passed++;
   } catch (error) {
     failed++;
     console.error('FAIL ' + (brokenHook ? 'non-pricing hook' : 'missing hook') + ': ' + error.message);
   }
 }
+assert.ok(marginInvariant.checks > 0, 'I2 margin invariant was exercised');
 console.log('L9.1 unpriceable breakers: ' + passed + ' passed, ' + failed + ' failed');
 if (failed) process.exitCode = 1;
