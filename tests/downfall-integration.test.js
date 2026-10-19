@@ -307,6 +307,5 @@ wall.strengthCannotBeLowered = false;
 chisel.virus = 0;
 assert.strictEqual(c.Strength(wall), 2, 'purge restores host strength');
 assert.strictEqual(rc.IceAI(wall, 20).strength, 1, 'next encounter only receives its own counter');
-console.log('Downfall integration: batch 1 mechanics and baseline AI passed');
 }
 main().catch(error => {console.error(error); process.exitCode = 1;});

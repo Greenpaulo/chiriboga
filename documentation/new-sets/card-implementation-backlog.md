@@ -206,9 +206,9 @@ existing number against its dated source snapshot.
 | Rebellion Without Rehearsal |           2 |           0 |                   2 |
 | Core Set                    |          62 |           0 |                  62 |
 | Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **516** |     **239** |             **277** |
+| **Total**                   |     **516** |     **243** |             **273** |
 
-Of the 277 omissions, 27 are identities and 250 are playable deck cards. The
+Of the 273 omissions, 27 are identities and 246 are playable deck cards. The
 five Midnight Sun omissions are:
 
 - 33001 Esâ Afontov: Eco-Insurrectionist

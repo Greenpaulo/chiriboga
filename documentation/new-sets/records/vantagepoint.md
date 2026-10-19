@@ -45,12 +45,6 @@ from the active tracker.
 3. Never skip a `Blocked` batch silently. If it is the first outstanding batch,
    report its blocker unless the user explicitly authorizes another batch.
 4. Implement exactly one batch per skill invocation.
-5. If all batches are `Complete` and implementation integration checks pass,
-   mark the set `Implemented` and `playable` independently of review. The next
-   invocation archives this tracker and selects the next queued set under the
-   operator guide's transition procedure, then implements its first batch.
-   Review/optimisation never holds this queue open. If no next set is recorded,
-   report that a set selection is needed; do not choose one arbitrarily.
 
 Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
@@ -190,8 +184,7 @@ remain open; availability is a separate user decision.
 The [pre-review implementation snapshot](../history/vantagepoint-2026-10-06.md)
 preserves the original full completion log. The
 [post-review snapshot](../history/vantagepoint-2026-10-06-reviewed.md) preserves this
-historical repair queue and review log. Keep completion history append-only
-and archive this tracker before selecting another set (Downfall is queued next). Use
+historical repair queue and review log. Keep completion history append-only. Use
 `optimise-card-batch` for repairs and independent batch/set review for sign-off.
 The review verdict does not block playability or the next implementation set.
 
