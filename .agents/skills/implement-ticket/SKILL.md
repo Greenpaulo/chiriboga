@@ -192,7 +192,13 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   `ticket.js check` uses the original path from Git history to verify that
   assertions or `EXPECT` lines were not changed during the move.
 - Add a variation or unit test when a broad heuristic changed.
-- `node tests/run-all-tests.js` passes.
+- Run the reproduction and affected focused tests to validate the fix. Use
+  `--fast` for a broader check only when the change or a failure warrants it;
+  it is not required after each edit or skill step. If ready for final handoff,
+  proceed directly to step 7's full `ticket.js check` rather than running a
+  separate fast suite first. Follow the test cadence in `tests/README.md`.
+  Ordinary card/AI heuristic changes do not require separate integration runs;
+  infrastructure changes use the targeted checks documented there.
 - Gated tickets: switch the option's default on only if the selected gate,
   run exactly as the ticket defines it, passes. For an F4 gate, build the
   command from the ticket's gate and record it in the Resolution as a
@@ -203,8 +209,10 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
   and `--games` if it needs more than 200 (see
   `documentation/ai-batch-harness.md`). A gate that measures start boards and
   the deck pool separately has one command per game set ("Writing a gate");
-  record and run each, and the gate passes only if every one passes. Run it yourself, after the full test
-  suite passes, as one blocking command with a timeout of at least 30 minutes
+  record and run each, and the gate passes only if every one passes. Before
+  spending time on the gate, confirm its focused tests and one fast suite pass;
+  reuse a current passing fast/full result rather than running it again. Run
+  the gate yourself as one blocking command with a timeout of at least 30 minutes
   (it takes about 15 to 20 and prints only the gated metrics). Waiting on a
   blocking command costs nothing; checking on a running one costs a step each
   time. So do not run it in the background and poll, and do not read the
@@ -289,10 +297,14 @@ line to `**Approved <date>.**`, and revise the plan first if the user amends it.
 - Move the ticket into the `code-review/` folder beside it with
   `node scripts/ticket.js move <ticket> code-review` (this also sets a linked
   roadmap item to `in-progress` and refreshes generated blocker headers), then run
-  `node scripts/ticket.js check <ticket-in-its-new-folder>` and fix anything it reports
+  `node scripts/ticket.js check <ticket-in-its-new-folder>` once as the final
+  verification (includes the full suite) and fix anything it reports
   as FAIL. Also fix warnings that say the reproduction comparison was skipped
   because the original pending path could not be found; warnings that merely
   report an intentionally pending gate or its unticked gate criteria are
-  expected.
+  expected. This is the ticket's one final full run; do not also invoke the
+  full runner separately. If it fails, use focused checks to repair the failure
+  and rerun final validation only once those repairs are ready. Report a still
+  running suite as pending under `AGENTS.md`; do not launch another copy.
 - Do not commit. Report the files changed, test results, deviations from the
   ticket or plan, and open questions.

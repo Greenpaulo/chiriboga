@@ -1,59 +1,99 @@
 #!/usr/bin/env node
 'use strict';
-// Runs every tests/*.test.js file. Output is shown only for failing files so an
-// agent's context stays small; set VERBOSE=1 to stream every file's output.
-// A passing file must stay quiet (a short summary at most): per-case output
-// belongs behind process.env.VERBOSE, and noisy files fail here.
-
+// Each file runs in its own process. Passing files stay quiet; VERBOSE streams
+// their output. Default to two workers to bound CPU/memory use during ticket work.
 const fs = require('fs');
 const path = require('path');
-const {spawnSync} = require('child_process');
+const {spawn} = require('child_process');
+const {performance} = require('perf_hooks');
 
 const testsDir = __dirname;
 const verbose = !!process.env.VERBOSE;
 const QUIET_MAX_LINES = 5;
 const QUIET_MAX_BYTES = 600;
-// This integration test launches AI games/batches; exclude it only when requested.
-const nonUnitFiles = new Set(['ai-batch.test.js']);
+const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
+
+// This test creates transient files in sets/ and documentation/. Other tests
+// enumerate those directories, so it must finish before any workers start.
+const exclusiveFiles = new Set(['agent-scripts.test.js']);
 const args = process.argv.slice(2);
-if (args.some(arg => arg !== '--unit-only')) {
-  console.error('Usage: node tests/run-all-tests.js [--unit-only]');
-  process.exit(2);
+let tier = 'full', jobs = 2, timingsFile;
+let selectedTier;
+function selectTier(value) {
+  if (selectedTier && selectedTier !== value) {
+    console.error('Choose one suite tier: --fast or --integration');
+    process.exit(2);
+  }
+  tier = selectedTier = value;
 }
-const unitOnly = args.includes('--unit-only');
-const files = fs.readdirSync(testsDir)
-  .filter(file => file.endsWith('.test.js') && (!unitOnly || !nonUnitFiles.has(file)))
-  .sort();
-
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--fast' || args[i] === '--unit-only') selectTier('fast');
+  else if (args[i] === '--integration') selectTier('integration');
+  else if (args[i] === '--jobs' && /^[1-9]\d*$/.test(args[i + 1] || '')) jobs = Number(args[++i]);
+  else if (args[i] === '--timings' && args[i + 1] && !args[i + 1].startsWith('--')) timingsFile = args[++i];
+  else {
+    console.error('Usage: node tests/run-all-tests.js [--fast | --integration | --unit-only] [--jobs N] [--timings file.json]');
+    process.exit(2);
+  }
+}
+const discover = dir => fs.existsSync(dir) ? fs.readdirSync(dir)
+  .filter(file => file.endsWith('.test.js')).sort() : [];
+const fastFiles = discover(testsDir);
+const integrationFiles = discover(path.join(testsDir, 'integration'))
+  .map(file => 'integration/' + file);
+const files = tier === 'fast' ? fastFiles : tier === 'integration' ? integrationFiles
+  : [...fastFiles, ...integrationFiles];
 const failed = [];
-for (const file of files) {
-  const result = spawnSync(process.execPath, [path.join(testsDir, file)], {
-    stdio: verbose ? 'inherit' : 'pipe',
-    encoding: 'utf8',
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  if (result.error) throw result.error;
-  const output = verbose ? '' : (result.stdout || '') + (result.stderr || '');
-  if (result.status !== 0) {
-    failed.push(file);
-    if (!verbose) {
-      console.log('--- FAILED ' + file + ' ---');
-      process.stdout.write(output);
-      console.log();
+const timings = [];
+const started = performance.now();
+
+function run(file) {
+  return new Promise(resolve => {
+    const start = performance.now();
+    const child = spawn(process.execPath, [path.join(testsDir, file)], {
+      stdio: verbose ? 'inherit' : ['ignore', 'pipe', 'pipe'],
+    });
+    const chunks = [];
+    let bytes = 0, error;
+    function collect(chunk) {
+      bytes += chunk.length;
+      if (bytes <= MAX_OUTPUT_BYTES) chunks.push(chunk);
+      else { error = 'Output exceeded 64 MiB'; child.kill(); }
     }
-    continue;
-  }
-  const lines = output.trim() ? output.trim().split('\n').length : 0;
-  if (!verbose && (lines > QUIET_MAX_LINES || output.length > QUIET_MAX_BYTES)) {
-    failed.push(file);
-    console.log('--- NOISY ' + file + ' ---\n' + file + ' passed but printed ' + lines +
-      ' lines (' + output.length + ' bytes). Passing tests may print at most ' + QUIET_MAX_LINES +
-      ' lines / ' + QUIET_MAX_BYTES + ' bytes; print per-case output only when process.env.VERBOSE is set.\n');
-  }
+    if (!verbose) { child.stdout.on('data', collect); child.stderr.on('data', collect); }
+    child.on('error', err => { error = err.message; });
+    child.on('close', (status, signal) => {
+      const output = Buffer.concat(chunks).toString('utf8');
+      const lines = output.trim() ? output.trim().split('\n').length : 0;
+      const noisy = !verbose && (lines > QUIET_MAX_LINES || bytes > QUIET_MAX_BYTES);
+      const passed = status === 0 && !error && !noisy;
+      timings.push({file, ms: Math.round(performance.now() - start), status, signal, passed});
+      if (!passed) {
+        failed.push(file);
+        console.log('--- ' + (noisy && status === 0 && !error ? 'NOISY ' : 'FAILED ') + file + ' ---');
+        if (error) console.log(error);
+        if (signal) console.log('Terminated by ' + signal);
+        if (noisy) console.log('Passing tests may print at most ' + QUIET_MAX_LINES + ' lines / ' + QUIET_MAX_BYTES + ' bytes; use VERBOSE for per-case output.');
+        process.stdout.write(output);
+        console.log();
+      }
+      resolve();
+    });
+  });
 }
 
-if (failed.length) {
-  console.log(failed.length + ' of ' + files.length + ' test files failed: ' + failed.join(', '));
-  process.exit(1);
-}
-console.log(files.length + (unitOnly ? ' unit test files passed; skipped ai-batch.test.js (plays batches).' : ' test files passed.'));
+(async () => {
+  for (const file of files.filter(file => exclusiveFiles.has(file))) await run(file);
+  const queue = files.filter(file => !exclusiveFiles.has(file));
+  await Promise.all(Array.from({length: Math.min(jobs, queue.length)}, async () => {
+    while (queue.length) await run(queue.shift());
+  }));
+  const wallMs = Math.round(performance.now() - started);
+  timings.sort((a, b) => b.ms - a.ms || a.file.localeCompare(b.file));
+  if (timingsFile) fs.writeFileSync(timingsFile, JSON.stringify({tier, jobs, wallMs, tests: timings}, null, 2) + '\n');
+  if (failed.length) console.log(failed.length + ' of ' + files.length + ' test files failed: ' + failed.join(', '));
+  else console.log(files.length + ' ' + tier + ' test files passed.');
+  console.log('Wall time: ' + (wallMs / 1000).toFixed(2) + 's (' + jobs + ' workers). Slowest files:');
+  for (const row of timings.slice(0, 10)) console.log('  ' + (row.ms / 1000).toFixed(2) + 's  ' + row.file);
+  process.exitCode = failed.length ? 1 : 0;
+})().catch(error => { console.error(error.stack || error); process.exitCode = 1; });

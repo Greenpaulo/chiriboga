@@ -38,8 +38,12 @@ tracker/backlog files. Give each reviewer the
 batch skill and raw set/test context, without proposed findings. Never run these
 reviews alongside production edits. Each batch retains its separate verdict and
 per-card evidence. One coordinator full-suite run on the shared immutable code
-snapshot can satisfy the shared verification requirement for all reports; reviewers
-must still run their focused checks and cite that coordinator result explicitly.
+snapshot satisfies the matching shared verification requirement for all reports;
+reviewers must still run their focused checks and cite that result explicitly.
+The coordinator schedules this run once when the reviewed state is settled,
+or reuses a verifiable matching pass. Do not run full validation once per batch
+and again for the set, or launch duplicate shared checks in parallel. Follow
+`tests/README.md` for matching inputs and rerun criteria.
 
 ## Audit the whole set
 
@@ -57,9 +61,13 @@ must still run their focused checks and cite that coordinator result explicitly.
 - Verify format legality and launcher defaults against code and current metadata,
   and generate legal Runner and Corp random decks for every applicable format.
   Check size, influence, agenda points, copies, side, identity and set legality.
-- Run the set's focused/shared commands, syntax checks, `git diff --check` and
-  `node tests/run-all-tests.js` using `.nvmrc`. Confirm Corp decision fixtures
-  and decision snapshots are included. Exclude known-red pending reproductions.
+- Complete the set's focused/shared commands, syntax checks and
+  `git diff --check`. Count commands included with matching arguments and
+  environment in the shared full run once; retain distinct checks. Use the
+  single coordinator full-suite result described above, using `.nvmrc` and
+  including Corp decision fixtures/snapshots, excluding known-red pending
+  reproductions. Writing reports or updating status alone does not require
+  another full run.
   Name failures and evidence limits; do not equate a green suite with correct AI.
 - Record human-facing manual checks actually performed. Missing essential manual
   or runtime evidence prevents Pass; name what would settle it. Do not claim

@@ -50,6 +50,30 @@ try {
     assert.throws(() => runControlBatch(args, output, () => ({status: null, error: Error('timeout')})), /timeout/);
     assert.throws(() => runControlBatch(args, output, saved(() => {}, 1)), /inconsistent/);
   });
+  test('fresh and reused controls reject failure identities that do not match failed games', () => {
+    const alterations = [
+      r => { r.failures[0].seed = r.games[0].seed; }, // Names a successful game.
+      r => { r.failures[0].deckPairId = 'other-pair'; },
+      r => { r.failures[0].fixtureId = 'other-start'; },
+      r => { r.games[0].ok = false; r.failures.push({...r.failures[0]}); },
+    ];
+    for (const alter of alterations) {
+      const corrupt = r => {
+        r.games[1].ok = false;
+        r.failures = [{fixtureId: null, deckPairId: 'gateway', seed: r.games[1].seed}];
+        alter(r);
+      };
+      const value = report(); corrupt(value);
+      assert.throws(() => checkControlReport(args, value, 'reused.json', []), /inconsistent/);
+      assert.throws(() => runControlBatch(args, output, saved(corrupt, 1)), /inconsistent/);
+    }
+  });
+  test('failure identities may be reordered and use equivalent seed representations', () => {
+    const value = report();
+    value.games.forEach(game => { game.ok = false; });
+    value.failures = value.games.map(game => ({deckPairId: game.deckPairId, seed: Number(game.seed)})).reverse();
+    checkControlReport(args, value, 'reused.json', []);
+  });
   test('loaded controls must match requested collectors, Corp options and samples', () => {
     const shape = require('../scripts/ai-batch/collectors/postureShapeByCardClass');
     const realized = require('../scripts/ai-batch/collectors/realizedIceByRootType');

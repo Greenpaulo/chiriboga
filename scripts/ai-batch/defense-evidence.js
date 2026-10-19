@@ -78,9 +78,14 @@ function checkGameRecords(report, file) {
       throw Error('Control report has invalid or duplicate game records: ' + file);
     actual.add(id);
   }
-  const failures = (report.games || []).filter(game => !game.ok).length;
+  const failedKeys = new Set((report.games || []).filter(game => !game.ok).map(key));
+  const failures = failedKeys.size;
   if (actual.size !== expected.size || !Array.isArray(report.failures) || report.failures.length !== failures)
     throw Error('Control report is incomplete or inconsistent: ' + file);
+  for (const failure of report.failures) {
+    if (!failure || !failedKeys.delete(key(failure)))
+      throw Error('Control report is incomplete or inconsistent: ' + file);
+  }
   return failures;
 }
 
