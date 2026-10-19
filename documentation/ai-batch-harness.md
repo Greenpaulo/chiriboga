@@ -873,6 +873,28 @@ Runner turn ends.
 breach rate of a group is `mean(secureBreached) / mean(secure)`, not the mean
 of per-game rates.
 
+## I2 stranded ICE collector
+
+`--collector strandedUnrezzedIceCost` reports
+`strandedUnrezzedIceCost.credits` (lower is better): per game, the credits the
+Corp paid installing ICE that was never rezzed afterwards, whether it stayed
+unrezzed to game end or was trashed or returned unrezzed. It reads two
+observation-only events from the headless runner: `iceInstall` (a Corp
+`SpendCredits(..., "installing", ice)` payment, with the card's tracker `id`
+and `cost`) and `iceRez` (a completed ICE rez: `Rez(card, true)`, which both a
+paid rez and a free rez reach). A rez clears every install payment recorded
+for that card. ICE already installed on a start board paid nothing here, so
+its rez is ignored. Neither event calls engine functions or changes play.
+
+`--collector iceInstallsByServer` is a diagnostic (no gate direction): per
+game, completed Corp ICE installs by destination kind (`hq`, `rd`,
+`archives`, and remotes by harness-true root: `agendaRemote`, `trapRemote`,
+`otherRemote`, `emptyRemote`), each with `count`, `firstTurn` (0 if none),
+summed printed `rezCost` and `strength`, plus `thirdLayerOrDeeper`. It reads
+the `iceInstalled` event, emitted when Corp ICE is first seen on the board
+between engine steps (ICE on a start board is marked at game start without an
+event; ICE moved between servers is not a new install).
+
 ## Checking the F3 security cache
 
 `node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`
