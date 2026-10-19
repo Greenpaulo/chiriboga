@@ -888,7 +888,7 @@ The [L8.9 calibration](corp-ai/measurements/L8.9-aac6ea9-stage1-calibration.json
 uses 2,800 versus 2,798 successful controls and retains both failed records.
 Its four noise envelopes are baseline-specific and broad; they are not universal
 I3/I5 tolerances or proof of acceptable strategic harm. The
-[delivery ticket](backlog/L8.9-observable-defense-parity.md) links the findings,
+[delivery ticket](backlog/code-review/L8.9-observable-defense-parity.md) links the findings,
 full historical analysis and limitations.
 
 `defense-guard-calibration.js <on-1-200> <on-201-400> <on-401-800> <output.json>`

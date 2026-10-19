@@ -522,7 +522,7 @@ option-only green tests were removed. Do not retry the same relative-depth
 formula or relax its gate after these results. Passive measurement, reporting
 and control-calibration evidence remain useful. See the
 [L8.2 failure record](../backlog/done/feature-layer-8-2-remote-deception-profiles.md);
-[L8.9](../backlog/L8.9-observable-defense-parity.md) delivers passive attribution;
+[L8.9](../backlog/code-review/L8.9-observable-defense-parity.md) delivers passive attribution;
 installation and holding changes belong to I3/I4/I5 and their own gates.
 
 **Agenda bluff probability.** `_shouldBluffAgendaServer()` rolls once per

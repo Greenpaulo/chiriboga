@@ -82,7 +82,7 @@ and the engine must not stop scheduling because the selected command is undefine
 
 ## Out of scope / related
 
-Found during [L8.9 Stage 1](../backlog/L8.9-observable-defense-parity.md).
+Found during [L8.9 Stage 1](../backlog/code-review/L8.9-observable-defense-parity.md).
 No existing open ticket covered Seamless Launch's empty-resolution mechanism.
 The completed Humanoid Resources install-stall and Scrounge unaffordable-install
 tickets have similar Null command symptoms but different card/lifecycle causes;

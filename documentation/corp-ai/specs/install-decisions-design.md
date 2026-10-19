@@ -50,7 +50,7 @@ card-definition example.
 
 ## Measurement handoff from L8.9
 
-[L8.9](../../backlog/L8.9-observable-defense-parity.md) delivers passive installation,
+[L8.9](../../backlog/code-review/L8.9-observable-defense-parity.md) delivers passive installation,
 defense and lifecycle tools; it owns no admission/holding rule. I3/I4/I5 retain
 those decisions. Before changing installation policy, use the
 [tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets)

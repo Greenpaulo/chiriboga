@@ -1,7 +1,7 @@
 # I5 Asset, ambush and economy value
 
 **Roadmap item:** I5 · **Depends on:** I3, L8.10, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** [L8.9 tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](../../backlog/L8.9-observable-defense-parity.md), [I3.1](I3.1-deck-game-plan-profile.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
+**Read first:** [L8.9 tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](../../backlog/code-review/L8.9-observable-defense-parity.md), [I3.1](I3.1-deck-game-plan-profile.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 376f32c (2026-09-25)
 
 ## Goal

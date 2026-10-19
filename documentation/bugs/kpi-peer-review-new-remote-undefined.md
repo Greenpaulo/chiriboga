@@ -80,7 +80,7 @@ an undefined function, and new remotes must use the normal install lifecycle.
 
 ## Out of scope / related
 
-Found during [L8.9 Stage 1](../backlog/L8.9-observable-defense-parity.md).
+Found during [L8.9 Stage 1](../backlog/code-review/L8.9-observable-defense-parity.md).
 The Snare! “Specific case” candidate route does not call this helper and is not
 the failing path. No existing bug/backlog ticket covered this mechanism when
 searched on 2026-10-19. Baseline repair is not implemented by this triage.

@@ -33,7 +33,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Shared collector and identity evidence delivered; L8.2 records fresh usable controls after its passive-label correction |
 | — | [L8.2](../backlog/done/feature-layer-8-2-remote-deception-profiles.md) | not adopted (merged) | Main merged into the I2 branch; observer/collector repairs and failure evidence retained, policy removed |
 | 1 | [I2](../backlog/code-review/I2-ice-selection-by-marginal-security.md) | in-progress | Phase B gate run 2 passed (7,000 pairs, seeds 1601–2600); `iceMarginalSecurity` on; 100 full test files passed; ready for review |
-| 2 | [L8.9](../backlog/L8.9-observable-defense-parity.md) | in-progress (owner authorized current I2 review branch) | Deliver passive install/lifecycle observations, offline analysis and completed control calibration; hand findings/tool usage to I3/I5 and shell-plan coverage to I3.1; no installation restriction |
+| 2 | [L8.9](../backlog/code-review/L8.9-observable-defense-parity.md) | in-progress (owner authorized current I2 review branch) | Deliver passive install/lifecycle observations, offline analysis and completed control calibration; hand findings/tool usage to I3/I5 and shell-plan coverage to I3.1; no installation restriction |
 | 3 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Reuse L8.9's measurement tools and findings; re-ground the spec and resolve [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) before freezing the design; fresh control and separate policy gates |
 
 F11 and F12 are done. L8.2 was not adopted (full gate failed; policy removed),
@@ -120,7 +120,7 @@ price yet.
 ### L8.9 Observable-defense measurement and attribution
 - **Status:** in-progress
 - **Depends on:** I2, F4, F11, F12, L8.4
-- **Ticket:** [L8.9-observable-defense-parity.md](../backlog/L8.9-observable-defense-parity.md)
+- **Ticket:** [L8.9-observable-defense-parity.md](../backlog/code-review/L8.9-observable-defense-parity.md)
 - **Goal:** Deliver passive install/lifecycle attribution, saved-report tools and baseline-specific calibration; installation/hold policy belongs to the I tickets. The proposed bare-trap restriction was withdrawn without implementation.
 
 ### L8.10 Trap mechanics and play-value diagnostics
