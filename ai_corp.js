@@ -1208,7 +1208,7 @@ class CorpAI {
 
   //this damage is potential because the run could jack out/prevent, not because we don't know the cards
   //this function assumes the runner is mid-run on this server
-  _potentialDamageOnBreach(server) {
+  _potentialDamageOnBreach(server, quiet = false) {
     if (!server) return 0;
     var ret = 0;
     //1 if it is contains an agenda and identity is Jinteki:PE (unless Runner wins before PE fires)
@@ -1248,7 +1248,7 @@ class CorpAI {
       creditsLeft -= 2;
       ret++;
     }
-    this._log("Could do " + ret + " damage on breach");
+    if (!quiet) this._log("Could do " + ret + " damage on breach");
     return ret;
   }
 
@@ -3779,6 +3779,16 @@ class CorpAI {
     //proof of security: let the per-layer lower-bound planner decide instead.
     if (unknown && !best) return null;
     var last = best ? best.last : null;
+    // RunCalculator recursively continues past installed finite-run defenders.
+    // Global-only providers still need their repeated cost added below.
+    var modelledGlobalETRUses = best ? InstalledCards(corp).reduce((total, card) => {
+      if (best.rc._ignoredIce.has(card) || !PlayerCanLook(corp, card) ||
+          typeof card.AIRunExtraRuns != "function" ||
+          !(card.AIRunExtraRuns.call(card, server) > 0) ||
+          typeof card.AIGlobalETRUses != "function") return total;
+      var uses = Number(card.AIGlobalETRUses.call(card, server));
+      return total + (isFinite(uses) ? Math.max(0, Math.floor(uses)) : 0);
+    }, 0) : 0;
     var cost = last ? last.runner_credits_spent + last.runner_credits_lost +
       (last.runner_credits_reserved || 0) : Infinity;
     return {
@@ -3788,6 +3798,7 @@ class CorpAI {
       unpricedMandatory: unpricedMandatory,
       unpricedAvoidance: unpricedAvoidance,
       routeFeasible: !!last,
+      modelledGlobalETRUses: modelledGlobalETRUses,
       restrictedCreditsPaid: last ? last.restrictedCreditsPaid || 0 : 0,
       routeDamage: last ? best.rc.TotalDamage(best.rc.TotalEffect(last)) : 0,
       reasons: [last ? "restricted-credit route is feasible" : "no feasible restricted-credit route"]
@@ -4258,9 +4269,13 @@ class CorpAI {
       if (approach.active && !result.honestIsSecure && typeof restrictedCost == "number" && isFinite(restrictedCost)) {
         //The calculator's route has no click split: price it as one credit layer.
         var restrictedLayers = [];
-        var restrictedRepeats = 1 + (serverLockout ? 0 : globalETRUses);
+        var restrictedRepeats = 1 + (serverLockout ? 0 :
+          Math.max(0, globalETRUses - (plan.modelledGlobalETRUses || 0)));
         for (var restrictedRepeat = 0; restrictedRepeat < restrictedRepeats; restrictedRepeat++)
-          restrictedLayers.push({card: null, options: [{credits: restrictedCost, clicks: 0}]}, ...approach.layers);
+          restrictedLayers.push({card: null, options: [{credits: restrictedCost, clicks: 0}]});
+        // Approach payments are absent from the calculator's ICE route.
+        for (var approachRepeat = 0; approachRepeat < 1 + (serverLockout ? 0 : globalETRUses); approachRepeat++)
+          restrictedLayers.push(...approach.layers);
         var restrictedVerdict = this._honestRouteVerdict(restrictedLayers, result.runnerCredits, clickBudget, clickCredits);
         var restrictedRoute = restrictedVerdict.feasible || restrictedVerdict.cheapest;
         result.honestRestrictedRoute = false;

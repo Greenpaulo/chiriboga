@@ -90,4 +90,23 @@ test('I2: snapshots without kind (older harness) add no rows', () => {
   const {samples} = playSamples([{type: 'gameStart'}, snapshot([server('HQ', true, true)]), {type: 'gameEnd'}]);
   assert.deepStrictEqual(samples, {rows: [], next: []});
 });
+test('physical replacement excludes next-turn samples even with identical title and rez state', () => {
+  const {createSecuritySignature} = require('../scripts/ai-batch/headless');
+  for (const area of ['ice', 'root']) {
+    const signature = createSecuritySignature();
+    const board = {ice: [{title: 'ICE', rezzed: true}], root: [{title: 'Root', rezzed: false}]};
+    const before = signature(board);
+    assert.strictEqual(signature(board), before, 'same physical board stays stable');
+    board[area][0] = {...board[area][0]};
+    const after = signature(board);
+    assert.notStrictEqual(after, before, area + ' replacement changes signature');
+    const {samples} = playSamples([{type: 'gameStart'},
+      snapshot([i2('HQ', 'hq', '0..1', '2..4', before)]), {type: 'turnEnd', side: 'runner'},
+      snapshot([i2('HQ', 'hq', '0..1', '2..4', after)]), {type: 'turnEnd', side: 'runner'},
+      snapshot([i2('HQ', 'hq', '0..1', '2..4', after)]), {type: 'gameEnd'}]);
+    assert.deepStrictEqual(samples.next, [['hq', '2..4', 0]], 'only unchanged physical board carries prediction');
+    board[area][0].rezzed = !board[area][0].rezzed;
+    assert.notStrictEqual(signature(board), after, 'rez state remains part of signature');
+  }
+});
 console.log(tests + ' securityCalibration cases passed.');

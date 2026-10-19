@@ -1649,9 +1649,11 @@ server's chosen ICE rez plan and of the counted unrezzed approach defences. The
 security evaluator calls the hook for every root card in `server`, rezzed or
 (when the rez is fundable with that plan) unrezzed, including detached
 hypothetical servers, so it must be pure: no state, logging or `preferred`, and
-no reads of `attackedServer`. It feeds only the observation-only honest
-fields (`honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`, I2's
-breach margin); compatibility `isSecure` and `hasHardLockout` ignore it.
+no reads of `attackedServer`. It feeds the honest fields
+(`honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`) and I2's
+breach margin. With `iceMarginalSecurity` enabled (the default), these affect
+live ICE-install ranking through `_marginalIceScore()`; compatibility
+`isSecure` and `hasHardLockout` ignore it.
 Effects that stop a successful run rather than charge on approach (for
 example Flagship) are breach prevention, not approach defences.
 
@@ -1659,7 +1661,7 @@ example Flagship) are breach prevention, not approach defences.
 // Manegarm Skunkworks: [click][click] or 5[c], unless the breach is lethal
 AIApproachDefense: function (server) {
   if (!server) return null;
-  if (corp.AI._potentialDamageOnBreach(server) > runner.grip.length) return null;
+  if (corp.AI._potentialDamageOnBreach(server, true) > runner.grip.length) return null;
   return {runnerOptions: [{credits: 5, clicks: 0}, {credits: 0, clicks: 2}], corpEndsRunUses: 0};
 },
 ```
@@ -1732,7 +1734,12 @@ AIPreventBreach: function(server) {
 },
 ```
 
-**`AIWouldTrigger()`**
+**`AIWouldTrigger(server?)`**
+
+An optional server argument supports pure planning against detached hypothetical
+servers. Anoetic Void uses it when supplied and otherwise falls back to
+`GetServer(this)`; runtime callers may omit it. Planning callers must use a
+quiet damage calculation (the second argument to `_potentialDamageOnBreach`).
 
 Return `true` to allow an upgrade's defensive ability to fire. Return `false` to suppress it:
 
@@ -1746,9 +1753,10 @@ AIWouldTrigger: function() {
 
 ```js
 // Anoetic Void: don't fire if there is an ambush in the server, or no cards to discard from HQ
-AIWouldTrigger: function() {
-    if (corp.AI._isAmbush(GetServer(this))) return false;
-    var cardsInServer = GetServer(this).root.length + (GetServer(this).cards || []).length;
+AIWouldTrigger: function(server) {
+    var thisServer = server || GetServer(this);
+    if (corp.AI._isAmbush(thisServer)) return false;
+    var cardsInServer = thisServer.root.length + (thisServer.cards || []).length;
     if (cardsInServer < 2) return false;
     if (corp.HQ.cards.length - corp.AI._agendasInHand() < 2) return false;
     return true;

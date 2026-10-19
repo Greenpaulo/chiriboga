@@ -2813,6 +2813,52 @@ test('I2 M4: Anoetic Void uses follow its AIWouldTrigger, Corp credits and HQ si
   hand(10); corp.creditPool = 5;
   assert.strictEqual(uses(rootServer([voidCard(), asset])).corpEndsRunUses, 2, 'credits limit uses');
 });
+test('I2 restricted approach route counts modelled and global-only reruns separately', () => {
+  context.playerTurn = corp; runner.creditPool = 100;
+  const srv = rootServer([]);
+  const original = ai._approachDefenses;
+  try {
+    for (const [globalUses, modelled, approachUses, expected] of [
+      [1, 1, 0, 16], // calculator's 10-credit route plus two 3-credit approach payments
+      [1, 0, 0, 26], // global-only ETR still repeats the route
+      [0, 0, 1, 26], // approach ETR repeats it as well
+      [1, 1, 1, 29], // mixed sources: only the extra approach ETR repeats the route
+    ]) {
+      ai._approachDefenses = () => ({active: true, corpEndsRunUses: approachUses,
+        layers: [{options: [{credits: 3, clicks: 0}]}]});
+      const result = {runnerCredits: 100, reasons: [], hasHardLockout: false,
+        isSecure: false, totalMandatoryBreakCost: 10, totalBreakCost: 10};
+      ai._addHonestVerdict(result, {modelledGlobalETRUses: modelled},
+        {clickCredits: 0}, srv, false, globalUses, []);
+      assert.strictEqual(result.honestMandatoryBreakCost, expected);
+      assert.strictEqual(result.honestIsSecure, false);
+    }
+  } finally { ai._approachDefenses = original; }
+});
+test('I2 restricted calculator records only finite-run global ETR providers', () => {
+  context.playerTurn = corp; runner.creditPool = 100;
+  runner.cards = [{title: 'Restricted source', AIRunRestrictedCredits: () => 1}];
+  const defender = {title: 'Finite ETR', rezzed: true, AIRunExtraRuns: () => 1, AIGlobalETRUses: () => 1};
+  const globalOnly = {title: 'Global-only ETR', rezzed: true, AIGlobalETRUses: () => 1};
+  const srv = rootServer([defender, globalOnly]);
+  const plan = ai._restrictedPaymentPlanOutcome(srv, [], ai._securityEvaluationContext(srv));
+  assert.strictEqual(plan.routeFeasible, true);
+  assert.strictEqual(plan.modelledGlobalETRUses, 1);
+});
+test('I2 Manegarm approach planning is quiet while ordinary breach evaluation logs', () => {
+  corp.identityCard = {title: 'Regression ID'};
+  const manegarm = Object.assign(card(30042), {rezzed: true});
+  const srv = rootServer([manegarm]);
+  const original = ai._log;
+  const messages = [];
+  ai._log = message => messages.push(message);
+  try {
+    assert.ok(manegarm.AIApproachDefense(srv));
+    assert.deepStrictEqual(messages, []);
+    assert.strictEqual(ai._potentialDamageOnBreach(srv), 0);
+    assert.deepStrictEqual(messages, ['Could do 0 damage on breach']);
+  } finally { ai._log = original; }
+});
 test('I2 M2: breach hazard is non-decreasing in margin and turn 2 adds projected income', () => {
   const kinds = ['agendaRemote', 'otherRemote', 'hq', 'rd', 'archives'];
   const margins = [-Infinity, -6, -4, -3, -1, 0, 1, 2, 4, 5, 9, 10, 20];

@@ -58,7 +58,8 @@ with its calibrated policy not adopted after a failed gate;
 the shared breach-consequence signal and supporting fixes remain.
 **Layer 8** is partly done (baiting, shared profiles and tag deterrence are
 done, including L8.4 bounded epochs and L8.5 public outcome feedback;
-L8.2 is open, L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic cannot
+L8.2's policy was not adopted, while its observer/collector work remains;
+L8.6 is optional). L9 covers run-simulation effects the per-ICE heuristic cannot
 price yet.
 
 ### L3.5.1 Value-weighted protection debt

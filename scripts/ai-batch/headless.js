@@ -129,6 +129,17 @@ function createRootTracker(emit) {
   };
 }
 
+// Stable physical-card identities for unchanged-board calibration comparisons.
+function createSecuritySignature() {
+  const ids = new WeakMap();
+  let next = 0;
+  const entry = card => {
+    if (!ids.has(card)) ids.set(card, ++next);
+    return [ids.get(card), card.title, !!card.rezzed];
+  };
+  return server => JSON.stringify([server.ice.map(entry), server.root.map(entry)]);
+}
+
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
 //   testOption (a no-op Corp option name, for the harness's own tests),
@@ -179,6 +190,7 @@ function playGame(options) {
   let logLines = 0, steps = 0;
   const immediates = new Set();
   const context = {
+    __securitySignature: createSecuritySignature(),
     console: {log() {}, warn() {}, error: (...parts) => {
       const message = parts.join(' ');
       logTail.push('ERROR ' + message);
@@ -286,8 +298,7 @@ function playGame(options) {
         margin: isFinite(m.margin) ? m.margin : null, upperBound: isFinite(m.upperBound) ? m.upperBound : null,
         bucket: corp.AI._breachMarginBucket(m.margin), bucket2: corp.AI._breachMarginBucket(later),
         iceCount: s.ice.length, publicThreatRisk: r.publicThreatRisk, approachDefense: !!r.approachDefense,
-        signature: JSON.stringify([s.ice.map(function (c) { return [c.title, !!c.rezzed]; }),
-          s.root.map(function (c) { return [c.title, !!c.rezzed]; })])};
+        signature: __securitySignature(s)};
     })`)));
   let snapshotPending = false;
   let defenseSnapshotPending = false;
@@ -651,4 +662,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};
+module.exports = {createSecuritySignature, playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};
