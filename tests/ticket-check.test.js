@@ -11,7 +11,7 @@ const source = fs.readFileSync(script, 'utf8');
 const ticket = 'documentation/bugs/code-review/review-fixture.md';
 const pending = 'tests/pending/review-fixture.test.js';
 
-function check({reproduction = pending, exists = true, option = 'removedOption', code = '', gate} = {}) {
+function check({reproduction = pending, exists = true, option = 'removedOption', code = '', gate, fast = false, extraArgs = []} = {}) {
   const files = new Map([
     [path.join(root, ticket), '# Fixture\n\n**Outcome:** not adopted — failed gate\n' +
       '**Reproduction:** `' + reproduction + '`\n\n## Resolution\n\nImplemented from `1fdb396`.\n\n' +
@@ -22,7 +22,7 @@ function check({reproduction = pending, exists = true, option = 'removedOption',
   if (exists) files.set(path.join(root, reproduction), '// reproduction');
   const output = [];
   let suiteRuns = 0;
-  const processStub = {execPath: process.execPath, argv: [process.execPath, script, 'check', ticket], exitCode: 0};
+  const processStub = {execPath: process.execPath, argv: [process.execPath, script, 'check', ticket, ...(fast ? ['--fast'] : []), ...extraArgs], exitCode: 0};
   const moduleStub = {exports: {}};
   function requireStub(name) {
     if (name === 'fs') return {
@@ -34,7 +34,7 @@ function check({reproduction = pending, exists = true, option = 'removedOption',
     };
     if (name === 'child_process') return {spawnSync: (command, args) => {
       if (command === process.execPath) {
-        assert.deepStrictEqual(Array.from(args), ['tests/run-all-tests.js']);
+        assert.deepStrictEqual(Array.from(args), ['tests/run-all-tests.js', ...(fast ? ['--fast'] : [])]);
         suiteRuns++;
         return {status: 0, stdout: '54 test files passed.\n', stderr: ''};
       }
@@ -51,7 +51,7 @@ function check({reproduction = pending, exists = true, option = 'removedOption',
     require: requireStub, module: moduleStub, __dirname: path.dirname(script),
     process: processStub, console: {log: message => output.push(message)},
   }, {filename: script});
-  assert.strictEqual(suiteRuns, 1, 'check still runs the regression suite');
+  assert.strictEqual(suiteRuns, extraArgs.length ? 0 : 1, 'valid checks run the selected regression suite');
   return {status: processStub.exitCode, output: output.join('\n')};
 }
 
@@ -98,4 +98,11 @@ const malformed = check({gate: 'failed — see `ai_corp.js`'});
 assert.strictEqual(malformed.status, 1, malformed.output);
 assert.match(malformed.output, /FAIL.*does not name its AI option/);
 
-console.log('Ticket check: pending reproduction and failed gate integration checks passed.');
+
+const fastCheck = check({fast: true});
+assert.strictEqual(fastCheck.status, 0, fastCheck.output);
+assert.match(fastCheck.output, /PASS.*Fast suite:/);
+assert.match(check().output, /PASS.*Full suite:/);
+assert.strictEqual(check({extraArgs: ['--unknown']}).status, 1);
+
+console.log('Ticket check: full/fast selection, pending reproduction and failed gate checks passed.');

@@ -846,8 +846,7 @@ cardSet[36009] = {
           "using",
           this,
           function () {
-            Draw(runner, 1);
-            RemoveTags(1);
+            Draw(runner, 1, function () { RemoveTags(1); });
           },
           this,
         );
@@ -2884,9 +2883,9 @@ cardSet[36036] = {
     return "Disposal Grounds";
   },
   _departmentImageFile: function () {
-    if (this.department == "HQ") return "36036-0.webp";
-    if (this.department == "R&D") return "36036-1.webp";
-    return "36036-2.webp";
+    if (this.department == "HQ") return "36036-0.jpg";
+    if (this.department == "R&D") return "36036-1.jpg";
+    return "36036-2.jpg";
   },
   _showIdentityFace: function (imageFile) {
     this.imageFile = imageFile;
@@ -3867,9 +3866,9 @@ cardSet[36044] = {
   },
   Resolve: function (params) {
     if (!params || !params.card || runner.tags < 1 || params.card.rezzed) return;
-    RemoveTags(1);
     var source = this;
     var target = params.card;
+    RemoveTags(1, function () {
     Rez(
       target,
       true,
@@ -3881,6 +3880,7 @@ cardSet[36044] = {
         this._offerSubroutine(target);
       },
     );
+    }, source);
   },
   AIWouldPlay: function () {
     return this.Enumerate().length > 0;
@@ -4087,10 +4087,8 @@ cardSet[36047] = {
   responseOnCorpActionPhaseEnds: {
     Resolve: function () {
       if (!this.scoredThisTurn) return;
-      RemoveTags(runner.tags);
-      AddTags(3);
+      RemoveTags(runner.tags, function () { AddTags(3); });
     },
-    automatic: true,
   },
 };
 
@@ -4153,14 +4151,14 @@ cardSet[36049] = {
   },
   responseOnCorpTurnBegins: {
     Resolve: function () {
-      RemoveTags(1);
-      if (corp.badPublicity > 0) {
-        corp.badPublicity -= 1;
-        Log("1 bad publicity removed");
-        UpdateCounters();
-      }
+      RemoveTags(1, function () {
+        if (corp.badPublicity > 0) {
+          corp.badPublicity -= 1;
+          Log("1 bad publicity removed");
+          UpdateCounters();
+        }
+      });
     },
-    automatic: true,
   },
   responseOnCorpDiscardEnds: {
     Resolve: function () {
