@@ -1,6 +1,6 @@
 'use strict';
 // Real engine reproduction: rewinding with Rotary installed must keep its
-// Corp-only ability usable (documentation/bugs/rewind-corrupts-runner-card-corp-abilities.md).
+// Corp-only ability usable (documentation/bugs/code-review/rewind-corrupts-runner-card-corp-abilities.md).
 const assert = require('assert');
 const path = require('path');
 const root = path.resolve(__dirname, path.basename(__dirname) === 'pending' ? '../..' : '..');

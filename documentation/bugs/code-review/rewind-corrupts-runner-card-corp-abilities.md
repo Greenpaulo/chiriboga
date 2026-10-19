@@ -13,9 +13,21 @@ and `runnerAbilities` are already handled; no AI choice changes. The
 reproduction moved to `tests/` with its assertions unchanged. It runs a real
 headless game with `sets/vantagepoint.js` loaded, because `_headless-board.js`
 loads only the trusted sets and Rotary is in Vantage Point.
-`node tests/run-all-tests.js`: 93 of 95 pass; `flipped-identity` and
-`vantagepoint-integration` fail only because the worktree has no `images/`
-(gitignored card art).
+The initial `node tests/run-all-tests.js` run passed 93 of 95 files;
+`flipped-identity` and `vantagepoint-integration` failed because the worktree
+had no `images/` (gitignored card art). The later
+`node scripts/ticket.js check documentation/bugs/code-review/rewind-corrupts-runner-card-corp-abilities.md`
+passed all 95 test files. The [PR #62 description](https://github.com/Greenpaulo/chiriboga/pull/62)
+records the final command and output:
+
+```text
+PASS Reproduction moved to tests/rewind-restores-corp-abilities.test.js unchanged.
+PASS Reproduction passes.
+PASS Full suite: 95 test files passed.
+```
+
+That check ended with `Ticket check passed.` and supersedes the initial
+93-of-95 result; no test failures are accepted by the checked criterion below.
 
 ## Summary
 After a rewind while the Runner has Rotary installed, the game throws
