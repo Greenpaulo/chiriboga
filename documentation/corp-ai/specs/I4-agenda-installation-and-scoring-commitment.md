@@ -251,8 +251,11 @@ proves this.
   `AgendaPoints(runner) + points ≥ AgendaPointsToWin()`. For each option let
   `W` be the probability the Runner wins by taking this agenda within `H`:
   `P(stolen)` for a destination (0 when `E = 0`, or when M1 is an honest
-  lockout, `−Infinity`, on every exposed turn); for hold, `1 − Π(1 − m5_t)`
-  plus `discardLoss`'s probability. Refusing to install can also lose, so
+  lockout, `−Infinity`, on every exposed turn). For hold, let `d_t` be
+  the discard-loss probability conditional on surviving HQ theft and all prior
+  turns: `W(hold) = 1 − Π_t((1 − m5_t) × (1 − d_t))`, where `m5_t`
+  is also conditional on prior survival. For one turn this is
+  `m5_1 + (1 − m5_1) × d_1`, bounded by one. Refusing to install can also lose, so
   this is not a one-sided veto: keep the options with the smallest `W`
   (within 0.01), then rank those by EV. When other agendas in HQ already let
   the Runner win from an HQ breach, `W(hold)` uses

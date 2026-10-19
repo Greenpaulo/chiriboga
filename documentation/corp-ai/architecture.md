@@ -155,8 +155,7 @@ lockouts; the supported exact restricted-credit route copies today's verdict. Th
 `securityCalibration` collector compares both verdicts with next-turn
 breaches.
 
-**Breach margin, hazard and approach defences (I2 phase A, observation
-only).** `_approachDefenses()` reads the root-card hook `AIApproachDefense`
+**Breach margin, hazard and approach defences (I2 phases A and B).** `_approachDefenses()` reads the root-card hook `AIApproachDefense`
 (Manegarm Skunkworks, Anoetic Void) for the honest route only: a rezzed card
 counts, an unrezzed one only when `_canFundRezPlan()` can fund it with the
 chosen ICE rez plan. Its `runnerOptions` become one extra layer after the
@@ -174,8 +173,14 @@ kind (`_breachKind()`) and margin bucket (`_breachMarginBucket()`), adding
 `_projectedRunnerIncome()` per later turn. The table and
 `CORP_AI_POINT_VALUE` are measured by
 `scripts/ai-batch/breach-hazard-table.js` from `securityCalibration` samples
-(evidence in `measurements/I2-15d485d-breach-hazard-calibration.json`). No
-decision reads any of them yet; I2 phase B is the first planned consumer.
+(evidence in `measurements/I2-15d485d-breach-hazard-calibration.json`).
+The held-out reliability and next-turn checks failed. The table was adopted
+on the phase B F4 gate result, rather than a successful calibration check.
+I2 phase B consumes the margin, table and point value through
+`_marginalIceScore()` with `iceMarginalSecurity` enabled by default.
+Its `_marginalHazard()` holds the next-turn hazard across the horizon.
+The per-turn income drift above belongs only to `_breachHazard()`, which
+has no decision consumer.
 
 **Global adoption rejected (L9.0.1).** The experiment switched all existing
 security consumers to the honest verdict. Its paired core-v1 gate failed:

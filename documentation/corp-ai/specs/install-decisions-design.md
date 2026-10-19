@@ -442,8 +442,9 @@ because refusing to install can also lose.
   overstate steal risk where accesses miss).
 - One-step lookahead could defer indefinitely; the I4 guard (scheduled
   improvement, at most 2 Corp turns) must be tested.
-- With `H` = 2, an agenda needing more Runner turns than `H` to score earns
-  no score inside the horizon; I4 extends that agenda's window to its M3.
+- With `H` = 2, I4's M3 limits exposure turns `E` to `0..H`.
+  Plans requiring more than `H` Runner turns are excluded; the agenda's
+  evaluation window is not extended beyond the shared horizon.
 - Deception (L8) stays a separate bounded input; bluff value is not part of
   this EV.
 

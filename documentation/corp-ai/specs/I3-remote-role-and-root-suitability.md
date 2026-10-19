@@ -86,7 +86,9 @@ All values are in expected agenda points over the design note's short horizon
 
 **1. Scoring remote: `_scoringRemote(context)`.** Candidates are every remote
 whose root holds no asset and no agenda other than one already being scored
-there, plus a new remote. For each, project M2 (`breachHazard`, server kind
+there, plus a new remote. The incumbent scoring remote remains eligible
+when its agenda is replaced by an Ambush asset, preserving its persisted role
+and expected scoring stakes under that substitution (scenario 6). For each, project M2 (`breachHazard`, server kind
 "agenda remote") after the best ICE investment affordable from projected Corp
 credits within `H`, using I2's `(ICE, server)` hypothetical evaluation and
 re-evaluating M1 against projected Runner income each turn (as the design note
@@ -105,8 +107,10 @@ Zero unless `server` is the scoring remote. Otherwise the expected agenda
 points that will pass through it within `H`: agenda points in HQ (Corp-known)
 plus expected agenda points drawn from R&D (R&D agenda density × planned
 draws), minus the expected points stolen from HQ/R&D before they are installed
-(M5 for HQ, M2 × accesses × density for R&D), capped by what the Corp can
-advance in `H` (`_potentialAdvancement()` per turn). The stolen-from-centrals
+(M5 for HQ, M2 × accesses × density for R&D). Discount only theft
+attributable to that projected supply, rather than unrelated agendas remaining
+in R&D. Cap the result by what the Corp can advance in `H`
+(`_potentialAdvancement()` per turn), then floor the final stakes at zero. The stolen-from-centrals
 discount is how "stop investing in remotes while centrals collapse" survives:
 when centrals leak, fewer agendas reach the remote, so I2 values remote ICE
 less and central ICE more, in the same unit. `_classifyRunnerMacroThreat().focus`

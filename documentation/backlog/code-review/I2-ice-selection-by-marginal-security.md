@@ -1052,7 +1052,7 @@ Missing samples are incomplete setup, not a pass.
 **Phase B**
 
 - [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [x] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [x] The behaviour change was evaluated behind the default-off `iceMarginalSecurity` option; after the recorded gate passed, adoption changed its default to on (see Resolution).
 - [x] Ordinary ICE-install generation no longer calls `_serverToProtect(..., targetIsEligible)`.
 - [x] The `strandedUnrezzedIceCost` collector and its `credits` metric are added and verified against scripted install/rez outcomes.
 - [x] Posture-label coverage is checked on the pool before any phase B result: it meets F12's readiness rule, so the posture guard is on the pool command and the `i2-posture` boards are dropped (owner decision 2026-10-16; [evidence](../../corp-ai/measurements/I2-343b2be-posture-coverage.json)).

@@ -3467,7 +3467,7 @@ cardSet[30042] = {
   //for the evaluated server: a lethal breach is not stopped.
   AIApproachDefense: function (server) {
     if (!server) return null;
-    if (corp.AI._potentialDamageOnBreach(server) > runner.grip.length) return null;
+    if (corp.AI._potentialDamageOnBreach(server, true) > runner.grip.length) return null;
     return {runnerOptions: [{credits: 5, clicks: 0}, {credits: 0, clicks: 2}], corpEndsRunUses: 0};
   },
 };
