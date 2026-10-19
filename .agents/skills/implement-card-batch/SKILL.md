@@ -138,17 +138,20 @@ contrasts when needed to validate the mechanic; a full strategic audit of every
 scarce-resource, immediate-win and competing-use state is an optimisation task.
 Direct hook-return tests are useful supplements, not the only AI evidence.
 
-Work card by card: implement one card, run the focused test, then move to the
-next. Small failures are cheaper to fix than a batch's worth at once.
+Work card by card and run the affected focused tests as mechanics become
+ready to exercise. Use a broader fast check when shared changes warrant it,
+not once per card or edit. Reserve full validation for the final batch state;
+follow the test cadence in `tests/README.md`.
 
 ## 4. Verify
 
-- Run `node scripts/card-status.js` to regenerate
-  `documentation/card-status.md`, then run the focused tests, every command
-  under **Required shared verification** in the tracker, and
-  `node tests/run-all-tests.js` using the runtime pinned in `.nvmrc`, including
-  Corp decision fixtures and decision snapshots (excluding known-red pending
-  reproductions).
+- Regenerate `documentation/card-status.md` with `node scripts/card-status.js`
+  and complete the focused and **Required shared verification** checks needed
+  for the batch. Count a matching command already passed on the same inputs
+  once; retain checks with different arguments or environments. Defer the
+  shared full-suite command to the end of step 5 so it covers final metadata
+  and any set enablement too. Do not run both fast and full just to satisfy
+  overlapping checklists.
 - Rerun `node scripts/batch-brief.js <n>`: every card must show "no unfinished
   markers". Also check the range for empty effects and empty subroutine arrays.
 - Never remove or weaken assertions to make tests pass.
@@ -164,7 +167,9 @@ claim rows from the **Optimisation queue** as implementation work.
 `Complete` means implemented gameplay and usable baseline AI with required tests
 passing. Independent strategic review and optimisation have separate statuses.
 
-Only after every card and test in the batch is complete:
+Once every card and its focused checks are ready, prepare the final tracker
+updates below. Completion claims remain provisional until final validation
+passes; a related failure leaves the batch In progress or precisely Blocked.
 
 1. Mark the queue row `Complete` and refresh the summary counts.
 2. Append a completion-log row: date, agent name, focused test files, a concise
@@ -185,9 +190,18 @@ When the last batch completes, run the implementation integration checklist in
 Under this workflow, completing that checklist authorizes marking the set
 `playable` in `documentation/card-sets.md` and setting its registry
 `hidden: false`, `untested: false` together. Regenerate card status and run the
-relevant focused checks and full suite after those changes. Do not wait for
-`review-card-set`; queue review/optimisation independently. Record any failed
-integration gate without falsely claiming the set is implemented or playable.
+relevant focused checks after those changes. Include any full-suite command
+from the integration checklist in the single final validation below, after
+registry and playability changes. Do not wait for `review-card-set`; queue
+review/optimisation independently. Record any failed integration gate without
+falsely claiming the set is implemented or playable.
+
+When code, generated status, tracker and enablement changes are ready, run
+`node tests/run-all-tests.js` once using `.nvmrc`. It includes Corp decision
+fixtures/snapshots and excludes known-red pending reproductions. Do not run it
+per card or again for another checklist on the same inputs. Repair failures
+with focused checks before repeating final validation; follow `AGENTS.md` for
+pending runs. Only claim completion when required checks have passed.
 
 Do not commit, push or discard work. Report the batch and IDs, mechanics and
 baseline AI, tests/results, queued optimisation and next implementation batch or

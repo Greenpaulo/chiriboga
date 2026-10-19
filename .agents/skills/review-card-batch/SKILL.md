@@ -95,10 +95,17 @@ A missing necessary consumer or ignored strategic effect is unfinished work.
 If a deeper architecture dependency prevents support, name the precise missing
 capability and affected behavior rather than accepting it as a vague limitation.
 
-Run relevant focused tests, the selected set's required shared verification and
-`node tests/run-all-tests.js` on the Node runtime pinned by `.nvmrc`. This includes
-Corp decision fixtures and decision snapshots, excluding known-red pending
-reproductions. Check `node --version` first and select the installed pinned
+Exercise the focused decision paths needed for the review and complete the
+selected set's required shared verification, counting matching current results
+once. Reuse an evidenced full-suite pass only if its source/tests, runtime and
+relevant inputs match this review; otherwise run `node tests/run-all-tests.js`
+once on the final reviewed snapshot. During a set review, use the coordinator's
+shared full-suite result instead of starting one per batch. Focused strategic
+probes remain required; a green shared suite cannot replace them. Do not rerun
+full validation just to write the report or update review status. See the test
+cadence in `tests/README.md`. The full suite includes Corp decision fixtures and
+decision snapshots and excludes known-red pending reproductions. Check
+`node --version` first and select the installed pinned
 binary (for example, with `nvm use`) if the shell resolves an older runtime.
 Name every failure and distinguish related from demonstrated
 pre-existing failures. An unrelated failure prevents claiming a green suite;

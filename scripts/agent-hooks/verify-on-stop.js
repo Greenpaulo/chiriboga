@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 // Agent Stop hook (wired up in .codex/hooks.json). When the working tree has
-// code or test changes, run the full regression suite and refuse to let the
+// code or test changes, run the fast regression suite and refuse to let the
 // agent end its turn while it fails. The agent is sent back at most
 // MAX_BLOCKS times per session before it may stop and report the failure.
 //
@@ -74,7 +74,7 @@ const suiteEnv = Object.assign({}, process.env, {
   PATH: path.dirname(suiteNode) + path.delimiter + (process.env.PATH || ''),
 });
 
-const run = spawnSync(suiteNode, [path.join(root, 'tests', 'run-all-tests.js')],
+const run = spawnSync(suiteNode, [path.join(root, 'tests', 'run-all-tests.js'), '--fast'],
   {cwd: root, env: suiteEnv, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 if (run.status === 0) { resetCount(); process.exit(0); }
 
@@ -85,7 +85,7 @@ fs.writeFileSync(counterFile, String(blocks + 1));
 const tail = ((run.stdout || '') + (run.stderr || '')).trim().split('\n').slice(-60).join('\n');
 process.stdout.write(JSON.stringify({
   decision: 'block',
-  reason: 'Regression suite (Node ' + (suiteNode === pinnedNode ? nodeVersion : process.versions.node) + ') fails with the current working-tree changes (' +
+  reason: 'Fast regression suite (Node ' + (suiteNode === pinnedNode ? nodeVersion : process.versions.node) + ') fails with the current working-tree changes (' +
     relevant.length + ' changed code/test files). Fix the failure before finishing. ' +
     'If it is pre-existing and unrelated to your change, say so explicitly in your final ' +
     'message with the failing test name instead of claiming success.\n\n' + tail,

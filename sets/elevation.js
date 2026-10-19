@@ -9035,3 +9035,350 @@ cardSet[35046] = {
     text: "AU Co.: Look at top 3 of R&D",
   },
 };
+
+// Missing NBN batch. ELO: Trash or Busto, 2026-10-16.
+cardSet[35057] = {
+  title: "Nebula Talent Management: Making Stars",
+  imageFile: "35057.png",
+  elo: 1931,
+  player: corp,
+  faction: "NBN",
+  cardType: "identity",
+  subTypes: ["Division"],
+  deckSize: 45,
+  influenceLimit: 15,
+  flipped: false,
+  _showIdentityFace: function () {
+    this.imageFile = this.flipped ? "35057-0.jpg" : "35057.png";
+    if (typeof this.renderer !== "undefined" && typeof cardRenderer !== "undefined") {
+      var texture = cardRenderer.LoadTexture("images/" + ChangeImageFileToJPG(this.imageFile));
+      this.renderer.frontTexture = texture;
+      this.renderer.loresTexture = texture;
+      this.renderer.hiresTexture = null;
+      if (this.renderer.dummy) this.renderer.dummy.texture = texture;
+      if (typeof this.renderer.SetTextureToFront == "function") this.renderer.SetTextureToFront();
+    }
+  },
+  operationPlayedThisTurn: false,
+  _resetTurn: function () { this.operationPlayedThisTurn = false; },
+  responseOnCorpTurnBegins: { Resolve: function () { this._resetTurn(); }, automatic: true },
+  responseOnRunnerTurnBegins: { Resolve: function () { this._resetTurn(); }, automatic: true },
+  automaticOnPlay: {
+    Resolve: function (card) {
+      if (card.player != corp || card.cardType != "operation") return;
+      if (this.flipped && !this.operationPlayedThisTurn) GainClicks(corp, 1);
+      this.operationPlayedThisTurn = true;
+    },
+  },
+  responseOnCorpActionPhaseEnds: {
+    Resolve: function () {
+      if (!this.flipped && this.operationPlayedThisTurn) {
+        GainCredits(corp, 1, "", this);
+        this.flipped = true;
+        this._showIdentityFace();
+        Log(this.title + " flipped to its reverse side");
+      }
+    },
+    automatic: true,
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (this.flipped && (attackedServer == corp.HQ || attackedServer == corp.RnD)) {
+        this.flipped = false;
+        this._showIdentityFace();
+        Log(this.title + " flipped to its front side");
+      }
+    },
+    automatic: true,
+  },
+  AIOperationPlayClickGain: function (operation, thisTurn, playedInPlan) {
+    if (!thisTurn || !this.flipped || this.operationPlayedThisTurn || playedInPlan ||
+        operation.player != corp || operation.cardType != "operation") return 0;
+    return 1;
+  },
+};
+
+cardSet[35058] = {
+  title: "Synapse Global: Faster than Thought",
+  imageFile: "35058.png",
+  elo: 1418,
+  player: corp,
+  faction: "NBN",
+  cardType: "identity",
+  subTypes: ["Division"],
+  deckSize: 45,
+  influenceLimit: 15,
+  tagRemovedThisTurn: false,
+  installPending: false,
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.tagRemovedThisTurn = false; this.installPending = false; },
+    automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.tagRemovedThisTurn = false; this.installPending = false; },
+    automatic: true,
+  },
+  automaticOnRemoveTags: {
+    Resolve: function () {
+      this.installPending = !this.tagRemovedThisTurn;
+      this.tagRemovedThisTurn = true;
+    },
+  },
+  responseOnRemoveTags: {
+    Enumerate: function () {
+      if (!this.installPending) return [];
+      var choices = ChoicesArrayInstall(corp.HQ.cards, true);
+      if (corp.AI) {
+        var index = corp.AI._bestInstallOption(choices, false);
+        if (index >= 0) return [choices[index]];
+        // The action planner can withhold installs outside the action phase.
+        // A free, revealed install still has a useful baseline route here.
+        var useful = choices.filter(function (choice) {
+          if (choice.card.cardType == "agenda") return choice.server &&
+            choice.server.ice.length > 0 && !choice.server.root.some(function (card) {
+              return card.cardType == "agenda" || card.cardType == "asset";
+            });
+          if (choice.card.cardType == "asset") return choice.server == null &&
+            RezCost(choice.card) <= Credits(corp);
+          return choice.card.cardType == "ice" && choice.server &&
+            choice.server.cards && RezCost(choice.card) <= Credits(corp);
+        });
+        useful.sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });
+        return useful.length ? [useful[0]] : [];
+      }
+      if (choices.length) choices.push({decline: true, label: "Decline", button: "Decline"});
+      return choices;
+    },
+    Resolve: function (params) {
+      this.installPending = false;
+      if (!params.card || !corp.HQ.cards.includes(params.card)) return;
+      Reveal(params.card, function () {
+        params.card.knownToRunner = true;
+        Install(params.card, params.server, true, null, true,
+          null, this, null, null, false);
+      }, this);
+    },
+    text: "Reveal and install 1 card from HQ, ignoring all costs",
+  },
+  abilities: [{
+    text: "[click], remove 1 tag: Gain 2[c].",
+    Enumerate: function () {
+      if (!CheckActionClicks(corp, 1) || runner.tags < 1) return [];
+      if (corp.AI && this.tagRemovedThisTurn && runner.tags < 2) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      SpendClicks(corp, 1);
+      RemoveTags(1, function () { GainCredits(corp, 2, "", this); }, this);
+    },
+  }],
+  AITriggerWhenCan: true,
+};
+
+cardSet[35059] = {
+  title: "Embedded Reporting",
+  imageFile: "35059.png",
+  elo: 1640,
+  player: corp,
+  faction: "NBN",
+  cardType: "agenda",
+  subTypes: ["Initiative"],
+  advancementRequirement: 3,
+  agendaPoints: 2,
+  advancement: 0,
+  agenda: 0,
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      var advancement = typeof intended.scoreAdvancement == "number" ? intended.scoreAdvancement : Counters(this, "advancement");
+      var requirement = typeof intended.scoreAdvancementRequirement == "number" ? intended.scoreAdvancementRequirement : AdvancementRequirement(this);
+      AddCounters(this, "agenda", 2 * Math.max(0, advancement - requirement));
+    },
+    automatic: true,
+  },
+  responseOnCorpDiscardEnds: {
+    Enumerate: function () {
+      if (!CheckCounters(this, "agenda", 1)) return [];
+      var choices = ChoicesArrayCards(corp.RnD.cards, function (card) {
+        return card.cardType == "operation";
+      });
+      // Searching can fail even when no operation remains in R&D.
+      choices.push({label: "Search without finding a card", button: "No card"});
+      if (corp.AI) {
+        var useful = choices.filter(function (choice) {
+          return choice.card && PlayCost(choice.card) <= Credits(corp) &&
+            (!choice.card.AIWouldPlay || choice.card.AIWouldPlay.call(choice.card));
+        });
+        useful.sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });
+        return useful.length ? [useful[0]] : [];
+      }
+      choices.push({decline: true, label: "Decline", button: "Decline"});
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params.decline) return;
+      RemoveCounters(this, "agenda", 1);
+      // Search shuffles before the selected card is put on top.
+      Shuffle(corp.RnD.cards);
+      if (params.card) Reveal(params.card, function () {
+        MoveCard(params.card, corp.RnD.cards);
+      }, this);
+    },
+    text: "Search R&D for an operation to put on top",
+  },
+  AIOverAdvance: true,
+  AIAdvancementLimit: function () {
+    return this.agenda > 0 ? 3 : 4;
+  },
+  AITriggerWhenCan: true,
+};
+
+cardSet[35060] = {
+  title: "Next Big Thing",
+  imageFile: "35060.png",
+  elo: 1628,
+  player: corp,
+  faction: "NBN",
+  cardType: "agenda",
+  subTypes: ["Initiative"],
+  advancementRequirement: 5,
+  agendaPoints: 3,
+  agenda: 0,
+  responseOnScored: {
+    Resolve: function () { if (intended.score == this) AddCounters(this, "agenda", 1); },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () { if (intended.steal == this) AddCounters(this, "agenda", 1); },
+    automatic: true,
+  },
+  _shuffleFromHQ: function () {
+    var choices = ChoicesArrayCards(corp.HQ.cards);
+    var done = {label: "Done", button: "Done"};
+    choices.push(done);
+    if (corp.AI) {
+      var choice = done;
+      if (corp.HQ.cards.length > MaxHandSize(corp)) {
+        var discardChoices = choices.slice(0, -1);
+        var index = corp.AI._bestDiscardOption(discardChoices);
+        if (index >= 0) choice = discardChoices[index];
+      }
+      corp.AI.preferred = {title: this.title, option: choice};
+    }
+    DecisionPhase(corp, choices, function (params) {
+      if (params.card && corp.HQ.cards.includes(params.card)) {
+        MoveCard(params.card, corp.RnD.cards);
+        this._shuffleFromHQ();
+      } else Shuffle(corp.RnD.cards);
+    }, this.title, "Choose cards to shuffle from HQ into R&D", this);
+  },
+  abilities: [{
+    text: "[click], hosted agenda counter: Draw 4 cards and shuffle cards from HQ into R&D.",
+    availableInRunnerScoreArea: true,
+    Enumerate: function () {
+      if (!CheckActionClicks(corp, 1) || !CheckCounters(this, "agenda", 1)) return [];
+      if (!corp.scoreArea.includes(this) && !runner.scoreArea.includes(this)) return [];
+      if (corp.AI && (corp.RnD.cards.length < 4 || corp.HQ.cards.length >= MaxHandSize(corp))) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      SpendClicks(corp, 1);
+      RemoveCounters(this, "agenda", 1);
+      Draw(corp, 4, this._shuffleFromHQ, this);
+    },
+  }],
+  AITriggerWhenCan: true,
+};
+
+cardSet[35065] = {
+  title: "Bigger Picture",
+  imageFile: "35065.png",
+  elo: 1496,
+  player: corp,
+  faction: "NBN",
+  influence: 2,
+  cardType: "operation",
+  subTypes: ["Gray Ops"],
+  playCost: 0,
+  Enumerate: function () {
+    if (runner.tags < 1) return [];
+    var choices = [{tags: -1, label: "Give the Runner 1 tag", button: "Give tag"}];
+    for (var tags = 0; tags <= runner.tags; tags++) choices.push({tags: tags,
+      label: "Remove " + tags + " tags; transfer up to " + (5 * tags) + "[c]", button: "Remove " + tags + " tags"});
+    if (corp.AI) {
+      if (runner.creditPool < 5) return [choices[0]];
+      var remove = Math.min(Math.ceil(runner.creditPool / 5), runner.tags);
+      return [choices[remove + 1]];
+    }
+    return choices;
+  },
+  Resolve: function (params) {
+    if (params.tags == -1) { AddTags(1); return; }
+    RemoveTags(params.tags, function () {
+      var lost = LoseCredits(runner, 5 * params.tags);
+      GainCredits(corp, lost, "", this);
+    }, this);
+  },
+  AIWouldPlay: function () { return runner.tags > 0; },
+  AITagPunishment: 1,
+  AIPlayWhenCan: 1,
+};
+
+cardSet[35066] = {
+  title: "IP Enforcement",
+  imageFile: "35066.png",
+  elo: 1484,
+  player: corp,
+  faction: "NBN",
+  influence: 5,
+  cardType: "operation",
+  subTypes: ["Gray Ops"],
+  playCost: 0,
+  trashCost: 5,
+  _printedPoints: function (card) {
+    var definition = card.cardDefinition || (card.setNumber && cardSet[card.setNumber]);
+    return definition ? definition.agendaPoints : card.agendaPoints;
+  },
+  Enumerate: function () {
+    var source = this;
+    var choices = ChoicesArrayInstall(runner.scoreArea, false, function (card) {
+      return card.player == corp && card.cardType == "agenda" &&
+        source._printedPoints(card) >= 0 && source._printedPoints(card) <= runner.tags;
+    });
+    if (corp.AI && choices.length) {
+      // Recover the largest stolen agenda, preferring an existing empty remote.
+      choices.sort(function (a, b) {
+        var pointDifference = source._printedPoints(b.card) - source._printedPoints(a.card);
+        if (pointDifference) return pointDifference;
+        function protection(choice) {
+          if (!choice.server) return -1;
+          if (choice.server.root.some(function (card) { return card.cardType == "agenda" || card.cardType == "asset"; })) return -2;
+          return choice.server.ice.length;
+        }
+        return protection(b) - protection(a);
+      });
+      return [choices[0]];
+    }
+    return choices;
+  },
+  payAdditionalPlayCosts: function (params, callback) {
+    RemoveTags(this._printedPoints(params.card), callback, this);
+  },
+  Resolve: function (params) {
+    if (!params.card || !runner.scoreArea.includes(params.card)) return;
+    var agenda = params.card;
+    var printedPoints = this._printedPoints(agenda);
+    Install(agenda, params.server, false, null, true, null, this, null,
+      function () {
+        // CR 1.13.13: counters leave the host after installation costs are paid.
+        ClearAllCounters(agenda);
+        ResetProperties(agenda);
+        agenda.agendaPoints = printedPoints;
+      }, false, function () {
+        if (runner.tags > 0 && CheckInstalled(agenda)) AddCounters(agenda, "advancement", 1);
+      });
+  },
+  command: "install",
+  AIWouldPlay: function () { return this.Enumerate().length > 0; },
+  AIPlayWhenCan: 2,
+};
