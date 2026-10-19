@@ -1,6 +1,6 @@
 ---
 name: review-card-batch
-description: Independently audit one previously implemented Chiriboga card batch for strong strategic AI support, exercise real decision paths, record findings and reopen incomplete work. Use when asked to review or audit a card batch, optionally naming the set and batch number. Does not implement repairs or replace the final set-wide review.
+description: Independently audit one previously implemented Chiriboga card batch for strong strategic AI support, exercise real decision paths, record findings and queue optimisation work. Use when asked to review or audit a card batch, optionally naming the set and batch number. Does not implement repairs or replace the final set-wide review.
 ---
 
 # Review one implemented card batch
@@ -31,13 +31,14 @@ resolved set, range and review scope before auditing.
 Resolve an explicit set against the tracker and `documentation/card-sets.md`;
 accept its name, registry key or pack code only when unambiguous. The active
 tracker supplies batch boundaries, definition file, notes and verification
-commands. For another set, locate a preserved batch queue or explicit batch
-ranges in its implementation records. Never reinterpret its number using the
+commands. For another set, follow the backlog's **Set record** link to
+`documentation/new-sets/records/<registry-key>.md`, with preserved batch ranges;
+use a historical snapshot only when no maintained record exists. Never reinterpret its number using the
 active set's queue or invent equally sized groups. If that mapping is absent,
 ask for the archived mapping or exact card IDs. Do not change the active set.
 
-Review previously implemented cards, including a reopened batch when explicitly
-requested. Do not claim unfinished cards have passed. Check `git status`,
+Review previously implemented cards, including batches awaiting optimisation
+re-review when explicitly requested. Do not claim unfinished cards have passed. Check `git status`,
 preserve pre-existing edits, and never review while another agent is editing the
 same definition file or tracker.
 
@@ -94,10 +95,17 @@ A missing necessary consumer or ignored strategic effect is unfinished work.
 If a deeper architecture dependency prevents support, name the precise missing
 capability and affected behavior rather than accepting it as a vague limitation.
 
-Run relevant focused tests, the selected set's required shared verification and
-`node tests/run-all-tests.js` on the Node runtime pinned by `.nvmrc`. This includes
-Corp decision fixtures and decision snapshots, excluding known-red pending
-reproductions. Check `node --version` first and select the installed pinned
+Exercise the focused decision paths needed for the review and complete the
+selected set's required shared verification, counting matching current results
+once. Reuse an evidenced full-suite pass only if its source/tests, runtime and
+relevant inputs match this review; otherwise run `node tests/run-all-tests.js`
+once on the final reviewed snapshot. During a set review, use the coordinator's
+shared full-suite result instead of starting one per batch. Focused strategic
+probes remain required; a green shared suite cannot replace them. Do not rerun
+full validation just to write the report or update review status. See the test
+cadence in `tests/README.md`. The full suite includes Corp decision fixtures and
+decision snapshots and excludes known-red pending reproductions. Check
+`node --version` first and select the installed pinned
 binary (for example, with `nvm use`) if the shell resolves an older runtime.
 Name every failure and distinguish related from demonstrated
 pre-existing failures. An unrelated failure prevents claiming a green suite;
@@ -138,22 +146,34 @@ Use one overall verdict:
 - **Inconclusive:** essential evidence or a ruling is unavailable. State exactly
   what would settle it; do not invent a defect or call this a passing review.
 
-During a full-set review, defer the following tracker/backlog updates and batch
-reopening to the coordinator. Batch reviewers record the required updates in
+During a full-set review, defer the following tracker/backlog updates and optimisation
+queue changes to the coordinator. Batch reviewers record the required updates in
 their reports and do not edit those shared files.
 
-For the active set, link the report and verdict from a separate batch-review log
-in the tracker, creating that section on the first review. Keep implementation
-completion history append-only. For Changes required, reopen a completed queue
-row as `Pending` for repairs, or `Blocked` only for a precise dependency that
-materially exceeds the batch. Clear its active owner, link the findings in its
-notes, and refresh summary counts. Do not overwrite another agent's active claim.
-Pass or Inconclusive does not change implementation status; an inconclusive
-review remains outstanding. For another set, update its own notes/backlog with
-the report and repair need; leave the active tracker untouched.
+Link the dated report/verdict from the set record's separate batch-review log,
+creating that section if absent. For the active set this is the tracker; for
+another set it is its maintained record under `documentation/new-sets/records/`.
+When only a historical tracker exists, preserve it and create a maintained
+record from it with relative links adjusted; link that record from the backlog.
+Never edit another set's active tracker or overwrite dated historical snapshots.
 
-Report the verdict, strongest findings, evidence limits and report path. Repairs
-for the active set go through `implement-card-batch`; reopening the earliest
-completed batch makes it selectable ahead of later pending work. Re-review after
-repairs. Batch reviews can run before the last implementation batch is finished;
-final set review still checks cross-batch interactions and overall readiness.
+Update only the selected batch's **Optimisation queue** row. Changes required
+becomes `Pending`, or `Blocked` for a precise dependency beyond the batch; Pass
+becomes `Pass`; Inconclusive becomes `Pending` with the exact evidence needed.
+Clear inactive ownership, but never overwrite another agent's active claim.
+Record baseline gameplay, baseline AI and integration defects explicitly as
+required repairs, with their impact and acceptance criteria; use bug tickets
+when separate work is needed. The queue coordinates these repairs without
+making them optional. Deeper strategic improvements remain optional.
+Preserve historical `Complete` rows and completion history; record outstanding
+baseline defects separately so completion is not read as current correctness.
+Keep playability unchanged and refresh optimisation counts separately.
+
+Report verdict, strongest findings, evidence limits and report path. Repairs go
+through `$optimise-card-batch <set> <batch>`, followed by independent re-review.
+Independent strategic review is optional for implementation completion and
+playability. A failing verdict alone does not reopen implementation; demonstrated
+baseline defects require repair and verification through the batch repair or
+ticket workflow, followed by independent re-review.
+Batch reviews can run before set implementation finishes, without production
+edits in parallel. Set review still audits cross-batch mechanics and integration.

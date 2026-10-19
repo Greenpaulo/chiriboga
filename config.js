@@ -161,8 +161,8 @@ var setRegistry = {
       file: "vantagepoint",
       code: "vp",
       name: "Vantage Point",
-      hidden: true,
-      untested: true,
+      hidden: false,
+      untested: false,
       idRange: [36000, 36999],
     },
     uprising: {

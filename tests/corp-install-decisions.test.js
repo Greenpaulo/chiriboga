@@ -34,6 +34,8 @@ const test = (name, body) => {
 
 function newAI() {
   const ai = new context.CorpAI();
+  // I0/I1 telemetry cases exercise the frozen legacy install policy.
+  ai.options.iceMarginalSecurity = false;
   ai._log = () => {};
   ai._securityCacheEnabled = false;
   ai._random = () => { throw new Error('telemetry must not consume randomness'); };

@@ -14,7 +14,9 @@ Use these companion references while implementing cards:
 - `documentation/new-sets/card-implementation-backlog.md` — known unfinished cards and
   the current ELO audit.
 - `.agents/skills/review-card-set/SKILL.md` — independent full-set audit, using
-  batch review evidence before the readiness verdict and preserving history.
+  batch review evidence for an optimisation verdict, independently of playability.
+- `.agents/skills/optimise-card-batch/SKILL.md` — post-implementation strategic
+  improvements and repairs through the optimise/review cycle.
 
 The Corp AI roadmap and specs (`documentation/corp-ai/`) describe plans, not
 card-authoring APIs. A hook proposed by a roadmap item must not be used until
@@ -30,7 +32,9 @@ Whether a set is playable is decided in `documentation/card-sets.md`, and the
 `hidden`/`untested` flags in `config.js` must follow that decision
 (`tests/card-status.test.js` enforces it). Normally a new set is recorded as
 `in-progress` and kept `hidden: true`, `untested: true` until its mechanics and
-AI behaviour have been reviewed.
+baseline AI behaviour have been implemented and implementation integration
+checks pass. Independent strategic review and optimisation are optional later
+stages; they do not gate implementation completion or availability.
 
 Existing ranges are defined by `setRegistry.availableSets` in `config.js`.
 Check that the new range does not overlap any of them. Do not infer the next
@@ -211,8 +215,16 @@ one-batch agent skill and one current-set tracker:
 The user can simply ask the agent to implement the next batch. The skill reads
 the tracker to discover the active set, selects the next unfinished
 batch, performs the work, updates status/ownership and appends test evidence.
-Switching sets changes only the tracker, so batch IDs and prior chat history do
-not need to be pasted and the skill does not drift between sets.
+After all batches and implementation integration checks pass, mark the set
+Implemented and playable before independent review. The next invocation moves
+to the next explicitly queued set under the operator guide. Preserve the old
+tracker in history and a maintained set record so optimisation can continue
+without changing the new active set. Review verdicts alone do not reopen
+implementation. Demonstrated baseline gameplay, baseline AI and integration
+defects require repair and verification through the batch repair or ticket
+workflow; preserve completion history and record outstanding defects separately.
+Deeper strategic improvements remain optional, and playability remains a separate
+human decision.
 
 At minimum, check the structural fields relevant to the card type:
 
@@ -231,10 +243,11 @@ the most common loading and deckbuilding omissions.
 
 Use the hook checklist in `documentation/engine_patterns.md`, then read the
 relevant detailed sections of `documentation/ai.md` and add the hooks that
-describe how the AI should value and use the card. Read the full AI tutorial
-for the first batch or when changing AI architecture; it need not be reread in
-full for every later batch. Implement AI in the same change as the mechanics
-rather than treating it as a later polish pass.
+describe how the AI should value and use the card. Read only the sections needed
+by the selected cards and consumers. Implement AI in the same change as the
+mechanics at a usable baseline level. The optional optimisation stage strengthens
+competing-plan decisions, synergy and difficult strategic edge cases; it also
+repairs bugs found in review. Do not defer missing rules or a usable AI path.
 
 Common checks include:
 
@@ -252,8 +265,30 @@ Common checks include:
   hooks documented in the Runner section of `ai.md`.
 
 Not every card needs every hook. It does need every hook required for the AI to
-understand its meaningful decisions. Exercise both a human player using the
-card and an AI player controlling or evaluating it.
+use the card for its normal role through working consumers. Exercise a
+representative useful selector/planner path and relevant resource/legality
+guards; a comprehensive strategic contrast audit belongs to optimisation.
+Exercise both a human player using the card and an AI player controlling or
+evaluating it.
+
+### Boundary between implementation and optimisation
+
+Implementation models direct card effects through existing evaluator contracts
+and supplies a useful baseline policy with legality/resource guards. Direct
+costs, restrictions, finite resources and durations must be accounted for.
+A basic useful tutor target with its required follow-up costs covered can be
+sufficient here; proving that the AI chooses the winning tutor sequence over
+competing plans belongs to optimisation. Record limited strategic foresight as
+specific optimisation work instead of expanding implementation into a planner
+redesign. Missing mechanics, crashes, illegal choices, incorrect direct-effect
+accounting or no usable AI consumer still block implementation.
+
+Optimisation assesses every implemented card's strategy and establishes a concrete
+work list from current findings and decision gaps. It improves competing-plan,
+resource, target, synergy and opponent-response choices through contrasting
+real-consumer tests. Mechanics are revalidated for supported defects, changed
+behaviour and affected interactions; the full original mechanics checklist is
+not repeated. Independent review supplies the broader correctness verdict.
 
 ### ELO is required
 
@@ -328,10 +363,24 @@ node tests/decklauncher-identity-change.test.js
    entries, add any accepted limitations, and refresh its ELO counts if card
    definitions changed.
 
-## Definition of done
+Run `node tests/run-all-tests.js` on the pinned `.nvmrc` runtime before handoff,
+including Corp decision fixtures and decision snapshots. After changing
+availability, regenerate card status and verify the final state. Record manual
+checks actually performed; do not claim browser evidence from VM tests. These
+are implementation checks, not a requirement to complete independent review.
+
+## Definition of implementation done
 
 A set is complete only when its intended cards are represented in metadata and
 the set file; images resolve; rules work for human players; required AI hooks
 and ELO values exist; legal formats and defaults are correct; random decks can
 use the cards legally; and automated plus manual checks pass. Merely loading a
 set without errors is not completion.
+
+Implementation completion and playability do not wait for `review-card-set` or
+a passing strategic review. Mark the tracker Implemented and the set playable,
+with matching registry flags, once these implementation checks pass. Record
+remaining deeper-strategy work in a separate optimisation queue. Subsequent
+reviews preserve this status and route defects, edge cases and stronger strategic
+evidence to `optimise-card-batch`, followed by independent `review-card-batch`.
+The next implementation invocation may move to the next queued set immediately.

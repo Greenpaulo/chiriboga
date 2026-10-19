@@ -57,7 +57,7 @@ This file is long. Read only the sections a task needs. To find one hook, search
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
    - [5.3 Bioroid Click-Break — Corp `AIImplementBreaker`](#53-bioroid-click-break)
    - [5.4 ICE Install Decisions — `AIWorthwhileIce`](#54-ice-install-decisions)
-   - [5.5 Upgrades — `AIDefensiveValue`, `AIIsScoringUpgrade`, `AILimitPerServer`, `AIPreventBreach`](#55-upgrades)
+   - [5.5 Upgrades — `AIApproachDefense`, `AIDefensiveValue`, `AIIsScoringUpgrade`, `AILimitPerServer`, `AIPreventBreach`](#55-upgrades)
    - [5.6 Operations — `AIFastAdvance`, `AIDamageOperation`, `AITagPunishment`, `AIWouldPlay`, `AIWouldPlayBeforeScore`](#56-operations)
    - [5.7 Agendas — `AIAdvancementLimit`, `AIOverAdvance`](#57-agendas)
    - [5.8 Inline AI Code for Corp](#58-inline-ai-code-for-corp)
@@ -1642,6 +1642,45 @@ and payoff conditions; it must not inspect hidden Runner information.
 
 ### 5.5 Upgrades
 
+**`AIApproachDefense(server, context)`**
+
+For a root card whose effect fires when the Runner approaches its server.
+Return `null` when it would not stop the run, or
+`{runnerOptions: [{credits, clicks}, ...], corpEndsRunUses: n}`:
+
+- `runnerOptions`: alternative costs the Runner may pay to continue the run.
+  The Corp AI adds them as one extra layer after the innermost ICE of the
+  honest security route, repeated with the route under global end-the-run.
+- `corpEndsRunUses`: how many approaches the Corp would end with its own
+  resources, following the card's own AI policy. Added to the server's global
+  end-the-run uses; covering the Runner's projected runs is an honest lockout.
+
+`context.spendableCredits` is the Corp's credits minus the rez costs of the
+server's chosen ICE rez plan and of the counted unrezzed approach defences. The
+security evaluator calls the hook for every root card in `server`, rezzed or
+(when the rez is fundable with that plan) unrezzed, including detached
+hypothetical servers, so it must be pure: no state, logging or `preferred`, and
+no reads of `attackedServer`. It feeds the honest fields
+(`honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`) and I2's
+breach margin. With `iceMarginalSecurity` enabled (the default), these affect
+live ICE-install ranking through `_marginalIceScore()`; compatibility
+`isSecure` and `hasHardLockout` ignore it.
+Effects that stop a successful run rather than charge on approach (for
+example Flagship) are breach prevention, not approach defences.
+
+```js
+// Manegarm Skunkworks: [click][click] or 5[c], unless the breach is lethal
+AIApproachDefense: function (server) {
+  if (!server) return null;
+  if (corp.AI._potentialDamageOnBreach(server, true) > runner.grip.length) return null;
+  return {runnerOptions: [{credits: 5, clicks: 0}, {credits: 0, clicks: 2}], corpEndsRunUses: 0};
+},
+```
+
+Anoetic Void returns `corpEndsRunUses = min(floor(spendableCredits / 2),
+floor(non-agenda HQ cards / 2))`, or `null` when its `AIWouldTrigger(server)`
+declines.
+
 **`AIDefensiveValue(server)`**
 
 Return a numeric value representing how much protection this upgrade provides to `server`.
@@ -1706,7 +1745,12 @@ AIPreventBreach: function(server) {
 },
 ```
 
-**`AIWouldTrigger()`**
+**`AIWouldTrigger(server?)`**
+
+An optional server argument supports pure planning against detached hypothetical
+servers. Anoetic Void uses it when supplied and otherwise falls back to
+`GetServer(this)`; runtime callers may omit it. Planning callers must use a
+quiet damage calculation (the second argument to `_potentialDamageOnBreach`).
 
 Return `true` to allow an upgrade's defensive ability to fire. Return `false` to suppress it:
 
@@ -1720,9 +1764,10 @@ AIWouldTrigger: function() {
 
 ```js
 // Anoetic Void: don't fire if there is an ambush in the server, or no cards to discard from HQ
-AIWouldTrigger: function() {
-    if (corp.AI._isAmbush(GetServer(this))) return false;
-    var cardsInServer = GetServer(this).root.length + (GetServer(this).cards || []).length;
+AIWouldTrigger: function(server) {
+    var thisServer = server || GetServer(this);
+    if (corp.AI._isAmbush(thisServer)) return false;
+    var cardsInServer = thisServer.root.length + (thisServer.cards || []).length;
     if (cardsInServer < 2) return false;
     if (corp.HQ.cards.length - corp.AI._agendasInHand() < 2) return false;
     return true;
@@ -2047,8 +2092,10 @@ and the policy never deliberately creates a naked agenda or retains an unsafe
 agenda posture when a breach could win the game or when the Corp could score
 that agenda to win immediately.
 
-Profiles (the shape) are cached for the card's lifetime. The bait/bluff
-activation decision is too, unless the Corp AI option `postureEpochs` (L8.4,
+Profiles (the shape) are cached with the card. With match-local feedback off,
+they last for its lifetime; feedback can refresh a shape at a later active
+commitment as described below. The bait/bluff activation decision lasts for
+the card's lifetime unless the Corp AI option `postureEpochs` (L8.4,
 default on after its revised F4 gate passed) is on: then the decision is kept for a
 bounded epoch of two or three Corp turns and reconsidered, at most once per
 Corp turn, after a public boundary (the server was run, Runner credits or
@@ -2056,6 +2103,13 @@ breakers changed, the root's advancement changed, or either side reached match
 point). Repeated evaluator calls never reroll. `AIPunishesAccess(server)` is
 unchanged: its signature and contract are the same with the option on or off,
 and posture epochs add no card-facing hook.
+
+The L8.2 relative-depth/parity/top-up experiment was not adopted after its
+full gate failed. Its policy and settings have been removed. The existing
+absolute-depth sampler, advancement cadence, epoch/feedback behavior and
+`AIPunishesAccess(server)` contract remain in force. Passive measurement and
+reporting improvements from that work remain available; see the rejected-design
+record in the Corp architecture and the L8.2 ticket.
 
 L8.5 records committed public actions through the engine's
 `RecordPublicPostureEvent(action, card, server, amount)` and the AI's
@@ -2254,6 +2308,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
+| `AIOperationPlayClickGain(operation, thisTurn, playedInPlan)` | function | Finite identity click income from an operation in advancement search |
 | `AIWorthInstalling(remotes)` | function | Asset placement: remote index, list length for new remote, or -1 to decline |
 | `AIDefensiveValue(server)` | function | Numeric protection value of this upgrade |
 | `AIPreferredUpgradeServer(legalServers)` | function | Return a supplied legal server, or `null` to hold; overrides generic placement |
@@ -2921,3 +2976,42 @@ acceptance is in `tests/vantagepoint-batch2.test.js`; hook-level integration is
 supplementary. Shared install consumers also affect other batches' pre-run
 preparation, and ordered route resources affect the earlier Corsair/Tailor and
 batch13 finite-payment evidence; independently revalidate them after this repair.
+
+### Elevation missing NBN batch (35057–35060, 35065–35066)
+
+`AIOperationPlayClickGain(operation, thisTurn, playedInPlan)` is an identity hook
+consumed by `CorpAI._potentialAdvancementDirections`. Return the nonnegative
+click income from playing that operation. The search records the identity in
+its local `persist` array after the first operation and passes that fact as
+`playedInPlan`; already-resolving operations have already received their income.
+The hook must be read-only, use public identity state and Corp-owned cards, and
+work outside a run. Nebula returns one only on its reverse side, for the first
+operation of the current turn. Ordinary play still requires its full click cost;
+this hook models a subsequent gain, not a cost reduction.
+
+Synapse uses `AITriggerWhenCan` for its click/tag economy action, preserving the
+last tag after its first-removal benefit has been used. Its response enumeration
+uses the real `_bestInstallOption` consumer, with a conservative legal fallback
+for a protected empty remote agenda, an affordable-to-rez asset in a new remote,
+or affordable-to-rez central ICE when ordinary action planning withholds installs.
+Installation itself ignores all costs; subsequent rez costs remain payable.
+
+Embedded Reporting uses `AIOverAdvance` and `AIAdvancementLimit` to seek one
+excess advancement counter (two dividends), then the real discard-response
+selector tutors a currently affordable operation, ranked by existing ELO (missing
+ratings count as zero).
+Its response offers no AI option without counters or a useful operation.
+
+Next Big Thing uses `AITriggerWhenCan`; the real paid-ability selector includes
+its `availableInRunnerScoreArea` ability only for the Corp. The AI waits for room
+in HQ and at least four cards in R&D, then uses the real `_bestDiscardOption`
+consumer to shuffle excess HQ cards back. It never activates a spent counter.
+
+Bigger Picture uses `AITagPunishment`, `AIPlayWhenCan`, and `AIWouldPlay` through
+the real main-phase play policy. Its enumeration transfers useful credits,
+removing only the tags needed, or adds a tag when the Runner has fewer than five
+credits. IP Enforcement uses the same play policy (`AIPlayWhenCan`,
+`AIWouldPlay`), takes a legal stolen agenda using printed points, and prefers the
+largest agenda and an empty protected remote. Neither operation is presented
+without its required tags/targets. These are baseline policies; competing kill,
+tag-retention, tutor-sequence, and scoring plans remain optimisation work.

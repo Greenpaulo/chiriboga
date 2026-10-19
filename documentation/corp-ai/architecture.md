@@ -155,6 +155,33 @@ lockouts; the supported exact restricted-credit route copies today's verdict. Th
 `securityCalibration` collector compares both verdicts with next-turn
 breaches.
 
+**Breach margin, hazard and approach defences (I2 phases A and B).** `_approachDefenses()` reads the root-card hook `AIApproachDefense`
+(Manegarm Skunkworks, Anoetic Void) for the honest route only: a rezzed card
+counts, an unrezzed one only when `_canFundRezPlan()` can fund it with the
+chosen ICE rez plan. Its `runnerOptions` become one extra layer after the
+innermost ICE, repeated with the route under global ETR, and its
+`corpEndsRunUses` add to the server's global ETR uses (covering
+`_projectedRunnerRuns()` is an honest lockout). `_hasDefensiveUpgrade()` and
+the compatibility fields ignore it. `_addHonestVerdict()` also records
+`honestRoute`, `honestClickBudget`, `honestClickCredits` and `approachDefense`.
+`_breachMargin()` turns them into the Runner's spare credit-equivalents after
+the route (`-Infinity` for an honest lockout, `null` with an `upperBound` for
+unknown pricing); outside those, a non-negative margin means the honest
+verdict is not secure. `_breachHazard()` looks up the probability of a
+successful run in one Runner turn in `CORP_AI_BREACH_HAZARD_TABLE` by server
+kind (`_breachKind()`) and margin bucket (`_breachMarginBucket()`), adding
+`_projectedRunnerIncome()` per later turn. The table and
+`CORP_AI_POINT_VALUE` are measured by
+`scripts/ai-batch/breach-hazard-table.js` from `securityCalibration` samples
+(evidence in `measurements/I2-15d485d-breach-hazard-calibration.json`).
+The held-out reliability and next-turn checks failed. The table was adopted
+on the phase B F4 gate result, rather than a successful calibration check.
+I2 phase B consumes the margin, table and point value through
+`_marginalIceScore()` with `iceMarginalSecurity` enabled by default.
+Its `_marginalHazard()` holds the next-turn hazard across the horizon.
+The per-turn income drift above belongs only to `_breachHazard()`, which
+has no decision consumer.
+
 **Global adoption rejected (L9.0.1).** The experiment switched all existing
 security consumers to the honest verdict. Its paired core-v1 gate failed:
 points stolen rose by 0.176 per game, points scored fell by 0.282 and Corp win
@@ -465,7 +492,7 @@ learn the AI's patterns (see `principles.md` §5).
 **Status:** Layer 8 is only partly done. Baiting (L8.1), the shared agenda/trap
 profiles, tag deterrence (L8.3), bounded posture epochs (L8.4) and
 match-local outcome feedback (L8.5) are implemented;
-legibility signals (L8.2) remain open; telemetry (L8.6) is optional and parked.
+legibility signals (L8.2) were tested and not adopted after their gate failed; telemetry (L8.6) is optional and parked.
 
 **Baiting (L8.1).** Facedown access-punishing cards expose
 `AIPunishesAccess(server)`. `_calculateBaitFrequency()` uses bounded
@@ -484,6 +511,24 @@ one-turn-delayed advancement. The profile feeds scoring-remote selection
 (`_deceptionInstallDistance()`), how many layers are added, and early
 advancement (`_deceptionAdvancementTarget()`). Profiles never create naked
 agenda servers and are disabled when a breach could win.
+
+**Rejected legibility strategy (L8.2, 2026-10-15).** The tested strategy
+restricted both payload classes to lone-root remotes, sampled depth relative
+to HQ/R&D protection and allowed a public-history top-up. The 1,400-pair full
+gate changed 211 games with no game failures, but did not demonstrate reduced
+all-root count TV (difference -0.005246, 95% interval [-0.012018, 0.001788]).
+The public-variable correlation maximum rose from 0.250379 to 0.701795;
+active-subset rho, win-rate and shape-overlap checks also failed. Holding the
+random draw fixed while increasing central depth makes the relative rule's
+remote target increase by construction. That matches the proposed rule and
+explains its conflict with the correlation guard; the combined gate does not
+isolate each signal's causal contribution. The policy, settings, memory and
+option-only green tests were removed. Do not retry the same relative-depth
+formula or relax its gate after these results. Passive measurement, reporting
+and control-calibration evidence remain useful. See the
+[L8.2 failure record](../backlog/code-review/feature-layer-8-2-remote-deception-profiles.md);
+[L8.9](specs/L8.9-observable-defense-parity.md) already owns attribution before
+a supported replacement is selected.
 
 **Agenda bluff probability.** `_shouldBluffAgendaServer()` rolls once per
 remote and agenda (cached in `_agendaBluffDecisions`) with probability
@@ -573,10 +618,11 @@ code as it is today.
 The security work answers *where another layer is needed*; install planning
 does not yet compare concrete options by their outcome.
 
-- **ICE.** `_iceInstallOptions(serverToInstallTo, cards, priorityOnly)` lists
+- **ICE.** `_iceInstallOptions(serverToInstallTo, cards, priorityOnly, tagGroup)` lists
   affordable ICE in input order, then unaffordable ICE when low-priority options
   are allowed, filtered by optional `AIWorthwhileIce(server, "install")` hooks.
-  It does not compare each ICE's marginal effect on security.
+  Unless `iceMarginalSecurity` is on (below), it does not compare each ICE's
+  marginal effect on security.
 - **Root destinations** are influenced indirectly through shared protection
   scores: `_emptyProtectedRemotes()`, `_isAScoringServer()`,
   `_scoringServers()`, `_scoringWindow()`, `_bestProtectedRemote()` and
@@ -643,8 +689,35 @@ does not yet compare concrete options by their outcome.
   is the single builder of post-install hypothetical servers (ICE as the
   outermost layer with its install cost paid, anything else in the root; a
   null server is a detached empty remote never added to
-  `corp.remoteServers`), restored through `_withHypothetical()`. No ranking
-  path calls it yet.
+  `corp.remoteServers`), restored through `_withHypothetical()`.
+  `_criticalBreachDefenseAction()` evaluates its candidate ICE through it, and
+  so does I2's ranking below.
+- **I2 marginal ICE ranking (option `iceMarginalSecurity`, default on
+  after its 7,000-pair F4 gate passed on seeds 1601–2600).** With the option on, `_rankedInstallOptionsCore()` no longer asks
+  `_serverToProtect()` for one target. `_marginalIceInstallOptions()` offers
+  ICE for every row of `_rankedServersToProtect()` (so the posture cap in
+  `_NoMoreProtectionForThisServer()` still holds) that is not valueless
+  (`_nothingWorthProtecting()`) and whose `_iceLayerPolicy()` allows a layer,
+  with the same per-server list `_iceInstallOptions()` builds. The new-server
+  fallback offers the same ranked list when an empty protected remote exists,
+  else ICE for a new remote when the economy check passes. Each pair is scored
+  by `_marginalIceScore()` in credit-equivalents: `CORP_AI_POINT_VALUE` times
+  the drop in expected points stolen over `CORP_AI_I2_HORIZON_RUNNER_TURNS`
+  Runner turns (`_marginalIceStolen()`: the next-turn M2 hazard from
+  `_hazardForMargin()` held for each turn, repeatable for HQ and R&D, one-shot
+  otherwise, before and after the hypothetical install; a designated empty
+  remote is exposed one turn fewer when its agenda cannot go in this turn), bounded to
+  zero and the points the Runner needs, minus the install cost and, when the
+  after-state's rez plan (`plannedRezIce` on the evaluation) includes the ICE,
+  its rez cost. `_iceStake()` gives centrals `_breachConsequence()`'s
+  `pointsExposed`, gives every remote holding an agenda or trap one common
+  stake (`_meanAgendaPoints()`, so ICE count is no tell) and, before I3, gives
+  the designated empty scoring remote the highest agenda points in HQ. An
+  unknown before-margin scores no reduction; an unknown after-margin uses its
+  `upperBound`. Order is legacy group (affordable before low-priority), then
+  score, then walk order; band-1 records carry the breakdown in
+  `scoreBreakdown`. Admission, same-turn bookkeeping and the critical
+  interrupt's thresholds are unchanged.
 
 Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
 rez choices. Luana Campos permits this economy rez only outside a run, with
@@ -837,7 +910,8 @@ needs.
     snapshots without calling security/posture/safety evaluators. Existing
     epoch/lifetime cache fields, real guard/roll/reuse events and passive query
     return capture supply labels (including silent failures and lifetime reuse);
-    unknown state and expired commitments remain explicit. Observation failures
+    roots with no activation record are `unrolled` without inferring safety;
+    unknown cached state and expired commitments remain explicit. Observation failures
     invalidate measurement without affecting gameplay. The
     `realizedIceByRootType` collector reports unrevealed all-root and known-active
     posture subsets using absolute Spearman rho and exact-bin total variation,

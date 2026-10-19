@@ -319,10 +319,9 @@ cardSet[34030] = {
     }
     else if (effectId === 3) {
       //Remove 1 tag
-      RemoveTags(1);
-      if (effectNumber === 1) {
-        cardRef._chooseEffect(2);
-      }
+      RemoveTags(1, function () {
+        if (effectNumber === 1) cardRef._chooseEffect(2);
+      });
     }
     else if (effectId === 4) {
       //Place 4 credits on this event

@@ -73,7 +73,7 @@ receive them.
 | `secureScoringServerGate` | I4 owns safe agenda destinations and scoring plans; I3/I6 consume scoring-server suitability. The PR 19 winning-steal concern is tracked in I4. |
 | `serverAtRiskInstallOverride` | I2 owns whether another ICE layer buys useful security; I7.1 compares that install with credits/draw, and I7.2/I8 account for competing scoring plans. |
 | `committedAgendaReserveBypass` | I4 owns completion/commitment; I7.2 compares advancement with defense/economy; I8 sequences costs across clicks. |
-| `emptyArchivesRunPressure` | I2 owns protection-install admission, and L3.5.1 consumes the same valueless predicate for aging. L7.1 supplies agenda/backdoor breach consequences, but does not yet design valuation of non-agenda rewards from empty Archives runs. That reward/admission calibration remains an explicit gap. |
+| `emptyArchivesRunPressure` | I2 owns protection-install admission, and L3.5.1 consumes the same valueless predicate for aging. L7.1 supplies agenda/backdoor breach consequences, but does not yet design valuation of non-agenda rewards from empty Archives runs. That reward/admission calibration remains an explicit gap, owned by [I2.1](I2.1-empty-archives-reward-valuation.md) (I2 keeps the exclusion). |
 | `valuelessServerDebtReset` | L3.5.1 owns aging/reset semantics. Its individual regression evidence is inconclusive; it was gated to reproduce the combined recovered build. |
 
 I0 must record the corrected default and effective options before collecting
@@ -322,12 +322,131 @@ legacy relative order.
 | `deceptionValue` | 0 to 1 | bounded symmetric placeholder from the existing deception profiles (`_deceptionInstallDistance()`, `_remoteDeceptionProfile()`). [L8.8](L8.8-marginal-deception-value.md) separately proposes a shared marginal concealment input after I2 adoption; private trap payoff remains with `trapValue`, and overlapping `futureValue` must be removed on adoption. No helper or evaluated-payoff model exists yet |
 | `installCost` | -8 to 0 | `-min(8, actualInstallCost)`; `actualInstallCost` is also recorded separately in `scoreBreakdown` for diagnostics, but only this bounded component enters the score |
 | `reserveCost` | -6 to 0 | credits that must stay available for existing rez obligations (the L1.1 shared unrezzed-ICE budget) and for post-rez spending that cards declare with `AIReserveCredits` (read through `_reserveCreditsForCard()`), counted only when spending now pushes the Corp below them |
-| `opportunityCost` | -4 to 0 | clicks beyond the first at `CLICK_VALUE`, plus I3's value of a role the install displaces (for example the only scoring remote) |
+| `opportunityCost` | -4 to 0 | clicks beyond the first at `CLICK_VALUE`, plus I3's value of a role the install displaces (for example the only scoring remote). Under the [scoring-risk model](#scoring-risk-model-2026-10-16) I3 instead charges the lost scoring EV in points at `POINT_VALUE`; remote roles live on the server (`server.AIRemoteRole`), separate from this record's install `role` |
 
 The only product is `securityDelta × consequenceWeight`, because security is
 worth something in proportion to what is at stake; everything else adds.
 `consequenceWeight` never reaches zero so an empty server still gains bounded
 value from a lockout.
+
+#### Breach-probability input
+
+Superseded by the [scoring-risk model](#scoring-risk-model-2026-10-16),
+which adopts breach likelihood as a graded measurement (M2) keyed on margin
+rather than on the `isSecure` verdict. The constraints recorded here still
+apply: observation-only first, stock-Runner-AI caveat, and severity owned by
+L7.1's `_breachConsequence` while likelihood is owned by M2.
+
+### Scoring-risk model (2026-10-16)
+
+**Why.** The Corp has twice been made weaker by turning a security
+measurement into a shared yes/no gate:
+[`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+("never score into an insecure remote") and the
+[L9.0.1 gate failure](../../backlog/done/L9.0.1-adopt-honest-lockout.md#resolution).
+The owner's 2026-10-14 playtests (one tester, not a measurement) saw both
+failure modes at once: agendas held in HQ for long periods, and agendas
+installed into weak remotes and then left there unadvanced. Both are
+exposure-time problems. "Is this server secure?" is the wrong question for
+scoring; the question is **"what do I expect to lose by waiting, compared with
+what I expect to lose by installing now?"** Every option carries risk. The Corp
+should take calculated risks: score fast, keep reusing a remote the Runner is
+locked out of, and count the scoring tools in hand and on the board, the way a
+human does with Seamless Launch or SanSan City Grid. This section is the shared
+plan that I2, I3 and I4 implement; it follows
+[Corp principle 6](../principles.md#6-shared-measurements-consumer-owned-decisions).
+
+**Unit.** Agenda decisions are compared in **expected agenda points** over a
+short horizon `H` (default 2 Runner turns, owned here; I4 may extend an
+agenda's window to its M3 exposure, and I2's reliability check may shorten it
+to 1 if next-turn predictions fail): expected Corp points scored minus expected Runner points
+stolen. Within one class (I2's ICE pairs, I4's agenda destinations including
+"hold") no conversion is needed. Where points must be traded against credits
+(an ICE's install and rez cost, I7's cross-class comparison) use one named
+coefficient `POINT_VALUE` (credit-equivalents per agenda point), stated once
+here, initially derived from the cost of advancing a typical agenda and
+tuned only by I9. I2 phase A sets its initial value as the pool mean of (advancement requirement × 2 + 1) / agenda points; if that under-values ICE, the gate will show it. This one coefficient replaces, for the consumers that adopt
+this model, the unmeasured `securityDelta` weights (0.6/0.25/0.15), the
+0.7 soft-lockout step, the ×8 scale and `planCompletion`'s 1/0.5/0 steps.
+Bands 3 and 2 (game-winning, game-losing) are unchanged and are not scored.
+
+**Measurements (shared, graded, observation-only first).** Each is a number
+in real units, published alongside today's fields; none replaces `isSecure`
+or changes an existing consumer.
+
+| ID | Measurement | Definition | Owner |
+|---|---|---|---|
+| M1 | `breachMargin(server)` | Runner's projected public credits (and clicks) minus the honest mandatory cost to get into the server, including approach-time root costs (M4). Negative means the Runner cannot get in; `-Infinity` for an honest hard lockout; `null` when unknown | I2 phase A |
+| M2 | `breachHazard(server, runnerTurnsAhead)` | Probability of a successful run on that server in one Runner turn, looked up from a checked-in calibration table keyed on margin bucket × server kind (agenda remote, other remote, HQ, R&D, Archives). For later turns, re-evaluate M1 against projected Runner income rather than assuming independence. Monotone in margin; thin buckets merge with their neighbours. A postured remote uses the agenda-remote row whatever its true contents, so agendas and traps are valued alike | I2 phase A |
+| M3 | `exposureTurns(agenda, server)` | Runner turns the agenda sits installed before an executable completion plan scores it, planned turn by turn with `_potentialAdvancement()`, keeping back the rez cost M2 assumed for that server's own ICE. Graded hooks today: `AIFastAdvanceCounters`, `AIAdvancementLimit`, `AIAdvanceCreditGain` (only Vantage Point cards declare the first and last). `AIFastAdvance` only orders operation play and `AIIsScoringUpgrade` is a boolean tag on five unrelated upgrades, so neither measures scoring. Title cases (Seamless Launch, Psychographics, Biotic Labor, Trick of Light, Built to Last, Oaktown Renovation, SanSan City Grid in `_advancementLimit()`) migrate to graded hooks as the I4 spec defines | I4 |
+| M4 | approach-time defence hook | A root card declares the cost it imposes when the Runner approaches the server (Runner credits/clicks, e.g. Manegarm Skunkworks), or a Corp-paid end-the-run with its Corp cost and condition (e.g. Anoetic Void, 2 credits and 2 HQ cards). Feeds M1's honest cost only; today both cards have only `AIDefensiveValue` and are invisible to `_evaluateServerSecurity()` | I2 phase A |
+| M5 | `hqStealHazard` | Probability an agenda in HQ is stolen per Runner turn: M2 for HQ times min(1, public accesses per breach ÷ HQ size), the chance of accessing *this* agenda; hand-size discard risk is a separate loss | I4 |
+
+The calibration table comes from extending `securityCalibration` (today it
+buckets by verdict only: `current`/`honest`, `all`/`agendaRemote`) to record
+M1 and server kind per server-turn, run on the F4 pool, with provenance
+(pool hash, seeds, commit) stored beside the table. Before any consumer reads
+M2, check its predictions against realised breaches on held-out seeds (a
+reliability table by bucket).
+
+**Decisions (each consumer behind its own option and gate).**
+
+- **I4, agenda commitment.** For each agenda in HQ, compare every destination
+  (existing remotes, a new remote) and *hold*:
+  `EV(install in s) = points × P(score) − points × P(stolen during M3)`, with
+  `P(stolen) = 1 − Π(1 − M2 per exposed turn)`;
+  `EV(hold) = −points × P(stolen from HQ while held, M5) − discard loss +
+  deferred value`, where deferred value is (1 − M5) × next turn's best
+  `EV(install)` over `H − 1`, counted only when this turn schedules a concrete
+  improvement and for at most 2 Corp turns running (one-step lookahead,
+  Runner income projected). Choose the best; a remote that is "not secure" can win this
+  comparison. Once committed, advancing the agenda outranks other ordinary
+  actions unless defending it improves EV more: this is where "score fast"
+  lives. It needs the plan to be exempt from the global rez reserve
+  (`_sufficientEconomy()`), which today skips the advance block in about 30%
+  of Corp actions taken while an agenda sits unfinished (I4 spec); the plan
+  keeps its own server's reserve instead. Repeat scoring needs no special rule: after a score the remote's M2
+  is still low, so the next agenda chooses it again.
+- **I2, ICE selection.** Value an `(ICE, server)` pair by the reduction in
+  expected points stolen it buys: points expected through the server within
+  the horizon (current stakes plus I3's expected future agendas for a scoring
+  remote; agenda density for HQ/R&D) × the drop in M2, minus install and rez
+  cost at `POINT_VALUE`. Maintaining a locked scoring remote as the Runner's
+  economy grows then ranks highly without a separate rule.
+- **I3, remote roles.** The scoring remote is the one with the best projected
+  M2 after affordable investment; its role persists across scores. An economy
+  install that would occupy it pays the lost scoring EV as opportunity cost.
+
+**Hard constraints stay boolean.** A game-winning score (band 3) and a
+game-losing steal remain tactical rules, not EV terms. I4 must state how a
+game-losing steal veto is compared with a game-losing HQ steal while holding,
+because refusing to install can also lose.
+
+**Order and validation.**
+
+1. I2 phase A: M1, M2 (calibration run and table), M4, observation-only, with
+   before/after-commit log-hash parity as L9.0 did (phase A has no option to
+   switch).
+2. Reliability check of M2 on held-out seeds.
+3. I2 consumer, then I3, then I4, each behind its own option and gate. I4 is
+   the item expected to move win rate; its gate improves `winRate` and
+   `pointsScored` with guards on `pointsStolen` and remote theft.
+
+**Known risks.**
+
+- M2 describes the stock Runner AI (aggressive, runs constantly). A human may
+  breach more or less often; playtest before changing defaults.
+- M2 is measured under today's Corp policy. Once agendas move, the Runner AI's
+  targeting may shift; recalibrate after each adoption (I9).
+- A server-turn breach is a successful run, not necessarily a steal (M2 may
+  overstate steal risk where accesses miss).
+- One-step lookahead could defer indefinitely; the I4 guard (scheduled
+  improvement, at most 2 Corp turns) must be tested.
+- With `H` = 2, I4's M3 limits exposure turns `E` to `0..H`.
+  Plans requiring more than `H` Runner turns are excluded; the agenda's
+  evaluation window is not extended beyond the shared horizon.
+- Deception (L8) stays a separate bounded input; bluff value is not part of
+  this EV.
 
 ## Acceptance gates
 

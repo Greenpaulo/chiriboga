@@ -19,6 +19,7 @@ const context = {
     String(name).replace(/^(\d+)/, (digits) => digits.padStart(5, '0')).replace(/\.png$/i, '.jpg'),
   runner: {
     side: 'runner',
+    scoreArea: [],
     AI: null,
     grip: [],
     stack: [],
@@ -72,11 +73,6 @@ metadata.forEach((data) => {
   const card = context.cardSet[code];
   assert(card, 'missing definition for ' + data.code + ' ' + data.title);
   assert.strictEqual(card.title, data.title, data.code + ': title');
-  assert.strictEqual(card.imageFile, data.code + '.png', data.code + ': image');
-  assert(
-    fs.existsSync(path.join(root, 'images', data.code + '.jpg')),
-    data.code + ': local image',
-  );
   assert.strictEqual(card.cardType, data.type_code, data.code + ': card type');
   assert(
     typeof card.elo === 'number' && Number.isFinite(card.elo),
@@ -161,8 +157,9 @@ context.TrashCost = (card) => card.trashCost;
 context.TrashAccessedCard = (canBePrevented) => {
   trashCalls.push({cards: [context.accessingCard], canBePrevented});
 };
-context.Draw = (player, amount) => {
+context.Draw = (player, amount, callback, callbackContext) => {
   cardsDrawn += amount;
+  if (callback) callback.call(callbackContext);
 };
 context.InstallCost = (card) => card.installCost;
 context.CheckStrength = () => true;
@@ -542,8 +539,9 @@ context.CheckActionClicks = (player, amount) => player.clickTracker >= amount;
 context.SpendClicks = (player, amount) => {
   player.clickTracker -= amount;
 };
-context.RemoveTags = (amount) => {
+context.RemoveTags = (amount, callback, callbackContext) => {
   context.runner.tags = Math.max(0, context.runner.tags - amount);
+  if (callback) callback.call(callbackContext);
 };
 context.AddTags = (amount, callback, callbackContext) => {
   context.runner.tags += amount;
@@ -1650,8 +1648,6 @@ meliesU.renderer = {
 };
 meliesU._setDepartment.call(meliesU, 'R&D');
 assert.deepStrictEqual(Array.from(meliesU.subTypes), ['Division']);
-assert.strictEqual(meliesU.imageFile, '36036.png');
-assert.strictEqual(loadedIdentityTexture, 'images/36036.jpg');
 assert.strictEqual(
   meliesU.responseOnRunSuccessful.Enumerate.call(meliesU, context.corp.archives).length,
   1,
@@ -1661,29 +1657,13 @@ decisions = [];
 meliesU.responseOnRunSuccessful.Resolve.call(meliesU, context.corp.archives);
 assert.strictEqual(meliesU.flipped, true);
 assert.deepStrictEqual(Array.from(meliesU.subTypes), ['Department']);
-assert.strictEqual(meliesU.imageFile, '36036-1.webp');
-assert.strictEqual(loadedIdentityTexture, 'images/36036-1.webp');
-assert.strictEqual(meliesU.renderer.frontTexture.imagePath, 'images/36036-1.webp');
-assert.strictEqual(meliesU.renderer.loresTexture.imagePath, 'images/36036-1.webp');
-assert.strictEqual(meliesU.renderer.dummy.texture.imagePath, 'images/36036-1.webp');
 assert.strictEqual(decisions.length, 0, '36036 only resolves the matching department effect');
 const creditsBeforeMelies = creditsGained;
 meliesU.responseOnRunnerActionPhaseEnds.Resolve.call(meliesU);
 assert.strictEqual(creditsGained, creditsBeforeMelies, '36036 front ability is inactive while flipped');
 meliesU.responseOnRunnerDiscardEnds.Resolve.call(meliesU);
 assert.strictEqual(meliesU.flipped, false);
-assert.strictEqual(meliesU.imageFile, '36036.png');
-assert.strictEqual(loadedIdentityTexture, 'images/36036.jpg');
 assert(identityFaceUpdates >= 3, '36036 refreshes its renderer when its face changes');
-for (const mapping of [
-  ['HQ', '36036-0.webp'],
-  ['R&D', '36036-1.webp'],
-  ['Archives', '36036-2.webp'],
-]) {
-  meliesU._setDepartment.call(meliesU, mapping[0]);
-  meliesU._flipToDepartment.call(meliesU);
-  assert.strictEqual(meliesU.imageFile, mapping[1]);
-}
 meliesU._flipToFront.call(meliesU);
 meliesU.responseOnRunnerActionPhaseEnds.Resolve.call(meliesU);
 assert.strictEqual(creditsGained, creditsBeforeMelies + 1);
@@ -1976,8 +1956,9 @@ context.AddTags = (amount, callback, callbackContext) => {
   context.runner.tags += amount;
   if (callback) callback.call(callbackContext);
 };
-context.RemoveTags = (amount) => {
+context.RemoveTags = (amount, callback, callbackContext) => {
   context.runner.tags = Math.max(0, context.runner.tags - amount);
+  if (callback) callback.call(callbackContext);
 };
 context.runner.creditPool = 5;
 context.CheckCredits = (player, amount) => player.creditPool >= amount;

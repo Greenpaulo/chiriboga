@@ -1,16 +1,24 @@
 ---
 name: review-card-set
-description: Independently review a completed Chiriboga card set by establishing current per-batch strategic evidence and auditing cross-batch mechanics, rules and integration. Use for a full or final set review and readiness verdict. Does not implement repairs or enable the set.
+description: Independently review a completed Chiriboga card set by establishing current per-batch strategic evidence and auditing cross-batch mechanics, rules and integration. Use for a full or final set review and optimisation verdict. Does not implement repairs or enable the set.
 ---
 
 # Review a completed card set
 
 Resolve the requested set from `documentation/new-sets/current-set-implementation.md`
-or its archived tracker. Read the integration guide, the set's notes and
+or the backlog-linked maintained set record under
+`documentation/new-sets/records/` (fall back to archived batch mappings). Read the integration guide, the set's notes and
 `documentation/card-sets.md`; treat implementation claims as unverified. Preserve
 pre-existing edits. Do not edit production code or existing tests, commit, push,
 or change playability flags. Temporary reproduction probes and review documents
 are allowed. Report the set, exact IDs, implementation status and review scope.
+
+This review is independent of implementation completion and playability. Keep
+its strategic evidence standard; queue deeper strategic findings for optional
+optimisation. Baseline gameplay, baseline AI and integration failures are
+required implementation defects, even when discovered after completion. A
+`Changes required` or `Inconclusive` verdict alone does not reopen implementation
+or prevent moving to another set; a demonstrated baseline defect requires repair.
 
 ## Establish per-card evidence
 
@@ -24,14 +32,18 @@ Missing reports are work to perform, not grounds to stop the review immediately.
 For a full set, independent agents may review disjoint batches in parallel.
 Each reviewer owns only its batch report and useful reproduction artifacts;
 only the coordinator edits the shared tracker/backlog. During a full-set review,
-the batch skill's tracker updates and batch reopening are deferred to the
+the batch skill's record updates and optimisation queue changes are deferred to the
 coordinator; batch reviewers report the required changes without editing shared
 tracker/backlog files. Give each reviewer the
 batch skill and raw set/test context, without proposed findings. Never run these
 reviews alongside production edits. Each batch retains its separate verdict and
 per-card evidence. One coordinator full-suite run on the shared immutable code
-snapshot can satisfy the shared verification requirement for all reports; reviewers
-must still run their focused checks and cite that coordinator result explicitly.
+snapshot satisfies the matching shared verification requirement for all reports;
+reviewers must still run their focused checks and cite that result explicitly.
+The coordinator schedules this run once when the reviewed state is settled,
+or reuses a verifiable matching pass. Do not run full validation once per batch
+and again for the set, or launch duplicate shared checks in parallel. Follow
+`tests/README.md` for matching inputs and rerun criteria.
 
 ## Audit the whole set
 
@@ -49,9 +61,13 @@ must still run their focused checks and cite that coordinator result explicitly.
 - Verify format legality and launcher defaults against code and current metadata,
   and generate legal Runner and Corp random decks for every applicable format.
   Check size, influence, agenda points, copies, side, identity and set legality.
-- Run the set's focused/shared commands, syntax checks, `git diff --check` and
-  `node tests/run-all-tests.js` using `.nvmrc`. Confirm Corp decision fixtures
-  and decision snapshots are included. Exclude known-red pending reproductions.
+- Complete the set's focused/shared commands, syntax checks and
+  `git diff --check`. Count commands included with matching arguments and
+  environment in the shared full run once; retain distinct checks. Use the
+  single coordinator full-suite result described above, using `.nvmrc` and
+  including Corp decision fixtures/snapshots, excluding known-red pending
+  reproductions. Writing reports or updating status alone does not require
+  another full run.
   Name failures and evidence limits; do not equate a green suite with correct AI.
 - Record human-facing manual checks actually performed. Missing essential manual
   or runtime evidence prevents Pass; name what would settle it. Do not claim
@@ -86,12 +102,21 @@ set-wide check has sufficient current evidence; **Changes required** for support
 defects or missing necessary capabilities; otherwise **Inconclusive**. Missing
 coverage stays visible even when demonstrated defects determine the verdict.
 
-The coordinator appends batch review results to the active tracker's separate
-review log, reopens only affected batches as Pending (or Blocked for a precise
-external dependency), clears their owners and refreshes counts. Keep completion
-history append-only. Update set-wide review status/report link and the backlog;
-for an archived set, update only its own records. Repairs go through
-`implement-card-batch` and require re-review. Recommend playability only after Pass;
-do not enable the set. Before the tracker is replaced, preserve its entire queue,
-completion/review logs and final state under `documentation/new-sets/history/`,
-without overwriting older snapshots; retain links to notes and review reports.
+The coordinator appends batch review results to this set record's separate
+review log and updates its **Optimisation queue**: affected batches Pending (or
+Blocked for a precise dependency), repaired batches needing review Awaiting
+review, and batches with current passing evidence Pass. Clear inactive owners
+and refresh optimisation counts. Record baseline gameplay, baseline AI and
+integration defects explicitly as required repairs in the linked report and queue;
+track them in bug tickets when they need separate work. The optimisation queue
+may coordinate these repairs, but must not make them optional. Preserve dated
+implementation completion/history, another set's active tracker, and availability.
+Update the set-wide review status/report link and backlog. For a non-active set,
+use its maintained record; preserve immutable historical snapshots.
+
+Batch repairs go through `optimise-card-batch` and require independent re-review;
+separately ticketed defects follow the ticket workflow. Baseline defects remain
+required until repaired and verified, regardless of the historical Complete row.
+Pass certifies the reviewed optimisation evidence; it is not a playability gate.
+Do not enable or disable the set. Keep unresolved findings and evidence gaps
+visible even when the set is already playable or implementation moves on.
