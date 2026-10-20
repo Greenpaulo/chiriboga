@@ -901,6 +901,8 @@ function Install(
 				}
 				var finishInstall = function(cardsTrashed) {
 				  //install done, card becomes active
+				  if (installingCard.player == runner && installingCard.cardType == "hardware")
+					RecordTurnEvent("runnerHardwareInstall");
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
 				  
@@ -1265,6 +1267,7 @@ function Draw(player, num=1, afterDraw, context) {
   }
   num += ModifyingTriggers("modifyDraw", player, -num); //lower limit of -num means the total will not be any lower than zero
   if (num < 1) return 0;
+  RecordTurnEvent(player == corp ? "corpDraw" : "runnerDraw");
   var cards = [];
   //draw for corp (lose if impossible)
   if (player == corp) {
@@ -1318,6 +1321,7 @@ function Draw(player, num=1, afterDraw, context) {
 function SpendClicks(player, num) {
   if (num < 1) return;
   player.clickTracker -= num;
+  player.clicksSpentThisTurn = ClicksSpentThisTurn(player) + num;
   if (num == 1) Log(PlayerName(player) + " spent one click");
   else Log(PlayerName(player) + " spent " + num + " clicks");
 }
@@ -2188,6 +2192,15 @@ function RemoveCounters(card, counter, num = 1) {
 function Trace(baseStrength, callback, context) {
   traceStrength = baseStrength;
   Log("Trace initiated");
+  //Interrupt window before either player raises strength (e.g. Flip Switch
+  //reduces the base trace strength to 0).
+  TriggeredResponsePhase(playerTurn, "responseOnTraceInitiated", [baseStrength], function () {
+    TraceStrengthDecisions(baseStrength, callback, context);
+  }, "Trace Initiated");
+}
+
+//Corp then Runner strength decisions once the base trace strength is final.
+function TraceStrengthDecisions(baseStrength, callback, context) {
   var corpChoices = [
     { num: 0, label: "Continue without increasing trace strength" },
   ];
@@ -2269,7 +2282,7 @@ function Trace(baseStrength, callback, context) {
     corpChoices,
     decisionCallbackA,
 	"Trace[" + baseStrength + "]",
-    "Increase trace strength (from " + baseStrength + ")",
+    "Increase trace strength (from " + traceStrength + ")",
     this,
 	"trace",
   );

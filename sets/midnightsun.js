@@ -3,6 +3,7 @@ setIdentifiers.push('ms');
 
 cardSet[33001] = {
   title: 'Esâ Afontov: Eco-Insurrectionist',
+  elo: 1774,
   imageFile: "33001.png",
   player: runner,
   link: 0,
@@ -444,6 +445,7 @@ cardSet[33007] = {
 //You can spend hosted credits during runs on central servers.
 cardSet[33017] = {
   title: "Cezve",
+  elo: 1829,
   imageFile: "33017.png",
   player: runner,
   faction: "Criminal",
@@ -492,6 +494,7 @@ cardSet[33017] = {
 //2[credit]: +3 strength.
 cardSet[33018] = {
   title: "Revolver",
+  elo: 1774,
   imageFile: "33018.png",
   player: runner,
   faction: "Criminal",
@@ -755,6 +758,7 @@ cardSet[33008] = {
 //[trash]: Remove 1 tag.
 cardSet[33020] = {
   title: "No Free Lunch",
+  elo: 1676,
   imageFile: "33020.png",
   player: runner,
   faction: "Criminal",
@@ -861,6 +865,7 @@ cardSet[33020] = {
 //trash: Charge 1 of your installed cards.
 cardSet[33030] = {
   title: "Stoneship Chart Room",
+  elo: 1708,
   imageFile: "33030.png",
   player: runner,
   faction: "Shaper",
