@@ -5,6 +5,27 @@ run(async ({
   assert, fs, path, readFixture, metrics, batch, root, pool, ranges, tmp, scenario, gateway,
   TEST_OPTION, game, cli, stable, setupFile, RECORD, EXTRA_DRAW
 }) => {
+  await scenario('I2.2 passive probe preserves real choices and logs with either policy', async () => {
+    for (const enabled of [false, true]) {
+      const plainEvents = [], probeEvents = [];
+      const options = {corpOptions: {iceMarginalSecurity: enabled}};
+      const plain = await game({...options, onEvent: event => plainEvents.push(event)});
+      const probe = await game({...options, onEvent: event => probeEvents.push(event),
+        setupFile: path.join(root, 'scripts/ai-batch/rnd-protection-probe.js')});
+      assert(plain.winner); assert(probe.winner);
+      assert.deepStrictEqual(probe.errors, []);
+      assert.strictEqual(probe.logHash, plain.logHash);
+      const choices = events => events.filter(e => e.type === 'decision')
+        .map(e => [e.n, e.side, e.identifier, e.choiceType, e.options, e.chosen]);
+      // Labels originate in separate VM realms; compare their JSON values.
+      assert.strictEqual(JSON.stringify(choices(probeEvents)), JSON.stringify(choices(plainEvents)));
+      assert.deepStrictEqual(probeEvents.filter(e => e.type === 'iceInstalled'),
+        plainEvents.filter(e => e.type === 'iceInstalled'));
+      assert(probeEvents.some(e => e.rndProtectionProbe?.length));
+      if (enabled) assert(probeEvents.some(e => e.rndProtectionProbe?.some(p => p.scores.length)));
+    }
+  });
+
   await scenario('F3 instrumented cache modes preserve real Gateway choices', async () => {
     const results = [];
     for (const mode of ['off', 'on', 'verify']) {

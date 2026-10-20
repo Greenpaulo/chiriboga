@@ -34,7 +34,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [L8.2](../backlog/done/feature-layer-8-2-remote-deception-profiles.md) | not adopted (merged) | Main merged into the I2 branch; observer/collector repairs and failure evidence retained, policy removed |
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
 | 1 | [L8.9](../backlog/code-review/L8.9-observable-defense-parity.md) | in code review | Review passive install/lifecycle tooling, findings and completed control calibration; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
-| 2 | [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) | ready | Investigate late R&D protection before I3 design freeze; record the trade-off or a separately gated repair |
+| 2 | [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) | in-progress | Investigate late R&D protection before I3 design freeze; record the trade-off or a separately gated repair |
 | 3 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Reuse L8.9's measurement tools and findings; re-ground the spec and resolve [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) before freezing the design; fresh control and separate policy gates |
 
 F11, F12 and I2 are done; I2 is merged. L8.2 was not adopted (full gate failed;
@@ -42,7 +42,7 @@ policy removed), while its observer/collector repairs remain. L8.9 is in code
 review as a measurement-only delivery. Reviewing it before I3 is a sequencing
 preference rather than an additional formal dependency.
 
-[I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) is ready and owns
+[I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) is in progress and owns
 the remaining R&D investigation before I3 design freeze; it is follow-up work,
 not an outstanding I2 acceptance criterion. I3 and I5 should reuse L8.9's tooling
 and findings, with fresh matching controls for their own policies.
@@ -252,7 +252,7 @@ I9 comes last.
 - **Goal:** Value public non-agenda rewards from successful empty-Archives runs as a bounded I2 score component, so Archives is protected only when those rewards outweigh the ICE.
 
 ### I2.2 R&D protection lateness investigation
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** I2, F4
 - **Ticket:** [I2.2-rnd-protection-lateness-investigation.md](../backlog/I2.2-rnd-protection-lateness-investigation.md)
 - **Goal:** Attribute I2's late R&D protection and higher R&D theft before I3 design freeze; record an evidence-backed trade-off decision or raise a concrete separately gated repair.
