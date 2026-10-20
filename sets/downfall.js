@@ -3355,6 +3355,7 @@ cardSet[26035] = {
 // Gain 2[c] or draw 2 cards. Repeat this process for each remote server that has a card in its root and is protected by ice.
 cardSet[26036] = {
   title: "Fully Operational",
+  elo: 1879,
   imageFile: "26036.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3404,6 +3405,7 @@ cardSet[26036] = {
 // Resolve 2 of the following in any order: Draw 2 cards. Gain 2[c]. Install 1 non-agenda card from HQ. Gain [click].
 cardSet[26037] = {
   title: "Red Level Clearance",
+  elo: 1831,
   imageFile: "26037.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3489,6 +3491,7 @@ cardSet[26037] = {
 // When your turn begins, remove all hosted power counters.
 cardSet[26038] = {
   title: "Cold Site Server",
+  elo: 1455,
   imageFile: "26038.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3505,6 +3508,7 @@ cardSet[26038] = {
 // [click]: Reveal 1 card from the grip at random or the top card of the stack.
 cardSet[26039] = {
   title: "Hyoubu Institute: Absolute Clarity",
+  elo: 1147,
   imageFile: "26039.png",
   player: corp,
   faction: "Jinteki",
@@ -3519,6 +3523,7 @@ cardSet[26039] = {
 // Hosted agenda counter: Swap 1 card from HQ with 1 card in the root of or protecting the attacked server. The Runner may jack out. Use this ability only during a run.
 cardSet[26040] = {
   title: "Project Yagi-Uda",
+  elo: 1536,
   imageFile: "26040.png",
   player: corp,
   faction: "Jinteki",
@@ -3534,6 +3539,7 @@ cardSet[26040] = {
 // When a player scores or steals this agenda, do X net damage. X is equal to 1 plus the number of copies of Sting! in the other playerʼs score area.
 cardSet[26041] = {
   title: "Sting!",
+  elo: 1827,
   imageFile: "26041.png",
   player: corp,
   faction: "Jinteki",
@@ -3549,6 +3555,7 @@ cardSet[26041] = {
 // When your turn begins, reveal the top card of R&D and gain 2[c].
 cardSet[26042] = {
   title: "Public Health Portal",
+  elo: 1181,
   imageFile: "26042.png",
   player: corp,
   faction: "Jinteki",
@@ -3576,6 +3583,7 @@ cardSet[26042] = {
 // [click], hosted power counter: Do 1 net damage.
 cardSet[26043] = {
   title: "Storgotic Resonator",
+  elo: 1313,
   imageFile: "26043.png",
   player: corp,
   faction: "Jinteki",
@@ -3612,6 +3620,7 @@ cardSet[26043] = {
 // ↳ Do 1 net damage.
 cardSet[26044] = {
   title: "Saisentan",
+  elo: 1748,
   imageFile: "26044.png",
   player: corp,
   faction: "Jinteki",
@@ -3635,6 +3644,7 @@ cardSet[26044] = {
 // Choose a card name, then do 1 net damage. If you trash a card with the chosen name this way, repeat this process.
 cardSet[26045] = {
   title: "Complete Image",
+  elo: 1356,
   imageFile: "26045.png",
   player: corp,
   faction: "Jinteki",
@@ -3651,6 +3661,7 @@ cardSet[26045] = {
 // The first time the Runner approaches this server during each run, play a Psi Game. (Players secretly bid 0–2[c]. Then each player reveals and spends their bid.) If the bids differ, you may trash this upgrade. If you do, the Runner moves to the outermost position of this server. They may jack out.
 cardSet[26046] = {
   title: "Letheia Nisei",
+  elo: 1394,
   imageFile: "26046.png",
   player: corp,
   faction: "Jinteki",
@@ -3667,6 +3678,7 @@ cardSet[26046] = {
 // Hosted agenda counter: Place 1 advancement counter on an installed card.
 cardSet[26047] = {
   title: "Remastered Edition",
+  elo: 1513,
   imageFile: "26047.png",
   player: corp,
   faction: "NBN",
@@ -3712,6 +3724,7 @@ cardSet[26047] = {
 // When your turn begins, if the Runner did not make a successful run on this server during their last turn, gain 3[c].
 cardSet[26048] = {
   title: "Daily Quest",
+  elo: 1535,
   imageFile: "26048.png",
   player: corp,
   faction: "NBN",
@@ -3766,6 +3779,7 @@ cardSet[26048] = {
 // The first time each turn a run begins, gain 1[c].
 cardSet[26049] = {
   title: "Tiered Subscription",
+  elo: 1478,
   imageFile: "26049.png",
   player: corp,
   faction: "NBN",
@@ -3803,6 +3817,7 @@ cardSet[26049] = {
 // ↳ Gain 2[c]. The Runner gains 1[c].
 cardSet[26050] = {
   title: "Congratulations!",
+  elo: 1249,
   imageFile: "26050.png",
   player: corp,
   faction: "NBN",
@@ -3845,6 +3860,7 @@ cardSet[26050] = {
 // ↳ Reveal the top 3 cards of the stack. Add 1 of those cards to the grip and gain X[c], where X is equal to that cardʼs play or install cost. The Runner shuffles the stack. Trash this ice.
 cardSet[26051] = {
   title: "Loot Box",
+  elo: 1377,
   imageFile: "26051.png",
   player: corp,
   faction: "NBN",
@@ -3936,6 +3952,7 @@ cardSet[26051] = {
 // Choose a card type, then reveal the grip. Choose a value for X equal to or less than the number of revealed cards of the chosen type. You may pay X[c] to place X advancement counters on 1 installed card.
 cardSet[26052] = {
   title: "Focus Group",
+  elo: 1374,
   imageFile: "26052.png",
   player: corp,
   faction: "NBN",
@@ -3954,6 +3971,7 @@ cardSet[26052] = {
 // Take 1 bad publicity.
 cardSet[26053] = {
   title: "Game Over",
+  elo: 1286,
   imageFile: "26053.png",
   player: corp,
   faction: "NBN",
@@ -3971,6 +3989,7 @@ cardSet[26053] = {
 // When the Runner accesses this upgrade, remove 1 bad publicity unless they take 1 tag.
 cardSet[26054] = {
   title: "Increased Drop Rates",
+  elo: 1216,
   imageFile: "26054.png",
   player: corp,
   faction: "NBN",
@@ -3986,6 +4005,7 @@ cardSet[26054] = {
 // Whenever the Runner steals another agenda, you may forfeit this agenda to gain 5[c] and add the stolen agenda to HQ.
 cardSet[26055] = {
   title: "Divested Trust",
+  elo: 1434,
   imageFile: "26055.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4002,6 +4022,7 @@ cardSet[26055] = {
 // When you score this agenda, trash 1 installed program.
 cardSet[26056] = {
   title: "SDS Drone Deployment",
+  elo: 1759,
   imageFile: "26056.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4017,6 +4038,7 @@ cardSet[26056] = {
 // [click][click][click]: Gain 6[c]. You may remove 1 bad publicity.
 cardSet[26057] = {
   title: "Roughneck Repair Squad",
+  elo: 1392,
   imageFile: "26057.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4069,6 +4091,7 @@ cardSet[26057] = {
 // ↳ End the run.
 cardSet[26058] = {
   title: "Afshar",
+  elo: 1703,
   imageFile: "26058.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4141,6 +4164,7 @@ cardSet[26058] = {
 // ↳ End the run.
 cardSet[26059] = {
   title: "Sandstone",
+  elo: 1612,
   imageFile: "26059.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4185,6 +4209,7 @@ cardSet[26059] = {
 // ↳ Trace[6]. If successful, the Runner cannot steal or trash Corp cards for the remainder of this run.
 cardSet[26060] = {
   title: "Trebuchet",
+  elo: 1512,
   imageFile: "26060.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4268,6 +4293,7 @@ cardSet[26060] = {
 // Search R&D for 1 piece of ice and reveal it. (Shuffle R&D after searching it.) Install that ice protecting a central server, paying 3[c] less.
 cardSet[26061] = {
   title: "Secure and Protect",
+  elo: 1364,
   imageFile: "26061.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4286,6 +4312,7 @@ cardSet[26061] = {
 // Whenever the Runner makes a successful run on a central server, remove 1 hosted power counter.
 cardSet[26062] = {
   title: "Reduced Service",
+  elo: 1380,
   imageFile: "26062.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -4301,6 +4328,7 @@ cardSet[26062] = {
 // You cannot score this agenda if it was installed this turn.
 cardSet[26063] = {
   title: "Vulnerability Audit",
+  elo: 1581,
   imageFile: "26063.png",
   player: corp,
   faction: "Neutral",
@@ -4316,6 +4344,7 @@ cardSet[26063] = {
 // When your turn begins, you may draw 1 card.
 cardSet[26064] = {
   title: "CSR Campaign",
+  elo: 1311,
   imageFile: "26064.png",
   player: corp,
   faction: "Neutral",
@@ -4348,6 +4377,7 @@ cardSet[26064] = {
 // ↳ The Runner loses 1[c].
 cardSet[26065] = {
   title: "Rime",
+  elo: 1425,
   imageFile: "26065.png",
   player: corp,
   faction: "Neutral",
