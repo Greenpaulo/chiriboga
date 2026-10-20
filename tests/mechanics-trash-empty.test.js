@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '..');
 const logs = [];
 const context = {
   console: {log() {}, warn() {}, error() {}},
+  activePlayer: null, // Trash attributes the trash to the active player by default
   Log(message) {
     logs.push(message);
   },

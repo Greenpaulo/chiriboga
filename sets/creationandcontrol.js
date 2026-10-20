@@ -5,6 +5,7 @@ setIdentifiers.push("cac");
 // Your maximum hand size is equal to the number of credits in your credit pool.
 cardSet[3001] = {
   title: "Cerebral Imaging: Infinite Frontiers",
+  elo: 2061,
   imageFile: "3001.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -24,6 +25,7 @@ cardSet[3001] = {
 // You cannot include Jinteki cards in this deck.
 cardSet[3002] = {
   title: "Custom Biotics: Engineered for Success",
+  elo: 1141,
   imageFile: "3002.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -38,6 +40,7 @@ cardSet[3002] = {
 // Before taking your first turn, you may install up to 3 pieces of ice, with no more than a single piece of ice per server. Draw until you have 5 cards in HQ.
 cardSet[3003] = {
   title: "NEXT Design: Guarding the Net",
+  elo: 1366,
   imageFile: "3003.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -128,6 +131,7 @@ cardSet[3003] = {
 // Limit 1 per deck.
 cardSet[3004] = {
   title: "Director Haas' Pet Project",
+  elo: 1395,
   imageFile: "3004.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -181,6 +185,7 @@ cardSet[3004] = {
 // [click], hosted agenda counter: Gain [click][click]. You cannot advance cards for the remainder of this turn.
 cardSet[3005] = {
   title: "Efficiency Committee",
+  elo: 1810,
   imageFile: "3005.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -220,6 +225,7 @@ cardSet[3005] = {
 // Hosted agenda counter: The rezzed piece of bioroid ice the Runner is approaching gains "↳ End the run." after its other subroutines for the remainder of this run.
 cardSet[3006] = {
   title: "Project Wotan",
+  elo: 1270,
   imageFile: "3006.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -266,6 +272,7 @@ cardSet[3006] = {
 // Whenever the Runner suffers at least 1 core damage, do 1 net damage.
 cardSet[3007] = {
   title: "Sentinel Defense Program",
+  elo: 1216,
   imageFile: "3007.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -290,6 +297,7 @@ cardSet[3007] = {
 // [click],[trash]: Gain 2[c] for each power counter on Alix T4LB07.
 cardSet[3008] = {
   title: "Alix T4LB07",
+  elo: 1404,
   imageFile: "3008.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -330,6 +338,7 @@ cardSet[3008] = {
 // When the Runner accesses this asset while it is installed, you may pay 3[c] to do X core damage. X is equal to the number of hosted advancement counters.
 cardSet[3009] = {
   title: "Cerebral Overwriter",
+  elo: 1559,
   imageFile: "3009.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -383,6 +392,7 @@ cardSet[3009] = {
 // When this asset is trashed from anywhere while being accessed, add it to the Runner's score area as an agenda worth 2 agenda points.
 cardSet[3010] = {
   title: "Director Haas",
+  elo: 1408,
   imageFile: "3010.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -419,6 +429,7 @@ cardSet[3010] = {
 // Once per turn → [click], hosted advancement counter: Gain [click][click].
 cardSet[3011] = {
   title: "Haas Arcology AI",
+  elo: 1296,
   imageFile: "3011.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -465,6 +476,7 @@ cardSet[3011] = {
 // [trash]: Gain 2[c] for each advancement token on Thomas Haas.
 cardSet[3012] = {
   title: "Thomas Haas",
+  elo: 1248,
   imageFile: "3012.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -496,6 +508,7 @@ cardSet[3012] = {
 // Rez a piece of bioroid ice, ignoring all costs, and install Bioroid Efficiency Research on that ice as a hosted condition counter with the text "Trash Bioroid Efficiency Research and derez host ice if all of its subroutines are broken during a single encounter."
 cardSet[3013] = {
   title: "Bioroid Efficiency Research",
+  elo: 1283,
   imageFile: "3013.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -561,6 +574,7 @@ cardSet[3013] = {
 // Gain 7[c].
 cardSet[3014] = {
   title: "Successful Demonstration",
+  elo: 1363,
   imageFile: "3014.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -583,6 +597,7 @@ cardSet[3014] = {
 // ↳ End the run.
 cardSet[3015] = {
   title: "Heimdall 2.0",
+  elo: 1329,
   imageFile: "3015.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -631,6 +646,7 @@ cardSet[3015] = {
 // ↳ You may install and rez 1 piece of bioroid ice from HQ or Archives directly inward from this ice, ignoring all costs. When this run ends, if you installed a piece of ice this way, trash this ice and derez the ice you installed.
 cardSet[3016] = {
   title: "Howler",
+  elo: 1200,
   imageFile: "3016.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -702,6 +718,7 @@ cardSet[3016] = {
 // ↳ Trace[3]. If successful, do 1 core damage and give the Runner 1 tag.
 cardSet[3017] = {
   title: "Ichi 2.0",
+  elo: 1424,
   imageFile: "3017.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -780,6 +797,7 @@ cardSet[3017] = {
 // ↳ You may install 1 piece of ice from HQ protecting this server, ignoring the install cost.
 cardSet[3018] = {
   title: "Minelayer",
+  elo: 1103,
   imageFile: "3018.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -830,6 +848,7 @@ cardSet[3018] = {
 // ↳ End the run.
 cardSet[3019] = {
   title: "Viktor 2.0",
+  elo: 1394,
   imageFile: "3019.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -886,6 +905,7 @@ cardSet[3019] = {
 // ↳ If the Runner has lost [click] to break a subroutine during this run, do 1 core damage.
 cardSet[3020] = {
   title: "Zed 1.0",
+  elo: 1049,
   imageFile: "3020.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -927,6 +947,7 @@ cardSet[3020] = {
 // Whenever the Runner passes all of the ice protecting this server, you may rez 1 hosted piece of ice, paying 7[c] less. If you do, the Runner encounters that ice. When this run ends, trash that ice.
 cardSet[3021] = {
   title: "Awakening Center",
+  elo: 1319,
   imageFile: "3021.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -1009,6 +1030,7 @@ cardSet[3021] = {
 // [interrupt] → [trash]: Prevent 1 subroutine from being broken on a piece of bioroid ice protecting this server.
 cardSet[3022] = {
   title: "Tyr's Hand",
+  elo: 1040,
   imageFile: "3022.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -1048,6 +1070,7 @@ cardSet[3022] = {
 // [click], [click]: Gain 3[c].
 cardSet[3023] = {
   title: "Gila Hands Arcology",
+  elo: 1409,
   imageFile: "3023.png",
   player: corp,
   faction: "Neutral",
@@ -1076,6 +1099,7 @@ cardSet[3023] = {
 // [click], 1[c]: Search R&D for a piece of ice, reveal it, and add it to HQ. Shuffle R&D.
 cardSet[3024] = {
   title: "Levy University",
+  elo: 1156,
   imageFile: "3024.png",
   player: corp,
   faction: "Neutral",
@@ -1138,6 +1162,7 @@ cardSet[3024] = {
 // Trash Server Diagnostics when you install a piece of ice.
 cardSet[3025] = {
   title: "Server Diagnostics",
+  elo: 1170,
   imageFile: "3025.png",
   player: corp,
   faction: "Neutral",
@@ -1170,6 +1195,7 @@ cardSet[3025] = {
 // ↳ End the run.
 cardSet[3026] = {
   title: "Bastion",
+  elo: 1432,
   imageFile: "3026.png",
   player: corp,
   faction: "Neutral",
@@ -1198,6 +1224,7 @@ cardSet[3026] = {
 // ↳ End the run.
 cardSet[3027] = {
   title: "Datapike",
+  elo: 1352,
   imageFile: "3027.png",
   player: corp,
   faction: "Neutral",
@@ -1239,6 +1266,7 @@ cardSet[3027] = {
 // The first time each turn you encounter a piece of ice, it gains code gate for the remainder of this run.
 cardSet[3028] = {
   title: "Rielle “Kit” Peddler: Transhuman",
+  elo: 1770,
   imageFile: "3028.png",
   player: runner,
   faction: "Shaper",
@@ -1286,6 +1314,7 @@ cardSet[3028] = {
 // The first copy of each program in this deck does not count against your influence limit.
 cardSet[3029] = {
   title: "The Professor: Keeper of Knowledge",
+  elo: 1264,
   imageFile: "3029.png",
   player: runner,
   faction: "Shaper",
@@ -1301,6 +1330,7 @@ cardSet[3029] = {
 // Whenever you install a program from your heap, draw 1 card.
 cardSet[3030] = {
   title: "Exile: Streethawk",
+  elo: 1286,
   imageFile: "3030.png",
   player: runner,
   faction: "Shaper",
@@ -1327,6 +1357,7 @@ cardSet[3030] = {
 // Run HQ. If successful, instead of breaching HQ, rearrange any number of ice protecting all servers. (Do not rez or derez any ice or change the number of ice protecting any server.)
 cardSet[3031] = {
   title: "Escher",
+  elo: 1282,
   imageFile: "3031.png",
   player: runner,
   faction: "Shaper",
@@ -1417,6 +1448,7 @@ cardSet[3031] = {
 // Run any server. If successful, instead of breaching that server, remove up to 3 advancement counters from 1 card in the root of or protecting the attacked server.
 cardSet[3032] = {
   title: "Exploratory Romp",
+  elo: 1085,
   imageFile: "3032.png",
   player: runner,
   faction: "Shaper",
@@ -1486,6 +1518,7 @@ cardSet[3032] = {
 // Trash up to 5 programs from your grip. Gain 2[c] for each program trashed.
 cardSet[3033] = {
   title: "Freelance Coding Contract",
+  elo: 1292,
   imageFile: "3033.png",
   player: runner,
   faction: "Shaper",
@@ -1550,6 +1583,7 @@ cardSet[3033] = {
 // Install 1 program from your grip or heap, paying X[c] less. X is equal to the install cost of the program you trashed.
 cardSet[3034] = {
   title: "Scavenge",
+  elo: 1630,
   imageFile: "3034.png",
   player: runner,
   faction: "Shaper",
@@ -1636,6 +1670,7 @@ cardSet[3034] = {
 // Shuffle your grip and heap into your stack. Draw 5 cards. Remove Levy AR Lab Access from the game instead of trashing it.
 cardSet[3035] = {
   title: "Levy AR Lab Access",
+  elo: 1952,
   imageFile: "3035.png",
   player: runner,
   faction: "Shaper",
@@ -1678,6 +1713,7 @@ cardSet[3035] = {
 // Limit 1 console per player.
 cardSet[3036] = {
   title: "Monolith",
+  elo: 1231,
   imageFile: "3036.png",
   player: runner,
   faction: "Shaper",
@@ -1788,6 +1824,7 @@ cardSet[3036] = {
 // [interrupt] → [trash]: Prevent up to 2 core damage.
 cardSet[3037] = {
   title: "Feedback Filter",
+  elo: 1466,
   imageFile: "3037.png",
   player: runner,
   faction: "Shaper",
@@ -1833,6 +1870,7 @@ cardSet[3037] = {
 // [trash]: Install a program from your heap (paying the install cost).
 cardSet[3038] = {
   title: "Clone Chip",
+  elo: 1917,
   imageFile: "3038.png",
   player: runner,
   faction: "Shaper",
@@ -1888,6 +1926,7 @@ cardSet[3038] = {
 // Use this credit to pay for using the hosted program.
 cardSet[3039] = {
   title: "Omni-drive",
+  elo: 1388,
   imageFile: "3039.png",
   player: runner,
   faction: "Shaper",
@@ -1913,6 +1952,7 @@ cardSet[3039] = {
 // Interface → 1[c]: Break 1 subroutine.
 cardSet[3040] = {
   title: "Atman",
+  elo: 1572,
   imageFile: "3040.png",
   player: runner,
   faction: "Shaper",
@@ -2018,6 +2058,7 @@ cardSet[3040] = {
 // Use this credit to pay for using icebreakers.
 cardSet[3041] = {
   title: "Cloak",
+  elo: 1543,
   imageFile: "3041.png",
   player: runner,
   faction: "Shaper",
@@ -2042,6 +2083,7 @@ cardSet[3041] = {
 // 1[c]: +5 strength. Spend credits only from stealth cards to use this ability.
 cardSet[3042] = {
   title: "Dagger",
+  elo: 1555,
   imageFile: "3042.png",
   player: runner,
   faction: "Shaper",
@@ -2153,6 +2195,7 @@ cardSet[3042] = {
 // If there are at least 3 virus counters on Chakana, the advancement requirement of all agendas is increased by 1.
 cardSet[3043] = {
   title: "Chakana",
+  elo: 1389,
   imageFile: "3043.png",
   player: runner,
   faction: "Shaper",
@@ -2186,6 +2229,7 @@ cardSet[3043] = {
 // 1[c]: +1 strength.
 cardSet[3044] = {
   title: "Cyber-Cypher",
+  elo: 1661,
   imageFile: "3044.png",
   player: runner,
   faction: "Shaper",
@@ -2291,6 +2335,7 @@ cardSet[3044] = {
 // You can spend hosted credits to pay trash costs of assets.
 cardSet[3045] = {
   title: "Paricia",
+  elo: 1624,
   imageFile: "3045.png",
   player: runner,
   faction: "Shaper",
@@ -2320,6 +2365,7 @@ cardSet[3045] = {
 // 2[c], [trash]: Search your stack for 1 program. Install it. (Shuffle your stack after searching it.)
 cardSet[3046] = {
   title: "Self-modifying Code",
+  elo: 1988,
   imageFile: "3046.png",
   player: runner,
   faction: "Shaper",
@@ -2401,6 +2447,7 @@ cardSet[3046] = {
 // Use these credits to install programs (you cannot use Sahasrara to install a program that trashes Sahasrara).
 cardSet[3047] = {
   title: "Sahasrara",
+  elo: 1511,
   imageFile: "3047.png",
   player: runner,
   faction: "Shaper",
@@ -2425,6 +2472,7 @@ cardSet[3047] = {
 // 2[c]: +1 strength for the remainder of this run.
 cardSet[3048] = {
   title: "Inti",
+  elo: 1543,
   imageFile: "3048.png",
   player: runner,
   faction: "Shaper",
@@ -2509,6 +2557,7 @@ cardSet[3048] = {
 // [click]: Gain 1[c] and draw 1 card.
 cardSet[3049] = {
   title: "Professional Contacts",
+  elo: 1623,
   imageFile: "3049.png",
   player: runner,
   faction: "Shaper",
@@ -2541,6 +2590,7 @@ cardSet[3049] = {
 // Your maximum hand size is increased by 1.
 cardSet[3050] = {
   title: "Borrowed Satellite",
+  elo: 1083,
   imageFile: "3050.png",
   player: runner,
   faction: "Shaper",
@@ -2565,6 +2615,7 @@ cardSet[3050] = {
 // You may use credits on Ice Analyzer to install programs.
 cardSet[3051] = {
   title: "Ice Analyzer",
+  elo: 1299,
   imageFile: "3051.png",
   player: runner,
   faction: "Shaper",
@@ -2592,6 +2643,7 @@ cardSet[3051] = {
 // Run any server. When that run ends, if it was successful, gain 5[c].
 cardSet[3052] = {
   title: "Dirty Laundry",
+  elo: 1862,
   imageFile: "3052.png",
   player: runner,
   faction: "Neutral",
@@ -2626,6 +2678,7 @@ cardSet[3052] = {
 // When your turn begins, take 2[c] from this resource.
 cardSet[3053] = {
   title: "Daily Casts",
+  elo: 1877,
   imageFile: "3053.png",
   player: runner,
   faction: "Neutral",
@@ -2663,6 +2716,7 @@ cardSet[3053] = {
 // [click], [click], [trash]: Play an event from your heap (paying its play cost).
 cardSet[3054] = {
   title: "Same Old Thing",
+  elo: 1971,
   imageFile: "3054.png",
   player: runner,
   faction: "Neutral",
@@ -2729,6 +2783,7 @@ cardSet[3054] = {
 // Trash The Source when an agenda is scored or stolen.
 cardSet[3055] = {
   title: "The Source",
+  elo: 1550,
   imageFile: "3055.png",
   player: runner,
   faction: "Neutral",

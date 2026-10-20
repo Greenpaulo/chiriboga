@@ -2669,6 +2669,17 @@ function IsFaceUp(card) {
 }
 
 /**
+ * Number of clicks the player has spent this turn; lost clicks are not spent.<br/>Nothing is logged.
+ *
+ * @method ClicksSpentThisTurn
+ * @param {Player} player corp or runner
+ * @returns {int} clicks spent since the player's clicks were last reset
+ */
+function ClicksSpentThisTurn(player) {
+  return player.clicksSpentThisTurn || 0;
+}
+
+/**
  * Provides the clicks for the active player to spend in their action phase.<br/>Logs if modified.
  *
  * @method ResetClicks
@@ -2691,6 +2702,7 @@ function ResetClicks(player) {
   if (totalClicks < 0) totalClicks = 0; //Can't have negative clicks
 
   player.clickTracker = totalClicks;
+  player.clicksSpentThisTurn = 0;
 
   //Log if there's any modification
   if (permanentMod !== 0 || tempMod !== 0) {
@@ -3837,6 +3849,20 @@ function ChoicesActiveTriggers(callbackName, player = null) {
     }
   }
   return ret;
+}
+
+/**
+ * Counts of public events this turn, for "the first time each turn" conditions.
+ * They include events that happened before the reacting card became active.
+ * ChangePhase clears them when a turn begins.
+ */
+var turnEventCounts = {};
+function RecordTurnEvent(name) {
+  turnEventCounts[name] = (turnEventCounts[name] || 0) + 1;
+  return turnEventCounts[name];
+}
+function TurnEventCount(name) {
+  return turnEventCounts[name] || 0;
 }
 
 /**

@@ -833,6 +833,10 @@ phases.corpActionStart = CreatePhaseFromTemplate(
 var corpActionStartOriginalInit = phases.corpActionStart.Init;
 phases.corpActionStart.Init = function() {
   corp.actionsCompletedThisTurn = 0;
+  corp.actionsTakenThisTurn = [];
+  corp.pendingAction = null;
+  corp.restrictedNextAction = null;
+  corp.actionCompletionResponded = 0;
   if (typeof corpActionStartOriginalInit === 'function') {
     corpActionStartOriginalInit.call(this);
   }
@@ -1101,6 +1105,100 @@ phases.corpPostAction.Resolve.n = function () {
   }
 };
 // DRBO6 END
+
+//Corp action identity for "same"/"different" action effects (CR 5.2.5):
+//actions are the same when initiated by the same basic action, or by the same
+//ability on the same card. card and ability are set only for card abilities.
+function CorpActionIdentity(command, params) {
+  var action = { command: command, card: null, ability: null };
+  if ((command == "trigger" || command == "archivesTrigger") && params) {
+    action.card = params.card || null;
+    action.ability = params.ability || null;
+  }
+  return action;
+}
+function SameCorpAction(a, b) {
+  return a.command == b.command && a.card == b.card && a.ability == b.ability;
+}
+function CorpActionExcluded(action) {
+  if (!corp.restrictedNextAction) return false;
+  var excluded = corp.restrictedNextAction.excluded;
+  for (var i = 0; i < excluded.length; i++) {
+    if (SameCorpAction(excluded[i], action)) return true;
+  }
+  return false;
+}
+//Read-only: whether the Corp could take an action different from every
+//excluded action with clickDiscount extra clicks. Used before offering one.
+function CorpHasDifferentActionAvailable(excluded, clickDiscount) {
+  var savedPhase = currentPhase;
+  var savedClicks = corp.clickTracker;
+  var savedRestriction = corp.restrictedNextAction;
+  var savedCheckedClick = checkedClick;
+  try {
+    currentPhase = phases.corpActionMain;
+    corp.clickTracker += clickDiscount;
+    corp.restrictedNextAction = { excluded: excluded };
+    for (var command in phases.corpActionMain.Enumerate) {
+      if (command == "n") continue;
+      if (phases.corpActionMain.Enumerate[command]().length > 0) return true;
+    }
+    return false;
+  } finally {
+    currentPhase = savedPhase;
+    corp.clickTracker = savedClicks;
+    corp.restrictedNextAction = savedRestriction;
+    checkedClick = savedCheckedClick;
+  }
+}
+//Record which action was initiated; it counts once its post-action window
+//opens (a cancelled install never reaches it). A pending restriction (for
+//example MirrorMorph's extra action) hides actions it excludes.
+Object.keys(phases.corpActionMain.Enumerate).forEach(function (command) {
+  if (command == "n") return;
+  var enumerate = phases.corpActionMain.Enumerate[command];
+  phases.corpActionMain.Enumerate[command] = function () {
+    var ret = enumerate.apply(this, arguments);
+    if (!corp.restrictedNextAction) return ret;
+    return ret.filter(function (option) {
+      return !CorpActionExcluded(CorpActionIdentity(command, option));
+    });
+  };
+});
+Object.keys(phases.corpActionMain.Resolve).forEach(function (command) {
+  if (command == "n") return;
+  var resolve = phases.corpActionMain.Resolve[command];
+  phases.corpActionMain.Resolve[command] = function (params) {
+    corp.pendingAction = CorpActionIdentity(command, params);
+    return resolve.apply(this, arguments);
+  };
+});
+var corpPostActionCountingInit = phases.corpPostAction.Init;
+phases.corpPostAction.Init = function () {
+  if (corp.pendingAction) {
+    if (!corp.actionsTakenThisTurn) corp.actionsTakenThisTurn = [];
+    corp.actionsTakenThisTurn.push(corp.pendingAction);
+    corp.pendingAction = null;
+    corp.restrictedNextAction = null;
+  }
+  corpPostActionCountingInit.call(this);
+};
+//When the Corp first passes the window after an action, that action has
+//completed: fire responseOnCorpActionCompletes once, then pass as normal.
+var corpPostActionPassN = phases.corpPostAction.Resolve.n;
+phases.corpPostAction.Resolve.n = function () {
+  var phase = this;
+  var args = arguments;
+  if (activePlayer == corp && corp.actionCompletionResponded !== corp.actionsCompletedThisTurn) {
+    corp.actionCompletionResponded = corp.actionsCompletedThisTurn;
+    TriggeredResponsePhase(corp, "responseOnCorpActionCompletes", [corp.actionsTakenThisTurn ? corp.actionsTakenThisTurn.slice() : []], function () {
+      activePlayer = corp;
+      corpPostActionPassN.apply(phase, args);
+    }, "Action Completes");
+    return;
+  }
+  corpPostActionPassN.apply(this, arguments);
+};
 
 // DRBO6 START - Create corp action phase ends phase (Nisei 2021 2.3)
 // Fires when corp runs out of clicks in action phase, before moving to discard
@@ -1389,6 +1487,11 @@ phases.runSubroutines = {
         return [];
       }
       var approachedIce = attackedServer.ice[approachIce];
+      //ice derezzed during the encounter (e.g. "Baklan" Bochkin) has no active subroutines
+      if (!approachedIce.rezzed) {
+        subroutine = -1;
+        return [];
+      }
       //loop through skipping broken subroutines
       for (; subroutine < approachedIce.subroutines.length; subroutine++) {
         //non-broken subroutine? trigger and resolve.
@@ -2013,6 +2116,8 @@ function ChangePhase(src, skipInit = false) {
 
   if (currentPhase.identifier == "Corp 1.1") playerTurn = corp;
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
+  if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
+    turnEventCounts = {};
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1") &&
       corp.AI && typeof corp.AI._publicPostureTurnBegins === "function")
     corp.AI._publicPostureTurnBegins(playerTurn == corp ? "corp" : "runner");

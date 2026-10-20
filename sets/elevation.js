@@ -3,6 +3,7 @@ setIdentifiers.push('elev');
 
 cardSet[35005] = {
   title: "Shred",
+  elo: 1234,
   imageFile: "35005.png",
   player: runner,
   faction: "Anarch",
@@ -157,6 +158,7 @@ cardSet[35005] = {
 
 cardSet[35011] = {
   title: "Rent Rioters",
+  elo: 1380,
   imageFile: "35011.png",
   player: runner,
   faction: "Anarch",
@@ -210,6 +212,7 @@ cardSet[35011] = {
 //Whenever the Corp rezzes a piece of ice, you may install 1 resource or piece of hardware from your grip.
 cardSet[35012] = {
   title: 'Barry "Baz" Wong: Tri-Maf Veteran',
+  elo: 1545,
   imageFile: "35012.png",
   player: runner,
   faction: "Criminal",
@@ -344,6 +347,7 @@ cardSet[35012] = {
 //or a run event, you may reveal it and add it to your grip.
 cardSet[35013] = {
   title: "MuslihaT: Multifarious Marketeer",
+  elo: 1725,
   imageFile: "35013.png",
   player: runner,
   faction: "Criminal",
@@ -467,6 +471,7 @@ cardSet[35013] = {
 
 cardSet[35034] = {
   title: "Side Hustle",
+  elo: 1475,
   imageFile: "35034.png",
   player: runner,
   faction: "Neutral",
@@ -530,6 +535,7 @@ cardSet[35034] = {
 
 cardSet[35079] = {
   title: "Flyswatter",
+  elo: 1620,
   imageFile: "35079.png",
   player: corp,
   faction: "Neutral",
@@ -570,6 +576,7 @@ cardSet[35079] = {
 
 cardSet[35014] = {
   title: "Clean Getaway",
+  elo: 1798,
   imageFile: "35014.png",
   player: runner,
   faction: "Criminal",
@@ -614,6 +621,7 @@ cardSet[35014] = {
 
 cardSet[35030] = {
   title: "Chromatophores",
+  elo: 1530,
   imageFile: "35030.png",
   player: runner,
   faction: "Shaper",
@@ -677,6 +685,7 @@ cardSet[35030] = {
 
 cardSet[35016] = {
   title: "Maintenance Access",
+  elo: 1564,
   imageFile: "35016.png",
   player: runner,
   faction: "Criminal",
@@ -750,6 +759,7 @@ cardSet[35016] = {
 
 cardSet[35026] = {
   title: "Ritual",
+  elo: 1625,
   imageFile: "35026.png",
   player: runner,
   faction: "Shaper",
@@ -786,6 +796,7 @@ cardSet[35026] = {
 
 cardSet[35004] = {
   title: "Scrounge",
+  elo: 1481,
   imageFile: "35004.png",
   player: runner,
   faction: "Anarch",
@@ -933,6 +944,7 @@ cardSet[35004] = {
 
 cardSet[35010] = {
   title: "Cacophony",
+  elo: 1475,
   imageFile: "35010.png",
   player: runner,
   faction: "Anarch",
@@ -1025,6 +1037,7 @@ cardSet[35010] = {
 
 cardSet[35029] = {
   title: "Azimat",
+  elo: 1638,
   imageFile: "35029.png",
   player: runner,
   faction: "Shaper",
@@ -1063,6 +1076,7 @@ cardSet[35029] = {
 //Limit 1 console per player.
 cardSet[35028] = {
   title: "Madani",
+  elo: 1690,
   imageFile: "35028.png",
   player: runner,
   faction: "Shaper",
@@ -1371,6 +1385,7 @@ cardSet[35028] = {
 
 cardSet[35008] = {
   title: "Hantu",
+  elo: 1329,
   imageFile: "35008.png",
   player: runner,
   faction: "Anarch",
@@ -1474,6 +1489,7 @@ cardSet[35008] = {
 
 cardSet[35009] = {
   title: "Rising Tide",
+  elo: 1626,
   imageFile: "35009.png",
   player: runner,
   faction: "Anarch",
@@ -1586,6 +1602,7 @@ cardSet[35009] = {
 //Limit 1 console per player.
 cardSet[35006] = {
   title: "Bling",
+  elo: 1456,
   imageFile: "35006.png",
   player: runner,
   faction: "Anarch",
@@ -1715,6 +1732,7 @@ cardSet[35006] = {
 
 cardSet[35007] = {
   title: "Gourmand",
+  elo: 1693,
   imageFile: "35007.png",
   player: runner,
   faction: "Anarch",
@@ -1782,6 +1800,7 @@ cardSet[35007] = {
 
 cardSet[35015] = {
   title: "Lie Low",
+  elo: 1583,
   imageFile: "35015.png",
   player: runner,
   faction: "Criminal",
@@ -1856,6 +1875,7 @@ cardSet[35015] = {
 
 cardSet[35022] = {
   title: "Open Market",
+  elo: 1678,
   imageFile: "35022.png",
   player: runner,
   faction: "Criminal",
@@ -1934,6 +1954,7 @@ cardSet[35022] = {
 //Side B: Whenever you make a successful run, if you have at least 1 unused MU, you may flip and draw 1 card.
 cardSet[35023] = {
   title: "Dewi Subrotoputri: Pedagogical Dhalang",
+  elo: 1433,
   imageFile: "35023.jpg",
   player: runner,
   faction: "Shaper",
@@ -2106,6 +2127,7 @@ cardSet[35023] = {
 
 cardSet[35027] = {
   title: "GAMEDRAGON™ Pro",
+  elo: 1538,
   imageFile: "35027.png",
   player: runner,
   faction: "Shaper",
@@ -2329,6 +2351,7 @@ cardSet[35027] = {
 //during that run, gain 1 credit and the Corp trashes 1 card from HQ.
 cardSet[35001] = {
   title: "Ryō \"Phoenix\" Ōno: Out of the Ashes",
+  elo: 1408,
   imageFile: "35001.png",
   player: runner,
   faction: "Anarch",
@@ -2451,6 +2474,7 @@ cardSet[35001] = {
 //When you install that card, suffer 1 meat damage.
 cardSet[35002] = {
   title: "Topan: Ormas Leader",
+  elo: 1422,
   imageFile: "35002.png",
   player: runner,
   faction: "Anarch",
@@ -2608,6 +2632,7 @@ cardSet[35002] = {
 //you accessed in Archives during that run.
 cardSet[35003] = {
   title: "Charm Offensive",
+  elo: 1431,
   imageFile: "35003.png",
   player: runner,
   faction: "Anarch",
@@ -2767,6 +2792,7 @@ cardSet[35003] = {
 //Limit 1 console per player.
 cardSet[35018] = {
   title: "Detente",
+  elo: 1294,
   imageFile: "35018.png",
   player: runner,
   faction: "Criminal",
@@ -3070,6 +3096,7 @@ cardSet[35018] = {
 //[click][click][click], [trash]: Gain 4 credits and draw 3 cards. Install up to 2 cards from HQ (one at a time). You may play 1 operation from HQ.
 cardSet[35039] = {
   title: "Humanoid Resources",
+  elo: 1824,
   imageFile: "35039.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3195,6 +3222,7 @@ function humanoidResourcesPlayOp(cardRef) {
 //↳ End the run.
 cardSet[35042] = {
   title: "Scatter Field",
+  elo: 1643,
   imageFile: "35042.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3276,6 +3304,7 @@ cardSet[35042] = {
 //When your discard phase ends, you may remove 1 hosted agenda counter to install 1 card from Archives, ignoring all costs.
 cardSet[35038] = {
   title: "Project Ingatan",
+  elo: 1565,
   imageFile: "35038.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3421,6 +3450,7 @@ function projectIngatanInstall(cardRef, cardToInstall) {
 //↳ End the run.
 cardSet[35075] = {
   title: "Kessleroid",
+  elo: 1529,
   imageFile: "35075.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -3478,6 +3508,7 @@ cardSet[35075] = {
 //↳ Do 1 core damage.
 cardSet[35041] = {
   title: "Bumi 1.0",
+  elo: 1633,
   imageFile: "35041.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3649,6 +3680,7 @@ cardSet[35041] = {
 //Limit 1 region per server.
 cardSet[35082] = {
   title: "Mahkota Langit Grid",
+  elo: 1435,
   imageFile: "35082.png",
   player: corp,
   faction: "Neutral",
@@ -3758,6 +3790,7 @@ cardSet[35082] = {
 //If you do, move this upgrade to the root of the server that piece of ice is protecting.
 cardSet[35045] = {
   title: "Mercia B4LL4RD",
+  elo: 1666,
   imageFile: "35045.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3880,6 +3913,7 @@ cardSet[35045] = {
 //When your turn begins, take 4 credits from this asset and draw 1 card.
 cardSet[35072] = {
   title: "Anthill Excavation Contract",
+  elo: 1693,
   imageFile: "35072.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -3928,6 +3962,7 @@ cardSet[35072] = {
 //When your turn begins, take 2 credits from this asset.
 cardSet[35040] = {
   title: "Otto Campaign",
+  elo: 1598,
   imageFile: "35040.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3975,6 +4010,7 @@ cardSet[35040] = {
 //Gain [click][click].
 cardSet[35043] = {
   title: "Nanomanagement",
+  elo: 1823,
   imageFile: "35043.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -3997,6 +4033,7 @@ cardSet[35043] = {
 //Draw 2 cards. Install up to 2 cards from HQ (one at a time).
 cardSet[35044] = {
   title: "Top-Down Solutions",
+  elo: 1661,
   imageFile: "35044.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -4056,6 +4093,7 @@ function topDownSolutionsInstall(cardRef, installCount) {
 //Whenever an agenda is stolen, you may install 1 non-agenda card from HQ.
 cardSet[35036] = {
   title: "Poétrï Luxury Brands: All the Rage",
+  elo: 1457,
   imageFile: "35036.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -4225,6 +4263,7 @@ function poetriInstallCard(cardToInstall) {
 //↳ Resolve 1 subroutine on another rezzed code gate.
 cardSet[35053] = {
   title: "Mycoweb",
+  elo: 1534,
   imageFile: "35053.png",
   player: corp,
   faction: "Jinteki",
@@ -4478,6 +4517,7 @@ function mycowebResolveSubroutine(cardRef, subtype, excludeSelf) {
 //they may spend [click]. If they do not, you get +1 allotted [click] for your next turn.
 cardSet[35037] = {
   title: "Aggressive Trendsetting",
+  elo: 1552,
   imageFile: "35037.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -4570,6 +4610,7 @@ cardSet[35037] = {
 //Gain 2 credits for each credit lost this way.
 cardSet[35017] = {
   title: "Transfer of Wealth",
+  elo: 1859,
   imageFile: "35017.png",
   player: runner,
   faction: "Criminal",
@@ -4632,6 +4673,7 @@ cardSet[35017] = {
 //to derez 1 installed Corp card.
 cardSet[35019] = {
   title: "Maglectric Rapid (748 Mod)",
+  elo: 1482,
   imageFile: "35019.png",
   player: runner,
   faction: "Criminal",
@@ -4694,6 +4736,7 @@ cardSet[35019] = {
 //3c: +2 strength. If a run event is active, this costs 2c less.
 cardSet[35020] = {
   title: "Sang Kancil",
+  elo: 1467,
   imageFile: "35020.png",
   player: runner,
   faction: "Criminal",
@@ -4786,6 +4829,7 @@ cardSet[35020] = {
 //you may trash this resource to bypass that ice.
 cardSet[35021] = {
   title: "Fransofia Ward",
+  elo: 1370,
   imageFile: "35021.png",
   player: runner,
   faction: "Criminal",
@@ -4985,6 +5029,7 @@ cardSet[35021] = {
 //2c: +2 strength.
 cardSet[35032] = {
   title: "Principia",
+  elo: 1454,
   imageFile: "35032.png",
   player: runner,
   faction: "Shaper",
@@ -5079,6 +5124,7 @@ cardSet[35032] = {
 //to access 1 additional card.
 cardSet[35031] = {
   title: "Devadatta Drone",
+  elo: 1556,
   imageFile: "35031.png",
   player: runner,
   faction: "Shaper",
@@ -5166,6 +5212,7 @@ cardSet[35031] = {
 //If you do, gain credits equal to its printed install cost and draw 1 card.
 cardSet[35033] = {
   title: "\"Knickknack\" O'Brian",
+  elo: 1653,
   imageFile: "35033.png",
   player: runner,
   faction: "Shaper",
@@ -5250,6 +5297,7 @@ cardSet[35033] = {
 //paying 1c less for each.
 cardSet[35025] = {
   title: "Illumination",
+  elo: 1668,
   imageFile: "35025.png",
   customPlaySound: "illumination",
   player: runner,
@@ -5376,6 +5424,7 @@ cardSet[35025] = {
 //or piece of hardware from among those cards.
 cardSet[35024] = {
   title: "Magdalene Keino-Chemutai: Cryptarchitect",
+  elo: 1732,
   imageFile: "35024.png",
   player: runner,
   faction: "Shaper",
@@ -5559,6 +5608,7 @@ cardSet[35024] = {
 //[sub] Do 2 net damage.
 cardSet[35052] = {
   title: "Empiricist",
+  elo: 1514,
   imageFile: "35052.png",
   player: corp,
   faction: "Jinteki",
@@ -5669,6 +5719,7 @@ cardSet[35052] = {
 //[sub] Do 2 net damage if the Runner has at least 2 tags.
 cardSet[35063] = {
   title: "Doomscroll",
+  elo: 1537,
   imageFile: "35063.png",
   player: corp,
   faction: "NBN",
@@ -5748,6 +5799,7 @@ cardSet[35063] = {
 //When you forfeit this agenda, gain 4[credit].
 cardSet[35070] = {
   title: "Greenmail",
+  elo: 1629,
   imageFile: "35070.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -5808,6 +5860,7 @@ cardSet[35070] = {
 //and reveal it. You may install that card, ignoring all costs. If you do not, add it to HQ.
 cardSet[35071] = {
   title: "Off the Books",
+  elo: 1707,
   imageFile: "35071.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -5996,6 +6049,7 @@ cardSet[35071] = {
 //advancement counter, gain 3[credit] and the Runner loses 2[credit].
 cardSet[35061] = {
   title: "Idiosyncresis",
+  elo: 1436,
   imageFile: "35061.png",
   player: corp,
   faction: "NBN",
@@ -6086,6 +6140,7 @@ cardSet[35061] = {
 //Threat 2 → When the Runner trashes this asset (while it is rezzed), give them 1 tag.
 cardSet[35062] = {
   title: "Public Access Plaza",
+  elo: 1543,
   imageFile: "35062.png",
   player: corp,
   faction: "NBN",
@@ -6166,6 +6221,7 @@ cardSet[35062] = {
 //[sub] Do 1 net damage.
 cardSet[35076] = {
   title: "Syailendra",
+  elo: 1444,
   imageFile: "35076.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -6350,6 +6406,7 @@ cardSet[35076] = {
 //you may draw 1 card.
 cardSet[35069] = {
   title: "The Zwicky Group: Invisible Hands",
+  elo: 1582,
   imageFile: "35069.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -6416,6 +6473,7 @@ cardSet[35069] = {
 //Reveal all but 1 card in HQ. Gain 7[credit]. You may install 1 card from HQ in the root of a remote server.
 cardSet[35055] = {
   title: "Peer Review",
+  elo: 1540,
   imageFile: "35055.png",
   player: corp,
   faction: "Jinteki",
@@ -6656,6 +6714,7 @@ cardSet[35055] = {
 //the ice being approached with a piece of ice from Archives or HQ.
 cardSet[35056] = {
   title: "Mitra Aman",
+  elo: 1586,
   imageFile: "35056.png",
   player: corp,
   faction: "Jinteki",
@@ -6850,6 +6909,7 @@ cardSet[35056] = {
 //When your turn begins, you may play 1 transaction operation from Archives. After it resolves, remove it from the game.
 cardSet[35073] = {
   title: "Plutus",
+  elo: 1616,
   imageFile: "35073.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -7035,6 +7095,7 @@ cardSet[35073] = {
 //Sub: End the run.
 cardSet[35074] = {
   title: "Biawak",
+  elo: 1657,
   imageFile: "35074.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -7195,6 +7256,7 @@ cardSet[35074] = {
 //Do 4 meat damage unless the Runner pays 8 credits.
 cardSet[35078] = {
   title: "Measured Response",
+  elo: 1851,
   imageFile: "35078.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -7297,6 +7359,7 @@ cardSet[35078] = {
 //Sub: End the run if the Runner is tagged.
 cardSet[35080] = {
   title: "Lamplighter",
+  elo: 1446,
   imageFile: "35080.png",
   player: corp,
   faction: "Neutral",
@@ -7438,6 +7501,7 @@ cardSet[35080] = {
 //Sub: End the run unless the Runner suffers 3 net damage.
 cardSet[35054] = {
   title: "Semak-samun",
+  elo: 1698,
   imageFile: "35054.png",
   player: corp,
   faction: "Jinteki",
@@ -7514,6 +7578,7 @@ cardSet[35054] = {
 //Sub: If the threat level is 4 or greater, end the run.
 cardSet[35064] = {
   title: "N-Pot",
+  elo: 1515,
   imageFile: "35064.png",
   player: corp,
   faction: "NBN",
@@ -7606,6 +7671,7 @@ cardSet[35064] = {
 // - Gain 2 credits.
 cardSet[35077] = {
   title: "Key Performance Indicators",
+  elo: 1641,
   imageFile: "35077.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -7870,6 +7936,7 @@ cardSet[35077] = {
 //[click]: Play this operation from Archives. After it resolves, remove it from the game.
 cardSet[35081] = {
   title: "Petty Cash",
+  elo: 1778,
   imageFile: "35081.png",
   player: corp,
   faction: "Neutral",
@@ -7977,6 +8044,7 @@ cardSet[35081] = {
 //Once per turn → Trash 1 rezzed bioroid card in the root of or protecting the attacked server: End the run.
 cardSet[35035] = {
   title: "LEO Construction: Labor Solutions",
+  elo: 1804,
   imageFile: "35035.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -8218,6 +8286,7 @@ cardSet[35050] = {
 //Choose up to 2 revealed cards of that type. The Runner shuffles those cards into the stack.
 cardSet[35067] = {
   title: "Touch-ups",
+  elo: 1893,
   imageFile: "35067.png",
   player: corp,
   faction: "NBN",
@@ -8362,6 +8431,7 @@ cardSet[35067] = {
 //Whenever the Runner accesses a faceup installed agenda, do 2 meat damage and give the Runner 1 tag.
 cardSet[35068] = {
   title: "BANGUN: When Disaster Strikes",
+  elo: 1340,
   imageFile: "35068.png",
   player: corp,
   faction: "Weyland Consortium",
@@ -8439,6 +8509,7 @@ cardSet[35068] = {
 //power counters. Do 1 net damage plus 1 net damage for each power counter removed this way.
 cardSet[35051] = {
   title: "Phật Gioan Baotixita",
+  elo: 1822,
   imageFile: "35051.png",
   player: corp,
   faction: "Jinteki",
@@ -8552,6 +8623,7 @@ cardSet[35051] = {
 //(You cannot score that card this turn.)
 cardSet[35047] = {
   title: "PT Untaian: Life's Building Blocks",
+  elo: 1320,
   imageFile: "35047.png",
   player: corp,
   faction: "Jinteki",
@@ -8648,6 +8720,7 @@ cardSet[35047] = {
 //(They approach any ice in that position.) Use this ability only during a run.
 cardSet[35048] = {
   title: "Proprionegation",
+  elo: 1656,
   imageFile: "35048.png",
   player: corp,
   faction: "Jinteki",
@@ -8745,6 +8818,7 @@ cardSet[35048] = {
 
 cardSet[35049] = {
   title: "Sericulture Expansion",
+  elo: 1516,
   imageFile: "35049.png",
   player: corp,
   faction: "Jinteki",
@@ -8859,6 +8933,7 @@ cardSet[35049] = {
 //Trash 1 of those cards and add the rest to HQ.
 cardSet[35046] = {
   title: "AU Co.: The Gold Standard in Clones",
+  elo: 1943,
   imageFile: "35046.png",
   player: corp,
   faction: "Jinteki",
