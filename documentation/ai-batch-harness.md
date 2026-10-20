@@ -787,6 +787,10 @@ histograms/TV, a separate unrevealed population, deck breakdowns, route/posture/
 safety/multi-root counts, endpoint ages, server allocation totals and root-age
 exposure to those allocations. Root change exposure can count a shared layer
 for several roots; it is explicitly not a count of independent allocations.
+Reports captured before the PR #65 review fix omit the first ICE addition when
+ICE creates a new remote. Their server allocation totals undercount additions;
+offline analysis cannot recover the missing events. This omission does not
+affect root exposure for those ICE-only remotes, which have no commitments.
 Unknown placement and left-censored coverage remain visible. The global installation-TV
 interval describes unrevealed installs; per-deck installation distributions and
 intervals include revealed installs as diagnostics. All 95% intervals resample
@@ -971,11 +975,6 @@ stall (BTL/Kit seed 257); calibration retains failure evidence and uses 1,399
 successful games with that stratum's reduced count. No consumer margin or
 policy adoption follows from this calibration. Lifecycle totals include all
 tracked remote root cards; metric class counts cover agendas and declared traps.
-
-`scripts/ai-batch/install-defense-summary.js <report.json> [...]` reads saved
-observer-on reports and prints install-time ICE by root class, bare-at-install
-rate by trap install route, and route counts. Pooled, read-only diagnostic; no
-game-clustered intervals.
 
 ## Install-series collectors and baselines (I0)
 

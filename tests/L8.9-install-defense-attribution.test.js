@@ -17,4 +17,3 @@ const install = events.find(event => event.type === 'realizedDefenseLifecycle' &
 assert.strictEqual(install.commitmentId, snapshot.commitmentId);
 assert.strictEqual(snapshot.iceCount, 2);
 assert.strictEqual(install.iceCount, 1, 'install defense must be recorded separately from later exposure');
-console.log('L8.9 install-defense attribution: passed');

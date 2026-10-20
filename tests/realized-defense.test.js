@@ -174,6 +174,34 @@ run(async ({
     assert.strictEqual(stats.installation.interval.valid, false);
     assert.strictEqual(stats.coverage.leftCensored, 2);
   });
+  await check('new remote first ICE is counted once while start-board ICE remains censored', () => {
+    const events = [], tracker = createRealizedDefenseTracker((type, e) => events.push({type, ...e}));
+    const existing = {ice: [{}], root: []}, corp = {remoteServers: [existing]};
+    tracker.start(corp, 0);
+    assert.deepStrictEqual(events, [], 'start-board ICE must not count as additions');
+    const remote = {ice: [{}], root: []};
+    corp.remoteServers.push(remote);
+    tracker.observe(corp, 1);
+    tracker.observe(corp, 1);
+    const added = events.filter(e => e.action === 'iceAdded');
+    assert.strictEqual(added.length, 1, 'first ICE must be emitted once, without a root commitment');
+    assert.strictEqual(added[0].count, 1);
+    assert.deepStrictEqual(added[0].commitments, []);
+    assert.strictEqual(added[0].serverId, tracker.serverId(remote));
+    corp.remoteServers.pop();
+    tracker.observe(corp, 2);
+    tracker.observe(corp, 2);
+    const removed = events.filter(e => e.action === 'iceRemoved');
+    assert.strictEqual(removed.length, 1);
+    assert.strictEqual(removed[0].serverId, added[0].serverId);
+    assert.strictEqual(removed[0].count, 1);
+    const game = {deckPairId: 'script', seed: 1};
+    for (const event of events) collector.onEvent(event, game);
+    const stats = collector.summarize([collector.samples(game)]).attribution;
+    assert.strictEqual(stats.serverIceChanges.iceAdded, 1);
+    assert.strictEqual(stats.serverIceChanges.iceRemoved, 1);
+    assert.deepStrictEqual(stats.rootChangeExposure, {}, 'ICE-only remotes create no root exposure');
+  });
   await check('committed install defense differs from the pre-request count when a cost removes ICE', () => {
     const events = [], tracker = createRealizedDefenseTracker((type, event) => events.push({type, ...event}));
     const card = {cardType: 'agenda'}, server = {ice: [{}, {}], root: []}, corp = {remoteServers: [server]};
