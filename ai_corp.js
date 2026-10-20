@@ -7,6 +7,43 @@ const CORP_AI_OBSERVED_RUN_PRESSURE_NUDGE = 1;
 //has not shown yet: the median install cost of the playable sets' typed
 //icebreakers (3) plus 1 credit per subroutine, and the install click.
 const CORP_AI_NO_BREAKER_ASSUMED_COST = {install: 3, perSubroutine: 1};
+//I2 M2: measured probability that the stock Runner AI breaches a server in one
+//Runner turn, by server kind, public ICE count (single: 0-1, multi: 2+; the
+//calibration found one-ICE and multi-ICE servers differ at equal margin) and
+//breach-margin bucket (_breachMarginBucket).
+//Derived by scripts/ai-batch/breach-hazard-table.js from
+//documentation/corp-ai/measurements/I2-15d485d-breach-hazard-calibration.json;
+//tests/breach-hazard-table.test.js keeps the two equal. Observation-only until
+//a consumer adopts it through its own gate.
+const CORP_AI_BREACH_HAZARD_TABLE = Object.freeze({
+  agendaRemote: Object.freeze({
+    single: Object.freeze({"lockout": 0.0498, "<=-4": 0.0498, "-3..-1": 0.0498, "0..1": 0.093, "2..4": 0.2015, "5..9": 0.2415, ">=10": 0.2689, "unknown": 0.2228}),
+    multi: Object.freeze({"lockout": 0.015, "<=-4": 0.015, "-3..-1": 0.0409, "0..1": 0.0488, "2..4": 0.1339, "5..9": 0.2063, ">=10": 0.2445, "unknown": 0.1661}),
+  }),
+  otherRemote: Object.freeze({
+    single: Object.freeze({"lockout": 0.0134, "<=-4": 0.0134, "-3..-1": 0.0134, "0..1": 0.0265, "2..4": 0.0718, "5..9": 0.1294, ">=10": 0.1523, "unknown": 0.1249}),
+    multi: Object.freeze({"lockout": 0.0097, "<=-4": 0.0097, "-3..-1": 0.0108, "0..1": 0.0313, "2..4": 0.0499, "5..9": 0.0872, ">=10": 0.1086, "unknown": 0.0742}),
+  }),
+  hq: Object.freeze({
+    single: Object.freeze({"lockout": 0.0232, "<=-4": 0.0232, "-3..-1": 0.0232, "0..1": 0.0678, "2..4": 0.1066, "5..9": 0.1539, ">=10": 0.1539, "unknown": 0.1331}),
+    multi: Object.freeze({"lockout": 0.0091, "<=-4": 0.0091, "-3..-1": 0.0232, "0..1": 0.0425, "2..4": 0.0952, "5..9": 0.1269, ">=10": 0.1408, "unknown": 0.104}),
+  }),
+  rd: Object.freeze({
+    single: Object.freeze({"lockout": 0.0499, "<=-4": 0.0499, "-3..-1": 0.0499, "0..1": 0.1016, "2..4": 0.1913, "5..9": 0.2085, ">=10": 0.2104, "unknown": 0.1925}),
+    multi: Object.freeze({"lockout": 0.0133, "<=-4": 0.0133, "-3..-1": 0.0557, "0..1": 0.1346, "2..4": 0.2103, "5..9": 0.2451, ">=10": 0.2451, "unknown": 0.2061}),
+  }),
+  archives: Object.freeze({
+    single: Object.freeze({"lockout": 0.123, "<=-4": 0.123, "-3..-1": 0.123, "0..1": 0.123, "2..4": 0.123, "5..9": 0.123, ">=10": 0.1516, "unknown": 0.1377}),
+    multi: Object.freeze({"lockout": 0.0537, "<=-4": 0.0537, "-3..-1": 0.0537, "0..1": 0.0537, "2..4": 0.0537, "5..9": 0.0537, ">=10": 0.0537, "unknown": 0.0537}),
+  }),
+});
+//Credit-equivalents per agenda point (cost to advance and install), from the
+//same calibration file. Only I9 retunes it.
+const CORP_AI_POINT_VALUE = 4.4;
+//I2 phase B horizon in Runner turns (gate run 2). The next-turn hazard is held
+//for every turn, with no projected-income drift (the drifted next-turn check
+//failed calibration), so repeatable centrals keep their repeat weight.
+const CORP_AI_I2_HORIZON_RUNNER_TURNS = 2;
 
 // Shared public shapes: all twelve scripts have positive baseline mass.
 const CORP_AI_POSTURE_SCRIPTS = Object.freeze([1, 2, 3].flatMap((depth, i) =>
@@ -1171,7 +1208,7 @@ class CorpAI {
 
   //this damage is potential because the run could jack out/prevent, not because we don't know the cards
   //this function assumes the runner is mid-run on this server
-  _potentialDamageOnBreach(server) {
+  _potentialDamageOnBreach(server, quiet = false) {
     if (!server) return 0;
     var ret = 0;
     //1 if it is contains an agenda and identity is Jinteki:PE (unless Runner wins before PE fires)
@@ -1211,7 +1248,7 @@ class CorpAI {
       creditsLeft -= 2;
       ret++;
     }
-    this._log("Could do " + ret + " damage on breach");
+    if (!quiet) this._log("Could do " + ret + " damage on breach");
     return ret;
   }
 
@@ -3742,6 +3779,16 @@ class CorpAI {
     //proof of security: let the per-layer lower-bound planner decide instead.
     if (unknown && !best) return null;
     var last = best ? best.last : null;
+    // RunCalculator recursively continues past installed finite-run defenders.
+    // Global-only providers still need their repeated cost added below.
+    var modelledGlobalETRUses = best ? InstalledCards(corp).reduce((total, card) => {
+      if (best.rc._ignoredIce.has(card) || !PlayerCanLook(corp, card) ||
+          typeof card.AIRunExtraRuns != "function" ||
+          !(card.AIRunExtraRuns.call(card, server) > 0) ||
+          typeof card.AIGlobalETRUses != "function") return total;
+      var uses = Number(card.AIGlobalETRUses.call(card, server));
+      return total + (isFinite(uses) ? Math.max(0, Math.floor(uses)) : 0);
+    }, 0) : 0;
     var cost = last ? last.runner_credits_spent + last.runner_credits_lost +
       (last.runner_credits_reserved || 0) : Infinity;
     return {
@@ -3751,6 +3798,7 @@ class CorpAI {
       unpricedMandatory: unpricedMandatory,
       unpricedAvoidance: unpricedAvoidance,
       routeFeasible: !!last,
+      modelledGlobalETRUses: modelledGlobalETRUses,
       restrictedCreditsPaid: last ? last.restrictedCreditsPaid || 0 : 0,
       routeDamage: last ? best.rc.TotalDamage(best.rc.TotalEffect(last)) : 0,
       reasons: [last ? "restricted-credit route is feasible" : "no feasible restricted-credit route"]
@@ -4082,6 +4130,8 @@ class CorpAI {
     result.totalBreakCost = bestPlan.totalBreakCost;
     result.totalMandatoryBreakCost = bestPlan.totalMandatoryBreakCost;
     result.reasons = result.reasons.concat(bestPlan.reasons);
+    //Unrezzed ICE the chosen plan rezzes (I2 charges its rez cost).
+    result.plannedRezIce = unrezzedIce.filter((card) => bestCards.indexOf(card) > -1);
     for (var i = 0; i < unrezzedIce.length; i++) {
       if (bestCards.indexOf(unrezzedIce[i]) < 0)
         result.reasons.push(
@@ -4162,7 +4212,7 @@ class CorpAI {
       result.isSecure = result.hasHardLockout || !bestPlan.breakerRouteFeasible;
     else result.isSecure = result.hasHardLockout || result.totalMandatoryBreakCost > result.runnerCredits;
     this._addHonestVerdict(result, bestPlan, effectiveCredits, server,
-      serverLockout, globalETRUses);
+      serverLockout, globalETRUses, bestCards);
     result.knownMandatoryBreakCost = result.totalMandatoryBreakCost;
     result.knownBreakCost = result.totalBreakCost;
     result.honestKnownMandatoryBreakCost = result.honestMandatoryBreakCost;
@@ -4186,16 +4236,53 @@ class CorpAI {
   //in both; L9.0.1 will adopt the other honest corrections for decisions.
   //honestLockout survives the click-break and "no breaker yet" corrections;
   //noBreakerLockout marks a layer today locked only by a missing breaker.
-  _addHonestVerdict(result, plan, credits, server, serverLockout, globalETRUses) {
+  _addHonestVerdict(result, plan, credits, server, serverLockout, globalETRUses, planIce) {
     result.honestReasons = [];
     result.noBreakerLockout = false;
+    result.honestRoute = null;
+    //I2 M4: approach-time root defences join the honest route only.
+    var approach = this._approachDefenses(server, planIce);
+    result.approachDefense = approach.active;
+    if (approach.corpEndsRunUses > 0) {
+      globalETRUses += approach.corpEndsRunUses;
+      if (globalETRUses >= this._projectedRunnerRuns(server)) {
+        serverLockout = true;
+        result.honestReasons.push("approach defence ends " + approach.corpEndsRunUses + " runs");
+      }
+    }
+    var evaluatingActiveRun = typeof attackedServer != "undefined" && attackedServer == server;
+    var clicks = this._projectedRunnerClicks();
+    var clickBudget = evaluatingActiveRun ? clicks : Math.max(0, clicks - 1);
+    var clickCredits = Math.min(credits.clickCredits, result.runnerCredits);
+    result.honestClickBudget = clickBudget;
+    result.honestClickCredits = clickCredits;
     if (!plan.honestLayers) {
       //The restricted-credit route already plans with the full RunCalculator.
-      result.honestReasons = result.reasons.filter(reason => reason.startsWith("unpriced breaker "));
-      result.honestLockout = result.hasHardLockout;
-      result.honestIsSecure = result.isSecure;
+      result.honestRestrictedRoute = true;
+      result.honestReasons = result.reasons.filter(reason => reason.startsWith("unpriced breaker "))
+        .concat(result.honestReasons);
+      result.honestLockout = result.hasHardLockout || serverLockout;
+      result.honestIsSecure = result.isSecure || result.honestLockout;
       result.honestMandatoryBreakCost = result.totalMandatoryBreakCost;
       result.honestBreakCost = result.totalBreakCost;
+      var restrictedCost = result.totalMandatoryBreakCost;
+      if (approach.active && !result.honestIsSecure && typeof restrictedCost == "number" && isFinite(restrictedCost)) {
+        //The calculator's route has no click split: price it as one credit layer.
+        var restrictedLayers = [];
+        var restrictedRepeats = 1 + (serverLockout ? 0 :
+          Math.max(0, globalETRUses - (plan.modelledGlobalETRUses || 0)));
+        for (var restrictedRepeat = 0; restrictedRepeat < restrictedRepeats; restrictedRepeat++)
+          restrictedLayers.push({card: null, options: [{credits: restrictedCost, clicks: 0}]});
+        // Approach payments are absent from the calculator's ICE route.
+        for (var approachRepeat = 0; approachRepeat < 1 + (serverLockout ? 0 : globalETRUses); approachRepeat++)
+          restrictedLayers.push(...approach.layers);
+        var restrictedVerdict = this._honestRouteVerdict(restrictedLayers, result.runnerCredits, clickBudget, clickCredits);
+        var restrictedRoute = restrictedVerdict.feasible || restrictedVerdict.cheapest;
+        result.honestRestrictedRoute = false;
+        result.honestRoute = restrictedRoute ? {credits: restrictedRoute.credits, clicks: restrictedRoute.clicks} : null;
+        result.honestMandatoryBreakCost = restrictedRoute ? restrictedRoute.total : Infinity;
+        result.honestIsSecure = !restrictedVerdict.feasible;
+      }
       return;
     }
     var layers = [];
@@ -4224,15 +4311,17 @@ class CorpAI {
         repeats += globalETRUses;
       for (var r = 0; r < repeats; r++) layers.push(layer);
     }
+    //Approach costs come after the innermost ICE, once per pass of the route.
+    for (var approachLayer of approach.layers) {
+      var approachRepeats = 1 + (globalETRUses > 0 && !serverLockout ? globalETRUses : 0);
+      for (var r = 0; r < approachRepeats; r++) layers.push(approachLayer);
+    }
     result.honestLockout = serverLockout || layerLockout;
-    var evaluatingActiveRun = typeof attackedServer != "undefined" && attackedServer == server;
-    var clicks = this._projectedRunnerClicks();
-    var clickBudget = evaluatingActiveRun ? clicks : Math.max(0, clicks - 1);
     var verdict = result.honestLockout
       ? {feasible: null, cheapest: null}
-      : this._honestRouteVerdict(layers, result.runnerCredits, clickBudget,
-        Math.min(credits.clickCredits, result.runnerCredits));
+      : this._honestRouteVerdict(layers, result.runnerCredits, clickBudget, clickCredits);
     var route = verdict.feasible || verdict.cheapest;
+    if (route) result.honestRoute = {credits: route.credits, clicks: route.clicks};
     result.honestMandatoryBreakCost = route ? route.total : Infinity;
     result.honestBreakCost = route
       ? Math.max(route.total, isFinite(result.totalBreakCost) ? result.totalBreakCost : 0)
@@ -4246,8 +4335,11 @@ class CorpAI {
           repeats += globalETRUses;
         for (var repeat = 0; repeat < repeats; repeat++) fullLayers.push(layer);
       }
-      var fullVerdict = this._honestRouteVerdict(fullLayers, result.runnerCredits, clickBudget,
-        Math.min(credits.clickCredits, result.runnerCredits));
+      for (var approachLayer of approach.layers) {
+        var approachRepeats = 1 + (globalETRUses > 0 && !serverLockout ? globalETRUses : 0);
+        for (var repeat = 0; repeat < approachRepeats; repeat++) fullLayers.push(approachLayer);
+      }
+      var fullVerdict = this._honestRouteVerdict(fullLayers, result.runnerCredits, clickBudget, clickCredits);
       var fullRoute = fullVerdict.feasible || fullVerdict.cheapest;
       result.honestBreakCost = fullRoute ? fullRoute.total : Infinity;
     }
@@ -4256,6 +4348,117 @@ class CorpAI {
       result.honestReasons.push("honest route needs " + route.credits + " credits and " +
         route.clicks + " clicks; Runner has " + result.runnerCredits + " credits and " +
         clickBudget + " clicks to break with");
+  }
+
+  //I2 M4: root cards' AIApproachDefense results for the honest route. A rezzed
+  //card counts; an unrezzed one only when its rez can be funded together with
+  //the chosen ICE rez plan (as _hasDefensiveUpgrade requires affordability).
+  _approachDefenses(server, planIce) {
+    var ret = {layers: [], corpEndsRunUses: 0, active: false};
+    if (!server || !server.root) return ret;
+    var funded = (planIce || []).filter(card => !card.rezzed);
+    var defenders = [];
+    for (var card of server.root) {
+      if (typeof card.AIApproachDefense != "function") continue;
+      if (!card.rezzed) {
+        if (!this._canFundRezPlan(funded.concat([card]))) continue;
+        funded.push(card);
+      }
+      defenders.push(card);
+    }
+    if (!defenders.length) return ret;
+    var spendable = Math.max(0, Credits(corp) -
+      funded.reduce((total, card) => total + Math.max(0, RezCost(card)), 0));
+    for (var card of defenders) {
+      var defense = card.AIApproachDefense.call(card, server, {spendableCredits: spendable});
+      if (!defense) continue;
+      var options = (defense.runnerOptions || []).map(option =>
+        ({credits: Math.max(0, option.credits || 0), clicks: Math.max(0, option.clicks || 0)}));
+      if (options.length) {
+        ret.layers.push({card: card, options: options});
+        ret.active = true;
+      }
+      var uses = Number(defense.corpEndsRunUses);
+      if (isFinite(uses) && uses > 0) {
+        ret.corpEndsRunUses += Math.floor(uses);
+        ret.active = true;
+      }
+    }
+    return ret;
+  }
+
+  //I2 M1: the Runner's spare credit-equivalents (CLICK_VALUE 1) after paying the
+  //honest route; negative is the shortfall. -Infinity for an honest lockout (or
+  //no restricted-credit route); null when a breaker is unpriced, with
+  //upperBound from the known part. Outside those, margin >= 0 exactly when
+  //honestIsSecure is false.
+  _breachMargin(server, evaluation) {
+    if (!evaluation) evaluation = this._evaluateServerSecurity(server);
+    var credits = evaluation.runnerCredits;
+    if (evaluation.honestLockout) return {margin: -Infinity, upperBound: -Infinity};
+    if (evaluation.honestMandatoryBreakCost === null) {
+      var known = evaluation.honestKnownMandatoryBreakCost;
+      return {margin: null, upperBound: typeof known == "number" ? credits - known : null};
+    }
+    var margin;
+    var route = evaluation.honestRoute;
+    if (route) {
+      var creditSlack = credits - Math.min(route.clicks, evaluation.honestClickCredits) - route.credits;
+      var clickSlack = evaluation.honestClickBudget - route.clicks;
+      margin = clickSlack >= 0 ? creditSlack : Math.min(creditSlack, 0) + clickSlack;
+    } else if (evaluation.honestRestrictedRoute && isFinite(evaluation.honestMandatoryBreakCost)) {
+      margin = credits - evaluation.honestMandatoryBreakCost;
+      //The calculator's own feasibility is authoritative on this path.
+      margin = evaluation.honestIsSecure ? Math.min(-1, margin) : Math.max(0, margin);
+    } else margin = -Infinity;
+    return {margin: margin, upperBound: margin};
+  }
+
+  //I2 M2 bucket of a breach margin (preregistered).
+  _breachMarginBucket(margin) {
+    if (margin === null || typeof margin == "undefined") return "unknown";
+    if (margin == -Infinity) return "lockout";
+    if (margin <= -4) return "<=-4";
+    if (margin <= -1) return "-3..-1";
+    if (margin <= 1) return "0..1";
+    if (margin <= 4) return "2..4";
+    if (margin <= 9) return "5..9";
+    return ">=10";
+  }
+
+  //I2 M2 table row of a server from public state. A remote with an installed
+  //root card uses the agendaRemote row (its type is hidden); consumers that
+  //know a stake pass their own kind.
+  _breachKind(server) {
+    if (server == corp.HQ) return "hq";
+    if (server == corp.RnD) return "rd";
+    if (server == corp.archives) return "archives";
+    return server && server.root && server.root.length ? "agendaRemote" : "otherRemote";
+  }
+
+  //Public click-for-credit floor of the Runner's next turn.
+  _projectedRunnerIncome() {
+    return Math.max(0, (typeof AllottedClicks == "function" ? AllottedClicks(runner) : 4) - 1);
+  }
+
+  //I2 M2: probability of a successful run on the server in Runner turn
+  //runnerTurnsAhead (1 = next), from CORP_AI_BREACH_HAZARD_TABLE (row by kind
+  //and the server's ICE count). Later turns
+  //move the margin by projected income; turns are never treated as independent.
+  _breachHazard(server, runnerTurnsAhead, evaluation, kind) {
+    var turns = Math.max(1, runnerTurnsAhead || 1);
+    var margin = this._breachMargin(server, evaluation).margin;
+    if (margin !== null && isFinite(margin))
+      margin += (turns - 1) * this._projectedRunnerIncome();
+    var iceCount = server && server.ice ? server.ice.length : 0;
+    return this._hazardForMargin(kind || this._breachKind(server), iceCount, margin);
+  }
+
+  //M2 table cell: row by kind and ICE count (0-1 single, 2+ multi), cell by
+  //margin bucket.
+  _hazardForMargin(kind, iceCount, margin) {
+    var rows = CORP_AI_BREACH_HAZARD_TABLE[kind];
+    return rows[iceCount >= 2 ? "multi" : "single"][this._breachMarginBucket(margin)];
   }
 
   //Security evaluation is used repeatedly while scoring possible actions. Keep
@@ -5169,7 +5372,9 @@ class CorpAI {
   }
 
   //used in _rankedInstallOptions
-  _iceInstallOptions(serverToInstallTo, cards, priorityOnly) {
+  //tagGroup marks each option's legacy group (iceGroup 0 affordable, 1 low
+  //priority) for I2's ranking.
+  _iceInstallOptions(serverToInstallTo, cards, priorityOnly, tagGroup = false) {
     var ret = [];
     //only create new empty protected remotes when there will be corp clicks to use them (e.g. not during Ansel firing) and not while a HVT is installed
     var permitNewEmpty = false;
@@ -5183,6 +5388,7 @@ class CorpAI {
           serverToInstallTo: serverToInstallTo,
         });
       }
+      var affordableCount = ret.length;
       if (!priorityOnly) {
         var notAffordableIce = this._notAffordableIce(serverToInstallTo, cards);
         for (var i = 0; i < notAffordableIce.length; i++) {
@@ -5192,8 +5398,209 @@ class CorpAI {
           });
         }
       }
+      if (tagGroup)
+        ret.forEach((option, index) => (option.iceGroup = index < affordableCount ? 0 : 1));
     }
     return ret;
+  }
+
+  //I2 phase B (iceMarginalSecurity): protection ICE for every server the
+  //legacy walk could have picked (same _rankedServersToProtect rows, so the
+  //posture cap and _NoMoreProtectionForThisServer hold; same empty-Archives
+  //exclusion and layer policy; same per-server ICE list), ranked by legacy
+  //group, then marginal score, then walk order. servers: an explicit list
+  //instead of the walk. Returns fresh options; scores are memoised in memo for
+  //one ranking.
+  _marginalIceInstallOptions(cards, priorityOnly, economyCheck, memo, servers = null) {
+    if (!memo.entries) {
+      memo.entries = this._rankedServersToProtect(false).filter(
+        (entry) =>
+          !this._nothingWorthProtecting(entry.server, entry.security) &&
+          this._iceLayerPolicy(entry.server, economyCheck, entry.security).allowed,
+      );
+      memo.byServer = new Map();
+      memo.designated = this._scoringServers(this._emptyProtectedRemotes())[0] || null;
+    }
+    var entries = servers
+      ? servers.map(
+          (server) =>
+            memo.entries.find((entry) => entry.server == server) || { server: server, security: null },
+        )
+      : memo.entries;
+    var candidates = [];
+    entries.forEach((entry) => {
+      if (!memo.byServer.has(entry.server))
+        memo.byServer.set(
+          entry.server,
+          this._marginalIceServerCandidates(entry, cards, priorityOnly, memo.designated),
+        );
+      candidates = candidates.concat(memo.byServer.get(entry.server));
+    });
+    var order = candidates.map((candidate, index) => ({ candidate: candidate, index: index }));
+    order.sort(
+      (a, b) =>
+        a.candidate.group - b.candidate.group ||
+        b.candidate.breakdown.score - a.candidate.breakdown.score ||
+        a.index - b.index,
+    );
+    return order.map((row) => ({
+      cardToInstall: row.candidate.card,
+      serverToInstallTo: row.candidate.server,
+      iceMarginalScore: row.candidate.breakdown,
+    }));
+  }
+
+  _marginalIceServerCandidates(entry, cards, priorityOnly, designated) {
+    var server = entry.server;
+    var options = this._iceInstallOptions(server, cards, priorityOnly, true);
+    if (options.length < 1) return [];
+    var before = this._marginalIceBefore(server, entry.security, designated);
+    return options.map((option) => ({
+      card: option.cardToInstall,
+      server: server,
+      group: option.iceGroup,
+      breakdown: this._marginalIceScore(option.cardToInstall, server, before),
+    }));
+  }
+
+  //Stake P(s): agenda points expected through the server per breach, capped at
+  //the points the Runner needs. Agendas and traps share one stake (the mean
+  //agenda points in the Corp's own deck) so ICE never tells them apart.
+  //Before I3, only the designated next scoring remote (first scoring empty
+  //remote, else the new remote) has an empty-remote stake, and only while HQ
+  //holds an agenda.
+  _iceStake(server, designated) {
+    var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
+    var stake = 0;
+    if (server == corp.HQ || server == corp.RnD || server == corp.archives)
+      stake = this._breachConsequence(server).pointsExposed;
+    else if (server && server.root.some((card) => this._isAgendaOrTrap(card)))
+      stake = this._meanAgendaPoints();
+    else if (server == designated) stake = this._highestAgendaPointsInHQ();
+    return Math.min(stake, pointsNeeded);
+  }
+
+  _isAgendaOrTrap(card) {
+    return (
+      CheckCardType(card, ["agenda"]) ||
+      CheckSubType(card, "Ambush") ||
+      typeof card.AIPunishesAccess == "function"
+    );
+  }
+
+  //Mean printed points per agenda across the Corp's own cards in every zone.
+  _meanAgendaPoints() {
+    var zones = [corp.HQ.cards, corp.RnD.cards, corp.archives.cards, corp.scoreArea, runner.scoreArea];
+    corp.remoteServers.forEach((server) => zones.push(server.root));
+    var total = 0;
+    var count = 0;
+    zones.forEach((zone) =>
+      (zone || []).forEach((card) => {
+        if (card.player != corp || !CheckCardType(card, ["agenda"])) return;
+        total += Number(card.agendaPoints) || 0;
+        count++;
+      }),
+    );
+    return count > 0 ? total / count : 0;
+  }
+
+  _highestAgendaPointsInHQ() {
+    return corp.HQ.cards.reduce(
+      (best, card) =>
+        CheckCardType(card, ["agenda"]) ? Math.max(best, Number(card.agendaPoints) || 0) : best,
+      0,
+    );
+  }
+
+  _marginalIceBefore(server, security, designated) {
+    var stake = this._iceStake(server, designated);
+    var central = server == corp.HQ || server == corp.RnD || server == corp.archives;
+    var kind = central ? this._breachKind(server) : stake > 0 ? "agendaRemote" : "otherRemote";
+    var evaluation = server
+      ? security || this._evaluateServerSecurity(server)
+      : this._detachedRemoteEvaluation();
+    //A designated empty remote's stake is an agenda still in HQ: it is exposed
+    //only from the Runner turn after it can be installed (this turn if a click
+    //remains after the ICE, else next Corp turn).
+    var pending =
+      !central && stake > 0 && !(server && server.root.some((card) => this._isAgendaOrTrap(card)));
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    return {
+      stake: stake,
+      kind: kind,
+      repeatable: server == corp.HQ || server == corp.RnD,
+      exposureTurns: pending && this._clicksLeft() < 2 ? horizon - 1 : horizon,
+      hazard: this._marginalHazard(kind, server ? server.ice.length : 0, evaluation, false),
+    };
+  }
+
+  //Expected points stolen over the exposure turns at a constant per-turn
+  //hazard: repeatable centrals stake x turns x hazard, one-shot servers
+  //stake x P(at least one breach).
+  _marginalIceStolen(before, hazard) {
+    if (hazard === null) return null;
+    if (before.repeatable) return before.stake * before.exposureTurns * hazard;
+    return before.stake * (1 - Math.pow(1 - hazard, before.exposureTurns));
+  }
+
+  //Security of an empty remote that is never added to corp.remoteServers.
+  _detachedRemoteEvaluation() {
+    var target = NewServer("Hypothetical remote", false);
+    target.AIHypothetical = true;
+    return this._withHypothetical(
+      () => {},
+      () => this._evaluateServerSecurity(target),
+      () => {},
+    );
+  }
+
+  //Next-turn M2 hazard, held over the horizon. null when unknown. Only the
+  //after-state may fall back to upperBound: a conservative bound on the drop,
+  //since hazard rises with margin. An unknown before-state measures nothing.
+  _marginalHazard(kind, iceCount, evaluation, allowUpperBound) {
+    var margin = this._breachMargin(null, evaluation);
+    var value = margin.margin;
+    if (value === null && allowUpperBound) value = margin.upperBound;
+    if (value === null || typeof value == "undefined") return null;
+    return this._hazardForMargin(kind, iceCount, value);
+  }
+
+  //Credit-equivalent score of installing card on server (null: new remote):
+  //POINT_VALUE x expected points no longer stolen, bounded to [0, POINT_VALUE
+  //x points to win], minus the install cost and, when the after-state's rez
+  //plan includes the ICE, its rez cost.
+  _marginalIceScore(card, server, before) {
+    var after = this._hypotheticalServerAfterInstall(card, server, (target) => {
+      var evaluation = this._evaluateServerSecurity(target);
+      return {
+        hazard: this._marginalHazard(before.kind, target.ice.length, evaluation, true),
+        planned: (evaluation.plannedRezIce || []).indexOf(card) > -1,
+      };
+    });
+    var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
+    var stolenBefore = this._marginalIceStolen(before, before.hazard);
+    var stolenAfter = this._marginalIceStolen(before, after.hazard);
+    var rawRiskReduction =
+      stolenBefore === null || stolenAfter === null
+        ? 0
+        : CORP_AI_POINT_VALUE * (stolenBefore - stolenAfter);
+    var riskReduction = Math.min(CORP_AI_POINT_VALUE * pointsNeeded, Math.max(0, rawRiskReduction));
+    var installCost = server ? server.ice.length : 0;
+    var plannedRezCost = after.planned ? RezCost(card) : 0;
+    return {
+      stake: before.stake,
+      kind: before.kind,
+      exposureTurns: before.exposureTurns,
+      hazardBefore: before.hazard,
+      hazardAfter: after.hazard,
+      stolenBefore: stolenBefore,
+      stolenAfter: stolenAfter,
+      rawRiskReduction: rawRiskReduction,
+      riskReduction: riskReduction,
+      installCost: installCost,
+      plannedRezCost: plannedRezCost,
+      score: riskReduction - installCost - plannedRezCost,
+    };
   }
 
   _serverHasStakes(server, securityEvaluation) {
@@ -5375,7 +5782,7 @@ class CorpAI {
         server: option.serverToInstallTo,
         kind: option.cardToInstall ? option.cardToInstall.cardType : null,
         role: group,
-        band: group == "win" ? 3 : 0,
+        band: group == "win" ? 3 : option.iceMarginalScore ? 1 : 0,
         compatibilityOrder: i,
         groupIndex: groupIndex,
         inGroupIndex: inGroupIndex,
@@ -5389,6 +5796,8 @@ class CorpAI {
         rejectionReasons: [],
         option: option,
       });
+      if (option.iceMarginalScore)
+        Object.assign(records[records.length - 1].scoreBreakdown, option.iceMarginalScore);
     }
     //ICE legacy did not offer to a server its protection walk ranked:
     //recorded for diagnostics (and for I2), never returned.
@@ -5443,6 +5852,7 @@ class CorpAI {
     };
     if (record.reasons.length > 1) row.reasons = record.reasons;
     if (!record.eligible) row.rejection = record.rejectionReasons;
+    if (record.band == 1) row.score = Math.round(record.scoreBreakdown.score * 1000) / 1000;
     if (record.scoreBreakdown.legacy != record.role)
       row.legacy = record.scoreBreakdown.legacy;
     return row;
@@ -5704,13 +6114,33 @@ class CorpAI {
     //An economy check used to prioritise whether to install ice (the 4 is arbitrary)
     var iceInstallEconomyCheck = this._sufficientEconomy(false, 4);
 
+    //I2 (iceMarginalSecurity): rank protection ICE across every admitted
+    //server instead of the one _serverToProtect() picks.
+    var marginalIceMemo = {};
+    if (this.options.iceMarginalSecurity) {
+      var marginalIceOptions = this._marginalIceInstallOptions(
+        cards,
+        priorityOnly,
+        iceInstallEconomyCheck,
+        marginalIceMemo,
+      );
+      for (var i = 0; i < marginalIceOptions.length; i++) {
+        marginalIceOptions[i].reason =
+          "returned by _iceInstallOptions for server that needs protection";
+        marginalIceOptions[i].AIProtectionInstall = true;
+      }
+      ret = ret.concat(marginalIceOptions);
+    }
+
     //Find out if any servers need protection. If so, we will choose an ice card if possible.
-    var serverToInstallTo = this._serverToProtect(
-      false,
-      false,
-      (server, security) =>
-        this._iceLayerPolicy(server, iceInstallEconomyCheck, security),
-    );
+    var serverToInstallTo = this.options.iceMarginalSecurity
+      ? undefined
+      : this._serverToProtect(
+          false,
+          false,
+          (server, security) =>
+            this._iceLayerPolicy(server, iceInstallEconomyCheck, security),
+        );
 
     //Too poor? Do not spend frivolously on new layers. A breachable server
     //with something to lose is not frivolous to reinforce.
@@ -5862,7 +6292,31 @@ class CorpAI {
     //If no protected empty remote exists, let's make one if prudent
     //otherwise just add ice to whatever server needs it most
     serverToInstallTo = null;
-    if (emptyProtectedRemotes.length > 0)
+    if (this.options.iceMarginalSecurity) {
+      //Same admission as below: the ranked walk when an empty protected remote
+      //exists (it then has no new-remote row), else a new remote if prudent.
+      var newServerIce = [];
+      if (emptyProtectedRemotes.length > 0)
+        newServerIce = this._marginalIceInstallOptions(
+          cards,
+          priorityOnly,
+          iceInstallEconomyCheck,
+          marginalIceMemo,
+        );
+      else if (iceInstallEconomyCheck)
+        newServerIce = this._marginalIceInstallOptions(
+          cards,
+          priorityOnly,
+          iceInstallEconomyCheck,
+          marginalIceMemo,
+          [null],
+        );
+      for (var i = 0; i < newServerIce.length; i++) {
+        newServerIce[i].reason = "returned by _iceInstallOptions for new server";
+        newServerIce[i].AIProtectionInstall = true;
+      }
+      ret = ret.concat(newServerIce);
+    } else if (emptyProtectedRemotes.length > 0)
       serverToInstallTo = this._serverToProtect(
         false,
         false,
@@ -5871,7 +6325,10 @@ class CorpAI {
       );
     //but don't create a new server if the above economy check failed
     //because we might be saving to afford better ice in critical server
-    if (serverToInstallTo != null || iceInstallEconomyCheck) {
+    if (
+      !this.options.iceMarginalSecurity &&
+      (serverToInstallTo != null || iceInstallEconomyCheck)
+    ) {
       var iceInstallOptions = this._iceInstallOptions(
         serverToInstallTo,
         cards,
@@ -7527,19 +7984,10 @@ class CorpAI {
           !CheckCardType(option.cardToInstall, ["ice"])
         )
           continue;
-        var installCost = risk.server.ice.length;
-        var originalCredits = corp.creditPool;
-        var originalIce = risk.server.ice.slice();
-        var postInstallRisk = this._withHypothetical(
-          () => {
-            corp.creditPool -= installCost;
-            risk.server.ice.push(option.cardToInstall);
-          },
-          () => this._centralBreachLossRisk(risk.server),
-          () => {
-            risk.server.ice.splice(0, risk.server.ice.length, ...originalIce);
-            corp.creditPool = originalCredits;
-          },
+        var postInstallRisk = this._hypotheticalServerAfterInstall(
+          option.cardToInstall,
+          risk.server,
+          (target) => this._centralBreachLossRisk(target),
         );
         if (postInstallRisk.probability < bestPostInstallRisk) {
           bestInstall = option;
@@ -8588,4 +9036,5 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   valuelessServerDebtReset: false,
   postureEpochs: true,
   matchLocalPostureFeedback: true,
+  iceMarginalSecurity: true,
 });
