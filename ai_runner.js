@@ -489,7 +489,7 @@ class RunnerAI {
     this.suspectedHQCards = []; //each is a { title, cardType, copies, uncertainty } object
 
     //teach the AI about cards (in order of priority, best first or better order of play)
-    this.economyPlay = ["Sure Gamble", "Creative Commission", "Wildcat Strike"]; //cards which can be played to gain credits
+    this.economyPlay = ["Sure Gamble", "Creative Commission", "Wildcat Strike"]; //legacy titles; new cards opt in via AIOrdinaryEconomyPlay
 	//cards which can be installed to increase maximum hand size
 	this.maxHandIncreasers = ["T400 Memory Diamond"];
 
@@ -645,6 +645,20 @@ class RunnerAI {
   //not currently being used, but not deleted because might need it later
   _phaseCallback(optionList, choiceType) {
     //console.log(currentPhase.identifier);
+  }
+
+  //an active card's ability may install the same grip card more cheaply (AIInstallDiscountAbility)
+  _installDiscountAbility(card, host) {
+    var best = null;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var source = activeCards[i];
+      if (typeof source.AIInstallDiscountAbility != "function" || !CheckHasAbilities(source)) continue;
+      var offer = source.AIInstallDiscountAbility.call(source, card, host || null);
+      if (offer && offer.discount > 0 && (!best || offer.discount > best.offer.discount))
+        best = { card: source, offer: offer };
+    }
+    return best;
   }
 
   //sets this.preferred to prefs and returns indexOf cmd in optionList
@@ -1568,8 +1582,28 @@ console.log(this.preferred);
 			  });
 			}
 		}
-		//check for the basic remove tag action
-		if (optionList.includes("remove")) {
+		//check for installed cards that can be triggered to remove tags without a click (e.g. Flip Switch)
+		//their paid abilities are offered in paid ability windows, not as action-phase click abilities
+		var freeTagRemoverAvailable = false;
+		var tagRemovers = ActiveCards(runner);
+		for (var i = 0; i < tagRemovers.length; i++) {
+			if (typeof tagRemovers[i].AITriggerToRemoveTags != "function") continue;
+			var tagAlt = tagRemovers[i].AITriggerToRemoveTags.call(tagRemovers[i]);
+			if (!tagAlt) continue;
+			var matchesAlt = function (a) { return a.alt == tagAlt; };
+			if (!ChoicesAbility(tagRemovers[i]).some(matchesAlt)) continue;
+			freeTagRemoverAvailable = true;
+			var limitTo = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+			if (optionList.includes("trigger") && ChoicesAbility(tagRemovers[i], limitTo).some(matchesAlt)) {
+				this._log("there is a card I would trigger to remove tags");
+				return this._returnPreference(optionList, "trigger", {
+					cardToTrigger: tagRemovers[i],
+					abilityAlt: tagAlt,
+				});
+			}
+		}
+		//check for the basic remove tag action (unless a free remover can be used in the next paid ability window)
+		if (optionList.includes("remove") && !freeTagRemoverAvailable) {
 		  //by default use the basic remove tag action
 		  return optionList.indexOf("remove");
 		}
@@ -2092,9 +2126,11 @@ console.log(this.preferred);
 		if (breachPrevented) this.serverList[i].potential = 0; //reset potential due to no breach
 
 		//consider potential of this server
-		for (var j = 0; j < activeCards.length; j++) {
-			if (typeof activeCards[j].AIRunExtraPotential == 'function' && (activeCards[j].AIBreachNotRequired || !breachPrevented)) {
-			  this.serverList[i].potential += activeCards[j].AIRunExtraPotential.call(activeCards[j],this.serverList[i].server,this.serverList[i].potential);
+		//(Runner lingering effects, e.g. Climactic Showdown, count as passive sources)
+		var potentialSources = activeCards.concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
+		for (var j = 0; j < potentialSources.length; j++) {
+			if (typeof potentialSources[j].AIRunExtraPotential == 'function' && (potentialSources[j].AIBreachNotRequired || !breachPrevented)) {
+			  this.serverList[i].potential += potentialSources[j].AIRunExtraPotential.call(potentialSources[j],this.serverList[i].server,this.serverList[i].potential);
 			}
 		}
 		
@@ -2704,12 +2740,19 @@ console.log(this.preferred);
       this._log("More credits could be nice");
       //something to play?
       if (optionList.includes("play")) {
+        // Preserve legacy order, then consider explicitly opted-in grip cards.
+        var economyCandidates = [];
         for (var i = 0; i < this.economyPlay.length; i++) {
-          //if this.economyPlay[i] is found in hand, and can be played, play it
-          cardToPlay = this._copyOfCardExistsIn(
-            this.economyPlay[i],
-            runner.grip
-          );
+          var legacyCard = this._copyOfCardExistsIn(this.economyPlay[i], runner.grip);
+          if (legacyCard) economyCandidates.push(legacyCard);
+        }
+        for (var i = 0; i < runner.grip.length; i++) {
+          if (runner.grip[i].AIOrdinaryEconomyPlay === true &&
+              !economyCandidates.includes(runner.grip[i]))
+            economyCandidates.push(runner.grip[i]);
+        }
+        for (var i = 0; i < economyCandidates.length; i++) {
+          cardToPlay = economyCandidates[i];
           if (cardToPlay) {
             this._log("maybe by playing a card?");
 			var ctpChoices = FullCheckPlay(cardToPlay); //returns list of choices or null
@@ -2723,6 +2766,10 @@ console.log(this.preferred);
 				  this._log("there's one I would play");
 				  return this._returnPreference(optionList, "play", {
 					cardToPlay: cardToPlay,
+                    nextPrefs: typeof cardToPlay.AIPreferredPlayChoice === "function" ? {
+                      title: "Playing " + cardToPlay.title,
+                      index: cardToPlay.AIPreferredPlayChoice(ctpChoices)
+                    } : null,
 				  });
 			  }
             }
@@ -2966,6 +3013,18 @@ console.log(this.preferred);
 							}
 						  }
 					}
+				}
+			}
+			//or installed through an active card's cheaper install ability (e.g. The Artist)
+			if (ret == optionList.indexOf("install") && inputOptionList.includes("trigger") && this.preferred &&
+				this.preferred.command == "install" && typeof this.preferred.cardToInstall != 'undefined') {
+				var discounted = this._installDiscountAbility(this.preferred.cardToInstall, this.preferred.hostToInstallTo);
+				if (discounted) {
+					if (typeof discounted.offer.select == "function") discounted.offer.select();
+					ret = this._returnPreference(inputOptionList, "trigger", {
+						cardToTrigger: discounted.card,
+						abilityAlt: discounted.offer.alt,
+					});
 				}
 			}
 			//if option is not in list, choose 0 and give error

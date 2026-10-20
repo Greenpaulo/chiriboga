@@ -9,6 +9,7 @@ setIdentifiers.push('ur');
 //When your turn ends, if there are 3 or more hosted credits, trash 1 of your installed cards.
 cardSet[26073] = {
   title: "Paladin Poemu",
+  elo: 1852,
   imageFile: "26073.png",
   player: runner,
   faction: "Anarch",
@@ -142,6 +143,7 @@ cardSet[26073] = {
 //When your turn begins, take 2 credits from this resource.
 cardSet[26094] = {
   title: "Daily Casts",
+  elo: 1877,
   imageFile: "26094.png",
   player: runner,
   faction: "Neutral",
@@ -191,6 +193,7 @@ cardSet[26094] = {
 //2 credits, trash: Search your stack for 1 program. Install it. (Shuffle your stack after searching it.)
 cardSet[26090] = {
   title: "Self-modifying Code",
+  elo: 1988,
   imageFile: "26090.png",
   player: runner,
   faction: "Shaper",
@@ -336,6 +339,7 @@ cardSet[26090] = {
 //If your identity is digital or you have at least 2 link, also gain 1 credit.
 cardSet[26095] = {
   title: "DreamNet",
+  elo: 1813,
   imageFile: "26095.png",
   player: runner,
   faction: "Neutral",
@@ -408,6 +412,7 @@ cardSet[26095] = {
 //1 recurring credit. You can spend hosted credits to use hardware and programs.
 cardSet[26088] = {
   title: "Mantle",
+  elo: 1529,
   imageFile: "26088.png",
   player: runner,
   faction: "Shaper",
@@ -462,6 +467,7 @@ cardSet[26088] = {
 //Whenever you install a non-AI icebreaker, that icebreaker gets +2 strength for the remainder of the turn.
 cardSet[26091] = {
   title: "Cybertrooper Talut",
+  elo: 1421,
   imageFile: "26091.png",
   player: runner,
   faction: "Shaper",

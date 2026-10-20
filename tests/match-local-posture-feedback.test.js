@@ -31,6 +31,7 @@ function world(on = true, seed = 123) {
     PlayerCanLook: (p, card) => p === corp || !!card.rezzed || !!card.faceUp,
     CheckAdvance: () => true, CheckInstalled: card => corp.remoteServers.some(s => s.root.includes(card)),
     AgendaPoints: p => p.agendaPoints || 0, AgendaPointsToWin: () => 7, GetTitle: card => card.title || 'Test card',
+    AdvancementRequirement: card => card.advancementRequirement || 0,
     GetServer: card => [corp.HQ, corp.RnD, corp.archives, ...corp.remoteServers].find(s =>
       s.root.includes(card) || s.ice.includes(card) || (s.cards || []).includes(card)),
     $: () => ui, jQuery: {extend: (deep, target, source) => deepCopy(source)},

@@ -128,6 +128,17 @@ function createRootTracker(emit) {
   };
 }
 
+// Stable physical-card identities for unchanged-board calibration comparisons.
+function createSecuritySignature() {
+  const ids = new WeakMap();
+  let next = 0;
+  const entry = card => {
+    if (!ids.has(card)) ids.set(card, ++next);
+    return [ids.get(card), card.title, !!card.rezzed];
+  };
+  return server => JSON.stringify([server.ice.map(entry), server.root.map(entry)]);
+}
+
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
 //   testOption (a no-op Corp option name, for the harness's own tests),
@@ -178,6 +189,7 @@ function playGame(options) {
   let logLines = 0, steps = 0;
   const immediates = new Set();
   const context = {
+    __securitySignature: createSecuritySignature(),
     console: {log() {}, warn() {}, error: (...parts) => {
       const message = parts.join(' ');
       logTail.push('ERROR ' + message);
@@ -212,13 +224,22 @@ function playGame(options) {
 
   let result = null, turns = 0, lastTurn = null;
   // Observed state, compared at every main-loop step and at the win.
-  const seen = {corpScored: 0, runnerScored: 0, stolenLocations: 0, run: null};
+  const seen = {corpScored: 0, runnerScored: 0, stolenLocations: 0, run: null, ice: new WeakSet()};
   const emitRun = () => emit('run', {server: seen.run.server, serverName: seen.run.serverName, success: seen.run.success});
   const serverKey = server => {
     if (!server) return 'remote';
     return SERVER_KEYS[server.serverName] || 'remote';
   };
+  // ICE seen on the board; newly seen ICE is a completed install. Start-board
+  // ICE is marked at game start without an event.
+  const scanIce = emitNew => {
+    const corp = run('corp');
+    for (const server of [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers))
+      for (const card of server.ice || [])
+        if (!seen.ice.has(card)) { seen.ice.add(card); if (emitNew) context.__iceInstalled(card, server); }
+  };
   const observe = () => {
+    if (options.observe) scanIce(true);
     const corpScore = run('corp.scoreArea');
     for (; seen.corpScored < corpScore.length; seen.corpScored++) {
       const card = corpScore[seen.corpScored];
@@ -265,9 +286,18 @@ function playGame(options) {
       return s.cards ? s != corp.archives || s.cards.length > 0 : s.root.length > 0;
     }).map(function (s) {
       var r = corp.AI._evaluateServerSecurityUncached(s);
-      return {serverName: s.serverName, agenda: !s.cards && s.root.some(function (c) { return c.cardType == "agenda"; }),
+      var agenda = !s.cards && s.root.some(function (c) { return c.cardType == "agenda"; });
+      // I2: breach margin, its hazard buckets now and one Runner turn later.
+      var m = corp.AI._breachMargin(s, r);
+      var later = m.margin === null ? null : m.margin + corp.AI._projectedRunnerIncome();
+      return {serverName: s.serverName, agenda: agenda,
         isSecure: r.isSecure, hasHardLockout: r.hasHardLockout, honestIsSecure: r.honestIsSecure,
-        honestLockout: r.honestLockout, noBreakerLockout: r.noBreakerLockout};
+        honestLockout: r.honestLockout, noBreakerLockout: r.noBreakerLockout,
+        kind: s == corp.HQ ? "hq" : s == corp.RnD ? "rd" : s == corp.archives ? "archives" : agenda ? "agendaRemote" : "otherRemote",
+        margin: isFinite(m.margin) ? m.margin : null, upperBound: isFinite(m.upperBound) ? m.upperBound : null,
+        bucket: corp.AI._breachMarginBucket(m.margin), bucket2: corp.AI._breachMarginBucket(later),
+        iceCount: s.ice.length, publicThreatRisk: r.publicThreatRisk, approachDefense: !!r.approachDefense,
+        signature: __securitySignature(s)};
     })`)));
   let snapshotPending = false;
   let defenseSnapshotPending = false;
@@ -305,7 +335,7 @@ function playGame(options) {
   // Corp AI bait/bluff/profile posture decisions (CorpAI._postureTelemetryEvent).
   context.__posture = event => {
     if (defense && run('AIHypothetical.depth') === 0) defenseSafe(() => defense.onPosture(event));
-    emit('posture', JSON.parse(JSON.stringify(event)));
+    emit('posture', {...JSON.parse(JSON.stringify(event)), hypothetical: run('AIHypothetical.depth') > 0});
   };
 
   // A Corp ICE install on HQ or R&D, with each installed Runner card's public
@@ -327,6 +357,24 @@ function playGame(options) {
   context.__rez = (card, cost) => emit('rez', {card: card.title, cardType: card.cardType, cost,
     id: roots ? roots.idOf(card) : undefined,
     hosted: (card.hostedCards || []).map(h => ({title: h.title, exempt: Boolean(h.AIHostedDoesNotPreventRez)}))});
+  // I2: Corp ICE install payments and completed ICE rezzes (paid or free:
+  // Rez() completes through Rez(card, true)), for strandedUnrezzedIceCost.
+  context.__iceInstall = (card, cost) => emit('iceInstall', {id: roots ? roots.idOf(card) : undefined, card: card.title, cost});
+  context.__iceRez = card => emit('iceRez', {id: roots ? roots.idOf(card) : undefined, card: card.title});
+  // I2 diagnostic: where a Corp ICE install landed, by server kind (harness
+  // truth for remote roots; never read by the AI). Found by scanIce() between
+  // steps, so the engine's Install() is not wrapped for it.
+  context.__iceInstalled = (card, server) => {
+    let kind = serverKey(server);
+    if (kind === 'remote') {
+      const root = (server && server.root) || [];
+      const trap = c => (c.subTypes || []).includes('Ambush') || typeof c.AIPunishesAccess === 'function';
+      kind = root.some(c => c.cardType === 'agenda') ? 'agendaRemote' : root.some(trap) ? 'trapRemote' :
+        root.length ? 'otherRemote' : 'emptyRemote';
+    }
+    emit('iceInstalled', {card: card.title, server: kind, iceCount: server && server.ice ? server.ice.length : 0,
+      turn: Math.ceil(turns / 2), rezCost: Number(card.rezCost) || 0, strength: Number(card.strength) || 0});
+  };
   if (options.telemetry) context.__decision = entry => {
     const counts = entry.side === 'corp' && context.__securityDecisionCounts;
     emit('decision', counts ? Object.assign({}, entry, {securityEvaluation: Object.assign({}, counts)}) : entry);
@@ -381,7 +429,13 @@ function playGame(options) {
       var __spendCredits = SpendCredits;
       SpendCredits = function(player, num, doing, card) {
         if (player === corp && doing === "rezzing" && card) __rez(card, num);
+        if (player === corp && doing === "installing" && card && card.cardType === "ice") __iceInstall(card, num);
         return __spendCredits.apply(this, arguments);
+      };
+      var __rezFn = Rez;
+      Rez = function(card, ignoreAllCosts) {
+        if (ignoreAllCosts && card && card.player === corp && card.cardType === "ice" && !card.rezzed) __iceRez(card);
+        return __rezFn.apply(this, arguments);
       };
       var __install = Install;
       Install = function(installingCard, destination) {
@@ -578,6 +632,7 @@ function playGame(options) {
   seen.runnerScored = run('runner.scoreArea.length');
   seen.stolenLocations = run('agendaStolenLocations.length');
   if (roots) roots.start(run('corp'));
+  if (options.observe) scanIce(false);
   defenseStarted = true;
   defenseSafe(() => defense.start(run('corp'), Math.ceil(turns / 2)));
   emit('gameStart', {fixtureId: fixture ? fixture.id : null, corpIdentity: run('corp.identityCard.title'),
@@ -594,4 +649,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};
+module.exports = {createSecuritySignature, playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};

@@ -2669,6 +2669,17 @@ function IsFaceUp(card) {
 }
 
 /**
+ * Number of clicks the player has spent this turn; lost clicks are not spent.<br/>Nothing is logged.
+ *
+ * @method ClicksSpentThisTurn
+ * @param {Player} player corp or runner
+ * @returns {int} clicks spent since the player's clicks were last reset
+ */
+function ClicksSpentThisTurn(player) {
+  return player.clicksSpentThisTurn || 0;
+}
+
+/**
  * Provides the clicks for the active player to spend in their action phase.<br/>Logs if modified.
  *
  * @method ResetClicks
@@ -2691,6 +2702,7 @@ function ResetClicks(player) {
   if (totalClicks < 0) totalClicks = 0; //Can't have negative clicks
 
   player.clickTracker = totalClicks;
+  player.clicksSpentThisTurn = 0;
 
   //Log if there's any modification
   if (permanentMod !== 0 || tempMod !== 0) {
@@ -3853,22 +3865,41 @@ function ChoicesActiveTriggers(callbackName, player = null) {
 }
 
 /**
+ * Counts of public events this turn, for "the first time each turn" conditions.
+ * They include events that happened before the reacting card became active.
+ * ChangePhase clears them when a turn begins.
+ */
+var turnEventCounts = {};
+function RecordTurnEvent(name) {
+  turnEventCounts[name] = (turnEventCounts[name] || 0) + 1;
+  return turnEventCounts[name];
+}
+function TurnEventCount(name) {
+  return turnEventCounts[name] || 0;
+}
+
+/**
  * Fire active triggers with the given callback name (assumes all are automatic).<br/>Returns the triggers fired.<br/>Nothing is logged.
  * @method AutomaticTriggers
  * @param {String} callbackName name of the callback property
  * @param [Object] parameters to pass to Resolve
  * @returns {Params[]} array of {card,label} where card[callbackName] is defined
  */
+// Owner of the currently resolving automatic effect, for trash attribution.
+var automaticTriggerSource = null;
 function AutomaticTriggers(callbackName, parameters = []) {
   //store current phase to ensure that the automatics are only doing what they're allowed
   var startingPhase = currentPhase;
   //any relevant triggers (assume automatic for now, if you want player choice use TriggeredResponsePhase)
   var triggerList = ChoicesActiveTriggers(callbackName);
   for (var i = 0; i < triggerList.length; i++) {
-    triggerList[i].card[callbackName].Resolve.apply(
-      triggerList[i].card,
-      parameters,
-    );
+    var previousSource = automaticTriggerSource;
+    automaticTriggerSource = triggerList[i].card;
+    try {
+      triggerList[i].card[callbackName].Resolve.apply(triggerList[i].card, parameters);
+    } finally {
+      automaticTriggerSource = previousSource;
+    }
     //if phase has changed then the trigger shouldn't have been automatic
     if (currentPhase != startingPhase) {
       LogError(
@@ -4257,6 +4288,8 @@ function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
           !card[abilitiesProperty][i].availableFromHQ) continue;
       if (card[abilitiesProperty][i].availableFromHQ && card.cardLocation !== corp.HQ.cards)
         continue;
+      if (card.player === corp && card.cardLocation === runner.scoreArea &&
+          !card[abilitiesProperty][i].availableInRunnerScoreArea) continue;
       checkedClick = false;
       checkedAccess = false;
       var choices = card[abilitiesProperty][i].Enumerate.call(card);
@@ -4370,6 +4403,16 @@ function ChoicesTriggerableAbilities(player, limitTo = "") {
       if (hqCard.abilities && hqCard.abilities.some(function (ability) {
         return ability.availableFromHQ;
       }) && activeCards.indexOf(hqCard) < 0) activeCards.push(hqCard);
+    }
+  }
+
+  // Printed Corp abilities that remain usable on stolen agendas.
+  if (player === corp) {
+    for (var scoreIndex = 0; scoreIndex < runner.scoreArea.length; scoreIndex++) {
+      var stolen = runner.scoreArea[scoreIndex];
+      if (stolen.player === corp && stolen.abilities && stolen.abilities.some(function (ability) {
+        return ability.availableInRunnerScoreArea;
+      }) && activeCards.indexOf(stolen) < 0) activeCards.push(stolen);
     }
   }
 

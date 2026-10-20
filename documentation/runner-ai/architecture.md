@@ -278,8 +278,12 @@ clicking for credits when it is within reach.
    when not broke): the highest `AIDrawTrigger` card (`AIWouldTrigger`), the
    highest `AIDrawInstall()` card (`AIWouldInstall`), the highest `AIPlayToDraw`
    event (`AIWouldPlay`), or draw; over it, a `maxHandIncreasers` title.
-2. Economy while the credit pool is 12 or less: the first playable
-   `economyPlay` title (`_wastefulToPlay()`, `AIWouldPlay`); the highest
+2. Economy while the credit pool is 12 or less: the first playable candidate
+   from legacy `economyPlay` titles, then grip cards explicitly declaring
+   `AIOrdinaryEconomyPlay: true` in grip order, without duplicates
+   (`FullCheckPlay`, `_wastefulToPlay()`, `AIWouldPlay`). This boolean opt-in
+   defaults to false; other truthy values do not enable it. A selected card's
+   `AIPreferredPlayChoice` index is passed through `nextPrefs`. The highest
    `AIEconomyTrigger` card (`AIWouldTrigger`; in the Runner 1.3 phase only
    click abilities); click for credits towards `priorityEcon`; the highest
    `AIEconomyInstall()` card (`_commonCardToInstallChecks()`, `AIWouldInstall`).
@@ -305,6 +309,28 @@ install paths pass a null host.
 Strike), `maxHandIncreasers` (T400 Memory Diamond, also used when potential is
 low), the potential and resource-check titles above, Conduit, Rielle "Kit"
 Peddler and the approach-cost cards in `runcalculator.js`.
+
+**Downfall batch 1.** Isolation opts into ordinary economy and uses
+`AIPreferredPlayChoice` to sacrifice only a legal resource whose `AIOkToTrash()`
+returns true; no such target means declining play and retention. Its
+`AIEconomyPlay` value of 2 separately informs priority-economy preparation.
+Demolisher's `AIEconomyInstall()` returns priority 1 for a useful console;
+its passive discount is included by `TrashCost`, while its once-per-turn
+credit requires an actual Runner trash and is not permanent run funding.
+Chisel's install choice avoids duplicate hosts and visible ICE that disable
+hosted programs or prevent strength reduction; hidden ICE are not ranked by
+their private stats. Its pending encounter modifier requires
+`knownToEvaluator`: at strength at or below zero it removes subroutines only
+when trashing is legal; above zero it reduces strength by one only if allowed.
+It does not apply the counter twice after the live encounter trigger resolves,
+and preserves on-encounter costs. Stargate installs one copy with sufficient
+MU, credits and clicks; `AIInstallBeforeRun` reserves the selected R&D run's
+direct costs. Its unspent R&D activation contributes `max(0, 1.6 - potential)`
+through `AIRunAbilityExtraPotential`, unless successful runs are suppressed.
+`AIBreachNotRequired` preserves this reward through breach prevention;
+`AIBreachReplacementValue` of 2 selects the replacement. Only after revealing
+does it choose the highest ELO legal trash target; planning never reads the
+unrevealed deck. See [the hook contracts](../ai.md#downfall-batch-1-card-hooks).
 
 ## Encounters and breaking
 
@@ -400,7 +426,8 @@ card while the debug flag `viewAllFronts` is on.
   T400 Memory Diamond. Accessed cards are trashed whenever trash is offered.
 - One copy per title is kept; a second Fracter, Decoder or Killer is always
   wasteful; no resource is installed while tagged. `AIEconomyPlay` only selects
-  `priorityEcon`; the economy branch plays only `economyPlay` titles.
+  `priorityEcon`; ordinary economy additionally requires a legacy `economyPlay`
+  title or the explicit `AIOrdinaryEconomyPlay` opt-in.
 - End-of-turn Corp discards (`Discard()`) do not update `suspectedHQCards`; a
   rezzed card with a suspected title is assumed to have left HQ.
 - Hypothetical hooks restore without try/finally; `GameEnded(winner)` is empty.
@@ -421,6 +448,7 @@ Contracts are in `documentation/ai.md`, which has no entry yet for
 | `AIOkToTrash` | Runner Install phase, `_spareMemoryUnits()` | Program may be trashed for room |
 | `AIInstallBeforeInstall`, `AIPlayForInstall` | `_commonCardToInstallChecks()`, `CommandChoice` | Install ordering; play to install |
 | `AIEconomyInstall`, `AIEconomyPlay`, `AIEconomyTrigger` | `priorityEcon`, economy branch | Economy priorities |
+| `AIOrdinaryEconomyPlay` | ordinary economy play candidates | Boolean opt-in, default false; only true enables it |
 | `AIDrawTrigger`, `AIDrawInstall`, `AIPlayToDraw` | draw branch | Draw priorities |
 | `AIWouldPlay`, `AIWouldInstall`, `AIWouldTrigger` | several branches | Final yes/no gate |
 | `AIPlayWhenCan`, `AIPlayToRemoveTags` | pre-run checks | Opportunity plays; tag removal |

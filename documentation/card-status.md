@@ -26,11 +26,11 @@ in card-sets.md.
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | not-implemented | 65 | 65 | 0 | 32 | 1 | 16 / 61 | true / false | no |
+| `downfall` | in-progress | 65 | 65 | 0 | 12 | 0 | 39 / 61 | true / true | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
-| `elevation` | playable | 82 | 76 | 6 | 0 | 0 | 55 / 64 | false / false | yes |
+| `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
 | `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
@@ -47,13 +47,13 @@ None.
 
 Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.
 
-Only the six explicitly recorded missing Elevation definitions are exempt.
+Playable sets have no missing-definition exemptions.
 
 None.
 
 ## Incomplete playable sets
 
-- `elevation`: 6 missing, 0 with scaffold markers and 0 missing a required AI hook (listed below).
+None.
 
 ## Gaps in playable and in-progress sets
 
@@ -65,14 +65,24 @@ None.
 
 None.
 
+### `downfall` (sets/downfall.js)
+
+- 26041 Sting!: 1 scaffold marker(s)
+- 26044 Saisentan: 2 scaffold marker(s)
+- 26045 Complete Image: 1 scaffold marker(s)
+- 26046 Letheia Nisei: 1 scaffold marker(s)
+- 26052 Focus Group: 1 scaffold marker(s)
+- 26053 Game Over: 1 scaffold marker(s)
+- 26054 Increased Drop Rates: 1 scaffold marker(s)
+- 26055 Divested Trust: 1 scaffold marker(s)
+- 26056 SDS Drone Deployment: 1 scaffold marker(s)
+- 26061 Secure and Protect: 1 scaffold marker(s)
+- 26062 Reduced Service: 1 scaffold marker(s)
+- 26063 Vulnerability Audit: 1 scaffold marker(s)
+
 ### `elevation` (sets/elevation.js)
 
-- 35057 Nebula Talent Management: Making Stars: no definition
-- 35058 Synapse Global: Faster than Thought: no definition
-- 35059 Embedded Reporting: no definition
-- 35060 Next Big Thing: no definition
-- 35065 Bigger Picture: no definition
-- 35066 IP Enforcement: no definition
+None.
 
 ### `vantagepoint` (sets/vantagepoint.js)
 

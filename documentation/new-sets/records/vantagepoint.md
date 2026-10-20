@@ -1,8 +1,9 @@
-# Current Card-Set Implementation
+# Vantage Point Maintenance Record
 
-This is the canonical handoff and progress log for the one card set currently
-being implemented in batches. The `implement-card-batch` skill (`.agents/skills/implement-card-batch/SKILL.md`) reads this file to learn
-which set and batch to work on; they must not hardcode a set name themselves.
+This is the maintained Vantage Point record for completed implementation,
+independent review and optimisation. New implementation work follows the set
+marked `In progress` in the [implementation backlog](../card-implementation-backlog.md)
+and the [active tracker](../current-set-implementation.md), currently Downfall.
 
 User-facing prompts and operating instructions are in
 `documentation/new-sets/card-set-agent-operator-guide.md`.
@@ -17,11 +18,11 @@ deeper strategic improvements remain optional. Review verdicts alone do not
 reopen implementation or change playability. See the operator guide for
 arguments and recovery.
 
-## Active set
+## Set record
 
 | Field                         | Value                                    |
 | ----------------------------- | ---------------------------------------- |
-| Status                        | Active                                   |
+| Status                        | Implemented                              |
 | Implementation status         | Implemented                              |
 | Set name                      | Vantage Point                            |
 | Registry key                  | `vantagepoint`                           |
@@ -34,8 +35,8 @@ arguments and recovery.
 | Implementation notes          | `documentation/new-sets/vantage-point-implementation-notes.md` |
 | Review directory              | `documentation/new-sets/reviews/vantage-point` |
 
-If `Status` is `Inactive`, an agent must not infer or start a set. It should
-report that no current set has been selected.
+Use this record for Vantage Point maintenance; select new implementation work
+from the active tracker.
 
 ## Batch selection rule
 
@@ -44,12 +45,6 @@ report that no current set has been selected.
 3. Never skip a `Blocked` batch silently. If it is the first outstanding batch,
    report its blocker unless the user explicitly authorizes another batch.
 4. Implement exactly one batch per skill invocation.
-5. If all batches are `Complete` and implementation integration checks pass,
-   mark the set `Implemented` and `playable` independently of review. The next
-   invocation archives this tracker and selects the next queued set under the
-   operator guide's transition procedure, then implements its first batch.
-   Review/optimisation never holds this queue open. If no next set is recorded,
-   report that a set selection is needed; do not choose one arbitrarily.
 
 Allowed statuses are `Pending`, `In progress`, `Blocked` and `Complete`.
 
@@ -189,8 +184,7 @@ remain open; availability is a separate user decision.
 The [pre-review implementation snapshot](../history/vantagepoint-2026-10-06.md)
 preserves the original full completion log. The
 [post-review snapshot](../history/vantagepoint-2026-10-06-reviewed.md) preserves this
-historical repair queue and review log. Keep completion history append-only
-and archive this tracker before selecting another set (Downfall is queued next). Use
+historical repair queue and review log. Keep completion history append-only. Use
 `optimise-card-batch` for repairs and independent batch/set review for sign-off.
 The review verdict does not block playability or the next implementation set.
 

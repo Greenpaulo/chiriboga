@@ -18,10 +18,12 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | In progress | Batch 8 complete and verified; other batches are maintained on separate branches. |
+| `downfall` | In progress | Batches 1–8 complete; batches 9–13 pending. |
 
-Downfall is active. Vantage Point is preserved in its [maintained record](records/vantagepoint.md).
-This branch implements batch 8 only; integrate other branches before selecting the next outstanding batch.
+Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
+[immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
+and [set report](reviews/vantage-point/vantagepoint-set-review.md). Outstanding
+review/optimisation work continues there independently.
 
 ## 1. Missing card definitions
 
@@ -37,47 +39,32 @@ for reprints rather than assuming every metadata entry needs a duplicate object.
 
 ## 2. Confirmed missing or incomplete mechanics
 
+### Elevation
+
+The six missing NBN definitions (35057–35060, 35065–35066) are implemented in
+the user-selected batch recorded in
+[elevation-missing-cards-implementation.md](elevation-missing-cards-implementation.md).
+Baseline tests exercise the real play, paid-ability, tutor/install selection,
+and advancement-search consumers. Independent strategic review is not yet
+requested; competing tag-punishment plans, identity flips, and tutor sequencing
+remain in the batch's optimisation queue.
+
 ### Downfall
 
-Batch 8 (26036–26040) is complete with gameplay, baseline AI and all 95 regression test files passing; see
-[implementation notes](downfall-implementation-notes.md) for evidence and optional strategy work.
+Batches 1–8 (26001–26040) now have working gameplay and baseline AI. Focused
+real-consumer evidence and specific deeper-strategy work are recorded in
+[the implementation notes](downfall-implementation-notes.md) and the active
+tracker's separate optimisation queue. Batches 9–13 remain unverified.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
 notes that printed behaviour is absent.
 
-Runner cards:
-
-| ID    | Card                             | Known gap                              |
-| ----- | -------------------------------- | -------------------------------------- |
-| 26004 | Stargate                         | Ability/replacement access absent      |
-| 26005 | Utae                             | Break and strength abilities absent    |
-| 26006 | Climactic Showdown               | Triggers and replacement effect absent |
-| 26007 | Fencer Fueno                     | Hosted-credit and turn triggers absent |
-| 26008 | The Nihilist                     | Virus/draw triggers absent             |
-| 26009 | Trickster Taka                   | Hosted-credit and turn triggers absent |
-| 26010 | Az McCaffrey: Mechanical Prodigy | Identity discount absent               |
-| 26011 | Always Have a Backup Plan        | Empty event effect                     |
-| 26012 | Blueberry! Diesel                | Empty event effect                     |
-| 26013 | Flip Switch                      | Abilities absent                       |
-| 26014 | Lucky Charm                      | Prevention ability absent              |
-| 26015 | Masterwork (v37)                 | Console abilities absent               |
-| 26017 | “Baklan” Bochkin                 | Encounter/counter ability absent       |
-| 26018 | The Class Act                    | Draw abilities absent                  |
-| 26019 | Lat: Ethical Freelancer          | Identity trigger absent                |
-| 26020 | In the Groove                    | Empty event effect                     |
-| 26021 | Khusyuk                          | Empty run-event effect                 |
-| 26025 | Pelangi                          | Counter and subtype ability absent     |
-| 26028 | Direct Access                    | Empty run-event effect                 |
-| 26029 | Rejig                            | Empty event effect                     |
-| 26030 | Whistleblower                    | Access ability absent                  |
-
-Corp cards:
+All previously listed Runner gameplay gaps were closed in batches 1–6.
+Remaining recorded Corp gaps:
 
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26031 | MirrorMorph: Endless Iteration     | Identity ability absent                                          |
-| 26032 | Architect Deployment Test          | On-score effect is a commented stub                              |
 | 26041 | Sting!                             | Score/steal damage trigger absent                                |
 | 26043 | Storgotic Resonator                | Counter placement absent; damage ability exists                  |
 | 26044 | Saisentan                          | Encounter choice and all subroutines absent; AI model is a no-op |
@@ -107,11 +94,10 @@ required repairs for demonstrated baseline gameplay, baseline AI and integration
 defects, alongside optional deeper strategic improvements in the optimisation
 queue; this does not assert review approval.
 
-**Set record:** [active tracker](current-set-implementation.md), with separate
-implementation and optimisation queues, ownership, verification and logs. On
-transition, replace this link with `records/vantagepoint.md` and retain a dated
-history link. `implement-card-batch` handles new implementation only;
-`optimise-card-batch` handles the review/repair cycle.
+**Set record:** [Vantage Point](records/vantagepoint.md), preserving separate
+implementation/optimisation queues, ownership, verification, logs and review
+links; see the [transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md).
+Use `optimise-card-batch` for its outstanding repairs.
 
 The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves all batch boundaries and the full append-only completion log before
@@ -175,25 +161,27 @@ finished before their AI behaviour is assessed.
 
 Every completed definition should have a finite numeric `elo` copied from Trash
 or Busto. This audit checks numeric presence only; it does not yet verify each
-existing number against its dated source snapshot.
+existing number against its dated source snapshot. Downfall’s row was refreshed
+for PR #66 on 2026-10-20; all 35 definitions in completed batches 1–7 have
+numeric ratings. Other rows retain the earlier audit.
 
 | Set                         | Definitions | Numeric ELO | Missing numeric ELO |
 | --------------------------- | ----------: | ----------: | ------------------: |
 | System Gateway              |          77 |          77 |                   0 |
 | System Update 2021          |          82 |          82 |                   0 |
-| Downfall                    |          65 |           5 |                  60 |
+| Downfall                    |          65 |          35 |                  30 |
 | Midnight Sun                |          12 |           7 |                   5 |
 | Parhelion                   |           4 |           0 |                   4 |
 | The Automata Initiative     |           3 |           0 |                   3 |
-| Elevation                   |          76 |           1 |                  75 |
+| Elevation                   |          82 |           7 |                  75 |
 | Vantage Point               |          66 |          66 |                   0 |
 | Uprising                    |           6 |           0 |                   6 |
 | Rebellion Without Rehearsal |           2 |           0 |                   2 |
 | Core Set                    |          62 |           0 |                  62 |
 | Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **510** |     **233** |             **277** |
+| **Total**                   |     **516** |     **274** |             **242** |
 
-Of the 277 omissions, 27 are identities and 250 are playable deck cards. The
+Of the 242 omissions, 24 are identities and 218 are playable deck cards. The
 five Midnight Sun omissions are:
 
 - 33001 Esâ Afontov: Eco-Insurrectionist
@@ -203,8 +191,9 @@ five Midnight Sun omissions are:
 - 33030 Stoneship Chart Room
 
 Parhelion, Automata Initiative, Uprising and Rebellion have ELO missing from
-every currently defined card. Elevation's only numeric value is on 35050 Byte!;
-it has not yet been checked against a dated Trash or Busto snapshot.
+every currently defined card. Elevation has numeric values on 35050 Byte! and
+the six newly implemented NBN cards. Only the latter six were checked against
+the dated 2026-10-16 Trash or Busto snapshot.
 
 Backfill each value from the card's exact published ELO on the
 [Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking). Do not

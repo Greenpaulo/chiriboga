@@ -7,6 +7,7 @@ setIdentifiers.push('tai');
 //Whenever host ice is rezzed or derezzed, gain 3 credits.
 cardSet[34017] = {
   title: "Saci",
+  elo: 1487,
   imageFile: "34017.png",
   player: runner,
   faction: "Criminal",
@@ -124,6 +125,7 @@ cardSet[34017] = {
 // - Place 4 credits on this event. You can spend hosted credits to pay trash costs for the remainder of this run.
 cardSet[34030] = {
   title: "Bahia Bands",
+  elo: 1720,
   imageFile: "34030.png",
   player: runner,
   faction: "Neutral",
@@ -319,10 +321,9 @@ cardSet[34030] = {
     }
     else if (effectId === 3) {
       //Remove 1 tag
-      RemoveTags(1);
-      if (effectNumber === 1) {
-        cardRef._chooseEffect(2);
-      }
+      RemoveTags(1, function () {
+        if (effectNumber === 1) cardRef._chooseEffect(2);
+      });
     }
     else if (effectId === 4) {
       //Place 4 credits on this event
@@ -429,6 +430,7 @@ cardSet[34030] = {
 //Run R&D. If successful, draw 5 cards.
 cardSet[34021] = {
   title: "Joy Ride",
+  elo: 1534,
   imageFile: "34021.png",
   player: runner,
   faction: "Shaper",

@@ -536,9 +536,10 @@ function Uninstall(card, destination, afterUninstall = null, context = null) {
  * @param {Boolean} canBePrevented true if can be prevented, false if not (e.g. is a cost)
  * @param {function(cardsTrashed)} [afterTrashing] called after trashing is complete with parameter cardsTrashed
  * @param {Object} [context] for afterTrashing
+ * @param {Player} [trashingPlayer] effect controller; defaults to automatic source, context owner or active player
  * @param {Object} [fromDamage] to fire damage callbacks
  */
-function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
+function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashingPlayer) {
   //if a single card is passed, make it an array with one element so that the function can run as normal
   if (!Array.isArray(cards)) {
 	cards = [cards];
@@ -549,11 +550,17 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 		afterTrashing.call(context, cards);
 	  return;
   }
+  // Capture the initiator before prevention/response windows change priority.
+  if (typeof trashingPlayer === "undefined") {
+    var source = typeof automaticTriggerSource !== "undefined" && automaticTriggerSource;
+    trashingPlayer = source ? source.player : context && context.player ? context.player : activePlayer;
+  }
+  var directlyTrashed = Array.isArray(cards) ? cards.slice() : [cards];
   if (canBePrevented) {
     intended.trash = cards;
 	//currently giving whoever's turn it is priority...not sure this is always going to be right
     OpportunityForAvoidPrevent(playerTurn, "responsePreventableTrash", [], function () {
-      Trash(intended.trash, false, afterTrashing, context);
+      Trash(intended.trash, false, afterTrashing, context, fromDamage, trashingPlayer);
     }, "About to Trash");
 	return;
   }
@@ -598,7 +605,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	  Log(GetTitle(card, true) + " trashed");
 	}
 	//first the automatic triggers
-	AutomaticTriggers("automaticOnTrash", [cards]);
+	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed]);
     if (fromDamage) {
 	  AutomaticTriggers("automaticOnTakeDamage", [fromDamage.damage, fromDamage.damageType]);
     }
@@ -613,7 +620,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage) {
 	  secondCallbackName="responseOnTakeDamage";
 	  secondEnumerateParams=[fromDamage.damage, fromDamage.damageType];		
 	}
-	TriggeredResponsePhase(playerTurn, "responseOnTrash", [cards], function() {
+	TriggeredResponsePhase(playerTurn, "responseOnTrash", [cards, trashingPlayer, directlyTrashed], function() {
 	  if (typeof afterTrashing === "function") {
 		afterTrashing.call(context, cards);
 	  }
@@ -902,6 +909,8 @@ function Install(
 				}
 				var finishInstall = function(cardsTrashed) {
 				  //install done, card becomes active
+				  if (installingCard.player == runner && installingCard.cardType == "hardware")
+					RecordTurnEvent("runnerHardwareInstall");
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
 				  
@@ -1035,9 +1044,22 @@ function Play(card, onPlayResolve, context) {
 		}
 		if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(card);
 		Log('Played "' + GetTitle(card, true) + '"');
-		AutomaticTriggers("automaticOnPlay", [card]);
-		card.Resolve.call(card, params);
+		var beginEffect = function () {
+		  AutomaticTriggers("automaticOnPlay", [card]);
+		  card.Resolve.call(card, params);
+		};
+		if (typeof card.payAdditionalPlayCosts == "function")
+		  card.payAdditionalPlayCosts.call(card, params, beginEffect);
+		else beginEffect();
 	};
+    // A selected trash additional cost is paid before the event is played.
+    // Keep the normal payment callback first so cancelling never trashes it.
+    if (card.additionalPlayCostTrash) {
+      var resolveAfterCosts = finishResolve;
+      finishResolve = function () {
+        Trash(params.card, false, resolveAfterCosts, card);
+      };
+    }
     //card will be played, callback fires
     if (typeof onPlayResolve === "function") onPlayResolve.call(context, finishResolve);
 	else finishResolve();
@@ -1253,6 +1275,7 @@ function Draw(player, num=1, afterDraw, context) {
   }
   num += ModifyingTriggers("modifyDraw", player, -num); //lower limit of -num means the total will not be any lower than zero
   if (num < 1) return 0;
+  RecordTurnEvent(player == corp ? "corpDraw" : "runnerDraw");
   var cards = [];
   //draw for corp (lose if impossible)
   if (player == corp) {
@@ -1306,6 +1329,7 @@ function Draw(player, num=1, afterDraw, context) {
 function SpendClicks(player, num) {
   if (num < 1) return;
   player.clickTracker -= num;
+  player.clicksSpentThisTurn = ClicksSpentThisTurn(player) + num;
   if (num == 1) Log(PlayerName(player) + " spent one click");
   else Log(PlayerName(player) + " spent " + num + " clicks");
 }
@@ -1617,7 +1641,8 @@ function TakeCredits(player, card, num) {
  * @method RemoveTags
  * @param {int} num number of tags to remove
  */
-function RemoveTags(num) {
+function RemoveTags(num, afterRemoval, context) {
+  var tagsBefore = runner.tags;
   if (runner.tags >= num) {
     if (num > 0) PlaySound('removeTag');
     runner.tags -= num;
@@ -1628,6 +1653,13 @@ function RemoveTags(num) {
     runner.tags = 0
   }
   UpdateCounters();
+  var removed = tagsBefore - runner.tags;
+  if (removed > 0) {
+    AutomaticTriggers("automaticOnRemoveTags", [removed]);
+    TriggeredResponsePhase(playerTurn, "responseOnRemoveTags", [removed], function () {
+      if (typeof afterRemoval == "function") afterRemoval.call(context);
+    }, "Tags removed");
+  } else if (typeof afterRemoval == "function") afterRemoval.call(context);
 }
 
 /**
@@ -1876,6 +1908,9 @@ function Score(card, afterScore, context) {
     if (intended.score == null) return;
     PlaySound('agendaScore');
     var postureScoreServer = GetServer(intended.score);
+    // Dividends uses the state before scoring removes server modifiers.
+    intended.scoreAdvancement = Counters(intended.score, "advancement");
+    intended.scoreAdvancementRequirement = AdvancementRequirement(intended.score);
     MoveCard(intended.score, corp.scoreArea);
     RecordPublicPostureEvent("agendaScored", intended.score, postureScoreServer);
     intended.score.faceUp = true;
@@ -1904,6 +1939,8 @@ function Score(card, afterScore, context) {
     var responsePhase = TriggeredResponsePhase(playerTurn, "responseOnScored", [], function () {
       intended.score.advancement = 0;
       intended.score = null;
+      delete intended.scoreAdvancement;
+      delete intended.scoreAdvancementRequirement;
 	  currentPhase.historyBreak = historyBreak;
 	  AddHistoryBreakIfRequired(corp);
       if (typeof afterScore === "function") afterScore.call(context);
@@ -2171,6 +2208,15 @@ function RemoveCounters(card, counter, num = 1) {
 function Trace(baseStrength, callback, context) {
   traceStrength = baseStrength;
   Log("Trace initiated");
+  //Interrupt window before either player raises strength (e.g. Flip Switch
+  //reduces the base trace strength to 0).
+  TriggeredResponsePhase(playerTurn, "responseOnTraceInitiated", [baseStrength], function () {
+    TraceStrengthDecisions(baseStrength, callback, context);
+  }, "Trace Initiated");
+}
+
+//Corp then Runner strength decisions once the base trace strength is final.
+function TraceStrengthDecisions(baseStrength, callback, context) {
   var corpChoices = [
     { num: 0, label: "Continue without increasing trace strength" },
   ];
@@ -2252,7 +2298,7 @@ function Trace(baseStrength, callback, context) {
     corpChoices,
     decisionCallbackA,
 	"Trace[" + baseStrength + "]",
-    "Increase trace strength (from " + baseStrength + ")",
+    "Increase trace strength (from " + traceStrength + ")",
     this,
 	"trace",
   );
