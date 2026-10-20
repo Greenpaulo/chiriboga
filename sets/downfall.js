@@ -1,5 +1,6 @@
 //CARD DEFINITIONS FOR DOWNFALL
 // Batch 1 ELO: Trash or Busto ranking, 2026-10-16; preserve existing values elsewhere.
+// Pelangi ELO: https://trash-or-busto.herokuapp.com/ranking, checked 2026-10-20.
 setIdentifiers.push("df");
 
 //Chisel (26003)
@@ -756,7 +757,7 @@ cardSet[26006] = {
       corp,
       choices,
       function (params) {
-        if (params.card) Trash(params.card, true);
+        if (params.card) Trash(params.card, true, null, this, undefined, corp);
         else showdown.AddBreachBonus();
       },
       "Climactic Showdown",
@@ -1005,7 +1006,7 @@ cardSet[26008] = {
       corp,
       choices,
       function (params) {
-        if (params.trash) Trash(corp.RnD.cards[corp.RnD.cards.length - 1], true);
+        if (params.trash) Trash(corp.RnD.cards[corp.RnD.cards.length - 1], true, null, this, undefined, corp);
         else Draw(runner, 2);
       },
       "The Nihilist",
@@ -2329,6 +2330,7 @@ cardSet[26024] = {
 // Once per turn → Hosted virus counter: Choose an ice subtype. The ice you are encountering gains that subtype for the remainder of this encounter.
 cardSet[26025] = {
   title: "Pelangi",
+  elo: 1604,
   imageFile: "26025.png",
   player: runner,
   faction: "Shaper",

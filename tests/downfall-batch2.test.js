@@ -32,6 +32,7 @@ const renderer = () => ({FaceUp() {}, FaceDown() {}, ToggleZoom() {}, zoomed: fa
 const put = (card, zone) => {card.cardLocation = zone; card.renderer = renderer(); zone.push(card); return card;};
 const card = id => Object.assign({}, c.cardSet[id]);
 let decisions = [];
+const realDecisionPhase = c.DecisionPhase;
 c.DecisionPhase = (player, choices, resolve, title, instruction, context) => {
   const d = {player, choices, title, choose: choice => resolve.call(context, choice)};
   decisions.push(d); return d;
@@ -42,10 +43,12 @@ c.MoveCard = (item, destination, position) => {
   item.cardLocation = destination;
 };
 let responseQueue = [];
+const trashEvents = [];
 c.TriggeredResponsePhase = (player, name, params, after) => {responseQueue.push({name, params, after});};
 function flushResponses() {
   while (responseQueue.length) {
     const event = responseQueue.shift();
+    if (event.name === 'responseOnTrash') trashEvents.push(event.params);
     for (const option of c.ChoicesActiveTriggers(event.name)) {
       const hook = option.card[event.name];
       if (hook.automatic) hook.Resolve.apply(option.card, event.params);
@@ -275,5 +278,30 @@ corp.RnD.ice = [];
 assert.strictEqual(showdown3.AIPreferredInstallChoice.call(showdown3, [{}]), -1, 'no iced server: do not install');
 showdown3.responseOnRunnerTurnBegins.Resolve.call(showdown3);
 assert(c.removedFromGame.includes(showdown3)); assert.strictEqual(decisions.length, 0);
+
+// Corp choices return priority to the Runner before the trash callback runs.
+// Use the real DecisionPhase/ChangePhase flow and inspect the engine's trash event.
+c.DecisionPhase = realDecisionPhase;
+for (const id of [26006, 26008]) {
+  c.ChangePhase(c.phases.runnerActionMain);
+  const source = card(id);
+  const target = id === 26006
+    ? put(codeGate('Corp-selected ice', 1, 1), corp.HQ.ice)
+    : put({title: 'Corp-selected R&D card', player: corp, cardType: 'operation'}, corp.RnD.cards);
+  withAI(corp, null, () => {
+    if (id === 26006) source.OfferIceTrash(corp.HQ);
+    else source.OfferDraw();
+  });
+  const choicePhase = c.currentPhase;
+  assert.strictEqual(c.activePlayer, corp, source.title + ': Corp makes the decision');
+  choicePhase.Resolve.continue(choicePhase.Enumerate.continue()[0]);
+  assert.strictEqual(c.activePlayer, runner, source.title + ': callback returns to Runner priority');
+  const countBefore = trashEvents.length;
+  flushResponses();
+  assert(corp.archives.cards.includes(target), source.title + ': selected card is trashed');
+  assert.strictEqual(trashEvents.length, countBefore + 1, source.title + ': one trash event');
+  assert.strictEqual(trashEvents[countBefore][0][0], target);
+  assert.strictEqual(trashEvents[countBefore][1], corp, source.title + ': trash is attributed to Corp');
+}
 }
 main().catch(error => {console.error(error); process.exit(1);});

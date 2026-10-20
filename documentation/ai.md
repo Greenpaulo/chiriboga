@@ -2734,10 +2734,6 @@ if (!runner.AI || runner.AI.rc !== rc) {
 - Az McCaffrey needs no hook: `modifyInstallCost` reaches `InstallCost`, so AI
   install affordability and choices see the discount.
 
-## 8. Step-by-Step Worked Example
-
-This section walks through adding AI support to two hypothetical new cards.
-
 ### Downfall Batch 5 card hooks
 
 - Lat: Ethical Freelancer and Supercorridor offer their optional
@@ -2834,6 +2830,10 @@ This section walks through adding AI support to two hypothetical new cards.
 ---
 
 ---
+
+## 8. Step-by-Step Worked Example
+
+This section walks through adding AI support to two hypothetical new cards.
 
 ### Runner Card: "Spike Drill" (Fracter, 2[c]/+2 str, 2[c]/break 1 sub)
 
