@@ -22,7 +22,7 @@ const rowRe =
 const byId = new Map();
 for (const m of html.matchAll(rowRe)) {
   const [, id, rawName, elo, votes] = m;
-  const row = { id, name: decode(rawName), elo: +elo, votes: +votes };
+  const row = { id, name: decode(rawName).replace(/\s+/g, " "), elo: +elo, votes: +votes };
   if (!row.name || !Number.isSafeInteger(row.elo) || !Number.isSafeInteger(row.votes))
     throw new Error(`Invalid ranking for card ${id}`);
   const prev = byId.get(id);

@@ -63,7 +63,6 @@ notes that printed behaviour is absent.
 All previously listed Runner gameplay gaps were closed in batches 1–6.
 Remaining recorded Corp gaps:
 
-
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
 | 26038 | Cold Site Server                   | Abilities and run cost absent                                    |

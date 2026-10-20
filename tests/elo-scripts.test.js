@@ -124,5 +124,14 @@ test('successful scrape decodes names, quotes CSV and prefers more votes', ({get
   assert.strictEqual(get('data/elo.csv'), 'id,name,elo,votes\n01001,"<Noise> & ""Kit"" 😀",1500,20\n');
 });
 
+test('scraped whitespace stays on one CSV line and supports name fallback', ({put, get, run, values, mockFetch}) => {
+  mockFetch(200, row('99001', '\r\n Daily\n\t Casts&#10;&#13;&#9;&nbsp; &amp;  &quot;Friends&quot; \n', 1500, 20));
+  put('sets/example.js', 'cardSet[1] = {\n  title: \'Daily Casts & "Friends"\',\n};\n');
+  run('scrape-elo.mjs');
+  assert.strictEqual(get('data/elo.csv'), 'id,name,elo,votes\n99001,"Daily Casts & ""Friends""",1500,20\n');
+  assert(run('fill-elo.mjs').includes('1 matched by name'));
+  assert.strictEqual(values('sets/example.js').cardSet[1].elo, 1500);
+});
+
 if (failures.length) { console.error(failures.join('\n')); process.exitCode = 1; }
-else console.log(`ELO scripts: ${cases} cases passed.`);
+else if (process.env.VERBOSE) console.log(`ELO scripts: ${cases} cases passed.`);
