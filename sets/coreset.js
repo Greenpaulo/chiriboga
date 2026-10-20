@@ -14,6 +14,7 @@
 var coreSet = [];
 coreSet[1001] = {
   title: "Noise: Hacker Extraordinaire",
+  elo: 1831,
   imageFile: "01001.png",
   player: runner,
   faction: "Anarch",
@@ -33,6 +34,7 @@ coreSet[1001] = {
 };
 coreSet[1002] = {
   title: "Déjà Vu",
+  elo: 1869,
   imageFile: "01002.png",
   player: runner,
   faction: "Anarch",
@@ -64,6 +66,7 @@ coreSet[1002] = {
 };
 coreSet[1003] = {
   title: "Demolition Run",
+  elo: 1429,
   imageFile: "01003.png",
   player: runner,
   faction: "Anarch",
@@ -102,6 +105,7 @@ coreSet[1003] = {
 };
 coreSet[1004] = {
   title: "Stimhack",
+  elo: 2037,
   imageFile: "01004.png",
   player: runner,
   faction: "Anarch",
@@ -126,6 +130,7 @@ coreSet[1004] = {
 };
 coreSet[1005] = {
   title: "Cyberfeeder",
+  elo: 1515,
   imageFile: "01005.png",
   player: runner,
   faction: "Anarch",
@@ -147,6 +152,7 @@ coreSet[1005] = {
 };
 coreSet[1006] = {
   title: "Grimoire",
+  elo: 1710,
   imageFile: "01006.png",
   player: runner,
   faction: "Anarch",
@@ -167,6 +173,7 @@ coreSet[1006] = {
 // coreSet[1007] = Corroder -  DUPLICATE: System Update 2021 has Corroder (card 31006)
 coreSet[1008] = {
   title: "Datasucker",
+  elo: 1739,
   imageFile: "01008.png",
   player: runner,
   faction: "Anarch",
@@ -210,6 +217,7 @@ coreSet[1008] = {
 };
 coreSet[1009] = {
   title: "Djinn",
+  elo: 1484,
   imageFile: "01009.png",
   player: runner,
   faction: "Anarch",
@@ -280,6 +288,7 @@ coreSet[1009] = {
 };
 coreSet[1010] = {
   title: "Medium",
+  elo: 1954,
   imageFile: "01010.png",
   player: runner,
   faction: "Anarch",
@@ -335,6 +344,7 @@ coreSet[1010] = {
 // coreSet[1011] = Mimic - DUPLICATE: System Update 2021 has Mimic (card 31008)
 coreSet[1012] = {
   title: "Parasite",
+  elo: 1968,
   imageFile: "01012.png",
   player: runner,
   faction: "Anarch",
@@ -459,6 +469,7 @@ coreSet[1012] = {
 };
 coreSet[1013] = {
   title: "Wyrm",
+  elo: 1177,
   imageFile: "01013.png",
   player: runner,
   faction: "Anarch",
@@ -555,6 +566,7 @@ coreSet[1013] = {
 };
 coreSet[1014] = {
   title: "Yog.0",
+  elo: 1953,
   imageFile: "01014.png",
   player: runner,
   faction: "Anarch",
@@ -593,6 +605,7 @@ coreSet[1014] = {
 // coreSet[1015] = Ice Carver - DUPLICATE: System Update 2021 has Ice Carver (card 31009)
 coreSet[1016] = {
   title: "Wyldside",
+  elo: 1741,
   imageFile: "01016.png",
   player: runner,
   cardType: "resource",
@@ -611,6 +624,7 @@ coreSet[1016] = {
 var gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = false;
 coreSet[1017] = {
   title: "Gabriel Santiago: Consummate Professional",
+  elo: 1571,
   imageFile: "01017.png",
   player: runner,
   faction: "Criminal",
@@ -645,6 +659,7 @@ coreSet[1017] = {
 };
 coreSet[1018] = {
   title: "Account Siphon",
+  elo: 2232,
   imageFile: "01018.png",
   player: runner,
   faction: "Criminal",
@@ -754,6 +769,7 @@ coreSet[1018] = {
 };
 coreSet[1019] = {
   title: "Easy Mark",
+  elo: 1408,
   imageFile: "01019.png",
   player: runner,
   faction: "Criminal",
@@ -769,6 +785,7 @@ coreSet[1019] = {
 // coreSet[1021] = Inside Job - DUPLICATE: System Update 2021 has Inside Job
 coreSet[1022] = {
   title: "Special Order",
+  elo: 1500,
   imageFile: "01022.png",
   player: runner,
   faction: "Criminal",
@@ -815,6 +832,7 @@ coreSet[1022] = {
 };
 coreSet[1023] = {
   title: "Lemuria Codecracker",
+  elo: 1071,
   imageFile: "01023.png",
   player: runner,
   faction: "Criminal",
@@ -902,6 +920,7 @@ coreSet[1023] = {
 };
 coreSet[1024] = {
   title: "Desperado",
+  elo: 2040,
   imageFile: "01024.png",
   player: runner,
   faction: "Criminal",
@@ -925,6 +944,7 @@ coreSet[1024] = {
 };
 coreSet[1025] = {
   title: "Aurora",
+  elo: 1140,
   imageFile: "01025.png",
   player: runner,
   faction: "Criminal",
@@ -1022,6 +1042,7 @@ coreSet[1025] = {
 // coreSet[1026] = Femme Fatale - DUPLICATE: System Update 2021 has Femme Fatale
 coreSet[1027] = {
   title: "Ninja",
+  elo: 1293,
   imageFile: "01027.png",
   player: runner,
   faction: "Criminal",
@@ -1119,6 +1140,7 @@ coreSet[1027] = {
 // coreSet[1028] = Sneakdoor Beta - DUPLICATE: System Update 2021 has Sneakdoor Beta
 coreSet[1029] = {
   title: "Bank Job",
+  elo: 1670,
   imageFile: "01029.png",
   player: runner,
   faction: "Criminal",
@@ -1218,6 +1240,7 @@ coreSet[1029] = {
 };
 coreSet[1030] = {
   title: "Crash Space",
+  elo: 1531,
   imageFile: "01030.png",
   player: runner,
   faction: "Criminal",
@@ -1268,6 +1291,7 @@ coreSet[1030] = {
 };
 coreSet[1031] = {
   title: "Data Dealer",
+  elo: 1483,
   imageFile: "01031.png",
   player: runner,
   faction: "Criminal",
@@ -1343,6 +1367,7 @@ coreSet[1031] = {
 };
 coreSet[1032] = {
   title: "Decoy",
+  elo: 1240,
   imageFile: "01032.png",
   player: runner,
   faction: "Criminal",
@@ -1373,6 +1398,7 @@ coreSet[1032] = {
 };
 coreSet[1033] = {
   title: 'Kate "Mac" McCaffrey: Digital Tinker',
+  elo: 1785,
   imageFile: "01033.png",
   player: runner,
   faction: "Shaper",
@@ -1412,6 +1438,7 @@ coreSet[1033] = {
 // coreSet[1034] = Diesel - DUPLICATE: System Update 2021 has Diesel (card 31027)
 coreSet[1035] = {
   title: "Modded",
+  elo: 1520,
   imageFile: "01035.png",
   player: runner,
   faction: "Shaper",
@@ -1471,6 +1498,7 @@ coreSet[1035] = {
 // coreSet[1036] = The Maker's Eye - DUPLICATE: System Update 2021 has The Maker's Eye (card 31026)
 coreSet[1037] = {
   title: "Tinkering",
+  elo: 1408,
   imageFile: "01037.png",
   player: runner,
   faction: "Shaper",
@@ -1549,6 +1577,7 @@ coreSet[1037] = {
 };
 coreSet[1038] = {
   title: "Akamatsu Mem Chip",
+  elo: 1356,
   imageFile: "01038.png",
   player: runner,
   faction: "Shaper",
@@ -1560,6 +1589,7 @@ coreSet[1038] = {
 };
 coreSet[1039] = {
   title: "Rabbit Hole",
+  elo: 1298,
   imageFile: "01039.png",
   player: runner,
   faction: "Shaper",
@@ -1670,6 +1700,7 @@ coreSet[1039] = {
 };
 coreSet[1040] = {
   title: "The Personal Touch",
+  elo: 1381,
   imageFile: "01040.png",
   player: runner,
   faction: "Shaper",
@@ -1691,6 +1722,7 @@ coreSet[1040] = {
 };
 coreSet[1041] = {
   title: "The Toolbox",
+  elo: 1312,
   imageFile: "01041.png",
   player: runner,
   faction: "Shaper",
@@ -1710,6 +1742,7 @@ coreSet[1041] = {
 };
 coreSet[1042] = {
   title: "Battering Ram",
+  elo: 1302,
   imageFile: "01042.png",
   player: runner,
   faction: "Shaper",
@@ -1830,6 +1863,7 @@ coreSet[1042] = {
 // coreSet[1043] = Gordian Blade - DUPLICATE: System Update 2021 has Gordian Blade (card 31033)
 coreSet[1044] = {
   title: "Magnum Opus",
+  elo: 1800,
   imageFile: "01044.png",
   player: runner,
   faction: "Shaper",
@@ -1864,6 +1898,7 @@ coreSet[1044] = {
 var netShieldUsedThisTurn = false; //Multiple Net Shields cannot prevent more damage. [Official FAQ]
 coreSet[1045] = {
   title: "Net Shield",
+  elo: 1409,
   imageFile: "01045.png",
   player: runner,
   faction: "Shaper",
@@ -1927,6 +1962,7 @@ coreSet[1045] = {
 };
 coreSet[1046] = {
   title: "Pipeline",
+  elo: 1096,
   imageFile: "01046.png",
   player: runner,
   faction: "Shaper",
@@ -2025,6 +2061,7 @@ coreSet[1046] = {
 // coreSet[1047] = Aesop's Pawnshop  - DUPLICATE: System Update 2021 has Aesop's Pawnshop (card 31035)
 coreSet[1048] = {
   title: "Sacrificial Construct",
+  elo: 1661,
   imageFile: "01048.png",
   player: runner,
   faction: "Shaper",
@@ -2080,6 +2117,7 @@ coreSet[1048] = {
 };
 coreSet[1049] = {
   title: "Infiltration",
+  elo: 1283,
   imageFile: "01049.png",
   player: runner,
   faction: "Neutral",
@@ -2122,6 +2160,7 @@ coreSet[1049] = {
 // coreSet[1050] = Sure Gamble - DUPLICATE: System Gateway has Sure Gamble (card 30030)
 coreSet[1051] = {
   title: "Crypsis",
+  elo: 1390,
   imageFile: "01051.png",
   player: runner,
   faction: "Neutral",
@@ -2229,6 +2268,7 @@ coreSet[1051] = {
 };
 coreSet[1052] = {
   title: "Access to Globalsec",
+  elo: 1197,
   imageFile: "01052.png",
   player: runner,
   faction: "Neutral",
@@ -2240,6 +2280,7 @@ coreSet[1052] = {
 };
 coreSet[1053] = {
   title: "Armitage Codebusting",
+  elo: 1475,
   imageFile: "01053.png",
   player: runner,
   faction: "Neutral",
@@ -2273,6 +2314,7 @@ coreSet[1053] = {
 // ---------------- CORP CARDS
 coreSet[1057] = {
   title: "Aggressive Secretary",
+  elo: 1453,
   imageFile: "01057.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -2330,6 +2372,7 @@ coreSet[1057] = {
 };
 coreSet[1060] = {
   title: "Shipment from MirrorMorph",
+  elo: 1766,
   imageFile: "01060.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -2373,6 +2416,7 @@ coreSet[1060] = {
 };
 coreSet[1061] = {
   title: "Heimdall 1.0",
+  elo: 1449,
   imageFile: "01061.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -2440,6 +2484,7 @@ coreSet[1061] = {
 };
 coreSet[1063] = {
   title: "Viktor 1.0",
+  elo: 1395,
   imageFile: "01063.png",
   player: corp,
   faction: "Haas-Bioroid",
@@ -2583,6 +2628,7 @@ coreSet[1063] = {
 // DUPLICATE: System Update 2021 has Nisei MK II (card 31052)
 coreSet[1069] = {
   title: "Project Junebug",
+  elo: 1498,
   imageFile: "01069.png",
   player: corp,
   faction: "Jinteki",
@@ -2695,6 +2741,7 @@ coreSet[1069] = {
 
 coreSet[1071] = {
   title: "Zaibatsu Loyalty",
+  elo: 995,
   imageFile: "01071.png",
   player: corp,
   faction: "Jinteki",
@@ -2775,6 +2822,7 @@ coreSet[1071] = {
 };
 coreSet[1072] = {
   title: "Neural EMP",
+  elo: 1585,
   imageFile: "01072.png",
   player: corp,
   faction: "Jinteki",
@@ -2817,6 +2865,7 @@ coreSet[1072] = {
 };
 coreSet[1073] = {
   title: "Precognition",
+  elo: 1242,
   imageFile: "01073.png",
   player: corp,
   faction: "Jinteki",
@@ -2861,6 +2910,7 @@ coreSet[1073] = {
 };
 coreSet[1074] = {
   title: "Cell Portal",
+  elo: 1097,
   imageFile: "01074.png",
   player: corp,
   faction: "Jinteki",
@@ -2888,6 +2938,7 @@ coreSet[1074] = {
 };
 coreSet[1075] = {
   title: "Chum",
+  elo: 1354,
   imageFile: "01075.png",
   player: corp,
   faction: "Jinteki",
@@ -2940,6 +2991,7 @@ coreSet[1075] = {
 };
 coreSet[1076] = {
   title: "Data Mine",
+  elo: 1256,
   imageFile: "01076.png",
   player: corp,
   faction: "Jinteki",
@@ -2963,6 +3015,7 @@ coreSet[1076] = {
 };
 coreSet[1077] = {
   title: "Neural Katana",
+  elo: 1464,
   imageFile: "01077.png",
   player: corp,
   faction: "Jinteki",
@@ -2984,6 +3037,7 @@ coreSet[1077] = {
 };
 coreSet[1078] = {
   title: "Wall of Thorns",
+  elo: 1299,
   imageFile: "01078.png",
   player: corp,
   faction: "Jinteki",
@@ -3012,6 +3066,7 @@ coreSet[1078] = {
 };
 coreSet[1079] = {
   title: "Akitaro Watanabe",
+  elo: 1298,
   imageFile: "01079.png",
   player: corp,
   faction: "Jinteki",
@@ -3035,6 +3090,7 @@ coreSet[1079] = {
 };
 coreSet[1080] = {
   title: "NBN: Making News",
+  elo: 1404,
   imageFile: "01080.png",
   player: corp,
   faction: "NBN",
@@ -3050,6 +3106,7 @@ coreSet[1080] = {
 };
 coreSet[1088] = {
   title: "Data Raven",
+  elo: 1879,
   imageFile: "01088.png",
   player: corp,
   faction: "NBN",
@@ -3108,6 +3165,7 @@ coreSet[1088] = {
 };
 coreSet[1089] = {
   title: "Matrix Analyzer",
+  elo: 1342,
   imageFile: "01089.png",
   player: corp,
   faction: "NBN",
@@ -3211,6 +3269,7 @@ coreSet[1089] = {
 // DUPLICATE: System Update 2021 has Hostile Takeover (card 31071)
 coreSet[1107] = {
   title: "Private Security Force",
+  elo: 1237,
   imageFile: "01107.png",
   player: corp,
   faction: "Neutral",
@@ -3237,6 +3296,7 @@ coreSet[1107] = {
 };
 coreSet[1108] = {
   title: "Melange Mining Corp.",
+  elo: 1519,
   imageFile: "01108.png",
   player: corp,
   faction: "Neutral",
@@ -3313,6 +3373,7 @@ coreSet[1108] = {
 // DUPLICATE: System Update 2021 has Enigma (card 31081)
 coreSet[1112] = {
   title: "Hunter",
+  elo: 1354,
   imageFile: "01112.png",
   player: corp,
   faction: "Neutral",
@@ -3335,6 +3396,7 @@ coreSet[1112] = {
 };
 coreSet[1113] = {
   title: "Wall of Static",
+  elo: 1456,
   imageFile: "01113.png",
   player: corp,
   faction: "Neutral",
