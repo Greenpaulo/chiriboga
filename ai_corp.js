@@ -3710,10 +3710,16 @@ class CorpAI {
   }
 
   _restrictedPaymentPlanOutcome(server, eligibleIce, evaluationContext) {
-    if (typeof RunCalculator == "undefined" || !AIWithRunContext(server, () =>
+    if (typeof RunCalculator == "undefined") return null;
+    var conditionalTags = eligibleIce.some(ice =>
+      (this._iceSubroutineEffects(ice, evaluationContext.iceAIs ? evaluationContext : undefined) || []).some(sr =>
+        sr.some(branch => branch.some(effect => typeof effect == "object" &&
+          (effect.ifTags !== undefined || effect.perTag)))));
+    if (!conditionalTags && !AIWithRunContext(server, () =>
         evaluationContext.runnerActiveCards.some(card => CheckHasAbilities(card) &&
-          typeof card.AIRunRestrictedCredits == "function" &&
-          card.AIRunRestrictedCredits.call(card, server) > 0))) return null;
+          ((typeof card.AIRunRestrictedCredits == "function" &&
+            card.AIRunRestrictedCredits.call(card, server) > 0) ||
+            card.AIRunOrderedDraw === true)))) return null;
     var unpricedMandatory = [];
     var unpricedAvoidance = [];
     var unsupportedMandatory = [];

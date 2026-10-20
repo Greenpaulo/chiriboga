@@ -67,7 +67,7 @@ async function main() {
   resource.automaticOnEncounter.Resolve.call(resource, horizon);
   assert.strictEqual(model(horizon).sr.length, 3);
   assert.strictEqual(rc.IceAI(horizon, 10).sr.length, 3, 'live modifier ignores route start index');
-  assert.deepStrictEqual(plain(model(horizon).sr[0]), [['netDamage']]);
+  assert.deepStrictEqual(plain(model(horizon).sr[0]), [['netDamage', 'drawCard']]);
   for (let index = 0; index < horizon.subroutines.length; index++) {
     const intact = plain(model(horizon).sr);
     horizon.subroutines[index].broken = true;
@@ -88,7 +88,7 @@ async function main() {
   server.ice = [unknownModel];
   resource.automaticOnEncounter.Resolve.call(resource, unknownModel);
   assert.strictEqual(model(unknownModel).sr.length, 3, 'default model must not duplicate the added row');
-  assert.deepStrictEqual(plain(model(unknownModel).sr[0]), [['netDamage']]);
+  assert.deepStrictEqual(plain(model(unknownModel).sr[0]), [['netDamage', 'drawCard']]);
   finish(); reset();
 
   // Real phase enumeration and firing preserve the identity across nested decisions.

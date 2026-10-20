@@ -5704,31 +5704,10 @@ cardSet[35063] = {
     },
   ],
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
-    //Sub 1: tag
-    //Sub 2: 1 net damage
-    //Sub 3: conditional 2 net damage (if 2+ tags)
-    //If runner already tagged, sub 3 is very dangerous
-    if (CheckTags(2)) {
-      result.sr = [
-        [["tag"]],
-        [["netDamage"]],
-        [["netDamage", "netDamage"]]
-      ];
-    } else if (CheckTags(1)) {
-      //Runner has 1 tag - if sub 1 fires first, sub 3 becomes active
-      result.sr = [
-        [["tag"]],
-        [["netDamage"]],
-        [["netDamage", "netDamage"]]
-      ];
-    } else {
-      //Runner not tagged - sub 3 won't fire unless sub 1 does first
-      result.sr = [
-        [["tag"]],
-        [["netDamage"]],
-        [["misc_minor"]]  //conditional, may not fire
-      ];
-    }
+    result.sr = [
+      [["tag"]], [["netDamage"]],
+      [[{ifTags: 2, effects: ["netDamage", "netDamage"]}]]
+    ];
     return result;
   },
   AIRezReasons: function() {
@@ -7422,8 +7401,8 @@ cardSet[35080] = {
   AIImplementIce: function(rc, result, maxCorpCred, incomplete) {
     //Sub 1: Tag unless pay 3
     //Sub 2: ETR if tagged
-    var sub1 = [["tag", "misc_minor"]]; //tag or lose 3 credits
-    var sub2 = runner.tags > 0 ? [["endTheRun"]] : [["nothing"]];
+    var sub1 = [["payCredits", "payCredits", "payCredits"], ["tag"]];
+    var sub2 = [[{ifTags: 1, effects: ["endTheRun"]}]];
     
     result.sr = [sub1, sub2];
     return result;

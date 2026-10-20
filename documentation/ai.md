@@ -1517,6 +1517,17 @@ the same threat.
 
 ---
 
+Conditional public tag effects may also be descriptors inside an SR choice:
+`{ifTags: minimum, effects: [...]}` resolves its effects only at that tag threshold;
+`{perTag: [...]}` repeats its effects for the tag count at the descriptor's start.
+`Directions` expands descriptors in resolution order using initial tags plus the
+chosen route's earlier tags. Broken and bypassed subroutines contribute no effects.
+Descriptions remain read-only; planners do not modify live tags. Doomscroll,
+Lamplighter and Vicsek use these descriptors. Corp security uses the complete
+resource-aware route whenever an eligible ICE description contains one, including
+boards without a Runner ordered-draw or restricted-credit card. Finite reruns
+carry tags forward; payment-policy forks retain the same initial tag context.
+
 ### 5.3 Bioroid Click-Break
 
 Bioroid ice can have their subroutines broken by spending runner clicks. Add `AIImplementBreaker` to the ice itself:
@@ -2277,6 +2288,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunRestrictedCredits(server)` | function | Nonnegative public credits available only for explicitly modelled restricted payments; shared providers report a maximum, not a sum |
 | `AIMeatDamagePrevention()` | function | Nonnegative currently usable public one-shot meat-damage prevention capacity |
 | `AIAdditionalAccess(server)` | function | Return extra accesses for given server |
+| `AIHypotheticalInstallCounters()` | function | Deterministic post-install counters for restored passive route simulation |
 | `AIInstallBeforeRun(server, ...)` | function | Return priority to install before running server |
 | `AIInstallBeforeInstall(card)` | function | Return true to install this before the given card |
 | `AIRunAbilityExtraPotential(server, pot)` | function | Extra potential from using this card's run ability |
@@ -2810,6 +2822,160 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
+
+### Vantage Point batch 2 repair
+
+- Lampades `AIInstallBeforeRun(server)` requires legal usable stealth and a
+  useful intended access: public savings/denial or a funded unknown access.
+  `AIWastefulToInstall()` applies the same criteria across servers to generic
+  install selection, declining available powered duplicates and MU pressure.
+  Checks use prospective run context and public access counts, restore that
+  context even on exceptions, and never inspect concealed card identities.
+- `AIHypotheticalInstallCounters()` returns a read-only object mapping counter
+  property names to their totals immediately after installation. Lampades returns
+  `{power: 3}`. `_runAfterInstall` applies these values for its independent route
+  calculation without firing gameplay triggers, then restores each original
+  property descriptor (including absence) on success or exception. This hook is
+  for deterministic starting counters, not arbitrary on-install effects.
+- Immediate public wins precede basic/event tag removal as well as passive setup
+  and expiring plays. Terminal route evaluation omits discretionary trash while
+  retaining mandatory approach effects and additional steal costs. Follow-up
+  access reserves apply the same terminal tag policy through independent
+  calculators; actual payments preserve indispensable sources. Live replanning
+  derives the goal from a still-public, legal winning agenda and reserves its
+  pool-only steal payment/clicks. Changed legality/resources can invalidate it;
+  ordinary routes retain finite tag cleanup and Grip-retention preferences.
+
+
+- `AIHostedInstallValue(card)` is a read-only hook on an installed Runner host.
+  Return the marginal public benefit of hosting this legal installation (zero
+  if none). Hackerspace returns the additional maximum hand slots from completing
+  its Companion/Connection pair. Runner `_preferredInstallChoice` preserves an
+  explicit `AIPreferredInstallChoice` veto/index; otherwise it ranks legal
+  destinations by install cost, then this benefit, excluding exposed tagged
+  resource hosts. Draw, pre-run and generic keep/install consumers carry the
+  selected host through `SelectChoice`. No card-title list is involved.
+- Hackerspace's `AIWorthKeeping`/`AIWastefulToInstall` require enough prospective
+  discounts to repay setup, or a Companion/Connection pair with immediate hand
+  pressure. `AIInstallBeforeInstall` orders a funded, click-budgeted setup before
+  its eligible resources; it does not assume cards can be rehosted after install.
+- Nurse Hạnh's `AIWorthKeeping`, `AIInstallBeforeRun`, `AIDrawInstall` and
+  `AIWastefulToInstall` use public facedown Archives count and finite own Stack
+  count. Draw setup requires time for installation and a run, projected hosted
+  hand space and an affordable survivable Archives route. `AIRunExtraPotential`
+  values actual usable draw slots; it makes the installed Nurse's draw opportunity
+  an action-selection benefit instead of merely making installation eligible.
+  Ordinary run selection checks `_winningRunBeforeOpportunity` first: legally
+  enumerated ordinary runs to public agendas that win immediately outrank this
+  passive draw benefit. The check includes complete route payments/rebates,
+  remaining clicks, additional steal costs and public breach/steal restrictions.
+  It evaluates the route in a prospective run context (including run-only credit
+  sources and last-click damage budgets), restored in `finally`. Its guarded
+  `_evaluatingWinningRun` context uses the actual survivable Grip budget,
+  independent of `AIWorthKeeping` preferences or cold/stale potential caches.
+  Ordered damage peaks, finite draw/prevention and real payments still constrain
+  survival. The guarded terminal calculation passes an unlimited tag limit so
+  `ValidPoint` cannot impose post-run removal costs on an immediate winning
+  steal. This relaxes cleanup preference only: damage, end-the-run effects,
+  payments, clicks and public steal/breach restrictions remain in the complete
+  route model. Ordinary routes retain finite tag cleanup and their keep-card
+  preference. The context is
+  restored on success, decline and exceptions. It installs no
+  hypothetical cards or run events; the selected funded route enters the normal
+  run cache for subsequent server/encounter choices. Infeasible or concealed
+  winning targets leave normal potential and preparation decisions available.
+- `AIRunBreachDraw(server)` returns the number of cards a public active Runner
+  card will draw at breach before accesses. `CalculatePieceBegin` calls it on
+  installed cards, after checking public breach replacements, to append ordered
+  `drawCard` effects after successful-run damage and before access threats.
+  Nurse returns at most two, only for a group of at least two facedown Archives
+  cards. Read only public counts; never inspect concealed card identities/order.
+- `AIRunOrderedDraw: true` is a boolean declaration that independent per-ICE
+  security costs cannot express this card's ordered resource effect. Corp
+  `_restrictedPaymentPlanOutcome` selects the complete public route calculator
+  for Nurse and Stick and Poke, alongside restricted payments and break income.
+  Both planners therefore evaluate finite Stack capacity and damage-before-draw.
+- `AIEncounterEffects` is an array of ordered effect strings on a **live inserted
+  subroutine**. `IceAI` inserts it into the printed ICE description before
+  masking broken subroutines. Stick and Poke uses `['netDamage', 'drawCard']`;
+  a broken or bypassed subroutine provides neither damage nor draw. This is
+  public encounter data, not an extra ability or a resolution callback.
+- `AIModifyIceAI(iceAI, startIceIdx, rc)` now receives the calculating instance
+  as an optional third argument. Existing two-argument hooks remain valid.
+  Stick and Poke adds the ordered subroutine only on the first predicted
+  encounter, unless its public once-per-turn state or the finite-continuation
+  overlay already consumed it. Live inserted subroutines use the property above;
+  direct hook calls also add the live ordered row when a printed model omits it.
+  Generic ICE models replace that row rather than duplicating it, and predicted
+  rows increment `srActualOffset` so broken printed rows stay aligned.
+- `drawCard` replenishes one Grip slot only while public Stack capacity remains.
+  `DamageResources` tracks damage peaks before replenishment as well as final
+  hand loss; draw cannot reverse an earlier flatline. Point costs still value
+  gross damage, since replacing a damaged card does not recover that card.
+  Finite reruns carry depleted Stack/Grip and consumed first-encounter state;
+  payment-policy branches retain those overlays. Existing finite meat prevention
+  is consumed before the corresponding draw. Source-sensitive payment damage
+  records the first payment's position among ordered encounter effects, so a
+  later Shackleton payment uses the already replenished hand.
+  `AINetDamagePrevention()` returns
+  a public, finite count of **free**, unconditional net prevention available now;
+  `PublicNetDamagePrevention`, `TotalEffect` and `DamageResources` consume it
+  once, before each prevented damage's following draw. It must be read-only,
+  valid outside runs, and exclude paid/conditional or already-used prevention.
+  Finite reruns carry its remaining budget, and payment branches retain the
+  override. The permanent fixture exercises the corresponding actual engine
+  prevention response as well as both public planners. No current playable card
+  supplies free net prevention; this hook does not promise legacy paid Net Shield
+  or Feedback Filter credits without modelling their costs.
+- Runner `_runAfterInstall` evaluates a passive installation with its selected
+  host, credit/click cost, lost Grip card, public passive effects and a separate
+  calculator. It fires no gameplay triggers, keeps live route caches untouched,
+  and restores own zones, host/location and resources in `finally`. The pre-run
+  consumer requires the intended route to remain complete before returning an
+  install command. Stick and Poke's `AIWorthKeeping`/`AIWastefulToInstall` retain
+  it for a useful free paired hand-space benefit or available free net prevention,
+  with finite draw capacity, rather than
+  paying a click for mandatory damage/cycling alone. `AIInstallBeforeRun` also
+  declines an already-used or exhausted draw opportunity.
+- `AIAccessTriggerPriority(optionList)` is a read-only access-window hook
+  called on legally triggerable Runner cards by the real access command selector.
+  Return zero to decline; positive values rank triggers: above 3 precedes steal,
+  above 2 precedes ordinary trash, above 1 precedes other triggers, and above zero
+  precedes leaving the card. The hook may inspect the currently accessed card,
+  own public resources and the supplied legal command list, not concealed Corp
+  cards. Lampades returns 3 when its trash saves pool credits or is the only
+  trash option, and zero when preserving power/stealth is preferable.
+- Lampades `AIAccessTriggerPriority` preserves finite power/stealth when ordinary
+  trash is cheaper, and uses the ability when ordinary trash is unavailable or
+  more expensive, provided the actual hosted-credit allocation preserves an
+  affordable publicly known winning follow-up steal. `_stealthPaymentPlan(amount)`
+  supplies the same least-flexible-first allocation to both the priority hook
+  and recursive payment. `AIReducesTrashCost` remains eligibility-sensitive.
+- Runner `_accessPaymentPreservesWinningRun({pool, hosted})` evaluates independent
+  complete routes to public winning remote agendas before and after a proposed
+  payment (`hosted` is an array of `{card, amount}`). It accounts for remaining
+  clicks, route payments/rebates, additional steal costs and public breach/steal
+  restrictions. Current-run temporary credits expire before the next run.
+  Hypothetical credits and encounter context are restored even on exceptions;
+  live route/cost caches are never changed. It reads no concealed Corp or Stack
+  identities and promises no future draws, installs or source replenishment.
+- Ordinary access trash also uses this reserve evaluation. `_accessTrashPayment`
+  mirrors `SpendCredits` source allocation using `"paying trash costs"` for
+  both `CreditPoolCanBeUsed` and hosted `canUseCredits` checks, matching actual
+  access enumeration/resolution and trash-only sources such as Azimat. The
+  access selector and reserve policy use that same reason; `"trashing"` is the
+  separate Corp click-to-trash payment. `AIPreserveOutsideCredits(doing, card,
+  amount)` prefers an affordable pool payment when spending hosted funding would
+  eliminate the winning opportunity; the actual payment consumer follows that
+  choice. If both ordinary trash and the ability destroy every currently funded
+  public winning route, the access selector leaves the card. Plentiful funding,
+  hidden/nonwinning agendas and expired follow-up clicks retain normal valuation.
+
+Permanent real command/card/host/server, payment, breach and opposing-planner
+acceptance is in `tests/vantagepoint-batch2.test.js`; hook-level integration is
+supplementary. Shared install consumers also affect other batches' pre-run
+preparation, and ordered route resources affect the earlier Corsair/Tailor and
+batch13 finite-payment evidence; independently revalidate them after this repair.
 
 ### Elevation missing NBN batch (35057–35060, 35065–35066)
 
