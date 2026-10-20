@@ -64,6 +64,7 @@ vm.runInContext(runnerSource.slice(0, runnerSource.indexOf('//actual class')), c
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file}));
 vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerRC = new RunCalculator();', context);
 const ai = context.reviewAI;
+const marginInvariant = require('./breach-margin-invariant')(ai); // I2 M1 on every evaluation
 const card = id => Object.assign({}, context.cardSet[id]);
 const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', player: corp,
   rezzed: true, rezCost: 1, strength: 3, subTypes: ['Barrier'],
@@ -388,5 +389,6 @@ test('optional counter break costs do not invent a feasible avoidance route', ()
   assert.strictEqual(result.totalBreakCost, Infinity);
   assert.strictEqual(result.honestBreakCost, Infinity);
 });
+assert.ok(marginInvariant.checks > 0, 'I2 margin invariant was exercised');
 console.log('L9.1 breaker pricing: ' + passed + ' passed, ' + failed + ' failed');
 if (failed) process.exitCode = 1;

@@ -1,0 +1,3676 @@
+{
+ "note": "I2 phase A breach-hazard calibration. Table rows: server kind (true root type, harness-only); columns: breach-margin bucket. Rate = successful runs on the server in the Runner turn after the snapshot / server-turns. Measured against the stock Runner AI with default options.",
+ "pool": {
+  "file": "tests/fixtures/ai-batch/deck-pool.json",
+  "id": "core-v1",
+  "sets": [
+   "systemgateway",
+   "systemupdate2021",
+   "elevation"
+  ]
+ },
+ "poolHash": "0ee4865c35412106",
+ "pairs": [
+  "pd-tao",
+  "btl-kit",
+  "neh-zahya",
+  "pe-steve",
+  "gateway",
+  "zwicky-magdalene",
+  "leo-topan"
+ ],
+ "options": {
+  "corp": {
+   "secureScoringServerGate": false,
+   "serverAtRiskInstallOverride": false,
+   "committedAgendaReserveBypass": false,
+   "emptyArchivesRunPressure": false,
+   "valuelessServerDebtReset": false,
+   "postureEpochs": true,
+   "matchLocalPostureFeedback": true
+  },
+  "runner": {}
+ },
+ "fitRun": {
+  "commit": "15d485d",
+  "dirty": true,
+  "codeHash": "fd89f0ad7a6a007a",
+  "command": "node scripts/ai-batch.js --seeds 1001-1400 --collector securityCalibration --out /private/tmp/claude-501/-Users-paulbingham-apps-netrunner-chiriboga-dev/2de680ea-e1c0-41fd-b244-711518440ccb/scratchpad/i2-fit.json",
+  "seeds": "1001-1400",
+  "games": 2800,
+  "failures": 0
+ },
+ "heldoutRun": {
+  "commit": "15d485d",
+  "dirty": true,
+  "codeHash": "fd89f0ad7a6a007a",
+  "command": "node scripts/ai-batch.js --seeds 1401-1600 --collector securityCalibration --out /private/tmp/claude-501/-Users-paulbingham-apps-netrunner-chiriboga-dev/2de680ea-e1c0-41fd-b244-711518440ccb/scratchpad/i2-heldout.json",
+  "seeds": "1401-1600",
+  "games": 1400,
+  "failures": 0
+ },
+ "method": {
+  "minCell": 200,
+  "reliabilityMin": 100,
+  "maxMeanAbsoluteError": 0.05,
+  "resamples": 2000,
+  "buckets": [
+   "lockout",
+   "<=-4",
+   "-3..-1",
+   "0..1",
+   "2..4",
+   "5..9",
+   ">=10",
+   "unknown"
+  ],
+  "kinds": [
+   "agendaRemote",
+   "otherRemote",
+   "hq",
+   "rd",
+   "archives"
+  ]
+ },
+ "pointValue": {
+  "value": 4.4,
+  "agendaCopies": 67,
+  "formula": "mean over agenda copies in the pool Corp decks of (advancementRequirement x 2 + 1) / agendaPoints"
+ },
+ "unsplit": {
+  "fitCells": {
+   "agendaRemote": {
+    "lockout": {
+     "turns": 45,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 336,
+     "breached": 5
+    },
+    "-3..-1": {
+     "turns": 945,
+     "breached": 47
+    },
+    "0..1": {
+     "turns": 1090,
+     "breached": 76
+    },
+    "2..4": {
+     "turns": 2371,
+     "breached": 410
+    },
+    "5..9": {
+     "turns": 3972,
+     "breached": 903
+    },
+    ">=10": {
+     "turns": 4911,
+     "breached": 1276
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "otherRemote": {
+    "lockout": {
+     "turns": 26,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 325,
+     "breached": 2
+    },
+    "-3..-1": {
+     "turns": 895,
+     "breached": 13
+    },
+    "0..1": {
+     "turns": 1346,
+     "breached": 38
+    },
+    "2..4": {
+     "turns": 4618,
+     "breached": 311
+    },
+    "5..9": {
+     "turns": 10076,
+     "breached": 1248
+    },
+    ">=10": {
+     "turns": 13335,
+     "breached": 1951
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "hq": {
+    "lockout": {
+     "turns": 97,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 714,
+     "breached": 7
+    },
+    "-3..-1": {
+     "turns": 2432,
+     "breached": 59
+    },
+    "0..1": {
+     "turns": 3064,
+     "breached": 165
+    },
+    "2..4": {
+     "turns": 8517,
+     "breached": 869
+    },
+    "5..9": {
+     "turns": 13674,
+     "breached": 2050
+    },
+    ">=10": {
+     "turns": 13514,
+     "breached": 1932
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "rd": {
+    "lockout": {
+     "turns": 72,
+     "breached": 1
+    },
+    "<=-4": {
+     "turns": 524,
+     "breached": 10
+    },
+    "-3..-1": {
+     "turns": 2218,
+     "breached": 119
+    },
+    "0..1": {
+     "turns": 2774,
+     "breached": 326
+    },
+    "2..4": {
+     "turns": 8890,
+     "breached": 1756
+    },
+    "5..9": {
+     "turns": 13462,
+     "breached": 3014
+    },
+    ">=10": {
+     "turns": 14072,
+     "breached": 3054
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "archives": {
+    "lockout": {
+     "turns": 2,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 9,
+     "breached": 0
+    },
+    "-3..-1": {
+     "turns": 68,
+     "breached": 0
+    },
+    "0..1": {
+     "turns": 140,
+     "breached": 3
+    },
+    "2..4": {
+     "turns": 5464,
+     "breached": 705
+    },
+    "5..9": {
+     "turns": 12971,
+     "breached": 1565
+    },
+    ">=10": {
+     "turns": 19621,
+     "breached": 2961
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   }
+  },
+  "table": {
+   "agendaRemote": {
+    "lockout": 0.0131,
+    "<=-4": 0.0131,
+    "-3..-1": 0.0497,
+    "0..1": 0.0697,
+    "2..4": 0.1729,
+    "5..9": 0.2273,
+    ">=10": 0.2598,
+    "unknown": 0.1988
+   },
+   "otherRemote": {
+    "lockout": 0.0057,
+    "<=-4": 0.0057,
+    "-3..-1": 0.0145,
+    "0..1": 0.0282,
+    "2..4": 0.0673,
+    "5..9": 0.1239,
+    ">=10": 0.1463,
+    "unknown": 0.1164
+   },
+   "hq": {
+    "lockout": 0.0086,
+    "<=-4": 0.0086,
+    "-3..-1": 0.0243,
+    "0..1": 0.0539,
+    "2..4": 0.102,
+    "5..9": 0.1465,
+    ">=10": 0.1465,
+    "unknown": 0.121
+   },
+   "rd": {
+    "lockout": 0.0185,
+    "<=-4": 0.0185,
+    "-3..-1": 0.0537,
+    "0..1": 0.1175,
+    "2..4": 0.1975,
+    "5..9": 0.2204,
+    ">=10": 0.2204,
+    "unknown": 0.1971
+   },
+   "archives": {
+    "lockout": 0.0137,
+    "<=-4": 0.0137,
+    "-3..-1": 0.0137,
+    "0..1": 0.0137,
+    "2..4": 0.1231,
+    "5..9": 0.1231,
+    ">=10": 0.1509,
+    "unknown": 0.1367
+   }
+  },
+  "heldoutCells": {
+   "agendaRemote": {
+    "lockout": {
+     "turns": 5,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 135,
+     "breached": 1
+    },
+    "-3..-1": {
+     "turns": 396,
+     "breached": 24
+    },
+    "0..1": {
+     "turns": 477,
+     "breached": 42
+    },
+    "2..4": {
+     "turns": 1079,
+     "breached": 183
+    },
+    "5..9": {
+     "turns": 1801,
+     "breached": 417
+    },
+    ">=10": {
+     "turns": 2490,
+     "breached": 744
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "otherRemote": {
+    "lockout": {
+     "turns": 6,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 168,
+     "breached": 0
+    },
+    "-3..-1": {
+     "turns": 434,
+     "breached": 12
+    },
+    "0..1": {
+     "turns": 604,
+     "breached": 19
+    },
+    "2..4": {
+     "turns": 2146,
+     "breached": 182
+    },
+    "5..9": {
+     "turns": 5041,
+     "breached": 675
+    },
+    ">=10": {
+     "turns": 6672,
+     "breached": 1003
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "hq": {
+    "lockout": {
+     "turns": 34,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 355,
+     "breached": 4
+    },
+    "-3..-1": {
+     "turns": 1160,
+     "breached": 30
+    },
+    "0..1": {
+     "turns": 1398,
+     "breached": 58
+    },
+    "2..4": {
+     "turns": 4159,
+     "breached": 372
+    },
+    "5..9": {
+     "turns": 6704,
+     "breached": 910
+    },
+    ">=10": {
+     "turns": 6810,
+     "breached": 1000
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "rd": {
+    "lockout": {
+     "turns": 28,
+     "breached": 1
+    },
+    "<=-4": {
+     "turns": 235,
+     "breached": 4
+    },
+    "-3..-1": {
+     "turns": 1036,
+     "breached": 44
+    },
+    "0..1": {
+     "turns": 1208,
+     "breached": 116
+    },
+    "2..4": {
+     "turns": 4309,
+     "breached": 838
+    },
+    "5..9": {
+     "turns": 6636,
+     "breached": 1477
+    },
+    ">=10": {
+     "turns": 7168,
+     "breached": 1593
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   },
+   "archives": {
+    "lockout": {
+     "turns": 5,
+     "breached": 0
+    },
+    "<=-4": {
+     "turns": 3,
+     "breached": 0
+    },
+    "-3..-1": {
+     "turns": 30,
+     "breached": 1
+    },
+    "0..1": {
+     "turns": 71,
+     "breached": 4
+    },
+    "2..4": {
+     "turns": 2541,
+     "breached": 317
+    },
+    "5..9": {
+     "turns": 6227,
+     "breached": 753
+    },
+    ">=10": {
+     "turns": 9878,
+     "breached": 1508
+    },
+    "unknown": {
+     "turns": 0,
+     "breached": 0
+    }
+   }
+  },
+  "reliability": {
+   "pass": false,
+   "meanAbsoluteError": 0.0063,
+   "rule": "every cell with >= 100 server-turns contains its prediction in its game-clustered 95% interval, and count-weighted MAE <= 0.05",
+   "cells": [
+    {
+     "kind": "agendaRemote",
+     "bucket": "lockout",
+     "turns": 5,
+     "predicted": 0.0131,
+     "observed": 0,
+     "interval": [
+      0,
+      0
+     ],
+     "checked": false,
+     "contains": false
+    },
+    {
+     "kind": "agendaRemote",
+     "bucket": "<=-4",
+     "turns": 135,
+     "predicted": 0.0131,
+     "observed": 0.0074,
+     "interval": [
+      0,
+      0.0245
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "agendaRemote",
+     "bucket": "-3..-1",
+     "turns": 396,
+     "predicted": 0.0497,
+     "observed": 0.0606,
+     "interval": [
+      0.0366,
+      0.086
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "agendaRemote",
+     "bucket": "0..1",
+     "turns": 477,
+     "predicted": 0.0697,
+     "observed": 0.0881,
+     "interval": [
+      0.0642,
+      0.1138
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "agendaRemote",
+     "bucket": "2..4",
+     "turns": 1079,
+     "predicted": 0.1729,
+     "observed": 0.1696,
+     "interval": [
+      0.1477,
+      0.1933
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "agendaRemote",
+     "bucket": "5..9",
+     "turns": 1801,
+     "predicted": 0.2273,
+     "observed": 0.2315,
+     "interval": [
+      0.2114,
+      0.2526
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "agendaRemote",
+     "bucket": ">=10",
+     "turns": 2490,
+     "predicted": 0.2598,
+     "observed": 0.2988,
+     "interval": [
+      0.2776,
+      0.32
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": "lockout",
+     "turns": 6,
+     "predicted": 0.0057,
+     "observed": 0,
+     "interval": [
+      0,
+      0
+     ],
+     "checked": false,
+     "contains": false
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": "<=-4",
+     "turns": 168,
+     "predicted": 0.0057,
+     "observed": 0,
+     "interval": [
+      0,
+      0
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": "-3..-1",
+     "turns": 434,
+     "predicted": 0.0145,
+     "observed": 0.0276,
+     "interval": [
+      0.0132,
+      0.044
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": "0..1",
+     "turns": 604,
+     "predicted": 0.0282,
+     "observed": 0.0315,
+     "interval": [
+      0.0174,
+      0.048
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": "2..4",
+     "turns": 2146,
+     "predicted": 0.0673,
+     "observed": 0.0848,
+     "interval": [
+      0.0726,
+      0.0974
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": "5..9",
+     "turns": 5041,
+     "predicted": 0.1239,
+     "observed": 0.1339,
+     "interval": [
+      0.1237,
+      0.144
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "otherRemote",
+     "bucket": ">=10",
+     "turns": 6672,
+     "predicted": 0.1463,
+     "observed": 0.1503,
+     "interval": [
+      0.1403,
+      0.1612
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "hq",
+     "bucket": "lockout",
+     "turns": 34,
+     "predicted": 0.0086,
+     "observed": 0,
+     "interval": [
+      0,
+      0
+     ],
+     "checked": false,
+     "contains": false
+    },
+    {
+     "kind": "hq",
+     "bucket": "<=-4",
+     "turns": 355,
+     "predicted": 0.0086,
+     "observed": 0.0113,
+     "interval": [
+      0.0025,
+      0.0225
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "hq",
+     "bucket": "-3..-1",
+     "turns": 1160,
+     "predicted": 0.0243,
+     "observed": 0.0259,
+     "interval": [
+      0.0159,
+      0.0375
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "hq",
+     "bucket": "0..1",
+     "turns": 1398,
+     "predicted": 0.0539,
+     "observed": 0.0415,
+     "interval": [
+      0.0306,
+      0.0531
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "hq",
+     "bucket": "2..4",
+     "turns": 4159,
+     "predicted": 0.102,
+     "observed": 0.0894,
+     "interval": [
+      0.0798,
+      0.0985
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "hq",
+     "bucket": "5..9",
+     "turns": 6704,
+     "predicted": 0.1465,
+     "observed": 0.1357,
+     "interval": [
+      0.1271,
+      0.145
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "hq",
+     "bucket": ">=10",
+     "turns": 6810,
+     "predicted": 0.1465,
+     "observed": 0.1468,
+     "interval": [
+      0.1371,
+      0.1568
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "rd",
+     "bucket": "lockout",
+     "turns": 28,
+     "predicted": 0.0185,
+     "observed": 0.0357,
+     "interval": [
+      0,
+      0.1379
+     ],
+     "checked": false,
+     "contains": true
+    },
+    {
+     "kind": "rd",
+     "bucket": "<=-4",
+     "turns": 235,
+     "predicted": 0.0185,
+     "observed": 0.017,
+     "interval": [
+      0.004,
+      0.036
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "rd",
+     "bucket": "-3..-1",
+     "turns": 1036,
+     "predicted": 0.0537,
+     "observed": 0.0425,
+     "interval": [
+      0.03,
+      0.0549
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "rd",
+     "bucket": "0..1",
+     "turns": 1208,
+     "predicted": 0.1175,
+     "observed": 0.096,
+     "interval": [
+      0.0782,
+      0.1152
+     ],
+     "checked": true,
+     "contains": false
+    },
+    {
+     "kind": "rd",
+     "bucket": "2..4",
+     "turns": 4309,
+     "predicted": 0.1975,
+     "observed": 0.1945,
+     "interval": [
+      0.1788,
+      0.2109
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "rd",
+     "bucket": "5..9",
+     "turns": 6636,
+     "predicted": 0.2204,
+     "observed": 0.2226,
+     "interval": [
+      0.2108,
+      0.2349
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "rd",
+     "bucket": ">=10",
+     "turns": 7168,
+     "predicted": 0.2204,
+     "observed": 0.2222,
+     "interval": [
+      0.2102,
+      0.2352
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "archives",
+     "bucket": "lockout",
+     "turns": 5,
+     "predicted": 0.0137,
+     "observed": 0,
+     "interval": [
+      0,
+      0
+     ],
+     "checked": false,
+     "contains": false
+    },
+    {
+     "kind": "archives",
+     "bucket": "<=-4",
+     "turns": 3,
+     "predicted": 0.0137,
+     "observed": 0,
+     "interval": [
+      0,
+      0
+     ],
+     "checked": false,
+     "contains": false
+    },
+    {
+     "kind": "archives",
+     "bucket": "-3..-1",
+     "turns": 30,
+     "predicted": 0.0137,
+     "observed": 0.0333,
+     "interval": [
+      0,
+      0.0968
+     ],
+     "checked": false,
+     "contains": true
+    },
+    {
+     "kind": "archives",
+     "bucket": "0..1",
+     "turns": 71,
+     "predicted": 0.0137,
+     "observed": 0.0563,
+     "interval": [
+      0,
+      0.137
+     ],
+     "checked": false,
+     "contains": true
+    },
+    {
+     "kind": "archives",
+     "bucket": "2..4",
+     "turns": 2541,
+     "predicted": 0.1231,
+     "observed": 0.1248,
+     "interval": [
+      0.1119,
+      0.1382
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "archives",
+     "bucket": "5..9",
+     "turns": 6227,
+     "predicted": 0.1231,
+     "observed": 0.1209,
+     "interval": [
+      0.1113,
+      0.1306
+     ],
+     "checked": true,
+     "contains": true
+    },
+    {
+     "kind": "archives",
+     "bucket": ">=10",
+     "turns": 9878,
+     "predicted": 0.1509,
+     "observed": 0.1527,
+     "interval": [
+      0.1404,
+      0.1649
+     ],
+     "checked": true,
+     "contains": true
+    }
+   ]
+  }
+ },
+ "oneIce": {
+  "differ": true,
+  "rule": "one-ICE and multi-ICE intervals do not overlap in a kind x bucket where both have >= 100 server-turns",
+  "cells": [
+   {
+    "kind": "agendaRemote",
+    "bucket": "<=-4",
+    "one": {
+     "turns": 130,
+     "rate": 0.0077,
+     "interval": [
+      0,
+      0.0265
+     ]
+    },
+    "multi": {
+     "turns": 341,
+     "rate": 0.0147,
+     "interval": [
+      0.0031,
+      0.029
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "-3..-1",
+    "one": {
+     "turns": 569,
+     "rate": 0.065,
+     "interval": [
+      0.0451,
+      0.0872
+     ]
+    },
+    "multi": {
+     "turns": 772,
+     "rate": 0.044,
+     "interval": [
+      0.0292,
+      0.0603
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "0..1",
+    "one": {
+     "turns": 775,
+     "rate": 0.0942,
+     "interval": [
+      0.0751,
+      0.1159
+     ]
+    },
+    "multi": {
+     "turns": 792,
+     "rate": 0.0568,
+     "interval": [
+      0.0417,
+      0.0736
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "2..4",
+    "one": {
+     "turns": 1962,
+     "rate": 0.1922,
+     "interval": [
+      0.1733,
+      0.2108
+     ]
+    },
+    "multi": {
+     "turns": 1458,
+     "rate": 0.1406,
+     "interval": [
+      0.122,
+      0.1588
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "5..9",
+    "one": {
+     "turns": 3404,
+     "rate": 0.2429,
+     "interval": [
+      0.2279,
+      0.2582
+     ]
+    },
+    "multi": {
+     "turns": 2301,
+     "rate": 0.2073,
+     "interval": [
+      0.1902,
+      0.2244
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": ">=10",
+    "one": {
+     "turns": 4602,
+     "rate": 0.2821,
+     "interval": [
+      0.2671,
+      0.2976
+     ]
+    },
+    "multi": {
+     "turns": 2633,
+     "rate": 0.2598,
+     "interval": [
+      0.2411,
+      0.279
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "<=-4",
+    "one": {
+     "turns": 193,
+     "rate": 0,
+     "interval": [
+      0,
+      0
+     ]
+    },
+    "multi": {
+     "turns": 300,
+     "rate": 0.0067,
+     "interval": [
+      0,
+      0.0172
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "-3..-1",
+    "one": {
+     "turns": 757,
+     "rate": 0.0198,
+     "interval": [
+      0.0106,
+      0.0305
+     ]
+    },
+    "multi": {
+     "turns": 570,
+     "rate": 0.0175,
+     "interval": [
+      0.0074,
+      0.0291
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "0..1",
+    "one": {
+     "turns": 1238,
+     "rate": 0.0242,
+     "interval": [
+      0.016,
+      0.0331
+     ]
+    },
+    "multi": {
+     "turns": 684,
+     "rate": 0.0351,
+     "interval": [
+      0.0213,
+      0.0506
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "2..4",
+    "one": {
+     "turns": 3747,
+     "rate": 0.059,
+     "interval": [
+      0.0516,
+      0.0669
+     ]
+    },
+    "multi": {
+     "turns": 1313,
+     "rate": 0.0503,
+     "interval": [
+      0.0387,
+      0.0624
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "5..9",
+    "one": {
+     "turns": 7198,
+     "rate": 0.0843,
+     "interval": [
+      0.0775,
+      0.0918
+     ]
+    },
+    "multi": {
+     "turns": 1952,
+     "rate": 0.0963,
+     "interval": [
+      0.0823,
+      0.1111
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": ">=10",
+    "one": {
+     "turns": 10053,
+     "rate": 0.0946,
+     "interval": [
+      0.0881,
+      0.1014
+     ]
+    },
+    "multi": {
+     "turns": 2565,
+     "rate": 0.108,
+     "interval": [
+      0.0952,
+      0.1212
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "<=-4",
+    "one": {
+     "turns": 204,
+     "rate": 0.0098,
+     "interval": [
+      0,
+      0.0263
+     ]
+    },
+    "multi": {
+     "turns": 865,
+     "rate": 0.0104,
+     "interval": [
+      0.0036,
+      0.0184
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "-3..-1",
+    "one": {
+     "turns": 1507,
+     "rate": 0.0299,
+     "interval": [
+      0.0209,
+      0.0408
+     ]
+    },
+    "multi": {
+     "turns": 2085,
+     "rate": 0.0211,
+     "interval": [
+      0.0146,
+      0.0282
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "0..1",
+    "one": {
+     "turns": 1987,
+     "rate": 0.0629,
+     "interval": [
+      0.052,
+      0.0753
+     ]
+    },
+    "multi": {
+     "turns": 2467,
+     "rate": 0.0397,
+     "interval": [
+      0.0314,
+      0.0478
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "hq",
+    "bucket": "2..4",
+    "one": {
+     "turns": 7398,
+     "rate": 0.0923,
+     "interval": [
+      0.0852,
+      0.0999
+     ]
+    },
+    "multi": {
+     "turns": 5103,
+     "rate": 0.088,
+     "interval": [
+      0.0793,
+      0.0971
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "5..9",
+    "one": {
+     "turns": 11810,
+     "rate": 0.1019,
+     "interval": [
+      0.0956,
+      0.1077
+     ]
+    },
+    "multi": {
+     "turns": 7229,
+     "rate": 0.1206,
+     "interval": [
+      0.1121,
+      0.129
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "hq",
+    "bucket": ">=10",
+    "one": {
+     "turns": 12253,
+     "rate": 0.1404,
+     "interval": [
+      0.1333,
+      0.1472
+     ]
+    },
+    "multi": {
+     "turns": 7859,
+     "rate": 0.1421,
+     "interval": [
+      0.1337,
+      0.1515
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "<=-4",
+    "one": {
+     "turns": 214,
+     "rate": 0.0234,
+     "interval": [
+      0.004,
+      0.052
+     ]
+    },
+    "multi": {
+     "turns": 545,
+     "rate": 0.0165,
+     "interval": [
+      0.0068,
+      0.028
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "-3..-1",
+    "one": {
+     "turns": 1667,
+     "rate": 0.0486,
+     "interval": [
+      0.0383,
+      0.0588
+     ]
+    },
+    "multi": {
+     "turns": 1587,
+     "rate": 0.0517,
+     "interval": [
+      0.0393,
+      0.0643
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "0..1",
+    "one": {
+     "turns": 2088,
+     "rate": 0.0977,
+     "interval": [
+      0.0835,
+      0.1123
+     ]
+    },
+    "multi": {
+     "turns": 1882,
+     "rate": 0.1265,
+     "interval": [
+      0.1091,
+      0.1443
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "2..4",
+    "one": {
+     "turns": 8666,
+     "rate": 0.1814,
+     "interval": [
+      0.1704,
+      0.1926
+     ]
+    },
+    "multi": {
+     "turns": 4335,
+     "rate": 0.2099,
+     "interval": [
+      0.1945,
+      0.2259
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "rd",
+    "bucket": "5..9",
+    "one": {
+     "turns": 13201,
+     "rate": 0.1738,
+     "interval": [
+      0.1662,
+      0.1813
+     ]
+    },
+    "multi": {
+     "turns": 5950,
+     "rate": 0.2595,
+     "interval": [
+      0.2454,
+      0.2731
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "rd",
+    "bucket": ">=10",
+    "one": {
+     "turns": 14352,
+     "rate": 0.2057,
+     "interval": [
+      0.1973,
+      0.2141
+     ]
+    },
+    "multi": {
+     "turns": 6614,
+     "rate": 0.2377,
+     "interval": [
+      0.2241,
+      0.2515
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "archives",
+    "bucket": "2..4",
+    "one": {
+     "turns": 500,
+     "rate": 0.074,
+     "interval": [
+      0.0518,
+      0.0967
+     ]
+    },
+    "multi": {
+     "turns": 110,
+     "rate": 0.0364,
+     "interval": [
+      0.0079,
+      0.0727
+     ]
+    },
+    "separated": false
+   },
+   {
+    "kind": "archives",
+    "bucket": "5..9",
+    "one": {
+     "turns": 954,
+     "rate": 0.1101,
+     "interval": [
+      0.0882,
+      0.1366
+     ]
+    },
+    "multi": {
+     "turns": 203,
+     "rate": 0.0542,
+     "interval": [
+      0.0263,
+      0.0864
+     ]
+    },
+    "separated": true
+   },
+   {
+    "kind": "archives",
+    "bucket": ">=10",
+    "one": {
+     "turns": 1336,
+     "rate": 0.1452,
+     "interval": [
+      0.1246,
+      0.1698
+     ]
+    },
+    "multi": {
+     "turns": 260,
+     "rate": 0.0808,
+     "interval": [
+      0.0414,
+      0.1306
+     ]
+    },
+    "separated": false
+   }
+  ]
+ },
+ "split": true,
+ "fitCells": {
+  "agendaRemote:single": {
+   "lockout": {
+    "turns": 12,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 103,
+    "breached": 1
+   },
+   "-3..-1": {
+    "turns": 407,
+    "breached": 25
+   },
+   "0..1": {
+    "turns": 516,
+    "breached": 48
+   },
+   "2..4": {
+    "turns": 1370,
+    "breached": 276
+   },
+   "5..9": {
+    "turns": 2377,
+    "breached": 574
+   },
+   ">=10": {
+    "turns": 3083,
+    "breached": 829
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "agendaRemote:multi": {
+   "lockout": {
+    "turns": 33,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 233,
+    "breached": 4
+   },
+   "-3..-1": {
+    "turns": 538,
+    "breached": 22
+   },
+   "0..1": {
+    "turns": 574,
+    "breached": 28
+   },
+   "2..4": {
+    "turns": 1001,
+    "breached": 134
+   },
+   "5..9": {
+    "turns": 1595,
+    "breached": 329
+   },
+   ">=10": {
+    "turns": 1828,
+    "breached": 447
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "otherRemote:single": {
+   "lockout": {
+    "turns": 15,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 130,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 525,
+    "breached": 9
+   },
+   "0..1": {
+    "turns": 867,
+    "breached": 23
+   },
+   "2..4": {
+    "turns": 3677,
+    "breached": 264
+   },
+   "5..9": {
+    "turns": 8746,
+    "breached": 1132
+   },
+   ">=10": {
+    "turns": 11511,
+    "breached": 1753
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "otherRemote:multi": {
+   "lockout": {
+    "turns": 11,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 195,
+    "breached": 2
+   },
+   "-3..-1": {
+    "turns": 370,
+    "breached": 4
+   },
+   "0..1": {
+    "turns": 479,
+    "breached": 15
+   },
+   "2..4": {
+    "turns": 941,
+    "breached": 47
+   },
+   "5..9": {
+    "turns": 1330,
+    "breached": 116
+   },
+   ">=10": {
+    "turns": 1824,
+    "breached": 198
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "hq:single": {
+   "lockout": {
+    "turns": 17,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 138,
+    "breached": 1
+   },
+   "-3..-1": {
+    "turns": 1009,
+    "breached": 26
+   },
+   "0..1": {
+    "turns": 1371,
+    "breached": 93
+   },
+   "2..4": {
+    "turns": 5094,
+    "breached": 543
+   },
+   "5..9": {
+    "turns": 8780,
+    "breached": 1429
+   },
+   ">=10": {
+    "turns": 8116,
+    "breached": 1172
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "hq:multi": {
+   "lockout": {
+    "turns": 80,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 576,
+    "breached": 6
+   },
+   "-3..-1": {
+    "turns": 1423,
+    "breached": 33
+   },
+   "0..1": {
+    "turns": 1693,
+    "breached": 72
+   },
+   "2..4": {
+    "turns": 3423,
+    "breached": 326
+   },
+   "5..9": {
+    "turns": 4894,
+    "breached": 621
+   },
+   ">=10": {
+    "turns": 5398,
+    "breached": 760
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "rd:single": {
+   "lockout": {
+    "turns": 22,
+    "breached": 1
+   },
+   "<=-4": {
+    "turns": 122,
+    "breached": 4
+   },
+   "-3..-1": {
+    "turns": 1158,
+    "breached": 60
+   },
+   "0..1": {
+    "turns": 1437,
+    "breached": 146
+   },
+   "2..4": {
+    "turns": 5971,
+    "breached": 1142
+   },
+   "5..9": {
+    "turns": 9484,
+    "breached": 1977
+   },
+   ">=10": {
+    "turns": 9601,
+    "breached": 2020
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "rd:multi": {
+   "lockout": {
+    "turns": 50,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 402,
+    "breached": 6
+   },
+   "-3..-1": {
+    "turns": 1060,
+    "breached": 59
+   },
+   "0..1": {
+    "turns": 1337,
+    "breached": 180
+   },
+   "2..4": {
+    "turns": 2919,
+    "breached": 614
+   },
+   "5..9": {
+    "turns": 3978,
+    "breached": 1037
+   },
+   ">=10": {
+    "turns": 4471,
+    "breached": 1034
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "archives:single": {
+   "lockout": {
+    "turns": 0,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 2,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 41,
+    "breached": 0
+   },
+   "0..1": {
+    "turns": 102,
+    "breached": 1
+   },
+   "2..4": {
+    "turns": 5388,
+    "breached": 702
+   },
+   "5..9": {
+    "turns": 12841,
+    "breached": 1557
+   },
+   ">=10": {
+    "turns": 19454,
+    "breached": 2950
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "archives:multi": {
+   "lockout": {
+    "turns": 2,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 7,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 27,
+    "breached": 0
+   },
+   "0..1": {
+    "turns": 38,
+    "breached": 2
+   },
+   "2..4": {
+    "turns": 76,
+    "breached": 3
+   },
+   "5..9": {
+    "turns": 130,
+    "breached": 8
+   },
+   ">=10": {
+    "turns": 167,
+    "breached": 11
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  }
+ },
+ "table": {
+  "agendaRemote": {
+   "single": {
+    "lockout": 0.0498,
+    "<=-4": 0.0498,
+    "-3..-1": 0.0498,
+    "0..1": 0.093,
+    "2..4": 0.2015,
+    "5..9": 0.2415,
+    ">=10": 0.2689,
+    "unknown": 0.2228
+   },
+   "multi": {
+    "lockout": 0.015,
+    "<=-4": 0.015,
+    "-3..-1": 0.0409,
+    "0..1": 0.0488,
+    "2..4": 0.1339,
+    "5..9": 0.2063,
+    ">=10": 0.2445,
+    "unknown": 0.1661
+   }
+  },
+  "otherRemote": {
+   "single": {
+    "lockout": 0.0134,
+    "<=-4": 0.0134,
+    "-3..-1": 0.0134,
+    "0..1": 0.0265,
+    "2..4": 0.0718,
+    "5..9": 0.1294,
+    ">=10": 0.1523,
+    "unknown": 0.1249
+   },
+   "multi": {
+    "lockout": 0.0097,
+    "<=-4": 0.0097,
+    "-3..-1": 0.0108,
+    "0..1": 0.0313,
+    "2..4": 0.0499,
+    "5..9": 0.0872,
+    ">=10": 0.1086,
+    "unknown": 0.0742
+   }
+  },
+  "hq": {
+   "single": {
+    "lockout": 0.0232,
+    "<=-4": 0.0232,
+    "-3..-1": 0.0232,
+    "0..1": 0.0678,
+    "2..4": 0.1066,
+    "5..9": 0.1539,
+    ">=10": 0.1539,
+    "unknown": 0.1331
+   },
+   "multi": {
+    "lockout": 0.0091,
+    "<=-4": 0.0091,
+    "-3..-1": 0.0232,
+    "0..1": 0.0425,
+    "2..4": 0.0952,
+    "5..9": 0.1269,
+    ">=10": 0.1408,
+    "unknown": 0.104
+   }
+  },
+  "rd": {
+   "single": {
+    "lockout": 0.0499,
+    "<=-4": 0.0499,
+    "-3..-1": 0.0499,
+    "0..1": 0.1016,
+    "2..4": 0.1913,
+    "5..9": 0.2085,
+    ">=10": 0.2104,
+    "unknown": 0.1925
+   },
+   "multi": {
+    "lockout": 0.0133,
+    "<=-4": 0.0133,
+    "-3..-1": 0.0557,
+    "0..1": 0.1346,
+    "2..4": 0.2103,
+    "5..9": 0.2451,
+    ">=10": 0.2451,
+    "unknown": 0.2061
+   }
+  },
+  "archives": {
+   "single": {
+    "lockout": 0.123,
+    "<=-4": 0.123,
+    "-3..-1": 0.123,
+    "0..1": 0.123,
+    "2..4": 0.123,
+    "5..9": 0.123,
+    ">=10": 0.1516,
+    "unknown": 0.1377
+   },
+   "multi": {
+    "lockout": 0.0537,
+    "<=-4": 0.0537,
+    "-3..-1": 0.0537,
+    "0..1": 0.0537,
+    "2..4": 0.0537,
+    "5..9": 0.0537,
+    ">=10": 0.0537,
+    "unknown": 0.0537
+   }
+  }
+ },
+ "heldoutCells": {
+  "agendaRemote:single": {
+   "lockout": {
+    "turns": 1,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 27,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 162,
+    "breached": 12
+   },
+   "0..1": {
+    "turns": 259,
+    "breached": 25
+   },
+   "2..4": {
+    "turns": 622,
+    "breached": 112
+   },
+   "5..9": {
+    "turns": 1095,
+    "breached": 269
+   },
+   ">=10": {
+    "turns": 1685,
+    "breached": 507
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "agendaRemote:multi": {
+   "lockout": {
+    "turns": 4,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 108,
+    "breached": 1
+   },
+   "-3..-1": {
+    "turns": 234,
+    "breached": 12
+   },
+   "0..1": {
+    "turns": 218,
+    "breached": 17
+   },
+   "2..4": {
+    "turns": 457,
+    "breached": 71
+   },
+   "5..9": {
+    "turns": 706,
+    "breached": 148
+   },
+   ">=10": {
+    "turns": 805,
+    "breached": 237
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "otherRemote:single": {
+   "lockout": {
+    "turns": 5,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 63,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 234,
+    "breached": 6
+   },
+   "0..1": {
+    "turns": 399,
+    "breached": 10
+   },
+   "2..4": {
+    "turns": 1774,
+    "breached": 163
+   },
+   "5..9": {
+    "turns": 4419,
+    "breached": 603
+   },
+   ">=10": {
+    "turns": 5931,
+    "breached": 924
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "otherRemote:multi": {
+   "lockout": {
+    "turns": 1,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 105,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 200,
+    "breached": 6
+   },
+   "0..1": {
+    "turns": 205,
+    "breached": 9
+   },
+   "2..4": {
+    "turns": 372,
+    "breached": 19
+   },
+   "5..9": {
+    "turns": 622,
+    "breached": 72
+   },
+   ">=10": {
+    "turns": 741,
+    "breached": 79
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "hq:single": {
+   "lockout": {
+    "turns": 11,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 66,
+    "breached": 1
+   },
+   "-3..-1": {
+    "turns": 498,
+    "breached": 19
+   },
+   "0..1": {
+    "turns": 624,
+    "breached": 32
+   },
+   "2..4": {
+    "turns": 2479,
+    "breached": 249
+   },
+   "5..9": {
+    "turns": 4369,
+    "breached": 659
+   },
+   ">=10": {
+    "turns": 4349,
+    "breached": 643
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "hq:multi": {
+   "lockout": {
+    "turns": 23,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 289,
+    "breached": 3
+   },
+   "-3..-1": {
+    "turns": 662,
+    "breached": 11
+   },
+   "0..1": {
+    "turns": 774,
+    "breached": 26
+   },
+   "2..4": {
+    "turns": 1680,
+    "breached": 123
+   },
+   "5..9": {
+    "turns": 2335,
+    "breached": 251
+   },
+   ">=10": {
+    "turns": 2461,
+    "breached": 357
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "rd:single": {
+   "lockout": {
+    "turns": 12,
+    "breached": 1
+   },
+   "<=-4": {
+    "turns": 92,
+    "breached": 1
+   },
+   "-3..-1": {
+    "turns": 509,
+    "breached": 21
+   },
+   "0..1": {
+    "turns": 663,
+    "breached": 58
+   },
+   "2..4": {
+    "turns": 2893,
+    "breached": 542
+   },
+   "5..9": {
+    "turns": 4664,
+    "breached": 970
+   },
+   ">=10": {
+    "turns": 5025,
+    "breached": 1055
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "rd:multi": {
+   "lockout": {
+    "turns": 16,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 143,
+    "breached": 3
+   },
+   "-3..-1": {
+    "turns": 527,
+    "breached": 23
+   },
+   "0..1": {
+    "turns": 545,
+    "breached": 58
+   },
+   "2..4": {
+    "turns": 1416,
+    "breached": 296
+   },
+   "5..9": {
+    "turns": 1972,
+    "breached": 507
+   },
+   ">=10": {
+    "turns": 2143,
+    "breached": 538
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "archives:single": {
+   "lockout": {
+    "turns": 2,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 2,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 19,
+    "breached": 0
+   },
+   "0..1": {
+    "turns": 51,
+    "breached": 4
+   },
+   "2..4": {
+    "turns": 2507,
+    "breached": 316
+   },
+   "5..9": {
+    "turns": 6154,
+    "breached": 750
+   },
+   ">=10": {
+    "turns": 9785,
+    "breached": 1498
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  },
+  "archives:multi": {
+   "lockout": {
+    "turns": 3,
+    "breached": 0
+   },
+   "<=-4": {
+    "turns": 1,
+    "breached": 0
+   },
+   "-3..-1": {
+    "turns": 11,
+    "breached": 1
+   },
+   "0..1": {
+    "turns": 20,
+    "breached": 0
+   },
+   "2..4": {
+    "turns": 34,
+    "breached": 1
+   },
+   "5..9": {
+    "turns": 73,
+    "breached": 3
+   },
+   ">=10": {
+    "turns": 93,
+    "breached": 10
+   },
+   "unknown": {
+    "turns": 0,
+    "breached": 0
+   }
+  }
+ },
+ "reliability": {
+  "pass": false,
+  "meanAbsoluteError": 0.0071,
+  "rule": "every cell with >= 100 server-turns contains its prediction in its game-clustered 95% interval, and count-weighted MAE <= 0.05",
+  "cells": [
+   {
+    "kind": "agendaRemote:single",
+    "bucket": "lockout",
+    "turns": 1,
+    "predicted": 0.0498,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote:single",
+    "bucket": "<=-4",
+    "turns": 27,
+    "predicted": 0.0498,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote:single",
+    "bucket": "-3..-1",
+    "turns": 162,
+    "predicted": 0.0498,
+    "observed": 0.0741,
+    "interval": [
+     0.0331,
+     0.122
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:single",
+    "bucket": "0..1",
+    "turns": 259,
+    "predicted": 0.093,
+    "observed": 0.0965,
+    "interval": [
+     0.0616,
+     0.1339
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:single",
+    "bucket": "2..4",
+    "turns": 622,
+    "predicted": 0.2015,
+    "observed": 0.1801,
+    "interval": [
+     0.15,
+     0.2127
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:single",
+    "bucket": "5..9",
+    "turns": 1095,
+    "predicted": 0.2415,
+    "observed": 0.2457,
+    "interval": [
+     0.2197,
+     0.2733
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:single",
+    "bucket": ">=10",
+    "turns": 1685,
+    "predicted": 0.2689,
+    "observed": 0.3009,
+    "interval": [
+     0.2749,
+     0.328
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": "lockout",
+    "turns": 4,
+    "predicted": 0.015,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": "<=-4",
+    "turns": 108,
+    "predicted": 0.015,
+    "observed": 0.0093,
+    "interval": [
+     0,
+     0.0301
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": "-3..-1",
+    "turns": 234,
+    "predicted": 0.0409,
+    "observed": 0.0513,
+    "interval": [
+     0.0234,
+     0.0818
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": "0..1",
+    "turns": 218,
+    "predicted": 0.0488,
+    "observed": 0.078,
+    "interval": [
+     0.0456,
+     0.1142
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": "2..4",
+    "turns": 457,
+    "predicted": 0.1339,
+    "observed": 0.1554,
+    "interval": [
+     0.1229,
+     0.1904
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": "5..9",
+    "turns": 706,
+    "predicted": 0.2063,
+    "observed": 0.2096,
+    "interval": [
+     0.1778,
+     0.2438
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote:multi",
+    "bucket": ">=10",
+    "turns": 805,
+    "predicted": 0.2445,
+    "observed": 0.2944,
+    "interval": [
+     0.2605,
+     0.3286
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": "lockout",
+    "turns": 5,
+    "predicted": 0.0134,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": "<=-4",
+    "turns": 63,
+    "predicted": 0.0134,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": "-3..-1",
+    "turns": 234,
+    "predicted": 0.0134,
+    "observed": 0.0256,
+    "interval": [
+     0.0082,
+     0.046
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": "0..1",
+    "turns": 399,
+    "predicted": 0.0265,
+    "observed": 0.0251,
+    "interval": [
+     0.0098,
+     0.0431
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": "2..4",
+    "turns": 1774,
+    "predicted": 0.0718,
+    "observed": 0.0919,
+    "interval": [
+     0.0776,
+     0.1069
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": "5..9",
+    "turns": 4419,
+    "predicted": 0.1294,
+    "observed": 0.1365,
+    "interval": [
+     0.1261,
+     0.1476
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:single",
+    "bucket": ">=10",
+    "turns": 5931,
+    "predicted": 0.1523,
+    "observed": 0.1558,
+    "interval": [
+     0.1454,
+     0.1675
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": "lockout",
+    "turns": 1,
+    "predicted": 0.0097,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": "<=-4",
+    "turns": 105,
+    "predicted": 0.0097,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": "-3..-1",
+    "turns": 200,
+    "predicted": 0.0108,
+    "observed": 0.03,
+    "interval": [
+     0.009,
+     0.0568
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": "0..1",
+    "turns": 205,
+    "predicted": 0.0313,
+    "observed": 0.0439,
+    "interval": [
+     0.0142,
+     0.08
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": "2..4",
+    "turns": 372,
+    "predicted": 0.0499,
+    "observed": 0.0511,
+    "interval": [
+     0.0304,
+     0.0736
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": "5..9",
+    "turns": 622,
+    "predicted": 0.0872,
+    "observed": 0.1158,
+    "interval": [
+     0.0897,
+     0.1442
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote:multi",
+    "bucket": ">=10",
+    "turns": 741,
+    "predicted": 0.1086,
+    "observed": 0.1066,
+    "interval": [
+     0.0843,
+     0.1309
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:single",
+    "bucket": "lockout",
+    "turns": 11,
+    "predicted": 0.0232,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "hq:single",
+    "bucket": "<=-4",
+    "turns": 66,
+    "predicted": 0.0232,
+    "observed": 0.0152,
+    "interval": [
+     0,
+     0.0566
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "hq:single",
+    "bucket": "-3..-1",
+    "turns": 498,
+    "predicted": 0.0232,
+    "observed": 0.0382,
+    "interval": [
+     0.0184,
+     0.0602
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:single",
+    "bucket": "0..1",
+    "turns": 624,
+    "predicted": 0.0678,
+    "observed": 0.0513,
+    "interval": [
+     0.0331,
+     0.0715
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:single",
+    "bucket": "2..4",
+    "turns": 2479,
+    "predicted": 0.1066,
+    "observed": 0.1004,
+    "interval": [
+     0.088,
+     0.113
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:single",
+    "bucket": "5..9",
+    "turns": 4369,
+    "predicted": 0.1539,
+    "observed": 0.1508,
+    "interval": [
+     0.1399,
+     0.1627
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:single",
+    "bucket": ">=10",
+    "turns": 4349,
+    "predicted": 0.1539,
+    "observed": 0.1479,
+    "interval": [
+     0.1357,
+     0.1596
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": "lockout",
+    "turns": 23,
+    "predicted": 0.0091,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": "<=-4",
+    "turns": 289,
+    "predicted": 0.0091,
+    "observed": 0.0104,
+    "interval": [
+     0,
+     0.0226
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": "-3..-1",
+    "turns": 662,
+    "predicted": 0.0232,
+    "observed": 0.0166,
+    "interval": [
+     0.0069,
+     0.0276
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": "0..1",
+    "turns": 774,
+    "predicted": 0.0425,
+    "observed": 0.0336,
+    "interval": [
+     0.0208,
+     0.0479
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": "2..4",
+    "turns": 1680,
+    "predicted": 0.0952,
+    "observed": 0.0732,
+    "interval": [
+     0.0598,
+     0.0877
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": "5..9",
+    "turns": 2335,
+    "predicted": 0.1269,
+    "observed": 0.1075,
+    "interval": [
+     0.0939,
+     0.1223
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "hq:multi",
+    "bucket": ">=10",
+    "turns": 2461,
+    "predicted": 0.1408,
+    "observed": 0.1451,
+    "interval": [
+     0.1283,
+     0.1629
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:single",
+    "bucket": "lockout",
+    "turns": 12,
+    "predicted": 0.0499,
+    "observed": 0.0833,
+    "interval": [
+     0,
+     0.3
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "rd:single",
+    "bucket": "<=-4",
+    "turns": 92,
+    "predicted": 0.0499,
+    "observed": 0.0109,
+    "interval": [
+     0,
+     0.037
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "rd:single",
+    "bucket": "-3..-1",
+    "turns": 509,
+    "predicted": 0.0499,
+    "observed": 0.0413,
+    "interval": [
+     0.0248,
+     0.0581
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:single",
+    "bucket": "0..1",
+    "turns": 663,
+    "predicted": 0.1016,
+    "observed": 0.0875,
+    "interval": [
+     0.0656,
+     0.1113
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:single",
+    "bucket": "2..4",
+    "turns": 2893,
+    "predicted": 0.1913,
+    "observed": 0.1873,
+    "interval": [
+     0.169,
+     0.2068
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:single",
+    "bucket": "5..9",
+    "turns": 4664,
+    "predicted": 0.2085,
+    "observed": 0.208,
+    "interval": [
+     0.1946,
+     0.2214
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:single",
+    "bucket": ">=10",
+    "turns": 5025,
+    "predicted": 0.2104,
+    "observed": 0.21,
+    "interval": [
+     0.1957,
+     0.2257
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": "lockout",
+    "turns": 16,
+    "predicted": 0.0133,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": "<=-4",
+    "turns": 143,
+    "predicted": 0.0133,
+    "observed": 0.021,
+    "interval": [
+     0,
+     0.0484
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": "-3..-1",
+    "turns": 527,
+    "predicted": 0.0557,
+    "observed": 0.0436,
+    "interval": [
+     0.0266,
+     0.0619
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": "0..1",
+    "turns": 545,
+    "predicted": 0.1346,
+    "observed": 0.1064,
+    "interval": [
+     0.0769,
+     0.1386
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": "2..4",
+    "turns": 1416,
+    "predicted": 0.2103,
+    "observed": 0.209,
+    "interval": [
+     0.1829,
+     0.237
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": "5..9",
+    "turns": 1972,
+    "predicted": 0.2451,
+    "observed": 0.2571,
+    "interval": [
+     0.2344,
+     0.2805
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd:multi",
+    "bucket": ">=10",
+    "turns": 2143,
+    "predicted": 0.2451,
+    "observed": 0.251,
+    "interval": [
+     0.229,
+     0.2754
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "archives:single",
+    "bucket": "lockout",
+    "turns": 2,
+    "predicted": 0.123,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives:single",
+    "bucket": "<=-4",
+    "turns": 2,
+    "predicted": 0.123,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives:single",
+    "bucket": "-3..-1",
+    "turns": 19,
+    "predicted": 0.123,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives:single",
+    "bucket": "0..1",
+    "turns": 51,
+    "predicted": 0.123,
+    "observed": 0.0784,
+    "interval": [
+     0,
+     0.186
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "archives:single",
+    "bucket": "2..4",
+    "turns": 2507,
+    "predicted": 0.123,
+    "observed": 0.126,
+    "interval": [
+     0.1131,
+     0.1394
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "archives:single",
+    "bucket": "5..9",
+    "turns": 6154,
+    "predicted": 0.123,
+    "observed": 0.1219,
+    "interval": [
+     0.1121,
+     0.1316
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "archives:single",
+    "bucket": ">=10",
+    "turns": 9785,
+    "predicted": 0.1516,
+    "observed": 0.1531,
+    "interval": [
+     0.1409,
+     0.1655
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": "lockout",
+    "turns": 3,
+    "predicted": 0.0537,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": "<=-4",
+    "turns": 1,
+    "predicted": 0.0537,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": "-3..-1",
+    "turns": 11,
+    "predicted": 0.0537,
+    "observed": 0.0909,
+    "interval": [
+     0,
+     0.25
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": "0..1",
+    "turns": 20,
+    "predicted": 0.0537,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": "2..4",
+    "turns": 34,
+    "predicted": 0.0537,
+    "observed": 0.0294,
+    "interval": [
+     0,
+     0.0833
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": "5..9",
+    "turns": 73,
+    "predicted": 0.0537,
+    "observed": 0.0411,
+    "interval": [
+     0,
+     0.0909
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "archives:multi",
+    "bucket": ">=10",
+    "turns": 93,
+    "predicted": 0.0537,
+    "observed": 0.1075,
+    "interval": [
+     0.036,
+     0.2069
+    ],
+    "checked": false,
+    "contains": true
+   }
+  ]
+ },
+ "nextTurn": {
+  "pass": false,
+  "meanAbsoluteError": 0.0287,
+  "rule": "every cell with >= 100 server-turns contains its prediction in its game-clustered 95% interval, and count-weighted MAE <= 0.05",
+  "cells": [
+   {
+    "kind": "agendaRemote",
+    "bucket": "lockout",
+    "turns": 1,
+    "predicted": 0.0131,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "<=-4",
+    "turns": 16,
+    "predicted": 0.0131,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "-3..-1",
+    "turns": 26,
+    "predicted": 0.0497,
+    "observed": 0.0385,
+    "interval": [
+     0,
+     0.1333
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "0..1",
+    "turns": 61,
+    "predicted": 0.0697,
+    "observed": 0.0492,
+    "interval": [
+     0,
+     0.1111
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "2..4",
+    "turns": 239,
+    "predicted": 0.1729,
+    "observed": 0.113,
+    "interval": [
+     0.0754,
+     0.1563
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": "5..9",
+    "turns": 579,
+    "predicted": 0.2273,
+    "observed": 0.1416,
+    "interval": [
+     0.1125,
+     0.1725
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "agendaRemote",
+    "bucket": ">=10",
+    "turns": 1203,
+    "predicted": 0.2598,
+    "observed": 0.212,
+    "interval": [
+     0.1866,
+     0.2367
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "lockout",
+    "turns": 5,
+    "predicted": 0.0057,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "<=-4",
+    "turns": 40,
+    "predicted": 0.0057,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "-3..-1",
+    "turns": 55,
+    "predicted": 0.0145,
+    "observed": 0.0727,
+    "interval": [
+     0.0159,
+     0.1509
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "0..1",
+    "turns": 103,
+    "predicted": 0.0282,
+    "observed": 0.1165,
+    "interval": [
+     0.0515,
+     0.1889
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "2..4",
+    "turns": 449,
+    "predicted": 0.0673,
+    "observed": 0.0356,
+    "interval": [
+     0.0201,
+     0.0546
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": "5..9",
+    "turns": 1942,
+    "predicted": 0.1239,
+    "observed": 0.0474,
+    "interval": [
+     0.038,
+     0.0571
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "otherRemote",
+    "bucket": ">=10",
+    "turns": 4522,
+    "predicted": 0.1463,
+    "observed": 0.0763,
+    "interval": [
+     0.0666,
+     0.088
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "lockout",
+    "turns": 25,
+    "predicted": 0.0086,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "<=-4",
+    "turns": 106,
+    "predicted": 0.0086,
+    "observed": 0.0377,
+    "interval": [
+     0,
+     0.0909
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq",
+    "bucket": "-3..-1",
+    "turns": 205,
+    "predicted": 0.0243,
+    "observed": 0.0537,
+    "interval": [
+     0.0245,
+     0.0867
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "0..1",
+    "turns": 464,
+    "predicted": 0.0539,
+    "observed": 0.0474,
+    "interval": [
+     0.0265,
+     0.0722
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "hq",
+    "bucket": "2..4",
+    "turns": 1627,
+    "predicted": 0.102,
+    "observed": 0.0596,
+    "interval": [
+     0.0481,
+     0.0717
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "hq",
+    "bucket": "5..9",
+    "turns": 5352,
+    "predicted": 0.1465,
+    "observed": 0.0805,
+    "interval": [
+     0.0725,
+     0.0887
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "hq",
+    "bucket": ">=10",
+    "turns": 8170,
+    "predicted": 0.1465,
+    "observed": 0.1251,
+    "interval": [
+     0.1167,
+     0.1329
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "lockout",
+    "turns": 19,
+    "predicted": 0.0185,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "<=-4",
+    "turns": 43,
+    "predicted": 0.0185,
+    "observed": 0.0698,
+    "interval": [
+     0,
+     0.1463
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "rd",
+    "bucket": "-3..-1",
+    "turns": 169,
+    "predicted": 0.0537,
+    "observed": 0.1006,
+    "interval": [
+     0.0573,
+     0.1455
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "0..1",
+    "turns": 402,
+    "predicted": 0.1175,
+    "observed": 0.1119,
+    "interval": [
+     0.082,
+     0.1435
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "rd",
+    "bucket": "2..4",
+    "turns": 1485,
+    "predicted": 0.1975,
+    "observed": 0.1481,
+    "interval": [
+     0.1289,
+     0.1692
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "rd",
+    "bucket": "5..9",
+    "turns": 5508,
+    "predicted": 0.2204,
+    "observed": 0.1801,
+    "interval": [
+     0.1667,
+     0.1939
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "rd",
+    "bucket": ">=10",
+    "turns": 8612,
+    "predicted": 0.2204,
+    "observed": 0.2062,
+    "interval": [
+     0.1958,
+     0.2177
+    ],
+    "checked": true,
+    "contains": false
+   },
+   {
+    "kind": "archives",
+    "bucket": "lockout",
+    "turns": 3,
+    "predicted": 0.0137,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives",
+    "bucket": "-3..-1",
+    "turns": 3,
+    "predicted": 0.0137,
+    "observed": 0,
+    "interval": [
+     0,
+     0
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives",
+    "bucket": "0..1",
+    "turns": 10,
+    "predicted": 0.0137,
+    "observed": 0.1,
+    "interval": [
+     0,
+     0.3333
+    ],
+    "checked": false,
+    "contains": true
+   },
+   {
+    "kind": "archives",
+    "bucket": "2..4",
+    "turns": 70,
+    "predicted": 0.1231,
+    "observed": 0.0571,
+    "interval": [
+     0.0114,
+     0.1212
+    ],
+    "checked": false,
+    "contains": false
+   },
+   {
+    "kind": "archives",
+    "bucket": "5..9",
+    "turns": 4619,
+    "predicted": 0.1231,
+    "observed": 0.1249,
+    "interval": [
+     0.1151,
+     0.1356
+    ],
+    "checked": true,
+    "contains": true
+   },
+   {
+    "kind": "archives",
+    "bucket": ">=10",
+    "turns": 12292,
+    "predicted": 0.1509,
+    "observed": 0.1502,
+    "interval": [
+     0.1397,
+     0.1607
+    ],
+    "checked": true,
+    "contains": true
+   }
+  ]
+ }
+}
