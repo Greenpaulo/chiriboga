@@ -2849,9 +2849,10 @@ priority economy, mutate the board, or enable legacy `AIEconomyPlay` cards.
   installation and retention. Target ranking uses only visible ICE stats,
   avoids duplicate Chisels and known cards that disable hosted programs or
   prevent strength reduction. `AIModifyIceAI` models its pending encounter:
-  remove subroutines only if strength is already zero and trash is legal;
-  otherwise lower strength by one. Do not lower again after the live trigger
-  resolves. `iceAI.knownToEvaluator` identifies genuine stats, including the
+  if strength is at or below zero, remove subroutines only if trash is legal;
+  otherwise leave the AI state unchanged. Above zero, lower strength by one
+  only when `strengthCannotBeLowered` is false. Do not lower again after the
+  live trigger resolves. `iceAI.knownToEvaluator` identifies genuine stats, including the
   Corp's own ICE during its security calculations; a hidden synthetic zero
   cannot be interpreted as trashable ICE. On-encounter costs remain represented.
   `AIReducesIceStrength` reports only the pending counter (0 or 1) for Corp
