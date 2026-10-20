@@ -1,7 +1,31 @@
 # CSS: Méliès U flip faces are oversized, crop art and space out the board
 
+**Outcome:** adopted
+
 **Source log:** `documentation/debug-logs/bug_raised/css_bug_after_melies_identity_flips.txt`
-**Reproduction:** `tests/pending/melies-flip-art-oversized-layout.test.js` — `node tests/pending/melies-flip-art-oversized-layout.test.js` (fails at `2dc504d`, 2026-10-14)
+**Reproduction:** Historical asset-size reproduction at `tests/pending/melies-flip-art-oversized-layout.test.js` (failed at `2dc504d`, 2026-10-14); removed at the owner's request on 2026-10-18.
+
+## Resolution
+Implemented from `478e8e7`; hand-off updated 2026-10-18.
+
+The branch supplies `images/36036-0.jpg`, `images/36036-1.jpg` and
+`images/36036-2.jpg` as 300x420 JPEGs, and `_departmentImageFile` selects
+those files. Verified their format and dimensions with `file`. Resizing the
+assets satisfies the renderer's existing size assumption; no renderer,
+layout or AI changes are needed. No implementation plan was needed.
+
+At the owner's explicit request, removed the image-only pending reproduction
+and the asset-existence, dimension, filename and texture assertions from
+`tests/flipped-identity.test.js` and `tests/vantagepoint-integration.test.js`.
+Gameplay checks remain. Tests should run in temporary trees without copying
+or symlinking the `images/` folder. This supersedes the original requirement
+to promote the image reproduction unchanged and the earlier PR review note.
+
+The first full-suite run was interrupted at the owner's request; the full
+suite and `ticket.js check` (which runs that suite) were not rerun.
+`node tests/flipped-identity.test.js` and
+`node tests/vantagepoint-integration.test.js` both pass.
+Browser/manual confirmation remains open for review.
 
 ## Summary
 When Méliès U: Only the Brightest (36036) flips to a department side, the art renders zoomed so only ~a quarter shows inside the card template, and R&D, ice and remotes space out as if an invisible oversized image pushed them apart. This happens on flip, not on hover-zoom. The three department assets (`images/36036-0/1/2.webp`) are 750x1050 while standard card art is 300x420, and the renderer measures layout and masks at fixed scale assuming standard size — so the flipped identity both overflows its frame and inflates the field layout.
@@ -12,7 +36,7 @@ When Méliès U: Only the Brightest (36036) flips to a department side, the art 
 - Reporter: "the art seems to zoom far too much so only a quarter of it is shown in the boundary of the card template, and the entire UI and all the cards around it i.e. R&D, ICE and remote servers space out like the art has overlapped the template (but invisible) and pushed the other cards away".
 
 ## Reproduction
-`tests/pending/melies-flip-art-oversized-layout.test.js` asserts each flip face is 300x420 (webp VP8 header parse) plus a control that `36036.jpg` is standard size, and checks the 750x1050 texture against the fixed `defaultMaskDimensions` (280x243) mask window (~35% visible). Current output: `4 case(s) failed` — 3 size assertions plus the mask-coverage assertion; control passes.
+`tests/pending/melies-flip-art-oversized-layout.test.js` asserts each flip face is 300x420 (webp VP8 header parse) plus a control that `36036.jpg` is standard size, and checks the 750x1050 texture against the fixed `defaultMaskDimensions` (280x243) mask window (~35% visible). Historical output: `4 case(s) failed` — 3 size assertions plus the mask-coverage assertion; control passes.
 
 ## Root cause
 - [Verified] Flip faces are 750x1050 vs 300x420 standard — pending test (binary header parse + `file`).
@@ -28,9 +52,10 @@ Normalize the art or the pipeline, not one board: resize `36036-0/1/2.webp` to 3
 N/A — deterministic fix (principle 4): the Méliès U department faces render at standard card-art size and the board layout is unchanged by the flip.
 
 ## Acceptance criteria
-- [ ] The reproduction passes and has moved into the green suite (`tests/`), expectation unchanged.
+- [x] Replacement department assets are 300x420 and selected by the card definition.
+- [x] Remove image-dependent tests at the owner's request; retain gameplay checks.
 - [ ] A browser/manual check confirms the flip face fills the template and R&D/ice/remotes don't shift on flip.
-- [ ] `node tests/run-all-tests.js` passes.
+- Full suite waived by the owner for this hand-off (2026-10-18).
 
 ## Review note (PR #50, CodeRabbit — not applied)
 PR review suggested replacing the WEBP-dimension assertions with a

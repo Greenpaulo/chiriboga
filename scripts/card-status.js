@@ -26,11 +26,8 @@ const SCAFFOLD_MARKER = new RegExp([
 ].join('|'));
 const isScaffoldMarker = line => SCAFFOLD_MARKER.test(line);
 
-// The six missing Elevation definitions are an existing, explicit decision in
-// card-sets.md. Exempt identities, not a count, so new gaps still fail the check.
-const ACCEPTED_MISSING_DEFINITIONS = {
-  elevation: new Set(['35057', '35058', '35059', '35060', '35065', '35066']),
-};
+// No playable set currently has accepted missing definitions.
+const ACCEPTED_MISSING_DEFINITIONS = {};
 
 function registry() {
   const context = {console};
@@ -188,7 +185,7 @@ function generate() {
   const playability = playabilityMismatches(sets);
   out.push('', '## Playability disagreements', '');
   out.push('Playable sets must have no scaffold placeholders or unaccepted missing definitions; `tests/card-status.test.js` fails on these.', '');
-  out.push('Only the six explicitly recorded missing Elevation definitions are exempt.', '');
+  out.push('Playable sets have no missing-definition exemptions.', '');
   out.push(...(playability.length ? playability.map(m => '- ' + m) : ['None.']));
 
   const gaps = s => s.missing.length || s.unfinished.length || s.hookGaps.length;

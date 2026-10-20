@@ -314,7 +314,7 @@ reveals the department name and changes the active identity subtype from
 Division to Department until the Runner's discard phase ends.
 
 The renderer maps Tenure Floors, Subsurface Labs and Disposal Grounds to
-`36036-0.webp`, `36036-1.webp` and `36036-2.webp`, respectively, and restores
+`36036-0.jpg`, `36036-1.jpg` and `36036-2.jpg`, respectively, and restores
 the normal `36036.jpg` front when the identity flips back.
 
 ## Batch 8 confirmed patterns

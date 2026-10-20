@@ -104,8 +104,10 @@ where the justified decision changes: useful action versus decline, alternative
 targets or competing resource use; include immediate wins/losses where relevant.
 Assert the command/card/target or planning outcome and explain why it is sound.
 Do not stub the path under test. Reuse existing contrasting evidence when it
-already covers an unchanged decision; add coverage for the gaps. Run focused
-tests as each repair lands.
+already covers an unchanged decision; add coverage for the gaps. Run the
+affected focused tests as each repair becomes testable. Use a broader fast
+check only when shared changes warrant it; do not run a suite per finding.
+Follow the test cadence in `tests/README.md`.
 
 For shared changes, identify affected consumers and batches requiring
 revalidation, including previously passing batches. A dependency materially
@@ -120,13 +122,20 @@ disproved, plus a per-card account of strategic support and any remaining gaps.
 Stop when that scope is satisfied; speculative further tuning does not prolong
 this pass. A known necessary gap keeps the work unfinished or precisely Blocked.
 
-Run focused tests, the set record's **Required shared verification**, relevant
-shared regressions and `node tests/run-all-tests.js` using `.nvmrc`. Include Corp
-decision fixtures and decision snapshots; exclude known-red pending reproductions.
-Never weaken assertions. If card definitions change, regenerate
+Complete the set record's **Required shared verification** and relevant shared
+regressions, reusing current matching results and deferring any full-suite
+command to the final work state. Never weaken assertions. If card definitions
+change, regenerate
 `documentation/card-status.md` and check the touched definitions for unfinished
 markers. Check repaired mechanics and affected interactions rather than
 repeating every card's original mechanics checklist.
+
+Prepare the final notes, generated status and tracker updates, then run
+`node tests/run-all-tests.js` once using `.nvmrc`. This includes Corp decision
+fixtures/snapshots and excludes known-red pending reproductions; it satisfies
+matching full-suite requirements in the set record too. Repair failures with
+focused checks before repeating final validation. Do not start another full
+run while one is pending; follow `AGENTS.md`.
 
 After verification passes, mark the optimisation row Awaiting review and clear
 its active owner. Append an **Optimisation log** row with date, batch/IDs,

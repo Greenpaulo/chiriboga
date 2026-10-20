@@ -39,7 +39,22 @@ for reprints rather than assuming every metadata entry needs a duplicate object.
 
 ## 2. Confirmed missing or incomplete mechanics
 
+### Elevation
+
+The six missing NBN definitions (35057–35060, 35065–35066) are implemented in
+the user-selected batch recorded in
+[elevation-missing-cards-implementation.md](elevation-missing-cards-implementation.md).
+Baseline tests exercise the real play, paid-ability, tutor/install selection,
+and advancement-search consumers. Independent strategic review is not yet
+requested; competing tag-punishment plans, identity flips, and tutor sequencing
+remain in the batch's optimisation queue.
+
 ### Downfall
+
+Batch 1 (26001–26004) now has working gameplay and baseline AI. Focused
+real-consumer evidence and specific deeper-strategy work are recorded in
+[the implementation notes](downfall-implementation-notes.md) and the active
+tracker's separate optimisation queue. Remaining batches are unverified.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
@@ -49,7 +64,6 @@ Runner cards:
 
 | ID    | Card                             | Known gap                              |
 | ----- | -------------------------------- | -------------------------------------- |
-| 26004 | Stargate                         | Ability/replacement access absent      |
 | 26005 | Utae                             | Break and strength abilities absent    |
 | 26006 | Climactic Showdown               | Triggers and replacement effect absent |
 | 26007 | Fencer Fueno                     | Hosted-credit and turn triggers absent |
@@ -104,11 +118,10 @@ required repairs for demonstrated baseline gameplay, baseline AI and integration
 defects, alongside optional deeper strategic improvements in the optimisation
 queue; this does not assert review approval.
 
-**Set record:** [active tracker](current-set-implementation.md), with separate
-implementation and optimisation queues, ownership, verification and logs. On
-transition, replace this link with `records/vantagepoint.md` and retain a dated
-history link. `implement-card-batch` handles new implementation only;
-`optimise-card-batch` handles the review/repair cycle.
+**Set record:** [Vantage Point](records/vantagepoint.md), preserving separate
+implementation/optimisation queues, ownership, verification, logs and review
+links; see the [transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md).
+Use `optimise-card-batch` for its outstanding repairs.
 
 The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves all batch boundaries and the full append-only completion log before
@@ -178,19 +191,19 @@ existing number against its dated source snapshot.
 | --------------------------- | ----------: | ----------: | ------------------: |
 | System Gateway              |          77 |          77 |                   0 |
 | System Update 2021          |          82 |          82 |                   0 |
-| Downfall                    |          65 |           0 |                  65 |
+| Downfall                    |          65 |           4 |                  61 |
 | Midnight Sun                |          12 |           7 |                   5 |
 | Parhelion                   |           4 |           0 |                   4 |
 | The Automata Initiative     |           3 |           0 |                   3 |
-| Elevation                   |          76 |           1 |                  75 |
+| Elevation                   |          82 |           7 |                  75 |
 | Vantage Point               |          66 |          66 |                   0 |
 | Uprising                    |           6 |           0 |                   6 |
 | Rebellion Without Rehearsal |           2 |           0 |                   2 |
 | Core Set                    |          62 |           0 |                  62 |
 | Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **510** |     **233** |             **277** |
+| **Total**                   |     **516** |     **243** |             **273** |
 
-Of the 277 omissions, 27 are identities and 250 are playable deck cards. The
+Of the 273 omissions, 27 are identities and 246 are playable deck cards. The
 five Midnight Sun omissions are:
 
 - 33001 Esâ Afontov: Eco-Insurrectionist
@@ -200,8 +213,9 @@ five Midnight Sun omissions are:
 - 33030 Stoneship Chart Room
 
 Parhelion, Automata Initiative, Uprising and Rebellion have ELO missing from
-every currently defined card. Elevation's only numeric value is on 35050 Byte!;
-it has not yet been checked against a dated Trash or Busto snapshot.
+every currently defined card. Elevation has numeric values on 35050 Byte! and
+the six newly implemented NBN cards. Only the latter six were checked against
+the dated 2026-10-16 Trash or Busto snapshot.
 
 Backfill each value from the card's exact published ELO on the
 [Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking). Do not

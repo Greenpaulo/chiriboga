@@ -859,3 +859,51 @@ Subroutine payment menus may attach `srChoice` to each option to identify the
 corresponding `AIImplementIce` OR branch. `RunnerAI` matches that stable index
 when unaffordable choices disappear. Keep the model branch order consistent and
 do not override its selected branch with an unconditional inline preference.
+
+
+## Downfall additional play costs and trash attribution
+
+`additionalPlayCostTrash: true` on an event uses its `Enumerate()` selected
+`params.card` as an unpreventable additional play cost. `Play()` pays normal
+credit/click costs through its existing callback, then finishes that trash and
+its responses before firing `automaticOnPlay` or resolving the event. Cancelling
+before payment does not trash the selected card. The card's Enumerate must
+restrict choices to legal, trashable targets (Isolation: installed resources).
+
+`Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashingPlayer)`
+accepts an optional explicit effect controller. Otherwise it captures the
+currently resolving automatic source's owner, the callback context's owner,
+or the active player before response/prevention windows change priority.
+`AutomaticTriggers()` restores its scoped source in `finally`, including
+nested effects. The captured actor survives prevention recursion.
+`automaticOnTrash` and `responseOnTrash` receive `(cards, trashingPlayer,
+directlyTrashed)`: the first array includes hosted casualties; the third
+contains the directly selected cards after prevention. Existing one-argument
+callbacks remain compatible. Demolisher uses the actor and direct-card array
+to distinguish Runner trashes from Corp sacrifices and collateral host cleanup.
+Callers that make another player trash a card must pass that player explicitly.
+
+### Elevation tag removal and score-area abilities
+
+`RemoveTags(num, afterRemoval?, context?)` removes up to `num` tags, invokes
+`automaticOnRemoveTags` with the number actually removed, then opens
+`responseOnRemoveTags`. The optional continuation runs after that window;
+zero removal opens no window and immediately runs the continuation. Effects
+that continue with another decision must use this callback. Turn-trigger
+abilities that can open this window must not be marked `automatic`.
+
+An operation may define `payAdditionalPlayCosts(params, callback)`. `Play`
+calls it after the ordinary play costs and before `automaticOnPlay` or the
+operation's effect. It must pay its declared costs, then invoke `callback`;
+its enumeration must already exclude choices that cannot pay those costs.
+IP Enforcement removes tags through this contract.
+
+A Corp paid ability may declare `availableInRunnerScoreArea: true`.
+`ChoicesTriggerableAbilities(corp)` then includes that ability on a stolen Corp
+agenda. This does not activate the agenda's other abilities or triggers and
+never grants its paid ability to the Runner.
+
+`Score` snapshots `intended.scoreAdvancement` and
+`intended.scoreAdvancementRequirement` before moving the agenda out of its
+server, then clears both when score responses finish. Dividends uses this
+snapshot (CR 10.13.2), including the requirement's server modifiers.

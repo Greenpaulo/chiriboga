@@ -70,7 +70,7 @@ When a row is done, delete its entries from `LEGACY_TITLES` and tick it here.
 | [ ] | `_bestMainPhaseEconomyOption` | Oaktown Renovation | I5 | Advance-for-credits hook on the agenda |
 | [ ] | `_bestMainPhaseEconomyOption` | Spin Doctor, Sprint, Daily Business Show, Predictive Planogram | I5 | Draw-for-economy hook alongside `AIEmergencyDraw` |
 | [ ] | `_iceIsDisabled` | Femme Fatale | P1 | Runner-card hook: this program disables the chosen ICE |
-| [ ] | `_advancementLimit` | SanSan City Grid | P1 | Preserve both states: `AdvancementRequirement()` already handles an active rezzed SanSan, while planning must still reduce the target for an unrezzed copy the Corp can afford to rez and score with. Replace the title check only with a hook or shared capability that covers the unrezzed plan |
+| [ ] | `_advancementLimit` | SanSan City Grid | I4 | Preserve both states: `AdvancementRequirement()` already handles an active rezzed SanSan, while planning must still reduce the target for an unrezzed copy the Corp can afford to rez and score with. Replace the title check only with a hook or shared capability that covers the unrezzed plan |
 | [ ] | `_bestRecurToHQOption` | Snare! | P1 | `AIPunishesAccess` on the recursion target |
 | [ ] | `_potentialDamageOnBreach` | Jinteki: Personal Evolution, Urtica Cipher, House of Knives, Snare!, Hokusai Grid | P1 | New `AIAccessDamage(server)`, separate from `AIPunishesAccess`, which is a planning weight rather than expected damage |
 | [ ] | `_cardProtectionValue` | Ice Wall | P1 | Declarative protection-value hook (advancement-scaled strength) |
@@ -79,7 +79,7 @@ When a row is done, delete its entries from `LEGACY_TITLES` and tick it here.
 | [ ] | `Phase_EOT` | Marilyn Campaign, Nico Campaign, PAD Campaign, Clearinghouse, Daily Business Show, Corporate Town; Spin Doctor (rez if duplicate) | P1 | `AIRezTiming` |
 | [ ] | `Phase_PostAction` | SanSan City Grid, Regolith Mining License, Ronin, Reversed Accounts | P1 | `AIRezTiming` |
 | [ ] | `_potentialOperationDamageDirections`, `_potentialOperationDamageThisTurn` | Neurospike, Punitive Counterstrike, Biotic Labor, Archived Memories | P1 | Extend `AIDamageOperation` |
-| [ ] | `_potentialAdvancementDirections` | Weyland Consortium: Built to Last, Oaktown Renovation, Seamless Launch, Psychographics, Trick of Light, Biotic Labor | P1 | Extend `AIFastAdvance` |
+| [ ] | `_potentialAdvancementDirections` | Weyland Consortium: Built to Last, Oaktown Renovation, Seamless Launch, Psychographics, Trick of Light, Biotic Labor | I4 | Extend the graded `AIFastAdvanceCounters` (not `AIFastAdvance`, which only orders operation play) and `AIAdvanceCreditGain`, per the I4 spec |
 | [ ] | `_useWhenTaggedCard` | Retribution, Predictive Planogram | P1 | Existing `AITagPunishment` for Retribution; a when-tagged play hook for Planogram |
 | [ ] | `Phase_Main` | Punitive Counterstrike, Neurospike, Public Trail, Archived Memories (play-now list); Orbital Superiority, Haas-Bioroid: Precision Design, Offworld Office, Hostile Takeover, Tomorrow's Headline, Biotic Labor (fast-advance combo) | P1 | `AIWouldPlay` / `AIDamageOperation` for the play-now list; `AIFastAdvance` plus a score-combo hook for the fast-advance block |
 | [ ] | `_iceWorthRezzing` (commented-out block) | Cell Portal, Chum | P1 | Delete the dead comment. The test ignores comments, so it is not counted |

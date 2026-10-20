@@ -52,13 +52,34 @@ const syntaxHeavyMethod = [
 assert.deepStrictEqual(blockFrom(syntaxHeavyMethod, 0, 'method'), syntaxHeavyMethod.slice(0, 5),
   'show.js method boundary uses JavaScript syntax');
 
-const brief = run('scripts/batch-brief.js', '3');
-assert(/^Batch 3 \(/.test(brief), 'batch-brief.js reads the tracker batch queue');
+// Pick the active tracker's completed batch rather than hardcoding a set's
+// historic batch 3. During a set transition, an In progress batch may still
+// contain stubs, so compare each reported marker status with its source.
+const tracker = fs.readFileSync(path.join(root, 'documentation/new-sets/current-set-implementation.md'), 'utf8');
+const queue = tracker.split(/^## Batch queue\s*$/m)[1].split(/^## /m)[0];
+const batches = [...queue.matchAll(/^\|\s*(\d+)\s*\|\s*(\d+)[–-](\d+)\s*\|\s*([^|]+)\|/gm)];
+const selected = batches.find(row => row[4].trim() === 'Complete') || batches[0];
+assert(selected, 'tracker has an implementation batch');
+const brief = run('scripts/batch-brief.js', selected[1]);
+assert(brief.startsWith('Batch ' + selected[1] + ' ('), 'batch-brief.js reads the tracker batch queue');
 const cardLines = brief.split('\n').filter(line => /^\d{5} /.test(line));
-assert(cardLines.length >= 1, 'batch-brief.js lists the batch cards');
+assert.strictEqual(cardLines.length, Number(selected[3]) - Number(selected[2]) + 1, 'brief lists the exact batch range');
 assert.strictEqual((brief.match(/Text: /g) || []).length, cardLines.length, 'each card has rules text');
-assert.strictEqual((brief.match(/no unfinished markers/g) || []).length, cardLines.length,
-  'a completed batch shows no unfinished markers');
+const {isScaffoldMarker} = require('../scripts/card-status.js');
+for (const section of brief.split(/\n(?=\d{5} )/).slice(1)) {
+  const match = section.match(/Stub: (.+):(\d+) \(([^)]+)\)/);
+  assert(match, 'each card has a source location and marker count');
+  const lines = fs.readFileSync(path.join(root, match[1]), 'utf8').split('\n');
+  const start = Number(match[2]) - 1;
+  const rest = lines.slice(start + 1);
+  const next = rest.findIndex(line => /^(?:cardSet|coreSet)\[\d+\]\s*=/.test(line));
+  const count = lines.slice(start, next < 0 ? lines.length : start + 1 + next).filter(isScaffoldMarker).length;
+  assert.strictEqual(match[3], count ? count + ' unfinished markers' : 'no unfinished markers', 'marker report matches the source');
+}
+if (selected[4].trim() === 'Complete') {
+  assert.strictEqual((brief.match(/no unfinished markers/g) || []).length, cardLines.length,
+    'a completed batch shows no unfinished markers');
+}
 
 const blockers = run('scripts/roadmap.js', 'blockers');
 assert(/(?:No tickets are blocked\.|documentation\/(?:bugs|backlog)\/[^\n]+\.md: [A-Z]\d)/.test(blockers),

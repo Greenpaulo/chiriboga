@@ -671,6 +671,19 @@ reach collectors as `posture` events (`kind` `bait`/`bluff`/`profile`,
 `publicVars`), emitted through `CorpAI._postureTelemetry`, which the harness
 sets only when observing a game.
 
+Profile events include the opaque `cardId`; active roll events attach an
+already-cached profile without creating one. The harness marks hypothetical
+events explicitly. `postureShapeByCardClass` measures the initial requested
+shape of each actual active commitment, separately for agendas and traps.
+Profiles may precede or follow the first activation roll; cached shapes on later
+rolls cover refreshes. Reuse and hypothetical events add no sample. Actual
+later protection changes are measured by F12, not substituted for initial
+profiles. Its pooled `tv` is total variation over depth/advancement/delay bins.
+It fails closed with fewer than ten known commitments or five contributing
+games per class, below 90% known shapes in either class, or an invalid bootstrap
+draw. It declares `metricNames` for strict reporting; collector loading checks
+that declaration before workers start.
+
 L8.5 also emits `kind: weights`, `action: weights` events containing the
 twelve scripts' ids, multipliers and normalized probabilities, with an initial
 observation after `gameStart` and subsequent observations on feedback updates
@@ -700,8 +713,11 @@ capture leaves/reinstalls even within one main-loop step; hypotheticals are
 excluded. Safety stops take precedence over cached scripts. Expired commitments
 are separate from active ones; a cache without an observation in the current
 installation remains unknown. `allowedAtLastQuery` does not claim current
-safety. Missing cached state remains unknown rather than being treated as
-neutral. Tracker/collector errors invalidate observations while gameplay
+safety. No activation record means `unrolled`: the AI has not selected a
+deception commitment, including before its first query. This does not establish
+safety, which remains unknown without evidence. A cached record without usable
+query/event evidence remains unknown rather than being treated as neutral.
+Tracker/collector errors invalidate observations while gameplay
 continues.
 
 Passive wrappers retain returns of bait/bluff queries the AI already made;
@@ -856,6 +872,28 @@ Runner turn ends.
 (remotes holding an agenda). The metrics are per-game counts. The pooled
 breach rate of a group is `mean(secureBreached) / mean(secure)`, not the mean
 of per-game rates.
+
+## I2 stranded ICE collector
+
+`--collector strandedUnrezzedIceCost` reports
+`strandedUnrezzedIceCost.credits` (lower is better): per game, the credits the
+Corp paid installing ICE that was never rezzed afterwards, whether it stayed
+unrezzed to game end or was trashed or returned unrezzed. It reads two
+observation-only events from the headless runner: `iceInstall` (a Corp
+`SpendCredits(..., "installing", ice)` payment, with the card's tracker `id`
+and `cost`) and `iceRez` (a completed ICE rez: `Rez(card, true)`, which both a
+paid rez and a free rez reach). A rez clears every install payment recorded
+for that card. ICE already installed on a start board paid nothing here, so
+its rez is ignored. Neither event calls engine functions or changes play.
+
+`--collector iceInstallsByServer` is a diagnostic (no gate direction): per
+game, completed Corp ICE installs by destination kind (`hq`, `rd`,
+`archives`, and remotes by harness-true root: `agendaRemote`, `trapRemote`,
+`otherRemote`, `emptyRemote`), each with `count`, `firstTurn` (0 if none),
+summed printed `rezCost` and `strength`, plus `thirdLayerOrDeeper`. It reads
+the `iceInstalled` event, emitted when Corp ICE is first seen on the board
+between engine steps (ICE on a start board is marked at game start without an
+event; ICE moved between servers is not a new install).
 
 ## Checking the F3 security cache
 

@@ -82,6 +82,7 @@ class RunCalculator {
       maxCorpCred = Math.max(maxCorpCred, RezCost(ice));
     }
     var iceKnown = PlayerCanLook(knowledgePlayer, ice);
+    result.knownToEvaluator = iceKnown; // Card modifiers must not interpret synthetic hidden strength as printed strength.
     if (!iceKnown) {
       //unknown ice
 	  var extraRezCost = this._publicRezCostModifier(ice, knowledgePlayer); //public effects only (the hidden card's own effects and printed cost are not read)
