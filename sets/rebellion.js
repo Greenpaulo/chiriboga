@@ -9,6 +9,7 @@ setIdentifiers.push('rwr');
 //When the Corp purges virus counters, trash this program.
 cardSet[34082] = {
   title: "Physarum Entangler",
+  elo: 1785,
   imageFile: "34082.png",
   player: runner,
   faction: "Criminal",
@@ -261,6 +262,7 @@ cardSet[34082] = {
 //Hosted power counter: Gain 2 credits. Use this ability only during your turn.
 cardSet[34089] = {
   title: "Coalescence",
+  elo: 1819,
   imageFile: "34089.png",
   player: runner,
   faction: "Shaper",

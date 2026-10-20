@@ -84,7 +84,22 @@ responseOnCorpTurnBegins:  { Enumerate?, Resolve, text?, automatic? }
 responseOnRunnerTurnBegins:{ Resolve, automatic: true }
 responseOnCorpTurnEnds:    { Resolve, automatic: true }
 responseOnRunnerTurnEnds:  { Resolve, automatic: true }
+responseOnRunnerDiscardEnds: { Enumerate?, Resolve, text?, automatic? } // Runner 2.3
+responseOnCorpDiscardEnds:   { Enumerate?, Resolve, text?, automatic? } // Corp 3.3
 ```
+
+No engine phase fires `responseOnRunnerTurnEnds` or `responseOnCorpTurnEnds`
+(checked 2026-10-16). Implement "when your turn ends" with the matching
+`*DiscardEnds` hook, which fires at the point both conditions trigger.
+
+`responseOnCorpActionCompletes: { Enumerate, Resolve, text }` fires once per
+Corp action, when the Corp first passes the post-action window; it receives a
+copy of `corp.actionsTakenThisTurn` (completed actions, oldest first). Compare
+actions with `SameCorpAction(a, b)` (CR 5.2.5: same basic action, or same
+ability on the same card). Setting `corp.restrictedNextAction = {excluded}`
+hides those actions from the next Corp action; it clears once an action is
+taken. `CorpHasDifferentActionAvailable(excluded, extraClicks)` is a read-only
+legality check (MirrorMorph).
 
 ### Run
 
@@ -111,6 +126,29 @@ automaticOnSubroutineFiring:   { Resolve }                 // an unbroken sub st
 An automatic `responseOnEncounter` receives no parameters; use
 `automaticOnEncounter` when the effect needs the encountered ice argument.
 
+Ice derezzed during its encounter ("Baklan" Bochkin) stays encountered but its
+subroutines no longer fire: `phases.runSubroutines` skips unrezzed ice.
+
+### Trace
+
+```js
+responseOnTraceInitiated: { Enumerate(baseStrength), Resolve } // before the Corp raises strength
+```
+
+`Trace` opens this window (first priority to `playerTurn`) after setting the
+global `traceStrength` and before either player raises strength; a response
+may change `traceStrength` (Flip Switch sets it to 0). With no response the
+trace continues synchronously.
+
+### Response windows
+
+Every enumerated trigger in a response window must be resolved before the
+window can pass, so an optional effect must offer its own decline choice
+(for example `{use: false, label: "Do not use", button: "Continue"}`) and ignore
+it in `Resolve`. `responseOnRunSuccessful` receives no parameters; read
+`attackedServer`. A played run event stays in `runner.resolvingCards`, and so
+stays active, until the post-action window moves it to the heap.
+
 ### Breach
 
 ```js
@@ -120,6 +158,14 @@ automaticOnArchivesCardsTurnedFaceUp: { Resolve } // receives the facedown cards
 The Archives hook fires once while the server is breached, before access
 choices are enumerated. It does not fire when no facedown Archives cards were
 turned faceup.
+
+`specialOnInsteadOfBreaching: { Enumerate, Resolve }` replaces a breach
+(Chastushka, Retrieval Run, Khusyuk); `Enumerate` returns `[{required: true}]`
+for a mandatory replacement. It resolves after the engine has entered Run 6.4,
+whose automatic `responseOnRunEnds` triggers have already fired, so keep the
+replacement's state out of those triggers and clean up in
+`automaticOnRunEndCleanup`. Khusyuk shows how to access a card from inside the
+replacement without re-initialising Run 6.4.
 
 ### Install / Rez / Trash
 
@@ -179,7 +225,7 @@ abilities: [{
   text: "[click]: ...",
   Enumerate: function() {
     if (!this.rezzed) return [];
-    if (!CheckClicks(corp, 1)) return [];
+    if (!CheckActionClicks(corp, 1)) return [];
     return [{}];
   },
   Resolve: function() { SpendClicks(corp, 1); /* effect */ },
@@ -237,6 +283,7 @@ SpendClicks(player, n);
 GainClicks(player, n);
 CheckClicks(player, n); // alias CheckActionClicks
 PlayClickCost(card); // 1 normally, 2 for Double, including active modifiers
+ClicksSpentThisTurn(player); // reset with allotted clicks; lost clicks are not spent ("first [click]" checks)
 ```
 
 ### Cards / Zones
@@ -681,6 +728,22 @@ responseOnRunnerTurnBegins: { Resolve: function() { this.usedThisTurn = false; }
 // in Enumerate: if (this.usedThisTurn) return [];
 ```
 
+Use this card-local guard for the card's own once-per-turn uses. When "the first
+time each turn" refers to a game event (you install hardware, you would draw),
+the event may have happened before the card became active. Check the engine's
+turn counter instead: `TurnEventCount(name)` is 1 during the first such event,
+and `ChangePhase` clears every count when a turn begins. Recorded names:
+`"runnerHardwareInstall"` (in `Install`, before install triggers),
+`"runnerDraw"` and `"corpDraw"` (in `Draw`, before cards move). Record a new
+event with `RecordTurnEvent(name)` at its single engine call site.
+
+```js
+responseOnInstall: { Enumerate: function (card) {
+  if (!CheckCardType(card, ["hardware"]) || TurnEventCount("runnerHardwareInstall") != 1) return [];
+  return [{}];
+}, Resolve: function () { Draw(runner, 1); } },
+```
+
 ### Ice weakens itself each encounter (Sandstone pattern)
 
 ```js
@@ -718,7 +781,7 @@ responseOnCorpTurnBegins: { Resolve: function() { this.usedThisTurn = false; }, 
 abilities: [{
   text: "[click]: Effect.",
   Enumerate: function() {
-    if (!this.rezzed || this.usedThisTurn || !CheckClicks(corp, 1)) return [];
+    if (!this.rezzed || this.usedThisTurn || !CheckActionClicks(corp, 1)) return []; // CheckActionClicks marks a main-phase click ability
     return [{}];
   },
   Resolve: function() { SpendClicks(corp, 1); this.usedThisTurn = true; /* effect */ },
@@ -727,9 +790,15 @@ abilities: [{
 
 ### On-trash optional effect (Calvin / Nanoetching pattern)
 
+Record the card's rezzed/installed state in an `availableWhenInactive`
+`automaticOnWouldTrash`, because the response fires after the card is in
+Archives. See `sets/downfall.js` 26033 for the full version.
+
 ```js
 responseOnTrash: {
-  Enumerate: function() {
+  availableWhenInactive: true,
+  Enumerate: function(cards, trashingPlayer) {
+    if (!cards.includes(this) || trashingPlayer != runner || !this._wasRezzedWhenTrashed) return [];
     return [{ id: 1, label: "Do X", button: "Do X" }, { id: 0, label: "Skip", button: "Pass" }];
   },
   Resolve: function(params) { if (params && params.id === 1) { /* effect */ } },
@@ -763,6 +832,9 @@ modifyInstallCost: {
 | ----- | ---------------------- | ------ |
 | 26001 | Isolation              | ✅     |
 | 26002 | Demolisher             | ✅     |
+| 26019 | Lat: Ethical Freelancer | ✅    |
+| 26020 | In the Groove          | ✅     |
+| 26021 | Khusyuk                | ✅     |
 | 26022 | Spec Work              | ✅     |
 | 26023 | Supercorridor          | ✅     |
 | 26024 | Gauss                  | ✅     |
