@@ -284,6 +284,22 @@ test('access-trash attribution resets on a later installation', () => {
   assert.deepStrictEqual(events.filter(e => e.type === 'leave').map(e => e.fate), ['trashedOnAccess', 'trashed']);
 });
 
+// I2: credits paid installing ICE that is never rezzed afterwards.
+test('strandedUnrezzedIceCost counts install credits of ICE never rezzed', () => {
+  const stranded = collector('strandedUnrezzedIceCost');
+  const state = {};
+  const on = (type, data) => stranded.onEvent(Object.assign({type}, data), state);
+  on('gameStart', {});
+  on('iceInstall', {id: 1, cost: 0});  // outermost layer, later rezzed
+  on('iceInstall', {id: 2, cost: 1});  // never rezzed
+  on('iceInstall', {id: 3, cost: 2});  // rezzed
+  on('iceInstall', {id: 4, cost: 3});  // trashed unrezzed: no rez follows
+  on('iceRez', {id: 1}); on('iceRez', {id: 3});
+  on('iceRez', {id: 9});               // ICE from a start board: nothing paid here
+  assert.deepStrictEqual(stranded.finish(state), {credits: 4});
+  assert.strictEqual(stranded.directions['strandedUnrezzedIceCost.credits'], 'lower');
+});
+
 async function observedWrappers() {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'install-outcomes-'));
   try {
@@ -312,6 +328,13 @@ async function observedWrappers() {
         TriggerAbility(asset, {Resolve: function() {}}).Resolve.continue({});
         DecisionPhase(corp, [{}], trap.responseOnAccess.Resolve, "Trap", "Trap", trap).Resolve.continue({});
         AIHypothetical.depth--;
+        // Real deck ICE (Rez() needs a renderable card), moved onto HQ.
+        var deckIce = corp.RnD.cards.filter(function(c) { return c.cardType === "ice"; });
+        var wall = deckIce[0], stranded = deckIce[1];
+        [wall, stranded].forEach(function(c) { MoveCard(c, corp.HQ.ice); });
+        SpendCredits(corp, 1, "installing", wall);
+        SpendCredits(corp, 2, "installing", stranded);
+        Rez(wall, true);
         __report = function() { return {credits: corp.creditPool, trapResolved: trap.resolved}; };
         PlayerWin(corp, "scripted observation");
       };
@@ -324,7 +347,7 @@ async function observedWrappers() {
       observe: true, setupFile, onEvent: event => { events.push(event); installs.onEvent(event, state); }});
     assert.deepStrictEqual(result.errors, []);
     assert.strictEqual(result.winner, 'corp');
-    assert.strictEqual(result.report.credits, 15, 'real engine functions still update credits');
+    assert.strictEqual(result.report.credits, 12, 'real engine functions still update credits (15 less 3 paid for ICE)');
     assert.strictEqual(result.report.trapResolved, true);
     const asset = events.find(e => e.type === 'install' && e.card === 'Observed asset');
     const trap = events.find(e => e.type === 'install' && e.card === 'Observed trap');
@@ -333,6 +356,14 @@ async function observedWrappers() {
     assert.deepStrictEqual(events.filter(e => e.type === 'cardCredits').map(e => [e.id, e.credits]),
       [[asset.id, 3], [asset.id, 2]]);
     assert.deepStrictEqual(events.filter(e => e.type === 'cardUsed').map(e => e.id), [asset.id, trap.id]);
+    const iceIds = events.filter(e => e.type === 'iceInstall').map(e => e.id);
+    assert.deepStrictEqual(events.filter(e => e.type === 'iceInstall').map(e => [e.id, e.cost]), [[iceIds[0], 1], [iceIds[1], 2]]);
+    assert.deepStrictEqual(events.filter(e => e.type === 'iceRez').map(e => e.id), [iceIds[0]], 'a free rez is observed');
+    assert.deepStrictEqual(events.filter(e => e.type === 'iceInstalled').map(e => [e.server, e.iceCount]), [['hq', 2], ['hq', 2]],
+      'ICE newly seen on the board is reported once, with its server kind');
+    const stranded = collector('strandedUnrezzedIceCost'), strandedState = {};
+    events.forEach(event => stranded.onEvent(event, strandedState));
+    assert.deepStrictEqual(stranded.finish(strandedState), {credits: 2});
     const outcomes = installs.finish(state);
     assert.strictEqual(outcomes.assetsInstalled, 2);
     assert.strictEqual(outcomes.assetNetCredits, 3);

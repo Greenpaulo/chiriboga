@@ -87,7 +87,7 @@ without uncalibrated coefficients, with each effect counted by one
 [owning component](specs/L8.8-marginal-deception-value.md#distinguish-mechanisms-and-prevent-double-counting).
 Changing a shared verdict's meaning moves all its consumers at once, as the
 [`fa1182c` regression](../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
-and [L9.0.1 gate failure](../backlog/code-review/L9.0.1-adopt-honest-lockout.md#resolution)
+and [L9.0.1 gate failure](../backlog/done/L9.0.1-adopt-honest-lockout.md#resolution)
 illustrate; agenda retention is an inferred mechanism, not established causality.
 If a shared signal must change meaning, split adoption by consumer behind
 separate options and gates, following the [regression findings](../corp-ai-regression/findings.md#evidence-for-gating-at-the-fixed-tip-b52d451)

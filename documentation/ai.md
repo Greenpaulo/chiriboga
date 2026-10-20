@@ -57,7 +57,7 @@ This file is long. Read only the sections a task needs. To find one hook, search
    - [5.2 ICE Subroutine Type Reference](#52-ice-subroutine-type-reference)
    - [5.3 Bioroid Click-Break — Corp `AIImplementBreaker`](#53-bioroid-click-break)
    - [5.4 ICE Install Decisions — `AIWorthwhileIce`](#54-ice-install-decisions)
-   - [5.5 Upgrades — `AIDefensiveValue`, `AIIsScoringUpgrade`, `AILimitPerServer`, `AIPreventBreach`](#55-upgrades)
+   - [5.5 Upgrades — `AIApproachDefense`, `AIDefensiveValue`, `AIIsScoringUpgrade`, `AILimitPerServer`, `AIPreventBreach`](#55-upgrades)
    - [5.6 Operations — `AIFastAdvance`, `AIDamageOperation`, `AITagPunishment`, `AIWouldPlay`, `AIWouldPlayBeforeScore`](#56-operations)
    - [5.7 Agendas — `AIAdvancementLimit`, `AIOverAdvance`](#57-agendas)
    - [5.8 Inline AI Code for Corp](#58-inline-ai-code-for-corp)
@@ -1637,6 +1637,45 @@ and payoff conditions; it must not inspect hidden Runner information.
 
 ### 5.5 Upgrades
 
+**`AIApproachDefense(server, context)`**
+
+For a root card whose effect fires when the Runner approaches its server.
+Return `null` when it would not stop the run, or
+`{runnerOptions: [{credits, clicks}, ...], corpEndsRunUses: n}`:
+
+- `runnerOptions`: alternative costs the Runner may pay to continue the run.
+  The Corp AI adds them as one extra layer after the innermost ICE of the
+  honest security route, repeated with the route under global end-the-run.
+- `corpEndsRunUses`: how many approaches the Corp would end with its own
+  resources, following the card's own AI policy. Added to the server's global
+  end-the-run uses; covering the Runner's projected runs is an honest lockout.
+
+`context.spendableCredits` is the Corp's credits minus the rez costs of the
+server's chosen ICE rez plan and of the counted unrezzed approach defences. The
+security evaluator calls the hook for every root card in `server`, rezzed or
+(when the rez is fundable with that plan) unrezzed, including detached
+hypothetical servers, so it must be pure: no state, logging or `preferred`, and
+no reads of `attackedServer`. It feeds the honest fields
+(`honestIsSecure`, `honestLockout`, `honestMandatoryBreakCost`) and I2's
+breach margin. With `iceMarginalSecurity` enabled (the default), these affect
+live ICE-install ranking through `_marginalIceScore()`; compatibility
+`isSecure` and `hasHardLockout` ignore it.
+Effects that stop a successful run rather than charge on approach (for
+example Flagship) are breach prevention, not approach defences.
+
+```js
+// Manegarm Skunkworks: [click][click] or 5[c], unless the breach is lethal
+AIApproachDefense: function (server) {
+  if (!server) return null;
+  if (corp.AI._potentialDamageOnBreach(server, true) > runner.grip.length) return null;
+  return {runnerOptions: [{credits: 5, clicks: 0}, {credits: 0, clicks: 2}], corpEndsRunUses: 0};
+},
+```
+
+Anoetic Void returns `corpEndsRunUses = min(floor(spendableCredits / 2),
+floor(non-agenda HQ cards / 2))`, or `null` when its `AIWouldTrigger(server)`
+declines.
+
 **`AIDefensiveValue(server)`**
 
 Return a numeric value representing how much protection this upgrade provides to `server`.
@@ -1701,7 +1740,12 @@ AIPreventBreach: function(server) {
 },
 ```
 
-**`AIWouldTrigger()`**
+**`AIWouldTrigger(server?)`**
+
+An optional server argument supports pure planning against detached hypothetical
+servers. Anoetic Void uses it when supplied and otherwise falls back to
+`GetServer(this)`; runtime callers may omit it. Planning callers must use a
+quiet damage calculation (the second argument to `_potentialDamageOnBreach`).
 
 Return `true` to allow an upgrade's defensive ability to fire. Return `false` to suppress it:
 
@@ -1715,9 +1759,10 @@ AIWouldTrigger: function() {
 
 ```js
 // Anoetic Void: don't fire if there is an ambush in the server, or no cards to discard from HQ
-AIWouldTrigger: function() {
-    if (corp.AI._isAmbush(GetServer(this))) return false;
-    var cardsInServer = GetServer(this).root.length + (GetServer(this).cards || []).length;
+AIWouldTrigger: function(server) {
+    var thisServer = server || GetServer(this);
+    if (corp.AI._isAmbush(thisServer)) return false;
+    var cardsInServer = thisServer.root.length + (thisServer.cards || []).length;
     if (cardsInServer < 2) return false;
     if (corp.HQ.cards.length - corp.AI._agendasInHand() < 2) return false;
     return true;
