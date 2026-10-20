@@ -1126,6 +1126,12 @@ not these hooks.
   `iceAI` object. It can update `iceAI.subTypes` for route-aware effects such as
   changing only the next ice that will be encountered. Existing cards that
   already expose this hook are also understood by Corp security planning.
+  `iceAI.knownToEvaluator` records `PlayerCanLook(knowledgePlayer, ice)`:
+  true means visible ICE statistics; false means strength and subroutines are
+  synthetic hidden-ICE estimates. The knowledge player defaults to the Runner
+  and is the Corp during security planning, which can see its own ICE.
+  The field is absent on early returns before visibility is evaluated (ignored
+  ICE or ICE ineligible for security planning).
   Standard engine `modifySubTypes` modifiers are consumed too, so most subtype
   cards do not need an additional AI-only hook.
   Stick and Poke also uses this hook to prepend its net-damage row when
@@ -2245,13 +2251,14 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWastefulToInstall()` | function | Return true if installing is wasteful |
 | `AIOkToTrash()` | function | Return true if this installed card can be trashed for space |
 | `AIWorthKeeping(installed, spareMU)` | function | Return true to keep this card in hand during discard |
+| `AIOrdinaryEconomyPlay` | boolean | Opt a grip card into ordinary Runner income selection after legacy candidates, subject to normal play checks |
 | `AISpecialBreaker` | bool | Marks non-standard breakers (Trojans etc.) |
 | `AIFixedStrength` | bool | Marks breakers that can't pump strength normally |
 | `AIMatchingBreakerInstalled(iceCard, effectiveSubTypes)` | function | Return self if this covers the given ice, else null; the optional list includes public subtype shifts |
 | `AIReducesIceStrength(ice)` | function | Return the amount this active card currently reduces the ice's strength |
 | `AIHostedBreakContribution(ice)` | function | Return how many subroutines this hosted card can currently break for free |
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
-| `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description |
+| `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description; `knownToEvaluator` distinguishes visible from synthetic statistics |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
@@ -2810,6 +2817,63 @@ cardSet[99003] = {
 ---
 
 That covers the full AI hook system. With these patterns you can add solid AI support to almost any card in the game. When in doubt, look at how an existing similar card implements its hooks in the `sets/` files — particularly `systemgateway.js`, which is the most comprehensively annotated set.
+
+
+### Runner ordinary economy selection
+
+`AIOrdinaryEconomyPlay` (boolean, default false) explicitly opts a grip card
+into the Runner's ordinary income policy. Only `true` enables it. When that
+policy needs credits and can play, it considers legacy title candidates first,
+then opted-in cards in grip order without duplicates. `FullCheckPlay`,
+`_wastefulToPlay` and `AIWouldPlay()` still gate play; `AIPreferredPlayChoice`
+supplies the follow-up index. This read-only declaration does not itself rank
+priority economy, mutate the board, or enable legacy `AIEconomyPlay` cards.
+
+### Downfall batch 1 card hooks
+
+- Isolation uses `AIWouldPlay`, `AIWorthKeeping` and `AIPreferredPlayChoice(choices)`
+  to cash out a legal installed resource whose `AIOkToTrash()` returns true.
+  It returns -1 for live resources or no target. Its `AIEconomyPlay: 2` informs
+  the Runner's priority-economy preparation; `AIOrdinaryEconomyPlay: true`
+  opts it into ordinary income selection after legacy candidates. That consumer
+  propagates the selected play-choice index into the follow-up decision, after
+  checking credit/click legality. This retains the existing economy policy's
+  scope rather than enabling every legacy Runner economy declaration.
+- Demolisher uses `AIWorthKeeping`, `AIWastefulToInstall` and
+  `AIEconomyInstall()` (priority 1) to install an affordable console when none
+  is installed. Its passive `modifyTrashCost` reaches the shared `TrashCost`
+  evaluator directly; the once-per-turn credit is awarded after an actual
+  Runner trash, never counted as permanent run funding.
+- Chisel uses `AISpecialBreaker`, `AIMatchingBreakerInstalled`,
+  `AIPreferredInstallChoice`, `AIWorthKeeping` and `AIOkToTrash` for legal host
+  installation and retention. Target ranking uses only visible ICE stats,
+  avoids duplicate Chisels and known cards that disable hosted programs or
+  prevent strength reduction. `AIModifyIceAI` models its pending encounter:
+  if strength is at or below zero, remove subroutines only if trash is legal;
+  otherwise leave the AI state unchanged. Above zero, lower strength by one
+  only when `strengthCannotBeLowered` is false. Do not lower again after the
+  live trigger resolves. `iceAI.knownToEvaluator` identifies genuine stats, including the
+  Corp's own ICE during its security calculations; a hidden synthetic zero
+  cannot be interpreted as trashable ICE. On-encounter costs remain represented.
+  `AIReducesIceStrength` reports only the pending counter (0 or 1) for Corp
+  shortcut pricing: existing counters are already included in `Strength()`.
+  Both hooks are read-only with respect to the board and safe outside runs.
+- Stargate uses `AIWorthKeeping`, `AIWastefulToInstall`,
+  `AIPreferredInstallChoice` and `AIInstallBeforeRun` to install one copy with
+  enough MU, credits and clicks for the selected R&D run. The install-before-run
+  hook reserves the run's direct costs. `AIRunAbilityExtraPotential` returns
+  `max(0, 1.6 - potential)` only for unspent, useful R&D activations without
+  successful-run suppression: its reward replaces the access value.
+  `AIBreachNotRequired` allows its reveal/trash reward to survive breach
+  prevention; `AIBreachReplacementValue: 2` supplies the real replacement
+  selector. Its reveal decision sets the Runner's existing preferred index to
+  the highest ELO legal revealed target. It never reads unrevealed deck contents
+  to rank a run, install or activation. Target competition, Archives follow-up
+  and immediate agenda-steal comparisons remain optimisation work.
+
+`tests/downfall-integration.test.js` exercises real Runner commands, follow-up
+selection, Corp security and run-calculator consumers, plus resource, timing,
+hidden-information, prevention and cleanup cases.
 
 ### Elevation missing NBN batch (35057–35060, 35065–35066)
 

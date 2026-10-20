@@ -18,11 +18,12 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | Pending | Next implementation set, selected by the user on 2026-10-16. |
+| `downfall` | In progress | Next implementation set, selected by the user on 2026-10-16. |
 
-Downfall is next. The next implementation invocation archives Vantage Point
-and prepares Downfall before implementing one batch; this workflow change does
-not itself start card work.
+Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
+[immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
+and [set report](reviews/vantage-point/vantagepoint-set-review.md). Outstanding
+review/optimisation work continues there independently.
 
 ## 1. Missing card definitions
 
@@ -50,6 +51,11 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
+Batch 1 (26001–26004) now has working gameplay and baseline AI. Focused
+real-consumer evidence and specific deeper-strategy work are recorded in
+[the implementation notes](downfall-implementation-notes.md) and the active
+tracker's separate optimisation queue. Remaining batches are unverified.
+
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
 notes that printed behaviour is absent.
@@ -58,7 +64,6 @@ Runner cards:
 
 | ID    | Card                             | Known gap                              |
 | ----- | -------------------------------- | -------------------------------------- |
-| 26004 | Stargate                         | Ability/replacement access absent      |
 | 26005 | Utae                             | Break and strength abilities absent    |
 | 26006 | Climactic Showdown               | Triggers and replacement effect absent |
 | 26007 | Fencer Fueno                     | Hosted-credit and turn triggers absent |
@@ -118,11 +123,10 @@ required repairs for demonstrated baseline gameplay, baseline AI and integration
 defects, alongside optional deeper strategic improvements in the optimisation
 queue; this does not assert review approval.
 
-**Set record:** [active tracker](current-set-implementation.md), with separate
-implementation and optimisation queues, ownership, verification and logs. On
-transition, replace this link with `records/vantagepoint.md` and retain a dated
-history link. `implement-card-batch` handles new implementation only;
-`optimise-card-batch` handles the review/repair cycle.
+**Set record:** [Vantage Point](records/vantagepoint.md), preserving separate
+implementation/optimisation queues, ownership, verification, logs and review
+links; see the [transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md).
+Use `optimise-card-batch` for its outstanding repairs.
 
 The [2026-10-06 implementation snapshot](history/vantagepoint-2026-10-06.md)
 preserves all batch boundaries and the full append-only completion log before
@@ -192,7 +196,7 @@ existing number against its dated source snapshot.
 | --------------------------- | ----------: | ----------: | ------------------: |
 | System Gateway              |          77 |          77 |                   0 |
 | System Update 2021          |          82 |          82 |                   0 |
-| Downfall                    |          65 |           0 |                  65 |
+| Downfall                    |          65 |           4 |                  61 |
 | Midnight Sun                |          12 |           7 |                   5 |
 | Parhelion                   |           4 |           0 |                   4 |
 | The Automata Initiative     |           3 |           0 |                   3 |
@@ -202,9 +206,9 @@ existing number against its dated source snapshot.
 | Rebellion Without Rehearsal |           2 |           0 |                   2 |
 | Core Set                    |          62 |           0 |                  62 |
 | Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **516** |     **239** |             **277** |
+| **Total**                   |     **516** |     **243** |             **273** |
 
-Of the 277 omissions, 27 are identities and 250 are playable deck cards. The
+Of the 273 omissions, 27 are identities and 246 are playable deck cards. The
 five Midnight Sun omissions are:
 
 - 33001 Esâ Afontov: Eco-Insurrectionist
