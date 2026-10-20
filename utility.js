@@ -3764,8 +3764,23 @@ function AdditionalRunCosts(server) {
     credits: ModifyingTriggers("modifyRunCreditCost", server, 0),
   };
 }
-function CanPayAdditionalRunCosts(server, clicksRequired = 0, creditsRequired = 0) {
+function CanPayAdditionalRunCosts(server, clicksRequired = 0, creditsRequired = 0, event = null) {
   var cost = AdditionalRunCosts(server);
+  if (event && creditsRequired > 0) {
+    // FullCheckPlay checks event affordability separately. Reserve only the
+    // part of its play cost that needs credits also usable to initiate a run.
+    // Event-only sources (e.g. Prepaid VoicePAD) cannot pay the run-entry tax.
+    var eventOnlyCredits = 0;
+    if (CreditPoolCanBeUsed(runner, "spend", "playing", event) &&
+        !CreditPoolCanBeUsed(runner, "spend", "initiating a run"))
+      eventOnlyCredits += runner.creditPool;
+    ActiveCards(runner).forEach(function (source) {
+      if (typeof source.credits != "undefined" && typeof source.canUseCredits == "function" &&
+          source.canUseCredits("playing", event) && !source.canUseCredits("initiating a run", null))
+        eventOnlyCredits += source.credits;
+    });
+    creditsRequired = Math.max(0, creditsRequired - eventOnlyCredits);
+  }
   return CheckClicks(runner, cost.clicks + clicksRequired) &&
     CheckCredits(runner, cost.credits + creditsRequired, "initiating a run");
 }
@@ -4332,7 +4347,7 @@ function FullCheckPlay(card, requireActionPhase = true) {
         if (typeof card.Enumerate !== "undefined") {
           var choices = card.Enumerate.call(card);
           if (card.player == runner && CheckSubType(card, "Run")) choices = choices.filter(function (choice) {
-            return !choice.server || CanPayAdditionalRunCosts(choice.server, clicksRequired, playCost);
+            return !choice.server || CanPayAdditionalRunCosts(choice.server, clicksRequired, playCost, card);
           });
           if (choices.length > 0) return choices; //valid by Enumerate
         } else return [{}]; //no Enumerate, assumed valid

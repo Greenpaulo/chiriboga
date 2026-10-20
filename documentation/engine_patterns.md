@@ -914,7 +914,12 @@ snapshot (CR 10.13.2), including the requirement's server modifiers.
 `modifyRunClickCost` and `modifyRunCreditCost` hooks (each `Resolve(server)`
 returns a nonnegative cost). These hooks must be read-only and safe during
 hypothetical run calculations. `CanPayAdditionalRunCosts(server, clicksRequired,
-creditsRequired)` reserves the initiating action/event costs as well.
+creditsRequired, event = null)` reserves the initiating action/event costs as
+well. When checking a run event, `FullCheckPlay` first verifies its play cost
+with `"playing", event`, then passes the event to this helper. Event-only
+credits can cover that play cost but cannot pay additional run costs; credits
+usable for both payments are reserved once, so shared funds are not counted
+twice.
 `MakeRun(server, ignoreAdditionalCosts = false)` pays additional costs before
 setting the attacked server or granting bad-publicity credits; it returns false
 if payment is impossible. Recalculating an ongoing run owes no entry costs.

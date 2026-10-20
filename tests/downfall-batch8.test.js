@@ -150,6 +150,50 @@ c.currentPhase = {identifier: 'Runner 1.3'};
 assert.strictEqual(c.FullCheckPlay(event), null, 'event and run costs must both be covered');
 runner.creditPool = 3;
 assert(c.FullCheckPlay(event));
+// Run-event play costs can use event-only credits; run-entry costs cannot.
+load('sets/systemupdate2021.js');
+const laundry = put(Object.assign({}, c.cardSet[31037]), runner.grip);
+const prepaid = put(Object.assign({}, c.cardSet[31038], {credits: 1}), runner.rig.hardware);
+const laundryCanRun = () => (c.FullCheckPlay(laundry) || []).some(choice => choice.server === home);
+cold.power = 0; runner.creditPool = 1;
+assert(laundryCanRun(),
+  'Prepaid VoicePAD plus one pool credit can play Dirty Laundry without a run tax');
+cold.power = 2; runner.clickTracker = 3;
+assert(!laundryCanRun(),
+  'event-only credits cannot pay the additional run cost');
+runner.creditPool = 2;
+assert(!laundryCanRun(),
+  'pool credits cannot be counted for both the event and the run tax');
+runner.creditPool = 3;
+assert(laundryCanRun(),
+  'Prepaid pays one event credit, leaving two pool credits for the run tax');
+runner.clickTracker = 2;
+assert(!laundryCanRun(),
+  'event funding does not waive the additional click cost');
+runner.clickTracker = 3; prepaid.credits = 0;
+assert(!laundryCanRun(),
+  'an exhausted Prepaid does not contribute to the event');
+prepaid.credits = 1;
+prepaid.canUseCredits = () => true; runner.creditPool = 2;
+assert(!laundryCanRun(),
+  'hosted credits eligible for both costs cannot be counted twice either');
+prepaid.canUseCredits = c.cardSet[31038].canUseCredits;
+runner.creditPool = 3; runner.AI = {};
+c.SpendClicks(runner, 1);
+let laundryStarted = false;
+c.SpendCredits(runner, 2, 'playing', laundry, () => {
+  assert.strictEqual(prepaid.credits, 0);
+  assert.strictEqual(runner.creditPool, 2, 'event payment leaves enough pool credits for the run');
+  laundry.Resolve({server: home});
+  laundryStarted = true;
+});
+assert(laundryStarted);
+assert.strictEqual(c.attackedServer, home);
+assert.strictEqual(runner.creditPool, 0, 'the additional run tax is paid separately');
+assert.strictEqual(runner.clickTracker, 0);
+runner.AI = null; c.attackedServer = null;
+c.currentPhase = {identifier: 'Runner 1.3'}; runner.clickTracker = 3;
+runner.rig.hardware = []; runner.grip = []; runner.creditPool = 3;
 c.phases.runnerActionMain.Resolve.run({server: home});
 assert.strictEqual(runner.clickTracker, 0, 'basic click plus both extra clicks');
 assert.strictEqual(runner.creditPool, 1);

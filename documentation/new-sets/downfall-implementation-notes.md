@@ -524,3 +524,34 @@ generated card status checks passed. Final `node tests/run-all-tests.js` passed
 all 109 test files (exit 0), including Corp decision fixtures, decision snapshots
 and integration tests. Output and status were saved separately in
 `/private/tmp/pr67-merge-tests.log` and `/private/tmp/pr67-merge-tests.status`.
+
+## Batch 8 run-event payment repair — 2026-10-20
+
+Bounded required repair for Cold Site Server (26038) and shared run-event
+legality: the additional-run-cost check reserved the event's entire play cost
+using only sources eligible for initiating a run. This rejected Dirty Laundry
+with one pool credit plus one credit on Prepaid VoicePAD, even without a tax.
+The new regression failed on that exact assertion before the repair.
+
+`FullCheckPlay` still checks event affordability with its actual payment
+purpose and card. The run-entry helper now reserves only the event cost left
+after event-only sources, preserving separate run-entry payment restrictions.
+Credits eligible for both costs are counted once. No AI hooks or card
+definitions changed; the House of Knives calculator correction is retained.
+
+Permanent evidence in `tests/downfall-batch8.test.js` covers Prepaid-funded
+Dirty Laundry without a tax, sufficient versus insufficient combined funds,
+exhausted Prepaid credits, shared hosted credits, additional click costs, and
+actual event payment followed by run initiation and payment of the tax.
+Batch 3's first-run tax/second-run waiver regression also passes. The other
+batch 8 cards and optional strategy queue are outside this repair's scope.
+Shared consumers revalidated include ordinary run actions, run events from
+System Update 2021, and Always Have a Backup Plan from batch 3.
+
+Focused batch 8/batch 3 checks and required shared format checks pass on Node
+20.19.0. Final `node tests/run-all-tests.js` passed all 109 files (exit 0),
+including Corp decision fixtures, decision snapshots and integration tests.
+Output/status are saved to
+`/private/tmp/chiriboga-run-event-payment-tests.log` and
+`/private/tmp/chiriboga-run-event-payment-tests.status`. Independent review of
+this bounded repair remains required; optional batch strategy work is unchanged.

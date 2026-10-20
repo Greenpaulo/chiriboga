@@ -82,7 +82,8 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**8 Pending** (optional strategy work), 0 In progress, 0 Blocked.
+**8 Pending** (optional strategy work), 0 In progress, 0 Blocked,
+1 Awaiting review (bounded run-entry repair).
 
 Implementation is complete for batches 1–8; no independent batch review is recorded.
 PR-comment remediation is not an independent strategic review.
@@ -98,10 +99,13 @@ Preserve subsequent review verdicts and ownership.
 | 6 | 26024–26030 | Pending | — | Optional strategy: Pelangi counter conservation/type choice, Artist install timing, Direct Access valuation, Rejig target value and Whistleblower timing. [Notes](downfall-implementation-notes.md#batch-6--2602426030). |
 | 7 | 26031–26035 | Pending | — | Optional strategy: MirrorMorph action ordering, Architect Deployment Test install value, draw/credit asset timing and Hagen program-trash value. [Notes](downfall-implementation-notes.md#batch-7--2603126035). |
 | 8 | 26036–26040 | Pending | — | Compare operation mode sequences, Cold Site setup budget, Hyoubu spare-click value and Yagi-Uda swap/overadvancement plans; see implementation notes. |
+| 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
 
 ## Optimisation log
 
-No optimisation recorded.
+| Date | Batch / IDs | Finding / scope | Repairs and evidence | Remaining review scope |
+| ---- | ----------- | --------------- | -------------------- | ---------------------- |
+| 2026-10-20 | 8 / 26038 shared dependency | Required run-event affordability repair | Preserve event-only credits, reserve shared funds once; focused batch 8/3 and required shared checks pass; full suite passes all 109 files on Node 20.19.0. [Notes](downfall-implementation-notes.md#batch-8-run-event-payment-repair--2026-10-20). | Independently review run-event funding and Cold Site costs; broader optional strategy work remains Pending. |
 
 ## Set-wide review status
 
