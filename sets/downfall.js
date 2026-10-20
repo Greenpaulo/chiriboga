@@ -1,6 +1,7 @@
 //CARD DEFINITIONS FOR DOWNFALL
 // Batch 1 ELO: Trash or Busto ranking, 2026-10-16; preserve existing values elsewhere.
-// Pelangi ELO: https://trash-or-busto.herokuapp.com/ranking, checked 2026-10-20.
+// Batches 2, 4 and 6 missing ELO values (including Pelangi):
+// https://trash-or-busto.herokuapp.com/ranking, checked 2026-10-20; existing ratings preserved.
 setIdentifiers.push("df");
 
 //Chisel (26003)
@@ -99,6 +100,7 @@ cardSet[26003] = {
 //When your turn begins, gain 1 credit.
 cardSet[26026] = {
   title: "Rezeki",
+  elo: 1981,
   imageFile: "26026.png",
   player: runner,
   faction: "Shaper",
@@ -138,6 +140,7 @@ cardSet[26026] = {
 //The first time each turn this program fully breaks a piece of ice, gain 2 credits.
 cardSet[26016] = {
   title: "Bukhgalter",
+  elo: 1947,
   imageFile: "26016.png",
   player: runner,
   faction: "Criminal",
@@ -536,6 +539,7 @@ cardSet[26004] = {
 // 1[c]: +1 strength.
 cardSet[26005] = {
   title: "Utae",
+  elo: 1205,
   imageFile: "26005.png",
   player: runner,
   faction: "Anarch",
@@ -714,6 +718,7 @@ cardSet[26005] = {
 // When your turn begins, remove this resource from the game. Choose a server protected by ice. The Corp may trash 1 piece of ice protecting that server. If they do not, the first time this turn you breach either R&D or HQ, access 2 additional cards.
 cardSet[26006] = {
   title: "Climactic Showdown",
+  elo: 1194,
   imageFile: "26006.png",
   player: runner,
   faction: "Anarch",
@@ -841,6 +846,7 @@ cardSet[26006] = {
 // When your turn ends, if there are 3 or more hosted credits, you must pay 1[c] or trash this resource.
 cardSet[26007] = {
   title: "Fencer Fueno",
+  elo: 1557,
   imageFile: "26007.png",
   player: runner,
   faction: "Anarch",
@@ -915,6 +921,7 @@ cardSet[26007] = {
 // When your turn begins, you may remove any 2 virus counters from your installed cards. If you do, draw 2 cards unless the Corp trashes the top card of R&D.
 cardSet[26008] = {
   title: "The Nihilist",
+  elo: 1364,
   imageFile: "26008.png",
   player: runner,
   faction: "Anarch",
@@ -1033,6 +1040,7 @@ cardSet[26008] = {
 // When your turn ends, if there are 3 or more hosted credits, you must take 1 tag or trash this resource.
 cardSet[26009] = {
   title: "Trickster Taka",
+  elo: 1659,
   imageFile: "26009.png",
   player: runner,
   faction: "Anarch",
@@ -1489,6 +1497,7 @@ cardSet[26014] = {
 // Limit 1 console per player.
 cardSet[26015] = {
   title: "Masterwork (v37)",
+  elo: 1576,
   imageFile: "26015.png",
   player: runner,
   faction: "Criminal",
@@ -1520,14 +1529,24 @@ cardSet[26015] = {
     },
     automatic: true,
   },
+  // Evaluate a hypothetical run-start install without leaking its surcharge.
+  _withExtraCostCard: function (card, evaluate) {
+    var previous = this.extraCostCard;
+    this.extraCostCard = card;
+    try {
+      return evaluate(card);
+    } finally {
+      this.extraCostCard = previous;
+    }
+  },
   _runInstallChoices: function () {
     var ret = [];
     for (var i = 0; i < runner.grip.length; i++) {
       if (!CheckCardType(runner.grip[i], ["hardware"])) continue;
-      this.extraCostCard = runner.grip[i]; //so affordability includes the extra 1[c]
-      ret = ret.concat(ChoicesCardInstall(runner.grip[i]));
+      ret = ret.concat(this._withExtraCostCard(runner.grip[i], function (card) {
+        return ChoicesCardInstall(card);
+      }));
     }
-    this.extraCostCard = null;
     return ret;
   },
   responseOnRunBegins: {
@@ -1562,9 +1581,10 @@ cardSet[26015] = {
       var card = choices[i].card;
       if (!worthKeeping.includes(card)) continue;
       if (typeof card.AIPreferredInstallChoice == "function" && card.AIPreferredInstallChoice([choices[i]]) < 0) continue;
-      this.extraCostCard = card;
-      var cost = InstallCost(card, choices[i].host || null);
-      this.extraCostCard = null;
+      var host = choices[i].host || null;
+      var cost = this._withExtraCostCard(card, function (target) {
+        return InstallCost(target, host);
+      });
       if (AvailableCredits(runner, "installing", card) - cost < runCreditCost) continue;
       return choices[i];
     }
@@ -1577,6 +1597,7 @@ cardSet[26015] = {
 // [trash], X hosted power counters: Derez the ice you are encountering if its strength is X or less. Take 1 tag.
 cardSet[26017] = {
   title: "“Baklan” Bochkin",
+  elo: 1448,
   imageFile: "26017.png",
   player: runner,
   faction: "Criminal",
@@ -1649,6 +1670,7 @@ cardSet[26017] = {
 // [interrupt] → The first time each turn you would draw any number of cards, look at the top X cards of your stack. Add 1 of those cards to the bottom of your stack. X is equal to the number of cards you would draw plus 1.
 cardSet[26018] = {
   title: "The Class Act",
+  elo: 1942,
   imageFile: "26018.png",
   player: runner,
   faction: "Criminal",
@@ -2189,6 +2211,7 @@ cardSet[26023] = {
 // 2[c]: +2 strength.
 cardSet[26024] = {
   title: "Gauss",
+  elo: 1639,
   imageFile: "26024.png",
   player: runner,
   faction: "Shaper",
@@ -2488,6 +2511,7 @@ cardSet[26025] = {
 // Once per turn → [click]: Install 1 program or piece of hardware from your grip, paying 1[c] less.
 cardSet[26027] = {
   title: "The Artist",
+  elo: 1334,
   imageFile: "26027.png",
   player: runner,
   faction: "Shaper",
@@ -2526,12 +2550,15 @@ cardSet[26027] = {
     },
   },
   InstallChoices: function () {
+    var previous = this._discountActive;
     this._discountActive = true;
-    var choices = ChoicesHandInstall(runner, false, function (card) {
-      return CheckCardType(card, ["program", "hardware"]);
-    });
-    this._discountActive = false;
-    return choices;
+    try {
+      return ChoicesHandInstall(runner, false, function (card) {
+        return CheckCardType(card, ["program", "hardware"]);
+      });
+    } finally {
+      this._discountActive = previous;
+    }
   },
   abilities: [
     {
@@ -2609,6 +2636,7 @@ cardSet[26027] = {
 // Run any server. When that run ends, you may shuffle this event into your stack.
 cardSet[26028] = {
   title: "Direct Access",
+  elo: 1337,
   imageFile: "26028.png",
   player: runner,
   faction: "Neutral",
@@ -2701,6 +2729,7 @@ cardSet[26028] = {
 // Install 1 program or piece of hardware from your grip, paying X[c] less. X is equal to the printed install cost of the card you added to your grip.
 cardSet[26029] = {
   title: "Rejig",
+  elo: 1552,
   imageFile: "26029.png",
   player: runner,
   faction: "Neutral",
@@ -2815,6 +2844,7 @@ cardSet[26029] = {
 // Whenever you make a successful run, you may trash this resource to choose a card name. The next time this run you access an agenda with the chosen name, steal it, ignoring all costs. (You are no longer accessing it.)
 cardSet[26030] = {
   title: "Whistleblower",
+  elo: 1164,
   imageFile: "26030.png",
   player: runner,
   faction: "Neutral",

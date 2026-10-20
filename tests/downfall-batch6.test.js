@@ -177,6 +177,30 @@ runner.creditPool = 2;
 let opts = artist.abilities[1].Enumerate.call(artist);
 same(opts.map(o => o.card.title), ['Breaker'], 'programs/hardware only, affordable with the discount');
 assert.strictEqual(c.InstallCost(breaker), 3, 'discount only through the ability');
+const originalHandInstall = c.ChoicesHandInstall;
+const installFailure = new Error('install enumeration failed');
+try {
+  for (const prior of [false, true]) for (const shouldThrow of [false, true]) {
+    artist._discountActive = prior;
+    let evaluated = false;
+    c.ChoicesHandInstall = () => {
+      evaluated = true;
+      assert.strictEqual(artist._discountActive, true, 'discount active during enumeration');
+      assert.strictEqual(c.InstallCost(breaker), 2, 'temporary discount reaches the cost evaluator');
+      if (shouldThrow) throw installFailure;
+      return [{card: breaker, host: null}];
+    };
+    if (shouldThrow)
+      assert.throws(() => artist.AIInstallDiscountAbility(breaker, null), error => error === installFailure);
+    else assert.strictEqual(artist.InstallChoices()[0].card, breaker);
+    assert(evaluated, 'discounted install enumeration was reached');
+    assert.strictEqual(artist._discountActive, prior, 'Artist restores the exact previous discount state');
+  }
+} finally {
+  c.ChoicesHandInstall = originalHandInstall;
+  artist._discountActive = false;
+}
+assert.strictEqual(c.InstallCost(breaker), 3, 'failed planning leaves no live discount');
 // AI: an install decision becomes the Artist ability
 c.currentPhase = c.phases.runnerActionMain;
 runner.AI.preferred = {command: 'install', cardToInstall: breaker, hostToInstallTo: null};

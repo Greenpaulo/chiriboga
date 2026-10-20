@@ -170,6 +170,40 @@ test('Runner AI installs at run start only while the planned run stays affordabl
   assert.strictEqual(choose(0), null, 'does not install hardware it would not keep');
 });
 
+for (const helper of ['_runInstallChoices', '_aiRunInstallChoice']) {
+  test('Masterwork restores extraCostCard after ' + helper + ' returns or throws', () => {
+    setUpBoard({installed: [ID.Masterwork], grip: [ID.T400, ID.DocklandsPass], credits: 5, ai: true});
+    const mw = run('runner.rig.hardware[0]');
+    const grip = run('runner.grip');
+    const ai = run('runner.AI');
+    run('attackedServer = corp.HQ; runner.AI.cachedPathServer = corp.HQ; runner.AI.cachedBestPath = [];');
+    ai._cardsInHandWorthKeeping = () => grip;
+    const evaluator = helper === '_runInstallChoices' ? 'ChoicesCardInstall' : 'InstallCost';
+    const original = context[evaluator];
+    const failure = new Error('install evaluation failed');
+    try {
+      for (const prior of [null, grip[1]]) for (const shouldThrow of [false, true]) {
+        mw.extraCostCard = prior;
+        let calls = 0;
+        context[evaluator] = target => {
+          calls++;
+          assert.strictEqual(mw.extraCostCard, target, 'extra cost applies during evaluation');
+          if (shouldThrow) throw failure;
+          return evaluator === 'InstallCost' ? 3 : [{card: target}];
+        };
+        const evaluate = () => mw[helper]([{card: grip[0]}]);
+        if (shouldThrow) assert.throws(evaluate, error => error === failure);
+        else assert(evaluate(), 'normal evaluation returns its choices');
+        assert(calls > 0, 'the temporary-cost evaluator was reached');
+        assert.strictEqual(mw.extraCostCard, prior, 'the exact previous state is restored');
+      }
+    } finally {
+      context[evaluator] = original;
+      mw.extraCostCard = null;
+    }
+  });
+}
+
 // ---------------- Bukhgalter ----------------
 function encounter(iceIdx = 0) {
   run(`attackedServer = corp.HQ; approachIce = ${iceIdx}; encountering = true;

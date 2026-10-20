@@ -2776,7 +2776,9 @@ if (!runner.AI || runner.AI.rc !== rc) {
   option list includes `trigger`, the largest offered discount replaces the
   install with a trigger preference `{cardToTrigger, abilityAlt}`. The offer's
   `select()` records the target, and the ability's `Enumerate` then lists only
-  that card. Offers must check that the ability can be used now.
+  that card. Offers must check that the ability can be used now. The Artist’s
+  install enumeration restores the prior temporary discount state in `finally`,
+  including when a legality or cost hook throws.
 - Direct Access uses `AIRunEventModify`/`AIRunEventRestore` to blank both
   identities while its run is calculated. `AIRunEventExtraPotential` returns
   0.2 for a worthwhile run only when the Corp identity has run-time effects and

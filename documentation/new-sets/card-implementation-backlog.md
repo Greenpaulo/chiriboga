@@ -51,41 +51,21 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
-Batch 1 (26001–26004) now has working gameplay and baseline AI. Focused
+Batches 1–7 (26001–26035) now have working gameplay and baseline AI. Focused
 real-consumer evidence and specific deeper-strategy work are recorded in
 [the implementation notes](downfall-implementation-notes.md) and the active
-tracker's separate optimisation queue. Remaining batches are unverified.
+tracker's separate optimisation queue. Batches 8–13 remain unverified.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
 notes that printed behaviour is absent.
 
-Runner cards:
+All previously listed Runner gameplay gaps were closed in batches 1–6.
+Remaining recorded Corp gaps:
 
-| ID    | Card                             | Known gap                              |
-| ----- | -------------------------------- | -------------------------------------- |
-| 26005 | Utae                             | Break and strength abilities absent    |
-| 26006 | Climactic Showdown               | Triggers and replacement effect absent |
-| 26007 | Fencer Fueno                     | Hosted-credit and turn triggers absent |
-| 26008 | The Nihilist                     | Virus/draw triggers absent             |
-| 26009 | Trickster Taka                   | Hosted-credit and turn triggers absent |
-| 26015 | Masterwork (v37)                 | Console abilities absent               |
-| 26017 | “Baklan” Bochkin                 | Encounter/counter ability absent       |
-| 26018 | The Class Act                    | Draw abilities absent                  |
-| 26019 | Lat: Ethical Freelancer          | Identity trigger absent                |
-| 26020 | In the Groove                    | Empty event effect                     |
-| 26021 | Khusyuk                          | Empty run-event effect                 |
-| 26025 | Pelangi                          | Counter and subtype ability absent     |
-| 26028 | Direct Access                    | Empty run-event effect                 |
-| 26029 | Rejig                            | Empty event effect                     |
-| 26030 | Whistleblower                    | Access ability absent                  |
-
-Corp cards:
 
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26031 | MirrorMorph: Endless Iteration     | Identity ability absent                                          |
-| 26032 | Architect Deployment Test          | On-score effect is a commented stub                              |
 | 26038 | Cold Site Server                   | Abilities and run cost absent                                    |
 | 26039 | Hyoubu Institute: Absolute Clarity | Identity abilities absent                                        |
 | 26040 | Project Yagi-Uda                   | On-score and agenda-counter ability absent                       |
@@ -185,13 +165,15 @@ finished before their AI behaviour is assessed.
 
 Every completed definition should have a finite numeric `elo` copied from Trash
 or Busto. This audit checks numeric presence only; it does not yet verify each
-existing number against its dated source snapshot.
+existing number against its dated source snapshot. Downfall’s row was refreshed
+for PR #66 on 2026-10-20; all 35 definitions in completed batches 1–7 have
+numeric ratings. Other rows retain the earlier audit.
 
 | Set                         | Definitions | Numeric ELO | Missing numeric ELO |
 | --------------------------- | ----------: | ----------: | ------------------: |
 | System Gateway              |          77 |          77 |                   0 |
 | System Update 2021          |          82 |          82 |                   0 |
-| Downfall                    |          65 |           4 |                  61 |
+| Downfall                    |          65 |          35 |                  30 |
 | Midnight Sun                |          12 |           7 |                   5 |
 | Parhelion                   |           4 |           0 |                   4 |
 | The Automata Initiative     |           3 |           0 |                   3 |
@@ -201,9 +183,9 @@ existing number against its dated source snapshot.
 | Rebellion Without Rehearsal |           2 |           0 |                   2 |
 | Core Set                    |          62 |           0 |                  62 |
 | Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **516** |     **243** |             **273** |
+| **Total**                   |     **516** |     **274** |             **242** |
 
-Of the 273 omissions, 27 are identities and 246 are playable deck cards. The
+Of the 242 omissions, 24 are identities and 218 are playable deck cards. The
 five Midnight Sun omissions are:
 
 - 33001 Esâ Afontov: Eco-Insurrectionist

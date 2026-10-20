@@ -83,9 +83,33 @@ Edited JavaScript syntax checks and `git diff --check` pass. The first full
 run identified the old tracker-test assumption and an empty-trash context
 lookup; both were repaired before the passing full run.
 
-Batch 1 is Complete. Batch 2 (26005–26009) is next; the set remains In progress,
-hidden and untested. Optional strategy work is queued separately. No commits
-or pushes were made.
+Batch 1 is Complete. At this batch’s handoff, batch 2 was next. The current
+implementation queue is maintained in [the tracker](current-set-implementation.md);
+the set remains In progress, hidden and untested.
+
+## Batch 2 — 26005–26009
+
+Reconciled against PR #66 on 2026-10-20. Focused evidence:
+`tests/downfall-batch2.test.js`, using the real engine, selectors and run
+calculator. The detailed baseline policies are in
+[Downfall Batch 2 card hooks](../ai.md#downfall-batch-2-card-hooks).
+
+- Utae pays X once for its once-per-run multi-break; the other break requires
+  three installed Virtual resources. Trickster Taka funds programs during runs;
+  Fencer Fueno funds trash/steal costs after a successful run.
+- Climactic Showdown removes itself before choosing a protected server. Its
+  optional Corp trash prevents the lingering HQ/R&D access bonus. The Nihilist
+  spends virus counters before the Corp chooses an R&D trash or Runner draw.
+  Both Corp-chosen trashes explicitly retain Corp attribution when their
+  decision returns to Runner priority; the real phase flow is covered.
+- Missing ELO values were copied from the published Trash or Busto ranking on
+  2026-10-20: Utae 1205, Showdown 1194, Fueno 1557, Nihilist 1364, Taka 1659.
+
+### Batch 2 optimisation
+
+Queue deeper Showdown server/trash valuation, Utae break sequencing,
+hosted-credit/tag trade-offs and use of other programs’ Nihilist counters.
+Current policies use local thresholds; no independent review is recorded.
 
 ## Batch 3 — 26010–26014
 
@@ -219,12 +243,12 @@ and Runner AI).
 - The Class Act bottoming choice does not plan around tutors or known
   upcoming needs.
 
-### Open
+### Batch 4 record reconciliation
 
-- ELO for 26015–26018 not set: the Trash or Busto lookup was not available in
-  this session.
-- Tracker and backlog rows not updated: on `main` the tracker still describes
-  Vantage Point; the Downfall transition is in the uncommitted batch 1 work.
+The missing ELO values for 26015–26018 were backfilled from the published
+Trash or Busto ranking on 2026-10-20: Masterwork 1576, Bukhgalter 1947,
+Baklan 1448 and The Class Act 1942. The tracker and gameplay backlog now
+record this batch’s implementation; optional strategy work remains queued.
 
 ## Batch 5 — 26019–26023
 
@@ -287,9 +311,71 @@ In the Groove 1477, Khusyuk 1491, Spec Work 1585, Supercorridor 1295.
 
 ### Open
 
-- Tracker and backlog rows not updated: on `main` the tracker still describes
-  Vantage Point; the Downfall tracker exists only on the batch 1 branch. Mark
-  batch 5 complete there when the branches merge.
 - `AIPreferredPlayChoice` on Sell Out (36011) is declared `(card, choices)` but
   is called with `(choices)`; it would throw if reached through
   `_wastefulToPlay`. Not changed here.
+
+
+## Batch 6 — 26024–26030
+
+Reconciled against PR #66 on 2026-10-20. Focused evidence:
+`tests/downfall-batch6.test.js`, using the real engine, selectors and run
+calculator. See [Downfall Batch 6 card hooks](../ai.md#downfall-batch-6-card-hooks)
+for the implemented baseline policies and consumers.
+
+- Gauss gains strength for its install turn. Pelangi adds an encounter subtype
+  by spending a virus counter once per turn; the run calculator and live
+  breaker choices follow that subtype. Rezeki gains at Runner turn start.
+- The Artist’s credit and discounted-install abilities have separate per-turn
+  limits. Its install enumeration restores the prior temporary discount in
+  `finally`, including failed AI planning and nested evaluation.
+- Direct Access blanks both identities for its run and restores hypothetical
+  AI state. Rejig returns a card as a cost and uses its printed cost as an
+  install discount. Whistleblower’s named-agenda effect survives its trash
+  and expires at run end; its AI uses known reachable agendas.
+- Missing ELO values were copied from the published Trash or Busto ranking on
+  2026-10-20: Gauss 1639, Pelangi 1604, Rezeki 1981, The Artist 1334,
+  Direct Access 1337, Rejig 1552 and Whistleblower 1164.
+
+### Batch 6 optimisation
+
+Queue Pelangi counter conservation/type selection, Artist install timing,
+Direct Access valuation, Rejig target value and Whistleblower timing. Current
+policies are baseline choices; no independent review is recorded.
+
+## Batch 7 — 26031–26035
+
+Reconciled against PR #66 on 2026-10-20. Focused evidence:
+`tests/downfall-batch7.test.js`, covering real engine phases, trash attribution
+and Corp AI selectors. See
+[Downfall Batch 7 card hooks](../ai.md#downfall-batch-7-card-hooks).
+
+- MirrorMorph records completed Corp actions and offers a credit or a different
+  extra action after three different actions. The post-action response fires
+  once; the restricted extra action goes through the normal main phase.
+- Architect Deployment Test looks at the top five R&D cards and optionally
+  installs and rezzes one asset, upgrade or ice; the AI ranks legal install
+  choices through the existing Corp install evaluator.
+- Calvin B4L3Y and Nanoetching Matrix have once-per-turn click abilities. Their
+  optional trash responses require the Runner to trash the rezzed asset.
+  Calvin’s AI draw ability keeps R&D above zero.
+- Hagen loses strength per installed icebreaker and can trash only a program
+  without a Decoder, Fracter or Killer subtype before its end-the-run subroutine.
+
+### Batch 7 optimisation
+
+Queue MirrorMorph action ordering, Architect Deployment Test install value,
+asset activation timing and Hagen program-trash value. Independent review and
+set-wide review remain unrequested in the tracker.
+
+## PR #66 record reconciliation — 2026-10-20
+
+Batches 2 and 4–7 were implemented in this PR but absent from the completion
+and optimisation logs. The tracker now records seven completed batches and
+six pending batches, with batch 8 selected next. Reconciliation dates describe
+this verification, not reconstructed original implementation dates. All six
+batch 2–7 focused test files pass on Node 20.19.0. Masterwork’s hypothetical
+surcharge helpers and The Artist’s discounted enumeration restore their prior
+state on success and exceptions; regressions cover both ordinary and already
+active state. The asynchronous surcharge used during an actual Masterwork
+install remains until its existing completion/cancel callbacks clear it.
