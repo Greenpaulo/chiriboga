@@ -1,4 +1,5 @@
 //CARD DEFINITIONS FOR DOWNFALL
+// Batch 1 ELO: Trash or Busto ranking, 2026-10-16; preserve existing values elsewhere.
 setIdentifiers.push("df");
 
 //Chisel (26003)
@@ -10,6 +11,7 @@ setIdentifiers.push("df");
 cardSet[26003] = {
   title: "Chisel",
   imageFile: "26003.png",
+  elo: 1663,
   player: runner,
   faction: "Anarch",
   influence: 4,
@@ -17,145 +19,77 @@ cardSet[26003] = {
   subTypes: ["Virus", "Trojan"],
   installCost: 2,
   memoryCost: 1,
-
-  //Install only on a piece of ice.
-  installOnlyOn: function (card) {
-    if (!CheckCardType(card, ["ice"])) return false;
-    return true;
-  },
-
-  //Host ice gets -1 strength for each hosted virus counter.
+  encounterResolved: false,
+  installOnlyOn: function (card) { return CheckCardType(card, ["ice"]); },
   modifyStrength: {
     Resolve: function (card) {
-      //Only affect host ice, with null check for when host is trashed
-      if (this.host && card == this.host) {
-        return -Counters(this, "virus");
-      }
-      return 0; //no modification to strength
+      return this.host && card === this.host && !card.strengthCannotBeLowered ? -Counters(this, "virus") : 0;
     },
   },
-
-  //Whenever you encounter host ice, if its strength is 0 or less, trash it.
-  //Otherwise, place 1 virus counter on this program.
+  automaticOnEncounter: {
+    Resolve: function () { this.encounterResolved = false; },
+  },
   responseOnEncounter: {
-    Enumerate: function (card) {
-      //Only trigger when encountering host ice
-      if (!CheckEncounter()) return [];
-      if (!this.host) return [];
-      if (attackedServer.ice[approachIce] != this.host) return [];
-      return [{}]; //Mandatory trigger - one option
+    Enumerate: function () {
+      if (!CheckEncounter() || !this.host || GetApproachEncounterIce() !== this.host) return [];
+      return [{}];
     },
-    Resolve: function (params) {
-      var hostIce = this.host;
-      if (!hostIce) return; //Safety check
-      var iceStrength = Strength(hostIce);
-
-      if (iceStrength <= 0) {
-        //Trash the host ice
-        Log(GetTitle(this) + " trashes " + GetTitle(hostIce));
-        Trash(hostIce, false);
-        //End the encounter since the ice is gone
-        //The runner will pass this position per CR rule 8.5.10
-        encountering = false;
-      } else {
-        //Place 1 virus counter
-        AddCounters(this, "virus", 1);
-      }
+    Resolve: function () {
+      this.encounterResolved = true;
+      if (Strength(this.host) <= 0) {
+        if (CheckTrash(this.host)) Trash(this.host, true, null, this);
+      } else AddCounters(this, "virus", 1);
     },
-    text: "Chisel triggers",
-    //Note: NOT automatic because Trash() causes phase changes for responseOnWouldTrash
+    text: "Chisel: trash host ice or place 1 virus counter",
   },
-
-  //AI: Marks Chisel as a special breaker (non-icebreaker that deals with ice)
+  responseOnEncounterEnds: {
+    Resolve: function () { this.encounterResolved = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _encounterPending: function (ice) {
+    return !(CheckEncounter() && GetApproachEncounterIce() === ice && this.encounterResolved);
+  },
   AISpecialBreaker: true,
-
-  //AI: Check if Chisel can handle specific ice (will trash it on encounter)
-  AIMatchingBreakerInstalled: function (iceCard) {
-    if (this.host && this.host == iceCard) {
-      //Check if Chisel will trash the ice (strength <= 0 after virus reduction)
-      var iceStrength = Strength(iceCard);
-      if (iceStrength <= 0) {
-        return this; //Chisel will trash this ice
-      }
-    }
+  AIMatchingBreakerInstalled: function (ice) {
+    if (ice === this.host && Strength(ice) <= 0 && CheckTrash(ice)) return this;
     return null;
   },
-
-  //AI: Prefer to install on high-value ice
-  AIPreferredInstallChoice: function (choices) {
-    //Don't install on ice that already has Chisel or similar trojans
-    var htsi = runner.AI._highestThreatScoreIce(
-      [this].concat(runner.AI._iceHostingSpecialBreakers()),
-    );
-
-    //Find the best target
-    var bestIndex = -1;
-    var bestValue = 0;
-
-    for (var i = 0; i < choices.length; i++) {
-      var targetIce = choices[i].host;
-      if (!targetIce) continue;
-
-      //Calculate value based on ice strength and rez cost
-      var value = 0;
-
-      //Prefer ice we know about (rezzed or known)
-      if (targetIce.rezzed || targetIce.knownToRunner) {
-        var iceStrength = Strength(targetIce);
-        var iceCost = RezCost(targetIce);
-
-        //Value based on how hard the ice is to deal with
-        value = iceStrength + iceCost / 2;
-
-        //Bonus for ice we can destroy quickly (low strength)
-        if (iceStrength <= 3) {
-          value += 3;
-        }
-
-        //Bonus for expensive ice
-        if (iceCost >= 5) {
-          value += 2;
-        }
-      } else {
-        //Unknown ice - moderate value
-        value = 2;
-      }
-
-      //Prefer the highest threat score ice if available
-      if (targetIce == htsi) {
-        value += 5;
-      }
-
-      if (value > bestValue) {
-        bestValue = value;
-        bestIndex = i;
-      }
+  AIModifyIceAI: function (iceAI) {
+    if (!CheckHasAbilities(this) || !iceAI.knownToEvaluator || iceAI.ice !== this.host || !this._encounterPending(iceAI.ice)) return iceAI;
+    // Evaluate the condition BEFORE placing a counter: reaching zero this
+    // encounter does not trash the ice until the next encounter.
+    if (iceAI.strength <= 0) {
+      if (CheckTrash(iceAI.ice)) iceAI.sr = [];
+    } else if (!iceAI.ice.strengthCannotBeLowered) {
+      iceAI.strength = Math.max(0, iceAI.strength - 1);
     }
-
-    //Only install if we found a reasonable target
-    if (bestValue >= 2) {
-      return bestIndex;
-    }
-
-    return -1; //don't install if no good target
+    return iceAI;
   },
-
-  AIWorthKeeping: function (installedRunnerCards, spareMU) {
-    //Worth keeping if there's rezzed ice to target
-    var installedCorpCards = InstalledCards(corp);
-    for (var i = 0; i < installedCorpCards.length; i++) {
-      var card = installedCorpCards[i];
-      if (CheckCardType(card, ["ice"]) && (card.rezzed || card.knownToRunner)) {
-        return true;
+  AIReducesIceStrength: function (ice) {
+    // Existing hosted counters already contribute through Strength(). Only
+    // report the prospective counter that the Corp's shortcut has not seen.
+    return ice === this.host && this._encounterPending(ice) && Strength(ice) > 0 ? 1 : 0;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    var best = -1, value = -Infinity;
+    for (var i = 0; i < choices.length; i++) {
+      var ice = choices[i].host;
+      if (!ice || (ice.hostedCards || []).some(function (card) { return card.title === "Chisel"; })) continue;
+      var score = 1;
+      if (PlayerCanLook(runner, ice)) {
+        if (ice.AIDisablesHostedPrograms || ice.strengthCannotBeLowered) continue;
+        score = RezCost(ice) + 4 / (Strength(ice) + 1);
       }
+      if (score > value) { best = i; value = score; }
     }
-    //Also worth keeping if there's any ice at all
-    for (var i = 0; i < installedCorpCards.length; i++) {
-      if (CheckCardType(installedCorpCards[i], ["ice"])) {
-        return true;
-      }
-    }
-    return false;
+    return best;
+  },
+  AIWorthKeeping: function () {
+    return InstalledCards(corp).some(function (card) { return CheckCardType(card, ["ice"]); });
+  },
+  AIOkToTrash: function () {
+    return !!(this.host && PlayerCanLook(runner, this.host) && this.host.AIDisablesHostedPrograms);
   },
 };
 
@@ -372,22 +306,39 @@ cardSet[26016] = {
 cardSet[26001] = {
   title: "Isolation",
   imageFile: "26001.png",
+  elo: 1269,
   player: runner,
   faction: "Anarch",
   influence: 1,
   cardType: "event",
   subTypes: [],
   playCost: 2,
+  additionalPlayCostTrash: true,
   Enumerate: function () {
-    return ChoicesArrayCards(runner.rig.resources);
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["resource"]) && CheckTrash(card);
+    });
   },
-  Resolve: function (params) {
-    if (params && params.card) {
-      Log(GetTitle(this) + " trashes " + GetTitle(params.card));
-      Trash(params.card, false);
-    }
+  Resolve: function () {
     GainCredits(runner, 7, "", this);
   },
+  AIPreferredPlayChoice: function (choices) {
+    // Cash out exhausted resources; do not sacrifice a live engine for income.
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      if (typeof card.AIOkToTrash === "function" && card.AIOkToTrash.call(card))
+        return i;
+    }
+    return -1;
+  },
+  AIWouldPlay: function () {
+    return this.AIPreferredPlayChoice(this.Enumerate()) >= 0;
+  },
+  AIWorthKeeping: function () {
+    return this.AIWouldPlay();
+  },
+  AIEconomyPlay: 2,
+  AIOrdinaryEconomyPlay: true,
 };
 
 //Demolisher (26002)
@@ -398,6 +349,7 @@ cardSet[26001] = {
 cardSet[26002] = {
   title: "Demolisher",
   imageFile: "26002.png",
+  elo: 1371,
   player: runner,
   faction: "Anarch",
   influence: 2,
@@ -408,33 +360,35 @@ cardSet[26002] = {
   memoryUnits: 1,
   usedThisTurn: false,
   responseOnRunnerTurnBegins: {
-    Resolve: function () {
-      this.usedThisTurn = false;
-    },
+    Resolve: function () { this.usedThisTurn = false; },
     automatic: true,
+    availableWhenInactive: true,
   },
   responseOnCorpTurnBegins: {
-    Resolve: function () {
-      this.usedThisTurn = false;
-    },
+    Resolve: function () { this.usedThisTurn = false; },
     automatic: true,
+    availableWhenInactive: true,
   },
   modifyTrashCost: {
     Resolve: function (card) {
-      if (card && card.player == corp) return -1;
-      return 0;
+      return card && card.player === corp ? -1 : 0;
     },
   },
-  responseOnTrash: {
-    Resolve: function (card) {
-      if (card && card.player == corp && !this.usedThisTurn) {
-        this.usedThisTurn = true;
-        Log(GetTitle(this) + " triggers, gaining 1[c]");
-        GainCredits(runner, 1, "", this);
-      }
+  automaticOnTrash: {
+    Resolve: function (cards, trashingPlayer, directlyTrashed) {
+      if (trashingPlayer !== runner || this.usedThisTurn) return;
+      if (!(directlyTrashed || cards).some(function (card) { return card.player === corp; })) return;
+      // "First time" is tracked even while inactive; installing later does not reset it.
+      this.usedThisTurn = true;
+      if (CheckActive(this) && CheckHasAbilities(this)) GainCredits(runner, 1, "", this);
     },
-    automatic: true,
+    availableWhenInactive: true,
   },
+  AIWorthKeeping: function () { return !this.AIWastefulToInstall(); },
+  AIWastefulToInstall: function () {
+    return InstalledCards(runner).some(function (card) { return CheckSubType(card, "Console"); });
+  },
+  AIEconomyInstall: function () { return this.AIWastefulToInstall() ? 0 : 1; },
 };
 
 //Stargate (26004)
@@ -442,6 +396,7 @@ cardSet[26002] = {
 cardSet[26004] = {
   title: "Stargate",
   imageFile: "26004.png",
+  elo: 1710,
   player: runner,
   faction: "Anarch",
   influence: 3,
@@ -449,7 +404,114 @@ cardSet[26004] = {
   subTypes: [],
   installCost: 4,
   memoryCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  runningWithThis: false,
+  breachReplacementQueued: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card === this) this.usedThisTurn = false;
+    },
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  abilities: [{
+    text: "[click]: Run R&D with Stargate",
+    Enumerate: function () {
+      if (this.usedThisTurn || !CheckActionClicks(runner, 1)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      SpendClicks(runner, 1);
+      this.usedThisTurn = true;
+      this.runningWithThis = true;
+      this.breachReplacementQueued = false;
+      MakeRun(corp.RnD);
+    },
+  }],
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      this.breachReplacementQueued = this.runningWithThis && server === corp.RnD;
+    },
+    availableWhenInactive: true,
+  },
+  specialOnInsteadOfBreaching: {
+    Enumerate: function () {
+      return this.breachReplacementQueued ? [{required: true}] : [];
+    },
+    Resolve: function () {
+      this.breachReplacementQueued = false;
+      var cards = corp.RnD.cards.slice(-Math.min(3, corp.RnD.cards.length)).reverse();
+      var priorFaceUp = cards.map(function (card) { return card.faceUp; });
+      var restore = function () {
+        cards.forEach(function (card, i) {
+          if (card.cardLocation === corp.RnD.cards) card.faceUp = priorFaceUp[i];
+        });
+      };
+      var chooseTrash = function () {
+        var choices = ChoicesArrayCards(cards, function (card) { return CheckTrash(card); });
+        if (!choices.length) { restore(); return; }
+        if (runner.AI) {
+          var best = 0;
+          for (var i = 1; i < choices.length; i++) {
+            if ((choices[i].card.elo || 0) > (choices[best].card.elo || 0)) best = i;
+          }
+          runner.AI.preferred = {title: "Stargate: trash a revealed card", index: best};
+        }
+        DecisionPhase(runner, choices, function (params) {
+          restore();
+          params.card.faceUp = true;
+          Trash(params.card, true, function () { restore(); }, this);
+        }, "Stargate: trash a revealed card", "Trash 1 revealed card", this);
+      };
+      var revealNext = function (index) {
+        if (index >= cards.length) { chooseTrash.call(this); return; }
+        Reveal(cards[index], function () {
+          cards[index].faceUp = true;
+          cards[index].knownToRunner = true;
+          revealNext.call(this, index + 1);
+        }, this);
+      };
+      revealNext.call(this, 0);
+    },
+    // The delayed effect survives Stargate leaving play during its run.
+    availableWhenInactive: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.runningWithThis = false;
+      this.breachReplacementQueued = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  AIRunAbilityExtraPotential: function (server, potential) {
+    if (server !== corp.RnD || this.usedThisTurn || !server.cards.length || ServerSuccessfulRunPrevented(server)) return 0;
+    // This replaces the access value; do not add that value to the trash reward.
+    return Math.max(0, 1.6 - potential);
+  },
+  AIBreachNotRequired: true,
+  AIBreachReplacementValue: 2,
+  AIWastefulToInstall: function () {
+    return InstalledCards(runner).some(function (card) { return card.title === "Stargate"; });
+  },
+  AIPreferredInstallChoice: function (choices) {
+    return !this.AIWastefulToInstall() && runner.clickTracker >= 2 && choices.length ? 0 : -1;
+  },
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost, runClickCost) {
+    if (server !== corp.RnD || !server.cards.length || ServerSuccessfulRunPrevented(server)) return 0;
+    if (runner.clickTracker <= runClickCost + 1 || this.AIWastefulToInstall()) return 0;
+    if (runner.creditPool < InstallCost(this) + runCreditCost) return 0;
+    return 1;
+  },
+  AIWorthKeeping: function () { return !this.AIWastefulToInstall() && corp.RnD.cards.length > 0; },
 };
 
 //Utae (26005)

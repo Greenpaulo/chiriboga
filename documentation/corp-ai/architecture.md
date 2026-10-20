@@ -246,6 +246,14 @@ disable the host ICE. Runner identities that bypass a single Barrier subroutine
 `AIHostedBreakContribution`, `AIMatchingBreakerInstalled`) are the primary
 path; text-pattern fallbacks apply only to cards without a hook.
 
+Chisel's `AIReducesIceStrength` reports only its pending encounter counter
+(0 or 1); existing counters already contribute through `Strength()`. Its
+`AIModifyIceAI` uses `knownToEvaluator` to distinguish real ICE stats,
+including the Corp's own ICE, from hidden synthetic zero strength. It models
+legal trashing at strength at or below zero, or one permitted strength
+reduction above zero, without repeating a resolved live trigger or removing
+on-encounter costs.
+
 Tests: `tests/corp-server-security.test.js`.
 
 ## Protection allocation
