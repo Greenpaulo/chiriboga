@@ -17,8 +17,8 @@ generated [card-status.md](card-status.md).
 | `systemgateway` | playable | |
 | `systemupdate2021` | playable | |
 | `elevation` | playable | All 82 metadata cards have definitions. The six previously missing NBN cards have gameplay and baseline AI tests; see new-sets/elevation-missing-cards-implementation.md. |
-| `vantagepoint` | playable | All 13 batches implemented. Playable by user decision on 2026-10-16 under the two-stage workflow; outstanding rules/AI findings remain in the [optimisation queue](new-sets/current-set-implementation.md#optimisation-queue) and [review](new-sets/reviews/vantage-point/vantagepoint-set-review.md). Review approval is outstanding. |
-| `downfall` | not-implemented | Every card is defined but many mechanics are missing. |
+| `vantagepoint` | playable | All 13 batches implemented. Playable by user decision on 2026-10-16 under the two-stage workflow; outstanding rules/AI findings remain in the [optimisation queue](new-sets/records/vantagepoint.md#optimisation-queue) and [review](new-sets/reviews/vantage-point/vantagepoint-set-review.md). Review approval is outstanding. |
+| `downfall` | in-progress | Batch implementation in progress; hidden and untested. See [tracker](new-sets/current-set-implementation.md). |
 | `creationandcontrol` | not-implemented | Every card is defined but mechanics are incomplete (see `documentation/new-sets/creation_and_control_audit.md`). |
 | `midnightsun` | not-implemented | |
 | `parhelion` | not-implemented | |

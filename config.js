@@ -122,7 +122,7 @@ var setRegistry = {
       code: "df",
       name: "Downfall",
       hidden: true,
-      untested: false,
+      untested: true,
       idRange: [26001, 26065],
     },
     midnightsun: {
