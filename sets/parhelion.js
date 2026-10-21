@@ -3,6 +3,7 @@ setIdentifiers.push('ph');
 
 cardSet[33092] = {
   title: "Dr. Nuka Vrolyck",
+  elo: 1758,
   imageFile: "33092.png",
   player: runner,
   faction: "Shaper",
@@ -66,6 +67,7 @@ cardSet[33092] = {
 
 cardSet[33087] = {
   title: "Flux Capacitor",
+  elo: 1401,
   imageFile: "33087.png",
   player: runner,
   faction: "Shaper",
@@ -144,6 +146,7 @@ cardSet[33087] = {
 //Interface → 2 credits: Break 1 sentry subroutine.
 cardSet[33073] = {
   title: "Num",
+  elo: 1352,
   imageFile: "33073.png",
   player: runner,
   faction: "Anarch",
@@ -222,6 +225,7 @@ cardSet[33073] = {
 //Each installed non-AI icebreaker gets +2 strength.
 cardSet[33090] = {
   title: "K2CP Turbine",
+  elo: 1944,
   imageFile: "33090.png",
   player: runner,
   faction: "Shaper",

@@ -26,7 +26,7 @@ in card-sets.md.
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | in-progress | 65 | 65 | 0 | 33 | 1 | 15 / 61 | true / true | no |
+| `downfall` | in-progress | 65 | 65 | 0 | 12 | 0 | 39 / 61 | true / true | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
@@ -67,27 +67,6 @@ None.
 
 ### `downfall` (sets/downfall.js)
 
-- 26005 Utae: 1 scaffold marker(s)
-- 26006 Climactic Showdown: 1 scaffold marker(s)
-- 26007 Fencer Fueno: 1 scaffold marker(s)
-- 26008 The Nihilist: 1 scaffold marker(s)
-- 26009 Trickster Taka: 1 scaffold marker(s)
-- 26011 Always Have a Backup Plan: 1 scaffold marker(s)
-- 26012 Blueberry!™ Diesel: 1 scaffold marker(s)
-- 26013 Flip Switch: 1 scaffold marker(s)
-- 26014 Lucky Charm: 1 scaffold marker(s)
-- 26015 Masterwork (v37): 1 scaffold marker(s)
-- 26017 “Baklan” Bochkin: 1 scaffold marker(s)
-- 26018 The Class Act: 1 scaffold marker(s)
-- 26020 In the Groove: 1 scaffold marker(s)
-- 26021 Khusyuk: 1 scaffold marker(s)
-- 26025 Pelangi: 1 scaffold marker(s)
-- 26028 Direct Access: 1 scaffold marker(s)
-- 26029 Rejig: 1 scaffold marker(s)
-- 26030 Whistleblower: 1 scaffold marker(s)
-- 26032 Architect Deployment Test: 1 scaffold marker(s)
-- 26038 Cold Site Server: 1 scaffold marker(s)
-- 26040 Project Yagi-Uda: 1 scaffold marker(s)
 - 26041 Sting!: 1 scaffold marker(s)
 - 26044 Saisentan: 2 scaffold marker(s)
 - 26045 Complete Image: 1 scaffold marker(s)
@@ -100,7 +79,6 @@ None.
 - 26061 Secure and Protect: 1 scaffold marker(s)
 - 26062 Reduced Service: 1 scaffold marker(s)
 - 26063 Vulnerability Audit: 1 scaffold marker(s)
-- 26005 Utae: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
 ### `elevation` (sets/elevation.js)
 

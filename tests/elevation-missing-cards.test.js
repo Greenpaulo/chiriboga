@@ -356,4 +356,28 @@ corp.remoteServers = [protectedRemote];
 const plannedInstall = synapse.responseOnRemoveTags.Enumerate.call(synapse);
 assert.strictEqual(plannedInstall.length, 1);
 assert.strictEqual(plannedInstall[c.ai.Choice(plannedInstall, 'select')].card, reporting);
+// Operations pass the new-server sentinel to Install, which owns server creation.
+corp.AI = null;
+c.Install = (...args) => { installed = args; };
+for (const destination of [null, protectedRemote]) {
+  const peerReview = c.cardSet[35055];
+  corp.HQ.cards = [freeAsset];
+  c.ChoicesCardInstall = card => [{card, server: destination}];
+  peerReview._offerInstall();
+  installed = null;
+  decision.resolve(decision.choices.find(p => p.card === freeAsset));
+  assert.strictEqual(installed[0], freeAsset);
+  assert.strictEqual(installed[1], destination, 'Peer Review delegates server creation to Install');
+  assert.notStrictEqual(installed[2], true, 'Peer Review pays normal install costs');
+
+  const kpi = c.cardSet[35077];
+  corp.HQ.cards = [wall];
+  c.ChoicesArrayInstall = () => [{card: wall, server: destination}];
+  kpi._executeEffect(2, 2);
+  installed = null;
+  decision.resolve(decision.choices.find(p => p.card === wall));
+  assert.strictEqual(installed[0], wall);
+  assert.strictEqual(installed[1], destination, 'KPI delegates server creation to Install');
+  assert.strictEqual(installed[2], true, 'KPI ignores all install costs');
+}
 console.log('Elevation missing-card tests passed.');

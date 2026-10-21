@@ -23,7 +23,11 @@ function RecordPublicPostureEvent(action, card = null, server = null, amount = 1
  * @method MakeRun
  * @param {Server} server e.g. corp.HQ or corp.remoteServers[0]
  */
-function MakeRun(server) {
+function MakeRun(server, ignoreAdditionalCosts = false) {
+  var cost = ignoreAdditionalCosts ? {clicks: 0, credits: 0} : AdditionalRunCosts(server);
+  if (!ignoreAdditionalCosts && !CanPayAdditionalRunCosts(server)) return false;
+  SpendClicks(runner, cost.clicks);
+  function beginRun() {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
@@ -50,6 +54,10 @@ function MakeRun(server) {
     }
     Render(); //to update server glow
   }, "Run Begins"); //DRBO6 - enable Knickknack by adding a trigger
+  }
+  if (cost.credits) SpendCredits(runner, cost.credits, "initiating a run", null, beginRun);
+  else beginRun();
+  return true;
 }
 
 /**
@@ -901,6 +909,8 @@ function Install(
 				}
 				var finishInstall = function(cardsTrashed) {
 				  //install done, card becomes active
+				  if (installingCard.player == runner && installingCard.cardType == "hardware")
+					RecordTurnEvent("runnerHardwareInstall");
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
 				  
@@ -1265,6 +1275,7 @@ function Draw(player, num=1, afterDraw, context) {
   }
   num += ModifyingTriggers("modifyDraw", player, -num); //lower limit of -num means the total will not be any lower than zero
   if (num < 1) return 0;
+  RecordTurnEvent(player == corp ? "corpDraw" : "runnerDraw");
   var cards = [];
   //draw for corp (lose if impossible)
   if (player == corp) {
@@ -1318,6 +1329,7 @@ function Draw(player, num=1, afterDraw, context) {
 function SpendClicks(player, num) {
   if (num < 1) return;
   player.clickTracker -= num;
+  player.clicksSpentThisTurn = ClicksSpentThisTurn(player) + num;
   if (num == 1) Log(PlayerName(player) + " spent one click");
   else Log(PlayerName(player) + " spent " + num + " clicks");
 }
@@ -1444,6 +1456,24 @@ function SpendCredits(
     var sources = eligibleHostedSources();
     var canUsePool = CreditPoolCanBeUsed(player, "spend", doing, card);
 
+    // Run-event affordability reserves shared credits for run-entry costs.
+    // Pay with event-only sources first, including when AI would preserve
+    // outside credits; these sources cannot fund MakeRun's later payment.
+    var eventOnlySources = player == runner && doing == "playing" && card &&
+      CheckSubType(card, "Run") ? sources.filter(function (source) {
+        return !source.canUseCredits("initiating a run", null);
+      }) : [];
+    if (eventOnlySources.length > 0) {
+      sources = eventOnlySources;
+      canUsePool = false;
+      if (player.AI) {
+        for (var i = 0; i < sources.length && num > 0; i++)
+          spendFromCard(sources[i], Math.min(num, sources[i].credits));
+        choosePaymentSource();
+        return;
+      }
+    }
+
     //Keep computer-player payments deterministic and compatible with the
     //existing strategy code. Human players choose every non-forced allocation.
     if (player.AI) {
@@ -1460,7 +1490,7 @@ function SpendCredits(
 
     // Temporary credits are optional sources too. Avoid adding a choice to
     // existing payments unless a source-sensitive effect makes it meaningful.
-    var temporary = temporaryAvailable();
+    var temporary = eventOnlySources.length > 0 ? 0 : temporaryAvailable();
     var sourceSensitive = player == runner && typeof OutsideCreditDamageSources == "function" &&
       OutsideCreditDamageSources(typeof attackedServer == "undefined" ? null : attackedServer).length > 0;
     if (temporary > 0 && !sourceSensitive) {
@@ -1547,8 +1577,8 @@ function SpendCredits(
  * @param {String} [temporary] set to a reason if any unused will be lost after run (e.g. "bad publicity")
  * @param {Card} [sourceCard] the operation or agenda that caused the credit gain (for The Zwicky Group)
  */
-function GainCredits(player, num, temporary = "", sourceCard = null) {
-  if (num < 1) return;
+function GainCredits(player, num, temporary = "", sourceCard = null, afterGain = null) {
+  if (num < 1) { if (afterGain) afterGain(); return; }
   var bpcStr = "";
   if (temporary != "") {
     runner.temporaryCredits += num;
@@ -1562,11 +1592,14 @@ function GainCredits(player, num, temporary = "", sourceCard = null) {
   //This is used by The Zwicky Group identity
   if (player === corp && sourceCard !== null) {
     if (CheckCardType(sourceCard, ["operation", "agenda"])) {
-      TriggeredResponsePhase(corp, "responseOnGainCreditsFromCard", [num, sourceCard], null, "Gained Credits");
+      TriggeredResponsePhase(corp, "responseOnGainCreditsFromCard", [num, sourceCard], afterGain, "Gained Credits");
+      PlayCreditGainSound(num);
+      return;
     }
   }
 
   PlayCreditGainSound(num);
+  if (afterGain) afterGain();
 }
 
 /**
@@ -2119,7 +2152,12 @@ function Expose(card) {
  * @param {Player} [playerToRevealTo] when the card is being revealed to its owner
  * @param {boolean} [skipHumanInput] for when this Continue button isn't required
  */
-function Reveal(card, callback, context, playerToRevealTo, skipHumanInput=false) {
+function Reveal(card, callback, context, playerToRevealTo, skipHumanInput=false, revealingPlayer) {
+  // Mandatory R&D access reveals are performed by the Runner; other reveals
+  // belong to the player resolving the effect. Callers may specify the actor.
+  if (typeof revealingPlayer == "undefined") revealingPlayer =
+    typeof accessingCard != "undefined" && card == accessingCard && card.cardLocation == corp.RnD.cards ? runner : activePlayer;
+  AutomaticTriggers("automaticOnReveal", [card, revealingPlayer]);
   var otherPlayer = corp;
   if (card.player == corp) otherPlayer = runner;
   if (typeof playerToRevealTo != 'undefined') otherPlayer=playerToRevealTo;
@@ -2188,6 +2226,15 @@ function RemoveCounters(card, counter, num = 1) {
 function Trace(baseStrength, callback, context) {
   traceStrength = baseStrength;
   Log("Trace initiated");
+  //Interrupt window before either player raises strength (e.g. Flip Switch
+  //reduces the base trace strength to 0).
+  TriggeredResponsePhase(playerTurn, "responseOnTraceInitiated", [baseStrength], function () {
+    TraceStrengthDecisions(baseStrength, callback, context);
+  }, "Trace Initiated");
+}
+
+//Corp then Runner strength decisions once the base trace strength is final.
+function TraceStrengthDecisions(baseStrength, callback, context) {
   var corpChoices = [
     { num: 0, label: "Continue without increasing trace strength" },
   ];
@@ -2269,7 +2316,7 @@ function Trace(baseStrength, callback, context) {
     corpChoices,
     decisionCallbackA,
 	"Trace[" + baseStrength + "]",
-    "Increase trace strength (from " + baseStrength + ")",
+    "Increase trace strength (from " + traceStrength + ")",
     this,
 	"trace",
   );

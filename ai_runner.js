@@ -647,6 +647,20 @@ class RunnerAI {
     //console.log(currentPhase.identifier);
   }
 
+  //an active card's ability may install the same grip card more cheaply (AIInstallDiscountAbility)
+  _installDiscountAbility(card, host) {
+    var best = null;
+    var activeCards = ActiveCards(runner);
+    for (var i = 0; i < activeCards.length; i++) {
+      var source = activeCards[i];
+      if (typeof source.AIInstallDiscountAbility != "function" || !CheckHasAbilities(source)) continue;
+      var offer = source.AIInstallDiscountAbility.call(source, card, host || null);
+      if (offer && offer.discount > 0 && (!best || offer.discount > best.offer.discount))
+        best = { card: source, offer: offer };
+    }
+    return best;
+  }
+
   //sets this.preferred to prefs and returns indexOf cmd in optionList
   //don't forget to return the result!
   _returnPreference(optionList, cmd, prefs) {
@@ -1568,8 +1582,28 @@ console.log(this.preferred);
 			  });
 			}
 		}
-		//check for the basic remove tag action
-		if (optionList.includes("remove")) {
+		//check for installed cards that can be triggered to remove tags without a click (e.g. Flip Switch)
+		//their paid abilities are offered in paid ability windows, not as action-phase click abilities
+		var freeTagRemoverAvailable = false;
+		var tagRemovers = ActiveCards(runner);
+		for (var i = 0; i < tagRemovers.length; i++) {
+			if (typeof tagRemovers[i].AITriggerToRemoveTags != "function") continue;
+			var tagAlt = tagRemovers[i].AITriggerToRemoveTags.call(tagRemovers[i]);
+			if (!tagAlt) continue;
+			var matchesAlt = function (a) { return a.alt == tagAlt; };
+			if (!ChoicesAbility(tagRemovers[i]).some(matchesAlt)) continue;
+			freeTagRemoverAvailable = true;
+			var limitTo = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+			if (optionList.includes("trigger") && ChoicesAbility(tagRemovers[i], limitTo).some(matchesAlt)) {
+				this._log("there is a card I would trigger to remove tags");
+				return this._returnPreference(optionList, "trigger", {
+					cardToTrigger: tagRemovers[i],
+					abilityAlt: tagAlt,
+				});
+			}
+		}
+		//check for the basic remove tag action (unless a free remover can be used in the next paid ability window)
+		if (optionList.includes("remove") && !freeTagRemoverAvailable) {
 		  //by default use the basic remove tag action
 		  return optionList.indexOf("remove");
 		}
@@ -2092,9 +2126,11 @@ console.log(this.preferred);
 		if (breachPrevented) this.serverList[i].potential = 0; //reset potential due to no breach
 
 		//consider potential of this server
-		for (var j = 0; j < activeCards.length; j++) {
-			if (typeof activeCards[j].AIRunExtraPotential == 'function' && (activeCards[j].AIBreachNotRequired || !breachPrevented)) {
-			  this.serverList[i].potential += activeCards[j].AIRunExtraPotential.call(activeCards[j],this.serverList[i].server,this.serverList[i].potential);
+		//(Runner lingering effects, e.g. Climactic Showdown, count as passive sources)
+		var potentialSources = activeCards.concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
+		for (var j = 0; j < potentialSources.length; j++) {
+			if (typeof potentialSources[j].AIRunExtraPotential == 'function' && (potentialSources[j].AIBreachNotRequired || !breachPrevented)) {
+			  this.serverList[i].potential += potentialSources[j].AIRunExtraPotential.call(potentialSources[j],this.serverList[i].server,this.serverList[i].potential);
 			}
 		}
 		
@@ -2977,6 +3013,18 @@ console.log(this.preferred);
 							}
 						  }
 					}
+				}
+			}
+			//or installed through an active card's cheaper install ability (e.g. The Artist)
+			if (ret == optionList.indexOf("install") && inputOptionList.includes("trigger") && this.preferred &&
+				this.preferred.command == "install" && typeof this.preferred.cardToInstall != 'undefined') {
+				var discounted = this._installDiscountAbility(this.preferred.cardToInstall, this.preferred.hostToInstallTo);
+				if (discounted) {
+					if (typeof discounted.offer.select == "function") discounted.offer.select();
+					ret = this._returnPreference(inputOptionList, "trigger", {
+						cardToTrigger: discounted.card,
+						abilityAlt: discounted.offer.alt,
+					});
 				}
 			}
 			//if option is not in list, choose 0 and give error
