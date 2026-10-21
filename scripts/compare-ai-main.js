@@ -13,7 +13,7 @@ function parseArgs(args) {
   for (let i = 0; i < args.length; i++) {
     const name = args[i];
     if (!['--format', '--jobs', '--seeds'].includes(name) || !args[i + 1])
-      throw new Error('Usage: node scripts/compare-ai-main.js [--format beginner|startup] [--jobs N] [--seeds FROM-TO]');
+      throw new Error('Usage: node scripts/compare-ai-main.js [--format beginner|startup|startup2] [--jobs N] [--seeds FROM-TO]');
     options[name.slice(2)] = args[++i];
   }
   benchmarkFormat(options.format);
@@ -52,6 +52,11 @@ function compareMain(root, options = {}, batch = runBatch) {
     added = true;
     // Comparing different deck pools would confound the code/latency comparison.
     const poolData = JSON.parse(fs.readFileSync(path.join(root, pool), 'utf8'));
+    // A newly added pool can exercise main's engine using the same decks.
+    if (!fs.existsSync(path.join(checkout, pool))) {
+      fs.mkdirSync(path.dirname(path.join(checkout, pool)), {recursive: true});
+      fs.copyFileSync(path.join(root, pool), path.join(checkout, pool));
+    }
     const inputs = [pool, ...new Set(poolData.pairs.flatMap(pair =>
       [path.join('precons', pair.corp), path.join('precons', pair.runner)]))];
     for (const file of inputs) {

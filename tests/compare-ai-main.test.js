@@ -18,7 +18,7 @@ function fixture(fn) {
   };
   try {
     git(['init', '--quiet', '--initial-branch=main']);
-    for (const format of ['beginner', 'startup']) {
+    for (const format of ['beginner', 'startup', 'startup2']) {
       const {pool} = benchmarkFormat(format);
       fs.mkdirSync(path.dirname(path.join(root, pool)), {recursive: true});
       fs.writeFileSync(path.join(root, pool), JSON.stringify({pairs: [{corp: 'corp.js', runner: 'runner.js'}]}));
@@ -37,7 +37,7 @@ function fixture(fn) {
   } finally { fs.rmSync(root, {recursive: true, force: true}); }
 }
 try {
-  for (const format of ['beginner', 'startup']) fixture((root, git) => {
+  for (const format of ['beginner', 'startup', 'startup2']) fixture((root, git) => {
     if (format === 'beginner') git(['switch', 'main']); // main can also be the candidate checkout
     const calls = [];
     const result = compareMain(root, {format, jobs: '2', seeds: '1-3'}, (cwd, args) => {
@@ -46,6 +46,9 @@ try {
       if (!args.includes('--compare')) fs.writeFileSync(args[args.length - 1], '{}');
     });
     assert.strictEqual(calls.length, 3);
+    assert.strictEqual(calls[0].args[2], benchmarkFormat(format).pool);
+    assert.strictEqual(path.relative(root, result.reports).split(path.sep).slice(0, -1).join('/'),
+      benchmarkFormat(format).bench + '/paired-main');
     assert.notStrictEqual(calls[0].cwd, root);
     assert.strictEqual(calls[1].cwd, root);
     assert.deepStrictEqual(calls[0].args.slice(0, -1), calls[1].args.slice(0, -1));
@@ -62,10 +65,27 @@ try {
     assert.strictEqual(count, failAt, 'failure stops later runs and comparison');
   });
   fixture(root => {
+    const pool = benchmarkFormat('startup2').pool;
+    // Simulate a new, uncommitted pool that does not exist on main.
+    const newPool = fs.readFileSync(path.join(root, pool));
+    const removed = spawnSync('git', ['rm', pool], {cwd: root, encoding: 'utf8'});
+    assert.strictEqual(removed.status, 0, removed.stderr);
+    const committed = spawnSync('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.test',
+      'commit', '--quiet', '-m', 'remove pool'], {cwd: root, encoding: 'utf8'});
+    assert.strictEqual(committed.status, 0, committed.stderr);
+    const updated = spawnSync('git', ['branch', '-f', 'main', 'HEAD'], {cwd: root, encoding: 'utf8'});
+    assert.strictEqual(updated.status, 0, updated.stderr);
+    fs.writeFileSync(path.join(root, pool), newPool);
+    compareMain(root, {format: 'startup2'}, (cwd, args) => {
+      if (!args.includes('--compare')) assert(fs.readFileSync(path.join(cwd, pool)).equals(newPool));
+    });
+  });
+  fixture(root => {
     fs.writeFileSync(path.join(root, 'precons/corp.js'), 'different deck');
     assert.throws(() => compareMain(root, {}, () => assert.fail('must not run')), /inputs differ/);
   });
   assert.deepStrictEqual(parseArgs(['--format', 'startup', '--jobs', '4']), {format: 'startup', jobs: '4'});
+  assert.deepStrictEqual(parseArgs(['--format', 'startup2']), {format: 'startup2'});
   for (const args of [['--format', 'unknown'], ['--jobs', '0'], ['--seeds', '3-1'], ['--other']])
     assert.throws(() => parseArgs(args));
 } finally { console.log = log; }
