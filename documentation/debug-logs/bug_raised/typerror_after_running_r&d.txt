@@ -1,0 +1,187 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Virtual Intelligence, P.I.: “You Can Call Me Vic”,1 Cleaver,2 Mutual Favor,2 Docklands Pass,3 Carmen,2 Marjanah,3 Red Team,3 Unity,3 Sure Gamble,2 Lie Low,3 Transfer of Wealth,2 Maglectric Rapid (748 Mod),2 Kompromat,2 Sell Out,3 Tailgate,3 Borrowed Goods,3 Rotary,2 Baker,1 Underdome Irregulars,2 Touchstone,2 Stowaway]
+[PT Untaian: Life's Building Blocks,1 Longevity Serum,3 Urtica Cipher,2 Karunā,3 Hansei Review,1 Neurospike,3 Spin Doctor,1 Clearinghouse,3 Orbital Superiority,2 Regolith Mining License,3 Whitespace,3 Hedge Fund,3 Proprionegation,3 Sericulture Expansion,3 Byte!,3 Phật Gioan Baotixita,3 Empiricist,3 Semak-samun,2 Measured Response,1 Flyswatter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 3.00; fresh-hand expectation 3.77
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Longevity Serum,Byte!,Petty Cash,Empiricist,Hedge Fund]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Unity,Cleaver,Underdome Irregulars,Touchstone]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: Scoring windows for empty servers: []
+Corp spent one click
+Corp installed ice protecting HQ
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Petty Cash,Longevity Serum,Proprionegation,Byte!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Unity,Cleaver,Underdome Irregulars,Touchstone]
+Runner spent one click
+Runner installed Borrowed Goods
+1 tag added
+Using Virtual Intelligence, P.I.: “You Can Call Me Vic”:
+Runner spent one click
+Runner spent one credit
+Runner drew a card
+1 tag removed
+Runner spent one click
+Runner spent 3 credits
+Runner installed Rotary
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Take 1 tag to access 1 additional card? triggered
+Valid option with undefined label:
+{use:true,label:Take 1 tag to access 1 additional card,command:continue}
+Measured Response accessed
+Run ends
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Petty Cash,Longevity Serum,Proprionegation,Byte!]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Unity,Cleaver,Underdome Irregulars,Touchstone]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+{text:[click], 2[c]: Trash Rotary.}
+ERROR: Value above (.corpAbilities) is unsupported in ValueToString.
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Proprionegation,Longevity Serum,Petty Cash,Measured Response,Byte!]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 4 card(s) in hand: [Unity,Cleaver,Underdome Irregulars,Touchstone]
+Rewinding...
+
+Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'Enumerate')
+    at ChoicesAbility (utility.js?1790674496:4099:48)
+    at ChoicesTriggerableAbilities (utility.js?1790674496:4245:25)
+    at Object.trigger (phase.js?1790674496:147:14)
+    at EnumeratePhase (command.js?1775674165:602:59)
+    at Main (init.js?1789986817:1993:20)
+    at command.js?1775674165:92:22
+    
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Petty Cash,Longevity Serum,Proprionegation,Byte!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Borrowed Goods,Unity,Cleaver,Underdome Irregulars,Touchstone]
+Runner spent one click
+Runner installed Borrowed Goods
+1 tag added
+Using Virtual Intelligence, P.I.: “You Can Call Me Vic”:
+Runner spent one click
+Runner spent one credit
+Runner drew a card
+1 tag removed
+Runner spent one click
+Runner spent 3 credits
+Runner installed Rotary
+Runner spent one click
+Run initiated attacking R&D
+
+Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'Enumerate')
+    at ChoicesAbility (utility.js?1790674496:4099:48)
+    at ChoicesTriggerableAbilities (utility.js?1790674496:4245:25)
+    at Object.trigger (phase.js?1790674496:147:14)
+    at EnumeratePhase (command.js?1775674165:602:59)
+    at Main (init.js?1789986817:1993:20)
+    at command.js?1775674165:92:22
+
+SPOILER: Contents of remote servers:
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(36009, [], [36014,30011,36024,36012,36013,30016,36010,30030,30015,35019,35015,35019,36024,35015,36015,35017,36010,36012,36012,30030,30013,30015,36021,30018,30011,36015,36011,30018,35017,30015,35017,30026,30030,30013,36011,30016,36014,36013,30018,30026], [30026,30006,36016,36021], [36013,36014], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [30075], [30047,30068,35052,30053,30047,35081,30074,30068,30068,30049,30048,35049,30061,35051,30071,30074,35048,30048,35054,35054,35054,35081,30075,35079,30045,30074,35051,35051,30071,35052,30075,35078,35049,35050,35049,30053,30053,30048,30045,35048,35050,30045,35078], [35081,30044,35048,35050], [], [], [35052], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[0].corpAbilities=[];
+runner.stack[23].runRnD=true;
+runner.stack[27].runRnD=true;
+runner.stack[36].corpAbilities=[];
+runner.stack[38].runRnD=true;
+runner.rig.hardware[1].corpAbilities=[];
+corp.archives.cards[0].faceUp=true;
+corp.HQ.cards[1].AICardsDiscarded=[];
+corp.RnD.AISuccessfulRuns=1;
+
+Version reference: Tue Sep 29 2026 11:26:30 GMT+0100 (British Summer Time)
