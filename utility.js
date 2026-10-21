@@ -288,6 +288,7 @@ const replicationCodeBlacklist = [
   //on-card properties to ignore (this assumes they will be constant...)
   "abilities",
   "runnerAbilities",
+  "corpAbilities",
   "subroutines",
 ];
 
