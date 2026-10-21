@@ -1,0 +1,275 @@
+{
+  "kind": "L8.9 Stage 1 control-only guard freeze",
+  "rule": "max(abs(low), abs(high)) of independent game-stratified bootstrap 95% difference interval, rounded upward to 6 decimals; declared before extension results",
+  "limits": [
+    "Noise allowances, not independently justified acceptable-harm ceilings.",
+    "No candidate results examined; no repair implemented.",
+    "Paired win-rate power needs candidate/control winner discordance, which controls do not estimate.",
+    "Complete-case intervals condition on baseline game completion; missingness need not be ignorable.",
+    "Failed records are retained and reported; no partial samples, zero filling or replacement games are used."
+  ],
+  "failureTreatment": "explicit complete-case",
+  "games": [
+    2800,
+    2798
+  ],
+  "droppedGames": [
+    0,
+    2
+  ],
+  "scheduledGames": [
+    2800,
+    2800
+  ],
+  "failures": [
+    [],
+    [
+      {
+        "fixtureId": null,
+        "deckPairId": "btl-kit",
+        "seed": "632",
+        "reason": "stalled",
+        "errors": [
+          "stalled: no main-loop step for 10 s after: Null command"
+        ]
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "zwicky-magdalene",
+        "seed": "576",
+        "reason": "Runner has reached 7 agenda points",
+        "errors": [
+          "ReferenceError: NewRemoteServer is not defined"
+        ]
+      }
+    ]
+  ],
+  "stratumCounts": [
+    [
+      {
+        "fixtureId": null,
+        "deckPairId": "btl-kit",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "gateway",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "leo-topan",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "neh-zahya",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "pd-tao",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "pe-steve",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "zwicky-magdalene",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      }
+    ],
+    [
+      {
+        "fixtureId": null,
+        "deckPairId": "btl-kit",
+        "scheduled": 400,
+        "successful": 399,
+        "failed": 1
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "gateway",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "leo-topan",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "neh-zahya",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "pd-tao",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "pe-steve",
+        "scheduled": 400,
+        "successful": 400,
+        "failed": 0
+      },
+      {
+        "fixtureId": null,
+        "deckPairId": "zwicky-magdalene",
+        "scheduled": 400,
+        "successful": 399,
+        "failed": 1
+      }
+    ]
+  ],
+  "strata": [
+    "[\"\",\"btl-kit\"]",
+    "[\"\",\"gateway\"]",
+    "[\"\",\"leo-topan\"]",
+    "[\"\",\"neh-zahya\"]",
+    "[\"\",\"pd-tao\"]",
+    "[\"\",\"pe-steve\"]",
+    "[\"\",\"zwicky-magdalene\"]"
+  ],
+  "metrics": {
+    "realizedIceByRootType.allCountCorrelation": {
+      "baseline": 0.14722289663735025,
+      "candidate": 0.14497221695957918,
+      "difference": -0.002250679677771067,
+      "low": -0.04964192182049318,
+      "high": 0.036049467949338276,
+      "resamples": 200,
+      "direction": "lower",
+      "improvement": {
+        "mean": 0.002250679677771067,
+        "low": -0.036049467949338276,
+        "high": 0.04964192182049318
+      }
+    },
+    "realizedIceByRootType.posturedCountCorrelation": {
+      "baseline": 0.05266509459077327,
+      "candidate": 0.09881721986062286,
+      "difference": 0.04615212526984959,
+      "low": -0.0316652560633176,
+      "high": 0.11098514770869225,
+      "resamples": 200,
+      "direction": "lower",
+      "improvement": {
+        "mean": -0.04615212526984959,
+        "low": -0.11098514770869225,
+        "high": 0.0316652560633176
+      }
+    },
+    "realizedIceByRootType.posturedCountDistance": {
+      "baseline": 0.17872219132855593,
+      "candidate": 0.16932921430929443,
+      "difference": -0.009392977019261506,
+      "low": -0.06327794129373016,
+      "high": 0.05752689824108845,
+      "resamples": 200,
+      "direction": "lower",
+      "improvement": {
+        "mean": 0.009392977019261506,
+        "low": -0.05752689824108845,
+        "high": 0.06327794129373016
+      }
+    },
+    "bluffSingleVariableCorrelation.max": {
+      "baseline": 0.20525406964879217,
+      "candidate": 0.22033867483144184,
+      "difference": 0.015084605182649674,
+      "low": -0.03358024654181535,
+      "high": 0.07552832662368739,
+      "resamples": 200,
+      "direction": "lower",
+      "improvement": {
+        "mean": -0.015084605182649674,
+        "low": -0.07552832662368739,
+        "high": 0.03358024654181535
+      }
+    }
+  },
+  "margins": {
+    "realizedIceByRootType.posturedCountDistance": 0.063278,
+    "realizedIceByRootType.allCountCorrelation": 0.049642,
+    "realizedIceByRootType.posturedCountCorrelation": 0.110986,
+    "bluffSingleVariableCorrelation.max": 0.075529
+  },
+  "winRatePlanning": [
+    {
+      "discordance": 0.05,
+      "pairs": 979,
+      "seedsPerDeckPair": 140,
+      "balancedPairs": 980,
+      "games": 1960
+    },
+    {
+      "discordance": 0.1,
+      "pairs": 1960,
+      "seedsPerDeckPair": 280,
+      "balancedPairs": 1960,
+      "games": 3920
+    },
+    {
+      "discordance": 0.2,
+      "pairs": 3923,
+      "seedsPerDeckPair": 561,
+      "balancedPairs": 3927,
+      "games": 7854
+    },
+    {
+      "discordance": 0.5,
+      "pairs": 9809,
+      "seedsPerDeckPair": 1402,
+      "balancedPairs": 9814,
+      "games": 19628
+    },
+    {
+      "discordance": 1,
+      "pairs": 19620,
+      "seedsPerDeckPair": 2803,
+      "balancedPairs": 19621,
+      "games": 39242
+    }
+  ],
+  "sources": [
+    {
+      "file": "bench/L8.9-aac6ea9-attribution-v2/on-1-200.json",
+      "sha256": "ec5b09032de7b49c3533d36f720eafa77e860e37941f76bb796955b4f57b5b5c"
+    },
+    {
+      "file": "bench/L8.9-aac6ea9-attribution-v2/on-201-400.json",
+      "sha256": "d95438b01919f47be3d354d7022856ee4381c55036703cbc9478d988b7c06551"
+    },
+    {
+      "file": "bench/L8.9-aac6ea9-attribution-v2/on-401-800.json",
+      "sha256": "6f9f4d381137b57d1f0a8286e2924e5b1e29963945c68ec31639be520ba2694f"
+    }
+  ]
+}

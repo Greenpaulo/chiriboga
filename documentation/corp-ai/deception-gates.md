@@ -39,12 +39,14 @@ strength or multivariable tells, or success against a learning human.
 | L8.5 | Merged; revised full gate passed with correlation report-only, information/reachability and adaptation hard checks plus performance guards; feedback defaults on |
 | L8.2 | Full gate failed; policy removed, not adopted. All-root TV reduction not demonstrated; public-variable correlation, active-subset rho, win-rate and shape-overlap checks failed. Retain measurements and frozen evidence. |
 | I2 | Consume F12 with its existing proposed count-rho and posture guards; 0.02 rho margins remain provisional pending calibration; retain security improvement/performance checks |
-| L8.9 | Investigate residual mechanisms, implement a supported repair in the same ticket, then require actual count-distance reduction and strategic safety guards |
+| L8.9 | Passive installation/lifecycle measurement, attribution and control calibration only; proposed installation restriction withdrawn. I3/I4/I5 own policy and their own gates; I3.1 owns read-only deck-plan evidence. |
 | I3 | Reconcile scoped tell guards before implementation; use fresh adopted-policy control and preserve its own improvement/performance gate |
 | I9 | Reconcile its absolute combined-policy target, role coverage and bounded-input exceptions in its source spec; no prior ticket silently adopts that target |
 
-A paired no-regression guard does not show a reduction. For L8.2/L8.9 the primary
-Improve row must demonstrate lower all-root TV with F11's paired pooled interval.
+A paired no-regression guard does not show a reduction. L8.2's primary Improve
+row required lower all-root TV with F11's paired pooled interval. Any later
+consumer claiming tell reduction must preregister an actual improvement check;
+L8.9's observation delivery itself requires no strategic improvement gate.
 Do not choose a successful subset after candidate results or replace the
 headline objective with an allowed regression. Keep safety overrides in headline
 coverage; root ages, commitment distributions and per-deck splits explain
@@ -74,10 +76,15 @@ active-subset and performance guards and the 0.05 shape-overlap ceiling.
 The full gate failed. The relative-depth/parity/top-up strategy and its settings
 were removed, with the evidence retained in the ticket and architecture. No
 L8.2 strategy was adopted; later controls use the unchanged adopted policy.
-L8.9 also requires passive instrumentation identity before policy changes; its
-repair design and calibrated complete command are recorded in that same ticket.
-A failed repair gate leaves the policy unadopted; investigation alone is not
-completion of its repair objective.
+The owner narrowed L8.9 to passive tooling/evidence: observation identity passed
+and complete-case control calibration finished, with failures retained. Its
+installation proposal was withdrawn without implementation, not gate-failed.
+I3/I5 must reuse its [tool recipe](../ai-batch-harness.md#using-install-observations-in-the-i-tickets)
+and define their own current matching controls, coverage and strategic thresholds.
+The recorded noise envelopes do not automatically become consumer tolerances.
+Shell/asset-spam can legitimately create many bare remotes; assess represented
+plans and per-deck results rather than treating all zero-ICE roots as defects.
+Any later failed policy gate still leaves that consumer's policy unadopted.
 
 Preserve L7.1's lesson: consequence weighting belongs in install ranking, not
 HQ/R&D protection scores used as bars for remote scoring. L8.8's concealment/

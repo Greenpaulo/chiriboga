@@ -5143,6 +5143,10 @@ class CorpAI {
                 var installPreference = corp.HQ.cards[i].AIWorthInstalling(
                   emptyProtectedRemotes,
                 );
+                if (typeof this._installAttribution == "function") {
+                  try { this._installAttribution(corp.HQ.cards[i], emptyProtectedRemotes, installPreference); }
+                  catch (_) {}
+                }
                 if (installPreference > -1) {
                   if (installPreference > emptyProtectedRemotes.length - 1)
                     prefToReturn = {
@@ -6116,6 +6120,12 @@ class CorpAI {
           var installPreference = cards[i].AIWorthInstalling(
             emptyProtectedRemotes,
           );
+          // Passive harness seam: report the result already returned by the hook.
+          // Observation failure must never affect an install decision.
+          if (typeof this._installAttribution == "function") {
+            try { this._installAttribution(cards[i], emptyProtectedRemotes, installPreference); }
+            catch (_) {}
+          }
           if (installPreference > -1) {
             if (installPreference > emptyProtectedRemotes.length - 1)
               ret.push({

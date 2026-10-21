@@ -5,6 +5,267 @@ run(async ({
   calibrateReports, batch, observationIdentity, measurementEvidence, check, row, cohort,
   report, clone
 }) => {
+  await check('control guard freeze uses interval envelopes and rejects incomplete evidence', () => {
+    const {GUARDS, mergeControls, freezeMargins, winRatePairs} = require('../scripts/ai-batch/defense-guard-calibration');
+    const metrics = Object.fromEntries(GUARDS.map(name => [name, {low: -.0123451, high: .008, difference: -.001}]));
+    assert.deepStrictEqual(Object.values(freezeMargins(metrics)), GUARDS.map(() => .012346));
+    metrics[GUARDS[0]] = {low: -.001, high: .0234561};
+    assert.strictEqual(freezeMargins(metrics)[GUARDS[0]], .023457);
+    assert.throws(() => freezeMargins({}), /Invalid calibration/);
+    assert.throws(() => freezeMargins({...metrics, [GUARDS[0]]: {low: 1, high: 0}}), /Invalid calibration/);
+    const make = seed => ({codeHash: 'matching', poolHash: 'pool', options: {}, starts: [],
+      collectors: ['realizedIceByRootType', 'bluffSingleVariableCorrelation'], pairs: ['deck'],
+      seeds: [seed], failures: [], defenseObserver: 'on', games: [{ok: true, deckPairId: 'deck', seed,
+        samples: {realizedIceByRootType: {errors: []}, bluffSingleVariableCorrelation: []}}]});
+    const one = make(1), two = make(2);
+    assert.deepStrictEqual(mergeControls([one, two]).seeds, [1, 2]);
+    assert.throws(() => mergeControls([one, one]), /Overlapping/);
+    assert.throws(() => mergeControls([one, {...two, codeHash: 'changed'}]), /codeHash/);
+    assert.throws(() => mergeControls([{...one, games: []}]), /Incomplete/);
+    assert.throws(() => mergeControls([{...one, games: [...one.games, ...one.games]}]), /duplicate/);
+    assert.throws(() => mergeControls([{...one, failures: [{}]}]), /Failed control/);
+    assert.throws(() => mergeControls([{...one, quick: true}]), /full observer/);
+    assert.strictEqual(winRatePairs(.109, .101), 82); // Stata's published example
+    assert.strictEqual(winRatePairs(.1), 1960);
+    assert.ok(winRatePairs(.5) > winRatePairs(.1));
+    assert.throws(() => winRatePairs(.01), /Invalid power/);
+  });
+  await check('explicit complete-case controls retain failures and validate scheduled records', () => {
+    const {mergeControls, controlCoverage} = require('../scripts/ai-batch/defense-guard-calibration');
+    const good = {ok: true, deckPairId: 'deck', seed: 1,
+      samples: {realizedIceByRootType: {errors: []}, bluffSingleVariableCorrelation: []}};
+    const failed = {ok: false, deckPairId: 'deck', seed: 2, reason: 'stalled', errors: ['stalled']};
+    const failure = {deckPairId: 'deck', seed: '2', reason: 'stalled', errors: ['stalled']};
+    const r = {codeHash: 'matching', poolHash: 'pool', options: {}, starts: [],
+      collectors: ['realizedIceByRootType', 'bluffSingleVariableCorrelation'], pairs: ['deck'],
+      seeds: [1, 2], failures: [failure], defenseObserver: 'on', games: [good, failed]};
+    const mode = {completeCase: true};
+    assert.throws(() => mergeControls([r]), /Failed control/);
+    const merged = mergeControls([r], mode);
+    assert.deepStrictEqual(merged.games, [good, failed]);
+    assert.deepStrictEqual(merged.failures, [failure]);
+    assert.deepStrictEqual(controlCoverage(merged), [{fixtureId: null, deckPairId: 'deck', scheduled: 2, successful: 1, failed: 1}]);
+    assert.throws(() => mergeControls([{...r, failures: []}], mode), /failure records/i);
+    assert.throws(() => mergeControls([{...r, failures: [failure, failure]}], mode), /failure records/i);
+    assert.throws(() => mergeControls([{...r, failures: [{...failure, reason: 'other'}]}], mode), /failure records/i);
+    assert.throws(() => mergeControls([{...r, games: [good]}], mode), /Incomplete/);
+    assert.throws(() => mergeControls([{...r, games: [good, {...failed, seed: 3}]}], mode), /Unexpected/);
+    assert.throws(() => mergeControls([{...r, games: [{...good, samples: {}}, failed]}], mode), /Missing or invalid/);
+    assert.throws(() => mergeControls([{...r, games: [{...good, errors: ['observer error']}, failed]}], mode), /Successful control/);
+    const next = {...r, seeds: [3], games: [{...good, seed: 3}], failures: []};
+    const combined = mergeControls([r, next], mode);
+    assert.strictEqual(combined.games.length, 3);
+    assert.strictEqual(combined.failures.length, 1);
+    assert.deepStrictEqual(controlCoverage(combined)[0], {fixtureId: null, deckPairId: 'deck', scheduled: 3, successful: 2, failed: 1});
+  });
+  await check('offline install analysis clusters games and retains endpoints and sparse coverage', () => {
+    const {analyzeReports} = require('../scripts/ai-batch/install-defense-analysis');
+    const make = copies => ({games: Array.from({length: 6}, (_, seed) => ({
+      ok: true, seed, deckPairId: 'script', samples: {realizedIceByRootType: {
+        lifecycle: Array.from({length: copies}, (_, id) => [
+          {action: 'install', commitmentId: id, installedTurn: 2, rootType: 'trap', iceCount: seed < 3 ? 0 : 1,
+            placement: {chosenReason: 'Specific case', requestedServerId: seed < 3 ? 0 : 3}},
+          {action: 'endpoint', commitmentId: id, turn: 8, leftTurn: 5, fate: seed < 3 ? 'gameEnd' : 'trashed'},
+        ]).flat(),
+        rows: Array.from({length: copies}, (_, id) => ({commitmentId: id, turn: 4, rootAge: 2,
+          rootType: 'trap', iceCount: 1, posture: 'neutral', revealed: false, multiRoot: copies > 1})),
+        changes: [{action: 'iceAdded', count: 1, commitments: Array.from({length: copies}, (_, id) => id)}],
+      }},
+    }))});
+    const first = analyzeReports([make(1)], {resamples: 200});
+    const repeated = analyzeReports([make(20)], {resamples: 200});
+    const c = first.buckets.find(b => b.group[0] === 'class');
+    const d = repeated.buckets.find(b => b.group[0] === 'class');
+    assert.deepStrictEqual(c.rates, d.rates); // Duplicating roots must not invent precision.
+    assert.strictEqual(c.counts.bare, 3);
+    assert.strictEqual(c.counts.rightCensored, 3);
+    assert.strictEqual(c.counts['endpoint:trashed'], 3);
+    assert.strictEqual(c.rates.meanEndpointAge.value, 3); // leftTurn, not settlement turn
+    assert.strictEqual(c.rates.lastBareRate.value, 0);
+    assert.strictEqual(c.rates.gainedNetRate.value, .5);
+    assert.strictEqual(c.rates.addedRate.value, 1);
+    assert.ok(first.otherSplit.startsWith('Unavailable'));
+    const sparse = make(1); sparse.games = sparse.games.slice(0, 1);
+    assert.strictEqual(analyzeReports([sparse], {resamples: 20}).buckets[0].rates.bareRate.valid, false);
+    assert.throws(() => analyzeReports([make(1), make(1)]), /Duplicate game/);
+    const missing = make(1); delete missing.games[0].samples;
+    assert.throws(() => analyzeReports([missing]), /Missing or invalid/);
+    const invalid = make(1); invalid.games[0].samples.realizedIceByRootType.lifecycle[0].iceCount = null;
+    assert.throws(() => analyzeReports([invalid]), /Unknown install ICE/);
+  });
+  await check('installation attribution captures actual helper returns without reevaluation', () => {
+    const {observeInstallDecisions} = require('../scripts/ai-batch/install-attribution');
+    const card = {cardType: 'asset', AIPunishesAccess() { throw Error('do not evaluate punishment'); }};
+    const blocked = {ice: [], root: [{}]}, low = {ice: [{}], root: []}, best = {ice: [{}, {}], root: []};
+    const corp = {remoteServers: [blocked, low, best]};
+    const rows = [], errors = [], tracker = createRealizedDefenseTracker((type, e) => rows.push({type, ...e}));
+    tracker.start(corp, 0);
+    let calls = 0, enabled = true;
+    const ai = {
+      _isAScoringServer(server) { calls++; return server === best; },
+      _scoringServers(servers) { return servers.filter(server => this._isAScoringServer(server)); },
+      _scoringWindow() { calls++; return 2; },
+      _advancementLimit() { calls++; return Infinity; },
+      _deceptionInstallDistance() { calls++; return 1; },
+      _protectionScore() { calls++; return 4; },
+      _isHVT() { return false; }, _uniqueCopyAlreadyInstalled() { return false; },
+      _rankedInstallOptionsCore(cards) {
+        this._scoringServers([low, best]); this._scoringWindow(best); this._protectionScore(best);
+        this._isHVT(card); this._uniqueCopyAlreadyInstalled(card);
+        if (this._installAttribution) this._installAttribution(card, [low, best], 1);
+        this._advancementLimit(card, best); this._deceptionInstallDistance(card, best);
+        return [{cardToInstall: card, serverToInstallTo: best, reason: 'actual hook choice'},
+          {cardToInstall: card, serverToInstallTo: low, reason: 'actual alternative'}];
+      },
+      _bestInstallOption(options) { this._rankedInstallOptionsCore([card]); return 0; },
+    };
+    const attribution = observeInstallDecisions(ai, {tracker, corp: () => corp, turn: () => 1,
+      active: () => enabled, safe: fn => { try { fn(); } catch (error) { errors.push(error.message); } }});
+    const choice = [{card, server: best}, {card, server: low}];
+    assert.strictEqual(ai._bestInstallOption(choice), 0);
+    assert.strictEqual(calls, 6);
+    attribution.request(card, best); best.root.push(card); tracker.observe(corp, 1);
+    const install = rows.find(e => e.action === 'install' && e.rootType === 'trap');
+    assert.strictEqual(install.placement.selection, 'legalSelection');
+    const record = install.placement.decision;
+    assert.deepStrictEqual(install.placement.legalDestinations, [tracker.serverId(best), tracker.serverId(low)]);
+    assert.strictEqual(record.hvt, false); assert.strictEqual(record.hook.result, 1);
+    assert.strictEqual(record.destinations.find(e => e.serverId === tracker.serverId(blocked)).emptyProtected, false);
+    assert.strictEqual(record.destinations.find(e => e.serverId === tracker.serverId(low)).scoringEligible, false);
+    assert.strictEqual(record.preferences[0].advancementLimit, 'Infinity');
+    assert.strictEqual(record.preferences[0].scoringWindow, 2);
+    assert.strictEqual(record.preferences[1].profileDistance, 'unknown');
+    assert.strictEqual(record.preferences[1].rank, 1);
+    assert.deepStrictEqual(errors, []);
+    enabled = false; ai._bestInstallOption(choice);
+    assert.strictEqual(calls, 12);
+  });
+  await check('server ICE changes, overwrite and game-end endpoints reconcile shared roots', () => {
+    const events = [], tracker = createRealizedDefenseTracker((type, e) => events.push({type, ...e}));
+    const agenda = {cardType: 'agenda'}, trap = {cardType: 'asset', subTypes: ['Ambush']};
+    const server = {ice: [{}], root: [agenda, trap]}, archives = [];
+    const corp = {remoteServers: [server], scoreArea: [], archives: {cards: archives}};
+    const runner = {scoreArea: []}; tracker.start(corp, 0);
+    server.ice.push({}); tracker.observe(corp, 1);
+    server.ice.pop(); tracker.observe(corp, 1); tracker.observe(corp, 1);
+    const added = events.filter(e => e.action === 'iceAdded'), removed = events.filter(e => e.action === 'iceRemoved');
+    assert.strictEqual(added.length, 1); assert.strictEqual(removed.length, 1);
+    assert.strictEqual(added[0].count, 1); assert.strictEqual(added[0].commitments.length, 2);
+    server.root.shift(); agenda.cardLocation = corp.scoreArea; corp.scoreArea.push(agenda);
+    tracker.observe(corp, 2, false, runner);
+    const replacement = {cardType: 'agenda'};
+    tracker.request(replacement, server, {selection: 'unknown'});
+    server.root.pop(); trap.cardLocation = archives; archives.push(trap);
+    tracker.observe(corp, 3, false, runner);
+    server.root.push(replacement); tracker.observe(corp, 3, false, runner);
+    tracker.finish(corp, runner, 4);
+    const endpoints = events.filter(e => e.action === 'endpoint');
+    assert.deepStrictEqual(endpoints.map(e => e.fate), ['scored', 'overwritten', 'gameEnd']);
+    const installed = events.filter(e => e.action === 'install');
+    assert.strictEqual(installed[0].iceCount, null);
+    assert.strictEqual(installed[0].leftCensored, true);
+    assert.strictEqual(installed[2].iceCount, 1);
+    const game = {deckPairId: 'script', seed: 1};
+    for (const event of events) collector.onEvent(event, game);
+    const stats = collector.summarize([collector.samples(game)]).attribution;
+    assert.strictEqual(stats.serverIceChanges.iceAdded, 1);
+    assert.strictEqual(stats.serverIceChanges.iceRemoved, 1);
+    assert.strictEqual(stats.endpoints['trap:overwritten'], 1);
+    assert.strictEqual(stats.installation.interval.valid, false);
+    assert.strictEqual(stats.coverage.leftCensored, 2);
+  });
+  await check('new remote first ICE is counted once while start-board ICE remains censored', () => {
+    const events = [], tracker = createRealizedDefenseTracker((type, e) => events.push({type, ...e}));
+    const existing = {ice: [{}], root: []}, corp = {remoteServers: [existing]};
+    tracker.start(corp, 0);
+    assert.deepStrictEqual(events, [], 'start-board ICE must not count as additions');
+    const remote = {ice: [{}], root: []};
+    corp.remoteServers.push(remote);
+    tracker.observe(corp, 1);
+    tracker.observe(corp, 1);
+    const added = events.filter(e => e.action === 'iceAdded');
+    assert.strictEqual(added.length, 1, 'first ICE must be emitted once, without a root commitment');
+    assert.strictEqual(added[0].count, 1);
+    assert.deepStrictEqual(added[0].commitments, []);
+    assert.strictEqual(added[0].serverId, tracker.serverId(remote));
+    corp.remoteServers.pop();
+    tracker.observe(corp, 2);
+    tracker.observe(corp, 2);
+    const removed = events.filter(e => e.action === 'iceRemoved');
+    assert.strictEqual(removed.length, 1);
+    assert.strictEqual(removed[0].serverId, added[0].serverId);
+    assert.strictEqual(removed[0].count, 1);
+    const game = {deckPairId: 'script', seed: 1};
+    for (const event of events) collector.onEvent(event, game);
+    const stats = collector.summarize([collector.samples(game)]).attribution;
+    assert.strictEqual(stats.serverIceChanges.iceAdded, 1);
+    assert.strictEqual(stats.serverIceChanges.iceRemoved, 1);
+    assert.deepStrictEqual(stats.rootChangeExposure, {}, 'ICE-only remotes create no root exposure');
+  });
+  await check('committed install defense differs from the pre-request count when a cost removes ICE', () => {
+    const events = [], tracker = createRealizedDefenseTracker((type, event) => events.push({type, ...event}));
+    const card = {cardType: 'agenda'}, server = {ice: [{}, {}], root: []}, corp = {remoteServers: [server]};
+    tracker.start(corp, 0); tracker.request(card, server, {selection: 'unknown'});
+    server.ice.pop(); tracker.observe(corp, 1);
+    server.root.push(card); tracker.observe(corp, 1);
+    const event = events.find(e => e.action === 'install');
+    assert.strictEqual(event.iceCount, 1);
+    assert.strictEqual(event.requestedIceCount, 2);
+    assert.strictEqual(event.observedIceCount, 1);
+  });
+  await check('installation TV uses game clusters and retains empty games and unknown placement', () => {
+    const samples = cohort([0], [1], 30);
+    for (const game of samples) game.lifecycle = game.rows.map(r => ({...r, action: 'install', installedTurn: 0,
+      turn: 0, leftCensored: false, placement: null}));
+    const empty = Array.from({length: 30}, (_, i) => ({gameId: `empty:${i}`, deckPairId: 'pair', rows: [], lifecycle: [], errors: []}));
+    const stats = collector.summarize([...samples, ...empty]).attribution;
+    assert.strictEqual(stats.installation.all.distance, 1);
+    assert.strictEqual(stats.installation.interval.valid, true);
+    assert.strictEqual(stats.installation.interval.low, 1);
+    assert.strictEqual(stats.installation.interval.high, 1);
+    assert.strictEqual(stats.coverage.unknownPlacement, 60);
+    assert.strictEqual(stats.installation.route['agenda:unknown'], 30);
+    assert.strictEqual(stats.installation.route['trap:unknown'], 30);
+  });
+  await check('overwrite attribution expires before a later reinstall and ordinary trash', () => {
+    const events = [], tracker = createRealizedDefenseTracker((type, event) => events.push({type, ...event}));
+    const trap = {cardType: 'asset', subTypes: ['Ambush']}, replacement = {cardType: 'agenda'};
+    const server = {ice: [], root: [trap]}, corp = {remoteServers: [server], archives: {cards: []}, HQ: {cards: []}};
+    tracker.start(corp, 0); tracker.request(replacement, server, {selection: 'unknown'});
+    server.root.pop(); trap.cardLocation = corp.archives.cards; tracker.observe(corp, 1);
+    server.root.push(replacement); tracker.observe(corp, 1);
+    server.root.pop(); replacement.cardLocation = corp.HQ.cards;
+    server.root.push(trap); trap.cardLocation = server.root; tracker.observe(corp, 2);
+    server.root.pop(); trap.cardLocation = corp.archives.cards; tracker.observe(corp, 3);
+    assert.deepStrictEqual(events.filter(e => e.action === 'endpoint' && e.rootType === 'trap').map(e => e.fate),
+      ['overwritten', 'trashed']);
+  });
+  await check('direct command installs capture their hook result with unknown unqueried inputs', () => {
+    const {observeInstallDecisions} = require('../scripts/ai-batch/install-attribution');
+    const rows = [], errors = [], tracker = createRealizedDefenseTracker((type, event) => rows.push({type, ...event}));
+    const card = {cardType: 'asset', subTypes: ['Ambush']}, server = {ice: [], root: []}, corp = {remoteServers: [server]};
+    const ai = {
+      _rankedInstallOptionsCore() { throw Error('direct route must not be ranked by observation'); },
+      _returnPreference(options, command, preference) { this.preferred = preference; return 0; },
+      Choice() {
+        this._installAttribution(card, [server], 0);
+        return this._returnPreference(['install'], 'install', {cardToInstall: card, serverToInstallTo: server});
+      },
+    };
+    tracker.start(corp, 0);
+    const observer = observeInstallDecisions(ai, {safe: fn => { try { fn(); } catch (e) { errors.push(e.message); } },
+      active: () => true, tracker, turn: () => 1, corp: () => corp});
+    assert.strictEqual(ai.Choice(), 0);
+    observer.request(card, server); server.root.push(card); tracker.observe(corp, 1);
+    const placement = rows.find(e => e.action === 'install').placement;
+    assert.strictEqual(placement.selection, 'commandPreference');
+    assert.strictEqual(placement.decision.source, 'directCommand');
+    assert.strictEqual(placement.decision.hook.result, 0);
+    assert.strictEqual(placement.decision.preferences[0].sortObserved, false);
+    assert.strictEqual(placement.decision.preferences[0].advancementLimit, 'unknown');
+    assert.strictEqual(placement.legalDestinations, null);
+    assert.deepStrictEqual(errors, []);
+  });
   await check('exact TV histograms and nonmonotonic tell', () => {
     const stats = collector.distribution([row('agenda', 0), row('agenda', 2), row('trap', 1), row('trap', 1)]);
     assert.strictEqual(stats.distance, 1);
@@ -238,6 +499,16 @@ run(async ({
     assert.strictEqual(result.metrics[`${collector.name}.allCountDistance`].difference, 0);
     assert.throws(() => compareReports(first, second), /seeds/);
     assert.throws(() => calibrateReports(first, first, [collector]), /disjoint/);
+    // Failed whole games stay recorded, including unusable samples; F11 excludes
+    // them from independent successful-game draws and reports unequal counts.
+    second.seeds.push(999);
+    second.games.push({ok: false, fixtureId: '', deckPairId: second.games[0].deckPairId, seed: 999,
+      samples: {[collector.name]: {rows: [{iceCount: NaN}]}}});
+    const completeCase = calibrateReports(first, second, [collector]);
+    assert.deepStrictEqual(completeCase.games, [first.games.length, second.games.length - 1]);
+    assert.deepStrictEqual(completeCase.droppedGames, [0, 1]);
+    assert.strictEqual(completeCase.metrics[`${collector.name}.allCountDistance`].difference, 0);
+
   });
   await check('observation identity rejects missing games, failures and changed decisions', () => {
     const first = report(cohort([0, 1], [0, 1])); first.pairs = ['pair'];

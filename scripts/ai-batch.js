@@ -47,7 +47,7 @@ const metricsLib = require('./ai-batch/metrics');
 
 const DEFAULT_POOL = path.join(root, 'tests/fixtures/ai-batch/deck-pool.json');
 const CACHE_DIR = process.env.AI_BATCH_CACHE ? path.resolve(process.env.AI_BATCH_CACHE) : path.join(root, '.ai-batch-cache');
-const HARNESS_FILES = ['scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js', 'scripts/ai-batch/realized-defense.js',
+const HARNESS_FILES = ['scripts/ai-batch/headless.js', 'scripts/ai-batch/metrics.js', 'scripts/ai-batch/realized-defense.js', 'scripts/ai-batch/install-attribution.js',
   'scripts/ai-batch/calibration.js', 'scripts/ai-batch/collectors/bluffSingleVariableCorrelation.js'];
 const CODE_FILES = ['deck/seedrandom.min.js', 'config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js',
   'checks.js', 'mechanics.js', 'utility.js', 'decks.js', 'runcalculator.js', 'ai_corp.js', 'ai_runner.js'];
