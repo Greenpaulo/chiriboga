@@ -35,7 +35,7 @@ selection if none is queued.
 
 ## Status summary
 
-**7 complete, 6 outstanding** (`6 Pending`, `0 In progress`, `0 Blocked`).
+**8 complete, 5 outstanding** (`5 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -53,7 +53,7 @@ No existing range is credited without tests.
 | 5 | 26019–26023 | Complete | PR #66 / reconciled 2026-10-20 | Lat, In the Groove, Khusyuk, Spec Work and Supercorridor; mechanics and Runner AI. |
 | 6 | 26024–26030 | Complete | PR #66 / reconciled 2026-10-20 | Gauss, Pelangi, Rezeki, The Artist, Direct Access, Rejig and Whistleblower; mechanics and Runner AI. |
 | 7 | 26031–26035 | Complete | PR #66 / reconciled 2026-10-20 | MirrorMorph, Architect Deployment Test, Calvin B4L3Y, Nanoetching Matrix and Hagen; mechanics and Corp AI. |
-| 8 | 26036–26040 | Pending | — | Preserve and validate existing implementations. |
+| 8 | 26036–26040 | Complete | Codex / 2026-10-16 | Gameplay and baseline AI verified; focused/shared checks and all 95 full-suite test files pass (2026-10-18). |
 | 9 | 26041–26046 | Pending | — | Preserve and validate existing implementations. |
 | 10 | 26047–26051 | Pending | — | Preserve and validate existing implementations. |
 | 11 | 26052–26056 | Pending | — | Preserve and validate existing implementations. |
@@ -71,6 +71,7 @@ No existing range is credited without tests.
 | 5 | 26019–26023 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch5.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 5 notes. |
 | 6 | 26024–26030 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch6.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 6 notes. |
 | 7 | 26031–26035 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch7.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 7 notes. |
+| 8 | 26036–26040 | 2026-10-18 | Codex | `tests/downfall-batch8.test.js`; shared format, helper and hook checks; full suite (95 files) | Operations, run-entry costs, reveal income and agenda swaps with baseline AI; see implementation notes. |
 
 ## Batch-review log
 
@@ -81,9 +82,10 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**7 Pending** (optional strategy work), 0 In progress, 0 Blocked.
+**8 Pending** (optional strategy work), 0 In progress, 0 Blocked,
+1 Awaiting review (bounded run-entry repair).
 
-Implementation is complete for batches 1–7; no independent batch review is recorded.
+Implementation is complete for batches 1–8; no independent batch review is recorded.
 PR-comment remediation is not an independent strategic review.
 Preserve subsequent review verdicts and ownership.
 
@@ -96,10 +98,14 @@ Preserve subsequent review verdicts and ownership.
 | 5 | 26019–26023 | Pending | — | Optional strategy: End-turn matching, In the Groove install order/draw choices, Khusyuk access value and Spec Work retention value. [Notes](downfall-implementation-notes.md#batch-5--2601926023). |
 | 6 | 26024–26030 | Pending | — | Optional strategy: Pelangi counter conservation/type choice, Artist install timing, Direct Access valuation, Rejig target value and Whistleblower timing. [Notes](downfall-implementation-notes.md#batch-6--2602426030). |
 | 7 | 26031–26035 | Pending | — | Optional strategy: MirrorMorph action ordering, Architect Deployment Test install value, draw/credit asset timing and Hagen program-trash value. [Notes](downfall-implementation-notes.md#batch-7--2603126035). |
+| 8 | 26036–26040 | Pending | — | Compare operation mode sequences, Cold Site setup budget, Hyoubu spare-click value and Yagi-Uda swap/overadvancement plans; see implementation notes. |
+| 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
 
 ## Optimisation log
 
-No optimisation recorded.
+| Date | Batch / IDs | Finding / scope | Repairs and evidence | Remaining review scope |
+| ---- | ----------- | --------------- | -------------------- | ---------------------- |
+| 2026-10-20 | 8 / 26038 shared dependency | Required run-event affordability repair | Preserve event-only credits, reserve shared funds once; focused batch 8/3 and required shared checks pass; full suite passes all 109 files on Node 20.19.0. [Notes](downfall-implementation-notes.md#batch-8-run-event-payment-repair--2026-10-20). | Independently review run-event funding and Cold Site costs; broader optional strategy work remains Pending. |
 
 ## Set-wide review status
 
@@ -110,6 +116,7 @@ Not requested.
 ```sh
 node --check sets/downfall.js
 node tests/downfall-integration.test.js
+node tests/downfall-batch8.test.js
 node tests/eternal-format.test.js
 node tests/deckbuild-format-pool.test.js
 node tests/decklauncher-identity-change.test.js

@@ -1166,8 +1166,7 @@ cardSet[26011] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 2,
-  //No engine run cost is additional at present; later additional-cost-to-run
-  //effects must waive themselves while secondRun is true.
+  //The second run waives additional run-entry costs through MakeRun.
   runningWithThis: false,
   firstRun: false,
   firstRunSuccessful: false,
@@ -1239,7 +1238,7 @@ cardSet[26011] = {
         this.secondRun = true;
         this.bypassIce = bypassIce;
         postCleanupCallbacks.push(function () {
-          MakeRun(nextServer);
+          MakeRun(nextServer, true);
         });
       } else this._reset();
     },
@@ -3363,42 +3362,35 @@ cardSet[26036] = {
   cardType: "operation",
   subTypes: [],
   playCost: 1,
-  Resolve: function (params) {
-    var validServers = 0;
-    for (var i = 0; i < corp.remoteServers.length; i++) {
-      var s = corp.remoteServers[i];
-      if (s.root.length > 0 && s.ice.length > 0) {
-        validServers++;
+  Resolve: function () {
+    var card = this;
+    var remaining = null;
+    function choose() {
+      var choices = [
+        { id: "credits", label: "Gain 2 credits" },
+        { id: "draw", label: "Draw 2 cards" },
+      ];
+      if (corp.AI) {
+        var draw = corp.RnD.cards.length > 2 && corp.HQ.cards.length < 3 && corp.creditPool >= 4;
+        corp.AI.preferred = { title: card.title, option: choices[draw ? 1 : 0] };
       }
+      DecisionPhase(corp, choices, function (params) {
+        function next() {
+          // Count only after the initial effect (including draw responses) finishes.
+          if (remaining === null) remaining = corp.remoteServers.filter(function (server) {
+            return server.root.length > 0 && server.ice.length > 0;
+          }).length;
+          else remaining--;
+          if (remaining > 0) choose();
+        }
+        if (params.id == "draw") Draw(corp, 2, next);
+        else GainCredits(corp, 2, "", card, next);
+      }, card.title, "Gain credits or draw cards", card);
     }
-    var totalTimes = 1 + validServers;
-    var currentIteration = 0;
-    var cardRef = this;
-    function promptChoice() {
-      currentIteration++;
-      DecisionPhase(
-        corp,
-        [
-          { id: 1, label: "Gain 2 credits", button: "Gain 2[c]" },
-          { id: 2, label: "Draw 2 cards", button: "Draw 2" },
-        ],
-        function (p) {
-          if (p.id === 1) {
-            GainCredits(corp, 2, "", cardRef);
-          } else {
-            Draw(corp, 2);
-          }
-          if (currentIteration < totalTimes) {
-            promptChoice();
-          }
-        },
-        "Fully Operational (" + currentIteration + "/" + totalTimes + ")",
-        "Choose to gain 2[c] or draw 2 cards",
-        cardRef,
-      );
-    }
-    promptChoice();
+    choose();
   },
+  AIEconomyPlay: 2,
+  AIWouldPlay: function () { return true; },
 };
 
 //Red Level Clearance (26037)
@@ -3413,76 +3405,50 @@ cardSet[26037] = {
   cardType: "operation",
   subTypes: ["Transaction"],
   playCost: 1,
-  Resolve: function (params) {
-    var cardRef = this;
-    var chosenOptions = [];
-    function chooseNextEffect(stepNum) {
-      var choices = [];
-      if (!chosenOptions.includes("draw"))
-        choices.push({ id: "draw", label: "Draw 2 cards", button: "Draw 2" });
-      if (!chosenOptions.includes("credits"))
-        choices.push({
-          id: "credits",
-          label: "Gain 2 credits",
-          button: "Gain 2[c]",
+  Resolve: function () {
+    var card = this;
+    var used = [];
+    function choose() {
+      var choices = [
+        {id: "draw", label: "Draw 2 cards"},
+        {id: "credits", label: "Gain 2 credits"},
+        {id: "install", label: "Install 1 non-agenda card from HQ"},
+        {id: "click", label: "Gain 1 click"},
+      ].filter(function (choice) { return used.indexOf(choice.id) < 0; });
+      if (corp.AI) {
+        var preferred = choices.find(function (choice) { return choice.id == "credits"; });
+        if (!preferred) preferred = choices.find(function (choice) {
+          return choice.id == (corp.HQ.cards.length < 3 && corp.RnD.cards.length > 2 ? "draw" : "click");
         });
-      if (!chosenOptions.includes("click"))
-        choices.push({
-          id: "click",
-          label: "Gain 1 click",
-          button: "+1 Click",
-        });
-      if (!chosenOptions.includes("install")) {
-        var hasNonAgenda = corp.HQ.cards.some(function (c) {
-          return c.cardType !== "agenda";
-        });
-        if (hasNonAgenda) {
-          choices.push({
-            id: "install",
-            label: "Install 1 non-agenda card from HQ",
-            button: "Install Card",
-          });
-        }
+        corp.AI.preferred = {title: card.title, option: preferred || choices[0]};
       }
-      DecisionPhase(
-        corp,
-        choices,
-        function (p) {
-          chosenOptions.push(p.id);
-          if (p.id === "draw") {
-            Draw(corp, 2);
-            if (stepNum === 1) chooseNextEffect(2);
-          } else if (p.id === "credits") {
-            GainCredits(corp, 2, "", cardRef);
-            if (stepNum === 1) chooseNextEffect(2);
-          } else if (p.id === "click") {
-            GainClicks(corp, 1);
-            if (stepNum === 1) chooseNextEffect(2);
-          } else if (p.id === "install") {
-            var installChoices = ChoicesHandInstall(corp, function (c) {
-              return c.cardType !== "agenda";
-            });
-            DecisionPhase(
-              corp,
-              installChoices,
-              function (instP) {
-                Install(instP.card, instP.server);
-                if (stepNum === 1) chooseNextEffect(2);
-              },
-              "Red Level Clearance",
-              "Choose non-agenda card from HQ to install",
-              cardRef,
-              "install",
-            );
+      DecisionPhase(corp, choices, function (params) {
+        function next() { if (used.length < 2) choose(); }
+        used.push(params.id);
+        if (params.id == "draw") Draw(corp, 2, next);
+        else if (params.id == "credits") GainCredits(corp, 2, "", card, next);
+        else if (params.id == "click") { GainClicks(corp, 1); next(); }
+        else {
+          var installs = ChoicesHandInstall(corp, false, function (target) {
+            return target.cardType != "agenda";
+          });
+          // An impossible instruction resolves without an effect; it still counts.
+          if (!installs.length) { next(); return; }
+          if (corp.AI) {
+            var best = corp.AI._bestInstallOption(installs, false);
+            corp.AI.preferred = {title: card.title, option: installs[Math.max(0, best)]};
           }
-        },
-        "Red Level Clearance (" + stepNum + "/2)",
-        "Choose effect " + stepNum + " of 2",
-        cardRef,
-      );
+          DecisionPhase(corp, installs, function (install) {
+            Install(install.card, install.server, false, null, true,
+              null, card, next, null, false, next);
+          }, card.title, "Choose non-agenda card to install", card, "install");
+        }
+      }, card.title, "Choose effect " + (used.length + 1) + " of 2", card);
     }
-    chooseNextEffect(1);
+    choose();
   },
+  AIEconomyPlay: 1,
+  AIWouldPlay: function () { return true; },
 };
 
 //Cold Site Server (26038)
@@ -3500,7 +3466,37 @@ cardSet[26038] = {
   subTypes: ["Facility"],
   rezCost: 0,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  power: 0,
+  abilities: [{
+    text: "[click]: Place 1 power counter on this upgrade.",
+    Enumerate: function () {
+      if (!this.rezzed || !CheckActionClicks(corp, 1)) return [];
+      if (corp.AI && !this._usefulCounter()) return [];
+      return [{}];
+    },
+    Resolve: function () { SpendClicks(corp, 1); AddCounters(this, "power", 1); },
+  }],
+  modifyRunClickCost: {
+    Resolve: function (server) { return GetServer(this) == server ? Counters(this, "power") : 0; },
+  },
+  modifyRunCreditCost: {
+    Resolve: function (server) { return GetServer(this) == server ? Counters(this, "power") : 0; },
+  },
+  automaticOnCorpTurnBegins: {
+    Resolve: function () { RemoveCounters(this, "power", Counters(this, "power")); },
+  },
+  _usefulCounter: function () {
+    var server = GetServer(this);
+    return server && server.root.some(function (card) { return card.cardType == "agenda"; }) &&
+      Counters(this, "power") < 3;
+  },
+  AITriggerWhenCan: true,
+  AITriggerAfterTactics: true,
+  AIRezWhenCan: function () { return playerTurn == corp && this._usefulCounter(); },
+  AIDefensiveValue: function (server) {
+    return server && typeof server.cards == "undefined" && server.ice.length ? 2 : 0;
+  },
+  AILimitPerServer: function () { return 1; },
 };
 
 //Hyoubu Institute: Absolute Clarity (26039)
@@ -3516,6 +3512,38 @@ cardSet[26039] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
+  usedThisTurn: false,
+  automaticOnCorpTurnBegins: { Resolve: function () { this.usedThisTurn = false; }, availableWhenInactive: true },
+  automaticOnRunnerTurnBegins: { Resolve: function () { this.usedThisTurn = false; }, availableWhenInactive: true },
+  automaticOnReveal: {
+    Resolve: function (card, revealingPlayer) {
+      if (revealingPlayer != corp || this.usedThisTurn) return;
+      this.usedThisTurn = true;
+      GainCredits(corp, 1, "", this);
+    },
+  },
+  abilities: [{
+    text: "[click]: Reveal a random card from the grip or the top card of the stack.",
+    Enumerate: function () {
+      if (!CheckActionClicks(corp, 1)) return [];
+      if (corp.AI && this.usedThisTurn) return [];
+      var choices = [];
+      if (runner.grip.length) choices.push({id: "grip", label: "Reveal a random card from the grip"});
+      if (runner.stack.length) choices.push({id: "stack", label: "Reveal the top card of the stack"});
+      // Choosing the zone does not inspect its hidden contents.
+      if (corp.AI) return choices.slice(0, 1);
+      return choices;
+    },
+    Resolve: function (params) {
+      var cards = params.id == "grip" ? runner.grip : runner.stack;
+      if (!cards.length) return;
+      SpendClicks(corp, 1);
+      var index = params.id == "grip" ? Math.floor(Math.random() * cards.length) : cards.length - 1;
+      Reveal(cards[index], function () {}, this, corp, false, corp);
+    },
+  }],
+  AITriggerWhenCan: true,
+  AITriggerAfterTactics: true,
 };
 
 //Project Yagi-Uda (26040)
@@ -3532,7 +3560,104 @@ cardSet[26040] = {
   subTypes: ["Research"],
   advancementRequirement: 3,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) AddCounters(this, "agenda", Math.max(0, Counters(this, "advancement") - 3));
+    },
+    automatic: true,
+  },
+  _swapChoices: function () {
+    if (!attackedServer || corp.scoreArea.indexOf(this) < 0 || !CheckCounters(this, "agenda", 1)) return [];
+    var server = attackedServer;
+    var choices = [];
+    server.root.concat(server.ice).forEach(function (installed) {
+      corp.HQ.cards.forEach(function (hand) {
+        if (!CheckInstallDestination(hand, server)) return;
+        if (server.ice.indexOf(installed) >= 0) {
+          if (hand.cardType != "ice") return;
+        } else {
+          if (["asset", "agenda", "upgrade"].indexOf(hand.cardType) < 0) return;
+          if (hand.cardType != "upgrade" && (typeof server.cards != "undefined" || server.root.some(function (other) {
+            return other != installed && (other.cardType == "asset" || other.cardType == "agenda");
+          }))) return;
+          if (CheckSubType(hand, "Region") && server.root.some(function (other) {
+            return other != installed && CheckSubType(other, "Region");
+          })) return;
+        }
+        choices.push({card: hand, target: installed,
+          label: GetTitle(hand, true) + " ↔ " + GetTitle(installed, true)});
+      });
+    });
+    return choices;
+  },
+  _preferredSwap: function (choices) {
+    return choices.find(function (choice) {
+      // Rescue an exposed agenda without installing another one in its place.
+      return choice.target.cardType == "agenda" && choice.card.cardType != "agenda";
+    }) || choices.find(function (choice) {
+      return !encountering && attackedServer.ice[approachIce] == choice.target &&
+        choice.card.cardType == "ice" && CheckCredits(corp, RezCost(choice.card), "rezzing", choice.card) &&
+        choice.card.strength > choice.target.strength;
+    });
+  },
+  abilities: [{
+    text: "Hosted agenda counter: Swap a card from HQ with an installed card in the attacked server. The Runner may jack out.",
+    Enumerate: function () {
+      var choices = this._swapChoices();
+      if (corp.AI) {
+        var best = this._preferredSwap(choices);
+        return best ? [best] : [];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!this._swapChoices().some(function (choice) {
+        return choice.card == params.card && choice.target == params.target;
+      })) return;
+      var card = this, server = attackedServer, incoming = params.card, outgoing = params.target;
+      var destination = outgoing.cardLocation, position = destination.indexOf(outgoing);
+      var endedEncounter = encountering && server.ice[approachIce] == outgoing;
+      RemoveCounters(this, "agenda", 1);
+      UninstallInterrupts([outgoing], function () {
+        var hosted = (outgoing.hostedCards || []).slice();
+        // Atomic exchange: moving either card separately could destroy a server
+        // or expose a temporarily illegal root. Use normal movement notifications.
+        var hqIndex = corp.HQ.cards.indexOf(incoming);
+        destination[position] = incoming;
+        corp.HQ.cards[hqIndex] = outgoing;
+        incoming.rezzed = false;
+        incoming.faceUp = false;
+        MoveCardTriggers(outgoing, destination, corp.HQ.cards);
+        MoveCardTriggers(incoming, corp.HQ.cards, destination);
+        function installed() {
+          AutomaticTriggers("automaticOnInstall", [incoming]);
+          TriggeredResponsePhase(playerTurn, "responseOnInstall", [incoming], function () {
+            var choices = [
+              {id: "continue", label: "Continue the run"},
+              {id: "jack", label: "Jack out"},
+            ];
+            if (runner.AI) {
+              var path = runner.AI._calculateBestCompleteRun(server, 0, 0, 0, 0, null,
+                endedEncounter ? approachIce - 1 : approachIce);
+              runner.AI.preferred = {title: card.title, option: choices[path ? 0 : 1]};
+            }
+            DecisionPhase(runner, choices, function (choice) {
+              if (choice.id == "jack") JackOut();
+              else if (endedEncounter) {
+                phases.runEncounterEnd.next = phases.runPassesIce;
+                ChangePhase(phases.runEncounterEnd);
+              }
+            }, card.title, "Jack out?", card);
+          }, "Installed");
+        }
+        if (hosted.length) Trash(hosted, false, installed);
+        else installed();
+      });
+    },
+  }],
+  AIOverAdvance: true,
+  AIAdvancementLimit: function () { return 4; },
+  AITriggerInPaidWindow: function () { return !!this._preferredSwap(this._swapChoices()); },
 };
 
 //Sting! (26041)

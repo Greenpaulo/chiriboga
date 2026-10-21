@@ -18,7 +18,7 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | In progress | Next implementation set, selected by the user on 2026-10-16. |
+| `downfall` | In progress | Batches 1–8 complete; batches 9–13 pending. |
 
 Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
@@ -51,10 +51,10 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
-Batches 1–7 (26001–26035) now have working gameplay and baseline AI. Focused
+Batches 1–8 (26001–26040) now have working gameplay and baseline AI. Focused
 real-consumer evidence and specific deeper-strategy work are recorded in
 [the implementation notes](downfall-implementation-notes.md) and the active
-tracker's separate optimisation queue. Batches 8–13 remain unverified.
+tracker's separate optimisation queue. Batches 9–13 remain unverified.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
@@ -65,9 +65,6 @@ Remaining recorded Corp gaps:
 
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26038 | Cold Site Server                   | Abilities and run cost absent                                    |
-| 26039 | Hyoubu Institute: Absolute Clarity | Identity abilities absent                                        |
-| 26040 | Project Yagi-Uda                   | On-score and agenda-counter ability absent                       |
 | 26041 | Sting!                             | Score/steal damage trigger absent                                |
 | 26043 | Storgotic Resonator                | Counter placement absent; damage ability exists                  |
 | 26044 | Saisentan                          | Encounter choice and all subroutines absent; AI model is a no-op |

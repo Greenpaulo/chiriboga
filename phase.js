@@ -1316,7 +1316,9 @@ phases.runnerActionMain = {
       return [];
     },
     run: function () {
-      if (CheckActionClicks(runner, 1)) return ChoicesExistingServers();
+      if (CheckActionClicks(runner, 1)) return ChoicesExistingServers().filter(function (choice) {
+        return CanPayAdditionalRunCosts(choice.server, 1);
+      });
       return [];
     },
     trigger: function () {

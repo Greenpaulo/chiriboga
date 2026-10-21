@@ -1,0 +1,35 @@
+{
+  "id": "startup-v2",
+  "sets": [
+    "systemgateway",
+    "elevation",
+    "vantagepoint"
+  ],
+  "pairs": [
+    {
+      "id": "leo-tao",
+      "corp": "[Startup] LEO after Offworld ban.js",
+      "runner": "[Startup] A Rising Tide Breaks All ICE.js"
+    },
+    {
+      "id": "neb-mag",
+      "corp": "[Startup] Glacier Nebula.js",
+      "runner": "[Startup] Reg Mag.js"
+    },
+    {
+      "id": "mel-dewi",
+      "corp": "[Startup] Going to School.js",
+      "runner": "[STARTUP - Vantage Point] Read-Write Dewi.js"
+    },
+    {
+      "id": "pd-topan",
+      "corp": "[Startup] The Two Remotes Problem.js",
+      "runner": "[Startup] They Are Huge With It.js"
+    },
+    {
+      "id": "leo-mulishaT",
+      "corp": "[Startup] Problematic LEO.js",
+      "runner": "[Startup] Negative Marketing Campaign.js"
+    }
+  ]
+}

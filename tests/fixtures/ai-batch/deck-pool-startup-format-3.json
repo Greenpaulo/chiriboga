@@ -1,0 +1,30 @@
+{
+  "id": "startup-v3",
+  "sets": [
+    "systemgateway",
+    "elevation",
+    "vantagepoint"
+  ],
+  "pairs": [
+    {
+      "id": "blt-tao",
+      "corp": "U Can't Touch This [Startup].js",
+      "runner": "[Startup] - Tao.js"
+    },
+    {
+      "id": "pt-loup",
+      "corp": "[Startup] Trashfire rush.js",
+      "runner": "[Startup] - Loup.js"
+    },
+    {
+      "id": "-hiram",
+      "corp": "",
+      "runner": "[Startup] - Hiram.js"
+    },
+    {
+      "id": "-mulishaT",
+      "corp": "",
+      "runner": "[Startup] - MuslihaT.js"
+    }
+  ]
+}

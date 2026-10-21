@@ -907,3 +907,31 @@ never grants its paid ability to the Runner.
 `intended.scoreAdvancementRequirement` before moving the agenda out of its
 server, then clears both when score responses finish. Dividends uses this
 snapshot (CR 10.13.2), including the requirement's server modifiers.
+
+## Run initiation and reveal notifications
+
+`AdditionalRunCosts(server)` returns `{clicks, credits}` from active
+`modifyRunClickCost` and `modifyRunCreditCost` hooks (each `Resolve(server)`
+returns a nonnegative cost). These hooks must be read-only and safe during
+hypothetical run calculations. `CanPayAdditionalRunCosts(server, clicksRequired,
+creditsRequired, event = null)` reserves the initiating action/event costs as
+well. When checking a run event, `FullCheckPlay` first verifies its play cost
+with `"playing", event`, then passes the event to this helper. Event-only
+credits can cover that play cost but cannot pay additional run costs; credits
+usable for both payments are reserved once, so shared funds are not counted
+twice. When paying to play a Run event, `SpendCredits` uses event-only hosted
+sources before shared credits, for both human and AI players, so the later
+run-entry payment retains the shared funding assumed by the check.
+`MakeRun(server, ignoreAdditionalCosts = false)` pays additional costs before
+setting the attacked server or granting bad-publicity credits; it returns false
+if payment is impossible. Recalculating an ongoing run owes no entry costs.
+
+`Reveal(card, callback, context, playerToRevealTo, skipHumanInput,
+revealingPlayer)` emits `automaticOnReveal(card, revealingPlayer)`. The actor
+normally defaults to the active player; mandatory R&D access reveals use the
+Runner. Explicitly pass the actor for effects resolving on behalf of another
+player. Hyoubu's action passes Corp even though the revealed card is Runner-owned.
+
+`GainCredits(player, amount, temporary, sourceCard, afterGain)` optionally calls
+`afterGain` after operation/agenda credit-gain responses. Repeated instructions
+should use this callback rather than starting a decision while responses remain.

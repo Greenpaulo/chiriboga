@@ -125,6 +125,8 @@ const cases = {
     var palisade = inst(PALISADE, corp.HQ.ice); palisade.rezzed = true;
     var plan = inst(26011, runner.resolvingCards);
     check(plan.Enumerate().some(function(c) { return c.server === corp.HQ; }), 'any server can be run');
+    var coldSite = inst(26038, corp.HQ.root); coldSite.rezzed = true; coldSite.power = 1;
+    runner.creditPool = 1; runner.clickTracker = 2;
     runner.AI = null;
     plan.Resolve({server: corp.HQ});
     settle(function() { return offered('trigger').some(function(t) { return t.card === plan; }); }, 'run again offered after unsuccessful run');
@@ -139,7 +141,8 @@ const cases = {
     check(currentPhase.identifier == 'Run 5.1', 'second run successful after the bypass');
     settle(actionPhase, 'second run ends');
     check(!plan.runningWithThis && !plan.secondRun && !plan.bypassIce, 'state cleaned up after the second run');
-    check(runner.clickTracker == 4, 'second run costs no click');
+    check(runner.clickTracker == 1 && runner.creditPool == 0, 'first run pays Cold Site costs; second run waives both costs');
+    coldSite.power = 0; runner.creditPool = 10; runner.clickTracker = 4;
 
     // Declining ends the effect; a successful first run offers nothing.
     MoveCard(plan, runner.resolvingCards);

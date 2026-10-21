@@ -6694,11 +6694,8 @@ cardSet[35055] = {
         }
         
         //Install in the chosen server
-        var targetServer = installParams.server;
-        if (targetServer === null) {
-          targetServer = NewRemoteServer();
-        }
-        Install(installParams.card, targetServer);
+        //Install creates a remote server when the destination is null.
+        Install(installParams.card, installParams.server);
       },
       "Peer Review",
       "Drag a card to a remote server or click Decline",
@@ -7860,11 +7857,8 @@ cardSet[35077] = {
             return;
           }
           //Install in the chosen server
-          var targetServer = installParams.server;
-          if (targetServer === null) {
-            targetServer = NewRemoteServer();
-          }
-          Install(installParams.card, targetServer, true); //true = ignore cost
+          //Install creates a remote server when the destination is null.
+          Install(installParams.card, installParams.server, true); //true = ignore cost
           if (effectNumber === 1) {
             cardRef._chooseEffect(2);
           }

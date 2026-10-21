@@ -1,0 +1,11 @@
+{
+  "id": "beginner-v1",
+  "sets": ["systemgateway", "systemupdate2021", "elevation"],
+  "pairs": [
+    {"id": "pd-tao", "corp": "Duel PD vs Tao.js", "runner": "Duel Tao vs PD.js"},
+    {"id": "btl-kit", "corp": "Duel BTL vs Kit.js", "runner": "Duel Kit vs BTL.js"},
+    {"id": "neh-zahya", "corp": "Duel NEH vs Zahya.js", "runner": "Duel Zahya vs NEH.js"},
+    {"id": "pe-steve", "corp": "Duel PE vs Steve.js", "runner": "Duel Steve vs PE.js"},
+    {"id": "gateway", "corp": "Gateway Corp.js", "runner": "Gateway Runner.js"}
+  ]
+}
