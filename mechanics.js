@@ -1456,6 +1456,24 @@ function SpendCredits(
     var sources = eligibleHostedSources();
     var canUsePool = CreditPoolCanBeUsed(player, "spend", doing, card);
 
+    // Run-event affordability reserves shared credits for run-entry costs.
+    // Pay with event-only sources first, including when AI would preserve
+    // outside credits; these sources cannot fund MakeRun's later payment.
+    var eventOnlySources = player == runner && doing == "playing" && card &&
+      CheckSubType(card, "Run") ? sources.filter(function (source) {
+        return !source.canUseCredits("initiating a run", null);
+      }) : [];
+    if (eventOnlySources.length > 0) {
+      sources = eventOnlySources;
+      canUsePool = false;
+      if (player.AI) {
+        for (var i = 0; i < sources.length && num > 0; i++)
+          spendFromCard(sources[i], Math.min(num, sources[i].credits));
+        choosePaymentSource();
+        return;
+      }
+    }
+
     //Keep computer-player payments deterministic and compatible with the
     //existing strategy code. Human players choose every non-forced allocation.
     if (player.AI) {
@@ -1472,7 +1490,7 @@ function SpendCredits(
 
     // Temporary credits are optional sources too. Avoid adding a choice to
     // existing payments unless a source-sensitive effect makes it meaningful.
-    var temporary = temporaryAvailable();
+    var temporary = eventOnlySources.length > 0 ? 0 : temporaryAvailable();
     var sourceSensitive = player == runner && typeof OutsideCreditDamageSources == "function" &&
       OutsideCreditDamageSources(typeof attackedServer == "undefined" ? null : attackedServer).length > 0;
     if (temporary > 0 && !sourceSensitive) {

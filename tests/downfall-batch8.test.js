@@ -178,7 +178,27 @@ prepaid.canUseCredits = () => true; runner.creditPool = 2;
 assert(!laundryCanRun(),
   'hosted credits eligible for both costs cannot be counted twice either');
 prepaid.canUseCredits = c.cardSet[31038].canUseCredits;
-runner.creditPool = 3; runner.AI = {};
+// Human payment must not consume the pool reserved for the run-entry tax.
+runner.creditPool = 3; runner.AI = null; decisions = [];
+c.SpendClicks(runner, 1);
+let humanLaundryStarted = false;
+c.SpendCredits(runner, 2, 'playing', laundry, () => {
+  laundry.Resolve({server: home});
+  humanLaundryStarted = true;
+});
+assert(!humanLaundryStarted);
+const eventPayment = decisions.pop();
+assert(eventPayment.choices.length > 0);
+assert(eventPayment.choices.every(choice => choice.card === prepaid),
+  'event-only credits must be used before shared credits for a Run event');
+eventPayment.choose(eventPayment.choices[0]);
+assert(humanLaundryStarted);
+assert.strictEqual(c.attackedServer, home);
+assert.strictEqual(runner.creditPool, 0);
+assert.strictEqual(runner.clickTracker, 0);
+c.attackedServer = null; prepaid.credits = 1; runner.clickTracker = 3;
+c.currentPhase = {identifier: 'Runner 1.3'};
+runner.creditPool = 3; runner.AI = {AIPreserveOutsideCredits: () => true};
 c.SpendClicks(runner, 1);
 let laundryStarted = false;
 c.SpendCredits(runner, 2, 'playing', laundry, () => {
