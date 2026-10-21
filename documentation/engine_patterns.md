@@ -919,7 +919,9 @@ well. When checking a run event, `FullCheckPlay` first verifies its play cost
 with `"playing", event`, then passes the event to this helper. Event-only
 credits can cover that play cost but cannot pay additional run costs; credits
 usable for both payments are reserved once, so shared funds are not counted
-twice.
+twice. When paying to play a Run event, `SpendCredits` uses event-only hosted
+sources before shared credits, for both human and AI players, so the later
+run-entry payment retains the shared funding assumed by the check.
 `MakeRun(server, ignoreAdditionalCosts = false)` pays additional costs before
 setting the attacked server or granting bad-publicity credits; it returns false
 if payment is impossible. Recalculating an ongoing run owes no entry costs.
