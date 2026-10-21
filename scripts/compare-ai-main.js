@@ -6,17 +6,34 @@ const os = require('os');
 const path = require('path');
 const {randomUUID} = require('crypto');
 const {spawnSync} = require('child_process');
-const {benchmarkFormat} = require('./ai-benchmark-format');
+const repositoryRoot = path.resolve(__dirname, '..');
 
-function parseArgs(args) {
-  const options = {format: 'beginner'};
+function resolvePool(root, id) {
+  const directory = 'tests/fixtures/ai-batch';
+  const pools = fs.readdirSync(path.join(root, directory), {withFileTypes: true})
+    .filter(entry => entry.isFile() && entry.name.endsWith('.json'))
+    .map(entry => {
+      const pool = path.join(directory, entry.name);
+      const data = JSON.parse(fs.readFileSync(path.join(root, pool), 'utf8'));
+      return {pool, id: data.id, pairs: data.pairs};
+    })
+    .filter(data => typeof data.id === 'string' && Array.isArray(data.pairs));
+  const matches = pools.filter(pool => pool.id === id);
+  if (!matches.length)
+    throw new Error(`Unknown pool ID: ${id}. Choose ${pools.map(pool => pool.id).sort().join(', ')}.`);
+  if (matches.length > 1) throw new Error(`Duplicate pool ID: ${id}`);
+  return matches[0].pool;
+}
+
+function parseArgs(args, root = repositoryRoot) {
+  const options = {pool: 'beginner-v1'};
   for (let i = 0; i < args.length; i++) {
     const name = args[i];
-    if (!['--format', '--jobs', '--seeds'].includes(name) || !args[i + 1])
-      throw new Error('Usage: node scripts/compare-ai-main.js [--format beginner|startup|startup2] [--jobs N] [--seeds FROM-TO]');
+    if (!['--pool', '--jobs', '--seeds'].includes(name) || !args[i + 1])
+      throw new Error('Usage: node scripts/compare-ai-main.js [--pool ID] [--jobs N] [--seeds FROM-TO]');
     options[name.slice(2)] = args[++i];
   }
-  benchmarkFormat(options.format);
+  resolvePool(root, options.pool);
   if (options.jobs !== undefined && !/^[1-9]\d*$/.test(options.jobs)) throw new Error('--jobs must be a positive integer');
   if (options.seeds !== undefined && (!/^[1-9]\d*-[1-9]\d*$/.test(options.seeds) ||
       Number(options.seeds.split('-')[0]) > Number(options.seeds.split('-')[1])))
@@ -31,7 +48,9 @@ function runBatch(cwd, args) {
 }
 
 function compareMain(root, options = {}, batch = runBatch) {
-  const {pool, bench} = benchmarkFormat(options.format || 'beginner');
+  const id = options.pool || 'beginner-v1';
+  const pool = resolvePool(root, id);
+  const bench = path.join('bench', 'pools', encodeURIComponent(id).replace(/\./g, '%2E'));
   const jobs = String(options.jobs || Math.max(1, os.cpus().length - 2));
   const seeds = options.seeds || '1-200';
   const git = args => {
