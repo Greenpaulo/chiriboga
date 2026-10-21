@@ -1753,6 +1753,18 @@ AIPreventBreach: function(server) {
 
 **`AIWouldTrigger(server?)`**
 
+In Corp run paid-ability windows (Run 2.1, 3.1, 4.3 and 4.5), the AI
+consults this hook on each legally offered paid-ability card. A false result
+vetoes that card's paid abilities, including a request from
+`AITriggerInPaidWindow()`. A true result permits selection; cards without this
+hook retain the default trigger behavior. The preference records the exact
+offered card and ability, so selecting an ability cannot switch to another
+ability on the same card. This does not choose the ability's later targets.
+Explicit `AITriggerInPaidWindow()` requests keep their priority; ordinary
+paid-ability choices follow the phase's rez checks. Other uses of these hooks,
+including simultaneous response callbacks and non-run paid windows, retain
+their existing dispatch.
+
 An optional server argument supports pure planning against detached hypothetical
 servers. Anoetic Void uses it when supplied and otherwise falls back to
 `GetServer(this)`; runtime callers may omit it. Planning callers must use a
@@ -2343,7 +2355,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRunExtraRuns(server)` | function | Public self-consuming ICE defense requires an additional ordinary run; see Batch 12 contracts below |
 | `AIRunSuccessfulDamage(server)` | function | Public available hand damage after a successful run |
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
-| `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
+| `AIWouldTrigger()` | function | Allow a defensive ability; veto a legally offered Corp run paid ability with false |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
 | `AIFastAdvanceCounters(card)` | function | Read-only counter count for an operation or installed one-shot advancement upgrade |
 | `AIDamageOperation` | bool | True if this operation deals damage |

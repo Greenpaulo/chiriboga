@@ -739,7 +739,13 @@ before its other economy choices, provided the Corp can pay the advance cost.
 
 When a trigger command is offered, `_choiceInner()` selects a legal ability
 whose card's `AITriggerInPaidWindow()` returns true before phase-specific
-handlers. Event Horizon uses the final movement paid window (`Run 4.5`,
+handlers. In Run 2.1, 3.1, 4.3 and 4.5, `_runPaidAbilityChoice()` first honors
+the offered card's `AIWouldTrigger()` veto, including for explicitly declared
+paid-window requests. Ordinary run paid abilities are selected after the
+phase's rez checks; cards without a veto hook keep their default behavior.
+The preference records both the card and the exact offered ability. This
+selection does not alter later target choices or simultaneous callback order.
+Event Horizon uses the final movement paid window (`Run 4.5`,
 `approachIce == 0`), or a paid window with all ICE already passed, to sacrifice
 against a potentially winning breach or to save an agenda on the Runner's
 last click. This paid-ability selection is separate from ordering simultaneous
@@ -752,10 +758,11 @@ callback triggers.
   saves credits for the attacked server's root and central-card declarations
   and for a higher-value server's ICE. Nothing holds an HQ card, an identity
   ability or credits for a card in hand (R1.1–R1.3).
-- `Phase_Approaching()` and `Phase_Movement()` choose LEO's paid ability
-  whenever `trigger` is offered, without calling its `AIWouldTrigger()`, and
-  the bioroid is picked by index (bug ticket
-  [leo-construction-ability-chosen-without-consulting-ai-hook.md](../bugs/leo-construction-ability-chosen-without-consulting-ai-hook.md); R1.2).
+- LEO's existing `AIWouldTrigger()` is honored in all four run paid windows.
+  Its heuristic can still permit early use, and the sacrifice target is still
+  picked by index. Timing and target valuation remain strategic follow-up
+  work after measuring the hook-routing fix (bug ticket
+  [leo-construction-ability-chosen-without-consulting-ai-hook.md](../bugs/code-review/leo-construction-ability-chosen-without-consulting-ai-hook.md); R1.2).
 - Each player orders their own simultaneous triggers (`ValidateTriggerList()`
   is in `utility.js`, not `phase.js`). For simultaneous callback triggers in
   Run 4.6.2, the Corp AI still has no dedicated ordering handler and falls

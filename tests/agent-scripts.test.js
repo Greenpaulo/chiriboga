@@ -9,7 +9,7 @@ const {spawnSync} = require('child_process');
 const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
-const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
+const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, reproductionSnapshotMatches, gateSetupProblems,
   outcomeLine, failedGateResult, outcomeProblem} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
@@ -103,6 +103,13 @@ const reproductionBefore = [
   "assert.strictEqual(firstChoice, 'install');",
   "assert.strictEqual(secondChoice, 'advance');",
 ];
+const snapshotLine = '**Reproduction SHA-256:** `ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad`';
+assert.strictEqual(reproductionSnapshotMatches(snapshotLine, Buffer.from('abc')), true,
+  'a new reproduction can match a byte-identical snapshot without a commit');
+assert.strictEqual(reproductionSnapshotMatches(snapshotLine, 'abd'), false, 'changed contents fail the snapshot check');
+assert.strictEqual(reproductionSnapshotMatches(snapshotLine, 'abc\n'), false, 'snapshot includes all bytes');
+assert.strictEqual(reproductionSnapshotMatches('**Reproduction SHA-256:** `bad`', 'abc'), false, 'malformed snapshots fail');
+assert.strictEqual(reproductionSnapshotMatches('', 'abc'), null, 'legacy tickets still use history or the missing-original warning');
 assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --corp-option x=true\n' +
   '--collector runs --start tests/fixtures/corp-decisions --collector <name> --guard winRate=0.02`'), [],
   'gate setup check accepts existing collectors, start boards and template placeholders');

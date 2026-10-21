@@ -6904,6 +6904,31 @@ class CorpAI {
     return rezIce;
   }
 
+  _runPaidAbilityChoice(optionList, declaredOnly = false) {
+    if (!optionList.includes("trigger")) return declaredOnly ? -1 : optionList.indexOf("n");
+    var triggers = ChoicesTriggerableAbilities(corp);
+    for (var i = 0; i < triggers.length; i++) {
+      var candidate = triggers[i];
+      var card = candidate.card;
+      var hasDeclaration = typeof card.AITriggerInPaidWindow == "function";
+      if (declaredOnly && !hasDeclaration) continue;
+      if (typeof card.AIWouldTrigger == "function" && !card.AIWouldTrigger.call(card)) {
+        this._log("AIWouldTrigger declined paid ability on " + GetTitle(card, true));
+        continue;
+      }
+      if (declaredOnly && !card.AITriggerInPaidWindow.call(card)) continue;
+      var reason = declaredOnly ? "AITriggerInPaidWindow accepted" :
+        typeof card.AIWouldTrigger == "function" ? "AIWouldTrigger accepted" :
+        "No AIWouldTrigger hook; retaining default";
+      this._log(reason + " paid ability on " + GetTitle(card, true));
+      return this._returnPreference(optionList, "trigger", {
+        cardToTrigger: card,
+        abilityToTrigger: candidate.ability,
+      });
+    }
+    return declaredOnly ? -1 : optionList.indexOf("n");
+  }
+
   Phase_Approaching(optionList) {
     //if there is something that can be rezzed...only bother if the server isn't empty
     if (
@@ -6939,13 +6964,7 @@ class CorpAI {
       }
     }
 
-    //something that could be triggered?
-    //for now assume trigger is always desired
-    if (optionList.indexOf("trigger") > -1) {
-      return optionList.indexOf("trigger");
-    }
-
-    return optionList.indexOf("n");
+    return this._runPaidAbilityChoice(optionList);
   }
 
   Phase_Movement(optionList) {
@@ -6992,11 +7011,7 @@ class CorpAI {
       }
     }
 
-    //if trigger is an option, use it by default
-    if (optionList.indexOf("trigger") > -1)
-      return optionList.indexOf("trigger");
-
-    return optionList.indexOf("n");
+    return this._runPaidAbilityChoice(optionList);
   }
 
   Phase_EOT(
@@ -8840,9 +8855,11 @@ class CorpAI {
           var data = [];
           if (cmd == "trash") data = [{ prop: "card", key: "cardToTrash" }];
           else if (cmd == "rez") data = [{ prop: "card", key: "cardToRez" }];
-          else if (cmd == "trigger")
+          else if (cmd == "trigger") {
             data = [{ prop: "card", key: "cardToTrigger" }];
-          else if (cmd == "play") data = [{ prop: "card", key: "cardToPlay" }];
+            if (typeof this.preferred.abilityToTrigger !== "undefined")
+              data.push({ prop: "ability", key: "abilityToTrigger" });
+          } else if (cmd == "play") data = [{ prop: "card", key: "cardToPlay" }];
           else if (cmd == "score")
             data = [{ prop: "card", key: "cardToScore" }];
           else if (cmd == "trash")
@@ -8925,7 +8942,12 @@ class CorpAI {
             return this._returnPreference(optionList, "rez", {cardToRez: rezCandidate});
         }
       }
-      if (optionList.includes("trigger")) {
+      var runPaidWindow = choiceType == "command" &&
+        ["Run 2.1", "Run 3.1", "Run 4.3", "Run 4.5"].includes(currentPhase.identifier);
+      if (runPaidWindow) {
+        var declaredRunTrigger = this._runPaidAbilityChoice(optionList, true);
+        if (declaredRunTrigger >= 0) return declaredRunTrigger;
+      } else if (optionList.includes("trigger")) {
         var paidTriggers = ChoicesTriggerableAbilities(corp);
         for (var paidIndex = 0; paidIndex < paidTriggers.length; paidIndex++) {
           var paidCard = paidTriggers[paidIndex].card;
@@ -8949,6 +8971,8 @@ class CorpAI {
         ret = this.Phase_Approaching(optionList);
       else if (currentPhase.identifier == "Run 4.5")
         ret = this.Phase_Movement(optionList);
+      else if (runPaidWindow)
+        ret = this._runPaidAbilityChoice(optionList);
       else if (currentPhase.identifier == "Corp Mulligan")
         ret = this.Phase_Mulligan(optionList);
       else if (

@@ -110,6 +110,13 @@ Per-case progress belongs behind `process.env.VERBOSE`. Follow the cadence
 above. Save full-run stdout/stderr
 and its exit status separately, following `AGENTS.md` for long runs.
 
+For a newly written pending reproduction that has no version in Git history,
+record its SHA-256 while it still fails on a `**Reproduction SHA-256:**` line,
+followed by the 64 lowercase hex characters in backticks. After promotion,
+`ticket.js check` uses that snapshot only when the historical pending file is
+unavailable, and requires the complete green file to remain byte-identical.
+Existing historical reproductions continue to use the assertion comparison.
+
 Consolidated regressions:
 
 | Former file | Current suite |

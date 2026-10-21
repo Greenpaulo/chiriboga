@@ -17,6 +17,7 @@
 // keeps a linked roadmap item's status in step: code-review/ or remediation/
 // set it to in-progress, and done/ turns its entry into a Done-table row.
 const fs = require('fs');
+const crypto = require('crypto');
 const path = require('path');
 const {spawnSync} = require('child_process');
 const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
@@ -346,6 +347,16 @@ function reproductionExpectationsMatch(file, before, after) {
     beforeExpectations.every((call, index) => call === afterExpectations[index]);
 }
 
+// New reproductions cannot be read from history during an uncommitted fix.
+// Record this digest while the pending test is still red; unlike an assertion
+// comparison, it requires the entire promoted file to remain byte-identical.
+function reproductionSnapshotMatches(text, content) {
+  const line = text.match(/^\*\*Reproduction SHA-256:\*\*\s*(.*)$/m);
+  if (!line) return null;
+  const digest = line[1].match(/^`([a-f0-9]{64})`\s*$/);
+  return !!digest && crypto.createHash('sha256').update(content).digest('hex') === digest[1];
+}
+
 // Collectors and start boards named by a ticket's `Gate command:` lines that
 // do not exist. Template placeholders (`<name>`) are ignored.
 function gateSetupProblems(text) {
@@ -454,7 +465,12 @@ function check(ticket, {fast = false} = {}) {
         if (added) original = git('show', added + ':' + pending);
       }
       if (original.status !== 0) {
-        report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        const snapshot = reproductionSnapshotMatches(text, fs.readFileSync(path.join(root, green)));
+        if (snapshot === null)
+          report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        else if (snapshot)
+          report('PASS', 'New reproduction moved to ' + green + ' unchanged (recorded SHA-256 snapshot).');
+        else report('FAIL', 'Reproduction differs from its recorded SHA-256 snapshot, or the snapshot is malformed.');
       } else {
         const before = original.stdout.split('\n');
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
@@ -533,7 +549,7 @@ function check(ticket, {fast = false} = {}) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
+  closeRoadmapItem, reproductionExpectationsMatch, reproductionSnapshotMatches, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
