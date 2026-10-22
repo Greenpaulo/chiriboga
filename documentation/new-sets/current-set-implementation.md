@@ -35,7 +35,7 @@ selection if none is queued.
 
 ## Status summary
 
-**8 complete, 5 outstanding** (`5 Pending`, `0 In progress`, `0 Blocked`).
+**9 complete, 4 outstanding** (`4 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -54,7 +54,7 @@ No existing range is credited without tests.
 | 6 | 26024–26030 | Complete | PR #66 / reconciled 2026-10-20 | Gauss, Pelangi, Rezeki, The Artist, Direct Access, Rejig and Whistleblower; mechanics and Runner AI. |
 | 7 | 26031–26035 | Complete | PR #66 / reconciled 2026-10-20 | MirrorMorph, Architect Deployment Test, Calvin B4L3Y, Nanoetching Matrix and Hagen; mechanics and Corp AI. |
 | 8 | 26036–26040 | Complete | Codex / 2026-10-16 | Gameplay and baseline AI verified; focused/shared checks and all 95 full-suite test files pass (2026-10-18). |
-| 9 | 26041–26046 | Pending | — | Preserve and validate existing implementations. |
+| 9 | 26041–26046 | Complete | Codex / 2026-10-22 | Damage, reveals, faction-trash counters and finite Psi repeat traversal; baseline AI; all 114 full-suite files pass. |
 | 10 | 26047–26051 | Pending | — | Preserve and validate existing implementations. |
 | 11 | 26052–26056 | Pending | — | Preserve and validate existing implementations. |
 | 12 | 26057–26061 | Pending | — | Preserve and validate existing implementations. |
@@ -73,6 +73,8 @@ No existing range is credited without tests.
 | 7 | 26031–26035 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch7.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 7 notes. |
 | 8 | 26036–26040 | 2026-10-18 | Codex | `tests/downfall-batch8.test.js`; shared format, helper and hook checks; full suite (95 files) | Operations, run-entry costs, reveal income and agenda swaps with baseline AI; see implementation notes. |
 
+| 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
+
 ## Batch-review log
 
 No independent reviews recorded.
@@ -82,10 +84,10 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**8 Pending** (optional strategy work), 0 In progress, 0 Blocked,
+**9 Pending** (optional strategy work), 0 In progress, 0 Blocked,
 1 Awaiting review (bounded run-entry repair).
 
-Implementation is complete for batches 1–8; no independent batch review is recorded.
+Implementation is complete for batches 1–9; no independent batch review is recorded.
 PR-comment remediation is not an independent strategic review.
 Preserve subsequent review verdicts and ownership.
 
@@ -100,6 +102,8 @@ Preserve subsequent review verdicts and ownership.
 | 7 | 26031–26035 | Pending | — | Optional strategy: MirrorMorph action ordering, Architect Deployment Test install value, draw/credit asset timing and Hagen program-trash value. [Notes](downfall-implementation-notes.md#batch-7--2603126035). |
 | 8 | 26036–26040 | Pending | — | Compare operation mode sequences, Cold Site setup budget, Hyoubu spare-click value and Yagi-Uda swap/overadvancement plans; see implementation notes. |
 | 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
+
+| 9 | 26041–26046 | Pending | — | Optional strategy: damage/counter timing versus scoring, Complete Image naming/play thresholds, Saisentan type priors and probabilistic damage pricing, Letheia bid/trash value and placement among protected servers. [Notes](downfall-implementation-notes.md#batch-9--2604126046). |
 
 ## Optimisation log
 

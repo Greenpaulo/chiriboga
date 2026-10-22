@@ -3121,3 +3121,57 @@ tag-retention, tutor-sequence, and scoring plans remain optimisation work.
   hosted-card responses, the Runner's actual run calculator selects the
   continue/jack-out option; encountered replacement ICE is skipped. Ordinary
   remaining-path recalculation includes the new board and clears the old path.
+
+### Downfall batch 9
+
+- Sting! uses ordinary agenda install/advance/score selection and
+  `AIPunishesAccess(server)` for installed bait severity. Its new
+  `AIOnStealDamage() -> nonnegative integer` declares preventable net damage
+  from stealing this agenda. The Runner run calculator includes it for known
+  agendas in a server root; the Corp `_potentialDamageOnBreach` includes the
+  largest qualifying agenda consequence among its own server/root cards.
+  Both omit damage when stealing wins first. The hook is read-only, callable
+  outside a run, and uses only public score areas. Central random-access
+  prediction remains the existing coarse estimate.
+- Public Health Portal uses `AIWorthInstalling`, `AIEconomyCard`,
+  `AIAvoidInstallingOverThis` and `AIRezWhenCan`; its `RezUsability` restricts
+  proactive rez to the Runner's final paid window. Reveal completion precedes
+  income; the income still resolves with empty R&D.
+- Storgotic Resonator uses `AIWorthInstalling` for a new remote,
+  `AIRezWhenCan` to start collecting counters, and `AITriggerWhenCan` for
+  legal counter-backed click damage. The first qualifying Corp trash is
+  counted independently of whether the asset is active. Its callback receives
+  a stable trash-event ordinal, so nested automatic effects cannot change
+  which trash was first. Its action enumeration checks clicks and counters.
+- Saisentan uses the title/option preference consumer for a card-type guess
+  based on public Heap/installed cards. `AIImplementIce` budgets up to two
+  net damage per subroutine (one original and at most one bonus). Only the
+  Runner-owned calculator may rule out that bonus from a chosen type absent
+  from its grip. This is a conservative bound, not a prediction of random
+  damage draws; the bonus does not recursively trigger itself.
+- Complete Image uses `AIPlayWhenCan`, `AIWouldPlay` and `AIDamageOperation`.
+  The real main-phase selector plays it against a grip of at most one card,
+  subject to agenda points, a successful run on the preceding Runner turn,
+  clicks and credits. Its naming preference guesses a publicly observed
+  title (or Sure Gamble), without inspecting grip/stack identities. The
+  Terminal effect waits for the entire damage chain, moves the resolving
+  operation to Archives, and ends the action phase directly.
+- Letheia Nisei uses `AIPreferredUpgradeServer(legalServers)` to select an
+  ICE-protected destination, `AIDefensiveValue`, `AILimitPerServer` and
+  `AIRezWhenCan` with approach-time `RezUsability`. The optional trash uses
+  the ordinary preference consumer; the Runner's real run calculator decides
+  whether to continue after movement. `PsiGame` creates independent seeded
+  bid preferences, bounded by each side's legal credit sources.
+
+`AIRunRepeatIce(server) -> 0 | 1` declares a possible finite repeat traversal
+of all ICE in the same run. It is read-only, safe outside a run, and uses only
+public run-use state and the Corp's own server. The Runner calculator consumes
+it only for known, active-ability, rezzed or affordable root cards. It budgets
+the adverse Psi outcome, preserves cumulative clicks, credits, damage, finite
+breaker resources and run-duration effects, and marks each defence used in
+path-local persistents. There is no new run click, run-entry tax or refreshed
+bad-publicity pool. After the real first approach the opportunity is gone.
+Corp security records bounded deterrence for this probabilistic effect and
+never uses it as a guaranteed lockout. Bid strategy, repeated-encounter target
+value and the trade-off against letting a dangerous breach occur remain
+optimisation work.

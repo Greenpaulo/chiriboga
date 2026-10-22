@@ -1095,6 +1095,11 @@ class RunCalculator {
 				}
 				approachEffects.push(approachEffect);
 			}
+            else if (typeof knownCardsInRoot[i].AIOnStealDamage == "function" &&
+                AgendaPoints(runner) + (knownCardsInRoot[i].agendaPoints || 0) < AgendaPointsToWin()) {
+              var stealDamage = knownCardsInRoot[i].AIOnStealDamage.call(knownCardsInRoot[i]);
+              approachEffects.push(Array(stealDamage).fill("netDamage"));
+            }
 			//check trash cost
 			else if (typeof knownCardsInRoot[i].trashCost !== "undefined") {
 			  var kctc = TrashCost(knownCardsInRoot[i]);
@@ -1147,7 +1152,15 @@ class RunCalculator {
 		data.storedDamage = totalApproachDamage;
 		data.damageLimit -= totalApproachDamage;
 	}
-	data.doInnerLoop = data.server.ice.length > 0 && data.startIceIdx > -1;
+    // A known Psi defence is a possible extra traversal in this run, never
+    // an infinite lockout. Runner planning budgets the adverse bid outcome;
+    // Corp security keeps this probabilistic effect out of its safety proof.
+    data.repeatDefenders = data.incomplete || this._securityPlanning ? [] : data.server.root.filter(function (card) {
+      return PlayerCanLook(runner, card) && CheckHasAbilities(card) &&
+        (card.rezzed || AvailableCredits(corp) >= RezCost(card)) &&
+        typeof card.AIRunRepeatIce == "function" && card.AIRunRepeatIce.call(card, data.server) > 0;
+    });
+    data.doInnerLoop = data.server.ice.length > 0 && (data.startIceIdx > -1 || data.repeatDefenders.length > 0);
     if (data.doInnerLoop) {
       //record execution time for testing
       data.timeInMS = Date.now();
@@ -1163,7 +1176,7 @@ class RunCalculator {
       this.precalculated.iceAIs = [];
       var unknownIce = 0; //accumulate during the next loop (used to limit risk-estimation)
       var maxCorpCred = AvailableCredits(corp);	  
-      for (var i = data.startIceIdx; i > -1; i--) {
+      for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i > -1; i--) {
         if (unknownIce == 0)
           this.precalculated.iceAIs[i] = this.IceAI(
 			data.server.ice[i], 
@@ -1193,7 +1206,7 @@ class RunCalculator {
       data.todo = []; //array of path arrays that are not finished
       //encounter options at starting ice
 	  var iceAI = this.precalculated.iceAIs[data.startIceIdx];
-      var encounterOptions = this.EncounterOptions(data.startIceIdx,iceAI);
+      var encounterOptions = data.startIceIdx < 0 ? [{effects: [], persistents: []}] : this.EncounterOptions(data.startIceIdx,iceAI);
 	  //create encounter option points
       for (var i = 0; i < encounterOptions.length; i++) {
 		//set up starting conditions
@@ -1244,6 +1257,25 @@ class RunCalculator {
             path_finished = current[current.length - 1].iceIdx < 0;
           else path_finished = current[current.length - 1].iceIdx < data.startIceIdx;
 
+          if (path_finished && data.repeatDefenders.length) {
+            var lastPoint = current[current.length - 1];
+            var repeatCard = data.repeatDefenders.find(function (card) {
+              return !lastPoint.persistents.some(function (persistent) {
+                return persistent.action == "repeatIce" && persistent.use == card;
+              });
+            });
+            if (repeatCard) {
+              var outer = data.server.ice.length - 1;
+              var options = this.EncounterOptions(outer, this.precalculated.iceAIs[outer]);
+              for (var option of options) {
+                var repeated = this.ValidateEncounterPoint(outer, lastPoint, false, option.effects.slice(),
+                  option.persistents, null, lastPoint.card_str_mods.filter(mod => mod.persist),
+                  lastPoint.persistents.concat([{action: "repeatIce", use: repeatCard}]));
+                if (repeated) data.todo.push(current.concat([repeated]));
+              }
+              return;
+            }
+          }
           if (path_finished) {
             data.min_cost = this_cost;
             this.paths.push(current); //since here we only store better paths, this.paths[this.paths.length-1] will always be the best path

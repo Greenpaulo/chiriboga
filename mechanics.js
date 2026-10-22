@@ -604,8 +604,14 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
 	  if (card.player == runner) card.faceUp = true;
 	  Log(GetTitle(card, true) + " trashed");
 	}
+    // Count events independently of active cards: a Resonator rezzed after
+    // an earlier matching trash must not trigger on the second one.
+    var trashEvent = {corpRunnerFactionOrdinal: 0};
+    if (trashingPlayer == corp && runner.identityCard && runner.identityCard.faction && directlyTrashed.some(function (card) {
+      return card.faction == runner.identityCard.faction;
+    })) trashEvent.corpRunnerFactionOrdinal = RecordTurnEvent("corpTrashRunnerFaction");
 	//first the automatic triggers
-	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed]);
+	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed, trashEvent]);
     if (fromDamage) {
 	  AutomaticTriggers("automaticOnTakeDamage", [fromDamage.damage, fromDamage.damageType]);
     }
@@ -620,7 +626,7 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
 	  secondCallbackName="responseOnTakeDamage";
 	  secondEnumerateParams=[fromDamage.damage, fromDamage.damageType];		
 	}
-	TriggeredResponsePhase(playerTurn, "responseOnTrash", [cards, trashingPlayer, directlyTrashed], function() {
+	TriggeredResponsePhase(playerTurn, "responseOnTrash", [cards, trashingPlayer, directlyTrashed, trashEvent], function() {
 	  if (typeof afterTrashing === "function") {
 		afterTrashing.call(context, cards);
 	  }
@@ -1386,7 +1392,8 @@ function SpendCredits(
   doing = "",
   card = null,
   afterSpend,
-  context
+  context,
+  deferredResponses
 ) {
   var outsideSpent = 0;
   var temporaryAvailable = function () {
@@ -1444,7 +1451,10 @@ function SpendCredits(
       );
       return;
     }
-    CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context);
+    if (deferredResponses) {
+      deferredResponses.push({player: player, outsideAmount: outsideSpent, doing: doing, card: card});
+      if (typeof afterSpend == "function") afterSpend.call(context);
+    } else CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context);
   }
 
   function choosePaymentSource() {
@@ -2213,6 +2223,41 @@ function RemoveCounters(card, counter, num = 1) {
   else
     Log(num + " " + counter + " counters removed from " + GetTitle(card, true));
   UpdateCounters();
+}
+
+/** Secret 0–2 credit bids. Neither bid is paid or logged before both commit. */
+function PsiGame(callback, context) {
+  function choicesFor(player) {
+    var choices = [];
+    for (var bid = 0; bid <= 2 && CheckCredits(player, bid, "psi"); bid++)
+      choices.push({bid: bid, label: "Secretly bid " + bid + "[c]"});
+    return choices;
+  }
+  var corpChoices = choicesFor(corp);
+  if (corp.AI) corp.AI.preferred = {title: "Psi Game: Corp bid",
+    option: corpChoices[Math.floor(corp.AI._random() * corpChoices.length)]};
+  DecisionPhase(corp, corpChoices, function (corpChoice) {
+    var runnerChoices = choicesFor(runner);
+    if (runner.AI) runner.AI.preferred = {title: "Psi Game: Runner bid",
+      option: runnerChoices[Math.floor(runner.AI._random() * runnerChoices.length)]};
+    DecisionPhase(runner, runnerChoices, function (runnerChoice) {
+      Log("Psi bids: Corp " + corpChoice.bid + ", Runner " + runnerChoice.bid);
+      var payments = [], order = playerTurn == runner ? [runner, corp] : [corp, runner];
+      function pay(index) {
+        if (index < order.length) {
+          var player = order[index], bid = player == corp ? corpChoice.bid : runnerChoice.bid;
+          SpendCredits(player, bid, "psi", null, function () { pay(index + 1); }, null, payments);
+        } else respond(0);
+      }
+      function respond(index) {
+        if (index >= payments.length) { callback.call(context, corpChoice.bid != runnerChoice.bid); return; }
+        var payment = payments[index];
+        CreditSpendResponses(payment.player, payment.outsideAmount, payment.doing, payment.card,
+          function () { respond(index + 1); });
+      }
+      pay(0);
+    }, "Psi Game: Runner bid", "Choose a secret bid");
+  }, "Psi Game: Corp bid", "Choose a secret bid");
 }
 
 /**

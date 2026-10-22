@@ -1221,6 +1221,13 @@ class CorpAI {
     //2+advancement if it is an active Urtica
     var urtica = this._copyOfCardExistsIn("Urtica Cipher", server.root);
     if (urtica) ret += 2 + urtica.advancement;
+    var stealDamage = 0;
+    for (var candidate of server.root.concat(server.cards || [])) {
+      if (typeof candidate.AIOnStealDamage == "function" &&
+          AgendaPoints(runner) + (candidate.agendaPoints || 0) < AgendaPointsToWin())
+        stealDamage = Math.max(stealDamage, candidate.AIOnStealDamage.call(candidate));
+    }
+    ret += stealDamage;
     //1 for each scored House of Knives that has at least 1 counter and hasn't been used this run
     for (var i = 0; i < corp.scoreArea.length; i++) {
       if (
@@ -4229,6 +4236,14 @@ class CorpAI {
       result.totalBreakCost = null;
     }
     if (result.unpricedBreakers.length) result.honestBreakCost = null;
+    for (var repeatCard of server.root) {
+      if (typeof repeatCard.AIRunRepeatIce == "function" &&
+          (repeatCard.rezzed || AvailableCredits(corp) >= RezCost(repeatCard)) &&
+          repeatCard.AIRunRepeatIce.call(repeatCard, server) > 0) {
+        result.deterrence += 1;
+        result.reasons.push("possible finite Psi repeat of ICE; no guaranteed lockout");
+      }
+    }
     return result;
   }
 

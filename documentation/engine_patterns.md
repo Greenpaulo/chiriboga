@@ -935,3 +935,28 @@ player. Hyoubu's action passes Corp even though the revealed card is Runner-owne
 `GainCredits(player, amount, temporary, sourceCard, afterGain)` optionally calls
 `afterGain` after operation/agenda credit-gain responses. Repeated instructions
 should use this callback rather than starting a decision while responses remain.
+
+## Downfall Psi bids and approach tracking
+
+`PsiGame(callback, context)` resolves secret legal 0–2 credit bids, then calls
+`callback(different)` after payment and spend responses. Bids are not logged or
+paid before both players commit. Payment-source choices follow active-player
+order; both payments finish before either spend-response window opens (CR
+10.14.4–10.14.6). `SpendCredits` accepts an optional seventh argument, an array
+of deferred response records, for this atomic payment. Its usual continuation
+then runs after deduction; the caller must flush `CreditSpendResponses` after
+all linked payments, before continuing the effect. Ordinary payments retain
+their existing wait-for-responses behaviour.
+
+`automaticOnApproachServer.Resolve(server)` fires before approach response
+triggers are collected, including when `availableWhenInactive` is set. Letheia
+Nisei uses it to consume the first approach even while unrezzed; run-begin
+cleanup resets the guard independently of active status.
+
+Trash callbacks also receive a fourth argument, `trashEvent`, whose
+`corpRunnerFactionOrdinal` is the turn's stable ordinal of this Corp trash
+matching the Runner identity's faction (zero for nonmatching events). The
+engine records it once per simultaneous direct trash, before automatic
+callbacks. It includes earlier trashes while the interested card was inactive
+and survives nested callbacks. Hosted collateral does not count as a direct
+player trash. This event counter resets with the other turn counters.

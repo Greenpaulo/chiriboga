@@ -1604,6 +1604,11 @@ phases.runApproachServer = CreatePhaseFromTemplate(
   "Run 4.6.2",
   null
 );
+var runApproachServerInit = phases.runApproachServer.Init;
+phases.runApproachServer.Init = function () {
+  AutomaticTriggers("automaticOnApproachServer", [attackedServer]);
+  runApproachServerInit.call(this);
+};
 phases.runApproachServer.triggerCallbackName = "responseOnApproachServer";
 phases.runApproachServer.historyBreak = { title: "Run: Server", style: "run" };
 
