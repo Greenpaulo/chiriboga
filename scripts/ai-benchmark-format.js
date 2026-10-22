@@ -3,11 +3,12 @@
 const formats = {
   beginner: {pool: 'documentation/corp-ai-regression/assets/beginner-pool.json', bench: 'bench'},
   startup: {pool: 'tests/fixtures/ai-batch/deck-pool-startup-format.json', bench: 'bench/startup'},
+  startup2: {pool: 'tests/fixtures/ai-batch/deck-pool-startup-format-2.json', bench: 'bench/startup2'},
 };
 
 function benchmarkFormat(format = 'beginner') {
   if (!Object.hasOwn(formats, format)) {
-    throw new Error(`Unknown benchmark format: ${format}. Choose beginner or startup.`);
+    throw new Error(`Unknown benchmark format: ${format}. Choose beginner, startup or startup2.`);
   }
   return formats[format];
 }
@@ -22,7 +23,7 @@ function parseFormat(args, script) {
     benchmarkFormat(args[1]);
     return args[1];
   }
-  throw new Error(`Usage: node scripts/${script} [--format beginner|startup]`);
+  throw new Error(`Usage: node scripts/${script} [--format beginner|startup|startup2]`);
 }
 
 module.exports = {benchmarkFormat, benchmarkBaselines, parseFormat};

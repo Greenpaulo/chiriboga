@@ -191,21 +191,23 @@ for the evidence and remaining scoring deficit against the historical H0 build.
 ### Fresh main-versus-checkout timing comparison
 
 ```sh
-node scripts/compare-ai-main.js --format startup
+node scripts/compare-ai-main.js --pool startup-v1
 ```
 
 This runs local `main` first in a temporary detached worktree, then the current
 checkout including uncommitted changes, then prints the paired comparison,
 including decision latency. Both runs use seeds 1–200 and the same worker count.
 It does not switch the current checkout, fetch main, or replace accepted baselines.
-Reports are retained in `bench/startup/paired-main/<unique-run>/main.json` and
+Reports are retained in `bench/pools/startup-v1/paired-main/<unique-run>/main.json` and
 `candidate.json`; the temporary main worktree is removed after success or failure.
 The deck pool and precons must match main, otherwise the command stops before
 playing games rather than compare different inputs.
 
 Use `--jobs 4` to pin concurrency. `--seeds 1-3` permits a small diagnostic run;
-it is not a full acceptance benchmark. Omitting `--format startup` selects the
-beginner pool and `bench/paired-main/`. Sequential runs reduce stale-baseline
+it is not a full acceptance benchmark. Use `--pool <id>` with the top-level `id` of any pool JSON file in
+`tests/fixtures/ai-batch/`, such as `startup-v2`, `startup-v3`, or `standard-v1`.
+Omitting `--pool` selects `beginner-v1`; reports are grouped under
+`bench/pools/<pool-id>/paired-main/`. Sequential runs reduce stale-baseline
 machine-load differences; changing load between runs can still affect timings.
 
 ### Refreshing the accepted baseline after a merge
@@ -787,6 +789,10 @@ histograms/TV, a separate unrevealed population, deck breakdowns, route/posture/
 safety/multi-root counts, endpoint ages, server allocation totals and root-age
 exposure to those allocations. Root change exposure can count a shared layer
 for several roots; it is explicitly not a count of independent allocations.
+Reports captured before the PR #65 review fix omit the first ICE addition when
+ICE creates a new remote. Their server allocation totals undercount additions;
+offline analysis cannot recover the missing events. This omission does not
+affect root exposure for those ICE-only remotes, which have no commitments.
 Unknown placement and left-censored coverage remain visible. The global installation-TV
 interval describes unrevealed installs; per-deck installation distributions and
 intervals include revealed installs as diagnostics. All 95% intervals resample
@@ -971,11 +977,6 @@ stall (BTL/Kit seed 257); calibration retains failure evidence and uses 1,399
 successful games with that stratum's reduced count. No consumer margin or
 policy adoption follows from this calibration. Lifecycle totals include all
 tracked remote root cards; metric class counts cover agendas and declared traps.
-
-`scripts/ai-batch/install-defense-summary.js <report.json> [...]` reads saved
-observer-on reports and prints install-time ICE by root class, bare-at-install
-rate by trap install route, and route counts. Pooled, read-only diagnostic; no
-game-clustered intervals.
 
 ## Install-series collectors and baselines (I0)
 

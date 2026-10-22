@@ -45,7 +45,9 @@ function createRealizedDefenseTracker(emit) {
     // defense. Root rows must not turn one layer into several allocations.
     const servers = new Set(corp.remoteServers || []);
     for (const server of new Set([...servers, ...ice.keys()])) {
-      const previous = ice.get(server), current = new Set(servers.has(server) ? server.ice : []);
+      // After start, a newly observed remote had no previously observed ICE.
+      const previous = ice.get(server) ?? (preexisting ? undefined : new Set());
+      const current = new Set(servers.has(server) ? server.ice : []);
       if (previous && !preexisting) {
         const commitments = [...installed.values()].filter(entry => entry.server === server).map(entry => entry.commitmentId);
         for (const [action, cards, other] of [['iceAdded', current, previous], ['iceRemoved', previous, current]]) {

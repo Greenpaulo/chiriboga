@@ -82,6 +82,7 @@ class RunCalculator {
       maxCorpCred = Math.max(maxCorpCred, RezCost(ice));
     }
     var iceKnown = PlayerCanLook(knowledgePlayer, ice);
+    result.knownToEvaluator = iceKnown; // Card modifiers must not interpret synthetic hidden strength as printed strength.
     if (!iceKnown) {
       //unknown ice
 	  var extraRezCost = this._publicRezCostModifier(ice, knowledgePlayer); //public effects only (the hidden card's own effects and printed cost are not read)
@@ -313,6 +314,13 @@ class RunCalculator {
 
   IceAct(card, iceAI, point, server) {
     var result = []; //array of points (directions)
+    //subtypes gained earlier in this encounter (persistents with addSubTypes, e.g. Pelangi)
+    var persistentsSoFar = point.persistents || [];
+    for (var i = 0; i < persistentsSoFar.length; i++) {
+      var gained = persistentsSoFar[i];
+      if (gained.addSubTypes && gained.target == iceAI.ice && gained.iceIdx == point.iceIdx)
+        iceAI = Object.assign({}, iceAI, { subTypes: iceAI.subTypes.concat(gained.addSubTypes) });
+    }
 
     var iceStrength = iceAI.strength;
     for (var i = 0; i < point.card_str_mods.length; i++) {
@@ -332,6 +340,10 @@ class RunCalculator {
 	if (typeof card.AIImplementBreaker == "function") {
 		result = card.AIImplementBreaker.call(card,this,result,point,server,cardStrength,iceAI,iceStrength,clicksLeft,creditsLeft);
 	}
+    //non-breaker encounter abilities that change how breakers apply (e.g. Pelangi)
+    if (typeof card.AIEncounterAbility == "function") {
+      result = card.AIEncounterAbility.call(card, this, result, point, iceAI);
+    }
     return result;
   }
 
@@ -890,8 +902,8 @@ class RunCalculator {
         restrictedCreditsSpent: 0,
         restrictedCreditsPaid: 0,
         meatDamagePrevention: this._meatDamagePrevention || 0,
-				runner_credits_lost: 0,
-                runner_clicks_spent: 0,
+				runner_credits_lost: this._runStartCosts ? this._runStartCosts.credits : 0,
+                runner_clicks_spent: this._runStartCosts ? this._runStartCosts.clicks : 0,
                 virus_counters_spent: 0,
                 card_str_mods: [],
 				persistents: [],
@@ -937,7 +949,9 @@ class RunCalculator {
 	if (typeof data.bonusBreaker == "undefined") data.bonusBreaker = null;
 	this.bonusBreaker = data.bonusBreaker;
     var installedRunnerCards = InstalledCards(runner);
-	data.clickLimit = data.clicks; //this is maybe not ideal (e.g. Enigma might break things)
+	this._runStartCosts = (this._securityPlanning || this._continuationRun || !attackedServer) && typeof AdditionalRunCosts == "function" ?
+      AdditionalRunCosts(data.server) : {clicks: 0, credits: 0};
+    data.clickLimit = data.clicks; //this is maybe not ideal (e.g. Enigma might break things)
 	data.poolCreditLimit = data.poolCredits; //same as above, maybe
     if (typeof OutsideCreditDamageSources == "function" && OutsideCreditDamageSources(data.server).length &&
         typeof CreditPoolCanBeUsed == "function" && !CreditPoolCanBeUsed(runner, "spend", "using", null)) {
@@ -988,7 +1002,7 @@ class RunCalculator {
 	  var activeHOKs = 0;
 	  corp.scoreArea.forEach(function(item){
 		if (!attackedServer || !item.usedThisRun) {
-			if (CheckCounters(item, "agenda", 1)) activeHOKs++;
+			if (item.title == "House of Knives" && CheckCounters(item, "agenda", 1)) activeHOKs++;
 		}
 	  });
 	  var hokEffect = [];

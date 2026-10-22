@@ -1,0 +1,21 @@
+{
+  "id": "standard-v1",
+  "sets": [
+    "systemgateway",
+    "elevation",
+    "vantagepoint",
+    "downfall"
+  ],
+  "pairs": [
+    {
+      "id": "hyoubu-az",
+      "corp": "[Standard So Far] - Hyoubu.js",
+      "runner": "[Standard So Far] - Az.js"
+    },
+    {
+      "id": "neb",
+      "corp": "[Standard So Far] - Nebula.js",
+      "runner": ""
+    }
+  ]
+}
