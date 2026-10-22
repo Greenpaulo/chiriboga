@@ -534,9 +534,9 @@ isolate each signal's causal contribution. The policy, settings, memory and
 option-only green tests were removed. Do not retry the same relative-depth
 formula or relax its gate after these results. Passive measurement, reporting
 and control-calibration evidence remain useful. See the
-[L8.2 failure record](../backlog/code-review/feature-layer-8-2-remote-deception-profiles.md);
-[L8.9](specs/L8.9-observable-defense-parity.md) already owns attribution before
-a supported replacement is selected.
+[L8.2 failure record](../backlog/done/feature-layer-8-2-remote-deception-profiles.md);
+[L8.9](../backlog/code-review/L8.9-observable-defense-parity.md) delivers passive attribution;
+installation and holding changes belong to I3/I4/I5 and their own gates.
 
 **Agenda bluff probability.** `_shouldBluffAgendaServer()` rolls once per
 remote and agenda (cached in `_agendaBluffDecisions`) with probability
@@ -941,7 +941,33 @@ needs.
     off/on batches for matching game outcomes and decision/gameplay hashes.
     The [harness guide](../ai-batch-harness.md#realized-defense-measurement-f12)
     records observer switches, evidence commands and interpretation limits;
-    I2/L8.2/L8.9 consume this shared collector with their own frozen gates.
+    I2/L8.2 use this shared collector in policy gates; L8.9 extends passive
+    diagnostics and supplies evidence to the installation consumers.
+    L8.9 extends this observer with actual helper-return capture through
+    `observeInstallDecisions()`, committed-install ICE counts, separate request
+    counts, final preference rank/reason, hook results and queried destination
+    eligibility. Uncomputed comparator inputs remain unknown. Protection
+    assessments retain their caller flags and are Corp-known measurements.
+    Server-level ICE changes carry their sharing commitments; root exposure to
+    a shared change is reported separately. Observed posture transitions and
+    settled lifecycle endpoints distinguish placement/allocation from survival.
+    Start-root original placement remains unknown. Installation distributions
+    and game-clustered intervals supplement the unchanged headline statistics.
+    Offline install-defense analysis adds per-deck/route distributions, whole-game
+    intervals, age bands and endpoint/censoring diagnostics from saved reports.
+    L8.9's observer identity passed 1,400/1,400 paired games. Its completed
+    baseline-only calibration compares 2,800 versus 2,798 successful games,
+    explicitly retaining two observer-independent failure records. The noise
+    allowances are baseline-specific and not strategic harm limits.
+    The proposed bare-trap installation restriction was withdrawn without
+    implementation; I3 owns roles/occupancy, I4 agenda installation/holding and
+    I5 asset/trap installation/holding. Their specs link the
+    [tool recipe](../ai-batch-harness.md#using-install-observations-in-the-i-tickets).
+    A shell/asset-spam plan may legitimately deploy bare disposable roots;
+    zero ICE is not by itself a bad installation. Current saved ordinary roots
+    combine assets/upgrades as other and lack full topology and HQ wait histories.
+    I3.1's future deck profile remains proposed/read-only, not a runtime consumer;
+    no implemented profile classifier or universal protection rule is claimed.
   - *Collectors.* A consumer adds
     `scripts/ai-batch/collectors/<name>.js` exporting `{name, onEvent(event,
     game), finish(game)}` and optional `directions`. `game` is a per-game
@@ -995,7 +1021,7 @@ allocation of restricted credit sources across payments (L6.1).
 L9.1 closes limit 1 (unpriceable installed breakers): unknown pricing can no
 longer prove security or create a lockout, and affected totals are explicitly
 unknown. Sang Kancil and Principia have real standard pricing hooks from the
-[preceding fix](../bugs/code-review/sang-kancil-and-principia-priced-as-unbreakable.md).
+[preceding fix](../bugs/done/sang-kancil-and-principia-priced-as-unbreakable.md).
 Bumi 1.0's missing Runner-side click-break implementation remains outside L9.1.
 The security tests load the real AI classes and card definitions with
 deterministic engine helpers; they do not replace playing the game in the

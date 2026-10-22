@@ -1,0 +1,111 @@
+{
+  "kind": "L8.9 Stage 1 isolated failure diagnosis",
+  "date": "2026-10-19",
+  "node": "v20.19.0",
+  "sha": "aac6ea9",
+  "codeHash": "5f42c3acc17d9c52",
+  "poolHash": "0ee4865c35412106",
+  "options": {
+    "corp": {
+      "secureScoringServerGate": false,
+      "serverAtRiskInstallOverride": false,
+      "committedAgendaReserveBypass": false,
+      "emptyArchivesRunPressure": false,
+      "valuelessServerDebtReset": false,
+      "postureEpochs": true,
+      "matchLocalPostureFeedback": true,
+      "iceMarginalSecurity": true
+    },
+    "runner": {}
+  },
+  "collectors": [
+    "bluffSingleVariableCorrelation",
+    "installOutcomes",
+    "realizedIceByRootType"
+  ],
+  "original": {
+    "file": "bench/L8.9-aac6ea9-attribution-v2/on-401-800.json",
+    "sha256": "6f9f4d381137b57d1f0a8286e2924e5b1e29963945c68ec31639be520ba2694f",
+    "records": 2800,
+    "successful": 2798,
+    "failed": 2
+  },
+  "diagnostics": [
+    {
+      "pair": "zwicky-magdalene",
+      "seed": "576",
+      "matchesOriginalAndEachOther": true,
+      "reports": [
+        {
+          "file": "bench/L8.9-aac6ea9-stage1-diagnostics/zwicky-magdalene-576-off.json",
+          "sha256": "edf384155376e39901544a938a8ebbadf07ce6f80fa747c1ddbfdf25ae470ead",
+          "exit": 2
+        },
+        {
+          "file": "bench/L8.9-aac6ea9-stage1-diagnostics/zwicky-magdalene-576-on.json",
+          "sha256": "cfc30018919ee7597a3bf78199d3cb9fe73afcdee5660137190b6b37b566bc80",
+          "exit": 2
+        }
+      ],
+      "result": {
+        "ok": false,
+        "winner": "runner",
+        "reason": "Runner has reached 7 agenda points",
+        "turns": 17,
+        "corpPoints": 5,
+        "runnerPoints": 8,
+        "logHash": "e5e90c59f8e8",
+        "decisionHash": "cb8f5032e532221009a9bf49492aa5934200f9d6",
+        "errors": [
+          "ReferenceError: NewRemoteServer is not defined"
+        ]
+      },
+      "trace": {
+        "file": "bench/L8.9-aac6ea9-stage1-diagnostics/zwicky-magdalene-576-trace-off.json",
+        "sha256": "b4bac2f187c4995374ed345e17e3a3ef9dca482c382b0d542e87dbc25897c434"
+      }
+    },
+    {
+      "pair": "btl-kit",
+      "seed": "632",
+      "matchesOriginalAndEachOther": true,
+      "reports": [
+        {
+          "file": "bench/L8.9-aac6ea9-stage1-diagnostics/btl-kit-632-off.json",
+          "sha256": "9f8bffe8e1aeee18680552b9f959655c582e1a65ddc24ec468cc60c8f5318dbb",
+          "exit": 2
+        },
+        {
+          "file": "bench/L8.9-aac6ea9-stage1-diagnostics/btl-kit-632-on.json",
+          "sha256": "4246ac491e9cdd1c3f9fff306d8e47f4d6a90e39386b7f22d67e3dc479914de8",
+          "exit": 2
+        }
+      ],
+      "result": {
+        "ok": false,
+        "winner": null,
+        "reason": "stalled",
+        "turns": 27,
+        "corpPoints": 4,
+        "runnerPoints": 5,
+        "logHash": "17fbc4f23c6e",
+        "decisionHash": "6ccc9a6081e13b3b82938817f822e08c461b1805",
+        "errors": [
+          "stalled: no main-loop step for 10 s after: Null command"
+        ]
+      },
+      "trace": {
+        "file": "bench/L8.9-aac6ea9-stage1-diagnostics/btl-kit-632-trace-off.json",
+        "sha256": "f4242cd9a14aa86d7a8ed9d2ae18da7a1d2616ab757be6174f5ef9e205933842"
+      }
+    }
+  ],
+  "observerOnlyDefectFound": false,
+  "calibration": {
+    "status": "blocked",
+    "marginsFrozen": false,
+    "reason": "Complete-case analysis changes the estimand and needs explicit authorization and a tested consumer change; baseline failure independence does not establish harmless missing exposure."
+  },
+  "traceSetup": "var l89Trace = {errors: [], nullCommands: []};\nvar l89LogError = LogError;\nLogError = function(src) {\n  l89Trace.errors.push({message: String(src), stack: src && src.stack || null,\n    phase: currentPhase.title, identifier: currentPhase.identifier});\n  return l89LogError.apply(this, arguments);\n};\nvar l89ExecuteChosen = ExecuteChosen;\nExecuteChosen = function(cmd) {\n  if (cmd == null) l89Trace.nullCommands.push({phase: currentPhase.title, identifier: currentPhase.identifier,\n    side: activePlayer === corp ? 'corp' : 'runner', executingCommand: executingCommand,\n    commands: EnumeratePhase(), resolving: corp.resolvingCards.map(function(c) {return c.title;})});\n  return l89ExecuteChosen.apply(this, arguments);\n};\n__report = function() {return l89Trace;};\n",
+  "traceRunner": "const fs = require('fs');\nconst root = process.cwd();\nconst batch = require(root+'/scripts/ai-batch');\nconst {playGame} = require(root+'/scripts/ai-batch/headless');\nconst [pairId,seed] = process.argv.slice(2);\nconst config = batch.buildConfig(batch.parseArgs(['--pool','tests/fixtures/ai-batch/deck-pool.json','--pairs',pairId,'--seeds',seed+'-'+seed,'--jobs','1','--defense-observer','off','--corp-option','postureEpochs=true','--corp-option','matchLocalPostureFeedback=true','--collector','realizedIceByRootType','--collector','bluffSingleVariableCorrelation','--collector','installOutcomes']));\nconst collectors=config.collectorNames.map(n=>require(root+'/scripts/ai-batch/collectors/'+n));\nconst states=collectors.map(()=>({seed,deckPairId:pairId,fixtureId:null}));\nconst events=[];\nplayGame({streamPrefix:seed+':'+pairId,corpFile:config.pairs[0].corp,runnerFile:config.pairs[0].runner,setFiles:config.setFiles,timeoutMs:config.timeoutMs,corpOptions:config.corpOptions,runnerOptions:config.runnerOptions,securityCache:config.securityCache,realizedDefenseSnapshot:false,defenseObserver:'off',telemetry:true,observe:true,fullLog:true,tail:200,setupFile:'/tmp/L8.9-trace-setup.js',onEvent:e=>{events.push(e);collectors.forEach((c,i)=>c.onEvent(Object.freeze({...e}),states[i]));}}).then(game=>{\n fs.writeFileSync(root+'/bench/L8.9-aac6ea9-stage1-diagnostics/'+pairId+'-'+seed+'-trace-off.json',JSON.stringify({diagnosticOnly:true,setupFile:'/tmp/L8.9-trace-setup.js',collectors:config.collectorNames,game,events},null,2)+'\\n');\n process.exitCode=game.errors.length || !game.winner ? 1:0;\n});\n"
+}

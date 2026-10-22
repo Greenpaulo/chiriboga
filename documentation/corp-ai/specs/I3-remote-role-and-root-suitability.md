@@ -1,7 +1,7 @@
 # I3 Remote role and root suitability
 
 **Roadmap item:** I3 · **Depends on:** I2, F4, L8.4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](I2-ice-selection-by-marginal-security.md), [deception gate reconciliation](../deception-gates.md)
+**Read first:** [L8.9 tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](../../backlog/code-review/L8.9-observable-defense-parity.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](../../backlog/done/I2-ice-selection-by-marginal-security.md), [deception gate reconciliation](../deception-gates.md)
 **Verified against code:** 60fa0d7 (2026-10-16)
 
 Dependency state at 60fa0d7: L8.4 is done and adopted (`postureEpochs`
@@ -154,8 +154,35 @@ displaced role. Bluff and bait remain L8 inputs, not roles.
 owns any marginal concealment value and I5 owns `trapValue`; I3 adds neither
 and does not feed private trap payoff into ICE ranking. Placing a trap in the
 scoring remote pays the same `opportunityCost` as any non-agenda root. Read
-[L8.9](L8.9-observable-defense-parity.md)'s post-I2 attribution before
+[L8.9](../../backlog/code-review/L8.9-observable-defense-parity.md)'s post-I2 attribution before
 implementing (a sequencing preference, not a dependency).
+
+**Measurement handoff from L8.9 (2026-10-19).** L8.9 delivers observation and
+findings, not an admission rule. Its proposed restriction on new bare trap
+remotes was withdrawn without implementation. I3 owns role/occupancy decisions
+for every candidate, while I5 owns whether/where installing an asset or trap is
+worthwhile. Do not inherit a “must have ICE” condition from that experiment.
+
+Use the [tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets)
+on fresh I3 baseline/candidate reports: collect `realizedIceByRootType`,
+`bluffSingleVariableCorrelation` and `installOutcomes`; run
+`node scripts/ai-batch/install-defense-summary.js <one-arm-report.json>` offline.
+Inspect requested/committed install ICE, placement eligibility/rank/reason,
+per-deck/routes, shared ICE changes, root ages and endpoints. Compare whether
+scoring-room occupancy changes allocation or merely which roots survive. Keep
+unknown inputs and failed-game coverage visible; use the existing L8.9 focused
+regressions for observation changes. These diagnostics supplement I3's own
+role collector and paired gate; they do not add or replace an improvement target.
+
+Include a shell/asset-spam counterexample: many cheap roots can legitimately
+occupy bare remotes while one scoring remote stays protected. A count difference
+or a new remote is not itself an error. Current L8.9 samples do not establish
+representative shell-plan coverage or a full ordinary-asset/topology history;
+state those gaps and add scoped passive evidence if a claim depends on them.
+[I3.1](I3.1-deck-game-plan-profile.md) owns future starting-deck evidence, but
+I3 need not wait for that profile or invent an archetype rule now. L8.9's
+calibrated noise allowances belong to its old baseline; reconcile fresh coverage
+and consumer-specific thresholds before candidate results.
 
 Option: `remoteRoles` (Corp AI), default `false`. With it off, nothing above is
 computed and decisions are identical.
@@ -262,6 +289,8 @@ no-worse row is not adopted; the F12 paired TV guard above replaces it, per
   advanced agenda to reuse a remote is out of scope.
 
 ## Acceptance criteria
+- [ ] Use the L8.9 tool recipe on current matching reports; record destination, allocation, lifetime and per-deck coverage evidence in the Resolution.
+- [ ] Exercise a shell/asset-spam counterexample with a protected scoring room and legitimate bare disposable roots, and state any missing representative pool/topology coverage.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] Every root install candidate carries the target remote's current and proposed role and its `opportunityCost` in points; a displaced `scoring` role is named in its reasons.
 - [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).

@@ -46,14 +46,16 @@ run(async ({
       __report = function() { return {corpDraws: defenseTestCorpDraws, runnerDraws: defenseTestRunnerDraws,
         engineDraws: defenseTestEngineDraws, mapWrites: defenseTestMapWrites, weakWrites: defenseTestWeakWrites}; };`);
     const records = [];
-    for (const mode of ['off', 'on', 'throw', 'sinkThrow', 'sinkNull', 'sinkUndefined', 'sinkUnsafe']) {
+    for (const mode of ['off', 'on', 'throw', 'sinkThrow', 'sinkChange', 'sinkInstall', 'sinkNull', 'sinkUndefined', 'sinkUnsafe']) {
       const events = [];
       const game = await playGame({streamPrefix: '1:gateway', corpFile: pair.corp, runnerFile: pair.runner,
         setFiles, timeoutMs: 120000, observe: true, telemetry: true, setupFile: setup,
         realizedDefenseSnapshot: mode !== 'off', defenseObserver: mode, onEvent: event => {
           events.push(event);
           if (mode === 'sinkThrow' && event.type === 'realizedDefenseSnapshot') throw Error('snapshot sink failed');
-          if (mode.startsWith('sink') && mode !== 'sinkThrow' &&
+          if (mode === 'sinkChange' && event.type === 'realizedDefenseChange') throw Error('change sink failed');
+          if (mode === 'sinkInstall' && event.type === 'realizedDefenseLifecycle') throw Error('install sink failed');
+          if (mode.startsWith('sink') && !['sinkThrow', 'sinkChange', 'sinkInstall'].includes(mode) &&
               ['realizedDefenseSnapshot', 'realizedDefenseError'].includes(event.type)) {
             if (mode === 'sinkNull') throw null;
             if (mode === 'sinkUndefined') throw undefined;

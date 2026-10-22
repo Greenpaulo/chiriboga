@@ -592,7 +592,7 @@ then ranks ICE with them behind its own option (phase B).
 **Why this design.** Turning a security measurement into a shared yes/no gate
 has twice made the Corp weaker: [`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote") and the
-[L9.0.1 gate failure](../done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](L9.0.1-adopt-honest-lockout.md#resolution)
 (global honest verdict: winRate −0.029, pointsScored −0.282, pointsStolen
 +0.176; remote theft fell while central theft rose). The owner's 2026-10-14
 playtests saw agendas held in HQ and agendas left in weak remotes. The redesign
