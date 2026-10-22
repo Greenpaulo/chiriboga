@@ -1,0 +1,2015 @@
+id,name,elo,votes
+01001,"Noise: Hacker Extraordinaire",1831,158
+01002,"Déjà Vu",1869,179
+01006,"Grimoire",1710,185
+01009,"Djinn",1484,212
+01013,"Wyrm",1177,159
+01014,"Yog.0",1953,184
+01016,"Wyldside",1741,170
+01018,"Account Siphon",2232,150
+01023,"Lemuria Codecracker",1071,164
+01024,"Desperado",2040,151
+01027,"Ninja",1293,194
+01032,"Decoy",1240,189
+01033,"Kate ""Mac"" McCaffrey: Digital Tinker",1785,189
+01041,"The Toolbox",1312,223
+01045,"Net Shield",1409,198
+01052,"Access to Globalsec",1197,178
+01054,"Haas-Bioroid: Engineering the Future",2031,136
+01055,"Accelerated Beta Test",1850,196
+01066,"Experiential Data",1231,156
+01071,"Zaibatsu Loyalty",995,150
+01073,"Precognition",1242,167
+01074,"Cell Portal",1097,158
+01075,"Chum",1354,191
+01076,"Data Mine",1256,185
+01079,"Akitaro Watanabe",1298,185
+01081,"AstroScript Pilot Program",2251,150
+01082,"Breaking News",2088,177
+01089,"Matrix Analyzer",1342,171
+01095,"Posted Bounty",1365,198
+01096,"Security Subcontract",1100,164
+01097,"Aggressive Negotiation",1353,183
+01105,"Research Station",1202,187
+02001,"Whizzard: Master Gamer",2015,145
+02005,"Cortez Chip",1206,175
+02007,"ZU.13 Key Master",1604,185
+02008,"The Helpful AI",1222,185
+02009,"Plascrete Carapace",1754,194
+02011,"Mandatory Upgrades",1420,212
+02012,"Janus 1.0",1372,205
+02015,"Snowflake",1279,179
+02016,"Restructured Datapool",1275,184
+02017,"TMI",1215,176
+02020,"Dracō",1255,173
+02021,"Vamp",1736,181
+02023,"Satellite Uplink",1150,176
+02025,"Compromised Employee",1361,192
+02027,"Snowball",1269,182
+02029,"Encryption Protocol",1475,194
+02030,"Sherlock 1.0",1272,174
+02034,"Sensei",1107,143
+02035,"Big Brother",1293,201
+02036,"ChiLo City Grid",1285,170
+02037,"Power Grid Overload",1370,181
+02038,"Amazon Industrial Zone",1273,201
+02039,"Executive Retreat",1248,179
+02040,"Freelancer",1271,166
+02041,"Nerve Agent",1515,184
+02042,"Joshua B.",1629,181
+02044,"Muresh Bodysuit",1182,175
+02045,"Snitch",1526,182
+02049,"Personal Workshop",1739,168
+02050,"Public Sympathy",1303,181
+02052,"Viper",1533,164
+02053,"Edge of World",1420,199
+02054,"Sunset",1045,136
+02057,"Woodcutter",1005,136
+02058,"Commercialization",1430,181
+02059,"Private Contracts",1323,187
+02060,"Chimera",1433,212
+02061,"Disrupter",1088,152
+02065,"Crescentus",1438,205
+02068,"Inside Man",1244,157
+02071,"Hourglass",1208,186
+02072,"Dedicated Server",1169,189
+02073,"Bullfrog",1279,187
+02074,"Uroboros",1342,162
+02075,"Net Police",1048,145
+02076,"Weyland Consortium: Because We Built It",1142,148
+02077,"Government Contracts",1301,178
+02078,"Tyrant",967,128
+02081,"Surge",1443,202
+02083,"Andromeda: Dispossessed Ristie",2063,159
+02087,"Quality Time",1599,190
+02088,"Replicator",1382,179
+02089,"Creeper",1051,163
+02090,"Kraken",1305,193
+02092,"Eve Campaign",1486,199
+02093,"Rework",1028,141
+02096,"Data Hound",1246,149
+02098,"Salvage",891,140
+02099,"Simone Diego",1236,167
+02100,"Foxfire",1335,196
+02103,"Data Leak Reversal",1886,184
+02108,"Deep Thought",1279,195
+02109,"New Angeles City Hall",1572,164
+02111,"Ruhr Valley",1387,215
+02113,"Midori",1253,155
+02114,"NBN: The World is Yours*",1245,143
+02116,"Midseason Replacements",1976,159
+02119,"Burke Bugs",1146,156
+02120,"Corporate War",1276,173
+03001,"Cerebral Imaging: Infinite Frontiers",2061,146
+03002,"Custom Biotics: Engineered for Success",1141,173
+03003,"NEXT Design: Guarding the Net",1366,181
+03004,"Director Haas' Pet Project",1395,196
+03005,"Efficiency Committee",1810,201
+03006,"Project Wotan",1270,158
+03007,"Sentinel Defense Program",1216,166
+03008,"Alix T4LB07",1404,184
+03010,"Director Haas",1408,192
+03011,"Haas Arcology AI",1296,195
+03012,"Thomas Haas",1248,184
+03013,"Bioroid Efficiency Research",1283,190
+03014,"Successful Demonstration",1363,213
+03015,"Heimdall 2.0",1329,169
+03016,"Howler",1200,173
+03017,"Ichi 2.0",1424,199
+03018,"Minelayer",1103,156
+03019,"Viktor 2.0",1394,189
+03020,"Zed 1.0",1049,141
+03021,"Awakening Center",1319,188
+03022,"Tyr's Hand",1040,137
+03023,"Gila Hands Arcology",1409,212
+03024,"Levy University",1156,176
+03025,"Server Diagnostics",1170,146
+03026,"Bastion",1432,199
+03027,"Datapike",1352,183
+03029,"The Professor: Keeper of Knowledge",1264,157
+03030,"Exile: Streethawk",1286,159
+03031,"Escher",1282,185
+03032,"Exploratory Romp",1085,180
+03033,"Freelance Coding Contract",1292,171
+03034,"Scavenge",1630,205
+03035,"Levy AR Lab Access",1952,186
+03036,"Monolith",1231,177
+03037,"Feedback Filter",1466,188
+03038,"Clone Chip",1917,173
+03039,"Omni-drive",1388,181
+03041,"Cloak",1543,229
+03042,"Dagger",1555,186
+03043,"Chakana",1389,195
+03044,"Cyber-Cypher",1661,184
+03047,"Sahasrara",1511,199
+03048,"Inti",1543,166
+03050,"Borrowed Satellite",1083,155
+03054,"Same Old Thing",1971,174
+03055,"The Source",1550,216
+04001,"Frame Job",1135,165
+04002,"Pawn",1154,169
+04003,"Rook",1225,185
+04005,"Gorman Drip v1",1460,190
+04006,"Lockpick",1343,191
+04007,"False Echo",1440,191
+04008,"Motivation",1204,177
+04014,"Character Assassination",1373,176
+04015,"Jackson Howard",2179,161
+04016,"Invasion of Privacy",1303,167
+04017,"Geothermal Fracking",1501,209
+04018,"Swarm",1047,140
+04019,"Cyberdex Trial",1183,159
+04020,"Grim",1362,177
+04021,"Bishop",1319,167
+04022,"Scheherazade",1613,194
+04023,"Hard at Work",1110,166
+04024,"Recon",1206,149
+04025,"Copycat",1278,167
+04026,"Leviathan",1033,161
+04027,"Eureka!",1224,151
+04028,"Record Reconstructor",1016,138
+04030,"Wotan",1353,188
+04031,"Hellion Alpha Test",1263,165
+04032,"Clone Retirement",1330,182
+04034,"Shipment from SanSan",1631,186
+04035,"Muckraker",1291,171
+04038,"Off the Grid",1408,229
+04039,"Profiteering",1452,212
+04040,"Restructure",1576,201
+04042,"Deep Red",1360,153
+04043,"Knight",1572,178
+04044,"Running Interference",1168,172
+04045,"Expert Schedule Analyzer",1068,148
+04046,"Grifter",1343,200
+04047,"Torch",1329,194
+04048,"Woman in the Red Dress",1340,180
+04049,"Raymond Flint",1211,172
+04050,"Isabel McGuire",1068,156
+04052,"Accelerated Diagnostics",1975,162
+04053,"Unorthodox Predictions",1192,189
+04055,"City Surveillance",1186,152
+04056,"Snoop",1231,178
+04057,"Ireress",1034,152
+04058,"Power Shutdown",1807,198
+04059,"Paper Wall",1514,189
+04060,"Interns",1650,171
+04061,"Keyhole",1936,171
+04062,"Activist Support",1187,163
+04063,"Lawyer Up",1375,217
+04064,"Leverage",1085,154
+04065,"Garrote",1282,203
+04066,"LLDS Processor",1261,189
+04067,"Sharpshooter",1451,193
+04068,"Capstone",1053,121
+04069,"Starlight Crusade Funding",1052,167
+04070,"Rex Campaign",1189,166
+04071,"Fenris",1362,173
+04072,"Panic Button",1367,193
+04073,"Shock!",1803,205
+04077,"RSVP",1345,174
+04078,"Curtain Wall",1517,178
+04080,"Veterans Program",1218,173
+04083,"Tallie Perrault",1146,165
+04084,"Executive Wiretaps",1033,146
+04085,"Blackguard",1195,156
+04086,"CyberSolutions Mem Chip",1191,172
+04087,"Alpha",1180,157
+04088,"Omega",1175,177
+04089,"Blackmail",1849,184
+04092,"Toshiyuki Sakai",1174,144
+04094,"Restoring Face",1014,142
+04095,"Market Research",1415,186
+04097,"GRNDL: Power Unleashed",1435,160
+04098,"Vulcan Coverup",1188,173
+04103,"Dyson Fractal Generator",1311,205
+04104,"Silencer",1360,199
+04105,"Savoir-faire",1343,201
+04107,"Power Nap",1178,173
+04108,"Paintbrush",1345,173
+04110,"Gyri Labyrinth",1153,180
+04111,"Reclamation Order",1546,206
+04112,"Broadcast Square",1060,134
+04113,"Corporate Shuffle",1369,194
+04114,"Caprice Nisei",1953,143
+04115,"Shinobi",1351,164
+04116,"Marker",1091,163
+04118,"Witness Tampering",1136,138
+04119,"NAPD Contract",1871,196
+04120,"Quandary",1633,202
+05001,"Harmony Medtech: Biomedical Pioneer",1360,192
+05002,"Nisei Division: The Next Generation",1230,155
+05003,"Tennin Institute: The Secrets Within",1531,149
+05005,"Medical Breakthrough",1603,195
+05007,"The Future Perfect",1940,193
+05008,"Chairman Hiro",1575,207
+05009,"Mental Health Clinic",1425,191
+05010,"Psychic Field",1582,189
+05011,"Shi.Kyū",1529,221
+05012,"Tenma Line",1002,138
+05013,"Cerebral Cast",1414,216
+05014,"Medical Research Fundraiser",1424,180
+05015,"Mushin No Shin",1722,212
+05016,"Inazuma",1369,226
+05017,"Komainu",1685,168
+05018,"Pup",1585,190
+05019,"Shiro",1204,172
+05020,"Susanoo-no-Mikoto",1452,170
+05021,"NeoTokyo Grid",1163,164
+05022,"Tori Hanzō",1367,206
+05023,"Plan B",1304,172
+05024,"Guard",1393,198
+05025,"Rainbow",1361,197
+05026,"Diversified Portfolio",1481,208
+05027,"Fast Track",1562,210
+05028,"Iain Stirling: Retired Spook",1380,180
+05030,"Silhouette: Stealth Operative",1226,188
+05031,"Calling in Favors",1402,194
+05032,"Early Bird",1400,182
+05033,"Express Delivery",1327,190
+05034,"Feint",1311,177
+05036,"Planned Assault",1408,190
+05037,"Logos",1436,191
+05038,"Public Terminal",1483,202
+05039,"Unregistered S&W '35",1250,157
+05040,"Window",892,138
+05041,"Alias",1367,194
+05042,"Breach",1396,213
+05043,"Bug",1050,161
+05044,"Gingerbread",1234,171
+05045,"Grappling Hook",1688,204
+05046,"Passport",1563,195
+05047,"Push Your Luck",1163,184
+05049,"Theophilius Bagbiter",1190,183
+05050,"Tri-maf Contact",1446,192
+05051,"Mass Install",1288,183
+05052,"Q-Coherence Chip",1177,198
+05053,"Overmind",1475,212
+05054,"Oracle May",1395,169
+05055,"Donut Taganes",1182,174
+06001,"Domestic Sleepers",1417,173
+06004,"Mutate",1217,169
+06006,"Primary Transmission Dish",1202,179
+06007,"Midway Station Grid",1419,182
+06008,"The Root",1367,181
+06009,"Taurus",1226,186
+06010,"Mother Goddess",1721,188
+06011,"Galahad",1443,166
+06012,"Bad Times",1167,167
+06013,"Cyber Threat",1198,198
+06015,"Paper Tripping",1280,182
+06016,"Power Tap",1505,212
+06017,"Nasir Meidan: Cyber Explorer",1236,185
+06018,"Social Engineering",1158,150
+06019,"Leprechaun",1666,180
+06020,"Eden Shard",1252,164
+06021,"The Foundry: Refining the Process",1369,173
+06022,"Enhanced Login Protocol",1695,184
+06023,"Heinlein Grid",1595,186
+06024,"Encrypted Portals",1237,173
+06025,"Cerebral Static",1482,191
+06026,"Targeted Marketing",1524,198
+06027,"Information Overload",1323,192
+06028,"Paywall Implementation",1617,185
+06029,"Sealed Vault",1259,180
+06030,"Eden Fragment",1330,170
+06031,"Lag Time",1315,198
+06032,"Will-o'-the-Wisp",1436,190
+06033,"D4v1d",1788,174
+06034,"Scrubbed",1360,195
+06035,"Three Steps Ahead",1304,185
+06036,"Unscheduled Maintenance",1323,178
+06038,"Net Celebrity",1397,189
+06039,"LLDS Energy Regulator",1247,183
+06040,"Ghost Runner",1362,185
+06041,"IQ",1462,188
+06042,"Eliza's Toybox",1345,198
+06043,"Kitsune",1248,162
+06044,"Port Anson Grid",1232,187
+06045,"The News Now Hour",1278,162
+06046,"Manhunt",1406,184
+06047,"Wendigo",1223,171
+06049,"Chronos Project",1554,174
+06050,"Shattered Remains",1367,190
+06051,"Lancelot",1425,212
+06053,"BlacKat",1363,190
+06054,"Duggar's",1307,193
+06055,"Box-E",1348,182
+06056,"The Supplier",1472,192
+06057,"Refractor",1595,213
+06058,"Order of Sol",1235,199
+06059,"Hades Shard",1653,205
+06060,"Rachel Beckman",1302,193
+06061,"Architect",1892,164
+06062,"Peak Efficiency",1339,206
+06063,"Labyrinthine Servers",1366,179
+06064,"Ashigaru",1342,174
+06065,"Mamba",1225,164
+06067,"Universal Connectivity Fee",1538,197
+06069,"Changeling",1313,191
+06070,"Reuse",1159,205
+06071,"Hades Fragment",1553,200
+06072,"Docklands Crackdown",1125,138
+06073,"Inject",1818,190
+06074,"Origami",1372,186
+06075,"Fester",1282,183
+06076,"Autoscripter",1355,181
+06077,"Switchblade",1597,189
+06078,"Trade-In",1236,160
+06079,"Astrolabe",1839,183
+06080,"Angel Arena",1057,170
+06081,"Bifrost Array",1390,184
+06082,"Sagittarius",1345,175
+06084,"Gemini",1166,171
+06087,"Superior Cyberwalls",1209,200
+06089,"Lycan",1176,171
+06090,"Snatch and Grab",1430,166
+06091,"Merlin",1390,169
+06092,"Shell Corporation",1223,171
+06093,"Ekomind",1267,203
+06094,"Cerberus ""Cuj.0"" H3",1351,186
+06096,"Cerberus ""Rex"" H2",1438,189
+06097,"Zona Sul Shipping",1247,191
+06098,"Cybsoft MacroDrive",1303,174
+06100,"Utopia Shard",1491,191
+06101,"Helium-3 Deposit",1224,168
+06102,"Errand Boy",1340,194
+06103,"IT Department",1395,194
+06104,"Markus 1.0",1364,197
+06105,"Industrial Genomics: Growing Solutions",1997,156
+06107,"Shoot the Moon",1191,172
+06108,"Troll",1334,197
+06109,"Virgo",1133,190
+06110,"Utopia Fragment",1479,197
+06112,"Self-destruct",1265,148
+06113,"Incubator",1421,187
+06114,"Ixodidae",1250,170
+06115,"Code Siphon",1382,159
+06116,"Collective Consciousness",1225,193
+06117,"Sage",1252,202
+06118,"Bribery",1133,147
+06119,"Au Revoir",1560,169
+07001,"Argus Security: Protection Guaranteed",1757,158
+07002,"Gagarin Deep Space: Expanding the Horizon",1833,150
+07003,"Titan Transnational: Investing In Your Future",1860,183
+07004,"Firmware Updates",1201,181
+07005,"Glenn Station",1261,186
+07006,"Government Takeover",1669,197
+07007,"High-Risk Investment",1424,217
+07008,"Constellation Protocol",1109,178
+07009,"Mark Yale",1464,176
+07010,"Space Camp",1321,181
+07011,"The Board",1241,175
+07012,"Asteroid Belt",1371,193
+07013,"Wormhole",1361,194
+07014,"Nebula",1344,169
+07015,"Orion",1487,196
+07016,"Builder",1217,165
+07017,"Checkpoint",1219,191
+07018,"Fire Wall",1437,192
+07019,"Searchlight",1129,176
+07020,"Housekeeping",1621,220
+07021,"Patch",1229,177
+07022,"Traffic Accident",1466,188
+07023,"Satellite Grid",1206,201
+07024,"The Twins",1339,197
+07025,"Sub Boost",1215,149
+07026,"Dedicated Technician Team",1144,137
+07027,"Cyberdex Virus Suite",1785,169
+07028,"Edward Kim: Humanity's Hammer",1592,180
+07029,"MaxX: Maximum Punk Rock",1993,198
+07030,"Valencia Estevez: The Angel of Cayambe",1832,141
+07031,"Amped Up",1644,208
+07032,"I've Had Worse",1915,182
+07033,"Itinerant Protesters",1227,194
+07034,"Showing Off",1125,202
+07035,"Wanton Destruction",1561,208
+07036,"Day Job",1576,211
+07037,"Forked",1624,198
+07038,"Knifed",1796,211
+07039,"Spooned",1606,185
+07040,"Eater",1792,182
+07041,"Gravedigger",1413,207
+07042,"Hivemind",1665,201
+07043,"Progenitor",1579,192
+07044,"Archives Interface",1324,174
+07045,"Chop Bot 3000",1499,192
+07046,"MemStrips",1459,178
+07047,"Vigil",1515,192
+07048,"Human First",1302,190
+07049,"Investigative Journalism",1180,164
+07050,"Sacrificial Clone",1204,161
+07051,"Stim Dealer",1304,169
+07052,"Virus Breeding Ground",1433,178
+07053,"Uninstall",1164,166
+07054,"Qianju PT",1225,162
+07055,"Data Folding",1565,184
+08002,"Paige Piper",1388,215
+08003,"Adjusted Chronotype",1593,206
+08004,"Spike",1428,202
+08005,"Enhanced Vision",1286,177
+08006,"Gene Conditioning Shoppe",1293,176
+08007,"Synthetic Blood",1297,178
+08008,"Traffic Jam",1458,179
+08009,"Symmetrical Visage",1572,191
+08010,"Brain-Taping Warehouse",1356,198
+08011,"NEXT Gold",1307,187
+08012,"Jinteki Biotech: Life Imagined",1517,184
+08013,"Genetic Resequencing",1346,190
+08014,"Cortex Lock",1728,186
+08015,"Valley Grid",1369,167
+08016,"Bandwidth",1162,172
+08017,"Predictive Algorithm",1497,182
+08018,"Capital Investors",1362,200
+08019,"Negotiator",1276,194
+08020,"Tech Startup",1684,218
+08021,"Hacktivist Meeting",1835,179
+08022,"Off-Campus Apartment",1615,221
+08024,"Dorm Computer",1512,189
+08025,"Hayley Kaplan: Universal Scholar",1987,145
+08026,"Game Day",1441,199
+08027,"Comet",1550,204
+08028,"Study Guide",1413,183
+08029,"London Library",1300,188
+08030,"Tyson Observatory",1167,189
+08031,"Beach Party",1196,206
+08032,"Research Grant",1312,167
+08034,"Crick",1615,185
+08035,"Recruiting Trip",1253,150
+08036,"Blacklist",1515,192
+08037,"Gutenberg",1491,206
+08038,"Student Loans",1236,183
+08039,"Meru Mati",1511,206
+08040,"Breaker Bay Grid",1777,179
+08041,"Immolation Script",1299,208
+08042,"Skulljack",1260,165
+08043,"Turntable",1814,164
+08044,"Chrome Parlor",1277,163
+08045,"Titanium Ribs",1602,174
+08046,"Crowbar",1306,188
+08047,"Net-Ready Eyes",1587,197
+08048,"Analog Dreamers",1156,160
+08049,"Brain Cage",1494,182
+08050,"Cybernetics Division: Humanity Upgraded",1374,161
+08051,"Self-Destruct Chips",1382,214
+08052,"Lab Dog",1255,157
+08053,"Oaktown Grid",1356,173
+08054,"Ryon Knight",1241,207
+08055,"Clairvoyant Monitor",1130,169
+08056,"Lockdown",1303,179
+08057,"Little Engine",1354,217
+08060,"Quicksand",1296,165
+08061,"Faust",2031,185
+08062,"Street Peddler",1835,191
+08063,"Armand ""Geist"" Walker: Tech Lord",1870,156
+08064,"Drive By",1630,179
+08065,"Forger",1339,188
+08066,"Shiv",1495,205
+08067,"Gang Sign",1792,158
+08068,"Muertos Gang Member",1367,190
+08070,"Hyperdriver",1951,177
+08071,"Test Ground",1032,141
+08072,"Defective Brainchips",1418,182
+08073,"Allele Repression",1232,165
+08074,"Marcus Batty",1832,193
+08075,"Exposé",1024,168
+08076,"Pachinko",1315,197
+08077,"Underway Renovation",1442,182
+08080,"Underway Grid",1178,199
+08081,"Trope",1496,221
+08082,"Spoilers",1334,194
+08083,"Drug Dealer",1595,193
+08084,"Rolodex",1123,162
+08085,"Fan Site",1594,202
+08086,"Film Critic",1978,145
+08087,"Paparazzi",1664,182
+08088,"Ronald Five",1415,197
+08089,"Enforcer 1.0",1316,177
+08090,"It's a Trap!",1312,168
+08091,"An Offer You Can't Refuse",1404,209
+08092,"Haarpsichord Studios: Entertainment Unleashed",1468,171
+08093,"Award Bait",1350,182
+08095,"Early Premiere",1475,212
+08096,"Casting Call",1409,209
+08097,"Old Hollywood Grid",1590,194
+08098,"Hollywood Renovation",1384,225
+08099,"Back Channels",1240,207
+08100,"Vanity Project",1536,202
+08101,"Power to the People",1158,165
+08102,"Surfer",1531,177
+08103,"DDoS",1914,185
+08104,"Laramy Fisk: Savvy Investor",1106,167
+08105,"Fisk Investment Seminar",1394,186
+08106,"Bookmark",1362,190
+08107,"DaVinci",1451,173
+08108,"Wireless Net Pavilion",1709,180
+08109,"Cybernetics Court",1546,164
+08110,"Team Sponsorship",1813,163
+08111,"Chronos Protocol: Selective Mind-mapping",1530,171
+08112,"Ancestral Imager",1213,165
+08113,"Genetics Pavilion",1680,185
+08114,"Franchise City",1408,208
+08116,"Worlds Plaza",1363,196
+08118,"Tour Guide",1817,179
+08119,"Expo Grid",1326,191
+08120,"The Future is Now",1421,204
+09001,"SYNC: Everything, Everywhere",1604,200
+09002,"New Angeles Sol: Your News",1477,202
+09004,"15 Minutes",1711,198
+09005,"Improved Tracers",1132,188
+09006,"Rebranding Team",1121,150
+09007,"Quantum Predictive Model",1733,196
+09008,"Lily Lockwell",1405,195
+09009,"News Team",1768,188
+09010,"Shannon Claire",1334,175
+09011,"Victoria Jenkins",1275,155
+09012,"Reality Threedee",1313,196
+09013,"Archangel",1597,195
+09014,"News Hound",1634,189
+09015,"Resistor",1618,187
+09016,"Special Offer",1497,163
+09017,"TL;DR",1250,187
+09018,"Turnpike",1766,184
+09019,"24/7 News Cycle",1952,179
+09020,"Ad Blitz",1310,168
+09021,"Media Blitz",1493,196
+09022,"The All-Seeing I",1628,192
+09023,"Surveillance Sweep",1338,187
+09024,"Keegan Lane",1506,184
+09025,"Rutherford Grid",1266,185
+09026,"Global Food Initiative",2101,157
+09027,"Launch Campaign",1540,189
+09028,"Assassin",1373,194
+09029,"Apex: Invasive Predator",1278,143
+09030,"Apocalypse",1991,118
+09031,"Prey",1438,190
+09032,"Heartbeat",1582,167
+09033,"Endless Hunger",1328,181
+09034,"Harbinger",1586,180
+09035,"Hunting Grounds",1575,178
+09036,"Wasteland",1466,196
+09037,"Adam: Compulsive Hacker",1575,157
+09038,"Independent Thinking",1318,167
+09039,"Brain Chip",1562,151
+09040,"Multithreader",1543,170
+09041,"Always Be Running",1306,183
+09042,"Dr. Lovegood",1324,159
+09043,"Neutralize All Threats",1722,188
+09044,"Safety First",1560,176
+09045,"Sunny Lebeau: Security Specialist",1402,175
+09046,"Security Chip",1477,170
+09047,"Security Nexus",1745,156
+09048,"GS Striker M1",1379,179
+09049,"GS Shrike M2",1360,159
+09050,"GS Sherman M3",1486,198
+09051,"Globalsec Security Clearance",1281,149
+09052,"Jak Sinclair",1496,191
+09053,"Employee Strike",1991,164
+09054,"Windfall",1092,167
+09055,"Technical Writer",1718,187
+10002,"Ramujan-reliant 550 BMI",1030,128
+10003,"Street Magic",1262,174
+10004,"High-Stakes Job",1387,185
+10005,"Mongoose",1599,184
+10006,"Jesminder Sareen: Girl Behind the Curtain",1394,213
+10007,"Maya",1433,191
+10008,"Panchatantra",1363,183
+10009,"Artist Colony",1449,213
+10010,"Chatterjee University",1134,137
+10011,"Advanced Concept Hopper",1503,223
+10012,"Vikram 1.0",1314,190
+10013,"Heritage Committee",1461,193
+10014,"Mumbad City Grid",1380,187
+10015,"Kala Ghoda Real TV",1280,181
+10016,"Interrupt 0",1121,173
+10017,"Dedication Ceremony",1717,211
+10018,"Mumba Temple",1855,187
+10019,"Museum of History",1946,152
+10020,"EMP Device",1371,192
+10021,"Diwan",1204,155
+10022,"CBI Raid",1458,184
+10023,"Tech Trader",1817,197
+10024,"NetChip",1305,185
+10025,"Corporate Scandal",1347,175
+10026,"Populist Rally",1185,150
+10027,"Advanced Assembly Lines",1832,201
+10028,"Lakshmi Smartfabrics",1767,177
+10029,"Product Recall",1224,190
+10030,"Pālanā Foods: Sustainable Growth",1703,145
+10031,"Pālanā Agroplex",1407,217
+10032,"Harvester",1295,170
+10033,"Remote Data Farm",1156,159
+10034,"Disposable HQ",1298,168
+10035,"New Construction",1406,199
+10036,"Mumbad Construction Co.",1383,199
+10037,"Corporate Sales Team",1759,164
+10038,"PAD Factory",1209,169
+10039,"Political Graffiti",1197,179
+10040,"Nero Severn: Information Broker",1276,192
+10041,"Reflection",1214,191
+10042,"Spy Camera",1556,178
+10043,"Political Operative",1804,155
+10044,"Sadyojata",1266,160
+10045,"""Freedom Through Equality""",1699,170
+10046,"Akshara Sareen",1171,178
+10047,"Councilman",1564,197
+10048,"Voting Machine Initiative",1398,212
+10049,"Clone Suffrage Movement",1943,169
+10050,"Bio-Ethics Association",1870,187
+10051,"Political Dealings",1496,206
+10052,"""Clones are not People""",1593,177
+10053,"Sensie Actors Union",2116,163
+10054,"Commercial Bankers Group",1896,168
+10055,"Mumbad City Hall",1932,194
+10056,"Bailiff",1438,188
+10057,"Surat City Grid",1524,205
+10058,"Making an Entrance",1294,199
+10059,"Salsette Slums",1486,227
+10060,"Exclusive Party",1432,228
+10061,"Vamadeva",1273,141
+10062,"Brahman",1515,188
+10063,"Patron",1366,221
+10064,"Sports Hopper",1642,177
+10065,"Bazaar",1307,217
+10066,"Personality Profiles",1286,184
+10067,"Jeeves Model Bioroids",2047,188
+10068,"Raman Rai",1254,170
+10069,"Upayoga",1278,195
+10070,"Aryabhata Tech",1431,215
+10071,"Salem's Hospitality",1588,182
+10072,"Executive Search Firm",1373,192
+10073,"Indian Union Stock Exchange",1546,188
+10074,"Cobra",1524,186
+10075,"Localized Product Line",1409,191
+10076,"Mumbad Virtual Tour",1786,197
+10077,"The Noble Path",1159,190
+10078,"Emptied Mind",1076,161
+10079,"Information Sifting",1496,159
+10080,"Out of the Ashes",1665,177
+10081,"Liberated Chela",1242,176
+10082,"Temple of the Liberated Mind",1321,167
+10083,"Rebirth",1848,169
+10084,"Guru Davinder",1516,205
+10085,"The Turning Wheel",1942,179
+10086,"Brainstorm",1341,186
+10088,"Dedicated Neural Net",1248,199
+10089,"Chetana",1343,180
+10090,"Puppet Master",1282,168
+10091,"Waiver",1244,151
+10092,"Exchange of Information",1892,179
+10093,"Red Tape",1193,183
+10094,"Consulting Visit",1762,178
+10095,"Vanilla",1711,166
+10096,"Fear the Masses",1454,197
+10097,"Aghora",1254,158
+10098,"Bhagat",1563,178
+10099,"The Black File",1393,172
+10100,"The Price of Freedom",1315,182
+10101,"Ankusa",1491,201
+10102,"Rigged Results",1199,162
+10104,"Lateral Growth",1631,176
+10105,"Improved Protein Source",1348,178
+10106,"Voter Intimidation",1444,209
+10107,"Harishchandra Ent.: Where You're the Star",1247,170
+10108,"Full Immersion RecStudio",1306,166
+10109,"Ibrahim Salem",1466,196
+10110,"Navi Mumbai City Grid",1398,193
+10111,"Zealous Judge",1762,171
+10112,"Election Day",1320,153
+10113,"Subcontract",1366,184
+10114,"Merger",1167,181
+11001,"System Outage",1356,174
+11002,"Null: Whistleblower",1411,156
+11003,"GPI Net Tap",1512,181
+11004,"Hernando Cortez",1464,195
+11005,"Mirror",1387,187
+11006,"Dai V",1326,166
+11007,"Another Day, Another Paycheck",1298,161
+11008,"Deuces Wild",1853,180
+11009,"Injection Attack",1398,169
+11010,"Fairchild 1.0",1371,211
+11011,"Sherlock 2.0",1325,178
+11012,"Hyoubu Research Facility",1184,143
+11013,"Chrysalis",1421,205
+11014,"Georgia Emelyov",1341,176
+11015,"Watchdog",1054,153
+11016,"Hard-Hitting News",2105,190
+11017,"NBN: Controlling the Message",2015,182
+11018,"Crisis Management",1253,173
+11019,"Stock Buy-Back",1789,206
+11020,"Sandburg",1642,198
+11021,"Credit Crash",1118,147
+11022,"Rumor Mill",2154,194
+11023,"Nfr",1238,175
+11024,"Paperclip",2176,159
+11025,"Golden",1285,189
+11026,"Temüjin Contract",2257,126
+11027,"Khan: Savvy Skiptracer",1169,141
+11028,"Data Breach",1218,160
+11029,"Algo Trading",1139,163
+11030,"Beth Kilrain-Chang",1848,193
+11031,"Fairchild 2.0",1604,197
+11032,"Aiki",1522,192
+11033,"Enforcing Loyalty",1355,198
+11034,"Hatchet Job",1365,173
+11035,"Special Report",1357,214
+11036,"C.I. Fund",1044,164
+11037,"Liquidation",1268,158
+11038,"Weyland Consortium: Builder of Nations",1555,159
+11039,"Financial Collapse",1274,165
+11040,"Prisec",1686,201
+11041,"Obelus",1807,178
+11042,"Black Orchestra",1853,158
+11043,"Omar Keung: Conspiracy Theorist",1707,170
+11044,"Peregrine",1234,178
+11045,"Houdini",1484,195
+11046,"Net Mercur",1803,185
+11047,"Find the Truth",1690,170
+11048,"First Responders",1201,161
+11049,"Fairchild 3.0",1966,153
+11050,"Ark Lockdown",1620,195
+11051,"Hellion Beta Test",1571,201
+11052,"Project Kusanagi",1204,159
+11053,"DNA Tracker",1841,193
+11054,"Jinteki: Potential Unleashed",1928,170
+11055,"Alexa Belsky",1225,171
+11056,"Observe and Destroy",1360,199
+11057,"Service Outage",1368,168
+11058,"BOOM!",1978,156
+11059,"Door to Door",1434,200
+11060,"Scarcity of Resources",2030,178
+11062,"Frantic Coding",1484,174
+11063,"The Gauntlet",1300,230
+11064,"Saker",1297,196
+11065,"Blockade Runner",1221,171
+11066,"Ele ""Smoke"" Scovak: Cynosure of the Net",1710,165
+11067,"Top Hat",1365,208
+11068,"Blackstone",1265,183
+11069,"Government Investigations",1118,183
+11070,"Citadel Sanctuary",1865,178
+11071,"Wetwork Refit",1196,164
+11073,"Fumiko Yamamori",1212,183
+11074,"Hasty Relocation",1482,199
+11075,"Data Ward",1646,175
+11076,"Drone Screen",1039,144
+11077,"Chief Slee",1343,203
+11078,"Bulwark",1557,178
+11079,"Best Defense",1591,176
+11080,"Preemptive Action",1717,142
+11081,"MKUltra",1791,192
+11082,"On the Lam",1406,198
+11083,"Cold Read",1334,228
+11084,"Equivocation",1579,175
+11085,"Misdirection",1693,175
+11086,"Reaver",1736,177
+11087,"Interdiction",1700,168
+11088,"Baba Yaga",1314,180
+11089,"Fairchild",1515,198
+11090,"Friends in High Places",2066,144
+11091,"Manta Grid",1364,172
+11092,"Mind Game",1402,174
+11093,"Nihongai Grid",1225,175
+11094,"IP Block",1847,151
+11095,"Thoth",1391,195
+11096,"Anson Rose",1254,189
+11097,"Mausolus",1703,171
+11098,"Sapper",1551,203
+11099,"Show of Force",1403,188
+11100,"Enforced Curfew",1485,185
+11101,"Şifr",2047,162
+11102,"Sūnya",1112,154
+11103,"Recon Drone",1255,174
+11104,"Tapwrm",1858,183
+11105,"Tracker",1322,183
+11106,"Aaron Marrón",1993,163
+11107,"Encore",1757,187
+11108,"Fawkes",1208,167
+11109,"Peace in Our Time",1702,195
+11110,"Sensor Net Activation",1239,178
+11111,"Violet Level Clearance",1878,174
+11112,"Chiyashi",1672,192
+11113,"Psychokinesis",1322,184
+11114,"Net Quarantine",1252,186
+11115,"Herald",1276,171
+11116,"Veritas",1463,172
+11117,"Bryan Stinson",1923,163
+11118,"NASX",1670,184
+11119,"Macrophage",1610,204
+11120,"Tribunal",1236,167
+12001,"Pushing the Envelope",1155,184
+12002,"Maw",1876,183
+12003,"The Archivist",1333,208
+12004,"Exploit",1362,190
+12005,"Spot the Prey",1250,169
+12006,"Bio-Modeled Network",1224,177
+12007,"Network Exchange",1180,178
+12008,"Mad Dash",1828,170
+12009,"NEXT Wave 2",1223,210
+12010,"Zed 2.0",1303,196
+12011,"Defense Construct",1109,158
+12012,"Synth DNA Modification",1286,176
+12013,"Kakugo",1862,168
+12014,"Net Analytics",1210,160
+12015,"SYNC BRE",1432,211
+12016,"Jemison Astronautics: Sacrifice. Audacity. Success.",1511,170
+12017,"Quarantine System",1259,190
+12018,"Oberth Protocol",1597,213
+12019,"Khondi Plaza",1033,144
+12020,"Signal Jamming",1267,160
+12021,"Severnius Stim Implant",1494,163
+12022,"Clan Vengeance",2011,195
+12023,"Counter Surveillance",1860,212
+12024,"Möbius",1373,193
+12025,"Los: Data Hijacker",1486,180
+12026,"System Seizure",1383,184
+12027,"Customized Secretary",1324,185
+12028,"Build Script",1407,214
+12029,"Seidr Adaptive Barrier",1432,191
+12030,"Nerine 2.0",1330,192
+12031,"Load Testing",1295,204
+12032,"Bloom",1159,168
+12033,"Replanting",1181,184
+12034,"CPC Generator",1226,149
+12035,"Free Lunch",1256,169
+12036,"MCA Informant",1349,192
+12037,"Clyde Van Rite",1312,169
+12038,"Watchtower",1165,175
+12039,"Sacrifice",1195,173
+12040,"Self-Adapting Code Wall",1290,171
+12041,"Berserker",1231,166
+12042,"Persephone",1348,202
+12043,"Rubicon Switch",1428,210
+12044,"Aeneas Informant",1762,184
+12045,"Rosetta 2.0",1477,180
+12046,"Adjusted Matrix",1272,181
+12047,"Dedicated Processor",1327,202
+12048,"Inversificator",1634,192
+12049,"Dadiana Chacon",1302,171
+12050,"NEXT Opal",1132,154
+12051,"Bioroid Work Crew",1395,192
+12052,"AgInfusion: New Miracles for a New World",1923,178
+12053,"Bamboo Dome",1172,156
+12054,"Ben Musashi",1505,195
+12055,"Authenticator",1506,184
+12056,"Henry Phillips",1173,183
+12057,"Battlement",1404,173
+12058,"Audacity",2012,160
+12059,"Red Planet Couriers",1687,189
+12060,"Owl",1381,179
+12061,"Alice Merchant: Clan Agitator",1502,158
+12062,"Jarogniew Mercs",1583,167
+12063,"Māui",1268,150
+12064,"Bug Out Bag",1362,185
+12065,"Keros Mcintyre",1256,188
+12066,"Daredevil",1339,171
+12067,"Mass-Driver",1274,174
+12068,"Warroid Tracker",1705,200
+12069,"Loki",1735,181
+12070,"Obokata Protocol",2124,167
+12071,"Mirāju",1508,211
+12072,"Shipment from Tennin",1891,156
+12073,"Escalate Vitriol",1148,160
+12074,"Reeducation",1857,207
+12075,"Traffic Analyzer",1221,177
+12076,"Meteor Mining",1281,192
+12077,"Standoff",1411,190
+12078,"Success",1249,177
+12079,"Whampoa Reclamation",1835,188
+12080,"Mass Commercialization",1744,178
+12081,"Mars for Martians",1846,207
+12082,"God of War",1530,199
+12083,"Leave No Trace",1426,214
+12084,"Rip Deal",1353,224
+12085,"Flashbang",1151,185
+12086,"Lean and Mean",1289,154
+12087,"Maven",1351,212
+12088,"Na'Not'K",1623,181
+12089,"Bloo Moose",2123,148
+12090,"O₂ Shortage",1091,168
+12091,"Helheim Servers",1440,175
+12092,"Mandatory Seed Replacement",1160,169
+12093,"Water Monopoly",1308,167
+12094,"Metamorph",1043,115
+12095,"Data Loop",1738,180
+12096,"Biased Reporting",1399,223
+12097,"Open Forum",1301,173
+12098,"Tithonium",1857,175
+12099,"Transparency Initiative",1101,173
+12100,"Rover Algorithm",1329,171
+12101,"Mining Accident",1727,179
+12102,"Respirocytes",1330,177
+12103,"Salvaged Vanadis Armory",2072,184
+12104,"Aumakua",2069,159
+12105,"Caldera",1443,232
+12106,"Diana's Hunt",1208,174
+12107,"Reshape",943,134
+12108,"Dummy Box",1533,188
+12109,"Corporate Defector",1253,206
+12110,"CFC Excavation Contract",1358,196
+12111,"MCA Austerity Policy",1870,134
+12112,"Restore",1727,196
+12113,"Breached Dome",1919,166
+12114,"Sand Storm",1345,190
+12115,"AR-Enhanced Security",1941,175
+12116,"Rolling Brownout",1234,171
+12117,"Threat Level Alpha",1341,182
+12118,"Priority Construction",1463,184
+12119,"Fractal Threat Matrix",1331,187
+12120,"Conundrum",1397,205
+13002,"Brute-Force-Hack",1250,158
+13004,"SYN Attack",1109,165
+13005,"Polyhistor",1255,190
+13007,"Lustig",1360,167
+13009,"Mammon",1478,180
+13010,"Charlatan",1242,171
+13011,"Maxwell James",1642,178
+13013,"Careful Planning",1247,153
+13014,"Deep Data Mining",1688,189
+13015,"LLDS Memory Diamond",1311,167
+13016,"Ubax",1432,189
+13017,"Adept",1244,165
+13018,"Savant",1257,185
+13020,"Dhegdheer",1650,220
+13021,"Levy Advanced Research Lab",1150,160
+13022,"Laguna Velasco District",1581,213
+13023,"Process Automation",1367,209
+13024,"Officer Frank",1275,169
+13025,"Dean Lister",1542,185
+13026,"Biometric Spoofing",1314,188
+13027,"The Shadow Net",1706,149
+13029,"Brain Rewiring",1736,199
+13030,"Elective Upgrade",1602,195
+13032,"Estelle Moon",2170,135
+13034,"Eli 2.0",1401,194
+13035,"Executive Functioning",1153,170
+13036,"Holmegaard",1345,197
+13037,"Tapestry",1338,180
+13038,"Ultraviolet Clearance",1893,160
+13039,"Black Level Clearance",1379,205
+13041,"Skorpios Defense Systems: Persuasive Power",1833,167
+13042,"Armored Servers",1350,177
+13043,"Illicit Sales",1331,206
+13044,"Graft",1386,203
+13045,"Illegal Arms Factory",1512,197
+13046,"Mr. Stone",1322,182
+13047,"Bloodletter",1095,150
+13049,"Hailstorm",1325,200
+13051,"Hunter Seeker",1844,167
+13052,"K. P. Lynn",1454,191
+13054,"Honeyfarm",1260,180
+13055,"Long-Term Investment",1091,153
+13056,"Weir",1263,173
+20002,"Demolition Run",1429,185
+20004,"Singularity",1414,198
+20007,"Spinal Modem",1416,222
+20008,"Darwin",1313,196
+20012,"Hemorrhage",1476,200
+20014,"Morning Star",1393,194
+20025,"Doppelgänger",1449,199
+20027,"Aurora",1140,149
+20030,"Peacock",1146,183
+20031,"Pheromones",1370,197
+20034,"Crash Space",1531,218
+20035,"Fall Guy",1661,185
+20036,"Mr. Li",1315,223
+20046,"Rabbit Hole",1298,197
+20047,"The Personal Touch",1381,206
+20050,"Magnum Opus",1800,189
+20053,"All-nighter",1504,197
+20054,"Sacrificial Construct",1661,179
+20055,"Infiltration",1283,189
+20057,"Dyson Mem Chip",1281,183
+20060,"Underworld Contact",1655,198
+20062,"Project Ares",1137,168
+20067,"Hudson 1.0",1201,179
+20073,"Green Level Clearance",1519,186
+20074,"Shipment from MirrorMorph",1766,216
+20076,"Strongbox",1342,177
+20080,"The Cleaners",1380,195
+20081,"Dedicated Response Team",1377,193
+20083,"GRNDL Refinery",1454,183
+20087,"Hive",1614,177
+20089,"Shadow",1241,180
+20092,"Shipment from Kaguya",1526,184
+20094,"Braintrust",1443,200
+20103,"Whirlpool",1242,192
+20111,"TGTBT",1541,197
+20118,"Anonymous Tip",1374,212
+20123,"Bernice Mai",1471,209
+20126,"Private Security Force",1237,144
+20127,"Melange Mining Corp.",1519,207
+21001,"By Any Means",1376,193
+21002,"Yusuf",1656,184
+21003,"Zamba",1463,197
+21004,"Puffer",1147,164
+21005,"Lewi Guilherme",1254,175
+21006,"Cyberdelia",1498,185
+21007,"Upya",1292,205
+21008,"Assimilator",1312,166
+21009,"Asa Group: Security Through Vigilance",1886,160
+21010,"Ikawah Project",1903,183
+21011,"Najja 1.0",1430,192
+21012,"Gene Splicer",1520,162
+21013,"Mganga",1321,194
+21014,"Genotyping",1610,209
+21015,"Echo Chamber",1521,206
+21016,"Self-Growth Program",1811,172
+21017,"Calibration Testing",1734,198
+21018,"Urban Renewal",1688,173
+21019,"Wake Up Call",1555,223
+21020,"Reconstruction Contract",1749,182
+21021,"Acacia",1388,179
+21022,"Plague",1221,157
+21023,"Credit Kiting",1682,182
+21024,"Wari",1180,152
+21025,"Kabonesa Wu: Netspace Thrillseeker",2095,162
+21026,"Takobi",1717,204
+21027,"Kongamato",1571,196
+21028,"Emergent Creativity",1630,195
+21029,"RNG Key",1435,180
+21030,"Nightdancer",1260,205
+21031,"Jinja City Grid",1716,195
+21032,"Aimor",1256,166
+21033,"Bacterial Programming",1867,192
+21034,"Jua",1484,214
+21035,"Threat Assessment",1500,148
+21036,"Economic Warfare",1806,199
+21037,"Forced Connection",1598,231
+21038,"SSL Endorsement",1924,170
+21039,"NGO Front",1855,171
+21040,"Distract the Masses",1420,177
+21041,"eXer",1381,213
+21042,"Friday Chip",1567,213
+21043,"Crypt",1153,158
+21044,"Corporate ""Grant""",1789,161
+21045,"No One Home",1662,196
+21046,"Marathon",1459,179
+21047,"Gbahali",1482,226
+21048,"White Hat",1555,177
+21049,"Kuwinda K4H1U3",1242,176
+21050,"NEXT Sapphire",1344,182
+21051,"Anansi",1949,149
+21052,"Code Replicator",1466,188
+21053,"Reverse Infection",1325,190
+21054,"Azmari EdTech: Shaping the Future",1856,176
+21055,"Degree Mill",1767,179
+21056,"Personalized Portal",1219,202
+21057,"Armed Intimidation",1514,225
+21058,"Death and Taxes",1596,204
+21059,"Trojan Horse",1641,190
+21060,"TechnoCo",1382,197
+21061,"Glut Cipher",1176,166
+21062,"Knobkierie",1802,201
+21063,"419: Amoral Scammer",1913,158
+21064,"Falsified Credentials",1741,195
+21065,"Rogue Trading",1677,193
+21066,"Because I Can",1498,203
+21067,"Nyashia",1562,209
+21068,"Consume",1760,137
+21069,"Malia Z0L0K4",1650,202
+21070,"Kill Switch",1423,182
+21071,"Tempus",1359,201
+21072,"Bio Vault",1803,190
+21073,"Sadaka",1649,191
+21074,"Endless EULA",1665,201
+21075,"Sandman",1278,181
+21076,"Amani Senai",1878,196
+21077,"SSO Industries: Fueling Innovation",1434,174
+21078,"City Works Project",1688,180
+21079,"Oduduwa",1593,187
+21080,"Rashida Jaheem",2170,151
+21081,"Freedom Khumalo: Crypto-Anarchist",1768,166
+21082,"Trypano",1333,201
+21083,"Contaminate",1539,195
+21084,"Embezzle",1571,188
+21085,"Slipstream",1268,147
+21086,"Laamb",1865,189
+21087,"Gebrselassie",1368,181
+21088,"Compile",1584,198
+21089,"Logic Bomb",1819,178
+21090,"Jackpot!",1396,164
+21091,"Remote Enforcement",1482,202
+21092,"Kamali 1.0",1258,170
+21093,"Warden Fatuma",1408,178
+21094,"Viral Weaponization",1584,190
+21095,"Envelope",1447,192
+21096,"Mwanza City Grid",1583,222
+21097,"Standard Procedure",1402,212
+21098,"Intake",1332,186
+21099,"Masvingo",1501,193
+21100,"Overseer Matrix",1607,211
+21101,"Zer0",1817,147
+21102,"Musaazi",1391,151
+21103,"Hippo",1852,193
+21104,"Amina",1605,172
+21105,"Diversion of Funds",1943,148
+21106,"PAD Tap",1971,154
+21107,"Reclaim",1496,198
+21108,"Engolo",1795,161
+21109,"Flame-out",1569,226
+21110,"Black Hat",1504,168
+21111,"Kasi String",1353,190
+21112,"NEXT Diamond",1303,206
+21113,"Riot Suppression",1507,207
+21114,"Mti Mwekundu: Life Improved",2146,125
+21115,"Mlinzi",1581,219
+21116,"Better Citizen Program",1603,204
+21117,"Market Forces",1682,208
+21118,"Surveyor",1704,170
+21119,"High-Profile Target",1970,154
+21120,"False Flag",1330,178
+22001,"Nathaniel ""Gnat"" Hall: One-of-a-Kind",1352,144
+22002,"Divide and Conquer",1555,209
+22003,"Guinea Pig",1414,206
+22005,"Hijacked Router",1472,183
+22006,"Cradle",1167,171
+22007,"District 99",1374,151
+22008,"Liza Talking Thunder: Prominent Legislator",2082,156
+22009,"Hot Pursuit",1786,188
+22011,"Bankroll",1694,199
+22012,"Tycoon",1398,185
+22013,"Thunder Art Gallery",1433,207
+22014,"Miss Bones",1923,188
+22015,"Akiko Nisei: Head Case",1530,192
+22016,"Insight",1313,176
+22017,"Mind's Eye",1367,202
+22018,"Mâché",1292,182
+22019,"Ika",1625,214
+22020,"Kyuban",1597,203
+22021,"Psych Mike",1415,200
+22022,"Algernon",1377,166
+22023,"Reboot",1482,182
+22024,"Office Supplies",1473,172
+22025,"DJ Fenris",1912,181
+22026,"Sportsmetal: Go Big or Go Home",1830,163
+22027,"Hyperloop Extension",1756,185
+22028,"Meridian",1556,175
+22029,"Gatekeeper",1845,160
+22030,"Divert Power",1342,191
+22031,"Fast Break",1763,202
+22032,"Game Changer",1999,165
+22033,"Giordano Memorial Field",1738,174
+22034,"Saraswati Mnemonics: Endless Exploration",1366,200
+22035,"Jumon",1362,162
+22036,"API-S Keeper Isobel",1397,197
+22037,"Neurostasis",1344,177
+22038,"Otoroshi",1295,198
+22039,"Thimblerig",1741,190
+22040,"Hangeki",1447,181
+22041,"Daruma",1374,165
+22042,"Acme Consulting: The Truth You Need",1572,170
+22043,"Fly on the Wall",1556,193
+22044,"SIU",1661,176
+22045,"Peeping Tom",1278,193
+22046,"Hydra",1553,159
+22047,"Eavesdrop",1354,182
+22048,"Attitude Adjustment",1730,189
+22049,"Arella Salvatore",1714,179
+22050,"The Outfit: Family Owned and Operated",1760,168
+22051,"Broad Daylight",1514,201
+22052,"Drudge Work",1719,177
+22053,"Blockchain",1370,166
+22054,"Formicary",1776,187
+22055,"Building Blocks",1411,198
+22056,"Too Big to Fail",1791,159
+22057,"Under the Bus",1614,178
+22058,"Lady Liberty",1663,206
+25003,"Queen's Gambit",1447,208
+25004,"Quest Completed",1491,188
+25006,"Run Amok",1442,193
+25007,"Stimhack",2037,169
+25008,"Cyberfeeder",1515,182
+25009,"Patchwork",1823,212
+25011,"Datasucker",1739,170
+25012,"Force of Nature",1120,148
+25014,"Lamprey",1492,191
+25020,"Gabriel Santiago: Consummate Professional",1571,173
+25021,"Leela Patel: Trained Pragmatist",1950,126
+25023,"Easy Mark",1408,203
+25025,"Hostage",1623,205
+25029,"Spear Phishing",1561,181
+25030,"Special Order",1500,191
+25031,"HQ Interface",1520,212
+25032,"Paragon",1778,182
+25034,"Demara",1322,194
+25035,"Faerie",1676,181
+25038,"Bank Job",1670,188
+25039,"Data Dealer",1483,200
+25040,"Chaos Theory: Wünderkind",1566,172
+25043,"Modded",1520,172
+25044,"Notoriety",1671,216
+25047,"Tinkering",1408,208
+25048,"Akamatsu Mem Chip",1356,194
+25049,"Dinosaurus",1454,197
+25050,"R&D Interface",1635,211
+25052,"Battering Ram",1302,184
+25053,"Deus X",1555,196
+25055,"Pipeline",1096,177
+25057,"Ice Analyzer",1299,155
+25061,"Crypsis",1390,192
+25062,"Armitage Codebusting",1475,175
+25064,"John Masanori",1584,189
+25065,"Kati Jones",1652,212
+25066,"Haas-Bioroid: Stronger Together",1288,148
+25067,"Seidr Laboratories: Destiny Defined",1404,202
+25069,"Successful Field Test",1608,181
+25070,"Adonis Campaign",1529,196
+25071,"Aggressive Secretary",1453,188
+25074,"Heimdall 1.0",1449,182
+25075,"Ichi 1.0",1542,196
+25077,"Turing",1656,226
+25078,"Viktor 1.0",1395,181
+25081,"Blue Level Clearance",1606,176
+25082,"Ash 2X3ZB9CY",1789,172
+25083,"Mason Bellamy",1508,204
+25085,"Jinteki: Replicating Perfection",1908,168
+25086,"Fetal AI",1693,182
+25088,"Philotic Entanglement",1784,210
+25089,"Project Junebug",1498,184
+25092,"Sundew",1759,194
+25093,"Himitsu-Bako",1544,173
+25095,"Neural Katana",1464,187
+25097,"Tsurugi",1412,188
+25098,"Wall of Thorns",1299,182
+25099,"Yagura",1421,223
+25101,"Neural EMP",1585,199
+25104,"NBN: Making News",1404,177
+25105,"Spark Agency: Worldswide Reach",1462,208
+25106,"Explode-a-palooza",1650,178
+25109,"Ghost Branch",1383,183
+25110,"Marked Accounts",1373,197
+25112,"Data Raven",1879,180
+25113,"Flare",1309,197
+25117,"Closed Accounts",1855,190
+25119,"SEA Source",1859,166
+25120,"Product Placement",1440,178
+25121,"Red Herrings",1532,197
+25123,"Blue Sun: Powering the Future",1797,139
+25127,"Contract Killer",1462,188
+25128,"Elizabeth Mills",1483,197
+25129,"Public Support",1313,200
+25131,"Caduceus",1544,203
+25132,"Hadrian's Wall",1319,218
+25135,"Spiderweb",1599,183
+25136,"Beanstalk Royalties",1491,213
+25137,"Oversight AI",1585,184
+25140,"Paper Trail",1359,195
+25141,"Priority Requisition",1277,197
+25144,"Hunter",1354,190
+25145,"Wall of Static",1456,203
+25147,"IPO",1781,178
+26001,"Isolation",1269,214
+26002,"Demolisher",1371,183
+26003,"Chisel",1663,217
+26004,"Stargate",1710,194
+26005,"Utae",1205,197
+26006,"Climactic Showdown",1194,185
+26007,"Fencer Fueno",1557,200
+26008,"The Nihilist",1364,178
+26009,"Trickster Taka",1659,204
+26010,"Az McCaffrey: Mechanical Prodigy",1521,186
+26011,"Always Have a Backup Plan",1314,186
+26012,"Blueberry!™ Diesel",1412,193
+26013,"Flip Switch",1428,179
+26014,"Lucky Charm",1445,200
+26015,"Masterwork (v37)",1576,208
+26016,"Bukhgalter",1947,168
+26017,"""Baklan"" Bochkin",1448,194
+26018,"The Class Act",1942,195
+26019,"Lat: Ethical Freelancer",1766,169
+26020,"In the Groove",1477,200
+26021,"Khusyuk",1491,183
+26022,"Spec Work",1585,216
+26023,"Supercorridor",1284,190
+26024,"Gauss",1639,194
+26025,"Pelangi",1604,173
+26026,"Rezeki",1981,149
+26027,"The Artist",1334,221
+26028,"Direct Access",1337,198
+26029,"Rejig",1552,203
+26030,"Whistleblower",1164,160
+26031,"MirrorMorph: Endless Iteration",1607,203
+26032,"Architect Deployment Test",1566,221
+26033,"Calvin B4L3Y",1469,201
+26034,"Nanoetching Matrix",1487,181
+26035,"Hagen",1649,165
+26036,"Fully Operational",1879,188
+26037,"Red Level Clearance",1831,210
+26038,"Cold Site Server",1455,189
+26039,"Hyoubu Institute: Absolute Clarity",1147,149
+26040,"Project Yagi-Uda",1536,182
+26041,"Sting!",1827,183
+26042,"Public Health Portal",1181,160
+26043,"Storgotic Resonator",1313,180
+26044,"Saisentan",1748,204
+26045,"Complete Image",1356,188
+26046,"Letheia Nisei",1394,180
+26047,"Remastered Edition",1513,194
+26048,"Daily Quest",1535,198
+26049,"Tiered Subscription",1478,232
+26050,"Congratulations!",1249,184
+26051,"Loot Box",1377,182
+26052,"Focus Group",1374,199
+26053,"Game Over",1286,172
+26054,"Increased Drop Rates",1216,181
+26055,"Divested Trust",1434,183
+26056,"SDS Drone Deployment",1759,199
+26057,"Roughneck Repair Squad",1392,190
+26058,"Afshar",1703,194
+26059,"Sandstone",1612,206
+26060,"Trebuchet",1512,201
+26061,"Secure and Protect",1364,172
+26062,"Reduced Service",1380,191
+26063,"Vulnerability Audit",1581,209
+26064,"CSR Campaign",1311,175
+26065,"Rime",1425,202
+26066,"Hoshiko Shiro: Untold Protagonist",1936,200
+26067,"Moshing",1859,218
+26068,"Devil Charm",1761,191
+26069,"Gachapon",1673,192
+26070,"Keiko",1751,156
+26071,"Odore",1367,200
+26073,"Paladin Poemu",1852,196
+26074,"Bravado",1873,181
+26075,"Boomerang",1985,167
+26076,"Mu Safecracker",1218,166
+26077,"Prognostic Q-Loop",1616,185
+26079,"Afterimage",1623,207
+26080,"Makler",1297,201
+26081,"Penumbral Toolkit",1367,204
+26082,"The Back",1380,177
+26083,"Harmony AR Therapy",1537,166
+26084,"Aniccam",1829,198
+26085,"Simulchip",1953,162
+26086,"Cordyceps",1227,179
+26087,"Euler",1726,189
+26088,"Mantle",1529,192
+26089,"Penrose",1514,195
+26090,"Self-modifying Code",1988,164
+26092,"Paule's Café",1328,202
+26093,"Buffer Drive",1588,210
+26094,"Daily Casts",1877,180
+26095,"DreamNet",1813,185
+26097,"Project Vacheron",2081,136
+26098,"Bass CH1R180G4",1598,182
+26099,"Cerebral Overwriter",1559,200
+26100,"Vaporframe Fabricator",1260,157
+26101,"Drafter",1881,211
+26102,"Týr",1580,207
+26103,"NEXT Activation Command",1594,220
+26104,"Scapenet",1515,203
+26105,"Tranquility Home Grid",1902,195
+26106,"Flower Sermon",1469,196
+26107,"Prāna Condenser",1579,219
+26108,"Engram Flush",1935,188
+26109,"Konjin",1502,207
+26110,"Hyoubu Precog Manifold",1339,178
+26111,"Kakurenbo",1466,198
+26113,"GameNET: Where Dreams are Real",1396,157
+26114,"Bellona",2038,167
+26115,"F2P",1545,209
+26116,"Gold Farmer",2011,169
+26118,"SYNC Rerouting",1402,181
+26119,"Ganked!",1624,194
+26120,"Earth Station: SEA Headquarters",1520,176
+26121,"Transport Monopoly",1355,184
+26122,"Wall to Wall",1650,195
+26123,"Akhet",1646,222
+26124,"Colossus",1497,185
+26125,"Winchester",1716,206
+26126,"Argus Crackdown",1412,171
+26128,"Cyberdex Sandbox",1909,187
+26129,"False Lead",1848,187
+26130,"NAPD Cordon",1502,187
+27001,"Mystic Maemi",1776,204
+27002,"Swift",1684,203
+27003,"Cybertrooper Talut",1421,220
+27004,"Megaprix Qualifier",1672,181
+27005,"La Costa Grid",1820,193
+27006,"Digital Rights Management",1500,173
+27007,"Cayambe Grid",1830,162
+28001,"Labor Rights",1936,172
+28002,"Crowdfunding",2112,138
+28003,"Embolus",1478,209
+28004,"Slot Machine",1968,168
+28005,"Border Control",2032,167
+28006,"Timely Public Release",1464,216
+29001,"Medium",1954,153
+29002,"Parasite",1968,188
+29003,"e3 Feedback Implants",1592,210
+29004,"Cache",1702,188
+29005,"Indexing",1837,168
+29006,"Cerberus ""Lady"" H1",1731,182
+29007,"Lucky Find",1721,198
+29009,"NEXT Bronze",1527,202
+29010,"NEXT Silver",1338,193
+29011,"Hostile Infrastructure",1822,161
+29012,"Turtlebacks",1918,149
+29013,"Sweeps Week",1725,207
+29015,"Executive Boot Camp",1542,182
+29016,"Scorched Earth",2000,176
+29017,"Excalibur",1666,184
+30001,"René ""Loup"" Arcemont: Party Animal",1736,161
+30002,"Wildcat Strike",1512,190
+30003,"Carnivore",1296,180
+30004,"Botulus",1892,181
+30005,"Buzzsaw",1755,199
+30006,"Cleaver",1885,220
+30007,"Fermenter",1865,198
+30008,"Leech",1789,192
+30009,"Cookbook",1639,204
+30010,"Zahya Sadeghi: Versatile Smuggler",1758,221
+30011,"Mutual Favor",1733,182
+30012,"Tread Lightly",1528,196
+30013,"Docklands Pass",1675,189
+30014,"Pennyshaver",1766,212
+30015,"Carmen",1697,195
+30016,"Marjanah",1343,177
+30017,"Tranquilizer",1499,190
+30018,"Red Team",1441,208
+30019,"Tāo Salonga: Telepresence Magician",1501,159
+30020,"Creative Commission",1829,192
+30021,"VRcation",1504,170
+30022,"DZMZ Optimizer",1692,186
+30023,"Pantograph",1563,222
+30024,"Conduit",1745,183
+30025,"Echelon",1660,183
+30026,"Unity",1750,179
+30027,"Telework Contract",1729,173
+30028,"Jailbreak",1663,201
+30029,"Overclock",1727,211
+30030,"Sure Gamble",1897,150
+30031,"T400 Memory Diamond",1442,189
+30032,"Mayfly",1584,189
+30033,"Smartware Distributor",1314,186
+30034,"Verbal Plasticity",1513,183
+30035,"Haas-Bioroid: Precision Design",1963,147
+30036,"Luminal Transubstantiation",1955,163
+30037,"Nico Campaign",1646,191
+30038,"Ansel 1.0",1650,151
+30039,"Brân 1.0",1911,201
+30040,"Seamless Launch",1992,174
+30041,"Sprint",1549,192
+30042,"Manegarm Skunkworks",1814,157
+30043,"Jinteki: Restoring Humanity",1546,173
+30044,"Longevity Serum",1642,193
+30045,"Urtica Cipher",1515,204
+30046,"Diviner",1417,213
+30047,"Karunā",1409,216
+30048,"Hansei Review",1700,208
+30049,"Neurospike",1649,207
+30050,"Anoetic Void",1889,175
+30051,"NBN: Reality Plus",1918,171
+30052,"Tomorrow's Headline",1789,207
+30053,"Spin Doctor",2010,166
+30054,"Funhouse",1610,196
+30055,"Ping",1770,197
+30056,"Predictive Planogram",1782,216
+30057,"Public Trail",1676,212
+30058,"AMAZE Amusements",1658,187
+30059,"Weyland Consortium: Built to Last",1713,166
+30060,"Above the Law",1822,180
+30061,"Clearinghouse",1684,206
+30062,"Ballista",1416,225
+30063,"Pharos",1629,174
+30064,"Government Subsidy",1589,206
+30065,"Retribution",1484,215
+30066,"Malapert Data Vault",1562,207
+30067,"Offworld Office",1872,169
+30068,"Orbital Superiority",1434,204
+30069,"Send a Message",1576,168
+30070,"Superconducting Hub",1420,170
+30071,"Regolith Mining License",1720,187
+30072,"Palisade",1415,181
+30073,"Tithe",1546,152
+30074,"Whitespace",1630,201
+30075,"Hedge Fund",1876,176
+30076,"The Catalyst: Convention Breaker",988,61
+30077,"The Syndicate: Profit over Principle",1071,60
+31001,"Quetzal: Free Spirit",1583,178
+31002,"Reina Roja: Freedom Fighter",1505,205
+31003,"En Passant",1468,203
+31004,"Retrieval Run",1623,207
+31005,"Clot",1922,165
+31006,"Corroder",1676,195
+31007,"Imp",1787,188
+31008,"Mimic",1657,203
+31009,"Ice Carver",1556,216
+31010,"Liberated Account",1767,168
+31011,"Scrubber",1515,191
+31012,"Xanadu",1375,192
+31013,"Ken ""Express"" Tenma: Disappeared Clone",1610,166
+31014,"Steve Cambridge: Master Grifter",1798,175
+31015,"Career Fair",1663,203
+31016,"Emergency Shutdown",1606,211
+31017,"Forged Activation Orders",1583,198
+31018,"Inside Job",1845,188
+31019,"Legwork",1753,191
+31020,"Networking",1434,202
+31021,"Abagnale",1560,186
+31022,"Femme Fatale",1586,188
+31023,"Sneakdoor Beta",1664,188
+31024,"Security Testing",1694,173
+31025,"Ayla ""Bios"" Rahim: Simulant Specialist",1433,189
+31026,"Rielle ""Kit"" Peddler: Transhuman",1770,183
+31027,"Diesel",1840,168
+31028,"Test Run",1543,197
+31029,"The Maker's Eye",1728,190
+31030,"Atman",1572,201
+31031,"Chameleon",1465,188
+31032,"Egret",1367,189
+31033,"Gordian Blade",1585,193
+31034,"Paricia",1624,207
+31035,"Aesop's Pawnshop",1878,159
+31036,"Professional Contacts",1623,187
+31037,"Dirty Laundry",1862,184
+31038,"Prepaid VoicePAD",1670,180
+31039,"Earthrise Hotel",1928,177
+31040,"Haas-Bioroid: Architects of Tomorrow",1502,178
+31041,"Project Vitruvius",1845,190
+31042,"Marilyn Campaign",1766,155
+31043,"Eli 1.0",1713,187
+31044,"Magnet",1750,185
+31045,"Ravana 1.0",1552,191
+31046,"Rototurret",1546,212
+31047,"Archived Memories",1836,190
+31048,"Biotic Labor",1841,140
+31049,"Corporate Troubleshooter",1461,202
+31050,"Jinteki: Personal Evolution",1943,166
+31051,"House of Knives",1765,178
+31052,"Nisei MK II",1787,166
+31053,"Ronin",1519,209
+31054,"Snare!",1784,196
+31055,"Lotus Field",1571,184
+31056,"Swordsman",1535,196
+31057,"Celebrity Gift",1576,192
+31058,"Trick of Light",1631,200
+31059,"Hokusai Grid",1532,177
+31060,"Near-Earth Hub: Broadcast Center",1902,164
+31061,"License Acquisition",1392,202
+31062,"Project Beale",1783,178
+31063,"Daily Business Show",1783,158
+31064,"Reversed Accounts",1601,209
+31065,"Pop-up Window",1582,192
+31066,"Tollbooth",1758,183
+31067,"Wraparound",1741,189
+31068,"Psychographics",1616,175
+31069,"SanSan City Grid",1859,167
+31070,"Weyland Consortium: Building a Better World",1401,206
+31071,"Hostile Takeover",1835,193
+31072,"Oaktown Renovation",1741,178
+31073,"Project Atlas",2052,145
+31074,"Corporate Town",1550,197
+31075,"Archer",1819,180
+31076,"Hortum",1679,184
+31077,"Ice Wall",1631,197
+31078,"Punitive Counterstrike",1875,190
+31079,"Crisium Grid",1747,184
+31080,"PAD Campaign",1562,192
+31081,"Enigma",1708,192
+31082,"Subliminal Messaging",1688,175
+33001,"Esâ Afontov: Eco-Insurrectionist",1774,82
+33002,"Chastushka",1715,107
+33003,"Running Hot",1696,115
+33004,"Steelskin Scarring",1879,106
+33005,"Ghosttongue",1666,125
+33006,"Marrow",1585,113
+33007,"Begemot",1694,115
+33008,"Avgustina Ivanovskaya",1401,121
+33009,"Light the Fire!",1540,174
+33010,"The Twinning",1851,101
+33011,"Nyusha ""Sable"" Sintashta: Symphonic Prodigy",1787,91
+33012,"Carpe Diem",1607,108
+33013,"Pinhole Threading",1907,109
+33014,"PAN-Weave",1485,106
+33015,"Virtuoso",1365,114
+33016,"Cat's Cradle",1536,139
+33017,"Cezve",1829,111
+33018,"Revolver",1774,162
+33019,"Backstitching",1538,102
+33020,"No Free Lunch",1676,104
+33021,"Captain Padma Isbister: Intrepid Explorer",1470,103
+33022,"Deep Dive",1971,148
+33023,"Into the Depths",1555,121
+33024,"Rigging Up",1551,106
+33025,"Endurance",2132,96
+33026,"Hyperbaric",1573,129
+33027,"Propeller",1751,105
+33028,"Daeg, First Net-Cat",1358,99
+33029,"Environmental Testing",1674,115
+33030,"Stoneship Chart Room",1708,105
+33031,"Élivágar Bifurcation",1625,132
+33032,"Midnight-3 Arcology",1585,114
+33033,"Refuge Campaign",1315,113
+33034,"Trieste Model Bioroids",1599,105
+33035,"Echo",1447,114
+33036,"Hákarl 1.0",1481,128
+33037,"Wave",1456,125
+33038,"Big Deal",1783,140
+33039,"Blood in the Water",1740,128
+33040,"Regenesis",1873,115
+33041,"Bladderwort",1805,111
+33042,"Moon Pool",1919,124
+33043,"Anemone",1775,147
+33044,"Bathynomus",1506,118
+33045,"Ivik",1401,110
+33046,"Mitosis",1526,111
+33047,"Mavirus",1715,132
+33048,"Pravdivost Consulting: Political Solutions",1529,111
+33049,"Artificial Cryptocrash",1693,117
+33050,"Chekist Scion",1512,127
+33051,"Drago Ivanov",2100,99
+33052,"Ubiquitous Vig",1368,137
+33053,"Mestnichestvo",1714,115
+33054,"Vasilisa",1386,111
+33055,"Backroom Machinations",1457,110
+33056,"Vladisibirsk City Grid",1613,164
+33057,"Ob Superheavy Logistics: Extract. Export. Excel.",2035,81
+33058,"Azef Protocol",1723,169
+33059,"Svyatogor Excavator",1672,97
+33060,"Envelopment",1693,107
+33061,"Maskirovka",1708,123
+33062,"Stavka",1712,128
+33063,"Extract",1689,96
+33064,"Mutually Assured Destruction",1691,110
+33065,"Trust Operation",1330,114
+33066,"Finality",1746,101
+33067,"Katorga Breakout",1680,97
+33068,"Raindrops Cut Stone",1721,118
+33069,"Time Bomb",1461,109
+33070,"Abaasy",1410,119
+33071,"Hush",1578,107
+33072,"Nga",1338,106
+33073,"Num",1352,112
+33074,"Tsakhia ""Bankhar"" Gantulga",1931,89
+33075,"Concerto",1414,114
+33076,"Reprise",1577,102
+33077,"Poison Vial",1530,116
+33078,"WAKE Implant v2A-JRJ",1754,103
+33079,"Zenit Chip JZ-2MJ",1524,109
+33080,"Tremolo",1359,107
+33081,"Tunnel Vision",1443,104
+33082,"Asmund Pudlat",1384,116
+33083,"Info Bounty",1643,95
+33084,"Spark of Inspiration",1582,142
+33085,"Hippocampic Mechanocytes",1467,115
+33086,"Basilar Synthgland 2KVJ",1457,118
+33087,"Flux Capacitor",1401,106
+33088,"Nanuq",1372,107
+33089,"Orca",1572,132
+33090,"K2CP Turbine",1944,110
+33091,"World Tree",2017,98
+33092,"Dr. Nuka Vrolyck",1758,103
+33093,"Nova Initiumia: Catalyst & Impetus",1210,90
+33094,"Matryoshka",1592,130
+33095,"Thule Subsea: Safety Below",1574,66
+33096,"Ontological Dependence",1670,100
+33097,"Nightmare Archive",1578,98
+33098,"Bloop",1548,100
+33099,"Pulse",1503,126
+33100,"Distributed Tracing",1596,101
+33101,"Hypoxia",1512,108
+33102,"Djupstad Grid",1550,118
+33103,"Mr. Hendrik",1638,107
+33104,"Issuaq Adaptics: Sustaining Diversity",1400,94
+33105,"Hybrid Release",1610,99
+33106,"Dr. Vientiane Keeling",1983,112
+33107,"Reaper Function",1667,97
+33108,"Hafrún",1565,104
+33109,"Vampyronassa",1548,109
+33110,"Simulation Reset",1540,103
+33111,"Nanisivik Grid",1928,87
+33112,"Freedom of Information",1549,108
+33113,"Post-Truth Dividend",1573,105
+33114,"Gaslight",1779,113
+33115,"Vera Ivanovna Shuyskaya",1429,113
+33116,"Klevetnik",1371,89
+33117,"Unsmiling Tsarevna",1625,124
+33118,"Nonequivalent Exchange",1439,92
+33119,"Shipment from Vladisibirsk",1661,111
+33120,"Regulatory Capture",1634,107
+33121,"Kimberlite Field",1429,93
+33122,"Hostile Architecture",1709,124
+33123,"Superdeep Borehole",1100,94
+33124,"Anvil",1533,105
+33125,"End of the Line",1829,108
+33126,"Yakov Erikovich Avdakov",1422,118
+33127,"ZATO City Grid",1619,109
+33128,"Ampère: Cybernetics For Anyone",1184,80
+34001,"Strike Fund",1767,94
+34002,"The Price",1752,86
+34003,"Solidarity Badge",1664,104
+34004,"Audrey v2",1781,90
+34005,"Banner",1356,98
+34006,"Monkeywrench",1331,87
+34007,"Eru Ayase-Pessoa",1662,91
+34008,"Hannah ""Wheels"" Pilintra",1782,106
+34009,"Lago Paranoá Shelter",1702,96
+34010,"Mercury: Chrome Libertador",1490,75
+34011,"Chrysopoeian Skimming",1178,99
+34012,"S-Dobrado",1672,88
+34013,"Capybara",1343,93
+34014,"Hermes",1976,80
+34015,"Curupira",1697,114
+34016,"Laser Pointer",1366,111
+34017,"Saci",1487,102
+34018,"Shibboleth",1648,95
+34019,"Debbie ""Downtown"" Moreira",1495,96
+34020,"Arissana Rocha Nahu: Street Artist",1791,71
+34021,"Joy Ride",1534,98
+34022,"AirbladeX (JSRF Ed.)",1508,96
+34023,"LilyPAD",1732,92
+34024,"Living Mural",1322,97
+34025,"Pichação",1714,108
+34026,"Slap Vandal",1582,91
+34027,"Umbrella",1295,98
+34028,"Beatriz Friere Gonzalez",1436,103
+34029,"Urban Art Vernissage",1615,96
+34030,"Bahia Bands",1720,86
+34031,"Salvo Testing",1391,79
+34032,"Stegodon MK IV",1514,94
+34033,"Wage Workers",1890,85
+34034,"Ablative Barrier",1736,93
+34035,"Jaguarundi",1525,112
+34036,"M.I.C.",1701,87
+34037,"Greasing the Palm",1600,85
+34038,"Vovô Ozetti",1594,83
+34039,"A Teia: IP Recovery",1571,83
+34040,"Fujii Asset Retrieval",1730,89
+34041,"Front Company",1607,90
+34042,"Attini",1518,104
+34043,"Phoneutria",1551,94
+34044,"Tatu-Bola",1778,87
+34045,"Mindscaping",1636,89
+34046,"Adrian Seis",1596,95
+34047,"Daniela Jorge Inácio",1589,93
+34048,"Epiphany Analytica: Nations Undivided",1624,90
+34049,"Oracle Thinktank",1676,101
+34050,"Balanced Coverage",1584,92
+34051,"Behold!",1661,89
+34052,"Federal Fundraising",1724,91
+34053,"Starlit Knight",1561,95
+34054,"Virtual Service Agent",1628,88
+34055,"Oppo Research",1903,80
+34056,"Your Digital Life",1843,88
+34057,"Slash and Burn Agriculture",1777,108
+34058,"Cybersand Harvester",1570,94
+34059,"Tree Line",1647,96
+34060,"Valentão",1508,84
+34061,"Armed Asset Protection",1499,92
+34062,"Pivot",1688,88
+34063,"Angelique Garza Correa",1584,84
+34064,"Tucana",1744,92
+34065,"B-1001",1590,94
+34066,"Sebastião Souza Pessoa: Activist Organizer",1708,62
+34067,"Eye for an Eye",1520,81
+34068,"Privileged Access",1775,75
+34069,"Amanuensis",1494,93
+34070,"The Wizard’s Chest",1474,94
+34071,"Boi-tatá",1372,85
+34072,"Heliamphora",1388,91
+34073,"Arruaceiras Crew",1830,78
+34074,"Friend of a Friend",1609,83
+34075,"Manuel Lattes de Moura",1632,81
+34076,"Meeting of Minds",1371,86
+34077,"Window of Opportunity",1638,75
+34078,"Alarm Clock",1640,86
+34079,"Jeitinho",1531,91
+34080,"Cupellation",1808,95
+34081,"Malandragem",1538,84
+34082,"Physarum Entangler",1785,71
+34083,"Amelia Earhart",1302,79
+34084,"Juli Moreira Lee",1461,79
+34085,"Burner",1713,83
+34086,"Spree",1429,82
+34087,"Trick Shot",2011,80
+34088,"Cataloguer",1678,98
+34089,"Coalescence",1819,91
+34090,"Lobisomem",1713,80
+34091,"Muse",1853,102
+34092,"Pressure Spike",1450,82
+34093,"""Pretty"" Mary da Silva",1611,95
+34094,"Ashen Epilogue",1685,74
+34095,"Valentina Ferreira Carvalho",1429,86
+34096,"Thunderbolt Armaments: Peace Through Power",1267,70
+34097,"Lightning Laboratory",1364,91
+34098,"Warm Reception",1615,92
+34099,"Working Prototype",1785,84
+34100,"Lycian Multi-Munition",1352,79
+34101,"Sorocaban Blade",1292,63
+34102,"Active Policing",1544,78
+34103,"Corporate Hospitality",1624,84
+34104,"Brasília Government Grid",1401,80
+34105,"See How They Run",1548,85
+34106,"Sisyphus Protocol",1565,95
+34107,"Charlotte Caçador",1813,73
+34108,"Cohort Guidance Program",1823,89
+34109,"Boto",1562,80
+34110,"Cloud Eater",1572,81
+34111,"Tributary",1959,74
+34112,"Bring Them Home",1455,87
+34113,"Kingmaking",1498,93
+34114,"Stoke the Embers",1480,82
+34115,"Janaína ""JK"" Dumont Kindelán",1300,77
+34116,"Capacitor",1261,91
+34117,"Piranhas",1539,93
+34118,"Seraph",1339,99
+34119,"Sudden Commandment",1584,69
+34120,"The Holo Man",1888,80
+34121,"Nuvem SA: Law of the Land",1584,71
+34122,"Eminent Domain",1728,87
+34123,"The Basalt Spire",1783,85
+34124,"Hearts and Minds",1518,75
+34125,"Descent",1581,83
+34126,"Hammer",1654,73
+34127,"Logjam",1753,98
+34128,"Business As Usual",1514,100
+34129,"Isaac Liberdade",1506,74
+34130,"The Powers That Be",1698,68
+35001,"Ryō ""Phoenix"" Ōno: Out of the Ashes",1408,53
+35002,"Topan: Ormas Leader",1422,43
+35003,"Charm Offensive",1431,63
+35004,"Scrounge",1481,54
+35005,"Shred",1234,58
+35006,"Bling",1456,64
+35007,"Gourmand",1693,63
+35008,"Hantu",1329,53
+35009,"Rising Tide",1626,59
+35010,"Cacophony",1475,68
+35011,"Rent Rioters",1380,71
+35012,"Barry ""Baz"" Wong: Tri-Maf Veteran",1545,50
+35013,"MuslihaT: Multifarious Marketeer",1725,37
+35014,"Clean Getaway",1798,55
+35015,"Lie Low",1583,55
+35016,"Maintenance Access",1564,55
+35017,"Transfer of Wealth",1859,60
+35018,"Detente",1294,65
+35019,"Maglectric Rapid (748 Mod)",1482,77
+35020,"Sang Kancil",1467,66
+35021,"Fransofia Ward",1370,63
+35022,"Open Market",1678,66
+35023,"Dewi Subrotoputri: Pedagogical Dhalang",1433,34
+35024,"Magdalene Keino-Chemutai: Cryptarchitect",1732,48
+35025,"Illumination",1668,63
+35026,"Ritual",1625,71
+35027,"GAMEDRAGON™ Pro",1538,63
+35028,"Madani",1690,59
+35029,"Azimat",1638,52
+35030,"Chromatophores",1530,70
+35031,"Devadatta Drone",1556,76
+35032,"Principia",1454,59
+35033,"""Knickknack"" O’Brian",1653,59
+35034,"Side Hustle",1475,60
+35035,"LEO Construction: Labor Solutions",1804,51
+35036,"Poétrï Luxury Brands: All the Rage",1457,43
+35037,"Aggressive Trendsetting",1552,60
+35038,"Project Ingatan",1565,67
+35039,"Humanoid Resources",1824,66
+35040,"Otto Campaign",1598,60
+35041,"Bumi 1.0",1633,60
+35042,"Scatter Field",1643,56
+35043,"Nanomanagement",1823,61
+35044,"Top-Down Solutions",1661,65
+35045,"Mercia B4LL4RD",1666,71
+35046,"AU Co.: The Gold Standard in Clones",1943,58
+35047,"PT Untaian: Life's Building Blocks",1320,38
+35048,"Proprionegation",1656,73
+35049,"Sericulture Expansion",1516,66
+35050,"Byte!",1656,61
+35051,"Phật Gioan Baotixita",1822,61
+35052,"Empiricist",1514,58
+35053,"Mycoweb",1534,69
+35054,"Semak-samun",1698,70
+35055,"Peer Review",1540,62
+35056,"Mitra Aman",1586,60
+35057,"Nebula Talent Management: Making Stars",1931,54
+35058,"Synapse Global: Faster than Thought",1418,48
+35059,"Embedded Reporting",1640,57
+35060,"Next Big Thing",1628,68
+35061,"Idiosyncresis",1436,65
+35062,"Public Access Plaza",1543,72
+35063,"Doomscroll",1537,57
+35064,"N-Pot",1515,61
+35065,"Bigger Picture",1496,65
+35066,"IP Enforcement",1484,68
+35067,"Touch-ups",1893,71
+35068,"BANGUN: When Disaster Strikes",1340,34
+35069,"The Zwicky Group: Invisible Hands",1582,49
+35070,"Greenmail",1629,71
+35071,"Off the Books",1707,55
+35072,"Anthill Excavation Contract",1693,70
+35073,"Plutus",1616,61
+35074,"Biawak",1657,70
+35075,"Kessleroid",1529,61
+35076,"Syailendra",1444,65
+35077,"Key Performance Indicators",1641,60
+35078,"Measured Response",1851,58
+35079,"Flyswatter",1620,67
+35080,"Lamplighter",1446,53
+35081,"Petty Cash",1778,67
+35082,"Mahkota Langit Grid",1435,63
+36001,"Chain Reaction",1301,30
+36002,"Take a Dive",1442,36
+36003,"The Tungsten Tailor",1752,39
+36004,"Corsair",1232,34
+36005,"Lampades",1379,39
+36006,"Hackerspace",1328,38
+36007,"Nurse Hạnh",1375,32
+36008,"Stick and Poke",1328,34
+36009,"Virtual Intelligence, P.I.: ""You Can Call Me Vic""",1630,20
+36010,"Kompromat",1379,33
+36011,"Sell Out",1522,34
+36012,"Tailgate",1625,35
+36013,"Borrowed Goods",1236,33
+36014,"Rotary",1430,39
+36015,"Baker",1606,30
+36016,"Underdome Irregulars",1473,34
+36017,"Hiram ""0mission"" Svensson: Shadow of the Past",1527,4
+36018,"Aircheck",1333,36
+36019,"Beta Build",1432,34
+36020,"Methuselah",1445,35
+36021,"Touchstone",1494,35
+36022,"Read-Write Share",1599,34
+36023,"Sipa",1407,38
+36024,"Stowaway",1646,40
+36025,"Word on the Street",1408,34
+36026,"Méliès City Luxury Line",1803,28
+36027,"Synchrocyclotron",1561,31
+36028,"Ansel 2.0",1508,31
+36029,"Reverb",1419,37
+36030,"Sleipnir",1715,42
+36031,"Vertigo",1387,39
+36032,"Caveat Emptor",1513,39
+36033,"realloc()",1368,33
+36034,"Retirement Plan",1504,32
+36035,"Perfect Recall",1426,34
+36036,"Méliès U: Only the Brightest",1590,5
+36037,"Lotus Haze",1587,38
+36038,"Esca",1506,35
+36039,"ezaM",1364,34
+36040,"Knowledge Seeker",1500,44
+36041,"Lionsmane",1607,32
+36042,"Vicsek",1351,30
+36043,"Cultivate",1494,36
+36044,"Unleash",1619,34
+36045,"The Red Room",1615,37
+36046,"Editorial Division: Ad Nihilum",1487,2
+36047,"Witch Hunt",1547,32
+36048,"Magistrate Revontulet",1720,46
+36049,"Nihilo Agent",1480,34
+36050,"Grubber",1567,37
+36051,"Lethe",1390,31
+36052,"Paywall",1526,38
+36053,"Flood the Market",1837,38
+36054,"Scapegoat",1411,34
+36055,"Hype Machine",1463,31
+36056,"Sacrifice Zone Expansion",1604,36
+36057,"Luana Campos",1410,39
+36058,"Event Horizon",1882,36
+36059,"Flywheel",1539,37
+36060,"Tocsin",1628,33
+36061,"Myōshu",1737,32
+36062,"Reanimation Protocol",1564,30
+36063,"Vulture Fund",1649,35
+36064,"Flagship",1598,46
+36065,"Shackleton Grid",1403,39
+36066,"Let Them Dream",1805,33

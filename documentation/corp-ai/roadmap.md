@@ -33,19 +33,26 @@ is recorded in the done tables and the historical merge plan.
 | — | [F12](../backlog/done/F12-realized-defense-measurement.md) | done (merged) | Shared collector and identity evidence delivered; L8.2 records fresh usable controls after its passive-label correction |
 | — | [L8.2](../backlog/done/feature-layer-8-2-remote-deception-profiles.md) | not adopted (merged) | Main merged into the I2 branch; observer/collector repairs and failure evidence retained, policy removed |
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
-| 1 | [L8.9](../backlog/code-review/L8.9-observable-defense-parity.md) | in code review | Review passive install/lifecycle tooling, findings and completed control calibration; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
-| 2 | [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) | ready | Investigate late R&D protection before I3 design freeze; record the trade-off or a separately gated repair |
-| 3 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Reuse L8.9's measurement tools and findings; re-ground the spec and resolve [I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) before freezing the design; fresh control and separate policy gates |
+| 1 | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | in code review | Review passive install/lifecycle tooling, findings and completed control calibration; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
+| 2 | [I2.2](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md) | in code review | Retain I2 after timing replication and paired attribution; I3/I9 constraints and passive probe ready for review |
+| 3 | [I2.3](../backlog/I2.3-hq-then-rnd-opening-ice-gate.md) | ready | Gate the owner's HQ-first, R&D-second opening ICE rule against adopted I2; freeze this comparison before I3 design |
+| 4 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Reuse L8.9's findings; incorporate reviewed I2.2 and the I2.3 comparison before freezing the design; fresh control and separate policy gates |
 
 F11, F12 and I2 are done; I2 is merged. L8.2 was not adopted (full gate failed;
 policy removed), while its observer/collector repairs remain. L8.9 is in code
 review as a measurement-only delivery. Reviewing it before I3 is a sequencing
 preference rather than an additional formal dependency.
 
-[I2.2](../backlog/I2.2-rnd-protection-lateness-investigation.md) is ready and owns
-the remaining R&D investigation before I3 design freeze; it is follow-up work,
-not an outstanding I2 acceptance criterion. I3 and I5 should reuse L8.9's tooling
+[I2.2](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md) is in code review. Its
+investigation retains the adopted trade-off, with reproducible opening-ranking
+evidence and explicit I3/I9 measurement constraints. Incorporate its reviewed
+disposition before I3 design freeze; this is not an outstanding I2 acceptance criterion. I3 and I5 should reuse L8.9's tooling
 and findings, with fresh matching controls for their own policies.
+
+The owner requested [I2.3](../backlog/I2.3-hq-then-rnd-opening-ice-gate.md)
+on 2026-10-22: compare HQ-first/R&D-second opening ICE against current I2,
+with I2 retained as the control until a separate frozen gate passes. Run this
+comparison before I3 design freeze; I2.2's investigation did not test it.
 
 The preliminary [L8.9 tell measurement](measurements/L8.9-aac6ea9-residual-tell.md)
 and later controls were collected on I2's recorded review revision. Preserve
@@ -125,12 +132,6 @@ price yet.
 - **Spec:** [L8.8-marginal-deception-value.md](specs/L8.8-marginal-deception-value.md)
 - **Goal:** Separately gate a shared marginal concealment value in adopted I2 ICE ranking, keeping private trap payoff distinct and agenda/trap substitution intact. Later consumers adopt through their own gates; this is not an I2 prerequisite.
 
-### L8.9 Observable-defense measurement and attribution
-- **Status:** in-progress
-- **Depends on:** I2, F4, F11, F12, L8.4
-- **Ticket:** [L8.9-observable-defense-parity.md](../backlog/code-review/L8.9-observable-defense-parity.md)
-- **Goal:** Deliver passive install/lifecycle attribution, saved-report tools and baseline-specific calibration; installation/hold policy belongs to the I tickets. The proposed bare-trap restriction was withdrawn without implementation.
-
 ### L8.10 Trap mechanics and play-value diagnostics
 - **Status:** proposed
 - **Depends on:** L8.7, I1, F2, F4
@@ -181,6 +182,7 @@ price yet.
 | L8.5 | Match-local public outcome feedback | [feature-layer-8-5-match-local-public-outcome-feedback](../backlog/done/feature-layer-8-5-match-local-public-outcome-feedback.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
 | L9.0.1 | Adopt honest lockout | [L9.0.1-adopt-honest-lockout](../backlog/done/L9.0.1-adopt-honest-lockout.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 | L8.2 | Deception legibility signals | [feature-layer-8-2-remote-deception-profiles](../backlog/done/feature-layer-8-2-remote-deception-profiles.md) | [architecture: baits, bluffs and deterrence](architecture.md#baits-bluffs-and-deterrence) |
+| L8.9 | Observable-defense measurement and attribution | [L8.9-observable-defense-parity](../backlog/done/L8.9-observable-defense-parity.md) | [Architecture](architecture.md#foundations) |
 
 ## Foundations (F)
 
@@ -190,7 +192,7 @@ Shared infrastructure used by every area.
 - **Status:** proposed
 - **Depends on:** F4
 - **Spec:** [F5-mulligan-weight-calibration.md](specs/F5-mulligan-weight-calibration.md)
-- **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option.
+- **Goal:** Calibrate the opening-hand score weights and mulligan margin with seeded games, behind a default-off option; separately scope the owner's two-ICE mulligan retest using I2.3's opening-hand/coverage evidence.
 
 ### F7 Indexed card-state and trigger discovery
 - **Status:** proposed
@@ -252,10 +254,16 @@ I9 comes last.
 - **Goal:** Value public non-agenda rewards from successful empty-Archives runs as a bounded I2 score component, so Archives is protected only when those rewards outweigh the ICE.
 
 ### I2.2 R&D protection lateness investigation
+- **Status:** in-progress
+- **Depends on:** I2, F4
+- **Ticket:** [I2.2-rnd-protection-lateness-investigation.md](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md)
+- **Goal:** Attribute I2's late R&D protection and higher R&D theft before I3 design freeze; record an evidence-backed trade-off decision or raise a concrete separately gated repair.
+
+### I2.3 HQ-first, R&D-second opening ICE gate
 - **Status:** ready
 - **Depends on:** I2, F4
-- **Ticket:** [I2.2-rnd-protection-lateness-investigation.md](../backlog/I2.2-rnd-protection-lateness-investigation.md)
-- **Goal:** Attribute I2's late R&D protection and higher R&D theft before I3 design freeze; record an evidence-backed trade-off decision or raise a concrete separately gated repair.
+- **Ticket:** [I2.3-hq-then-rnd-opening-ice-gate.md](../backlog/I2.3-hq-then-rnd-opening-ice-gate.md)
+- **Goal:** Compare mandatory HQ-first/R&D-second opening ICE with adopted I2, preserving subsequent I2 placement; gate R&D and combined central theft improvements against scoring, win, economy and deception guards before I3 design freeze.
 
 ### I3 Remote role and root suitability
 - **Status:** proposed

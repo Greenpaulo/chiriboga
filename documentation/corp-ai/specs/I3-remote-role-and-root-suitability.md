@@ -9,7 +9,20 @@ defaults to `true`); F4 is done; I2 is proposed. I3 needs I2 phase A
 (measurements M1, M2, M4 and the M2 reliability check) and I2's phase B
 expected-points ICE consumer, which reads I3's expected future agendas.
 
-**Before design freeze:** resolve the R&D allocation finding in [I2.2](../../backlog/I2.2-rnd-protection-lateness-investigation.md) and incorporate its disposition. This is a sequencing requirement, not an additional formal dependency.
+**Before design freeze:** incorporate the [I2.2 retain disposition](../measurements/I2.2-rnd-protection-lateness.md)
+and its review. This is a sequencing requirement, not an additional formal
+dependency. Its paired replays establish an opening-ranking mechanism for
+delayed R&D protection, alongside beneficial remote/HQ counterexamples;
+they do not justify a mandatory central-first policy. When replacing the
+designated-remote stake and exposure rule, account for competing HQ/R&D
+agenda exposure and install timing. Preserve early, late and never-protected
+R&D cases, and report per-central theft, never-protected counts and the share
+bare through turn 2 (including early game-end censoring), not just conditional
+first-ICE means. Use a fresh matched control for I3's separate policy gates.
+
+Also complete the owner's [I2.3 HQ-then-R&D opening comparison](../../backlog/I2.3-hq-then-rnd-opening-ice-gate.md)
+before design freeze. I2.2 retains I2 as its control; it did not test this
+alternative. Incorporate the recorded adopt/reject result into I3's baseline.
 
 ## Goal
 Name one scoring remote and keep it: the remote with the best projected

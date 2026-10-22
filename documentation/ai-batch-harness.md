@@ -1085,6 +1085,26 @@ the `iceInstalled` event, emitted when Corp ICE is first seen on the board
 between engine steps (ICE on a start board is marked at game start without an
 event; ICE moved between servers is not a new install).
 
+## R&D allocation investigation probe (I2.2)
+
+`node scripts/ai-batch/rnd-protection-probe.js <pair> <seed> <true|false>`
+replays one committed-pool game with the specified `iceMarginalSecurity`
+setting. It records turn-1/2 install rankings, Corp-held ICE and credits,
+already-returned layer admission and affordability lists, and the marginal
+stake, before/after hazards, costs and scores. It calls each wrapped method
+once and adds no evaluator, card-hook or random calls. Its JSON also includes
+completed ICE installs for the whole game and log/decision fingerprints.
+`--plain` omits the probe for identity comparison in a separate process.
+Scripted measurement checks live in the fast batch suite; the integration
+suite compares choices, logs and installs with observation on/off under both
+policies. This is diagnostic tooling, not an adoption gate.
+
+For current-default I2 replay diffs use
+`node scripts/ai-batch.js replay --pairs <pair> --seeds <seed> --corp-option iceMarginalSecurity=false --diff`.
+The CLI's baseline is the current defaults (I2 **on**); its candidate is I2
+**off**, despite the printed baseline label saying “options off”. Reverse
+the interpretation when describing historical off-to-on effects.
+
 ## Checking the F3 security cache
 
 `node scripts/ai-batch.js security-cache-gate --games 200 --jobs 8 --out /tmp/chiriboga-f3-gate`
