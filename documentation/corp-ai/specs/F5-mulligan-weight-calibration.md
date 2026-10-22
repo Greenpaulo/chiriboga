@@ -83,6 +83,22 @@ If no candidate passes, keep the current weights, record the sweep in
 `architecture.md`, and park the item.
 
 ## Things to consider
+
+- **Opening-central follow-up, 2026-10-22:** the owner asked to retest the
+  earlier “mulligan below two ICE” rule in connection with
+  [I2.3](../../backlog/I2.3-hq-then-rnd-opening-ice-gate.md). Commit `41a10b0`
+  replaced that rule with the current hand-score comparison; no win-rate-based
+  rejection is recorded there. Finding 04's deterministic tests establish
+  score behaviour, not strategic superiority. Keep this question open.
+  A strict two-ICE rule goes beyond this spec's coefficient/margin sweep:
+  explicitly scope it as a separate default-off candidate and freeze its
+  gate before implementation/results, including what counts as usable ICE
+  and whether economy/agenda exceptions exist. Hold placement fixed when
+  testing it, or preregister a four-cell placement × mulligan comparison.
+  Do not compare only current-I2/current-mulligan against central-first/two-ICE
+  and attribute that bundled difference to either change. I2.3 holds current
+  mulligans fixed and supplies opening-hand strata and turn-1/2 actual
+  both-central coverage. Its placement gate does not adopt a mulligan change.
 - The weights interact with I4 (agenda commitment) and I5 (economy value). A
   later change to either can move the optimum, so re-run the sweep after
   them, not before.

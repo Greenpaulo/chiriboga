@@ -719,6 +719,14 @@ does not yet compare concrete options by their outcome.
   `scoreBreakdown`. Admission, same-turn bookkeeping and the critical
   interrupt's thresholds are unchanged.
 
+  [I2.2's investigation](measurements/I2.2-rnd-protection-lateness.md)
+  retains this allocation trade-off. Replays show affordable, admitted R&D ICE
+  losing to higher-scored remote preparation, with useful counterexamples in
+  both directions. Timing measurements include never-protected games; they
+  do not establish what fraction of aggregate theft is caused by timing.
+  I3 carries these contrasts into its role design; I9 rechecks calibration
+  under the adopted allocation. This investigation changes no policy.
+
 Card-declared `AIRezWhenCan()` opportunities are checked before phase-specific
 rez choices. Luana Campos permits this economy rez only outside a run, with
 bad publicity and at least two R&D cards, preserving funds for approached ICE.
