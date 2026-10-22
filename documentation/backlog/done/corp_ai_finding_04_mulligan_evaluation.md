@@ -60,6 +60,16 @@ prerequisite for this bug fix.
 
 ## Verification
 
+**Historical clarification (2026-10-22):** `41a10b0` (2026-09-23) replaced
+the earlier fewer-than-two-affordable-ICE rule with the score-versus-redraw
+model described above. The commit and this Resolution record no win-rate
+gate rejecting the old rule. The current one-ICE economy regression asserts
+the hand score, not a demonstrated win-rate advantage. F5 remains proposed;
+the owner has requested a separately gated two-ICE retest alongside
+[I2.3's opening-placement study](../I2.3-hq-then-rnd-opening-ice-gate.md).
+Do not treat this historical “fixed” status as calibration or as evidence
+against that untested alternative.
+
 - `node tests/corp-mulligan.test.js`: passed.
 - `node tests/corp-decision-fixtures.test.js`: passed, including the promoted mulligan fixture.
 - `node tests/decision-snapshots.test.js`: passed.

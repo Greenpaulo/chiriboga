@@ -28,6 +28,13 @@ whichever of L8.2, L8.4 or L8.5 lands first; I9 extends it).
 
 Work:
 
+- Recheck M2 under adopted I2 allocation and later I3 roles, following the
+  [I2.2 findings](../measurements/I2.2-rnd-protection-lateness.md): separate
+  server kind, public ICE-count group, early turn, deck pair and margin bucket,
+  retain cell support and held-out uncertainty, and audit R&D/HQ theft and
+  no/late protection. I2.2 retains the present trade-off; it does not establish
+  that a specific table cell or point value is wrong. Any recalibration's
+  policy adoption still needs its own frozen gate.
 - Tune coefficients only inside the design note's stated bounds; record each
   coefficient beside its component.
 - Run broader randomized matches only after deterministic regression tests
@@ -78,6 +85,7 @@ coefficients:
   bucket is within 0.05 of the documented formula.
 
 ## Acceptance criteria
+- [ ] Before retiring the legacy fallback, audit the retained I2.2 R&D trade-off and record current M2 calibration, separate R&D/HQ theft and uncensored protection timing against a fresh matching control. Do not infer the causal theft fraction from selected replays or inherit I2's historical passing gate for later policy changes.
 - [ ] Before retiring the legacy fallback, audit I2's empty-Archives reward-valuation disposition. The Resolution links its completed fix/evidence or its still-open follow-up ticket and states the remaining policy. An open gap must remain tracked, and unvalidated reward-based Archives admission must remain off; omission from the calibrated policy does not count as resolving it.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] The `bluffSingleVariableCorrelation` collector (added by an L8 item through F4's collector extension point) also covers install-role decisions.

@@ -4,6 +4,49 @@ run(async ({
   assert, fs, path, spawnSync, loadPrecon, metrics, batch, root, pool, setFiles, ranges, tmp,
   scenario, gateway, game, cli, setupFile
 }) => {
+  await scenario('I2.2 probe records returned measurements without reevaluating or changing results', () => {
+    const {installProbe} = require('../scripts/ai-batch/rnd-protection-probe');
+    const card = {title: 'ICE', cardType: 'ice', rezCost: 3};
+    const server = {serverName: 'R&D'};
+    const score = {stake: 0.4, hazardBefore: 0.3, hazardAfter: 0.1, score: -2.648};
+    const policy = {allowed: true, reason: 'noUnrezzedIce'};
+    const options = [{cardToInstall: card, serverToInstallTo: server, iceMarginalScore: score}];
+    const corp = {creditPool: 5, clickTracker: 3, HQ: {cards: [card]}};
+    const before = JSON.stringify(corp), notes = [], calls = [];
+    const ai = {
+      _marginalIceScore(c, s) { calls.push('score'); assert.strictEqual(this, ai); return score; },
+      _iceLayerPolicy(s) { calls.push('policy'); return policy; },
+      _iceInCardsCommon(s, affordable, cards) { calls.push('affordability'); return cards; },
+      _rankedInstallOptions(cards) {
+        assert.strictEqual(cards, corp.HQ.cards);
+        this._iceLayerPolicy(server);
+        this._iceInCardsCommon(server, true, cards);
+        this._marginalIceScore(card, server);
+        return options;
+      },
+    };
+    installProbe(ai, corp, {Note(key, value) { notes.push({key, value}); }});
+    assert.strictEqual(ai._rankedInstallOptions(corp.HQ.cards), options);
+    assert.deepStrictEqual(calls, ['policy', 'affordability', 'score']);
+    assert.strictEqual(JSON.stringify(corp), before);
+    assert.deepStrictEqual(notes[0].value.scores, [{card: 'ICE', server: 'R&D', ...score}]);
+    assert.deepStrictEqual(notes[0].value.admission, [{server: 'R&D', ...policy}]);
+    assert.deepStrictEqual(notes[0].value.affordability, [{server: 'R&D', affordable: true, cards: ['ICE']}]);
+    assert.strictEqual(ai._marginalIceScore(card, server), score);
+    assert.strictEqual(notes[0].value.scores.length, 1, 'completed frame must not receive later calls');
+  });
+
+  await scenario('I2.2 probe restores its observation frame after an exception', () => {
+    const {installProbe} = require('../scripts/ai-batch/rnd-protection-probe');
+    const failure = new Error('ranking failed'), notes = [];
+    const ai = {_marginalIceScore() { return {}; }, _iceLayerPolicy() { return {}; },
+      _iceInCardsCommon() { return []; }, _rankedInstallOptions() { throw failure; }};
+    installProbe(ai, {HQ: {cards: []}}, {Note(key, value) { notes.push(value); }});
+    assert.throws(() => ai._rankedInstallOptions([]), error => error === failure);
+    assert.deepStrictEqual(ai._iceInCardsCommon(null, true, []), []);
+    assert.deepStrictEqual(notes, []);
+  });
+
   await scenario('F3 collector distinguishes requests from work and filters main commands', () => {
     const collector = require('../scripts/ai-batch/collectors/evaluatorCallCount');
     const state = {};
