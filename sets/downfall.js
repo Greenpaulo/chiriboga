@@ -4001,41 +4001,52 @@ cardSet[26047] = {
   subTypes: ["Expansion"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  onScore: {
+  responseOnScored: {
     Resolve: function () {
-      AddCounters(this, "agenda", 1);
-      Log("Remastered Edition scored: placed 1 agenda counter");
+      if (intended.score == this) AddCounters(this, "agenda", 1);
     },
+    automatic: true,
   },
-  abilities: [
-    {
-      text: "Hosted agenda counter: Place 1 advancement counter on an installed card.",
-      Enumerate: function () {
-        if (Counters(this, "agenda") < 1) return [];
-        var choices = ChoicesInstalledCards(corp, function (card) {
-          return true;
+  abilities: [{
+    text: "Hosted agenda counter: Place 1 advancement counter on an installed card.",
+    Enumerate: function () {
+      if (!CheckCounters(this, "agenda", 1)) return [];
+      var choices = ChoicesInstalledCards(null, function () { return true; });
+      if (corp.AI) {
+        if (playerTurn != corp || !currentPhase.identifier.startsWith("Corp 2.")) return [];
+        var useful = choices.filter(function (option) {
+          var target = option.card;
+          return target.player == corp && CheckCardType(target, ["agenda"]) &&
+            Counters(target, "advancement") < AdvancementRequirement(target) &&
+            AdvancementRequirement(target) - Counters(target, "advancement") <=
+              1 + Math.min(corp.clickTracker, Credits(corp));
         });
-        if (choices.length === 0) return [];
-        return choices;
-      },
-      Resolve: function (params) {
-        if (params && params.card) {
-          AddCounters(this, "agenda", -1);
-          AddCounters(params.card, "advancement", 1);
-          Log(
-            "Remastered Edition: placed 1 advancement counter on " +
-              GetTitle(params.card),
-          );
+        if (this.AIPreferredTarget) {
+          var preferred = useful.find(function (option) { return option.card == this.AIPreferredTarget; }, this);
+          if (preferred) return [preferred];
         }
-      },
+        useful.sort(function (a, b) {
+          return (AdvancementRequirement(a.card) - Counters(a.card, "advancement")) -
+            (AdvancementRequirement(b.card) - Counters(b.card, "advancement"));
+        });
+        return useful.slice(0, 1);
+      }
+      return choices;
     },
-  ],
+    Resolve: function (params) {
+      RemoveCounters(this, "agenda", 1);
+      AddCounters(params.card, "advancement", 1);
+      delete this.AIPreferredTarget;
+    },
+  }],
+  AITriggerWhenCan: true,
+  AIFastAdvanceCounters: function (card) {
+    return corp.scoreArea.includes(this) && CheckCounters(this, "agenda", 1) &&
+      card && card.player == corp && CheckInstalled(card) ? 1 : 0;
+  },
 };
 
 //Daily Quest (26048)
-// Rez only during your action phase.
-// Whenever the Runner makes a successful run on this server, they gain 2[c].
-// When your turn begins, if the Runner did not make a successful run on this server during their last turn, gain 3[c].
 cardSet[26048] = {
   title: "Daily Quest",
   elo: 1535,
@@ -4047,50 +4058,53 @@ cardSet[26048] = {
   subTypes: [],
   rezCost: 1,
   trashCost: 3,
-  runnerRanThisServerLastTurn: false,
-  runnerRanThisServerThisTurn: false,
+  successfulServersLastTurn: [],
+  _runnerSucceededLastTurn: function () {
+    return this.successfulServersLastTurn.includes(GetServer(this));
+  },
   canBeRezzed: function () {
-    return (
-      currentPhase &&
-      (currentPhase.identifier == "Corp 2.2" ||
-        currentPhase == phases.corpActionMain)
-    );
+    return playerTurn == corp && currentPhase.identifier.startsWith("Corp 2.");
+  },
+  automaticOnRunnerTurnBegins: {
+    Resolve: function () { this.successfulServersLastTurn = []; },
+    availableWhenInactive: true,
+  },
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      // History belongs to the server, including runs before this card is installed.
+      if (playerTurn == runner && !this.successfulServersLastTurn.includes(server))
+        this.successfulServersLastTurn = this.successfulServersLastTurn.concat([server]);
+    },
+    availableWhenInactive: true,
   },
   responseOnRunSuccessful: {
     Resolve: function () {
-      if (this.rezzed && attackedServer == GetServer(this)) {
-        this.runnerRanThisServerThisTurn = true;
-        Log(
-          "Daily Quest: Runner made successful run on this server, gaining 2[c]",
-        );
-        GainCredits(runner, 2, "", this);
-      }
-    },
-    automatic: true,
-  },
-  responseOnRunnerTurnEnds: {
-    Resolve: function () {
-      this.runnerRanThisServerLastTurn = this.runnerRanThisServerThisTurn;
-      this.runnerRanThisServerThisTurn = false;
+      if (attackedServer == GetServer(this)) GainCredits(runner, 2, "", this);
     },
     automatic: true,
   },
   responseOnCorpTurnBegins: {
     Resolve: function () {
-      if (this.rezzed && !this.runnerRanThisServerLastTurn) {
-        Log(
-          GetTitle(this) +
-            " triggers (no successful run last turn), gaining 3[c]",
-        );
-        GainCredits(corp, 3, "", this);
-      }
+      if (!this._runnerSucceededLastTurn()) GainCredits(corp, 3, "", this);
     },
     automatic: true,
   },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.AI._sufficientEconomy(false) && this.cardLocation != corp.archives.cards) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++)
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    return emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
+  AIEconomyCard: true,
+  AIRezWhenCan: function () { return this.canBeRezzed(); },
+  AIRunExtraPotential: function (server) {
+    return server == GetServer(this) ? 1 + (this._runnerSucceededLastTurn() ? 0 : 0.5) : 0;
+  },
+  AIBreachNotRequired: true,
 };
 
 //Tiered Subscription (26049)
-// The first time each turn a run begins, gain 1[c].
 cardSet[26049] = {
   title: "Tiered Subscription",
   elo: 1478,
@@ -4103,32 +4117,33 @@ cardSet[26049] = {
   rezCost: 0,
   trashCost: 3,
   usedThisTurn: false,
-  responseOnRunnerTurnBegins: {
-    Resolve: function () {
-      this.usedThisTurn = false;
-    },
-    automatic: true,
+  automaticOnRunnerTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    availableWhenInactive: true,
   },
-  responseOnCorpTurnBegins: {
-    Resolve: function () {
-      this.usedThisTurn = false;
-    },
-    automatic: true,
+  automaticOnCorpTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    availableWhenInactive: true,
   },
   automaticOnRunBegins: {
     Resolve: function () {
-      if (this.rezzed && !this.usedThisTurn) {
-        this.usedThisTurn = true;
-        Log(GetTitle(this) + " triggers on run, gaining 1[c]");
-        GainCredits(corp, 1, "", this);
-      }
+      if (this.usedThisTurn) return;
+      this.usedThisTurn = true;
+      if (CheckActive(this)) GainCredits(corp, 1, "", this);
     },
+    availableWhenInactive: true,
   },
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.AI._sufficientEconomy(false) && this.cardLocation != corp.archives.cards) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++)
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    return emptyProtectedRemotes.length;
+  },
+  AIAvoidInstallingOverThis: true,
+  AIRezWhenCan: function () { return !this.usedThisTurn; },
 };
 
 //Congratulations! (26050)
-// When the Runner passes this ice, gain 1[c].
-// ↳ Gain 2[c]. The Runner gains 1[c].
 cardSet[26050] = {
   title: "Congratulations!",
   elo: 1249,
@@ -4142,36 +4157,27 @@ cardSet[26050] = {
   strength: 3,
   responseOnPassesIce: {
     Resolve: function () {
-      if (
-        attackedServer &&
-        attackedServer.ice &&
-        attackedServer.ice[approachIce] == this
-      ) {
-        Log("Congratulations! passed, Corp gains 1[c]");
+      if (attackedServer && attackedServer.ice[approachIce] == this)
         GainCredits(corp, 1, "", this);
-      }
     },
     automatic: true,
   },
-  subroutines: [
-    {
-      text: "Gain 2[c]. The Runner gains 1[c].",
-      Resolve: function () {
-        GainCredits(corp, 2, "", this);
-        GainCredits(runner, 1, "", this);
-      },
-      visual: { y: 94, h: 16 },
+  subroutines: [{
+    text: "Gain 2[c]. The Runner gains 1[c].",
+    Resolve: function () {
+      GainCredits(corp, 2, "", this);
+      GainCredits(runner, 1, "", this);
     },
-  ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["gainCreditsCorp"], ["gainCreditsRunner"]]];
+    visual: { y: 94, h: 16 },
+  }],
+  AIImplementIce: function (rc, result) {
+    result.sr = [[["misc_minor", "misc_minor", "gainCredits"]]];
+    result.passEffects = ["misc_minor"];
     return result;
   },
 };
 
 //Loot Box (26051)
-// ↳ End the run unless the Runner pays 2[c].
-// ↳ Reveal the top 3 cards of the stack. Add 1 of those cards to the grip and gain X[c], where X is equal to that cardʼs play or install cost. The Runner shuffles the stack. Trash this ice.
 cardSet[26051] = {
   title: "Loot Box",
   elo: 1377,
@@ -4183,80 +4189,59 @@ cardSet[26051] = {
   subTypes: ["Trap"],
   rezCost: 0,
   strength: 3,
-  subroutines: [
-    {
-      text: "End the run unless the Runner pays 2[c].",
-      Resolve: function () {
-        if (CheckCredits(runner, 2)) {
-          DecisionPhase(
-            runner,
-            [
-              { id: 1, label: "Pay 2 credits", button: "Pay 2[c]" },
-              { id: 0, label: "End the run", button: "End run" },
-            ],
-            function (p) {
-              if (p.id === 1) {
-                SpendCredits(runner, 2, "paying to continue", this);
-              } else {
-                EndTheRun();
-              }
-            },
-            "Loot Box",
-            "Pay 2[c] to avoid ending the run?",
-            this,
-          );
-        } else {
-          EndTheRun();
-        }
-      },
-      visual: { y: 59, h: 16 },
+  subroutines: [{
+    text: "End the run unless the Runner pays 2[c].",
+    Resolve: function () {
+      var choices = [];
+      if (CheckCredits(runner, 2, "using", this))
+        choices.push({id: 1, label: "Pay 2[c]", button: "Pay 2[c]"});
+      choices.push({id: 0, label: "End the run", button: "End run"});
+      if (runner.AI) runner.AI.preferred = {title: this.title,
+        option: runner.AI.cachedComplete && runner.AI.cachedBestPath ? choices[0] : choices[choices.length - 1]};
+      DecisionPhase(runner, choices, function (params) {
+        if (params.id == 1) SpendCredits(runner, 2, "using", this);
+        else EndTheRun();
+      }, this.title, "Pay 2[c] to avoid ending the run?", this);
     },
-    {
-      text: "Reveal top 3 cards of stack, add 1 to grip and gain X[c] (cost of card). Runner shuffles. Trash this ice.",
-      Resolve: function () {
-        var cardsToReveal = Math.min(3, runner.stack.cards.length);
-        var cardRef = this;
-        if (cardsToReveal > 0) {
-          var revealed = [];
-          for (var i = 0; i < cardsToReveal; i++) {
-            revealed.push(
-              runner.stack.cards[runner.stack.cards.length - 1 - i],
-            );
-          }
-          var choices = ChoicesArrayCards(revealed);
-          DecisionPhase(
-            runner,
-            choices,
-            function (params) {
-              if (params && params.card) {
-                var chosen = params.card;
-                MoveCard(chosen, runner.grip);
-                var cost =
-                  typeof chosen.playCost !== "undefined"
-                    ? chosen.playCost
-                    : typeof chosen.installCost !== "undefined"
-                      ? chosen.installCost
-                      : 0;
-                if (typeof cost === "number" && cost > 0) {
-                  GainCredits(runner, cost, "", cardRef);
-                }
-              }
-              Shuffle(runner.stack);
-              Trash(cardRef, false);
-            },
-            "Loot Box",
-            "Choose 1 revealed card to add to grip",
-            this,
-          );
-        } else {
-          Trash(cardRef, false);
+    visual: { y: 59, h: 16 },
+  }, {
+    text: "Reveal the top 3 cards of the stack. Add 1 to the grip and gain its printed cost in credits. The Runner shuffles the stack. Trash this ice.",
+    Resolve: function () {
+      var source = this;
+      var revealed = runner.stack.slice(-3).reverse();
+      function finish() {
+        Shuffle(runner.stack);
+        Trash(source, true);
+      }
+      function revealNext(index) {
+        if (index < revealed.length) {
+          Reveal(revealed[index], function () { revealNext(index + 1); }, source, corp, false, corp);
+          return;
         }
-      },
-      visual: { y: 106, h: 80 },
+        if (!revealed.length) { finish(); return; }
+        var choices = ChoicesArrayCards(revealed);
+        if (corp.AI) {
+          var best = choices[0];
+          for (var i = 1; i < choices.length; i++)
+            if (source._printedCost(choices[i].card) > source._printedCost(best.card)) best = choices[i];
+          corp.AI.preferred = {title: source.title, option: best};
+        }
+        DecisionPhase(corp, choices, function (params) {
+          MoveCard(params.card, runner.grip);
+          GainCredits(corp, source._printedCost(params.card), "", source);
+          finish();
+        }, source.title, "Choose 1 revealed card to add to the grip", source);
+      }
+      revealNext(0);
     },
-  ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["endTheRun"]], [["trashProgram"]]];
+    visual: { y: 106, h: 80 },
+  }],
+  _printedCost: function (card) {
+    var cost = CheckCardType(card, ["event"]) ? card.playCost : card.installCost;
+    return typeof cost == "number" && cost > 0 ? cost : 0;
+  },
+  AIImplementIce: function (rc, result) {
+    result.sr = [[["payCredits", "payCredits"], ["endTheRun"]], [["gainGripCard", "misc_minor", "trashIce"]]];
     return result;
   },
 };

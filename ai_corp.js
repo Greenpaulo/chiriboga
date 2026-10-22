@@ -2663,6 +2663,9 @@ class CorpAI {
       if (
         effect != "misc_minor" &&
         effect != "loseCredits" &&
+        effect != "gainCredits" &&
+        effect != "gainGripCard" &&
+        effect != "trashIce" &&
         effect != "payCredits"
       )
         return true;
@@ -7572,11 +7575,12 @@ class CorpAI {
       });
     }
     //other actions e.g. placing advancement counters, gaining clicks...
-    //One-shot installed advancement upgrades. Record consumption locally.
-    var installedAdvancementCards = InstalledCards(corp);
+    //One-shot installed upgrades and scored agenda abilities. Record consumption locally.
+    var scoredAdvancementCards = corp.scoreArea || [];
+    var installedAdvancementCards = InstalledCards(corp).concat(scoredAdvancementCards);
     for (var upgradeIndex = 0; upgradeIndex < installedAdvancementCards.length; upgradeIndex++) {
       var upgrade = installedAdvancementCards[upgradeIndex];
-      if (!CheckCardType(upgrade, ["upgrade"]) ||
+      if ((!CheckCardType(upgrade, ["upgrade"]) && !scoredAdvancementCards.includes(upgrade)) ||
           typeof upgrade.AIFastAdvanceCounters != "function" ||
           point.persist.includes(upgrade) || !CheckHasAbilities(upgrade)) continue;
       //Rez policy reads the prospective resources and target counters. Use
@@ -7594,9 +7598,9 @@ class CorpAI {
         },
         () => {
           var counters = upgrade.AIFastAdvanceCounters.call(upgrade, card);
-          var cost = upgrade.rezzed ? 0 : RezCost(upgrade);
+          var cost = upgrade.rezzed || scoredAdvancementCards.includes(upgrade) ? 0 : RezCost(upgrade);
           if (counters <= 0 || point.corpCredits < cost ||
-              (!upgrade.rezzed && !FullCheckRez(upgrade, ["upgrade"]))) return null;
+              (!upgrade.rezzed && !scoredAdvancementCards.includes(upgrade) && !FullCheckRez(upgrade, ["upgrade"]))) return null;
           return {counters: counters, cost: cost};
         },
         () => {
@@ -8505,12 +8509,13 @@ class CorpAI {
                 );
                 if (potentialAdvCards.length > 0 && potentialAdvCards[0]) {
                   var plannedCard = potentialAdvCards[0];
-                  if (CheckCardType(plannedCard, ["upgrade"]) && CheckInstalled(plannedCard)) {
+                  var plannedCardScored = (corp.scoreArea || []).includes(plannedCard);
+                  if ((CheckCardType(plannedCard, ["upgrade"]) && CheckInstalled(plannedCard)) || plannedCardScored) {
                     plannedCard.AIPreferredTarget = card;
-                    if (!plannedCard.rezzed && optionList.includes("rez") &&
+                    if (!plannedCard.rezzed && !plannedCardScored && optionList.includes("rez") &&
                         FullCheckRez(plannedCard, ["upgrade"]))
                       return this._returnPreference(optionList, "rez", {cardToRez: plannedCard});
-                    if (plannedCard.rezzed && optionList.includes("trigger"))
+                    if ((plannedCard.rezzed || plannedCardScored) && optionList.includes("trigger"))
                       return this._returnPreference(optionList, "trigger", {cardToTrigger: plannedCard});
                   }
                   //don't waste these by overadvancing an ordinary advancement target

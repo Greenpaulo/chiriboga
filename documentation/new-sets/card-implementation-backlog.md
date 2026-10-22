@@ -51,10 +51,10 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
-Batches 1–9 (26001–26046) now have working gameplay and baseline AI. Focused
+Batches 1–10 (26001–26051) now have working gameplay and baseline AI. Focused
 real-consumer evidence and specific deeper-strategy work are recorded in
 [the implementation notes](downfall-implementation-notes.md) and the active
-tracker's separate optimisation queue. Batches 10–13 remain unverified.
+tracker's separate optimisation queue. Batches 11–13 remain unverified.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit

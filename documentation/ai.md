@@ -3175,3 +3175,55 @@ Corp security records bounded deterrence for this probabilistic effect and
 never uses it as a guaranteed lockout. Bid strategy, repeated-encounter target
 value and the trade-off against letting a dangerous breach occur remain
 optimisation work.
+
+### Downfall batch 10
+
+- Remastered Edition uses `AITriggerWhenCan` with an inline ability enumerator
+  that selects a Corp agenda finishable with its counter and remaining basic
+  advances. It preserves the counter without a useful affordable target or
+  outside the Corp action phase. Human choices include either side's installed
+  cards. `AIFastAdvanceCounters(card)` now also supports a scored Corp agenda:
+  return the nonnegative counter placement available from one activation, or
+  zero without a legal installed Corp target or available counter. The existing
+  advancement planner consumes each source once per hypothetical plan, without
+  changing its counters. Scored sources cost no rez credits. Main-phase plans
+  select their paid ability through `AIPreferredTarget` and `trigger`.
+- Daily Quest and Tiered Subscription use `AIWorthInstalling(remotes)`,
+  `AIAvoidInstallingOverThis` and `AIRezWhenCan()` for economy setup. Daily Quest
+  also declares `AIEconomyCard`. The real `CheckRez` permission check now consumes
+  `canBeRezzed()` (boolean, all players), so Daily Quest's Corp action-phase
+  restriction applies to humans as well as AI. This is a rules restriction,
+  separate from the AI's `RezUsability` preference.
+- Daily Quest uses the existing `AIRunExtraPotential(server)` contract on a
+  public active Corp card. The Runner's run-potential consumer now includes
+  active Corp cards as sources alongside Runner cards and Runner lingering
+  effects. Its value reflects the successful-run reward and, before the first
+  success that turn, denying next-turn income. `AIBreachNotRequired` keeps this
+  successful-run incentive when a breach is replaced. This hook must be
+  read-only and use public information only; hidden Corp cards are not sources.
+- Congratulations! models its mandatory pass income with `result.passEffects`
+  (effect-string array on `AIImplementIce`'s result). `Directions` applies these
+  effects after unbroken subroutines, including bypassed or fully broken ICE.
+  Its subroutine uses two `misc_minor` effects for Corp income and `gainCredits`
+  for the Runner's one credit. `gainCredits` immediately adds one pool credit
+  in `ValidateEncounterPoint`, represented as negative cumulative
+  `runner_credits_lost`, so subsequent payments can use it. Earlier payments
+  cannot use later gains; Corp subroutine ranking treats a gain as harmless.
+- Loot Box models its first subroutine as two `payCredits` or `endTheRun`.
+  Its second has `gainGripCard` for the card added to the Runner hand,
+  `misc_minor` for hidden-card-dependent Corp income, plus
+  `trashIce`: this calculator effect records `{action: "trashedIce", card}` in
+  the path's persistents, suppresses that layer on subsequent traversals and
+  excludes it from finite-run continuations. The local continuation cache
+  includes removed layers; no board cards are moved by planning. Corp ranking
+  treats self-trash as harmless. A broken second subroutine leaves the ICE in
+  place. The live Runner payment preference follows a cached complete route;
+  the live Corp reveal choice prefers the highest printed cost among the
+  revealed cards, without inspecting unrevealed stack contents.
+
+  `gainGripCard` preserves the printed hand-size effect for later damage: the
+  path's damage allowance increases by one for each card actually available in
+  the public stack count. Multiple gifts and finite-run continuations share
+  that count; the model never reads hidden card identities. Corp subroutine
+  ranking treats the gift as harmless. Damage already taken keeps its ordinary
+  penalty, while the added card affects survival capacity.

@@ -629,3 +629,61 @@ Saisentan's subroutine overlays were measured with
 zoom helper: centres 155, 175 and 195, each one printed line (`h: 16`). The
 focused visual regression and measurement audit pass. Initial full validation
 caught these missing overlay fields; they were repaired before final rerun.
+
+
+## Batch 10 — 26047–26051
+
+Implemented and validated 2026-10-22 by Codex. Existing metadata and ELO values
+are preserved: Remastered Edition 1513, Daily Quest 1535, Tiered Subscription
+1478, Congratulations! 1249 and Loot Box 1377.
+
+- Remastered Edition now receives its scored counter through the engine's
+  `responseOnScored`, gated to itself. The counter places on any installed card,
+  including Runner cards; it is placement, not the basic advance action. The
+  Corp AI selects a finishable agenda and saves an unusable counter. The real
+  advancement planner includes scored sources once per plan, without spending
+  real counters or assigning a rez cost.
+- Daily Quest's rez restriction is enforced by the shared `CheckRez` permission
+  consumer, including both the start-of-action and post-action paid windows.
+  Inactive successful-run tracking remembers server identity, including a run
+  before installation or rez. The next Runner turn resets that history. Every
+  success while active pays the Runner two credits; only the last Runner turn's
+  successful runs suppress next Corp-turn income. The dead turn-end hook is
+  removed. Its economy install/rez policy and public Runner run-potential
+  consumer provide baseline use.
+- Tiered Subscription tracks the first run even in HQ or while unrezzed and
+  resets while inactive on either turn. Later rezzing does not create a new
+  first-run opportunity. Economy install and legal pre-run rez consumers work.
+- Congratulations! pays both players the printed subroutine amounts and gains
+  its passing credit independently of whether its subroutine broke. Calculator
+  pass effects and immediate Runner pool-credit gains preserve payment order;
+  income does not become a threatening program-trash or end-the-run effect.
+- Loot Box's first subroutine offers a legal two-credit payment or end-the-run,
+  with compatible temporary credits and a cached-route Runner preference. The
+  second reveals up to three stack cards sequentially to the Corp, who chooses
+  the card added to grip and gains its printed play/install cost. The Runner
+  shuffles even with an empty stack; the ICE then trashes as a preventable
+  effect, not an unpreventable cost. Missing printed costs yield zero. The
+  calculator models the tax and self-trash instead of program destruction;
+  a Letheia repeat cannot charge a resolved Loot Box again. Hypothetical removal
+  stays local and participates in finite-run continuation cache keys. Added
+  grip cards also increase subsequent damage capacity in the run calculator,
+  capped by the public stack count across gifts and continued runs. An empty
+  stack supplies no extra damage capacity.
+
+Focused evidence: `tests/downfall-batch10.test.js` exercises actual Corp install,
+rez and trigger selectors, read-only finite advancement planning, public Runner
+run valuation, live reveal/payment choices, inactive timing, small/empty stacks,
+pool/temporary funding, finite gifted-card damage capacity, order of ICE payments and repeat traversal after
+self-trash. Batches 8–9 and the set integration test also pass. Required shared
+checks pass; the final full suite passes all 115 files on pinned Node 20.19.0,
+including Corp decision fixtures and decision snapshots.
+No browser playtesting or independent strategic review is claimed.
+
+Optional optimisation: compare counter conservation across multiple agenda
+plans; protect Daily Quest while pricing the Runner reward and income denial;
+compare Subscription's pre-run rez opportunity with other commitments; place
+Congratulations! for credit sequencing; choose Loot Box's revealed card using
+Corp income versus the Runner's gifted-card value. The baseline chooses the
+highest printed cost, not the best strategic gift. Hidden stack contents are
+never read during planning.

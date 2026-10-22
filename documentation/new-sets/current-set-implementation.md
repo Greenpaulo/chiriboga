@@ -35,7 +35,7 @@ selection if none is queued.
 
 ## Status summary
 
-**9 complete, 4 outstanding** (`4 Pending`, `0 In progress`, `0 Blocked`).
+**10 complete, 3 outstanding** (`3 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -55,7 +55,7 @@ No existing range is credited without tests.
 | 7 | 26031–26035 | Complete | PR #66 / reconciled 2026-10-20 | MirrorMorph, Architect Deployment Test, Calvin B4L3Y, Nanoetching Matrix and Hagen; mechanics and Corp AI. |
 | 8 | 26036–26040 | Complete | Codex / 2026-10-16 | Gameplay and baseline AI verified; focused/shared checks and all 95 full-suite test files pass (2026-10-18). |
 | 9 | 26041–26046 | Complete | Codex / 2026-10-22 | Damage, reveals, faction-trash counters and finite Psi repeat traversal; baseline AI; all 114 full-suite files pass. |
-| 10 | 26047–26051 | Pending | — | Preserve and validate existing implementations. |
+| 10 | 26047–26051 | Complete | Codex / 2026-10-22 | Scored advancement, conditional/first-run income, ICE credit timing and revealing self-trash trap; real baseline AI consumers. |
 | 11 | 26052–26056 | Pending | — | Preserve and validate existing implementations. |
 | 12 | 26057–26061 | Pending | — | Preserve and validate existing implementations. |
 | 13 | 26062–26065 | Pending | — | Preserve and validate existing implementations. |
@@ -75,6 +75,8 @@ No existing range is credited without tests.
 
 | 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
 
+| 10 | 26047–26051 | 2026-10-22 | Codex | `tests/downfall-batch10.test.js`; batches 8–9 and set integration; required shared checks; full suite | Gameplay, real install/rez/trigger/run consumers, finite counter/self-trash and gifted-card accounting; all 115 full-suite files pass on Node 20.19.0. See batch 10 notes. |
+
 ## Batch-review log
 
 No independent reviews recorded.
@@ -84,10 +86,10 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**9 Pending** (optional strategy work), 0 In progress, 0 Blocked,
+**10 Pending** (optional strategy work), 0 In progress, 0 Blocked,
 1 Awaiting review (bounded run-entry repair).
 
-Implementation is complete for batches 1–9; no independent batch review is recorded.
+Implementation is complete for batches 1–10; no independent batch review is recorded.
 PR-comment remediation is not an independent strategic review.
 Preserve subsequent review verdicts and ownership.
 
@@ -104,6 +106,8 @@ Preserve subsequent review verdicts and ownership.
 | 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
 
 | 9 | 26041–26046 | Pending | — | Optional strategy: damage/counter timing versus scoring, Complete Image naming/play thresholds, Saisentan type priors and probabilistic damage pricing, Letheia bid/trash value and placement among protected servers. [Notes](downfall-implementation-notes.md#batch-9--2604126046). |
+
+| 10 | 26047–26051 | Pending | — | Optional strategy: scored-counter conservation and cross-agenda sequences; Daily Quest protection/reward trade-offs; Subscription rez timing; Congratulations! placement and Loot Box income versus gifted-card value. [Notes](downfall-implementation-notes.md#batch-10--2604726051). |
 
 ## Optimisation log
 

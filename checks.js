@@ -28,6 +28,7 @@ function CheckAdvance(card) {
  */
 function CheckRez(card, validCardTypes) {
   if (card != null) {
+    if (typeof card.canBeRezzed == "function" && !card.canBeRezzed.call(card)) return false;
     if (CheckCardType(card, validCardTypes)) {
       if (typeof card.rezzed !== "undefined") {
         if (card.rezzed) {

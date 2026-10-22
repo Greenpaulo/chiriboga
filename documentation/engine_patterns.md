@@ -239,6 +239,8 @@ The flag does not make other abilities on the card active.
 
 ### canBeRezzed (conditional)
 
+`CheckRez` consumes this rules permission for both humans and AI.
+
 ```js
 canBeRezzed: function() { return currentPhase.identifier == "Corp 2.2"; }
 ```
