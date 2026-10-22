@@ -4990,9 +4990,9 @@ class CorpAI {
 
   //this will return index of best option, or -1 if none of them are acceptable
   //if inhibit is false, more willing installs are permitted (use this for free install&rez)
-  _bestInstallOption(optionList, inhibit = true) {
+  _bestInstallOption(optionList, inhibit = true, recordOpening = false) {
     if (!this._securityCache && this._securityCacheEnabled)
-      return this._withSecurityCache(() => this._bestInstallOption(optionList, inhibit));
+      return this._withSecurityCache(() => this._bestInstallOption(optionList, inhibit, recordOpening));
     //make a cards list from optionList (since this could be hand, archives, card-generated list, etc)
     var cards = [];
     for (var i = 0; i < optionList.length; i++) {
@@ -5013,8 +5013,10 @@ class CorpAI {
       for (var i = 0; i < optionList.length; i++) {
         if (
           optionList[i].card == rankedInstallOptions[j].cardToInstall &&
-          optionList[i].server == rankedInstallOptions[j].serverToInstallTo
+          optionList[i].server == rankedInstallOptions[j].serverToInstallTo &&
+          this._openingIceAllows(optionList[i].card, optionList[i].server)
         ) {
+          if (recordOpening) this._rememberOpeningIceOption(rankedInstallOptions[j]);
           this._noteBestInstall(rankedInstallOptions, j, i);
           return i;
         }
@@ -5404,6 +5406,8 @@ class CorpAI {
   //priority) for I2's ranking.
   _iceInstallOptions(serverToInstallTo, cards, priorityOnly, tagGroup = false) {
     var ret = [];
+    var openingTarget = this._openingIceTarget();
+    if (openingTarget !== undefined && serverToInstallTo !== openingTarget) return ret;
     //only create new empty protected remotes when there will be corp clicks to use them (e.g. not during Ansel firing) and not while a HVT is installed
     var permitNewEmpty = false;
     if (this._HVTsInstalled() == 0 && this._clicksLeft() > 1)
@@ -5449,6 +5453,8 @@ class CorpAI {
       memo.byServer = new Map();
       memo.designated = this._scoringServers(this._emptyProtectedRemotes())[0] || null;
     }
+    var openingTarget = this._openingIceTarget();
+    if (openingTarget !== undefined) servers = [openingTarget];
     var entries = servers
       ? servers.map(
           (server) =>
@@ -5475,6 +5481,7 @@ class CorpAI {
       cardToInstall: row.candidate.card,
       serverToInstallTo: row.candidate.server,
       iceMarginalScore: row.candidate.breakdown,
+      ...(openingTarget !== undefined ? {openingIceGroup: row.candidate.group} : {}),
     }));
   }
 
@@ -7101,6 +7108,7 @@ class CorpAI {
   //sets this.preferred to prefs and returns indexOf cmd in optionList
   //don't forget to return the result!
   _returnPreference(optionList, cmd, prefs) {
+    if (cmd === "install") this._rememberOpeningIceOption(prefs);
     this.preferred = prefs;
     this.preferred.command = cmd;
     if (
@@ -8015,7 +8023,16 @@ class CorpAI {
     //Prefer an affordable ICE install when the actual public-board security
     //model says that layer materially lowers the immediate loss chance.
     if (optionList.includes("install")) {
-      var installOptions = this._rankedInstallOptions(corp.HQ.cards, true);
+      var installOptions;
+      var previousOpeningProbe = this._openingIceTacticalProbe;
+      try {
+        // The existing critical-breach consumer alone can inspect the
+        // unconstrained list. Its unchanged thresholds authorize exceptions.
+        this._openingIceTacticalProbe = true;
+        installOptions = this._rankedInstallOptions(corp.HQ.cards, true);
+      } finally {
+        this._openingIceTacticalProbe = previousOpeningProbe;
+      }
       var bestInstall = null;
       var bestPostInstallRisk = risk.probability;
       for (var i = 0; i < installOptions.length; i++) {
@@ -8045,6 +8062,8 @@ class CorpAI {
             ServerName(risk.server) +
             "; installing effective ICE",
         );
+        if (this.options.openingHqThenRdIce)
+          bestInstall.openingIceException = "criticalBreachDefense";
         return this._returnPreference(optionList, "install", bestInstall);
       }
     }
@@ -8738,10 +8757,108 @@ class CorpAI {
     return this._bestMainPhaseEconomyOption(optionList);
   }
 
+  // I2.3's optional opening is based on completed actions, never coverage.
+  _openingIceTarget() {
+    if (!this.options.openingHqThenRdIce || this._openingIceTacticalProbe) return undefined;
+    if (this._completedIceInstalls === 0) return corp.HQ;
+    if (this._completedIceInstalls === 1) return corp.RnD;
+    return undefined;
+  }
+
+  _openingIceAllows(card, server) {
+    var target = this._openingIceTarget();
+    if (target === undefined || !card || card.cardType !== "ice" || server === target) return true;
+    var exception = this._openingIceExceptions.get(card);
+    return !!(exception && exception.server === server && exception.ordinal === this._completedIceInstalls + 1 &&
+      exception.reason === "criticalBreachDefense");
+  }
+
+  // Card effects sometimes select a card before presenting just destinations.
+  _openingIceServerChoices(card, choices) {
+    if (this._openingIceTarget() === undefined || card.cardType !== "ice") return choices;
+    return choices.map(choice => Object.assign({}, choice, {card: card}));
+  }
+
+  _openingIceEmergencyInstall(card, server) {
+    if (this._openingIceAllows(card, server)) return true;
+    if (server !== corp.HQ && server !== corp.RnD) return false;
+    var before = this._centralBreachLossRisk(server);
+    if (before.probability < CORP_AI_CRITICAL_BREACH_RISK_THRESHOLD) return false;
+    var after = this._hypotheticalServerAfterInstall(card, server, target => this._centralBreachLossRisk(target));
+    if (before.probability - after.probability < CORP_AI_CRITICAL_BREACH_MINIMUM_IMPROVEMENT) return false;
+    this._rememberOpeningIceOption({cardToInstall: card, serverToInstallTo: server,
+      openingIceException: "criticalBreachDefense"});
+    return true;
+  }
+
+  // Enforce the destination even when a preference or card effect bypasses
+  // the ordinary main-phase list. Do not change non-ICE action ordering.
+  _openingIceChoice(options, selected) {
+    var target = this._openingIceTarget();
+    if (target === undefined) return selected;
+    var choice = options[selected];
+    if (!choice || !Object.prototype.hasOwnProperty.call(choice, "server") ||
+        !choice.card || choice.card.cardType !== "ice") return selected;
+    if (choice.server !== target && this._openingIceAllows(choice.card, choice.server)) return selected;
+    var permitted = options.filter(option => option && option.card && option.card.cardType === "ice" &&
+      Object.prototype.hasOwnProperty.call(option, "server") && option.server === target);
+    var best = permitted.length ? this._bestInstallOption(permitted, false, true) : -1;
+    if (best >= 0) return options.indexOf(permitted[best]);
+    var decline = options.findIndex(option => option === "n" || option &&
+      (option.card === null || option.cancel || option.skip || option.decline));
+    if (decline >= 0) return decline;
+    var other = options.findIndex(option => !option || !option.card || option.card.cardType !== "ice");
+    if (other >= 0) return other;
+    // If this decision has no decline/non-ICE route, complete a legal install.
+    // Preserve the required central whenever it is actually offered.
+    var required = options.findIndex(option => option.server === target);
+    if (required >= 0) {choice = options[required]; selected = required;}
+    this._openingIceExceptions.set(choice.card, {server: choice.server,
+      ordinal: this._completedIceInstalls + 1,
+      reason: required >= 0 ? "forcedNoSuitableIce" : "forcedNoPermittedDestination"});
+    return selected;
+  }
+
+  _rememberOpeningIceOption(option) {
+    if (this._openingIceTarget() === undefined || !option.cardToInstall || option.cardToInstall.cardType !== "ice") return;
+    this._openingIceExceptions.set(option.cardToInstall, {server: option.serverToInstallTo,
+      ordinal: this._completedIceInstalls + 1, reason: option.openingIceException || "requiredCentral",
+      group: option.openingIceGroup == null ? null : option.openingIceGroup,
+      score: option.iceMarginalScore ? option.iceMarginalScore.score : null});
+  }
+
+  _cancelOpeningIceInstall(card) {
+    this._openingIceExceptions.delete(card);
+  }
+
+  _recordCompletedIceInstall(card, server) {
+    if ((typeof AIHypothetical !== "undefined" && AIHypothetical.depth > 0) ||
+        !card || card.player !== corp || card.cardType !== "ice") return;
+    var target = this._openingIceTarget();
+    var ordinal = ++this._completedIceInstalls;
+    var decision = this._openingIceExceptions.get(card);
+    var sameDestination = decision && (decision.server === server || decision.server === null &&
+      server !== corp.HQ && server !== corp.RnD && server !== corp.archives);
+    var reason = target === undefined ? "currentI2" :
+      decision && decision.ordinal === ordinal && sameDestination ? decision.reason :
+      server === target ? "requiredCentral" : "unclassifiedDestination";
+    var record = {ordinal: ordinal, required: target === corp.HQ ? "hq" : target === corp.RnD ? "rd" : null,
+      actual: server === corp.HQ ? "hq" : server === corp.RnD ? "rd" : server === corp.archives ? "archives" : "remote",
+      reason: reason, group: decision && decision.group != null ? decision.group : null,
+      score: decision && decision.score != null ? decision.score : null};
+    this._openingIceExceptions.delete(card);
+    if (this.options.openingHqThenRdIce) this._log("Opening ICE " + JSON.stringify(record));
+    if (this._iceInstallTelemetry) this._iceInstallTelemetry(card, server, record);
+  }
+
   //***CLASS DEFINITION AND CORE AI CODE***
   constructor() {
     this.preferred = null;
     this.options = Object.assign({}, CorpAI.DEFAULT_OPTIONS);
+    this._completedIceInstalls = 0;
+    this._iceInstallTelemetry = null;
+    this._openingIceExceptions = new WeakMap();
+    this._openingIceTacticalProbe = false;
     this._protectionInstallsThisTurn = [];
     this._serverProtectionDebt = new Map();
     this._recentSuccessfulRunPressure = new WeakMap();
@@ -8809,6 +8926,7 @@ class CorpAI {
       var telemetryLabels = telemetry ? optionList.map(DecisionSnapshots.Label) : null;
       var startedAt = telemetry ? DecisionSnapshots.Now() : 0;
       var ret = this._choiceInner(optionList, choiceType);
+      if (choiceType === "select") ret = this._openingIceChoice(optionList, ret);
       var notes = recorder ? recorder.notes : null;
       if (telemetry) {
         var recordedChoice = ret >= 0 ? telemetryOptions.indexOf(optionList[ret]) : ret;
@@ -8905,12 +9023,18 @@ class CorpAI {
       else if (executingCommand == "install") {
         ret = this._bestInstallOption(optionList, false); //don't inhibit, this may be a free install/rez
         if (ret < 0) {
+          if (this._openingIceTarget() !== undefined) {
+            var decline = optionList.findIndex(option => option &&
+              (option.card === null || option.cancel || option.skip || option.decline));
+            ret = decline >= 0 ? decline : 0;
+          } else {
           //none found in options list? I guess we just need to return a default (but investigate, this isn't ideal)
           ret = 0; //since executing command is already set, we have to choose something!
           LogError(
             "bestInstallOption failed to find any desired install options with this optionList:",
           );
           console.log(optionList);
+          }
         }
       } else if (executingCommand == "discard")
         ret = this._bestDiscardOption(optionList);
@@ -9054,7 +9178,12 @@ class CorpAI {
 
   SelectChoice(optionList) {
     return new Promise((resolve) => {
-      if (optionList.length == 1) {
+      // Only actual ICE destination choices need the opening guard. Routing
+      // unrelated singleton parameters through Choice re-evaluates mulligans.
+      var openingInstall = this._openingIceTarget() !== undefined && optionList[0] &&
+        optionList[0].card && optionList[0].card.cardType === "ice" &&
+        Object.prototype.hasOwnProperty.call(optionList[0], "server");
+      if (optionList.length == 1 && !openingInstall) {
         if (this.preferred !== null) {
           if (executingCommand == this.preferred.command) this.preferred = null; //whether it succeeded or not, the preference is done
         }
@@ -9070,6 +9199,8 @@ class CorpAI {
 }
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
+  // Optional HQ-first/R&D-second opening for manual playtesting (I2.3).
+  openingHqThenRdIce: false,
   secureScoringServerGate: false,
   serverAtRiskInstallOverride: false,
   committedAgendaReserveBypass: false,

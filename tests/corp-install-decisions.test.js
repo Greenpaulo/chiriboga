@@ -320,4 +320,103 @@ test('I1: every eligible record carries a score breakdown and a reason, and note
   assert.strictEqual(JSON.stringify(notes.installCandidates[0]), JSON.stringify(ranked.candidates.map(r => ai._traceInstallCandidate(r))));
 });
 
+// I2.3 is retained for owner-requested manual playtesting, default off.
+function openingAI() {
+  const ai = candidateAI({affordable: [iceA, iceB], economy: true});
+  ai.options.iceMarginalSecurity = true;
+  ai.options.openingHqThenRdIce = true;
+  ai._marginalIceBefore = () => ({});
+  ai._marginalIceScore = (card, target) => ({score: target === remote ? 100 : target === corp.HQ ? 2 : 1});
+  return ai;
+}
+
+test('manual opening flag defaults off, selects HQ then R&D, and yields to I2 after two completions', () => {
+  assert.strictEqual(new context.CorpAI().options.openingHqThenRdIce, false);
+  const ai = openingAI(), card = {...iceA, player: corp}, history = [];
+  ai._iceInstallTelemetry = (card, target, record) => history.push(record);
+  ai.options.openingHqThenRdIce = false;
+  assert.strictEqual(ai._marginalIceInstallOptions([iceA], false, true, {})[0].serverToInstallTo, remote);
+  ai.options.openingHqThenRdIce = true;
+  for (const target of [corp.HQ, corp.RnD]) {
+    const options = ai._rankedInstallOptions([iceA, iceB], false).filter(o => o.cardToInstall.cardType === 'ice');
+    assert(options.length && options.every(o => o.serverToInstallTo === target));
+    const selected = {...options[0], cardToInstall: card};
+    ai._returnPreference(['install'], 'install', selected);
+    assert.strictEqual(ai._completedIceInstalls, history.length, 'preference selection never advances history');
+    ai._recordCompletedIceInstall(card, target);
+  }
+  assert.strictEqual(ai._openingIceTarget(), undefined);
+  assert.strictEqual(ai._marginalIceInstallOptions([iceA], false, true, {})[0].serverToInstallTo, remote);
+  assert.deepStrictEqual(history.map(r => [r.ordinal, r.required, r.actual, r.reason]),
+    [[1, 'hq', 'hq', 'requiredCentral'], [2, 'rd', 'rd', 'requiredCentral']]);
+});
+
+test('manual opening preserves affordability groups and rejects new-remote fallback', () => {
+  const ai = openingAI();
+  ai._affordableIce = () => [iceA]; ai._notAffordableIce = () => [iceB];
+  same(pairs(ai._marginalIceInstallOptions([iceA, iceB], false, false, {})), [[iceA.title, 'HQ'], [iceB.title, 'HQ']]);
+  assert.strictEqual(ai._marginalIceInstallOptions([iceA, iceB], true, false, {}).length, 1);
+  ai._affordableIce = () => []; ai._notAffordableIce = () => [];
+  assert.strictEqual(ai._marginalIceInstallOptions([iceA], false, false, {}).length, 0);
+  assert.strictEqual(ai._iceInstallOptions(null, [iceA], false).length, 0);
+});
+
+test('manual opening catches preferred/card-granted choices and identifies forced exceptions', () => {
+  const ai = openingAI(), card = {...iceA, player: corp};
+  const options = [{card, server: remote}, {card, server: corp.HQ}, {card: null}];
+  ai._choiceInner = () => 0;
+  assert.strictEqual(ai.Choice(options, 'select'), 1, 'final selection enforces HQ despite a prior remote preference');
+  for (const decline of [{card: null}, {cancel: true}, {skip: true}, {decline: true}])
+    assert.strictEqual(ai._openingIceChoice([options[0], decline], 0), 1);
+  assert.strictEqual(ai._openingIceChoice([options[0]], 0), 0);
+  let completion;
+  ai._iceInstallTelemetry = (card, server, record) => {completion = record;};
+  ai._recordCompletedIceInstall(card, remote);
+  assert.strictEqual(completion.reason, 'forcedNoPermittedDestination');
+  assert.strictEqual(ai._openingIceTarget(), corp.RnD);
+  const destinations = [{server: corp.HQ}, {server: corp.RnD}];
+  const withCards = ai._openingIceServerChoices(card, destinations);
+  assert.strictEqual(ai._openingIceChoice(withCards, 0), 1);
+  assert(!Object.hasOwn(destinations[0], 'card'), 'destination inputs remain unchanged');
+  ai.options.openingHqThenRdIce = false;
+  assert.strictEqual(ai._openingIceServerChoices(card, destinations), destinations);
+});
+
+test('manual opening keeps planning, hypotheticals, hidden information and reset independent of progress', () => {
+  const ai = openingAI(), card = {...iceA, player: corp};
+  for (let n = 0; n < 3; n++) ai._marginalIceInstallOptions([iceA], false, true, {});
+  context.AIHypothetical.depth++;
+  try {ai._recordCompletedIceInstall(card, corp.HQ);} finally {context.AIHypothetical.depth--;}
+  assert.strictEqual(ai._completedIceInstalls, 0);
+  assert.strictEqual(openingAI()._openingIceTarget(), corp.HQ);
+  const previous = context.runner;
+  context.runner = new Proxy({}, {get() {throw Error('hidden Runner information');}});
+  try {assert.strictEqual(ai._marginalIceInstallOptions([iceA], true, true, {})[0].serverToInstallTo, corp.HQ);}
+  finally {context.runner = previous;}
+});
+
+test('manual opening uses existing critical-breach thresholds and restores tactical probes', () => {
+  const ai = openingAI(), card = {...iceA, player: corp};
+  context.ServerName = target => target.serverName;
+  ai._centralBreachLossRisk = target => ({server: target, probability: target === corp.RnD ? 1 : 0});
+  ai._rankedInstallOptions = () => {
+    assert.strictEqual(ai._openingIceTarget(), undefined);
+    return [{cardToInstall: card, serverToInstallTo: corp.RnD, iceMarginalScore: {score: 3}, openingIceGroup: 0}];
+  };
+  ai._hypotheticalServerAfterInstall = () => ({probability: 0});
+  ai._criticalBreachDefenseAction(['install']);
+  assert.strictEqual(ai._openingIceTarget(), corp.HQ);
+  assert(ai._openingIceAllows(card, corp.RnD));
+  let completion;
+  ai._iceInstallTelemetry = (card, server, record) => {completion = record;};
+  ai._recordCompletedIceInstall(card, corp.RnD);
+  assert.strictEqual(completion.reason, 'criticalBreachDefense');
+  assert.strictEqual(completion.score, 3);
+  ai._rankedInstallOptions = () => {throw Error('probe failure');};
+  assert.throws(() => ai._criticalBreachDefenseAction(['install']), /probe failure/);
+  assert.strictEqual(ai._openingIceTarget(), corp.RnD);
+  ai._cancelOpeningIceInstall(card);
+  assert.strictEqual(ai._openingIceExceptions.has(card), false);
+});
+
 console.log(tests + ' install-decision telemetry tests passed.');

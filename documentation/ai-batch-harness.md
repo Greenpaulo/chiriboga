@@ -1076,14 +1076,54 @@ paid rez and a free rez reach). A rez clears every install payment recorded
 for that card. ICE already installed on a start board paid nothing here, so
 its rez is ignored. Neither event calls engine functions or changes play.
 
-`--collector iceInstallsByServer` is a diagnostic (no gate direction): per
-game, completed Corp ICE installs by destination kind (`hq`, `rd`,
+`--collector iceInstallsByServer` is a historical first-seen diagnostic (no gate direction): per
+game, newly observed installed Corp ICE by destination kind (`hq`, `rd`,
 `archives`, and remotes by harness-true root: `agendaRemote`, `trapRemote`,
 `otherRemote`, `emptyRemote`), each with `count`, `firstTurn` (0 if none),
 summed printed `rezCost` and `strength`, plus `thirdLayerOrDeeper`. It reads
 the `iceInstalled` event, emitted when Corp ICE is first seen on the board
 between engine steps (ICE on a start board is marked at game start without an
-event; ICE moved between servers is not a new install).
+event; ICE moved between servers is not a new install). A bounced card's
+reinstallation is not counted again, and a previously unseen card swapped onto
+the board can count here. Its contract remains unchanged for historical report
+comparability. Use the separate completion history below for literal installs.
+
+## Opening central coverage experiment (I2.3)
+
+`--collector openingCentralCoverage` adds diagnostic metrics
+`openingCentralCoverage.turn1.observed`, `.turn1.both`, `.turn2.observed` and
+`.turn2.both`. The headless observer emits Corp `turnEnd` at the transition to
+the Runner's start response, before its initialization, with `centralIce.hq`
+and `centralIce.rd` counts. Both centrals must currently have ICE (rezzed or
+unrezzed); an earlier installation later removed does not establish coverage.
+An unfinished boundary is unobserved. No game-end event invents one.
+
+Raw collector samples include the initially offered hand and keep/mulligan
+choice, the kept/redrawn hand, and the hand immediately after the first
+compulsory draw before draw responses. Card types and printed rez costs are
+known-hand supply measurements, not affordability or suitability evaluations;
+the observer calls no AI/card hook and consumes no randomness. The separate
+`corpIceInstallCompleted` event is emitted by the actual engine completion
+notification before install responses. It records literal ordinal, destination,
+policy reason and available preference group/score, counts reinstallations,
+and excludes movement, cancellation, hypotheticals and start-board setup.
+The legacy `iceInstalled` event and historical collectors remain unchanged.
+
+After the frozen gate, run
+`node scripts/ai-batch/opening-central-summary.js <baseline-report.json> <candidate-report.json> > /tmp/i23-opening-diagnostics.json`.
+Use the two report paths printed by the gate. This reads reports only. It
+checks matching game keys, I2 on in both arms, only the opening option differing,
+and matched offered/kept/first-draw hands. Per deck and initial offered-hand
+ICE stratum (0, 1, 2+), it reports boundary numerators/observed denominators,
+total and successful games, all-successful-game confirmed-coverage lower
+bounds, early ends, failures, paired differences with bootstrap 95% intervals
+and retained/excluded pair counts. It also reports exact-completion timing,
+never-installed counts, no install through turn 2 or earlier end, theft,
+first-two destinations, exceptions and printed hand-cost distributions.
+Conditional first-install timing excludes no-install games explicitly, using
+null if none installed; boundary occupancy never uses first-install turn as
+a substitute. A hand mismatch or unclassified candidate destination makes
+the summary invalid. These diagnostics do not decide strategic adoption.
 
 ## R&D allocation investigation probe (I2.2)
 

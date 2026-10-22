@@ -727,6 +727,32 @@ does not yet compare concrete options by their outcome.
   `scoreBreakdown`. Admission, same-turn bookkeeping and the critical
   interrupt's thresholds are unchanged.
 
+- **I2.3 optional manual opening (option `openingHqThenRdIce`, default off).**
+  The owner requested retaining this policy for his own games despite its failed
+  AI-vs-AI adoption gate; see [the measured result and retention decision](measurements/I2.3-hq-then-rnd-opening-ice-gate.md).
+  With it on, `_openingIceTarget()` requires HQ before the first completed Corp
+  ICE install and R&D before the second. Later installs use current I2. The
+  central replaces soft server admission in `_marginalIceInstallOptions()`;
+  `_iceInstallOptions()` rejects other destinations, including new-remote
+  fallback. Existing suitability and affordability groups still rank cards.
+  `_openingIceChoice()` checks final selections, preferred returns and singleton
+  card-granted installs. Non-ICE actions retain their ordering; this does not
+  force ICE as the first two actions or add pressure to draw more ICE.
+  `_openingIceServerChoices()` preserves card context in destination-only
+  effects. Optional unavailable choices decline; forced choices carry explicit
+  reasons. `_criticalBreachDefenseAction()` can inspect unconstrained candidates
+  but authorizes exceptions only after its existing public-risk thresholds.
+  `_openingIceEmergencyInstall()` applies those thresholds to optional
+  fixed-destination run installs. Winning scores keep their priority.
+  `_recordCompletedIceInstall()` counts literal engine completions before
+  automatic install responses and emits ordinal/destination/reason telemetry.
+  Reinstalls count again; movement, rez, cancellation and hypotheticals do not.
+  A fresh AI resets the count. Singleton parameters unrelated to ICE destination
+  selection retain their original path, including mulligan parameters.
+  Historical first-seen measurements retain their former contract. Failed F4
+  results do not establish performance against the owner; no global default
+  adoption or successful human-game gate is claimed.
+
   [I2.2's investigation](measurements/I2.2-rnd-protection-lateness.md)
   retains this allocation trade-off. Replays show affordable, admitted R&D ICE
   losing to higher-scored remote preparation, with useful counterexamples in

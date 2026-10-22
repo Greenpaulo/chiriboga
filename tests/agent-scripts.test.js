@@ -125,6 +125,12 @@ assert.strictEqual(outcomeLine('# T\n\n**Outcome:** not adopted — gate failed\
 assert.strictEqual(outcomeLine('# T\n'), undefined, 'a ticket without an Outcome line has none');
 assert.strictEqual(failedGateResult('x', 'false')[0], 'FAIL', 'a failed option still in the code fails the check');
 assert.strictEqual(failedGateResult('x', undefined)[0], 'PASS', 'a removed failed option passes');
+assert.strictEqual(failedGateResult('x', 'false', 'if (this.options.x) act();', true)[0], 'PASS',
+  'explicit owner-requested manual playtesting permits a default-off failed candidate');
+assert.strictEqual(failedGateResult('x', 'true', 'if (this.options.x) act();', true)[0], 'FAIL',
+  'manual retention does not authorize default-on adoption');
+assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.x) act();', true)[0], 'FAIL',
+  'manual retention still requires an explicit default');
 for (const code of [
   'if (this.options.x) act();', 'if (this.options["x"]) act();', 'const {x} = this.options;',
   'if (this.options?.x) act();', 'if (this.options?.["x"]) act();',

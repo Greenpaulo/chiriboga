@@ -1918,6 +1918,22 @@ AIAdvancementLimit: function() {
 
 Like Runner, complex Corp cards include AI logic directly inside `Enumerate` or `Resolve`. Use `corp.AI.preferred` to communicate choices.
 
+Corp card-granted installs should use `_bestInstallOption(choices, inhibit)`
+over legal `{card, server}` options, keeping a decline option when installation
+is optional. The default-off manual opening option `openingHqThenRdIce` checks
+final destination choices, including singletons and preferences. If a card
+selects its card before offering destinations, call
+`corp.AI._openingIceServerChoices(card, serverChoices)` before presenting or
+compressing the list (Project Ingatan, Poétrï and Mycoweb in Elevation). It
+returns unchanged options with the flag off; with it on, ICE options also carry
+the known card. It does not change legality or advance history. For optional
+installs with a destination fixed by the effect,
+`_openingIceEmergencyInstall(card, server)` permits the required central or an
+explicit critical-breach exception under the existing public-risk thresholds;
+false means decline (Brân 1.0). Completed engine installs alone advance the
+ordinal. No new card-defined AI hook is introduced. These helpers must not read
+opponent-private cards or R&D order, and should not run in hypothetical probes.
+
 **Setting a preference (by option title):**
 ```js
 if (corp.AI != null) {

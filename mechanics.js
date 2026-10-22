@@ -909,6 +909,9 @@ function Install(
 				}
 				var finishInstall = function(cardsTrashed) {
 				  //install done, card becomes active
+				  if (installingCard.player === corp && installingCard.cardType === "ice" &&
+				      corp.AI && typeof corp.AI._recordCompletedIceInstall === "function")
+				    corp.AI._recordCompletedIceInstall(installingCard, GetServer(installingCard));
 				  if (installingCard.player == runner && installingCard.cardType == "hardware")
 					RecordTurnEvent("runnerHardwareInstall");
 				  //first the automatic triggers
@@ -955,6 +958,8 @@ function Install(
 	  if (allowCancel) {
 		installTrashPhase.Cancel = {
 		  trash: function () {
+			if (installingCard.player === corp && corp.AI && typeof corp.AI._cancelOpeningIceInstall === "function")
+			  corp.AI._cancelOpeningIceInstall(installingCard);
 			ChangePhase(oldPhase, true);
 			MoveCard(installingCard, oldLocation);
 			if (typeof onCancelResolve === "function")
