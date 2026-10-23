@@ -57,7 +57,7 @@ No existing range is credited without tests.
 | 9 | 26041–26046 | Complete | Codex / 2026-10-22 | Damage, reveals, faction-trash counters and finite Psi repeat traversal; baseline AI; all 114 full-suite files pass. |
 | 10 | 26047–26051 | Complete | Codex / 2026-10-22 | Scored advancement, conditional/first-run income, ICE credit timing and revealing self-trash trap; real baseline AI consumers. |
 | 11 | 26052–26056 | Complete | Claude / 2026-10-23 | Focus Group, Game Over, Increased Drop Rates, Divested Trust and SDS Drone Deployment; shared program-trash steal cost; real Corp/Runner AI consumers. |
-| 12 | 26057–26061 | Pending | — | Preserve and validate existing implementations. |
+| 12 | 26057–26061 | Complete | Claude / 2026-10-23 | Roughneck, Afshar HQ break limit, Sandstone, Trebuchet lingering lock and Secure and Protect tutor; real baseline AI consumers. |
 | 13 | 26062–26065 | Pending | — | Preserve and validate existing implementations. |
 
 ## Completion log
@@ -75,6 +75,7 @@ No existing range is credited without tests.
 | 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
 | 10 | 26047–26051 | 2026-10-22 | Codex | `tests/downfall-batch10.test.js`; batches 8–9 and set integration; required shared checks; full suite | Gameplay, real install/rez/trigger/run consumers, finite counter/self-trash and gifted-card accounting; all 115 full-suite files pass on Node 20.19.0. See batch 10 notes. |
 | 11 | 26052–26056 | 2026-10-23 | Claude | `tests/downfall-batch11.test.js`; `tests/play-and-steal-cost.test.js`; required shared checks; full suite | Last-turn operations, grip reveal, per-card prevention, R&D-revealing ambush, steal-response forfeit and program-trash steal cost with baseline AI. See batch 11 notes. |
+| 12 | 26057–26061 | 2026-10-23 | Claude | `tests/downfall-batch12.test.js`; `tests/card-bad-publicity.test.js`; `tests/subroutine-visual.test.js`; full suite | Rewrote the unverified definitions: shared `modifyCannot("break")` rule and run-calculator `maxSrBroken`, own-encounter Sandstone counters, Trebuchet rez trigger/subtypes and lingering trace lock, Secure and Protect search/reveal/discounted central install. See batch 12 notes. |
 
 ## Batch-review log
 

@@ -194,6 +194,9 @@ class RunCalculator {
     num //this doesn't include costs - handle that in the place you call this
   ) {
     var result = [];
+    // Printed break limits (Afshar): never plan more breaks than this encounter allows.
+    if (typeof iceAI.maxSrBroken == "number" && point.sr_broken.length + num > iceAI.maxSrBroken)
+      return result;
     var unbrokensr = [];
     for (var i = 0; i < iceAI.sr.length; i++) {
       if (!this.SrBroken(point, i)) unbrokensr.push({ use: card, idx: i });

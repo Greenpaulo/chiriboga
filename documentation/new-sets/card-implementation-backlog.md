@@ -65,7 +65,6 @@ Remaining recorded Corp gaps:
 
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26061 | Secure and Protect                 | Empty operation effect                                           |
 | 26062 | Reduced Service                    | Rez, run-cost and counter-removal abilities absent               |
 | 26063 | Vulnerability Audit                | Installed-this-turn scoring restriction absent                   |
 

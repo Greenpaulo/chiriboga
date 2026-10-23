@@ -44,7 +44,7 @@ for (const id of [36002, 36010, 26060]) {
     card.runningWithThis = card.runWasSuccessful = true;
     card.responseOnRunEnds.Resolve.call(card);
     choose();
-  } else card.responseOnRez.Resolve.call(card);
+  } else card.responseOnRez.Resolve.call(card, card); // the engine passes the rezzed card
   assert.strictEqual(typeof prevent, 'function', card.title + ' uses engine prevention');
   assert.strictEqual(context.corp.badPublicity, before);
   assert.strictEqual(removed, null);

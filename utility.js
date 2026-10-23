@@ -4066,7 +4066,7 @@ function ChoicesEncounteredSubroutines() {
   }
   for (var i = 0; i < attackedServer.ice[approachIce].subroutines.length; i++) {
     var subroutine = attackedServer.ice[approachIce].subroutines[i];
-    if (!subroutine.broken && !subroutine._lockedFromBreak) {
+    if (!subroutine.broken && !subroutine._lockedFromBreak && !CardEffectsForbid("break", subroutine)) {
       var params = {};
       params.subroutine = subroutine;
       params.label = subroutine.text;
