@@ -1,0 +1,250 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Tāo Salonga: Telepresence Magician,2 Mutual Favor,2 Docklands Pass,2 Carmen,3 Creative Commission,3 DZMZ Optimizer,3 Conduit,2 Unity,3 Telework Contract,2 Jailbreak,3 Sure Gamble,2 Smartware Distributor,2 Verbal Plasticity,2 Ritual,3 GAMEDRAGON™ Pro,1 Azimat,2 Principia,2 Side Hustle,1 Beta Build]
+[Méliès U: Only the Brightest,2 Brân 1.0,1 Manegarm Skunkworks,1 Longevity Serum,3 Hansei Review,2 Anoetic Void,3 Spin Doctor,1 Predictive Planogram,3 Send a Message,3 Regolith Mining License,2 Whitespace,3 Hedge Fund,2 Humanoid Resources,2 Proprionegation,3 Sericulture Expansion,1 Empiricist,1 Mycoweb,3 Semak-samun,1 Peer Review,2 Mitra Aman,2 Flyswatter,3 Petty Cash,3 Knowledge Seeker,2 Lionsmane]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 6.75; fresh-hand expectation 4.52
+AI: Opening hand meets fresh-hand expectation
+Corp chose to keep
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Knowledge Seeker,Petty Cash,Hansei Review,Send a Message,Semak-samun]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Smartware Distributor,Sure Gamble,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [11.65836991402193]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+Secretly set Méliès U triggered
+AI: I don't have code to handle this situation: [Secretly set Méliès U,Corp 3.3,continue,[{department:HQ,label:Tenure Floors (HQ),command:continue},{department:R&D,label:Subsurface Labs (R&D),command:continue},{department:Archives,label:Disposal Grounds (Archives),command:continue}]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Mycoweb,Petty Cash,Hansei Review]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Smartware Distributor,Sure Gamble,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Run initiated attacking HQ
+Approaching HQ
+Run successful
+Méliès U: Only the Brightest flipped to Tenure Floors
+AI: I don't have code to handle this situation: [Tenure Floors,Run 5.1,continue,[{id:1,label:Trash Spin Doctor,button:Trash,command:continue},{id:0,label:Keep the card,button:Keep,command:continue}]]
+[hidden card] trashed
+Spin Doctor added from Archives to HQ
+Hansei Review accessed
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching HQ
+Run successful
+Petty Cash accessed
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Approaching HQ
+Run successful
+Petty Cash accessed
+Run ends
+Méliès U: Only the Brightest flipped to its front side
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Posture bluff epoch 2: neutral (install)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Mycoweb,Petty Cash,Hansei Review,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Smartware Distributor,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 0 vs 4.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hansei Review might be good economy play?
+AI: a relevant preference has been set
+AI: considering discard options...
+Corp spent one click
+Corp spent 5 credits
+Played Hansei Review
+Corp gained 10 credits
+[hidden card] trashed
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+Secretly set Méliès U triggered
+AI: I don't have code to handle this situation: [Secretly set Méliès U,Corp 3.3,continue,[{department:HQ,label:Tenure Floors (HQ),command:continue},{department:R&D,label:Subsurface Labs (R&D),command:continue},{department:Archives,label:Disposal Grounds (Archives),command:continue}]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 3 card(s) in hand: [Petty Cash,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Smartware Distributor,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 5 credits
+Corp rezzed Knowledge Seeker
+Encountering Knowledge Seeker
+Firing Place 1 virus counter on this ice. on Knowledge Seeker:
+1 virus counter placed on Knowledge Seeker
+Firing Look at the top 4 cards of R&D and arrange them in any order. on Knowledge Seeker:
+4 cards on top of R&D were arranged
+Firing End the run. on Knowledge Seeker:
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Played Beta Build
+Runner installed Unity
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: Rezzing Semak-samun prevents a game-winning breach on R&D
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 3 card(s) in hand: [Petty Cash,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Smartware Distributor,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 5 credits
+Corp rezzed Knowledge Seeker
+Encountering Knowledge Seeker
+Firing Place 1 virus counter on this ice. on Knowledge Seeker:
+1 virus counter placed on Knowledge Seeker
+Firing Look at the top 4 cards of R&D and arrange them in any order. on Knowledge Seeker:
+4 cards on top of R&D were arranged
+Firing End the run. on Knowledge Seeker:
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Played Beta Build
+Runner installed Unity
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: Rezzing Semak-samun prevents a game-winning breach on R&D
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 3 card(s) in hand: [Petty Cash,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Smartware Distributor,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 5 credits
+Corp rezzed Knowledge Seeker
+Encountering Knowledge Seeker
+Firing Place 1 virus counter on this ice. on Knowledge Seeker:
+1 virus counter placed on Knowledge Seeker
+Firing Look at the top 4 cards of R&D and arrange them in any order. on Knowledge Seeker:
+4 cards on top of R&D were arranged
+Firing End the run. on Knowledge Seeker:
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Played Beta Build
+Runner installed Unity
+Run initiated attacking Archives
+Rewinding...
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 3 card(s) in hand: [Petty Cash,Humanoid Resources,Spin Doctor]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [Smartware Distributor,Beta Build,GAMEDRAGON™ Pro,GAMEDRAGON™ Pro]
+Runner spent one click
+Runner installed Smartware Distributor
+Using Smartware Distributor:
+Runner spent one click
+3 credits placed on Smartware Distributor
+Runner spent one click
+Runner spent 3 credits
+Played Beta Build
+Runner installed Unity
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+Corp did not rez ice
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Send a Message]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(30019, [30030], [30022,30028,35032,30011,30034,30020,35027,30020,35034,35026,35026,30024,30013,35034,30011,30020,30030,30022,30026,30024,30022,30034,30027,30024,35029,30033,30015,30015,30013,35032,30028,30027,30030,30027], [35027,35027], [30033,30026], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(36036, [35053,30048], [35048,30071,30039,35081,30069,35048,35039,35052,36040,36041,30048,30069,30075,30048,30071,36040,30075,35054,30053,35056,30056,30074,30042,35049,30050,36041,30044,35049,35079,30053,30075,30039,35056,30074,35081,30071,35049,35079,30050,35055,35054], [35081,35039,30053], [], [35054], [], [[30069,36040]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[0].installedProgramThisTurn=true;
+runner.stack[17].installedProgramThisTurn=true;
+runner.stack[20].installedProgramThisTurn=true;
+runner.rig.resources[0].credits=3;
+corp.archives.cards[0].host=null;
+corp.archives.cards[1].faceUp=true;
+corp.RnD.cards[26].AICardsDiscarded=[];
+corp.HQ.cards[2].host=null;
+corp.remoteServers[0].root[0].advancement=2;
+corp.remoteServers[0].root[0].AITurnsInstalled=3;
+corp.remoteServers[0].root[0].AIScoringPlanCommitted=true;
+corp.HQ.AISuccessfulRuns=3;
+
+Version reference: Fri Oct 23 2026 09:57:02 GMT+0100 (British Summer Time)

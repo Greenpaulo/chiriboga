@@ -1580,23 +1580,9 @@ cardSet[36019] = {
   lingeringEffectTarget: null,
   runningWithThis: false,
   Enumerate: function () {
-    var programs = ChoicesArrayInstall(runner.stack, true, function (card) {
+    return ChoicesArrayInstall(runner.stack, true, function (card) {
       return CheckCardType(card, ["program"]) && !CheckSubType(card, "Virus");
     });
-    var servers = ChoicesExistingServers();
-    var choices = [];
-    for (var i = 0; i < programs.length; i++) {
-      for (var j = 0; j < servers.length; j++) {
-        choices.push({
-          card: programs[i].card,
-          host: programs[i].host,
-          server: servers[j].server,
-          label:
-            programs[i].label + "; run " + ServerName(servers[j].server),
-        });
-      }
-    }
-    return choices;
   },
   Resolve: function (params) {
     Shuffle(runner.stack);
@@ -1614,8 +1600,20 @@ cardSet[36019] = {
       false,
       function () {
         betaBuild.lingeringEffectTarget = params.card;
-        betaBuild.runningWithThis = true;
-        MakeRun(params.server);
+        var servers = ChoicesExistingServers();
+        var title = betaBuild.title + ": choose server";
+        if (runner.AI) {
+          var preferredServer = runner.AI.serverList && runner.AI.serverList.length > 0
+            ? runner.AI.serverList[0].server : null;
+          var preferred = servers.find(function (choice) {
+            return choice.server === preferredServer;
+          }) || servers[0];
+          runner.AI.preferred = {title: title, option: preferred};
+        }
+        DecisionPhase(runner, servers, function (choice) {
+          this.runningWithThis = true;
+          MakeRun(choice.server);
+        }, title, "Choose a server to run", betaBuild);
       },
     );
   },
@@ -1644,14 +1642,8 @@ cardSet[36019] = {
       runner.stack,
       InstalledCards(runner),
     );
-    var preferredServer = null;
-    if (runner.AI.serverList && runner.AI.serverList.length > 0)
-      preferredServer = runner.AI.serverList[0].server;
     for (var i = 0; i < choices.length; i++) {
-      if (
-        (!preferredCard || choices[i].card == preferredCard) &&
-        (!preferredServer || choices[i].server == preferredServer)
-      )
+      if (!preferredCard || choices[i].card == preferredCard)
         return i;
     }
     return choices.length > 0 ? 0 : -1;

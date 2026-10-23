@@ -112,6 +112,14 @@ and its exit status separately, following `AGENTS.md` for long runs.
 
 Consolidated regressions:
 
+When a pending reproduction was created in the current worktree and has no Git
+history, record its SHA-256 before implementation in the ticket's Resolution
+as `**Untracked reproduction SHA-256:** \`<64 lowercase hex digits>\``.
+The ticket checker uses that digest only when Git has no original pending file;
+the moved green reproduction must then match the complete original file byte
+for byte. A mismatch fails validation. Keep extra coverage in an existing suite
+so the original reproduction can remain unchanged.
+
 | Former file | Current suite |
 | --- | --- |
 | `f6-headless-ai-performance.test.js` | `corp-server-security.test.js`: three unrezzed ICE priced once each; now unconditional, avoiding a second run of the entire security suite |
