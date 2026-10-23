@@ -3417,3 +3417,30 @@ optimisation work.
   lowest install cost plus hosted credits and counters, with icebreakers (+20)
   and consoles (+15) protected; Poemu itself is a candidate valued with its
   credits.
+
+### Uprising batch 3 card hooks
+
+- Bravado uses `AIRunEventExtraPotential` (0 for unprotected servers, else
+  `0.6 + 0.1 × ice`) and `AIBreachNotRequired`, because it pays 6 credits plus 1
+  per distinct passed ice when the run ends, successful or not.
+- Boomerang uses `AIImplementBreaker` on its chosen ice: one free use per run
+  calculation, breaking 1 or 2 subroutines (no credit cost; the trash is not
+  priced). It deliberately has no `AIMatchingBreakerInstalled`, so the one-shot
+  break never makes its ice count as permanently covered for Runner threat or
+  Corp security planning. `AIInstallBeforeRun(server)` returns 1 when the server
+  has rezzed ice without a matching installed breaker; the install choice picks
+  the most threatening ice on `runner.AI.cachedPathServer`, else the most
+  threatening ice overall. The AI always accepts the end-of-run shuffle.
+- Mu Safecracker uses `AIAdditionalAccess(server)` and `AIInstallBeforeRun(server)`
+  (HQ with 1, R&D with 2 currently spendable stealth credits) and
+  `AICentralPressure(server)` (`{additionalAccess: 1}`, counting recurring stealth
+  credits as refilled outside the Runner's turn). Only installed stealth cards
+  whose `canUseCredits("using", mu)` allows it can pay; the AI always pays.
+- Prognostic Q-Loop always takes the free look. `AIDrawTrigger: 2` with
+  `AIWouldTrigger()` uses the reveal ability in a non-click paid window (for
+  example after an action) only when the top card is one it looked at, is a
+  program or hardware that passes `_commonCardToInstallChecks`, and the Runner
+  can pay 1 plus its install cost. `AIDrawInstall` returns 1.
+- Swift uses `AIEconomyInstall` (2 with a run event in grip, else 1; 0 when a
+  console is installed), `AIWastefulToInstall` and `AIWorthKeeping`. Its click
+  gain is not yet included in run-event click planning.

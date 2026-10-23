@@ -74,6 +74,8 @@ unverified and not credited, and 59 are scaffolds with TODO markers. Batch 2
 Batch 1 (26066–26069) is implemented with baseline AI; its optimisation row is
 `Pending` with the deeper-strategy findings in the tracker.
 
+Batch 3 (26074–26078) is complete (2026-10-23); its optimisation row is Pending.
+
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.
 
