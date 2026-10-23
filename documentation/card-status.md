@@ -26,13 +26,13 @@ in card-sets.md.
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | in-progress | 65 | 65 | 0 | 0 | 0 | 55 / 61 | true / true | no |
+| `downfall` | playable | 65 | 65 | 0 | 0 | 0 | 55 / 61 | false / false | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
-| `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 59 | 5 | 15 / 62 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
@@ -77,6 +77,73 @@ None.
 
 None.
 
+### `uprising` (sets/uprising.js)
+
+- 26066 Hoshiko Shiro: Untold Protagonist: 1 scaffold marker(s)
+- 26067 Moshing: 1 scaffold marker(s)
+- 26068 Devil Charm: 1 scaffold marker(s)
+- 26069 Gachapon: 1 scaffold marker(s)
+- 26070 Keiko: 1 scaffold marker(s)
+- 26071 Odore: 1 scaffold marker(s)
+- 26072 Mystic Maemi: 1 scaffold marker(s)
+- 26074 Bravado: 1 scaffold marker(s)
+- 26075 Boomerang: 1 scaffold marker(s)
+- 26076 Mu Safecracker: 1 scaffold marker(s)
+- 26077 Prognostic Q-Loop: 1 scaffold marker(s)
+- 26078 Swift: 1 scaffold marker(s)
+- 26079 Afterimage: 1 scaffold marker(s)
+- 26080 Makler: 1 scaffold marker(s)
+- 26081 Penumbral Toolkit: 1 scaffold marker(s)
+- 26082 The Back: 1 scaffold marker(s)
+- 26083 Harmony AR Therapy: 1 scaffold marker(s)
+- 26084 Aniccam: 1 scaffold marker(s)
+- 26085 Simulchip: 1 scaffold marker(s)
+- 26086 Cordyceps: 1 scaffold marker(s)
+- 26087 Euler: 1 scaffold marker(s)
+- 26089 Penrose: 1 scaffold marker(s)
+- 26092 Pauleʼs Café: 1 scaffold marker(s)
+- 26093 Buffer Drive: 1 scaffold marker(s)
+- 26096 Megaprix Qualifier: 1 scaffold marker(s)
+- 26097 Project Vacheron: 1 scaffold marker(s)
+- 26098 Bass CH1R180G4: 1 scaffold marker(s)
+- 26099 Cerebral Overwriter: 1 scaffold marker(s)
+- 26100 Vaporframe Fabricator: 1 scaffold marker(s)
+- 26101 Drafter: 2 scaffold marker(s)
+- 26102 Týr: 2 scaffold marker(s)
+- 26103 NEXT Activation Command: 1 scaffold marker(s)
+- 26104 Scapenet: 1 scaffold marker(s)
+- 26105 Tranquility Home Grid: 1 scaffold marker(s)
+- 26106 Flower Sermon: 1 scaffold marker(s)
+- 26107 Prāna Condenser: 1 scaffold marker(s)
+- 26108 Engram Flush: 2 scaffold marker(s)
+- 26109 Konjin: 2 scaffold marker(s)
+- 26110 Hyoubu Precog Manifold: 1 scaffold marker(s)
+- 26111 Kakurenbo: 1 scaffold marker(s)
+- 26112 La Costa Grid: 1 scaffold marker(s)
+- 26113 GameNET: Where Dreams are Real: 1 scaffold marker(s)
+- 26114 Bellona: 1 scaffold marker(s)
+- 26115 F2P: 2 scaffold marker(s)
+- 26116 Gold Farmer: 2 scaffold marker(s)
+- 26117 Digital Rights Management: 1 scaffold marker(s)
+- 26118 SYNC Rerouting: 1 scaffold marker(s)
+- 26119 Ganked!: 1 scaffold marker(s)
+- 26120 Earth Station: SEA Headquarters: 1 scaffold marker(s)
+- 26121 Transport Monopoly: 1 scaffold marker(s)
+- 26122 Wall to Wall: 1 scaffold marker(s)
+- 26123 Akhet: 2 scaffold marker(s)
+- 26124 Colossus: 2 scaffold marker(s)
+- 26125 Winchester: 2 scaffold marker(s)
+- 26126 Argus Crackdown: 1 scaffold marker(s)
+- 26127 Cayambe Grid: 1 scaffold marker(s)
+- 26128 Cyberdex Sandbox: 1 scaffold marker(s)
+- 26129 False Lead: 1 scaffold marker(s)
+- 26130 NAPD Cordon: 1 scaffold marker(s)
+- 26071 Odore: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
+- 26079 Afterimage: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
+- 26080 Makler: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
+- 26087 Euler: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
+- 26089 Penrose: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
+
 ## Runner keep coverage (playable sets)
 
 How `_cardsWorthKeeping()` in `ai_runner.js` sees each Runner Grip card (event,
@@ -88,9 +155,10 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 |---|---:|---:|---:|---:|---:|
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
 | `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
+| `downfall` | 28 | 13 | 3 | 12 | 2 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
 | `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
-| **Total** | 115 | 55 | 25 | 35 | 7 |
+| **Total** | 143 | 68 | 28 | 47 | 9 |
 
 **Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
 
@@ -100,6 +168,8 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30033 Smartware Distributor
 - 30034 Verbal Plasticity
 - 31038 Prepaid VoicePAD
+- 26022 Spec Work
+- 26027 The Artist
 - 36011 Sell Out
 
 **Intent hook and `AIWorthKeeping` (candidates for W5: the hand-written check may duplicate a shared need):**
@@ -112,6 +182,12 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 31035 Aesop’s Pawnshop
 - 31036 Professional Contacts
 - 31039 Earthrise Hotel
+- 26001 Isolation
+- 26002 Demolisher
+- 26007 Fencer Fueno
+- 26009 Trickster Taka
+- 26018 The Class Act
+- 26026 Rezeki
 - 35010 Cacophony
 - 35011 Rent Rioters
 - 35022 Open Market
@@ -147,6 +223,18 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 31034 Paricia
 - 31037 Dirty Laundry
 - 31038 Prepaid VoicePAD
+- 26011 Always Have a Backup Plan
+- 26012 Blueberry!™ Diesel
+- 26013 Flip Switch
+- 26014 Lucky Charm
+- 26020 In the Groove
+- 26021 Khusyuk
+- 26022 Spec Work
+- 26025 Pelangi
+- 26027 The Artist
+- 26028 Direct Access
+- 26029 Rejig
+- 26030 Whistleblower
 - 35003 Charm Offensive
 - 35005 Shred
 - 35007 Gourmand
