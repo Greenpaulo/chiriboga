@@ -3562,3 +3562,28 @@ optimisation work.
   non-AI icebreaker waits in the grip; its boost reaches the run calculator
   through `modifyStrength`. Mantle keeps `AIEconomyInstall`/`AIWorthKeeping`;
   Corp security counts its credit through `canUseCredits("using", breaker)`.
+
+### Uprising batch 7 card hooks
+
+- Buffer Drive's trash response reads `trashEvent.runnerGripOrStackOrdinal`
+  and `trashEvent.runnerGripOrStackCards`, which `Trash()` records once per
+  trash event (the turn event `runnerGripOrStackTrash` counts events before the
+  card was installed; discarding is not trashing). For the AI, its `Enumerate`
+  offers only `AIBufferDriveChoice(cards)`: a needed icebreaker
+  (`_icebreakerInPileNotInHandOrArray`), else the first card worth keeping,
+  else the first trashed card. The AI never passes; bottoming has no cost.
+- Buffer Drive's remove-from-game ability uses `AIBufferDriveHeapChoice()`
+  (a needed icebreaker in the heap, or `null`) for both its AI target and
+  `AIWouldTrigger()`. Its draw-trigger priority of 1 lets the existing Runner
+  draw-trigger loop use it when the AI wants cards. This happens only in a paid-ability window such as
+  post-action `Runner 1.3*`, because the action phase limits that loop to click
+  abilities. The breaker is then drawn by the AI's next draw.
+- Daily Casts keeps `AIEconomyInstall()` 3 and `AIWorthKeeping()` true. Its
+  turn-start trigger is non-automatic so the empty trash opens normal trash
+  windows.
+- DreamNet's trigger uses the turn event `runnerSuccessfulRun`, recorded when a
+  run is declared successful, so only the turn's first successful run draws,
+  including when that run happened before DreamNet was installed.
+  `AIDreamNetGainsCredit()` is true with a Digital identity or at least 2 link.
+  `AIDrawInstall()` returns 2, and `AIEconomyInstall()` returns 1 only when the
+  credit clause applies.

@@ -474,6 +474,8 @@ phaseTemplates.globalTriggers = {
 			typeof corp.AI._recordSuccessfulRunForProtection === "function"
 		  )
 			corp.AI._recordSuccessfulRunForProtection(attackedServer);
+		  //count it for "the first time each turn you make a successful run" (DreamNet)
+		  RecordTurnEvent("runnerSuccessfulRun");
 		  //and fire the pre-phase succesful automatics
 		  AutomaticTriggers("automaticOnRunSuccessful", [attackedServer]);
 	  }

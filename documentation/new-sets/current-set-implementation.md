@@ -56,7 +56,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 4 | 26079–26082 | Complete | Claude, 2026-10-23 | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
 | 5 | 26083–26087 | Complete | Claude, 2026-10-23 | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
 | 6 | 26088–26092 | Complete | Claude, 2026-10-23 | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut, Paule's Café. Existing three verified and repaired. |
-| 7 | 26093–26095 | Pending | — | Neutral Runner: Buffer Drive, Daily Casts, DreamNet (two existing, unverified). |
+| 7 | 26093–26095 | Complete | Claude, 2026-10-23 | Neutral Runner: Buffer Drive, Daily Casts, DreamNet. Existing Daily Casts and DreamNet repaired and verified. |
 | 8 | 26096–26100 | Pending | — | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
 | 9 | 26101–26105 | Pending | — | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
 | 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
@@ -77,6 +77,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 4 | 26079–26082 | 2026-10-23 | Claude | `tests/uprising-batch4.test.js` | Afterimage stealth-only pump/bypass (restricted credits via encounter-option `restrictedCredits`), Makler, Penumbral Toolkit, The Back (new `automaticOnAbilityUsed` trigger, `HasTrashAbility` helper). See notes. |
 | 5 | 26083–26087 | 2026-10-23 | Claude | `tests/uprising-batch5.test.js` | Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler with baseline AI. Shared: `Trash()` records the `runnerEventTrashed`/`runnerInstalledProgramTrashed` turn events; played events trashed after resolving open `responseOnPlayedEventTrashed`; a Runner `AITriggerInPaidWindow()` consumer. See the [notes](uprising-implementation-notes.md#batch-5--2026-10-23). |
 | 6 | 26088–26092 | 2026-10-23 | Claude | `tests/uprising-batch6.test.js` | Penrose and Paule's Café implemented; SMC, Talut repaired (turn cleanup never fired, AI hooks uncalled); new `AIAbilityInstallBreakers` planner hook and pending paid-ability consumer in `ai_runner.js`. See implementation notes. |
+| 7 | 26093–26095 | 2026-10-23 | Claude | `tests/uprising-batch7.test.js` | Buffer Drive implemented: grip/stack trash response through a new `Trash()` event record, remove-from-game heap recovery and AI choices. Daily Casts empty-trash now uses `Trash()`. DreamNet used to draw on every successful run; it now draws only on the first, counted with a new turn event. See [notes](uprising-implementation-notes.md#batch-7--2026-10-23). |
 
 ## Batch-review log
 
@@ -98,6 +99,7 @@ initialised when each implementation batch completes.
 | 4 | 26079–26082 | Pending | — | Corsair's `AIRunRestrictedCredits` still counts run-only stealth sources (Toolkit, Touchstone, Methuselah) that also report `AIRunPoolCreditOffset`, so with Corsair installed pre-run stealth budgets can double count; Makler's full-break 1[c] and Afterimage's once-per-turn bypass across finite reruns are not priced; Corp security does not price Afterimage's 2-credit bypass; The Back counts only abilities resolved through `TriggerAbility` (not optional hardware responses or hosted-credit spending) and picks heap cards by ELO. |
 | 5 | 26083–26087 | Pending | — | Deeper strategy only: Simulchip never pays the program-trash cost and is not used during runs (e.g. to recover a breaker trashed by a subroutine); Cordyceps only weakens the central just run, with unrezzed ice valued at the default threat estimate; Harmony AR Therapy ranks recovered cards by ELO, without deck-plan or Aniccam synergy; Aniccam has no event-count install valuation; Euler's install-turn free breaks are not anticipated when planning install-then-run. |
 | 6 | 26088–26092 | Pending | — | SMC/Café installs only before a run (first paid window), not reactively mid-run on unexpected ice; planner reserves 2 clicks for ability installs; Talut boost not applied to hypothetical installs; Café hosts only for a strict ≥2-connection saving (no storage/overflow hosting); Runner run budget ignores Mantle's credit for ordinary breaks. |
+| 7 | 26093–26095 | Pending | — | Buffer Drive: the AI recovers a needed breaker only in a paid-ability window, after an action-phase draw. It is not valued as damage/mill protection when installing (generic install path only). DreamNet draw is not counted in run potential. |
 
 ## Optimisation log
 
