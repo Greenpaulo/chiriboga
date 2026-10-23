@@ -34,14 +34,14 @@ is recorded in the done tables and the historical merge plan.
 | — | [L8.2](../backlog/done/feature-layer-8-2-remote-deception-profiles.md) | not adopted (merged) | Main merged into the I2 branch; observer/collector repairs and failure evidence retained, policy removed |
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
 | — | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | done (merged) | Passive install/lifecycle tooling, findings and control calibration delivered; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
-| — | [I2.2](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md) | merged; ticket not yet moved to done | I2 retained; I3/I9 constraints carried into the I3 ticket |
+| — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
 | 1 | [I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted; merge pending | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merge after the Downfall batches 11–13 branch |
 | 2 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready | Re-grounded at faccb78 with I2.2 and I2.3 incorporated. Merge `main` into the I3 branch before its fresh control (seeds 6001–7000), then implement |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
 failed; policy removed), while its observer/collector repairs remain.
 
-[I2.2](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md) is
+[I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) is
 merged. Its investigation retains the adopted trade-off, with reproducible
 opening-ranking evidence and explicit I3/I9 measurement constraints, which the
 I3 ticket now carries. I3 and I5 reuse L8.9's tooling and findings, with fresh
@@ -251,12 +251,6 @@ I9 comes last.
 - **Spec:** [I2.1-empty-archives-reward-valuation.md](specs/I2.1-empty-archives-reward-valuation.md)
 - **Goal:** Value public non-agenda rewards from successful empty-Archives runs as a bounded I2 score component, so Archives is protected only when those rewards outweigh the ICE.
 
-### I2.2 R&D protection lateness investigation
-- **Status:** in-progress
-- **Depends on:** I2, F4
-- **Ticket:** [I2.2-rnd-protection-lateness-investigation.md](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md)
-- **Goal:** Attribute I2's late R&D protection and higher R&D theft before I3 design freeze; record an evidence-backed trade-off decision or raise a concrete separately gated repair.
-
 ### I2.3 HQ-first, R&D-second opening ICE gate
 - **Status:** in-progress
 - **Depends on:** I2, F4
@@ -330,6 +324,7 @@ I9 comes last.
 | I0 | Baseline capture and decision telemetry | [I0-baseline-capture-and-telemetry](../backlog/done/I0-baseline-capture-and-telemetry.md) | [architecture: install planning today](architecture.md#install-planning-today) |
 | I1 | Unified install candidate model | [I1-unified-install-candidate-model](../backlog/done/I1-unified-install-candidate-model.md) | [architecture: install planning today](architecture.md#install-planning-today) |
 | I2 | ICE selection by marginal security | [I2-ice-selection-by-marginal-security](../backlog/done/I2-ice-selection-by-marginal-security.md) | [server security evaluation](architecture.md#server-security-evaluation) |
+| I2.2 | R&D protection lateness investigation | [I2.2-rnd-protection-lateness-investigation](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | [install-planning architecture](architecture.md#install-planning-today) |
 
 ## Reactive commitment (R)
 
