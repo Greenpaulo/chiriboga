@@ -29,8 +29,8 @@ function parseArgs(args, root = repositoryRoot) {
   const options = {pool: 'beginner-v1'};
   for (let i = 0; i < args.length; i++) {
     const name = args[i];
-    if (!['--pool', '--jobs', '--seeds'].includes(name) || !args[i + 1])
-      throw new Error('Usage: node scripts/compare-ai-main.js [--pool ID] [--jobs N] [--seeds FROM-TO]');
+    if (!['--pool', '--jobs', '--seeds', '--timeout'].includes(name) || !args[i + 1])
+      throw new Error('Usage: node scripts/compare-ai-main.js [--pool ID] [--jobs N] [--seeds FROM-TO] [--timeout SECONDS]');
     options[name.slice(2)] = args[++i];
   }
   resolvePool(root, options.pool);
@@ -38,13 +38,16 @@ function parseArgs(args, root = repositoryRoot) {
   if (options.seeds !== undefined && (!/^[1-9]\d*-[1-9]\d*$/.test(options.seeds) ||
       Number(options.seeds.split('-')[0]) > Number(options.seeds.split('-')[1])))
     throw new Error('--seeds must be an ascending positive range, e.g. 1-200');
+  if (options.timeout !== undefined && (!Number.isFinite(Number(options.timeout)) || Number(options.timeout) <= 0 || Number(options.timeout) > 2147482.647))
+    throw new Error('--timeout must be a positive finite number of seconds within the timer range');
   return options;
 }
 
 function runBatch(cwd, args) {
   const result = spawnSync(process.execPath, args, {cwd, stdio: 'inherit'});
   if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`ai-batch failed (${result.signal || result.status}); reports retained.`);
+  if (result.status !== 0 && result.status !== 1) throw new Error(`ai-batch failed (${result.signal || result.status}); reports retained.`);
+  return result.status;
 }
 
 function compareMain(root, options = {}, batch = runBatch) {
@@ -84,11 +87,19 @@ function compareMain(root, options = {}, batch = runBatch) {
         throw new Error('Main and candidate benchmark inputs differ: ' + file);
     }
     fs.mkdirSync(reports, {recursive: true});
-    const args = ['scripts/ai-batch.js', '--pool', pool, '--seeds', seeds, '--jobs', jobs];
+    // Use the same timeout/diagnostic harness for both engines, including older main commits.
+    for (const file of ['scripts/ai-batch.js', 'scripts/ai-batch/headless.js']) {
+      const source = path.join(root, file);
+      fs.copyFileSync(source, path.join(checkout, file));
+    }
+    const args = ['scripts/ai-batch.js', '--pool', pool, '--seeds', seeds, '--jobs', jobs,
+      '--timeout', String(options.timeout || 60)];
     console.log(`Fresh sequential comparison: main ${mainSha.slice(0, 8)}, then current checkout (including uncommitted changes).`);
     console.log(`Seeds ${seeds}; ${jobs} workers in both runs. Reports: ${reports}`);
-    batch(checkout, [...args, '--out', mainReport]);
-    batch(root, [...args, '--out', candidateReport]);
+    const mainStatus = batch(checkout, [...args, '--out', mainReport]);
+    const candidateStatus = batch(root, [...args, '--out', candidateReport]);
+    if (mainStatus === 1 || candidateStatus === 1)
+      throw new Error(`Games failed; inspect failures and diagnostic tails in ${reports}. Comparison skipped.`);
     batch(root, ['scripts/ai-batch.js', '--compare', mainReport, candidateReport]);
     return {reports, mainReport, candidateReport};
   } finally {

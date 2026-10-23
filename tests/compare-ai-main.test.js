@@ -32,10 +32,15 @@ function fixture(fn) {
     fs.mkdirSync(path.join(root, 'precons'));
     for (const file of ['corp.js', 'runner.js']) fs.writeFileSync(path.join(root, 'precons', file), 'deck');
     fs.writeFileSync(path.join(root, 'engine.js'), 'main');
+    fs.mkdirSync(path.join(root, 'scripts/ai-batch'), {recursive: true});
+    for (const file of ['scripts/ai-batch.js', 'scripts/ai-batch/headless.js'])
+      fs.writeFileSync(path.join(root, file), 'old harness');
     git(['add', '.']);
     git(['-c', 'user.name=Test', '-c', 'user.email=test@example.test', 'commit', '--quiet', '-m', 'fixture']);
     git(['switch', '-c', 'candidate']);
     fs.writeFileSync(path.join(root, 'engine.js'), 'uncommitted candidate');
+    for (const file of ['scripts/ai-batch.js', 'scripts/ai-batch/headless.js'])
+      fs.writeFileSync(path.join(root, file), 'current diagnostic harness');
     fn(root, git);
     assert.strictEqual(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), 'uncommitted candidate');
     assert.strictEqual(git(['worktree', 'list', '--porcelain']).split('\n').filter(x => x.startsWith('worktree ')).length, 1);
@@ -49,6 +54,11 @@ try {
     const result = compareMain(root, {pool: id, jobs: '2', seeds: '1-3'}, (cwd, args) => {
       calls.push({cwd, args});
       if (calls.length === 1) assert.strictEqual(fs.readFileSync(path.join(cwd, 'engine.js'), 'utf8'), 'main');
+      if (!args.includes('--compare')) {
+        for (const file of ['scripts/ai-batch.js', 'scripts/ai-batch/headless.js'])
+          assert.strictEqual(fs.readFileSync(path.join(cwd, file), 'utf8'), 'current diagnostic harness');
+        assert.strictEqual(args[args.indexOf('--timeout') + 1], '60');
+      }
       if (!args.includes('--compare')) fs.writeFileSync(args[args.length - 1], '{}');
     });
     assert.strictEqual(calls.length, 3);
@@ -62,6 +72,15 @@ try {
     assert(fs.existsSync(result.mainReport) && fs.existsSync(result.candidateReport));
     assert(!fs.existsSync(calls[0].cwd));
     assert.strictEqual(git(['branch', '--show-current']), id === 'beginner-v1' ? 'main' : 'candidate');
+  });
+  fixture(root => {
+    const calls = [];
+    assert.throws(() => compareMain(root, {timeout: '5'}, (cwd, args) => {
+      calls.push(args);
+      assert.strictEqual(args[args.indexOf('--timeout') + 1], '5');
+      return calls.length === 1 ? 1 : 0;
+    }), /Games failed; inspect failures and diagnostic tails/);
+    assert.strictEqual(calls.length, 2, 'both reports are collected before skipping comparison');
   });
   for (const failAt of [1, 2]) fixture(root => {
     let count = 0;
@@ -105,7 +124,8 @@ try {
     assert.throws(() => compareMain(root, {}, () => assert.fail('must not run')), /Duplicate pool ID/);
   });
   for (const args of [['--pool', 'unknown'], ['--format', 'startup'], ['--pool'],
-    ['--jobs', '0'], ['--seeds', '3-1'], ['--other']])
+    ['--jobs', '0'], ['--seeds', '3-1'], ['--timeout', '0'], ['--timeout', '-1'],
+    ['--timeout', 'NaN'], ['--timeout', 'Infinity'], ['--timeout', '2147483'], ['--other']])
     assert.throws(() => parseArgs(args));
 } finally { console.log = log; }
 console.log(`${cases} fresh-main workflow cases and CLI validation passed.`);

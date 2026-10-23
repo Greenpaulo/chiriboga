@@ -204,6 +204,7 @@ async function playJob(job) {
     });
   };
   const game = await playGame({
+    onDiagnostic: diagnostic => process.send?.({diagnostic}),
     streamPrefix: `${job.seed}:${job.deckPairId}`, corpFile: job.corp, runnerFile: job.runner,
     setFiles: job.setFiles, timeoutMs: job.timeoutMs, start: job.start, corpOptions: job.corpOptions,
     runnerOptions: job.runnerOptions, securityCache: job.securityCache,
@@ -257,11 +258,13 @@ function runBatch(config) {
     let active = 0;
     let failed = false;
     const children = [];
+    const timers = new Set();
     const retried = new Set();
     const fail = error => {
       if (failed) return;
       failed = true;
-      for (const child of children) child.kill();
+      for (const timer of timers) clearTimeout(timer);
+      for (const child of children) child.kill('SIGKILL');
       reject(error);
     };
     const workers = Math.max(1, Math.min(config.jobs, jobs.length));
@@ -272,26 +275,56 @@ function runBatch(config) {
       const child = fork(__filename, ['--worker'], {stdio: ['ignore', 'ignore', 'inherit', 'ipc']});
       children.push(child);
       active++;
-      let pending = null;
+      let pending = null, timer = null, diagnostic = null, timedOut = false;
+      const clearDeadline = () => { clearTimeout(timer); timers.delete(timer); };
+
       const next = () => {
         if (failed) return;
         if (!jobs.length) { child.kill(); return; }
         const job = jobs.shift();
         pending = job;
-        child.once('message', message => {
+        diagnostic = null;
+        timer = setTimeout(() => {
+          timers.delete(timer);
+          if (failed || !pending) return;
+          timedOut = true;
+          const reason = `Worker timeout after ${config.timeoutMs / 1000} s`;
+          games.push({fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed,
+            ok: false, winner: null, reason, errors: [reason], ms: Date.now() - dispatched,
+            corp: job.corp, runner: job.runner, diagnostic});
+          console.error(`${reason}: ${job.deckPairId} seed ${job.seed}` +
+            (job.fixtureId ? ` start ${job.fixtureId}` : '') +
+            (diagnostic?.phase ? ` (${diagnostic.phase})` : ''));
           pending = null;
-          if (failed) return;
-          if (message.error) { fail(new Error(message.error)); return; }
-          games.push(message.record);
-          effective = effective || message.options;
           progress();
-          next();
-        });
+          child.kill('SIGKILL');
+        }, config.timeoutMs + 1000); // Allow the in-worker timer to return its richer summary first.
+        timers.add(timer);
+        const dispatched = Date.now();
         child.send(job, error => { if (error) fail(error); });
       };
+      child.on('message', message => {
+        if (failed || timedOut || !pending) return;
+        if (message.diagnostic) { diagnostic = message.diagnostic; return; }
+        clearDeadline();
+        if (message.record && !message.record.ok) Object.assign(message.record,
+          {corp: pending.corp, runner: pending.runner, diagnostic});
+        pending = null;
+        if (message.error) { fail(new Error(message.error)); return; }
+        games.push(message.record);
+        effective = effective || message.options;
+        progress();
+        next();
+      });
       child.on('error', fail);
       child.on('exit', (code, signal) => {
+        clearDeadline();
         if (failed) return;
+        if (timedOut && jobs.length) {
+          active--;
+          spawnWorker();
+          return;
+        }
         if (pending) {
           const detail = `Worker exited before returning ${pending.deckPairId} seed ${pending.seed}` +
             `${pending.fixtureId ? ' start ' + pending.fixtureId : ''} (code ${code}, signal ${signal})`;
@@ -341,10 +374,12 @@ function buildConfig(args, overrides = {}) {
     corpOptions: parseAssignments(args.corpOption, '--corp-option'),
     runnerOptions: parseAssignments(args.runnerOption, '--runner-option'),
     collectorNames, directions: Object.assign({}, ...collectors.map(c => c.directions || {})),
-    jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout || 900) * 1000,
+    jobs: Number(args.jobs || Math.max(1, os.cpus().length - 2)), timeoutMs: Number(args.timeout ?? 900) * 1000,
     quick: Boolean(args.quick), securityCache: args['security-cache'],
     defenseObserver: args['defense-observer'] || 'on',
   }, overrides);
+  if (!Number.isFinite(config.timeoutMs) || config.timeoutMs <= 0 || config.timeoutMs > 2147482647)
+    throw new Error('--timeout must be a positive finite number of seconds within the timer range');
   validateDeckPairs(config.pairs, config.setFiles);
   return config;
 }
@@ -379,7 +414,7 @@ function budgetSeeds(args, starts, pairs) {
 function reportKey(config) {
   return sha1(JSON.stringify([codeHash(config.setFiles, config.collectorNames), config.poolInfo.hash,
     config.pairs.map(p => p.id), config.seeds, config.starts.map(s => s.hash), config.collectorNames,
-    config.corpOptions, config.runnerOptions, config.securityCache, config.defenseObserver])).slice(0, 16);
+    config.corpOptions, config.runnerOptions, config.securityCache, config.defenseObserver, config.timeoutMs])).slice(0, 16);
 }
 
 // Validate option names before playing any game: unknown names are errors.
@@ -417,7 +452,7 @@ async function batch(config, command) {
     directions: config.directions, quick: config.quick, budget: config.budget,
     options: effective || {corp: config.corpOptions, runner: config.runnerOptions},
     failures: games.filter(g => !g.ok).map(g => ({fixtureId: g.fixtureId, deckPairId: g.deckPairId, seed: g.seed,
-      reason: g.reason, errors: g.errors})),
+      reason: g.reason, errors: g.errors, diagnostic: g.diagnostic})),
     aggregates: metricsLib.aggregate(games),
     batchMetrics: metricsLib.batchMetrics(loadCollectors(config.collectorNames), games),
     batchDiagnostics: Object.fromEntries(loadCollectors(config.collectorNames).filter(c => c.summarize)
@@ -473,6 +508,7 @@ function printSummary(report) {
     `${report.quick ? ' [quick: indicative only]' : ''}`];
   for (const key of Object.keys(report.aggregates)) {
     const games = report.games.filter(g => g.ok && (key === 'pooled' || (g.fixtureId ? g.fixtureId + '/' : '') + g.deckPairId === key));
+    if (!games.length) { lines.push(`  ${key.padEnd(24)} no completed games`); continue; }
     const wins = games.map(g => g.metrics.winRate);
     const ci = metricsLib.bootstrap(wins, 'winRate:' + key);
     const m = report.aggregates[key].metrics;

@@ -197,6 +197,16 @@ node scripts/compare-ai-main.js --pool startup-v1
 This runs local `main` first in a temporary detached worktree, then the current
 checkout including uncommitted changes, then prints the paired comparison,
 including decision latency. Both runs use seeds 1–200 and the same worker count.
+Each game has a 60-second timeout (`--timeout 30` changes it). The parent kills
+an unresponsive worker after the deadline plus one second of grace, records
+the failure, and starts a replacement for remaining games. Both engines use
+the checkout's `ai-batch.js` and `headless.js` harness so older main commits also
+get this protection. Main's engine, AI and card code remain from main.
+Both reports are collected even if games fail; failed runs exit unsuccessfully
+and skip the paired comparison. Each failed game includes its seed, deck files
+and latest `diagnostic` phase and recent log tail when available. Diagnostic
+updates are throttled to 250 ms, so a hard block can leave the tail slightly stale.
+Restart an already-running command to use the updated harness.
 It does not switch the current checkout, fetch main, or replace accepted baselines.
 Reports are retained in `bench/pools/startup-v1/paired-main/<unique-run>/main.json` and
 `candidate.json`; the temporary main worktree is removed after success or failure.
@@ -597,7 +607,9 @@ roadmap item F8.
 ## When something goes wrong
 
 - **`FAILED <pair> seed <n>: <error>`.** That game logged an engine error or
-  ran out of time (900 s by default, `--timeout` to change). Failed games are
+  ran out of time (900 s by default for `ai-batch.js`, 60 s for
+  `compare-ai-main.js`; `--timeout` changes either). A parent-enforced deadline
+  also stops blocked workers after one second of grace. Failed games are
   listed in the report and left out of comparisons. Reproduce it with
   `ai-game.js` and the same decks, then triage the error like any other bug.
 - **`Unknown corp AI option`.** Check the name against `DEFAULT_OPTIONS`.
