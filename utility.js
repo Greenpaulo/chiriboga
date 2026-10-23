@@ -2036,6 +2036,7 @@ function AIGameEnded(winner) {
  * @param {String} msgstr reason for win
  */
 function PlayerWin(player, msgstr) {
+  if (typeof PassPriorityReset == "function") PassPriorityReset(); //game over: stop passing
   //old code from before there was a decisionphase
   /*
   $("#cmdform").hide();

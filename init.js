@@ -96,6 +96,7 @@ function Init() {
 		rewindStates.shift();
 	}
 	eval(rewindStates[0].code);
+	if (typeof PassPriorityReset == "function") PassPriorityReset(); //passing never survives a rewind
 	rewinding=false;
 	
 	//recreate renderers for all cards after restoring state
@@ -1846,6 +1847,7 @@ function StartGame() {
     });
   }
   
+  if (typeof PassPriorityReset == "function") PassPriorityReset(); //new game
   if (!currentPhase) IncrementPhase(); //move to first phase
   if (!skipShuffleAndDraw) {
     
@@ -1999,6 +2001,7 @@ async function Main() {
   if (autoExecute && currentPhase.requireHumanInput && activePlayer.AI == null)
     autoExecute = false; //special case if active player is human-controlled
   if (autoExecute) ExecuteChosen(optionList[0]);
+  else if (PassPriorityShouldAutoPass(optionList)) ExecuteChosen("n"); //human is passing until end of turn: submit the normal Continue
   else if (activePlayer.AI != null) {
     try {
 	  //active player is AI controlled
