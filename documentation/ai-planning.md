@@ -30,6 +30,7 @@ IDs are unique across both areas.
 | `R` | Corp: reactive commitment | Is it better to hold or reorder an action for a visible future condition? |
 | `P` | Corp: principle debt | Corp code that breaks a principle and must be migrated |
 | `W` | Runner: hand keep and discard | Which Grip cards are worth keeping, playing or installing, and which go first? |
+| `T` | Runner: run targeting | Which server should the Runner run, and what risk does it take there? |
 | `D` | Runner: principle debt | Runner code that breaks a principle and must be migrated |
 
 ## Item lifecycle
