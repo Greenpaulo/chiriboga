@@ -814,7 +814,7 @@ blocking about 30% of Corp actions while an agenda sat unfinished.
   (`_hqStealHazard()`) and logs them on agenda install decisions while the
   option is on, but no decision reads them: driving destinations from I2's
   breach-hazard table made the Corp install agendas into bare remotes the
-  table rates far too safe (see the I4 Resolution and I4.1).
+  table rates far too safe (see the I4 Resolution).
 
 ## Not yet modelled: holding and trigger ordering
 

@@ -5751,7 +5751,7 @@ class CorpAI {
   }
 
   //Consecutive previous Corp turns this agenda was held for a deferred install
-  //(the I4.1 consumer records holds; nothing does yet).
+  //(the destination/hold consumer records holds; nothing does yet).
   _agendaHoldStreak(agenda) {
     var turns = this._agendaHolds && this._agendaHolds.get(agenda);
     if (!turns) return 0;
@@ -6482,7 +6482,7 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
-        //I4 observation only: the install/hold choice is split out to I4.1 and
+        //I4 observation only: the install/hold choice is not yet a consumer and
         //decides nothing here.
         if (this.options.agendaCommitmentPlan && CheckCardType(cards[i], ["agenda"]) &&
             corp.HQ.cards.includes(cards[i]) && this._hypotheticalDepth == 0)

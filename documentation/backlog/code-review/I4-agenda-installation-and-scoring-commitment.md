@@ -1,6 +1,6 @@
 # I4 Agenda installation and scoring commitment
 
-**Outcome:** blocked — score-fast plan execution is ready behind `agendaCommitmentPlan`; its F4 gate is pending (the owner runs it). Agenda destination/hold is split to I4.1.
+**Outcome:** blocked — score-fast plan execution is ready behind `agendaCommitmentPlan`; its F4 gate is pending (the owner runs it). Agenda destination/hold is folded back into I4 (see "Destination and hold"); next is a counter-aware exposure table.
 
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](../done/I2-ice-selection-by-marginal-security.md) phase A, [I3](../I3-remote-role-and-root-suitability.md) (now follows I4)
@@ -14,7 +14,7 @@ Implemented from eb78846, 2026-10-23.
 
 **Gate command:** `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
 
-**Quick run:** `350 paired games, 229 changed by the options [quick: indicative only, cannot pass a gate]` (2026-10-23, gate command without `--seeds`; `--quick` with `--seeds` plays the full range). Indicative only: win rate 0.309 → 0.320 [−0.034, +0.057]; points scored 4.049 → 3.800 [−0.483, −0.026]; remote points stolen 2.034 → 2.471 [+0.226, +0.657]; insolvent turns 1.717 → 2.031; idle agenda turns 3.020 → 1.857; agenda exposure turns 1.579 → 1.372. The quick sample failed the remote-theft, insolvency, two tell guards and both improvements. Likely cause, to check in the full run: advancing across turns shows counters, which the Runner AI targets, and I2's table does not condition on counters (the same blind spot I4.1 measures). If the full gate fails, follow "When a gate fails" and carry this into I4.1.
+**Quick run:** `350 paired games, 229 changed by the options [quick: indicative only, cannot pass a gate]` (2026-10-23, gate command without `--seeds`; `--quick` with `--seeds` plays the full range). Indicative only: win rate 0.309 → 0.320 [−0.034, +0.057]; points scored 4.049 → 3.800 [−0.483, −0.026]; remote points stolen 2.034 → 2.471 [+0.226, +0.657]; insolvent turns 1.717 → 2.031; idle agenda turns 3.020 → 1.857; agenda exposure turns 1.579 → 1.372. The quick sample failed the remote-theft, insolvency, two tell guards and both improvements. Likely cause, to check in the full run: advancing across turns shows counters, which the Runner AI targets, and I2's table does not condition on counters (the same blind spot the destination/hold measurement covers).
 
 **Scope split (owner decision 2026-10-23).** The full design was built and
 tried. Quick batches (7 pairs × 20 seeds, not gate evidence):
@@ -37,7 +37,7 @@ those absolute rates against HQ's, so it cannot be trusted until that risk is
 measured. The destination/hold consumer, the hold-streak recording and I2's
 empty-remote stake following I4's destination were removed; their design
 and the replay evidence move to
-[I4.1](../../corp-ai/specs/I4.1-agenda-destination-and-hold.md). Scenario 1
+[Destination and hold](#destination-and-hold-folded-back-from-i41-owner-decision-2026-10-23) (formerly I4.1). Scenario 1
 (the pending reproduction) is an install/hold case and stays pending there:
 under the trial it passed with install 0.90 against hold 0.99 (the owner's
 install-within-0.1 amendment).
@@ -94,7 +94,7 @@ advancement title case in `_potentialAdvancementDirections()` or
 (band 3). `ai-batch-install-outcomes.test.js` covers the `agendaCommitment`
 collector on scripted boards (idle, advanced, scored, held with and without
 a free remote). Reproduction: `tests/fixtures/corp-decisions-pending/corp-agenda-held-while-secure-remote-available.txt`
-stays pending for I4.1.
+stays pending for destination/hold.
 
 **Remote agenda steal risk (measured 2026-10-23, passive).** Collector
 `remoteAgendaRisk`; current defaults, 7 pairs × seeds 3001-4000 (7000 games,
@@ -120,7 +120,7 @@ within each counter row (1 ICE, 1+ counters: 0.060 at -3..-1 to 0.592 at
 ≥10). Observational: the current policy chooses which agendas carry counters
 into a Runner turn. Full cells: `batchDiagnostics.remoteAgendaRisk` of the run.
 
-**Left open:** the full gate (owner); I4.1; the owner playtest before any
+**Left open:** the full gate (owner); destination/hold; the owner playtest before any
 default change.
 
 ## Implementation plan
@@ -725,12 +725,12 @@ for both metrics.
   `a / n`; the sequential per-agenda evaluation accounts for it.
 
 ## Acceptance criteria
-- [x] Every test scenario that remains in I4 (3 score fast, 9 band 3, 10 identity) is covered by a deterministic test that asserts the logged reason as well as the choice; scenarios 1, 2 and 4–8 moved to I4.1 with the destination/hold consumer.
-- [ ] ~~The pending reproduction passes under the option~~ — moved to I4.1 (install/hold case; see Resolution).
+- [x] Every test scenario that remains in I4 (3 score fast, 9 band 3, 10 identity) is covered by a deterministic test that asserts the logged reason as well as the choice; scenarios 1, 2 and 4–8 moved to destination/hold (below) with its consumer.
+- [ ] ~~The pending reproduction passes under the option~~ — moved to destination/hold (install/hold case; see Resolution).
 - [x] Phase A identity run (7 pairs × 20 seeds, option on with consumer disabled) matches every `logHash`; the hook migrations are behaviour-preserving.
 - [x] The behaviour change ships behind an AI option that defaults to off (`agendaCommitmentPlan`, named in the Resolution).
 - [x] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the option.
-- [ ] ~~With the option on, I2's empty-remote stake follows I4's chosen destination~~ — moved to I4.1 with the destination consumer.
+- [ ] ~~With the option on, I2's empty-remote stake follows I4's chosen destination~~ — moved to destination/hold with its consumer.
 - [x] The `agendaCommitment` collector declares lower-is-better directions for both metrics and is verified against scripted boards (idle, advanced, scored, held with and without an empty remote) and back-filled into a fresh baseline without changing decisions.
 - [ ] I0's `installOutcomes`, `stallTurns` and `corpInsolventTurns` are back-filled into the same fresh baseline with the corrected PR #34 tracker.
 - [ ] Gate evidence is recorded in the Resolution: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; each improvement interval's lower bound is above zero.
@@ -738,4 +738,142 @@ for both metrics.
 - [x] New or changed card-facing hooks (`AIScoringSupport`, extended `AIFastAdvanceCounters` and `AIAdvanceCreditGain`) are documented in `documentation/ai.md`, and migrated titles are removed from `LEGACY_TITLES` and ticked in P1.
 - [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [x] `documentation/corp-ai/architecture.md` describes the new behaviour ([Agenda scoring plans (I4)](../../corp-ai/architecture.md#agenda-scoring-plans-i4)).
+- [ ] `node tests/run-all-tests.js` passes.
+
+## Destination and hold (folded back from I4.1, owner decision 2026-10-23)
+
+Formerly the separate item I4.1; folded back into I4 so the destination/hold
+consumer and score fast are measured and gated together. Its design and gate
+below are kept as written; "I4" in them means score fast, and "the I4 option" 
+is `agendaCommitmentPlan`.
+
+### Goal
+
+Choose where to install each agenda in HQ, or hold it, by expected agenda
+points over the horizon, as I4 designed, but using a breach risk measured for
+the boards that choice creates: a remote holding an installed (and often
+advanced) agenda. First measure that risk; then reattach I4's existing
+`_agendaCommitmentOptions()` to decisions behind its own option and gate.
+
+**Why this is separate.** I4's destination/hold consumer was implemented and
+tried on 2026-10-23 (20 seeds per pair). It cut Corp wins from 30.0% to
+22.9% and points scored from 4.09 to 2.78. Replays show agendas installed
+into bare new remotes and stolen on the next run: I2's breach-hazard table
+rates a bare remote at about 0.24 per Runner turn and a one-ICE remote at
+about 0.20. The table was calibrated under a policy that rarely leaves an
+agenda there, and the Runner AI attacks advanced cards, so its absolute
+rates do not describe these boards. I2 accepted the table for comparisons
+only. Restricting destinations to protected remotes still lost (27.9%,
+3.26 scored). Only I4's plan-execution half was kept.
+
+### Current behaviour
+
+- Destinations and holding use the legacy rule: `_isAScoringServer()`
+  admission into `_scoringServers()`, sorted by `_scoringWindow()`.
+- With `agendaCommitmentPlan` on, `_agendaCommitmentOptions()` computes every
+  destination (remotes with room, with or without ICE, and a new remote) and
+  hold, with EV, band-2 `W`, M3 plan and M5 hold hazard, and the owner's
+  install-within-0.1 amendment in `_bestAgendaCommitment()`; it is only
+  logged.
+- Hazards come from `_hazardForMargin("agendaRemote", iceCount, margin)`
+  (I2's table, rows by ICE count 0–1 or 2+, cells by margin bucket).
+
+### Design
+
+1. **Measurement (passive, no decision change).** A collector records, for
+   each Runner turn, every remote holding an installed agenda: its ICE count,
+   rezzed ICE count, the agenda's advancement counters, I2's margin bucket
+   and whether the agenda was accessed (stolen) that turn. Run it on a fresh
+   baseline with I4's adopted options. Report steal rates by ICE count
+   (0, 1, 2+), counters (0, 1+) and margin bucket, with counts and intervals.
+   Freeze the table and its use before any candidate run.
+2. **Consumer.** Under a new option, replace `_agendaDestinationHazard()`'s
+   table lookup with the measured exposure table for installs, keep M5 and
+   discard loss for holding, and let `_bestAgendaCommitment()` choose the
+   destination or hold. Re-enable the indefinite-hold guard recording and
+   I2's empty-remote ICE stake following the chosen destination (both were
+   written and tested in I4's trial and removed with the split; see I4's
+   Resolution). Keep band 2 and band 3.
+3. If the measured table still cannot separate destinations (for example a
+   one-ICE remote and a bare remote within noise), stop and report rather
+   than adding rules.
+
+### Safety and information boundary
+
+Only public and Corp-known state: ICE, rez state, counters and the Corp's
+own hand. The table is measured on the stock Runner AI; human Runners may
+differ, so the owner playtests before adoption. Game-winning scores and
+game-losing steals stay lexicographic rules.
+
+### Test scenarios
+
+1. The pending reproduction `corp-agenda-held-while-secure-remote-available.txt`
+   installs into Remote 0 (I4 measured install 0.90 against hold 0.99, an
+   install-within-0.1 tie).
+2. A bare new remote is never chosen over holding when HQ's steal hazard is
+   low and the measured bare-remote exposure is high.
+3. Repeat scoring: after scoring from a locked remote, the next agenda goes
+   to the same remote.
+4. Agenda flood: an excess agenda goes to the remote that loses the fewest
+   expected points when holding means a discard.
+5. Band 2: a game-losing install is rejected exactly when a lower-`W`
+   option exists.
+6. Option off: decisions unchanged on the pool (identity run).
+
+### Acceptance gate
+
+F4 gate. A new option (named in the Resolution), off in the baseline and on
+in the candidate; both arms with I4's adopted options. Committed deck pool,
+paired seeds 8001–9000 (1,000 games per deck pair; unused by earlier gates),
+bootstrap 95% intervals. Collectors: `installOutcomes`, `stallTurns`,
+`corpInsolventTurns`, `agendaCommitment`, `strandedUnrezzedIceCost`,
+`bluffSingleVariableCorrelation`, `realizedIceByRootType`, and the exposure
+collector this item builds (report-only).
+Starts: none; every pool game reaches agenda decisions.
+
+| Check | Metric | Better | Threshold |
+|---|---|---|---|
+| Improve | `winRate` | higher | interval of the improvement above 0 |
+| Improve | `pointsScored` | higher | interval of the improvement above 0 |
+| Guard | `pointsStolen` | lower | regression at most 0.2 |
+| Guard | `pointsStolenByServer.remote` | lower | regression at most 0.5 |
+| Guard | `gameLength` | lower | regression at most 1.5 turns |
+| Guard | `corpInsolventTurns` | lower | regression at most 0.5 turns |
+| Guard | `stallTurns` | lower | regression at most 0.5 turns |
+| Guard | `installOutcomes.agendaExposureTurns` | lower | regression at most 0.5 turns |
+| Guard | `agendaCommitment.hqHoldTurns` | lower | regression at most 0.5 turns |
+| Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
+| Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 |
+| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
+| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
+
+Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option <option>=true --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 8001-9000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+
+The baseline arm assumes I4's `agendaCommitmentPlan` is adopted; if it is
+not, drop that option from both arms before the run.
+
+### Things to consider
+
+- The measured table describes the stock Runner AI under I4's policy; once
+  destinations change, re-measure under I9.
+- A hold that waits for ICE ("planned improvement") was not modelled in I4's
+  trial; I8's multi-click planning may own it.
+
+### Acceptance criteria
+
+- [ ] The exposure measurement is collected on a fresh baseline and its table, counts and intervals are recorded before any candidate run.
+- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
+- [ ] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the options.
+- [ ] Applicable gate evidence is recorded in the Resolution.
+      For F4: exact command, committed deck pairs, paired seeds, seed count,
+      every metric's baseline/candidate result and bootstrap 95% confidence
+      interval, guarded-regression result, pass conditions and thresholds; an
+      improvement interval's lower bound must be above zero. Only then is the
+      option switched on by default.
+- [ ] The exposure collector exists, declares its metrics report-only, and is tested.
+- [ ] An owner playtest against the option is recorded before the default changes.
+- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
+- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
+- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
 - [ ] `node tests/run-all-tests.js` passes.
