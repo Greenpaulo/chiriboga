@@ -786,6 +786,36 @@ against a potentially winning breach or to save an agenda on the Runner's
 last click. This paid-ability selection is separate from ordering simultaneous
 callback triggers.
 
+### Agenda scoring plans (I4)
+
+Behind `agendaCommitmentPlan` (default off until its F4 gate passes), an
+installed agenda is advanced under a completion plan instead of waiting on
+the global rez reserve (`_sufficientEconomy()`), which the I4 probe found
+blocking about 30% of Corp actions while an agenda sat unfinished.
+
+- `_agendaCompletionPlan(agenda, destination, startTurn, evaluation, installed)`
+  (M3) finds the fewest Runner turns, up to `CORP_AI_I2_HORIZON_RUNNER_TURNS`,
+  before the agenda can be scored. Each turn advances as far as
+  `_potentialAdvancement()` allows with that turn's clicks and credits (spare
+  clicks become credits), counting operations, one-shot upgrades and identity
+  hooks. Credits for the server's planned ICE rezzes (`defenceReserve`) and an
+  unrezzed `AIScoringSupport` upgrade's rez (`_scoringSupport()`) are never
+  spent on advancing.
+- `_plannedAgendaToAdvance()` picks the installed agenda whose plan scores
+  within the horizon, advances this turn and leaves the Corp at least
+  `defenceReserve` credits after the advance. Advancing must gain more points
+  (exposure E instead of E + 1 at the server's held next-turn I2 hazard) than
+  I2's best ICE for that server saves (`_bestDefencePoints()`, its credit
+  score divided by `CORP_AI_POINT_VALUE`). `Phase_Main()` then admits that
+  agenda alone to its advance block; an agenda that can score this turn
+  (`almostDoneAgenda`) still takes precedence.
+- Where to install an agenda, and whether to hold it, is unchanged.
+  `_agendaCommitmentOptions()` computes every destination and hold with M5
+  (`_hqStealHazard()`) and logs them on agenda install decisions while the
+  option is on, but no decision reads them: driving destinations from I2's
+  breach-hazard table made the Corp install agendas into bare remotes the
+  table rates far too safe (see the I4 Resolution and I4.1).
+
 ## Not yet modelled: holding and trigger ordering
 
 - Credit holds exist only for installed cards: `_sufficientEconomy()` sums

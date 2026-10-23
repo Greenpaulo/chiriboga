@@ -36,7 +36,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | done (merged) | Passive install/lifecycle tooling, findings and control calibration delivered; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
 | — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
 | 1 | [I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted; merge pending | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merge after the Downfall batches 11–13 branch |
-| 2 | [I4](../backlog/I4-agenda-installation-and-scoring-commitment.md) | in-progress | Moved ahead of I3 (owner decision 2026-10-23); re-grounded at 65251a5. Supplies its chosen agenda remote to I2's empty-remote stake, own M3/M5; fresh control on seeds 7001–8000 |
+| 2 | [I4](../backlog/I4-agenda-installation-and-scoring-commitment.md) | in-progress (score fast only; destination/hold split to I4.1) | Moved ahead of I3 (owner decision 2026-10-23); re-grounded at 65251a5. Supplies its chosen agenda remote to I2's empty-remote stake, own M3/M5; fresh control on seeds 7001–8000 |
 | 3 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready (blocked by I4) | Re-scope after I4's evidence to persistence and asset opportunity cost only, if the Corp still drifts between remotes; seeds 6001–7000 reserved |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
@@ -285,6 +285,12 @@ I9 comes last.
 - **Depends on:** I2, F4
 - **Ticket:** [I4-agenda-installation-and-scoring-commitment.md](../backlog/I4-agenda-installation-and-scoring-commitment.md)
 - **Goal:** Install an agenda where expected points beat holding it, then advance it to a score without the global reserve stalling the plan.
+
+### I4.1 Agenda destination and hold by measured exposure risk
+- **Status:** proposed
+- **Depends on:** I4, F4
+- **Spec:** [I4.1-agenda-destination-and-hold.md](specs/I4.1-agenda-destination-and-hold.md)
+- **Goal:** Measure how often agendas installed in remotes are stolen by ICE count and counters, then choose agenda destination or hold by expected points on that measured risk (split from I4 after its trial lost to the legacy rule).
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed

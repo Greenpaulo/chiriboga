@@ -5598,7 +5598,8 @@ class CorpAI {
   //clicks become credits. No draws or income beyond hook-declared advance
   //income. Credits for the destination's planned ICE rezzes (defenceReserve)
   //and an unrezzed scoring upgrade's rez are never spent on advancing.
-  _agendaCompletionPlan(agenda, destination, startTurn = 0, evaluation = null) {
+  //installed: the agenda is already in destination (no install click; counters so far count).
+  _agendaCompletionPlan(agenda, destination, startTurn = 0, evaluation = null, installed = false) {
     var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
     if (!evaluation)
       evaluation = destination ? this._evaluateServerSecurity(destination) : this._detachedRemoteEvaluation();
@@ -5611,12 +5612,12 @@ class CorpAI {
     var plan = {exposureTurns: Infinity, steps: [], defenceReserve: defenceReserve,
       limit: limit, tools: []};
     if (credits < 0) return plan;
-    var counters = 0;
+    var counters = installed ? Counters(agenda, "advancement") : 0;
     var hand = corp.resolvingCards.concat(corp.HQ.cards).filter((card) => card != agenda);
     for (var turn = startTurn; turn <= startTurn + horizon; turn++) {
       var thisTurn = turn == 0;
       var clicks = thisTurn ? this._clicksLeft() : AllottedClicks(corp);
-      if (turn == startTurn) clicks--; //the install click
+      if (turn == startTurn && !installed) clicks--; //the install click
       if (clicks < 0) return plan;
       var used = [];
       var endpoint = {corpCredits: credits, corpClicks: clicks, handCards: hand};
@@ -5626,7 +5627,7 @@ class CorpAI {
         gained = this._withHypothetical(
           () => { corp.creditPool = Math.max(0, credits); },
           () => this._potentialAdvancement(agenda, limit, thisTurn, hand, clicks, used,
-            counters, turn == startTurn, endpoint),
+            counters, turn == startTurn && !installed, endpoint),
           () => { corp.creditPool = savedCredits; },
         );
       }
@@ -5749,10 +5750,55 @@ class CorpAI {
     return best;
   }
 
-  //Consecutive Corp turns this agenda was held for a deferred install (I4 phase B).
+  //Consecutive previous Corp turns this agenda was held for a deferred install
+  //(the I4.1 consumer records holds; nothing does yet).
   _agendaHoldStreak(agenda) {
-    var record = this._agendaHolds && this._agendaHolds.get(agenda);
-    return record ? record.streak : 0;
+    var turns = this._agendaHolds && this._agendaHolds.get(agenda);
+    if (!turns) return 0;
+    var streak = 0;
+    while (turns.has(this._postureEpoch - streak - 1)) streak++;
+    return streak;
+  }
+
+  //Points I2's best ICE for server would save (its credit score / POINT_VALUE).
+  _bestDefencePoints(server) {
+    if (!this.options.iceMarginalSecurity) return 0;
+    var ice = corp.HQ.cards.filter((card) => CheckCardType(card, ["ice"]));
+    if (ice.length < 1) return 0;
+    var best = 0;
+    this._marginalIceInstallOptions(ice, false, false, {}, [server]).forEach((option) => {
+      if (option.iceMarginalScore && option.iceMarginalScore.score > best) best = option.iceMarginalScore.score;
+    });
+    return best / CORP_AI_POINT_VALUE;
+  }
+
+  //I4 plan execution: the installed agenda to advance now under its plan, or
+  //null. Its plan must score within H, advance this turn and keep credits for
+  //its server's planned rezzes; advancing must gain more points than I2's best
+  //ICE for the same server would save. Fewest exposure turns, then most points.
+  _plannedAgendaToAdvance() {
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    var best = null;
+    corp.remoteServers.forEach((server) => server.root.forEach((card) => {
+      if (!CheckCardType(card, ["agenda"]) || !CheckAdvance(card)) return;
+      if (Counters(card, "advancement") >= AdvancementRequirement(card)) return;
+      var evaluation = this._evaluateServerSecurity(server);
+      var plan = this._agendaCompletionPlan(card, server, 0, evaluation, true);
+      if (plan.exposureTurns > horizon || plan.steps.length < 1 || plan.steps[0].advancement <= 0) return;
+      if (Credits(corp) - 1 < plan.defenceReserve) return;
+      var points = Number(card.agendaPoints) || 0;
+      var hazard = this._agendaDestinationHazard(server, evaluation).hazard;
+      var gain = this._agendaInstallValue(points, plan.exposureTurns, hazard) -
+        this._agendaInstallValue(points, plan.exposureTurns + 1, hazard);
+      var defence = this._bestDefencePoints(server);
+      this._log("I4 plan for " + card.title + " in " + server.serverName + ": exposure " +
+        plan.exposureTurns + ", advance gain " + gain.toFixed(3) + ", defence gain " + defence.toFixed(3));
+      if (defence > gain) return;
+      if (!best || plan.exposureTurns < best.exposureTurns ||
+          (plan.exposureTurns == best.exposureTurns && points > best.points))
+        best = {card: card, exposureTurns: plan.exposureTurns, points: points};
+    }));
+    return best ? best.card : null;
   }
 
   //Log summary of _agendaCommitmentOptions.
@@ -6436,7 +6482,8 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
-        //I4 phase A: observation only, decisions unchanged.
+        //I4 observation only: the install/hold choice is split out to I4.1 and
+        //decides nothing here.
         if (this.options.agendaCommitmentPlan && CheckCardType(cards[i], ["agenda"]) &&
             corp.HQ.cards.includes(cards[i]) && this._hypotheticalDepth == 0)
           this._log("I4 agenda options " + JSON.stringify(
@@ -8611,11 +8658,17 @@ class CorpAI {
       }
     }
 
+    //I4: an installed agenda with a plan is advanced without the global reserve.
+    var plannedAgenda =
+      this.options.agendaCommitmentPlan && !almostDoneAgenda && optionList.indexOf("advance") > -1
+        ? this._plannedAgendaToAdvance()
+        : null;
     //is there something I could advance?
     if (
       (almostDoneAgenda ||
         almostDoneHostileAsset ||
         sufficientEconomy ||
+        plannedAgenda ||
         (this.options.committedAgendaReserveBypass &&
           this._installedAgendaCanBeCompleted())) &&
       optionList.indexOf("advance") > -1
@@ -8626,6 +8679,7 @@ class CorpAI {
           var card = corp.remoteServers[i].root[j];
           //check for priority
           if (almostDoneAgenda && card !== almostDoneAgenda) continue;
+          if (plannedAgenda && card !== plannedAgenda) continue;
           //something advanceable that's worth it
           if (CheckAdvance(card) && !this._obsoleteBluff(card)) {
             var advancementLimit = this._advancementLimit(card);
@@ -8658,6 +8712,7 @@ class CorpAI {
             else if (
               !CheckCardType(card, ["agenda"]) ||
               card == almostDoneAgenda ||
+              card == plannedAgenda ||
               shouldStartAdvancingAgenda
             ) {
               if (
@@ -9389,6 +9444,6 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   postureEpochs: true,
   matchLocalPostureFeedback: true,
   iceMarginalSecurity: true,
-  // I4 agenda install/hold and scoring plan; phase A only logs its options.
+  // I4 scoring-plan execution (agenda install/hold options are logged only).
   agendaCommitmentPlan: false,
 });

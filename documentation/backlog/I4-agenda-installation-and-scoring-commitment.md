@@ -1,8 +1,103 @@
 # I4 Agenda installation and scoring commitment
 
+**Outcome:** blocked — score-fast plan execution is ready behind `agendaCommitmentPlan`; its F4 gate is pending (the owner runs it). Agenda destination/hold is split to I4.1.
+
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md) phase A, [I3](I3-remote-role-and-root-suitability.md) (now follows I4)
 **Verified against code:** eb78846 (2026-10-23; after the Downfall merge, whose only relevant change is the band-3 `AICannotScoreOnInstallTurn` skip noted below)
+
+## Resolution
+
+Implemented from eb78846, 2026-10-23.
+
+**Gate:** pending F4 — `agendaCommitmentPlan` defaults to off.
+
+**Gate command:** `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+
+**Quick run:** `350 paired games, 229 changed by the options [quick: indicative only, cannot pass a gate]` (2026-10-23, gate command without `--seeds`; `--quick` with `--seeds` plays the full range). Indicative only: win rate 0.309 → 0.320 [−0.034, +0.057]; points scored 4.049 → 3.800 [−0.483, −0.026]; remote points stolen 2.034 → 2.471 [+0.226, +0.657]; insolvent turns 1.717 → 2.031; idle agenda turns 3.020 → 1.857; agenda exposure turns 1.579 → 1.372. The quick sample failed the remote-theft, insolvency, two tell guards and both improvements. Likely cause, to check in the full run: advancing across turns shows counters, which the Runner AI targets, and I2's table does not condition on counters (the same blind spot I4.1 measures). If the full gate fails, follow "When a gate fails" and carry this into I4.1.
+
+**Scope split (owner decision 2026-10-23).** The full design was built and
+tried. Quick batches (7 pairs × 20 seeds, not gate evidence):
+
+| Variant | Corp win | Scored | Stolen |
+|---|---|---|---|
+| Option off | 30.0% | 4.09 | 6.18 |
+| Destination/hold + score fast (full design) | 22.9% | 2.78 | 6.57 |
+| Same, destinations limited to remotes with ICE | 27.9% | 3.26 | 6.36 |
+| Score fast only (shipped) | 32.9% | 3.81 | 6.00 |
+
+Replays (gateway seed 4) show the destination/hold choice installing
+agendas in bare new remotes, which were stolen on the next run. I2's
+breach-hazard table rates a bare remote with a large Runner margin at about
+0.24 per Runner turn and a one-ICE remote at about 0.20. It was measured
+under a policy that seldom leaves agendas there, and the Runner AI attacks
+advanced cards, so its absolute rates do not describe these boards (I2
+accepted it for comparisons only). The design's install/hold EV compares
+those absolute rates against HQ's, so it cannot be trusted until that risk is
+measured. The destination/hold consumer, the hold-streak recording and I2's
+empty-remote stake following I4's destination were removed; their design
+and the replay evidence move to
+[I4.1](../corp-ai/specs/I4.1-agenda-destination-and-hold.md). Scenario 1
+(the pending reproduction) is an install/hold case and stays pending there:
+under the trial it passed with install 0.90 against hold 0.99 (the owner's
+install-within-0.1 amendment).
+
+**What ships behind `agendaCommitmentPlan`.**
+
+- `_plannedAgendaToAdvance()` admits one installed agenda to `Phase_Main`'s
+  advance block without `_sufficientEconomy()` or the start rule when its M3
+  plan (`_agendaCompletionPlan(..., installed = true)`) scores within
+  `CORP_AI_I2_HORIZON_RUNNER_TURNS`, advances this turn, and leaves at least
+  the server's planned ICE rez cost (`defenceReserve`) after the advance.
+  Advancing must gain more points (exposure E rather than E + 1 at the
+  server's held next-turn hazard) than I2's best ICE for that server saves
+  (`_bestDefencePoints()`). `almostDoneAgenda` still takes precedence.
+- Observation only: `_agendaCommitmentOptions()` (every destination and
+  hold, with EV, `W`, M3 and M5) is logged on agenda install decisions.
+- `AIScoringPlanCommitted` keeps its legacy meaning; the "only when E ≤ H"
+  rule belonged to the destination consumer and moved with it.
+
+**Phase A (hooks, measurements, collector).** Six title cases moved to
+hooks with an identity run (7 pairs × 20 seeds, every log and decision hash
+unchanged): Built to Last and Oaktown Renovation declare
+`AIAdvanceCreditGain` (now read from `corp.identityCard` as well, with an
+`advancementSoFar` context); Seamless Launch, Psychographics and Biotic
+Labor declare `AIFastAdvanceCounters`, which may now return
+`{counters, credits, clicks}` and receives a search context; SanSan City
+Grid declares the new `AIScoringSupport`. Trick of Light stays a title case
+(its room check moved into `_remoteHasRoom()`). With the option on and no
+consumer, the identity run also matched; after the split, option-off games
+are again identical to the pre-I4 baseline (140 of 140).
+
+**Cards updated:** System Gateway: Weyland Consortium: Built to Last,
+Seamless Launch. System Update 2021: Oaktown Renovation, Psychographics,
+Biotic Labor, SanSan City Grid. No other card in the playable sets has an
+advancement title case in `_potentialAdvancementDirections()` or
+`_advancementLimit()` except Trick of Light (kept).
+
+**Departures from the ticket.**
+- `rezPlanCost` is computed inside M3 from `plannedRezIce` rather than added
+  to `_evaluateServerSecurity()`, to leave cached evaluations unchanged.
+- M3 keeps only the reserve-respecting plan; the second plan that spends
+  `defenceReserve` to finish faster is not built.
+- `AIFastAdvanceCounters`' object form reports gains beyond the printed play
+  cost (an X cost as negative credits), not the net change including it, so
+  the search keeps applying `PlayCost`/`PlayClickCost` as before.
+- The advance/defend comparison counts ICE net of its install and rez cost
+  (I2's score) and advancing gross, since advancing's credits are spent
+  whenever the agenda is scored.
+
+**Tests.** Green fixtures: `i4-score-fast-advances-planned-agenda.txt`
+(reserve-blocked board advances), `i4-score-fast-off-keeps-reserve.txt`
+(same board, option off), `i4-score-fast-keeps-defence-reserve.txt`,
+`i4-advance-beats-defence.txt`, `i4-almost-done-agenda-unchanged.txt`
+(band 3). `ai-batch-install-outcomes.test.js` covers the `agendaCommitment`
+collector on scripted boards (idle, advanced, scored, held with and without
+a free remote). Reproduction: `tests/fixtures/corp-decisions-pending/corp-agenda-held-while-secure-remote-available.txt`
+stays pending for I4.1.
+
+**Left open:** the full gate (owner); I4.1; the owner playtest before any
+default change.
 
 ## Implementation plan
 
@@ -606,17 +701,17 @@ for both metrics.
   `a / n`; the sequential per-agenda evaluation accounts for it.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] The pending reproduction `corp-agenda-held-while-secure-remote-available.txt` passes under the option with its expectation unchanged; its ticket records how I4 resolves it.
-- [ ] Phase A identity run (7 pairs × 20 seeds, option on with consumer disabled) matches every `logHash`; the hook migrations are behaviour-preserving.
-- [ ] The behaviour change ships behind an AI option that defaults to off (`agendaCommitmentPlan`, named in the Resolution).
-- [ ] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the option.
-- [ ] With the option on, I2's empty-remote stake in `_iceStake()` follows I4's chosen agenda destination instead of the legacy designated remote; with it off it is unchanged.
-- [ ] The `agendaCommitment` collector declares lower-is-better directions for both metrics and is verified against scripted boards (idle, advanced, scored, held with and without an empty remote) and back-filled into a fresh baseline without changing decisions.
+- [x] Every test scenario that remains in I4 (3 score fast, 9 band 3, 10 identity) is covered by a deterministic test that asserts the logged reason as well as the choice; scenarios 1, 2 and 4–8 moved to I4.1 with the destination/hold consumer.
+- [ ] ~~The pending reproduction passes under the option~~ — moved to I4.1 (install/hold case; see Resolution).
+- [x] Phase A identity run (7 pairs × 20 seeds, option on with consumer disabled) matches every `logHash`; the hook migrations are behaviour-preserving.
+- [x] The behaviour change ships behind an AI option that defaults to off (`agendaCommitmentPlan`, named in the Resolution).
+- [x] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the option.
+- [ ] ~~With the option on, I2's empty-remote stake follows I4's chosen destination~~ — moved to I4.1 with the destination consumer.
+- [x] The `agendaCommitment` collector declares lower-is-better directions for both metrics and is verified against scripted boards (idle, advanced, scored, held with and without an empty remote) and back-filled into a fresh baseline without changing decisions.
 - [ ] I0's `installOutcomes`, `stallTurns` and `corpInsolventTurns` are back-filled into the same fresh baseline with the corrected PR #34 tracker.
 - [ ] Gate evidence is recorded in the Resolution: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; each improvement interval's lower bound is above zero.
 - [ ] An owner playtest against the option is recorded before the default changes.
-- [ ] New or changed card-facing hooks (`AIScoringSupport`, extended `AIFastAdvanceCounters` and `AIAdvanceCreditGain`) are documented in `documentation/ai.md`, and migrated titles are removed from `LEGACY_TITLES` and ticked in P1.
-- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
+- [x] New or changed card-facing hooks (`AIScoringSupport`, extended `AIFastAdvanceCounters` and `AIAdvanceCreditGain`) are documented in `documentation/ai.md`, and migrated titles are removed from `LEGACY_TITLES` and ticked in P1.
+- [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
+- [x] `documentation/corp-ai/architecture.md` describes the new behaviour ([Agenda scoring plans (I4)](../corp-ai/architecture.md#agenda-scoring-plans-i4)).
 - [ ] `node tests/run-all-tests.js` passes.
