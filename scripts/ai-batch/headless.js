@@ -68,6 +68,25 @@ function validateDeckPairs(pairs, setFiles) {
 // `leave` events. It reads only Corp-known or public state and never calls
 // engine functions. Cards already installed when the game starts (a start
 // board) are ignored until they leave and are installed again.
+// I4 agendaCommitment turn-end state: installed agendas whose counters did not
+// rise since the previous Corp turn end (counters: WeakMap card -> counters,
+// updated here), agendas in HQ, and whether a remote has no agenda or asset.
+function agendaTurnSnapshot(corp, counters) {
+  let idleInstalled = 0;
+  let remoteRoom = false;
+  corp.remoteServers.forEach(server => {
+    if (!server.root.some(card => card.cardType === 'agenda' || card.cardType === 'asset')) remoteRoom = true;
+    server.root.forEach(card => {
+      if (card.cardType !== 'agenda') return;
+      const now = Number(card.advancement) || 0;
+      if (now <= (counters.get(card) || 0)) idleInstalled++;
+      counters.set(card, now);
+    });
+  });
+  const inHQ = corp.HQ.cards.filter(card => card.cardType === 'agenda').length;
+  return {idleInstalled, inHQ, remoteRoom};
+}
+
 function createRootTracker(emit) {
   const ids = new WeakMap();
   let next = 0;
@@ -439,8 +458,12 @@ function playGame(options) {
         cards: hand.map(card => ({id: card.setNumber, card: card.title, cardType: card.cardType,
           rezCost: Number(card.rezCost) || 0}))});
     };
+    // I4 agendaCommitment: counters at the previous Corp turn end, by card.
+    const agendaCounters = new WeakMap();
+    const agendaTurnState = () => agendaTurnSnapshot(run('corp'), agendaCounters);
     context.__corpTurnEnd = () => emit('turnEnd', {side: 'corp', turn: Math.ceil(turns / 2),
-      centralIce: {hq: run('corp.HQ.ice.length'), rd: run('corp.RnD.ice.length')}});
+      centralIce: {hq: run('corp.HQ.ice.length'), rd: run('corp.RnD.ice.length')},
+      agendas: agendaTurnState()});
     // Event wrappers: they call the real functions unchanged and only record.
     run(`
       corp.AI._iceInstallTelemetry = __completedIceInstall;
@@ -719,4 +742,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {createSecuritySignature, playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};
+module.exports = {createSecuritySignature, playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, agendaTurnSnapshot, root};

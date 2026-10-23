@@ -997,16 +997,26 @@ class CorpAI {
       server &&
       typeof card.advancementRequirement !== "undefined" &&
       ret == card.advancementRequirement
-    ) {
-      var printedLimit = ret;
-      for (var supportIndex = 0; supportIndex < server.root.length; supportIndex++) {
-        var supportCard = server.root[supportIndex];
-        if (typeof supportCard.AIScoringSupport != "function") continue;
-        var support = supportCard.AIScoringSupport.call(supportCard, card, server);
-        if (!support || !support.requirementDelta) continue;
-        if (!support.requiresRez || supportCard.rezzed ||
-            AvailableCredits(corp) >= RezCost(supportCard) + printedLimit - Counters(card, "advancement"))
-          ret += support.requirementDelta;
+    )
+      ret += this._scoringSupport(card, server, ret, AvailableCredits(corp)).delta;
+    return ret;
+  }
+
+  //Requirement change from root upgrades declaring AIScoringSupport, and the
+  //rez cost of the unrezzed ones counted. An unrezzed one counts only when its
+  //rez and the remaining advancements fit in credits.
+  _scoringSupport(card, server, requirement, credits) {
+    var ret = {delta: 0, rezCost: 0};
+    if (!server) return ret;
+    for (var supportIndex = 0; supportIndex < server.root.length; supportIndex++) {
+      var supportCard = server.root[supportIndex];
+      if (typeof supportCard.AIScoringSupport != "function") continue;
+      var support = supportCard.AIScoringSupport.call(supportCard, card, server);
+      if (!support || !support.requirementDelta) continue;
+      var rezCost = support.requiresRez && !supportCard.rezzed ? RezCost(supportCard) : 0;
+      if (credits >= rezCost + requirement - Counters(card, "advancement")) {
+        ret.delta += support.requirementDelta;
+        ret.rezCost += rezCost;
       }
     }
     return ret;
@@ -4837,28 +4847,32 @@ class CorpAI {
     return bestProtectedRemote;
   }
 
+  //No agenda or asset in root, except an obsolete bluff not kept for Trick of Light.
+  _remoteHasRoom(server) {
+    for (var j = 0; j < server.root.length; j++) {
+      if (CheckCardType(server.root[j], ["agenda", "asset"])) {
+        //replace obsolete bluffs
+        if (!this._obsoleteBluff(server.root[j])) return false;
+        //but keep if useful for Trick of Light
+        if (
+          CheckCounters(server.root[j], "advancement", 2) &&
+          this._copyOfCardExistsIn(
+            "Trick of Light",
+            corp.HQ.cards.concat(corp.RnD.cards),
+          )
+        )
+          return false;
+      }
+    }
+    return true;
+  }
+
   _emptyProtectedRemotes() {
     //returns a list (strongest protection first) of remote servers which are empty (can contain upgrades or obsolete bluffs though) and have ice in front
     var ret = [];
     var protectionScores = [];
     for (var i = 0; i < corp.remoteServers.length; i++) {
-      var hasRoom = true;
-      for (var j = 0; j < corp.remoteServers[i].root.length; j++) {
-        if (CheckCardType(corp.remoteServers[i].root[j], ["agenda", "asset"])) {
-          //replace obsolete bluffs
-          if (!this._obsoleteBluff(corp.remoteServers[i].root[j]))
-            hasRoom = false;
-          //but keep if useful for Trick of Light
-          else if (
-            CheckCounters(corp.remoteServers[i].root[j], "advancement", 2) &&
-            this._copyOfCardExistsIn(
-              "Trick of Light",
-              corp.HQ.cards.concat(corp.RnD.cards),
-            )
-          )
-            hasRoom = false;
-        }
-      }
+      var hasRoom = this._remoteHasRoom(corp.remoteServers[i]);
       if (corp.remoteServers[i].ice.length > 0 && hasRoom) {
         //insert into ret in order by finding the relevant index
         var thisProtectionScore = this._protectionScore(
@@ -5566,6 +5580,200 @@ class CorpAI {
     );
   }
 
+  //I4 M2 for an agenda in server (null: a new remote): the agendaRemote
+  //next-turn hazard, held over the horizon like I2's. Unknown margins use the
+  //table's unknown cell.
+  _agendaDestinationHazard(server, evaluation) {
+    var margin = this._breachMargin(null, evaluation).margin;
+    return {
+      margin: margin,
+      hazard: this._hazardForMargin("agendaRemote", server ? server.ice.length : 0, margin),
+    };
+  }
+
+  //I4 M3: the fewest Runner turns E (0..H) an agenda installed in destination
+  //(null: new remote) at startTurn (0 this turn, 1 next) stays exposed before a
+  //plan scores it; Infinity when none within H. Each turn advances as far as
+  //_potentialAdvancement allows with that turn's clicks and credits; spare
+  //clicks become credits. No draws or income beyond hook-declared advance
+  //income. Credits for the destination's planned ICE rezzes (defenceReserve)
+  //and an unrezzed scoring upgrade's rez are never spent on advancing.
+  _agendaCompletionPlan(agenda, destination, startTurn = 0, evaluation = null) {
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    if (!evaluation)
+      evaluation = destination ? this._evaluateServerSecurity(destination) : this._detachedRemoteEvaluation();
+    var defenceReserve = (evaluation.plannedRezIce || []).reduce((sum, ice) => sum + RezCost(ice), 0);
+    var credits = Credits(corp) - defenceReserve;
+    var requirement = AdvancementRequirement(agenda);
+    var support = this._scoringSupport(agenda, destination, requirement, credits);
+    var limit = requirement + support.delta;
+    credits -= support.rezCost;
+    var plan = {exposureTurns: Infinity, steps: [], defenceReserve: defenceReserve,
+      limit: limit, tools: []};
+    if (credits < 0) return plan;
+    var counters = 0;
+    var hand = corp.resolvingCards.concat(corp.HQ.cards).filter((card) => card != agenda);
+    for (var turn = startTurn; turn <= startTurn + horizon; turn++) {
+      var thisTurn = turn == 0;
+      var clicks = thisTurn ? this._clicksLeft() : AllottedClicks(corp);
+      if (turn == startTurn) clicks--; //the install click
+      if (clicks < 0) return plan;
+      var used = [];
+      var endpoint = {corpCredits: credits, corpClicks: clicks, handCards: hand};
+      var gained = 0;
+      if (clicks > 0 && counters < limit) {
+        var savedCredits = corp.creditPool;
+        gained = this._withHypothetical(
+          () => { corp.creditPool = Math.max(0, credits); },
+          () => this._potentialAdvancement(agenda, limit, thisTurn, hand, clicks, used,
+            counters, turn == startTurn, endpoint),
+          () => { corp.creditPool = savedCredits; },
+        );
+      }
+      counters += gained;
+      used.forEach((card) => { if (card && !plan.tools.includes(card)) plan.tools.push(card); });
+      plan.steps.push({turn: turn, advancement: gained, counters: counters});
+      if (counters >= limit) {
+        plan.exposureTurns = turn - startTurn;
+        return plan;
+      }
+      credits = endpoint.corpCredits + Math.max(0, endpoint.corpClicks);
+      hand = endpoint.handCards;
+    }
+    return plan;
+  }
+
+  //I4 M5: per-agenda HQ steal hazard per Runner turn, the held next-turn HQ
+  //hazard times min(1, accesses / HQ size).
+  _hqStealHazard() {
+    var size = corp.HQ.cards.length;
+    if (size < 1) return 0;
+    var evaluation = this._evaluateServerSecurity(corp.HQ);
+    var hazard = this._hazardForMargin("hq", corp.HQ.ice.length, this._breachMargin(null, evaluation).margin);
+    return hazard * Math.min(1, this._centralAccessCount(corp.HQ) / size);
+  }
+
+  //I4: expected points over H of installing with exposure E at hazard h.
+  _agendaInstallValue(points, exposureTurns, hazard) {
+    if (exposureTurns == 0) return points;
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    var stolen = 1 - Math.pow(1 - hazard, Math.min(exposureTurns, horizon));
+    var scored = exposureTurns <= horizon ? 1 - stolen : 0;
+    return points * scored - points * stolen;
+  }
+
+  //I4: this agenda is discarded at end of turn when HQ holds more agendas than
+  //the maximum hand size and it is among the lowest-point ones. Loss is the
+  //chance it is then stolen from Archives within H.
+  _agendaDiscardLoss(agenda, points) {
+    var agendas = corp.HQ.cards.filter((card) => CheckCardType(card, ["agenda"]));
+    var excess = agendas.length - MaxHandSize(corp);
+    if (excess <= 0) return {probability: 0, points: 0};
+    agendas.sort((a, b) => (Number(a.agendaPoints) || 0) - (Number(b.agendaPoints) || 0));
+    if (agendas.indexOf(agenda) >= excess) return {probability: 0, points: 0};
+    var evaluation = this._evaluateServerSecurity(corp.archives);
+    var hazard = this._hazardForMargin("archives", corp.archives.ice.length,
+      this._breachMargin(null, evaluation).margin);
+    var stolen = 1 - Math.pow(1 - hazard, CORP_AI_I2_HORIZON_RUNNER_TURNS);
+    return {probability: 1, points: points * stolen};
+  }
+
+  //I4: every destination and hold for an agenda in HQ, with EV in agenda
+  //points over H, the Runner's game-winning probability W when this agenda
+  //would win it the game (band 2), the plan and the choice. Read-only.
+  _agendaCommitmentOptions(agenda) {
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    var points = Number(agenda.agendaPoints) || 0;
+    var band2 = AgendaPoints(runner) + points >= AgendaPointsToWin();
+    var destinations = corp.remoteServers.filter((server) => this._remoteHasRoom(server)).concat([null]);
+    var options = [];
+    var deferred = 0;
+    var deferredTo;
+    destinations.forEach((server) => {
+      var evaluation = server ? this._evaluateServerSecurity(server) : this._detachedRemoteEvaluation();
+      var risk = this._agendaDestinationHazard(server, evaluation);
+      var plan = this._agendaCompletionPlan(agenda, server, 0, evaluation);
+      var exposed = Math.min(plan.exposureTurns, horizon);
+      var lockout = risk.margin == -Infinity;
+      options.push({
+        kind: "install",
+        server: server,
+        hazard: risk.hazard,
+        plan: plan,
+        ev: this._agendaInstallValue(points, plan.exposureTurns, risk.hazard),
+        W: !band2 || plan.exposureTurns == 0 || lockout ? 0 : 1 - Math.pow(1 - risk.hazard, exposed),
+      });
+      //Holding defers the install one turn with one turn less of horizon.
+      var later = this._agendaCompletionPlan(agenda, server, 1, evaluation);
+      if (later.exposureTurns <= horizon - 1) {
+        var laterValue = this._agendaInstallValue(points, later.exposureTurns, risk.hazard);
+        if (laterValue > deferred) {
+          deferred = laterValue;
+          deferredTo = server;
+        }
+      }
+    });
+    if (this._agendaHoldStreak(agenda) >= 2) deferred = 0; //indefinite-hold guard
+    var m5 = this._hqStealHazard();
+    var discard = this._agendaDiscardLoss(agenda, points);
+    options.push({
+      kind: "hold",
+      server: deferredTo,
+      hazard: m5,
+      deferred: deferred,
+      discard: discard,
+      ev: -points * m5 - discard.points + (1 - m5) * (1 - discard.probability) * deferred,
+      W: band2 ? 1 - Math.pow(1 - m5, horizon) * (1 - discard.probability) : 0,
+    });
+    return {agenda: agenda, points: points, band2: band2, options: options,
+      best: this._bestAgendaCommitment(options, band2)};
+  }
+
+  //Band 2 first (smallest W within 0.01), then EV. Owner amendment: an install
+  //within 0.1 points of holding is preferred.
+  _bestAgendaCommitment(options, band2) {
+    var kept = options;
+    if (band2) {
+      var minW = Math.min.apply(null, options.map((option) => option.W));
+      kept = options.filter((option) => option.W <= minW + 0.01);
+    }
+    var best = null;
+    kept.forEach((option) => { if (!best || option.ev > best.ev) best = option; });
+    if (best && best.kind == "hold") {
+      var install = null;
+      kept.forEach((option) => {
+        if (option.kind == "install" && (!install || option.ev > install.ev)) install = option;
+      });
+      if (install && install.ev >= best.ev - 0.1) best = install;
+    }
+    return best;
+  }
+
+  //Consecutive Corp turns this agenda was held for a deferred install (I4 phase B).
+  _agendaHoldStreak(agenda) {
+    var record = this._agendaHolds && this._agendaHolds.get(agenda);
+    return record ? record.streak : 0;
+  }
+
+  //Log summary of _agendaCommitmentOptions.
+  _agendaCommitmentSummary(result) {
+    var name = (server) => (server ? server.serverName : "new remote");
+    return {
+      agenda: result.agenda.title,
+      band2: result.band2,
+      best: result.best ? result.best.kind + " " + name(result.best.server) : null,
+      options: result.options.map((option) => ({
+        kind: option.kind,
+        server: name(option.server),
+        ev: Math.round(option.ev * 1000) / 1000,
+        W: Math.round(option.W * 1000) / 1000,
+        hazard: Math.round(option.hazard * 1000) / 1000,
+        exposureTurns: option.plan ? option.plan.exposureTurns : undefined,
+        deferred: option.kind == "hold" ? Math.round(option.deferred * 1000) / 1000 : undefined,
+      })),
+    };
+  }
+
   _marginalIceBefore(server, security, designated) {
     var stake = this._iceStake(server, designated);
     var central = server == corp.HQ || server == corp.RnD || server == corp.archives;
@@ -6228,6 +6436,11 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
+        //I4 phase A: observation only, decisions unchanged.
+        if (this.options.agendaCommitmentPlan && CheckCardType(cards[i], ["agenda"]) &&
+            corp.HQ.cards.includes(cards[i]) && this._hypotheticalDepth == 0)
+          this._log("I4 agenda options " + JSON.stringify(
+            this._agendaCommitmentSummary(this._agendaCommitmentOptions(cards[i]))));
         //loop through scoring servers
         for (var j = 0; j < scoringServers.length; j++) {
           serverToInstallTo = scoringServers[j];
@@ -7543,10 +7756,12 @@ class CorpAI {
     var card = null;
     var thisTurn = true;
     var limit = Infinity;
+    var installedThisTurn = false;
     if (options) {
       if (typeof options.thisTurn != "undefined") thisTurn = options.thisTurn;
       if (typeof options.limit != "undefined") limit = options.limit;
       if (typeof options.card != "undefined") card = options.card;
+      if (options.installedThisTurn) installedThisTurn = true;
     }
     //destination reached
     if (point.advancementSoFar >= limit) return ret;
@@ -7642,6 +7857,7 @@ class CorpAI {
         clicks: point.corpClicks,
         remaining: limit - point.advancementSoFar,
         resolving: resolving,
+        installedThisTurn: installedThisTurn,
       });
       if (typeof operationGain == "number") operationGain = {counters: operationGain};
       if (!operationGain) continue;
@@ -7728,6 +7944,8 @@ class CorpAI {
   //if null card is specified, this is a generic "what if one was to be installed?" check
   //(in which case it will assume a click less) unless assumeClicks (int) is specified (assumeClicks applies regardless of thisTurn)
   //if an output array is specified, the cards will be written to it in the order decided here (except for cards already resolving)
+  //installedThisTurn: card is (or will be) installed on the searched turn (I4 plans)
+  //endpoint: optional object that receives the best path's corpCredits, corpClicks and handCards
   _potentialAdvancement(
     card,
     limit,
@@ -7736,6 +7954,8 @@ class CorpAI {
     assumeClicks,
     output = [],
     startingCounters,
+    installedThisTurn = false,
+    endpoint = null,
   ) {
     if (typeof fastAdvanceArray == "undefined")
       fastAdvanceArray = corp.resolvingCards.concat(corp.HQ.cards); //source of fast advance cards
@@ -7748,6 +7968,7 @@ class CorpAI {
       card: card,
       thisTurn: thisTurn,
       limit: limit,
+      installedThisTurn: installedThisTurn,
     };
     //this point is not stored, just used as a base for initial directions
     var clicksLeft = 20; //essentially infinity but allows for subtraction/addition
@@ -7853,6 +8074,12 @@ class CorpAI {
         bestpath[bestpath.length - 1].advancementSoFar - startingAdvancement;
     for (var i = 0; i < bestpath.length; i++) {
       output.push(bestpath[i].using);
+    }
+    if (endpoint) {
+      var finalPoint = bestpath.length > 0 ? bestpath[bestpath.length - 1] : startingPoint;
+      endpoint.corpCredits = finalPoint.corpCredits;
+      endpoint.corpClicks = finalPoint.corpClicks;
+      endpoint.handCards = finalPoint.handCards;
     }
     return ret;
   }
@@ -9162,4 +9389,6 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   postureEpochs: true,
   matchLocalPostureFeedback: true,
   iceMarginalSecurity: true,
+  // I4 agenda install/hold and scoring plan; phase A only logs its options.
+  agendaCommitmentPlan: false,
 });

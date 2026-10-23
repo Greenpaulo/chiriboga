@@ -1100,6 +1100,20 @@ reinstallation is not counted again, and a previously unseen card swapped onto
 the board can count here. Its contract remains unchanged for historical report
 comparability. Use the separate completion history below for literal installs.
 
+## Agenda commitment collector (I4)
+
+`--collector agendaCommitment` reads the Corp turn-end state (observe mode)
+and reports two lower-is-better counts per game:
+
+- `agendaCommitment.idleAgendaTurns`: Corp turns ending with an installed,
+  unscored agenda whose advancement counters did not rise since the previous
+  Corp turn end (a newly installed agenda with no counters counts).
+- `agendaCommitment.hqHoldTurns`: Corp turns ending with an agenda in HQ while
+  some remote had no agenda or asset in its root.
+
+The state comes from `agendaTurnSnapshot()` in `scripts/ai-batch/headless.js`
+and is the same in both gate arms; it reads no AI option.
+
 ## Opening central coverage experiment (I2.3)
 
 `--collector openingCentralCoverage` adds diagnostic metrics

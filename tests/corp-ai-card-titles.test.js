@@ -27,7 +27,7 @@ const LEGACY_TITLES = [
   '_potentialDamageOnBreach: Snare!',
   '_potentialDamageOnBreach: Urtica Cipher',
   '_cardProtectionValue: Ice Wall',
-  '_emptyProtectedRemotes: Trick of Light',
+  '_remoteHasRoom: Trick of Light',
   '_economyCards: Celebrity Gift',
   '_economyCards: Government Subsidy',
   '_economyCards: Hansei Review',

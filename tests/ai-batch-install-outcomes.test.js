@@ -7,7 +7,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const {createRootTracker, playGame} = require('../scripts/ai-batch/headless');
+const {createRootTracker, playGame, agendaTurnSnapshot} = require('../scripts/ai-batch/headless');
 const collector = name => require(path.join(__dirname, '..', 'scripts', 'ai-batch', 'collectors', name + '.js'));
 const COLLECTORS = ['installOutcomes', 'successfulRunsByServer', 'corpInsolventTurns', 'stallTurns', 'unusedCreditsAtEnd'].map(collector);
 
@@ -183,6 +183,33 @@ test('upgrade uses belong to the active installation only', () => {
   }).installOutcomes;
   assert.strictEqual(out.upgradesInstalled, 2);
   assert.strictEqual(out.upgradesUsed, 1);
+});
+
+test('I4 agendaCommitment counts idle installed agendas and HQ holds with a free remote', () => {
+  const c = collector('agendaCommitment');
+  const state = {};
+  const counters = new WeakMap();
+  const {corp} = board();
+  const remote = {serverName: 'Remote 0', ice: [], root: []};
+  corp.remoteServers.push(remote);
+  const agenda = {title: 'A', cardType: 'agenda', advancement: 0};
+  const asset = {title: 'B', cardType: 'asset'};
+  const endTurn = () => c.onEvent({type: 'turnEnd', side: 'corp', agendas: agendaTurnSnapshot(corp, counters)}, state);
+  c.onEvent({type: 'gameStart'}, state);
+  corp.HQ.cards.push(agenda);
+  endTurn(); // held while Remote 0 is empty: hold
+  corp.HQ.cards.splice(0, 1); remote.root.push(agenda);
+  endTurn(); // installed, no counter: idle; no free remote
+  agenda.advancement = 2;
+  endTurn(); // advanced: not idle
+  endTurn(); // not advanced again: idle
+  remote.root.splice(0, 1); corp.scoreArea.push(agenda);
+  remote.root.push(asset); corp.HQ.cards.push({title: 'C', cardType: 'agenda'});
+  endTurn(); // scored; agenda held but the only remote holds an asset: neither
+  c.onEvent({type: 'turnEnd', side: 'runner'}, state);
+  assert.deepStrictEqual(c.finish(state), {idleAgendaTurns: 2, hqHoldTurns: 1});
+  assert.deepStrictEqual(Object.keys(c.directions).sort(),
+    ['agendaCommitment.hqHoldTurns', 'agendaCommitment.idleAgendaTurns']);
 });
 
 test('turn collectors count runs, insolvency, stalls and credits left', () => {

@@ -3320,7 +3320,7 @@ cardSet[30040] = {
   AIFastAdvance:true, //is a card for fast advancing
   //Cannot target a card installed this turn.
   AIFastAdvanceCounters: function (card, context) {
-    if (!card) return 0;
+    if (!card || (context && context.installedThisTurn)) return 0;
     if (context && context.thisTurn === false) return 2;
     return this.cardsInstalledThisTurn.includes(card) ? 0 : 2;
   },
