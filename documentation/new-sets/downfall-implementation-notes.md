@@ -727,7 +727,8 @@ Known limitations (not silently approximated in the engine path):
 - Elevation's HQ-access replacement (35018) steals through its own path, which
   ignores every additional steal cost (credits, clicks and programs) and does
   not set `intended.steal`, so Divested Trust cannot respond there. This is a
-  pre-existing defect outside the batch range.
+  pre-existing defect outside the batch range; raised as
+  [detente-access-steal-bypasses-steal-costs-and-responses](../bugs/detente-access-steal-bypasses-steal-costs-and-responses.md).
 - Whether the Runner wins on the steal before Divested Trust resolves follows
   the engine's existing win-check timing; no special handling was added.
 
