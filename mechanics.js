@@ -920,6 +920,8 @@ function Install(
 				    corp.AI._recordCompletedIceInstall(installingCard, GetServer(installingCard));
 				  if (installingCard.player == runner && installingCard.cardType == "hardware")
 					RecordTurnEvent("runnerHardwareInstall");
+				  if (installingCard.player == runner && CheckSubType(installingCard, "Companion"))
+					RecordTurnEvent("runnerCompanionUse");
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
 				  
@@ -1377,11 +1379,16 @@ function GainClicks(player, num) {
  */
 // Notify source-dependent spend responses only after a payment is complete.
 // The continuation waits for optional damage/prevention and all responses.
-function CreditSpendResponses(player, outsideAmount, doing, card, afterSpend, context) {
+// `sources` lists the installed cards whose hosted credits paid (Keiko).
+// Printed subtypes only: no effect grants Companion, and payment must not
+// depend on the active-trigger scan.
+function CreditSpendResponses(player, outsideAmount, doing, card, afterSpend, context, sources = []) {
+  if (player == runner && sources.some(function (source) { return (source.subTypes || []).includes("Companion"); }))
+    RecordTurnEvent("runnerCompanionUse");
   if (outsideAmount > 0 && ActiveCards(null).some(function (source) {
     return source && source.responseOnCreditsSpent && CheckHasAbilities(source);
   })) {
-    TriggeredResponsePhase(playerTurn, "responseOnCreditsSpent", [player, outsideAmount, doing, card],
+    TriggeredResponsePhase(playerTurn, "responseOnCreditsSpent", [player, outsideAmount, doing, card, sources],
       function () { if (typeof afterSpend == "function") afterSpend.call(context); }, "Credits spent");
   } else if (typeof afterSpend == "function") afterSpend.call(context);
 }
@@ -1393,7 +1400,7 @@ function SpendHostedCredits(player, source, amount, afterSpend, context) {
   UpdateCounters();
   Log(PlayerName(player) + " spent " + amount + " credits from " + GetTitle(source, true));
   if (typeof source.onCreditsSpent == "function") source.onCreditsSpent.call(source, amount);
-  CreditSpendResponses(player, amount, "using", source, afterSpend, context);
+  CreditSpendResponses(player, amount, "using", source, afterSpend, context, [source]);
 }
 
 function SpendCredits(
@@ -1406,6 +1413,7 @@ function SpendCredits(
   deferredResponses
 ) {
   var outsideSpent = 0;
+  var spentSources = [];
   var temporaryAvailable = function () {
     return player == runner ? Math.max(0, runner.temporaryCredits || 0) : 0;
   };
@@ -1425,6 +1433,7 @@ function SpendCredits(
 
   function spendFromCard(source, amount) {
     source.credits -= amount;
+    if (!spentSources.includes(source)) spentSources.push(source);
     num -= amount;
     outsideSpent += amount;
     if (amount == 1)
@@ -1462,9 +1471,9 @@ function SpendCredits(
       return;
     }
     if (deferredResponses) {
-      deferredResponses.push({player: player, outsideAmount: outsideSpent, doing: doing, card: card});
+      deferredResponses.push({player: player, outsideAmount: outsideSpent, doing: doing, card: card, sources: spentSources});
       if (typeof afterSpend == "function") afterSpend.call(context);
-    } else CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context);
+    } else CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context, spentSources);
   }
 
   function choosePaymentSource() {
@@ -2263,7 +2272,7 @@ function PsiGame(callback, context) {
         if (index >= payments.length) { callback.call(context, corpChoice.bid != runnerChoice.bid); return; }
         var payment = payments[index];
         CreditSpendResponses(payment.player, payment.outsideAmount, payment.doing, payment.card,
-          function () { respond(index + 1); });
+          function () { respond(index + 1); }, null, payment.sources);
       }
       pay(0);
     }, "Psi Game: Runner bid", "Choose a secret bid");

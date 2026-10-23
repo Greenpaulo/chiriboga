@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**0 complete, 16 outstanding** (`16 Pending`, `0 In progress`, `0 Blocked`).
+**1 complete, 15 outstanding** (`15 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -51,7 +51,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | Batch | Card IDs | Status | Owner / started | Notes/blocker |
 | ----: | -------- | ------ | --------------- | ------------- |
 | 1 | 26066–26069 | Complete | Claude, 2026-10-23 | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
-| 2 | 26070–26073 | Pending | — | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
+| 2 | 26070–26073 | Complete | Claude, 2026-10-23 | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
 | 3 | 26074–26078 | Pending | — | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
 | 4 | 26079–26082 | Pending | — | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
 | 5 | 26083–26087 | Pending | — | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
@@ -72,6 +72,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
 | 1 | 26066–26069 | 2026-10-23 | Claude | `tests/uprising-batch1.test.js` | Hoshiko access-driven flip; Moshing multi-select grip cost; Devil Charm encounter removal with a run-long lingering -6 and a Run Calculator `strengthMod` persistent (shared `IceAct` change); Gachapon set-aside dig with discounted install. Baseline AI through economy/draw play, encounter-window preference, `AIDrawTrigger`. |
+| 2 | 26070–26073 | 2026-10-23 | Claude | `tests/uprising-batch2.test.js` | Keiko, Odore, Mystic Maemi, Paladin Poemu (rewritten); engine records `runnerCompanionUse` and passes spent hosted `sources` to `responseOnCreditsSpent`. See notes. |
 
 ## Batch-review log
 
@@ -82,12 +83,13 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**0 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**1 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
 | 1 | 26066–26069 | Pending | — | Hoshiko: run planning ignores the flip incentive/penalty. Moshing: plays only with three cards not worth keeping. Devil Charm: Corp security counts the single use on every ice; install heuristic is strength-only. Gachapon: digs only for a missing basic breaker type. See notes. |
+| 2 | 26070–26073 | Pending | — | Poemu/Maemi do not plan to spend the stash before 3 credits; Maemi keep/trash ignores stash value vs grip; Keiko priority ignores companion usage. See notes. |
 
 ## Optimisation log
 
