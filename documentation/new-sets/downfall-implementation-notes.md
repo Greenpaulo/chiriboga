@@ -687,3 +687,68 @@ Congratulations! for credit sequencing; choose Loot Box's revealed card using
 Corp income versus the Runner's gifted-card value. The baseline chooses the
 highest printed cost, not the best strategic gift. Hidden stack contents are
 never read during planning.
+
+## Batch 12 — 26057–26061 (2026-10-23)
+
+The pre-existing definitions were not credited: Afshar's lock relied on
+break responses, Sandstone gained counters on every ICE encounter, Trebuchet
+took bad publicity on any rez, had wrong subtypes and forbade trashing Runner
+cards, and Secure and Protect was empty. All five were rewritten.
+
+### Mechanics and baseline AI
+
+- Roughneck Repair Squad: three action-phase clicks gain 6[c], then an optional
+  removal prompt when the Corp has bad publicity. AI installs it into a
+  non-scoring remote when economy is insufficient, rezzes it (free), triggers
+  it from the main-phase economy policy and always removes bad publicity.
+- Afshar: subroutines are marked `printed`. While it protects HQ, its
+  `modifyCannot("break", subroutine)` forbids a further printed break once one
+  printed subroutine is broken; broken flags reset when an encounter begins.
+  `ChoicesEncounteredSubroutines` and `Break` both consult this, so every
+  breaker path (including multi-break loops) honours it. Gained subroutines are
+  not limited. AI: `result.maxSrBroken` makes `rc.SrBreak` plan only the ETR
+  break on HQ (the Runner loses 2[c]); remote copies are unlimited. The lose
+  subroutine is now modelled as two `loseCredits` (it was an unrecognised
+  string).
+- Sandstone: `automaticOnEncounter` adds a virus counter only when Sandstone
+  itself is encountered. AI strength is one lower before its encounter so plans
+  include the counter placed before breaking.
+- Trebuchet: printed subtypes Sentry - Destroyer - Tracer - Liability. Bad
+  publicity only when Trebuchet itself rezzes. The trash subroutine targets any
+  trashable installed Runner card. A successful Trace[6] adds a lingering
+  effect that forbids stealing and trashing Corp cards only, survives
+  Trebuchet leaving play and is removed when the run ends. AI follows the
+  Ansel 1.0 model (trash serious with programs, lock `misc_serious`).
+- Secure and Protect: the Double click is the engine's `PlayClickCost`.
+  Resolution offers installable (ice, central server) pairs from R&D, reveals
+  the chosen ice to the Runner, installs it with a temporary -3[c]
+  `modifyInstallCost` (cleared on payment, cancel or completion) and shuffles
+  R&D. With no installable ice it shuffles and ends. Playing without a target
+  is legal for humans. AI plays it (via `AIPlayWhenCan`) only for a central
+  server chosen by `_serverToProtect` when R&D holds stopping ICE and HQ has no
+  affordable stopping ICE; it chooses ETR ICE, then rezzable after paying,
+  then uncovered by installed breakers, then ELO.
+
+### Rulings and limits
+
+- Only affordable ice is offered; the rules allow searching for any ice, but an
+  unaffordable install cannot complete, so it would remain in R&D anyway.
+- Afshar counts only its printed subroutines, as printed.
+
+### Optimisation queue
+
+Pending (optional strategy): Roughneck timing versus other three-click plans
+and bad-publicity value; Afshar placement preference for HQ; Corp rez value of
+Trebuchet's bad publicity and Trace[6] boost spending (the Runner model treats
+the trace as always successful); Secure and Protect versus other central
+defence and remote-protection plans.
+
+### Verification
+
+`tests/downfall-batch12.test.js` drives the real install, rez, economy-trigger,
+main-phase play and decision selectors, the run calculator with Buzzsaw on HQ
+versus a remote, live break locks and reset, Sandstone counters/strength,
+Trebuchet rez/trash/trace lock/run-end cleanup and failed trace, and Secure and
+Protect costs, Double click guard, reveal, discounted install, cleanup and AI
+guards. `tests/card-bad-publicity.test.js` now passes the rezzed card, as the
+engine does. No browser playtesting or independent strategic review is claimed.

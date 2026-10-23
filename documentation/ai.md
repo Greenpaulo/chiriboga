@@ -1425,6 +1425,7 @@ AIImplementIce: function(rc, result, maxCorpCred, incomplete)
 
 - `rc` — the `RunCalculator`.
 - `result` — an object with `{ ice, subTypes, sr, strength, encounterEffects }`. You modify `result.sr` and return `result`.
+- Optional `result.maxSrBroken` (number) caps how many subroutines `rc.SrBreak` may plan to break on this encounter; set it to the remaining allowance during a live encounter (Afshar on HQ).
 - `maxCorpCred` — corp's available credits (used for cost assumptions about unknown ice).
 - `incomplete` — `true` if the subroutine list may be incomplete (e.g. face-down ice). In this case, be defensive and avoid assigning punishing effects to those slots.
 
@@ -3227,3 +3228,29 @@ optimisation work.
   that count; the model never reads hidden card identities. Corp subroutine
   ranking treats the gift as harmless. Damage already taken keeps its ordinary
   penalty, while the added card affects survival capacity.
+
+### Downfall batch 12
+
+- Roughneck Repair Squad uses `AIWorthInstalling(remotes)` (non-scoring remote,
+  declined when `_sufficientEconomy(false)`), `AIEconomyCard` and
+  `AIRezWhenCan()` (its rez is free). The main-phase economy policy finds its
+  "Gain 6[c]" click ability through `_clickAbilityLikeAvailable`; the ability
+  enumerates only with three action-phase clicks. The Corp AI always removes
+  bad publicity through `corp.AI.preferred`.
+- Afshar sets `result.maxSrBroken` while protecting HQ: `1` before any
+  printed subroutine is broken, `0` afterwards. `rc.SrBreak` returns no option
+  that would exceed it, so the Runner plans to break only the ETR and accept the
+  credit loss. The engine rule uses `modifyCannot` with id `"break"` on a
+  subroutine, consumed by `ChoicesEncounteredSubroutines` and `Break`.
+  The Corp security model already treats only the ETR as required.
+- Sandstone lowers `result.strength` by one outside its own encounter, because
+  its encounter counter is placed before the Runner can break.
+- Trebuchet models the trash subroutine as Ansel 1.0 does and a successful
+  Trace[6] lock as `misc_serious` (blank when `incomplete`).
+- Secure and Protect uses `AIWouldPlay()` with `AIPlayWhenCan: 1` and
+  `AIIsRecurOrTutor`. It plays only when `_serverToProtect` (central servers
+  only) can receive stopping ICE from R&D and HQ holds no affordable stopping
+  ICE. Its resolution prefers ETR ICE, then ICE that can still be rezzed after
+  paying, then ICE without an installed compatible breaker, then higher ELO.
+  Probes apply the 3[c] discount locally, are read-only, and use only the
+  Corp's own deck contents.

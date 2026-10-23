@@ -26,7 +26,7 @@ in card-sets.md.
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | in-progress | 65 | 65 | 0 | 8 | 0 | 47 / 61 | true / true | no |
+| `downfall` | in-progress | 65 | 65 | 0 | 7 | 0 | 49 / 61 | true / true | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
@@ -72,7 +72,6 @@ None.
 - 26054 Increased Drop Rates: 1 scaffold marker(s)
 - 26055 Divested Trust: 1 scaffold marker(s)
 - 26056 SDS Drone Deployment: 1 scaffold marker(s)
-- 26061 Secure and Protect: 1 scaffold marker(s)
 - 26062 Reduced Service: 1 scaffold marker(s)
 - 26063 Vulnerability Audit: 1 scaffold marker(s)
 
