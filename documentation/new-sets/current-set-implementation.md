@@ -35,7 +35,7 @@ selection if none is queued.
 
 ## Status summary
 
-**8 complete, 5 outstanding** (`5 Pending`, `0 In progress`, `0 Blocked`).
+**13 complete, 0 outstanding** (`0 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -54,11 +54,11 @@ No existing range is credited without tests.
 | 6 | 26024–26030 | Complete | PR #66 / reconciled 2026-10-20 | Gauss, Pelangi, Rezeki, The Artist, Direct Access, Rejig and Whistleblower; mechanics and Runner AI. |
 | 7 | 26031–26035 | Complete | PR #66 / reconciled 2026-10-20 | MirrorMorph, Architect Deployment Test, Calvin B4L3Y, Nanoetching Matrix and Hagen; mechanics and Corp AI. |
 | 8 | 26036–26040 | Complete | Codex / 2026-10-16 | Gameplay and baseline AI verified; focused/shared checks and all 95 full-suite test files pass (2026-10-18). |
-| 9 | 26041–26046 | Pending | — | Preserve and validate existing implementations. |
-| 10 | 26047–26051 | Pending | — | Preserve and validate existing implementations. |
-| 11 | 26052–26056 | Pending | — | Preserve and validate existing implementations. |
-| 12 | 26057–26061 | Pending | — | Preserve and validate existing implementations. |
-| 13 | 26062–26065 | Pending | — | Preserve and validate existing implementations. |
+| 9 | 26041–26046 | Complete | Codex / 2026-10-22 | Damage, reveals, faction-trash counters and finite Psi repeat traversal; baseline AI; all 114 full-suite files pass. |
+| 10 | 26047–26051 | Complete | Codex / 2026-10-22 | Scored advancement, conditional/first-run income, ICE credit timing and revealing self-trash trap; real baseline AI consumers. |
+| 11 | 26052–26056 | Complete | Claude / 2026-10-23 | Focus Group, Game Over, Increased Drop Rates, Divested Trust and SDS Drone Deployment; shared program-trash steal cost; real Corp/Runner AI consumers. |
+| 12 | 26057–26061 | Complete | Claude / 2026-10-23 | Roughneck, Afshar HQ break limit, Sandstone, Trebuchet lingering lock and Secure and Protect tutor; real baseline AI consumers. |
+| 13 | 26062–26065 | Complete | Claude / 2026-10-23 | Reduced Service run tax, install-turn scoring block, CSR Campaign draw and run-window Rime rez; real baseline AI consumers. |
 
 ## Completion log
 
@@ -72,6 +72,11 @@ No existing range is credited without tests.
 | 6 | 26024–26030 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch6.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 6 notes. |
 | 7 | 26031–26035 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch7.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 7 notes. |
 | 8 | 26036–26040 | 2026-10-18 | Codex | `tests/downfall-batch8.test.js`; shared format, helper and hook checks; full suite (95 files) | Operations, run-entry costs, reveal income and agenda swaps with baseline AI; see implementation notes. |
+| 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
+| 10 | 26047–26051 | 2026-10-22 | Codex | `tests/downfall-batch10.test.js`; batches 8–9 and set integration; required shared checks; full suite | Gameplay, real install/rez/trigger/run consumers, finite counter/self-trash and gifted-card accounting; all 115 full-suite files pass on Node 20.19.0. See batch 10 notes. |
+| 11 | 26052–26056 | 2026-10-23 | Claude | `tests/downfall-batch11.test.js`; `tests/play-and-steal-cost.test.js`; required shared checks; full suite | Last-turn operations, grip reveal, per-card prevention, R&D-revealing ambush, steal-response forfeit and program-trash steal cost with baseline AI. See batch 11 notes. |
+| 12 | 26057–26061 | 2026-10-23 | Claude | `tests/downfall-batch12.test.js`; `tests/card-bad-publicity.test.js`; `tests/subroutine-visual.test.js`; full suite | Rewrote the unverified definitions: shared `modifyCannot("break")` rule and run-calculator `maxSrBroken`, own-encounter Sandstone counters, Trebuchet rez trigger/subtypes and lingering trace lock, Secure and Protect search/reveal/discounted central install. See batch 12 notes. |
+| 13 | 26062–26065 | 2026-10-23 | Claude | `tests/downfall-batch13.test.js`; required shared checks; full suite (116 files, Node 20.19.0) | Rez-time counter purchase and run tax, install-turn score restriction, optional draw asset and run-window ICE rez with +1 server strength; real install/rez/run consumers. See batch 13 notes. |
 
 ## Batch-review log
 
@@ -82,10 +87,10 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**8 Pending** (optional strategy work), 0 In progress, 0 Blocked,
+**13 Pending** (optional strategy work), 0 In progress, 0 Blocked,
 1 Awaiting review (bounded run-entry repair).
 
-Implementation is complete for batches 1–8; no independent batch review is recorded.
+Implementation is complete for batches 1–13; no independent batch review is recorded.
 PR-comment remediation is not an independent strategic review.
 Preserve subsequent review verdicts and ownership.
 
@@ -100,6 +105,11 @@ Preserve subsequent review verdicts and ownership.
 | 7 | 26031–26035 | Pending | — | Optional strategy: MirrorMorph action ordering, Architect Deployment Test install value, draw/credit asset timing and Hagen program-trash value. [Notes](downfall-implementation-notes.md#batch-7--2603126035). |
 | 8 | 26036–26040 | Pending | — | Compare operation mode sequences, Cold Site setup budget, Hyoubu spare-click value and Yagi-Uda swap/overadvancement plans; see implementation notes. |
 | 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
+| 9 | 26041–26046 | Pending | — | Optional strategy: damage/counter timing versus scoring, Complete Image naming/play thresholds, Saisentan type priors and probabilistic damage pricing, Letheia bid/trash value and placement among protected servers. [Notes](downfall-implementation-notes.md#batch-9--2604126046). |
+| 10 | 26047–26051 | Pending | — | Optional strategy: scored-counter conservation and cross-agenda sequences; Daily Quest protection/reward trade-offs; Subscription rez timing; Congratulations! placement and Loot Box income versus gifted-card value. [Notes](downfall-implementation-notes.md#batch-10--2604726051). |
+| 11 | 26052–26056 | Pending | — | Optional strategy: Focus Group type guessing, play timing and ICE/asset targets; Game Over timing versus Runner credits and bad-publicity cost; Runner prevention payments; Increased Drop Rates placement and the Runner tag-versus-bad-publicity trade; Divested Trust in scoring order; Runner valuation of SDS program loss. [Notes](downfall-implementation-notes.md#batch-11--2605226056). |
+| 12 | 26057–26061 | Pending | — | Optional strategy: Roughneck timing versus other 3-click plans and bad-publicity value; Afshar HQ placement preference; Trebuchet rez decision ignoring its bad publicity, unmodelled trace boost and Runner model assuming trace success; Secure and Protect versus other central/remote defence plans. [Notes](downfall-implementation-notes.md#batch-12--2605726061-2026-10-23). |
+| 13 | 26062–26065 | Pending | — | Optional strategy: Reduced Service rez timing/counter budget versus other spending and central-run decay; Vulnerability Audit install-turn advancement exposure; CSR Campaign draw versus hand size; Rime rez timing and hidden +1 strength in Runner planning. [Notes](downfall-implementation-notes.md#batch-13--2606226065). |
 
 ## Optimisation log
 

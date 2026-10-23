@@ -1221,6 +1221,13 @@ class CorpAI {
     //2+advancement if it is an active Urtica
     var urtica = this._copyOfCardExistsIn("Urtica Cipher", server.root);
     if (urtica) ret += 2 + urtica.advancement;
+    var stealDamage = 0;
+    for (var candidate of server.root.concat(server.cards || [])) {
+      if (typeof candidate.AIOnStealDamage == "function" &&
+          AgendaPoints(runner) + (candidate.agendaPoints || 0) < AgendaPointsToWin())
+        stealDamage = Math.max(stealDamage, candidate.AIOnStealDamage.call(candidate));
+    }
+    ret += stealDamage;
     //1 for each scored House of Knives that has at least 1 counter and hasn't been used this run
     for (var i = 0; i < corp.scoreArea.length; i++) {
       if (
@@ -2656,6 +2663,9 @@ class CorpAI {
       if (
         effect != "misc_minor" &&
         effect != "loseCredits" &&
+        effect != "gainCredits" &&
+        effect != "gainGripCard" &&
+        effect != "trashIce" &&
         effect != "payCredits"
       )
         return true;
@@ -4229,6 +4239,14 @@ class CorpAI {
       result.totalBreakCost = null;
     }
     if (result.unpricedBreakers.length) result.honestBreakCost = null;
+    for (var repeatCard of server.root) {
+      if (typeof repeatCard.AIRunRepeatIce == "function" &&
+          (repeatCard.rezzed || AvailableCredits(corp) >= RezCost(repeatCard)) &&
+          repeatCard.AIRunRepeatIce.call(repeatCard, server) > 0) {
+        result.deterrence += 1;
+        result.reasons.push("possible finite Psi repeat of ICE; no guaranteed lockout");
+      }
+    }
     return result;
   }
 
@@ -6102,7 +6120,8 @@ class CorpAI {
     //check for cards in hand that could be installed and fast-advanced to win
     for (var i = 0; i < corp.HQ.cards.length; i++) {
       var card = corp.HQ.cards[i];
-      if (CheckCardType(card, ["agenda"])) {
+      //An agenda that cannot be scored on its install turn cannot win this way.
+      if (CheckCardType(card, ["agenda"]) && !card.AICannotScoreOnInstallTurn) {
         if (AgendaPoints(corp) + card.agendaPoints >= AgendaPointsToWin()) {
           if (
             this._advancementLimit(card, strongestEmptyRemote) <=
@@ -7565,11 +7584,12 @@ class CorpAI {
       });
     }
     //other actions e.g. placing advancement counters, gaining clicks...
-    //One-shot installed advancement upgrades. Record consumption locally.
-    var installedAdvancementCards = InstalledCards(corp);
+    //One-shot installed upgrades and scored agenda abilities. Record consumption locally.
+    var scoredAdvancementCards = corp.scoreArea || [];
+    var installedAdvancementCards = InstalledCards(corp).concat(scoredAdvancementCards);
     for (var upgradeIndex = 0; upgradeIndex < installedAdvancementCards.length; upgradeIndex++) {
       var upgrade = installedAdvancementCards[upgradeIndex];
-      if (!CheckCardType(upgrade, ["upgrade"]) ||
+      if ((!CheckCardType(upgrade, ["upgrade"]) && !scoredAdvancementCards.includes(upgrade)) ||
           typeof upgrade.AIFastAdvanceCounters != "function" ||
           point.persist.includes(upgrade) || !CheckHasAbilities(upgrade)) continue;
       //Rez policy reads the prospective resources and target counters. Use
@@ -7587,9 +7607,9 @@ class CorpAI {
         },
         () => {
           var counters = upgrade.AIFastAdvanceCounters.call(upgrade, card);
-          var cost = upgrade.rezzed ? 0 : RezCost(upgrade);
+          var cost = upgrade.rezzed || scoredAdvancementCards.includes(upgrade) ? 0 : RezCost(upgrade);
           if (counters <= 0 || point.corpCredits < cost ||
-              (!upgrade.rezzed && !FullCheckRez(upgrade, ["upgrade"]))) return null;
+              (!upgrade.rezzed && !scoredAdvancementCards.includes(upgrade) && !FullCheckRez(upgrade, ["upgrade"]))) return null;
           return {counters: counters, cost: cost};
         },
         () => {
@@ -8509,12 +8529,13 @@ class CorpAI {
                 );
                 if (potentialAdvCards.length > 0 && potentialAdvCards[0]) {
                   var plannedCard = potentialAdvCards[0];
-                  if (CheckCardType(plannedCard, ["upgrade"]) && CheckInstalled(plannedCard)) {
+                  var plannedCardScored = (corp.scoreArea || []).includes(plannedCard);
+                  if ((CheckCardType(plannedCard, ["upgrade"]) && CheckInstalled(plannedCard)) || plannedCardScored) {
                     plannedCard.AIPreferredTarget = card;
-                    if (!plannedCard.rezzed && optionList.includes("rez") &&
+                    if (!plannedCard.rezzed && !plannedCardScored && optionList.includes("rez") &&
                         FullCheckRez(plannedCard, ["upgrade"]))
                       return this._returnPreference(optionList, "rez", {cardToRez: plannedCard});
-                    if (plannedCard.rezzed && optionList.includes("trigger"))
+                    if ((plannedCard.rezzed || plannedCardScored) && optionList.includes("trigger"))
                       return this._returnPreference(optionList, "trigger", {cardToTrigger: plannedCard});
                   }
                   //don't waste these by overadvancing an ordinary advancement target
@@ -9054,7 +9075,9 @@ class CorpAI {
         for (var rezIndex = 0; rezIndex < rezCandidates.length; rezIndex++) {
           var rezCandidate = rezCandidates[rezIndex];
           if (typeof rezCandidate.AIRezWhenCan == "function" &&
-              FullCheckRez(rezCandidate, ["asset", "upgrade"]) &&
+              FullCheckRez(rezCandidate,
+                typeof CheckRezAsNonIceDuringRun == "function" &&
+                CheckRezAsNonIceDuringRun(rezCandidate) ? ["asset", "upgrade", "ice"] : ["asset", "upgrade"]) &&
               rezCandidate.AIRezWhenCan.call(rezCandidate))
             return this._returnPreference(optionList, "rez", {cardToRez: rezCandidate});
         }

@@ -87,6 +87,22 @@ class RunnerAI {
     return Math.max(0, Math.min(n - 1, Math.floor(this._random() * n)));
   }
 
+  //Choose the program to trash for a steal cost (e.g. SDS Drone Deployment):
+  //an AIOkToTrash card, else a non-icebreaker, else the cheapest by install
+  //cost plus hosted credits and virus counters. Returns one of the choices.
+  _stealCostProgramOption(choices) {
+    var score = function (card) {
+      var value = (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus");
+      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) value -= 100;
+      if (CheckSubType(card, "Icebreaker")) value += 10;
+      return value;
+    };
+    var best = choices[0];
+    for (var i = 1; i < choices.length; i++)
+      if (score(choices[i].card) < score(best.card)) best = choices[i];
+    return best;
+  }
+
   _cardsOkToTrashOnInstall(installedRunnerCards) {
 	var okToTrash = [];
     for (var i = 0; i < installedRunnerCards.length; i++) {
@@ -2127,7 +2143,7 @@ console.log(this.preferred);
 
 		//consider potential of this server
 		//(Runner lingering effects, e.g. Climactic Showdown, count as passive sources)
-		var potentialSources = activeCards.concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
+		var potentialSources = activeCards.concat(ActiveCards(corp)).concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
 		for (var j = 0; j < potentialSources.length; j++) {
 			if (typeof potentialSources[j].AIRunExtraPotential == 'function' && (potentialSources[j].AIBreachNotRequired || !breachPrevented)) {
 			  this.serverList[i].potential += potentialSources[j].AIRunExtraPotential.call(potentialSources[j],this.serverList[i].server,this.serverList[i].potential);

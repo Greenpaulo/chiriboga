@@ -31,8 +31,15 @@ Read only the section you need:
 
 ## Decision flow
 
-The advancement search includes card-declared operations and one-shot installed
-upgrades through `AIFastAdvanceCounters`. Unrezzed upgrades must pass
+The advancement search includes card-declared operations, one-shot installed
+upgrades and scored Corp agendas through `AIFastAdvanceCounters`. Each installed
+or scored source is consumed once per hypothetical plan without changing its
+real counters. A scored source declares a positive placement only when its
+counter is available and the installed Corp target is legal. Scored sources
+incur no rez cost and need no rez legality check.
+Main-phase selection sets `AIPreferredTarget` to the planned advancement target
+and selects the scored source's paid ability through `trigger`.
+Unrezzed upgrades must pass
 `FullCheckRez` with the search point’s credits, clicks and target counters.
 The shared hypothetical guard restores resources, counters and active player
 on success or exception. Main-phase selection checks full rez legality again

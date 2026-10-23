@@ -1425,6 +1425,7 @@ AIImplementIce: function(rc, result, maxCorpCred, incomplete)
 
 - `rc` — the `RunCalculator`.
 - `result` — an object with `{ ice, subTypes, sr, strength, encounterEffects }`. You modify `result.sr` and return `result`.
+- Optional `result.maxSrBroken` (number) caps how many subroutines `rc.SrBreak` may plan to break on this encounter; set it to the remaining allowance during a live encounter (Afshar on HQ).
 - `maxCorpCred` — corp's available credits (used for cost assumptions about unknown ice).
 - `incomplete` — `true` if the subroutine list may be incomplete (e.g. face-down ice). In this case, be defensive and avoid assigning punishing effects to those slots.
 
@@ -1721,7 +1722,11 @@ AIIsScoringUpgrade: true,
 **`AIRezWhenCan()`**
 
 Return `true` to select this installed asset or upgrade for rez at the next
-available paid-ability window. Corp command selection calls this after
+available paid-ability window. Ice qualifies only while
+`CheckRezAsNonIceDuringRun(card)` is true (it declares
+`rezAsNonIceDuringRunsOnServer` and a run is in progress against the server it
+protects, as for Rime); the same check adds that ice to the engine's run-window
+rez options. Corp command selection calls this after
 `FullCheckRez` validates card type, affordability, additional costs and
 `RezUsability`, and before the ordinary phase policy. The hook must be
 read-only, safe outside a run, and use only information available to the Corp.
@@ -1900,6 +1905,15 @@ AIAdvancementLimit: function() {
     return 4;
 },
 ```
+
+**`AICannotScoreOnInstallTurn`** (boolean, agendas only)
+
+Set to `true` when the agenda's own text forbids scoring it on the turn it was
+installed (Vulnerability Audit). The card enforces the rule through
+`modifyCannot("score")`, so `CheckScore` and the installed-agenda fast-advance
+checks already decline it once installed. This flag covers the hand: the Corp
+install ranking skips the agenda when looking for an install-and-fast-advance
+win this turn. It is static and read-only.
 
 **`AIOverAdvance`** (boolean, agendas only)
 
@@ -2344,7 +2358,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIImmediateWin()` | function | Boolean immediate operation win; checked before tactics with normal play legality |
 | `agendaPointsForPlayer(player)` | function | Agenda point value for the supplied scoring player; consumed by `AgendaPointsForCard` |
 | `AIIsScoringUpgrade` | bool | True if this is a fast-advance scoring upgrade |
-| `AIRezWhenCan()` | function | Select a legal asset/upgrade rez opportunity in any available paid-ability window |
+| `AIRezWhenCan()` | function | Select a legal asset/upgrade (or run-rezzable ice) rez opportunity in any available paid-ability window |
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
@@ -2370,6 +2384,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
+| `AICannotScoreOnInstallTurn` | bool | Agenda cannot be scored on the turn it is installed; excluded from install-and-fast-advance win plans |
 | `AIAdvanceCreditGain(thisTurn, advancedInPlan)` | function | Read-only credit income from the next basic advance, consumed by advancement and economy planners |
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
@@ -3137,3 +3152,186 @@ tag-retention, tutor-sequence, and scoring plans remain optimisation work.
   hosted-card responses, the Runner's actual run calculator selects the
   continue/jack-out option; encountered replacement ICE is skipped. Ordinary
   remaining-path recalculation includes the new board and clears the old path.
+
+### Downfall batch 9
+
+- Sting! uses ordinary agenda install/advance/score selection and
+  `AIPunishesAccess(server)` for installed bait severity. Its new
+  `AIOnStealDamage() -> nonnegative integer` declares preventable net damage
+  from stealing this agenda. The Runner run calculator includes it for known
+  agendas in a server root; the Corp `_potentialDamageOnBreach` includes the
+  largest qualifying agenda consequence among its own server/root cards.
+  Both omit damage when stealing wins first. The hook is read-only, callable
+  outside a run, and uses only public score areas. Central random-access
+  prediction remains the existing coarse estimate.
+- Public Health Portal uses `AIWorthInstalling`, `AIEconomyCard`,
+  `AIAvoidInstallingOverThis` and `AIRezWhenCan`; its `RezUsability` restricts
+  proactive rez to the Runner's final paid window. Reveal completion precedes
+  income; the income still resolves with empty R&D.
+- Storgotic Resonator uses `AIWorthInstalling` for a new remote,
+  `AIRezWhenCan` to start collecting counters, and `AITriggerWhenCan` for
+  legal counter-backed click damage. The first qualifying Corp trash is
+  counted independently of whether the asset is active. Its callback receives
+  a stable trash-event ordinal, so nested automatic effects cannot change
+  which trash was first. Its action enumeration checks clicks and counters.
+- Saisentan uses the title/option preference consumer for a card-type guess
+  based on public Heap/installed cards. `AIImplementIce` budgets up to two
+  net damage per subroutine (one original and at most one bonus). Only the
+  Runner-owned calculator may rule out that bonus from a chosen type absent
+  from its grip. This is a conservative bound, not a prediction of random
+  damage draws; the bonus does not recursively trigger itself.
+- Complete Image uses `AIPlayWhenCan`, `AIWouldPlay` and `AIDamageOperation`.
+  The real main-phase selector plays it against a grip of at most one card,
+  subject to agenda points, a successful run on the preceding Runner turn,
+  clicks and credits. Its naming preference guesses a publicly observed
+  title (or Sure Gamble), without inspecting grip/stack identities. The
+  Terminal effect waits for the entire damage chain, moves the resolving
+  operation to Archives, and ends the action phase directly.
+- Letheia Nisei uses `AIPreferredUpgradeServer(legalServers)` to select an
+  ICE-protected destination, `AIDefensiveValue`, `AILimitPerServer` and
+  `AIRezWhenCan` with approach-time `RezUsability`. The optional trash uses
+  the ordinary preference consumer; the Runner's real run calculator decides
+  whether to continue after movement. `PsiGame` creates independent seeded
+  bid preferences, bounded by each side's legal credit sources.
+
+`AIRunRepeatIce(server) -> 0 | 1` declares a possible finite repeat traversal
+of all ICE in the same run. It is read-only, safe outside a run, and uses only
+public run-use state and the Corp's own server. The Runner calculator consumes
+it only for known, active-ability, rezzed or affordable root cards. It budgets
+the adverse Psi outcome, preserves cumulative clicks, credits, damage, finite
+breaker resources and run-duration effects, and marks each defence used in
+path-local persistents. There is no new run click, run-entry tax or refreshed
+bad-publicity pool. After the real first approach the opportunity is gone.
+Corp security records bounded deterrence for this probabilistic effect and
+never uses it as a guaranteed lockout. Bid strategy, repeated-encounter target
+value and the trade-off against letting a dangerous breach occur remain
+optimisation work.
+
+### Downfall batch 10
+
+- Remastered Edition uses `AITriggerWhenCan` with an inline ability enumerator
+  that selects a Corp agenda finishable with its counter and remaining basic
+  advances. It preserves the counter without a useful affordable target or
+  outside the Corp action phase. Human choices include either side's installed
+  cards. `AIFastAdvanceCounters(card)` now also supports a scored Corp agenda:
+  return the nonnegative counter placement available from one activation, or
+  zero without a legal installed Corp target or available counter. The existing
+  advancement planner consumes each source once per hypothetical plan, without
+  changing its counters. Scored sources cost no rez credits. Main-phase plans
+  select their paid ability through `AIPreferredTarget` and `trigger`.
+- Daily Quest and Tiered Subscription use `AIWorthInstalling(remotes)`,
+  `AIAvoidInstallingOverThis` and `AIRezWhenCan()` for economy setup. Daily Quest
+  also declares `AIEconomyCard`. The real `CheckRez` permission check now consumes
+  `canBeRezzed()` (boolean, all players), so Daily Quest's Corp action-phase
+  restriction applies to humans as well as AI. This is a rules restriction,
+  separate from the AI's `RezUsability` preference.
+- Daily Quest uses the existing `AIRunExtraPotential(server)` contract on a
+  public active Corp card. The Runner's run-potential consumer now includes
+  active Corp cards as sources alongside Runner cards and Runner lingering
+  effects. Its value reflects the successful-run reward and, before the first
+  success that turn, denying next-turn income. `AIBreachNotRequired` keeps this
+  successful-run incentive when a breach is replaced. This hook must be
+  read-only and use public information only; hidden Corp cards are not sources.
+- Congratulations! models its mandatory pass income with `result.passEffects`
+  (effect-string array on `AIImplementIce`'s result). `Directions` applies these
+  effects after unbroken subroutines, including bypassed or fully broken ICE.
+  Its subroutine uses two `misc_minor` effects for Corp income and `gainCredits`
+  for the Runner's one credit. `gainCredits` immediately adds one pool credit
+  in `ValidateEncounterPoint`, represented as negative cumulative
+  `runner_credits_lost`, so subsequent payments can use it. Earlier payments
+  cannot use later gains; Corp subroutine ranking treats a gain as harmless.
+- Loot Box models its first subroutine as two `payCredits` or `endTheRun`.
+  Its second has `gainGripCard` for the card added to the Runner hand,
+  `misc_minor` for hidden-card-dependent Corp income, plus
+  `trashIce`: this calculator effect records `{action: "trashedIce", card}` in
+  the path's persistents, suppresses that layer on subsequent traversals and
+  excludes it from finite-run continuations. The local continuation cache
+  includes removed layers; no board cards are moved by planning. Corp ranking
+  treats self-trash as harmless. A broken second subroutine leaves the ICE in
+  place. The live Runner payment preference follows a cached complete route;
+  the live Corp reveal choice prefers the highest printed cost among the
+  revealed cards, without inspecting unrevealed stack contents.
+
+  `gainGripCard` preserves the printed hand-size effect for later damage: the
+  path's damage allowance increases by one for each card actually available in
+  the public stack count. Multiple gifts and finite-run continuations share
+  that count; the model never reads hidden card identities. Corp subroutine
+  ranking treats the gift as harmless. Damage already taken keeps its ordinary
+  penalty, while the added card affects survival capacity.
+
+### Downfall batch 11
+
+- Focus Group and Game Over use `AIWouldPlay()` with `AIPlayWhenCan` (1 and 2)
+  through the main-phase declared-opportunity consumer. Both track their
+  last-turn condition while inactive (successful run / steal during the Runner
+  turn, reset when the Runner turn begins). Focus Group's AI chooses the card
+  type from public Runner cards (heap and rig) with fixed priors, never the
+  grip, then sets X to the smaller of the matching count, affordable credits and
+  the target's remaining advancement; it plays only with two Grip cards, two
+  spare credits and an unfinished Corp agenda or `_cardShouldBeFastAdvanced`
+  target. Game Over's AI chooses the type with the largest credit-equivalent
+  loss (install cost, hosted credits/virus counters, hosted cards, consoles),
+  assuming the Runner saves cards worth 3 or more while it can pay 3, and plays
+  only when that loss is at least 5. The Runner AI pays 3 to save a card worth
+  3 or more; the most valuable cards are offered first.
+- Increased Drop Rates uses `AIPreferredUpgradeServer(legalServers)`: hold it
+  (null) without bad publicity, otherwise a remote with a Corp agenda, else HQ.
+  `AIPunishesAccess(server)` returns 1 while the Corp has bad publicity and the
+  card is in that server's root or cards. The Runner AI takes the tag only
+  when already tagged and the Corp has bad publicity.
+- Divested Trust's optional forfeit is an inline Corp preference: forfeit when
+  the stolen agenda has at least one printed point.
+- SDS Drone Deployment declares `stealCost: {programs: 1}`. `StealCost` now
+  returns `programs`; `CheckSteal` requires that many trashable installed
+  programs, the access decline option stays available, and
+  `PayStealCostPrograms` trashes them as an unpreventable cost before `Steal`.
+  The Runner AI chooses through `RunnerAI._stealCostProgramOption(choices)`
+  (an `AIOkToTrash` card, else a non-icebreaker, else the cheapest by install
+  cost plus hosted credits/virus counters); it still always steals when legal.
+  The on-score trash uses the Corp `trash` command and `_bestTrashOption`.
+
+### Downfall batch 12
+
+- Roughneck Repair Squad uses `AIWorthInstalling(remotes)` (non-scoring remote,
+  declined when `_sufficientEconomy(false)`), `AIEconomyCard` and
+  `AIRezWhenCan()` (its rez is free). The main-phase economy policy finds its
+  "Gain 6[c]" click ability through `_clickAbilityLikeAvailable`; the ability
+  enumerates only with three action-phase clicks. The Corp AI always removes
+  bad publicity through `corp.AI.preferred`.
+- Afshar sets `result.maxSrBroken` while protecting HQ: `1` before any
+  printed subroutine is broken, `0` afterwards. `rc.SrBreak` returns no option
+  that would exceed it, so the Runner plans to break only the ETR and accept the
+  credit loss. The engine rule uses `modifyCannot` with id `"break"` on a
+  subroutine, consumed by `ChoicesEncounteredSubroutines` and `Break`.
+  The Corp security model already treats only the ETR as required.
+- Sandstone lowers `result.strength` by one outside its own encounter, because
+  its encounter counter is placed before the Runner can break.
+- Trebuchet models the trash subroutine as Ansel 1.0 does and a successful
+  Trace[6] lock as `misc_serious` (blank when `incomplete`).
+- Secure and Protect uses `AIWouldPlay()` with `AIPlayWhenCan: 1` and
+  `AIIsRecurOrTutor`. It plays only when `_serverToProtect` (central servers
+  only) can receive stopping ICE from R&D and HQ holds no affordable stopping
+  ICE. Its resolution prefers ETR ICE, then ICE that can still be rezzed after
+  paying, then ICE without an installed compatible breaker, then higher ELO.
+  Probes apply the 3[c] discount locally, are read-only, and use only the
+  Corp's own deck contents.
+
+### Downfall batch 13
+
+- Reduced Service uses `modifyRunCreditCost` for its run tax, so Runner run
+  legality, `AdditionalRunCosts` and the run calculator's run-start cost (also
+  used by Corp security planning) charge 2 credits per hosted counter without a
+  separate AI hook. `AIDefensiveValue(server)` (2 in an iced remote, else 0) and
+  `AILimitPerServer` place it. `AIRezWhenCan()` rezzes it on the Runner's turn
+  outside a run, in a central or a non-empty remote, when spare credits remain;
+  its `responseOnRez` choice offers the AI only its preferred amount: up to 4,
+  keeping enough credits to rez the server's unrezzed ice.
+- Vulnerability Audit uses `AICannotScoreOnInstallTurn`; see §5.7.
+- CSR Campaign uses `AIWorthInstalling(remotes)` (non-scoring remote, R&D of at
+  least 4 and hand room), `AIAvoidInstallingOverThis` and `AIRezWhenCan()` at the
+  end of the Runner's turn. The AI draws unless R&D has 2 or fewer cards.
+- Rime declares `rezAsNonIceDuringRunsOnServer`; `CheckRezAsNonIceDuringRun`
+  adds it to run-window rez options and the `AIRezWhenCan()` consumer, which
+  rezzes it at the first Corp opportunity in a run on its server. Its subroutine
+  is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
+  `Strength()` in Runner and Corp security calculations.

@@ -194,6 +194,9 @@ class RunCalculator {
     num //this doesn't include costs - handle that in the place you call this
   ) {
     var result = [];
+    // Printed break limits (Afshar): never plan more breaks than this encounter allows.
+    if (typeof iceAI.maxSrBroken == "number" && point.sr_broken.length + num > iceAI.maxSrBroken)
+      return result;
     var unbrokensr = [];
     for (var i = 0; i < iceAI.sr.length; i++) {
       if (!this.SrBroken(point, i)) unbrokensr.push({ use: card, idx: i });
@@ -434,6 +437,30 @@ class RunCalculator {
 			  }
 		  }
 		  
+          // A resolved self-trash removes this layer from subsequent traversals.
+          else if (eff == "trashIce" && iceAI) {
+            encounter_effects.splice(j, 1);
+            j--;
+            persistents = persistents.concat([{action: "trashedIce", card: iceAI.ice}]);
+          }
+
+          // A revealed stack card added to grip increases later damage capacity.
+          else if (eff == "gainGripCard") {
+            var gained = (this.TotalEffect(point).gainGripCard || 0) +
+              encounter_effects.slice(0, j).filter(function (effect) { return effect == "gainGripCard"; }).length;
+            if (gained + (this._stackCardsConsumed || 0) >= runner.stack.length) {
+              encounter_effects.splice(j, 1);
+              j--;
+            }
+          }
+
+          // Credit gains enter the pool immediately, before later ICE payments.
+          else if (eff == "gainCredits") {
+            encounter_effects.splice(j, 1);
+            j--;
+            creditLoss--;
+          }
+
 		  //apply credit loss
 		  else if (eff == "loseCredits") {
 			  //remove from encounter_effects (will be included in total costs instead)
@@ -536,6 +563,8 @@ class RunCalculator {
     this.reason = "error in directions"; //for reporting
 
     var iceAI = this.precalculated.iceAIs[point.iceIdx];
+    if (point.persistents.some(function (p) { return p.action == "trashedIce" && p.card == iceAI.ice; }))
+      iceAI = Object.assign({}, iceAI, {sr: [], passEffects: [], fullyBrokenEffects: [], bypassEffects: []});
 
     //create list of unbroken subroutines (each is an array of 'or' choices)
     var unbroken_sr = [];
@@ -624,6 +653,9 @@ class RunCalculator {
         sr_effects = sr_effects.concat(iceAI.sr[srIdx][choiceIdx]);
         if (iceAI.sr[srIdx][choiceIdx].includes("endTheRun")) break; //if a subroutine ends the run, the remaining subroutines don't fire
       }
+
+      // Passing also occurs after bypassing or breaking every subroutine.
+      sr_effects = sr_effects.concat(iceAI.passEffects || []);
 
       //don't follow paths where a program was up strengthed but not used for something else too (e.g. to down strength or to break sr)
       //start by making a list of all programs that had their strength upped during this encounter
@@ -861,7 +893,7 @@ class RunCalculator {
 		  if (damageLimit < 0) damageLimit = 0;
 		  //now check damage against limit
 		  reason = "damage";
-          if (totalDamage <= damageLimit) {
+          if (totalDamage <= damageLimit + (totalEffect.gainGripCard || 0)) {
             var totalTag = 0;
             if (totalEffect.tag) totalTag += totalEffect.tag;
 			//update tag limit based on clicks and credits spent (unless it is set to Infinity)
@@ -1095,6 +1127,11 @@ class RunCalculator {
 				}
 				approachEffects.push(approachEffect);
 			}
+            else if (typeof knownCardsInRoot[i].AIOnStealDamage == "function" &&
+                AgendaPoints(runner) + (knownCardsInRoot[i].agendaPoints || 0) < AgendaPointsToWin()) {
+              var stealDamage = knownCardsInRoot[i].AIOnStealDamage.call(knownCardsInRoot[i]);
+              approachEffects.push(Array(stealDamage).fill("netDamage"));
+            }
 			//check trash cost
 			else if (typeof knownCardsInRoot[i].trashCost !== "undefined") {
 			  var kctc = TrashCost(knownCardsInRoot[i]);
@@ -1147,7 +1184,15 @@ class RunCalculator {
 		data.storedDamage = totalApproachDamage;
 		data.damageLimit -= totalApproachDamage;
 	}
-	data.doInnerLoop = data.server.ice.length > 0 && data.startIceIdx > -1;
+    // A known Psi defence is a possible extra traversal in this run, never
+    // an infinite lockout. Runner planning budgets the adverse bid outcome;
+    // Corp security keeps this probabilistic effect out of its safety proof.
+    data.repeatDefenders = data.incomplete || this._securityPlanning ? [] : data.server.root.filter(function (card) {
+      return PlayerCanLook(runner, card) && CheckHasAbilities(card) &&
+        (card.rezzed || AvailableCredits(corp) >= RezCost(card)) &&
+        typeof card.AIRunRepeatIce == "function" && card.AIRunRepeatIce.call(card, data.server) > 0;
+    });
+    data.doInnerLoop = data.server.ice.length > 0 && (data.startIceIdx > -1 || data.repeatDefenders.length > 0);
     if (data.doInnerLoop) {
       //record execution time for testing
       data.timeInMS = Date.now();
@@ -1163,7 +1208,7 @@ class RunCalculator {
       this.precalculated.iceAIs = [];
       var unknownIce = 0; //accumulate during the next loop (used to limit risk-estimation)
       var maxCorpCred = AvailableCredits(corp);	  
-      for (var i = data.startIceIdx; i > -1; i--) {
+      for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i > -1; i--) {
         if (unknownIce == 0)
           this.precalculated.iceAIs[i] = this.IceAI(
 			data.server.ice[i], 
@@ -1193,7 +1238,7 @@ class RunCalculator {
       data.todo = []; //array of path arrays that are not finished
       //encounter options at starting ice
 	  var iceAI = this.precalculated.iceAIs[data.startIceIdx];
-      var encounterOptions = this.EncounterOptions(data.startIceIdx,iceAI);
+      var encounterOptions = data.startIceIdx < 0 ? [{effects: [], persistents: []}] : this.EncounterOptions(data.startIceIdx,iceAI);
 	  //create encounter option points
       for (var i = 0; i < encounterOptions.length; i++) {
 		//set up starting conditions
@@ -1244,6 +1289,25 @@ class RunCalculator {
             path_finished = current[current.length - 1].iceIdx < 0;
           else path_finished = current[current.length - 1].iceIdx < data.startIceIdx;
 
+          if (path_finished && data.repeatDefenders.length) {
+            var lastPoint = current[current.length - 1];
+            var repeatCard = data.repeatDefenders.find(function (card) {
+              return !lastPoint.persistents.some(function (persistent) {
+                return persistent.action == "repeatIce" && persistent.use == card;
+              });
+            });
+            if (repeatCard) {
+              var outer = data.server.ice.length - 1;
+              var options = this.EncounterOptions(outer, this.precalculated.iceAIs[outer]);
+              for (var option of options) {
+                var repeated = this.ValidateEncounterPoint(outer, lastPoint, false, option.effects.slice(),
+                  option.persistents, null, lastPoint.card_str_mods.filter(mod => mod.persist),
+                  lastPoint.persistents.concat([{action: "repeatIce", use: repeatCard}]));
+                if (repeated) data.todo.push(current.concat([repeated]));
+              }
+              return;
+            }
+          }
           if (path_finished) {
             data.min_cost = this_cost;
             this.paths.push(current); //since here we only store better paths, this.paths[this.paths.length-1] will always be the best path
@@ -1292,7 +1356,9 @@ class RunCalculator {
   _finiteRunContinuations(data, icePoint, defender) {
     var firstPoolSpent = Math.max(0, icePoint.runner_credits_spent - data.otherCredits - (icePoint.restrictedCreditsPaid || 0)) +
       icePoint.runner_credits_lost;
-    var firstDamage = this.TotalDamage(this.TotalEffect(icePoint));
+    var firstEffects = this.TotalEffect(icePoint);
+    var gainedCards = firstEffects.gainGripCard || 0;
+    var firstDamage = this.TotalDamage(firstEffects) - gainedCards;
     var futureOther = this._poolOnly ? 0 : (corp.badPublicity || 0);
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
     // Before a run, bad-publicity credits are included in the pool budget.
@@ -1308,8 +1374,9 @@ class RunCalculator {
       icePoint.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
     var remainingPrevention = Math.max(0, this._meatDamagePrevention - rawMeat);
     var spentOutside = icePoint.runner_credits_spent > 0 && icePoint.creditSpendDamage > 0;
-    var cacheKey = [futureClicks, futurePool, futureOther, futureDamage, data.tagLimit,
-      icePoint.restrictedCreditsSpent || 0, remainingPrevention, Number(spentOutside)].join(":");
+    var trashedIce = icePoint.persistents.filter(function (p) { return p.action == "trashedIce"; }).map(function (p) { return p.card; });
+    var cacheKey = [trashedIce.map(function (ice) { return data.server.ice.indexOf(ice); }).join(","), futureClicks, futurePool, futureOther, futureDamage, data.tagLimit,
+      icePoint.restrictedCreditsSpent || 0, gainedCards, remainingPrevention, Number(spentOutside)].join(":");
     var routes = data.continuationCache.get(cacheKey);
     if (!routes) {
       var future = new RunCalculator();
@@ -1318,7 +1385,9 @@ class RunCalculator {
       future._securityPlanning = this._securityPlanning;
       future._continuationRun = true; // fresh bad-publicity credits are in otherCredits
       future._ignoredIce = new Set(this._ignoredIce);
+      future._stackCardsConsumed = (this._stackCardsConsumed || 0) + gainedCards;
       future._ignoredIce.add(defender);
+      for (var ice of trashedIce) future._ignoredIce.add(ice);
       future._restrictedCreditsUsed = (this._restrictedCreditsUsed || 0) + (icePoint.restrictedCreditsSpent || 0);
       future._creditPolicyBranch = !!this._poolOnly;
       future._poolOnly = !!this._poolOnly;
@@ -1419,6 +1488,7 @@ class RunCalculator {
       rc._meatPreventionOverride = this._meatPreventionOverride;
       rc._restrictedCreditsUsed = this._restrictedCreditsUsed || 0;
       rc._ignoredIce = new Set(this._ignoredIce);
+      rc._stackCardsConsumed = this._stackCardsConsumed || 0;
       rc._runnerPlanning = this._runnerPlanning || (runner.AI && runner.AI.rc == this);
       rc.runEvent = this.runEvent;
       rc.suppressOutput = this.suppressOutput;

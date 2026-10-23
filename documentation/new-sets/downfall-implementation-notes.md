@@ -555,3 +555,327 @@ Output/status are saved to
 `/private/tmp/chiriboga-run-event-payment-tests.log` and
 `/private/tmp/chiriboga-run-event-payment-tests.status`. Independent review of
 this bounded repair remains required; optional batch strategy work is unchanged.
+
+## Batch 9 — 26041–26046
+
+Implemented by Codex, 2026-10-22. Existing metadata and exact ELOs preserved.
+
+- **Sting!** resolves score/steal damage only for itself and counts the opposite
+  player's copies after movement into the score area. Ordinary agenda scoring,
+  bait evaluation, known-root Runner run costing and Corp breach-damage
+  evaluation consume its baseline support. Winning steals omit post-win damage
+  in the evaluators.
+- **Public Health Portal** uses the real reveal API, including the Corp reveal
+  notification consumed by Hyoubu, and waits for viewing completion before
+  income. Empty R&D still yields income under the do-as-much-as-possible rule.
+  The real install and paid-window rez consumers exercise its economy route.
+- **Storgotic Resonator** is unique and gains one counter for the first matching
+  direct Corp trash each turn, including damage and trashes from noninstalled
+  zones. Earlier matching trashes while unrezzed consume that turn's opportunity;
+  Runner-controlled trashes and off-faction cards do not qualify. A stable event
+  ordinal prevents nested automatic trashes from changing the first event's
+  eligibility. Click damage checks action timing, counters and clicks; real
+  command selection activates it and cannot use an empty counter pool.
+- **Saisentan** offers the mandatory encounter type choice and all three damage
+  subroutines. Each original subroutine can cause one separately preventable
+  bonus; that bonus is from the encounter ability and does not recursively
+  amplify itself. Cleanup clears the type at encounter end, even if inactive.
+  Corp choices use public Heap/rig type frequencies. The real ICE calculator
+  budgets the possible extra damage conservatively, without Corp grip access.
+- **Complete Image** checks three agenda points and a successful run during the
+  preceding Runner turn. Each name/damage step waits for damage prevention and
+  trash responses, repeats only on an actual named casualty, and ends the action
+  phase after the chain. It cleans up its resolving operation. Baseline AI uses
+  its real play selector against a small grip and guesses from public names;
+  it does not inspect hidden grip or stack card names.
+- **Letheia Nisei** is unique, tracks the first approach even while unrezzed,
+  plays secret affordable 0–2 credit bids, offers the optional trash only after
+  different bids, and moves the Runner to the outermost ICE in the same run.
+  The Runner may jack out and otherwise reapproaches that ICE. The install and
+  rez consumers choose an ICE-protected destination and its approach window.
+  Real optional-choice and Runner run-calculation consumers handle trash and
+  continuation. Run-local calculator persistents bound the possible repeated
+  traversal to one per upgrade and preserve spent credits, clicks, damage,
+  breaker resources and run-duration effects; they refresh no run-start funds.
+  The Corp safety proof does not turn a chance-based Psi outcome into a lockout.
+
+Rules consulted: local Comprehensive Rules v26.03, §§5.4.3–5.4.4 (Terminal
+ends the action phase directly), 10.14.3 (legal bid credit sources, including
+hosted funds) and 10.14.4–10.14.6 (secret bids, payment-source order, no
+checkpoint between bid payments). `PsiGame` defers spend responses until both
+payments finish; focused tests assert that observers see both deductions.
+
+Focused evidence: `tests/downfall-batch9.test.js` drives the real score/play,
+install/rez, click-trigger and option selectors, engine trash/damage/reveal
+flows, known-root/ICE run evaluation, and finite repeat traversal. Negative
+cases include wrong score trigger, no qualifying run/points/credits, wrong
+trash actor/faction, earlier inactive and nested trashes, empty counters,
+prevented damage, repeat-approach expiry, zero-credit bids and insufficient
+same-run payment resources. Required shared format/deck/integration checks
+also pass. Final validation: all **114 full-suite test files pass** on Node
+20.19.0, including Corp decision fixtures and decision snapshots; exit status
+0. Known-red pending reproductions remain excluded. Syntax checks, hook docs,
+agent-script checks and `git diff --check` pass.
+
+Optional optimisation: compare Resonator damage with scoring and economy;
+improve Complete Image play thresholds and public title inference; calibrate
+Saisentan type priors and its conservative two-damage bound; choose Letheia
+bids and trash timing by expected re-encounter/breach value and rank protected
+destinations by actual taxed cost. These are baseline heuristic limitations,
+not missing printed mechanics or deferred required consumers.
+
+Saisentan's subroutine overlays were measured with
+`node scripts/measure-subroutine-visual.js 26044` and checked with the ASCII
+zoom helper: centres 155, 175 and 195, each one printed line (`h: 16`). The
+focused visual regression and measurement audit pass. Initial full validation
+caught these missing overlay fields; they were repaired before final rerun.
+
+
+## Batch 10 — 26047–26051
+
+Implemented and validated 2026-10-22 by Codex. Existing metadata and ELO values
+are preserved: Remastered Edition 1513, Daily Quest 1535, Tiered Subscription
+1478, Congratulations! 1249 and Loot Box 1377.
+
+- Remastered Edition now receives its scored counter through the engine's
+  `responseOnScored`, gated to itself. The counter places on any installed card,
+  including Runner cards; it is placement, not the basic advance action. The
+  Corp AI selects a finishable agenda and saves an unusable counter. The real
+  advancement planner includes scored sources once per plan, without spending
+  real counters or assigning a rez cost.
+- Daily Quest's rez restriction is enforced by the shared `CheckRez` permission
+  consumer, including both the start-of-action and post-action paid windows.
+  Inactive successful-run tracking remembers server identity, including a run
+  before installation or rez. The next Runner turn resets that history. Every
+  success while active pays the Runner two credits; only the last Runner turn's
+  successful runs suppress next Corp-turn income. The dead turn-end hook is
+  removed. Its economy install/rez policy and public Runner run-potential
+  consumer provide baseline use.
+- Tiered Subscription tracks the first run even in HQ or while unrezzed and
+  resets while inactive on either turn. Later rezzing does not create a new
+  first-run opportunity. Economy install and legal pre-run rez consumers work.
+- Congratulations! pays both players the printed subroutine amounts and gains
+  its passing credit independently of whether its subroutine broke. Calculator
+  pass effects and immediate Runner pool-credit gains preserve payment order;
+  income does not become a threatening program-trash or end-the-run effect.
+- Loot Box's first subroutine offers a legal two-credit payment or end-the-run,
+  with compatible temporary credits and a cached-route Runner preference. The
+  second reveals up to three stack cards sequentially to the Corp, who chooses
+  the card added to grip and gains its printed play/install cost. The Runner
+  shuffles even with an empty stack; the ICE then trashes as a preventable
+  effect, not an unpreventable cost. Missing printed costs yield zero. The
+  calculator models the tax and self-trash instead of program destruction;
+  a Letheia repeat cannot charge a resolved Loot Box again. Hypothetical removal
+  stays local and participates in finite-run continuation cache keys. Added
+  grip cards also increase subsequent damage capacity in the run calculator,
+  capped by the public stack count across gifts and continued runs. An empty
+  stack supplies no extra damage capacity.
+
+Focused evidence: `tests/downfall-batch10.test.js` exercises actual Corp install,
+rez and trigger selectors, read-only finite advancement planning, public Runner
+run valuation, live reveal/payment choices, inactive timing, small/empty stacks,
+pool/temporary funding, finite gifted-card damage capacity, order of ICE payments and repeat traversal after
+self-trash. Batches 8–9 and the set integration test also pass. Required shared
+checks pass; the final full suite passes all 115 files on pinned Node 20.19.0,
+including Corp decision fixtures and decision snapshots.
+No browser playtesting or independent strategic review is claimed.
+
+Optional optimisation: compare counter conservation across multiple agenda
+plans; protect Daily Quest while pricing the Runner reward and income denial;
+compare Subscription's pre-run rez opportunity with other commitments; place
+Congratulations! for credit sequencing; choose Loot Box's revealed card using
+Corp income versus the Runner's gifted-card value. The baseline chooses the
+highest printed cost, not the best strategic gift. Hidden stack contents are
+never read during planning.
+
+## Batch 11 — 26052–26056
+
+Implemented 2026-10-23 by Claude on branch `cards/downfall-batch-11`. Existing
+metadata and ELO values are preserved: Focus Group 1374, Game Over 1286,
+Increased Drop Rates 1216, Divested Trust 1434 and SDS Drone Deployment 1759.
+Game Over's scaffolded subtypes (`Illicit`, `Gray Ops`) are corrected to the
+card data's `Gray Ops - Liability`.
+
+- Focus Group and Game Over track their last-turn conditions while inactive in
+  any zone (successful run or steal during the Runner turn; reset when the
+  Runner turn begins), following Complete Image.
+- Focus Group offers the four Runner card types, reveals each Grip card to the
+  Corp, then offers X from the matching count down to 0, bounded by affordable
+  credits; 0 declines. Like Remastered Edition, the placement target is any
+  installed card, including Runner cards. No matches, no installed card or no
+  credits end the effect without a choice.
+- Game Over offers the four Runner card types; installed non-icebreaker cards of
+  that type that can be trashed are offered one by one, most valuable first, and
+  the Runner may pay 3 credits each to prevent. The rest are trashed together
+  as a preventable Corp effect, then the Corp takes 1 bad publicity even when
+  nothing was trashed.
+- Increased Drop Rates reveals itself while accessed in R&D (Esca pattern) and
+  restores its face-down state when access completes. On access anywhere, the
+  Runner chooses a tag or the Corp's bad-publicity removal; with no bad
+  publicity the removal does nothing.
+- Divested Trust responds only from the Corp score area to another agenda that
+  is in the Runner score area (`intended.steal`). Forfeiting gains 5 credits and
+  returns that agenda to HQ face down with no advancement counters.
+- SDS Drone Deployment adds a shared program-trash steal cost:
+  `StealCost().programs`, a `CheckSteal` guard, the access decline option and
+  `PayStealCostPrograms` (unpreventable trash, Runner chooses) before `Steal`.
+  Whistleblower's AI naming counts it as a relevant steal cost. Scoring trashes
+  one installed program chosen by the Corp; the trash is preventable.
+
+Known limitations (not silently approximated in the engine path):
+
+- Elevation's HQ-access replacement (35018) steals through its own path, which
+  ignores every additional steal cost (credits, clicks and programs) and does
+  not set `intended.steal`, so Divested Trust cannot respond there. This is a
+  pre-existing defect outside the batch range; raised as
+  [detente-access-steal-bypasses-steal-costs-and-responses](../bugs/detente-access-steal-bypasses-steal-costs-and-responses.md).
+- Whether the Runner wins on the steal before Divested Trust resolves follows
+  the engine's existing win-check timing; no special handling was added.
+
+Focused evidence: `tests/downfall-batch11.test.js` covers the last-turn windows
+and expiry, reveal sequencing, X bounds by matches and credits, any-installed
+targeting, the real Corp `CommandChoice` play selector for Focus Group and Game
+Over (positive, no-condition, no-target, unaffordable and low-value holds), the
+Corp type/X/target preferences, icebreaker exemption, per-card prevention with
+shared Runner credits and the Runner AI's save choice, bad publicity, R&D reveal
+and cleanup, both Runner AI tag choices and the no-bad-publicity case, the real
+upgrade-install preference and `AIPunishesAccess`, a real `Steal` response for
+Divested Trust (AI forfeit, human decline, unscored and self cases), the access
+phase's steal/decline enumeration with and without programs, the Runner AI's
+program payment through the real choice path, and the on-score Corp trash
+selector. `tests/play-and-steal-cost.test.js` now asserts the `programs` field.
+
+Optional optimisation: Focus Group type guessing from more than public
+frequency, holding it for a higher X or a scoring turn, and choosing ICE or
+asset targets; Game Over timing against Runner credits and bad-publicity cost;
+Runner AI prevention payments that weigh remaining credits and card roles;
+Increased Drop Rates placement and the Runner's tag-versus-bad-publicity trade;
+Divested Trust valuation in scoring order; Runner run valuation of SDS's
+program cost (the Runner AI always steals when legal) and choosing which
+program to lose by matching ICE.
+
+## Batch 12 — 26057–26061 (2026-10-23)
+
+The pre-existing definitions were not credited: Afshar's lock relied on
+break responses, Sandstone gained counters on every ICE encounter, Trebuchet
+took bad publicity on any rez, had wrong subtypes and forbade trashing Runner
+cards, and Secure and Protect was empty. All five were rewritten.
+
+### Mechanics and baseline AI
+
+- Roughneck Repair Squad: three action-phase clicks gain 6[c], then an optional
+  removal prompt when the Corp has bad publicity. AI installs it into a
+  non-scoring remote when economy is insufficient, rezzes it (free), triggers
+  it from the main-phase economy policy and always removes bad publicity.
+- Afshar: subroutines are marked `printed`. While it protects HQ, its
+  `modifyCannot("break", subroutine)` forbids a further printed break once one
+  printed subroutine is broken; broken flags reset when an encounter begins.
+  `ChoicesEncounteredSubroutines` and `Break` both consult this, so every
+  breaker path (including multi-break loops) honours it. Gained subroutines are
+  not limited. AI: `result.maxSrBroken` makes `rc.SrBreak` plan only the ETR
+  break on HQ (the Runner loses 2[c]); remote copies are unlimited. The lose
+  subroutine is now modelled as two `loseCredits` (it was an unrecognised
+  string).
+- Sandstone: `automaticOnEncounter` adds a virus counter only when Sandstone
+  itself is encountered. AI strength is one lower before its encounter so plans
+  include the counter placed before breaking.
+- Trebuchet: printed subtypes Sentry - Destroyer - Tracer - Liability. Bad
+  publicity only when Trebuchet itself rezzes. The trash subroutine targets any
+  trashable installed Runner card. A successful Trace[6] adds a lingering
+  effect that forbids stealing and trashing Corp cards only, survives
+  Trebuchet leaving play and is removed when the run ends. AI follows the
+  Ansel 1.0 model (trash serious with programs, lock `misc_serious`).
+- Secure and Protect: the Double click is the engine's `PlayClickCost`.
+  Resolution offers installable (ice, central server) pairs from R&D, reveals
+  the chosen ice to the Runner, installs it with a temporary -3[c]
+  `modifyInstallCost` (cleared on payment, cancel or completion) and shuffles
+  R&D. With no installable ice it shuffles and ends. Playing without a target
+  is legal for humans. AI plays it (via `AIPlayWhenCan`) only for a central
+  server chosen by `_serverToProtect` when R&D holds stopping ICE and HQ has no
+  affordable stopping ICE; it chooses ETR ICE, then rezzable after paying,
+  then uncovered by installed breakers, then ELO.
+
+### Rulings and limits
+
+- Only affordable ice is offered; the rules allow searching for any ice, but an
+  unaffordable install cannot complete, so it would remain in R&D anyway.
+- Afshar counts only its printed subroutines, as printed.
+
+### Optimisation queue
+
+Pending (optional strategy): Roughneck timing versus other three-click plans
+and bad-publicity value; Afshar placement preference for HQ; Corp rez value of
+Trebuchet's bad publicity and Trace[6] boost spending (the Runner model treats
+the trace as always successful); Secure and Protect versus other central
+defence and remote-protection plans.
+
+### Verification
+
+`tests/downfall-batch12.test.js` drives the real install, rez, economy-trigger,
+main-phase play and decision selectors, the run calculator with Buzzsaw on HQ
+versus a remote, live break locks and reset, Sandstone counters/strength,
+Trebuchet rez/trash/trace lock/run-end cleanup and failed trace, and Secure and
+Protect costs, Double click guard, reveal, discounted install, cleanup and AI
+guards. `tests/card-bad-publicity.test.js` now passes the rezzed card, as the
+engine does. No browser playtesting or independent strategic review is claimed.
+
+## Batch 13 — 26062–26065
+
+Implemented and validated 2026-10-23 by Claude, on a branch in parallel with
+batches 11 and 12. Existing metadata and ELO values are preserved: Reduced
+Service 1380, Vulnerability Audit 1581, CSR Campaign 1311 and Rime 1425.
+
+- Reduced Service is now `unique`, as printed. Its `responseOnRez` is gated to
+  itself and offers the human 0 up to min(4, available credits); paying places
+  that many power counters. The run tax uses the shared `modifyRunCreditCost`
+  consumer (as Cold Site Server does): 2 credits per counter, only for runs on
+  its own server and only while rezzed. Run legality, `AdditionalRunCosts` and
+  the run calculator's run-start cost therefore charge it. Every successful run
+  on HQ, R&D or Archives removes one counter, including a run on another
+  central server. Counters never go below zero, and inactive counters neither
+  tax nor decay. Corp AI: `AIDefensiveValue` places it in an iced remote, and
+  `AIRezWhenCan` rezzes it on the Runner's turn outside a run, in a central or
+  a non-empty remote. The AI is offered only its preferred amount: up to 4,
+  keeping enough credits to rez that server's unrezzed ICE.
+- Vulnerability Audit tracks its own install while inactive and clears the flag
+  when either turn begins. `modifyCannot("score")` blocks only this card, only
+  while it is installed, so `CheckScore`, the score command and the Corp
+  installed-agenda fast-advance checks all decline it on the install turn. The
+  new `AICannotScoreOnInstallTurn` flag removes it from the install ranking's
+  install-and-fast-advance win plan, the one planner that considers hand
+  agendas.
+- CSR Campaign's existing optional draw is kept. The AI now draws unless R&D
+  has 2 or fewer cards, which keeps the mandatory draw safe. New hooks:
+  `AIWorthInstalling` (non-scoring remote, R&D of at least 4 and hand room),
+  `AIAvoidInstallingOverThis`, and `AIRezWhenCan` at the end of the Runner's
+  turn (Runner 2.2), just before its first trigger.
+- Rime: the new engine check `CheckRezAsNonIceDuringRun(card)` (checks.js) is
+  true for ice that declares `rezAsNonIceDuringRunsOnServer` while a run is in
+  progress against the server it protects. The shared run paid-window rez
+  enumeration (approach, encounter, pass and approach-server windows) adds such
+  ice to its rezzable types. Ordinary ice keeps approach-only timing. The
+  strength boost now includes Rime itself (printed 0, so 1 while rezzed),
+  applies only to ice protecting its server, and stacks across copies. The
+  subroutine's AI model was the invalid `bankroll` string; it is now the
+  documented `loseCredits` effect. The Corp AI's `AIRezWhenCan` consumer now
+  also accepts run-rezzable ice, so Rime is rezzed at the Corp's first
+  opportunity in a run on its server.
+
+Focused evidence: `tests/downfall-batch13.test.js` covers the real `Rez` response
+window and human payment choices, Runner run enumeration and run-calculator tax
+affordability, central/remote/inactive decay, Corp rez selection through
+`CommandChoice` (positive, no-content, reserve, mid-run and Corp-turn guards), upgrade
+placement, the score restriction and its reset on both turns, the install-ranking
+win-plan exclusion against an unflagged control, CSR install/rez/draw
+choices with thin-R&D and hand-size guards, Rime's strength (self, stacking,
+other servers, unrezzed), its rez windows, and the Corp AI rez command plus
+selection. Required shared checks pass; the full suite passes all 116 files on Node 20.19.0, including Corp decision fixtures and snapshots (see the tracker
+completion log).
+
+Optional optimisation: weigh Reduced Service's rez timing and counter budget
+against other spending, and against expected decay from central runs.
+Vulnerability Audit still accepts ordinary advancement on its install turn,
+which exposes counters a turn early. Weigh CSR Campaign's draw against hand
+size and discard. Choose when to reveal Rime instead of always rezzing at the
+first run window. The Runner AI does not anticipate an unrezzed Rime's +1
+strength (hidden information).

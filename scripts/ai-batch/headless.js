@@ -189,11 +189,20 @@ function playGame(options) {
   const hash = crypto.createHash('sha1');
   let logLines = 0, steps = 0;
   const immediates = new Set();
+  let lastDiagnostic = 0;
+  const reportDiagnostic = () => {
+    if (!options.onDiagnostic || Date.now() - lastDiagnostic < 250) return;
+    lastDiagnostic = Date.now();
+    options.onDiagnostic({phase: context.currentPhase?.title, identifier: context.currentPhase?.identifier,
+      steps, tail: logTail.slice(-50)});
+  };
   const context = {
     __securitySignature: createSecuritySignature(),
     console: {log() {}, warn() {}, error: (...parts) => {
       const message = parts.join(' ');
       logTail.push('ERROR ' + message);
+      if (logTail.length > 200) logTail.shift();
+      reportDiagnostic();
       lastError = message.split('\n')[0].slice(0, 120);
       if (/Error/.test(message)) errors.add(message.split('\n')[0].slice(0, 120));
     }},
@@ -279,6 +288,7 @@ function playGame(options) {
     hash.update(line + '\n'); logLines++;
     if (fullLog) fullLog.push(line);
     logTail.push(line); if (logTail.length > 200) logTail.shift();
+    reportDiagnostic();
   };
   // L9.0: today's and the honest security verdict of every server with stakes,
   // read through the uncached evaluator so no cache or telemetry counter moves.

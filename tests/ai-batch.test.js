@@ -121,6 +121,11 @@ run(async ({
     assert.throws(() => batch.loadPool(file), /Duplicate deck pair id in pool: gateway/);
   });
 
+  await scenario('game timeout must fit a positive finite Node timer', () => {
+    for (const timeout of ['0', '-1', 'NaN', 'Infinity', '2147483'])
+      assert.throws(() => batch.buildConfig(batch.parseArgs(['--timeout', timeout])), /timeout/);
+  });
+
   await scenario('CLI value options require operands, including both comparison reports', () => {
     for (const option of ['--budget', '--pool', '--games', '--seeds', '--pairs', '--jobs', '--timeout', '--out',
       '--side', '--start', '--start-tag', '--corp-option', '--runner-option', '--collector', '--guard',

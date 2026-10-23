@@ -28,6 +28,7 @@ function CheckAdvance(card) {
  */
 function CheckRez(card, validCardTypes) {
   if (card != null) {
+    if (typeof card.canBeRezzed == "function" && !card.canBeRezzed.call(card)) return false;
     if (CheckCardType(card, validCardTypes)) {
       if (typeof card.rezzed !== "undefined") {
         if (card.rezzed) {
@@ -246,6 +247,21 @@ function CheckRunning() {
 }
 
 /**
+ * Checks whether ice may be rezzed like a non-ice card in the current window:
+ * a run is in progress against the server it protects and the card declares
+ * rezAsNonIceDuringRunsOnServer (e.g. Rime).
+ *
+ * @method CheckRezAsNonIceDuringRun
+ * @param {Card} card ice to check
+ * @returns {Boolean} true if this ice is rezzable whenever non-ice cards are
+ */
+function CheckRezAsNonIceDuringRun(card) {
+  if (!card || card.rezAsNonIceDuringRunsOnServer !== true) return false;
+  if (!CheckRunning() || !CheckCardType(card, ["ice"])) return false;
+  return attackedServer.ice.includes(card);
+}
+
+/**
  * Checks if ice is being approached but not encountered.
  *
  * @method CheckApproach
@@ -425,6 +441,7 @@ function CheckSteal() {
   var cost = StealCost(accessingCard);
   if (!CheckCredits(runner, cost.credits, "stealing", accessingCard)) return false;
   if (!CheckClicks(runner, cost.clicks)) return false;
+  if (cost.programs > 0 && StealCostProgramChoices().length < cost.programs) return false;
   return true;
 }
 

@@ -213,9 +213,9 @@ modifyInstallCost: Resolve(card, destination); // destination is a server or hos
 modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
-modifyStealCost: Resolve(card); // returns {credits, clicks} additional costs
+modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
-modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
+modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid
 ```
 
 ### Click Ability
@@ -238,6 +238,8 @@ must check HQ location, action-click legality, credit/trash costs and targets.
 The flag does not make other abilities on the card active.
 
 ### canBeRezzed (conditional)
+
+`CheckRez` consumes this rules permission for both humans and AI.
 
 ```js
 canBeRezzed: function() { return currentPhase.identifier == "Corp 2.2"; }
@@ -360,7 +362,8 @@ runner.grip / runner.stack / runner.heap;
 ```js
 CheckCardType(card, ["ice","asset",...])
 CheckSubType(card, "Barrier")
-StealCost(card); // {credits, clicks}, including printed and active additional costs
+StealCost(card); // {credits, clicks, programs}, including printed `stealCost` and active additional costs;
+// programs = installed programs the Runner trashes (PayStealCostPrograms, unpreventable)
 InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)
@@ -747,7 +750,7 @@ responseOnInstall: { Enumerate: function (card) {
 ### Ice weakens itself each encounter (Sandstone pattern)
 
 ```js
-responseOnEncounter: { Resolve: function() { AddCounters(this, "virus", 1); }, automatic: true },
+automaticOnEncounter: { Resolve: function(ice) { if (ice == this) AddCounters(this, "virus", 1); } },
 modifyStrength: { Resolve: function(card) { if (card==this) return -Counters(this,"virus"); return 0; } },
 ```
 
@@ -768,9 +771,11 @@ modifyStrength: {
 ### Prevent steal/trash for run duration (Trebuchet pattern)
 
 ```js
-_flag: false,
-modifyCannot:    { Resolve: function(id) { return this._flag && (id==="steal"||id==="trash"); } },
-responseOnRunEnds: { Resolve: function() { this._flag = false; }, automatic: true },
+// In the subroutine: a lingering effect survives the ICE being trashed or derezzed.
+AddLingeringEffect({
+  modifyCannot: { Resolve: function(id, card) { return card && card.player == corp && (id=="steal"||id=="trash"); } },
+  responseOnRunEnds: { Resolve: function() { RemoveLingeringEffect(this); }, automatic: true },
+});
 ```
 
 ### Asset with click ability (once per turn)
@@ -935,3 +940,30 @@ player. Hyoubu's action passes Corp even though the revealed card is Runner-owne
 `GainCredits(player, amount, temporary, sourceCard, afterGain)` optionally calls
 `afterGain` after operation/agenda credit-gain responses. Repeated instructions
 should use this callback rather than starting a decision while responses remain.
+
+## Downfall Psi bids and approach tracking
+
+`PsiGame(callback, context)` resolves secret legal 0–2 credit bids, then calls
+`callback(different)` after payment and spend responses. Bids are not logged or
+paid before both players commit. Payment-source choices follow active-player
+order; both payments finish before either spend-response window opens (CR
+10.14.4–10.14.6). `SpendCredits` accepts an optional seventh argument, an array
+of deferred response records, for this atomic payment. Its usual continuation
+then runs after deduction; the caller must flush `CreditSpendResponses` after
+all linked payments, before continuing the effect. Ordinary payments retain
+their existing wait-for-responses behaviour.
+
+`automaticOnApproachServer.Resolve(server)` fires after would-approach redirects
+and before approach response triggers are collected, including when
+`availableWhenInactive` is set. Its server argument is the current attacked
+server after any redirect. Letheia Nisei uses it to consume the first approach
+even while unrezzed; run-begin
+cleanup resets the guard independently of active status.
+
+Trash callbacks also receive a fourth argument, `trashEvent`, whose
+`corpRunnerFactionOrdinal` is the turn's stable ordinal of this Corp trash
+matching the Runner identity's faction (zero for nonmatching events). The
+engine records it once per simultaneous direct trash, before automatic
+callbacks. It includes earlier trashes while the interested card was inactive
+and survives nested callbacks. Hosted collateral does not count as a direct
+player trash. This event counter resets with the other turn counters.
