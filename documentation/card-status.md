@@ -32,7 +32,7 @@ in card-sets.md.
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
-| `uprising` | in-progress | 65 | 65 | 0 | 59 | 5 | 15 / 62 | true / true | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 57 | 4 | 17 / 62 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
@@ -100,8 +100,6 @@ None.
 - 26085 Simulchip: 1 scaffold marker(s)
 - 26086 Cordyceps: 1 scaffold marker(s)
 - 26087 Euler: 1 scaffold marker(s)
-- 26089 Penrose: 1 scaffold marker(s)
-- 26092 Pauleʼs Café: 1 scaffold marker(s)
 - 26093 Buffer Drive: 1 scaffold marker(s)
 - 26096 Megaprix Qualifier: 1 scaffold marker(s)
 - 26097 Project Vacheron: 1 scaffold marker(s)
@@ -142,7 +140,6 @@ None.
 - 26079 Afterimage: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 26080 Makler: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 26087 Euler: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 26089 Penrose: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
 ## Runner keep coverage (playable sets)
 

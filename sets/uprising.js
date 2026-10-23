@@ -206,134 +206,121 @@ cardSet[26090] = {
   subTypes: [],
   installCost: 0,
   memoryCost: 2,
-  
+  //AI: the program chosen by AIAbilityInstallBreakers for the next use
+  _aiTutorTarget: null,
+  _programChoices: function () {
+    return ChoicesArrayInstall(runner.stack, false, function (card) {
+      return CheckCardType(card, ["program"]);
+    });
+  },
   abilities: [
     {
-      text: "2[c], [trash]: Search your stack for 1 program. Install it.",
+      text: "2[c], [trash]: Search your stack for 1 program. Install it. (Shuffle your stack after searching it.)",
+      alt: "smc_tutor",
       Enumerate: function () {
-        //Check if we can pay 2 credits
+        //the search may fail to find, so an empty stack does not prevent the ability
         if (!CheckCredits(runner, 2, "using", this)) return [];
-        //Check if this card can be trashed (not prevented somehow)
         if (!CheckTrash(this)) return [];
-        //Check if there are any programs in stack that can be installed
-        var choices = ChoicesArrayInstall(runner.stack, false, function (card) {
-          return CheckCardType(card, ["program"]);
-        });
-        if (choices.length == 0) return [];
+        if (runner.AI != null && this._aiTutorTarget && !runner.stack.includes(this._aiTutorTarget)) return [];
         return [{}];
       },
-      Resolve: function (params) {
-        var cardRef = this;
-        //Pay 2 credits as cost
-        SpendCredits(runner, 2, "using", this, function () {
-          //Trash self as cost (unpreventable since it's a cost)
-          Trash(cardRef, false, function (cardsTrashed) {
-            //Get installable programs from stack
-            var choices = ChoicesArrayInstall(runner.stack, false, function (card) {
-              return CheckCardType(card, ["program"]);
-            });
-            
-            //**AI code
-            if (runner.AI != null) {
-              //Prefer icebreakers we don't have installed
-              var installedRunnerCards = InstalledCards(runner);
-              var preferredCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
-              if (preferredCard) {
-                for (var i = 0; i < choices.length; i++) {
-                  if (choices[i].card == preferredCard) {
-                    choices = [choices[i]];
-                    break;
-                  }
+      Resolve: function () {
+        var smc = this;
+        var target = runner.AI != null ? this._aiTutorTarget : null;
+        this._aiTutorTarget = null;
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            //trashing is part of the cost, so it cannot be prevented (and frees this program's MU first)
+            Trash(
+              smc,
+              false,
+              function () {
+                //install costs are paid after the ability's 2[c]
+                var choices = smc._programChoices();
+                var finish = function () {
+                  Shuffle(runner.stack);
+                  Log("Stack shuffled");
+                };
+                if (runner.AI != null) {
+                  var preferred = target || runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, InstalledCards(runner));
+                  var targeted = choices.filter(function (choice) {
+                    return choice.card == preferred;
+                  });
+                  if (targeted.length > 0) choices = targeted;
                 }
-              }
-            }
-            
-            DecisionPhase(
-              runner,
-              choices,
-              function (paramsB) {
-                Shuffle(runner.stack);
-                Log("Stack shuffled");
-                //Install the selected program (paying normal costs, disallow cancel)
-                Install(paramsB.card, paramsB.host, false, null, true, null, cardRef, null, null, false);
+                if (choices.length < 1) {
+                  Log("Self-modifying Code found no program it can install");
+                  finish();
+                  return;
+                }
+                //a hidden-zone search may fail to find
+                if (runner.AI == null) choices.push({ card: null, label: "Install nothing", button: "Install nothing" });
+                DecisionPhase(
+                  runner,
+                  choices,
+                  function (params) {
+                    finish();
+                    if (!params || !params.card) return;
+                    Install(params.card, params.host, false, null, true, null, smc, null, null, false);
+                  },
+                  "Self-modifying Code",
+                  "Choose a program to install",
+                  smc,
+                  "install",
+                );
               },
-              "Self-modifying Code",
-              "Self-modifying Code",
-              cardRef,
-              "install"
+              smc,
             );
-          }, cardRef);
-        }, cardRef);
-      },
-      //AI: Determine when to use this ability
-      AIWouldUse: function () {
-        //Don't use outside of a run unless we really need a program
-        if (!CheckRunning()) {
-          //Only use outside run if we're desperate for a specific program
-          return -1; //don't use outside of runs
-        }
-        
-        //During a run, check if we need a breaker for current ice
-        if (CheckEncounter()) {
-          var ice = attackedServer.ice[approachIce];
-          if (ice && ice.rezzed) {
-            //Check if we can already break this ice
-            var dominated = runner.AI._iceDominated(ice);
-            if (!dominated) {
-              //We can't break this ice - check if SMC can help
-              var installedRunnerCards = InstalledCards(runner);
-              var neededBreaker = runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
-              if (neededBreaker) {
-                //Check if the needed breaker can handle this ice
-                return 5; //high priority - we need this breaker now!
-              }
-            }
-          }
-        }
-        
-        //During approach, might want to preemptively fetch
-        if (CheckApproaching()) {
-          var ice = attackedServer.ice[approachIce];
-          if (ice && ice.rezzed) {
-            var dominated = runner.AI._iceDominated(ice);
-            if (!dominated) {
-              return 4; //fetch before encounter
-            }
-          }
-        }
-        
-        return -1; //don't use if not needed
+          },
+          this,
+        );
       },
     },
   ],
-  
-  //AI evaluation functions
+
+  //AI: install before a run when the stack holds a breaker it could fetch
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
-    //Worth keeping if there are icebreakers in stack we might need
-    if (spareMU >= 2) {
-      var targetCard = runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
-      if (targetCard) return true;
-    }
-    return false;
+    if (spareMU < 2) return false;
+    return !!runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
   },
-  
-  //Get list of icebreakers that AI might tutor by this
-  AIIcebreakerTutor: function (installedRunnerCards) {
-    return runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, installedRunnerCards);
-  },
-  
-  //AI: Prefer to install SMC early to have tutor available
   AIPreferredInstallChoice: function (choices) {
-    //Install if we have spare MU
-    if (MemoryUnits() - InstalledMemoryCost() >= 2) return 0;
-    return -1;
-  },
-  
-  //AI: Can use this during runs to fetch needed breakers
-  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost, runClickCost) {
-    //Install before run if we might need to fetch a breaker mid-run
-    if (MemoryUnits() - InstalledMemoryCost() >= 2) return 1;
+    if (MemoryUnits() - InstalledMemoryCost() < 2) return -1;
     return 0;
+  },
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost, runClickCost) {
+    if (MemoryUnits() - InstalledMemoryCost() < 2) return 0;
+    if (!runner.AI._icebreakerInPileNotInHandOrArray(runner.stack, InstalledCards(runner))) return 0;
+    return 1;
+  },
+  //AI: run planner offers (stack icebreakers, priced at 2[c] plus the install cost)
+  AIAbilityInstallBreakers: function (installedRunnerCards) {
+    if (!CheckInstalled(this)) return [];
+    var smc = this;
+    var installedTitles = installedRunnerCards.map(function (card) {
+      return card.title;
+    });
+    var seen = [];
+    return runner.stack
+      .filter(function (card) {
+        if (!CheckCardType(card, ["program"]) || !CheckSubType(card, "Icebreaker")) return false;
+        if (installedTitles.includes(card.title) || seen.includes(card.title)) return false;
+        seen.push(card.title);
+        return true;
+      })
+      .map(function (card) {
+        return {
+          card: card,
+          cost: 2 + InstallCost(card),
+          alt: "smc_tutor",
+          select: function () {
+            smc._aiTutorTarget = card;
+          },
+        };
+      });
   },
 };
 
@@ -480,89 +467,65 @@ cardSet[26091] = {
   subTypes: ["Connection", "Virtual"],
   installCost: 2,
   unique: true,
-  
+
   //+1 link
   link: 1,
-  
-  //Track icebreakers boosted this turn
+
+  //Icebreakers boosted this turn (per copy). The boost is a lingering effect: it
+  //outlasts this resource, ends with the turn or when the breaker leaves play.
   boostedCards: [],
-  
+
   //Whenever you install a non-AI icebreaker, that icebreaker gets +2 strength for the remainder of the turn.
   automaticOnInstall: {
     Resolve: function (card) {
-      //Check if installed card is a non-AI icebreaker
-      if (!CheckSubType(card, "Icebreaker")) return;
-      if (CheckSubType(card, "AI")) return;
-      //Boost it
+      if (card == this || card.player != runner) return;
+      if (!CheckSubType(card, "Icebreaker") || CheckSubType(card, "AI")) return;
+      if (this.boostedCards.includes(card)) return;
       this.boostedCards.push(card);
       Log(GetTitle(card, true) + " gets +2 strength for the remainder of the turn");
     },
   },
-  
-  //Modify strength for boosted cards
   modifyStrength: {
     Resolve: function (card) {
       if (this.boostedCards.includes(card)) return 2;
       return 0;
     },
+    availableWhenInactive: true,
   },
-  
-  //Clear boosted cards at end of turn
-  responseOnRunnerTurnEnds: {
+  automaticOnUninstall: {
+    Resolve: function (card) {
+      var index = this.boostedCards.indexOf(card);
+      if (index > -1) this.boostedCards.splice(index, 1);
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //The turn ends after its discard step.
+  responseOnRunnerDiscardEnds: {
     Resolve: function () {
       this.boostedCards = [];
     },
     automatic: true,
     availableWhenInactive: true,
   },
-  responseOnCorpTurnEnds: {
+  responseOnCorpDiscardEnds: {
     Resolve: function () {
       this.boostedCards = [];
     },
     automatic: true,
     availableWhenInactive: true,
   },
-  
-  //AI evaluation
+
+  //AI: link is passive; install when it can boost a breaker installed this turn
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
-    //Worth keeping if we have non-AI icebreakers or plan to install them
-    for (var i = 0; i < installedRunnerCards.length; i++) {
-      if (CheckSubType(installedRunnerCards[i], "Icebreaker") && 
-          !CheckSubType(installedRunnerCards[i], "AI")) {
-        return true;
-      }
-    }
-    //Check grip for non-AI icebreakers
-    for (var i = 0; i < runner.grip.length; i++) {
-      if (CheckSubType(runner.grip[i], "Icebreaker") && 
-          !CheckSubType(runner.grip[i], "AI")) {
-        return true;
-      }
-    }
-    //Link is always useful
     return true;
   },
-  
   AIEconomyInstall: function () {
-    //This card is most valuable when installed BEFORE icebreakers
-    //so we get the +2 strength bonus when installing them
-    
-    //Check hand for non-AI icebreakers we plan to install
-    var breakersInHand = 0;
+    //install ahead of a non-AI icebreaker waiting in the grip, otherwise only for link
     for (var i = 0; i < runner.grip.length; i++) {
-      if (CheckSubType(runner.grip[i], "Icebreaker") && 
-          !CheckSubType(runner.grip[i], "AI")) {
-        breakersInHand++;
-      }
+      if (CheckSubType(runner.grip[i], "Icebreaker") && !CheckSubType(runner.grip[i], "AI")) return 1;
     }
-    
-    //High priority if we have icebreakers in hand to install after this
-    if (breakersInHand >= 2) return 3;
-    if (breakersInHand >= 1) return 2;
-    
-    //Low priority for just the +1 link
-    //Still useful but not urgent
-    return 1;
+    return 0;
   },
 };
 
@@ -980,15 +943,179 @@ cardSet[26089] = {
   memoryCost: 1,
   strength: 2,
   strengthBoost: 0,
+  //true from this program's install until the end of that turn (barrier interface)
+  installedThisTurn: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) this.installedThisTurn = true;
+    },
+  },
+  //The turn ends after its discard step.
+  responseOnRunnerDiscardEnds: {
+    Resolve: function () {
+      this.installedThisTurn = false;
+    },
+    automatic: true,
+  },
+  responseOnCorpDiscardEnds: {
+    Resolve: function () {
+      this.installedThisTurn = false;
+    },
+    automatic: true,
+  },
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
       return 0;
     },
   },
+  //Installed stealth cards whose hosted credits may pay for this program.
+  _stealthCreditCards: function () {
+    var penrose = this;
+    return InstalledCards(runner).filter(function (card) {
+      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1) return false;
+      return typeof card.canUseCredits !== "function" || card.canUseCredits("using", penrose);
+    });
+  },
+  //Ice this program can interface with right now.
+  _canInterface: function (ice) {
+    if (!ice) return false;
+    if (CheckSubType(ice, "Code Gate")) return true;
+    return this.installedThisTurn && CheckSubType(ice, "Barrier");
+  },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Interface → 1[c]: Break 1 barrier subroutine. Use this ability only if this program was installed this turn.",
+      Enumerate: function () {
+        if (!this.installedThisTurn) return [];
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "Interface → 1[c]: Break 1 code gate subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "1[c]: +3 strength. Spend credits only from stealth cards to use this ability.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return []; //interface usability, as Corroder
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!this._canInterface(attackedServer.ice[approachIce])) return [];
+        if (this._stealthCreditCards().length === 0) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var penrose = this;
+        var sources = ChoicesArrayCards(this._stealthCreditCards());
+        if (sources.length === 0) return;
+        var pump = function (selection) {
+          if (!selection || !selection.card || selection.card.credits < 1) return;
+          SpendHostedCredits(
+            runner,
+            selection.card,
+            1,
+            function () {
+              BoostStrength(penrose, 3);
+            },
+            penrose,
+          );
+        };
+        if (sources.length === 1) pump(sources[0]);
+        else
+          DecisionPhase(
+            runner,
+            sources,
+            pump,
+            "Penrose",
+            "Select a Stealth card to spend 1 credit from:",
+            penrose,
+          );
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  //AI: 1[c] breaks for code gates (and barriers in its install turn, including a
+  //hypothetical install by the run planner); the +3 pump is a restricted stealth payment.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    var breakTypes = [];
+    if (iceAI.subTypes.includes("Code Gate")) breakTypes.push("Code Gate");
+    if (iceAI.subTypes.includes("Barrier") &&
+        (this.installedThisTurn || (rc.bonusBreaker && rc.bonusBreaker.card == this)))
+      breakTypes.push("Barrier");
+    if (breakTypes.length == 0) return result;
+    if (cardStrength >= iceStrength)
+      return result.concat(
+        rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, breakTypes, Infinity, 0, 1, 1, creditsLeft),
+      );
+    var stealthCredits = this._stealthCreditCards().reduce(function (total, card) {
+      return total + card.credits;
+    }, 0);
+    var restrictedSpent = (point.restrictedCreditsSpent || 0) + (rc._restrictedCreditsUsed || 0);
+    if (!rc._poolOnly && restrictedSpent < stealthCredits) {
+      var pumped = rc.StrModify(this, this, point, 3);
+      pumped.runner_credits_spent += 1;
+      pumped.restrictedCreditsSpent = (point.restrictedCreditsSpent || 0) + 1;
+      pumped.restrictedCreditsPaid = Math.min(pumped.restrictedCreditsSpent, rc._restrictedStealthCredits || 0);
+      result.push(pumped);
+    }
+    return result;
+  },
+  AIRunRestrictedCredits: function (server) {
+    //stealth credits excluded from the generic route budget (e.g. Mantle) pay only the pump
+    return this._stealthCreditCards().reduce(function (total, card) {
+      return typeof card.canUseCredits == "function" && card.canUseCredits("", null) ? total : total + card.credits;
+    }, 0);
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Decoder")) return spareMU >= 1;
+    }
+    return true;
+  },
 };
 
 //Pauleʼs Café (26092)
@@ -1004,7 +1131,214 @@ cardSet[26092] = {
   cardType: "resource",
   subTypes: ["Location", "Seedy"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //hosted faceup but not installed (notInstalled), so they use no MU
+  hostedCards: [],
+  //the first install through this card on each Runner turn gets the connection discount
+  installedThisWayThisTurn: false,
+  //the card currently being installed with the discount
+  _discountCard: null,
+  //AI targets for the next host/install
+  _aiHostTarget: null,
+  _aiInstallTarget: null,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.installedThisWayThisTurn = false;
+    },
+    automatic: true,
+  },
+  //Unique (♦) connection resources currently installed.
+  _uniqueConnections: function () {
+    return InstalledCards(runner).filter(function (card) {
+      return CheckCardType(card, ["resource"]) && CheckSubType(card, "Connection") && card.unique === true && card.faceUp !== false;
+    }).length;
+  },
+  //Discount the next install through this card would receive now.
+  _nextDiscount: function () {
+    if (playerTurn != runner || this.installedThisWayThisTurn) return 0;
+    return this._uniqueConnections();
+  },
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (card && card == this._discountCard) return -this._uniqueConnections();
+      return 0;
+    },
+  },
+  //Install cost of a hosted card through this card (not counting the ability's 1[c]).
+  _hostedInstallCost: function (card, host) {
+    var previous = this._discountCard;
+    if (this._nextDiscount() > 0) this._discountCard = card;
+    try {
+      return InstallCost(card, host || null);
+    } finally {
+      this._discountCard = previous;
+    }
+  },
+  _hostChoices: function () {
+    return ChoicesArrayCards(runner.grip, function (card) {
+      return CheckCardType(card, ["program", "hardware"]);
+    });
+  },
+  //Whether 1[c] for this ability and then the install cost can both be paid:
+  //shared credits (pool and unrestricted sources) cover whatever restricted ones cannot.
+  _canPay: function (card, installCost) {
+    var shared = AvailableCredits(runner);
+    var abilityOnly = Math.max(0, AvailableCredits(runner, "using", this) - shared);
+    var installOnly = Math.max(0, AvailableCredits(runner, "installing", card) - shared);
+    return Math.max(0, 1 - abilityOnly) + Math.max(0, installCost - installOnly) <= shared;
+  },
+  _installChoices: function () {
+    var ret = [];
+    for (var i = 0; i < this.hostedCards.length; i++) {
+      var hosted = this.hostedCards[i];
+      var destinations = ChoicesCardInstall(hosted, true);
+      for (var j = 0; j < destinations.length; j++) {
+        if (this._canPay(hosted, this._hostedInstallCost(hosted, destinations[j].host))) ret.push(destinations[j]);
+      }
+    }
+    return ret;
+  },
+  abilities: [
+    {
+      text: "[click]: Host 1 program or piece of hardware from your grip faceup on this resource.",
+      alt: "paule_host",
+      Enumerate: function () {
+        if (!CheckActionClicks(runner, 1)) return [];
+        var choices = this._hostChoices();
+        var target = this._aiHostTarget;
+        if (runner.AI != null && target) {
+          var targeted = choices.filter(function (choice) {
+            return choice.card == target;
+          });
+          if (targeted.length > 0) return targeted;
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        this._aiHostTarget = null;
+        if (!params || !params.card) return;
+        MoveCard(params.card, this.hostedCards);
+        params.card.host = this;
+        params.card.faceUp = true;
+        params.card.notInstalled = true;
+        Log(GetTitle(params.card, true) + " hosted on " + GetTitle(this, true));
+      },
+    },
+    {
+      text: "1[c]: Install 1 hosted card.",
+      alt: "paule_install",
+      Enumerate: function () {
+        var choices = this._installChoices();
+        var target = this._aiInstallTarget;
+        if (runner.AI != null && target) {
+          var targeted = choices.filter(function (choice) {
+            return choice.card == target;
+          });
+          if (targeted.length > 0) return targeted;
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        var cafe = this;
+        this._aiInstallTarget = null;
+        if (!params || !params.card || !this.hostedCards.includes(params.card)) return;
+        var card = params.card;
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            if (playerTurn == runner && !cafe.installedThisWayThisTurn) {
+              cafe.installedThisWayThisTurn = true;
+              cafe._discountCard = card;
+            }
+            var finish = function () {
+              cafe._discountCard = null;
+            };
+            Install(
+              card,
+              params.host,
+              false,
+              null,
+              true,
+              null,
+              cafe,
+              finish,
+              function () {
+                //no longer merely hosted: it leaves this resource as it is installed
+                card.notInstalled = false;
+              },
+              false,
+              finish,
+            );
+          },
+          this,
+        );
+      },
+    },
+  ],
+
+  //AI: host a grip card and install it at once when unique connections make that cheaper
+  //than a direct install; hosted icebreakers are offered to the run planner.
+  AIInstallDiscountAbility: function (card, host) {
+    if (!CheckCardType(card, ["program", "hardware"]) || !runner.grip.includes(card)) return null;
+    if (!CheckActionClicks(runner, 1)) return null;
+    var discount = this._nextDiscount();
+    if (discount < 2) return null; //the 1[c] ability cost cancels one point of discount
+    host = host || null;
+    var previous = this._discountCard;
+    this._discountCard = card;
+    var discountedCost;
+    try {
+      discountedCost = InstallCost(card, host);
+    } finally {
+      this._discountCard = previous;
+    }
+    var saving = InstallCost(card, host) - discountedCost - 1;
+    if (saving < 1) return null;
+    if (!this._canPay(card, discountedCost)) return null;
+    var cafe = this;
+    return {
+      alt: "paule_host",
+      discount: saving,
+      select: function () {
+        cafe._aiHostTarget = card;
+      },
+      followUp: {
+        source: cafe,
+        alt: "paule_install",
+        card: card,
+        select: function () {
+          cafe._aiInstallTarget = card;
+        },
+      },
+    };
+  },
+  AIAbilityInstallBreakers: function (installedRunnerCards) {
+    var cafe = this;
+    var installedTitles = installedRunnerCards.map(function (card) {
+      return card.title;
+    });
+    return this.hostedCards
+      .filter(function (card) {
+        return CheckSubType(card, "Icebreaker") && !installedTitles.includes(card.title);
+      })
+      .map(function (card) {
+        return {
+          card: card,
+          cost: 1 + cafe._hostedInstallCost(card, null),
+          alt: "paule_install",
+          select: function () {
+            cafe._aiInstallTarget = card;
+          },
+        };
+      });
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    return this._uniqueConnections() >= 1;
+  },
 };
 
 //Buffer Drive (26093)
