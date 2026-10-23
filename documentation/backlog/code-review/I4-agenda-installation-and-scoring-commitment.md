@@ -48,20 +48,16 @@ Part 1:
 node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05
 ```
 
-Part 1 + 2 (seeds 8001-9000, as the folded destination/hold gate reserves):
+Part 1 + 2, on the same games (the baseline arm is reused from the cache):
 
 ```
-node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --corp-option agendaDestinationPlan=true --seeds 8001-9000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05
+node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --corp-option agendaDestinationPlan=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05
 ```
 
-To see part 2's own effect, compare the two candidates on the same seeds
-(both batch runs, then a paired comparison; report only):
-
-```
-node scripts/ai-batch.js --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --seeds 8001-9000 --collector installOutcomes --collector agendaCommitment --out /tmp/i4-part1.json
-node scripts/ai-batch.js --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --corp-option agendaDestinationPlan=true --seeds 8001-9000 --collector installOutcomes --collector agendaCommitment --out /tmp/i4-part2.json
-node scripts/ai-batch.js --compare /tmp/i4-part1.json /tmp/i4-part2.json --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5
-```
+Both gates print the path of their candidate report
+(`.ai-batch-cache/candidate-<hash>.json`). Part 2's own effect is the paired
+comparison of those two reports:
+`node scripts/ai-batch.js --compare <part-1 candidate> <part-1+2 candidate> --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5`
 
 **Next for the agent.**
 - Record the gate results in this Resolution. If part 1 passes, the owner
