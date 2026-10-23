@@ -10,7 +10,7 @@ const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
 const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
-  outcomeLine, failedGateResult, outcomeProblem} = require('../scripts/ticket.js');
+  outcomeLine, failedGateResult, outcomeProblem, untrackedReproductionMatches} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -103,6 +103,18 @@ const reproductionBefore = [
   "assert.strictEqual(firstChoice, 'install');",
   "assert.strictEqual(secondChoice, 'advance');",
 ];
+const originalReproduction = reproductionBefore.join('\n') + '\n';
+const baselineLine = '**Untracked reproduction SHA-256:** `' +
+  crypto.createHash('sha256').update(originalReproduction).digest('hex') + '`';
+assert(untrackedReproductionMatches(baselineLine, Buffer.from(originalReproduction)),
+  'untracked reproduction fallback verifies the complete original bytes');
+assert(!untrackedReproductionMatches(baselineLine, originalReproduction.replace('install', 'advance')),
+  'untracked reproduction fallback rejects a changed assertion');
+assert(!untrackedReproductionMatches(baselineLine, originalReproduction + '// extra\n'),
+  'untracked reproduction fallback also rejects non-assertion changes');
+assert(!untrackedReproductionMatches('', originalReproduction), 'fallback requires a recorded baseline');
+assert(!untrackedReproductionMatches('**Untracked reproduction SHA-256:** `bad`', originalReproduction),
+  'fallback rejects malformed digests');
 assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --corp-option x=true\n' +
   '--collector runs --start tests/fixtures/corp-decisions --collector <name> --guard winRate=0.02`'), [],
   'gate setup check accepts existing collectors, start boards and template placeholders');

@@ -17,6 +17,7 @@
 // keeps a linked roadmap item's status in step: code-review/ or remediation/
 // set it to in-progress, and done/ turns its entry into a Done-table row.
 const fs = require('fs');
+const crypto = require('crypto');
 const path = require('path');
 const {spawnSync} = require('child_process');
 const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
@@ -29,6 +30,14 @@ const FAMILIES = ['bugs', 'backlog'];
 const run = (cmd, args) => spawnSync(cmd, args, {cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 const git = (...args) => run('git', args);
 const rel = file => path.relative(root, path.resolve(root, file)).split(path.sep).join('/');
+
+// A reproduction created in the current worktree has no Git baseline. Record
+// its digest before implementation; this fallback requires the entire file to
+// remain unchanged, a stricter comparison than the assertion-only Git check.
+function untrackedReproductionMatches(resolution, contents) {
+  const match = (resolution || '').match(/^\*\*Untracked reproduction SHA-256:\*\* `([0-9a-f]{64})`\s*$/m);
+  return Boolean(match && crypto.createHash('sha256').update(contents).digest('hex') === match[1]);
+}
 
 function ticketFamily(ticket) {
   const match = rel(ticket).match(/^documentation\/(bugs|backlog)\//);
@@ -454,7 +463,11 @@ function check(ticket, {fast = false} = {}) {
         if (added) original = git('show', added + ':' + pending);
       }
       if (original.status !== 0) {
-        report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        if (untrackedReproductionMatches(resolution, fs.readFileSync(path.join(root, green))))
+          report('PASS', 'Untracked reproduction matches its recorded original SHA-256 byte for byte.');
+        else if (/^\*\*Untracked reproduction SHA-256:\*\*/m.test(resolution || ''))
+          report('FAIL', 'Untracked reproduction does not match its recorded original SHA-256.');
+        else report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
       } else {
         const before = original.stdout.split('\n');
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
@@ -533,7 +546,8 @@ function check(ticket, {fast = false} = {}) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
+  closeRoadmapItem, reproductionExpectationsMatch, untrackedReproductionMatches,
+  gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);
