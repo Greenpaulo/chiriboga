@@ -626,7 +626,6 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
     })) trashEvent.corpRunnerFactionOrdinal = RecordTurnEvent("corpTrashRunnerFaction");
     if (runnerEventTrashed) trashEvent.runnerEventOrdinal = RecordTurnEvent("runnerEventTrashed");
     if (runnerInstalledProgramTrashed) RecordTurnEvent("runnerInstalledProgramTrashed");
-
     trashEvent.runnerGripOrStackCards = runnerGripOrStackCards;
     trashEvent.runnerGripOrStackOrdinal = runnerGripOrStackCards.length > 0 ? RecordTurnEvent("runnerGripOrStackTrash") : 0;
 	//first the automatic triggers

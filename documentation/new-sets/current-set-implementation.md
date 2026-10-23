@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**1 complete, 15 outstanding** (`15 Pending`, `0 In progress`, `0 Blocked`).
+**8 complete, 8 outstanding** (`8 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -89,7 +89,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**1 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**8 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |

@@ -244,8 +244,6 @@ AI decisions:
   pool substitution, pre-run Toolkit offset), the AI's live encounter choice,
   Corp bypass hook, and the action-phase selector triggering The Back.
 
-No batches implemented yet.
-
 ### Batch 5 — 2026-10-23
 
 Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler (26083–26087).
