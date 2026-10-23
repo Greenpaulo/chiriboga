@@ -100,7 +100,9 @@ function compareMain(root, options = {}, batch = runBatch) {
     const candidateStatus = batch(root, [...args, '--out', candidateReport]);
     if (mainStatus === 1 || candidateStatus === 1)
       throw new Error(`Games failed; inspect failures and diagnostic tails in ${reports}. Comparison skipped.`);
-    batch(root, ['scripts/ai-batch.js', '--compare', mainReport, candidateReport]);
+    const comparisonStatus = batch(root, ['scripts/ai-batch.js', '--compare', mainReport, candidateReport]);
+    if (comparisonStatus === 1)
+      throw new Error(`Comparison failed; reports retained in ${reports}.`);
     return {reports, mainReport, candidateReport};
   } finally {
     if (added) {

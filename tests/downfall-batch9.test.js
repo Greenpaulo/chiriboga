@@ -21,7 +21,7 @@ const c = {console, cardSet: [], setIdentifiers: [], $: jq, jQuery: jq, PIXI: st
   setTimeout, clearTimeout, setInterval: () => 0, Image: function () {}, Audio: function () {return stub;}};
 vm.createContext(c);
 for (const file of ['config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js', 'checks.js', 'mechanics.js', 'utility.js',
-  'runcalculator.js', 'ai_runner.js', 'ai_corp.js', 'sets/systemgateway.js', 'sets/downfall.js'])
+  'runcalculator.js', 'ai_runner.js', 'ai_corp.js', 'sets/systemgateway.js', 'sets/downfall.js', 'sets/elevation.js'])
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), c, {filename: file});
 c.Log = () => {}; c.LogError = message => {throw Error(message);};
 c.Render = () => {}; c.UpdateCounters = () => {}; c.PlaySound = () => {}; c.SetHistoryThumbnail = () => {};
@@ -271,6 +271,25 @@ c.playerTurn = runner; c.attackedServer = corp.HQ; c.approachIce = -1;
 c.currentPhase = {identifier: 'Run 4.5', title: 'Before approach'};
 assert.strictEqual(await ai.CommandChoice(['rez', 'n']), 0);
 assert.strictEqual(ai.preferred.cardToRez, installLetheia);
+// Maintenance Access redirects before approach tracking and response enumeration.
+reset();
+const originalLetheia = put(card(26046), corp.archives.root);
+const redirectedLetheia = put(card(26046), corp.HQ.root); redirectedLetheia.rezzed = true;
+const maintenance = put(card(35016), runner.resolvingCards); maintenance.runningWithThis = true;
+c.AutomaticTriggers('automaticOnRunBegins');
+c.attackedServer = corp.archives; c.approachIce = 0; c.playerTurn = runner;
+c.currentPhase = c.phases.runApproachServer;
+c.currentPhase.Init();
+assert.strictEqual(c.attackedServer, corp.HQ);
+assert.strictEqual(c.approachIce, -1);
+assert.strictEqual(originalLetheia.approachedThisRun, false, 'redirected-away server was never approached');
+assert.strictEqual(redirectedLetheia.firstApproach, true, 'destination gets its first approach');
+c.GlobalTriggersPhaseCommonResolveN(false); // Runner passes; Corp approach triggers are built.
+assert(c.currentPhase.Enumerate.trigger().some(option => option.card === redirectedLetheia),
+  'redirect destination offers the Letheia Psi response');
+c.MoveCard(originalLetheia, corp.archives.cards);
+c.MoveCard(redirectedLetheia, corp.HQ.cards);
+c.MoveCard(maintenance, runner.heap);
 // Letheia: first approach only (including inactive tracking), optional trash,
 // same-run movement, legal target, real Corp preference and Runner continuation.
 reset(); grip(10); runner.creditPool = 20;

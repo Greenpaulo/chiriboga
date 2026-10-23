@@ -18,7 +18,7 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | In progress | Batches 1–9 complete; batches 10–13 pending. |
+| `downfall` | In progress | Batches 1–10 complete; batches 11–13 pending. |
 
 Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)

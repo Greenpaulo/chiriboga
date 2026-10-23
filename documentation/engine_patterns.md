@@ -950,9 +950,11 @@ then runs after deduction; the caller must flush `CreditSpendResponses` after
 all linked payments, before continuing the effect. Ordinary payments retain
 their existing wait-for-responses behaviour.
 
-`automaticOnApproachServer.Resolve(server)` fires before approach response
-triggers are collected, including when `availableWhenInactive` is set. Letheia
-Nisei uses it to consume the first approach even while unrezzed; run-begin
+`automaticOnApproachServer.Resolve(server)` fires after would-approach redirects
+and before approach response triggers are collected, including when
+`availableWhenInactive` is set. Its server argument is the current attacked
+server after any redirect. Letheia Nisei uses it to consume the first approach
+even while unrezzed; run-begin
 cleanup resets the guard independently of active status.
 
 Trash callbacks also receive a fourth argument, `trashEvent`, whose

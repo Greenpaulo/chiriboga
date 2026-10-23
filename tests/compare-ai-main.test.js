@@ -82,6 +82,12 @@ try {
     }), /Games failed; inspect failures and diagnostic tails/);
     assert.strictEqual(calls.length, 2, 'both reports are collected before skipping comparison');
   });
+  fixture(root => {
+    let calls = 0;
+    assert.throws(() => compareMain(root, {}, () => ++calls === 3 ? 1 : 0),
+      /Comparison failed; reports retained/);
+    assert.strictEqual(calls, 3, 'comparison failure is reported after both game runs');
+  });
   for (const failAt of [1, 2]) fixture(root => {
     let count = 0;
     assert.throws(() => compareMain(root, {}, () => {

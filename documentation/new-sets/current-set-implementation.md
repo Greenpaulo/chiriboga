@@ -72,9 +72,7 @@ No existing range is credited without tests.
 | 6 | 26024–26030 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch6.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 6 notes. |
 | 7 | 26031–26035 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch7.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 7 notes. |
 | 8 | 26036–26040 | 2026-10-18 | Codex | `tests/downfall-batch8.test.js`; shared format, helper and hook checks; full suite (95 files) | Operations, run-entry costs, reveal income and agenda swaps with baseline AI; see implementation notes. |
-
 | 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
-
 | 10 | 26047–26051 | 2026-10-22 | Codex | `tests/downfall-batch10.test.js`; batches 8–9 and set integration; required shared checks; full suite | Gameplay, real install/rez/trigger/run consumers, finite counter/self-trash and gifted-card accounting; all 115 full-suite files pass on Node 20.19.0. See batch 10 notes. |
 
 ## Batch-review log
@@ -104,9 +102,7 @@ Preserve subsequent review verdicts and ownership.
 | 7 | 26031–26035 | Pending | — | Optional strategy: MirrorMorph action ordering, Architect Deployment Test install value, draw/credit asset timing and Hagen program-trash value. [Notes](downfall-implementation-notes.md#batch-7--2603126035). |
 | 8 | 26036–26040 | Pending | — | Compare operation mode sequences, Cold Site setup budget, Hyoubu spare-click value and Yagi-Uda swap/overadvancement plans; see implementation notes. |
 | 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
-
 | 9 | 26041–26046 | Pending | — | Optional strategy: damage/counter timing versus scoring, Complete Image naming/play thresholds, Saisentan type priors and probabilistic damage pricing, Letheia bid/trash value and placement among protected servers. [Notes](downfall-implementation-notes.md#batch-9--2604126046). |
-
 | 10 | 26047–26051 | Pending | — | Optional strategy: scored-counter conservation and cross-agenda sequences; Daily Quest protection/reward trade-offs; Subscription rez timing; Congratulations! placement and Loot Box income versus gifted-card value. [Notes](downfall-implementation-notes.md#batch-10--2604726051). |
 
 ## Optimisation log
