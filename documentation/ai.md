@@ -2331,6 +2331,9 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AITriggerToRemoveTags()` | function | Return the alt of a paid ability that removes tags without a click, or falsy |
 | `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes, and one with `strengthMod` and `target` changes that ice's strength for the rest of the route |
 | `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
+
+| `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
+| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes |
 | `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select}` when this card's ability can install the grip card more cheaply than the basic install action |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
@@ -3489,3 +3492,32 @@ optimisation work.
   `AIWorthKeeping` is true while installed hardware has an ability to use.
   Counters come from the engine's new `automaticOnAbilityUsed(card, ability)`
   trigger, fired by `TriggerAbility` when any card ability resolves.
+
+### Uprising batch 5 card hooks
+
+- Harmony AR Therapy uses `AIWouldPlay()` and `AIWorthKeeping()`: it is worth
+  playing when `_icebreakerInPileNotInHandOrArray(runner.heap, …)` finds a needed
+  breaker in the Heap, or the Stack has under 5 cards and the Heap at least 3.
+  `AIHeapCards()` resolves the choice: that breaker first, then the highest-ELO
+  cards, at most 5 with different names.
+- Aniccam has no AI hook: its draw is mandatory, and the Runner AI installs it as
+  its desired Console.
+- Simulchip uses `AITriggerInPaidWindow()`, the Corp hook name, which now also
+  has a Runner consumer. In a decision with `trigger` and no run in progress,
+  the Runner AI triggers an active card's ability whose `alt` the hook returns.
+  In `Runner 1.3` it considers only click abilities. Simulchip returns
+  `"simulchip_install"` only when an installed program has already been trashed
+  this turn (cost waived) and a needed Heap breaker is installable after the 3[c]
+  discount. Its resolution helpers `AICostChoice(choices)` (lowest-value
+  program, keeping icebreakers) and `AIHeapInstallChoice(choices)` (the needed
+  breaker, else the highest ELO) choose the AI's targets. All are read-only
+  apart from Simulchip's own temporary discount flag.
+- Cordyceps uses `AIWastefulToInstall()` (no central ice, or fewer than 2
+  installed ice) and `AIChooseSwap(server)`. Its success response offers the AI
+  only the swap that most lowers `_iceThreatScore` for the central just run:
+  known ice protecting it for ice protecting another server. It declines when
+  no swap lowers it.
+- Euler's `AIImplementBreaker` prices code gates at 1[c] per +1 strength and,
+  on its install turn (`installedThisTurn`), free single breaks; otherwise
+  2[c] breaks up to 2. Its free ability is listed first, so a planned break uses
+  it while available. `AIPreferredInstallChoice` keeps the last click.

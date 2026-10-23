@@ -582,6 +582,16 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
   //currently giving whoever's turn it is priority...not sure this is always going to be right
   TriggeredResponsePhase(playerTurn, "responseOnWouldTrash", [cards], function() {
     UninstallInterrupts(cards, function () {
+    // Public turn facts for Uprising cards, captured while trashed cards are still
+    // in place: a faceup event trashed from any location (Aniccam) and an installed
+    // program trashed (Simulchip). Facedown installed cards have no card type.
+    var runnerEventTrashed = false, runnerInstalledProgramTrashed = false;
+    for (var i=0; i<cards.length; i++) {
+      var installedFacedown = CheckInstalled(cards[i]) && !cards[i].faceUp;
+      if (cards[i].player != runner || installedFacedown) continue;
+      if (cards[i].cardType == "event") runnerEventTrashed = true;
+      else if (cards[i].cardType == "program" && CheckInstalled(cards[i])) runnerInstalledProgramTrashed = true;
+    }
 	//loop through all the cards (move cards, lose information about HQ cards, cancel encounters if relevant, set host to null, and log message)
 	//BUT fire the on trashed trigger just once, when all this is one (i.e. for all cards at once)
 	for (var i=0; i<cards.length; i++) {
@@ -610,6 +620,8 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
     if (trashingPlayer == corp && runner.identityCard && runner.identityCard.faction && directlyTrashed.some(function (card) {
       return card.faction == runner.identityCard.faction;
     })) trashEvent.corpRunnerFactionOrdinal = RecordTurnEvent("corpTrashRunnerFaction");
+    if (runnerEventTrashed) trashEvent.runnerEventOrdinal = RecordTurnEvent("runnerEventTrashed");
+    if (runnerInstalledProgramTrashed) RecordTurnEvent("runnerInstalledProgramTrashed");
 	//first the automatic triggers
 	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed, trashEvent]);
     if (fromDamage) {

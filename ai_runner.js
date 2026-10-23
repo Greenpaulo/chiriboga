@@ -1625,6 +1625,24 @@ console.log(this.preferred);
 		}
 	}
 	
+	//installed cards declaring a useful paid ability outside runs (e.g. Simulchip):
+	//AITriggerInPaidWindow() returns the ability alt to use now, or a falsy value
+	if (optionList.includes("trigger") && attackedServer === null) {
+		var paidWindowCards = ActiveCards(runner);
+		var paidLimitTo = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+		for (var i = 0; i < paidWindowCards.length; i++) {
+			if (typeof paidWindowCards[i].AITriggerInPaidWindow != "function") continue;
+			var paidAlt = paidWindowCards[i].AITriggerInPaidWindow.call(paidWindowCards[i]);
+			if (!paidAlt) continue;
+			if (!ChoicesAbility(paidWindowCards[i], paidLimitTo).some(function (a) { return a.alt == paidAlt; })) continue;
+			this._log("there is a card I would trigger in this paid ability window");
+			return this._returnPreference(optionList, "trigger", {
+				cardToTrigger: paidWindowCards[i],
+				abilityAlt: paidAlt,
+			});
+		}
+	}
+
     if (optionList.includes("jack")) {
       if (currentPhase.identifier == "Run 4.3" && approachIce == 0) {
         //past last ice, choosing whether to approach server

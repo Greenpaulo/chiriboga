@@ -243,3 +243,56 @@ AI decisions:
   payments, run-calculator routes (bypass, restricted pump, once per route, no
   pool substitution, pre-run Toolkit offset), the AI's live encounter choice,
   Corp bypass hook, and the action-phase selector triggering The Back.
+
+No batches implemented yet.
+
+### Batch 5 — 2026-10-23
+
+Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler (26083–26087).
+Focused tests: `tests/uprising-batch5.test.js`.
+
+Rulings (NetrunnerDB/NSG rulings and CR v26.03):
+
+- Aniccam: events trashed as they finish resolving count, events that remove
+  themselves from the game do not, and facedown installed cards have no card
+  type. Discarding is not trashing (CR 1.19.3), so hand-size discards do not draw.
+- Simulchip can be used with no program in the heap. The program trashed to pay
+  its cost reaches the heap first and may be the one it installs.
+- Harmony AR Therapy can be played with an empty heap or stack.
+- Cordyceps follows CR 8.8.3: swapped ice stay installed and keep hosted cards.
+  It does not offer ice hosted on Awakening Center; that card is in the
+  non-playable Creation and Control set.
+
+Shared engine/AI changes (kept minimal):
+
+- `mechanics.js` `Trash()`: before cards move, records whether a faceup
+  Runner event or a faceup installed program is trashed. It then sets
+  `trashEvent.runnerEventOrdinal = RecordTurnEvent("runnerEventTrashed")` and
+  records `RecordTurnEvent("runnerInstalledProgramTrashed")`. No existing
+  trigger changes.
+- `phase.js`: the post-action cleanup that moves resolved Runner cards to the
+  heap (`TrashResolvedRunnerCard`) also records `runnerEventTrashed` for events.
+  When the post-action window closes, `Resolve.n` opens one
+  `responseOnPlayedEventTrashed(events, trashEvent)` window before continuing.
+  It does not wait for the next action's Init, because `IncrementPhase` enters
+  the post-action phase before the event resolves. Only Aniccam uses the new
+  callback; other "whenever trashed" cards still see only `Trash()`.
+- `ai_runner.js`: a Runner consumer for `AITriggerInPaidWindow()` (already a
+  Corp hook). It runs outside runs when `trigger` is offered, and only click
+  abilities count during `Runner 1.3`.
+
+Card decisions:
+
+- Harmony AR Therapy chooses one card at a time (names already chosen are not
+  offered) with a Done option, then shuffles and removes itself from the game.
+- Aniccam's draw is mandatory and uses the shared per-turn ordinal, so an event
+  trashed before Aniccam was installed still uses up the "first time".
+- Simulchip discounts through `modifyInstallCost` with `availableWhenInactive`,
+  because it is already in the heap while the install resolves. The cost and the
+  chip are trashed together and cannot be prevented. The install is mandatory
+  when any program is affordable.
+- Cordyceps swaps through a once-per-turn optional success response. Human
+  players choose an ice on the central, then any other installed ice. The AI
+  offers only its best threat-lowering swap.
+- Euler tracks `installedThisTurn`, reset when either turn begins. Its 2[c]
+  break, like Buzzsaw's, makes the AI break a second subroutine when one remains.
