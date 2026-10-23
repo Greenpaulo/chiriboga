@@ -389,3 +389,43 @@ Queued for optimisation:
   action-phase draw can come first.
 - Install has no damage/mill-aware value.
 - DreamNet's draw is not in run potential.
+
+### Batch 8 — Haas-Bioroid (26096–26100), 2026-10-23
+
+Shared changes (kept minimal; both are needed by these cards only):
+
+- `utility.js` `MoveCardTriggers`: new card hook
+  `interruptOnAddedToScoreArea(scoreArea, locationfrom)`, called when a card
+  enters either score area, after `cardLocation` is set. Project Vacheron uses
+  it so its 4 counters exist before the after-command win check. A
+  `responseOnStolen` placement would let a 3-point steal win first. Because it
+  runs inside `MoveCard`, it also covers non-`Steal` moves into the Runner's
+  score area, such as a swap from the Corp's score area.
+- `mechanics.js` `Damage`: `runner.coreDamage` now increases by the damage
+  dealt, not by 1 per call. Every existing caller does 1 core damage, so only
+  Cerebral Overwriter's X > 1 changes behaviour.
+
+Rulings and decisions:
+
+- Megaprix Qualifier counts any other copy in either score area. The +1 is
+  computed from the hosted counter through `agendaPointsForPlayer`.
+- Project Vacheron: "from anywhere except Archives" is tested against the
+  card's location as it moves. The gained ability uses
+  `responseOnRunnerTurnBegins` with `availableWhenInactive`, because cards in
+  the Runner's score area are not active. Several older readers use raw
+  `agendaPoints` (Data Dealer AI, some run-calculator and Corp-AI estimates),
+  so they see 3. That is the same accepted limitation as Let Them Dream.
+- Bass CH1R180G4 trashes itself as an unpreventable cost, then gains 2 clicks.
+- Cerebral Overwriter works unrezzed, like other ambushes. It is offered only
+  with at least one advancement counter and 3[c] available; paying for 0 damage
+  has no effect.
+- Vaporframe Fabricator installs without rezzing. Its trash response needs the
+  Runner to trash it while it is rezzed, using the Calvin B4L3Y pattern. "Not in
+  the root of this server" excludes asset, upgrade and agenda options for that
+  server, but ice can still be installed protecting it.
+
+Baseline AI evidence: `tests/uprising-batch8.test.js`. It drives the real Corp
+action-phase selector for Bass (score burst) and Cerebral Overwriter (advance
+up to 3), and uses AI `preferred` choices for Overwriter's payment and
+Vaporframe's installs. Deeper strategy is queued in the tracker's optimisation
+queue.
