@@ -54,7 +54,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 2 | 26070–26073 | Pending | — | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
 | 3 | 26074–26078 | Pending | — | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
 | 4 | 26079–26082 | Pending | — | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
-| 5 | 26083–26087 | Pending | — | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
+| 5 | 26083–26087 | Complete | Claude, 2026-10-23 | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
 | 6 | 26088–26092 | Pending | — | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut (three existing, unverified), Paule's Café. Complex. |
 | 7 | 26093–26095 | Pending | — | Neutral Runner: Buffer Drive, Daily Casts, DreamNet (two existing, unverified). |
 | 8 | 26096–26100 | Pending | — | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
@@ -73,6 +73,7 @@ No batches completed.
 
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
+| 5 | 26083–26087 | 2026-10-23 | Claude | `tests/uprising-batch5.test.js` | Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler with baseline AI. Shared: `Trash()` records the `runnerEventTrashed`/`runnerInstalledProgramTrashed` turn events; played events trashed after resolving open `responseOnPlayedEventTrashed`; a Runner `AITriggerInPaidWindow()` consumer. See the [notes](uprising-implementation-notes.md#batch-5--2026-10-23). |
 
 ## Batch-review log
 
@@ -88,6 +89,7 @@ initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
+| 5 | 26083–26087 | Pending | — | Deeper strategy only: Simulchip never pays the program-trash cost and is not used during runs (e.g. to recover a breaker trashed by a subroutine); Cordyceps only weakens the central just run, with unrezzed ice valued at the default threat estimate; Harmony AR Therapy ranks recovered cards by ELO, without deck-plan or Aniccam synergy; Aniccam has no event-count install valuation; Euler's install-turn free breaks are not anticipated when planning install-then-run. |
 
 ## Optimisation log
 

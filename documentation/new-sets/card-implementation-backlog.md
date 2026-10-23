@@ -71,6 +71,9 @@ unverified and not credited, and 59 are scaffolds with TODO markers. See the
 [active tracker](current-set-implementation.md) and
 [implementation notes](uprising-implementation-notes.md).
 
+- Batch 5 (26083–26087) is implemented; its deeper-strategy work is in the
+  tracker's optimisation queue.
+
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.
 

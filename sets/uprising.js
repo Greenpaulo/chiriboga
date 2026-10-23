@@ -880,8 +880,79 @@ cardSet[26083] = {
   cardType: "event",
   subTypes: [],
   playCost: 2,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  //heap cards that can still be chosen: not chosen yet and not sharing a chosen name
+  HeapChoices: function (chosen) {
+    var names = chosen.map(function (card) {
+      return card.title;
+    });
+    return ChoicesArrayCards(runner.heap, function (card) {
+      return !chosen.includes(card) && !names.includes(card.title);
+    });
+  },
+  //Playable with an empty heap or stack: it still shuffles and removes itself.
+  Resolve: function () {
+    if (runner.AI != null) {
+      this.ShuffleIntoStack(this.AIHeapCards());
+      return;
+    }
+    this.ChooseHeapCards([]);
+  },
+  ChooseHeapCards: function (chosen) {
+    var choices = this.HeapChoices(chosen);
+    if (chosen.length >= 5 || choices.length < 1) {
+      this.ShuffleIntoStack(chosen);
+      return;
+    }
+    for (var i = 0; i < choices.length; i++)
+      choices[i].label = "(Harmony AR Therapy) Shuffle into stack -> " + choices[i].label;
+    choices.push({
+      card: null,
+      label: "Shuffle " + chosen.length + " chosen card(s) into the stack",
+      button: "Done",
+    });
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        if (params.card) this.ChooseHeapCards(chosen.concat([params.card]));
+        else this.ShuffleIntoStack(chosen);
+      },
+      "Harmony AR Therapy",
+      "Choose up to 5 cards with different names in your heap",
+      this,
+    );
+  },
+  ShuffleIntoStack: function (chosen) {
+    for (var i = 0; i < chosen.length; i++) MoveCard(chosen[i], runner.stack);
+    Shuffle(runner.stack);
+    Log(
+      "Harmony AR Therapy shuffled " +
+        (chosen.length > 0 ? chosen.map(function (card) { return GetTitle(card, true); }).join(", ") : "no cards") +
+        " into the stack",
+    );
+    RemoveFromGame(this);
+  },
+  //AI: up to 5 differently named heap cards, a needed icebreaker first, then by ELO
+  AIHeapCards: function () {
+    var needed = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner));
+    var ranked = runner.heap.concat([]).sort(function (a, b) {
+      if (a == needed) return -1;
+      if (b == needed) return 1;
+      return (b.elo || 0) - (a.elo || 0);
+    });
+    var chosen = [];
+    for (var i = 0; i < ranked.length && chosen.length < 5; i++) {
+      if (!chosen.some(function (card) { return card.title == ranked[i].title; })) chosen.push(ranked[i]);
+    }
+    return chosen;
+  },
+  //AI: recover a needed icebreaker, or refill a short stack from a stocked heap
+  AIWouldPlay: function () {
+    if (runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner))) return true;
+    return runner.stack.length < 5 && runner.heap.length >= 3;
+  },
+  AIWorthKeeping: function () {
+    return this.AIWouldPlay();
   },
 };
 
@@ -899,7 +970,31 @@ cardSet[26084] = {
   cardType: "hardware",
   subTypes: ["Console"],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  //The engine numbers event trashes each turn (runnerEventOrdinal), including
+  //trashes before this console was installed and played events trashed as they
+  //finish resolving; only the first one draws. Discarding is not trashing.
+  responseOnTrash: {
+    Enumerate: function (cards, trashingPlayer, directlyTrashed, trashEvent) {
+      if (!trashEvent || trashEvent.runnerEventOrdinal !== 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      Draw(runner, 1);
+    },
+    text: "Aniccam: Draw 1 card",
+  },
+  responseOnPlayedEventTrashed: {
+    Enumerate: function (events, trashEvent) {
+      if (!trashEvent || trashEvent.runnerEventOrdinal !== 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      Draw(runner, 1);
+    },
+    text: "Aniccam: Draw 1 card",
+  },
 };
 
 //Simulchip (26085)
@@ -915,7 +1010,128 @@ cardSet[26085] = {
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  //true while listing heap installs; the chosen program keeps the discount while it installs
+  _discountActive: false,
+  _discountCard: null,
+  //the chip is in the heap by the time its install resolves
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (!card || !CheckCardType(card, ["program"])) return 0;
+      if (this._discountActive && runner.heap.includes(card)) return -3;
+      if (card == this._discountCard) return -3;
+      return 0;
+    },
+    availableWhenInactive: true,
+  },
+  //Installed programs trashed earlier this turn, by either player, waive the additional cost.
+  CostWaived: function () {
+    return TurnEventCount("runnerInstalledProgramTrashed") > 0;
+  },
+  CostPrograms: function () {
+    return InstalledCards(runner).filter(function (card) {
+      return CheckCardType(card, ["program"]) && CheckTrash(card);
+    });
+  },
+  HeapInstallChoices: function () {
+    var previous = this._discountActive;
+    this._discountActive = true;
+    try {
+      return ChoicesArrayInstall(runner.heap, false, function (card) {
+        return CheckCardType(card, ["program"]);
+      });
+    } finally {
+      this._discountActive = previous;
+    }
+  },
+  //Usable with no program in the heap (the no-change rule no longer applies).
+  //The trashed cost program reaches the heap first and may be the one installed.
+  abilities: [
+    {
+      text: "[trash]: Install 1 program from your heap, paying 3[c] less.",
+      alt: "simulchip_install",
+      Enumerate: function () {
+        if (!CheckInstalled(this) || !CheckTrash(this)) return [];
+        if (!this.CostWaived() && this.CostPrograms().length < 1) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var chip = this;
+        var payCosts = function (program) {
+          Trash(program ? [chip, program] : [chip], false, function () {
+            chip.InstallFromHeap();
+          }, chip);
+        };
+        if (this.CostWaived()) {
+          payCosts(null);
+          return;
+        }
+        var choices = ChoicesArrayCards(this.CostPrograms());
+        if (runner.AI != null) choices = [this.AICostChoice(choices)];
+        DecisionPhase(
+          runner,
+          choices,
+          function (params) {
+            payCosts(params.card);
+          },
+          "Simulchip",
+          "Trash 1 installed program",
+          this,
+        );
+      },
+    },
+  ],
+  InstallFromHeap: function () {
+    var choices = this.HeapInstallChoices();
+    if (choices.length < 1) {
+      Log("Simulchip: no program in the heap can be installed");
+      return;
+    }
+    if (runner.AI != null) choices = [this.AIHeapInstallChoice(choices)];
+    var chip = this;
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        var finish = function () {
+          chip._discountCard = null;
+        };
+        chip._discountCard = params.card;
+        Install(params.card, params.host || null, false, null, true, null, chip, finish, null, false, finish);
+      },
+      "Simulchip",
+      "Install 1 program from your heap, paying 3[c] less",
+      this,
+      "install",
+    );
+  },
+  //AI: give up the least valuable program, keeping icebreakers where possible
+  AICostChoice: function (choices) {
+    var score = function (card) {
+      return (CheckSubType(card, "Icebreaker") ? 10000 : 0) + (card.elo || 0);
+    };
+    return choices.concat([]).sort(function (a, b) {
+      return score(a.card) - score(b.card);
+    })[0];
+  },
+  //AI: a needed icebreaker, otherwise the highest-ELO installable program
+  AIHeapInstallChoice: function (choices) {
+    var needed = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner));
+    for (var i = 0; i < choices.length; i++) if (choices[i].card == needed) return choices[i];
+    return choices.concat([]).sort(function (a, b) {
+      return (b.card.elo || 0) - (a.card.elo || 0);
+    })[0];
+  },
+  //AI: once an installed program was trashed this turn, recover a needed icebreaker
+  //it can afford outside a run. Paying the program cost is left to optimisation.
+  AITriggerInPaidWindow: function () {
+    if (!CheckInstalled(this) || !this.CostWaived()) return null;
+    var needed = runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner));
+    if (!needed) return null;
+    var affordable = this.HeapInstallChoices().some(function (choice) {
+      return choice.card == needed;
+    });
+    return affordable ? "simulchip_install" : null;
+  },
 };
 
 //Cordyceps (26086)
@@ -932,7 +1148,134 @@ cardSet[26086] = {
   subTypes: ["Virus"],
   installCost: 3,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "virus", 2);
+    },
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //Ice protecting servers. Ice hosted elsewhere (Awakening Center) is not offered.
+  ServerIce: function () {
+    var servers = [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers);
+    var ret = [];
+    for (var i = 0; i < servers.length; i++) ret = ret.concat(servers[i].ice);
+    return ret;
+  },
+  OtherIce: function (iceCard) {
+    return this.ServerIce().filter(function (card) {
+      return card != iceCard;
+    });
+  },
+  CanSwapAt: function (server) {
+    if (this.usedThisTurn || !CheckInstalled(this) || !CheckCounters(this, "virus", 1)) return false;
+    if (server != corp.HQ && server != corp.RnD && server != corp.archives) return false;
+    return server.ice.length > 0 && this.ServerIce().length > 1;
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      //the engine passes no parameters; the run is still attacking its server
+      if (!this.CanSwapAt(attackedServer)) return [];
+      //response windows require every listed trigger, so offer a decline
+      var decline = { use: false, label: "Do not use Cordyceps", button: "Continue" };
+      if (runner.AI != null) {
+        var swap = this.AIChooseSwap(attackedServer);
+        if (!swap) return [decline];
+        return [{ use: true, swap: swap, label: "Cordyceps: swap " + GetTitle(swap[0], true) + " with " + GetTitle(swap[1], true) }];
+      }
+      return [{ use: true, label: "Cordyceps: remove 1 virus counter to swap ice" }, decline];
+    },
+    Resolve: function (params) {
+      if (!params.use) return;
+      var server = attackedServer;
+      this.usedThisTurn = true;
+      RemoveCounters(this, "virus", 1);
+      if (params.swap) {
+        this.SwapIce(params.swap[0], params.swap[1]);
+        return;
+      }
+      DecisionPhase(
+        runner,
+        ChoicesArrayCards(server.ice),
+        function (first) {
+          DecisionPhase(
+            runner,
+            ChoicesArrayCards(this.OtherIce(first.card)),
+            function (second) {
+              this.SwapIce(first.card, second.card);
+            },
+            "Cordyceps",
+            "Choose another installed piece of ice",
+            this,
+          );
+        },
+        "Cordyceps",
+        "Choose a piece of ice protecting " + ServerName(server),
+        this,
+      );
+    },
+    text: "Cordyceps: you may swap ice",
+  },
+  //Swapped ice stay installed and keep hosted cards (CR 8.8.3).
+  SwapIce: function (iceA, iceB) {
+    var serverA = GetServer(iceA);
+    var serverB = GetServer(iceB);
+    var indexA = serverA.ice.indexOf(iceA);
+    var indexB = serverB.ice.indexOf(iceB);
+    var savedApproachIce = approachIce;
+    var remoteIndexB = corp.remoteServers.indexOf(serverB);
+    MoveCard(iceA, serverB.ice, indexB);
+    MoveCard(iceB, serverA.ice, indexA);
+    //moving ice out of a remote server must not destroy it (CR 8.5.9)
+    if (remoteIndexB > -1 && corp.remoteServers.indexOf(serverB) < 0)
+      corp.remoteServers.splice(remoteIndexB, 0, serverB);
+    approachIce = savedApproachIce;
+    Log(
+      "Cordyceps swapped " + GetTitle(iceA, true) + " in " + ServerName(serverA) +
+        " with " + GetTitle(iceB, true) + (serverA == serverB ? "" : " in " + ServerName(serverB)),
+    );
+  },
+  //AI: weaken the central just run by moving its most threatening known ice
+  //out for the least threatening ice protecting another server.
+  AIChooseSwap: function (server) {
+    var ai = runner.AI;
+    var best = null;
+    var bestGain = 0;
+    var others = this.ServerIce().filter(function (card) {
+      return GetServer(card) != server;
+    });
+    for (var i = 0; i < server.ice.length; i++) {
+      var iceA = server.ice[i];
+      if (!PlayerCanLook(runner, iceA)) continue;
+      var threatA = ai._iceThreatScore(iceA, [], true);
+      for (var j = 0; j < others.length; j++) {
+        var gain = threatA - ai._iceThreatScore(others[j], [], true);
+        if (gain > bestGain) {
+          bestGain = gain;
+          best = [iceA, others[j]];
+        }
+      }
+    }
+    return best;
+  },
+  //AI: nothing to swap without ice on a central and a second installed ice
+  AIWastefulToInstall: function () {
+    var centralIce = corp.HQ.ice.length + corp.RnD.ice.length + corp.archives.ice.length;
+    return centralIce < 1 || this.ServerIce().length < 2;
+  },
 };
 
 //Euler (26087)
@@ -952,15 +1295,131 @@ cardSet[26087] = {
   memoryCost: 1,
   strength: 2,
   strengthBoost: 0,
+  installedThisTurn: false,
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
       return 0;
     },
   },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) this.installedThisTurn = true;
+    },
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.installedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.installedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  CanBreakCodeGate: function () {
+    if (!CheckEncounter()) return false;
+    if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return false;
+    return CheckStrength(this);
+  },
+  //The free break is listed first, so a breaker trigger uses it while it is available.
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "0[c]: Break 1 code gate subroutine (installed this turn).",
+      alt: "euler_free",
+      Enumerate: function () {
+        if (!this.installedThisTurn) return [];
+        if (!this.CanBreakCodeGate()) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        Break(params.subroutine);
+      },
+    },
+    {
+      text: "2[c]: Break up to 2 code gate subroutines.",
+      alt: "euler_break2",
+      Enumerate: function () {
+        if (!this.CanBreakCodeGate()) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        //choose the first subroutine, then the second is optional
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+            var choices = ChoicesEncounteredSubroutines();
+            for (var i = 0; i < choices.length; i++)
+              choices[i].label = "(Euler) Break another subroutine. -> " + choices[i].label;
+            //the AI uses both breaks when a second subroutine remains
+            if (runner.AI == null || choices.length == 0)
+              choices.push({ id: choices.length, label: "Continue", button: "Continue" });
+            DecisionPhase(
+              runner,
+              choices,
+              function (second) {
+                if (typeof second.subroutine !== "undefined") Break(second.subroutine);
+              },
+              "Break up to 2 code gate subroutines",
+              "Euler",
+              this,
+            );
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "1[c]: +1 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return []; //interface usability, as Corroder
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 1);
+          },
+          this,
+        );
+      },
+    },
   ],
+  //Installed this turn: free single breaks; otherwise 2[c] for up to 2.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    var breakCost = this.installedThisTurn ? 0 : 2;
+    var breakAmount = this.installedThisTurn ? 1 : 2;
+    return result.concat(
+      rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Code Gate"], 1, 1, breakCost, breakAmount, creditsLeft),
+    );
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
 };
 
 //Penrose (26089)
