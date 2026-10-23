@@ -36,7 +36,8 @@ is recorded in the done tables and the historical merge plan.
 | — | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | done (merged) | Passive install/lifecycle tooling, findings and control calibration delivered; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
 | — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
 | 1 | [I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted; merge pending | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merge after the Downfall batches 11–13 branch |
-| 2 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready | Re-grounded at faccb78 with I2.2 and I2.3 incorporated. Merge `main` into the I3 branch before its fresh control (seeds 6001–7000), then implement |
+| 2 | [I4](../backlog/I4-agenda-installation-and-scoring-commitment.md) | ready | Moved ahead of I3 (owner decision 2026-10-23); re-grounded at 65251a5. Supplies its chosen agenda remote to I2's empty-remote stake, own M3/M5; fresh control on seeds 7001–8000 |
+| 3 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready (blocked by I4) | Re-scope after I4's evidence to persistence and asset opportunity cost only, if the Corp still drifts between remotes; seeds 6001–7000 reserved |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
 failed; policy removed), while its observer/collector repairs remain.
@@ -238,10 +239,14 @@ maps the five default-off recovery gates to these layers and L3.5.1/L7.1,
 including the remaining empty-Archives reward-valuation gap. Future I-layer
 baselines must capture the corrected policy rather than the old unconditional
 behaviors.
-I0 → I1 → I2 → I3 run in order: I2 (ICE selection) is the first intentional
-policy change and I3 decides what each remote is for. I4 (agendas) and I5
-(assets, after L8.10 mechanics/diagnostics) then run in parallel; I6 (upgrades)
-follows I3 and I4. I7.1 compares ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
+I0 → I1 → I2 → I4 → I3 run in order: I2 (ICE selection) is the first
+intentional policy change, I4 (agendas) decides where and when to install and
+score agendas and tells I2 which empty remote it will score in, and I3 then
+tests whether a persistent remote role and asset opportunity cost still add
+anything (owner decision 2026-10-23: the playtest symptoms were agendas held in
+HQ and left unadvanced, which I4 addresses directly). I5 (assets, after L8.10
+mechanics/diagnostics) follows I3; I6 (upgrades) follows I3 and I4. I7.1
+compares ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
 installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
 
@@ -265,7 +270,7 @@ I9 comes last.
 
 ### I3 Remote role and root suitability
 - **Status:** ready
-- **Depends on:** I2, F4, L8.4
+- **Depends on:** I2, I4, F4, L8.4
 - **Ticket:** [I3-remote-role-and-root-suitability.md](../backlog/I3-remote-role-and-root-suitability.md)
 - **Goal:** Keep a persistent scoring remote, chosen by projected breach hazard, and charge other installs the scoring value they displace. Reuse L8.9's placement/allocation/lifetime tools and test legitimate bare asset-spam remotes.
 
@@ -276,9 +281,9 @@ I9 comes last.
 - **Goal:** Record explainable starting-deck composition and mechanic evidence, including shell/asset-spam, glacier and hybrid contrasts, without changing decisions. Does not block I3/I5; later consumers need their own evidence and gate.
 
 ### I4 Agenda installation and scoring commitment
-- **Status:** proposed
-- **Depends on:** I3, F4
-- **Spec:** [I4-agenda-installation-and-scoring-commitment.md](specs/I4-agenda-installation-and-scoring-commitment.md)
+- **Status:** ready
+- **Depends on:** I2, F4
+- **Ticket:** [I4-agenda-installation-and-scoring-commitment.md](../backlog/I4-agenda-installation-and-scoring-commitment.md)
 - **Goal:** Install an agenda where expected points beat holding it, then advance it to a score without the global reserve stalling the plan.
 
 ### I5 Asset, ambush and economy value

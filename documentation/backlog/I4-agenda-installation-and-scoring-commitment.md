@@ -1,14 +1,27 @@
 # I4 Agenda installation and scoring commitment
 
-**Roadmap item:** I4 · **Depends on:** I3, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](I2-ice-selection-by-marginal-security.md) phase A, [I3](I3-remote-role-and-root-suitability.md)
-**Verified against code:** 60fa0d7 (2026-10-16)
+**Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md) phase A, [I3](I3-remote-role-and-root-suitability.md) (now follows I4)
+**Verified against code:** 65251a5 (2026-10-23)
 
-Dependency state at 60fa0d7: F4, I0 and I1 are done; I2 and I3 are proposed.
-I4 reads I2 phase A's `_breachMargin()` (M1), `_breachHazard()` (M2, after
-its reliability check), `_projectedRunnerIncome()`,
-`CORP_AI_RISK_HORIZON_RUNNER_TURNS` (`H`) and `CORP_AI_POINT_VALUE`, and
-I3's `_scoringRemote()`. None exists yet.
+Dependency state at 65251a5 (re-grounded 2026-10-23; previously 60fa0d7):
+F4, I0, I1 and I2 are done; I2's `iceMarginalSecurity` defaults to `true`.
+**I4 now runs before I3** (owner decision 2026-10-23) and does not depend on
+it. I4 reads I2's `_breachMargin()` (M1), `_hazardForMargin()`/`_breachKind()`
+(M2's table), `CORP_AI_I2_HORIZON_RUNNER_TURNS` (`H` = 2) and
+`CORP_AI_POINT_VALUE` (4.4). I2's M2 reliability and next-turn checks failed;
+the owner accepted the table for comparisons and kept `H` = 2, and production
+holds the next-turn hazard over `H` with no projected-income drift.
+`_breachHazard(server, t)` exists but adds `(t − 1) ×`
+`_projectedRunnerIncome()` drift for `t > 1`, which is the unvalidated
+projection; I4 uses `_breachHazard(s, 1)` (equivalently I2's
+`_marginalHazard()`) for every turn of `H`. The table is not
+lockout-safe: a lockout bucket still has a small non-zero hazard, so only
+band 2's explicit rule makes a steal impossible.
+
+I4 also takes over the one piece of I3 every agenda plan needs: under
+`agendaCommitmentPlan`, I2's empty-remote ICE stake follows I4's chosen
+destination (see "I2 ICE stake" below).
 
 ## Goal
 
@@ -23,10 +36,10 @@ and a game-losing steal stay hard tactical rules.
 
 **Why this design.** Turning a security measurement into a yes/no admission
 gate has twice made the Corp weaker:
-[`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+[`fa1182c`](../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote"; removing only that gate recovered
 +7.6 pp win rate and +0.79 points scored per game) and the
-[L9.0.1 gate failure](../../backlog/done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](done/L9.0.1-adopt-honest-lockout.md#resolution)
 (−2.9 pp win rate, −0.28 points scored, +0.18 stolen). The owner's 2026-10-14
 playtests (one tester, not a measurement) found the Corp easy to beat: it
 holds agendas too long, plays some into weak remotes and then leaves them
@@ -36,13 +49,16 @@ score fast once installed, keep scoring through a secure remote, count
 lockout cards such as Manegarm Skunkworks and Anoetic Void, and count
 scoring tools such as Seamless Launch and SanSan City Grid the way a human
 does, through AI hooks rather than titles. The
-[scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16)
+[scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16)
 is the shared plan; I4 owns M3 `exposureTurns`, M5 `hqStealHazard` and the
 agenda-commitment consumer, and is the I-layer item expected to move win rate.
 
 ## Current behaviour
 
-Verified at 60fa0d7.
+Verified at 65251a5 (previously 60fa0d7). No commit since 60fa0d7 touched
+admission, `_scoringWindow()`, `_sufficientEconomy()`, the advance block or
+`AIScoringPlanCommitted`; I2's ICE ranking is now on by default, which
+changes the game states the measured shares below came from.
 
 **Destination.** `_rankedInstallOptionsCore()` offers each `_isHVT()` card
 (agenda, Ambush, Hostile; not an obsolete bluff) only to
@@ -59,7 +75,7 @@ and rejects an insecure remote only when `secureScoringServerGate` is on
 holding a scoring upgrade, and being the strongest empty protected remote. In
 practice one destination is offered. HQ's score grows with hand size, so a
 large hand can reject every remote, including one the evaluator calls secure
-(pending bug [corp-agenda-held-while-secure-remote-available](../../bugs/corp-agenda-held-while-secure-remote-available.md)).
+(pending bug [corp-agenda-held-while-secure-remote-available](../bugs/corp-agenda-held-while-secure-remote-available.md)).
 
 Candidates are sorted by `|_advancementLimit() − _scoringWindow()|` plus
 `0.75 × _deceptionInstallDistance()`. `_scoringWindow()` is an unitless sum
@@ -82,8 +98,9 @@ and `_ordinaryPurgeOutcome()`, the advance block runs only if one of these
 holds: an installed agenda (`almostDoneAgenda`) or Hostile asset can be
 finished this turn; `_sufficientEconomy()`; or the bypass. Inside it, an
 agenda with no counters starts only if its remote's `_protectionScore()` is
-above `0.5 × Credits(runner)` or strictly above HQ's, and
-`_potentialAdvancement(card, Infinity, false) ≥` its limit.
+above `0.5 × Credits(runner)` or strictly above HQ's (skipped when it is
+`almostDoneAgenda`), and `_potentialAdvancement(card, Infinity, false) ≥` its
+limit as adjusted by `_deceptionAdvancementTarget()`.
 `_sufficientEconomy()` is a global reserve: credits must cover the three
 largest rez costs among installed unrezzed assets and upgrades and ICE
 protecting a non-empty server, plus every `AIReserveCredits`; the total is
@@ -105,15 +122,17 @@ operation-play ordering, not by the advancement search. `AIIsScoringUpgrade`
 Recall, Hype Machine) is a placement tag read by `_isAScoringServer()`,
 `_shouldUpgradeServerWithCard()` and score-time rez/install; it does not say
 what the upgrade does to scoring, and those five do different things.
-Manegarm Skunkworks and Anoetic Void declare only `AIDefensiveValue`; their
-approach costs are invisible to the evaluator until I2's M4.
+Manegarm Skunkworks and Anoetic Void declare `AIDefensiveValue` and
+`AIWouldTrigger`; neither exposes an approach cost (`AIApproachDefense`, I2's
+M4). The identity hook `AIOperationPlayClickGain` (Nebula Talent Management,
+`sets/elevation.js`) is now read by `_potentialAdvancementDirections()`.
 
 **Safety.** No point-sensitive install veto exists. `_breachConsequence()`
 (L7.1, done) publishes points exposed and win probability per server,
 including HQ via `_centralAccessCount()` and `_centralWinProbability()`.
 `_runnerMayWinIfServerBreached()` guards the agenda bluff
 (`_shouldBluffAgendaServer()` never bluffs when the Corp would win or a
-breach would lose) and ICE rez. The [PR 19 follow-up](../../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard)
+breach would lose) and ICE rez. The [PR 19 follow-up](../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard)
 assigns the winning-steal install risk to I4, measured against the corrected
 default rather than the old blanket floor.
 
@@ -121,7 +140,8 @@ default rather than the old blanket floor.
 games; its `installOutcomes` predates the PR #34 tracker fixes, so treat as
 indicative): win rate 0.37; per game 3.14 agendas installed, 1.98 scored,
 0.99 stolen; points stolen 5.87 (remote 2.16, R&D 1.92, HQ 1.74); mean 1.13
-turns install-to-score and 1.44 exposed Runner turns.
+turns install-to-score and 1.44 exposed Runner turns. These predate I2's
+adoption; phase A's fresh baseline replaces them.
 
 ### Why installed agendas sit unadvanced
 
@@ -129,7 +149,9 @@ Measured at 60fa0d7 with default options: a scratch probe wrapped
 `Phase_Main` in 280 headless games (7 pool pairs × seeds 1–40; Corp won 93)
 and classified each of 3,546 Corp actions taken while an installed agenda
 was unfinished. The probe's helper calls may perturb caches, so the games
-are not the batch's games; the proportions are the evidence.
+are not the batch's games; the proportions are the evidence. The probe was
+not committed and predates I2's adoption, so the shares are indicative;
+the `agendaCommitment` back-fill on the fresh baseline re-measures them.
 
 | Outcome of the action | Share |
 |---|---|
@@ -154,8 +176,7 @@ needs `>`).
 ## Design
 
 All values are expected agenda points over `H` (I2's
-`CORP_AI_RISK_HORIZON_RUNNER_TURNS`: 2, or 1 if I2's next-turn check
-failed). No other coefficient is introduced. Everything below is behind the
+`CORP_AI_I2_HORIZON_RUNNER_TURNS` = 2). No other coefficient is introduced. Everything below is behind the
 Corp option `agendaCommitmentPlan` (default `false`); with it off, play is
 identical (phase A identity run).
 
@@ -188,7 +209,7 @@ A plan that also must spend `defenceReserve` to finish faster is a second
 candidate plan; the destination EV evaluates both with their own hazards.
 
 **M5 `_hqStealHazard(agenda, t)`**, per Runner turn `t`:
-`_breachHazard(corp.HQ, t) × min(1, a / n)`, where `a` is
+`_breachHazard(corp.HQ, 1) × min(1, a / n)` (next-turn hazard held for every `t`), where `a` is
 `_centralAccessCount(corp.HQ)` and `n` is HQ's size after this turn's
 planned plays (the Corp knows its hand). The per-agenda rate is `a / n`,
 not the agenda fraction of HQ (that is the probability of hitting *some*
@@ -196,7 +217,7 @@ agenda). Holding over turns: `1 − Π(1 − m5_t)` (HQ is repeatable).
 
 **Discard loss.** If the Corp must discard at end of turn and HQ holds more
 agendas than it can keep, the excess agenda is lost to Archives:
-`points × (1 − Π_t(1 − _breachHazard(corp.archives, t)))` stolen, and no
+`points × (1 − Π_t(1 − _breachHazard(corp.archives, 1)))` stolen, and no
 score within `H`.
 
 ### Decision: install where, or hold
@@ -206,8 +227,8 @@ choices as hypothetically made):
 
 - **Destinations:** every remote whose root holds no agenda or asset (current
   obsolete-bluff rule kept), with or without ICE, plus a new remote. I3's
-  `_scoringRemote()` is one of these, not a filter. Hazard
-  `h_s,t = _breachHazard(s after this turn's planned defence, t)` over the
+  `_scoringRemote()` (if later adopted) would be one of these, not a filter. Hazard
+  `h_s,t = _breachHazard(s after this turn's planned defence, 1)`, held for every `t`, over the
   plan's exposed turns (the server holds one agenda, so a successful run
   accesses it).
 - `EV(install in s) = points × P(score) − points × P(stolen)`, with
@@ -215,9 +236,10 @@ choices as hypothetically made):
   `P(score) = 1 − P(stolen)` when `E ≤ H`, else 0. `E = 0` gives `points`.
 - `EV(hold) = −points × m5_1 − discardLoss + (1 − m5_1) × D`, where `D` is
   `max(0, max_s EV(install in s at startTurn 1))` over horizon `H − 1`, after
-  this turn's planned improvement (I3's projected investment or I2's best
-  ICE for that remote) and one turn of `_projectedRunnerIncome()`. The
-  shorter horizon is the cost of delay.
+  this turn's planned improvement (I2's best ICE for that remote), with the
+  same held next-turn hazard (no `_projectedRunnerIncome()` drift: that
+  projection failed I2's check). The shorter horizon and the HQ hold hazard
+  are the cost of delay.
 - **Indefinite-hold guard.** `D` counts only if (a) the improvement it assumes
   is an action the Corp schedules this turn and is recorded with the hold,
   and (b) the agenda was not held with deferred credit on each of the
@@ -242,6 +264,31 @@ loses fewer expected points than Archives.
 again, its hazard is still low, so the next agenda chooses it. Scenario 7
 proves this.
 
+### I2 ICE stake
+
+Added at re-grounding (2026-10-23), replacing what I3 was to supply. With
+`agendaCommitmentPlan` on, I2's empty-remote ICE stake follows this
+decision instead of the legacy designated remote:
+
+- `memo.designated` in `_marginalIceInstallOptions()` (today
+  `_scoringServers(_emptyProtectedRemotes())[0]`) becomes the chosen
+  destination of the highest-EV committed or planned agenda: an existing
+  remote (with or without ICE), `null` for a new remote, or no remote when
+  every agenda's best choice is to hold.
+- `_iceStake()` uses that agenda's points instead of
+  `_highestAgendaPointsInHQ()`.
+- Fix 3's `exposureTurns` (`horizon − 1` when the install is pending and
+  fewer than two clicks remain) is replaced by M3's `startTurn` and
+  `exposureTurns` for that plan.
+- The choice is recomputed every Corp decision from the board; nothing is
+  persisted on the server. Reuse of a safe remote follows from its low
+  hazard. A persistent role and the asset opportunity cost stay with I3,
+  which now follows I4.
+- `_rankedServersToProtect()` may not list an unprotected chosen remote;
+  pass it explicitly when ranking ICE for it.
+
+With the option off, I2's stake rule is unchanged.
+
 ### Hard constraints (lexicographic, before EV)
 
 - **Band 3, game-winning:** unchanged. The "could be installed and
@@ -260,7 +307,7 @@ proves this.
   (within 0.01), then rank those by EV. When other agendas in HQ already let
   the Runner win from an HQ breach, `W(hold)` uses
   `_breachConsequence(corp.HQ).winProbability` per breach instead of `a / n`.
-  This decides the [PR 19 follow-up](../../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard):
+  This decides the [PR 19 follow-up](../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard):
   a game-losing install is rejected exactly when a lower-loss option exists.
 - Existing guards stay authoritative: `_shouldBluffAgendaServer()`,
   `_criticalBreachDefenseAction()`, `_icePreventsGameWinningBreach()` rez
@@ -303,11 +350,12 @@ title cases into the new scoring").
 | `AIFastAdvanceCounters(card)` | exists (Flood the Market, Hype Machine) | Counters from operations in HQ and one-shot upgrades. Extend: may return `{counters, credits, clicks}` (net change including play cost) and receive `{thisTurn}` as a second argument |
 | `AIAdvanceCreditGain(thisTurn, advancedInPlan)` | exists (Sacrifice Zone Expansion) | Advance income. Also read from `corp.identityCard` |
 | `AIAdvancementLimit()` | exists | Agenda's own target |
+| `AIOperationPlayClickGain` | exists (identity: Nebula Talent Management) | Already read by `_potentialAdvancement()`; M3 counts it as clicks in later-turn plans |
 | **`AIScoringSupport(agenda, server)`** | **new** | Read-only, on an installed or HQ upgrade: `{requirementDelta, requiresRez}` for scoring `agenda` in `server` while active there (SanSan City Grid: `{requirementDelta: -1, requiresRez: true}`); the plan pays `RezCost()` when unrezzed. Returns null when it does not apply |
 | `AIIsScoringUpgrade` | boolean, unchanged | Not read by I4. It conflates requirement reduction (SanSan), one-shot counters (Hype Machine), score riders (Malapert, via `AIWouldRezBeforeScore`), steal deterrence (AMAZE) and Perfect Recall. I6 retires it once each card's effect is covered by `AIScoringSupport`, `AIFastAdvanceCounters`, score-time hooks or I2's M4 |
 | `AIFastAdvance` | boolean, unchanged | Not read by I4 |
 
-Title cases to migrate ([P1](../../backlog/corp_ai_finding_13_legacy_title_lists.md)
+Title cases to migrate ([P1](corp_ai_finding_13_legacy_title_lists.md)
 rows `_advancementLimit` and `_potentialAdvancementDirections` are tagged I4
 (owner decision 2026-10-16); the rest of P1 stays later work):
 
@@ -399,11 +447,17 @@ and the two no-ETR fixtures (the legacy gate is untouched).
 
 ## Acceptance gate
 F4 gate. Option `agendaCommitmentPlan` (Corp AI), off in the baseline and on
-in the candidate. Committed deck pool, paired seeds, 200 games per deck
-pair, bootstrap 95% intervals. Both arms keep the five 2026-10-05 recovery
-options off and the I2/I3 options at their adopted values.
+in the candidate. Committed deck pool, paired seeds 7001–8000 (1,000 games
+per deck pair; unused by any earlier gate, 6001–7000 being reserved for I3),
+bootstrap 95% intervals. Both arms use current defaults: the five 2026-10-05
+recovery options off, I2's `iceMarginalSecurity` on (stated explicitly in the
+command) and I2.3's `openingHqThenRdIce` off. I3 is not a prerequisite
+(re-grounded 2026-10-23). Fresh matched control on the I4 branch after `main`
+(Downfall, I2.3) is merged in.
 Collectors: `installOutcomes`, `stallTurns`, `corpInsolventTurns` (I0;
-definitions in `documentation/ai-batch-harness.md`); `agendaCommitment`
+definitions in `documentation/ai-batch-harness.md`); `strandedUnrezzedIceCost`,
+`bluffSingleVariableCorrelation`, `realizedIceByRootType` (I2's guard set,
+because I4 changes which empty remote I2's ICE stake protects); `agendaCommitment`
 (new, built by this item from public and Corp-known turn-end state, the same
 definition in both arms): `agendaCommitment.idleAgendaTurns`, Corp turns
 ending with an installed unscored agenda that gained no advancement counter
@@ -426,15 +480,12 @@ Grid and Biotic Labor in NEH, Oaktown Renovation in BTL, Trick of Light in PE.
 | Guard | `installOutcomes.agendaExposureTurns` | lower | regression at most 0.5 turns |
 | Guard | `agendaCommitment.idleAgendaTurns` | lower | regression at most 0.5 turns |
 | Guard | `agendaCommitment.hqHoldTurns` | lower | regression at most 0.5 turns |
+| Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
+| Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 |
+| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
+| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
 
-Gate command: `node scripts/ai-batch.js gate --corp-option agendaCommitmentPlan=true
---collector installOutcomes --collector stallTurns --collector corpInsolventTurns
---collector agendaCommitment --improve winRate --improve pointsScored
---guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5
---guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5
---guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5
---guard installOutcomes.agendaExposureTurns=0.5
---guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5`
+Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
 
 `winRate` and `pointsScored` are Improve rows rather than the standard
 guards, because this item exists to move them; dropping either needs a spec
@@ -445,6 +496,12 @@ the remote-theft Improve row are retired with the old design. M2 describes the
 stock Runner AI (aggressive, runs constantly); a human may breach more or
 less often, so a passing gate is necessary but not sufficient: the owner
 playtests before `agendaCommitmentPlan` defaults to on.
+
+**Re-grounding changes (2026-10-23).** Added seeds, pool and the explicit I2
+option; dropped the I3 arm. Added I2's stranded-ICE and tell guards at I2's
+thresholds because I4 now redirects I2's empty-remote stake; no existing
+threshold was loosened. `agendaCommitment` declares lower-is-better directions
+for both metrics.
 
 ## Things to consider
 
@@ -466,7 +523,8 @@ playtests before `agendaCommitmentPlan` defaults to on.
 - [ ] Phase A identity run (7 pairs × 20 seeds, option on with consumer disabled) matches every `logHash`; the hook migrations are behaviour-preserving.
 - [ ] The behaviour change ships behind an AI option that defaults to off (`agendaCommitmentPlan`, named in the Resolution).
 - [ ] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the option.
-- [ ] The `agendaCommitment` collector is verified against scripted boards (idle, advanced, scored, held with and without an empty remote) and back-filled into a fresh baseline without changing decisions.
+- [ ] With the option on, I2's empty-remote stake in `_iceStake()` follows I4's chosen agenda destination instead of the legacy designated remote; with it off it is unchanged.
+- [ ] The `agendaCommitment` collector declares lower-is-better directions for both metrics and is verified against scripted boards (idle, advanced, scored, held with and without an empty remote) and back-filled into a fresh baseline without changing decisions.
 - [ ] I0's `installOutcomes`, `stallTurns` and `corpInsolventTurns` are back-filled into the same fresh baseline with the corrected PR #34 tracker.
 - [ ] Gate evidence is recorded in the Resolution: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; each improvement interval's lower bound is above zero.
 - [ ] An owner playtest against the option is recorded before the default changes.
