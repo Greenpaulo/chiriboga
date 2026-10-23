@@ -133,6 +133,8 @@ phaseTemplates.standardResponse = {
         var ret = ChoicesInstalledCards(corp, function (card) {
 			//corp can always rez upgrades and assets (except for usability)
 			var validRezTypes = ["upgrade", "asset"];
+			//ice such as Rime may be rezzed like non-ice cards during runs on its server
+			if (CheckRezAsNonIceDuringRun(card)) validRezTypes.push("ice");
 			//but only the approached (not encountered) ice
 			if (CheckApproach() && approachIce < attackedServer.ice.length) {
 				if (card == attackedServer.ice[approachIce]) validRezTypes.push("ice");
@@ -1721,7 +1723,7 @@ phases.runAccessingCard = {
 		  return [{}];
 	  }
       var cost = StealCost(accessingCard);
-      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1) return [];
+      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1 && cost.programs < 1) return [];
       return [{}];
     },
   },
@@ -1749,7 +1751,7 @@ phases.runAccessingCard = {
         agenda,
         function () {
           SpendClicks(runner, cost.clicks);
-          Steal();
+          PayStealCostPrograms(agenda, cost.programs, Steal);
         },
         this
       );

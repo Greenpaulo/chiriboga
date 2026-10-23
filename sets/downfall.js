@@ -2962,7 +2962,7 @@ cardSet[26030] = {
     var known = this.KnownReachableAgendas(server);
     for (var i = 0; i < known.length; i++) {
       var cost = StealCost(known[i]);
-      if (cost.credits < 1 && cost.clicks < 1) continue;
+      if (cost.credits < 1 && cost.clicks < 1 && cost.programs < 1) continue;
       if (!best || (known[i].agendaPoints || 0) > (best.agendaPoints || 0)) best = known[i];
     }
     return best ? best.title : null;
@@ -4246,6 +4246,8 @@ cardSet[26051] = {
   },
 };
 
+// Batch 11 (26052–26056) ELO: Trash or Busto ranking values preserved from the scaffold.
+
 //Focus Group (26052)
 // Play only if the Runner made a successful run during their last turn.
 // Choose a card type, then reveal the grip. Choose a value for X equal to or less than the number of revealed cards of the chosen type. You may pay X[c] to place X advancement counters on 1 installed card.
@@ -4259,9 +4261,109 @@ cardSet[26052] = {
   cardType: "operation",
   subTypes: [],
   playCost: 3,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  successfulRunLastTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.successfulRunLastTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
   },
+  responseOnRunSuccessful: {
+    Resolve: function () { if (playerTurn == runner) this.successfulRunLastTurn = true; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _gripTypes: ["event", "hardware", "program", "resource"],
+  Enumerate: function () {
+    return this.successfulRunLastTurn ? [{}] : [];
+  },
+  Resolve: function () {
+    var source = this;
+    var choices = this._gripTypes.map(function (type) {
+      var name = type.charAt(0).toUpperCase() + type.slice(1);
+      return { cardType: type, label: name, button: name };
+    });
+    if (corp.AI) {
+      var guess = this._aiGuessGripType();
+      corp.AI.preferred = { title: this.title, option: choices.find(function (choice) { return choice.cardType == guess; }) };
+    }
+    DecisionPhase(corp, choices, function (params) {
+      Log("Focus Group chooses " + params.cardType);
+      var revealed = runner.grip.slice();
+      function revealNext(index) {
+        if (index < revealed.length) {
+          Reveal(revealed[index], function () { revealNext(index + 1); }, source, corp);
+          return;
+        }
+        var count = revealed.filter(function (card) { return CheckCardType(card, [params.cardType]); }).length;
+        source._chooseX(count);
+      }
+      revealNext(0);
+    }, this.title, "Choose a card type", this);
+  },
+  //X is at most the matching count; only affordable values are offered, and 0 declines to pay.
+  _chooseX: function (count) {
+    var source = this;
+    var targets = ChoicesInstalledCards(null, function () { return true; });
+    var max = targets.length > 0 ? count : 0;
+    while (max > 0 && !CheckCredits(corp, max, "using", this)) max--;
+    if (max < 1) {
+      Log("Focus Group places no advancement counters");
+      return;
+    }
+    var choices = [];
+    for (var x = max; x >= 0; x--)
+      choices.push(x > 0
+        ? { id: x, label: "Pay " + x + "[c] to place " + x + " advancement counters", button: "X = " + x }
+        : { id: 0, label: "Do not pay", button: "Do not pay" });
+    var aiTarget = null;
+    if (corp.AI) {
+      aiTarget = this._aiBestTarget(targets);
+      var wanted = aiTarget ? Math.max(0, Math.min(max, corp.AI._advancementStillRequired(aiTarget.card))) : 0;
+      corp.AI.preferred = { title: this.title, option: choices.find(function (choice) { return choice.id == wanted; }) };
+    }
+    DecisionPhase(corp, choices, function (params) {
+      var x = params.id;
+      if (x < 1) return;
+      if (corp.AI && aiTarget) corp.AI.preferred = { title: source.title, option: aiTarget };
+      DecisionPhase(corp, targets, function (target) {
+        SpendCredits(corp, x, "using", source, function () {
+          AddCounters(target.card, "advancement", x);
+        }, source);
+      }, source.title, "Choose 1 installed card to place " + x + " advancement counters on", source);
+    }, this.title, "Choose X", this);
+  },
+  //AI: guess the most common type from public Runner cards (heap and rig), never the grip.
+  _aiGuessGripType: function () {
+    var weights = { event: 2, hardware: 1, program: 1.5, resource: 1.5 };
+    var seen = runner.heap.concat(InstalledCards(runner));
+    for (var i = 0; i < seen.length; i++)
+      if (typeof weights[seen[i].cardType] == "number") weights[seen[i].cardType]++;
+    var best = this._gripTypes[0];
+    for (var j = 1; j < this._gripTypes.length; j++)
+      if (weights[this._gripTypes[j]] > weights[best]) best = this._gripTypes[j];
+    return best;
+  },
+  //AI: an advanceable Corp card worth fast advancing, else an unfinished Corp agenda.
+  _aiBestTarget: function (targets) {
+    var best = null;
+    for (var i = 0; i < targets.length; i++) {
+      var card = targets[i].card;
+      if (card.player != corp || !CheckAdvance(card)) continue;
+      if (corp.AI._advancementStillRequired(card) < 1) continue;
+      var rank = corp.AI._cardShouldBeFastAdvanced(card) ? 2 : CheckCardType(card, ["agenda"]) ? 1 : 0;
+      if (rank < 1) continue;
+      if (!best || rank > best.rank || (rank == best.rank &&
+          Counters(card, "advancement") > Counters(best.option.card, "advancement")))
+        best = { rank: rank, option: targets[i] };
+    }
+    return best ? best.option : null;
+  },
+  AIWouldPlay: function () {
+    if (runner.grip.length < 2) return false;
+    if (Credits(corp) < PlayCost(this) + 2) return false;
+    return !!this._aiBestTarget(ChoicesInstalledCards(corp, function () { return true; }));
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Game Over (26053)
@@ -4276,11 +4378,107 @@ cardSet[26053] = {
   faction: "NBN",
   influence: 3,
   cardType: "operation",
-  subTypes: ["Illicit", "Gray Ops"],
+  subTypes: ["Gray Ops", "Liability"],
   playCost: 4,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  stoleAgendaLastTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.stoleAgendaLastTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
   },
+  responseOnStolen: {
+    Resolve: function () { if (playerTurn == runner) this.stoleAgendaLastTurn = true; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _runnerTypes: ["hardware", "program", "resource", "event"],
+  _targetsOfType: function (type) {
+    return InstalledCards(runner).filter(function (card) {
+      return CheckCardType(card, [type]) && !CheckSubType(card, "Icebreaker") && CheckTrash(card);
+    });
+  },
+  _cardValue: function (card) {
+    var value = (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus");
+    if (card.hostedCards) value += 2 * card.hostedCards.length;
+    if (CheckSubType(card, "Console")) value += 2;
+    return value;
+  },
+  Enumerate: function () {
+    return this.stoleAgendaLastTurn ? [{}] : [];
+  },
+  Resolve: function () {
+    var source = this;
+    var choices = this._runnerTypes.map(function (type) {
+      var name = type.charAt(0).toUpperCase() + type.slice(1);
+      return { cardType: type, label: name, button: name };
+    });
+    if (corp.AI) {
+      var best = this._aiBestType().cardType;
+      corp.AI.preferred = { title: this.title, option: choices.find(function (choice) { return choice.cardType == best; }) };
+    }
+    DecisionPhase(corp, choices, function (params) {
+      Log("Game Over chooses " + params.cardType);
+      //offer the most valuable cards first, so shared credits protect those
+      var targets = source._targetsOfType(params.cardType).sort(function (a, b) {
+        return source._cardValue(b) - source._cardValue(a);
+      });
+      source._offerPrevention(targets, 0, []);
+    }, this.title, "Choose a Runner card type", this);
+  },
+  _offerPrevention: function (targets, index, toTrash) {
+    var source = this;
+    if (index >= targets.length) {
+      Trash(toTrash, true, function () { BadPublicity(1, null, source); }, source, undefined, corp);
+      return;
+    }
+    var card = targets[index];
+    var next = function () { source._offerPrevention(targets, index + 1, toTrash); };
+    if (!CheckCredits(runner, 3)) {
+      toTrash.push(card);
+      next();
+      return;
+    }
+    var choices = [
+      { id: 1, label: "Pay 3[c] to prevent " + GetTitle(card) + " from being trashed", button: "Pay 3[c]" },
+      { id: 0, label: "Allow " + GetTitle(card) + " to be trashed", button: "Allow" },
+    ];
+    if (runner.AI) runner.AI.preferred = { title: this.title, option: this._cardValue(card) >= 3 ? choices[0] : choices[1] };
+    DecisionPhase(runner, choices, function (params) {
+      if (params.id == 1) SpendCredits(runner, 3, "", null, next, source);
+      else {
+        toTrash.push(card);
+        next();
+      }
+    }, this.title, "Pay 3[c] to prevent " + GetTitle(card) + " from being trashed?", this);
+  },
+  //AI: credit-equivalent loss per type; a Runner save costs them 3[c] (they save cards worth 3+).
+  _aiTypeGain: function (type) {
+    var source = this;
+    var values = this._targetsOfType(type).map(function (card) { return source._cardValue(card); })
+      .sort(function (a, b) { return b - a; });
+    var saves = Math.floor(Credits(runner) / 3);
+    var gain = 0;
+    for (var i = 0; i < values.length; i++) {
+      if (values[i] >= 3 && saves > 0) {
+        saves--;
+        gain += 3;
+      } else gain += Math.max(1, values[i]);
+    }
+    return gain;
+  },
+  _aiBestType: function () {
+    var best = { cardType: this._runnerTypes[0], gain: this._aiTypeGain(this._runnerTypes[0]) };
+    for (var i = 1; i < this._runnerTypes.length; i++) {
+      var gain = this._aiTypeGain(this._runnerTypes[i]);
+      if (gain > best.gain) best = { cardType: this._runnerTypes[i], gain: gain };
+    }
+    return best;
+  },
+  AIWouldPlay: function () {
+    if (!this.stoleAgendaLastTurn) return false;
+    return this._aiBestType().gain >= 5;
+  },
+  AIPlayWhenCan: 2,
 };
 
 //Increased Drop Rates (26054)
@@ -4297,7 +4495,67 @@ cardSet[26054] = {
   subTypes: ["Ambush"],
   rezCost: 0,
   trashCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  storedFaceUp: false,
+  automaticOnAccess: {
+    Resolve: function (card) {
+      if (card != this) return;
+      this.storedFaceUp = this.faceUp;
+      if (this.cardLocation == corp.RnD.cards) {
+        this.faceUp = true;
+        this.knownToRunner = true;
+        Log(GetTitle(this) + " revealed");
+      }
+    },
+  },
+  responseOnAccess: {
+    Enumerate: function () {
+      return accessingCard == this ? [{}] : [];
+    },
+    Resolve: function () {
+      var choices = [
+        { id: 0, label: "The Corp removes 1 bad publicity", button: "Remove bad publicity" },
+        { id: 1, label: "Take 1 tag", button: "Take 1 tag" },
+      ];
+      if (runner.AI) runner.AI.preferred = { title: this.title, option: choices[this._aiRunnerTakesTag() ? 1 : 0] };
+      DecisionPhase(runner, choices, function (params) {
+        if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
+        if (params.id == 1) AddTags(1);
+        else if (corp.badPublicity > 0) {
+          corp.badPublicity--;
+          Log("1 bad publicity removed");
+          UpdateCounters();
+        } else Log("The Corp has no bad publicity to remove");
+      }, this.title, "Take 1 tag, or the Corp removes 1 bad publicity", this);
+    },
+    text: "Increased Drop Rates: remove 1 bad publicity unless the Runner takes 1 tag",
+  },
+  automaticOnAccessComplete: {
+    Resolve: function (card) {
+      if (card == this && card.cardLocation != corp.archives.cards && !this.storedFaceUp) this.faceUp = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //Runner AI: a tag matters less when already tagged; with no bad publicity, refusing costs nothing.
+  _aiRunnerTakesTag: function () {
+    return corp.badPublicity > 0 && runner.tags > 0;
+  },
+  //Corp AI: only worth installing with bad publicity to remove; sit with a Corp agenda, else in HQ.
+  AIPreferredUpgradeServer: function (legalServers) {
+    if (corp.badPublicity < 1) return null;
+    for (var i = 0; i < legalServers.length; i++) {
+      var root = legalServers[i].root || [];
+      if (typeof legalServers[i].cards == "undefined" &&
+          root.some(function (card) { return CheckCardType(card, ["agenda"]); }))
+        return legalServers[i];
+    }
+    return legalServers.includes(corp.HQ) ? corp.HQ : null;
+  },
+  AIPunishesAccess: function (server) {
+    if (!server) return 0;
+    var here = (server.root && server.root.includes(this)) || (server.cards && server.cards.includes(this));
+    return here && corp.badPublicity > 0 ? 1 : 0;
+  },
 };
 
 //Divested Trust (26055)
@@ -4313,7 +4571,35 @@ cardSet[26055] = {
   subTypes: [],
   advancementRequirement: 3,
   agendaPoints: 1,
-  // onScore: { Resolve: function () { ... } },
+  responseOnStolen: {
+    Enumerate: function () {
+      var stolen = intended.steal;
+      if (!stolen || stolen == this || this.cannotForfeit) return [];
+      if (!corp.scoreArea.includes(this) || !runner.scoreArea.includes(stolen)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var source = this;
+      var stolen = intended.steal;
+      var choices = [
+        { id: 1, label: "Forfeit to gain 5[c] and add " + GetTitle(stolen, true) + " to HQ", button: "Forfeit" },
+        { id: 0, label: "Decline", button: "Decline" },
+      ];
+      if (corp.AI) corp.AI.preferred = { title: this.title, option: choices[(stolen.agendaPoints || 0) >= 1 ? 0 : 1] };
+      DecisionPhase(corp, choices, function (params) {
+        if (params.id != 1) return;
+        Forfeit(source, function () {
+          GainCredits(corp, 5, "", source);
+          if (!runner.scoreArea.includes(stolen)) return;
+          MoveCard(stolen, corp.HQ.cards);
+          stolen.faceUp = false;
+          stolen.advancement = 0;
+          Log(GetTitle(stolen, true) + " added to HQ");
+        });
+      }, this.title, "Forfeit Divested Trust?", this);
+    },
+    text: "Divested Trust: forfeit to gain 5[c] and add the stolen agenda to HQ",
+  },
 };
 
 //SDS Drone Deployment (26056)
@@ -4330,7 +4616,28 @@ cardSet[26056] = {
   subTypes: ["Security"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  //StealCost/CheckSteal/the access steal option pay this through PayStealCostPrograms.
+  stealCost: { programs: 1 },
+  _trashablePrograms: function () {
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["program"]) && CheckTrash(card);
+    });
+  },
+  responseOnScored: {
+    Enumerate: function () {
+      return intended.score == this && this._trashablePrograms().length > 0 ? [{}] : [];
+    },
+    Resolve: function () {
+      var choices = this._trashablePrograms();
+      if (choices.length < 1) return;
+      //the Corp AI resolves the "trash" command with _bestTrashOption (ranked threats)
+      DecisionPhase(corp, choices, function (params) {
+        Log("SDS Drone Deployment trashes " + GetTitle(params.card));
+        Trash(params.card, true, null, this, undefined, corp);
+      }, this.title, "Choose 1 installed program to trash", this, "trash");
+    },
+    text: "SDS Drone Deployment: trash 1 installed program",
+  },
 };
 
 //Roughneck Repair Squad (26057)
@@ -4351,37 +4658,49 @@ cardSet[26057] = {
       text: "[click][click][click]: Gain 6[c]. You may remove 1 bad publicity.",
       Enumerate: function () {
         if (!this.rezzed) return [];
-        if (!CheckClicks(corp, 3)) return [];
+        if (!CheckActionClicks(corp, 3)) return [];
         return [{}];
       },
       Resolve: function () {
         SpendClicks(corp, 3);
         GainCredits(corp, 6, "", this);
-        if (corp.badPublicity > 0) {
-          DecisionPhase(
-            corp,
-            [
-              {
-                id: 1,
-                label: "Remove 1 bad publicity",
-                button: "Remove Bad Pub",
-              },
-              { id: 0, label: "Do not remove", button: "Pass" },
-            ],
-            function (p) {
-              if (p && p.id === 1) {
-                corp.badPublicity = Math.max(0, corp.badPublicity - 1);
-                Log("1 bad publicity removed");
-              }
-            },
-            "Roughneck Repair Squad",
-            "Remove 1 bad publicity?",
-            this,
-          );
-        }
+        if (corp.badPublicity < 1) return;
+        var choices = [
+          { id: 1, label: "Remove 1 bad publicity", button: "Remove" },
+          { id: 0, label: "Do not remove bad publicity", button: "Pass" },
+        ];
+        // Bad publicity only helps the Runner, so the Corp AI always removes it.
+        if (corp.AI != null)
+          corp.AI.preferred = { title: "Roughneck Repair Squad", option: choices[0] };
+        DecisionPhase(
+          corp,
+          choices,
+          function (params) {
+            if (params && params.id === 1 && corp.badPublicity > 0) {
+              corp.badPublicity--;
+              Log("1 bad publicity removed");
+            }
+          },
+          "Roughneck Repair Squad",
+          "You may remove 1 bad publicity",
+          this,
+        );
       },
     },
   ],
+  // Economy remote: decline when the economy is already sufficient.
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.AI._sufficientEconomy(false)) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  AIEconomyCard: true,
+  // Rezzing is free and only enables the click ability.
+  AIRezWhenCan: function () {
+    return true;
+  },
 };
 
 //Afshar (26058)
@@ -4399,45 +4718,30 @@ cardSet[26058] = {
   subTypes: ["Code Gate"],
   rezCost: 3,
   strength: 1,
-  brokenCount: 0,
-  responseOnEncounter: {
-    Resolve: function () {
-      this.brokenCount = 0;
-    },
-    automatic: true,
+  // Printed subroutines broken this encounter (broken flags reset when an encounter begins).
+  _printedBroken: function () {
+    var count = 0;
+    for (var i = 0; i < this.subroutines.length; i++) {
+      if (this.subroutines[i].printed && this.subroutines[i].broken) count++;
+    }
+    return count;
   },
-  responseOnSubroutineBroken: {
-    Resolve: function () {
-      if (
-        attackedServer &&
-        attackedServer == corp.HQ &&
-        attackedServer.ice &&
-        attackedServer.ice[approachIce] == this
-      ) {
-        this.brokenCount++;
-        if (this.brokenCount >= 1) {
-          for (var i = 0; i < this.subroutines.length; i++) {
-            if (!this.subroutines[i].broken) {
-              this.subroutines[i]._lockedFromBreak = true;
-            }
-          }
-        }
-      }
-    },
-    automatic: true,
+  _breakLimitApplies: function () {
+    return this.rezzed && GetServer(this) == corp.HQ;
   },
-  responseOnEncounterEnds: {
-    Resolve: function () {
-      this.brokenCount = 0;
-      for (var i = 0; i < this.subroutines.length; i++) {
-        delete this.subroutines[i]._lockedFromBreak;
-      }
+  // CardEffectsForbid("break", subroutine) is checked by ChoicesEncounteredSubroutines and Break.
+  modifyCannot: {
+    Resolve: function (id, subroutine) {
+      if (id !== "break" || !subroutine || !subroutine.printed) return false;
+      if (this.subroutines.indexOf(subroutine) < 0) return false;
+      if (!this._breakLimitApplies()) return false;
+      return this._printedBroken() >= 1;
     },
-    automatic: true,
   },
   subroutines: [
     {
       text: "The Runner loses 2[c].",
+      printed: true,
       Resolve: function () {
         LoseCredits(runner, 2);
       },
@@ -4445,6 +4749,7 @@ cardSet[26058] = {
     },
     {
       text: "End the run.",
+      printed: true,
       Resolve: function () {
         EndTheRun();
       },
@@ -4452,7 +4757,10 @@ cardSet[26058] = {
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["loseCreditsRunner"]], [["endTheRun"]]];
+    result.sr = [[["loseCredits", "loseCredits"]], [["endTheRun"]]];
+    // SrBreak never plans more breaks than maxSrBroken on this encounter.
+    if (this._breakLimitApplies())
+      result.maxSrBroken = Math.max(0, 1 - this._printedBroken());
     return result;
   },
 };
@@ -4472,12 +4780,12 @@ cardSet[26059] = {
   subTypes: ["Barrier"],
   rezCost: 3,
   strength: 6,
-  responseOnEncounter: {
-    Resolve: function () {
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (ice != this) return;
       Log("Sandstone: placing 1 virus counter (strength -1)");
       AddCounters(this, "virus", 1);
     },
-    automatic: true,
   },
   modifyStrength: {
     Resolve: function (card) {
@@ -4497,6 +4805,9 @@ cardSet[26059] = {
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
+    // Before its encounter, the counter it gains on encounter is still to come.
+    if (!(CheckEncounter() && GetApproachEncounterIce() == this))
+      result.strength = Math.max(0, result.strength - 1);
     result.sr = [[["endTheRun"]]];
     return result;
   },
@@ -4514,28 +4825,14 @@ cardSet[26060] = {
   faction: "Weyland Consortium",
   influence: 3,
   cardType: "ice",
-  subTypes: ["Sentry", "Illicit", "Destroyer", "Tracer"],
+  subTypes: ["Sentry", "Destroyer", "Tracer", "Liability"],
   rezCost: 7,
   strength: 6,
-  _cannotStealTrashActive: false,
   responseOnRez: {
-    Resolve: function () {
+    Resolve: function (card) {
+      if (card != this) return;
       Log("Trebuchet rezzed: Corp takes 1 bad publicity");
       BadPublicity(1);
-    },
-    automatic: true,
-  },
-  modifyCannot: {
-    Resolve: function (id, card) {
-      if (this._cannotStealTrashActive && (id === "steal" || id === "trash")) {
-        return true;
-      }
-      return false;
-    },
-  },
-  responseOnRunEnds: {
-    Resolve: function () {
-      this._cannotStealTrashActive = false;
     },
     automatic: true,
   },
@@ -4543,46 +4840,60 @@ cardSet[26060] = {
     {
       text: "Trash 1 installed Runner card.",
       Resolve: function () {
-        var choices = ChoicesInstalledCards(runner, function (card) {
-          return CheckTrash(card);
-        });
-        if (choices.length > 0) {
-          DecisionPhase(
-            corp,
-            choices,
-            function (params) {
-              if (params && params.card) {
-                Log("Trebuchet trashes " + GetTitle(params.card));
-                Trash(params.card, true);
-              }
-            },
-            "Trebuchet",
-            "Choose an installed Runner card to trash",
-            this,
-            "trash",
-          );
-        }
+        var choices = ChoicesInstalledCards(runner, CheckTrash);
+        if (choices.length < 1) return;
+        DecisionPhase(
+          corp,
+          choices,
+          function (params) {
+            if (params && params.card) Trash(params.card, true);
+          },
+          "Trebuchet",
+          "Choose an installed Runner card to trash",
+          this,
+          "trash",
+        );
       },
       visual: { y: 94, h: 16 },
     },
     {
       text: "Trace[6]. If successful, the Runner cannot steal or trash Corp cards for the remainder of this run.",
       Resolve: function () {
-        var cardRef = this;
         Trace(6, function (successful) {
-          if (successful) {
-            cardRef._cannotStealTrashActive = true;
-            Log(
-              "Trebuchet trace successful: Runner cannot steal or trash Corp cards for remainder of run",
-            );
-          }
+          if (!successful) return;
+          Log("Trebuchet: the Runner cannot steal or trash Corp cards for the remainder of this run");
+          // A lingering effect survives Trebuchet being derezzed or trashed later this run.
+          AddLingeringEffect({
+            title: "Trebuchet",
+            modifyCannot: {
+              Resolve: function (id, card) {
+                return card && card.player == corp && (id == "steal" || id == "trash");
+              },
+            },
+            responseOnRunEnds: {
+              Resolve: function () {
+                RemoveLingeringEffect(this);
+              },
+              automatic: true,
+            },
+          });
         });
       },
       visual: { y: 129, h: 48 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["trashProgram"]], [["trace"]]];
+    // Trash: serious with a program to lose, moderate otherwise (Ansel 1.0 model).
+    var programs = ChoicesInstalledCards(runner, function (c) {
+      return CheckCardType(c, ["program"]);
+    });
+    if (rc.precalculated.runnerInstalledCardsLength > 0) {
+      if (programs.length > 0) result.sr.push([["misc_serious"]]);
+      else result.sr.push([["misc_moderate"]]);
+    } else result.sr.push([[]]);
+    // A successful trace denies all steals and trashes for the rest of the run.
+    if (incomplete) result.sr.push([[]]);
+    else result.sr.push([["misc_serious"]]);
     return result;
   },
 };
@@ -4600,9 +4911,110 @@ cardSet[26061] = {
   cardType: "operation",
   subTypes: ["Double"],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  installingIce: null,
+  modifyInstallCost: {
+    Resolve: function (card) {
+      return card == this.installingIce ? -3 : 0;
+    },
   },
+  // Installable (ice, central server) pairs; the discount is applied locally,
+  // so probing from HQ needs no active modifier and changes no state.
+  _choices: function (credits) {
+    var choices = [];
+    var centrals = [corp.HQ, corp.RnD, corp.archives];
+    for (var i = 0; i < corp.RnD.cards.length; i++) {
+      var ice = corp.RnD.cards[i];
+      if (!CheckCardType(ice, ["ice"])) continue;
+      for (var j = 0; j < centrals.length; j++) {
+        if (!CheckInstallDestination(ice, centrals[j])) continue;
+        var cost = Math.max(0, InstallCost(ice, centrals[j]) - 3);
+        if (cost > credits) continue;
+        choices.push({
+          card: ice,
+          server: centrals[j],
+          cost: cost,
+          label: GetTitle(ice) + " → " + ServerName(centrals[j]),
+        });
+      }
+    }
+    return choices;
+  },
+  Resolve: function () {
+    var choices = this._choices(Credits(corp));
+    if (choices.length < 1) {
+      Log("Secure and Protect found no ice that can be installed");
+      Shuffle(corp.RnD.cards);
+      return;
+    }
+    if (corp.AI != null) {
+      var preferred = this._preferredChoice(choices, 0);
+      if (preferred) corp.AI.preferred = { title: this.title, option: preferred };
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        var ice = params.card;
+        var server = params.server;
+        Reveal(
+          ice,
+          function () {
+            this.installingIce = ice;
+            var clearDiscount = function () {
+              this.installingIce = null;
+            };
+            Install(ice, server, false, null, true, null, this, clearDiscount, clearDiscount, false, clearDiscount);
+            // Install has moved the ice out of R&D; shuffle after searching.
+            Shuffle(corp.RnD.cards);
+          },
+          this,
+          undefined,
+          false,
+          corp,
+        );
+      },
+      this.title,
+      "Reveal 1 piece of ice from R&D and install it protecting a central server",
+      this,
+    );
+  },
+  // The central that most needs protection; prefer stopping ice the Runner
+  // cannot yet break and can be rezzed after installation.
+  _preferredChoice: function (choices, extraCost) {
+    var ai = corp.AI;
+    if (!ai) return null;
+    var centrals = [corp.HQ, corp.RnD, corp.archives];
+    var server = ai._serverToProtect(false, false, function (s) {
+      return centrals.includes(s);
+    });
+    if (!server) return null;
+    var credits = Credits(corp) - extraCost;
+    var candidates = choices.filter(function (choice) {
+      return choice.server == server && choice.cost <= credits;
+    });
+    candidates.sort(function (a, b) {
+      var stopping = Number(ai._iceHasETR(b.card)) - Number(ai._iceHasETR(a.card));
+      if (stopping) return stopping;
+      var rezA = Number(credits - a.cost >= RezCost(a.card));
+      var rezB = Number(credits - b.cost >= RezCost(b.card));
+      if (rezA != rezB) return rezB - rezA;
+      var covered = Number(ai._aCompatibleBreakerIsInstalled(a.card)) - Number(ai._aCompatibleBreakerIsInstalled(b.card));
+      if (covered) return covered;
+      return (b.card.elo || 0) - (a.card.elo || 0);
+    });
+    return candidates[0] || null;
+  },
+  AIWouldPlay: function () {
+    var extra = PlayCost(this);
+    var preferred = this._preferredChoice(this._choices(Math.max(0, Credits(corp) - extra)), extra);
+    if (!preferred || !corp.AI._iceHasETR(preferred.card)) return false;
+    // A one-click install of stopping ice from HQ is cheaper than this Double tutor.
+    return !corp.AI._affordableIce(preferred.server, corp.HQ.cards).some(function (ice) {
+      return corp.AI._iceHasETR(ice);
+    });
+  },
+  AIPlayWhenCan: 1,
+  AIIsRecurOrTutor: true,
 };
 
 //Reduced Service (26062)
@@ -4620,7 +5032,62 @@ cardSet[26062] = {
   subTypes: [],
   rezCost: 0,
   trashCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  power: 0,
+  responseOnRez: {
+    Enumerate: function (card) {
+      if (card != this) return [];
+      var max = Math.min(4, AvailableCredits(corp, "using", this));
+      //**AI code: offer only the preferred amount
+      if (corp.AI != null) {
+        var x = Math.min(max, this._AIPreferredCounters());
+        return [{ id: x, label: "Pay " + x + "[c]", button: "Pay " + x }];
+      }
+      var choices = [];
+      for (var i = 0; i <= max; i++)
+        choices.push({ id: i, label: "Pay " + i + "[c]", button: "Pay " + i });
+      return choices;
+    },
+    Resolve: function (params) {
+      var x = params && params.id ? params.id : 0;
+      if (x < 1) return;
+      SpendCredits(corp, x, "using", this, function () {
+        AddCounters(this, "power", x);
+      }, this);
+    },
+    text: "Reduced Service: pay up to 4[c] for power counters",
+  },
+  modifyRunCreditCost: {
+    Resolve: function (server) {
+      return GetServer(this) == server ? 2 * Counters(this, "power") : 0;
+    },
+  },
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      if (server != corp.HQ && server != corp.RnD && server != corp.archives) return;
+      if (Counters(this, "power") > 0) RemoveCounters(this, "power", 1);
+    },
+  },
+  //Counters bought at rez, keeping credits to rez this server's unrezzed ICE.
+  _AIPreferredCounters: function () {
+    var server = GetServer(this);
+    var reserve = 0;
+    if (server) server.ice.forEach(function (ice) { if (!ice.rezzed) reserve += RezCost(ice); });
+    return Math.max(0, Math.min(4, AvailableCredits(corp, "using", this) - reserve));
+  },
+  AIDefensiveValue: function (server) {
+    return server && typeof server.cards == "undefined" && server.ice.length ? 2 : 0;
+  },
+  AILimitPerServer: function () { return 1; },
+  //Rez between runs on the Runner's turn so the tax applies to the next run.
+  AIRezWhenCan: function () {
+    var server = GetServer(this);
+    if (!server || CheckRunning() || playerTurn != runner) return false;
+    var self = this;
+    if (typeof server.cards == "undefined" &&
+        !server.root.some(function (card) { return card != self; })) return false;
+    return this._AIPreferredCounters() > 0;
+  },
 };
 
 //Vulnerability Audit (26063)
@@ -4636,7 +5103,28 @@ cardSet[26063] = {
   subTypes: ["Research"],
   advancementRequirement: 4,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  installedThisTurn: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) this.installedThisTurn = true;
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnCorpTurnBegins: {
+    Resolve: function () { this.installedThisTurn = false; },
+    availableWhenInactive: true,
+  },
+  automaticOnRunnerTurnBegins: {
+    Resolve: function () { this.installedThisTurn = false; },
+    availableWhenInactive: true,
+  },
+  modifyCannot: {
+    Resolve: function (str, card) {
+      return str == "score" && card == this && this.installedThisTurn && CheckInstalled(this);
+    },
+    availableWhenInactive: true,
+  },
+  AICannotScoreOnInstallTurn: true,
 };
 
 //CSR Campaign (26064)
@@ -4655,10 +5143,11 @@ cardSet[26064] = {
   responseOnCorpTurnBegins: {
     Enumerate: function () {
       if (!this.rezzed) return [];
-      return [
-        { id: 1, label: "Draw 1 card", button: "Draw 1" },
-        { id: 0, label: "Do not draw", button: "Pass" },
-      ];
+      var drawChoice = { id: 1, label: "Draw 1 card", button: "Draw 1" };
+      var passChoice = { id: 0, label: "Do not draw", button: "Pass" };
+      //**AI code: draw unless it would leave R&D too thin for the mandatory draw
+      if (corp.AI != null) return [corp.RnD.cards.length > 2 ? drawChoice : passChoice];
+      return [drawChoice, passChoice];
     },
     Resolve: function (params) {
       if (params && params.id === 1) {
@@ -4667,6 +5156,18 @@ cardSet[26064] = {
       }
     },
     text: "CSR Campaign: draw 1 card?",
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.RnD.cards.length < 4 || PlayerHand(corp).length > MaxHandSize(corp) - 2) return -1;
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  //Rez at the end of the Runner's turn, just before the first draw trigger.
+  AIRezWhenCan: function () {
+    return currentPhase.identifier == "Runner 2.2" && corp.RnD.cards.length > 2;
   },
 };
 
@@ -4685,15 +5186,14 @@ cardSet[26065] = {
   subTypes: ["Mythic"],
   rezCost: 0,
   strength: 0,
+  //During runs against this server, rez like a non-ice card (CheckRezAsNonIceDuringRun).
+  rezAsNonIceDuringRunsOnServer: true,
+  //Each piece of ice protecting this server, including this one, gets +1 strength.
   modifyStrength: {
     Resolve: function (card) {
-      // Boost all other rezzed ice protecting the same server by +1
-      if (card != this && this.rezzed && CheckCardType(card, ["ice"])) {
-        var rimeServer = GetServer(this);
-        if (rimeServer != null && GetServer(card) == rimeServer) {
-          return 1;
-        }
-      }
+      if (!this.rezzed || !CheckCardType(card, ["ice"])) return 0;
+      var rimeServer = GetServer(this);
+      if (rimeServer != null && rimeServer.ice.includes(card)) return 1;
       return 0;
     },
   },
@@ -4708,7 +5208,11 @@ cardSet[26065] = {
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["bankroll"]]]; // minor drain effect
+    result.sr = [[["loseCredits"]]];
     return result;
+  },
+  //Rez as early as possible in a run on this server so every layer gets +1 strength.
+  AIRezWhenCan: function () {
+    return CheckRezAsNonIceDuringRun(this);
   },
 };

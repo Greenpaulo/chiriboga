@@ -213,9 +213,9 @@ modifyInstallCost: Resolve(card, destination); // destination is a server or hos
 modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
-modifyStealCost: Resolve(card); // returns {credits, clicks} additional costs
+modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
-modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
+modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid
 ```
 
 ### Click Ability
@@ -362,7 +362,8 @@ runner.grip / runner.stack / runner.heap;
 ```js
 CheckCardType(card, ["ice","asset",...])
 CheckSubType(card, "Barrier")
-StealCost(card); // {credits, clicks}, including printed and active additional costs
+StealCost(card); // {credits, clicks, programs}, including printed `stealCost` and active additional costs;
+// programs = installed programs the Runner trashes (PayStealCostPrograms, unpreventable)
 InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)
@@ -749,7 +750,7 @@ responseOnInstall: { Enumerate: function (card) {
 ### Ice weakens itself each encounter (Sandstone pattern)
 
 ```js
-responseOnEncounter: { Resolve: function() { AddCounters(this, "virus", 1); }, automatic: true },
+automaticOnEncounter: { Resolve: function(ice) { if (ice == this) AddCounters(this, "virus", 1); } },
 modifyStrength: { Resolve: function(card) { if (card==this) return -Counters(this,"virus"); return 0; } },
 ```
 
@@ -770,9 +771,11 @@ modifyStrength: {
 ### Prevent steal/trash for run duration (Trebuchet pattern)
 
 ```js
-_flag: false,
-modifyCannot:    { Resolve: function(id) { return this._flag && (id==="steal"||id==="trash"); } },
-responseOnRunEnds: { Resolve: function() { this._flag = false; }, automatic: true },
+// In the subroutine: a lingering effect survives the ICE being trashed or derezzed.
+AddLingeringEffect({
+  modifyCannot: { Resolve: function(id, card) { return card && card.player == corp && (id=="steal"||id=="trash"); } },
+  responseOnRunEnds: { Resolve: function() { RemoveLingeringEffect(this); }, automatic: true },
+});
 ```
 
 ### Asset with click ability (once per turn)
