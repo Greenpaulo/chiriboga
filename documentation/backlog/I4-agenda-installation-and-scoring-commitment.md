@@ -2,7 +2,92 @@
 
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md) phase A, [I3](I3-remote-role-and-root-suitability.md) (now follows I4)
-**Verified against code:** 65251a5 (2026-10-23)
+**Verified against code:** eb78846 (2026-10-23; after the Downfall merge, whose only relevant change is the band-3 `AICannotScoreOnInstallTurn` skip noted below)
+
+## Implementation plan
+
+Proposed at `eb78846`, 2026-10-23. **Approved 2026-10-23**, with one owner
+amendment: when the best install and hold differ by less than 0.1 points
+(the same band the design uses for deception ordering), install. This is
+the tempo and aggressive play the points-only EV misses; it also settles
+scenario 1's near-tie.
+
+- **Validation:** Strategic change; the F4 gate stands. The re-grounding at
+  65251a5 holds after the Downfall merge. The pending reproduction fails as
+  described at eb78846 (`Phase_Main -> gain`, expected install of Hostile
+  Takeover into Remote 0). **Disagreement — scenario 1 may not follow from the
+  design.** At the fixture's state (2 clicks, 5 credits, Runner 0 credits, no
+  programs) installing now gives `E = 1`, while holding gives
+  `D = EV(install next turn with E = 0) = 2`. With `H = 2`, `EV(install) ≈ 2 − 4h_remote`
+  and `EV(hold) ≈ 2 − 4·m5`, where `m5 = h_HQ × a/n` (HQ has 5 cards, so
+  about 0.2·h_HQ). Both servers fall in low lockout buckets, so the points-only
+  EV probably prefers holding, by a margin within the M2 table's noise. The fixture's
+  install is justified by tempo (this turn's clicks do useful work and next
+  turn is freed), which a points-only EV does not see. The indefinite-hold
+  guard's rule (a) is also ambiguous when `D` needs no improvement. Phase A
+  logs the exact EVs for this board before any consumer is written. If hold
+  wins, I stop and ask, rather than tune the design or the fixture.
+- **Approach (two checkpoints):**
+  1. **Phase A, observation only.**
+     - `_evaluateServerSecurity()` gains `rezPlanCost`.
+     - New helpers: `_agendaCompletionPlan()` (M3), `_hqStealHazard()` (M5,
+       held next-turn hazard) and `_agendaCommitmentOptions()` (every
+       destination plus hold, with EV, `W`, plan and reasons).
+     - The options are logged on each agenda decision with
+       `agendaCommitmentPlan` off.
+     - Hook migrations from the table below. Five title cases leave
+       `LEGACY_TITLES`: SanSan City Grid in `_advancementLimit`, and Built to
+       Last, Oaktown, Seamless Launch, Psychographics and Biotic Labor in
+       `_potentialAdvancementDirections`. Trick of Light stays.
+     - `agendaCommitment` collector plus the headless events it needs.
+     - Identity run: 7 pairs × 20 seeds, comparing `logHash` with and
+       without the phase A code.
+     - **Checkpoint:** report the scenario 1 EVs, the identity run and the
+       share of agenda decisions where the plan would differ.
+  2. **Phase B, consumer behind `agendaCommitmentPlan`.**
+     - Destination-or-hold choice in the agenda branch of
+       `_rankedInstallOptionsCore()`, bypassing `_isAScoringServer()` for
+       agendas only.
+     - Band 2 and band 3 constraints.
+     - `AIScoringPlan` on install. The `Phase_Main` advance block admits a
+       planned agenda against its `defenceReserve` instead of
+       `_sufficientEconomy()`.
+     - The advance-versus-defend comparison.
+     - The I2 stake seam: `memo.designated`, `_iceStake()` and the fix 3
+       `exposureTurns` (ai_corp.js around 5454, 5532 and 5585).
+     - Deterministic tests, `--quick` gate, then the full gate with one
+       blocking command.
+
+  Rejected alternatives:
+  - Patching only `_sufficientEconomy()` for committed agendas
+    (`committedAgendaReserveBypass` already exists and stays off). It fixes
+    the "score fast" part but not destinations or holding.
+  - Waiting for I3's role.
+- **Tests:**
+  - `tests/corp-install-decisions.test.js` gets scenarios 2–9 as cases,
+    asserting the logged EV, `W` and reason as well as the choice.
+  - The pending fixture moves to green unchanged if scenario 1 holds.
+  - Hook-migration cases go in the existing card or advancement tests.
+  - New collector test next to the existing collector tests.
+  - The fixtures listed under Test scenarios stay green with the option off,
+    or with `secureScoringServerGate` on where stated.
+- **Risk:**
+  - Phase A's hook migrations change shared advancement math for six cards.
+    The identity run and existing fixtures check this.
+  - Phase B changes destinations, holding, the advance gate and I2's ICE
+    target together. The gate's guards cover theft, insolvency, stranded
+    ICE and layout tells.
+  - The M2 table was accepted only for comparisons. Install-versus-hold
+    compares absolute hazards across server kinds (agenda remote against HQ
+    times a/n), so calibration error between kinds biases the choice. The
+    gate measures the net effect, and I9 owns recalibration.
+- **Docs:**
+  - `ai.md`: new `AIScoringSupport`, the extended `AIFastAdvanceCounters` and
+    `AIAdvanceCreditGain`.
+  - `corp-ai/architecture.md`: install planning, plan execution and the I2
+    stake.
+  - `ai-batch-harness.md`: the `agendaCommitment` collector.
+  - P1 rows ticked, roadmap status, and the fixture's bug ticket.
 
 Dependency state at 65251a5 (re-grounded 2026-10-23; previously 60fa0d7):
 F4, I0, I1 and I2 are done; I2's `iceMarginalSecurity` defaults to `true`.
@@ -249,7 +334,8 @@ choices as hypothetically made):
   any destination with higher EV wins. If the scheduled improvement did not
   happen, the next turn's hold has `D = 0`.
 - Choose the highest EV. A remote the evaluator calls insecure can win, and
-  so can holding. Destinations whose EVs differ by less than 0.1 points may
+  so can holding. Owner amendment (2026-10-23): if the best install's EV is
+  within 0.1 points of hold's, install. Destinations whose EVs differ by less than 0.1 points may
   be reordered by `_deceptionInstallDistance()`; deception never decides
   install versus hold (it remains L8's bounded input, not part of this EV).
 - Under the option, this replaces `_isAScoringServer()`'s admission,
