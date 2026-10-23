@@ -1216,7 +1216,7 @@ function Damage(damageType, num, canBePrevented, afterTrashing, context) {
 	//opportunity for prevention has passed, intended.damage will now be done
     Log("Runner takes " + intended.damage + " " + intended.damageType + " damage");
 	if (intended.damageType == "core") {
-		runner.coreDamage++;
+		runner.coreDamage += intended.damage; //each point reduces maximum hand size
 	}
 	//if damage is greater than grip length, flatline
     if (intended.damage > runner.grip.length) {

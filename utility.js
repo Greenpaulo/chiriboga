@@ -3093,6 +3093,12 @@ function MoveCardTriggers(card, locationfrom, locationto) {
 
   //the above parts use cardLocation as it was
   card.cardLocation = locationto;
+  //Interrupts that replace how a card enters a score area (Project Vacheron).
+  //They resolve before any later win check sees the new agenda points.
+  if (locationto !== null && locationfrom !== locationto &&
+      (locationto == corp.scoreArea || locationto == runner.scoreArea) &&
+      typeof card.interruptOnAddedToScoreArea == "function")
+    card.interruptOnAddedToScoreArea.call(card, locationto, locationfrom);
 
   //once a card being accessed moves to another zone, the access ends immediately. (NRDB Q&A for NBN:Reality Plus)
   //we do this last because it uses the new cardLocation

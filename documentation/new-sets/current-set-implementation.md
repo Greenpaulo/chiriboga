@@ -57,7 +57,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 5 | 26083–26087 | Pending | — | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
 | 6 | 26088–26092 | Pending | — | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut (three existing, unverified), Paule's Café. Complex. |
 | 7 | 26093–26095 | Pending | — | Neutral Runner: Buffer Drive, Daily Casts, DreamNet (two existing, unverified). |
-| 8 | 26096–26100 | Pending | — | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
+| 8 | 26096–26100 | Complete | Claude, 2026-10-23 | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
 | 9 | 26101–26105 | Pending | — | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
 | 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
 | 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
@@ -69,10 +69,9 @@ the shared Lockdown mechanic first needed in batch 9.
 
 ## Completion log
 
-No batches completed.
-
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
+| 8 | 26096–26100 | 2026-10-23 | Claude | `tests/uprising-batch8.test.js` | Megaprix/Vacheron variable points via `agendaPointsForPlayer`; new `interruptOnAddedToScoreArea` engine hook in `MoveCardTriggers` (Vacheron counters before the win check); core damage now counts every point; Bass score-burst/last-click AI; Cerebral Overwriter ambush AI; Vaporframe free installs through `_bestInstallOption`. |
 
 ## Batch-review log
 
@@ -88,6 +87,7 @@ initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
+| 8 | 26096–26100 | Pending | — | Corp scoring/protection and steal-risk estimates read printed points: Megaprix second-copy bonus and Vacheron 0-point steal not valued. Bass is not part of the fast-advance search (only exact one-click bursts or last click). Vaporframe free installs are ranked with paid-install inhibition, so cost-free outer ice is undervalued; no plan for its trash response as bait. Cerebral Overwriter fires whenever affordable (no credit-reserve trade-off); advancement limit fixed at 3. |
 
 ## Optimisation log
 

@@ -1037,7 +1037,21 @@ cardSet[26096] = {
   subTypes: [],
   advancementRequirement: 3,
   agendaPoints: 1,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      var self = this;
+      var otherCopy = corp.scoreArea.concat(runner.scoreArea).some(function (card) {
+        return card != self && card.title == self.title;
+      });
+      if (otherCopy) AddCounters(this, "agenda", 1);
+    },
+    automatic: true,
+  },
+  //The bonus applies to whoever holds it, wherever its counter came from.
+  agendaPointsForPlayer: function () {
+    return this.agendaPoints + (Counters(this, "agenda") > 0 ? 1 : 0);
+  },
 };
 
 //Project Vacheron (26097)
@@ -1054,7 +1068,29 @@ cardSet[26097] = {
   subTypes: ["Research"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  //Called by MoveCardTriggers as the card enters a score area, before any win check.
+  interruptOnAddedToScoreArea: function (scoreArea, locationfrom) {
+    if (scoreArea != runner.scoreArea || locationfrom == corp.archives.cards) return;
+    AddCounters(this, "agenda", 4);
+  },
+  agendaPointsForPlayer: function () {
+    if (runner.scoreArea.includes(this) && Counters(this, "agenda") > 0) return 0;
+    return this.agendaPoints;
+  },
+  //Score-area cards are inactive, so the gained ability is enabled explicitly.
+  responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      if (!runner.scoreArea.includes(this) || !CheckCounters(this, "agenda", 1)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      if (!runner.scoreArea.includes(this) || !CheckCounters(this, "agenda", 1)) return;
+      RemoveCounters(this, "agenda", 1);
+    },
+    text: "Project Vacheron: remove 1 hosted agenda counter",
+    automatic: true,
+    availableWhenInactive: true,
+  },
 };
 
 //Bass CH1R180G4 (26098)
@@ -1070,7 +1106,57 @@ cardSet[26098] = {
   subTypes: ["Bioroid"],
   rezCost: 3,
   trashCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  abilities: [
+    {
+      text: "[click], [trash]: Gain [click][click].",
+      Enumerate: function () {
+        if (!this.rezzed || !CheckInstalled(this)) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
+        //**AI code: spend it to finish an agenda this turn, or as the last click (+1 click either way)
+        if (corp.AI && !this._aiScoreBurstAgenda() && corp.clickTracker != 1) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        //the trash is a cost, so it cannot be prevented
+        Trash(this, false, function () {
+          GainClicks(corp, 2);
+        }, this);
+      },
+    },
+  ],
+  //An installed agenda that exactly one extra click (with its advancement credits) would finish this turn.
+  _aiScoreBurstAgenda: function () {
+    if (playerTurn != corp || !currentPhase.identifier || currentPhase.identifier.indexOf("Corp 2") != 0) return null;
+    var clicks = corp.clickTracker;
+    if (clicks < 1) return null;
+    var spare = Credits(corp) - (this.rezzed ? 0 : RezCost(this));
+    var agendas = InstalledCards(corp).filter(function (card) {
+      if (!CheckCardType(card, ["agenda"]) || !CheckAdvance(card)) return false;
+      var remaining = AdvancementRequirement(card) - Counters(card, "advancement");
+      return remaining == clicks + 1 && remaining <= spare;
+    });
+    return agendas.length ? agendas[0] : null;
+  },
+  AITriggerWhenCan: true,
+  AIRezWhenCan: function () {
+    if (this._aiScoreBurstAgenda()) return true;
+    //otherwise only to use as the last click, with credits to spare
+    return playerTurn == corp && !!currentPhase.identifier && currentPhase.identifier.indexOf("Corp 2") == 0 &&
+      corp.clickTracker == 1 && Credits(corp) >= RezCost(this) + 5;
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    var installed = InstalledCards(corp);
+    for (var i = 0; i < installed.length; i++) {
+      if (installed[i] != this && GetTitle(installed[i]) == GetTitle(this)) return -1;
+    }
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
+  },
 };
 
 //Cerebral Overwriter (26099)
@@ -1087,7 +1173,44 @@ cardSet[26099] = {
   subTypes: ["Ambush"],
   rezCost: 0,
   trashCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  canBeAdvanced: true,
+  advancement: 0,
+  responseOnAccess: {
+    Enumerate: function () {
+      if (accessingCard != this || !CheckInstalled(this)) return [];
+      //paying for 0 damage has no effect
+      if (Counters(this, "advancement") < 1 || !CheckCredits(corp, 3, "using", this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var damage = Counters(this, "advancement");
+      var choices = [
+        { id: 0, label: "Pay 3[c]: do " + damage + " core damage", button: "Pay 3[c]: " + damage + " core damage" },
+        { id: 1, label: "Continue", button: "Continue" },
+      ];
+      //**AI code: always fire; the counters are only worth anything when it does
+      if (corp.AI) corp.AI.preferred = { title: this.title, option: choices[0] };
+      DecisionPhase(corp, choices, function (params) {
+        if (params.id != 0 || !CheckCredits(corp, 3, "using", this)) return;
+        SpendCredits(corp, 3, "using", this, function () {
+          if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
+          //damage can be prevented
+          Damage("core", damage, true);
+        }, this);
+      }, this.title, this.title, this);
+    },
+  },
+  RezUsability: function () {
+    return false;
+  }, //never rez (for usability rather than legality)
+  AIAdvancementLimit: function () {
+    return 3;
+  },
+  AIPunishesAccess: function (server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (Credits(corp) < 3) return 0;
+    return Counters(this, "advancement");
+  },
 };
 
 //Vaporframe Fabricator (26100)
@@ -1104,7 +1227,102 @@ cardSet[26100] = {
   subTypes: ["Industrial"],
   rezCost: 2,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  _wasRezzedWhenTrashed: false,
+  _serverWhenTrashed: null,
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+  },
+  //HQ install options ignoring all costs; excludedRoot bans (only) that server's root.
+  _installChoices: function (excludedRoot) {
+    return ChoicesHandInstall(corp, true).filter(function (option) {
+      return !(excludedRoot && option.server == excludedRoot && !CheckCardType(option.card, ["ice"]));
+    });
+  },
+  _installFree: function (choices, instruction) {
+    if (corp.AI) {
+      var best = corp.AI._bestInstallOption(choices, false);
+      var decline = choices.find(function (option) { return !option.card; });
+      corp.AI.preferred = { title: this.title, option: best >= 0 ? choices[best] : decline || choices[0] };
+    }
+    DecisionPhase(corp, choices, function (params) {
+      if (!params || !params.card) return;
+      Install(params.card, params.server, true, null, true, null, this, null, null, false);
+    }, this.title, instruction, this, "install");
+  },
+  abilities: [
+    {
+      text: "[click]: Install 1 card from HQ, ignoring all costs.",
+      Enumerate: function () {
+        if (!this.rezzed || this.usedThisTurn) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
+        var choices = this._installChoices(null);
+        if (!choices.length) return [];
+        //**AI code: only for an install the shared ranking wants, and not while clicks are needed to finish an agenda
+        if (corp.AI) {
+          var clicks = corp.clickTracker;
+          var finishing = InstalledCards(corp).some(function (card) {
+            if (!CheckCardType(card, ["agenda"])) return false;
+            var remaining = AdvancementRequirement(card) - Counters(card, "advancement");
+            return remaining > 0 && remaining == clicks && remaining <= Credits(corp);
+          });
+          if (finishing || corp.AI._bestInstallOption(choices, true) < 0) return [];
+        }
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        this.usedThisTurn = true;
+        var choices = this._installChoices(null);
+        if (!choices.length) return;
+        this._installFree(choices, "Install 1 card from HQ, ignoring all costs");
+      },
+    },
+  ],
+  //An unrezzed asset's ability is inactive, so remember its state and server before it moves.
+  automaticOnWouldTrash: {
+    Resolve: function (cards) {
+      if (!cards.includes(this)) return;
+      this._wasRezzedWhenTrashed = this.rezzed && CheckInstalled(this);
+      this._serverWhenTrashed = GetServer(this);
+    },
+    availableWhenInactive: true,
+  },
+  responseOnTrash: {
+    Enumerate: function (cards, trashingPlayer) {
+      if (!cards || !cards.includes(this)) return [];
+      if (trashingPlayer != runner || !this._wasRezzedWhenTrashed) return [];
+      var choices = this._installChoices(this._serverWhenTrashed);
+      if (!choices.length) return [];
+      //**AI code: only when the shared ranking accepts a free install
+      if (corp.AI && corp.AI._bestInstallOption(choices, false) < 0) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      this._wasRezzedWhenTrashed = false;
+      var choices = this._installChoices(this._serverWhenTrashed);
+      this._serverWhenTrashed = null;
+      if (!choices.length) return;
+      choices.push({ card: null, label: "Install nothing", button: "Install nothing" });
+      this._installFree(choices, "You may install 1 card from HQ, ignoring all costs");
+    },
+    text: "Vaporframe Fabricator trashed: install 1 card from HQ?",
+    availableWhenInactive: true,
+  },
+  AIRezWhenCan: function () {
+    return Credits(corp) >= RezCost(this) + 3;
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.HQ.cards.length < 3) return -1;
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
+  },
 };
 
 //Drafter (26101)

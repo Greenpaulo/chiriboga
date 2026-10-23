@@ -3364,3 +3364,41 @@ optimisation work.
   rezzes it at the first Corp opportunity in a run on its server. Its subroutine
   is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
   `Strength()` in Runner and Corp security calculations.
+
+### Uprising batch 8 card hooks
+
+- Megaprix Qualifier and Project Vacheron use `agendaPointsForPlayer` (see §7)
+  for their variable value: +1 while Megaprix hosts an agenda counter, 0 while
+  Vacheron is in the Runner's score area with counters. Corp scoring, protection
+  and steal-risk estimates still read printed `agendaPoints`; see the Uprising
+  optimisation queue.
+- Project Vacheron uses the engine hook `interruptOnAddedToScoreArea(scoreArea,
+  locationfrom)` (not an AI hook). `MoveCardTriggers` calls it when a card enters
+  either score area, after `cardLocation` is updated and before the
+  after-command win check. It covers `Steal` and every other move into the
+  Runner's score area; Vacheron returns early for the Corp's score area and for
+  Archives. Its gained "Runner's turn begins" ability is a
+  `responseOnRunnerTurnBegins` with `availableWhenInactive`, because
+  score-area cards are not active.
+- Bass CH1R180G4 uses `AITriggerWhenCan`. Its AI-only `Enumerate` guard offers
+  the ability when one more click finishes an installed agenda this turn and
+  the remaining advancements (plus rez cost if unrezzed) are affordable
+  (`_aiScoreBurstAgenda`), or when it is the last click. `AIRezWhenCan()` rezzes
+  it for that burst, or on the Corp's turn for the last click with at least 5
+  spare credits. It also uses `AIWorthInstalling` (non-scoring remote; unique)
+  and `AIAvoidInstallingOverThis`.
+- Cerebral Overwriter follows Urtica Cipher: `canBeAdvanced`,
+  `AIAdvancementLimit()` 3, `RezUsability` false and `AIPunishesAccess(server)`.
+  `AIPunishesAccess` returns the hosted advancement counters when it is in that
+  server's root and the Corp can pay 3[c], otherwise 0. Its access response
+  sets `corp.AI.preferred` to pay whenever it is offered (at least one counter
+  and 3[c] available).
+- Vaporframe Fabricator follows Calvin B4L3Y (`AIRezWhenCan` with 3 credits to
+  spare after the rez, `AIWorthInstalling` with at least 3 cards in HQ, and
+  `AIAvoidInstallingOverThis`). Its click ability is offered to the AI only when
+  `_bestInstallOption(choices, true)` ranks one of the cost-free HQ installs,
+  and not when an installed agenda needs every remaining click to be finished.
+  The install decision and the Runner-trash response both choose with
+  `_bestInstallOption(choices, false)`. The response is offered to the AI only
+  when that ranking accepts an install; it excludes the root of the trashed
+  card's server but still allows ice protecting it.
