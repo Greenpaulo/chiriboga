@@ -272,9 +272,9 @@ I9 comes last.
   evidence about the tested AI-vs-AI version, not a decision about Paul's games.
 
 ### I3 Remote role and root suitability
-- **Status:** proposed
+- **Status:** ready
 - **Depends on:** I2, F4, L8.4
-- **Spec:** [I3-remote-role-and-root-suitability.md](specs/I3-remote-role-and-root-suitability.md)
+- **Ticket:** [I3-remote-role-and-root-suitability.md](../backlog/I3-remote-role-and-root-suitability.md)
 - **Goal:** Keep a persistent scoring remote, chosen by projected breach hazard, and charge other installs the scoring value they displace. Reuse L8.9's placement/allocation/lifetime tools and test legitimate bare asset-spam remotes.
 
 ### I3.1 Deck game-plan profile

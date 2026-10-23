@@ -1,15 +1,32 @@
 # I3 Remote role and root suitability
 
 **Roadmap item:** I3 · **Depends on:** I2, F4, L8.4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** [L8.9 tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](../../backlog/code-review/L8.9-observable-defense-parity.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](../../backlog/done/I2-ice-selection-by-marginal-security.md), [deception gate reconciliation](../deception-gates.md)
-**Verified against code:** 60fa0d7 (2026-10-16)
+**Read first:** [L8.9 tool recipe](../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](done/L8.9-observable-defense-parity.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md), [deception gate reconciliation](../corp-ai/deception-gates.md)
+**Verified against code:** faccb78 (2026-10-23)
 
-Dependency state at 60fa0d7: L8.4 is done and adopted (`postureEpochs`
-defaults to `true`); F4 is done; I2 is proposed. I3 needs I2 phase A
-(measurements M1, M2, M4 and the M2 reliability check) and I2's phase B
-expected-points ICE consumer, which reads I3's expected future agendas.
+Dependency state at faccb78: L8.4 is done and adopted (`postureEpochs`
+defaults to `true`); F4 is done; I2 is done and adopted (`iceMarginalSecurity`
+defaults to `true`). I2 delivered M1 (`_breachMargin()`), M2's next-turn
+lookup (`_hazardForMargin()`, `_breachKind()`) and M4 (`AIApproachDefense`),
+all read in production through `_marginalHazard()`/`_marginalIceScore()`, and
+its phase B points-based ICE consumer. Three corrections to the earlier
+assumptions (re-grounded 2026-10-23):
 
-**Before design freeze:** incorporate the [I2.2 retain disposition](../measurements/I2.2-rnd-protection-lateness.md)
+- **No I3 slot exists in I2.** Phase B's stake for an empty remote is a
+  pre-I3 placeholder in `_iceStake()`: only the designated next scoring remote
+  (`memo.designated = _scoringServers()[0]` in `_marginalIceInstallOptions()`)
+  gets a stake, the highest-point agenda in HQ, delayed by fix 3's
+  `exposureTurns` (horizon − 1). I3 replaces that rule; it does not feed an
+  existing input.
+- **M2 is a constant next-turn hazard.** I2's M2 reliability and next-turn
+  checks failed; the owner accepted the table for comparisons only and the
+  code holds the next-turn hazard over `CORP_AI_I2_HORIZON_RUNNER_TURNS` (2)
+  with no projected-income drift. `_breachHazard()`/`_projectedRunnerIncome()`
+  exist but no decision reads them. I9 owns M2 recalibration under I3's roles.
+- **M3 and M5 do not exist.** Both are I4-owned in the design note.
+  `POINT_VALUE` is `CORP_AI_POINT_VALUE` (4.4) in `ai_corp.js`.
+
+**Before design freeze:** incorporate the [I2.2 retain disposition](../corp-ai/measurements/I2.2-rnd-protection-lateness.md)
 and its review. This is a sequencing requirement, not an additional formal
 dependency. Its paired replays establish an opening-ranking mechanism for
 delayed R&D protection, alongside beneficial remote/HQ counterexamples;
@@ -20,9 +37,14 @@ R&D cases, and report per-central theft, never-protected counts and the share
 bare through turn 2 (including early game-end censoring), not just conditional
 first-ICE means. Use a fresh matched control for I3's separate policy gates.
 
-Also complete the owner's [I2.3 HQ-then-R&D opening comparison](../../backlog/I2.3-hq-then-rnd-opening-ice-gate.md)
-before design freeze. I2.2 retains I2 as its control; it did not test this
-alternative. Incorporate the recorded adopt/reject result into I3's baseline.
+The owner's [I2.3 HQ-then-R&D opening comparison](code-review/I2.3-hq-then-rnd-opening-ice-gate.md)
+is complete: its F4 gate failed (seeds 5001–6000; R&D theft improved but
+combined central theft, scoring and Corp wins regressed), so I3's control
+keeps adopted I2 placement with `openingHqThenRdIce` off. That option remains
+default-off only for the owner's manual playtests; I3 does not read it.
+Seeds 5001–6000 are exposed and cannot be I3 adoption evidence. I2.3's
+`openingCentralCoverage` collector and exact ICE-completion events are
+available for I2.2's central-timing reports below.
 
 ## Goal
 Name one scoring remote and keep it: the remote with the best projected
@@ -35,9 +57,9 @@ install that would occupy it the scoring value it displaces, in agenda points.
 
 **Why this design.** Two earlier changes weakened the Corp by turning a
 security measurement into a shared yes/no gate (`fa1182c`, and the
-[L9.0.1 gate failure](../../backlog/done/L9.0.1-adopt-honest-lockout.md#resolution)),
+[L9.0.1 gate failure](done/L9.0.1-adopt-honest-lockout.md#resolution)),
 and the owner's 2026-10-14 playtests saw agendas held in HQ and agendas left
-unadvanced in weak remotes. The [scoring-risk model](install-decisions-design.md#scoring-risk-model-2026-10-16)
+unadvanced in weak remotes. The [scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16)
 replaces "is this server secure?" with expected points lost by waiting versus
 installing; I3's share is the remote role, in the model's words "the scoring
 remote is the one with the best projected M2 after affordable investment; its
@@ -46,48 +68,66 @@ lost scoring EV as opportunity cost." Owner's playtest note: "if it manages to
 build a secure remote then keep getting agendas in and keep scoring."
 
 ## Current behaviour
-Verified at 60fa0d7 in `ai_corp.js`.
+Verified at faccb78 in `ai_corp.js` (re-grounded 2026-10-23; previously 60fa0d7).
 
 - `_emptyProtectedRemotes()` lists remotes with ICE and no agenda/asset root
-  (obsolete bluffs count as room unless kept for Trick of Light), sorted by
-  `_protectionScore()` descending. `_bestProtectedRemote()` returns the remote
-  with the highest `_protectionScore()`.
-- `_isAScoringServer(server)` (remotes only): with
-  `secureScoringServerGate` (default `false`) it first rejects
-  `!_evaluateServerSecurity(server).isSecure`; then it returns `true` if the
-  root holds a scoring upgrade (`AIIsScoringUpgrade`), an agenda or an Ambush;
-  otherwise it requires `_protectionScore` at least HQ's (Archives' when the
-  hand is about to overflow with agendas), no other empty protected remote
-  holding a scoring upgrade, and being the strongest empty protected remote.
-  The role is recomputed from scratch every call; nothing persists it.
+  (an obsolete bluff counts as room unless it has two or more advancements and
+  Trick of Light is in HQ or R&D), sorted by `_protectionScore()` descending.
+  `_bestProtectedRemote()` returns the remote with the highest positive
+  `_protectionScore()`, otherwise `null`.
+- `_isAScoringServer(server)` (remotes only) always evaluates
+  `_evaluateServerSecurity(server)` for `_protectionScore`; with
+  `secureScoringServerGate` (default `false`) it also rejects
+  `!isSecure`. It returns `true` if the root holds a scoring upgrade
+  (`AIIsScoringUpgrade`), an agenda or an Ambush; otherwise it requires
+  `_protectionScore` at least HQ's (Archives' when `_agendasInHand()` exceeds
+  hand size − 1), no other empty protected remote holding a scoring upgrade,
+  and being the strongest empty protected remote. The role is recomputed every
+  call; nothing persists it.
 - `_scoringServers()` filters the empty protected remotes through
-  `_isAScoringServer()`. In `_rankedInstallOptionsCore()` HVTs (`_isHVT()`)
-  are offered into each scoring server; generic assets are offered into empty
-  protected remotes in `_assetDestinationOrder()` order (a new remote only when
-  installing from Archives or resolving cards with fewer than two empty
-  remotes) and skip `strongestEmptyRemote`; options are sorted by
-  `|advancement requirement − _scoringWindow()| + 0.75 × _deceptionInstallDistance()`.
-  Assets with `AIWorthInstalling(emptyProtectedRemotes)` (11 cards across
-  `systemupdate2021.js`, `systemgateway.js`, `elevation.js`, `vantagepoint.js`)
-  choose their own index; the three in `systemupdate2021.js` call
-  `_isAScoringServer()` to pick the first non-scoring remote.
+  `_isAScoringServer()`. Readers: `_rankedInstallOptionsCore()`, I2's
+  `_marginalIceInstallOptions()` (`memo.designated`, the pre-I3 stake seam
+  above) and Vantage Point's `_preferredSearch` (`sets/vantagepoint.js`).
+- In `_rankedInstallOptionsCore()` a game-winning fast-advance option into
+  `strongestEmptyRemote` comes first; HVTs (`_isHVT()`) are offered into each
+  scoring server; generic assets are offered into empty protected remotes in
+  `_assetDestinationOrder()` order (a new remote only when installing from
+  Archives or resolving cards with fewer than two empty remotes) and skip
+  `strongestEmptyRemote`; options are sorted by
+  `|_advancementLimit(card, server) − window| + 0.75 × _deceptionInstallDistance()`,
+  where `window` is `_scoringWindow(server)` for scoring servers and 0
+  otherwise. I2 changed only this function's ICE block; I2.3's
+  `openingHqThenRdIce` lives elsewhere.
+- `AIWorthInstalling(emptyProtectedRemotes)` lets 13 assets choose their own
+  index (previously counted as 11 in four files): two each in
+  `systemgateway.js`, `elevation.js` and `downfall.js` (Downfall is not yet a
+  playable set), three in `systemupdate2021.js` and four in `vantagepoint.js`.
+  Twelve call `_isAScoringServer()` to avoid scoring remotes; one in
+  `vantagepoint.js` does not.
 - `_isAScoringServer()` is also read by `_shouldUpgradeServerWithCard()`
-  (scoring upgrades only into scoring servers) and by
+  (scoring upgrades only into scoring servers), by
   `_rankedServersToProtect()` (scoring remotes get `−_agendasInHand()` as a
-  protection-priority adjustment).
-- `_bestServerToUpgrade()` uses `AIPreferredUpgradeServer` when a card has
-  it; otherwise the first non-empty protected remote, falling back to the
-  weakest of R&D/HQ/Archives by `_protectionScore()`. No role input.
+  protection-priority adjustment) and wrapped by
+  `scripts/ai-batch/install-attribution.js`.
+- `_bestServerToUpgrade()` uses a legal `AIPreferredUpgradeServer` when a card
+  has it, and the weakest legal server under `installOnlyIn`. Otherwise it
+  keeps the first non-empty protected remote only if R&D's `_protectionScore()`
+  is at least the remote's, else R&D, then HQ, then Archives when it backdoors
+  a stronger HQ. No role input.
 - `_classifyRunnerMacroThreat()` returns `focus`
-  (`balanced`/`hq`/`rd`/`centrals`) from `_centralServerThreat()` penalties
-  with fixed thresholds; only tests call it.
-- `_breachConsequence()` exists (L7.1) but L7.1 was **not adopted** (gate
-  failed 2026-10-09); no production decision reads it.
-- Posture: `postureEpochs` defaults to `true` (L8.4 adopted), so bait/bluff
-  commitments are re-evaluated at epoch boundaries; `_remoteDeceptionProfile()`
-  still caches the profile shape per card lifetime.
-- L9.0's `honestLockout`/`honestIsSecure` fields are observation-only;
-  L9.0.1's global adoption failed its gate and was removed.
+  (`balanced`/`hq`/`rd`/`centrals`) and `nonInteractive` from
+  `_centralServerThreat()` penalties, growth and persistent pressure with fixed
+  thresholds; only tests call it.
+- `_breachConsequence()` (L7.1; L7.1's policy was not adopted) now has a
+  production reader: I2's `_iceStake()` uses its `pointsExposed` for central
+  stakes.
+- Posture: `postureEpochs` defaults to `true` (L8.4 adopted).
+  `_remoteDeceptionProfile()` caches per card in a WeakMap; with
+  `matchLocalPostureFeedback` (default `true`, L8.5) the profile is rerolled
+  at a new active posture commitment.
+- L9.0's `honestLockout`/`honestIsSecure` fields feed `_breachMargin()` (M1)
+  and so I2's marginal ICE score; L9.0.1's global `isSecure` adoption failed
+  its gate and was removed.
 - I1 candidate records carry `role` = the legacy preference group (for
   example `protectionIce`), not a remote role.
 
@@ -101,11 +141,15 @@ All values are in expected agenda points over the design note's short horizon
 whose root holds no asset and no agenda other than one already being scored
 there, plus a new remote. The incumbent scoring remote remains eligible
 when its agenda is replaced by an Ambush asset, preserving its persisted role
-and expected scoring stakes under that substitution (scenario 6). For each, project M2 (`breachHazard`, server kind
-"agenda remote") after the best ICE investment affordable from projected Corp
-credits within `H`, using I2's `(ICE, server)` hypothetical evaluation and
-re-evaluating M1 against projected Runner income each turn (as the design note
-says; never assume independence). The scoring remote is the candidate with the
+and expected scoring stakes under that substitution (scenario 6). For each, project M2 (server kind "agenda
+remote") after the best ICE investment affordable from projected Corp credits
+within `H`, using I2's `(ICE, server)` hypothetical evaluation and the same
+hazard I2 adopted: `_hazardForMargin()` on `_breachMargin()`, held over
+`CORP_AI_I2_HORIZON_RUNNER_TURNS` (re-grounded 2026-10-23: the design note's
+per-turn re-evaluation against projected Runner income is not used, because
+`_breachHazard()`'s projection failed I2's reliability check and no decision
+reads it; using one hazard keeps I3's role choice and I2's ICE stakes on the
+same scale). The scoring remote is the candidate with the
 lowest projected cumulative hazard over `H`. Ties go to the current scoring
 remote, then more installed ICE, then server order. Persistence needs no
 hysteresis constant: sunk ICE keeps the incumbent's projected M2 low, and the
@@ -120,7 +164,9 @@ Zero unless `server` is the scoring remote. Otherwise the expected agenda
 points that will pass through it within `H`: agenda points in HQ (Corp-known)
 plus expected agenda points drawn from R&D (R&D agenda density × planned
 draws), minus the expected points stolen from HQ/R&D before they are installed
-(M5 for HQ, M2 × accesses × density for R&D). Discount only theft
+(for HQ, the design note's M5 formula M2(HQ) × min(1, accesses ÷ HQ size);
+for R&D, M2 × accesses × density). M5 does not exist yet: I3 implements it as
+a private helper and I4 reuses it rather than adding a second version. Discount only theft
 attributable to that projected supply, rather than unrelated agendas remaining
 in R&D. Cap the result by what the Corp can advance in `H`
 (`_potentialAdvancement()` per turn), then floor the final stakes at zero. The stolen-from-centrals
@@ -152,22 +198,26 @@ role, the proposed role after install and `opportunityCost`; a
 displaced role. Bluff and bait remain L8 inputs, not roles.
 
 **5. What I3 supplies.**
-- To I2 phase B: `_expectedScoringStakes(server)` as the "I3's expected future
-  agendas" term of points through the server. It must depend only on the
-  remote's role and the Corp's agenda supply, never on whether the current
+- To I2 phase B: with `remoteRoles` on, `_iceStake()`'s pre-I3 empty-remote
+  rule (designated `_scoringServers()[0]`, highest-point HQ agenda, fix 3's
+  `exposureTurns` delay) is replaced by `_expectedScoringStakes(server)` for
+  the scoring remote and zero for other empty remotes. It must depend only on
+  the remote's role and the Corp's agenda supply, never on whether the current
   root is an agenda or a trap, so I2's equivalent-board substitution invariant
-  holds.
+  holds. Per I2.2, the replacement must be weighed against competing HQ/R&D
+  exposure and install timing (the stolen-from-centrals discount in 2 is that
+  term), not simply add remote points; no mandatory central-first rule.
 - To I4: `_scoringRemote()` (server or new remote), its per-turn projected M2
   over `H` and the ICE investment that projection assumed, as the
   "install in s" destination and as next turn's improvement for `EV(hold)`.
   Repeat scoring then needs no rule: after a score the remote keeps its role
   and low M2.
 
-**Deception input ownership.** [L8.8](L8.8-marginal-deception-value.md)
+**Deception input ownership.** [L8.8](../corp-ai/specs/L8.8-marginal-deception-value.md)
 owns any marginal concealment value and I5 owns `trapValue`; I3 adds neither
 and does not feed private trap payoff into ICE ranking. Placing a trap in the
 scoring remote pays the same `opportunityCost` as any non-agenda root. Read
-[L8.9](../../backlog/code-review/L8.9-observable-defense-parity.md)'s post-I2 attribution before
+[L8.9](done/L8.9-observable-defense-parity.md)'s post-I2 attribution before
 implementing (a sequencing preference, not a dependency).
 
 **Measurement handoff from L8.9 (2026-10-19).** L8.9 delivers observation and
@@ -176,7 +226,7 @@ remotes was withdrawn without implementation. I3 owns role/occupancy decisions
 for every candidate, while I5 owns whether/where installing an asset or trap is
 worthwhile. Do not inherit a “must have ICE” condition from that experiment.
 
-Use the [tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets)
+Use the [tool recipe](../ai-batch-harness.md#using-install-observations-in-the-i-tickets)
 on fresh I3 baseline/candidate reports: collect `realizedIceByRootType`,
 `bluffSingleVariableCorrelation` and `installOutcomes`; run
 `node scripts/ai-batch/install-defense-summary.js <one-arm-report.json>` offline.
@@ -192,7 +242,7 @@ occupy bare remotes while one scoring remote stays protected. A count difference
 or a new remote is not itself an error. Current L8.9 samples do not establish
 representative shell-plan coverage or a full ordinary-asset/topology history;
 state those gaps and add scoped passive evidence if a claim depends on them.
-[I3.1](I3.1-deck-game-plan-profile.md) owns future starting-deck evidence, but
+[I3.1](../corp-ai/specs/I3.1-deck-game-plan-profile.md) owns future starting-deck evidence, but
 I3 need not wait for that profile or invent an archetype rule now. L8.9's
 calibrated noise allowances belong to its old baseline; reconcile fresh coverage
 and consumer-specific thresholds before candidate results.
@@ -234,19 +284,28 @@ boundary; no deception safety rule is weakened.
    to the baseline.
 
 ## Acceptance gate
-Expected effect: small in pool games. Legacy code already keeps generic assets
-off the strongest empty remote and the `systemupdate2021.js` hooks avoid
-scoring servers, so the direct redirection rarely fires; most of I3's value
-reaches play through I2's points-based ICE ranking and I4's destinations.
-Command 1 is therefore non-inferiority only; command 2 must show the persistent
-scoring remote improves scoring on boards where it matters.
+Expected effect: small direct redirection in pool games. Legacy code already
+keeps generic assets off the strongest empty remote and 12 of the 13
+`AIWorthInstalling` hooks avoid scoring servers. Most of I3's effect reaches
+play through its replacement of I2's pre-I3 empty-remote stake in
+`_iceStake()`, which changes which ICE is installed where, and later through
+I4's destinations. Command 1 is therefore non-inferiority only; command 2 must
+show the persistent scoring remote improves scoring on boards where it matters.
 
 F4 gate. Option `remoteRoles` (Corp AI), off in the baseline and on in the
-candidate, both arms with I2's adopted options and current defaults. Committed
-deck pool, paired seeds, 200 games per deck pair, bootstrap 95% intervals.
+candidate. Both arms use current defaults, which include I2's adopted
+`iceMarginalSecurity=true` and `openingHqThenRdIce=false`; the command states
+`iceMarginalSecurity` explicitly. Committed deck pool, paired seeds 6001–7000
+(1,000 games per deck pair; unused by any earlier gate; I2 and I2.3 used 1,000
+per pair), bootstrap 95% intervals. Fresh matched control: run on the I3
+branch after `main` (Downfall, I2.3) is merged in, never reusing I2 or I2.3
+reports.
 Collectors: `remoteRoles` (adds `remoteRoles.scoringRemoteSwitches` and
 `remoteRoles.scoringRemoteOccupiedTurns`, report-only, defined in this ticket),
-`realizedIceByRootType` (F12).
+`centralStolen`, `corpInsolventTurns`, `strandedUnrezzedIceCost`,
+`bluffSingleVariableCorrelation`, `realizedIceByRootType` (F12),
+`installOutcomes` (L8.9 recipe) and `openingCentralCoverage` (I2.3; report-only,
+for I2.2's turn-1/2 central coverage).
 Starts: boards this ticket builds with `scripts/start-board.js` from benchmark
 game logs (`ai-batch.js replay` of a pool seed reaching this state; no human
 logs exist),
@@ -263,13 +322,14 @@ Command 1 (deck pool; non-inferiority only):
 | Guard | `pointsStolenByServer.remote` | lower | regression at most 0.15 |
 | Guard | `pointsStolenByServer.hq` | lower | regression at most 0.1 |
 | Guard | `pointsStolenByServer.rd` | lower | regression at most 0.1 |
-| Guard | `realizedIceByRootType.allCountDistance` | lower | paired pooled regression at most 0.02 (provisional; frozen from F12 control calibration before any candidate run) |
+| Guard | `gameLength` | lower | regression at most 1.5 |
+| Guard | `corpInsolventTurns` | lower | regression at most 0.5 |
+| Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
+| Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 |
+| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
+| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
 
-Gate command: `node scripts/ai-batch.js gate --corp-option remoteRoles=true
---collector remoteRoles --collector realizedIceByRootType --guard winRate=0.02
---guard pointsScored=0.2 --guard pointsStolen=0.2
---guard pointsStolenByServer.remote=0.15 --guard pointsStolenByServer.hq=0.1
---guard pointsStolenByServer.rd=0.1 --guard realizedIceByRootType.allCountDistance=0.02`
+Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option remoteRoles=true --corp-option iceMarginalSecurity=true --seeds 6001-7000 --collector remoteRoles --collector centralStolen --collector corpInsolventTurns --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --collector installOutcomes --collector openingCentralCoverage --guard winRate=0.02 --guard pointsScored=0.2 --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.15 --guard pointsStolenByServer.hq=0.1 --guard pointsStolenByServer.rd=0.1 --guard gameLength=1.5 --guard corpInsolventTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05 --better gameLength=lower`
 
 Command 2 (start boards):
 
@@ -278,17 +338,33 @@ Command 2 (start boards):
 | Improve | `pointsScored` | higher | interval of the improvement above 0 |
 | Guard | `winRate` | higher | regression at most 0.02 |
 | Guard | `pointsStolen` | lower | regression at most 0.2 |
+| Guard | `pointsStolenByServer.remote` | lower | regression at most 0.15 |
 
-Gate command: `node scripts/ai-batch.js gate --corp-option remoteRoles=true
---collector remoteRoles --start-tag scoring-remote --improve pointsScored
---guard winRate=0.02 --guard pointsStolen=0.2`
+Gate command: `node scripts/ai-batch.js gate --corp-option remoteRoles=true --corp-option iceMarginalSecurity=true --start-tag scoring-remote --budget 1400 --collector remoteRoles --collector realizedIceByRootType --improve pointsScored --guard winRate=0.02 --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.15`
 
 The gate passes only when both commands pass. The `pointsStolenByServer.remote`
 guard is tightened from the standard 0.2 because I3 directly changes what sits
 in remotes; the HQ and R&D guards (previously one combined +0.1 bound) check
-that stakes-weighted remote ICE does not starve the centrals. The earlier proposal to add a `bluffSingleVariableCorrelation.max`
-no-worse row is not adopted; the F12 paired TV guard above replaces it, per
-[deception-gates.md](../deception-gates.md).
+that stakes-weighted remote ICE does not starve the centrals.
+
+**Re-grounding changes (2026-10-23).** The earlier
+`realizedIceByRootType.allCountDistance` guard at 0.02 is replaced: that metric
+is total variation, and [deception-gates.md](../corp-ai/deception-gates.md) forbids
+copying I2's rho margin into TV units or leaving a provisional threshold to be
+frozen later. I3 instead keeps I2's adopted tell and performance guard set
+(rho count/posture at 0.05, bluff correlation, game length, insolvency and
+stranded ICE), which I2 and I2.3 both ran. The earlier rejection of the bluff
+row depended on the TV guard and is withdrawn. Seeds, pool, explicit prior
+option, `--budget 1400` and the command 2 remote guard are added; no existing
+metric threshold was loosened. Any TV-based tell guard needs control-only
+calibration recorded here before any candidate run.
+
+I2.2 report requirements (report-only, in the Resolution): R&D and HQ theft
+separately; conditional first-ICE timing per central together with
+never-protected counts and the share bare through turn 2, including early
+game-end censoring; early, late and never-protected R&D cases preserved in
+the evidence. `openingCentralCoverage` gives turn-1/2 occupancy; add a passive
+per-central never-protected count if the existing collectors do not supply it.
 
 ## Things to consider
 - `_isAScoringServer()` keeps its meaning; I3 adds `_scoringRemote()`
@@ -315,6 +391,9 @@ no-worse row is not adopted; the F12 paired TV guard above replaces it, per
       improvement interval's lower bound must be above zero. Only then is the
       option switched on by default.
 - [ ] The `remoteRoles` collector exists, declares its metrics report-only, and is tested.
+- [ ] Every other collector the gate commands name (`centralStolen`, `corpInsolventTurns`, `strandedUnrezzedIceCost`, `bluffSingleVariableCorrelation`, `realizedIceByRootType`, `installOutcomes`, `openingCentralCoverage`) runs in the `--quick` gate run.
+- [ ] With `remoteRoles` on, `_iceStake()`'s pre-I3 designated-remote stake and fix 3's `exposureTurns` delay are replaced by `_expectedScoringStakes()`; with it off they are unchanged.
+- [ ] The Resolution records I2.2's report-only central evidence: HQ and R&D theft separately, first-ICE timing with never-protected and bare-through-turn-2 shares (with censoring), and early/late/never-protected R&D cases.
 - [ ] The `scoring-remote` start boards exist, each `NOTE` names its source log or what was adapted, and they are tested.
 - [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
 - [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
