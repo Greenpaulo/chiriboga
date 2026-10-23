@@ -2771,6 +2771,16 @@ if (!runner.AI || runner.AI.rc !== rc) {
   trigger or option whose `alt` matches during that encounter, so the card's
   `responseOnEncounter` choice must carry the same `alt`. Return `[]` when the
   option does not apply. Read-only.
+  Since Uprising batch 4 the calculator also passes `point` (the route point
+  before this encounter, or `null` at the starting encounter) and `rc`:
+  `AIEncounterOptions(iceIdx, iceAI, point, rc)`. Use `point.persistents` to
+  enforce once-per-turn options along one route and
+  `point.restrictedCreditsSpent` plus `rc._restrictedCreditsUsed` for shared
+  restricted budgets. A persistent may carry `restrictedCredits: n`:
+  `ValidateEncounterPoint` then charges `n` credits as restricted (stealth-only)
+  spending, with the same `restrictedCreditsSpent`/`restrictedCreditsPaid`
+  accounting as Corsair's reduction, and excludes the branch on pool-only or
+  unaffordable routes.
 - Always Have a Backup Plan uses `AIRunEventExtraPotential` and
   `AIEncounterOptions`. During its second run (or while evaluating one) the
   encounter options add a bypass persistent for the last ice encountered in the
@@ -3364,3 +3374,38 @@ optimisation work.
   rezzes it at the first Corp opportunity in a run on its server. Its subroutine
   is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
   `Strength()` in Runner and Corp security calculations.
+
+### Uprising batch 4
+
+- Afterimage (26079) uses `AIImplementBreaker`: 1[c] breaks up to 2 sentry
+  subroutines from any credits once at strength; below strength it emits a
+  `StrModify` +2 paid from stealth credits only, recorded as restricted
+  spending (shared with Corsair's `restrictedCreditsSpent`) and bounded by
+  the stealth credits available for that prospective run
+  (`_AIStealthCredits(server)` reads them under `AIWithRunContext`, so
+  run-only sources such as Penumbral Toolkit count). `AIEncounterOptions`
+  offers its once-per-turn sentry bypass as a persistent with
+  `restrictedCredits: 2` and alt `"afterimage_bypass"`, matching its
+  `responseOnEncounter` choice; one bypass per route and none after
+  `bypassUsedThisTurn`. `AIRunRestrictedCredits(server)` reports stealth
+  credits that are neither generically spendable (`canUseCredits("", null)`)
+  nor already offered through `AIRunPoolCreditOffset`. For Corp security,
+  `AIBypassesOneIce(iceCard, server)` is true for a sentry while the bypass is
+  unused this turn and 2 public stealth credits are available; the 2-credit
+  bypass cost is not priced there. `AIMatchingBreakerInstalled`,
+  `AIPreferredInstallChoice` and `AIWorthKeeping` are standard killer hooks.
+- Makler (26080) is a standard `AIImplementBreaker` fracter (2[c] +2 strength,
+  2[c] break up to 2). Its first-full-break 1[c] gain is not modelled in route
+  pricing.
+- Penumbral Toolkit (26081) follows Touchstone: `canUseCredits` during runs and
+  `AIRunPoolCreditOffset` reporting its hosted credits for pre-run planning.
+  `AIEconomyInstall` returns 3 while the HQ-success discount makes it free,
+  otherwise 1; `AIWorthKeeping` is true.
+- The Back (26082) uses `AIEconomyTrigger: 1` with `AIWouldTrigger`: trigger
+  when it has a power counter, the heap has a card with a [trash] ability
+  (`HasTrashAbility`), and either its counters cover every eligible heap card
+  (2 per counter) or it has 3+ counters. When resolving for the AI it offers
+  only the highest-ELO eligible heap card at each pick (`_AIHeapOrder`).
+  `AIWorthKeeping` is true while installed hardware has an ability to use.
+  Counters come from the engine's new `automaticOnAbilityUsed(card, ability)`
+  trigger, fired by `TriggerAbility` when any card ability resolves.

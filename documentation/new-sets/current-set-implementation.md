@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**0 complete, 16 outstanding** (`16 Pending`, `0 In progress`, `0 Blocked`).
+**1 complete, 15 outstanding** (`15 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -53,7 +53,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 1 | 26066–26069 | Pending | — | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
 | 2 | 26070–26073 | Pending | — | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
 | 3 | 26074–26078 | Pending | — | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
-| 4 | 26079–26082 | Pending | — | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
+| 4 | 26079–26082 | Complete | Claude, 2026-10-23 | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
 | 5 | 26083–26087 | Pending | — | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
 | 6 | 26088–26092 | Pending | — | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut (three existing, unverified), Paule's Café. Complex. |
 | 7 | 26093–26095 | Pending | — | Neutral Runner: Buffer Drive, Daily Casts, DreamNet (two existing, unverified). |
@@ -69,10 +69,9 @@ the shared Lockdown mechanic first needed in batch 9.
 
 ## Completion log
 
-No batches completed.
-
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
+| 4 | 26079–26082 | 2026-10-23 | Claude | `tests/uprising-batch4.test.js` | Afterimage stealth-only pump/bypass (restricted credits via encounter-option `restrictedCredits`), Makler, Penumbral Toolkit, The Back (new `automaticOnAbilityUsed` trigger, `HasTrashAbility` helper). See notes. |
 
 ## Batch-review log
 
@@ -83,11 +82,12 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**0 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**1 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
+| 4 | 26079–26082 | Pending | — | Corsair's `AIRunRestrictedCredits` still counts run-only stealth sources (Toolkit, Touchstone, Methuselah) that also report `AIRunPoolCreditOffset`, so with Corsair installed pre-run stealth budgets can double count; Makler's full-break 1[c] and Afterimage's once-per-turn bypass across finite reruns are not priced; Corp security does not price Afterimage's 2-credit bypass; The Back counts only abilities resolved through `TriggerAbility` (not optional hardware responses or hosted-credit spending) and picks heap cards by ELO. |
 
 ## Optimisation log
 

@@ -3410,6 +3410,16 @@ function InstallDestination(installingCard, destination = null) {
   return null; //don't want to return a new empty array because we don't want to install to it
 }
 
+// Whether a card has a [trash] ability (one with trashing itself in its cost).
+// Cards declare trashAbility: true unless an ability text names [trash].
+function HasTrashAbility(card) {
+  if (!card) return false;
+  if (card.trashAbility) return true;
+  return (card.abilities || []).some(function (ability) {
+    return typeof ability.text == "string" && ability.text.indexOf("[trash]") > -1;
+  });
+}
+
 /**
  * Gets the available credit pool for a player, including bad publicity but not recurring credits.<br/>Nothing is logged.
  *

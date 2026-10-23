@@ -32,7 +32,7 @@ in card-sets.md.
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
-| `uprising` | in-progress | 65 | 65 | 0 | 59 | 5 | 15 / 62 | true / true | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 55 | 3 | 19 / 62 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
@@ -91,10 +91,6 @@ None.
 - 26076 Mu Safecracker: 1 scaffold marker(s)
 - 26077 Prognostic Q-Loop: 1 scaffold marker(s)
 - 26078 Swift: 1 scaffold marker(s)
-- 26079 Afterimage: 1 scaffold marker(s)
-- 26080 Makler: 1 scaffold marker(s)
-- 26081 Penumbral Toolkit: 1 scaffold marker(s)
-- 26082 The Back: 1 scaffold marker(s)
 - 26083 Harmony AR Therapy: 1 scaffold marker(s)
 - 26084 Aniccam: 1 scaffold marker(s)
 - 26085 Simulchip: 1 scaffold marker(s)
@@ -139,8 +135,6 @@ None.
 - 26129 False Lead: 1 scaffold marker(s)
 - 26130 NAPD Cordon: 1 scaffold marker(s)
 - 26071 Odore: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 26079 Afterimage: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 26080 Makler: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 26087 Euler: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 26089 Penrose: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
