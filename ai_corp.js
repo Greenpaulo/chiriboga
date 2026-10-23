@@ -990,22 +990,23 @@ class CorpAI {
     } else if (typeof card.advancementRequirement !== "undefined") {
       ret = AdvancementRequirement(card);
     }
-    //rezzed/unrezzed SanSan (except overadvanced, or already applied by AdvancementRequirement)
+    //Root upgrades declaring AIScoringSupport (except overadvanced, or already
+    //applied by AdvancementRequirement). An unrezzed one counts only when its rez
+    //and the remaining advancements are affordable together; approximate.
     if (
       server &&
       typeof card.advancementRequirement !== "undefined" &&
       ret == card.advancementRequirement
     ) {
-      var sanSan = this._copyOfCardExistsIn("SanSan City Grid", server.root);
-      if (sanSan) {
-        //ignoring other discounts for now
-        //this is approximate - for proper calculation would probably need some kind of combined use of _potentialAdvancement
-        if (
-          sanSan.rezzed ||
-          AvailableCredits(corp) >=
-            RezCost(sanSan) + ret - Counters(card, "advancement")
-        )
-          ret--;
+      var printedLimit = ret;
+      for (var supportIndex = 0; supportIndex < server.root.length; supportIndex++) {
+        var supportCard = server.root[supportIndex];
+        if (typeof supportCard.AIScoringSupport != "function") continue;
+        var support = supportCard.AIScoringSupport.call(supportCard, card, server);
+        if (!support || !support.requirementDelta) continue;
+        if (!support.requiresRez || supportCard.rezzed ||
+            AvailableCredits(corp) >= RezCost(supportCard) + printedLimit - Counters(card, "advancement"))
+          ret += support.requirementDelta;
       }
     }
     return ret;
@@ -7553,24 +7554,17 @@ class CorpAI {
     if (point.corpCredits > 0 && point.corpClicks > 0) {
       //pay the credit
       var newCredits = point.corpCredits - 1;
-      //special case: Built to Last
-      if (
-        point.advancementSoFar < 1 &&
-        corp.identityCard.title == "Weyland Consortium: Built to Last"
-      )
-        newCredits += 2;
-      //special case: Oaktown Renovation
-      if (card) {
-        if (card.title == "Oaktown Renovation") {
-          if (point.advancementSoFar < 4) newCredits += 2;
-          else newCredits += 3;
-        }
-      }
+      // Advance income from the identity and the advanced card (I4 hook migration).
+      var advanceContext = {card: card, advancementSoFar: point.advancementSoFar};
+      var advanceIdentity = corp.identityCard;
+      if (advanceIdentity && typeof advanceIdentity.AIAdvanceCreditGain == "function")
+        newCredits += advanceIdentity.AIAdvanceCreditGain.call(
+          advanceIdentity, thisTurn, point.persist.includes(advanceIdentity), advanceContext);
       // Track first-advance income locally; placing counters does not trigger it.
       var advancePersist = point.persist;
       if (card && typeof card.AIAdvanceCreditGain == "function") {
         newCredits += card.AIAdvanceCreditGain.call(
-          card, thisTurn, point.persist.includes(card));
+          card, thisTurn, point.persist.includes(card), advanceContext);
         advancePersist = point.persist.includes(card) ? point.persist : point.persist.concat([card]);
       }
       var basicadvcards = point.handCards.concat([]); //make a copy of the array
@@ -7635,86 +7629,39 @@ class CorpAI {
       });
     }
     //Card-declared advancement operations, including Double click costs.
+    //A hook returns counters, or {counters, credits, clicks} gained beyond the
+    //printed play cost (a variable X cost is returned as negative credits).
     for (var opIndex = 0; opIndex < point.handCards.length; opIndex++) {
       var operation = point.handCards[opIndex];
       if (!CheckCardType(operation, ["operation"]) ||
           typeof operation.AIFastAdvanceCounters != "function") continue;
-      var counters = operation.AIFastAdvanceCounters.call(operation, card);
-      if (counters <= 0) continue;
       var resolving = corp.resolvingCards.includes(operation);
-      var creditCost = resolving ? 0 : PlayCost(operation);
+      var operationGain = operation.AIFastAdvanceCounters.call(operation, card, {
+        thisTurn: thisTurn,
+        credits: point.corpCredits,
+        clicks: point.corpClicks,
+        remaining: limit - point.advancementSoFar,
+        resolving: resolving,
+      });
+      if (typeof operationGain == "number") operationGain = {counters: operationGain};
+      if (!operationGain) continue;
+      var counters = operationGain.counters || 0;
+      var creditGain = operationGain.credits || 0;
+      var clickGain = operationGain.clicks || 0;
+      if (counters <= 0 && clickGain <= 0 && creditGain <= 0) continue;
+      var creditCost = resolving ? 0 : Number(PlayCost(operation)) || 0;
       var clickCost = resolving ? 0 : PlayClickCost(operation);
       if (point.corpCredits < creditCost || point.corpClicks < clickCost) continue;
       var remainingCards = point.handCards.slice();
       remainingCards.splice(opIndex, 1);
       ret.push({
-        corpCredits: point.corpCredits - creditCost,
-        corpClicks: point.corpClicks - clickCost,
+        corpCredits: point.corpCredits - creditCost + creditGain,
+        corpClicks: point.corpClicks - clickCost + clickGain,
         handCards: remainingCards,
         advancementSoFar: point.advancementSoFar + counters,
         using: operation,
         persist: point.persist,
       });
-    }
-    //Seamless Launch
-    if (card && point.corpCredits > 0 && point.corpClicks > 0) {
-      var slih = this._copyOfCardExistsIn("Seamless Launch", point.handCards);
-      if (slih) {
-        if (!thisTurn || !slih.cardsInstalledThisTurn.includes(card)) {
-          var slidx = point.handCards.indexOf(slih);
-          if (slidx > -1) {
-            var slcards = point.handCards.concat([]); //make a copy of the array
-            slcards.splice(slidx, 1); //remove played card
-            ret.push({
-              corpCredits: point.corpCredits - 1,
-              corpClicks: point.corpClicks - 1,
-              handCards: slcards,
-              advancementSoFar: point.advancementSoFar + 2,
-              using: slih,
-              persist: point.persist,
-            });
-          }
-        }
-      }
-    }
-    //Psychographics
-    //already resolving
-    var pgres = this._copyOfCardExistsIn("Psychographics", corp.resolvingCards);
-    //still require it to be in the specified list
-    var pgridx = point.handCards.indexOf(pgres);
-    if (pgridx > -1) {
-      var pgrcards = point.handCards.concat([]); //make a copy of the array
-      pgrcards.splice(pgridx, 1); //remove played card
-      ret.push({
-        corpCredits: point.corpCredits,
-        corpClicks: point.corpClicks,
-        handCards: pgrcards,
-        advancementSoFar: point.advancementSoFar + pgres.AIPlayedWithCost,
-        using: pgres,
-        persist: point.persist,
-      });
-    }
-    //still in hand
-    var pgih = this._copyOfCardExistsIn("Psychographics", point.handCards);
-    if (point.corpCredits > 1 && point.corpClicks > 0) {
-      var pgidx = point.handCards.indexOf(pgih);
-      if (pgidx > -1) {
-        var maxX = Math.min(point.corpCredits, runner.tags);
-        if (maxX + point.advancementSoFar > limit)
-          maxX = limit - point.advancementSoFar;
-        var pgcred = point.corpCredits - maxX;
-        var pgclick = point.corpClicks - 1;
-        var pgcards = point.handCards.concat([]); //make a copy of the array
-        pgcards.splice(pgidx, 1); //remove played card
-        ret.push({
-          corpCredits: pgcred,
-          corpClicks: pgclick,
-          handCards: pgcards,
-          advancementSoFar: point.advancementSoFar + maxX,
-          using: pgih,
-          persist: point.persist,
-        });
-      }
     }
     //Trick of Light
     if (point.corpCredits > 0 && point.corpClicks > 0) {
@@ -7751,23 +7698,6 @@ class CorpAI {
             persist: point.persist.concat([{ trickOfLightSource: tolSource }]),
           });
         }
-      }
-    }
-    //Biotic Labor
-    if (point.corpCredits > 3 && point.corpClicks > 0) {
-      var blih = this._copyOfCardExistsIn("Biotic Labor", point.handCards);
-      var blidx = point.handCards.indexOf(blih);
-      if (blidx > -1) {
-        var blcards = point.handCards.concat([]); //make a copy of the array
-        blcards.splice(blidx, 1); //remove played card
-        ret.push({
-          corpCredits: point.corpCredits - 4,
-          corpClicks: point.corpClicks + 1,
-          handCards: blcards,
-          advancementSoFar: point.advancementSoFar, //biotic doesn't directly advance
-          using: blih,
-          persist: point.persist,
-        });
       }
     }
     // First-operation click income is finite within each search path.

@@ -20,7 +20,6 @@ const verbose = !!process.env.VERBOSE;
 
 const LEGACY_TITLES = [
   '_iceIsDisabled: Femme Fatale',
-  '_advancementLimit: SanSan City Grid',
   '_bestRecurToHQOption: Snare!',
   '_potentialDamageOnBreach: Hokusai Grid',
   '_potentialDamageOnBreach: House of Knives',
@@ -64,12 +63,7 @@ const LEGACY_TITLES = [
   '_potentialOperationDamageDirections: Punitive Counterstrike',
   '_potentialOperationDamageThisTurn: Neurospike',
   '_potentialOperationDamageThisTurn: Punitive Counterstrike',
-  '_potentialAdvancementDirections: Biotic Labor',
-  '_potentialAdvancementDirections: Oaktown Renovation',
-  '_potentialAdvancementDirections: Psychographics',
-  '_potentialAdvancementDirections: Seamless Launch',
   '_potentialAdvancementDirections: Trick of Light',
-  '_potentialAdvancementDirections: Weyland Consortium: Built to Last',
   '_useWhenTaggedCard: Predictive Planogram',
   '_useWhenTaggedCard: Retribution',
   'Phase_Main: Archived Memories',
