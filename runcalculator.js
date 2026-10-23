@@ -330,6 +330,11 @@ class RunCalculator {
       if (point.card_str_mods[i].card == iceAI.ice)
         iceStrength += point.card_str_mods[i].amt;
     }
+    //persistents with strengthMod lower/raise the target ice for the remainder of the run (Devil Charm)
+    for (var i = 0; i < persistentsSoFar.length; i++) {
+      if (persistentsSoFar[i].strengthMod && persistentsSoFar[i].target == iceAI.ice)
+        iceStrength += persistentsSoFar[i].strengthMod;
+    }
     var cardStrength = this._baseStrength(card);
     for (var i = 0; i < point.card_str_mods.length; i++) {
       if (point.card_str_mods[i].card == card)

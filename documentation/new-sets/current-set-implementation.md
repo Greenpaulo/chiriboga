@@ -50,7 +50,7 @@ the shared Lockdown mechanic first needed in batch 9.
 
 | Batch | Card IDs | Status | Owner / started | Notes/blocker |
 | ----: | -------- | ------ | --------------- | ------------- |
-| 1 | 26066–26069 | Pending | — | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
+| 1 | 26066–26069 | Complete | Claude, 2026-10-23 | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
 | 2 | 26070–26073 | Pending | — | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
 | 3 | 26074–26078 | Pending | — | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
 | 4 | 26079–26082 | Pending | — | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
@@ -69,10 +69,9 @@ the shared Lockdown mechanic first needed in batch 9.
 
 ## Completion log
 
-No batches completed.
-
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
+| 1 | 26066–26069 | 2026-10-23 | Claude | `tests/uprising-batch1.test.js` | Hoshiko access-driven flip; Moshing multi-select grip cost; Devil Charm encounter removal with a run-long lingering -6 and a Run Calculator `strengthMod` persistent (shared `IceAct` change); Gachapon set-aside dig with discounted install. Baseline AI through economy/draw play, encounter-window preference, `AIDrawTrigger`. |
 
 ## Batch-review log
 
@@ -88,6 +87,7 @@ initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
+| 1 | 26066–26069 | Pending | — | Hoshiko: run planning ignores the flip incentive/penalty. Moshing: plays only with three cards not worth keeping. Devil Charm: Corp security counts the single use on every ice; install heuristic is strength-only. Gachapon: digs only for a missing basic breaker type. See notes. |
 
 ## Optimisation log
 

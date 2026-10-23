@@ -70,6 +70,8 @@ six pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095) are
 unverified and not credited, and 59 are scaffolds with TODO markers. See the
 [active tracker](current-set-implementation.md) and
 [implementation notes](uprising-implementation-notes.md).
+Batch 1 (26066–26069) is implemented with baseline AI; its optimisation row is
+`Pending` with the deeper-strategy findings in the tracker.
 
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.

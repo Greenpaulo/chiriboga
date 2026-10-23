@@ -2329,7 +2329,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
 | `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description; `knownToEvaluator` distinguishes visible from synthetic statistics |
 | `AITriggerToRemoveTags()` | function | Return the alt of a paid ability that removes tags without a click, or falsy |
-| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes |
+| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes, and one with `strengthMod` and `target` changes that ice's strength for the rest of the route |
+| `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
 | `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select}` when this card's ability can install the grip card more cheaply than the basic install action |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
@@ -2892,6 +2893,32 @@ if (!runner.AI || runner.AI.rc !== rc) {
 ---
 
 ---
+
+### Uprising Batch 1 card hooks
+
+- Hoshiko Shiro (26066) is passive: `automaticOnAccess` counts accesses on the
+  Runner turn, `responseOnRunnerTurnBegins` applies the flip side, and
+  `responseOnRunnerDiscardEnds` flips. No AI decision exists.
+- Moshing (26067) returns one AI play option whose `cards` are the three grip
+  cards `_indexOfBestDiscardOption` would drop first, only when none is in
+  `_cardsWorthKeeping`; `AIWouldPlay` uses the same check. It is reached
+  through `AIOrdinaryEconomyPlay` and `AIPlayToDraw: 1`.
+- Devil Charm (26068) uses `AIEncounterAbility`: before any other action on an
+  ice it adds a point with persistent `{use, target, iceIdx, strengthMod: -6}`
+  and a `misc_moderate` effect for the lost hardware. `rc.IceAct` adds
+  `strengthMod` from persistents targeting the encountered ice to its strength
+  (shared change, also later in the route because the effect lasts the run).
+  In the live `responseOnEncounter` window the card sets `runner.AI.preferred`
+  to use or decline from whether the best route uses it on this ice; the decision
+  is fixed for the encounter and the route is replanned after use.
+  `AIReducesIceStrength` returns 6 while installed (Leech-style: the Corp sees
+  the single use on every ice), and `AIInstallBeforeRun` returns 1 for a server
+  with visible strength 4+ ice.
+- Gachapon (26069) uses `AIDrawTrigger: 1` with `AIWouldTrigger` (stack of 6+,
+  1+ install credit, a basic breaker type missing from rig and grip) and
+  `AIDrawInstall`. It installs a missing-type breaker first, otherwise the
+  highest-ELO non-wasteful card, and shuffles back the three cards that score
+  highest on worth-keeping, missing type and ELO.
 
 ## 8. Step-by-Step Worked Example
 

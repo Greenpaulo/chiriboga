@@ -571,6 +571,8 @@ cardSet[26091] = {
 // Flip side:
 // When your turn begins, draw 1 card and lose 1[c].
 // When your turn ends, if you did not access any cards this turn, flip this identity.
+// No flip-side image or printed back-side stats are in the local data, so the
+// face stays 26066 and the link stays 0; the flip state is logged.
 cardSet[26066] = {
   title: "Hoshiko Shiro: Untold Protagonist",
   imageFile: "26066.png",
@@ -582,7 +584,42 @@ cardSet[26066] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 0,
-  // TODO: Add abilities or responseOn triggers
+  //false = front (Untold Protagonist), true = flip side
+  flipped: false,
+  //cards accessed during the current Runner turn
+  accessedThisTurn: 0,
+  _flip: function () {
+    this.flipped = !this.flipped;
+    Log(this.title + " flipped to its " + (this.flipped ? "flip" : "front") + " side");
+  },
+  automaticOnAccess: {
+    Resolve: function () {
+      if (playerTurn == runner) this.accessedThisTurn++;
+    },
+  },
+  //Flip side: when your turn begins, draw 1 card and lose 1[c].
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.accessedThisTurn = 0;
+      if (!this.flipped) return;
+      Draw(runner, 1);
+      if (Credits(runner) > 0 || runner.temporaryCredits > 0) LoseCredits(runner, 1);
+    },
+    automatic: true,
+  },
+  //"When your turn ends" fires at the end of the Runner discard step.
+  responseOnRunnerDiscardEnds: {
+    Resolve: function () {
+      var accessed = this.accessedThisTurn > 0;
+      this.accessedThisTurn = 0;
+      if (!this.flipped) {
+        if (!accessed) return;
+        GainCredits(runner, 2, "", this);
+        this._flip();
+      } else if (!accessed) this._flip();
+    },
+    automatic: true,
+  },
 };
 
 //Moshing (26067)
@@ -598,9 +635,86 @@ cardSet[26067] = {
   cardType: "event",
   subTypes: [],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  //Additional cost: choose exactly 3 other grip cards (multi-select for a human).
+  Enumerate: function () {
+    var moshing = this;
+    var choices = ChoicesHandCards(runner, function (card) {
+      return card != moshing;
+    });
+    if (choices.length < 3) return [];
+    if (runner.AI != null) {
+      var picked = this._aiCardsToTrash();
+      if (!picked) return [];
+      return [{ cards: picked, label: "Trash " + picked.map(function (card) { return card.title; }).join(", ") }];
+    }
+    choices.push({
+      label: "Trash selected cards",
+      button: "Trash 0/3 cards",
+      multiSelectDynamicButtonText: function (numSelected) {
+        return "Trash " + numSelected + "/3 cards";
+      },
+      multiSelectDynamicButtonEnabler: function (numSelected) {
+        return numSelected === 3;
+      },
+    });
+    for (var i = 0; i < choices.length; i++) choices[i].cards = [null, null, null];
+    return choices;
   },
+  Resolve: function (params) {
+    var moshing = this;
+    var cards = (params && params.cards ? params.cards : []).filter(function (card) {
+      return card && card != moshing && runner.grip.includes(card);
+    });
+    if (cards.length != 3) {
+      LogError("Moshing requires exactly 3 grip cards to trash");
+      return;
+    }
+    //Trashing is a cost, so it cannot be prevented.
+    Trash(
+      cards,
+      false,
+      function () {
+        GainCredits(runner, 3, "", moshing);
+        Draw(runner, 3);
+      },
+      this,
+    );
+  },
+  //AI: the three grip cards the discard ranking would drop first, but only when
+  //none of them is worth keeping (otherwise null: do not play).
+  _aiCardsToTrash: function () {
+    var moshing = this;
+    var ai = runner.AI;
+    var pool = runner.grip.filter(function (card) {
+      return card != moshing;
+    });
+    if (pool.length < 3) return null;
+    var keep = ai._cardsWorthKeeping(pool);
+    var saved = ai.cardsWorthKeeping;
+    var picked = [];
+    ai.cardsWorthKeeping = keep;
+    try {
+      while (picked.length < 3) {
+        var options = pool
+          .filter(function (card) {
+            return !picked.includes(card);
+          })
+          .map(function (card) {
+            return { card: card };
+          });
+        picked.push(options[ai._indexOfBestDiscardOption(options)].card);
+      }
+    } finally {
+      ai.cardsWorthKeeping = saved;
+    }
+    if (picked.some(function (card) { return keep.includes(card); })) return null;
+    return picked;
+  },
+  AIWouldPlay: function () {
+    return this._aiCardsToTrash() != null;
+  },
+  AIOrdinaryEconomyPlay: true,
+  AIPlayToDraw: 1,
 };
 
 //Devil Charm (26068)
@@ -615,7 +729,109 @@ cardSet[26068] = {
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //the ice whose encounter window has already been answered (not offered again this encounter)
+  _windowPassedIce: null,
+  //AI decision for the current encounter, fixed at the first Enumerate
+  _aiChoice: null,
+  automaticOnEncounter: {
+    Resolve: function () {
+      this._windowPassedIce = null;
+      this._aiChoice = null;
+    },
+  },
+  responseOnEncounter: {
+    Enumerate: function (card) {
+      if (!card || !CheckCardType(card, ["ice"])) return [];
+      var choices = [
+        {
+          id: 0,
+          label: "Remove Devil Charm from the game: " + GetTitle(card, true) + " gets -6 strength for the remainder of this run",
+          button: "Use Devil Charm",
+          alt: "devilcharm_use",
+        },
+        { id: 1, label: "Decline", button: "Decline", alt: "continue" },
+      ];
+      if (runner.AI) runner.AI.preferred = { title: this.title, option: choices[this._aiUse(card) ? 0 : 1] };
+      return choices;
+    },
+    Resolve: function (params) {
+      var ice = GetApproachEncounterIce();
+      this._windowPassedIce = ice;
+      if (!params || params.id !== 0 || !ice) return;
+      RemoveFromGame(this);
+      AddLingeringEffect({
+        title: "Devil Charm",
+        player: runner,
+        ice: ice,
+        modifyStrength: {
+          Resolve: function (card) {
+            return card == this.ice ? -6 : 0;
+          },
+        },
+        responseOnRunEnds: {
+          Resolve: function () {
+            RemoveLingeringEffect(this);
+          },
+          automatic: true,
+        },
+      });
+      Log(GetTitle(ice, true) + " gets -6 strength for the remainder of this run");
+      //the live strength now includes the reduction; replan without Devil Charm
+      if (runner.AI) runner.AI.cachedBestPath = null;
+    },
+    text: "Devil Charm",
+  },
+  //AI: use it when the best route through the run uses Devil Charm on this ice.
+  _aiUse: function (ice) {
+    if (this._aiChoice && this._aiChoice.ice == ice) return this._aiChoice.use;
+    var use = false;
+    if (attackedServer && !runner.AI.rc._calculationActive) {
+      runner.AI._cachedOrBestRun(attackedServer, approachIce);
+      var path = runner.AI.cachedBestPath || [];
+      var charm = this;
+      use = path.some(function (point) {
+        return point.persistents.some(function (p) {
+          return p.use == charm && p.target == ice;
+        });
+      });
+    }
+    this._aiChoice = { ice: ice, use: use };
+    return use;
+  },
+  //Run Calculator: at the start of an encounter, remove Devil Charm for -6
+  //strength on that ice for the rest of the route. One use per route; the lost
+  //hardware is charged as a moderate cost.
+  AIEncounterAbility: function (rc, result, point, iceAI) {
+    if (!CheckInstalled(this) || rc.PersistentsUse(point, this)) return result;
+    if (point.sr_broken.length > 0) return result;
+    for (var i = 0; i < point.card_str_mods.length; i++) {
+      if (point.card_str_mods[i].iceIdx == point.iceIdx) return result;
+    }
+    if (!iceAI.ice || iceAI.ice.strengthCannotBeLowered || iceAI.strength <= 0) return result;
+    if (CheckEncounter() && iceAI.ice == this._windowPassedIce) return result;
+    var p = rc.CopyPoint(point);
+    p.persistents = p.persistents.concat([{ use: this, target: iceAI.ice, iceIdx: point.iceIdx, strengthMod: -6 }]);
+    p.effects = p.effects.concat([["misc_moderate"]]);
+    result.push(p);
+    return result;
+  },
+  //Corp security: one ice the Runner encounters can be 6 weaker (single use; see notes).
+  AIReducesIceStrength: function (iceCard) {
+    return CheckInstalled(this) ? 6 : 0;
+  },
+  //Install before running a server protected by visible ice of strength 4 or more.
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost, runClickCost) {
+    if (!server || !server.ice) return 0;
+    for (var i = 0; i < server.ice.length; i++) {
+      var ice = server.ice[i];
+      if (PlayerCanLook(runner, ice) && !ice.strengthCannotBeLowered && Strength(ice) >= 4) return 1;
+    }
+    return 0;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Gachapon (26069)
@@ -630,7 +846,189 @@ cardSet[26069] = {
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  //cards set aside by the current resolution
+  setAsideCards: [],
+  gachaponDiscount: false,
+  gachaponInstalling: null,
+  abilities: [
+    {
+      text: "[trash]: Set aside the top 6 cards of your stack faceup.",
+      Enumerate: function () {
+        if (!CheckInstalled(this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var gachapon = this;
+        //Trashing is a cost, so it cannot be prevented.
+        Trash(this, false, function () {
+          gachapon._setAside();
+        }, this);
+      },
+    },
+  ],
+  //paying 2[c] less (Gachapon is in the heap while this applies)
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (!this.gachaponDiscount || !card) return 0;
+      if (card == this.gachaponInstalling || this.setAsideCards.includes(card)) return -2;
+      return 0;
+    },
+    availableWhenInactive: true,
+  },
+  _setAside: function () {
+    this.setAsideCards = [];
+    var n = Math.min(6, runner.stack.length);
+    for (var i = 0; i < n; i++) {
+      var top = runner.stack[runner.stack.length - 1];
+      MoveCard(top, this.setAsideCards);
+      top.faceUp = true;
+    }
+    Log("Gachapon set aside " + (n ? this.setAsideCards.map(function (card) { return GetTitle(card); }).join(", ") : "no cards"));
+    this.gachaponDiscount = true;
+    var choices = ChoicesArrayInstall(this.setAsideCards, false, function (card) {
+      return CheckCardType(card, ["program"]) || (CheckCardType(card, ["resource"]) && CheckSubType(card, "Virtual"));
+    });
+    if (choices.length < 1) {
+      this._afterInstall();
+      return;
+    }
+    var skip = { card: null, label: "Install nothing", button: "Install nothing" };
+    if (runner.AI != null) {
+      var pick = this._aiInstallChoice(choices);
+      choices = pick ? [pick] : [];
+    }
+    choices.push(skip);
+    var gachapon = this;
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        if (!params || !params.card) {
+          gachapon._afterInstall();
+          return;
+        }
+        var done = false;
+        var finish = function () {
+          if (done) return;
+          done = true;
+          gachapon._afterInstall();
+        };
+        gachapon.gachaponInstalling = params.card;
+        Install(params.card, params.host, false, null, true, null, gachapon, finish, null, false, finish);
+      },
+      "Gachapon",
+      "You may install 1 program or virtual resource, paying 2[c] less",
+      this,
+      "install",
+    );
+  },
+  _afterInstall: function () {
+    this.gachaponDiscount = false;
+    this.gachaponInstalling = null;
+    var remaining = this.setAsideCards.slice();
+    if (remaining.length <= 3) {
+      this._shuffleAndRemove(remaining);
+      return;
+    }
+    if (runner.AI != null) {
+      this._shuffleAndRemove(this._aiCardsToShuffle(remaining));
+      return;
+    }
+    var choices = ChoicesArrayCards(remaining);
+    choices.push({
+      label: "Shuffle selected cards into the stack",
+      button: "Shuffle 0/3 cards",
+      multiSelectDynamicButtonText: function (numSelected) {
+        return "Shuffle " + numSelected + "/3 cards";
+      },
+      multiSelectDynamicButtonEnabler: function (numSelected) {
+        return numSelected === 3;
+      },
+    });
+    for (var i = 0; i < choices.length; i++) choices[i].cards = [null, null, null];
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        var chosen = (params && params.cards ? params.cards : []).filter(function (card) {
+          return card && remaining.includes(card);
+        });
+        if (chosen.length != 3) chosen = remaining.slice(0, 3);
+        this._shuffleAndRemove(chosen);
+      },
+      "Gachapon",
+      "Choose 3 cards to shuffle into your stack; the rest are removed from the game",
+      this,
+    );
+  },
+  _shuffleAndRemove: function (toShuffle) {
+    var rest = this.setAsideCards.filter(function (card) {
+      return !toShuffle.includes(card);
+    });
+    for (var i = 0; i < toShuffle.length; i++) {
+      toShuffle[i].faceUp = false;
+      MoveCard(toShuffle[i], runner.stack);
+    }
+    for (var j = 0; j < rest.length; j++) RemoveFromGame(rest[j]);
+    Shuffle(runner.stack);
+    Log("Gachapon: " + toShuffle.length + " card(s) shuffled into the stack");
+    this.setAsideCards = [];
+  },
+  //missing basic breaker types (installed or in grip)
+  _aiMissingBreakerTypes: function () {
+    var have = InstalledCards(runner).concat(runner.grip);
+    return ["Fracter", "Decoder", "Killer"].filter(function (type) {
+      return !have.some(function (card) {
+        return CheckSubType(card, type);
+      });
+    });
+  },
+  //AI: an icebreaker of a missing type first, otherwise the highest-rated
+  //non-wasteful card; null installs nothing.
+  _aiInstallChoice: function (choices) {
+    var missing = this._aiMissingBreakerTypes();
+    var best = null;
+    var bestScore = -Infinity;
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      if (runner.AI._wastefulToInstall(card)) continue;
+      if (typeof card.AIPreferredInstallChoice == "function" &&
+          card.AIPreferredInstallChoice(ChoicesCardInstall(card, true)) < 0) continue;
+      var score = Number(card.elo) || 1500;
+      if (missing.some(function (type) { return CheckSubType(card, type); })) score += 1000;
+      if (choices[i].host) score -= 1;
+      if (score > bestScore) {
+        best = choices[i];
+        bestScore = score;
+      }
+    }
+    return best;
+  },
+  //AI: keep the three cards it most wants to draw later.
+  _aiCardsToShuffle: function (cards) {
+    var keep = runner.AI._cardsWorthKeeping(cards);
+    var missing = this._aiMissingBreakerTypes();
+    var score = function (card) {
+      var s = (Number(card.elo) || 1500) / 1000;
+      if (keep.includes(card)) s += 10;
+      if (missing.some(function (type) { return CheckSubType(card, type); })) s += 20;
+      return s;
+    };
+    return cards.slice().sort(function (a, b) {
+      return score(b) - score(a);
+    }).slice(0, 3);
+  },
+  //Dig when a basic breaker type is missing, the stack is deep enough and an
+  //install can be afforded after the discount.
+  AIWouldTrigger: function () {
+    if (runner.stack.length < 6) return false;
+    if (AvailableCredits(runner, "installing") < 1) return false;
+    return this._aiMissingBreakerTypes().length > 0;
+  },
+  AIDrawTrigger: 1,
+  AIDrawInstall: function () {
+    return 1;
+  },
 };
 
 //Keiko (26070)
