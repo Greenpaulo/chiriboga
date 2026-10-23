@@ -817,3 +817,64 @@ Trebuchet rez/trash/trace lock/run-end cleanup and failed trace, and Secure and
 Protect costs, Double click guard, reveal, discounted install, cleanup and AI
 guards. `tests/card-bad-publicity.test.js` now passes the rezzed card, as the
 engine does. No browser playtesting or independent strategic review is claimed.
+
+## Batch 13 — 26062–26065
+
+Implemented and validated 2026-10-23 by Claude, on a branch in parallel with
+batches 11 and 12. Existing metadata and ELO values are preserved: Reduced
+Service 1380, Vulnerability Audit 1581, CSR Campaign 1311 and Rime 1425.
+
+- Reduced Service is now `unique`, as printed. Its `responseOnRez` is gated to
+  itself and offers the human 0 up to min(4, available credits); paying places
+  that many power counters. The run tax uses the shared `modifyRunCreditCost`
+  consumer (as Cold Site Server does): 2 credits per counter, only for runs on
+  its own server and only while rezzed. Run legality, `AdditionalRunCosts` and
+  the run calculator's run-start cost therefore charge it. Every successful run
+  on HQ, R&D or Archives removes one counter, including a run on another
+  central server. Counters never go below zero, and inactive counters neither
+  tax nor decay. Corp AI: `AIDefensiveValue` places it in an iced remote, and
+  `AIRezWhenCan` rezzes it on the Runner's turn outside a run, in a central or
+  a non-empty remote. The AI is offered only its preferred amount: up to 4,
+  keeping enough credits to rez that server's unrezzed ICE.
+- Vulnerability Audit tracks its own install while inactive and clears the flag
+  when either turn begins. `modifyCannot("score")` blocks only this card, only
+  while it is installed, so `CheckScore`, the score command and the Corp
+  installed-agenda fast-advance checks all decline it on the install turn. The
+  new `AICannotScoreOnInstallTurn` flag removes it from the install ranking's
+  install-and-fast-advance win plan, the one planner that considers hand
+  agendas.
+- CSR Campaign's existing optional draw is kept. The AI now draws unless R&D
+  has 2 or fewer cards, which keeps the mandatory draw safe. New hooks:
+  `AIWorthInstalling` (non-scoring remote, R&D of at least 4 and hand room),
+  `AIAvoidInstallingOverThis`, and `AIRezWhenCan` at the end of the Runner's
+  turn (Runner 2.2), just before its first trigger.
+- Rime: the new engine check `CheckRezAsNonIceDuringRun(card)` (checks.js) is
+  true for ice that declares `rezAsNonIceDuringRunsOnServer` while a run is in
+  progress against the server it protects. The shared run paid-window rez
+  enumeration (approach, encounter, pass and approach-server windows) adds such
+  ice to its rezzable types. Ordinary ice keeps approach-only timing. The
+  strength boost now includes Rime itself (printed 0, so 1 while rezzed),
+  applies only to ice protecting its server, and stacks across copies. The
+  subroutine's AI model was the invalid `bankroll` string; it is now the
+  documented `loseCredits` effect. The Corp AI's `AIRezWhenCan` consumer now
+  also accepts run-rezzable ice, so Rime is rezzed at the Corp's first
+  opportunity in a run on its server.
+
+Focused evidence: `tests/downfall-batch13.test.js` covers the real `Rez` response
+window and human payment choices, Runner run enumeration and run-calculator tax
+affordability, central/remote/inactive decay, Corp rez selection through
+`CommandChoice` (positive, no-content, reserve, mid-run and Corp-turn guards), upgrade
+placement, the score restriction and its reset on both turns, the install-ranking
+win-plan exclusion against an unflagged control, CSR install/rez/draw
+choices with thin-R&D and hand-size guards, Rime's strength (self, stacking,
+other servers, unrezzed), its rez windows, and the Corp AI rez command plus
+selection. Required shared checks pass; the full suite passes all 116 files on Node 20.19.0, including Corp decision fixtures and snapshots (see the tracker
+completion log).
+
+Optional optimisation: weigh Reduced Service's rez timing and counter budget
+against other spending, and against expected decay from central runs.
+Vulnerability Audit still accepts ordinary advancement on its install turn,
+which exposes counters a turn early. Weigh CSR Campaign's draw against hand
+size and discard. Choose when to reveal Rime instead of always rezzing at the
+first run window. The Runner AI does not anticipate an unrezzed Rime's +1
+strength (hidden information).

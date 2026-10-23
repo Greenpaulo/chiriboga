@@ -1722,7 +1722,11 @@ AIIsScoringUpgrade: true,
 **`AIRezWhenCan()`**
 
 Return `true` to select this installed asset or upgrade for rez at the next
-available paid-ability window. Corp command selection calls this after
+available paid-ability window. Ice qualifies only while
+`CheckRezAsNonIceDuringRun(card)` is true (it declares
+`rezAsNonIceDuringRunsOnServer` and a run is in progress against the server it
+protects, as for Rime); the same check adds that ice to the engine's run-window
+rez options. Corp command selection calls this after
 `FullCheckRez` validates card type, affordability, additional costs and
 `RezUsability`, and before the ordinary phase policy. The hook must be
 read-only, safe outside a run, and use only information available to the Corp.
@@ -1901,6 +1905,15 @@ AIAdvancementLimit: function() {
     return 4;
 },
 ```
+
+**`AICannotScoreOnInstallTurn`** (boolean, agendas only)
+
+Set to `true` when the agenda's own text forbids scoring it on the turn it was
+installed (Vulnerability Audit). The card enforces the rule through
+`modifyCannot("score")`, so `CheckScore` and the installed-agenda fast-advance
+checks already decline it once installed. This flag covers the hand: the Corp
+install ranking skips the agenda when looking for an install-and-fast-advance
+win this turn. It is static and read-only.
 
 **`AIOverAdvance`** (boolean, agendas only)
 
@@ -2329,7 +2342,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIImmediateWin()` | function | Boolean immediate operation win; checked before tactics with normal play legality |
 | `agendaPointsForPlayer(player)` | function | Agenda point value for the supplied scoring player; consumed by `AgendaPointsForCard` |
 | `AIIsScoringUpgrade` | bool | True if this is a fast-advance scoring upgrade |
-| `AIRezWhenCan()` | function | Select a legal asset/upgrade rez opportunity in any available paid-ability window |
+| `AIRezWhenCan()` | function | Select a legal asset/upgrade (or run-rezzable ice) rez opportunity in any available paid-ability window |
 | `AILimitPerServer(server)` | function | Max copies of this card per server |
 | `AIPreventBreach(server)` | function | True if this upgrade prevents breach |
 | `AIPunishesAccess(server)` | function | Return current access-punishment severity for bait planning |
@@ -2355,6 +2368,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
+| `AICannotScoreOnInstallTurn` | bool | Agenda cannot be scored on the turn it is installed; excluded from install-and-fast-advance win plans |
 | `AIAdvanceCreditGain(thisTurn, advancedInPlan)` | function | Read-only credit income from the next basic advance, consumed by advancement and economy planners |
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
@@ -3285,3 +3299,23 @@ optimisation work.
   paying, then ICE without an installed compatible breaker, then higher ELO.
   Probes apply the 3[c] discount locally, are read-only, and use only the
   Corp's own deck contents.
+
+### Downfall batch 13
+
+- Reduced Service uses `modifyRunCreditCost` for its run tax, so Runner run
+  legality, `AdditionalRunCosts` and the run calculator's run-start cost (also
+  used by Corp security planning) charge 2 credits per hosted counter without a
+  separate AI hook. `AIDefensiveValue(server)` (2 in an iced remote, else 0) and
+  `AILimitPerServer` place it. `AIRezWhenCan()` rezzes it on the Runner's turn
+  outside a run, in a central or a non-empty remote, when spare credits remain;
+  its `responseOnRez` choice offers the AI only its preferred amount: up to 4,
+  keeping enough credits to rez the server's unrezzed ice.
+- Vulnerability Audit uses `AICannotScoreOnInstallTurn`; see §5.7.
+- CSR Campaign uses `AIWorthInstalling(remotes)` (non-scoring remote, R&D of at
+  least 4 and hand room), `AIAvoidInstallingOverThis` and `AIRezWhenCan()` at the
+  end of the Runner's turn. The AI draws unless R&D has 2 or fewer cards.
+- Rime declares `rezAsNonIceDuringRunsOnServer`; `CheckRezAsNonIceDuringRun`
+  adds it to run-window rez options and the `AIRezWhenCan()` consumer, which
+  rezzes it at the first Corp opportunity in a run on its server. Its subroutine
+  is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
+  `Strength()` in Runner and Corp security calculations.

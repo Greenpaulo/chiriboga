@@ -247,6 +247,21 @@ function CheckRunning() {
 }
 
 /**
+ * Checks whether ice may be rezzed like a non-ice card in the current window:
+ * a run is in progress against the server it protects and the card declares
+ * rezAsNonIceDuringRunsOnServer (e.g. Rime).
+ *
+ * @method CheckRezAsNonIceDuringRun
+ * @param {Card} card ice to check
+ * @returns {Boolean} true if this ice is rezzable whenever non-ice cards are
+ */
+function CheckRezAsNonIceDuringRun(card) {
+  if (!card || card.rezAsNonIceDuringRunsOnServer !== true) return false;
+  if (!CheckRunning() || !CheckCardType(card, ["ice"])) return false;
+  return attackedServer.ice.includes(card);
+}
+
+/**
  * Checks if ice is being approached but not encountered.
  *
  * @method CheckApproach

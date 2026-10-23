@@ -133,6 +133,8 @@ phaseTemplates.standardResponse = {
         var ret = ChoicesInstalledCards(corp, function (card) {
 			//corp can always rez upgrades and assets (except for usability)
 			var validRezTypes = ["upgrade", "asset"];
+			//ice such as Rime may be rezzed like non-ice cards during runs on its server
+			if (CheckRezAsNonIceDuringRun(card)) validRezTypes.push("ice");
 			//but only the approached (not encountered) ice
 			if (CheckApproach() && approachIce < attackedServer.ice.length) {
 				if (card == attackedServer.ice[approachIce]) validRezTypes.push("ice");

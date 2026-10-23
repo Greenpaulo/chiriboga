@@ -18,7 +18,7 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | In progress | Batches 1–10 complete; batches 11–13 pending. |
+| `downfall` | In progress | Batches 1–13 complete; implementation integration checks (§8) pending. |
 
 Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
@@ -51,26 +51,13 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
-Batches 1–10 (26001–26051) now have working gameplay and baseline AI. Focused
+Batches 1–13 (26001–26065) now have working gameplay and baseline AI. Focused
 real-consumer evidence and specific deeper-strategy work are recorded in
 [the implementation notes](downfall-implementation-notes.md) and the active
-tracker's separate optimisation queue. Batches 11–13 remain unverified.
+tracker's separate optimisation queue.
 
-`sets/downfall.js` defines all 65 cards, but the following definitions contain
-explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
-notes that printed behaviour is absent.
-
-All previously listed Runner gameplay gaps were closed in batches 1–6.
-Remaining recorded Corp gaps:
-
-| ID    | Card                               | Known gap                                                        |
-| ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26062 | Reduced Service                    | Rez, run-cost and counter-removal abilities absent               |
-| 26063 | Vulnerability Audit                | Installed-this-turn scoring restriction absent                   |
-
-These cards are structurally eligible for format-aware random decks. Until
-their mechanics are completed, selecting Downfall can therefore put unfinished
-cards into generated decks.
+`sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
+the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.
 
 ### Other sets
 
