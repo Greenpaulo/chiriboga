@@ -584,6 +584,10 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
     UninstallInterrupts(cards, function () {
 	//loop through all the cards (move cards, lose information about HQ cards, cancel encounters if relevant, set host to null, and log message)
 	//BUT fire the on trashed trigger just once, when all this is one (i.e. for all cards at once)
+	//Runner cards leaving the grip or stack, captured before they move (Buffer Drive).
+	var runnerGripOrStackCards = cards.filter(function (card) {
+	  return card.cardLocation == runner.grip || card.cardLocation == runner.stack;
+	});
 	for (var i=0; i<cards.length; i++) {
 	  var card = cards[i];
 	  card.host = null;
@@ -610,6 +614,8 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
     if (trashingPlayer == corp && runner.identityCard && runner.identityCard.faction && directlyTrashed.some(function (card) {
       return card.faction == runner.identityCard.faction;
     })) trashEvent.corpRunnerFactionOrdinal = RecordTurnEvent("corpTrashRunnerFaction");
+    trashEvent.runnerGripOrStackCards = runnerGripOrStackCards;
+    trashEvent.runnerGripOrStackOrdinal = runnerGripOrStackCards.length > 0 ? RecordTurnEvent("runnerGripOrStackTrash") : 0;
 	//first the automatic triggers
 	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed, trashEvent]);
     if (fromDamage) {

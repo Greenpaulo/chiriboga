@@ -53,4 +53,53 @@ and need a shared design in the first batch that meets them:
 
 ## Batch notes
 
-No batches implemented yet.
+### Batch 7 — 2026-10-23
+
+Buffer Drive, Daily Casts and DreamNet. Focused tests:
+`tests/uprising-batch7.test.js`.
+
+Shared engine changes (small, used by these cards only so far):
+
+- `Trash()` (`mechanics.js`) now records which trashed cards came from the
+  Runner's grip or stack, before they move. It adds
+  `trashEvent.runnerGripOrStackCards` and
+  `trashEvent.runnerGripOrStackOrdinal` (turn event `runnerGripOrStackTrash`,
+  0 when no such card). Existing `trashEvent` consumers are unaffected.
+- The successful-run declaration (`phase.js`, `Run 5.1`) records the turn
+  event `runnerSuccessfulRun` before `automaticOnRunSuccessful`.
+
+Rulings and decisions:
+
+- Buffer Drive: "first time each turn" counts trash events from before it was
+  installed, as `TurnEventCount` does for Masterwork. Discarding (hand size,
+  `Discard()`) is not trashing (CR 1.19.3), so it does not trigger. Net damage,
+  stack trashes and grip trashes as costs do. Only cards from the grip/stack
+  that are still in the heap are offered. The human may pass; the AI always
+  bottoms a card. Its remove-from-game ability needs a heap card and is a cost
+  paid on activation; the card is removed from the game, not trashed. It has no
+  [trash] cost, so the `trashAbility` cross-set rule does not apply. Marked
+  `unique` per metadata.
+- Daily Casts: the turn-start take was automatic and moved the empty card to the
+  heap with `MoveCard`, so no trash windows opened. It is now a non-automatic
+  mandatory trigger, so the human resolves it each turn, and it uses
+  `Trash(this, true)`. It takes as many credits as remain, up to 2.
+- DreamNet: the existing trigger was `automatic` with an `Enumerate`, which the
+  engine ignores (it logs an error), so it drew on every successful run. Now it
+  is non-automatic and uses `TurnEventCount("runnerSuccessfulRun") == 1`, so a
+  successful run before installation uses up the first time. The credit
+  (Digital identity or 2+ link) is checked on resolution and gained after the
+  draw. AI: `AIDrawInstall` 2, and `AIEconomyInstall` 1 only with the credit
+  clause. Before, it was a priority-economy install even without it.
+
+Baseline AI evidence (real consumers): the AI installs Daily Casts as priority
+economy and DreamNet when it wants cards. Buffer Drive's trash response gives
+the AI a needed icebreaker. In the post-action paid-ability window, the
+draw-trigger loop removes Buffer Drive to put a needed heap breaker on top. It
+does not trigger with no needed breaker in the heap.
+
+Queued for optimisation:
+
+- Buffer Drive recovery happens only in a paid-ability window, so an
+  action-phase draw can come first.
+- Install has no damage/mill-aware value.
+- DreamNet's draw is not in run potential.

@@ -155,37 +155,39 @@ cardSet[26094] = {
   cardType: "resource",
   subTypes: [],
   installCost: 3,
-  
+
   //When you install this resource, load 8 credits onto it.
   automaticOnInstall: {
     Resolve: function (card) {
       if (card == this) LoadCredits(this, 8);
     },
   },
-  
-  //When your turn begins, take 2 credits from this resource.
+
+  //When your turn begins, take 2 credits from this resource. When it is empty, trash it.
+  //Not automatic: the empty trash opens trash interrupt/response windows (e.g. Buffer Drive).
   responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      if (!CheckCounters(this, "credits", 1)) return [];
+      return [{}];
+    },
     Resolve: function () {
-      if (CheckCounters(this, "credits", 2)) {
-        TakeCredits(runner, this, 2);
-        //When it is empty, trash it (use MoveCard to avoid phase change in automatic trigger)
-        if (!CheckCounters(this, "credits", 1)) {
-          Log(GetTitle(this, true) + " trashed (empty)");
-          MoveCard(this, runner.heap);
-          this.faceUp = true;
-        }
+      //take as many as possible (only 2 is reachable unless another effect removed one)
+      TakeCredits(runner, this, 2);
+      if (!CheckCounters(this, "credits", 1)) {
+        Log(GetTitle(this, true) + " is empty");
+        Trash(this, true);
       }
     },
-    automatic: true,
+    text: "Daily Casts: take 2[c]",
   },
-  
+
   //AI evaluation functions
   AIEconomyInstall: function () {
     //Excellent drip economy: pay 3, get 8 over 4 turns = 5 credit profit
     //High priority economy card
     return 3;
   },
-  
+
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
     //Always worth keeping - excellent economy card
     return true;
@@ -352,59 +354,39 @@ cardSet[26095] = {
   subTypes: ["Virtual"],
   installCost: 3,
   unique: true,
-  
-  //Track if triggered this turn
-  triggeredThisTurn: false,
-  
-  //Reset flag at start of each turn
-  responseOnRunnerTurnBegins: {
-    Resolve: function () {
-      this.triggeredThisTurn = false;
-    },
-    automatic: true,
-  },
-  responseOnCorpTurnBegins: {
-    Resolve: function () {
-      this.triggeredThisTurn = false;
-    },
-    automatic: true,
-  },
-  
+
   //The first time each turn you make a successful run, draw 1 card.
   //If your identity is digital or you have at least 2 link, also gain 1 credit.
+  //TurnEventCount includes successful runs made before this resource was installed.
+  //Not automatic: Draw can open the cards-drawn response window.
   responseOnRunSuccessful: {
     Enumerate: function () {
-      if (this.triggeredThisTurn) return [];
+      if (TurnEventCount("runnerSuccessfulRun") != 1) return [];
       return [{}];
     },
     Resolve: function (params) {
-      this.triggeredThisTurn = true;
-      
-      //Draw 1 card
-      Draw(runner, 1);
-      
-      //Check for digital identity or 2+ link
-      var isDigital = CheckSubType(runner.identityCard, "Digital");
-      var hasEnoughLink = Link() >= 2;
-      
-      if (isDigital || hasEnoughLink) {
-        GainCredits(runner, 1, "", this);
-      }
+      var gainsCredit = this.AIDreamNetGainsCredit();
+      Draw(runner, 1, function () {
+        if (gainsCredit) GainCredits(runner, 1, "", this);
+      }, this);
     },
-    text: "DreamNet: Draw 1 card",
-    automatic: true,
+    text: "DreamNet: draw 1 card",
   },
-  
+
   //AI evaluation functions
-  AIEconomyInstall: function () {
-    //Good drip card draw (and potentially credits)
-    //Higher priority if we have 2+ link or digital identity
-    var isDigital = CheckSubType(runner.identityCard, "Digital");
-    var hasEnoughLink = Link() >= 2;
-    if (isDigital || hasEnoughLink) return 3; //high priority - draw + credit
-    return 2; //moderate priority - just draw
+  //True when the credit clause applies (digital identity or at least 2 link).
+  AIDreamNetGainsCredit: function () {
+    return CheckSubType(runner.identityCard, "Digital") || Link() >= 2;
   },
-  
+  //Primarily a draw engine for a Runner who runs every turn.
+  AIDrawInstall: function () {
+    return 2;
+  },
+  //Also economy when the credit clause applies.
+  AIEconomyInstall: function () {
+    return this.AIDreamNetGainsCredit() ? 1 : 0;
+  },
+
   AIWorthKeeping: function (installedRunnerCards, spareMU) {
     //Always worth keeping - solid card draw for runners who run
     return true;
@@ -1020,7 +1002,79 @@ cardSet[26093] = {
   cardType: "hardware",
   subTypes: [],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //The first time each turn 1 or more cards are trashed from your grip or stack, you may add 1 of those cards to the bottom of your stack.
+  //Trash() records that event once per turn (including before this was installed); discarding is not trashing (CR 1.19.3).
+  responseOnTrash: {
+    Enumerate: function (cards, trashingPlayer, directlyTrashed, trashEvent) {
+      if (!trashEvent || trashEvent.runnerGripOrStackOrdinal !== 1) return [];
+      var candidates = trashEvent.runnerGripOrStackCards.filter(function (card) {
+        return card.cardLocation == runner.heap;
+      });
+      if (candidates.length < 1) return [];
+      var choices = candidates.map(function (card) {
+        return { card: card, label: "Add " + GetTitle(card, true) + " to the bottom of your stack" };
+      });
+      //**AI code: bottom the most useful card (there is no downside)
+      if (runner.AI != null) {
+        var preferred = this.AIBufferDriveChoice(candidates);
+        return choices.filter(function (choice) {
+          return choice.card == preferred;
+        });
+      }
+      choices.push({ card: null, label: "Do not add a card", button: "Pass" });
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params || !params.card || params.card.cardLocation != runner.heap) return;
+      MoveCard(params.card, runner.stack, 0);
+      Log(GetTitle(params.card, true) + " added to the bottom of the stack");
+    },
+    text: "Buffer Drive: add a trashed card to the bottom of your stack?",
+  },
+  abilities: [
+    {
+      text: "Remove this hardware from the game: Add 1 card from your heap to the top of your stack.",
+      Enumerate: function () {
+        if (!CheckInstalled(this)) return [];
+        var choices = runner.heap.map(function (card) {
+          return { card: card, label: "Add " + GetTitle(card, true) + " to the top of your stack" };
+        });
+        //**AI code: only the needed card (AIWouldTrigger gates use)
+        if (runner.AI != null) {
+          var preferred = this.AIBufferDriveHeapChoice();
+          return choices.filter(function (choice) {
+            return choice.card == preferred;
+          });
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        RemoveFromGame(this);
+        if (!params || !params.card || params.card.cardLocation != runner.heap) return;
+        MoveCard(params.card, runner.stack);
+        Log(GetTitle(params.card, true) + " added to the top of the stack");
+      },
+    },
+  ],
+  //AI: prefer a needed icebreaker, then a card worth keeping, else the first.
+  AIBufferDriveChoice: function (cards) {
+    var installed = InstalledCards(runner);
+    var breaker = runner.AI._icebreakerInPileNotInHandOrArray(cards, installed);
+    if (breaker) return breaker;
+    var keep = runner.AI._cardsWorthKeeping(cards);
+    if (keep.length > 0) return keep[0];
+    return cards[0];
+  },
+  //AI: recover only a needed icebreaker that is in the heap (null otherwise).
+  AIBufferDriveHeapChoice: function () {
+    return runner.AI._icebreakerInPileNotInHandOrArray(runner.heap, InstalledCards(runner));
+  },
+  //Consumed by the Runner AI's draw-trigger loop: put the breaker on top before drawing.
+  AIDrawTrigger: 1,
+  AIWouldTrigger: function () {
+    return this.AIBufferDriveHeapChoice() != null;
+  },
 };
 
 //Megaprix Qualifier (26096)
