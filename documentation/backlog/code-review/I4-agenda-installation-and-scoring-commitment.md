@@ -3,7 +3,7 @@
 **Outcome:** blocked — score-fast plan execution is ready behind `agendaCommitmentPlan`; its F4 gate is pending (the owner runs it). Agenda destination/hold is split to I4.1.
 
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md) phase A, [I3](I3-remote-role-and-root-suitability.md) (now follows I4)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](../done/I2-ice-selection-by-marginal-security.md) phase A, [I3](../I3-remote-role-and-root-suitability.md) (now follows I4)
 **Verified against code:** eb78846 (2026-10-23; after the Downfall merge, whose only relevant change is the band-3 `AICannotScoreOnInstallTurn` skip noted below)
 
 ## Resolution
@@ -37,7 +37,7 @@ those absolute rates against HQ's, so it cannot be trusted until that risk is
 measured. The destination/hold consumer, the hold-streak recording and I2's
 empty-remote stake following I4's destination were removed; their design
 and the replay evidence move to
-[I4.1](../corp-ai/specs/I4.1-agenda-destination-and-hold.md). Scenario 1
+[I4.1](../../corp-ai/specs/I4.1-agenda-destination-and-hold.md). Scenario 1
 (the pending reproduction) is an install/hold case and stays pending there:
 under the trial it passed with install 0.90 against hold 0.99 (the owner's
 install-within-0.1 amendment).
@@ -216,10 +216,10 @@ and a game-losing steal stay hard tactical rules.
 
 **Why this design.** Turning a security measurement into a yes/no admission
 gate has twice made the Corp weaker:
-[`fa1182c`](../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
+[`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote"; removing only that gate recovered
 +7.6 pp win rate and +0.79 points scored per game) and the
-[L9.0.1 gate failure](done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](../done/L9.0.1-adopt-honest-lockout.md#resolution)
 (−2.9 pp win rate, −0.28 points scored, +0.18 stolen). The owner's 2026-10-14
 playtests (one tester, not a measurement) found the Corp easy to beat: it
 holds agendas too long, plays some into weak remotes and then leaves them
@@ -229,7 +229,7 @@ score fast once installed, keep scoring through a secure remote, count
 lockout cards such as Manegarm Skunkworks and Anoetic Void, and count
 scoring tools such as Seamless Launch and SanSan City Grid the way a human
 does, through AI hooks rather than titles. The
-[scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16)
+[scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16)
 is the shared plan; I4 owns M3 `exposureTurns`, M5 `hqStealHazard` and the
 agenda-commitment consumer, and is the I-layer item expected to move win rate.
 
@@ -255,7 +255,7 @@ and rejects an insecure remote only when `secureScoringServerGate` is on
 holding a scoring upgrade, and being the strongest empty protected remote. In
 practice one destination is offered. HQ's score grows with hand size, so a
 large hand can reject every remote, including one the evaluator calls secure
-(pending bug [corp-agenda-held-while-secure-remote-available](../bugs/corp-agenda-held-while-secure-remote-available.md)).
+(pending bug [corp-agenda-held-while-secure-remote-available](../../bugs/corp-agenda-held-while-secure-remote-available.md)).
 
 Candidates are sorted by `|_advancementLimit() − _scoringWindow()|` plus
 `0.75 × _deceptionInstallDistance()`. `_scoringWindow()` is an unitless sum
@@ -314,7 +314,7 @@ M4). The identity hook `AIOperationPlayClickGain` (Nebula Talent Management,
 including HQ via `_centralAccessCount()` and `_centralWinProbability()`.
 `_runnerMayWinIfServerBreached()` guards the agenda bluff
 (`_shouldBluffAgendaServer()` never bluffs when the Corp would win or a
-breach would lose) and ICE rez. The [PR 19 follow-up](../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard)
+breach would lose) and ICE rez. The [PR 19 follow-up](../../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard)
 assigns the winning-steal install risk to I4, measured against the corrected
 default rather than the old blanket floor.
 
@@ -490,7 +490,7 @@ With the option off, I2's stake rule is unchanged.
   (within 0.01), then rank those by EV. When other agendas in HQ already let
   the Runner win from an HQ breach, `W(hold)` uses
   `_breachConsequence(corp.HQ).winProbability` per breach instead of `a / n`.
-  This decides the [PR 19 follow-up](../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard):
+  This decides the [PR 19 follow-up](../../corp-ai-regression/implementation.md#pr-19-review-proposed-winning-steal-install-guard):
   a game-losing install is rejected exactly when a lower-loss option exists.
 - Existing guards stay authoritative: `_shouldBluffAgendaServer()`,
   `_criticalBreachDefenseAction()`, `_icePreventsGameWinningBreach()` rez
@@ -538,7 +538,7 @@ title cases into the new scoring").
 | `AIIsScoringUpgrade` | boolean, unchanged | Not read by I4. It conflates requirement reduction (SanSan), one-shot counters (Hype Machine), score riders (Malapert, via `AIWouldRezBeforeScore`), steal deterrence (AMAZE) and Perfect Recall. I6 retires it once each card's effect is covered by `AIScoringSupport`, `AIFastAdvanceCounters`, score-time hooks or I2's M4 |
 | `AIFastAdvance` | boolean, unchanged | Not read by I4 |
 
-Title cases to migrate ([P1](corp_ai_finding_13_legacy_title_lists.md)
+Title cases to migrate ([P1](../corp_ai_finding_13_legacy_title_lists.md)
 rows `_advancementLimit` and `_potentialAdvancementDirections` are tagged I4
 (owner decision 2026-10-16); the rest of P1 stays later work):
 
@@ -713,5 +713,5 @@ for both metrics.
 - [ ] An owner playtest against the option is recorded before the default changes.
 - [x] New or changed card-facing hooks (`AIScoringSupport`, extended `AIFastAdvanceCounters` and `AIAdvanceCreditGain`) are documented in `documentation/ai.md`, and migrated titles are removed from `LEGACY_TITLES` and ticked in P1.
 - [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [x] `documentation/corp-ai/architecture.md` describes the new behaviour ([Agenda scoring plans (I4)](../corp-ai/architecture.md#agenda-scoring-plans-i4)).
+- [x] `documentation/corp-ai/architecture.md` describes the new behaviour ([Agenda scoring plans (I4)](../../corp-ai/architecture.md#agenda-scoring-plans-i4)).
 - [ ] `node tests/run-all-tests.js` passes.
