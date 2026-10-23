@@ -67,7 +67,8 @@ verification; see the [transition snapshot](history/downfall-2026-10-23-implemen
 
 Active implementation set (26066–26130). `sets/uprising.js` defines all 65 cards:
 six pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095) are
-unverified and not credited, and 59 are scaffolds with TODO markers. See the
+unverified and not credited, and 59 are scaffolds with TODO markers. Batch 2
+(26070–26073, including Paladin Poemu) is complete. See the
 [active tracker](current-set-implementation.md) and
 [implementation notes](uprising-implementation-notes.md).
 

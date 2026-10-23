@@ -53,4 +53,52 @@ and need a shared design in the first batch that meets them:
 
 ## Batch notes
 
-No batches implemented yet.
+### Batch 2 — 26070–26073 (Claude, 2026-10-23)
+
+Shared engine change (`mechanics.js`, small and additive; merge note for other
+batches):
+
+- `Install` records turn event `"runnerCompanionUse"` when a Runner card with
+  the Companion subtype is installed (next to `"runnerHardwareInstall"`).
+- `SpendCredits` tracks the hosted sources it spent from (`spentSources`);
+  `CreditSpendResponses(..., sources = [])` takes them as a new trailing
+  argument, records `"runnerCompanionUse"` once per payment that spent
+  companion credits (printed subtypes, so payment never needs the active-trigger
+  scan; no effect grants Companion), and passes `sources` as a fifth `responseOnCreditsSpent`
+  parameter. `SpendHostedCredits` passes `[source]`; the psi-bid deferred
+  payments carry `sources` too. Existing callers and Shackleton are unchanged.
+
+Rulings and decisions:
+
+- Keiko: "the first time each turn" is one shared event across installing a
+  companion and spending credits from an installed companion, and it may have
+  happened before Keiko was installed, so both triggers read
+  `TurnEventCount("runnerCompanionUse") == 1`. Keiko is itself a companion, so
+  installing it as the turn's first companion event gains 1[c]. The gain from a
+  spend resolves after the payment completes, so the gained credit cannot pay
+  that cost. Limit 1 console is the engine's existing console replacement.
+- Odore: Interface only marks the break abilities (CR 3.9.5e–g). The 0[c]
+  single break has no use limit, so with 3+ installed virtual resources (any
+  installed resource with the Virtual subtype, hosted ones included) every
+  sentry subroutine is free. Its ability order puts the free break first for the
+  AI executor; the strength boost resets at encounter and run end.
+- Mystic Maemi: credits pay only for playing events. With an empty grip the
+  random-trash option cannot be chosen, so Maemi must be trashed.
+- Paladin Poemu: the pre-existing definition was rewritten: the steal drip is
+  now automatic (it is mandatory), the trash goes through one `DecisionPhase`
+  for both human and AI, the AI choice values Poemu's own credits, and the
+  no-op `AIPreferredInstallChoice` and debug logging were removed. The trash is
+  mandatory and always has a target (Poemu itself).
+
+AI evidence (`tests/uprising-batch2.test.js`, 17 cases): the real command
+selector installs Keiko (and not a second console), Mystic Maemi and Paladin
+Poemu; `FullCheckPlay` counts Maemi credits for Sure Gamble; AI payment uses
+Poemu credits before the pool; the run calculator plans Odore at 2[c] per
+sentry, 3[c] pump + 2[c] break, and 0[c] with 3 virtual resources; a real
+encounter driven by `CommandChoice`/`SelectChoice` breaks Rototurret with Odore
+at the planned cost both ways.
+
+Optimisation candidates: Poemu/Maemi do not plan to spend the stash before it
+reaches 3 (for example, installing a cheap card to avoid Poemu's trash);
+Maemi's keep/trash choice ignores the value of the stash against the grip;
+Keiko's economy priority ignores how often companions will actually be used.

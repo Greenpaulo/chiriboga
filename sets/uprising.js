@@ -22,122 +22,65 @@ cardSet[26073] = {
   subTypes: ["Companion", "Virtual"],
   installCost: 1,
   unique: true,
-  
-  //When your turn begins, place 1 credit on this resource.
   responseOnRunnerTurnBegins: {
     Resolve: function () {
       PlaceCredits(this, 1);
-      Log(GetTitle(this) + " places 1 credit (turn begins)");
     },
     automatic: true,
   },
-  
-  //Whenever you steal an agenda, place 1 credit on this resource.
   responseOnStolen: {
-    Resolve: function (params) {
+    Resolve: function () {
       PlaceCredits(this, 1);
-      Log(GetTitle(this) + " places 1 credit (agenda stolen)");
     },
-    text: "Paladin Poemu: Place 1 credit",
+    automatic: true,
   },
-  
-  //You can spend hosted credits to install non-connection cards.
   canUseCredits: function (doing, card) {
-    if (doing != "installing") return false;
-    if (!card) return false;
-    //Cannot spend on Connection cards
-    if (CheckSubType(card, "Connection")) return false;
-    return true;
+    return doing == "installing" && !!card && !CheckSubType(card, "Connection");
   },
-  
-  //When your turn ends, if there are 3 or more hosted credits, trash 1 of your installed cards.
+  // Mandatory: Poemu itself is installed, so there is always a legal target.
   responseOnRunnerDiscardEnds: {
     Enumerate: function () {
-      //Only trigger if 3 or more hosted credits
-      if (!this.credits || this.credits < 3) return [];
-      //Must have at least one installed card to trash
-      var installedCards = InstalledCards(runner);
-      if (installedCards.length == 0) return [];
+      if (!CheckCounters(this, "credits", 3)) return [];
       return [{}];
     },
     Resolve: function () {
       var choices = ChoicesInstalledCards(runner);
-      
-      //AI decision-making for which card to trash
-      if (runner.AI != null) {
-        //Prefer to trash cards that are depleted or low value
-        var bestTrashIndex = 0;
-        var lowestValue = Infinity;
-        
-        for (var i = 0; i < choices.length; i++) {
-          var card = choices[i].card;
-          var value = 10; //base value
-          
-          //Prefer to trash cards with 0 counters that started with counters
-          if (typeof card.power !== "undefined" && card.power == 0) {
-            value = 1;
-          }
-          //Prefer to trash resources over programs/hardware
-          if (card.cardType == "resource") {
-            value -= 2;
-          }
-          //Don't trash icebreakers
-          if (CheckSubType(card, "Icebreaker")) {
-            value += 20;
-          }
-          //Don't trash consoles
-          if (CheckSubType(card, "Console")) {
-            value += 15;
-          }
-          //Factor in install cost - cheaper cards are more expendable
-          if (typeof card.installCost !== "undefined") {
-            value += card.installCost;
-          }
-          
-          if (value < lowestValue) {
-            lowestValue = value;
-            bestTrashIndex = i;
-          }
-        }
-        
-        //Trash the selected card
-        var cardToTrash = choices[bestTrashIndex].card;
-        Log(GetTitle(this) + " forces trashing of " + GetTitle(cardToTrash));
-        Trash(cardToTrash, true);
-        return;
-      }
-      
-      //Human player decision
+      if (choices.length < 1) return;
+      if (runner.AI != null) choices = [this.AITrashChoice(choices)];
       DecisionPhase(
         runner,
         choices,
         function (params) {
-          Log(GetTitle(this) + " forces trashing of " + GetTitle(params.card));
           Trash(params.card, true);
         },
-        "Paladin Poemu: Trash 1 of your installed cards",
-        "card",
-        this
+        "Paladin Poemu",
+        "Trash 1 of your installed cards",
+        this,
       );
     },
     text: "Paladin Poemu: Trash 1 installed card (3+ hosted credits)",
   },
-  
-  //AI evaluation functions
+  // Lowest value: AIOkToTrash cards first, then by install cost plus hosted
+  // credits and counters; icebreakers and consoles are protected. Poemu itself
+  // is a candidate valued with its hosted credits.
+  AITrashChoice: function (choices) {
+    var score = function (card) {
+      var value = (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus") + Counters(card, "power");
+      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) value -= 100;
+      if (CheckSubType(card, "Icebreaker")) value += 20;
+      if (CheckSubType(card, "Console")) value += 15;
+      return value;
+    };
+    var best = choices[0];
+    for (var i = 1; i < choices.length; i++)
+      if (score(choices[i].card) < score(best.card)) best = choices[i];
+    return best;
+  },
   AIEconomyInstall: function () {
-    //Good drip economy, moderate priority
     return 2;
   },
-  
-  AIWorthKeeping: function (installedRunnerCards, spareMU) {
-    //Always worth keeping - good cheap drip economy
+  AIWorthKeeping: function () {
     return true;
-  },
-  
-  AIPreferredInstallChoice: function (choices) {
-    //Good to install early for economy
-    //But be mindful of the 3-credit penalty
-    return 0; //install it
   },
 };
 
@@ -647,7 +590,51 @@ cardSet[26070] = {
   cardType: "hardware",
   subTypes: ["Console", "Companion"],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 2,
+  // "The first time each turn" is a game event that may precede Keiko's
+  // install, so both triggers read the engine's turn counter. The engine
+  // records "runnerCompanionUse" once per companion install (before install
+  // responses, so Keiko's own install counts) and once per payment that spent
+  // hosted credits from a companion (before responseOnCreditsSpent).
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (!card || card.player != runner || !CheckSubType(card, "Companion")) return [];
+      if (TurnEventCount("runnerCompanionUse") != 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      GainCredits(runner, 1, "", this);
+    },
+    text: "Keiko: Gain 1[c]",
+  },
+  responseOnCreditsSpent: {
+    Enumerate: function (player, outsideAmount, doing, card, sources) {
+      if (player != runner || !sources) return [];
+      if (!sources.some(function (source) { return CheckSubType(source, "Companion"); })) return [];
+      if (TurnEventCount("runnerCompanionUse") != 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      GainCredits(runner, 1, "", this);
+    },
+    text: "Keiko: Gain 1[c]",
+  },
+  AIWastefulToInstall: function () {
+    var self = this;
+    return InstalledCards(runner).some(function (card) {
+      return card != self && CheckSubType(card, "Console");
+    });
+  },
+  AIWorthKeeping: function () {
+    return !this.AIWastefulToInstall();
+  },
+  // A console with drip from companions: higher priority once one is in play or in hand.
+  AIEconomyInstall: function () {
+    if (this.AIWastefulToInstall()) return 0;
+    var companion = function (card) { return CheckSubType(card, "Companion") && card.cardType != "hardware"; };
+    return InstalledCards(runner).some(companion) || runner.grip.some(companion) ? 2 : 1;
+  },
 };
 
 //Odore (26071)
@@ -673,9 +660,118 @@ cardSet[26071] = {
       return 0;
     },
   },
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  VirtualResourceCount: function () {
+    return InstalledCards(runner).filter(function (card) {
+      return card.cardType == "resource" && CheckSubType(card, "Virtual");
+    }).length;
+  },
+  CanBreakSentry: function () {
+    if (!CheckEncounter()) return false;
+    if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return false;
+    return CheckStrength(this);
+  },
+  // "Any number": the first subroutine is chosen with the ability, then each
+  // further one is optional. "Continue" carries alt "continue" so the AI
+  // run-path executor stops after its planned subroutines.
+  BreakMore: function () {
+    var choices = ChoicesEncounteredSubroutines();
+    if (choices.length < 1) return;
+    for (var i = 0; i < choices.length; i++)
+      choices[i].label = "(Odore) Break another subroutine. -> " + choices[i].label;
+    choices.push({ label: "Continue", button: "Continue", alt: "continue" });
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        if (!params.subroutine) return;
+        Break(params.subroutine);
+        this.BreakMore();
+      },
+      "Odore",
+      "Break any number of sentry subroutines",
+      this,
+    );
+  },
+  // The free break is listed first so that the AI's card-level trigger uses it
+  // whenever it is legal; the printed order is 2[c] break, 0[c] break, pump.
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break 1 sentry subroutine (3 or more installed virtual resources).",
+      Enumerate: function () {
+        if (this.VirtualResourceCount() < 3) return [];
+        if (!this.CanBreakSentry()) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        Break(params.subroutine);
+      },
+    },
+    {
+      text: "Break any number of sentry subroutines.",
+      Enumerate: function () {
+        if (!this.CanBreakSentry()) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+            this.BreakMore();
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "+3 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return []; //interface usability, as Corroder
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 3, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendCredits(
+          runner,
+          3,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 3);
+          },
+          this,
+        );
+      },
+    },
   ],
+  // 3[c] for +3 strength; 2[c] breaks any number of sentry subroutines. With
+  // 3+ installed virtual resources the 0[c] single break can be repeated, so
+  // every sentry subroutine is free.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    var breakCost = this.VirtualResourceCount() >= 3 ? 0 : 2;
+    return result.concat(
+      rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Sentry"], 3, 3, breakCost, iceAI.sr.length, creditsLeft),
+    );
+  },
 };
 
 //Mystic Maemi (26072)
@@ -692,7 +788,64 @@ cardSet[26072] = {
   cardType: "resource",
   subTypes: ["Companion", "Virtual"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      PlaceCredits(this, 1);
+    },
+    automatic: true,
+  },
+  responseOnStolen: {
+    Resolve: function () {
+      PlaceCredits(this, 1);
+    },
+    automatic: true,
+  },
+  canUseCredits: function (doing, card) {
+    return doing == "playing" && !!card && CheckCardType(card, ["event"]);
+  },
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () {
+      if (!CheckCounters(this, "credits", 3)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      // An empty grip cannot pay the first option, so Maemi must be trashed.
+      var choices = [];
+      if (runner.grip.length > 0)
+        choices.push({ grip: true, label: "Trash 1 card from your grip at random", button: "Trash from grip" });
+      choices.push({ grip: false, label: "Trash Mystic Maemi", button: "Trash Maemi" });
+      if (runner.AI != null) choices = [this.AIKeepsStash() ? choices[0] : choices[choices.length - 1]];
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          if (params.grip) {
+            var copyOfGrip = runner.grip.concat([]);
+            Shuffle(copyOfGrip);
+            Trash(copyOfGrip[0], true);
+          } else Trash(this, true);
+        },
+        "Mystic Maemi",
+        "Trash 1 card from your grip at random or trash Mystic Maemi",
+        this,
+      );
+    },
+    text: "Mystic Maemi: Trash a random grip card or trash Maemi (3+ hosted credits)",
+  },
+  // Keep the stash (3+ credits for events) when losing a random card is cheap:
+  // at least two cards in grip, or a lone card not worth keeping.
+  AIKeepsStash: function () {
+    if (runner.grip.length < 1) return false;
+    if (runner.grip.length >= 2) return true;
+    return runner.AI._cardsWorthKeeping(runner.grip).length < 1;
+  },
+  AIEconomyInstall: function () {
+    return runner.grip.some(function (card) { return CheckCardType(card, ["event"]); }) ? 2 : 1;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Bravado (26074)

@@ -737,6 +737,9 @@ the event may have happened before the card became active. Check the engine's
 turn counter instead: `TurnEventCount(name)` is 1 during the first such event,
 and `ChangePhase` clears every count when a turn begins. Recorded names:
 `"runnerHardwareInstall"` (in `Install`, before install triggers),
+`"runnerCompanionUse"` (in `Install` for a Runner companion, and once per
+payment that spent hosted credits from a companion, before
+`responseOnCreditsSpent(player, outsideAmount, doing, card, sources)`),
 `"runnerDraw"` and `"corpDraw"` (in `Draw`, before cards move). Record a new
 event with `RecordTurnEvent(name)` at its single engine call site.
 

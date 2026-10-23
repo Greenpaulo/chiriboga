@@ -2712,8 +2712,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   route's `paymentPoolOnly` policy during live payment; absent a route it tries
   the safer pool first. `SpendCredits` offers human temporary-credit choices
   when a source-sensitive hazard is active. A completed payment emits
-  `responseOnCreditsSpent(player, outsideAmount, doing, card)` before its
-  continuation. `SpendHostedCredits` sends required stealth payments through
+  `responseOnCreditsSpent(player, outsideAmount, doing, card, sources)` before its
+  continuation (`sources`: the cards whose hosted credits paid, possibly empty). `SpendHostedCredits` sends required stealth payments through
   the same checkpoint, including Corsair, Lampades and Baker before redirect.
   Shackleton's optional response uses normal title/option preferences; only
   choosing damage consumes its opportunity, reset at both turn boundaries.
@@ -3364,3 +3364,29 @@ optimisation work.
   rezzes it at the first Corp opportunity in a run on its server. Its subroutine
   is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
   `Strength()` in Runner and Corp security calculations.
+
+### Uprising batch 2 card hooks
+
+- Keiko uses `AIWastefulToInstall` (another console installed),
+  `AIWorthKeeping` and `AIEconomyInstall` (2 with a non-hardware companion
+  installed or in grip, else 1; 0 when wasteful). Its gains are mandatory
+  `responseOnInstall` and `responseOnCreditsSpent` triggers gated on
+  `TurnEventCount("runnerCompanionUse") == 1`.
+- Odore uses `AIImplementBreaker`: 3[c] for +3 strength and one 2[c] branch for
+  any number of sentry subroutines; with 3+ installed virtual resources the
+  break costs 0, because the 0[c] single break is repeatable. The free break is
+  listed first in `abilities`, so the run-path executor's card-level trigger uses
+  it whenever legal; the "any number" follow-up's Continue carries
+  `alt: "continue"`.
+- Mystic Maemi uses `AIEconomyInstall` (2 with an event in grip, else 1) and
+  `AIWorthKeeping`. Its `canUseCredits("playing", event)` lets `FullCheckPlay`
+  and AI payment use the stash for events. `AIKeepsStash()` (card-local,
+  read-only) decides the turn-end choice: trash a random grip card when the grip
+  holds 2+ cards or a lone card `_cardsWorthKeeping` rejects; otherwise trash
+  Maemi (forced with an empty grip).
+- Paladin Poemu uses `AIEconomyInstall` and `AIWorthKeeping`; AI install
+  payments spend its credits first through `SpendCredits`. `AITrashChoice(choices)`
+  (card-local) picks the turn-end trash: `AIOkToTrash` cards first, then the
+  lowest install cost plus hosted credits and counters, with icebreakers (+20)
+  and consoles (+15) protected; Poemu itself is a candidate valued with its
+  credits.
