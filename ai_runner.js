@@ -2127,7 +2127,7 @@ console.log(this.preferred);
 
 		//consider potential of this server
 		//(Runner lingering effects, e.g. Climactic Showdown, count as passive sources)
-		var potentialSources = activeCards.concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
+		var potentialSources = activeCards.concat(ActiveCards(corp)).concat(lingeringEffects.filter(function (effect) { return effect.player == runner; }));
 		for (var j = 0; j < potentialSources.length; j++) {
 			if (typeof potentialSources[j].AIRunExtraPotential == 'function' && (potentialSources[j].AIBreachNotRequired || !breachPrevented)) {
 			  this.serverList[i].potential += potentialSources[j].AIRunExtraPotential.call(potentialSources[j],this.serverList[i].server,this.serverList[i].potential);

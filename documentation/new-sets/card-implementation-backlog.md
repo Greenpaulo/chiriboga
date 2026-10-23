@@ -18,7 +18,7 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | In progress | Batches 1–8 complete; batches 9–13 pending. |
+| `downfall` | In progress | Batches 1–10 complete; batches 11–13 pending. |
 
 Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
@@ -51,10 +51,10 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
-Batches 1–8 (26001–26040) now have working gameplay and baseline AI. Focused
+Batches 1–10 (26001–26051) now have working gameplay and baseline AI. Focused
 real-consumer evidence and specific deeper-strategy work are recorded in
 [the implementation notes](downfall-implementation-notes.md) and the active
-tracker's separate optimisation queue. Batches 9–13 remain unverified.
+tracker's separate optimisation queue. Batches 11–13 remain unverified.
 
 `sets/downfall.js` defines all 65 cards, but the following definitions contain
 explicit TODOs, empty effects, commented trigger stubs or otherwise explicit
@@ -65,11 +65,6 @@ Remaining recorded Corp gaps:
 
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26041 | Sting!                             | Score/steal damage trigger absent                                |
-| 26043 | Storgotic Resonator                | Counter placement absent; damage ability exists                  |
-| 26044 | Saisentan                          | Encounter choice and all subroutines absent; AI model is a no-op |
-| 26045 | Complete Image                     | Empty operation effect                                           |
-| 26046 | Letheia Nisei                      | Psi/approach ability absent                                      |
 | 26052 | Focus Group                        | Empty operation effect                                           |
 | 26053 | Game Over                          | Empty operation effect                                           |
 | 26054 | Increased Drop Rates               | Access ability absent                                            |

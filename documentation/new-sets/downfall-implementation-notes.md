@@ -555,3 +555,135 @@ Output/status are saved to
 `/private/tmp/chiriboga-run-event-payment-tests.log` and
 `/private/tmp/chiriboga-run-event-payment-tests.status`. Independent review of
 this bounded repair remains required; optional batch strategy work is unchanged.
+
+## Batch 9 — 26041–26046
+
+Implemented by Codex, 2026-10-22. Existing metadata and exact ELOs preserved.
+
+- **Sting!** resolves score/steal damage only for itself and counts the opposite
+  player's copies after movement into the score area. Ordinary agenda scoring,
+  bait evaluation, known-root Runner run costing and Corp breach-damage
+  evaluation consume its baseline support. Winning steals omit post-win damage
+  in the evaluators.
+- **Public Health Portal** uses the real reveal API, including the Corp reveal
+  notification consumed by Hyoubu, and waits for viewing completion before
+  income. Empty R&D still yields income under the do-as-much-as-possible rule.
+  The real install and paid-window rez consumers exercise its economy route.
+- **Storgotic Resonator** is unique and gains one counter for the first matching
+  direct Corp trash each turn, including damage and trashes from noninstalled
+  zones. Earlier matching trashes while unrezzed consume that turn's opportunity;
+  Runner-controlled trashes and off-faction cards do not qualify. A stable event
+  ordinal prevents nested automatic trashes from changing the first event's
+  eligibility. Click damage checks action timing, counters and clicks; real
+  command selection activates it and cannot use an empty counter pool.
+- **Saisentan** offers the mandatory encounter type choice and all three damage
+  subroutines. Each original subroutine can cause one separately preventable
+  bonus; that bonus is from the encounter ability and does not recursively
+  amplify itself. Cleanup clears the type at encounter end, even if inactive.
+  Corp choices use public Heap/rig type frequencies. The real ICE calculator
+  budgets the possible extra damage conservatively, without Corp grip access.
+- **Complete Image** checks three agenda points and a successful run during the
+  preceding Runner turn. Each name/damage step waits for damage prevention and
+  trash responses, repeats only on an actual named casualty, and ends the action
+  phase after the chain. It cleans up its resolving operation. Baseline AI uses
+  its real play selector against a small grip and guesses from public names;
+  it does not inspect hidden grip or stack card names.
+- **Letheia Nisei** is unique, tracks the first approach even while unrezzed,
+  plays secret affordable 0–2 credit bids, offers the optional trash only after
+  different bids, and moves the Runner to the outermost ICE in the same run.
+  The Runner may jack out and otherwise reapproaches that ICE. The install and
+  rez consumers choose an ICE-protected destination and its approach window.
+  Real optional-choice and Runner run-calculation consumers handle trash and
+  continuation. Run-local calculator persistents bound the possible repeated
+  traversal to one per upgrade and preserve spent credits, clicks, damage,
+  breaker resources and run-duration effects; they refresh no run-start funds.
+  The Corp safety proof does not turn a chance-based Psi outcome into a lockout.
+
+Rules consulted: local Comprehensive Rules v26.03, §§5.4.3–5.4.4 (Terminal
+ends the action phase directly), 10.14.3 (legal bid credit sources, including
+hosted funds) and 10.14.4–10.14.6 (secret bids, payment-source order, no
+checkpoint between bid payments). `PsiGame` defers spend responses until both
+payments finish; focused tests assert that observers see both deductions.
+
+Focused evidence: `tests/downfall-batch9.test.js` drives the real score/play,
+install/rez, click-trigger and option selectors, engine trash/damage/reveal
+flows, known-root/ICE run evaluation, and finite repeat traversal. Negative
+cases include wrong score trigger, no qualifying run/points/credits, wrong
+trash actor/faction, earlier inactive and nested trashes, empty counters,
+prevented damage, repeat-approach expiry, zero-credit bids and insufficient
+same-run payment resources. Required shared format/deck/integration checks
+also pass. Final validation: all **114 full-suite test files pass** on Node
+20.19.0, including Corp decision fixtures and decision snapshots; exit status
+0. Known-red pending reproductions remain excluded. Syntax checks, hook docs,
+agent-script checks and `git diff --check` pass.
+
+Optional optimisation: compare Resonator damage with scoring and economy;
+improve Complete Image play thresholds and public title inference; calibrate
+Saisentan type priors and its conservative two-damage bound; choose Letheia
+bids and trash timing by expected re-encounter/breach value and rank protected
+destinations by actual taxed cost. These are baseline heuristic limitations,
+not missing printed mechanics or deferred required consumers.
+
+Saisentan's subroutine overlays were measured with
+`node scripts/measure-subroutine-visual.js 26044` and checked with the ASCII
+zoom helper: centres 155, 175 and 195, each one printed line (`h: 16`). The
+focused visual regression and measurement audit pass. Initial full validation
+caught these missing overlay fields; they were repaired before final rerun.
+
+
+## Batch 10 — 26047–26051
+
+Implemented and validated 2026-10-22 by Codex. Existing metadata and ELO values
+are preserved: Remastered Edition 1513, Daily Quest 1535, Tiered Subscription
+1478, Congratulations! 1249 and Loot Box 1377.
+
+- Remastered Edition now receives its scored counter through the engine's
+  `responseOnScored`, gated to itself. The counter places on any installed card,
+  including Runner cards; it is placement, not the basic advance action. The
+  Corp AI selects a finishable agenda and saves an unusable counter. The real
+  advancement planner includes scored sources once per plan, without spending
+  real counters or assigning a rez cost.
+- Daily Quest's rez restriction is enforced by the shared `CheckRez` permission
+  consumer, including both the start-of-action and post-action paid windows.
+  Inactive successful-run tracking remembers server identity, including a run
+  before installation or rez. The next Runner turn resets that history. Every
+  success while active pays the Runner two credits; only the last Runner turn's
+  successful runs suppress next Corp-turn income. The dead turn-end hook is
+  removed. Its economy install/rez policy and public Runner run-potential
+  consumer provide baseline use.
+- Tiered Subscription tracks the first run even in HQ or while unrezzed and
+  resets while inactive on either turn. Later rezzing does not create a new
+  first-run opportunity. Economy install and legal pre-run rez consumers work.
+- Congratulations! pays both players the printed subroutine amounts and gains
+  its passing credit independently of whether its subroutine broke. Calculator
+  pass effects and immediate Runner pool-credit gains preserve payment order;
+  income does not become a threatening program-trash or end-the-run effect.
+- Loot Box's first subroutine offers a legal two-credit payment or end-the-run,
+  with compatible temporary credits and a cached-route Runner preference. The
+  second reveals up to three stack cards sequentially to the Corp, who chooses
+  the card added to grip and gains its printed play/install cost. The Runner
+  shuffles even with an empty stack; the ICE then trashes as a preventable
+  effect, not an unpreventable cost. Missing printed costs yield zero. The
+  calculator models the tax and self-trash instead of program destruction;
+  a Letheia repeat cannot charge a resolved Loot Box again. Hypothetical removal
+  stays local and participates in finite-run continuation cache keys. Added
+  grip cards also increase subsequent damage capacity in the run calculator,
+  capped by the public stack count across gifts and continued runs. An empty
+  stack supplies no extra damage capacity.
+
+Focused evidence: `tests/downfall-batch10.test.js` exercises actual Corp install,
+rez and trigger selectors, read-only finite advancement planning, public Runner
+run valuation, live reveal/payment choices, inactive timing, small/empty stacks,
+pool/temporary funding, finite gifted-card damage capacity, order of ICE payments and repeat traversal after
+self-trash. Batches 8–9 and the set integration test also pass. Required shared
+checks pass; the final full suite passes all 115 files on pinned Node 20.19.0,
+including Corp decision fixtures and decision snapshots.
+No browser playtesting or independent strategic review is claimed.
+
+Optional optimisation: compare counter conservation across multiple agenda
+plans; protect Daily Quest while pricing the Runner reward and income denial;
+compare Subscription's pre-run rez opportunity with other commitments; place
+Congratulations! for credit sequencing; choose Loot Box's revealed card using
+Corp income versus the Runner's gifted-card value. The baseline chooses the
+highest printed cost, not the best strategic gift. Hidden stack contents are
+never read during planning.
