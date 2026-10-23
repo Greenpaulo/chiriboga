@@ -4620,7 +4620,62 @@ cardSet[26062] = {
   subTypes: [],
   rezCost: 0,
   trashCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  power: 0,
+  responseOnRez: {
+    Enumerate: function (card) {
+      if (card != this) return [];
+      var max = Math.min(4, AvailableCredits(corp, "using", this));
+      //**AI code: offer only the preferred amount
+      if (corp.AI != null) {
+        var x = Math.min(max, this._AIPreferredCounters());
+        return [{ id: x, label: "Pay " + x + "[c]", button: "Pay " + x }];
+      }
+      var choices = [];
+      for (var i = 0; i <= max; i++)
+        choices.push({ id: i, label: "Pay " + i + "[c]", button: "Pay " + i });
+      return choices;
+    },
+    Resolve: function (params) {
+      var x = params && params.id ? params.id : 0;
+      if (x < 1) return;
+      SpendCredits(corp, x, "using", this, function () {
+        AddCounters(this, "power", x);
+      }, this);
+    },
+    text: "Reduced Service: pay up to 4[c] for power counters",
+  },
+  modifyRunCreditCost: {
+    Resolve: function (server) {
+      return GetServer(this) == server ? 2 * Counters(this, "power") : 0;
+    },
+  },
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      if (server != corp.HQ && server != corp.RnD && server != corp.archives) return;
+      if (Counters(this, "power") > 0) RemoveCounters(this, "power", 1);
+    },
+  },
+  //Counters bought at rez, keeping credits to rez this server's unrezzed ICE.
+  _AIPreferredCounters: function () {
+    var server = GetServer(this);
+    var reserve = 0;
+    if (server) server.ice.forEach(function (ice) { if (!ice.rezzed) reserve += RezCost(ice); });
+    return Math.max(0, Math.min(4, AvailableCredits(corp, "using", this) - reserve));
+  },
+  AIDefensiveValue: function (server) {
+    return server && typeof server.cards == "undefined" && server.ice.length ? 2 : 0;
+  },
+  AILimitPerServer: function () { return 1; },
+  //Rez between runs on the Runner's turn so the tax applies to the next run.
+  AIRezWhenCan: function () {
+    var server = GetServer(this);
+    if (!server || CheckRunning() || playerTurn != runner) return false;
+    var self = this;
+    if (typeof server.cards == "undefined" &&
+        !server.root.some(function (card) { return card != self; })) return false;
+    return this._AIPreferredCounters() > 0;
+  },
 };
 
 //Vulnerability Audit (26063)
@@ -4636,7 +4691,28 @@ cardSet[26063] = {
   subTypes: ["Research"],
   advancementRequirement: 4,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  installedThisTurn: false,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) this.installedThisTurn = true;
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnCorpTurnBegins: {
+    Resolve: function () { this.installedThisTurn = false; },
+    availableWhenInactive: true,
+  },
+  automaticOnRunnerTurnBegins: {
+    Resolve: function () { this.installedThisTurn = false; },
+    availableWhenInactive: true,
+  },
+  modifyCannot: {
+    Resolve: function (str, card) {
+      return str == "score" && card == this && this.installedThisTurn && CheckInstalled(this);
+    },
+    availableWhenInactive: true,
+  },
+  AICannotScoreOnInstallTurn: true,
 };
 
 //CSR Campaign (26064)
@@ -4655,10 +4731,11 @@ cardSet[26064] = {
   responseOnCorpTurnBegins: {
     Enumerate: function () {
       if (!this.rezzed) return [];
-      return [
-        { id: 1, label: "Draw 1 card", button: "Draw 1" },
-        { id: 0, label: "Do not draw", button: "Pass" },
-      ];
+      var drawChoice = { id: 1, label: "Draw 1 card", button: "Draw 1" };
+      var passChoice = { id: 0, label: "Do not draw", button: "Pass" };
+      //**AI code: draw unless it would leave R&D too thin for the mandatory draw
+      if (corp.AI != null) return [corp.RnD.cards.length > 2 ? drawChoice : passChoice];
+      return [drawChoice, passChoice];
     },
     Resolve: function (params) {
       if (params && params.id === 1) {
@@ -4667,6 +4744,18 @@ cardSet[26064] = {
       }
     },
     text: "CSR Campaign: draw 1 card?",
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (corp.RnD.cards.length < 4 || PlayerHand(corp).length > MaxHandSize(corp) - 2) return -1;
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  //Rez at the end of the Runner's turn, just before the first draw trigger.
+  AIRezWhenCan: function () {
+    return currentPhase.identifier == "Runner 2.2" && corp.RnD.cards.length > 2;
   },
 };
 
@@ -4685,15 +4774,14 @@ cardSet[26065] = {
   subTypes: ["Mythic"],
   rezCost: 0,
   strength: 0,
+  //During runs against this server, rez like a non-ice card (CheckRezAsNonIceDuringRun).
+  rezAsNonIceDuringRunsOnServer: true,
+  //Each piece of ice protecting this server, including this one, gets +1 strength.
   modifyStrength: {
     Resolve: function (card) {
-      // Boost all other rezzed ice protecting the same server by +1
-      if (card != this && this.rezzed && CheckCardType(card, ["ice"])) {
-        var rimeServer = GetServer(this);
-        if (rimeServer != null && GetServer(card) == rimeServer) {
-          return 1;
-        }
-      }
+      if (!this.rezzed || !CheckCardType(card, ["ice"])) return 0;
+      var rimeServer = GetServer(this);
+      if (rimeServer != null && rimeServer.ice.includes(card)) return 1;
       return 0;
     },
   },
@@ -4708,7 +4796,11 @@ cardSet[26065] = {
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    result.sr = [[["bankroll"]]]; // minor drain effect
+    result.sr = [[["loseCredits"]]];
     return result;
+  },
+  //Rez as early as possible in a run on this server so every layer gets +1 strength.
+  AIRezWhenCan: function () {
+    return CheckRezAsNonIceDuringRun(this);
   },
 };
