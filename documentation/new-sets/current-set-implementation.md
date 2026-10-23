@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**0 complete, 16 outstanding** (`16 Pending`, `0 In progress`, `0 Blocked`).
+**1 complete, 15 outstanding** (`15 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -52,7 +52,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | ----: | -------- | ------ | --------------- | ------------- |
 | 1 | 26066–26069 | Pending | — | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
 | 2 | 26070–26073 | Pending | — | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
-| 3 | 26074–26078 | Pending | — | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
+| 3 | 26074–26078 | Complete | Claude, 2026-10-23 | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
 | 4 | 26079–26082 | Pending | — | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
 | 5 | 26083–26087 | Pending | — | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
 | 6 | 26088–26092 | Pending | — | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut (three existing, unverified), Paule's Café. Complex. |
@@ -69,10 +69,9 @@ the shared Lockdown mechanic first needed in batch 9.
 
 ## Completion log
 
-No batches completed.
-
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
+| 3 | 26074–26078 | 2026-10-23 | Claude | `tests/uprising-batch3.test.js` (11 real-engine scenarios) | Bravado (distinct passed ice, pays on any run end), Boomerang (chosen ice, trash break 2, delayed heap-to-stack recursion), Mu Safecracker (stealth-only payment, +1 HQ/R&D access), Prognostic Q-Loop (first-run look, once-per-turn reveal/install), Swift (+1 MU, first run event click). No shared engine/AI changes. |
 
 ## Batch-review log
 
@@ -83,11 +82,12 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**0 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**1 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
+| 3 | 26074–26078 | Pending | — | Deeper strategy: Bravado as pure economy when no run is otherwise wanted; Boomerang trash not priced (may be spent where a cheap breaker would do) and target choice vs. future runs; Mu Safecracker always pays, ignoring later stealth-credit needs, and access estimate ignores credits spent breaking earlier in the run; Q-Loop knowledge can survive a stack shuffle that leaves the same card on top, and blind reveals are never used; Swift click gain absent from run-event click planning. See implementation notes. |
 
 ## Optimisation log
 

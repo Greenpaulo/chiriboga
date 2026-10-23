@@ -707,8 +707,48 @@ cardSet[26074] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 3,
+  runningWithThis: false,
+  icePassed: [],
+  Enumerate: function () {
+    return ChoicesExistingServers().filter(function (choice) {
+      return choice.server.ice.length > 0;
+    });
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.runningWithThis = true;
+    this.icePassed = [];
+    MakeRun(params.server);
+  },
+  //Each distinct piece of ice counts once, even if passed again during the run.
+  responseOnPassesIce: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      var ice = attackedServer ? attackedServer.ice[approachIce] : null;
+      if (ice && !this.icePassed.includes(ice)) this.icePassed.push(ice);
+    },
+    automatic: true,
+  },
+  //Successful or not, the payout happens when the run ends.
+  responseOnRunEnds: {
+    Resolve: function () {
+      if (!this.runningWithThis) return;
+      var amount = 6 + this.icePassed.length;
+      this.runningWithThis = false;
+      this.icePassed = [];
+      GainCredits(runner, amount, "", this);
+      Log(GetTitle(this) + ": gained " + amount + " credits");
+    },
+    automatic: true,
+  },
+  //AI: economy on any iced server it is already willing to run; it pays out
+  //even if the run fails, plus 1 credit per ice it expects to pass.
+  AIBreachNotRequired: true,
+  AIRunEventExtraPotential: function (server, potential) {
+    if (!server || server.ice.length < 1) return 0;
+    return 0.6 + 0.1 * server.ice.length;
+  },
+  AIWorthKeeping: function () {
+    return true;
   },
 };
 
@@ -725,7 +765,167 @@ cardSet[26075] = {
   cardType: "hardware",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  chosenCard: null,
+  //delayed "when this run ends" ability created by the trash ability
+  boomerangReturnPending: false,
+  boomerangRunSuccessful: false,
+  automaticOnUninstall: {
+    Resolve: function (card) {
+      if (card == this.chosenCard) this.chosenCard = null;
+    },
+  },
+  //When you install this hardware, choose 1 installed piece of ice.
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (card != this) return [];
+      var choices = ChoicesInstalledCards(corp, function (corpCard) {
+        return CheckCardType(corpCard, ["ice"]);
+      });
+      if (choices.length > 0 && runner.AI != null) return [choices[this._aiIceChoice(choices)]];
+      return choices;
+    },
+    Resolve: function (params) {
+      this.chosenCard = params.card;
+      Log("Runner chose " + GetTitle(params.card, true) + " protecting " + ServerName(GetServer(params.card)) + " for Boomerang");
+    },
+    text: "Boomerang: choose 1 installed piece of ice",
+  },
+  abilities: [
+    {
+      text: "[trash]: Break up to 2 subroutines.",
+      alt: "boomerang_break",
+      Enumerate: function () {
+        if (!CheckInstalled(this) || !CheckTrash(this)) return [];
+        if (!CheckEncounter() || !this.chosenCard) return [];
+        if (GetApproachEncounterIce() != this.chosenCard) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        var boomerang = this;
+        Trash(this, false, function () {
+          boomerang.boomerangReturnPending = true;
+          boomerang.boomerangRunSuccessful = false;
+          Break(params.subroutine);
+          var choices = ChoicesEncounteredSubroutines();
+          if (choices.length < 1) return;
+          choices.push({ id: -1, label: "Done", button: "Done" });
+          if (runner.AI != null) choices = [boomerang._aiSecondBreak(choices)];
+          DecisionPhase(
+            runner,
+            choices,
+            function (choice) {
+              if (choice && choice.subroutine) Break(choice.subroutine);
+            },
+            "Boomerang",
+            "Break up to 1 more subroutine",
+            boomerang,
+          );
+        }, this);
+      },
+    },
+  ],
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (this.boomerangReturnPending) this.boomerangRunSuccessful = true;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnRunEnds: {
+    Enumerate: function () {
+      if (!this.boomerangReturnPending || !this.boomerangRunSuccessful) return [];
+      if (!this._heapCopy()) return [];
+      var choices = [
+        { use: true, label: "Shuffle 1 copy of Boomerang from your heap into your stack", button: "Shuffle" },
+        { use: false, label: "Leave Boomerang in your heap", button: "Continue" },
+      ];
+      if (runner.AI != null) return [choices[0]];
+      return choices;
+    },
+    Resolve: function (params) {
+      this.boomerangReturnPending = false;
+      this.boomerangRunSuccessful = false;
+      if (!params.use) return;
+      var copy = this._heapCopy();
+      if (!copy) return;
+      MoveCard(copy, runner.stack);
+      Shuffle(runner.stack);
+      Log("Boomerang shuffled from the heap into the stack");
+    },
+    text: "Boomerang: you may shuffle 1 copy from your heap into your stack",
+    availableWhenInactive: true,
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      this.boomerangReturnPending = false;
+      this.boomerangRunSuccessful = false;
+    },
+    availableWhenInactive: true,
+  },
+  _heapCopy: function () {
+    if (runner.heap.includes(this)) return this;
+    for (var i = 0; i < runner.heap.length; i++) {
+      if (runner.heap[i].title == this.title) return runner.heap[i];
+    }
+    return null;
+  },
+  //AI: choose the most threatening rezzed ice on the server it is about to run,
+  //otherwise the most threatening ice overall.
+  _aiIceChoice: function (choices) {
+    var target = null;
+    var server = runner.AI.cachedPathServer || null;
+    if (server && server.ice.length > 0) {
+      var best = -1;
+      for (var i = 0; i < server.ice.length; i++) {
+        var score = runner.AI._iceThreatScore(server.ice[i]);
+        if (score > best) {
+          best = score;
+          target = server.ice[i];
+        }
+      }
+    }
+    if (!target) target = runner.AI._highestThreatScoreIcePermitExcludedIce();
+    for (var j = 0; j < choices.length; j++) {
+      if (choices[j].card == target) return j;
+    }
+    return 0;
+  },
+  //AI: break the next subroutine its planned path assigned to Boomerang, else the first unbroken one.
+  _aiSecondBreak: function (choices) {
+    var path = runner.AI.cachedBestPath || [];
+    var ice = GetApproachEncounterIce();
+    for (var i = 0; i < path.length; i++) {
+      if (path[i].iceIdx != approachIce) continue;
+      for (var j = 0; j < path[i].sr_broken.length; j++) {
+        if (path[i].sr_broken[j].use != this) continue;
+        var sr = ice ? ice.subroutines[path[i].sr_broken[j].idx] : null;
+        for (var k = 0; k < choices.length; k++) {
+          if (sr && choices[k].subroutine == sr) return choices[k];
+        }
+      }
+    }
+    return choices[0];
+  },
+  //Run calculator: a free, one-use break of up to 2 subroutines on the chosen ice.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (!this.chosenCard || iceAI.ice != this.chosenCard) return result;
+    for (var i = 0; i < point.sr_broken.length; i++) {
+      if (point.sr_broken[i].use == this) return result;
+    }
+    return result.concat(rc.SrBreak(this, iceAI, point, 2)).concat(rc.SrBreak(this, iceAI, point, 1));
+  },
+  //Install before running a server with rezzed ice no installed breaker matches.
+  AIInstallBeforeRun: function (server) {
+    if (!server || server.ice.length < 1) return 0;
+    for (var i = 0; i < server.ice.length; i++) {
+      if (server.ice[i].rezzed && !runner.AI._matchingBreakerInstalled(server.ice[i])) return 1;
+    }
+    return 0;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Mu Safecracker (26076)
@@ -742,7 +942,116 @@ cardSet[26076] = {
   cardType: "hardware",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  additionalAccessServer: null,
+  //Stealth cards whose hosted credits may pay for this hardware. A stealth
+  //card without canUseCredits (Cloak) has its own, narrower restriction.
+  _stealthCreditCards: function () {
+    var mu = this;
+    return InstalledCards(runner).filter(function (card) {
+      return CheckSubType(card, "Stealth") && (card.credits || 0) > 0 &&
+        typeof card.canUseCredits === "function" && card.canUseCredits("using", mu);
+    });
+  },
+  _stealthCredits: function () {
+    return this._stealthCreditCards().reduce(function (sum, card) {
+      return sum + card.credits;
+    }, 0);
+  },
+  _cost: function (server) {
+    if (server == corp.HQ) return 1;
+    if (server == corp.RnD) return 2;
+    return 0;
+  },
+  //Pay from stealth cards only, one source at a time.
+  _payStealth: function (amount, afterPay) {
+    var mu = this;
+    if (amount < 1) {
+      afterPay.call(mu);
+      return;
+    }
+    var sources = this._stealthCreditCards();
+    if (sources.length < 1) return;
+    var paySource = function (choice) {
+      var source = choice.card;
+      var paid = Math.min(amount, source.credits);
+      SpendHostedCredits(runner, source, paid, function () {
+        mu._payStealth(amount - paid, afterPay);
+      }, mu);
+    };
+    var choices = ChoicesArrayCards(sources);
+    if (choices.length == 1 || runner.AI != null) paySource(choices[0]);
+    else
+      DecisionPhase(runner, choices, paySource, "Mu Safecracker",
+        "Choose a stealth card to spend credits from", mu);
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      var cost = this._cost(attackedServer);
+      if (cost < 1 || this._stealthCredits() < cost) return [];
+      var choices = [
+        { use: true, label: "Pay " + cost + " stealth credit" + (cost > 1 ? "s" : "") + " to access 1 additional card", button: "Pay" },
+        { use: false, label: "Do not pay", button: "Continue" },
+      ];
+      if (runner.AI != null) return [choices[0]];
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params.use) return;
+      var server = attackedServer;
+      this._payStealth(this._cost(server), function () {
+        this.additionalAccessServer = server;
+        Log("Mu Safecracker: access 1 additional card when breaching " + ServerName(server));
+      });
+    },
+    text: "Mu Safecracker: pay stealth credits to access 1 additional card?",
+  },
+  modifyBreachAccess: {
+    Resolve: function () {
+      if (this.additionalAccessServer && this.additionalAccessServer == attackedServer) return 1;
+      return 0;
+    },
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.additionalAccessServer = null;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //Public stealth credits available on the next breach; recurring credits refill
+  //when the Runner's turn begins, so outside it report the refilled amount.
+  _aiStealthCreditsForNextRun: function () {
+    var mu = this;
+    var refill = playerTurn != runner;
+    return InstalledCards(runner).reduce(function (sum, card) {
+      if (!CheckSubType(card, "Stealth") || typeof card.canUseCredits !== "function") return sum;
+      if (!card.canUseCredits("using", mu)) return sum;
+      var credits = card.credits || 0;
+      if (refill && typeof card.recurringCredits === "number") credits = Math.max(credits, card.recurringCredits);
+      return sum + credits;
+    }, 0);
+  },
+  AIAdditionalAccess: function (server) {
+    var cost = this._cost(server);
+    if (cost < 1 || this._stealthCredits() < cost) return 0;
+    return 1;
+  },
+  AICentralPressure: function (server) {
+    var cost = this._cost(server);
+    if (cost < 1 || this._aiStealthCreditsForNextRun() < cost) return {};
+    return { additionalAccess: 1 };
+  },
+  AIInstallBeforeRun: function (server) {
+    var cost = this._cost(server);
+    if (cost < 1 || this._stealthCredits() < cost) return 0;
+    return 1;
+  },
+  AIWorthKeeping: function () {
+    return InstalledCards(runner).some(function (card) {
+      return CheckSubType(card, "Stealth");
+    });
+  },
 };
 
 //Prognostic Q-Loop (26077)
@@ -758,7 +1067,135 @@ cardSet[26077] = {
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  usedThisTurn: false,
+  //"First time each turn" counts runs begun before this was installed too.
+  runBeganThisTurn: false,
+  lookPending: false,
+  lookedAt: [],
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.runBeganThisTurn = false;
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.runBeganThisTurn = false;
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnRunBegins: {
+    Resolve: function () {
+      this.lookPending = !this.runBeganThisTurn && CheckActive(this) && CheckHasAbilities(this);
+      this.runBeganThisTurn = true;
+    },
+    availableWhenInactive: true,
+  },
+  responseOnRunBegins: {
+    Enumerate: function () {
+      if (!this.lookPending || runner.stack.length < 1) return [];
+      var choices = [
+        { use: true, label: "Look at the top 2 cards of your stack", button: "Look" },
+        { use: false, label: "Do not look", button: "Continue" },
+      ];
+      //looking is free information
+      if (runner.AI != null) return [choices[0]];
+      return choices;
+    },
+    Resolve: function (params) {
+      this.lookPending = false;
+      if (!params.use) return;
+      //the top of the stack is the end of the array
+      var top = runner.stack.slice(-2).reverse();
+      for (var i = 0; i < top.length; i++) top[i].knownToRunner = true;
+      this.lookedAt = top;
+      Log("Runner looked at the top " + top.length + " card" + (top.length > 1 ? "s" : "") + " of the stack");
+      if (runner.AI != null) return;
+      var label = "Top: " + GetTitle(top[0]) + (top.length > 1 ? "; next: " + GetTitle(top[1]) : "");
+      DecisionPhase(runner, [{ id: 0, label: label, button: "Continue" }], function () {},
+        "Prognostic Q-Loop", label, this);
+    },
+    text: "Prognostic Q-Loop: you may look at the top 2 cards of your stack",
+  },
+  abilities: [
+    {
+      text: "1[c]: Reveal the top card of your stack. If it is a program or hardware, you may install it.",
+      alt: "qloop_reveal",
+      Enumerate: function () {
+        if (!CheckInstalled(this) || this.usedThisTurn) return [];
+        if (runner.stack.length < 1) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        var qloop = this;
+        this.usedThisTurn = true;
+        SpendCredits(runner, 1, "using", this, function () {
+          qloop._revealTop();
+        }, this);
+      },
+    },
+  ],
+  _revealTop: function () {
+    var qloop = this;
+    var top = runner.stack[runner.stack.length - 1];
+    if (!top) return;
+    Reveal(top, function () {
+      top.knownToRunner = true;
+      if (!CheckCardType(top, ["program", "hardware"])) return;
+      var choices = ChoicesCardInstall(top);
+      if (choices.length < 1) {
+        Log(GetTitle(top) + " cannot be installed");
+        return;
+      }
+      choices.push({ card: null, label: "Do not install", button: "Continue" });
+      if (runner.AI != null) choices = [qloop._aiInstallTarget() == top ? qloop._aiInstallChoice(choices) : choices[choices.length - 1]];
+      DecisionPhase(
+        runner,
+        choices,
+        function (choice) {
+          if (!choice || !choice.card || runner.stack[runner.stack.length - 1] != choice.card) return;
+          Install(choice.card, choice.host || null, false, null, true);
+        },
+        "Prognostic Q-Loop",
+        "You may install " + GetTitle(top),
+        qloop,
+      );
+    }, this);
+  },
+  _aiInstallChoice: function (choices) {
+    var card = choices[0].card;
+    if (typeof card.AIPreferredInstallChoice == "function") {
+      var index = card.AIPreferredInstallChoice(choices.slice(0, -1));
+      if (index > -1 && index < choices.length - 1) return choices[index];
+    }
+    return choices[0];
+  },
+  //AI: the known top card, if it is a program or hardware worth installing now
+  //and the Runner can pay this ability and its install cost.
+  _aiInstallTarget: function () {
+    var top = runner.stack[runner.stack.length - 1];
+    if (!top || !top.knownToRunner || !this.lookedAt.includes(top)) return null;
+    if (!CheckCardType(top, ["program", "hardware"])) return null;
+    if (AvailableCredits(runner) < 1 + InstallCost(top)) return null;
+    if (!runner.AI || !runner.AI._commonCardToInstallChecks(top, true)) return null;
+    return top;
+  },
+  AIDrawTrigger: 2,
+  AIWouldTrigger: function () {
+    return this._aiInstallTarget() !== null;
+  },
+  AIDrawInstall: function () {
+    return 1;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //Swift (26078)
@@ -775,7 +1212,51 @@ cardSet[26078] = {
   cardType: "hardware",
   subTypes: ["Console", "Vehicle"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  //"First time each turn" counts run events played before this was installed too.
+  playedRunEventThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.playedRunEventThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.playedRunEventThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnPlay: {
+    Resolve: function (card) {
+      if (card.player != runner || !CheckCardType(card, ["event"]) || !CheckSubType(card, "Run")) return;
+      if (this.playedRunEventThisTurn) return;
+      this.playedRunEventThisTurn = true;
+      if (CheckActive(this) && CheckHasAbilities(this)) {
+        GainClicks(runner, 1);
+        Log(GetTitle(this) + ": gained [click]");
+      }
+    },
+    availableWhenInactive: true,
+  },
+  AIWastefulToInstall: function () {
+    return InstalledCards(runner).some(function (card) {
+      return CheckSubType(card, "Console");
+    });
+  },
+  AIEconomyInstall: function () {
+    if (this.AIWastefulToInstall()) return 0;
+    var runEvents = runner.grip.filter(function (card) {
+      return CheckCardType(card, ["event"]) && CheckSubType(card, "Run");
+    }).length;
+    return runEvents > 0 ? 2 : 1;
+  },
+  AIWorthKeeping: function () {
+    return !this.AIWastefulToInstall();
+  },
 };
 
 //Afterimage (26079)

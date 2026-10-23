@@ -53,4 +53,34 @@ and need a shared design in the first batch that meets them:
 
 ## Batch notes
 
-No batches implemented yet.
+### Batch 3 (26074–26078) — Criminal
+
+No shared engine or AI helper changes; all logic is on the five cards. Tests:
+`tests/uprising-batch3.test.js` (real engine, human menus and both AIs).
+
+- **Bravado**: only servers with ice are offered. `responseOnPassesIce` records
+  each distinct passed ice (ruling: a piece passed twice counts once); the
+  automatic `responseOnRunEnds` pays 6 + that count whether or not the run was
+  successful. Unrezzed ice the Corp does not rez is passed and counts.
+- **Boomerang**: the install response chooses any installed ice (rezzed or not);
+  the chosen ice is cleared if it is uninstalled. `[trash]` breaks 1 subroutine,
+  then offers an optional second. The trash ability creates a delayed
+  "when this run ends" ability, kept as flags read by `availableWhenInactive`
+  `responseOnRunSuccessful`/`responseOnRunEnds` on the trashed card and cleared in
+  `automaticOnRunEndCleanup`. It shuffles any heap copy (this one first).
+- **Mu Safecracker**: credits come only from installed stealth cards that define
+  `canUseCredits("using", mu)` and allow it (for example Mantle). Cloak is excluded because its credit is for icebreakers
+  only; Penumbral Toolkit (batch 4) qualifies only once it defines
+  `canUseCredits`. Payment uses `SpendHostedCredits` source by source, never the
+  pool. The offer is a `responseOnRunSuccessful` choice; `modifyBreachAccess` adds
+  1 on that server’s breach, cleared when the run ends.
+- **Prognostic Q-Loop**: "first time each turn a run begins" is tracked while
+  inactive too, so a run begun before installation uses it up. The look is an
+  optional `responseOnRunBegins` choice; looked-at cards get `knownToRunner`. The
+  once-per-turn ability pays 1, reveals the top card and offers installing a
+  program or hardware at its normal cost.
+- **Swift**: `memoryUnits: 1`; the first-run-event flag uses its own name
+  (`usedThisTurn` is reset when a card changes zones) and is tracked while
+  inactive, matching Ken Tenma/Touchstone.
+- Test harness note: test-instanced cards need
+  `InvalidateActiveTriggerCandidateCache()` for `modify*` callbacks to be seen.
