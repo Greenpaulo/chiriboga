@@ -210,7 +210,8 @@ async function playJob(job) {
     runnerOptions: job.runnerOptions, securityCache: job.securityCache,
     realizedDefenseSnapshot: job.collectors.includes('realizedIceByRootType') && job.defenseObserver !== 'off',
     defenseObserver: job.defenseObserver,
-    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), securitySnapshot: job.collectors.includes('securityCalibration'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
+    evaluatorTelemetry: job.collectors.includes('evaluatorCallCount'), securitySnapshot: job.collectors.includes('securityCalibration'),
+    remoteAgendaSnapshot: job.collectors.includes('remoteAgendaRisk'), telemetry: true, observe: true, onEvent, testOption: process.env.AI_BATCH_TEST_OPTION,
   });
   const ok = Boolean(game.winner) && !game.errors.length;
   const record = {fixtureId: job.fixtureId, deckPairId: job.deckPairId, seed: job.seed, ok,

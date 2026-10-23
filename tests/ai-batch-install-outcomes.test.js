@@ -212,6 +212,26 @@ test('I4 agendaCommitment counts idle installed agendas and HQ holds with a free
     ['agendaCommitment.hqHoldTurns', 'agendaCommitment.idleAgendaTurns']);
 });
 
+test('I4 remoteAgendaRisk pools steal rates by ICE count and counters', () => {
+  const c = collector('remoteAgendaRisk');
+  const row = (iceCount, counters, stolen, bucket = '0..1') =>
+    ({serverName: 'Remote 0', iceCount, rezzedIce: 0, counters, points: 2, bucket, stolen});
+  const games = [[row(0, 0, true), row(1, 2, false)], [row(1, 0, false), row(3, 1, true, '>=10')]].map(servers => {
+    const state = {};
+    c.onEvent({type: 'gameStart'}, state);
+    servers.forEach((server, turn) => c.onEvent({type: 'remoteAgendaTurn', turn, servers: [server]}, state));
+    return state;
+  });
+  assert.deepStrictEqual(c.finish(games[0]), {turns: 2, stolen: 1});
+  const out = c.summarize(games.map(c.samples));
+  assert.deepStrictEqual(Object.fromEntries(Object.entries(out.byIceAndCounters).map(([k, v]) => [k, [v.turns, v.stolen, v.games]])),
+    {'0 ice / 0 counters': [1, 1, 1], '1 ice / 0 counters': [1, 0, 1], '1 ice / 1+ counters': [1, 0, 1],
+      '2+ ice / 1+ counters': [1, 1, 1]});
+  assert.deepStrictEqual(Object.keys(out.byBucket), ['0..1', '>=10']);
+  const [low, high] = c._test.wilson(5, 50);
+  assert.ok(low > 0.04 && low < 0.05 && high > 0.21 && high < 0.22);
+});
+
 test('turn collectors count runs, insolvency, stalls and credits left', () => {
   const out = play(g => {
     g.corpTurn({credits: 0, hand: [{cardType: 'ice', playCost: null}], unrezzedIceRezCosts: []}); // insolvent, able

@@ -96,6 +96,30 @@ collector on scripted boards (idle, advanced, scored, held with and without
 a free remote). Reproduction: `tests/fixtures/corp-decisions-pending/corp-agenda-held-while-secure-remote-available.txt`
 stays pending for I4.1.
 
+**Remote agenda steal risk (measured 2026-10-23, passive).** Collector
+`remoteAgendaRisk`; current defaults, 7 pairs × seeds 3001-4000 (7000 games,
+none failed; log and decision hashes unchanged by the collector). One row per
+remote holding an agenda at the start of a Runner turn; rate = stolen that turn.
+Intervals: Wilson; game-resampled intervals agree.
+
+| ICE | Counters | Server-turns | Stolen | Rate [95%] |
+|---|---|---|---|---|
+| 0 | 0 | 382 | 45 | 0.118 [0.089, 0.154] |
+| 0 | 1+ | 47 | 43 | 0.915 [0.801, 0.966] |
+| 1 | 0 | 12329 | 1061 | 0.086 [0.081, 0.091] |
+| 1 | 1+ | 8051 | 2721 | 0.338 [0.328, 0.348] |
+| 2+ | 0 | 9044 | 822 | 0.091 [0.085, 0.097] |
+| 2+ | 1+ | 6181 | 1631 | 0.264 [0.253, 0.275] |
+
+Counters, not ICE count, drive the risk: at margin ≥10 a one-ICE remote is
+0.115 with no counters and 0.592 with counters (I2's single row: 0.269);
+at 5..9, 0.095 against 0.433 (I2: 0.242). With no counters, one and 2+ ICE
+do not differ (0.086, 0.091); with counters, 2+ ICE is lower only at
+margins ≥5 (0.344/0.442 against 0.433/0.592). Margin still orders risk
+within each counter row (1 ICE, 1+ counters: 0.060 at -3..-1 to 0.592 at
+≥10). Observational: the current policy chooses which agendas carry counters
+into a Runner turn. Full cells: `batchDiagnostics.remoteAgendaRisk` of the run.
+
 **Left open:** the full gate (owner); I4.1; the owner playtest before any
 default change.
 

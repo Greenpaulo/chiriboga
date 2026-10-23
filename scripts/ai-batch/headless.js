@@ -162,7 +162,8 @@ function createSecuritySignature() {
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
 //   testOption (a no-op Corp option name, for the harness's own tests),
-//   securitySnapshot (L9.0: emit 'securitySnapshot' once per Runner turn)}
+//   securitySnapshot (L9.0: emit 'securitySnapshot' once per Runner turn),
+//   remoteAgendaSnapshot (I4: emit 'remoteAgendaTurn' at each Runner turn's end)}
 // Resolves to a summary: {winner, reason, turns, ms, steps, corpPoints,
 //   runnerPoints, logLines, logHash, errors, tail, log (with fullLog), report}.
 function playGame(options) {
@@ -299,6 +300,7 @@ function playGame(options) {
     observe();
     result = {winner: player === context.corp ? 'corp' : 'runner', reason};
     if (seen.run) { emitRun(); seen.run = null; }
+    closeRemoteAgendaTurn();
     if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), true);
     emit('gameEnd', {winner: result.winner, reason, turns: Math.ceil(turns / 2), corpCredits: run('corp.creditPool')});
     setImmediate(done);
@@ -329,6 +331,32 @@ function playGame(options) {
         iceCount: s.ice.length, publicThreatRisk: r.publicThreatRisk, approachDefense: !!r.approachDefense,
         signature: __securitySignature(s)};
     })`)));
+  // I4: every remote holding an installed agenda when the Runner's turn
+  // begins (same moment as securitySnapshot), with its public ICE, rezzed ICE,
+  // the most advancement counters on an agenda there and I2's margin bucket.
+  // The agendas are kept by identity so the turn's end can say whether one
+  // was stolen. Read through the uncached evaluator, as securitySnapshot is.
+  const remoteAgendaRows = () => run(`corp.remoteServers.filter(function (s) {
+      return s.root.some(function (c) { return c.cardType == "agenda"; });
+    }).map(function (s) {
+      var agendas = s.root.filter(function (c) { return c.cardType == "agenda"; });
+      var m = corp.AI._breachMargin(s, corp.AI._evaluateServerSecurityUncached(s));
+      return {serverName: s.serverName, agendas: agendas, iceCount: s.ice.length,
+        rezzedIce: s.ice.filter(function (c) { return c.rezzed; }).length,
+        counters: Math.max.apply(null, agendas.map(function (c) { return Number(c.advancement) || 0; })),
+        points: Math.max.apply(null, agendas.map(function (c) { return c.agendaPoints || 0; })),
+        bucket: corp.AI._breachMarginBucket(m.margin)};
+    })`);
+  let remoteAgendaTurn = null;
+  const closeRemoteAgendaTurn = () => {
+    if (!remoteAgendaTurn) return;
+    const stolen = new Set(run('runner.scoreArea'));
+    emit('remoteAgendaTurn', {turn: remoteAgendaTurn.turn, servers: remoteAgendaTurn.rows.map(row => ({
+      serverName: row.serverName, iceCount: row.iceCount, rezzedIce: row.rezzedIce, counters: row.counters,
+      points: row.points, bucket: row.bucket, stolen: row.agendas.some(card => stolen.has(card))}))});
+    remoteAgendaTurn = null;
+  };
+  let remoteAgendaPending = false;
   let snapshotPending = false;
   let defenseSnapshotPending = false;
   context.__stop = () => {
@@ -336,17 +364,23 @@ function playGame(options) {
     observe();
     const side = run('playerTurn === corp ? "corp" : "runner"');
     if (side !== lastTurn) {
+      if (lastTurn === 'runner') closeRemoteAgendaTurn();
       if (lastTurn && (lastTurn !== 'corp' || !options.observe)) emit('turnEnd', {side: lastTurn, turn: Math.ceil(turns / 2)});
       lastTurn = side; turns++;
       if (options.observe) emit('turnStart', side === 'corp' ? {side, turn: Math.ceil(turns / 2), corp: corpTurnState()} :
         {side, turn: Math.ceil(turns / 2)});
       snapshotPending = Boolean(options.securitySnapshot) && side === 'runner';
+      remoteAgendaPending = Boolean(options.remoteAgendaSnapshot) && side === 'runner';
       defenseSnapshotPending = Boolean(defense) && side === 'runner';
     }
     // The Runner's clicks are granted after its turn begins.
     if (snapshotPending && !seen.run && run('runner.clickTracker') > 0) {
       snapshotPending = false;
       emit('securitySnapshot', {turn: Math.ceil(turns / 2), servers: securitySnapshot()});
+    }
+    if (remoteAgendaPending && !seen.run && run('runner.clickTracker') > 0) {
+      remoteAgendaPending = false;
+      remoteAgendaTurn = {turn: Math.ceil(turns / 2), rows: remoteAgendaRows()};
     }
     // F12 observes settled turn-begin responses, immediately before the first
     // action. Granted clicks alone can still be inside a turn-begin response.
