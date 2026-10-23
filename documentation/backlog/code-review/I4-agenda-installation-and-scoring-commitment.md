@@ -967,7 +967,7 @@ game-losing steals stay lexicographic rules.
 
 F4 gate. A new option (named in the Resolution), off in the baseline and on
 in the candidate; both arms with I4's adopted options. Committed deck pool,
-paired seeds 8001–9000 (1,000 games per deck pair; unused by earlier gates),
+paired seeds 7001–8000, the same games as part 1's gate (superseded by the Handoff commands; 1,000 games per deck pair),
 bootstrap 95% intervals. Collectors: `installOutcomes`, `stallTurns`,
 `corpInsolventTurns`, `agendaCommitment`, `strandedUnrezzedIceCost`,
 `bluffSingleVariableCorrelation`, `realizedIceByRootType`, and the exposure
@@ -990,7 +990,7 @@ Starts: none; every pool game reaches agenda decisions.
 | Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
 | Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
 
-Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option <option>=true --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 8001-9000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaDestinationPlan=true --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
 
 The baseline arm assumes I4's `agendaCommitmentPlan` is adopted; if it is
 not, drop that option from both arms before the run.
