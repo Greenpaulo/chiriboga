@@ -1596,6 +1596,7 @@ cardSet[26015] = {
 // [trash], X hosted power counters: Derez the ice you are encountering if its strength is X or less. Take 1 tag.
 cardSet[26017] = {
   title: "“Baklan” Bochkin",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1448,
   imageFile: "26017.png",
   player: runner,

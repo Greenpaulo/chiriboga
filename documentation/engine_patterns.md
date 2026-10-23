@@ -237,6 +237,12 @@ while its card is in HQ, even though the card is inactive there. Its enumeration
 must check HQ location, action-click legality, credit/trash costs and targets.
 The flag does not make other abilities on the card active.
 
+`TriggerAbility` fires `automaticOnAbilityUsed(card, ability)` on active cards
+(and on cards whose hook sets `availableWhenInactive`) after the ability's
+choice is confirmed and before its `Resolve` runs. The Back (26082) uses it to
+count the first hardware use during a run each turn. It covers paid abilities
+used through the trigger command, not optional `responseOn*` triggers.
+
 ### canBeRezzed (conditional)
 
 `CheckRez` consumes this rules permission for both humans and AI.
@@ -368,7 +374,12 @@ InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)
 ChoicesHandInstall(player, filterFn)
+HasTrashAbility(card) // true for trashAbility: true, or an ability text naming [trash]
 ```
+
+Cards whose [trash] ability is not named in an `abilities` text (prevention
+interrupts, or abilities with a different label) declare `trashAbility: true`
+so heap-recursion effects such as The Back can find them.
 
 ### Decisions
 

@@ -1827,15 +1827,224 @@ cardSet[26079] = {
   memoryCost: 1,
   strength: 2,
   strengthBoost: 0,
+  bypassUsedThisTurn: false,
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
       return 0;
     },
   },
+  // Installed stealth cards whose hosted credits can pay this program's abilities.
+  _stealthCreditCards: function () {
+    var afterimage = this;
+    return InstalledCards(runner).filter(function (card) {
+      if (!CheckSubType(card, "Stealth") || (card.credits || 0) < 1) return false;
+      return typeof card.canUseCredits !== "function" || card.canUseCredits("using", afterimage);
+    });
+  },
+  _stealthCredits: function () {
+    return this._stealthCreditCards().reduce(function (total, card) {
+      return total + card.credits;
+    }, 0);
+  },
+  // Pay amount credits from stealth cards one source at a time, then call done.
+  _payStealthCredits: function (amount, done) {
+    var self = this;
+    if (amount < 1) {
+      done.call(self);
+      return;
+    }
+    var sources = this._stealthCreditCards();
+    if (sources.length < 1) return;
+    var payFrom = function (source) {
+      if (!source || source.credits < 1) return;
+      var spend = Math.min(amount, source.credits);
+      SpendHostedCredits(runner, source, spend, function () {
+        self._payStealthCredits(amount - spend, done);
+      }, self);
+    };
+    if (sources.length == 1 || runner.AI) {
+      payFrom(sources[0]);
+      return;
+    }
+    DecisionPhase(
+      runner,
+      ChoicesArrayCards(sources),
+      function (params) {
+        payFrom(params.card);
+      },
+      "Afterimage",
+      "Select a Stealth card to spend credits from:",
+      self,
+    );
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.bypassUsedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.bypassUsedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //Once per turn → When you encounter a sentry, you may pay 2[c] (stealth only) to bypass it.
+  responseOnEncounter: {
+    Enumerate: function (card) {
+      if (this.bypassUsedThisTurn) return [];
+      if (!card || !CheckSubType(card, "Sentry")) return [];
+      if (this._stealthCredits() < 2) return [];
+      return [
+        { id: 0, label: "2[c] (stealth): Bypass", button: "2[c]: Bypass", alt: "afterimage_bypass" },
+        { id: 1, label: "Continue", button: "Continue", alt: "continue" },
+      ];
+    },
+    Resolve: function (params) {
+      if (params.id != 0) return;
+      this.bypassUsedThisTurn = true;
+      this._payStealthCredits(2, function () {
+        Bypass();
+      });
+    },
+    text: "Afterimage: pay 2[c] from stealth cards to bypass",
+  },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "1[c]: Break up to 2 sentry subroutines.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          1,
+          "using",
+          this,
+          function () {
+            Break(params.subroutine);
+            var choices = ChoicesEncounteredSubroutines();
+            if (choices.length < 1) return;
+            for (var i = 0; i < choices.length; i++) {
+              choices[i].label = "(Afterimage) Break another subroutine. -> " + choices[i].label;
+            }
+            choices.push({ id: choices.length, label: "Continue", button: "Continue" });
+            DecisionPhase(
+              runner,
+              choices,
+              function (params) {
+                if (typeof params.subroutine !== "undefined") Break(params.subroutine);
+              },
+              "Break up to 2 sentry subroutines",
+              "Afterimage",
+              this,
+            );
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "1[c]: +2 strength. (Stealth credits only)",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (this._stealthCreditCards().length < 1) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        this._payStealthCredits(1, function () {
+          BoostStrength(this, 2);
+        });
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  // Stealth credits for a prospective run on server (run-only sources such as
+  // Penumbral Toolkit answer in that context). Read-only.
+  _AIStealthCredits: function (server) {
+    var self = this;
+    if (!server || typeof AIWithRunContext != "function") return this._stealthCredits();
+    return AIWithRunContext(server, function () {
+      return self._stealthCredits();
+    });
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (!iceAI.subTypes.includes("Sentry")) return result;
+    if (cardStrength >= iceStrength) {
+      //pump unavailable here (Infinity); 1[c] breaks up to 2
+      return result.concat(
+        rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Sentry"], Infinity, 0, 1, 2, creditsLeft),
+      );
+    }
+    //+2 strength paid only from stealth credits (shared restricted-spend accounting with Corsair)
+    if (rc._poolOnly) return result;
+    var spent = (point.restrictedCreditsSpent || 0) + (rc._restrictedCreditsUsed || 0);
+    if (spent + 1 > this._AIStealthCredits(server)) return result;
+    var boost = rc.StrModify(this, this, point, 2, false);
+    boost.runner_credits_spent += 1;
+    boost.restrictedCreditsSpent = (point.restrictedCreditsSpent || 0) + 1;
+    boost.restrictedCreditsPaid = Math.min(boost.restrictedCreditsSpent, rc._restrictedStealthCredits || 0);
+    if (creditsLeft - 1 + boost.restrictedCreditsPaid - (point.restrictedCreditsPaid || 0) < 0) return result;
+    result.push(boost);
+    return result;
+  },
+  //Stealth-paid bypass of one sentry per turn; once per path, 2 restricted credits.
+  AIEncounterOptions: function (iceIdx, iceAI, point, rc) {
+    if (this.bypassUsedThisTurn || !iceAI || !iceAI.subTypes.includes("Sentry")) return [];
+    if (rc && rc._poolOnly) return [];
+    var self = this;
+    if (point && point.persistents.some(function (p) { return p.use == self && p.action == "bypass"; })) return [];
+    var spent = (point ? point.restrictedCreditsSpent || 0 : 0) + (rc ? rc._restrictedCreditsUsed || 0 : 0);
+    if (spent + 2 > this._AIStealthCredits(GetServer(iceAI.ice))) return [];
+    return [{
+      effects: [],
+      persistents: [{ use: this, target: iceAI.ice, iceIdx: iceIdx, action: "bypass", alt: "afterimage_bypass", restrictedCredits: 2 }],
+    }];
+  },
+  AIRunRestrictedCredits: function (server) {
+    var self = this;
+    var count = function () {
+      return self._stealthCreditCards().reduce(function (total, card) {
+        // Generic run sources (AIRunPoolCreditOffset) are already in the route budget.
+        if (typeof card.AIRunPoolCreditOffset == "function") return total;
+        return typeof card.canUseCredits == "function" && card.canUseCredits("", null) ? total : total + card.credits;
+      }, 0);
+    };
+    return count();
+  },
+  //Corp security: one sentry per turn can be bypassed while 2 public stealth credits remain.
+  AIBypassesOneIce: function (iceCard, server) {
+    if (this.bypassUsedThisTurn || !iceCard || !CheckSubType(iceCard, "Sentry")) return false;
+    return this._AIStealthCredits(server) >= 2;
+  },
+  AIMatchingBreakerInstalled: function (iceCard, effectiveSubTypes) {
+    return (effectiveSubTypes || iceCard.subTypes || []).includes("Sentry") ? this : null;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Killer")) return spareMU >= 2;
+    }
+    return true;
+  },
 };
 
 //Makler (26080)
@@ -1855,15 +2064,141 @@ cardSet[26080] = {
   memoryCost: 1,
   strength: 2,
   strengthBoost: 0,
+  hasFullyBrokenThisTurn: false,
+  brokenThisEncounter: [],
   modifyStrength: {
     Resolve: function (card) {
       if (card == this) return this.strengthBoost;
       return 0;
     },
   },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.hasFullyBrokenThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.hasFullyBrokenThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnEncounter: {
+    Resolve: function () {
+      this.brokenThisEncounter = [];
+    },
+  },
+  _break: function (subroutine) {
+    this.brokenThisEncounter = this.brokenThisEncounter.concat([subroutine]);
+    Break(subroutine);
+  },
+  //Fully breaks only if this program broke every subroutine (CR 6.5.7b).
+  _checkFullyBroken: function () {
+    if (this.hasFullyBrokenThisTurn || !CheckEncounter()) return;
+    var ice = attackedServer.ice[approachIce];
+    var self = this;
+    if (!ice || !ice.subroutines || ice.subroutines.length < 1) return;
+    var all = ice.subroutines.every(function (sr) {
+      return sr.broken && self.brokenThisEncounter.includes(sr);
+    });
+    if (!all) return;
+    this.hasFullyBrokenThisTurn = true;
+    Log(GetTitle(this) + " fully broke " + GetTitle(ice) + ", gaining 1[c]");
+    GainCredits(runner, 1, "", this);
+  },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "2[c]: Break up to 2 barrier subroutines.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            this._break(params.subroutine);
+            var choices = ChoicesEncounteredSubroutines();
+            if (choices.length < 1) {
+              this._checkFullyBroken();
+              return;
+            }
+            for (var i = 0; i < choices.length; i++) {
+              choices[i].label = "(Makler) Break another subroutine. -> " + choices[i].label;
+            }
+            choices.push({ id: choices.length, label: "Continue", button: "Continue" });
+            DecisionPhase(
+              runner,
+              choices,
+              function (params) {
+                if (typeof params.subroutine !== "undefined") this._break(params.subroutine);
+                this._checkFullyBroken();
+              },
+              "Break up to 2 barrier subroutines",
+              "Makler",
+              this,
+            );
+          },
+          this,
+        );
+      },
+    },
+    {
+      text: "2[c]: +2 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendCredits(
+          runner,
+          2,
+          "using",
+          this,
+          function () {
+            BoostStrength(this, 2);
+          },
+          this,
+        );
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+      this.brokenThisEncounter = [];
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    //cost to str, amt to str, cost to brk, amt to brk
+    return result.concat(
+      rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Barrier"], 2, 2, 2, 2, creditsLeft),
+    );
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Fracter")) return spareMU >= 2;
+    }
+    return true;
+  },
 };
 
 //Penumbral Toolkit (26081)
@@ -1880,7 +2215,64 @@ cardSet[26081] = {
   cardType: "resource",
   subTypes: ["Stealth", "Virtual"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  madeSuccessfulRunOnHQThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.madeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.madeSuccessfulRunOnHQThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      if (server == corp.HQ) this.madeSuccessfulRunOnHQThisTurn = true;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  modifyInstallCost: {
+    Resolve: function (card) {
+      if (card == this && !CheckInstalled(card) && this.madeSuccessfulRunOnHQThisTurn) return -2;
+      return 0;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) LoadCredits(this, 4);
+    },
+  },
+  //You can spend hosted credits during runs.
+  canUseCredits: function () {
+    return attackedServer !== null;
+  },
+  //When it is empty, trash it (MoveCard avoids a phase change mid-payment).
+  onCreditsSpent: function () {
+    if (!CheckInstalled(this)) return;
+    if (typeof this.credits === "undefined" || this.credits <= 0) {
+      Log(GetTitle(this, true) + " trashed (empty)");
+      MoveCard(this, runner.heap);
+      this.faceUp = true;
+    }
+  },
+  AIRunPoolCreditOffset: function () {
+    return this.credits || 0;
+  },
+  //Free after an HQ success (4 run credits for 0), otherwise 2 for 4.
+  AIEconomyInstall: function () {
+    return this.madeSuccessfulRunOnHQThisTurn ? 3 : 1;
+  },
+  AIWorthKeeping: function () {
+    return true;
+  },
 };
 
 //The Back (26082)
@@ -1896,7 +2288,104 @@ cardSet[26082] = {
   cardType: "resource",
   subTypes: ["Job", "Location"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  usedHardwareDuringRunThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedHardwareDuringRunThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedHardwareDuringRunThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //"Use" = resolving an ability of a Runner hardware card (via TriggerAbility).
+  //Tracked while inactive so a use before install still counts as the first.
+  automaticOnAbilityUsed: {
+    Resolve: function (card) {
+      if (this.usedHardwareDuringRunThisTurn || !card || card.player != runner) return;
+      if (!CheckCardType(card, ["hardware"]) || !CheckRunning()) return;
+      this.usedHardwareDuringRunThisTurn = true;
+      if (CheckInstalled(this)) AddCounters(this, "power", 1);
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _eligibleHeapCards: function (exclude) {
+    return runner.heap.filter(function (card) {
+      return HasTrashAbility(card) && !(exclude || []).includes(card);
+    });
+  },
+  _AIHeapOrder: function (cards) {
+    return cards.slice().sort(function (a, b) {
+      return (b.elo || 0) - (a.elo || 0);
+    });
+  },
+  abilities: [
+    {
+      text: "[click], remove this resource from the game: Shuffle up to 2 heap cards with [trash] abilities into your stack per hosted power counter.",
+      Enumerate: function () {
+        if (!CheckActionClicks(runner, 1)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(runner, 1);
+        //last known information: counters hosted when the cost was paid
+        var limit = 2 * Counters(this, "power");
+        RemoveFromGame(this);
+        var self = this;
+        var chosen = [];
+        var finish = function () {
+          if (chosen.length > 0) ShuffleInto(chosen, runner.stack);
+        };
+        var choose = function () {
+          var eligible = self._eligibleHeapCards(chosen);
+          if (chosen.length >= limit || eligible.length < 1) {
+            finish();
+            return;
+          }
+          if (runner.AI) eligible = self._AIHeapOrder(eligible).slice(0, 1);
+          var choices = ChoicesArrayCards(eligible);
+          if (!runner.AI) choices.push({ card: null, label: "Done", button: "Done" });
+          DecisionPhase(
+            runner,
+            choices,
+            function (params) {
+              if (!params.card) {
+                finish();
+                return;
+              }
+              chosen.push(params.card);
+              choose();
+            },
+            "The Back",
+            "Choose a heap card with a [trash] ability (" + (limit - chosen.length) + " left)",
+            self,
+          );
+        };
+        choose();
+      },
+    },
+  ],
+  //Trigger once the counters can recover every eligible heap card, or at 3+.
+  AIEconomyTrigger: 1,
+  AIWouldTrigger: function () {
+    var counters = Counters(this, "power");
+    if (counters < 1) return false;
+    var eligible = this._eligibleHeapCards().length;
+    if (eligible < 1) return false;
+    return eligible <= 2 * counters || counters >= 3;
+  },
+  AIWorthKeeping: function (installedRunnerCards) {
+    return (installedRunnerCards || []).some(function (card) {
+      return CheckCardType(card, ["hardware"]) && (card.abilities || []).length > 0;
+    });
+  },
 };
 
 //Harmony AR Therapy (26083)

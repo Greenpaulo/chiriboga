@@ -1164,6 +1164,8 @@ function TriggerAbility(card, ability, onTriggerResolve, context) {
     if (typeof onTriggerResolve === "function") onTriggerResolve.call(context);
     //Log("Triggered \""+ability.text+"\"");
     Log("Using " + GetTitle(card, true) + ":");
+    // Ability-use watchers (e.g. The Back counts hardware used during a run).
+    AutomaticTriggers("automaticOnAbilityUsed", [card, ability]);
     ability.Resolve.call(card, params); //call in context of the card
   };
   var player = card.player;

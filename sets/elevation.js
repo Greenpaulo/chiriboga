@@ -158,6 +158,7 @@ cardSet[35005] = {
 
 cardSet[35011] = {
   title: "Rent Rioters",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1380,
   imageFile: "35011.png",
   player: runner,
@@ -1732,6 +1733,7 @@ cardSet[35006] = {
 
 cardSet[35007] = {
   title: "Gourmand",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1693,
   imageFile: "35007.png",
   player: runner,

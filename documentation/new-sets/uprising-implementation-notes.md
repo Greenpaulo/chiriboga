@@ -190,3 +190,56 @@ No shared engine or AI helper changes; all logic is on the five cards. Tests:
   inactive, matching Ken Tenma/Touchstone.
 - Test harness note: test-instanced cards need
   `InvalidateActiveTriggerCandidateCache()` for `modify*` callbacks to be seen.
+
+### Batch 4 — 26079–26082 (Claude, 2026-10-23)
+
+Rulings:
+
+- Afterimage: the metadata text restricts both the sentry bypass and the +2
+  strength ability to stealth credits; the 1[c] break uses any credits. The
+  bypass is chosen when the sentry is encountered, once per turn, paid 2 from
+  stealth cards (possibly two sources, chosen one at a time).
+- Penumbral Toolkit: the discount checks a successful run on HQ this turn
+  (the server at success). Credits are spendable on anything while
+  `attackedServer` is set; spending it empty trashes it (Open Market pattern).
+- The Back: "use a piece of hardware" is counted when a Runner hardware ability
+  resolves through `TriggerAbility` while a run is in progress. The first such
+  use each turn is tracked even while The Back is not installed, so a later
+  use the same turn after installing it gives no counter. Optional hardware
+  `responseOn*` triggers and spending hosted credits are not counted (baseline).
+  Its ability uses last-known information: counters hosted when the cost is
+  paid set the limit (2 per counter), and it can be used with no counters.
+
+Shared engine/AI changes (kept minimal for merges):
+
+- `mechanics.js` `TriggerAbility`: fires
+  `AutomaticTriggers("automaticOnAbilityUsed", [card, ability])` just before an
+  ability resolves (2 lines).
+- `utility.js`: new `HasTrashAbility(card)` — true for `trashAbility: true`
+  or an ability whose text names `[trash]`. One-line `trashAbility: true`
+  flags added to Crash Space, Decoy, Sacrificial Construct (coreset), Fermenter
+  (systemgateway), Abagnale (systemupdate2021), Revolver, No Free Lunch,
+  Stoneship Chart Room (midnightsun), Rent Rioters, Gourmand (elevation) and
+  “Baklan” Bochkin (downfall). `tests/uprising-batch4.test.js` guards every
+  implemented Runner card whose metadata has a [trash] cost; scaffolds with
+  TODO markers are exempt, so batches 1, 3 and 5 (Gachapon, Boomerang,
+  Simulchip) must name `[trash]` in the ability text or set the flag.
+- `runcalculator.js`: `EncounterOptions` passes `(iceIdx, iceAI, point, rc)`
+  to `AIEncounterOptions` (extra args ignored by existing cards), and
+  `ValidateEncounterPoint` honours `restrictedCredits: n` on encounter
+  persistents with Corsair's restricted-spend accounting (pool-only and
+  unaffordable branches excluded).
+
+AI decisions:
+
+- Afterimage: Corsair-style restricted pump in `AIImplementBreaker`, bypass via
+  `AIEncounterOptions` (one per route, not after use), `AIBypassesOneIce` for
+  Corp security. Stealth credits are read under `AIWithRunContext` so
+  run-only sources count for the prospective run.
+- Makler: standard fracter pricing; Penumbral Toolkit: Touchstone-style run
+  credit offset and economy install (priority 3 when free); The Back:
+  `AIEconomyTrigger` gated by `AIWouldTrigger` and highest-ELO heap picks.
+- Evidence: `tests/uprising-batch4.test.js` (22 cases) — real encounters and
+  payments, run-calculator routes (bypass, restricted pump, once per route, no
+  pool substitution, pre-run Toolkit offset), the AI's live encounter choice,
+  Corp bypass hook, and the action-phase selector triggering The Back.

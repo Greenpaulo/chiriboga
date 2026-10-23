@@ -53,7 +53,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 1 | 26066–26069 | Complete | Claude, 2026-10-23 | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
 | 2 | 26070–26073 | Complete | Claude, 2026-10-23 | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
 | 3 | 26074–26078 | Complete | Claude, 2026-10-23 | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
-| 4 | 26079–26082 | Pending | — | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
+| 4 | 26079–26082 | Complete | Claude, 2026-10-23 | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
 | 5 | 26083–26087 | Pending | — | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
 | 6 | 26088–26092 | Pending | — | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut (three existing, unverified), Paule's Café. Complex. |
 | 7 | 26093–26095 | Pending | — | Neutral Runner: Buffer Drive, Daily Casts, DreamNet (two existing, unverified). |
@@ -74,6 +74,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 1 | 26066–26069 | 2026-10-23 | Claude | `tests/uprising-batch1.test.js` | Hoshiko access-driven flip; Moshing multi-select grip cost; Devil Charm encounter removal with a run-long lingering -6 and a Run Calculator `strengthMod` persistent (shared `IceAct` change); Gachapon set-aside dig with discounted install. Baseline AI through economy/draw play, encounter-window preference, `AIDrawTrigger`. |
 | 2 | 26070–26073 | 2026-10-23 | Claude | `tests/uprising-batch2.test.js` | Keiko, Odore, Mystic Maemi, Paladin Poemu (rewritten); engine records `runnerCompanionUse` and passes spent hosted `sources` to `responseOnCreditsSpent`. See notes. |
 | 3 | 26074–26078 | 2026-10-23 | Claude | `tests/uprising-batch3.test.js` (11 real-engine scenarios) | Bravado (distinct passed ice, pays on any run end), Boomerang (chosen ice, trash break 2, delayed heap-to-stack recursion), Mu Safecracker (stealth-only payment, +1 HQ/R&D access), Prognostic Q-Loop (first-run look, once-per-turn reveal/install), Swift (+1 MU, first run event click). No shared engine/AI changes. |
+| 4 | 26079–26082 | 2026-10-23 | Claude | `tests/uprising-batch4.test.js` | Afterimage stealth-only pump/bypass (restricted credits via encounter-option `restrictedCredits`), Makler, Penumbral Toolkit, The Back (new `automaticOnAbilityUsed` trigger, `HasTrashAbility` helper). See notes. |
 
 ## Batch-review log
 
@@ -92,6 +93,7 @@ initialised when each implementation batch completes.
 | 1 | 26066–26069 | Pending | — | Hoshiko: run planning ignores the flip incentive/penalty. Moshing: plays only with three cards not worth keeping. Devil Charm: Corp security counts the single use on every ice; install heuristic is strength-only. Gachapon: digs only for a missing basic breaker type. See notes. |
 | 2 | 26070–26073 | Pending | — | Poemu/Maemi do not plan to spend the stash before 3 credits; Maemi keep/trash ignores stash value vs grip; Keiko priority ignores companion usage. See notes. |
 | 3 | 26074–26078 | Pending | — | Deeper strategy: Bravado as pure economy when no run is otherwise wanted; Boomerang trash not priced (may be spent where a cheap breaker would do) and target choice vs. future runs; Mu Safecracker always pays, ignoring later stealth-credit needs, and access estimate ignores credits spent breaking earlier in the run; Q-Loop knowledge can survive a stack shuffle that leaves the same card on top, and blind reveals are never used; Swift click gain absent from run-event click planning. See implementation notes. |
+| 4 | 26079–26082 | Pending | — | Corsair's `AIRunRestrictedCredits` still counts run-only stealth sources (Toolkit, Touchstone, Methuselah) that also report `AIRunPoolCreditOffset`, so with Corsair installed pre-run stealth budgets can double count; Makler's full-break 1[c] and Afterimage's once-per-turn bypass across finite reruns are not priced; Corp security does not price Afterimage's 2-credit bypass; The Back counts only abilities resolved through `TriggerAbility` (not optional hardware responses or hosted-credit spending) and picks heap cards by ELO. |
 
 ## Optimisation log
 

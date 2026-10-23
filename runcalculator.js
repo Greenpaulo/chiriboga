@@ -388,6 +388,12 @@ class RunCalculator {
 	  var creditPayment = 0;
 	  var creditLoss = 0;
 	  var clickLoss = 0;
+	  // Encounter options may carry restricted (stealth-only) payments, e.g.
+	  // Afterimage's bypass: {restrictedCredits: n} on an encounter persistent.
+	  var restrictedPayment = (encounter_persistents || []).reduce(function (sum, p) {
+		return sum + (p.restrictedCredits || 0);
+	  }, 0);
+	  if (restrictedPayment > 0 && this._poolOnly) return null;
 	  
 	  //loop through effects in order
 	  for (var j=0; j<encounter_effects.length; j++) {
@@ -503,14 +509,21 @@ class RunCalculator {
 	  }
 	  
 	  //now put it all together to create a path branch (if not excluded)
+	  if (!exclude_path && restrictedPayment > 0) {
+		var restrictedPaid = Math.min((point.restrictedCreditsSpent || 0) + restrictedPayment, this._restrictedStealthCredits || 0);
+		if (this.basePoolCredits + this.baseOtherCredits + restrictedPaid - point.runner_credits_spent - creditPayment -
+			restrictedPayment - point.runner_credits_lost - creditLoss < 0) exclude_path = true;
+	  }
 	  if (!exclude_path) {
 		return {
 		  iceIdx: nextIceIdx,
-		  runner_credits_spent: point.runner_credits_spent + creditPayment,
+		  runner_credits_spent: point.runner_credits_spent + creditPayment + restrictedPayment,
       paymentPoolOnly: !!this._poolOnly,
       creditSpendDamage: this._creditSpendDamage || 0,
-        restrictedCreditsSpent: point.restrictedCreditsSpent || 0,
-        restrictedCreditsPaid: point.restrictedCreditsPaid || 0,
+        restrictedCreditsSpent: (point.restrictedCreditsSpent || 0) + restrictedPayment,
+        restrictedCreditsPaid: restrictedPayment > 0 ?
+          Math.min((point.restrictedCreditsSpent || 0) + restrictedPayment, this._restrictedStealthCredits || 0) :
+          point.restrictedCreditsPaid || 0,
         meatDamagePrevention: this._meatDamagePrevention || 0,
 		  runner_credits_lost: point.runner_credits_lost + creditLoss,
 		  runner_clicks_spent: point.runner_clicks_spent + clickLoss,
@@ -527,7 +540,7 @@ class RunCalculator {
   
   //create encounter options for next ice
   //at the moment only effects and persistents
-  EncounterOptions(nextIceIdx, nextIceAI) {
+  EncounterOptions(nextIceIdx, nextIceAI, point = null) {
 	  var encounterOptions = [];
 	  //standard from ice
 	  var encounterEffects = nextIceAI.encounterEffects;
@@ -539,13 +552,13 @@ class RunCalculator {
 	  var activeCards = this.precalculated.activeCards;
 	  for (var i = 0; i < activeCards.length; i++) {
 		if (typeof activeCards[i].AIEncounterOptions == 'function') {
-		  encounterOptions = encounterOptions.concat(activeCards[i].AIEncounterOptions.call(activeCards[i],nextIceIdx,nextIceAI));
+		  encounterOptions = encounterOptions.concat(activeCards[i].AIEncounterOptions.call(activeCards[i],nextIceIdx,nextIceAI,point,this));
 		}
 	  };
 	  //and hypothetical
 	  if (this.runEvent) {
 		if (typeof this.runEvent.AIEncounterOptions == 'function') {
-		  encounterOptions = encounterOptions.concat(this.runEvent.AIEncounterOptions.call(this.runEvent,nextIceIdx,nextIceAI));
+		  encounterOptions = encounterOptions.concat(this.runEvent.AIEncounterOptions.call(this.runEvent,nextIceIdx,nextIceAI,point,this));
 		}
 	  }
 	  return encounterOptions;
@@ -751,7 +764,7 @@ class RunCalculator {
         if (!incomplete) {
 		  //incomplete paths jack out before the next ice i.e. no additional effect
           if (point.iceIdx > 0) {
-			  encounterOptions = this.EncounterOptions(point.iceIdx - 1,nextIceAI);
+			  encounterOptions = this.EncounterOptions(point.iceIdx - 1,nextIceAI,point);
 		  }
         }
         for (var i = 0; i < encounterOptions.length; i++) {
@@ -1303,7 +1316,7 @@ class RunCalculator {
             });
             if (repeatCard) {
               var outer = data.server.ice.length - 1;
-              var options = this.EncounterOptions(outer, this.precalculated.iceAIs[outer]);
+              var options = this.EncounterOptions(outer, this.precalculated.iceAIs[outer], lastPoint);
               for (var option of options) {
                 var repeated = this.ValidateEncounterPoint(outer, lastPoint, false, option.effects.slice(),
                   option.persistents, null, lastPoint.card_str_mods.filter(mod => mod.persist),
