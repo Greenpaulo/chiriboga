@@ -83,7 +83,9 @@ Candidates are sorted by `|_advancementLimit() − _scoringWindow()|` plus
 Before every other group, "could be installed and fast-advanced to win" is
 emitted when `_potentialAdvancement(null, Infinity, true)` covers the
 agenda's `_advancementLimit()` in the strongest empty remote (band 3 in the
-design note).
+design note). Agendas with `AICannotScoreOnInstallTurn` (Downfall, merged
+into the I4 branch at 3592967) are skipped there; M3 must likewise give such
+an agenda no `E = 0` plan.
 
 **Commitment.** `_returnPreference()` sets `AIScoringPlanCommitted = true` on
 every agenda chosen for install, plan or not. The flag is read only by
