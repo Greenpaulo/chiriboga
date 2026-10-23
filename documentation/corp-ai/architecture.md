@@ -809,6 +809,17 @@ blocking about 30% of Corp actions while an agenda sat unfinished.
   score divided by `CORP_AI_POINT_VALUE`). `Phase_Main()` then admits that
   agenda alone to its advance block; an agenda that can score this turn
   (`almostDoneAgenda`) still takes precedence.
+- With `agendaExposureTable` as well (default off), score fast reads
+  `CORP_AI_AGENDA_EXPOSURE_TABLE` instead of I2's table: the steal hazard per
+  Runner turn of an agenda in a remote, by whether it carries counters, the
+  remote's ICE count (0, 1, 2+) and I2's margin bucket (measured; see
+  `documentation/corp-ai/measurements/I4-3f46a2a-agenda-exposure-calibration.json`).
+  `_agendaAdvanceGain()` compares advancing now (each exposed turn on the
+  advanced row) with waiting: for an agenda with no counters, the burst plan
+  (`_agendaCompletionPlan(..., burst = true)`: no counters until one turn
+  finishes it, spare clicks become credits) on the no-counters row; for one
+  already advanced, one more exposed turn. It does not advance when waiting
+  is worth as much.
 - Where to install an agenda, and whether to hold it, is unchanged.
   `_agendaCommitmentOptions()` computes every destination and hold with M5
   (`_hqStealHazard()`) and logs them on agenda install decisions while the

@@ -120,10 +120,73 @@ within each counter row (1 ICE, 1+ counters: 0.060 at -3..-1 to 0.592 at
 ≥10). Observational: the current policy chooses which agendas carry counters
 into a Runner turn. Full cells: `batchDiagnostics.remoteAgendaRisk` of the run.
 
+**Counter-aware exposure (amendment, 2026-10-23).** Table built from the
+baseline above (fit) and checked on a second fresh run (seeds 4001-5000,
+7000 games): the six headline rates repeat (for example one ICE: 0.086 →
+0.084 without counters, 0.338 → 0.348 with). I2's strict per-cell rule
+failed (6 of 23 checked cells outside their intervals, every miss at most
+0.045) while the weighted error was 0.010 against the 0.05 limit. Owner
+decision: use the table. Calibration:
+`documentation/corp-ai/measurements/I4-3f46a2a-agenda-exposure-calibration.json`.
+`agendaExposureTable` (default off) makes score fast compare advancing now
+against waiting (the burst plan for an agenda with no counters). Fixtures:
+`i4-exposure-waits-for-burst.txt`, `i4-exposure-advanced-keeps-advancing.txt`;
+`tests/agenda-exposure-table.test.js`. Option-off games unchanged (35 of 35).
+Quick run (gate command with `--corp-option agendaExposureTable=true`,
+`--quick`, indicative only; 350 paired games, 158 changed): win rate 0.309 →
+0.360 [+0.011, +0.091]; points scored 4.049 → 4.280 [+0.046, +0.414]; points
+stolen 6.157 → 5.951 [−0.403, −0.014]; remote points stolen 2.034 → 2.080
+[−0.137, +0.234]; insolvent turns 1.717 → 1.843; idle agenda turns 3.020 →
+2.466. Score fast without the table had lost points and remote theft on the
+same seeds. Every listed guard and both improvements passed.
+
 **Left open:** the full gate (owner); destination/hold; the owner playtest before any
 default change.
 
 ## Implementation plan
+
+### Amendment: counter-aware agenda exposure
+
+Proposed at `c127130`, 2026-10-23. **Approved 2026-10-23.**
+
+- **Validation:** the remoteAgendaRisk baseline (Resolution) shows steal risk
+  per Runner turn depends mainly on whether the agenda carries counters
+  (one-ICE remote: 0.09 without, 0.34 with; bare remote: 0.12 against 0.92).
+  Score fast and the destination/hold EV both read I2's table, which ignores
+  counters, so advancing across turns looked safe. Holding counters back until
+  the agenda can be finished in one turn ("burst") was never an option they
+  compared.
+- **Approach:**
+  1. `CORP_AI_AGENDA_EXPOSURE_TABLE` (counters none/advanced × ICE
+     bare/single/multi × I2 margin bucket), built by
+     `scripts/ai-batch/agenda-exposure-table.js` from the fit run (seeds
+     3001–4000) and checked on a held-out run (4001–5000) with I2's rule.
+     Committed with its calibration file; a test re-derives it. If the held-out
+     check fails, stop and report.
+  2. New option `agendaExposureTable` (default off; needs
+     `agendaCommitmentPlan`). `_agendaExposureHazard(server, evaluation,
+     counters)` reads the table; each plan turn's hazard uses the counters the
+     agenda has after that Corp turn.
+  3. `_agendaCompletionPlan(..., burst)`: a plan that adds no counters until
+     one turn can finish the agenda (spare clicks become credits).
+  4. Score fast: an agenda with no counters is advanced now only when the
+     advance-now plan's value beats the burst plan's (and I2's best ICE, as
+     now). An agenda already advanced keeps today's comparison, on the
+     advanced row.
+  5. Destination/hold (from the folded section): re-attach the removed
+     consumer (47818df) behind the same option, with each destination valued
+     at the better of its advance-now and burst plans on the new table.
+     Built second, after a quick run of steps 1–4.
+- **Tests:** unit cases for the table and plan values; fixtures: uncountered
+  agenda in a one-ICE remote waits for a burst; already-advanced agenda keeps
+  advancing; option off unchanged. Destination/hold scenarios as listed in
+  its section, including the pending reproduction.
+- **Risk:** only I4 consumers read the new table (I2's ICE choice and M5 keep
+  I2's). The table is observational: once the Corp stops leaving advanced
+  agendas out, advanced-row rates may shift; re-measure with the option on
+  before the gate. Check with option-off identity and quick runs.
+- **Docs:** `documentation/corp-ai/architecture.md`, `documentation/ai-batch-harness.md`
+  (builder), Resolution.
 
 Proposed at `eb78846`, 2026-10-23. **Approved 2026-10-23**, with one owner
 amendment: when the best install and hold differ by less than 0.1 points

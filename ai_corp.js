@@ -37,6 +37,23 @@ const CORP_AI_BREACH_HAZARD_TABLE = Object.freeze({
     multi: Object.freeze({"lockout": 0.0537, "<=-4": 0.0537, "-3..-1": 0.0537, "0..1": 0.0537, "2..4": 0.0537, "5..9": 0.0537, ">=10": 0.0537, "unknown": 0.0537}),
   }),
 });
+//I4: steal hazard per Runner turn of an agenda in a remote, by whether it
+//carries advancement counters (none / advanced), the remote's ICE count
+//(bare 0 / single 1 / multi 2+) and I2's margin bucket. Built by
+//scripts/ai-batch/agenda-exposure-table.js from the I4 remoteAgendaRisk
+//calibration (documentation/corp-ai/measurements/). Read only with agendaExposureTable.
+const CORP_AI_AGENDA_EXPOSURE_TABLE = Object.freeze({
+  none: Object.freeze({
+    bare: Object.freeze({"lockout": 0.1178, "<=-4": 0.1178, "-3..-1": 0.1178, "0..1": 0.1178, "2..4": 0.1178, "5..9": 0.1178, ">=10": 0.1178, "unknown": 0.1178}),
+    single: Object.freeze({"lockout": 0.0229, "<=-4": 0.0229, "-3..-1": 0.0229, "0..1": 0.0288, "2..4": 0.0693, "5..9": 0.0946, ">=10": 0.1148, "unknown": 0.0861}),
+    multi: Object.freeze({"lockout": 0, "<=-4": 0, "-3..-1": 0.0221, "0..1": 0.0411, "2..4": 0.0724, "5..9": 0.123, ">=10": 0.1246, "unknown": 0.0909}),
+  }),
+  advanced: Object.freeze({
+    bare: Object.freeze({"lockout": 0.9149, "<=-4": 0.9149, "-3..-1": 0.9149, "0..1": 0.9149, "2..4": 0.9149, "5..9": 0.9149, ">=10": 0.9149, "unknown": 0.9149}),
+    single: Object.freeze({"lockout": 0.0618, "<=-4": 0.0618, "-3..-1": 0.0618, "0..1": 0.1241, "2..4": 0.2271, "5..9": 0.433, ">=10": 0.5922, "unknown": 0.338}),
+    multi: Object.freeze({"lockout": 0.0095, "<=-4": 0.0095, "-3..-1": 0.0601, "0..1": 0.0839, "2..4": 0.2202, "5..9": 0.3442, ">=10": 0.4421, "unknown": 0.2639}),
+  }),
+});
 //Credit-equivalents per agenda point (cost to advance and install), from the
 //same calibration file. Only I9 retunes it.
 const CORP_AI_POINT_VALUE = 4.4;
@@ -5599,7 +5616,9 @@ class CorpAI {
   //income. Credits for the destination's planned ICE rezzes (defenceReserve)
   //and an unrezzed scoring upgrade's rez are never spent on advancing.
   //installed: the agenda is already in destination (no install click; counters so far count).
-  _agendaCompletionPlan(agenda, destination, startTurn = 0, evaluation = null, installed = false) {
+  //burst: add no counters until one turn can finish the agenda; until then
+  //every click becomes a credit.
+  _agendaCompletionPlan(agenda, destination, startTurn = 0, evaluation = null, installed = false, burst = false) {
     var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
     if (!evaluation)
       evaluation = destination ? this._evaluateServerSecurity(destination) : this._detachedRemoteEvaluation();
@@ -5630,6 +5649,11 @@ class CorpAI {
             counters, turn == startTurn && !installed, endpoint),
           () => { corp.creditPool = savedCredits; },
         );
+      }
+      if (burst && counters + gained < limit) {
+        plan.steps.push({turn: turn, advancement: 0, counters: counters});
+        credits += Math.max(0, clicks);
+        continue;
       }
       counters += gained;
       used.forEach((card) => { if (card && !plan.tools.includes(card)) plan.tools.push(card); });
@@ -5772,6 +5796,55 @@ class CorpAI {
     return best / CORP_AI_POINT_VALUE;
   }
 
+  //I4: CORP_AI_AGENDA_EXPOSURE_TABLE cell for an agenda with counters in
+  //server (null: new remote) at the margin of evaluation.
+  _agendaExposureHazard(server, evaluation, counters) {
+    var iceCount = server ? server.ice.length : 0;
+    var row = CORP_AI_AGENDA_EXPOSURE_TABLE[counters > 0 ? "advanced" : "none"];
+    return row[iceCount >= 2 ? "multi" : iceCount == 1 ? "single" : "bare"][
+      this._breachMarginBucket(this._breachMargin(null, evaluation).margin)];
+  }
+
+  //I4: per-Runner-turn hazards of plan's exposure turns (H + 1 when it does not
+  //score within H); each turn uses the counters after that Corp turn.
+  _agendaPlanHazards(plan, server, evaluation) {
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    var turns = Math.min(plan.exposureTurns, horizon + 1);
+    var hazards = [];
+    var counters = 0;
+    for (var t = 0; t < turns; t++) {
+      if (plan.steps[t]) counters = plan.steps[t].counters;
+      hazards.push(this._agendaExposureHazard(server, evaluation, counters));
+    }
+    return hazards;
+  }
+
+  //I4: expected points over H of an exposure path (per-turn hazards); scored
+  //only when the path is at most H turns long. _agendaInstallValue with
+  //varying hazards.
+  _agendaPathValue(points, hazards) {
+    var horizon = CORP_AI_I2_HORIZON_RUNNER_TURNS;
+    var kept = 1;
+    hazards.slice(0, horizon).forEach((hazard) => { kept *= 1 - hazard; });
+    return points * (hazards.length <= horizon ? kept : 0) - points * (1 - kept);
+  }
+
+  //I4 with agendaExposureTable: points gained by advancing an installed
+  //agenda now rather than waiting. With no counters yet, waiting means the
+  //burst plan (no counters shown until one turn can finish it); with counters,
+  //one more exposed turn on the advanced row.
+  _agendaAdvanceGain(card, server, evaluation, plan, points) {
+    var now = this._agendaPathValue(points, this._agendaPlanHazards(plan, server, evaluation));
+    var waitHazards;
+    if (Counters(card, "advancement") > 0)
+      waitHazards = [this._agendaExposureHazard(server, evaluation, 1)].concat(
+        this._agendaPlanHazards(plan, server, evaluation));
+    else
+      waitHazards = this._agendaPlanHazards(
+        this._agendaCompletionPlan(card, server, 0, evaluation, true, true), server, evaluation);
+    return {now: now, wait: this._agendaPathValue(points, waitHazards)};
+  }
+
   //I4 plan execution: the installed agenda to advance now under its plan, or
   //null. Its plan must score within H, advance this turn and keep credits for
   //its server's planned rezzes; advancing must gain more points than I2's best
@@ -5787,13 +5860,20 @@ class CorpAI {
       if (plan.exposureTurns > horizon || plan.steps.length < 1 || plan.steps[0].advancement <= 0) return;
       if (Credits(corp) - 1 < plan.defenceReserve) return;
       var points = Number(card.agendaPoints) || 0;
-      var hazard = this._agendaDestinationHazard(server, evaluation).hazard;
-      var gain = this._agendaInstallValue(points, plan.exposureTurns, hazard) -
-        this._agendaInstallValue(points, plan.exposureTurns + 1, hazard);
+      var gain;
+      if (this.options.agendaExposureTable) {
+        var values = this._agendaAdvanceGain(card, server, evaluation, plan, points);
+        gain = values.now - values.wait;
+      } else {
+        var hazard = this._agendaDestinationHazard(server, evaluation).hazard;
+        gain = this._agendaInstallValue(points, plan.exposureTurns, hazard) -
+          this._agendaInstallValue(points, plan.exposureTurns + 1, hazard);
+      }
       var defence = this._bestDefencePoints(server);
       this._log("I4 plan for " + card.title + " in " + server.serverName + ": exposure " +
         plan.exposureTurns + ", advance gain " + gain.toFixed(3) + ", defence gain " + defence.toFixed(3));
       if (defence > gain) return;
+      if (this.options.agendaExposureTable && plan.exposureTurns > 0 && gain <= 0) return;
       if (!best || plan.exposureTurns < best.exposureTurns ||
           (plan.exposureTurns == best.exposureTurns && points > best.points))
         best = {card: card, exposureTurns: plan.exposureTurns, points: points};
@@ -9446,4 +9526,6 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   iceMarginalSecurity: true,
   // I4 scoring-plan execution (agenda install/hold options are logged only).
   agendaCommitmentPlan: false,
+  // I4: score fast reads the counter-aware agenda exposure table (needs agendaCommitmentPlan).
+  agendaExposureTable: false,
 });

@@ -1129,6 +1129,12 @@ reports `remoteAgendaRisk.turns` and `.stolen`. The report's
 three. Each cell has a Wilson interval and an interval that resamples games.
 Selecting it does not change any game (log and decision hashes match).
 
+`scripts/ai-batch/agenda-exposure-table.js --fit <report> --heldout <report> --out <file>`
+builds `CORP_AI_AGENDA_EXPOSURE_TABLE` from two such reports the way I2's
+breach-hazard table is built (thin cells merged, rates non-decreasing in
+margin) and runs I2's held-out reliability check;
+`tests/agenda-exposure-table.test.js` re-derives the committed table.
+
 ## Opening central coverage experiment (I2.3)
 
 `--collector openingCentralCoverage` adds diagnostic metrics
