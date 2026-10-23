@@ -5714,24 +5714,31 @@ class CorpAI {
     var options = [];
     var deferred = 0;
     var deferredTo;
+    var table = this.options.agendaExposureTable;
     destinations.forEach((server) => {
       var evaluation = server ? this._evaluateServerSecurity(server) : this._detachedRemoteEvaluation();
       var risk = this._agendaDestinationHazard(server, evaluation);
-      var plan = this._agendaCompletionPlan(agenda, server, 0, evaluation);
+      var value = table ? this._agendaExposureValue(agenda, server, evaluation, 0, points) : null;
+      var plan = value ? value.plan : this._agendaCompletionPlan(agenda, server, 0, evaluation);
       var exposed = Math.min(plan.exposureTurns, horizon);
       var lockout = risk.margin == -Infinity;
+      var stolen = value ? 1 - value.hazards.slice(0, horizon).reduce((kept, h) => kept * (1 - h), 1)
+        : 1 - Math.pow(1 - risk.hazard, exposed);
       options.push({
         kind: "install",
         server: server,
-        hazard: risk.hazard,
+        hazard: value ? value.hazards[0] || 0 : risk.hazard,
         plan: plan,
-        ev: this._agendaInstallValue(points, plan.exposureTurns, risk.hazard),
-        W: !band2 || plan.exposureTurns == 0 || lockout ? 0 : 1 - Math.pow(1 - risk.hazard, exposed),
+        burst: value ? value.burst : false,
+        ev: value ? value.ev : this._agendaInstallValue(points, plan.exposureTurns, risk.hazard),
+        W: !band2 || plan.exposureTurns == 0 || lockout ? 0 : stolen,
       });
       //Holding defers the install one turn with one turn less of horizon.
-      var later = this._agendaCompletionPlan(agenda, server, 1, evaluation);
+      var laterOption = table ? this._agendaExposureValue(agenda, server, evaluation, 1, points) : null;
+      var later = laterOption ? laterOption.plan : this._agendaCompletionPlan(agenda, server, 1, evaluation);
       if (later.exposureTurns <= horizon - 1) {
-        var laterValue = this._agendaInstallValue(points, later.exposureTurns, risk.hazard);
+        var laterValue = laterOption ? laterOption.ev :
+          this._agendaInstallValue(points, later.exposureTurns, risk.hazard);
         if (laterValue > deferred) {
           deferred = laterValue;
           deferredTo = server;
@@ -5752,6 +5759,27 @@ class CorpAI {
     });
     return {agenda: agenda, points: points, band2: band2, options: options,
       best: this._bestAgendaCommitment(options, band2)};
+  }
+
+  //I4 with agendaExposureTable: the better of an agenda's planned and burst
+  //plans when installed into server (null: new remote) at startTurn, valued
+  //on the exposure table.
+  _agendaExposureValue(agenda, server, evaluation, startTurn, points) {
+    var best = null;
+    [false, true].forEach((burst) => {
+      var plan = this._agendaCompletionPlan(agenda, server, startTurn, evaluation, false, burst);
+      var hazards = this._agendaPlanHazards(plan, server, evaluation);
+      var ev = this._agendaPathValue(points, hazards);
+      if (!best || ev > best.ev) best = {plan: plan, hazards: hazards, ev: ev, burst: burst};
+    });
+    return best;
+  }
+
+  //Record this Corp turn as a hold of agenda (indefinite-hold guard).
+  _recordAgendaHold(agenda) {
+    if (!this._agendaHolds) this._agendaHolds = new WeakMap();
+    if (!this._agendaHolds.has(agenda)) this._agendaHolds.set(agenda, new Set());
+    this._agendaHolds.get(agenda).add(this._postureEpoch);
   }
 
   //Band 2 first (smallest W within 0.01), then EV. Owner amendment: an install
@@ -5775,7 +5803,7 @@ class CorpAI {
   }
 
   //Consecutive previous Corp turns this agenda was held for a deferred install
-  //(the destination/hold consumer records holds; nothing does yet).
+  //(recorded by the agendaDestinationPlan consumer).
   _agendaHoldStreak(agenda) {
     var turns = this._agendaHolds && this._agendaHolds.get(agenda);
     if (!turns) return 0;
@@ -6562,12 +6590,26 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
-        //I4 observation only: the install/hold choice is not yet a consumer and
-        //decides nothing here.
+        //I4: the install/hold options are logged; with agendaDestinationPlan
+        //they replace the scoring-server destinations for an agenda in HQ.
+        var commitment = null;
         if (this.options.agendaCommitmentPlan && CheckCardType(cards[i], ["agenda"]) &&
-            corp.HQ.cards.includes(cards[i]) && this._hypotheticalDepth == 0)
-          this._log("I4 agenda options " + JSON.stringify(
-            this._agendaCommitmentSummary(this._agendaCommitmentOptions(cards[i]))));
+            corp.HQ.cards.includes(cards[i]) &&
+            (this._hypotheticalDepth == 0 || this.options.agendaDestinationPlan)) {
+          commitment = this._agendaCommitmentOptions(cards[i]);
+          if (this._hypotheticalDepth == 0)
+            this._log("I4 agenda options " + JSON.stringify(this._agendaCommitmentSummary(commitment)));
+        }
+        if (commitment && this.options.agendaDestinationPlan && commitment.best) {
+          if (commitment.best.kind == "install")
+            intoServerOptions.push({
+              cardToInstall: cards[i],
+              serverToInstallTo: commitment.best.server,
+              reason: "I4 agenda destination",
+            });
+          else if (this._hypotheticalDepth == 0) this._recordAgendaHold(cards[i]);
+          continue;
+        }
         //loop through scoring servers
         for (var j = 0; j < scoringServers.length; j++) {
           serverToInstallTo = scoringServers[j];
@@ -9528,4 +9570,7 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   agendaCommitmentPlan: false,
   // I4: score fast reads the counter-aware agenda exposure table (needs agendaCommitmentPlan).
   agendaExposureTable: false,
+  // I4: choose each agenda's destination, or hold it, by _agendaCommitmentOptions
+  // (needs agendaCommitmentPlan; meant with agendaExposureTable).
+  agendaDestinationPlan: false,
 });

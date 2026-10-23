@@ -140,6 +140,21 @@ stolen 6.157 → 5.951 [−0.403, −0.014]; remote points stolen 2.034 → 2.08
 2.466. Score fast without the table had lost points and remote theft on the
 same seeds. Every listed guard and both improvements passed.
 
+**Destination/hold retried (`agendaDestinationPlan`, default off,
+2026-10-23).** `_agendaCommitmentOptions()` values each destination with the
+exposure table (better of the planned and burst plans) and, with the option,
+its best choice replaces the scoring-server destinations for an agenda in HQ
+(holds are recorded for the indefinite-hold guard). I2's empty-remote stake
+following the destination is not rebuilt. The pending reproduction
+`corp-agenda-held-while-secure-remote-available.txt` now passes with the
+options set (install Remote 0 0.954 against hold 0.991, the install-within-0.1
+rule) and moved to the green fixtures. Quick comparison (350 paired games,
+both arms with score fast and the table): win rate 0.360 → 0.371 [−0.051,
++0.074]; points scored 4.280 → 4.354 [−0.251, +0.403]; points stolen 5.951 →
+5.814; from remotes 2.080 → 2.291 [−0.051, +0.480], from HQ 1.274 → 1.066;
+stall turns 1.331 → 1.083. No clear gain: both improvements failed. Not in
+tonight's gate.
+
 **Left open:** the full gate (owner); destination/hold; the owner playtest before any
 default change.
 
