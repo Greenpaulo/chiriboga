@@ -213,7 +213,7 @@ modifyInstallCost: Resolve(card, destination); // destination is a server or hos
 modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
-modifyStealCost: Resolve(card); // returns {credits, clicks} additional costs
+modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
 modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
 ```
@@ -362,7 +362,8 @@ runner.grip / runner.stack / runner.heap;
 ```js
 CheckCardType(card, ["ice","asset",...])
 CheckSubType(card, "Barrier")
-StealCost(card); // {credits, clicks}, including printed and active additional costs
+StealCost(card); // {credits, clicks, programs}, including printed `stealCost` and active additional costs;
+// programs = installed programs the Runner trashes (PayStealCostPrograms, unpreventable)
 InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)

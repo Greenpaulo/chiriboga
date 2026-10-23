@@ -3227,3 +3227,34 @@ optimisation work.
   that count; the model never reads hidden card identities. Corp subroutine
   ranking treats the gift as harmless. Damage already taken keeps its ordinary
   penalty, while the added card affects survival capacity.
+
+### Downfall batch 11
+
+- Focus Group and Game Over use `AIWouldPlay()` with `AIPlayWhenCan` (1 and 2)
+  through the main-phase declared-opportunity consumer. Both track their
+  last-turn condition while inactive (successful run / steal during the Runner
+  turn, reset when the Runner turn begins). Focus Group's AI chooses the card
+  type from public Runner cards (heap and rig) with fixed priors, never the
+  grip, then sets X to the smaller of the matching count, affordable credits and
+  the target's remaining advancement; it plays only with two Grip cards, two
+  spare credits and an unfinished Corp agenda or `_cardShouldBeFastAdvanced`
+  target. Game Over's AI chooses the type with the largest credit-equivalent
+  loss (install cost, hosted credits/virus counters, hosted cards, consoles),
+  assuming the Runner saves cards worth 3 or more while it can pay 3, and plays
+  only when that loss is at least 5. The Runner AI pays 3 to save a card worth
+  3 or more; the most valuable cards are offered first.
+- Increased Drop Rates uses `AIPreferredUpgradeServer(legalServers)`: hold it
+  (null) without bad publicity, otherwise a remote with a Corp agenda, else HQ.
+  `AIPunishesAccess(server)` returns 1 while the Corp has bad publicity and the
+  card is in that server's root or cards. The Runner AI takes the tag only
+  when already tagged and the Corp has bad publicity.
+- Divested Trust's optional forfeit is an inline Corp preference: forfeit when
+  the stolen agenda has at least one printed point.
+- SDS Drone Deployment declares `stealCost: {programs: 1}`. `StealCost` now
+  returns `programs`; `CheckSteal` requires that many trashable installed
+  programs, the access decline option stays available, and
+  `PayStealCostPrograms` trashes them as an unpreventable cost before `Steal`.
+  The Runner AI chooses through `RunnerAI._stealCostProgramOption(choices)`
+  (an `AIOkToTrash` card, else a non-icebreaker, else the cheapest by install
+  cost plus hosted credits/virus counters); it still always steals when legal.
+  The on-score trash uses the Corp `trash` command and `_bestTrashOption`.

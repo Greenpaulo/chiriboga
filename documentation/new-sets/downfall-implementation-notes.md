@@ -687,3 +687,68 @@ Congratulations! for credit sequencing; choose Loot Box's revealed card using
 Corp income versus the Runner's gifted-card value. The baseline chooses the
 highest printed cost, not the best strategic gift. Hidden stack contents are
 never read during planning.
+
+## Batch 11 — 26052–26056
+
+Implemented 2026-10-23 by Claude on branch `cards/downfall-batch-11`. Existing
+metadata and ELO values are preserved: Focus Group 1374, Game Over 1286,
+Increased Drop Rates 1216, Divested Trust 1434 and SDS Drone Deployment 1759.
+Game Over's scaffolded subtypes (`Illicit`, `Gray Ops`) are corrected to the
+card data's `Gray Ops - Liability`.
+
+- Focus Group and Game Over track their last-turn conditions while inactive in
+  any zone (successful run or steal during the Runner turn; reset when the
+  Runner turn begins), following Complete Image.
+- Focus Group offers the four Runner card types, reveals each Grip card to the
+  Corp, then offers X from the matching count down to 0, bounded by affordable
+  credits; 0 declines. Like Remastered Edition, the placement target is any
+  installed card, including Runner cards. No matches, no installed card or no
+  credits end the effect without a choice.
+- Game Over offers the four Runner card types; installed non-icebreaker cards of
+  that type that can be trashed are offered one by one, most valuable first, and
+  the Runner may pay 3 credits each to prevent. The rest are trashed together
+  as a preventable Corp effect, then the Corp takes 1 bad publicity even when
+  nothing was trashed.
+- Increased Drop Rates reveals itself while accessed in R&D (Esca pattern) and
+  restores its face-down state when access completes. On access anywhere, the
+  Runner chooses a tag or the Corp's bad-publicity removal; with no bad
+  publicity the removal does nothing.
+- Divested Trust responds only from the Corp score area to another agenda that
+  is in the Runner score area (`intended.steal`). Forfeiting gains 5 credits and
+  returns that agenda to HQ face down with no advancement counters.
+- SDS Drone Deployment adds a shared program-trash steal cost:
+  `StealCost().programs`, a `CheckSteal` guard, the access decline option and
+  `PayStealCostPrograms` (unpreventable trash, Runner chooses) before `Steal`.
+  Whistleblower's AI naming counts it as a relevant steal cost. Scoring trashes
+  one installed program chosen by the Corp; the trash is preventable.
+
+Known limitations (not silently approximated in the engine path):
+
+- Elevation's HQ-access replacement (35018) steals through its own path, which
+  ignores every additional steal cost (credits, clicks and programs) and does
+  not set `intended.steal`, so Divested Trust cannot respond there. This is a
+  pre-existing defect outside the batch range.
+- Whether the Runner wins on the steal before Divested Trust resolves follows
+  the engine's existing win-check timing; no special handling was added.
+
+Focused evidence: `tests/downfall-batch11.test.js` covers the last-turn windows
+and expiry, reveal sequencing, X bounds by matches and credits, any-installed
+targeting, the real Corp `CommandChoice` play selector for Focus Group and Game
+Over (positive, no-condition, no-target, unaffordable and low-value holds), the
+Corp type/X/target preferences, icebreaker exemption, per-card prevention with
+shared Runner credits and the Runner AI's save choice, bad publicity, R&D reveal
+and cleanup, both Runner AI tag choices and the no-bad-publicity case, the real
+upgrade-install preference and `AIPunishesAccess`, a real `Steal` response for
+Divested Trust (AI forfeit, human decline, unscored and self cases), the access
+phase's steal/decline enumeration with and without programs, the Runner AI's
+program payment through the real choice path, and the on-score Corp trash
+selector. `tests/play-and-steal-cost.test.js` now asserts the `programs` field.
+
+Optional optimisation: Focus Group type guessing from more than public
+frequency, holding it for a higher X or a scoring turn, and choosing ICE or
+asset targets; Game Over timing against Runner credits and bad-publicity cost;
+Runner AI prevention payments that weigh remaining credits and card roles;
+Increased Drop Rates placement and the Runner's tag-versus-bad-publicity trade;
+Divested Trust valuation in scoring order; Runner run valuation of SDS's
+program cost (the Runner AI always steals when legal) and choosing which
+program to lose by matching ICE.

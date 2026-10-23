@@ -1721,7 +1721,7 @@ phases.runAccessingCard = {
 		  return [{}];
 	  }
       var cost = StealCost(accessingCard);
-      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1) return [];
+      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1 && cost.programs < 1) return [];
       return [{}];
     },
   },
@@ -1749,7 +1749,7 @@ phases.runAccessingCard = {
         agenda,
         function () {
           SpendClicks(runner, cost.clicks);
-          Steal();
+          PayStealCostPrograms(agenda, cost.programs, Steal);
         },
         this
       );

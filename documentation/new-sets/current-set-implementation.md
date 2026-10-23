@@ -56,7 +56,7 @@ No existing range is credited without tests.
 | 8 | 26036–26040 | Complete | Codex / 2026-10-16 | Gameplay and baseline AI verified; focused/shared checks and all 95 full-suite test files pass (2026-10-18). |
 | 9 | 26041–26046 | Complete | Codex / 2026-10-22 | Damage, reveals, faction-trash counters and finite Psi repeat traversal; baseline AI; all 114 full-suite files pass. |
 | 10 | 26047–26051 | Complete | Codex / 2026-10-22 | Scored advancement, conditional/first-run income, ICE credit timing and revealing self-trash trap; real baseline AI consumers. |
-| 11 | 26052–26056 | Pending | — | Preserve and validate existing implementations. |
+| 11 | 26052–26056 | Complete | Claude / 2026-10-23 | Focus Group, Game Over, Increased Drop Rates, Divested Trust and SDS Drone Deployment; shared program-trash steal cost; real Corp/Runner AI consumers. |
 | 12 | 26057–26061 | Pending | — | Preserve and validate existing implementations. |
 | 13 | 26062–26065 | Pending | — | Preserve and validate existing implementations. |
 
@@ -74,6 +74,7 @@ No existing range is credited without tests.
 | 8 | 26036–26040 | 2026-10-18 | Codex | `tests/downfall-batch8.test.js`; shared format, helper and hook checks; full suite (95 files) | Operations, run-entry costs, reveal income and agenda swaps with baseline AI; see implementation notes. |
 | 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
 | 10 | 26047–26051 | 2026-10-22 | Codex | `tests/downfall-batch10.test.js`; batches 8–9 and set integration; required shared checks; full suite | Gameplay, real install/rez/trigger/run consumers, finite counter/self-trash and gifted-card accounting; all 115 full-suite files pass on Node 20.19.0. See batch 10 notes. |
+| 11 | 26052–26056 | 2026-10-23 | Claude | `tests/downfall-batch11.test.js`; `tests/play-and-steal-cost.test.js`; required shared checks; full suite | Last-turn operations, grip reveal, per-card prevention, R&D-revealing ambush, steal-response forfeit and program-trash steal cost with baseline AI. See batch 11 notes. |
 
 ## Batch-review log
 

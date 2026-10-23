@@ -426,6 +426,7 @@ function CheckSteal() {
   var cost = StealCost(accessingCard);
   if (!CheckCredits(runner, cost.credits, "stealing", accessingCard)) return false;
   if (!CheckClicks(runner, cost.clicks)) return false;
+  if (cost.programs > 0 && StealCostProgramChoices().length < cost.programs) return false;
   return true;
 }
 

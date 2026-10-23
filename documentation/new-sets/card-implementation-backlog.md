@@ -65,11 +65,6 @@ Remaining recorded Corp gaps:
 
 | ID    | Card                               | Known gap                                                        |
 | ----- | ---------------------------------- | ---------------------------------------------------------------- |
-| 26052 | Focus Group                        | Empty operation effect                                           |
-| 26053 | Game Over                          | Empty operation effect                                           |
-| 26054 | Increased Drop Rates               | Access ability absent                                            |
-| 26055 | Divested Trust                     | Agenda-steal response absent                                     |
-| 26056 | SDS Drone Deployment               | Steal cost and on-score effect absent                            |
 | 26061 | Secure and Protect                 | Empty operation effect                                           |
 | 26062 | Reduced Service                    | Rez, run-cost and counter-removal abilities absent               |
 | 26063 | Vulnerability Audit                | Installed-this-turn scoring restriction absent                   |
