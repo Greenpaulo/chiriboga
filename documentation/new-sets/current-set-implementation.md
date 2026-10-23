@@ -55,7 +55,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 3 | 26074–26078 | Complete | Claude, 2026-10-23 | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
 | 4 | 26079–26082 | Complete | Claude, 2026-10-23 | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
 | 5 | 26083–26087 | Complete | Claude, 2026-10-23 | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
-| 6 | 26088–26092 | Pending | — | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut (three existing, unverified), Paule's Café. Complex. |
+| 6 | 26088–26092 | Complete | Claude, 2026-10-23 | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut, Paule's Café. Existing three verified and repaired. |
 | 7 | 26093–26095 | Pending | — | Neutral Runner: Buffer Drive, Daily Casts, DreamNet (two existing, unverified). |
 | 8 | 26096–26100 | Pending | — | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
 | 9 | 26101–26105 | Pending | — | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
@@ -76,6 +76,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 3 | 26074–26078 | 2026-10-23 | Claude | `tests/uprising-batch3.test.js` (11 real-engine scenarios) | Bravado (distinct passed ice, pays on any run end), Boomerang (chosen ice, trash break 2, delayed heap-to-stack recursion), Mu Safecracker (stealth-only payment, +1 HQ/R&D access), Prognostic Q-Loop (first-run look, once-per-turn reveal/install), Swift (+1 MU, first run event click). No shared engine/AI changes. |
 | 4 | 26079–26082 | 2026-10-23 | Claude | `tests/uprising-batch4.test.js` | Afterimage stealth-only pump/bypass (restricted credits via encounter-option `restrictedCredits`), Makler, Penumbral Toolkit, The Back (new `automaticOnAbilityUsed` trigger, `HasTrashAbility` helper). See notes. |
 | 5 | 26083–26087 | 2026-10-23 | Claude | `tests/uprising-batch5.test.js` | Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler with baseline AI. Shared: `Trash()` records the `runnerEventTrashed`/`runnerInstalledProgramTrashed` turn events; played events trashed after resolving open `responseOnPlayedEventTrashed`; a Runner `AITriggerInPaidWindow()` consumer. See the [notes](uprising-implementation-notes.md#batch-5--2026-10-23). |
+| 6 | 26088–26092 | 2026-10-23 | Claude | `tests/uprising-batch6.test.js` | Penrose and Paule's Café implemented; SMC, Talut repaired (turn cleanup never fired, AI hooks uncalled); new `AIAbilityInstallBreakers` planner hook and pending paid-ability consumer in `ai_runner.js`. See implementation notes. |
 
 ## Batch-review log
 
@@ -96,6 +97,7 @@ initialised when each implementation batch completes.
 | 3 | 26074–26078 | Pending | — | Deeper strategy: Bravado as pure economy when no run is otherwise wanted; Boomerang trash not priced (may be spent where a cheap breaker would do) and target choice vs. future runs; Mu Safecracker always pays, ignoring later stealth-credit needs, and access estimate ignores credits spent breaking earlier in the run; Q-Loop knowledge can survive a stack shuffle that leaves the same card on top, and blind reveals are never used; Swift click gain absent from run-event click planning. See implementation notes. |
 | 4 | 26079–26082 | Pending | — | Corsair's `AIRunRestrictedCredits` still counts run-only stealth sources (Toolkit, Touchstone, Methuselah) that also report `AIRunPoolCreditOffset`, so with Corsair installed pre-run stealth budgets can double count; Makler's full-break 1[c] and Afterimage's once-per-turn bypass across finite reruns are not priced; Corp security does not price Afterimage's 2-credit bypass; The Back counts only abilities resolved through `TriggerAbility` (not optional hardware responses or hosted-credit spending) and picks heap cards by ELO. |
 | 5 | 26083–26087 | Pending | — | Deeper strategy only: Simulchip never pays the program-trash cost and is not used during runs (e.g. to recover a breaker trashed by a subroutine); Cordyceps only weakens the central just run, with unrezzed ice valued at the default threat estimate; Harmony AR Therapy ranks recovered cards by ELO, without deck-plan or Aniccam synergy; Aniccam has no event-count install valuation; Euler's install-turn free breaks are not anticipated when planning install-then-run. |
+| 6 | 26088–26092 | Pending | — | SMC/Café installs only before a run (first paid window), not reactively mid-run on unexpected ice; planner reserves 2 clicks for ability installs; Talut boost not applied to hypothetical installs; Café hosts only for a strict ≥2-connection saving (no storage/overflow hosting); Runner run budget ignores Mantle's credit for ordinary breaks. |
 
 ## Optimisation log
 

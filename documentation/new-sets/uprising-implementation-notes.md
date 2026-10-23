@@ -296,3 +296,45 @@ Card decisions:
   offers only its best threat-lowering swap.
 - Euler tracks `installedThisTurn`, reset when either turn begins. Its 2[c]
   break, like Buzzsaw's, makes the AI break a second subroutine when one remains.
+
+### Batch 6 — Shaper programs and resources (26088–26092), 2026-10-23
+
+- **Mantle**: existing definition verified unchanged (1 recurring credit; pays
+  only for using programs and hardware, not installs or general spending).
+- **Penrose**: implemented. Barrier break only while `installedThisTurn` (set
+  on its own install, cleared at either turn's discard end, as Gauss). The +3
+  pump is paid only from hosted credits on installed Stealth cards
+  (`SpendHostedCredits`, as Corsair) and, following the engine convention, is
+  offered only during an encounter with ice it can break and while too weak.
+  Pump lasts for the encounter.
+- **Self-modifying Code**: repaired. Payment is "using" the program (Mantle can
+  pay), trash is an unpreventable cost, and the install choices are computed
+  after paying 2[c]. Usable with an empty or program-less stack (a hidden-zone
+  search may fail to find); humans get "Install nothing". Ability text keeps
+  `[trash]` for the cross-set trash-cost check.
+- **Cybertrooper Talut**: repaired. Its `responseOnRunnerTurnEnds`/
+  `responseOnCorpTurnEnds` cleanup hooks do not exist in the engine, so the
+  boost never expired; it now clears at either turn's discard end. The boost is
+  a lingering effect (`modifyStrength` and cleanup are `availableWhenInactive`),
+  so it outlasts Talut, and it ends early if the breaker leaves play.
+  `boostedCards` is per copy (InstanceCard deep-copies definitions).
+- **Paule's Café**: implemented. Hosted cards are faceup, `notInstalled` (no
+  MU, not installed). Install is a paid ability (usable in any paid ability
+  window); the first install through it each Runner turn is reduced by the
+  number of installed unique Connection resources (`modifyInstallCost` on the
+  card being installed). Affordability checks the 1[c] ability cost and the
+  install cost against shared and restricted credit sources separately.
+- **Shared AI change** (`ai_runner.js`, ~60 lines): new hook
+  `AIAbilityInstallBreakers` feeds the run planner's bonus-breaker step. The
+  action phase offers click abilities only, so a chosen paid-ability install is
+  stored as `runner.AI._pendingAbilityInstall` and triggered by
+  `_pendingAbilityTrigger` in the next paid ability window (first approach of
+  the run, or Runner 1.3* after an action); it expires off the Runner's turn.
+  `AIInstallDiscountAbility` offers may add a `followUp` stored the same way
+  (Café host, then install). Removed SMC's uncalled ability-use hook and
+  mis-typed `AIIcebreakerTutor`.
+- Baseline AI evidence (tests/uprising-batch6.test.js): the real run planner
+  runs HQ planning SMC, then triggers SMC at Run 2.1 and fetches the planned
+  decoder; Penrose's stealth pump funds a strength-5 code gate route only with
+  Mantle credit; Talut's boost removes a pump from a route; CommandChoice turns
+  a grip install into Café host plus discounted install in Runner 1.3*.

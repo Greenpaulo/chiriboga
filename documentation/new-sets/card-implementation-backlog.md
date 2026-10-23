@@ -81,6 +81,9 @@ Batch 4 (26079–26082) is Complete; its optimisation row is Pending.
 - Batch 5 (26083–26087) is implemented; its deeper-strategy work is in the
   tracker's optimisation queue.
 
+Batch 6 (26088–26092) is complete, including the three existing definitions;
+its optimisation row is Pending.
+
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.
 

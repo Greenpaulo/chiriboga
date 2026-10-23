@@ -2334,7 +2334,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 
 | `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
 | `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes |
-| `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select}` when this card's ability can install the grip card more cheaply than the basic install action |
+| `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select, followUp?}` when this card's ability can install the grip card more cheaply than the basic install action; `followUp` names a paid ability to trigger next |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
@@ -2370,6 +2370,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPlayToDraw` | number | Priority for playing this card to draw |
 | `AIDrawInstall()` | function | Priority for installing this draw-enabling card |
 | `AIIcebreakerTutor(installed)` | function | Return eligible icebreakers, or `[]` when none are available |
+| `AIAbilityInstallBreakers(installed)` | function | Installed card: offer `[{card, cost, alt, select}]` icebreakers its paid ability can install; the run planner uses one in the next paid ability window (Uprising batch 6) |
 | `AIPermitMoreLeeches(installed)` | function | Card-specific install limit check |
 
 ### Corp AI Hooks
@@ -3521,3 +3522,43 @@ optimisation work.
   on its install turn (`installedThisTurn`), free single breaks; otherwise
   2[c] breaks up to 2. Its free ability is listed first, so a planned break uses
   it while available. `AIPreferredInstallChoice` keeps the last click.
+
+### Uprising batch 6 card hooks
+
+- `AIAbilityInstallBreakers(installedRunnerCards)` (new) is read from active,
+  ability-enabled Runner cards by the run planner's breaker-acquisition step
+  (`uniqueAffordableBreakers` in `ai_runner.js`). It returns
+  `[{card, cost, alt, select}]`: an icebreaker the card's paid ability can
+  install, the total credits (ability cost plus discounted install cost), the
+  ability `alt`, and an optional `select()` that targets that card for the
+  ability's AI choice. Titles already in the grip, installed or offered by a
+  tutor are skipped. The planner prices the route like any bonus breaker (pool
+  offset by `cost`, two clicks reserved). Because the action phase
+  (`Runner 1.3`) offers click abilities only, a chosen offer that is not
+  triggerable now is stored as `runner.AI._pendingAbilityInstall` and the AI
+  makes the run; `_pendingAbilityTrigger` triggers it in the next paid ability
+  window (normally the first Run 2.1 approach, or Runner 1.3* after another
+  action). Pending plans expire when it is not the Runner's turn or a new turn
+  begins, and are replanned at every action-phase run assessment. The hook must
+  be read-only; it may inspect the Runner's own stack (the Runner can search
+  it). Self-modifying Code offers stack icebreakers at `2 + InstallCost`;
+  Paule's Café offers hosted icebreakers at `1 + discounted InstallCost`.
+- `AIInstallDiscountAbility` offers may carry `followUp: {source, alt, card,
+  select}`. `CommandChoice` stores it as the pending ability after triggering
+  the offer, so a two-step route (Paule's Café: [click] host, then 1[c]
+  install) completes through the same pending consumer. Café offers only when
+  unique connections make host-and-install cheaper than a direct install
+  (discount of 2 or more; saving reported as discount minus 1).
+- Penrose: `AIImplementBreaker` breaks code gates for 1[c], and barriers only
+  while `installedThisTurn` or when it is the run planner's hypothetical
+  `rc.bonusBreaker`. Its +3 pump is modelled like Corsair's restricted stealth
+  payment (`restrictedCreditsSpent` / `restrictedCreditsPaid`), and
+  `AIRunRestrictedCredits` reports stealth credits outside the generic budget
+  (Mantle's), so pool credits never fund the pump.
+- Self-modifying Code: `AIInstallBeforeRun` and `AIWorthKeeping` require 2
+  free MU and a stack icebreaker; its uncalled ability-use hook and mis-typed
+  `AIIcebreakerTutor` (returned a card, read only for playable events) were
+  removed. Cybertrooper Talut's `AIEconomyInstall` returns 1 only when a
+  non-AI icebreaker waits in the grip; its boost reaches the run calculator
+  through `modifyStrength`. Mantle keeps `AIEconomyInstall`/`AIWorthKeeping`;
+  Corp security counts its credit through `canUseCredits("using", breaker)`.
