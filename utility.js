@@ -4052,9 +4052,10 @@ function ChoicesSubroutine(iceCard, triggeredSubroutine) {
  * Gets list of unbroken subroutines on ice being encountered.<br/>Nothing is logged.
  *
  * @method ChoicesEncounteredSubroutines
+ * @param {Subroutine[]} [selectedBreaks] pending breaks to exclude and include in break limits
  * @returns {Params[]} list of subroutines to choose from (each object has .subroutine and .label)
  */
-function ChoicesEncounteredSubroutines() {
+function ChoicesEncounteredSubroutines(selectedBreaks) {
   var ret = [];
   //Check if ice still exists (might have been trashed during encounter)
   if (
@@ -4066,7 +4067,11 @@ function ChoicesEncounteredSubroutines() {
   }
   for (var i = 0; i < attackedServer.ice[approachIce].subroutines.length; i++) {
     var subroutine = attackedServer.ice[approachIce].subroutines[i];
-    if (!subroutine.broken && !subroutine._lockedFromBreak && !CardEffectsForbid("break", subroutine)) {
+    if (
+      !subroutine.broken && !subroutine._lockedFromBreak &&
+      !(selectedBreaks || []).includes(subroutine) &&
+      !CardEffectsForbid("break", subroutine, selectedBreaks)
+    ) {
       var params = {};
       params.subroutine = subroutine;
       params.label = subroutine.text;

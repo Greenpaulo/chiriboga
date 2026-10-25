@@ -157,11 +157,52 @@ assert.strictEqual(c.ChoicesEncounteredSubroutines().length, 1, 'non-printed sub
 afsharHQ.subroutines.pop();
 c.UnbreakAll(afsharHQ);
 assert.strictEqual(c.ChoicesEncounteredSubroutines().length, 2, 'limit resets with a new encounter');
+// Utae counts pending selections before payment, without breaking anything early.
+const utae = put(card(26005), runner.rig.programs);
+for (const first of [0, 1]) {
+  c.UnbreakAll(afsharHQ); utae.usedThisRun = false; runner.creditPool = 5;
+  assert.strictEqual(c.ChoicesEncounteredSubroutines([afsharHQ.subroutines[first]]).length, 0);
+  assert(afsharHQ.subroutines.every(sub => !sub.broken), 'selection leaves live flags unchanged');
+  utae.abilities[0].Resolve.call(utae, {subroutine: afsharHQ.subroutines[first]});
+  assert.strictEqual(decisions.length, 0, 'no illegal second printed break is offered');
+  assert.strictEqual(runner.creditPool, 4, 'only one printed break is charged');
+  assert.strictEqual(afsharHQ.subroutines.filter(sub => sub.broken).length, 1);
+  assert(afsharHQ.subroutines[first].broken);
+  // Revalidation also rejects stale, repeated or over-limit selections at payment.
+  c.UnbreakAll(afsharHQ); utae.usedThisRun = false; runner.creditPool = 5;
+  utae.PayXAndBreak.call(utae, [afsharHQ.subroutines[first], afsharHQ.subroutines[first], afsharHQ.subroutines[1 - first]]);
+  assert.strictEqual(runner.creditPool, 4, 'invalid selections never add payment');
+  assert.strictEqual(afsharHQ.subroutines.filter(sub => sub.broken).length, 1);
+}
+// Gained subroutines do not consume Afshar's printed allowance, in either order.
+afsharHQ.subroutines.push(gained);
+for (const selected of [[gained, afsharHQ.subroutines[1]], [afsharHQ.subroutines[1], gained]]) {
+  c.UnbreakAll(afsharHQ); utae.usedThisRun = false; runner.creditPool = 5;
+  utae.abilities[0].Resolve.call(utae, {subroutine: selected[0]});
+  const choice = decisions.shift(); assert(choice, 'one additional legal break is offered');
+  assert(afsharHQ.subroutines.every(sub => !sub.broken));
+  choice.choose(choice.choices.find(option => option.subroutine == selected[1]));
+  assert.strictEqual(decisions.length, 0);
+  assert.strictEqual(runner.creditPool, 3, 'printed and gained breaks both paid');
+  assert(selected.every(sub => sub.broken));
+  assert(!afsharHQ.subroutines[0].broken);
+}
+afsharHQ.subroutines.pop(); c.UnbreakAll(afsharHQ);
+c.MoveCard(utae, runner.heap);
 // Remote copy has no limit.
 const afsharRemote = put(card(26058), remote().ice); afsharRemote.rezzed = true;
 encounter(c.GetServer(afsharRemote), 0); c.InvalidateActiveTriggerCandidateCache();
 c.Break(afsharRemote.subroutines[0]); c.Break(afsharRemote.subroutines[1]);
 assert(afsharRemote.subroutines.every(sub => sub.broken), 'both subroutines break away from HQ');
+c.UnbreakAll(afsharRemote); c.MoveCard(utae, runner.rig.programs);
+utae.usedThisRun = false; runner.creditPool = 5;
+utae.abilities[0].Resolve.call(utae, {subroutine: afsharRemote.subroutines[0]});
+const remoteChoice = decisions.shift(); assert(remoteChoice);
+remoteChoice.choose(remoteChoice.choices.find(option => option.subroutine == afsharRemote.subroutines[1]));
+assert.strictEqual(runner.creditPool, 3, 'Utae still pays for both remote breaks');
+assert(afsharRemote.subroutines.every(sub => sub.broken));
+c.MoveCard(utae, runner.heap);
+
 // Run calculator with Buzzsaw (break up to 2 code gate subroutines) honours the limit.
 c.encountering = false; c.attackedServer = null; c.approachIce = -1;
 afsharRemote.subroutines.forEach(sub => {sub.broken = false;});

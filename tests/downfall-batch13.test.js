@@ -269,16 +269,18 @@ assert.strictEqual(runner.creditPool, 4, 'Runner loses 1');
 // Rez legality: any non-ice rez window during runs on its server.
 rime.rezzed = false; c.InvalidateActiveTriggerCandidateCache();
 c.playerTurn = runner; c.activePlayer = corp;
-const rezOptions = phase => {c.currentPhase = phase; return c.phases.runApproachIce.Enumerate.rez().map(o => o.card);};
+const rezOptions = phase => {c.currentPhase = phase; return phase.Enumerate.rez().map(o => o.card);};
 c.attackedServer = home; c.approachIce = 0; // approaching the outer wall, not Rime
 assert(rezOptions(c.phases.runApproachIce).includes(rime), 'rezzable while another ice is approached');
 c.encountering = true; c.encounteredIce = wall;
-assert(rezOptions(c.phases.runEncounterIce).includes(rime), 'rezzable during an encounter');
+// Official Downfall release notes: Rime cannot rez in the encounter's no-rez window.
+assert(!rezOptions(c.phases.runEncounterIce).includes(rime), 'not rezzable during an encounter');
+assert(!rezOptions(c.phases.runDecideContinue).includes(rime), 'not rezzable in the pre-jack-out window');
 c.encountering = false; c.encounteredIce = null;
 c.approachIce = -1;
-assert(rezOptions(c.phases.runApproachServer).includes(rime), 'rezzable after passing all ice');
+assert(rezOptions(c.phases.runResponseBeforeApproach).includes(rime), 'rezzable in the post-jack-out window after passing all ice');
 const ordinary = put(ice('Ordinary inner', {rezCost: 0}), home.ice);
-assert(!rezOptions(c.phases.runApproachServer).includes(ordinary), 'ordinary ice keeps approach-only timing');
+assert(!rezOptions(c.phases.runResponseBeforeApproach).includes(ordinary), 'ordinary ice keeps approach-only timing');
 c.MoveCard(ordinary, corp.archives.cards);
 c.attackedServer = corp.HQ; c.approachIce = 0;
 assert(!rezOptions(c.phases.runApproachIce).includes(rime), 'not during runs on another server');

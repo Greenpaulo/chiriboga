@@ -91,15 +91,21 @@ class RunnerAI {
   //an AIOkToTrash card, else a non-icebreaker, else the cheapest by install
   //cost plus hosted credits and virus counters. Returns one of the choices.
   _stealCostProgramOption(choices) {
-    var score = function (card) {
-      var value = (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus");
-      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) value -= 100;
-      if (CheckSubType(card, "Icebreaker")) value += 10;
-      return value;
+    var rank = function (card) {
+      var tier = 1;
+      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) tier = 0;
+      else if (CheckSubType(card, "Icebreaker")) tier = 2;
+      return {tier: tier, cost: (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus")};
     };
     var best = choices[0];
-    for (var i = 1; i < choices.length; i++)
-      if (score(choices[i].card) < score(best.card)) best = choices[i];
+    var bestRank = rank(best.card);
+    for (var i = 1; i < choices.length; i++) {
+      var candidate = rank(choices[i].card);
+      if (candidate.tier < bestRank.tier || (candidate.tier == bestRank.tier && candidate.cost < bestRank.cost)) {
+        best = choices[i];
+        bestRank = candidate;
+      }
+    }
     return best;
   }
 

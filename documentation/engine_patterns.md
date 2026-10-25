@@ -215,7 +215,7 @@ modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
 modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
-modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid
+modifyCannot: Resolve(id, card, selectedBreaks); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid; optional selectedBreaks includes pending selections for multi-break limits
 ```
 
 ### Click Ability
@@ -343,7 +343,7 @@ EndTheRun();
 Trace(strength, callback); // callback(successful: bool)
 Break(subroutine);
 CheckUnbrokenSubroutines();
-ChoicesEncounteredSubroutines(); // unbroken + unlocked subs (respects _lockedFromBreak)
+ChoicesEncounteredSubroutines(selectedBreaks); // unbroken + unlocked subs; optional pending selections count toward break limits
 Rez(card, ignoreAllCosts, onRezResolve, context, allowCancel, costReduction, afterRezResponses);
 ```
 
@@ -759,7 +759,7 @@ modifyStrength: { Resolve: function(card) { if (card==this) return -Counters(thi
 ```js
 modifyStrength: {
   Resolve: function(card) {
-    if (card != this && this.rezzed && CheckCardType(card, ["ice"])) {
+    if (this.rezzed && CheckCardType(card, ["ice"])) {
       var s = GetServer(this);
       if (s != null && GetServer(card) == s) return 1;
     }
