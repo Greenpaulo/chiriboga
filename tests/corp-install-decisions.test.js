@@ -382,6 +382,28 @@ test('manual opening catches preferred/card-granted choices and identifies force
   assert.strictEqual(ai._openingIceServerChoices(card, destinations), destinations);
 });
 
+test('manual opening preserves an ICE selection already at the required central', () => {
+  for (const ordinal of [0, 1]) {
+    const ai = openingAI(), card = {...iceA, player: corp};
+    ai._completedIceInstalls = ordinal;
+    const target = ai._openingIceTarget();
+    const options = [{card: iceB, server: target}, {card, server: target}, {card: null}];
+    ai._bestInstallOption = () => 0;
+    assert.strictEqual(ai._openingIceChoice(options, 1), 1,
+      'a valid lower-ranked selection must survive the destination guard');
+    ai._bestInstallOption = () => -1;
+    assert.strictEqual(ai._openingIceChoice(options, 1), 1,
+      'a valid selection must not become a decline');
+    assert.strictEqual(ai._openingIceChoice(options.slice(0, 2), 1), 1);
+    assert.strictEqual(ai._openingIceExceptions.has(card), false,
+      'a normal central install must not be recorded as forced');
+    let completion;
+    ai._iceInstallTelemetry = (card, server, record) => {completion = record;};
+    ai._recordCompletedIceInstall(card, target);
+    assert.strictEqual(completion.reason, 'requiredCentral');
+  }
+});
+
 test('manual opening keeps planning, hypotheticals, hidden information and reset independent of progress', () => {
   const ai = openingAI(), card = {...iceA, player: corp};
   for (let n = 0; n < 3; n++) ai._marginalIceInstallOptions([iceA], false, true, {});

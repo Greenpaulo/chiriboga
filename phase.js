@@ -447,6 +447,7 @@ phaseTemplates.globalTriggers = {
       AutomaticTriggers("automaticOnWouldApproachServer", [attackedServer]);
       Log("Approaching " + attackedServer.serverName);
       approachIce = -1;
+      AutomaticTriggers("automaticOnApproachServer", [attackedServer]);
     }
     //END DRBO6 - EDIT FOR MAINTENANCE ACCESS
 

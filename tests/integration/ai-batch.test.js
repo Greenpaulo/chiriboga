@@ -104,6 +104,57 @@ run(async ({
     assert.strictEqual(a.games.length, 2);
   });
 
+  await scenario('parent deadline stops blocked workers, saves diagnostics and completes remaining games', () => {
+    for (const blockAll of [false, true]) {
+      const preload = setupFile('worker-blocked-' + blockAll, `
+        if (process.argv.includes('--worker')) {
+          process.on('message', job => {
+            if (job.seed !== '1' && !${blockAll}) {
+              process.send({record: {deckPairId: job.deckPairId, seed: job.seed, fixtureId: job.fixtureId,
+                ok: true, winner: 'corp', errors: [], metrics: {winRate: 1, pointsScored: 7,
+                  pointsStolen: 0, gameLength: 1}}, options: {corp: {}, runner: {}}});
+              return;
+            }
+            process.send({diagnostic: {phase: 'Run: Subroutines', identifier: 'Run Subroutines',
+              tail: ['last engine log before blocking']}});
+            while (true) {} // Neither the game timer nor its event loop can run.
+          });
+          process.on = function(name, listener) {
+            if (name === 'message') return this;
+            return require('events').EventEmitter.prototype.on.call(this, name, listener);
+          };
+        }
+      `);
+      const out = path.join(tmp, 'worker-blocked-' + blockAll + '.json');
+      const result = cli(['--pairs', 'gateway', '--seeds', '1-2', '--jobs', blockAll ? '2' : '1',
+        '--timeout', '2', '--out', out], {NODE_OPTIONS: '--require ' + JSON.stringify(preload)});
+      assert.strictEqual(result.status, 1, result.out);
+      const report = JSON.parse(fs.readFileSync(out, 'utf8'));
+      assert.strictEqual(report.games.length, 2);
+      assert.strictEqual(report.failures.length, blockAll ? 2 : 1);
+      for (const failure of report.failures) {
+        assert.match(failure.reason, /Worker timeout after 2 s/);
+        assert.strictEqual(failure.diagnostic.phase, 'Run: Subroutines');
+        assert.deepStrictEqual(failure.diagnostic.tail, ['last engine log before blocking']);
+        const record = report.games.find(g => g.seed === failure.seed);
+        assert.strictEqual(record.corp, gateway.corp);
+        assert.strictEqual(record.runner, gateway.runner);
+      }
+      if (!blockAll) assert(report.games.find(g => g.seed === '2').ok,
+        'a replacement worker finishes the next game');
+    }
+  });
+
+  await scenario('headless diagnostics include recent engine logs without changing gameplay', async () => {
+    const diagnostics = [];
+    const plain = await game();
+    const observed = await game({onDiagnostic: d => diagnostics.push(d)});
+    assert(observed.winner);
+    assert.strictEqual(observed.logHash, plain.logHash);
+    assert(diagnostics.some(d => d.tail.length > 0));
+    assert(diagnostics.every(d => d.tail.length <= 50));
+  });
+
   await scenario('worker exits with an outstanding job reject without publishing a report', async () => {
     // A preload intercepts the real worker's first dispatch, before playJob.
     // Seed 2 stays alive without replying: failure must also stop this sibling.
