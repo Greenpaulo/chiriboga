@@ -3423,6 +3423,9 @@ function projectIngatanInstall(cardRef, cardToInstall) {
     serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   }
   
+  if (corp.AI && typeof corp.AI._openingIceServerChoices === "function")
+    serverChoices = corp.AI._openingIceServerChoices(cardToInstall, serverChoices);
+
   DecisionPhase(
     corp,
     serverChoices,
@@ -4241,6 +4244,9 @@ function poetriInstallCard(cardToInstall) {
     serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   }
   
+  if (corp.AI && typeof corp.AI._openingIceServerChoices === "function")
+    serverChoices = corp.AI._openingIceServerChoices(cardToInstall, serverChoices);
+
   DecisionPhase(
     corp,
     serverChoices,
@@ -4439,6 +4445,9 @@ function mycowebInstallIce(iceToInstall) {
   }
   serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   
+  if (corp.AI && typeof corp.AI._openingIceServerChoices === "function")
+    serverChoices = corp.AI._openingIceServerChoices(iceToInstall, serverChoices);
+
   DecisionPhase(
     corp,
     serverChoices,
@@ -5990,8 +5999,12 @@ cardSet[35071] = {
                     
                     //**AI code
                     if (corp.AI != null && serverChoices.length > 1) {
-                      //AI picks first available server option
-                      serverChoices = [serverChoices[0]];
+                      var openingIndex = 0;
+                      if (typeof corp.AI._openingIceServerChoices === "function") {
+                        serverChoices = corp.AI._openingIceServerChoices(foundCard, serverChoices);
+                        openingIndex = corp.AI._openingIceChoice(serverChoices, 0);
+                      }
+                      serverChoices = [serverChoices[openingIndex]];
                     }
                     
                     DecisionPhase(
@@ -9211,6 +9224,7 @@ cardSet[35058] = {
           if (choice.card.cardType == "asset") return choice.server == null &&
             RezCost(choice.card) <= Credits(corp);
           return choice.card.cardType == "ice" && choice.server &&
+            (typeof corp.AI._openingIceAllows !== "function" || corp.AI._openingIceAllows(choice.card, choice.server)) &&
             choice.server.cards && RezCost(choice.card) <= Credits(corp);
         });
         useful.sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });
