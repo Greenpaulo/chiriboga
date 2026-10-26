@@ -3548,13 +3548,15 @@ function PlayClickCost(card) {
  *
  * @method StealCost
  * @param {Card} card agenda being accessed
- * @returns {{credits:int, clicks:int}} additional steal costs
+ * `programs` counts installed programs the Runner must trash (SDS Drone Deployment).
+ * @returns {{credits:int, clicks:int, programs:int}} additional steal costs
  */
 function StealCost(card) {
-  var ret = { credits: 0, clicks: 0 };
+  var ret = { credits: 0, clicks: 0, programs: 0 };
   if (card && card.stealCost) {
     ret.credits += card.stealCost.credits || 0;
     ret.clicks += card.stealCost.clicks || 0;
+    ret.programs += card.stealCost.programs || 0;
   }
   var triggerList = ChoicesActiveTriggers("modifyStealCost");
   for (var i = 0; i < triggerList.length; i++) {
@@ -3565,10 +3567,57 @@ function StealCost(card) {
     if (!modification) continue;
     ret.credits += modification.credits || 0;
     ret.clicks += modification.clicks || 0;
+    ret.programs += modification.programs || 0;
   }
   ret.credits = Math.max(0, ret.credits);
   ret.clicks = Math.max(0, ret.clicks);
+  ret.programs = Math.max(0, ret.programs);
   return ret;
+}
+
+/**
+ * Installed Runner programs that can be trashed to pay a steal cost.
+ *
+ * @method StealCostProgramChoices
+ * @returns {Object[]} card choices
+ */
+function StealCostProgramChoices() {
+  return ChoicesInstalledCards(runner, function (card) {
+    return CheckCardType(card, ["program"]) && CheckTrash(card);
+  });
+}
+
+/**
+ * Pay a steal cost's program trashes one at a time (a cost: not preventable).
+ *
+ * @method PayStealCostPrograms
+ * @param {Card} agenda being stolen
+ * @param {int} count programs still to trash
+ * @param {function} afterPaying called once all are trashed
+ */
+function PayStealCostPrograms(agenda, count, afterPaying) {
+  var choices = StealCostProgramChoices();
+  if (count < 1 || choices.length < 1) {
+    afterPaying();
+    return;
+  }
+  if (runner.AI != null && typeof runner.AI._stealCostProgramOption == "function")
+    runner.AI.preferred = {
+      title: "Steal cost",
+      option: runner.AI._stealCostProgramOption(choices),
+    };
+  DecisionPhase(
+    runner,
+    choices,
+    function (params) {
+      Trash(params.card, false, function () {
+        PayStealCostPrograms(agenda, count - 1, afterPaying);
+      }, null, undefined, runner);
+    },
+    "Steal cost",
+    "Trash 1 installed program to steal " + GetTitle(agenda, true),
+    null,
+  );
 }
 
 /**
@@ -4003,9 +4052,10 @@ function ChoicesSubroutine(iceCard, triggeredSubroutine) {
  * Gets list of unbroken subroutines on ice being encountered.<br/>Nothing is logged.
  *
  * @method ChoicesEncounteredSubroutines
+ * @param {Subroutine[]} [selectedBreaks] pending breaks to exclude and include in break limits
  * @returns {Params[]} list of subroutines to choose from (each object has .subroutine and .label)
  */
-function ChoicesEncounteredSubroutines() {
+function ChoicesEncounteredSubroutines(selectedBreaks) {
   var ret = [];
   //Check if ice still exists (might have been trashed during encounter)
   if (
@@ -4017,7 +4067,11 @@ function ChoicesEncounteredSubroutines() {
   }
   for (var i = 0; i < attackedServer.ice[approachIce].subroutines.length; i++) {
     var subroutine = attackedServer.ice[approachIce].subroutines[i];
-    if (!subroutine.broken && !subroutine._lockedFromBreak) {
+    if (
+      !subroutine.broken && !subroutine._lockedFromBreak &&
+      !(selectedBreaks || []).includes(subroutine) &&
+      !CardEffectsForbid("break", subroutine, selectedBreaks)
+    ) {
       var params = {};
       params.subroutine = subroutine;
       params.label = subroutine.text;

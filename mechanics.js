@@ -1096,6 +1096,11 @@ function Play(card, onPlayResolve, context) {
  * @param {Subroutine} subroutine the subroutine to break
  */
 function Break(subroutine) {
+  // Printed break limits (Afshar) forbid this break on every breaker path.
+  if (CardEffectsForbid("break", subroutine)) {
+    Log('Subroutine "' + subroutine.text + '" cannot be broken');
+    return;
+  }
   subroutine.broken = true;
   //particle effect
   var card = GetApproachEncounterIce();

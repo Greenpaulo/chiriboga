@@ -6120,7 +6120,8 @@ class CorpAI {
     //check for cards in hand that could be installed and fast-advanced to win
     for (var i = 0; i < corp.HQ.cards.length; i++) {
       var card = corp.HQ.cards[i];
-      if (CheckCardType(card, ["agenda"])) {
+      //An agenda that cannot be scored on its install turn cannot win this way.
+      if (CheckCardType(card, ["agenda"]) && !card.AICannotScoreOnInstallTurn) {
         if (AgendaPoints(corp) + card.agendaPoints >= AgendaPointsToWin()) {
           if (
             this._advancementLimit(card, strongestEmptyRemote) <=
@@ -9074,7 +9075,9 @@ class CorpAI {
         for (var rezIndex = 0; rezIndex < rezCandidates.length; rezIndex++) {
           var rezCandidate = rezCandidates[rezIndex];
           if (typeof rezCandidate.AIRezWhenCan == "function" &&
-              FullCheckRez(rezCandidate, ["asset", "upgrade"]) &&
+              FullCheckRez(rezCandidate,
+                typeof CheckRezAsNonIceDuringRun == "function" &&
+                CheckRezAsNonIceDuringRun(rezCandidate) ? ["asset", "upgrade", "ice"] : ["asset", "upgrade"]) &&
               rezCandidate.AIRezWhenCan.call(rezCandidate))
             return this._returnPreference(optionList, "rez", {cardToRez: rezCandidate});
         }

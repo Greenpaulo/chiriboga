@@ -367,6 +367,12 @@ costs under 0.8, and otherwise switches to an exit strategy.
   whenever offered, with no value comparison; then a card trigger above 1, any
   trigger at 1, a card trigger above 0, else no action.
 
+For program steal costs, `RunnerAI._stealCostProgramOption(choices)` prefers
+an `AIOkToTrash` program, then a non-Icebreaker, then an Icebreaker. Within each
+tier it chooses the lowest install cost plus hosted credits and virus counters.
+`PayStealCostPrograms` trashes the chosen program as an unpreventable cost before
+`Steal`. The Runner still steals whenever legally offered.
+
 ## What the Runner AI knows
 
 **HQ memory.** `suspectedHQCards` holds title, card type, copies and
