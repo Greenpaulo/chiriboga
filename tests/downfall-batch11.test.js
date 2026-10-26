@@ -282,6 +282,21 @@ d = decisions[0]; assert.strictEqual(d.player, runner); assert.strictEqual(d.cho
 assert.strictEqual((await chooseAI(runner)).card, spare, 'Runner AI keeps its icebreaker');
 assert(runner.heap.includes(spare) && runner.rig.programs.includes(keep));
 assert(runner.scoreArea.includes(drone), 'stolen after paying');
+// Priority tiers must hold even when hosted counters overwhelm the old offsets.
+const cheapBreaker = breaker('Cheap breaker', 1);
+const valuableUtility = program('Counter-heavy utility', []);
+valuableUtility.virus = 30;
+const disposable = breaker('Disposable breaker', 5);
+disposable.credits = 150; disposable.AIOkToTrash = function () {return true;};
+const cheaperDisposable = program('Cheaper disposable', []);
+cheaperDisposable.virus = 120; cheaperDisposable.AIOkToTrash = function () {return true;};
+const stealPick = cards => runner.AI._stealCostProgramOption(cards.map(card => ({card}))).card;
+for (const cards of [[cheapBreaker, valuableUtility], [valuableUtility, cheapBreaker]])
+  assert.strictEqual(stealPick(cards), valuableUtility, 'non-Icebreaker tier precedes counter cost');
+for (const cards of [[cheapBreaker, valuableUtility, disposable], [disposable, valuableUtility, cheapBreaker]])
+  assert.strictEqual(stealPick(cards), disposable, 'AIOkToTrash tier precedes counter cost and subtype');
+assert.strictEqual(stealPick([disposable, cheaperDisposable]), cheaperDisposable, 'cost breaks ties inside a tier');
+assert.strictEqual(stealPick([valuableUtility, program('Cheap utility', [])]).title, 'Cheap utility');
 // Scoring trashes the most threatening program through the Corp trash selector.
 reset();
 const scoreMe = put(card(26056), remote().root); scoreMe.advancement = 5;

@@ -9154,7 +9154,7 @@ class CorpAI {
     var choice = options[selected];
     if (!choice || !Object.prototype.hasOwnProperty.call(choice, "server") ||
         !choice.card || choice.card.cardType !== "ice") return selected;
-    if (choice.server !== target && this._openingIceAllows(choice.card, choice.server)) return selected;
+    if (this._openingIceAllows(choice.card, choice.server)) return selected;
     var permitted = options.filter(option => option && option.card && option.card.cardType === "ice" &&
       Object.prototype.hasOwnProperty.call(option, "server") && option.server === target);
     var best = permitted.length ? this._bestInstallOption(permitted, false, true) : -1;

@@ -545,9 +545,10 @@ var phaseOptions = []; //contains all the valid/legal actions Params[] for this 
  * @method CardEffectsForbid
  * @param {String} id phase option
  * @param {Card} card specific card for which the option may be forbidden
+ * @param {Subroutine[]} [selectedBreaks] pending breaks in the same selection
  * @returns {Boolean} true if forbidden, false if permitted
  */
-function CardEffectsForbid(id, card) {
+function CardEffectsForbid(id, card, selectedBreaks) {
   var triggerName = "modifyCannot";
   var triggerList = ChoicesActiveTriggers(triggerName);
   //assumes all are automatic
@@ -556,7 +557,8 @@ function CardEffectsForbid(id, card) {
       triggerList[i].card[triggerName].Resolve.call(
         triggerList[i].card,
         id,
-        card
+        card,
+        selectedBreaks
       )
     )
       return true; //at least one card effect forbids it for this card

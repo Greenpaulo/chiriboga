@@ -579,13 +579,11 @@ cardSet[26005] = {
     if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return false;
     return CheckStrength(this);
   },
-  // X is chosen by selecting the subroutines before paying; nothing changes
-  // between the choice and the single X-credit payment.
+  // Include pending selections in break restrictions before choosing X.
+  // Revalidate the complete selection before the single X-credit payment.
   ChooseXSubroutines: function (selected) {
     var affordable = AvailableCredits(runner, "using", this);
-    var choices = ChoicesEncounteredSubroutines().filter(function (choice) {
-      return !selected.includes(choice.subroutine);
-    });
+    var choices = ChoicesEncounteredSubroutines(selected);
     if (selected.length >= affordable || choices.length < 1) {
       this.PayXAndBreak(selected);
       return;
@@ -610,6 +608,14 @@ cardSet[26005] = {
     );
   },
   PayXAndBreak: function (selected) {
+    var legal = [];
+    for (var i = 0; i < selected.length; i++) {
+      if (ChoicesEncounteredSubroutines(legal).some(function (choice) {
+        return choice.subroutine == selected[i];
+      })) legal.push(selected[i]);
+    }
+    if (legal.length < 1) return;
+    selected = legal;
     this.usedThisRun = true;
     SpendCredits(
       runner,
@@ -4719,10 +4725,11 @@ cardSet[26058] = {
   rezCost: 3,
   strength: 1,
   // Printed subroutines broken this encounter (broken flags reset when an encounter begins).
-  _printedBroken: function () {
+  _printedBroken: function (selectedBreaks) {
     var count = 0;
     for (var i = 0; i < this.subroutines.length; i++) {
-      if (this.subroutines[i].printed && this.subroutines[i].broken) count++;
+      if (this.subroutines[i].printed &&
+        (this.subroutines[i].broken || (selectedBreaks || []).includes(this.subroutines[i]))) count++;
     }
     return count;
   },
@@ -4731,11 +4738,11 @@ cardSet[26058] = {
   },
   // CardEffectsForbid("break", subroutine) is checked by ChoicesEncounteredSubroutines and Break.
   modifyCannot: {
-    Resolve: function (id, subroutine) {
+    Resolve: function (id, subroutine, selectedBreaks) {
       if (id !== "break" || !subroutine || !subroutine.printed) return false;
       if (this.subroutines.indexOf(subroutine) < 0) return false;
       if (!this._breakLimitApplies()) return false;
-      return this._printedBroken() >= 1;
+      return this._printedBroken(selectedBreaks) >= 1;
     },
   },
   subroutines: [
