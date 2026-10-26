@@ -3156,6 +3156,8 @@ cardSet[30039] = {
 			  }
 			  //AI can nope out if it realises there are no good options (better to keep the ice in hand)
 			  if (!wouldRez && params.id == 0) return; //the decision phase is skipped
+			  if (typeof corp.AI._openingIceEmergencyInstall === "function" &&
+			      !corp.AI._openingIceEmergencyInstall(harcc, attackedServer)) return;
 			  corp.AI._log("I choose this one");			  
 			  corp.AI.preferred = { command: "install", cardToInstall: harcc, serverToInstallTo:attackedServer };
 			}

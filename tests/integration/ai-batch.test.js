@@ -5,6 +5,51 @@ run(async ({
   assert, fs, path, readFixture, metrics, batch, root, pool, ranges, tmp, scenario, gateway,
   TEST_OPTION, game, cli, stable, setupFile, RECORD, EXTRA_DRAW
 }) => {
+  await scenario('opening coverage observation preserves baseline choices, logs and real opening samples', async () => {
+    const events = [], plainEvents = [];
+    const plain = await game({observe: false, onEvent: event => plainEvents.push(event)});
+    const observed = await game({observe: true, onEvent: event => events.push(event)});
+    assert(plain.winner && observed.winner);
+    assert.deepStrictEqual(observed.errors, []);
+    assert.strictEqual(observed.logHash, plain.logHash);
+    const choices = rows => JSON.stringify(rows.filter(e => e.type === 'decision')
+      .map(e => [e.side, e.identifier, e.choiceType, e.options, e.chosen]));
+    assert.strictEqual(choices(events), choices(plainEvents));
+    const hands = events.filter(e => e.type === 'openingHand');
+    assert.deepStrictEqual(hands.map(e => e.stage), ['offered', 'kept', 'firstDraw']);
+    assert.strictEqual(hands[0].mulligan, Boolean(events.find(e => e.type === 'mulligan' && e.side === 'corp')));
+    assert(events.some(e => e.type === 'corpIceInstallCompleted'));
+    for (const turn of [1, 2]) {
+      const boundary = events.find(e => e.type === 'turnEnd' && e.side === 'corp' && e.turn === turn);
+      assert(boundary && typeof boundary.centralIce.hq === 'number' && typeof boundary.centralIce.rd === 'number');
+    }
+  });
+
+  await scenario('manual opening flag reaches real HQ/R&D installs without changing mulligans or passive observation', async () => {
+    const histories = [];
+    for (const enabled of [false, true]) {
+      const events = [], plainEvents = [];
+      const base = {corpOptions: {openingHqThenRdIce: enabled, iceMarginalSecurity: true}};
+      const plain = await game({...base, observe: false, onEvent: e => plainEvents.push(e)});
+      const observed = await game({...base, observe: true, onEvent: e => events.push(e)});
+      assert(plain.winner && observed.winner);
+      assert.deepStrictEqual(observed.errors, []);
+      assert.strictEqual(observed.logHash, plain.logHash);
+      const choices = rows => JSON.stringify(rows.filter(e => e.type === 'decision')
+        .map(e => [e.side, e.identifier, e.choiceType, e.options, e.chosen]));
+      assert.strictEqual(choices(events), choices(plainEvents));
+      histories.push(events.filter(e => e.type === 'openingHand'));
+      assert.deepStrictEqual(histories.at(-1).map(e => e.stage), ['offered', 'kept', 'firstDraw']);
+      const installs = events.filter(e => e.type === 'corpIceInstallCompleted');
+      assert(installs.length > 0);
+      if (enabled) assert.deepStrictEqual(installs.slice(0, 2).map(e => [e.actual, e.reason]),
+        [['hq', 'requiredCentral'], ['rd', 'requiredCentral']]);
+    }
+    // Hand arrays originate in separate VM realms; compare their data values.
+    assert.strictEqual(JSON.stringify(histories[0]), JSON.stringify(histories[1]),
+      'opening flag does not alter mulligan/draw policy');
+  });
+
   await scenario('I2.2 passive probe preserves real choices and logs with either policy', async () => {
     for (const enabled of [false, true]) {
       const plainEvents = [], probeEvents = [];

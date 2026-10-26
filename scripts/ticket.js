@@ -380,8 +380,18 @@ function startBoardsTagged(tags) {
 
 // The ticket's state in one line (ai-planning.md, "When a gate fails").
 const outcomeLine = text => (text.match(/^\*\*Outcome:\*\*\s*(.+)$/m) || [])[1];
-// A failed idea is removed, not left switched off.
-const failedGateResult = (option, setting, code = '') => {
+// Only the complete declaration prescribed in ai-planning.md permits retention.
+function hasManualPlaytesting(option, resolution) {
+  const declaration = (resolution || '').match(/^\*\*Manual playtesting:\*\* owner-requested — `(\w+)`, \d{4}-\d{2}-\d{2}; defaults to off\.[ \t]*\r?$/m);
+  return Boolean(option && declaration && declaration[1] === option);
+}
+
+// Failed ideas are normally removed. The owner may explicitly retain one
+// default-off for manual playtesting without adopting it as the default.
+const failedGateResult = (option, setting, code = '', manualPlaytesting = false) => {
+  if (manualPlaytesting) return setting === 'false'
+    ? ['PASS', 'Gate failed; owner-requested manual playtesting retains ' + option + ' default off.']
+    : ['FAIL', 'Manual playtesting retention requires ' + option + ' to have an explicit false default.'];
   //A removed option may share its name with an existing evaluation field.
   //Inspect option accesses, ignoring comments and opaque string contents.
   const tokens = reproductionTokens(code);
@@ -426,6 +436,8 @@ function check(ticket, {fast = false} = {}) {
 
   const outcome = outcomeLine(text);
   const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
+  const optionName = gate && (gate.match(/`(\w+)`/) || [])[1];
+  const manualPlaytesting = hasManualPlaytesting(optionName, resolution);
   const outcomeIssue = outcomeProblem(outcome, gate);
   if (outcomeIssue) report(...outcomeIssue);
   const notAdopted = outcome && /^not adopted\b/i.test(outcome);
@@ -433,7 +445,7 @@ function check(ticket, {fast = false} = {}) {
   const reproLine = (text.match(/^\*\*Reproduction:\*\*(.*)$/m) || [])[1] || '';
   const pending = (reproLine.match(/`(tests\/[^`]+)`/) || [])[1];
   const green = pending && greenPathFor(pending);
-  if (notAdopted) {
+  if (notAdopted && !manualPlaytesting) {
     if (!pending) report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
     else if (!green) report('FAIL', 'Not adopted, but reproduction ' + pending + ' is not a pending path.');
     else if (!fs.existsSync(path.join(root, pending)))
@@ -497,7 +509,7 @@ function check(ticket, {fast = false} = {}) {
     const failed = gate && /^failed\b/i.test(gate);
     if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');
     else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
-    else if (failed) report(...failedGateResult(option, setting, code));
+    else if (failed) report(...failedGateResult(option, setting, code, manualPlaytesting));
     else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
     else if (!passed) report('WARN', 'Gate not passed; ' + option + ' defaults to off: ' + gate);
@@ -505,7 +517,7 @@ function check(ticket, {fast = false} = {}) {
     // The gate's setup is part of the ticket: every collector and start board
     // its gate commands name must exist before review.
     // A not-adopted ticket's gate is history; its boards may have been rebuilt or dropped since.
-    if (!notAdopted) for (const problem of gateSetupProblems(text)) report('FAIL', problem);
+    if (!notAdopted || manualPlaytesting) for (const problem of gateSetupProblems(text)) report('FAIL', problem);
   }
 
   for (const [level, message] of results) console.log(level.padEnd(4) + ' ' + message);
@@ -533,7 +545,8 @@ function check(ticket, {fast = false} = {}) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
+  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem,
+  hasManualPlaytesting};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);

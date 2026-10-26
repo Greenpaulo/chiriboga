@@ -35,7 +35,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
 | 1 | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | in code review | Review passive install/lifecycle tooling, findings and completed control calibration; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
 | 2 | [I2.2](../backlog/code-review/I2.2-rnd-protection-lateness-investigation.md) | in code review | Retain I2 after timing replication and paired attribution; I3/I9 constraints and passive probe ready for review |
-| 3 | [I2.3](../backlog/I2.3-hq-then-rnd-opening-ice-gate.md) | ready | Gate the owner's HQ-first, R&D-second opening ICE rule against adopted I2; freeze this comparison before I3 design |
+| 3 | [I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md) | in-progress | F4 failed; keep default-off opening flag for Paul's manual playtests |
 | 4 | [I3](specs/I3-remote-role-and-root-suitability.md), then remaining install track | proposed | Reuse L8.9's findings; incorporate reviewed I2.2 and the I2.3 comparison before freezing the design; fresh control and separate policy gates |
 
 F11, F12 and I2 are done; I2 is merged. L8.2 was not adopted (full gate failed;
@@ -49,7 +49,7 @@ evidence and explicit I3/I9 measurement constraints. Incorporate its reviewed
 disposition before I3 design freeze; this is not an outstanding I2 acceptance criterion. I3 and I5 should reuse L8.9's tooling
 and findings, with fresh matching controls for their own policies.
 
-The owner requested [I2.3](../backlog/I2.3-hq-then-rnd-opening-ice-gate.md)
+The owner requested [I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md)
 on 2026-10-22: compare HQ-first/R&D-second opening ICE against current I2,
 with I2 retained as the control until a separate frozen gate passes. Run this
 comparison before I3 design freeze; I2.2's investigation did not test it.
@@ -260,10 +260,16 @@ I9 comes last.
 - **Goal:** Attribute I2's late R&D protection and higher R&D theft before I3 design freeze; record an evidence-backed trade-off decision or raise a concrete separately gated repair.
 
 ### I2.3 HQ-first, R&D-second opening ICE gate
-- **Status:** ready
+- **Status:** in-progress
 - **Depends on:** I2, F4
-- **Ticket:** [I2.3-hq-then-rnd-opening-ice-gate.md](../backlog/I2.3-hq-then-rnd-opening-ice-gate.md)
-- **Goal:** Compare mandatory HQ-first/R&D-second opening ICE with adopted I2, preserving subsequent I2 placement; gate R&D and combined central theft improvements against scoring, win, economy and deception guards before I3 design freeze.
+- **Ticket:** [I2.3-hq-then-rnd-opening-ice-gate.md](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md)
+- **Goal:** F4 does not support default adoption; retain the opening policy for Paul to playtest himself, by his explicit request.
+- **Manual playtesting:** In [ai_corp.js](../../ai_corp.js), edit `CorpAI.DEFAULT_OPTIONS`:
+  set `openingHqThenRdIce: true` for first completed ICE on HQ, second on R&D,
+  then normal I2; set it to `false` for normal I2 throughout. Keep
+  `iceMarginalSecurity: true`. Reload the page and start a new game after editing.
+  The committed default remains `false`. The batch failure is preserved as
+  evidence about the tested AI-vs-AI version, not a decision about Paul's games.
 
 ### I3 Remote role and root suitability
 - **Status:** proposed
