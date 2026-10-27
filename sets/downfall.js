@@ -1727,31 +1727,22 @@ cardSet[26018] = {
   },
   //Interrupt -> The first time each turn you would draw any number of cards, look at the top X cards
   //of your stack. Add 1 of those cards to the bottom of your stack. X is the number you would draw plus 1.
-  //Draw moves the cards before its responses, so this resolves as the equivalent choice afterwards:
-  //the drawn cards plus the new top card of the stack. Choosing a drawn card swaps it for that top card.
-  //With no card left in the stack, every looked-at card would be drawn anyway, so nothing changes.
-  responseOnCardsDrawn: {
-    Enumerate: function (cards) {
-      if (TurnEventCount("runnerDraw") != 1) return [];
-      if (!cards || cards.length < 1 || cards[0].player != runner) return [];
-      if (runner.stack.length < 1) return [];
-      var looked = cards.filter(function (card) {
-        return runner.grip.includes(card);
-      });
-      if (looked.length < cards.length) return []; //a drawn card already left the grip
-      looked.push(runner.stack[runner.stack.length - 1]);
+  responseOnWouldDraw: {
+    //The trigger decision grants a private look only for its card choices.
+    privateLook: true,
+    Enumerate: function (draw) {
+      if (draw.player != runner || !draw.firstThisTurn || runner.stack.length < 1) return [];
+      var looked = runner.stack.slice(-(draw.count + 1)).reverse();
       var choices = ChoicesArrayCards(looked);
       choices.forEach(function (choice) {
-        choice.label = "Bottom of stack: " + GetTitle(choice.card, true);
-        choice.button = choice.label;
+        //This instruction grants the Runner a look, not a public reveal.
+        choice.label = "Bottom of stack: " + choice.card.title;
       });
       if (runner.AI) return [choices[this._aiBottomIndex(looked)]];
       return choices;
     },
     Resolve: function (params) {
-      var top = runner.stack[runner.stack.length - 1];
-      MoveCard(params.card, runner.stack, 0); //bottom of the stack
-      if (params.card != top) MoveCard(top, runner.grip);
+      MoveCard(params.card, runner.stack, 0);
       Log("The Class Act: a card was added to the bottom of the stack");
     },
     text: "The Class Act: Add 1 card to the bottom of your stack",
@@ -1759,7 +1750,7 @@ cardSet[26018] = {
   //AI: send the least useful card to the bottom
   _aiBottomIndex: function (cards) {
     var keep = runner.AI._cardsWorthKeeping(cards);
-    var alreadyHave = InstalledCards(runner).concat(runner.grip);
+    var alreadyHave = InstalledCards(runner).concat(runner.grip, cards);
     for (var i = 0; i < cards.length; i++) {
       if (cards[i].unique && runner.AI._copyOfCardExistsIn(cards[i].title, alreadyHave, [cards[i]])) return i;
     }

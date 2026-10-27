@@ -615,10 +615,8 @@ coreSet[1016] = {
   unique: true,
   responseOnRunnerTurnBegins: {
     Resolve: function () {
-      Draw(runner, 2);
-      LoseClicks(runner, 1);
+      Draw(runner, 2, function () { LoseClicks(runner, 1); });
     },
-    automatic: true, //for usability, this is not strict implementation
   },
 };
 var gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = false;

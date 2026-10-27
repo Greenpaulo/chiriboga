@@ -469,10 +469,15 @@ nurseHanh.automaticOnArchivesCardsTurnedFaceUp.Resolve.call(nurseHanh, [
   {title: 'One'},
 ]);
 assert.strictEqual(cardsDrawn, 0);
+assert.strictEqual(nurseHanh.responseOnBreach.Enumerate.call(nurseHanh).length, 0);
 nurseHanh.automaticOnArchivesCardsTurnedFaceUp.Resolve.call(nurseHanh, [
   {title: 'One'},
   {title: 'Two'},
 ]);
+assert.strictEqual(cardsDrawn, 0, 'automatic notification does not interrupt breach setup');
+assert.strictEqual(nurseHanh.responseOnBreach.Enumerate.call(nurseHanh).length, 1);
+nurseHanh.responseOnBreach.Resolve.call(nurseHanh);
+assert.strictEqual(nurseHanh.responseOnBreach.Enumerate.call(nurseHanh).length, 0);
 assert.strictEqual(cardsDrawn, 2, '36007 draws for one group of 2 or more cards');
 context.corp.archives.cards = [{faceUp: false}, {faceUp: false}];
 assert.strictEqual(nurseHanh.AIInstallBeforeRun.call(nurseHanh, context.corp.archives), 2);

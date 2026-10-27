@@ -10,7 +10,7 @@ const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
 const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
-  outcomeLine, failedGateResult, outcomeProblem, hasManualPlaytesting} = require('../scripts/ticket.js');
+  outcomeLine, failedGateResult, outcomeProblem, hasManualPlaytesting, reproductionChecksumMatches} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -103,6 +103,19 @@ const reproductionBefore = [
   "assert.strictEqual(firstChoice, 'install');",
   "assert.strictEqual(secondChoice, 'advance');",
 ];
+const pendingBytes = Buffer.from("assert.strictEqual(result, 1);\r\n");
+const pendingDigest = crypto.createHash('sha256').update(pendingBytes).digest('hex');
+const checksumTicket = '**Reproduction SHA-256:** `' + pendingDigest + '`\n';
+assert.strictEqual(reproductionChecksumMatches(checksumTicket, pendingBytes), true,
+  'an initially untracked reproduction can be verified unchanged by its recorded digest');
+assert.strictEqual(reproductionChecksumMatches(checksumTicket, Buffer.from('assert.strictEqual(result, 2);\r\n')), false,
+  'the checksum fallback rejects changed expectations');
+assert.strictEqual(reproductionChecksumMatches(checksumTicket, Buffer.from('assert.strictEqual(result, 1);\n')), false,
+  'the checksum fallback requires an exact byte match, including line endings');
+assert.strictEqual(reproductionChecksumMatches('', pendingBytes), null,
+  'a missing checksum cannot establish an untracked baseline');
+assert.strictEqual(reproductionChecksumMatches('**Reproduction SHA-256:** `invalid`', pendingBytes), null,
+  'a malformed digest cannot establish an untracked baseline');
 assert.deepStrictEqual(gateSetupProblems('Gate command: `node scripts/ai-batch.js gate --corp-option x=true\n' +
   '--collector runs --start tests/fixtures/corp-decisions --collector <name> --guard winRate=0.02`'), [],
   'gate setup check accepts existing collectors, start boards and template placeholders');

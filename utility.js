@@ -2568,7 +2568,7 @@ function MaxHandSize(player) {
  * @param {Player} player to perform draw for
  * @param {function()} [afterDraw] called after drawing is complete (even if no cards are drawn)
  * @param {Object} [context] for afterDraw
- * @returns {int} number of cards drawn (including effects)
+ * @returns {int|undefined} immediate draw count, or undefined while interrupted; use afterDraw
  */
 function BasicActionDraw(player, afterDraw, context) {
   var num = 1;
@@ -2641,6 +2641,8 @@ function PlayerCanLook(player, card) {
   if (card == accessingCard) return true;
   if (player == runner && card.knownToRunner) return true;
   if (player == null) return false;
+  if (typeof currentPhase !== "undefined" && currentPhase && currentPhase.privateLook &&
+      currentPhase.privateLook.player == player && currentPhase.privateLook.cards.includes(card)) return true;
   if (card.cardLocation == PlayerHand(player)) return true;
   if (
     typeof player.identityCard.setAsideCards != "undefined" &&

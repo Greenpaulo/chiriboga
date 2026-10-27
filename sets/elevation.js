@@ -488,7 +488,7 @@ cardSet[35034] = {
       var creditsToTake = this.credits;
       Log("Side Hustle pays out " + creditsToTake + " credits");
       TakeCredits(runner, this, creditsToTake);
-      //Use MoveCard to avoid phase change in automatic trigger (trash is unpreventable anyway)
+      //The unpreventable trash precedes the draw and its interrupt.
       Log(GetTitle(this, true) + " trashed");
       MoveCard(this, runner.heap);
       this.faceUp = true;
@@ -500,7 +500,6 @@ cardSet[35034] = {
     Resolve: function (card) {
       if (card == this) {
         PlaceCredits(this, 1);
-        this.checkAndTriggerPayout();
       }
     },
   },
@@ -508,10 +507,20 @@ cardSet[35034] = {
   automaticOnRunBegins: {
     Resolve: function (server) {
       PlaceCredits(this, 1);
-      this.checkAndTriggerPayout();
     },
   },
   
+  //Payout can draw and therefore must allow interrupt decisions.
+  responseOnInstall: {
+    Enumerate: function (card) {
+      return card == this && Counters(this, "credits") >= 6 ? [{}] : [];
+    },
+    Resolve: function () { this.checkAndTriggerPayout(); },
+  },
+  responseOnRunBegins: {
+    Enumerate: function () { return Counters(this, "credits") >= 6 ? [{}] : []; },
+    Resolve: function () { this.checkAndTriggerPayout(); },
+  },
   AIEconomyInstall: function() {
     //Good early game economy card
     return 2; //priority 2 (moderate - it takes time to pay off but is efficient)

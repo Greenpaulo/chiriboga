@@ -376,19 +376,13 @@ cardSet[26095] = {
     Resolve: function (params) {
       this.triggeredThisTurn = true;
       
-      //Draw 1 card
-      Draw(runner, 1);
-      
-      //Check for digital identity or 2+ link
-      var isDigital = CheckSubType(runner.identityCard, "Digital");
-      var hasEnoughLink = Link() >= 2;
-      
-      if (isDigital || hasEnoughLink) {
-        GainCredits(runner, 1, "", this);
-      }
+      Draw(runner, 1, function () {
+        if (CheckSubType(runner.identityCard, "Digital") || Link() >= 2) {
+          GainCredits(runner, 1, "", this);
+        }
+      }, this);
     },
     text: "DreamNet: Draw 1 card",
-    automatic: true,
   },
   
   //AI evaluation functions

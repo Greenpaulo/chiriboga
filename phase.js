@@ -585,6 +585,10 @@ phaseTemplates.globalTriggers = {
         instruction,
         card
       );
+      if (triggerCallback.privateLook) {
+        decisionPhase.privateLook = {player: card.player,
+          cards: choices.filter(function (choice) { return choice.card; }).map(function (choice) { return choice.card; })};
+      }
 	  if (typeof triggerCallback.footerText !== "undefined")
 		decisionPhase.footerText = triggerCallback.footerText;
     },
@@ -2115,6 +2119,12 @@ function ChangePhase(src, skipInit = false) {
 	
   var nextPhase = src;
   var previousPhase = currentPhase;
+  //Private looked-at cards must not remain in the cached grid after a decision.
+  if (previousPhase && previousPhase.privateLook && previousPhase !== nextPhase) {
+    viewingGrid = null;
+    previousViewingGrid = null;
+    viewingPile = null;
+  }
   currentPhase = nextPhase;
 
   var oldTurn = playerTurn;

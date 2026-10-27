@@ -1340,16 +1340,10 @@ cardSet[3030] = {
   influenceLimit: 15,
   link: 1,
   responseOnInstall: {
-    automatic: true,
-    Resolve: function (installedCard, sourceZone) {
-      if (
-        CheckCardType(installedCard, ["program"]) &&
-        sourceZone === runner.heap
-      ) {
-        Log("Exile ID triggers on program install from Heap: Draw 1 card.");
-        Draw(runner, 1);
-      }
+    Enumerate: function (installedCard, sourceZone) {
+      return CheckCardType(installedCard, ["program"]) && sourceZone === runner.heap ? [{}] : [];
     },
+    Resolve: function () { Draw(runner, 1); },
   },
 };
 
@@ -1696,11 +1690,11 @@ cardSet[3035] = {
         Shuffle(runner.stack);
         Log("Levy AR Lab Access: Shuffled Grip and Heap into Stack.");
 
-        Draw(runner, 5);
-
-        // Remove self from the game instead of trashing
-        MoveCard(this, runner.removedFromGame);
-        Log("Levy AR Lab Access removed from the game.");
+        Draw(runner, 5, function () {
+          // Remove self from the game instead of trashing.
+          MoveCard(this, runner.removedFromGame);
+          Log("Levy AR Lab Access removed from the game.");
+        }, this);
       }.bind(this),
     );
   },
@@ -2577,9 +2571,10 @@ cardSet[3049] = {
         PlaySound('professionalContacts');
         suppressCreditDrawSound = true;
         GainCredits(runner, 1, "ability", this);
-        Draw(runner, 1);
+        Draw(runner, 1, function () {
+          Log("Professional Contacts used: Gained 1[c] and drew 1 card.");
+        });
         suppressCreditDrawSound = false;
-        Log("Professional Contacts used: Gained 1[c] and drew 1 card.");
       },
     },
   ],

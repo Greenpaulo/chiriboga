@@ -38,6 +38,7 @@ vm.createContext(context);
 vm.runInContext('if (!String.prototype.replaceAll) String.prototype.replaceAll = function(a, b) { return this.split(a).join(b); };', context);
 const files = ['deck/seedrandom.min.js', 'config.js', 'init.js', 'phase.js', 'command.js', 'checks.js', 'mechanics.js',
   'utility.js', 'sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/downfall.js',
+  'sets/elevation.js', 'sets/vantagepoint.js', 'sets/uprising.js', 'sets/creationandcontrol.js', 'sets/automatainitiative.js', 'sets/coreset.js',
   'decks.js', 'runcalculator.js', 'ai_corp.js', 'ai_runner.js'];
 for (const file of files) vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, {filename: file});
 const run = code => vm.runInContext(code, context);
@@ -57,7 +58,7 @@ function setUpBoard({hqIce = [], rndIce = [], archivesIce = [], stack = [], grip
     var strengthTextures = {ice: null, ib: null, broken: null, rc: null, crc: null, ctc: null};
     viewAllFronts = false; accessingCard = null; lingeringEffects = [];
     attackedServer = null; approachIce = -1; encountering = false; encounteredIce = null;
-    turnEventCounts = {};
+    turnEventCounts = {}; viewingPlayer = runner;
     Object.assign(corp, {identityCard: null, creditPool: 5, clickTracker: 0, tempBonusClicks: 0, scoreArea: [],
       HQ: NewServer("HQ", true), RnD: NewServer("R&D", true), archives: NewServer("Archives", true),
       remoteServers: [], serverIncrementer: 0, maxHandSize: 5, resolvingCards: [], installingCards: [], badPublicity: 0, AI: null});
@@ -77,10 +78,10 @@ function setUpBoard({hqIce = [], rndIce = [], archivesIce = [], stack = [], grip
 
 // Resolve every pending trigger in the current global-trigger phases and
 // decisions; `pick(choices, card)` chooses within a card's decision.
-function settle(pick = choices => choices[0]) {
+function settle(pick = choices => choices[0], stopAt = []) {
   for (let guard = 0; guard < 50; guard++) {
     const phase = run('currentPhase');
-    if (run('[phases.runnerActionMain, phases.runApproachIce, phases.runEncounterIce, phases.runSubroutines]').includes(phase)) return;
+    if (run('[phases.runnerActionMain, phases.runApproachIce, phases.runEncounterIce, phases.runSubroutines]').concat(stopAt).includes(phase)) return;
     const options = cmd => typeof phase.Resolve[cmd] !== 'function' ? [] :
       phase.Enumerate && typeof phase.Enumerate[cmd] === 'function' ? phase.Enumerate[cmd]() : [{}];
     if (phase.triggerCallbackName) {
@@ -344,15 +345,25 @@ test('The Class Act ignores later draws when a draw already happened this turn',
   assert.strictEqual(run('runner.grip.length'), 2, 'drawn normally, no interrupt choice');
 });
 
-test('The Class Act keeping the top card leaves the draw unchanged; empty stack offers nothing', () => {
+test('The Class Act keeping the top card leaves the draw unchanged; short stacks still bottom', () => {
   setUpBoard({installed: [ID.ClassAct], stack: [ID.HedgeFund, ID.Diesel, ID.SureGamble]});
   run('Draw(runner, 2)');
   settle((choices, card) => card && card.title === 'The Class Act' ? choices[choices.length - 1] : choices[0]);
   assert.deepStrictEqual(titles(run('runner.grip')).sort(), ['Diesel', 'Sure Gamble']);
   assert.deepStrictEqual(titles(run('runner.stack')), ['Hedge Fund'], 'top card moved to the bottom of a 1-card stack');
   setUpBoard({installed: [ID.ClassAct], stack: [ID.HedgeFund, ID.Diesel]});
-  run('Draw(runner, 2)'); settle(noClassAct);
-  assert.strictEqual(run('runner.grip.length'), 2, 'all looked-at cards are drawn anyway');
+  run('Draw(runner, 2)');
+  let shortChoice = false;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act') {
+      shortChoice = true;
+      assert.strictEqual(run('runner.grip.length'), 0);
+      return choices[0];
+    }
+    return choices[0];
+  });
+  assert.ok(shortChoice, 'mandatory bottoming still occurs with a short stack');
+  assert.deepStrictEqual(titles(run('runner.grip')), ['Hedge Fund', 'Diesel'], 'bottoming changes draw order');
 });
 
 test('The Class Act draws 4 when a discard phase ends in the turn it was installed', () => {
@@ -361,9 +372,9 @@ test('The Class Act draws 4 when a discard phase ends in the turn it was install
   assert.strictEqual(run('runner.creditPool'), 1);
   run('TriggeredResponsePhase(runner, "responseOnRunnerDiscardEnds", [], function () {}, "Discard Ends")');
   settle();
-  assert.strictEqual(run('runner.grip.length'), 4, 'drew 4 (interrupt swapped one, count unchanged)');
+  assert.strictEqual(run('runner.grip.length'), 4, 'drew 4 after the interrupt');
   assert.strictEqual(run('runner.stack.length'), 2);
-  run('runner.rig.resources[0].responseOnCorpTurnBegins.Resolve.call(runner.rig.resources[0]); turnEventCounts = {};');
+  run('runner.rig.resources[0].responseOnCorpTurnBegins.Resolve.call(runner.rig.resources[0]); turnEventCounts = {}; viewingPlayer = runner;');
   run('TriggeredResponsePhase(corp, "responseOnCorpDiscardEnds", [], function () {}, "Discard Ends")');
   settle();
   assert.strictEqual(run('runner.grip.length'), 4, 'not installed this turn');
@@ -372,13 +383,14 @@ test('The Class Act draws 4 when a discard phase ends in the turn it was install
 test('Runner AI bottoms a duplicate unique with The Class Act', () => {
   setUpBoard({installed: [ID.ClassAct], stack: [ID.HedgeFund, ID.Masterwork, ID.Masterwork], ai: true});
   run('runner.rig.hardware = []; runner.AI.cardsWorthKeeping = [];');
-  // the drawn Masterwork duplicates the unique one on top of the stack
   run('Draw(runner, 1)');
-  const choices = run(`(function () {
-    var ca = runner.rig.resources[0];
-    return ca.responseOnCardsDrawn.Enumerate.call(ca, [runner.grip[0]]).map(function (c) { return c.card.title; });
-  })()`);
-  assert.deepStrictEqual(Array.from(choices), ['Masterwork (v37)'], 'AI returns a single duplicate unique to bottom');
+  let offered;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act') offered = titles(choices.map(choice => choice.card));
+    return choices[0];
+  });
+  assert.deepStrictEqual(offered, ['Masterwork (v37)'], 'AI returns a single duplicate unique to bottom');
+  assert.strictEqual(run('runner.grip[0].title'), 'Masterwork (v37)');
 });
 
 test('Runner AI installs The Class Act when it wants cards and can pay', async () => {
@@ -393,6 +405,238 @@ test('Runner AI installs The Class Act when it wants cards and can pay', async (
   };
   assert.strictEqual(await choose(8), 'install:The Class Act', 'nothing to run, wants cards');
   assert.notStrictEqual(await choose(3), 'install:The Class Act', 'cannot pay 4');
+});
+
+test('private looking is limited to the decision and its player, and clears the grid cache', () => {
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400]});
+  run('viewingPlayer = runner; Draw(runner, 1)');
+  let looked;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act') {
+      looked = choices.map(choice => choice.card);
+      for (const c of looked) {
+        assert.ok(context.PlayerCanLook(context.runner, c));
+        assert.ok(!context.PlayerCanLook(context.corp, c));
+        assert.ok(!c.knownToRunner && !c.faceUp);
+      }
+      assert.ok(!run('PlayerCanLook(runner, runner.stack[0])'), 'unlooked stack card stays hidden');
+      context.previousViewingGrid = looked;
+      context.viewingGrid = looked;
+      context.viewingPile = looked;
+    }
+    return choices[0];
+  });
+  assert.strictEqual(context.previousViewingGrid, null);
+  assert.strictEqual(context.viewingGrid, null);
+  assert.strictEqual(context.viewingPile, null);
+  assert.ok(!context.PlayerCanLook(context.runner, looked[0]), 'bottomed card no longer viewable');
+});
+
+for (const count of [0, 1, 2, 4]) {
+  test('Class Act handles stack size ' + count + ' and completes callback once', () => {
+    setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400, ID.DocklandsPass].slice(0, count)});
+    let calls = 0, choicesSeen = 0;
+    context.Draw(context.runner, 4, () => { calls++; });
+    settle((choices, card) => {
+      if (card && card.title === 'The Class Act') {
+        choicesSeen++;
+        assert.strictEqual(choices.length, count);
+        assert.strictEqual(run('runner.grip.length'), 0);
+      }
+      return choices[0];
+    });
+    assert.strictEqual(choicesSeen, count ? 1 : 0);
+    assert.strictEqual(calls, 1);
+    assert.strictEqual(run('runner.grip.length'), count);
+  });
+}
+
+test('zero and modified-to-zero draws complete once without consuming the first draw', () => {
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400]});
+  let calls = 0;
+  assert.strictEqual(context.Draw(context.runner, 0, () => { calls++; }), 0);
+  run('runner.rig.resources[0].modifyDraw = {Resolve: function () { return -1; }, automatic: true}; InvalidateActiveTriggerCandidateCache();');
+  assert.strictEqual(context.Draw(context.runner, 1, () => { calls++; }), 0);
+  assert.strictEqual(calls, 2);
+  assert.strictEqual(run('TurnEventCount("runnerDraw")'), 0);
+  run('delete runner.rig.resources[0].modifyDraw; InvalidateActiveTriggerCandidateCache(); Draw(runner, 1)');
+  let seen = false;
+  settle((choices, card) => { if (card && card.title === 'The Class Act') seen = true; return choices[0]; });
+  assert.ok(seen);
+});
+
+for (const corpTurn of [false, true]) {
+  test('basic draw modifiers and post-draw ordering on ' + (corpTurn ? 'Corp' : 'Runner') + ' turn', () => {
+    setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400, ID.DocklandsPass]});
+    run(`playerTurn = ${corpTurn ? 'corp' : 'runner'};
+      var seenDraws = [], drawMods = 0;
+      runner.rig.resources[0].modifyBasicActionRunnerDraw = {Resolve: function () { return 1; }, automatic: true};
+      runner.rig.resources[0].modifyDraw = {Resolve: function () { drawMods++; return 1; }, automatic: true};
+      runner.rig.resources[0].responseOnCardsDrawn = {
+        Enumerate: function (cards) { seenDraws.push(cards.slice()); return [{}]; },
+        Resolve: function () { seenDraws.push('observer'); }
+      };
+      var callbackContext = {done: 0};
+      var drawReturn = BasicActionDraw(runner, function () {
+        this.done++; seenDraws.push('callback');
+      }, callbackContext);`);
+    assert.strictEqual(run('drawReturn'), undefined, 'suspended draw does not claim a completed count');
+    let expected;
+    settle((choices, card) => {
+      if (card && card.title === 'The Class Act' && choices[0].card) {
+        assert.strictEqual(choices.length, 4, 'both modifiers applied before X is calculated');
+        assert.strictEqual(run('seenDraws.length'), 0);
+        expected = Array.from(run('runner.stack')).slice(0, -1).reverse();
+      }
+      return choices[0];
+    });
+    assert.deepStrictEqual(Array.from(run('runner.grip')), expected);
+    const observations = run('seenDraws');
+    for (const observed of observations.filter(Array.isArray)) assert.deepStrictEqual(Array.from(observed), expected);
+    assert.deepStrictEqual(Array.from(observations).filter(x => typeof x === 'string'), ['observer', 'callback']);
+    assert.strictEqual(run('callbackContext.done'), 1);
+    assert.strictEqual(run('drawMods'), 1);
+    assert.strictEqual(run('TurnEventCount("runnerDraw")'), 1);
+    assert.strictEqual(run('runner.clickTracker'), 3);
+  });
+}
+
+test('a nested interrupt draw does not retrigger first-draw bottoming', () => {
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400, ID.DocklandsPass]});
+  run(`var nestedDone = 0, outerDone = 0;
+    runner.identityCard.responseOnWouldDraw = {
+      Enumerate: function (draw) { return draw.firstThisTurn ? [{}] : []; },
+      Resolve: function () { Draw(runner, 1, function () { nestedDone++; }); }
+    };
+    Draw(runner, 1, function () { outerDone++; });`);
+  let bottoms = 0;
+  settle((choices, card) => { if (card && card.title === 'The Class Act') bottoms++; return choices[0]; });
+  assert.strictEqual(bottoms, 1);
+  assert.strictEqual(run('nestedDone'), 1);
+  assert.strictEqual(run('outerDone'), 1);
+  assert.strictEqual(run('runner.grip.length'), 2);
+});
+
+test('normal Runner and Corp draws retain synchronous counts and Corp empty-deck loss', () => {
+  setUpBoard({stack: [ID.Diesel, ID.SureGamble]});
+  assert.strictEqual(context.Draw(context.runner, 1), 1);
+  assert.strictEqual(context.Draw(context.corp, 1), 1);
+  let winner;
+  const originalWin = context.PlayerWin;
+  context.PlayerWin = player => { winner = player; };
+  try { assert.strictEqual(context.Draw(context.corp, 99), 0); }
+  finally { context.PlayerWin = originalWin; }
+  assert.strictEqual(winner, context.runner);
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400]});
+  assert.strictEqual(context.Draw(context.corp, 1), 1, 'an inapplicable Runner interrupt does not suspend Corp draws');
+  run('Draw(runner, 1)'); settle();
+  assert.strictEqual(context.Draw(context.runner, 1), 1, 'later draws without applicable interrupts stay synchronous');
+});
+
+test('the debug draw goes through the interrupt instead of directly moving a stack card', () => {
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble]});
+  const render = context.Render;
+  context.Render = () => {};
+  try { run('viewingPlayer = runner; debugDrawCard()'); }
+  finally { context.Render = render; }
+  assert.strictEqual(run('runner.grip.length'), 0);
+  settle();
+  assert.strictEqual(run('runner.grip.length'), 1);
+});
+
+test('Side Hustle payout during run initiation waits for Class Act', () => {
+  setUpBoard({rndIce: [ID.IceWall], installed: [ID.ClassAct, 35034], stack: [ID.Diesel, ID.SureGamble, ID.T400]});
+  run('runner.rig.resources[1].credits = 5; MakeRun(corp.RnD)');
+  let saw = false;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act') {
+      saw = true;
+      assert.strictEqual(run('runner.grip.length'), 0);
+      assert.ok(run('runner.heap.some(function (c) { return c.title == "Side Hustle"; })'));
+    }
+    return choices[0];
+  });
+  assert.ok(saw);
+  assert.strictEqual(run('runner.grip.length'), 1);
+  assert.strictEqual(run('attackedServer'), context.corp.RnD);
+});
+
+test('Nurse Hạnh draw at Archives breach preserves the interrupt and breach phase', () => {
+  setUpBoard({installed: [ID.ClassAct, 36007], stack: [ID.Diesel, ID.SureGamble, ID.T400]});
+  run(`corp.archives.cards.forEach(function (c) { c.faceUp = false; });
+    MoveCard(corp.HQ.cards[0], corp.archives.cards); MoveCard(corp.RnD.cards[0], corp.archives.cards);
+    corp.archives.cards.forEach(function (c) { c.faceUp = false; });
+    attackedServer = corp.archives; ChangePhase(phases.runBreachServer);`);
+  let saw = false;
+  //This test returns to breach rather than to the default settle stop phases.
+  settle((choices, card) => {
+      if (card && card.title === 'The Class Act') { saw = true; assert.strictEqual(run('runner.grip.length'), 0); }
+      return choices[0];
+  }, [context.phases.runBreachServer]);
+  assert.ok(saw);
+  assert.strictEqual(run('runner.grip.length'), 2);
+  assert.strictEqual(run('currentPhase'), context.phases.runBreachServer);
+});
+
+test('installation-turn draw-four also resolves during the Corp discard phase', () => {
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400, ID.DocklandsPass, ID.Diesel]});
+  run(`runner.rig.resources[0].installedThisTurn = true; playerTurn = corp;
+    TriggeredResponsePhase(corp, 'responseOnCorpDiscardEnds', [], function () {}, 'Discard Ends');`);
+  let saw = false;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act' && choices[0].card) {
+      saw = true;
+      assert.strictEqual(choices.length, 5);
+      assert.strictEqual(run('runner.grip.length'), 0);
+    }
+    return choices[0];
+  });
+  assert.ok(saw);
+  assert.strictEqual(run('runner.grip.length'), 4);
+});
+
+test('Exile install-trigger draw can suspend for Class Act', () => {
+  setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble]});
+  run(`runner.identityCard = InstanceCard(3030, null, null, strengthTextures); runner.identityCard.faceUp = true;
+    var heapProgram = InstanceCardsPush(30007, runner.heap, 1, null, null, strengthTextures)[0];
+    TriggeredResponsePhase(runner, 'responseOnInstall', [heapProgram, runner.heap], function () {}, 'Installed');`);
+  let saw = false;
+  settle((choices, card) => { if (card && card.title === 'The Class Act') saw = true; return choices[0]; });
+  assert.ok(saw);
+  assert.strictEqual(run('runner.grip.length'), 1);
+});
+
+test('DreamNet finishes its credit instruction after the interrupt and draw', () => {
+  setUpBoard({installed: [ID.ClassAct, 26095], stack: [ID.Diesel, ID.SureGamble]});
+  run(`runner.identityCard.subTypes.push('Digital');
+    TriggeredResponsePhase(runner, 'responseOnRunSuccessful', [], function () {}, 'Successful');`);
+  let saw = false;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act') {
+      saw = true;
+      assert.strictEqual(run('runner.creditPool'), 5);
+    }
+    return choices[0];
+  });
+  assert.ok(saw);
+  assert.strictEqual(run('runner.creditPool'), 6);
+  assert.strictEqual(run('runner.grip.length'), 1);
+});
+
+test('Gourmand access ends on trash while its draw waits for the interrupt', () => {
+  setUpBoard({installed: [ID.ClassAct, 35007], stack: [ID.Diesel, ID.SureGamble]});
+  run(`accessingCard = corp.HQ.cards[0]; runner.rig.programs[0].abilities[0].Resolve.call(runner.rig.programs[0]);`);
+  let saw = false;
+  settle((choices, card) => {
+    if (card && card.title === 'The Class Act') {
+      saw = true;
+      assert.strictEqual(run('accessingCard'), null, 'moving the accessed card ends access immediately');
+      assert.strictEqual(run('runner.grip.length'), 0);
+    }
+    return choices[0];
+  });
+  assert.ok(saw);
+  assert.strictEqual(run('runner.grip.length'), 1);
 });
 
 (async () => {
