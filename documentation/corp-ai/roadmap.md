@@ -22,7 +22,7 @@ before viewing candidate gate results. The roadmap table below owns the current 
 
 ## Current implementation order
 
-Updated 2026-10-23. This is the preferred sequence for the deception/install
+Updated 2026-10-27. This is the preferred sequence for the deception/install
 track; item dependencies below remain the formal blockers. Completed merge work
 is recorded in the done tables and the historical merge plan.
 
@@ -35,7 +35,7 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
 | — | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | done (merged) | Passive install/lifecycle tooling, findings and control calibration delivered; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
 | — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
-| 1 | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted; merge pending | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merge after the Downfall batches 11–13 branch |
+| 1 | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted (merged) | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
 | 2 | [I4](../backlog/code-review/I4-agenda-installation-and-scoring-commitment.md) | in-progress (implementation complete; review and manual playtesting, 2026-10-26) | Score fast, exposure table and destination/hold remain default-off; I2 empty-remote stake now follows the selected agenda and M3 exposure. Owner-directed flag playtesting supersedes batch adoption guards; historical part 1 gate failed |
 | 3 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready (blocked by I4) | Re-scope after I4's evidence to persistence and asset opportunity cost only, if the Corp still drifts between remotes; seeds 6001–7000 reserved |
 

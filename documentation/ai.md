@@ -1819,8 +1819,9 @@ where a variable X cost is returned as negative `credits` (Psychographics
 returns `{counters: X, credits: -X}`; Biotic Labor returns
 `{counters: 0, clicks: 2}`). The search applies the printed `PlayCost` and
 `PlayClickCost` as before and skips a direction that gains nothing. Operations
-receive `context = {thisTurn, credits, clicks, remaining, resolving}` from the
-search point (`remaining` is counters still useful before the limit);
+receive `context = {thisTurn, installedThisTurn, credits, clicks, remaining, resolving}` from the
+search point (`installedThisTurn` is true when the target is installed on the
+searched turn; `remaining` is counters still useful before the limit);
 installed upgrades and older callers pass no context, so treat a missing
 context as this turn. Seamless Launch returns 2 except for a card installed
 this turn. The advancement search calls this on operations in its

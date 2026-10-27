@@ -24,18 +24,18 @@ in card-sets.md.
 
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
+| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
+| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
-| `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
+| `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `downfall` | in-progress | 65 | 65 | 0 | 0 | 0 | 55 / 61 | true / true | no |
+| `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
+| `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
-| `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
-| `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
-| `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
-| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
+| `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
 
 ## config.js disagreements
 
@@ -61,7 +61,7 @@ None.
 
 None.
 
-### `systemupdate2021` (sets/systemupdate2021.js)
+### `elevation` (sets/elevation.js)
 
 None.
 
@@ -69,7 +69,7 @@ None.
 
 None.
 
-### `elevation` (sets/elevation.js)
+### `systemupdate2021` (sets/systemupdate2021.js)
 
 None.
 
@@ -87,8 +87,8 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 | Set | Grip cards | AIWorthKeeping | Subtype fallback only | Neither | Intent hook without AIWorthKeeping |
 |---|---:|---:|---:|---:|---:|
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
-| `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
+| `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
 | **Total** | 115 | 55 | 25 | 35 | 7 |
 
@@ -107,15 +107,15 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30007 Fermenter
 - 30022 DZMZ Optimizer
 - 30027 Telework Contract
+- 35010 Cacophony
+- 35011 Rent Rioters
+- 35022 Open Market
+- 35034 Side Hustle
 - 31010 Liberated Account
 - 31024 Security Testing
 - 31035 Aesop’s Pawnshop
 - 31036 Professional Contacts
 - 31039 Earthrise Hotel
-- 35010 Cacophony
-- 35011 Rent Rioters
-- 35022 Open Market
-- 35034 Side Hustle
 - 36003 The Tungsten Tailor
 - 36007 Nurse Hạnh
 - 36016 Underdome Irregulars
@@ -131,6 +131,15 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30029 Overclock
 - 30033 Smartware Distributor
 - 30034 Verbal Plasticity
+- 35003 Charm Offensive
+- 35005 Shred
+- 35007 Gourmand
+- 35014 Clean Getaway
+- 35015 Lie Low
+- 35016 Maintenance Access
+- 35017 Transfer of Wealth
+- 35025 Illumination
+- 35029 Azimat
 - 31003 En Passant
 - 31004 Retrieval Run
 - 31005 Clot
@@ -147,15 +156,6 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 31034 Paricia
 - 31037 Dirty Laundry
 - 31038 Prepaid VoicePAD
-- 35003 Charm Offensive
-- 35005 Shred
-- 35007 Gourmand
-- 35014 Clean Getaway
-- 35015 Lie Low
-- 35016 Maintenance Access
-- 35017 Transfer of Wealth
-- 35025 Illumination
-- 35029 Azimat
 - 36005 Lampades
 - 36011 Sell Out
 - 36012 Tailgate

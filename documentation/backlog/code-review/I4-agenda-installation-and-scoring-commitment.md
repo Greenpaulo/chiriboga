@@ -889,10 +889,17 @@ and the two no-ETR fixtures (the legacy gate is untouched).
 Human gate. Options `agendaCommitmentPlan`, `agendaExposureTable` and
 `agendaDestinationPlan` (Corp AI), off by default. Owner decision 2026-10-26:
 manual flag comparisons decide adoption; the former statistical improvement
-and guard thresholds are superseded. No fixed sample size, numerical target
-or additional AI-vs-AI batch is required by the owner. Regression tests still
-must pass. Record the owner's explicit default-adoption decision here before
-changing any default; no such decision has been given for this continuation.
+and guard thresholds are superseded.
+Sample: none set by the owner; manual games compare flags using the I4 decision
+logs. No additional AI-vs-AI batch is required.
+
+| Check | Metric | Better | Threshold |
+|---|---|---|---|
+| Improve | Owner assessment of agenda timing and destination choices | preferred choices in manual flag comparisons | none set; explicit owner adoption decision required |
+| Guard | Regression tests | passing | all required checks pass |
+
+Status: not adopted. No owner decision to change defaults has been given.
+Record that explicit decision here before changing any default.
 
 The part 1 batch command remains in the historical handoff for provenance,
 and its actual failure is recorded in Resolution. It is not a pending task.

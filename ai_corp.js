@@ -1021,10 +1021,11 @@ class CorpAI {
 
   //Requirement change from root upgrades declaring AIScoringSupport, and the
   //rez cost of the unrezzed ones counted. An unrezzed one counts only when its
-  //rez and the remaining advancements fit in credits.
+  //rez and the remaining advancements fit in credits. A modified requirement
+  //already includes active scoring support and must not receive it twice.
   _scoringSupport(card, server, requirement, credits) {
     var ret = {delta: 0, rezCost: 0};
-    if (!server) return ret;
+    if (!server || requirement != card.advancementRequirement) return ret;
     for (var supportIndex = 0; supportIndex < server.root.length; supportIndex++) {
       var supportCard = server.root[supportIndex];
       if (typeof supportCard.AIScoringSupport != "function") continue;
@@ -5669,7 +5670,8 @@ class CorpAI {
       counters += gained;
       used.forEach((card) => { if (card && !plan.tools.includes(card)) plan.tools.push(card); });
       plan.steps.push({turn: turn, advancement: gained, counters: counters});
-      if (counters >= limit) {
+      if (counters >= limit &&
+          !(agenda.AICannotScoreOnInstallTurn && turn == startTurn && !installed)) {
         plan.exposureTurns = turn - startTurn;
         return plan;
       }
@@ -5862,9 +5864,16 @@ class CorpAI {
     var ice = corp.HQ.cards.filter((card) => CheckCardType(card, ["ice"]));
     if (ice.length < 1) return 0;
     var best = 0;
-    this._marginalIceInstallOptions(ice, false, false, {}, [server]).forEach((option) => {
-      if (option.iceMarginalScore && option.iceMarginalScore.score > best) best = option.iceMarginalScore.score;
-    });
+    var previousOpeningProbe = this._openingIceTacticalProbe;
+    try {
+      // Measure defence for this remote without the opening target override.
+      this._openingIceTacticalProbe = true;
+      this._marginalIceInstallOptions(ice, false, false, {}, [server]).forEach((option) => {
+        if (option.iceMarginalScore && option.iceMarginalScore.score > best) best = option.iceMarginalScore.score;
+      });
+    } finally {
+      this._openingIceTacticalProbe = previousOpeningProbe;
+    }
     return best / CORP_AI_POINT_VALUE;
   }
 
@@ -5955,7 +5964,7 @@ class CorpAI {
 
   //Log summary of _agendaCommitmentOptions.
   _agendaCommitmentSummary(result) {
-    var name = (server) => (server ? server.serverName : "new remote");
+    var name = (server) => (server === undefined ? "none" : server === null ? "new remote" : server.serverName);
     return {
       agenda: result.agenda.title,
       band2: result.band2,

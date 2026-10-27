@@ -826,7 +826,7 @@ blocking about 30% of Corp actions while an agenda sat unfinished.
   completion on the exposure table when `agendaExposureTable` is enabled.
   `_rankedInstallOptionsCore()` installs into the selected destination or
   records a hold for the indefinite-hold guard. The choice counts forced
-  agenda discard, prefers an install within 0.1 points of holding, and first
+  agenda discard, prefers installation within 0.1 points of holding, and first
   minimises game-losing steal risk (band 2). A safe remote can be reused after
   scoring without assigning a persistent server role.
 - When both destination planning and I2 marginal ICE ranking are enabled,

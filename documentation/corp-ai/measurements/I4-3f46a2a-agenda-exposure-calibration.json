@@ -38,7 +38,7 @@
   "commit": "58fbfe6",
   "dirty": true,
   "codeHash": "430fb2ae2c939793",
-  "command": "node scripts/ai-batch.js --seeds 3001-4000 --collector remoteAgendaRisk --out /private/tmp/claude-501/-Users-paulbingham-apps-netrunner-chiriboga-dev/eec9e798-4026-47ac-a625-2291b1abd7ea/scratchpad/risk-baseline.json",
+  "command": "node scripts/ai-batch.js --seeds 3001-4000 --collector remoteAgendaRisk --out /tmp/i4-risk-baseline.json",
   "seeds": "3001-4000",
   "games": 7000,
   "failures": 0
@@ -47,7 +47,7 @@
   "commit": "c127130",
   "dirty": true,
   "codeHash": "d70e637a4a078167",
-  "command": "node scripts/ai-batch.js --seeds 4001-5000 --collector remoteAgendaRisk --out /private/tmp/claude-501/-Users-paulbingham-apps-netrunner-chiriboga-dev/eec9e798-4026-47ac-a625-2291b1abd7ea/scratchpad/risk-heldout.json",
+  "command": "node scripts/ai-batch.js --seeds 4001-5000 --collector remoteAgendaRisk --out /tmp/i4-risk-heldout.json",
   "seeds": "4001-5000",
   "games": 7000,
   "failures": 0
