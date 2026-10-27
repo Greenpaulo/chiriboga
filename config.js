@@ -99,8 +99,25 @@ var setRegistry = {
   // Set 'hidden: true' to hide a set from the index.php settings UI
   // Set 'untested: true' to show "(Untested)" after the set name
   // Set 'idRange: [start, end]' for card ID range (used for set detection)
-  // NOTE: Display order in settings UI follows the order defined here
+  // Keep sets in chronological release order (oldest first).
+  // Settings and deckbuilder set filters follow the order defined here.
   availableSets: {
+    coreset: {
+      file: "coreset",
+      code: "core",
+      name: "Core Set",
+      hidden: true,
+      untested: true,
+      idRange: [1000, 1999],
+    },
+    creationandcontrol: {
+      file: "creationandcontrol",
+      code: "cac",
+      name: "Creation and Control",
+      hidden: true,
+      untested: true,
+      idRange: [3001, 3055],
+    },
     systemgateway: {
       file: "systemgateway",
       code: "sg",
@@ -109,13 +126,13 @@ var setRegistry = {
       untested: false,
       idRange: [30000, 30999],
     },
-    systemupdate2021: {
-      file: "systemupdate2021",
-      code: "su21",
-      name: "System Update 2021",
+    elevation: {
+      file: "elevation",
+      code: "elev",
+      name: "Elevation",
       hidden: false,
       untested: false,
-      idRange: [31000, 31999],
+      idRange: [35000, 35999],
     },
     downfall: {
       file: "downfall",
@@ -124,6 +141,22 @@ var setRegistry = {
       hidden: true,
       untested: true,
       idRange: [26001, 26065],
+    },
+    uprising: {
+      file: "uprising",
+      code: "ur",
+      name: "Uprising",
+      hidden: true,
+      untested: true,
+      idRange: [26066, 26130],
+    },
+    systemupdate2021: {
+      file: "systemupdate2021",
+      code: "su21",
+      name: "System Update 2021",
+      hidden: false,
+      untested: false,
+      idRange: [31000, 31999],
     },
     midnightsun: {
       file: "midnightsun",
@@ -149,30 +182,6 @@ var setRegistry = {
       untested: true,
       idRange: [34001, 34065],
     },
-    elevation: {
-      file: "elevation",
-      code: "elev",
-      name: "Elevation",
-      hidden: false,
-      untested: false,
-      idRange: [35000, 35999],
-    },
-    vantagepoint: {
-      file: "vantagepoint",
-      code: "vp",
-      name: "Vantage Point",
-      hidden: false,
-      untested: false,
-      idRange: [36000, 36999],
-    },
-    uprising: {
-      file: "uprising",
-      code: "ur",
-      name: "Uprising",
-      hidden: true,
-      untested: true,
-      idRange: [26066, 26130],
-    },
     rebellion: {
       file: "rebellion",
       code: "rwr",
@@ -181,21 +190,14 @@ var setRegistry = {
       untested: true,
       idRange: [34066, 34130],
     },
-    coreset: {
-      file: "coreset",
-      code: "core",
-      name: "Core Set",
-      hidden: true,
-      untested: true,
-      idRange: [1000, 1999],
-    },
-    creationandcontrol: {
-      file: "creationandcontrol",
-      code: "cac",
-      name: "Creation and Control",
-      hidden: true,
-      untested: true,
-      idRange: [3001, 3055],
+    
+    vantagepoint: {
+      file: "vantagepoint",
+      code: "vp",
+      name: "Vantage Point",
+      hidden: false,
+      untested: false,
+      idRange: [36000, 36999],
     },
   },
 
@@ -600,7 +602,7 @@ var formatRegistry = {
   standard: {
     name: "Standard",
     sets: ['sg', 'elev', 'vp', 'df', 'ur', 'ms', 'ph', 'tai', 'rwr'],
-    enabled: false
+    enabled: true
   },
   // Eternal: every card ever released. Includes every set listed in
   // setRegistry.availableSets (rotated NSG sets + the original Core Set and

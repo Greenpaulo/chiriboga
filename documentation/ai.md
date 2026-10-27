@@ -1719,6 +1719,18 @@ Set to `true` if this upgrade is used for fast advancing agendas. This tells the
 AIIsScoringUpgrade: true,
 ```
 
+**`AIScoringSupport(agenda, server)`** (I4)
+
+Read-only, on an upgrade. Return `{requirementDelta, requiresRez}` when this
+upgrade changes the advancement requirement of `agenda` scored in `server`
+(the agenda may still be in HQ), or `null` when it does not apply.
+`_advancementLimit()` adds `requirementDelta` for each root upgrade of
+`server` that declares it, only when the printed requirement is not already
+modified. An unrezzed upgrade with `requiresRez: true` counts only when the
+Corp can afford its rez cost plus the remaining advancements. SanSan City
+Grid returns `{requirementDelta: -1, requiresRez: true}` in its own server.
+Use public and Corp-known state only.
+
 **`AIRezWhenCan()`**
 
 Return `true` to select this installed asset or upgrade for rez at the next
@@ -1798,10 +1810,21 @@ Set to `true` if this operation is used to fast advance an agenda:
 AIFastAdvance: true,
 ```
 
-**`AIFastAdvanceCounters(card)`**
+**`AIFastAdvanceCounters(card, context)`**
 
 Return the nonnegative number of advancement counters this card can place on
-the supplied target. The advancement search calls this on operations in its
+the supplied target. An operation may instead return
+`{counters, credits, clicks}`: what it gains beyond its printed play cost,
+where a variable X cost is returned as negative `credits` (Psychographics
+returns `{counters: X, credits: -X}`; Biotic Labor returns
+`{counters: 0, clicks: 2}`). The search applies the printed `PlayCost` and
+`PlayClickCost` as before and skips a direction that gains nothing. Operations
+receive `context = {thisTurn, installedThisTurn, credits, clicks, remaining, resolving}` from the
+search point (`installedThisTurn` is true when the target is installed on the
+searched turn; `remaining` is counters still useful before the limit);
+installed upgrades and older callers pass no context, so treat a missing
+context as this turn. Seamless Launch returns 2 except for a card installed
+this turn. The advancement search calls this on operations in its
 candidate hand and installed one-shot upgrades. `card` may be null when
 estimating advancement of a future install; return zero when its destination
 or legality cannot be established. The hook must be read-only, safe outside a
@@ -1886,9 +1909,15 @@ does not play it without a useful effect.
 
 ### 5.7 Agendas
 
-**`AIAdvanceCreditGain(thisTurn, advancedInPlan)`**
+**`AIAdvanceCreditGain(thisTurn, advancedInPlan, context)`**
 
 Return credits gained from a basic advance, excluding its one-credit cost.
+The advancement search reads it from the advanced card and from
+`corp.identityCard`, passing `context = {card, advancementSoFar}` (counters
+before this advance); economy callers pass no context, so fall back to the
+card's own counters. Built to Last (identity) returns 2 when
+`advancementSoFar` is 0; Oaktown Renovation returns 2, or 3 from its fifth
+counter.
 `thisTurn` distinguishes the current turn from a future turn;
 `advancedInPlan` records whether this plan already used a basic advance on the
 card. Consumers track that locally without changing card flags. Counter placement
@@ -2375,7 +2404,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
-| `AIFastAdvanceCounters(card)` | function | Read-only counter count for an operation or installed one-shot advancement upgrade |
+| `AIFastAdvanceCounters(card, context)` | function | Read-only counter count, or an operation's `{counters, credits, clicks}` gain, for an operation or installed one-shot advancement upgrade |
 | `AIDamageOperation` | bool | True if this operation deals damage |
 | `AITagPunishment` | number | Min tags needed for this punishment op to fire |
 | `AIWouldPlay()` | function | Return true to play this operation |
@@ -2385,7 +2414,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
 | `AIAdvancementLimit()` | function | Custom advancement counter target |
 | `AICannotScoreOnInstallTurn` | bool | Agenda cannot be scored on the turn it is installed; excluded from install-and-fast-advance win plans |
-| `AIAdvanceCreditGain(thisTurn, advancedInPlan)` | function | Read-only credit income from the next basic advance, consumed by advancement and economy planners |
+| `AIAdvanceCreditGain(thisTurn, advancedInPlan, context)` | function | Read-only credit income from the next basic advance, on the card or the identity, consumed by advancement and economy planners |
+| `AIScoringSupport(agenda, server)` | function | Read-only `{requirementDelta, requiresRez}` an upgrade gives agendas scored in its server (I4) |
 | `AIOverAdvance` | bool | Keep advance available past an agenda's score requirement; use with `AIAdvancementLimit()` |
 | `AIRezForFree()` | function | True if this ice should be rezzed at zero cost to corp for on-rez effect |
 | `AIDrawAbility` | number | Cards drawn by this card's click ability; the Corp prefers it to the basic draw when it draws more than 1 |

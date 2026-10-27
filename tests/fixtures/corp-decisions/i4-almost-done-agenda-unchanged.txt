@@ -1,0 +1,12 @@
+// PHASE: Phase_Main
+// IDENTIFIER: Corp 2.2
+// TITLE: Corporation's Action Phase
+// COMMAND:
+// CHOICETYPE: command
+// OPTIONS: install, advance, gain, draw
+// EXPECT: advance
+// SETUP: corp.creditPool=5; corp.clickTracker=3; runner.creditPool=5; reviewAI.options.agendaCommitmentPlan=true; reviewAI.options.iceMarginalSecurity=true
+// NOTE: I4 band 3 preserved: advance-agenda-one-short.txt with agendaCommitmentPlan on still advances the agenda that can score this turn (almostDoneAgenda bypasses the plan).
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [], [31077], [], [], [], [[31071]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.remoteServers[0].root[0].advancement=1;

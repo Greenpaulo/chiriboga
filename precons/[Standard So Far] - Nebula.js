@@ -39,5 +39,5 @@ registerPrecon({
         "36066": 3  // Let Them Dream
     },
     // sets: The set codes this deck is designed with
-    sets: ["core", "sg", "elev", "vp"]
+    sets: ["df", "sg", "elev", "vp"]
 });

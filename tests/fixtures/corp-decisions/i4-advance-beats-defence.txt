@@ -1,0 +1,11 @@
+// PHASE: Phase_Main
+// IDENTIFIER: Corp 2.2
+// TITLE: Corporation's Action Phase
+// COMMAND:
+// CHOICETYPE: command
+// OPTIONS: install, advance, gain, draw
+// EXPECT: advance
+// SETUP: corp.creditPool=6; corp.clickTracker=3; runner.creditPool=8; reviewAI.options.agendaCommitmentPlan=true; reviewAI.options.iceMarginalSecurity=true
+// NOTE: I4 advance versus defend: Offworld Office sits in a bare remote with two Enigmas in HQ. Advancing now gains about 0.79 points (exposure 1 instead of 2); I2's best Enigma there saves about 0.06 points net of its rez, so the planned agenda is advanced. The legacy reserve would click for credits.
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [30075, 30075, 30075], [30064, 31081, 31081], [], [31046], [30062], [[30067]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

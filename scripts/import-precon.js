@@ -14,6 +14,7 @@
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
+const vm = require("vm");
 
 const args = process.argv.slice(2);
 const positional = [];
@@ -69,17 +70,20 @@ async function main() {
     }
     if (!Object.keys(cards).length) throw new Error("Decklist has no cards after removing the identity");
 
-    // Infer set codes from card code ranges, matching existing precon files:
-    //   300xx -> sg, 310xx -> su21, 350xx -> elev, 360xx -> vp, 1xxx/2xxx -> core
-    // Include the identity: it can be the deck's only card from its set.
+    // Use the same set ranges as the application, including split releases
+    // such as Downfall/Uprising. Never guess Core for an unrecognised ID.
+    const configContext = {};
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "config.js"), "utf8"),
+        configContext, {filename: "config.js"});
+    const registeredSets = Object.values(configContext.setRegistry.availableSets);
     const sets = new Set();
+    // Include the identity: it can be the deck's only card from its set.
     for (const code of [...Object.keys(cards), identity]) {
-        const n = parseInt(code, 10);
-        if (n >= 36000 && n < 37000) sets.add("vp");
-        else if (n >= 35000 && n < 36000) sets.add("elev");
-        else if (n >= 31000 && n < 32000) sets.add("su21");
-        else if (n >= 30000 && n < 31000) sets.add("sg");
-        else if (n < 30000) sets.add("core");
+        const n = Number(code);
+        const set = /^\d+$/.test(String(code)) && registeredSets.find(entry =>
+            entry.idRange && n >= entry.idRange[0] && n <= entry.idRange[1]);
+        if (!set) throw new Error(`Cannot determine set for card ${code}; add its set range to config.js before importing`);
+        sets.add(set.code);
     }
 
     // Strip HTML tags and entities from the description for notes.

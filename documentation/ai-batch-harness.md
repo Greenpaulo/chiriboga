@@ -1100,6 +1100,41 @@ reinstallation is not counted again, and a previously unseen card swapped onto
 the board can count here. Its contract remains unchanged for historical report
 comparability. Use the separate completion history below for literal installs.
 
+## Agenda commitment collector (I4)
+
+`--collector agendaCommitment` reads the Corp turn-end state (observe mode)
+and reports two lower-is-better counts per game:
+
+- `agendaCommitment.idleAgendaTurns`: Corp turns ending with an installed,
+  unscored agenda whose advancement counters did not rise since the previous
+  Corp turn end (a newly installed agenda with no counters counts).
+- `agendaCommitment.hqHoldTurns`: Corp turns ending with an agenda in HQ while
+  some remote had no agenda or asset in its root.
+
+The state comes from `agendaTurnSnapshot()` in `scripts/ai-batch/headless.js`
+and is the same in both gate arms; it reads no AI option.
+
+## Remote agenda risk collector (I4)
+
+`--collector remoteAgendaRisk` is passive measurement. When each Runner turn
+begins (the same moment as `securitySnapshot`), the harness records every
+remote holding an installed agenda: public ICE count, rezzed ICE count, the
+most advancement counters on an agenda there, agenda points and I2's margin
+bucket (`_breachMarginBucket(_breachMargin(...))`, through the uncached
+evaluator). It keeps those agendas by identity and, when the turn ends, records
+whether one was stolen, then emits a `remoteAgendaTurn` event. Per game it
+reports `remoteAgendaRisk.turns` and `.stolen`. The report's
+`batchDiagnostics.remoteAgendaRisk` pools steal rates by ICE count (0, 1, 2+)
+× counters (0, 1+), by rezzed ICE × counters, by margin bucket and by all
+three. Each cell has a Wilson interval and an interval that resamples games.
+Selecting it does not change any game (log and decision hashes match).
+
+`scripts/ai-batch/agenda-exposure-table.js --fit <report> --heldout <report> --out <file>`
+builds `CORP_AI_AGENDA_EXPOSURE_TABLE` from two such reports the way I2's
+breach-hazard table is built (thin cells merged, rates non-decreasing in
+margin) and runs I2's held-out reliability check;
+`tests/agenda-exposure-table.test.js` re-derives the committed table.
+
 ## Opening central coverage experiment (I2.3)
 
 `--collector openingCentralCoverage` adds diagnostic metrics

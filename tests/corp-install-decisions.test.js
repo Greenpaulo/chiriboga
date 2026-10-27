@@ -417,6 +417,301 @@ test('manual opening keeps planning, hypotheticals, hidden information and reset
   finally {context.runner = previous;}
 });
 
+test('I4 empty-remote ICE stake follows the selected agenda rather than the legacy destination', () => {
+  const ai = openingAI();
+  ai.options.openingHqThenRdIce = false;
+  ai.options.agendaCommitmentPlan = true;
+  ai.options.agendaDestinationPlan = true;
+  const legacy = server('Legacy'), chosen = server('Chosen');
+  ai._evaluateServerSecurity = () => insecure;
+  const agenda = {title: 'Planned agenda', cardType: 'agenda', agendaPoints: 1};
+  const oldHand = corp.HQ.cards;
+  corp.HQ.cards = [agenda, {cardType: 'agenda', agendaPoints: 3}];
+  ai._scoringServers = () => [legacy];
+  ai._agendaCommitmentOptions = card => ({agenda: card, best: card === agenda
+    ? {kind: 'install', server: chosen, ev: 1, plan: {exposureTurns: 1}}
+    : {kind: 'hold', ev: 0}});
+  const before = [];
+  ai._marginalIceBefore = (target, security, designated, plan) => {
+    before.push({target, designated, plan}); return {};
+  };
+  try {
+    ai._marginalIceInstallOptions([iceA], false, true, {});
+    assert(before.some(row => row.target === chosen), 'chosen remote is included even when the legacy walk omits it');
+    const row = before.find(row => row.target === chosen);
+    assert.strictEqual(row.designated, chosen);
+    assert.strictEqual(row.plan.agenda, agenda, 'use the selected agenda, not the largest agenda in HQ');
+    ai.options.agendaDestinationPlan = false;
+    before.length = 0;
+    ai._marginalIceInstallOptions([iceA], false, true, {});
+    assert(before.every(row => row.designated === legacy && !row.plan), 'option off preserves legacy designation');
+  } finally { corp.HQ.cards = oldHand; }
+});
+
+// Controlled public hazard measurements; completion planning, EV, tactical
+// filtering, hold recording and the install consumer are the real AI methods.
+function agendaAI({hand, remotes = [], hqHazard = 0.01, bareHazard = 0.9, clicks = 2} = {}) {
+  Object.assign(context, {
+    Credits: player => player.creditPool,
+    Counters: (card, type) => card[type] || 0,
+    AdvancementRequirement: card => card.advancementRequirement || 0,
+    AllottedClicks: () => 3, MaxHandSize: () => 5,
+    AgendaPoints: player => player.agendaPoints || 0, AgendaPointsToWin: () => 7,
+    CheckSubType: (card, type) => (card.subTypes || []).includes(type),
+    CheckHasAbilities: card => !card.disabled,
+    InstalledCards: player => player === corp ? corp.remoteServers.flatMap(s => s.root.concat(s.ice)) : [],
+    GetTitle: card => card.title, RezCost: card => card.rezCost || 0,
+  });
+  Object.assign(corp, {creditPool: 12, clickTracker: clicks, resolvingCards: [], scoreArea: [],
+    remoteServers: remotes, agendaPoints: 0, identityCard: null});
+  corp.HQ.cards = hand;
+  context.runner.agendaPoints = 0;
+  const ai = candidateAI();
+  corp.AI = ai;
+  ai.options.agendaCommitmentPlan = ai.options.agendaExposureTable = ai.options.agendaDestinationPlan = true;
+  delete ai._potentialAdvancement;
+  delete ai._clicksLeft;
+  ai._iceInstallOptions = () => [];
+  ai._serverToProtect = () => undefined;
+  ai._isHVT = card => card.cardType === 'agenda';
+  ai._evaluateServerSecurity = target => ({plannedRezIce: [], margin: target === corp.archives ? 10 : 1});
+  ai._breachMargin = (target, evaluation) => ({margin: evaluation.margin});
+  ai._hqStealHazard = () => hqHazard;
+  ai._agendaDestinationHazard = target => ({hazard: target ? target.hazard : bareHazard,
+    margin: target && target.locked ? -Infinity : 1});
+  ai._agendaExposureHazard = target => target ? target.hazard : bareHazard;
+  ai.messages = [];
+  ai._log = message => ai.messages.push(message);
+  return ai;
+}
+// Restore the shared VM and board even when setup or an assertion throws.
+function agendaTest(name, body) {
+  test(name, () => {
+    const snapshots = [context, corp, corp.HQ, context.runner].map(object =>
+      ({object, descriptors: Object.getOwnPropertyDescriptors(object)}));
+    try { body(); } finally {
+      for (const {object, descriptors} of snapshots) {
+        for (const key of Reflect.ownKeys(object))
+          if (!Object.hasOwn(descriptors, key)) delete object[key];
+        Object.defineProperties(object, descriptors);
+      }
+    }
+  });
+}
+const agendaCard = (points = 2, requirement = 3) => ({title: 'Test agenda', player: corp,
+  cardType: 'agenda', agendaPoints: points, advancementRequirement: requirement});
+function agendaInstall(ai, agenda) {
+  return ai._rankedInstallOptionsCore([agenda], false, false).find(o => o.cardToInstall === agenda);
+}
+function loggedAgenda(ai) {
+  return JSON.parse(ai.messages.findLast(message => message.startsWith('I4 agenda options ')).slice(18));
+}
+
+agendaTest('I4 destination: quiet HQ beats exposing an agenda in a bare new remote', () => {
+  const agenda = agendaCard(), ai = agendaAI({hand: [agenda]});
+  assert.strictEqual(agendaInstall(ai, agenda), undefined);
+  const log = loggedAgenda(ai);
+  assert(log.best.startsWith('hold'));
+  assert(log.options.find(o => o.kind === 'hold').ev > log.options.find(o => o.kind === 'install').ev);
+  assert.strictEqual(ai._agendaHolds.get(agenda).size, 1);
+});
+
+agendaTest('I4 destination: after a score the same locked remote takes the next agenda', () => {
+  const first = agendaCard(), next = agendaCard();
+  const locked = {...server('Scoring remote', [{}]), hazard: 0, locked: true};
+  const ai = agendaAI({hand: [first, next], remotes: [locked]});
+  assert.strictEqual(agendaInstall(ai, first).serverToInstallTo, locked);
+  // Install and then score the first agenda; no role or designation is stored.
+  corp.HQ.cards = [next]; locked.root.push(first);
+  locked.root.pop(); corp.scoreArea.push(first); corp.agendaPoints += first.agendaPoints;
+  const install = agendaInstall(ai, next);
+  assert.strictEqual(install.serverToInstallTo, locked);
+  assert.strictEqual(install.reason, 'I4 agenda destination');
+  assert.strictEqual(loggedAgenda(ai).best, 'install Scoring remote');
+});
+
+agendaTest('I4 destination: forced agenda discard makes the least costly remote beat holding', () => {
+  const agenda = agendaCard(1, 7), others = Array.from({length: 5}, () => agendaCard(2, 7));
+  const weak = {...server('Weak remote'), hazard: 0.35};
+  const ai = agendaAI({hand: [agenda, ...others], remotes: [weak], bareHazard: 0.8});
+  const choice = ai._agendaCommitmentOptions(agenda);
+  const hold = choice.options.find(o => o.kind === 'hold');
+  assert.strictEqual(hold.discard.probability, 1);
+  assert.strictEqual(choice.best.kind, 'install');
+  assert.strictEqual(choice.best.server, weak);
+  const install = agendaInstall(ai, agenda);
+  assert.strictEqual(install.serverToInstallTo, weak);
+  assert.strictEqual(install.reason, 'I4 agenda destination');
+  assert.strictEqual(loggedAgenda(ai).best, 'install Weak remote');
+  corp.HQ.cards = [agenda, ...others.slice(0, 4)];
+  assert.strictEqual(ai._agendaCommitmentOptions(agenda).options.find(o => o.kind === 'hold').discard.probability, 0);
+  assert.strictEqual(ai._agendaCommitmentOptions(agenda).best.kind, 'hold', 'without the forced discard, holding wins');
+});
+
+agendaTest('I4 band 2: reject a winning steal when holding is safer, install when the remote is safer', () => {
+  const agenda = agendaCard(), weak = {...server('Remote'), hazard: 0.3};
+  const ai = agendaAI({hand: [agenda], remotes: [weak], hqHazard: 0.01});
+  context.runner.agendaPoints = 5;
+  assert.strictEqual(agendaInstall(ai, agenda), undefined);
+  let log = loggedAgenda(ai);
+  assert.strictEqual(log.band2, true);
+  assert(log.options.find(o => o.kind === 'hold').W < log.options.find(o => o.server === 'Remote').W);
+  ai._hqStealHazard = () => 0.8;
+  assert.strictEqual(agendaInstall(ai, agenda).serverToInstallTo, weak);
+  log = loggedAgenda(ai);
+  assert.strictEqual(log.best, 'install Remote');
+  assert(log.options.find(o => o.server === 'Remote').W < log.options.find(o => o.kind === 'hold').W);
+});
+
+agendaTest('I4 ICE plans distinguish all-held agendas from a chosen new remote and use the selected points', () => {
+  const agenda = agendaCard(1), larger = agendaCard(3);
+  const ai = agendaAI({hand: [agenda, larger]});
+  assert.strictEqual(ai._agendaIcePlan(), null, 'all-held agendas do not invent a remote commitment');
+  assert.strictEqual(ai._iceStake(null, undefined), 0, 'undefined is not the new-remote designation');
+  ai._agendaCommitmentOptions = card => ({best: card === agenda
+    ? {kind: 'install', server: null, ev: 1}
+    : {kind: 'install', server: null, ev: 0.5}});
+  const plan = ai._agendaIcePlan();
+  assert.strictEqual(plan.agenda, agenda);
+  assert.strictEqual(plan.server, null);
+  assert.strictEqual(ai._iceStake(null, null, plan), 1);
+  const occupied = {...server('Occupied'), root: [agendaCard(2)]};
+  ai._meanAgendaPoints = () => 2;
+  assert.strictEqual(ai._iceStake(occupied, null, plan), 2, 'occupied remote valuation stays with I2');
+  context.runner.agendaPoints = 6;
+  assert.strictEqual(ai._iceStake(null, null, {agenda: larger}), 1, 'stake stays capped at points needed');
+});
+
+agendaTest('I4 planned stake reaches the real I2 candidate score and changes which empty remote receives ICE', () => {
+  const agenda = agendaCard(), legacy = {...server('Legacy'), hazard: 0.8};
+  const chosen = {...server('Chosen'), hazard: 0.1};
+  const ai = agendaAI({hand: [agenda, iceA], remotes: [legacy, chosen], hqHazard: 0.8});
+  ai.options.iceMarginalSecurity = true;
+  ai._rankedServersToProtect = () => [legacy, chosen].map(target => ({server: target, security: ai._evaluateServerSecurity(target)}));
+  ai._nothingWorthProtecting = () => false;
+  ai._iceLayerPolicy = () => ({allowed: true});
+  ai._iceInstallOptions = () => [{cardToInstall: iceA, iceGroup: 0}];
+  ai._evaluateServerSecurity = target => ({plannedRezIce: [], margin: target.ice.length ? -Infinity : 10});
+  ai._scoringServers = () => [legacy];
+  let options = ai._marginalIceInstallOptions([iceA], false, true, {});
+  assert.strictEqual(options[0].serverToInstallTo, chosen);
+  assert.strictEqual(options[0].iceMarginalScore.stake, agenda.agendaPoints);
+  assert.strictEqual(options[0].iceMarginalScore.exposureTurns, 1);
+  assert(options[0].iceMarginalScore.riskReduction > 0);
+  assert.strictEqual(options[1].iceMarginalScore.stake, 0);
+  ai.options.agendaDestinationPlan = false;
+  options = ai._marginalIceInstallOptions([iceA], false, true, {});
+  assert.strictEqual(options[0].serverToInstallTo, legacy);
+  assert.strictEqual(chosen.ice.length, 0);
+  assert.strictEqual(legacy.ice.length, 0);
+  assert.strictEqual(corp.creditPool, 12);
+});
+
+agendaTest('I4 ICE exposure uses completion after the ICE click and restores resources even on a throw', () => {
+  const agenda = agendaCard(2, 1), target = server('Planned remote');
+  const ai = agendaAI({hand: [agenda], remotes: [target], clicks: 3});
+  const plan = {agenda, server: target};
+  const evaluation = ai._evaluateServerSecurity(target);
+  const before = () => ai._marginalIceBefore(target, evaluation, target, plan);
+  assert.strictEqual(before().exposureTurns, 0, 'ICE, install and advance can score before a Runner turn');
+  corp.clickTracker = 2;
+  assert.strictEqual(before().exposureTurns, 1, 'the ICE click prevents scoring this turn');
+  corp.clickTracker = 1;
+  assert.strictEqual(before().exposureTurns, 0, 'agenda goes in and scores next Corp turn, with no installed exposure');
+  agenda.advancementRequirement = 4;
+  assert.strictEqual(before().exposureTurns, 1, 'only one horizon turn remains after next-turn installation');
+  assert.strictEqual(corp.clickTracker, 1);
+  assert.strictEqual(corp.creditPool, 12);
+  target.ice.push({});
+  ai._agendaCompletionPlan = () => {
+    assert.strictEqual(corp.clickTracker, 0);
+    assert.strictEqual(corp.creditPool, 11, 'existing ICE determines the new ICE installation cost');
+    throw new Error('planning failure');
+  };
+  assert.throws(before, /planning failure/);
+  assert.strictEqual(corp.clickTracker, 1);
+  assert.strictEqual(corp.creditPool, 12);
+  assert.strictEqual(context.AIHypothetical.depth, 0);
+});
+
+agendaTest('I4 completion counts rezzed scoring support once and unrezzed support with its cost', () => {
+  const agenda = agendaCard(2, 3), target = server('Scoring remote');
+  const support = {rezzed: true, rezCost: 6,
+    AIScoringSupport: () => ({requirementDelta: -1, requiresRez: true})};
+  target.root = [agenda, support];
+  const ai = agendaAI({hand: [], remotes: [target], clicks: 1});
+  context.AdvancementRequirement = () => support.rezzed ? 2 : 3;
+  const plan = () => ai._agendaCompletionPlan(agenda, target, 0, {plannedRezIce: []}, true);
+  assert.strictEqual(plan().limit, 2);
+  assert.strictEqual(plan().exposureTurns, 1, 'one click cannot pay two advancements');
+  support.rezzed = false;
+  assert.strictEqual(plan().limit, 2, 'affordable unrezzed support still applies');
+  assert.strictEqual(ai._scoringSupport(agenda, target, 3, 12).rezCost, 6);
+  corp.creditPool = 2;
+  assert.strictEqual(plan().limit, 3, 'unaffordable support cannot reduce the requirement');
+});
+
+agendaTest('I4 completion exposes install-turn restricted agendas even with enough advancement', () => {
+  const agenda = {...agendaCard(2, 1), AICannotScoreOnInstallTurn: true};
+  const ai = agendaAI({hand: [agenda], clicks: 3});
+  context.runner.agendaPoints = 5;
+  ai.options.agendaExposureTable = false;
+  const evaluation = {plannedRezIce: []};
+  for (const startTurn of [0, 1]) {
+    const plan = ai._agendaCompletionPlan(agenda, null, startTurn, evaluation);
+    assert.strictEqual(plan.steps[0].counters, 1, 'advancement on the install turn is legal');
+    assert.strictEqual(plan.exposureTurns, 1, 'scoring must wait until the next Corp turn');
+  }
+  const option = ai._agendaCommitmentOptions(agenda).options.find(o => o.kind === 'install');
+  assert(option.ev < agenda.agendaPoints);
+  assert(option.W > 0, 'winning steal risk cannot vanish on the install turn');
+  assert.strictEqual(ai._agendaCompletionPlan(agenda, null, 0, evaluation, true).exposureTurns, 0,
+    'an agenda installed on a prior turn may score immediately');
+});
+
+agendaTest('I4 defence probe measures the remote during both constrained opening installs', () => {
+  const target = server('Agenda remote'), agenda = agendaCard();
+  target.root = [agenda];
+  const ai = agendaAI({hand: [iceA], remotes: [target]});
+  ai.options.iceMarginalSecurity = ai.options.openingHqThenRdIce = true;
+  ai._rankedServersToProtect = () => [corp.HQ, corp.RnD, target].map(server =>
+    ({server, security: insecure}));
+  ai._nothingWorthProtecting = () => false;
+  ai._iceLayerPolicy = () => ({allowed: true});
+  ai._iceInstallOptions = () => [{cardToInstall: iceA, iceGroup: 0}];
+  ai._marginalIceBefore = server => {
+    assert.strictEqual(server, target, 'the real candidate generator must use the requested remote');
+    return {};
+  };
+  ai._marginalIceScore = () => ({score: 9});
+  ai._completedIceInstalls = 0;
+  const value = ai._bestDefencePoints(target);
+  assert(value > 0);
+  assert.strictEqual(ai._openingIceTarget(), corp.HQ);
+  ai._completedIceInstalls = 1;
+  assert.strictEqual(ai._bestDefencePoints(target), value);
+  assert.strictEqual(ai._openingIceTarget(), corp.RnD);
+  ai._marginalIceBefore = () => { throw Error('defence failure'); };
+  assert.throws(() => ai._bestDefencePoints(target), /defence failure/);
+  assert.strictEqual(ai._openingIceTarget(), corp.RnD, 'restore the probe even after a throw');
+  ai._openingIceTacticalProbe = true;
+  assert.throws(() => ai._bestDefencePoints(target), /defence failure/);
+  assert.strictEqual(ai._openingIceTacticalProbe, true, 'preserve a nested probe');
+});
+
+agendaTest('I4 summary distinguishes no deferral, a new remote and an existing remote', () => {
+  const agenda = agendaCard(2, 20), ai = agendaAI({hand: [agenda]});
+  const choice = ai._agendaCommitmentOptions(agenda);
+  const summary = ai._agendaCommitmentSummary(choice);
+  assert.strictEqual(summary.best, 'hold none');
+  assert.strictEqual(summary.options.find(o => o.kind === 'hold').server, 'none');
+  const hold = choice.options.find(o => o.kind === 'hold');
+  hold.server = null;
+  assert.strictEqual(ai._agendaCommitmentSummary(choice).best, 'hold new remote');
+  hold.server = server('Existing');
+  assert.strictEqual(ai._agendaCommitmentSummary(choice).best, 'hold Existing');
+});
+
 test('manual opening uses existing critical-breach thresholds and restores tactical probes', () => {
   const ai = openingAI(), card = {...iceA, player: corp};
   context.ServerName = target => target.serverName;
