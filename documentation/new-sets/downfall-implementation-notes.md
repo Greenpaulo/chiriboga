@@ -852,8 +852,10 @@ Service 1380, Vulnerability Audit 1581, CSR Campaign 1311 and Rime 1425.
 - Rime: the new engine check `CheckRezAsNonIceDuringRun(card)` (checks.js) is
   true for ice that declares `rezAsNonIceDuringRunsOnServer` while a run is in
   progress against the server it protects. The shared run paid-window rez
-  enumeration (approach, encounter, pass and approach-server windows) adds such
-  ice to its rezzable types. Ordinary ice keeps approach-only timing. The
+  enumeration (approach ice and post-jack-out movement windows) adds such ice
+  to its rezzable types. Encounter and pre-jack-out windows permit no rez,
+  including Rime, as confirmed by the [official release notes](https://nullsignal.games/products/Downfall/DFReleaseNotes/).
+  Ordinary ice keeps approach-only timing. The
   strength boost now includes Rime itself (printed 0, so 1 while rezzed),
   applies only to ice protecting its server, and stacks across copies. The
   subroutine's AI model was the invalid `bankroll` string; it is now the

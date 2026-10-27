@@ -60,6 +60,7 @@ generated in [../card-status.md](../card-status.md#runner-keep-coverage-playable
 Which server should the Runner run, and what risk does it take there?
 
 ### T1 Caution with advanced face-down cards
+
 - **Status:** proposed
 - **Depends on:** F4
 - **Spec:** [T1-advanced-card-trap-caution.md](specs/T1-advanced-card-trap-caution.md)

@@ -1819,8 +1819,9 @@ where a variable X cost is returned as negative `credits` (Psychographics
 returns `{counters: X, credits: -X}`; Biotic Labor returns
 `{counters: 0, clicks: 2}`). The search applies the printed `PlayCost` and
 `PlayClickCost` as before and skips a direction that gains nothing. Operations
-receive `context = {thisTurn, credits, clicks, remaining, resolving}` from the
-search point (`remaining` is counters still useful before the limit);
+receive `context = {thisTurn, installedThisTurn, credits, clicks, remaining, resolving}` from the
+search point (`installedThisTurn` is true when the target is installed on the
+searched turn; `remaining` is counters still useful before the limit);
 installed upgrades and older callers pass no context, so treat a missing
 context as this turn. Seamless Launch returns 2 except for a card installed
 this turn. The advancement search calls this on operations in its
@@ -3373,6 +3374,9 @@ optimisation work.
   that would exceed it, so the Runner plans to break only the ETR and accept the
   credit loss. The engine rule uses `modifyCannot` with id `"break"` on a
   subroutine, consumed by `ChoicesEncounteredSubroutines` and `Break`.
+  Pending multi-break selections are passed as `selectedBreaks` to
+  `modifyCannot` so Utae offers and pays only for legal breaks, without changing
+  live broken flags during selection.
   The Corp security model already treats only the ETR as required.
 - Sandstone lowers `result.strength` by one outside its own encounter, because
   its encounter counter is placed before the Runner can break.
@@ -3401,7 +3405,8 @@ optimisation work.
   least 4 and hand room), `AIAvoidInstallingOverThis` and `AIRezWhenCan()` at the
   end of the Runner's turn. The AI draws unless R&D has 2 or fewer cards.
 - Rime declares `rezAsNonIceDuringRunsOnServer`; `CheckRezAsNonIceDuringRun`
-  adds it to run-window rez options and the `AIRezWhenCan()` consumer, which
+  adds it to run windows that permit non-ice rez (not encounters or
+  pre-jack-out windows) and the `AIRezWhenCan()` consumer, which
   rezzes it at the first Corp opportunity in a run on its server. Its subroutine
   is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
   `Strength()` in Runner and Corp security calculations.

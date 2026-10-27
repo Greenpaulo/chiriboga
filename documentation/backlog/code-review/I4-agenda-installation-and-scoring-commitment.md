@@ -1,18 +1,162 @@
 # I4 Agenda installation and scoring commitment
 
-**Outcome:** blocked — score-fast plan execution is ready behind `agendaCommitmentPlan`; its F4 gate is pending (the owner runs it). Agenda destination/hold is folded back into I4 (see "Destination and hold"); next is a counter-aware exposure table.
+**Outcome:** not adopted as default — implementation complete for flag-based owner playtesting; all three I4 options remain off by default. Independent review and an owner decision on defaults remain.
 
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](../done/I2-ice-selection-by-marginal-security.md) phase A, [I3](../I3-remote-role-and-root-suitability.md) (now follows I4)
-**Verified against code:** eb78846 (2026-10-23; after the Downfall merge, whose only relevant change is the band-3 `AICannotScoreOnInstallTurn` skip noted below)
+**Verified against code:** dd5d256 (2026-10-26; remaining destination/hold seam and scenarios rechecked against current code, then implemented below).
 
 ## Resolution
 
+Implemented from dd5d256, 2026-10-26 (destination/hold completion; earlier
+implementation history below).
+
+**Gate:** failed — `agendaCommitmentPlan` retained, defaults to off for owner-requested manual playtesting; the historical part 1 F4 failure does not reject this implementation.
+
+**Manual playtesting:** owner-requested — `agendaCommitmentPlan`, 2026-10-26; defaults to off.
+
+The owner explicitly chose flags and human playtesting instead of statistical
+batch guards as the adoption workflow. Keep `agendaCommitmentPlan`,
+`agendaExposureTable` and `agendaDestinationPlan` available and default-off.
+No new batch gate is required by this handoff, no default is enabled, and no
+quantified human result or passed gate is claimed. The owner reported decent
+combined playtests with all three flags and `openingHqThenRdIce` enabled;
+that predates the ICE seam completed here.
+
+**Completed in this continuation.** With both `agendaCommitmentPlan` and
+`agendaDestinationPlan` enabled, `_agendaIcePlan()` chooses the highest-EV
+agenda whose current best option is installation. I2 designates its destination
+(including a bare or new remote) and values it with that agenda's points,
+capped at points the Runner needs. When every agenda is held there is no
+empty-remote stake; `undefined` (no destination) is distinct from `null` (new
+remote). Occupied remote and central stakes retain I2's existing rules.
+A chosen remote absent from the legacy walk is included subject to the
+existing posture and ICE-layer policy. Explicit server probes and the optional
+HQ-first/R&D-second opening still constrain the candidate list.
+
+`_agendaIceExposure()` asks M3 for completion after spending the ICE install's
+click and installation cost. Exposure begins when the agenda can be installed
+and ends at scoring, capped at the remaining horizon. It restores clicks and
+credits through `_withHypothetical()`, including on exceptions. New ICE rez
+cost remains accounted for by I2's existing candidate score; this does not add
+joint ICE/agenda action search or assume a held agenda's future defence action
+has been scheduled (I8 owns that broader planning).
+
+**Classification and authorization.** Strategic coordination of legal ICE and
+agenda choices, kept behind the existing flags. The 2026-10-23 approved plan's
+I2 stake seam already covers these methods; the owner's 2026-10-26 instruction
+explicitly requests this remaining seam and scenario coverage. No new hook
+contract, title case or acceptance expectation is changed.
+
+**Tests.** `tests/corp-install-decisions.test.js` reproduces the old mismatch
+(chosen remote omitted from I2), now passing. It also exercises the real
+completion planner, destination EV, band-2 filtering, hold recording and
+install consumer with controlled public hazard measurements: risky bare remote
+versus quiet HQ; reuse after scoring; forced discard versus the same hand
+below its limit; and both directions of a game-losing steal comparison. Each
+checks the logged choice/value or install reason. An integration case runs the actual I2 candidate scorer and demonstrates ICE
+placement moving from the legacy remote to the I4 destination. Additional seam cases cover
+option-off legacy designation, all-held versus new remote, selected agenda
+points, occupied stakes, point caps, zero/one exposed turn after ICE, delayed
+installation, horizon clipping and restoration on throw. These establish
+implementation contracts, not strategic superiority. Existing real-board
+fixtures and server-security tests are unchanged.
+
+**Earlier part 1 batch evidence (dd5d256, before this seam).** Baseline
+`baseline-6aa1ad78f97f2995.json`, candidate `candidate-47c7eb64c9db30fd.json`,
+core-v1 pool, seven pairs, seeds 7001–8000: 7,000 games per arm, one candidate
+failure, 6,999 successful pairs, 3,205 changed. Win-rate difference +0.003
+[−0.006, +0.012] did not establish improvement; points scored +0.079
+[+0.039, +0.118] did. Bluff correlation +0.02677 [+0.00483, +0.04318]
+failed tolerance 0.02; other listed guards passed. The Seamless Launch failure
+is independently tracked in [its existing bug](../../bugs/seamless-launch-empty-choice-stall.md).
+These results do not cover destination/hold or the new seam, and are historical
+measurements rather than a prerequisite for retaining the flags.
+
+**Validation:** focused checks passed: 30 install-decision cases, 197 server-security
+cases, and 104 decision-fixture checks across 26 fixtures. Final validation:
+`node scripts/ticket.js check documentation/backlog/code-review/I4-agenda-installation-and-scoring-commitment.md`
+passed (121 full test files, exit 0). Log:
+`/tmp/chiriboga-i4-completion-check.log`. The feature regression was added to the
+existing green install suite rather than moved from a pending file; the generic
+no-reproduction-header warning does not indicate an untested reproduction.
+
+Architecture: [Agenda scoring plans (I4)](../../corp-ai/architecture.md#agenda-scoring-plans-i4).
+No card-facing hook changed in this continuation; earlier migrations are listed
+in the implementation history.
+
+## Historical handoff (2026-10-23 afternoon)
+
+State at the head of `backlog/I4-agenda-installation-and-scoring-commitment`
+(unpushed). Full `node scripts/ticket.js check` passed after the last code
+change. Option-off games are unchanged.
+
+**What was done this afternoon.**
+1. Measured the real steal risk of agendas in remotes (passive collector
+   `remoteAgendaRisk`, fresh baseline seeds 3001-4000, check run 4001-5000).
+   The Runner AI steals an agenda with advancement counters about 3 times as
+   often as one without (one-ICE remote: 0.09 → 0.34 per Runner turn; bare
+   remote: 0.12 → 0.92). ICE count matters little. I2's table ignores
+   counters, which is why score fast lost.
+2. Built `CORP_AI_AGENDA_EXPOSURE_TABLE` from that data
+   (`scripts/ai-batch/agenda-exposure-table.js`,
+   `documentation/corp-ai/measurements/I4-3f46a2a-agenda-exposure-calibration.json`).
+   I2's strict held-out rule failed on small cells (6 of 23, misses ≤ 0.045;
+   weighted error 0.010 against 0.05); owner chose to use it.
+3. **Part 1** (`agendaExposureTable`, with `agendaCommitmentPlan`): score fast
+   only starts advancing an agenda with no counters when that beats waiting
+   and advancing it all in one turn (the burst plan). Quick run against
+   defaults: win rate 0.309 → 0.360, points scored 4.05 → 4.28, points stolen
+   6.16 → 5.95; all guards and both improvements passed (indicative only).
+4. **Part 2** (`agendaDestinationPlan`): where to install an agenda from HQ,
+   or hold it, by expected points on the new table. Built and switched off.
+   Quick run against part 1: no clear gain (win 0.360 → 0.371, scored
+   4.28 → 4.35, both within noise; more theft from remotes, less from HQ).
+   Owner: keep the code, off. Its old pending reproduction now passes with
+   the options set and is in the green fixtures.
+5. Folded I4.1 back into this ticket (section "Destination and hold");
+   proposed Runner item T1 (the Runner nearly always runs advanced face-down
+   cards) and noted the evidence in I5.
+
+**Historical gate commands (no longer required).** Each compares against defaults (all I4 options
+off), 1,000 seeds per deck pair.
+
+Part 1:
+
+```
+node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05
+```
+
+Part 1 + 2, on the same games (the baseline arm is reused from the cache):
+
+```
+node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --corp-option agendaDestinationPlan=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05
+```
+
+Both gates print the path of their candidate report
+(`.ai-batch-cache/candidate-<hash>.json`). Part 2's own effect is the paired
+comparison of those two reports:
+`node scripts/ai-batch.js --compare <part-1 candidate> <part-1+2 candidate> --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5`
+
+**Historical next steps (superseded by the current Resolution).**
+- Record the gate results in this Resolution. If part 1 passes, the owner
+  playtests before any default changes; if it fails, follow "When a gate
+  fails" in `documentation/ai-planning.md` for `agendaExposureTable`.
+- Part 2 is unfinished: I2's empty-remote ICE stake does not follow its chosen
+  destination, and no tests cover its other scenarios (bare remote vs hold,
+  repeat scoring, agenda flood, band 2). Only worth continuing if its gate
+  shows a gain.
+- The exposure table was measured with the Corp's old policy; re-measure it
+  with the options on (`--collector remoteAgendaRisk`) before relying on it
+  further.
+
+## Implementation history
+
 Implemented from eb78846, 2026-10-23.
 
-**Gate:** pending F4 — `agendaCommitmentPlan` defaults to off.
+**Original gate status:** pending F4 — `agendaCommitmentPlan` defaults to off.
 
-**Gate command:** `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+**Gate command:** `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
 
 **Quick run:** `350 paired games, 229 changed by the options [quick: indicative only, cannot pass a gate]` (2026-10-23, gate command without `--seeds`; `--quick` with `--seeds` plays the full range). Indicative only: win rate 0.309 → 0.320 [−0.034, +0.057]; points scored 4.049 → 3.800 [−0.483, −0.026]; remote points stolen 2.034 → 2.471 [+0.226, +0.657]; insolvent turns 1.717 → 2.031; idle agenda turns 3.020 → 1.857; agenda exposure turns 1.579 → 1.372. The quick sample failed the remote-theft, insolvency, two tell guards and both improvements. Likely cause, to check in the full run: advancing across turns shows counters, which the Runner AI targets, and I2's table does not condition on counters (the same blind spot the destination/hold measurement covers).
 
@@ -120,10 +264,95 @@ within each counter row (1 ICE, 1+ counters: 0.060 at -3..-1 to 0.592 at
 ≥10). Observational: the current policy chooses which agendas carry counters
 into a Runner turn. Full cells: `batchDiagnostics.remoteAgendaRisk` of the run.
 
+**Counter-aware exposure (amendment, 2026-10-23).** Table built from the
+baseline above (fit) and checked on a second fresh run (seeds 4001-5000,
+7000 games): the six headline rates repeat (for example one ICE: 0.086 →
+0.084 without counters, 0.338 → 0.348 with). I2's strict per-cell rule
+failed (6 of 23 checked cells outside their intervals, every miss at most
+0.045) while the weighted error was 0.010 against the 0.05 limit. Owner
+decision: use the table. Calibration:
+`documentation/corp-ai/measurements/I4-3f46a2a-agenda-exposure-calibration.json`.
+`agendaExposureTable` (default off) makes score fast compare advancing now
+against waiting (the burst plan for an agenda with no counters). Fixtures:
+`i4-exposure-waits-for-burst.txt`, `i4-exposure-advanced-keeps-advancing.txt`;
+`tests/agenda-exposure-table.test.js`. Option-off games unchanged (35 of 35).
+Quick run (gate command with `--corp-option agendaExposureTable=true`,
+`--quick`, indicative only; 350 paired games, 158 changed): win rate 0.309 →
+0.360 [+0.011, +0.091]; points scored 4.049 → 4.280 [+0.046, +0.414]; points
+stolen 6.157 → 5.951 [−0.403, −0.014]; remote points stolen 2.034 → 2.080
+[−0.137, +0.234]; insolvent turns 1.717 → 1.843; idle agenda turns 3.020 →
+2.466. Score fast without the table had lost points and remote theft on the
+same seeds. Every listed guard and both improvements passed.
+
+**Destination/hold retried (`agendaDestinationPlan`, default off,
+2026-10-23).** `_agendaCommitmentOptions()` values each destination with the
+exposure table (better of the planned and burst plans) and, with the option,
+its best choice replaces the scoring-server destinations for an agenda in HQ
+(holds are recorded for the indefinite-hold guard). I2's empty-remote stake
+following the destination is not rebuilt. The pending reproduction
+`corp-agenda-held-while-secure-remote-available.txt` now passes with the
+options set (install Remote 0 0.954 against hold 0.991, the install-within-0.1
+rule) and moved to the green fixtures. Quick comparison (350 paired games,
+both arms with score fast and the table): win rate 0.360 → 0.371 [−0.051,
++0.074]; points scored 4.280 → 4.354 [−0.251, +0.403]; points stolen 5.951 →
+5.814; from remotes 2.080 → 2.291 [−0.051, +0.480], from HQ 1.274 → 1.066;
+stall turns 1.331 → 1.083. No clear gain: both improvements failed. Not in
+tonight's gate.
+
 **Left open:** the full gate (owner); destination/hold; the owner playtest before any
 default change.
 
 ## Implementation plan
+
+**Continuation authorized 2026-10-26:** finish the already approved I2 stake
+seam behind `agendaDestinationPlan` and cover bare-remote hold, repeat scoring,
+agenda flood and band 2. The objective is strategic coordination, with manual
+playtesting per the owner's explicit workflow decision. Existing flags and
+assertions remain unchanged; regression checks validate the implementation.
+
+
+### Amendment: counter-aware agenda exposure
+
+Proposed at `c127130`, 2026-10-23. **Approved 2026-10-23.**
+
+- **Validation:** the remoteAgendaRisk baseline (Resolution) shows steal risk
+  per Runner turn depends mainly on whether the agenda carries counters
+  (one-ICE remote: 0.09 without, 0.34 with; bare remote: 0.12 against 0.92).
+  Score fast and the destination/hold EV both read I2's table, which ignores
+  counters, so advancing across turns looked safe. Holding counters back until
+  the agenda can be finished in one turn ("burst") was never an option they
+  compared.
+- **Approach:**
+  1. `CORP_AI_AGENDA_EXPOSURE_TABLE` (counters none/advanced × ICE
+     bare/single/multi × I2 margin bucket), built by
+     `scripts/ai-batch/agenda-exposure-table.js` from the fit run (seeds
+     3001–4000) and checked on a held-out run (4001–5000) with I2's rule.
+     Committed with its calibration file; a test re-derives it. If the held-out
+     check fails, stop and report.
+  2. New option `agendaExposureTable` (default off; needs
+     `agendaCommitmentPlan`). `_agendaExposureHazard(server, evaluation,
+     counters)` reads the table; each plan turn's hazard uses the counters the
+     agenda has after that Corp turn.
+  3. `_agendaCompletionPlan(..., burst)`: a plan that adds no counters until
+     one turn can finish the agenda (spare clicks become credits).
+  4. Score fast: an agenda with no counters is advanced now only when the
+     advance-now plan's value beats the burst plan's (and I2's best ICE, as
+     now). An agenda already advanced keeps today's comparison, on the
+     advanced row.
+  5. Destination/hold (from the folded section): re-attach the removed
+     consumer (47818df) behind the same option, with each destination valued
+     at the better of its advance-now and burst plans on the new table.
+     Built second, after a quick run of steps 1–4.
+- **Tests:** unit cases for the table and plan values; fixtures: uncountered
+  agenda in a one-ICE remote waits for a burst; already-advanced agenda keeps
+  advancing; option off unchanged. Destination/hold scenarios as listed in
+  its section, including the pending reproduction.
+- **Risk:** only I4 consumers read the new table (I2's ICE choice and M5 keep
+  I2's). The table is observational: once the Corp stops leaving advanced
+  agendas out, advanced-row rates may shift; re-measure with the option on
+  before the gate. Check with option-off identity and quick runs.
+- **Docs:** `documentation/corp-ai/architecture.md`, `documentation/ai-batch-harness.md`
+  (builder), Resolution.
 
 Proposed at `eb78846`, 2026-10-23. **Approved 2026-10-23**, with one owner
 amendment: when the best install and hold differ by less than 0.1 points
@@ -224,7 +453,7 @@ lockout-safe: a lockout bucket still has a small non-zero hazard, so only
 band 2's explicit rule makes a steal impossible.
 
 I4 also takes over the one piece of I3 every agenda plan needs: under
-`agendaCommitmentPlan`, I2's empty-remote ICE stake follows I4's chosen
+`agendaCommitmentPlan` plus `agendaDestinationPlan`, I2's empty-remote ICE stake follows I4's chosen
 destination (see "I2 ICE stake" below).
 
 ## Goal
@@ -258,6 +487,9 @@ is the shared plan; I4 owns M3 `exposureTurns`, M5 `hqStealHazard` and the
 agenda-commitment consumer, and is the I-layer item expected to move win rate.
 
 ## Current behaviour
+
+The following describes the pre-I4 baseline and historical measurements. The
+current flag-enabled implementation is described in Resolution and architecture.
 
 Verified at 65251a5 (previously 60fa0d7). No commit since 60fa0d7 touched
 admission, `_scoringWindow()`, `_sufficientEconomy()`, the advance block or
@@ -473,8 +705,8 @@ proves this.
 
 ### I2 ICE stake
 
-Added at re-grounding (2026-10-23), replacing what I3 was to supply. With
-`agendaCommitmentPlan` on, I2's empty-remote ICE stake follows this
+Added at re-grounding (2026-10-23), replacing what I3 was to supply. With both
+`agendaCommitmentPlan` and `agendaDestinationPlan` on, I2's empty-remote ICE stake follows this
 decision instead of the legacy designated remote:
 
 - `memo.designated` in `_marginalIceInstallOptions()` (today
@@ -653,62 +885,24 @@ and the two no-ETR fixtures (the legacy gate is untouched).
     (phase A identity run).
 
 ## Acceptance gate
-F4 gate. Option `agendaCommitmentPlan` (Corp AI), off in the baseline and on
-in the candidate. Committed deck pool, paired seeds 7001–8000 (1,000 games
-per deck pair; unused by any earlier gate, 6001–7000 being reserved for I3),
-bootstrap 95% intervals. Both arms use current defaults: the five 2026-10-05
-recovery options off, I2's `iceMarginalSecurity` on (stated explicitly in the
-command) and I2.3's `openingHqThenRdIce` off. I3 is not a prerequisite
-(re-grounded 2026-10-23). Fresh matched control on the I4 branch after `main`
-(Downfall, I2.3) is merged in.
-Collectors: `installOutcomes`, `stallTurns`, `corpInsolventTurns` (I0;
-definitions in `documentation/ai-batch-harness.md`); `strandedUnrezzedIceCost`,
-`bluffSingleVariableCorrelation`, `realizedIceByRootType` (I2's guard set,
-because I4 changes which empty remote I2's ICE stake protects); `agendaCommitment`
-(new, built by this item from public and Corp-known turn-end state, the same
-definition in both arms): `agendaCommitment.idleAgendaTurns`, Corp turns
-ending with an installed unscored agenda that gained no advancement counter
-that turn (lower); `agendaCommitment.hqHoldTurns`, Corp turns ending with an
-agenda in HQ while a remote with an empty root existed (lower).
-Starts: none. Every pool game reaches agenda decisions; Seamless Launch is in
-6 of 7 Corp decks, Manegarm Skunkworks in 3, Anoetic Void in 2, SanSan City
-Grid and Biotic Labor in NEH, Oaktown Renovation in BTL, Trick of Light in PE.
+
+Human gate. Options `agendaCommitmentPlan`, `agendaExposureTable` and
+`agendaDestinationPlan` (Corp AI), off by default. Owner decision 2026-10-26:
+manual flag comparisons decide adoption; the former statistical improvement
+and guard thresholds are superseded.
+Sample: none set by the owner; manual games compare flags using the I4 decision
+logs. No additional AI-vs-AI batch is required.
 
 | Check | Metric | Better | Threshold |
 |---|---|---|---|
-| Improve | `winRate` | higher | interval of the improvement above 0 |
-| Improve | `pointsScored` | higher | interval of the improvement above 0 |
-| Guard | `pointsStolen` | lower | regression at most 0.2 |
-| Guard | `pointsStolenByServer.remote` | lower | regression at most 0.5 |
-| Guard | `gameLength` | lower | regression at most 1.5 turns |
-| Guard | `corpInsolventTurns` | lower | regression at most 0.5 turns |
-| Guard | `stallTurns` | lower | regression at most 0.5 turns |
-| Guard | `installOutcomes.installToScoreTurns` | lower | regression at most 0.5 turns |
-| Guard | `installOutcomes.agendaExposureTurns` | lower | regression at most 0.5 turns |
-| Guard | `agendaCommitment.idleAgendaTurns` | lower | regression at most 0.5 turns |
-| Guard | `agendaCommitment.hqHoldTurns` | lower | regression at most 0.5 turns |
-| Guard | `strandedUnrezzedIceCost.credits` | lower | regression at most 1 |
-| Guard | `bluffSingleVariableCorrelation.max` | lower | regression at most 0.02 |
-| Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
-| Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
+| Improve | Owner assessment of agenda timing and destination choices | preferred choices in manual flag comparisons | none set; explicit owner adoption decision required |
+| Guard | Regression tests | passing | all required checks pass |
 
-Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.installToScoreTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.idleAgendaTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+Status: not adopted. No owner decision to change defaults has been given.
+Record that explicit decision here before changing any default.
 
-`winRate` and `pointsScored` are Improve rows rather than the standard
-guards, because this item exists to move them; dropping either needs a spec
-update before the run. Remote theft has a wider tolerance than the standard
-0.2 because the design deliberately moves agendas from HQ into remotes; total
-`pointsStolen` keeps the standard tolerance. The older 0.03/0.25 exception and
-the remote-theft Improve row are retired with the old design. M2 describes the
-stock Runner AI (aggressive, runs constantly); a human may breach more or
-less often, so a passing gate is necessary but not sufficient: the owner
-playtests before `agendaCommitmentPlan` defaults to on.
-
-**Re-grounding changes (2026-10-23).** Added seeds, pool and the explicit I2
-option; dropped the I3 arm. Added I2's stranded-ICE and tell guards at I2's
-thresholds because I4 now redirects I2's empty-remote stake; no existing
-threshold was loosened. `agendaCommitment` declares lower-is-better directions
-for both metrics.
+The part 1 batch command remains in the historical handoff for provenance,
+and its actual failure is recorded in Resolution. It is not a pending task.
 
 ## Things to consider
 
@@ -725,20 +919,20 @@ for both metrics.
   `a / n`; the sequential per-agenda evaluation accounts for it.
 
 ## Acceptance criteria
-- [x] Every test scenario that remains in I4 (3 score fast, 9 band 3, 10 identity) is covered by a deterministic test that asserts the logged reason as well as the choice; scenarios 1, 2 and 4–8 moved to destination/hold (below) with its consumer.
-- [ ] ~~The pending reproduction passes under the option~~ — moved to destination/hold (install/hold case; see Resolution).
+- [x] Score-fast, band-3 and identity fixtures remain green; the original held-agenda fixture plus bare-remote/hold, repeat-scoring, flood and band-2 cases cover destination/hold with logged values and reasons.
+- [x] The original held-agenda reproduction passes with all I4 options and is in the green fixtures (see implementation history).
 - [x] Phase A identity run (7 pairs × 20 seeds, option on with consumer disabled) matches every `logHash`; the hook migrations are behaviour-preserving.
 - [x] The behaviour change ships behind an AI option that defaults to off (`agendaCommitmentPlan`, named in the Resolution).
-- [x] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the option.
-- [ ] ~~With the option on, I2's empty-remote stake follows I4's chosen destination~~ — moved to destination/hold with its consumer.
+- [x] Flag-on scenarios and flag-off compatibility are covered by focused tests; adoption follows the owner-directed manual-playtesting decision.
+- [x] With destination/hold enabled, I2's empty-remote stake follows the selected agenda and its completion exposure; with it off, legacy designation remains.
 - [x] The `agendaCommitment` collector declares lower-is-better directions for both metrics and is verified against scripted boards (idle, advanced, scored, held with and without an empty remote) and back-filled into a fresh baseline without changing decisions.
-- [ ] I0's `installOutcomes`, `stallTurns` and `corpInsolventTurns` are back-filled into the same fresh baseline with the corrected PR #34 tracker.
-- [ ] Gate evidence is recorded in the Resolution: exact command, committed deck pairs, paired seeds, seed count, every metric's baseline/candidate result and bootstrap 95% confidence interval, guarded-regression result, pass conditions and thresholds; each improvement interval's lower bound is above zero.
+- [x] I0's `installOutcomes`, `stallTurns` and `corpInsolventTurns` are present in the matching dd5d256 baseline (the fresh recorded run).
+- [x] Historical batch disposition and the owner's replacement manual-playtesting workflow are recorded in Resolution; no statistical gate is pending.
 - [ ] An owner playtest against the option is recorded before the default changes.
 - [x] New or changed card-facing hooks (`AIScoringSupport`, extended `AIFastAdvanceCounters` and `AIAdvanceCreditGain`) are documented in `documentation/ai.md`, and migrated titles are removed from `LEGACY_TITLES` and ticked in P1.
 - [x] The Resolution lists the cards updated in each set in scope and confirms none were missed.
 - [x] `documentation/corp-ai/architecture.md` describes the new behaviour ([Agenda scoring plans (I4)](../../corp-ai/architecture.md#agenda-scoring-plans-i4)).
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] `node tests/run-all-tests.js` passes through the final full ticket check (121 files).
 
 ## Destination and hold (folded back from I4.1, owner decision 2026-10-23)
 
@@ -820,11 +1014,14 @@ game-losing steals stay lexicographic rules.
    option exists.
 6. Option off: decisions unchanged on the pool (identity run).
 
-### Acceptance gate
+### Historical destination/hold batch proposal
+
+Superseded by the owner-directed manual-playtesting workflow above; retained
+only as design history.
 
 F4 gate. A new option (named in the Resolution), off in the baseline and on
 in the candidate; both arms with I4's adopted options. Committed deck pool,
-paired seeds 8001–9000 (1,000 games per deck pair; unused by earlier gates),
+paired seeds 7001–8000, the same games as part 1's gate (superseded by the Handoff commands; 1,000 games per deck pair),
 bootstrap 95% intervals. Collectors: `installOutcomes`, `stallTurns`,
 `corpInsolventTurns`, `agendaCommitment`, `strandedUnrezzedIceCost`,
 `bluffSingleVariableCorrelation`, `realizedIceByRootType`, and the exposure
@@ -847,7 +1044,7 @@ Starts: none; every pool game reaches agenda decisions.
 | Guard | `realizedIceByRootType.allCountCorrelation` | lower | regression at most 0.05 |
 | Guard | `realizedIceByRootType.posturedCountCorrelation` | lower | regression at most 0.05 |
 
-Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option <option>=true --corp-option agendaCommitmentPlan=true --corp-option iceMarginalSecurity=true --seeds 8001-9000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
+Gate command: `node scripts/ai-batch.js gate --pool tests/fixtures/ai-batch/deck-pool.json --corp-option agendaDestinationPlan=true --corp-option agendaCommitmentPlan=true --corp-option agendaExposureTable=true --corp-option iceMarginalSecurity=true --seeds 7001-8000 --collector installOutcomes --collector stallTurns --collector corpInsolventTurns --collector agendaCommitment --collector strandedUnrezzedIceCost --collector bluffSingleVariableCorrelation --collector realizedIceByRootType --improve winRate --improve pointsScored --guard pointsStolen=0.2 --guard pointsStolenByServer.remote=0.5 --guard gameLength=1.5 --better gameLength=lower --guard corpInsolventTurns=0.5 --guard stallTurns=0.5 --guard installOutcomes.agendaExposureTurns=0.5 --guard agendaCommitment.hqHoldTurns=0.5 --guard strandedUnrezzedIceCost.credits=1 --guard bluffSingleVariableCorrelation.max=0.02 --guard realizedIceByRootType.allCountCorrelation=0.05 --guard realizedIceByRootType.posturedCountCorrelation=0.05`
 
 The baseline arm assumes I4's `agendaCommitmentPlan` is adopted; if it is
 not, drop that option from both arms before the run.
@@ -861,19 +1058,11 @@ not, drop that option from both arms before the run.
 
 ### Acceptance criteria
 
-- [ ] The exposure measurement is collected on a fresh baseline and its table, counts and intervals are recorded before any candidate run.
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] The gate is ready to run: every collector it names exists and is tested, and a `--quick` run of the gate command completes and reports at least one game changed by the options.
-- [ ] Applicable gate evidence is recorded in the Resolution.
-      For F4: exact command, committed deck pairs, paired seeds, seed count,
-      every metric's baseline/candidate result and bootstrap 95% confidence
-      interval, guarded-regression result, pass conditions and thresholds; an
-      improvement interval's lower bound must be above zero. Only then is the
-      option switched on by default.
-- [ ] The exposure collector exists, declares its metrics report-only, and is tested.
-- [ ] An owner playtest against the option is recorded before the default changes.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [ ] `documentation/corp-ai/architecture.md` describes the new behaviour.
-- [ ] `node tests/run-all-tests.js` passes.
+- [x] Exposure measurement and calibration are recorded in implementation history.
+- [x] The held-agenda fixture and four remaining destination/hold scenarios are green, with logged values and install reasons checked.
+- [x] All three I4 options default to off for owner-directed manual playtesting.
+- [x] I2 uses the selected agenda's empty-remote destination, points and M3 exposure; option-off designation remains unchanged.
+- [x] Existing exposure collectors and hook migrations remain documented and tested; no new hooks were needed here.
+- [x] Updated cards are listed in implementation history and the architecture describes the current implementation.
+- [ ] The owner approves default adoption after playtesting the completed implementation.
+- [x] `node tests/run-all-tests.js` passes through the final full ticket check (121 files).

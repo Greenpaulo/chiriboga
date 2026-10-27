@@ -8,11 +8,21 @@ const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const stub = new Proxy(function () {}, {get: (t, k) => k === Symbol.toPrimitive ? () => 0 : stub, apply: () => stub});
 const c = {console, cardSet: [], setIdentifiers: [], $: stub, jQuery: stub, PIXI: stub,
-  window: {}, document: stub, navigator: {userAgent: 'node'}, localStorage: {getItem: () => null},
+  window: {}, location: {search: ''}, document: stub, navigator: {userAgent: 'node'}, localStorage: {getItem: () => null},
   setTimeout, clearTimeout, setInterval: () => 0, Image: function () {}, Audio: function () {return stub;}};
+// Headless jQuery.extend dependency used by the real InstanceCard constructor.
+const extend = (deep, target, ...sources) => {
+  for (const source of sources) for (const key in source) {
+    const value = source[key];
+    target[key] = deep && value && typeof value === 'object'
+      ? extend(true, Array.isArray(value) ? [] : {}, value) : value;
+  }
+  return target;
+};
+c.jQuery = {extend};
 vm.createContext(c);
 for (const file of ['config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js', 'checks.js', 'mechanics.js', 'utility.js',
-  'runcalculator.js', 'ai_runner.js', 'ai_corp.js', 'sets/uprising.js'])
+  'decks.js', 'runcalculator.js', 'ai_runner.js', 'ai_corp.js', 'sets/uprising.js'])
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), c, {filename: file});
 c.Log = () => {}; c.LogError = message => {throw Error(message);};
 c.Render = () => {}; c.UpdateCounters = () => {}; c.PlaySound = () => {};
@@ -21,7 +31,7 @@ const corp = c.corp, runner = c.runner;
 Object.assign(corp, {side: 'corp', creditPool: 10, clickTracker: 3, badPublicity: 0, scoreArea: [],
   resolvingCards: [], installingCards: [], identityCard: {player: corp, title: 'Corp', subTypes: []},
   HQ: c.NewServer('HQ', true), RnD: c.NewServer('R&D', true), archives: c.NewServer('Archives', true), remoteServers: []});
-Object.assign(runner, {side: 'runner', startingMU: 4, creditPool: 5, temporaryCredits: 0, clickTracker: 4, tags: 0,
+Object.assign(runner, {side: 'runner', startingMU: 4, creditPool: 5, temporaryCredits: 0, clickTracker: 4, tags: 0, maxHandSize: 5, coreDamage: 0,
   grip: [], stack: [], heap: [], scoreArea: [], resolvingCards: [], installingCards: [],
   identityCard: {player: runner, title: 'Runner', subTypes: [], link: 0}, rig: {programs: [], hardware: [], resources: []}});
 c.playerTurn = runner; c.activePlayer = runner; c.viewingPlayer = runner;
@@ -228,6 +238,18 @@ assert.strictEqual(smc2.abilities[0].Enumerate.call(smc2).length, 1, 'usable wit
 smc2.abilities[0].Resolve.call(smc2, {});
 assert.strictEqual(decisions.length, 0); assert(runner.heap.includes(smc2));
 
+// Ability offers pay credits without the hand-install click/card allowance.
+reset();
+const calculate = runner.AI._calculateBestCompleteRunAsync;
+let offsets;
+runner.AI._calculateBestCompleteRunAsync = async (...args) => {offsets = args.slice(1, 5); return [];};
+const bonus = {card: breaker('Offset Decoder', 'Decoder', 3), cost: 4};
+await runner.AI._commonRunCalculationChecksAsync(corp.HQ, null, bonus, false);
+same(offsets, [-4, 0, -3, -1], 'hand installs retain their setup offsets');
+await runner.AI._commonRunCalculationChecksAsync(corp.HQ, null, {...bonus, ability: {}}, false);
+same(offsets, [-4, 0, -1, 0], 'ability installs pay only their offered credit cost');
+runner.AI._calculateBestCompleteRunAsync = calculate;
+
 // AI: the run planner fetches a missing breaker with SMC during the run
 reset();
 const smc3 = card(26090); install(smc3);
@@ -237,6 +259,9 @@ put(fetched, runner.stack);
 put(ice('Gate', 'Code Gate', 3, 1), corp.HQ.ice);
 put({title: 'Agenda', player: corp, cardType: 'agenda', agendaPoints: 2}, corp.HQ.cards);
 runner.creditPool = 8;
+runner.clickTracker = 1; //paid installs need no setup click before the last-click run
+// The last-click run heuristic requires a full grip at turn end.
+for (let i = 0; i < 5; i++) put({title: 'Filler ' + i, player: runner, cardType: 'event'}, runner.grip);
 const offers = smc3.AIAbilityInstallBreakers(c.InstalledCards(runner));
 same(offers.map(o => [o.card.title, o.cost, o.alt]), [['Fetched Decoder', 4, 'smc_tutor']]);
 same(card(26090).AIAbilityInstallBreakers([]), [], 'only an installed SMC offers');
@@ -272,7 +297,7 @@ assert.strictEqual(runner.AI._pendingAbilityInstall, null, 'expired on the Corp 
 
 // --- Cybertrooper Talut: +1 link, +2 strength to non-AI breakers installed this turn ---
 reset();
-const talut = card(26091);
+const talut = c.InstanceCard(26091);
 install(talut);
 assert.strictEqual(c.Link(), 1, '+1 link');
 const b1 = breaker('Breaker One', 'Fracter', 1);
@@ -281,8 +306,10 @@ assert.strictEqual(c.Strength(b1), 3, 'boosted');
 const aiBreaker = breaker('AI Breaker', 'Fracter', 1); aiBreaker.subTypes = ['Icebreaker', 'AI'];
 install(aiBreaker);
 assert.strictEqual(c.Strength(aiBreaker), 1, 'AI breakers excluded');
-const talut2 = card(26091);
+const talut2 = c.InstanceCard(26091);
 assert.notStrictEqual(talut2.boostedCards, talut.boostedCards, 'copies keep their own state');
+assert.strictEqual(talut2.boostedCards.length, 0, 'the second engine instance inherits no boosts');
+assert.strictEqual(c.cardSet[26091].boostedCards.length, 0, 'the definition remains untouched');
 // AI: the run calculator uses the boost
 put(ice('Wall', 'Barrier', 3, 1), corp.HQ.ice);
 put({title: 'Agenda', player: corp, cardType: 'agenda'}, corp.HQ.cards);

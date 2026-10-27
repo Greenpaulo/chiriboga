@@ -148,7 +148,9 @@ with the standard guards (design note) and:
   risks a contract that fits one card; adapt `AIWorthInstalling()` first.
 - The Runner AI nearly always runs an advanced face-down card in a bare
   remote: advanced agendas there were stolen in 43 of 47 Runner turns (I4
-  `remoteAgendaRisk` baseline, 2026-10-23). Advanced traps there will look
+  `remoteAgendaRisk` baseline, 2026-10-23;
+  [fit cells and remote-turn filter](../../runner-ai/specs/T1-advanced-card-trap-caution.md#current-behaviour)).
+  Advanced traps there will look
   very strong against today's Runner; do not tune to that. Runner item T1
   makes the Runner cautious; run I5's gate with T1 on if it has landed, or
   rerun it after.

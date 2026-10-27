@@ -10,7 +10,7 @@ const {blockFrom} = require('../scripts/show.js');
 const {pendingGate, codeChangesSince, blockerState, validateBlockerMarkers, next: nextRoadmap,
   hasManualBlocker} = require('../scripts/roadmap.js');
 const {ticketSummary, ticketInventory, move, reproductionExpectationsMatch, gateSetupProblems,
-  outcomeLine, failedGateResult, outcomeProblem} = require('../scripts/ticket.js');
+  outcomeLine, failedGateResult, outcomeProblem, hasManualPlaytesting} = require('../scripts/ticket.js');
 
 const root = path.resolve(__dirname, '..');
 const run = (...args) => {
@@ -131,6 +131,29 @@ assert.strictEqual(failedGateResult('x', 'true', 'if (this.options.x) act();', t
   'manual retention does not authorize default-on adoption');
 assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.x) act();', true)[0], 'FAIL',
   'manual retention still requires an explicit default');
+for (const code of ['', '// this.options.x', 'const defaults = {x: false};'])
+  assert.strictEqual(failedGateResult('x', 'false', code, true)[0], 'FAIL',
+    'manual retention requires a live read, not just a default or comment');
+assert.strictEqual(failedGateResult('x', 'false', 'const {x} = this.options;', true)[0], 'PASS',
+  'destructured reads support manual retention');
+const manualDeclaration = '**Manual playtesting:** owner-requested — `x`, 2026-10-22; defaults to off.';
+assert(hasManualPlaytesting('x', 'Implemented from abc1234\n\n' + manualDeclaration + '\n'),
+  'the complete dated declaration permits manual retention');
+for (const declaration of [
+  '**Manual playtesting:** owner-requested — `x`,',
+  manualDeclaration.replace('2026-10-22', ''),
+  manualDeclaration.replace('2026-10-22', 'someday'),
+  manualDeclaration.replace('; defaults to off.', ''),
+  manualDeclaration.replace('defaults to off', 'defaults to on'),
+  manualDeclaration.replace('`x`', '`extra`'),
+  manualDeclaration.replace('owner-requested', 'agent-requested'),
+  manualDeclaration + ' Actually defaults to on.',
+]) {
+  assert.strictEqual(hasManualPlaytesting('x', declaration), false,
+    'an incomplete or mismatched manual retention declaration must not qualify: ' + declaration);
+}
+assert.strictEqual(hasManualPlaytesting(undefined, manualDeclaration), false);
+assert.strictEqual(hasManualPlaytesting('x', undefined), false);
 for (const code of [
   'if (this.options.x) act();', 'if (this.options["x"]) act();', 'const {x} = this.options;',
   'if (this.options?.x) act();', 'if (this.options?.["x"]) act();',

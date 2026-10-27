@@ -60,7 +60,8 @@ function reliability(table, games) {
       rows.push({key, bucket, turns: cell.turns, predicted, observed: round(observed), interval, checked, contains});
     }
   }
-  const mae = total ? round(weighted / total) : 0;
+  const mae = total ? round(weighted / total) : null;
+  if (!total) pass = false;
   if (mae > hazard.MAX_MAE) pass = false;
   return {pass, meanAbsoluteError: mae, rule: `every cell with >= ${hazard.RELIABILITY_MIN} remote-turns contains its prediction in its game-clustered 95% interval, and count-weighted MAE <= ${hazard.MAX_MAE}`, cells: rows};
 }
@@ -72,6 +73,10 @@ function build(fitReport, heldoutReport) {
   for (const field of ['poolHash', 'pairs', 'options'])
     if (JSON.stringify(fitReport[field]) !== JSON.stringify(heldoutReport[field]))
       throw new Error('Fit and held-out reports differ in ' + field);
+  const gameKey = game => JSON.stringify([game.deckPairId, game.seed]);
+  const fitKeys = new Set(fitReport.games.map(gameKey));
+  if (heldoutReport.games.some(game => fitKeys.has(gameKey(game))))
+    throw new Error('Fit and held-out reports contain overlapping deck-pair/seed games');
   const fit = samplesOf(fitReport), heldout = samplesOf(heldoutReport);
   const fitCells = cellCounts(fit);
   const table = deriveTable(fitCells);

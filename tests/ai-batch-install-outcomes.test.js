@@ -363,6 +363,7 @@ test('openingCentralCoverage records occupancy, censored boundaries and raw prin
     assert.strictEqual(c.samples(state).hands.offered.cards[0].rezCost, 15, 'sample is detached');
     assert.strictEqual(c.samples(state).hands.kept.cards.length, 0);
     assert.strictEqual(c.samples(state).hands.firstDraw.cards.length, 1);
+    assert.strictEqual(c.samples(state).hands.firstDraw.cards[0].rezCost, 15, 'first draw is detached');
     c.onEvent({type: 'gameEnd'}, state);
     assert.strictEqual(c.finish(state).turn2.observed, 0, 'early end does not fabricate a boundary');
   }

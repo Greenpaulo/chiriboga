@@ -37,7 +37,7 @@ R&D cases, and report per-central theft, never-protected counts and the share
 bare through turn 2 (including early game-end censoring), not just conditional
 first-ICE means. Use a fresh matched control for I3's separate policy gates.
 
-The owner's [I2.3 HQ-then-R&D opening comparison](code-review/I2.3-hq-then-rnd-opening-ice-gate.md)
+The owner's [I2.3 HQ-then-R&D opening comparison](done/I2.3-hq-then-rnd-opening-ice-gate.md)
 is complete: its F4 gate failed (seeds 5001–6000; R&D theft improved but
 combined central theft, scoring and Corp wins regressed), so I3's control
 keeps adopted I2 placement with `openingHqThenRdIce` off. That option remains

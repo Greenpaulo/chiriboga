@@ -380,12 +380,15 @@ function startBoardsTagged(tags) {
 
 // The ticket's state in one line (ai-planning.md, "When a gate fails").
 const outcomeLine = text => (text.match(/^\*\*Outcome:\*\*\s*(.+)$/m) || [])[1];
+// Only the complete declaration prescribed in ai-planning.md permits retention.
+function hasManualPlaytesting(option, resolution) {
+  const declaration = (resolution || '').match(/^\*\*Manual playtesting:\*\* owner-requested — `(\w+)`, \d{4}-\d{2}-\d{2}; defaults to off\.[ \t]*\r?$/m);
+  return Boolean(option && declaration && declaration[1] === option);
+}
+
 // Failed ideas are normally removed. The owner may explicitly retain one
 // default-off for manual playtesting without adopting it as the default.
 const failedGateResult = (option, setting, code = '', manualPlaytesting = false) => {
-  if (manualPlaytesting) return setting === 'false'
-    ? ['PASS', 'Gate failed; owner-requested manual playtesting retains ' + option + ' default off.']
-    : ['FAIL', 'Manual playtesting retention requires ' + option + ' to have an explicit false default.'];
   //A removed option may share its name with an existing evaluation field.
   //Inspect option accesses, ignoring comments and opaque string contents.
   const tokens = reproductionTokens(code);
@@ -399,6 +402,9 @@ const failedGateResult = (option, setting, code = '', manualPlaytesting = false)
   const destructured = new RegExp('\\{[^{}]*\\b' + option +
     '\\b[^{}]*\\}\\s*=\\s*(?:\\w+\\s*(?:\\?\\.|\\.)\\s*)*options\\b')
     .test(structure);
+  if (manualPlaytesting) return setting === 'false' && (accessed || destructured)
+    ? ['PASS', 'Gate failed; owner-requested manual playtesting retains ' + option + ' default off.']
+    : ['FAIL', 'Manual playtesting retention requires ' + option + ' to have an explicit false default and a live option read.'];
   return setting || accessed || destructured ?
     ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
     ['PASS', 'Gate failed and ' + option + ' has been removed.'];
@@ -431,8 +437,7 @@ function check(ticket, {fast = false} = {}) {
   const outcome = outcomeLine(text);
   const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
   const optionName = gate && (gate.match(/`(\w+)`/) || [])[1];
-  const manualPlaytesting = Boolean(optionName && new RegExp('^\\*\\*Manual playtesting:\\*\\* owner-requested — `' +
-    optionName + '`(?:[,; ]|$)', 'm').test(resolution || ''));
+  const manualPlaytesting = hasManualPlaytesting(optionName, resolution);
   const outcomeIssue = outcomeProblem(outcome, gate);
   if (outcomeIssue) report(...outcomeIssue);
   const notAdopted = outcome && /^not adopted\b/i.test(outcome);
@@ -540,7 +545,8 @@ function check(ticket, {fast = false} = {}) {
 }
 
 module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
+  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem,
+  hasManualPlaytesting};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);

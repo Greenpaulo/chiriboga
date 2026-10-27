@@ -18,7 +18,9 @@ costs and responses playable, so this path now produces illegal steals.
 
 ## Evidence
 `sets/elevation.js`, `cardSet[35018].resolveDetenteAccess` at `42aa3f2`:
-- It calls `CheckSteal()` to offer "Steal", but never reads `StealCost()`.
+- It calls `CheckSteal()` to offer "Steal". That check reads `StealCost()`
+  and rejects SDS Drone Deployment when there is no eligible installed program,
+  but the later steal branch never pays the checked cost.
 - "Continue" is omitted for an agenda that can be stolen, so a costed steal
   cannot be declined; the Runner AI always keeps only "steal".
 - The steal branch does `MoveCard(action.card, runner.scoreArea)` and then
@@ -34,10 +36,12 @@ The engine path (`phases.runAccessingCard.Resolve.steal` in `phase.js` →
 
 ## Reproduction
 To write (pending test under `tests/pending/`): Runner has Detente with two hosted
-cards and no installed program; HQ holds only SDS Drone Deployment. Using
+cards and one eligible installed program; HQ holds only SDS Drone Deployment. Using
 Detente's ability, the expectations are:
-- with no program installed, "Steal" is not offered;
-- with one program installed, stealing trashes it;
+- stealing must trash the installed program; the current direct score-area move
+  leaves it installed, so this is the failing payment reproduction;
+- with no eligible program installed, "Steal" is not offered (an existing passing
+  legality check to preserve);
 - a second scenario with Divested Trust scored and a stolen agenda: the Corp is
   offered the forfeit.
 

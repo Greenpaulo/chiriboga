@@ -22,7 +22,7 @@ before viewing candidate gate results. The roadmap table below owns the current 
 
 ## Current implementation order
 
-Updated 2026-10-23. This is the preferred sequence for the deception/install
+Updated 2026-10-27. This is the preferred sequence for the deception/install
 track; item dependencies below remain the formal blockers. Completed merge work
 is recorded in the done tables and the historical merge plan.
 
@@ -35,8 +35,8 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
 | — | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | done (merged) | Passive install/lifecycle tooling, findings and control calibration delivered; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
 | — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
-| 1 | [I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted; merge pending | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merge after the Downfall batches 11–13 branch |
-| 2 | [I4](../backlog/code-review/I4-agenda-installation-and-scoring-commitment.md) | in-progress (score fast behind its option; destination/hold folded back in, 2026-10-23) | Moved ahead of I3 (owner decision 2026-10-23); re-grounded at 65251a5. Supplies its chosen agenda remote to I2's empty-remote stake, own M3/M5; fresh control on seeds 7001–8000 |
+| 1 | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted (merged) | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
+| 2 | [I4](../backlog/code-review/I4-agenda-installation-and-scoring-commitment.md) | in-progress (implementation complete; review and manual playtesting, 2026-10-26) | Score fast, exposure table and destination/hold remain default-off; I2 empty-remote stake now follows the selected agenda and M3 exposure. Owner-directed flag playtesting supersedes batch adoption guards; historical part 1 gate failed |
 | 3 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready (blocked by I4) | Re-scope after I4's evidence to persistence and asset opportunity cost only, if the Corp still drifts between remotes; seeds 6001–7000 reserved |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
@@ -48,7 +48,7 @@ opening-ranking evidence and explicit I3/I9 measurement constraints, which the
 I3 ticket now carries. I3 and I5 reuse L8.9's tooling and findings, with fresh
 matching controls for their own policies.
 
-[I2.3](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md), requested
+[I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md), requested
 by the owner on 2026-10-22, compared HQ-first/R&D-second opening ICE against
 current I2. Its gate failed, so I2 remains the control; its seeds 5001–6000
 are exposed and cannot be reused as held-out adoption evidence.
@@ -256,18 +256,6 @@ I9 comes last.
 - **Spec:** [I2.1-empty-archives-reward-valuation.md](specs/I2.1-empty-archives-reward-valuation.md)
 - **Goal:** Value public non-agenda rewards from successful empty-Archives runs as a bounded I2 score component, so Archives is protected only when those rewards outweigh the ICE.
 
-### I2.3 HQ-first, R&D-second opening ICE gate
-- **Status:** in-progress
-- **Depends on:** I2, F4
-- **Ticket:** [I2.3-hq-then-rnd-opening-ice-gate.md](../backlog/code-review/I2.3-hq-then-rnd-opening-ice-gate.md)
-- **Goal:** F4 does not support default adoption; retain the opening policy for Paul to playtest himself, by his explicit request.
-- **Manual playtesting:** In [ai_corp.js](../../ai_corp.js), edit `CorpAI.DEFAULT_OPTIONS`:
-  set `openingHqThenRdIce: true` for first completed ICE on HQ, second on R&D,
-  then normal I2; set it to `false` for normal I2 throughout. Keep
-  `iceMarginalSecurity: true`. Reload the page and start a new game after editing.
-  The committed default remains `false`. The batch failure is preserved as
-  evidence about the tested AI-vs-AI version, not a decision about Paul's games.
-
 ### I3 Remote role and root suitability
 - **Status:** ready
 - **Depends on:** I2, I4, F4, L8.4
@@ -330,6 +318,7 @@ I9 comes last.
 | I1 | Unified install candidate model | [I1-unified-install-candidate-model](../backlog/done/I1-unified-install-candidate-model.md) | [architecture: install planning today](architecture.md#install-planning-today) |
 | I2 | ICE selection by marginal security | [I2-ice-selection-by-marginal-security](../backlog/done/I2-ice-selection-by-marginal-security.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 | I2.2 | R&D protection lateness investigation | [I2.2-rnd-protection-lateness-investigation](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | [install-planning architecture](architecture.md#install-planning-today) |
+| I2.3 | HQ-first, R&D-second opening ICE gate | [I2.3-hq-then-rnd-opening-ice-gate](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | [install planning](architecture.md#install-planning-today) |
 
 ## Reactive commitment (R)
 

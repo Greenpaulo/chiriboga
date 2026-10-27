@@ -91,15 +91,21 @@ class RunnerAI {
   //an AIOkToTrash card, else a non-icebreaker, else the cheapest by install
   //cost plus hosted credits and virus counters. Returns one of the choices.
   _stealCostProgramOption(choices) {
-    var score = function (card) {
-      var value = (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus");
-      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) value -= 100;
-      if (CheckSubType(card, "Icebreaker")) value += 10;
-      return value;
+    var rank = function (card) {
+      var tier = 1;
+      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) tier = 0;
+      else if (CheckSubType(card, "Icebreaker")) tier = 2;
+      return {tier: tier, cost: (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus")};
     };
     var best = choices[0];
-    for (var i = 1; i < choices.length; i++)
-      if (score(choices[i].card) < score(best.card)) best = choices[i];
+    var bestRank = rank(best.card);
+    for (var i = 1; i < choices.length; i++) {
+      var candidate = rank(choices[i].card);
+      if (candidate.tier < bestRank.tier || (candidate.tier == bestRank.tier && candidate.cost < bestRank.cost)) {
+        best = choices[i];
+        bestRank = candidate;
+      }
+    }
     return best;
   }
 
@@ -1187,14 +1193,16 @@ class RunnerAI {
 			runEventDiscount += activeCards[i].AIRunEventDiscount.call(activeCards[i],server,runEventCardToUse);
 		}
 	}
-	//if a bonus breaker is defined, a click is needed to install it, and a card slot (reduce max damage by 1)
+	//Charge the offered install cost; only hand installs and event tutors need setup clicks and a grip card.
 	if (bonusBreaker) {
 		//for now we assume pool credit is used to install/tutor the card
 		poolCreditOffset -= bonusBreaker.cost;
 		//assume two clicks needed to install it and prep (somewhat arbitrary but reduces the chance of install without run)
-		clickOffset -= 2;
-		//take into account one less card in grip
-		damageOffset -= 1;
+		if (!bonusBreaker.ability) {
+		  clickOffset -= 2;
+		  //hand installs and event tutors consume a card from grip
+		  damageOffset -= 1;
+		}
 		//since this is a hypothetical install we may need to temporarily modify some things
 		if (typeof bonusBreaker.card.AIPrepareHypotheticalForRC == "function") {
 			bonusBreaker.card.AIPrepareHypotheticalForRC.call(bonusBreaker.card,bonusBreaker.host);
@@ -2244,10 +2252,11 @@ console.log(this.preferred);
 		//consider icebreakers that could be installed to improve run cost
 		//bonusBreaker is an object containing card, tutor, host, and cost
 		this.serverList[i].bonusBreaker = null; //by default don't pre-install a breaker
-        if (runner.clickTracker > 1) {
-			//start by preparing a list of unique affordable breakers to consider
+        {
+			//Paid abilities can install a breaker even on the last click.
 			var uniqueAffordableBreakers = []; // as {card, tutor, host}
 			var dontCheckAgain = []; //titles we've already checked
+			if (runner.clickTracker > 1) {
 			//from cards worth keeping in hand
 			if (optionList.includes("install")) {
 			  for (var k = 0; k < this.cardsWorthKeeping.length; k++) {
@@ -2324,6 +2333,7 @@ console.log(this.preferred);
 					}
 				}
 			  }
+			}
 			}
 			//and from installed cards whose paid abilities install a breaker (AIAbilityInstallBreakers, e.g. Self-modifying Code)
 			//no click is needed, so the ability can be used in the run's first paid ability window
