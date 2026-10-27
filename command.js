@@ -86,11 +86,18 @@ function ResolveChoice(idx) {
       if (phaseOptions.score.includes(chosenOption)) executingCommand = "score";
     }
   }
+  //Only shorten routine bulk Archives steps; keep yielding through the event loop.
+  var fastArchivesStep = false;
+  if (executingCommand === "n" && currentPhase === phases.runAccessingCard)
+    fastArchivesStep = phases.runAccessingCard.IsRoutineArchivesAccess(accessingCard);
+  else if (executingCommand === "access" &&
+      (currentPhase === phases.runBreachServer || currentPhase.context === phases.runAccessingCard))
+    fastArchivesStep = phases.runAccessingCard.IsRoutineArchivesAccess(chosenOption.card);
   //set before execution to allow for things to clear it
   mainLoop = window.setTimeout(function(){
 	//timeout completed, callback code:
 	if (!Narrate(Main)) Main(); //either narrate then call Main, or if no narration just proc Main now
-  }, ($('#narration').prop('checked') ? 1 : mainLoopDelay ) ); 
+  }, ($('#narration').prop('checked') ? 1 : fastArchivesStep ? 0 : mainLoopDelay ) );
   //note this next line happens before the code in the timeout
   //(the existence check is in case the game has ended and therefore there are no more choices)
   if (typeof currentPhase.Resolve[executingCommand] == 'function') currentPhase.Resolve[executingCommand](chosenOption);
@@ -864,7 +871,7 @@ function MakeChoice() {
 		typeof phaseOptions.access !== "undefined"
 	  ) {
 		footerHtml +=
-		  '<button class="button" onclick="AccessAllInArchives();">Access All</button>';
+		  '<button class="button" onclick="AccessAllInArchives();" title="Fast-forward routine Archives cards; stop for agendas and access decisions">Fast access</button>';
 	  }
 
 	  //show cancel button if relevant

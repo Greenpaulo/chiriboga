@@ -1631,6 +1631,7 @@ phases.runBreachServer = {
   title: "Run: Breach", //was 'Access' (i.e. access cards in server) but Nisei changed it so it's not confused with each individual access
   identifier: "Run 5.2",
   Init: function() {
+    autoAccessing = false; //bulk access belongs to this breach only
 	if (attackedServer == corp.archives) {
 	  var cardsTurnedFaceUp = attackedServer.cards.filter(function(card) {
 		return !card.faceUp;
@@ -1673,18 +1674,35 @@ phases.runAccessingCard = {
   requireHumanInput: true,
   title: "Run: Access",
   identifier: "Run Accessing",
+  //Conservatively keep normal presentation whenever an access may need attention.
+  IsRoutineArchivesAccess: function (card) {
+    if (typeof autoAccessing === "undefined" || !autoAccessing || runner.AI != null ||
+        attackedServer !== corp.archives || !card ||
+        card.cardLocation !== corp.archives.cards || card.cardType === "agenda") return false;
+    if (typeof card.automaticOnAccess !== "undefined" ||
+        typeof card.responseOnAccess !== "undefined" ||
+        typeof card.automaticOnAccessComplete !== "undefined") return false;
+    //Global automatic counters still run silently; optional responses need attention.
+    if (ChoicesActiveTriggers("responseOnAccess").length > 0) return false;
+    return ChoicesTriggerableAbilities(runner, "access").length === 0;
+  },
   Init: function () {
 	//add to accessed list to prevent accessing it a second time
     if (accessingCard.cardLocation == attackedServer.root) accessedCards.root.push(accessingCard);
 	else accessedCards.cards.push(accessingCard);
+    var routineAccess = this.IsRoutineArchivesAccess(accessingCard);
     if (viewingPlayer == runner) {
       accessingCard.renderer.canView = true;
-      SetHistoryThumbnail(accessingCard.imageFile, "Access");
-    } else SetHistoryThumbnail("Corp_back.png", "Access");
-    accessingCard.renderer.ToggleZoom();
+      if (!routineAccess) SetHistoryThumbnail(accessingCard.imageFile, "Access");
+    } else if (!routineAccess) SetHistoryThumbnail("Corp_back.png", "Access");
+    if (!routineAccess) accessingCard.renderer.ToggleZoom();
     RecordPublicPostureEvent("access", accessingCard, attackedServer);
 
     AutomaticTriggers("automaticOnAccess", [accessingCard]); //special case in CheckCallback allows for this to work even when card not active
+    if (routineAccess && accessingCard && !this.IsRoutineArchivesAccess(accessingCard)) {
+      SetHistoryThumbnail(viewingPlayer == runner ? accessingCard.imageFile : "Corp_back.png", "Access");
+      accessingCard.renderer.ToggleZoom();
+    }
     this.chosenString = "chosen";
     //since archived cards are already face up we can skip the flip-and-look-on-access step
     if (attackedServer == corp.archives) this.requireHumanInput = false;
@@ -1835,6 +1853,7 @@ phases.runEnds.Resolve.n = function () {
         "Runner loses " + runner.temporaryCredits + " unspent temporary credits"
       );
     runner.temporaryCredits = 0;
+    autoAccessing = false;
     attackedServer = null;
     approachIce = -1;
     encountering = false;
