@@ -115,10 +115,13 @@ Installed active cards can also offer breakers through
 `AIAbilityInstallBreakers(installed)`, including on the last click. Offers
 are scanned in title order to keep tied ranks independent of hidden Stack
 order. Each supplies its total credit cost and an ability plan (`source`,
-`alt`, optional `select`, and target `card`). The chosen run stores that plan in
-`_pendingAbilityInstall`. `_pendingAbilityTrigger()` triggers it at the next
-window where that ability is legal; it runs `select` before setting the trigger
-preference. `AIInstallDiscountAbility` can also supply a pending `followUp`.
+`alt`, optional `select`, and target `card`). If the ability is legal and
+`trigger` is offered immediately, the planner runs `select` and returns the
+trigger preference without storing a pending plan. Otherwise, the chosen run
+stores the plan in `_pendingAbilityInstall`. `_pendingAbilityTrigger()` triggers
+this deferred plan at the next window where the ability is legal, running
+`select` before setting the trigger preference. `AIInstallDiscountAbility` can
+also supply a pending `followUp`.
 Plans clear when consumed, when their source leaves play, on the Corp turn,
 or at the Runner's next turn-start phases (Runner 1.1/1.2).
 
