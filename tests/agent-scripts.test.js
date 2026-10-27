@@ -131,6 +131,26 @@ assert.strictEqual(failedGateResult('x', 'true', 'if (this.options.x) act();', t
   'manual retention does not authorize default-on adoption');
 assert.strictEqual(failedGateResult('x', undefined, 'if (this.options.x) act();', true)[0], 'FAIL',
   'manual retention still requires an explicit default');
+for (const code of ['', '// this.options.x', 'const defaults = {x: false};'])
+  assert.strictEqual(failedGateResult('x', 'false', code, true)[0], 'FAIL',
+    'manual retention requires a live read, not just a default or comment');
+assert.strictEqual(failedGateResult('x', 'false', 'const {x} = this.options;', true)[0], 'PASS',
+  'destructured reads support manual retention');
+// Writes still prevent removal, but cannot justify retaining a live branch.
+for (const code of [
+  'options.x = false;', 'this.options["x"] = false;',
+  'delete this.options.x;', 'delete options?.["x"];',
+  '(this.options.x) = false;', 'delete (this.options.x);',
+]) {
+  assert.strictEqual(failedGateResult('x', 'false', code, true)[0], 'FAIL',
+    'write-only access is not a live option read: ' + code);
+  assert.strictEqual(failedGateResult('x', undefined, code)[0], 'FAIL',
+    'write-only access still prevents claiming removal: ' + code);
+}
+for (const code of ['options.x === false;', 'options.x += 1;', 'options.x++;',
+  'options.x = options.x || false;', 'delete options.x.child;'])
+  assert.strictEqual(failedGateResult('x', 'false', code, true)[0], 'PASS',
+    'genuine reads still support manual retention: ' + code);
 const manualDeclaration = '**Manual playtesting:** owner-requested — `x`, 2026-10-22; defaults to off.';
 assert(hasManualPlaytesting('x', 'Implemented from abc1234\n\n' + manualDeclaration + '\n'),
   'the complete dated declaration permits manual retention');

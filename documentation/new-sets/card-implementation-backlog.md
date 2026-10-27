@@ -18,9 +18,12 @@ order of the availability table. A user-requested different set takes precedence
 | Set (registry key) | Status | Notes |
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
-| `downfall` | In progress | Batches 1–13 complete; implementation integration checks (§8) pending. |
+| `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
+| `uprising` | In progress | User-selected 2026-10-23; 16 batches (26066–26130) in the [active tracker](current-set-implementation.md). |
 
-Downfall is active. Vantage Point retains its [maintained set record](records/vantagepoint.md),
+Uprising is active. Downfall retains its [maintained set record](records/downfall.md)
+and [immutable transition snapshot](history/downfall-2026-10-23-implementation-transition.md);
+no set review exists yet. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
 and [set report](reviews/vantage-point/vantagepoint-set-review.md). Outstanding
 review/optimisation work continues there independently.
@@ -51,10 +54,24 @@ remain in the batch's optimisation queue.
 
 ### Downfall
 
-Batches 1–13 (26001–26065) now have working gameplay and baseline AI. Focused
+Batches 1–13 (26001–26065) have working gameplay and baseline AI; the §8
+implementation checks passed on 2026-10-23 and Downfall is playable. Focused
 real-consumer evidence and specific deeper-strategy work are recorded in
-[the implementation notes](downfall-implementation-notes.md) and the active
-tracker's separate optimisation queue.
+[the implementation notes](downfall-implementation-notes.md) and the separate
+optimisation queue.
+
+**Set record:** [Downfall](records/downfall.md), preserving both queues, logs and
+verification; see the [transition snapshot](history/downfall-2026-10-23-implementation-transition.md).
+
+### Uprising
+
+Active implementation set (26066–26130). `sets/uprising.js` defines all 65 cards.
+Batches 1–8 (26066–26100) are complete with baseline AI, including the six
+pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095), which were
+verified and repaired where needed. Their optimisation rows are Pending in the
+tracker. Batches 9–16 (26101–26130) remain scaffolds with TODO markers. See the
+[active tracker](current-set-implementation.md) and
+[implementation notes](uprising-implementation-notes.md).
 
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.
@@ -136,40 +153,26 @@ finished before their AI behaviour is assessed.
 ## 4. Missing ELO values
 
 Every completed definition should have a finite numeric `elo` copied from Trash
-or Busto. This audit checks numeric presence only; it does not yet verify each
-existing number against its dated source snapshot. Downfall’s row was refreshed
-for PR #66 on 2026-10-20; all 35 definitions in completed batches 1–7 have
-numeric ratings. Other rows retain the earlier audit.
+or Busto. This audit checks numeric presence only; it does not verify each
+existing number against its dated source snapshot. Counts were recomputed on
+2026-10-23 by loading every registered set file; Uprising's 59 scaffolded
+cards were filled from the 2026-10-23 ranking (see the `sets/uprising.js` header).
 
 | Set                         | Definitions | Numeric ELO | Missing numeric ELO |
 | --------------------------- | ----------: | ----------: | ------------------: |
 | System Gateway              |          77 |          77 |                   0 |
 | System Update 2021          |          82 |          82 |                   0 |
-| Downfall                    |          65 |          35 |                  30 |
-| Midnight Sun                |          12 |           7 |                   5 |
-| Parhelion                   |           4 |           0 |                   4 |
-| The Automata Initiative     |           3 |           0 |                   3 |
-| Elevation                   |          82 |           7 |                  75 |
+| Downfall                    |          65 |          65 |                   0 |
+| Midnight Sun                |          12 |          12 |                   0 |
+| Parhelion                   |           4 |           4 |                   0 |
+| The Automata Initiative     |           3 |           3 |                   0 |
+| Elevation                   |          82 |          82 |                   0 |
 | Vantage Point               |          66 |          66 |                   0 |
-| Uprising                    |           6 |           0 |                   6 |
-| Rebellion Without Rehearsal |           2 |           0 |                   2 |
-| Core Set                    |          62 |           0 |                  62 |
-| Creation and Control        |          55 |           0 |                  55 |
-| **Total**                   |     **516** |     **274** |             **242** |
-
-Of the 242 omissions, 24 are identities and 218 are playable deck cards. The
-five Midnight Sun omissions are:
-
-- 33001 Esâ Afontov: Eco-Insurrectionist
-- 33017 Cezve
-- 33018 Revolver
-- 33020 No Free Lunch
-- 33030 Stoneship Chart Room
-
-Parhelion, Automata Initiative, Uprising and Rebellion have ELO missing from
-every currently defined card. Elevation has numeric values on 35050 Byte! and
-the six newly implemented NBN cards. Only the latter six were checked against
-the dated 2026-10-16 Trash or Busto snapshot.
+| Uprising                    |          65 |          65 |                   0 |
+| Rebellion Without Rehearsal |           2 |           2 |                   0 |
+| Core Set                    |          62 |          62 |                   0 |
+| Creation and Control        |          55 |          55 |                   0 |
+| **Total**                   |     **575** |     **575** |               **0** |
 
 Backfill each value from the card's exact published ELO on the
 [Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking). Do not

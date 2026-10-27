@@ -389,22 +389,39 @@ function hasManualPlaytesting(option, resolution) {
 // Failed ideas are normally removed. The owner may explicitly retain one
 // default-off for manual playtesting without adopting it as the default.
 const failedGateResult = (option, setting, code = '', manualPlaytesting = false) => {
-  if (manualPlaytesting) return setting === 'false'
-    ? ['PASS', 'Gate failed; owner-requested manual playtesting retains ' + option + ' default off.']
-    : ['FAIL', 'Manual playtesting retention requires ' + option + ' to have an explicit false default.'];
   //A removed option may share its name with an existing evaluation field.
   //Inspect option accesses, ignoring comments and opaque string contents.
   const tokens = reproductionTokens(code);
   const keys = ["'" + option + "'", '"' + option + '"', '`' + option + '`'];
-  const accessed = tokens.some((token, i) => token === 'options' && (
-    (['.', '?.'].includes(tokens[i + 1]) && tokens[i + 2] === option) ||
-    (tokens[i + 1] === '[' && keys.includes(tokens[i + 2])) ||
-    (tokens[i + 1] === '?.' && tokens[i + 2] === '[' && keys.includes(tokens[i + 3]))));
+  let accessed = false, read = false;
+  tokens.forEach((token, i) => {
+    if (token !== 'options') return;
+    let end;
+    if (['.', '?.'].includes(tokens[i + 1]) && tokens[i + 2] === option) end = i + 3;
+    else {
+      const bracket = i + (tokens[i + 1] === '?.' ? 2 : 1);
+      if (tokens[bracket] === '[' && keys.includes(tokens[bracket + 1]) && tokens[bracket + 2] === ']')
+        end = bracket + 3;
+    }
+    if (end === undefined) return;
+    accessed = true;
+    // Locate the beginning of a dotted receiver, e.g. this.ai.options.x.
+    let start = i;
+    while (['.', '?.'].includes(tokens[start - 1]) && /^[$\w]+$/.test(tokens[start - 2] || '')) start -= 2;
+    // Parentheses do not turn assignment/deletion targets into reads.
+    while (tokens[start - 1] === '(' && tokens[end] === ')') { start--; end++; }
+    const assignment = tokens[end] === '=' && !['=', '>'].includes(tokens[end + 1]);
+    const receiverRead = ['.', '?.', '[', '('].includes(tokens[end]);
+    if (receiverRead || (!assignment && tokens[start - 1] !== 'delete')) read = true;
+  });
   const structure = tokens.map(token => keys.includes(token) ? option :
     /^['"`]/.test(token) ? '' : token).join(' ');
   const destructured = new RegExp('\\{[^{}]*\\b' + option +
     '\\b[^{}]*\\}\\s*=\\s*(?:\\w+\\s*(?:\\?\\.|\\.)\\s*)*options\\b')
     .test(structure);
+  if (manualPlaytesting) return setting === 'false' && (read || destructured)
+    ? ['PASS', 'Gate failed; owner-requested manual playtesting retains ' + option + ' default off.']
+    : ['FAIL', 'Manual playtesting retention requires ' + option + ' to have an explicit false default and a live option read.'];
   return setting || accessed || destructured ?
     ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
     ['PASS', 'Gate failed and ' + option + ' has been removed.'];

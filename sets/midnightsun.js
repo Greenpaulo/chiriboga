@@ -494,6 +494,7 @@ cardSet[33017] = {
 //2[credit]: +3 strength.
 cardSet[33018] = {
   title: "Revolver",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1774,
   imageFile: "33018.png",
   player: runner,
@@ -758,6 +759,7 @@ cardSet[33008] = {
 //[trash]: Remove 1 tag.
 cardSet[33020] = {
   title: "No Free Lunch",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1676,
   imageFile: "33020.png",
   player: runner,
@@ -865,6 +867,7 @@ cardSet[33020] = {
 //trash: Charge 1 of your installed cards.
 cardSet[33030] = {
   title: "Stoneship Chart Room",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1708,
   imageFile: "33030.png",
   player: runner,

@@ -237,6 +237,12 @@ while its card is in HQ, even though the card is inactive there. Its enumeration
 must check HQ location, action-click legality, credit/trash costs and targets.
 The flag does not make other abilities on the card active.
 
+`TriggerAbility` fires `automaticOnAbilityUsed(card, ability)` on active cards
+(and on cards whose hook sets `availableWhenInactive`) after the ability's
+choice is confirmed and before its `Resolve` runs. The Back (26082) uses it to
+count the first hardware use during a run each turn. It covers paid abilities
+used through the trigger command, not optional `responseOn*` triggers.
+
 ### canBeRezzed (conditional)
 
 `CheckRez` consumes this rules permission for both humans and AI.
@@ -368,7 +374,12 @@ InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)
 ChoicesHandInstall(player, filterFn)
+HasTrashAbility(card) // true for trashAbility: true, or an ability text naming [trash]
 ```
+
+Cards whose [trash] ability is not named in an `abilities` text (prevention
+interrupts, or abilities with a different label) declare `trashAbility: true`
+so heap-recursion effects such as The Back can find them.
 
 ### Decisions
 
@@ -737,8 +748,22 @@ the event may have happened before the card became active. Check the engine's
 turn counter instead: `TurnEventCount(name)` is 1 during the first such event,
 and `ChangePhase` clears every count when a turn begins. Recorded names:
 `"runnerHardwareInstall"` (in `Install`, before install triggers),
+`"runnerCompanionUse"` (in `Install` for a Runner companion, and once per
+payment that spent hosted credits from a companion, before
+`responseOnCreditsSpent(player, outsideAmount, doing, card, sources)`),
+`"runnerSuccessfulRun"` (Run 5.1 in `phase.js`, after declaring success and
+before `automaticOnRunSuccessful`),
+`"runnerEventTrashed"` (once per `Trash` batch containing a Runner event that
+was not installed facedown, before trash callbacks; also recorded by
+`TrashResolvedRunnerCard` when the first resolved event enters the pending
+post-action batch),
+`"runnerInstalledProgramTrashed"` (once per `Trash` batch containing a Runner
+program that was installed faceup, before trash callbacks),
+`"runnerGripOrStackTrash"` (once per `Trash` batch with cards originating in
+the Runner's grip or Stack, before trash callbacks),
 `"runnerDraw"` and `"corpDraw"` (in `Draw`, before cards move). Record a new
-event with `RecordTurnEvent(name)` at its single engine call site.
+event with `RecordTurnEvent(name)` at the engine event boundary, independently
+of whether an interested card is active.
 
 ```js
 responseOnInstall: { Enumerate: function (card) {
@@ -967,3 +992,20 @@ engine records it once per simultaneous direct trash, before automatic
 callbacks. It includes earlier trashes while the interested card was inactive
 and survives nested callbacks. Hosted collateral does not count as a direct
 player trash. This event counter resets with the other turn counters.
+
+`trashEvent.runnerEventOrdinal` is the stable turn ordinal of a batch that
+trashed a Runner event (absent on other `Trash` batches).
+`trashEvent.runnerGripOrStackCards` captures the cards originating in the grip
+or Stack before movement; `runnerGripOrStackOrdinal`
+is that batch's turn ordinal, or zero when the list is empty. These fields are
+recorded before `automaticOnTrash` and `responseOnTrash`, so nested responses
+do not change the original event's ordinal.
+
+Resolved played events use `TrashResolvedRunnerCard` rather than `Trash`:
+post-action cleanup batches them and opens
+`responseOnPlayedEventTrashed(cards, trashEvent)` when the Runner passes the
+post-action window, before continuing to the next action or ending the action
+phase. This separate response receives the batched events and their
+`runnerEventOrdinal`; it does not emit the ordinary trash callbacks or the
+other `trashEvent` fields. Cards responding to any trashed event must support
+both windows (Aniccam pattern).

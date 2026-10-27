@@ -42,4 +42,27 @@ test('committed calibration: table and constant equal the script output', () => 
     for (let k = 1; k < ORDERED.length; k++)
       assert.ok(derived[c][i][ORDERED[k]] >= derived[c][i][ORDERED[k - 1]], c + ' ' + i + ' ' + ORDERED[k]);
 });
+// Synthetic reports retain the same pool/options while varying deterministic game keys.
+const report = (seed, rows = [[1, 0, 0, 2, '5..9', 0]]) => ({
+  poolHash: 'pool', pairs: [{id: 'a'}], options: {}, seeds: [seed], failures: [],
+  games: [{ok: true, deckPairId: 'a', seed, samples: {remoteAgendaRisk: rows}}],
+});
+test('held-out reliability requires observations, including when every game fails', () => {
+  const fit = report(1), heldout = report(2);
+  heldout.games[0].ok = false;
+  const result = exposure.build(fit, heldout).reliability;
+  assert.strictEqual(result.pass, false);
+  assert.strictEqual(result.meanAbsoluteError, null);
+  assert.strictEqual(exposure.build(fit, report(2, [])).reliability.pass, false);
+  assert.strictEqual(exposure.build(fit, report(2)).reliability.pass, true);
+});
+test('fit and held-out reports reject repeated deck-pair/seed games', () => {
+  const fit = report(1);
+  assert.throws(() => exposure.build(fit, fit), /overlapping/);
+  assert.throws(() => exposure.build(fit, report(1)), /overlapping/);
+  const differentPair = report(1);
+  differentPair.games[0].deckPairId = 'b';
+  assert.doesNotThrow(() => exposure.build(fit, differentPair));
+  assert.doesNotThrow(() => exposure.build(fit, report(2)));
+});
 console.log(tests + ' agenda exposure table cases passed.');

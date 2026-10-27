@@ -474,6 +474,8 @@ phaseTemplates.globalTriggers = {
 			typeof corp.AI._recordSuccessfulRunForProtection === "function"
 		  )
 			corp.AI._recordSuccessfulRunForProtection(attackedServer);
+		  //count it for "the first time each turn you make a successful run" (DreamNet)
+		  RecordTurnEvent("runnerSuccessfulRun");
 		  //and fire the pre-phase succesful automatics
 		  AutomaticTriggers("automaticOnRunSuccessful", [attackedServer]);
 	  }
@@ -1861,10 +1863,20 @@ phases.runnerPostAction = CreatePhaseFromTemplate(
   "Runner 1.3*",
   null
 );
+//A played event is trashed as it finishes resolving (Aniccam counts it). It
+//happens here, after resolution, because the action moves to this phase first.
+var runnerResolvedEventsTrashed = null;
+function TrashResolvedRunnerCard(card) {
+  MoveCard(card, runner.heap);
+  if (card.cardType != "event") return;
+  if (!runnerResolvedEventsTrashed)
+    runnerResolvedEventsTrashed = { cards: [], trashEvent: { runnerEventOrdinal: RecordTurnEvent("runnerEventTrashed") } };
+  runnerResolvedEventsTrashed.cards.push(card);
+}
 phases.runnerPostAction.Enumerate.n = function () {
   //since this is post-action, this is also where we clean up any resolving cards that still remain
   while (runner.resolvingCards.length > 0) {
-    MoveCard(runner.resolvingCards[0], runner.heap);
+    TrashResolvedRunnerCard(runner.resolvingCards[0]);
   }
   return [{}];
 };
@@ -1875,7 +1887,21 @@ phases.runnerPostAction.Enumerate.n = function () {
 //     ChangePhase(phases.runnerDiscardStart);
 //   } else IncrementPhase();
 // }; //if out of clicks, time to move on
+//Played events trashed as they finished resolving get one response window
+//("an event is trashed", e.g. Aniccam) before the post-action window closes.
+function RunnerPostActionContinue() {
+  if (runner.clickTracker < 1) {
+    ChangePhase(phases.runnerActionPhaseEnds);
+  } else IncrementPhase();
+}
 phases.runnerPostAction.Resolve.n = function () {
+  var trashed = runnerResolvedEventsTrashed;
+  runnerResolvedEventsTrashed = null;
+  if (trashed) {
+    TriggeredResponsePhase(playerTurn, "responseOnPlayedEventTrashed", [trashed.cards, trashed.trashEvent],
+      RunnerPostActionContinue, "Trashed");
+    return;
+  }
   if (runner.clickTracker < 1) {
     ChangePhase(phases.runnerActionPhaseEnds);
   } else IncrementPhase();

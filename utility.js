@@ -3093,6 +3093,12 @@ function MoveCardTriggers(card, locationfrom, locationto) {
 
   //the above parts use cardLocation as it was
   card.cardLocation = locationto;
+  //Interrupts that replace how a card enters a score area (Project Vacheron).
+  //They resolve before any later win check sees the new agenda points.
+  if (locationto !== null && locationfrom !== locationto &&
+      (locationto == corp.scoreArea || locationto == runner.scoreArea) &&
+      typeof card.interruptOnAddedToScoreArea == "function")
+    card.interruptOnAddedToScoreArea.call(card, locationto, locationfrom);
 
   //once a card being accessed moves to another zone, the access ends immediately. (NRDB Q&A for NBN:Reality Plus)
   //we do this last because it uses the new cardLocation
@@ -3408,6 +3414,16 @@ function InstallDestination(installingCard, destination = null) {
   }
   LogError("invalid card install destination");
   return null; //don't want to return a new empty array because we don't want to install to it
+}
+
+// Whether a card has a [trash] ability (one with trashing itself in its cost).
+// Cards declare trashAbility: true unless an ability text names [trash].
+function HasTrashAbility(card) {
+  if (!card) return false;
+  if (card.trashAbility) return true;
+  return (card.abilities || []).some(function (ability) {
+    return typeof ability.text == "string" && ability.text.indexOf("[trash]") > -1;
+  });
 }
 
 /**
