@@ -41,8 +41,9 @@ selection if none is queued.
 ## Batch queue
 
 Boundaries follow faction, then complexity (4–5 cards where a batch has an
-identity, hosting, run/encounter redirects or a new shared mechanic; 3 for the
-short neutral tails). Six cards already had definitions (26073, 26088, 26090,
+identity, hosting, run/encounter redirects or a new shared mechanic; 3 for
+short faction groups, including neutral tails and the complex Jinteki and NBN
+groups in batches 10 and 13). Six cards already had definitions (26073, 26088, 26090,
 26091, 26094, 26095); none is credited without tests. The other 59 are
 `scripts/scaffold_set.py` stubs with TODO markers and dated ELO. See the
 [setup notes](uprising-implementation-notes.md) for per-batch risks, including
@@ -62,7 +63,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
 | 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
 | 12 | 26113–26116 | Pending | — | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
-| 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked!. Complex. |
+| 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
 | 14 | 26120–26123 | Pending | — | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
 | 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
 | 16 | 26128–26130 | Pending | — | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |

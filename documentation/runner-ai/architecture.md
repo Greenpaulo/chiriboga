@@ -112,9 +112,10 @@ worth-keeping cards (tutor play cost). Rank = visible ICE on the server lacking
 (`_breakerMatchesIce()`), times its `elo`; the best positive rank wins.
 
 Installed active cards can also offer breakers through
-`AIAbilityInstallBreakers(installed)`, including on the last click. Each offer
-supplies its total credit cost and an ability plan (`source`, `alt`, optional
-`select`, and target `card`). The chosen run stores that plan in
+`AIAbilityInstallBreakers(installed)`, including on the last click. Offers
+are scanned in title order to keep tied ranks independent of hidden Stack
+order. Each supplies its total credit cost and an ability plan (`source`,
+`alt`, optional `select`, and target `card`). The chosen run stores that plan in
 `_pendingAbilityInstall`. `_pendingAbilityTrigger()` triggers it at the next
 window where that ability is legal; it runs `select` before setting the trigger
 preference. `AIInstallDiscountAbility` can also supply a pending `followUp`.

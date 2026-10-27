@@ -2342,7 +2342,11 @@ console.log(this.preferred);
 			for (var k = 0; k < abilitySources.length; k++) {
 			  var abilitySource = abilitySources[k];
 			  if (typeof abilitySource.AIAbilityInstallBreakers != "function" || !CheckHasAbilities(abilitySource)) continue;
-			  var abilityOffers = abilitySource.AIAbilityInstallBreakers.call(abilitySource, installedForAbility) || [];
+			  // Search offers may follow hidden Stack order; break ranking ties by title.
+			  var abilityOffers = (abilitySource.AIAbilityInstallBreakers.call(abilitySource, installedForAbility) || []).slice().sort(function (a, b) {
+				var ta = a && a.card ? a.card.title : "", tb = b && b.card ? b.card.title : "";
+				return ta < tb ? -1 : ta > tb ? 1 : 0;
+			  });
 			  for (var j = 0; j < abilityOffers.length; j++) {
 				var abilityOffer = abilityOffers[j];
 				if (!abilityOffer || !abilityOffer.card || dontCheckAgain.includes(abilityOffer.card.title)) continue;

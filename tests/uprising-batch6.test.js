@@ -284,6 +284,24 @@ same(d.choices.map(o => o.card.title), ['Fetched Decoder'], 'AI searches for the
 d.choose(d.choices[0]);
 assert(runner.rig.programs.includes(fetched));
 assert.strictEqual(runner.AI._pendingAbilityInstall, null);
+// Equal-ranked search offers must not reveal the hidden Stack order.
+for (const reverse of [false, true]) {
+  reset();
+  const source = card(26090); install(source);
+  const candidates = ['Alpha Decoder', 'Zulu Decoder'].map(title =>
+    breaker(title, 'Decoder', 3, {elo: 1700, AIImplementBreaker: fetched.AIImplementBreaker}));
+  for (const candidate of reverse ? candidates.slice().reverse() : candidates) put(candidate, runner.stack);
+  put(ice('Gate', 'Code Gate', 3, 1), corp.HQ.ice);
+  put({title: 'Agenda', player: corp, cardType: 'agenda', agendaPoints: 2}, corp.HQ.cards);
+  runner.creditPool = 8;
+  runner.AI.cardsWorthKeeping = [];
+  const before = runner.stack.slice();
+  const choice = await runner.AI._internalChoiceDetermination(['draw', 'gain', 'run', 'trigger'], 'command');
+  assert.strictEqual(choice, 2, 'the real selector chooses the run');
+  assert.strictEqual(runner.AI.preferred.serverToRun, corp.HQ);
+  assert.strictEqual(source._aiTutorTarget.title, 'Alpha Decoder', 'ties use title order in both Stack permutations');
+  assert(before.every((item, index) => runner.stack[index] === item), 'planning preserves the Stack order');
+}
 // negatives: nothing useful in the stack -> no offer; stale plans expire on another turn
 reset();
 const smc4 = card(26090); install(smc4);

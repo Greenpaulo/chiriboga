@@ -2332,9 +2332,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AITriggerToRemoveTags()` | function | Return the alt of a paid ability that removes tags without a click, or falsy |
 | `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes, and one with `strengthMod` and `target` changes that ice's strength for the rest of the route |
 | `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
-
 | `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
-| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes |
 | `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select, followUp?}` when this card's ability can install the grip card more cheaply than the basic install action; `followUp` names a paid ability to trigger next |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
@@ -3537,9 +3535,10 @@ optimisation work.
   install, the total credits (ability cost plus discounted install cost), the
   ability `alt`, and an optional `select()` that targets that card for the
   ability's AI choice. Titles already in the grip, installed or offered by a
-  tutor are skipped. The planner prices the route like any bonus breaker (pool
-  offset by `cost`, two clicks reserved). Because the action phase
-  (`Runner 1.3`) offers click abilities only, a chosen offer that is not
+  tutor are skipped. Offers are scanned in title order so tied ranks do not
+  depend on hidden Stack order. The planner offsets the pool by `cost` only,
+  reserving no setup clicks or grip card for paid-ability installs. Because the
+  action phase (`Runner 1.3`) offers click abilities only, a chosen offer that is not
   triggerable now is stored as `runner.AI._pendingAbilityInstall` and the AI
   makes the run; `_pendingAbilityTrigger` triggers it in the next paid ability
   window (normally the first Run 2.1 approach, or Runner 1.3* after another
