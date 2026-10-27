@@ -5501,7 +5501,17 @@ class CorpAI {
           this._iceLayerPolicy(entry.server, economyCheck, entry.security).allowed,
       );
       memo.byServer = new Map();
-      memo.designated = this._scoringServers(this._emptyProtectedRemotes())[0] || null;
+      if (this.options.agendaCommitmentPlan && this.options.agendaDestinationPlan) {
+        memo.agendaPlan = this._agendaIcePlan();
+        //undefined means every agenda is held; null means a planned new remote.
+        memo.designated = memo.agendaPlan ? memo.agendaPlan.server : undefined;
+        if (memo.agendaPlan && !memo.entries.some((entry) => entry.server === memo.designated) &&
+            (!memo.designated || !this._NoMoreProtectionForThisServer(memo.designated))) {
+          var security = memo.designated ? this._evaluateServerSecurity(memo.designated) : null;
+          if (this._iceLayerPolicy(memo.designated, economyCheck, security).allowed)
+            memo.entries.push({server: memo.designated, security: security});
+        }
+      } else memo.designated = this._scoringServers(this._emptyProtectedRemotes())[0] || null;
     }
     var openingTarget = this._openingIceTarget();
     if (openingTarget !== undefined) servers = [openingTarget];
@@ -5516,7 +5526,7 @@ class CorpAI {
       if (!memo.byServer.has(entry.server))
         memo.byServer.set(
           entry.server,
-          this._marginalIceServerCandidates(entry, cards, priorityOnly, memo.designated),
+          this._marginalIceServerCandidates(entry, cards, priorityOnly, memo.designated, memo.agendaPlan),
         );
       candidates = candidates.concat(memo.byServer.get(entry.server));
     });
@@ -5535,11 +5545,11 @@ class CorpAI {
     }));
   }
 
-  _marginalIceServerCandidates(entry, cards, priorityOnly, designated) {
+  _marginalIceServerCandidates(entry, cards, priorityOnly, designated, agendaPlan = null) {
     var server = entry.server;
     var options = this._iceInstallOptions(server, cards, priorityOnly, true);
     if (options.length < 1) return [];
-    var before = this._marginalIceBefore(server, entry.security, designated);
+    var before = this._marginalIceBefore(server, entry.security, designated, agendaPlan);
     return options.map((option) => ({
       card: option.cardToInstall,
       server: server,
@@ -5551,17 +5561,18 @@ class CorpAI {
   //Stake P(s): agenda points expected through the server per breach, capped at
   //the points the Runner needs. Agendas and traps share one stake (the mean
   //agenda points in the Corp's own deck) so ICE never tells them apart.
-  //Before I3, only the designated next scoring remote (first scoring empty
-  //remote, else the new remote) has an empty-remote stake, and only while HQ
-  //holds an agenda.
-  _iceStake(server, designated) {
+  //Only the designated next scoring remote has an empty-remote stake while
+  //HQ holds its agenda. I4 destination planning supplies that agenda; with
+  //the option off, retain the first legacy scoring remote and largest agenda.
+  _iceStake(server, designated, agendaPlan = null) {
     var pointsNeeded = Math.max(0, AgendaPointsToWin() - AgendaPoints(runner));
     var stake = 0;
     if (server == corp.HQ || server == corp.RnD || server == corp.archives)
       stake = this._breachConsequence(server).pointsExposed;
     else if (server && server.root.some((card) => this._isAgendaOrTrap(card)))
       stake = this._meanAgendaPoints();
-    else if (server == designated) stake = this._highestAgendaPointsInHQ();
+    else if (typeof designated !== "undefined" && server == designated)
+      stake = agendaPlan ? Number(agendaPlan.agenda.agendaPoints) || 0 : this._highestAgendaPointsInHQ();
     return Math.min(stake, pointsNeeded);
   }
 
@@ -5761,6 +5772,39 @@ class CorpAI {
       best: this._bestAgendaCommitment(options, band2)};
   }
 
+  //The highest-EV agenda actually selected for installation supplies I2's
+  //empty-remote stake. A hold supplies no speculative remote. Recomputed per
+  //ranking, including hypothetical boards; never persisted on a server.
+  _agendaIcePlan() {
+    var best = null;
+    corp.HQ.cards.forEach((agenda) => {
+      if (!CheckCardType(agenda, ["agenda"])) return;
+      var choice = this._agendaCommitmentOptions(agenda).best;
+      if (choice && choice.kind == "install" && (!best || choice.ev > best.ev))
+        best = {agenda: agenda, server: choice.server, ev: choice.ev, burst: choice.burst};
+    });
+    return best;
+  }
+
+  //Only Runner turns after installation and before scoring expose this agenda.
+  //Account for the ICE install's click and printed install cost before asking
+  //M3 when the agenda can finish. The ICE's rez cost remains in I2's score.
+  _agendaIceExposure(agendaPlan, evaluation) {
+    var clicks = corp.clickTracker;
+    var credits = corp.creditPool;
+    var startTurn = this._clicksLeft() > 1 ? 0 : 1;
+    var plan = this._withHypothetical(
+      () => {
+        corp.clickTracker = Math.max(0, clicks - 1);
+        corp.creditPool -= agendaPlan.server ? agendaPlan.server.ice.length : 0;
+      },
+      () => this._agendaCompletionPlan(agendaPlan.agenda, agendaPlan.server,
+        startTurn, evaluation, false, !!agendaPlan.burst),
+      () => { corp.clickTracker = clicks; corp.creditPool = credits; },
+    );
+    return Math.max(0, Math.min(CORP_AI_I2_HORIZON_RUNNER_TURNS - startTurn, plan.exposureTurns));
+  }
+
   //I4 with agendaExposureTable: the better of an agenda's planned and burst
   //plans when installed into server (null: new remote) at startTurn, valued
   //on the exposure table.
@@ -5928,8 +5972,8 @@ class CorpAI {
     };
   }
 
-  _marginalIceBefore(server, security, designated) {
-    var stake = this._iceStake(server, designated);
+  _marginalIceBefore(server, security, designated, agendaPlan = null) {
+    var stake = this._iceStake(server, designated, agendaPlan);
     var central = server == corp.HQ || server == corp.RnD || server == corp.archives;
     var kind = central ? this._breachKind(server) : stake > 0 ? "agendaRemote" : "otherRemote";
     var evaluation = server
@@ -5945,7 +5989,9 @@ class CorpAI {
       stake: stake,
       kind: kind,
       repeatable: server == corp.HQ || server == corp.RnD,
-      exposureTurns: pending && this._clicksLeft() < 2 ? horizon - 1 : horizon,
+      exposureTurns: pending && agendaPlan && server === designated
+        ? this._agendaIceExposure(agendaPlan, evaluation)
+        : pending && this._clicksLeft() < 2 ? horizon - 1 : horizon,
       hazard: this._marginalHazard(kind, server ? server.ice.length : 0, evaluation, false),
     };
   }

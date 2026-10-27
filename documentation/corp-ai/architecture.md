@@ -788,7 +788,7 @@ callback triggers.
 
 ### Agenda scoring plans (I4)
 
-Behind `agendaCommitmentPlan` (default off until its F4 gate passes), an
+Behind `agendaCommitmentPlan` (default off for owner-directed manual playtesting), an
 installed agenda is advanced under a completion plan instead of waiting on
 the global rez reserve (`_sufficientEconomy()`), which the I4 probe found
 blocking about 30% of Corp actions while an agenda sat unfinished.
@@ -820,12 +820,35 @@ blocking about 30% of Corp actions while an agenda sat unfinished.
   finishes it, spare clicks become credits) on the no-counters row; for one
   already advanced, one more exposed turn. It does not advance when waiting
   is worth as much.
-- Where to install an agenda, and whether to hold it, is unchanged.
-  `_agendaCommitmentOptions()` computes every destination and hold with M5
-  (`_hqStealHazard()`) and logs them on agenda install decisions while the
-  option is on, but no decision reads them: driving destinations from I2's
-  breach-hazard table made the Corp install agendas into bare remotes the
-  table rates far too safe (see the I4 Resolution).
+- With `agendaDestinationPlan` as well (default off),
+  `_agendaCommitmentOptions()` compares every available remote and a new
+  remote against holding in HQ. It uses the better of advancing now and burst
+  completion on the exposure table when `agendaExposureTable` is enabled.
+  `_rankedInstallOptionsCore()` installs into the selected destination or
+  records a hold for the indefinite-hold guard. The choice counts forced
+  agenda discard, prefers an install within 0.1 points of holding, and first
+  minimises game-losing steal risk (band 2). A safe remote can be reused after
+  scoring without assigning a persistent server role.
+- When both destination planning and I2 marginal ICE ranking are enabled,
+  `_agendaIcePlan()` supplies I2's empty-remote designation: the highest-EV
+  agenda selected for installation, its destination and its own points.
+  All-held agendas supply no designation; a new remote is distinct from no
+  destination. A chosen remote absent from the legacy walk is considered
+  subject to posture and layer policy. Existing central and occupied-remote
+  stakes remain unchanged. `_agendaIceExposure()` recomputes M3 completion
+  after the ICE installation click and cost, counting only exposed Runner
+  turns before scoring within the remaining horizon; hypothetical resources
+  are restored even on exceptions. New ICE rez cost remains in I2's existing
+  candidate score. This is coordination of the two consumers, not joint
+  action search. With destination planning off, I2 keeps its original empty
+  scoring-remote designation.
+
+All three I4 options remain off by default. On 2026-10-26 the owner chose
+manual flag comparisons for adoption instead of the former batch statistical
+guards. Focused decision tests and regression checks remain required. The
+historical part 1 batch failed its win-rate improvement and bluff-correlation
+checks; that result does not establish the quality of the combined policy
+against a human and does not cover the later ICE coordination seam.
 
 ## Not yet modelled: holding and trigger ordering
 

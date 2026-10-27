@@ -1,6 +1,7 @@
 # Corp AI: Seamless Launch enters an empty decision phase and stalls
 
 **Source log:** `documentation/debug-logs/bug_raised/L8.9-btl-kit-632.log`
+**Additional source:** `documentation/debug-logs/bug_raised/I4-btl-kit-7203-seamless-launch.json` (I4 part 1 candidate, 2026-10-26)
 **Reproduction:** `tests/pending/seamless-launch-empty-choice-stall.test.js` — `node tests/pending/seamless-launch-empty-choice-stall.test.js` (fails at `aac6ea9` plus uncommitted L8.9 observation changes, 2026-10-19)
 
 ## Summary
@@ -32,19 +33,44 @@ The original L8.9 extension and isolated observer-off/on reports match: btl-kit
 seed 632, 27 turns, Corp 4–5 Runner, no winner, log hash `17fbc4f23c6e`, decision
 hash `6ccc9a6081e13b3b82938817f822e08c461b1805`. Both modes fail identically.
 
+### I4 recurrence (2026-10-26)
+
+At `dd5d256`, the I4 part 1 run completed 7,000 candidate games with one
+failure: `btl-kit`, seed `7203`, turn 26. The baseline had no failures.
+The archived JSON preserves the failed game's report entry, options, collectors
+and diagnostic from `.ai-batch-cache/candidate-47c7eb64c9db30fd.json`;
+it does not depend on keeping that ignored cache file.
+Lines 45–52 identify the seed, `stalled` reason, 10-second no-step error and
+`Playing Seamless Launch` phase. Line 104 ends the diagnostic tail with
+`ERROR No valid commands available`.
+
+This candidate enabled `iceMarginalSecurity`, `agendaCommitmentPlan` and
+`agendaExposureTable`, with `agendaDestinationPlan` and `openingHqThenRdIce`
+off. The same symptom already occurs in the older baseline reproduction;
+this is additional evidence, not proof that I4 introduced the bug.
+
 ## Reproduction
 
-The pending test plays just this recorded seed with the original pool, three
-collectors, effective options and observer off. It asserts the game does not
+The pending test plays the original recorded seed with the original pool, three
+collectors, effective options and observer off, then seed `7203` with the I4
+candidate options, all seven recorded collectors and observer on.
+For each game it asserts the game does not
 stall, has no errors, and completes with a winner. Current output fails the
 first assertion with actual reason `stalled`. Run log:
 `/tmp/L8.9-seamless-pending.log`; exit `/tmp/L8.9-seamless-pending.exit` is 1.
 No alternate target or expectation workaround is applied.
+The extended reproduction at `dd5d256` also fails both cases with
+`Seamless Launch must not leave a phase with no legal commands` (2026-10-26).
+Latest run log: `/tmp/chiriboga-seamless-triage.log`; exit status:
+`/tmp/chiriboga-seamless-triage.exit` (1).
 
 ## Root cause
 
 - [Verified] The recorded runtime trace and isolated seeded runs reach the
   empty Seamless Launch phase, then Null command and the no-step stall.
+- [Verified] The I4 candidate also stalls on seed `7203` — archived diagnostic
+  and the extended pending reproduction above. Both recorded seeds still fail
+  on `dd5d256`; the exact admission/resolution mismatch remains unisolated.
 - [Inferred] `Play()` obtains `card.Enumerate()` choices and creates DecisionPhase.
   Seamless Launch's `Enumerate()` filters installed advanceable targets through
   `_cardShouldBeFastAdvanced()` and excludes cards installed this turn.
@@ -73,7 +99,7 @@ and the engine must not stop scheduling because the selected command is undefine
 
 ## Acceptance criteria
 
-- [ ] The pending reproduction passes and moves into `tests/`, expectation unchanged.
+- [ ] Both pending seeded reproductions pass and move into `tests/`, expectations unchanged.
 - [ ] A focused board case isolates why admission and resolution choices diverge.
 - [ ] Valid targets remain playable; cards installed this turn remain excluded.
 - [ ] No-target handling preserves phase, clicks, credits and card location correctly.
