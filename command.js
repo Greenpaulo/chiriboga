@@ -871,7 +871,7 @@ function MakeChoice() {
 		typeof phaseOptions.access !== "undefined"
 	  ) {
 		footerHtml +=
-		  '<button class="button" onclick="AccessAllInArchives();" title="Fast-forward routine Archives cards; stop for agendas and access decisions">Fast access</button>';
+		  '<button class="button" onclick="AccessAllInArchives();" title="Fast-forward routine Archives cards; stop for agendas and access decisions">Access All</button>';
 	  }
 
 	  //show cancel button if relevant
