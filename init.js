@@ -1367,6 +1367,8 @@ function Render() {
     //include at most 1 copy of each card
     var uniqueGrid = [];
     for (var i = 0; i < viewingGrid.length; i++) {
+      if (currentPhase.privateLook &&
+          (viewingPlayer != currentPhase.privateLook.player || !currentPhase.privateLook.cards.includes(viewingGrid[i]))) continue;
       if (!uniqueGrid.includes(viewingGrid[i])) uniqueGrid.push(viewingGrid[i]);
     }
     //now lay out the grid
@@ -1420,7 +1422,7 @@ function Render() {
       gridViewY += gridViewYStep;
     }
     //viewingGrid is just a once-off state but store it in case needed e.g. window resize
-    previousViewingGrid = viewingGrid;
+    previousViewingGrid = currentPhase.privateLook ? uniqueGrid : viewingGrid;
     viewingGrid = null;
   }
 
@@ -2131,12 +2133,8 @@ function debugAddCredit() {
   }
 }
 function debugDrawCard() {
-  if (viewingPlayer === runner && runner.stack.length > 0) {
-    runner.grip.push(runner.stack.pop());
-    Render();
-    EnumeratePhase();
-  } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
-    corp.HQ.cards.paush(corp.RnD.cards.pop());
+  if ((viewingPlayer === runner || viewingPlayer === corp) && PlayerDeck(viewingPlayer).length > 0) {
+    Draw(viewingPlayer, 1);
     Render();
     EnumeratePhase();
   }

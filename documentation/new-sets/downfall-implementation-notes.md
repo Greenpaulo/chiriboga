@@ -215,13 +215,14 @@ and Runner AI).
 - "Baklan" Bochkin: only X equal to the ice's strength (minimum 0) is offered,
   because the card is trashed either way. Counters and trash are paid before the
   derez; the tag is taken whether or not the derez happens.
-- The Class Act: `Draw` moves cards before its responses, so the interrupt
-  resolves as the equivalent choice afterwards — the drawn cards plus the new
-  top card of the stack; choosing a drawn card swaps it for that top card. With
-  no card left in the stack every looked-at card would be drawn anyway, so no
-  choice is offered. Any other `responseOnCardsDrawn` effect on Runner draws
-  would see the pre-swap cards; none exists today. The draw-4 fires at the end
-  of either player's discard phase in the turn it was installed.
+- The Class Act: `Draw` opens `responseOnWouldDraw` before moving cards. The
+  Runner privately looks at the top modified draw count + 1 cards (or the
+  whole stack if shorter), selects a displayed card to bottom, then completes
+  the original draw. Short stacks still require bottoming and may change draw
+  order. The shared card grid shows only the looked-at choices; temporary
+  visibility and the grid cache clear after selection. Post-draw observers
+  receive the actual cards drawn, before the draw callback. The draw-4 fires
+  at the end of either player's discard phase in the turn it was installed.
 
 ### Baseline AI
 
@@ -233,7 +234,9 @@ and Runner AI).
   encounter; reserved for servers with potential ≥ 1.5. The run path triggers
   it through the normal persistent-ability route.
 - The Class Act: `AIDrawInstall` 2; bottoms a duplicate unique, else a card the
-  AI would not keep, else the lowest-ELO card.
+  AI would not keep, else the lowest-ELO card. The pre-draw choice checks
+  duplicates among the privately looked-at cards as well as cards in grip
+  and installed cards.
 
 ### Optimisation queue
 

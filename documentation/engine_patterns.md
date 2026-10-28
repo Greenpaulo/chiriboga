@@ -140,6 +140,42 @@ global `traceStrength` and before either player raises strength; a response
 may change `traceStrength` (Flip Switch sets it to 0). With no response the
 trace continues synchronously.
 
+### Drawing and private look decisions
+
+`Draw(player, count, afterDraw, context)` applies `modifyDraw` once, then
+offers `responseOnWouldDraw: { Enumerate(draw), Resolve, text }` before moving
+cards. Its occurrence parameter is a read-only snapshot with `player`, `count`
+(after modifiers) and `firstThisTurn`. The turn's draw occurrence is reserved
+before interrupts, so nested draws and installation after an earlier draw do
+not create a second first draw. A zero or modified-to-zero draw completes its
+callback without recording an occurrence. An empty-stack positive draw still
+records its occurrence.
+
+Enumerations must be safe to repeat, including the applicability check before
+the window opens. Once all interrupts finish, the engine moves/logs the draw,
+opens `responseOnCardsDrawn` with the actual cards, then calls `afterDraw` in
+`context` exactly once. `Draw` returns the number moved immediately, or
+`undefined` while an interrupt suspends movement. Use its callback for any
+instruction that follows the draw; `BasicActionDraw` follows the same contract.
+An inapplicable interrupt does not suspend a draw. Corp deck-out ends the game
+instead of continuing the instruction.
+
+An enumerated response may set `privateLook: true` to grant its controller a
+private look at its card choices for that decision. Use ordinary `{card, label}`
+choices, without `button`, for the shared selectable card grid. Build labels
+from the privately looked-at cards' titles, rather than a public reveal. The
+decision's `privateLook` holds its player and exact card references;
+`PlayerCanLook` grants access only within that decision. The grid filters to
+that player and those cards. Leaving the decision clears the grid and resize
+cache, without setting persistent visibility flags. The Class Act uses this
+path before bottoming a card and resuming the draw.
+
+Automatic hooks cannot suspend for draws or other decisions. Keep synchronous
+bookkeeping there, and perform draws in an enumerated response: Side Hustle
+places credits automatically and pays out in its install/run-begin response;
+Nurse Hạnh records the Archives turn-faceup event automatically and draws in
+the ensuing breach response window.
+
 ### Response windows
 
 Every enumerated trigger in a response window must be resolved before the

@@ -451,11 +451,8 @@ cardSet[34021] = {
   },
   
   responseOnRunSuccessful: {
-    Resolve: function () {
-      if (!this.runningWithThis) return;
-      Draw(runner, 5);
-    },
-    automatic: true,
+    Enumerate: function () { return this.runningWithThis ? [{}] : []; },
+    Resolve: function () { Draw(runner, 5); },
   },
   
   responseOnRunEnds: {

@@ -4,6 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const crypto = require('crypto');
 
 const root = path.resolve(__dirname, '..');
 const script = path.join(root, 'scripts/ticket.js');
@@ -11,15 +12,18 @@ const source = fs.readFileSync(script, 'utf8');
 const ticket = 'documentation/bugs/code-review/review-fixture.md';
 const pending = 'tests/pending/review-fixture.test.js';
 
-function check({reproduction = pending, exists = true, option = 'removedOption', code = '', gate, fast = false, extraArgs = []} = {}) {
+function check({reproduction = pending, exists = true, option = 'removedOption', code = '', gate, fast = false, extraArgs = [], outcome = 'not adopted — failed gate', checksum, greenContent} = {}) {
   const files = new Map([
-    [path.join(root, ticket), '# Fixture\n\n**Outcome:** not adopted — failed gate\n' +
-      '**Reproduction:** `' + reproduction + '`\n\n## Resolution\n\nImplemented from `1fdb396`.\n\n' +
-      '**Gate:** ' + (gate || 'failed — `' + option + '` removed.') + '\n'],
+    [path.join(root, ticket), '# Fixture\n\n**Outcome:** ' + outcome + '\n' +
+      '**Reproduction:** `' + reproduction + '`\n' +
+      (checksum ? '**Reproduction SHA-256:** `' + checksum + '`\n' : '') +
+      '\n## Resolution\n\nImplemented from `1fdb396`.\n\n' +
+      (gate === null ? '' : '**Gate:** ' + (gate || 'failed — `' + option + '` removed.') + '\n')],
     [path.join(root, 'ai_corp.js'), code],
     [path.join(root, 'ai_runner.js'), ''],
   ]);
   if (exists) files.set(path.join(root, reproduction), '// reproduction');
+  if (greenContent !== undefined) files.set(path.join(root, 'tests/review-fixture.test.js'), greenContent);
   const output = [];
   let suiteRuns = 0;
   const processStub = {execPath: process.execPath, argv: [process.execPath, script, 'check', ticket, ...(fast ? ['--fast'] : []), ...extraArgs], exitCode: 0};
@@ -34,13 +38,15 @@ function check({reproduction = pending, exists = true, option = 'removedOption',
     };
     if (name === 'child_process') return {spawnSync: (command, args) => {
       if (command === process.execPath) {
+        if (args[0] === 'tests/review-fixture.test.js') return {status: 0, stdout: '', stderr: ''};
         assert.deepStrictEqual(Array.from(args), ['tests/run-all-tests.js', ...(fast ? ['--fast'] : [])]);
         suiteRuns++;
         return {status: 0, stdout: '54 test files passed.\n', stderr: ''};
       }
       assert.strictEqual(command, 'git');
-      assert(['cat-file', 'diff', 'ls-files', 'remote', 'rev-parse'].includes(args[0]),
+      assert(['cat-file', 'diff', 'log', 'ls-files', 'remote', 'rev-parse', 'show'].includes(args[0]),
         'unexpected git command: ' + args.join(' '));
+      if (args[0] === 'show') return {status: 1, stdout: '', stderr: 'fatal: path not in history'};
       return {status: 0, stdout: '', stderr: ''};
     }};
     if (name === './roadmap.js') return require('../scripts/roadmap.js');
@@ -53,6 +59,18 @@ function check({reproduction = pending, exists = true, option = 'removedOption',
   }, {filename: script});
   assert.strictEqual(suiteRuns, extraArgs.length ? 0 : 1, 'valid checks run the selected regression suite');
   return {status: processStub.exitCode, output: output.join('\n')};
+}
+
+
+const pendingBytes = '// original reproduction\n';
+const checksum = crypto.createHash('sha256').update(pendingBytes).digest('hex');
+for (const matches of [true, false]) {
+  const result = check({exists: false, outcome: 'adopted', gate: null, checksum,
+    greenContent: matches ? pendingBytes : '// changed reproduction\n'});
+  assert.strictEqual(result.status, matches ? 0 : 1, result.output);
+  assert.match(result.output, matches
+    ? /PASS.*Reproduction matches its recorded SHA-256; the recording order is not verified\./
+    : /FAIL.*Reproduction differs from its recorded pending SHA-256\./);
 }
 
 const retained = check();

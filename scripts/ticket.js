@@ -18,6 +18,7 @@
 // set it to in-progress, and done/ turns its entry into a Done-table row.
 const fs = require('fs');
 const path = require('path');
+const {createHash} = require('crypto');
 const {spawnSync} = require('child_process');
 const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
   blockerMismatches, blockers} = require('./roadmap.js');
@@ -483,7 +484,12 @@ function check(ticket, {fast = false} = {}) {
         if (added) original = git('show', added + ':' + pending);
       }
       if (original.status !== 0) {
-        report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        const checksumMatch = reproductionChecksumMatches(text, fs.readFileSync(path.join(root, green)));
+        if (checksumMatch === null)
+          report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        else report(checksumMatch ? 'PASS' : 'FAIL', checksumMatch
+          ? 'Reproduction matches its recorded SHA-256; the recording order is not verified.'
+          : 'Reproduction differs from its recorded pending SHA-256.');
       } else {
         const before = original.stdout.split('\n');
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
@@ -561,7 +567,16 @@ function check(ticket, {fast = false} = {}) {
   process.exitCode = failed ? 1 : 0;
 }
 
-module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
+//For a pending reproduction supplied untracked, record this digest before
+//editing/moving it. Prefer Git history whenever it exists; this fallback checks
+//the entire file byte-for-byte, rather than only its assertions.
+function reproductionChecksumMatches(text, contents) {
+  const match = text.match(/^\*\*Reproduction SHA-256:\*\* `([a-f0-9]{64})`\s*$/m);
+  if (!match) return null;
+  return createHash('sha256').update(contents).digest('hex') === match[1];
+}
+
+module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus, reproductionChecksumMatches,
   closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem,
   hasManualPlaytesting};
 
