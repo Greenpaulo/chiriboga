@@ -1102,7 +1102,8 @@ function PassPriorityWindowEligible(player, optionList) {
   if (typeof phaseOptions.rez !== "undefined") {
     for (var i = 0; i < phaseOptions.rez.length; i++) {
       var rezCard = phaseOptions.rez[i].card;
-      if (rezCard && rezCard.cardType == "ice") return false;
+      if (rezCard && rezCard.cardType == "ice" && CheckApproach() &&
+          rezCard === attackedServer.ice[approachIce]) return false;
     }
   }
   return true;

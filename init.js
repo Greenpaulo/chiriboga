@@ -1040,7 +1040,12 @@ function Render() {
 
   //scale field to match approximate height (do this BEFORE any apply, so that cards are rendered in the new field)
   var w = window.innerWidth;
-  var h = window.innerHeight;
+  //Reserve the footer and persistent priority rail even when passing is off.
+  //Keeping the reservation stable also preserves board positions and focus.
+  var layoutStyle = window.getComputedStyle(document.documentElement);
+  var bottomReserve = parseFloat(layoutStyle.getPropertyValue("--game-footer-height")) +
+    parseFloat(layoutStyle.getPropertyValue("--pass-priority-rail-height"));
+  var h = Math.max(1, window.innerHeight - (bottomReserve || 0));
   cardRenderer.app.view.style.width = w + "px";
   cardRenderer.app.view.style.height = h + "px";
   cardRenderer.app.stage.pivot.x = w * 0.5;

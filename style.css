@@ -648,18 +648,23 @@ body.card-zoom-active #footer {
   box-sizing: border-box;
 }
 
-/* Pass until end of turn: persistent Resume Priority control. Fixed in the
-   bottom-right corner, clear of the history strip and outside #footer, so
-   footer re-rendering never moves or removes it. */
+/* Keep a permanent rail above the 65px footer. The canvas uses this same
+   reservation, so passing never overlays cards or shifts the options panel. */
+:root {
+  --pass-priority-rail-height: 80px;
+  --game-footer-height: 65px;
+}
 #passpriority {
   display: none;
   position: fixed;
   right: 64px;
-  bottom: 8px;
+  bottom: calc(var(--game-footer-height) + 6px);
+  height: calc(var(--pass-priority-rail-height) - 12px);
   z-index: 3;
   max-width: calc(100vw - 80px);
   box-sizing: border-box;
   flex-direction: column;
+  justify-content: center;
   align-items: stretch;
   gap: 4px;
   padding: 6px 10px;
@@ -673,19 +678,10 @@ body.card-zoom-active #footer {
 #passpriority.active {
   display: flex;
 }
-#passpriority .passpriority-text {
-  white-space: nowrap;
-}
 #passpriority button:focus-visible,
 #footerbutton-passpriority:focus-visible {
   outline: 2px solid var(--crt-green);
   outline-offset: 2px;
-}
-/* narrow windows: sit above the bottom-left options panel instead of beside it */
-@media (max-width: 720px) {
-  #passpriority {
-    bottom: 75px;
-  }
 }
 
 #header {

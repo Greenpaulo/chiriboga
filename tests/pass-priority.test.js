@@ -1,5 +1,5 @@
 'use strict';
-// Pass until end of turn / Resume Priority (documentation/backlog/pass-priority-until-end-of-turn.md):
+// Pass until end of turn / Resume Priority (documentation/backlog/code-review/pass-priority-until-end-of-turn.md):
 // phase eligibility, turn lifetime, normal response-loop progression and Auto skip/resume interaction.
 const assert = require('assert');
 const fs = require('fs');
@@ -33,7 +33,7 @@ const c = {console, cardSet: [], setIdentifiers: [], $: jq, jQuery: jq, PIXI: st
 c.window = c;
 vm.createContext(c);
 for (const file of ['config.js', 'sounds.js', 'init.js', 'phase.js', 'command.js', 'checks.js', 'mechanics.js', 'utility.js',
-  'sets/systemgateway.js', 'sets/vantagepoint.js'])
+  'sets/systemgateway.js', 'sets/vantagepoint.js', 'sets/downfall.js'])
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), c, {filename: file});
 c.Log = () => {}; c.LogError = message => { throw Error(message); };
 c.Render = () => {}; c.UpdateCounters = () => {}; c.PlaySound = () => {}; c.SetHistoryThumbnail = () => {};
@@ -105,7 +105,9 @@ test('stops are kept for jack out, breaking, approached ice, triggered effects, 
   at(c.phases.runDecideContinue, corp, runner);
   assert(c.PassPriorityWindowEligible(corp, ['n', 'trigger']), 'Corp has no jack-out decision');
   at(c.phases.runApproachIce, corp, runner);
-  c.phaseOptions = {n: [{}], rez: [{card: {cardType: 'ice'}}]};
+  const ice = {cardType: 'ice'};
+  c.attackedServer = {ice: [ice]}; c.approachIce = 0; c.encountering = false; c.movement = false;
+  c.phaseOptions = {n: [{}], rez: [{card: ice}]};
   assert(!c.PassPriorityWindowEligible(corp, ['n', 'rez']), 'rezzing the approached ice keeps its stop');
   c.phaseOptions = {n: [{}], rez: [{card: {cardType: 'asset'}}]};
   assert(c.PassPriorityWindowEligible(corp, ['n', 'rez']), 'optional asset rez is declined by passing');
@@ -119,6 +121,40 @@ test('stops are kept for jack out, breaking, approached ice, triggered effects, 
   runner.AI = fakeAI;
   at(c.phases.runnerStartResponse, runner, runner);
   assert(!c.PassPriorityWindowEligible(runner, ['n', 'trigger']), 'never for an AI player');
+});
+
+test('non-approached Rime rez offers allow passing, while the approached ice keeps its stop', () => {
+  reset(); human(corp);
+  const server = c.NewServer('Remote', false);
+  const rime = Object.assign({}, c.cardSet[26065], {cardLocation: server.ice, rezzed: false});
+  const outer = {cardType: 'ice', player: corp, rezzed: false, rezCost: 0, cardLocation: server.ice};
+  server.ice.push(rime, outer); corp.remoteServers.push(server);
+  corp.creditPool = 10;
+  c.attackedServer = server; c.approachIce = 1; c.encountering = false; c.movement = false;
+  try {
+    at(c.phases.runApproachIce, corp, runner);
+    let options = c.EnumeratePhase();
+    assert(c.phaseOptions.rez.some(o => o.card === outer), 'real enumeration offers approached ice');
+    assert(c.phaseOptions.rez.some(o => o.card === rime), 'real enumeration also offers non-approached Rime');
+    assert(!c.PassPriorityWindowEligible(corp, options), 'mixed offer keeps the approached-ice stop');
+    outer.rezzed = true;
+    options = c.EnumeratePhase();
+    assert(c.phaseOptions.rez.some(o => o.card === rime));
+    assert(c.PassPriorityOffered(options), 'pass button is offered for optional Rime rez');
+    c.passPriority.player = corp; c.passPriority.turn = runner;
+    assert(c.PassPriorityShouldAutoPass(options), 'active passing also continues');
+    c.approachIce = 0;
+    options = c.EnumeratePhase();
+    assert(!c.PassPriorityShouldAutoPass(options), 'Rime itself is now approached');
+    c.movement = true;
+    at(c.phases.runResponseBeforeApproach, corp, runner);
+    options = c.EnumeratePhase();
+    assert(c.phaseOptions.rez.some(o => o.card === rime));
+    assert(c.PassPriorityShouldAutoPass(options), 'movement is not approaching');
+  } finally {
+    corp.remoteServers.pop(); corp.creditPool = 0;
+    c.attackedServer = null; c.approachIce = -1; c.encountering = false; c.movement = false;
+  }
 });
 
 test('passing submits Continue once per opportunity through the normal response loop', () => {
@@ -168,12 +204,71 @@ test('activation on the opponent\'s turn ends when that turn ends', () => {
   assert.strictEqual(c.passPriority.player, null, 'reset at Runner 1.1, not carried into the human turn');
 });
 
+test('decisions inheriting a turn-start identifier keep passing through the same turn', () => {
+  for (const [phase, turn] of [[c.phases.runnerStartResponse, runner], [c.phases.corpStartDraw, corp]]) {
+    reset(); human(runner); at(phase, runner, turn);
+    c.passPriority.player = runner; c.passPriority.turn = turn;
+    const decision = c.DecisionPhase(runner, [{label: 'First'}, {label: 'Second'}], () => {}, 'Choose');
+    assert.strictEqual(decision.identifier, phase.identifier);
+    assert(c.PassPriorityActive(runner), 'opening an inherited-identifier decision is not a turn boundary');
+    decision.Resolve.continue({});
+    assert.strictEqual(c.currentPhase, phase);
+    assert(c.PassPriorityActive(runner), 'returning from the decision keeps passing');
+  }
+});
+
 test('game end clears passing', () => {
   reset(); human(runner);
   c.passPriority.player = runner; c.passPriority.turn = runner;
   c.playerTurn = runner;
   try { c.PlayerWin(corp, 'test'); } catch (e) { if (process.env.VERBOSE) console.log(e.message); }
   assert.strictEqual(c.passPriority.player, null);
+});
+
+test('StartGame clears passing before starting the main loop', () => {
+  reset(); human(runner);
+  at(c.phases.runnerStartResponse, runner, runner);
+  c.passPriority.player = runner; c.passPriority.turn = runner;
+  const saved = {Main: c.Main, URIParameter: c.URIParameter, skipShuffleAndDraw: c.skipShuffleAndDraw};
+  let called = false;
+  try {
+    c.URIParameter = () => ''; c.skipShuffleAndDraw = true;
+    c.Main = () => {
+      called = true;
+      assert.strictEqual(c.passPriority.player, null);
+      assert.strictEqual(c.passPriority.turn, null);
+    };
+    c.StartGame();
+    assert(called, 'new game reached its main loop');
+  } finally { Object.assign(c, saved); }
+});
+
+test('registered rewind handler clears passing after restoring state', () => {
+  reset(); human(runner);
+  const saved = {};
+  for (const key of ['$', 'Log', 'AllCards', 'cardRenderer', 'RenderRewindOptions', 'Main', 'document', 'rewindStates']) saved[key] = c[key];
+  let handler, continued = false;
+  const stop = new Error('stop after registering rewind');
+  try {
+    c.$ = selector => selector === '#rewind-select' ? {
+      on: (event, fn) => { assert.strictEqual(event, 'change'); handler = fn; }, val: () => 0,
+    } : stub;
+    c.Log = () => { throw stop; };
+    assert.throws(() => c.Init(), error => error === stop);
+    assert.strictEqual(typeof handler, 'function');
+    c.Log = () => {}; c.AllCards = () => []; c.cardRenderer = {UpdateGlow() {}};
+    c.RenderRewindOptions = () => {}; c.document = {querySelector: () => null};
+    // Restoration deliberately reintroduces a passing state: reset must follow it.
+    c.rewindStates = [{code: 'passPriority.player = runner; passPriority.turn = playerTurn;'}];
+    c.Main = () => {
+      continued = true;
+      assert.strictEqual(c.passPriority.player, null);
+      assert.strictEqual(c.passPriority.turn, null);
+      assert.strictEqual(c.rewinding, false);
+    };
+    handler();
+    assert(continued, 'rewind resumed the game after restoration');
+  } finally { Object.assign(c, saved); c.rewinding = true; }
 });
 
 test('Resume Priority restores stops and disables Auto skip', () => {
