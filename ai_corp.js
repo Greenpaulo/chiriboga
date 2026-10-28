@@ -9611,21 +9611,56 @@ class CorpAI {
 }
 
 CorpAI.DEFAULT_OPTIONS = Object.freeze({
-  // Optional HQ-first/R&D-second opening for manual playtesting (I2.3).
-  openingHqThenRdIce: false,
+  // Sends the first completed ICE install to HQ and the second to R&D, 
+  // with forced/tactical exceptions. Later installs use normal placement. (I2.3).
+  openingHqThenRdIce: true,
+
+  // Requires a remote to pass the security evaluation before treating 
+  // it as a scoring server.
   secureScoringServerGate: false,
+
+  // Allows another ICE layer on a vulnerable server with something valuable 
+  // at stake, despite the usual poor-economy/existing-unrezzed-ICE restriction. 
+  // Affordability checks still apply.
   serverAtRiskInstallOverride: false,
+
+  // Keeps working towards scoring an agenda it has already committed to, 
+  // even when it would normally stop advancing to save money. 
+  // (Predates I4 and can override it)
   committedAgendaReserveBypass: false,
-  emptyArchivesRunPressure: false,
+
+  // Treats otherwise empty Archives as worth protecting when public run rewards 
+  // or observed pressure give the Runner a reason to visit.
+  emptyArchivesRunPressure: true,
+
+  // Clears accumulated “this server needs protection” urgency when the server has 
+  // nothing worth protecting. Currently this targets Archives.
   valuelessServerDebtReset: false,
+
+  // Keeps bluff/bait commitments consistent for a period, then allows 
+  // reconsideration after meaningful changes such as a run, advancement 
+  // or changed pressure.
   postureEpochs: true,
+
+  // Makes small adjustments to bluff presentation based on whether the Runner 
+  // challenges or ignores it during this game.
   matchLocalPostureFeedback: true,
+
+  // Uses I2’s placement system: compares candidate ICE by the extra protection 
+  // it provides across eligible servers.
   iceMarginalSecurity: true,
-  // I4 scoring-plan execution (agenda install/hold options are logged only).
-  agendaCommitmentPlan: false,
-  // I4: score fast reads the counter-aware agenda exposure table (needs agendaCommitmentPlan).
-  agendaExposureTable: false,
-  // I4: choose each agenda's destination, or hold it, by _agendaCommitmentOptions
-  // (needs agendaCommitmentPlan; meant with agendaExposureTable).
+
+  // I4: Uses a completion plan to decide when to advance installed agendas, balancing 
+  // faster scoring against spending on defence and keeping rez money available.
+  agendaCommitmentPlan: true,
+
+  // I4: Accounts for advanced agendas attracting more attention from the Runner. 
+  // Helps decide when to advance, where to install, and when to keep an agenda in HQ. 
+  // (needs agendaCommitmentPlan).
+  agendaExposureTable: true,
+
+  // I4: Uses the agenda planner to choose where to install an agenda from HQ 
+  // —or to hold it in HQ. Requires agendaCommitmentPlan; intended alongside 
+  // agendaExposureTable.
   agendaDestinationPlan: false,
 });

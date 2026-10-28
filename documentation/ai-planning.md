@@ -39,8 +39,8 @@ IDs are unique across both areas.
 |---|---|---|
 | `proposed` | Worth doing, not yet refined into a ticket | `<area>/specs/<ID>-<slug>.md` |
 | `ready` | A ticket exists; it is actionable when neither a generated `## Blocker` nor an unmarked `## Additional blocker` section is present | `documentation/backlog/` |
-| `in-progress` | `implement-ticket` has started it, or its reviewed change waits behind a default-off option for its gate | `documentation/backlog/` (or `code-review/`, `remediation/`) |
-| `done` | Reviewed and merged; described in `architecture.md` | `documentation/backlog/done/` (when it had a ticket) |
+| `in-progress` | Implementation or review is underway; pending owner adoption alone does not keep merged work in progress | `documentation/backlog/` (or `code-review/`, `remediation/`) |
+| `done` | Reviewed and merged; described in `architecture.md`; owner playtesting/adoption can remain open | `documentation/backlog/done/` (when it had a ticket) |
 | `parked` | Deliberately deferred; the entry says why | Either |
 
 ## Commands
@@ -113,24 +113,43 @@ The full procedure, including re-checking the gate classification, is
 
 ## Acceptance gates
 
-The owner's guide to gates (why, who does what, how to read results) is
-[judging-ai-changes.md](judging-ai-changes.md). `node scripts/roadmap.js gates`
+**Current owner direction (2026-10-28):** use
+[ai-playtesting.md](ai-playtesting.md) for strategic AI work. Priorities come
+from observed weaknesses; behaviour remains behind flags and Paul decides
+adoption through playtesting. Use its **Human gate** form without a required
+sample size or numerical thresholds. This overrides older compulsory batch
+and quantified-human adoption instructions in tickets and skills for this
+route. Correctness tests, review and required suite validation still apply.
+Implementation may be merged while owner adoption remains pending.
+
+The numerical requirements below apply when the owner explicitly selects a
+measured comparison. They are not prerequisites for the owner-playtesting
+route. Existing CLI summaries/checks retain some older assumptions; see the
+workflow document's tooling limitation before interpreting them as adoption
+verdicts.
+
+The current owner workflow is [ai-playtesting.md](ai-playtesting.md);
+[judging-ai-changes.md](judging-ai-changes.md) explains optional measured comparisons. `node scripts/roadmap.js gates`
 lists gated items by what is left to do.
 
 Every AI-behaviour spec and ticket must contain the exact, unnumbered headings
 `## Acceptance gate` and `## Acceptance criteria`; workflow scripts parse them
 literally. Absence never means ungated. An objectively correct change records
 `N/A — deterministic fix (principle 4): <the rules, legality,
-information-boundary or invariant oracle>`. A strategic preference records a
-measurable gate as described below. Ticket/spec creation makes this decision,
+information-boundary or invariant oracle>`. A strategic preference records
+an owner-playtesting gate or an explicitly requested measurable comparison.
+Ticket/spec creation makes this decision,
 `reground-spec` rechecks it against current code, and `implement-ticket`
 normalizes older or manually created tickets before planning.
 
-An item whose goal is to play better, rather than to reproduce a fixed
-decision, is **gated**: deterministic tests cannot show that the change helps,
-so its **Acceptance gate** decides adoption from seeded games run with the F4
-harness ([corp_ai_finding_12_seeded_batch_harness.md](backlog/done/corp_ai_finding_12_seeded_batch_harness.md)).
-A gated item:
+A strategic item remains **gated** because deterministic tests alone do not
+establish better play. Its gate is owner-controlled playtesting by default.
+
+### Explicitly requested measured comparisons
+
+An F4 gate decides the outcome of that particular comparison from seeded games
+run with the [F4 harness](backlog/done/corp_ai_finding_12_seeded_batch_harness.md).
+An item using that route:
 
 - keeps its deterministic **Test scenarios**;
 - lists F4 in **Depends on**;
@@ -155,7 +174,9 @@ sample size, metrics and thresholds the same way.
 
 ### Writing a gate
 
-Every `## Acceptance gate` section uses exactly one of these three forms, so
+Every `## Acceptance gate` section uses the owner-playtesting form in
+[ai-playtesting.md](ai-playtesting.md#record-the-gate-in-a-ticket), or one of
+the three measured/objective forms below, so
 gates read the same everywhere and an agent can turn one into a command
 without interpretation. `triage-log`, spec creation, `reground-spec` and
 `implement-ticket` all write or normalise to this template.
@@ -381,18 +402,18 @@ rewriting.
 1. <Deterministic scenario that must hold.>
 
 ## Acceptance gate
-<One of the three forms in "Writing a gate" above: the N/A line, the F4 gate
-table with its gate command, or the human gate table. Never omit this
-section.>
+<The owner-playtesting Human gate form, the objective N/A line, or an
+explicitly requested measured comparison. Never omit this section.>
 
 ## Things to consider
 <Optional: tensions with other items, performance, edge cases.>
 
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] (Gated items) The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] (Gated items) The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
-- [ ] (Gated items) Applicable gate evidence is recorded in the Resolution.
+- [ ] (Gated items) The behaviour change ships under a named AI flag, initially off unless the owner requests otherwise (named in the Resolution).
+- [ ] (Measured gates only) The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
+- [ ] (Owner playtesting) The handoff names the tested flags, the behaviour to assess and contrasting cases; owner adoption remains explicit or pending.
+- [ ] (Measured gates only) Applicable gate evidence is recorded in the Resolution.
       For F4: exact command, committed deck pairs, paired seeds, seed count,
       every metric's baseline/candidate result and bootstrap 95% confidence
       interval, guarded-regression result, pass conditions and thresholds; an

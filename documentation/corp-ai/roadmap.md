@@ -22,8 +22,10 @@ before viewing candidate gate results. The roadmap table below owns the current 
 
 ## Current implementation order
 
-Updated 2026-10-27. This is the preferred sequence for the deception/install
-track; item dependencies below remain the formal blockers. Completed merge work
+Updated 2026-10-28. This is the preferred sequence for the deception/install
+track when playtest evidence warrants that work; item dependencies below
+remain the formal blockers. Follow [owner-controlled playtesting](../ai-playtesting.md)
+when choosing work and deciding which flags to keep. Completed merge work
 is recorded in the done tables and the historical merge plan.
 
 | Order | Item | Status | Next step / adoption evidence |
@@ -35,12 +37,19 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2](../backlog/done/I2-ice-selection-by-marginal-security.md) | done (merged) | Marginal ICE ranking adopted; `iceMarginalSecurity` on; remaining R&D concern belongs to I2.2 |
 | — | [L8.9](../backlog/done/L8.9-observable-defense-parity.md) | done (merged) | Passive install/lifecycle tooling, findings and control calibration delivered; I3/I5 reuse instructions and I3.1 shell-plan coverage recorded; no installation restriction |
 | — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
-| 1 | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | not adopted (merged) | F4 failed; `openingHqThenRdIce` kept default-off for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
-| 2 | [I4](../backlog/code-review/I4-agenda-installation-and-scoring-commitment.md) | in-progress (implementation complete; review and manual playtesting, 2026-10-26) | Score fast, exposure table and destination/hold remain default-off; I2 empty-remote stake now follows the selected agenda and M3 exposure. Owner-directed flag playtesting supersedes batch adoption guards; historical part 1 gate failed |
-| 3 | [I3](../backlog/I3-remote-role-and-root-suitability.md), then remaining install track | ready (blocked by I4) | Re-scope after I4's evidence to persistence and asset opportunity cost only, if the Corp still drifts between remotes; seeds 6001–7000 reserved |
+| — | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | done (merged; recorded gate failed) | HQ-first/R&D-second opening retained behind `openingHqThenRdIce` for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
+| — | [I4](../backlog/done/I4-agenda-installation-and-scoring-commitment.md) | done (merged; manual playtesting continues) | Agenda advancement, theft-risk table and install/hold choices delivered behind separate flags; recorded part 1 gate failed. When destination planning is enabled, ICE placement follows the chosen agenda destination. No final choice of flags is recorded here |
+| 1 | [I3](../backlog/I3-remote-role-and-root-suitability.md), coordinated with I4 follow-up | ready (scope revision first) | Use the agenda-stall log to assess scoring-room availability and replacement of an installed asset with little current use. Work with I4 advancement/exposure on and destination planning off; do not implement the full older role/value design or a separate placement bypass automatically. Seeds 6001–7000 remain reserved |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
 failed; policy removed), while its observer/collector repairs remain.
+I2.3 and I4 are also merged; neither remains in the implementation queue.
+I3's formal dependencies are complete. The current next step is revising its
+scope against the [agenda-stall evidence](../bugs/corp-agenda-held-while-secure-remote-available.md),
+not automatically implementing its old design. I4 owns agenda placement and
+holding; I3 owns making a scoring remote available, including asset reuse.
+The owner separately reported undefended last-click installs with I4 destination
+planning on; that needs a captured decision before selecting a repair.
 
 [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) is
 merged. Its investigation retains the adopted trade-off, with reproducible
@@ -235,11 +244,13 @@ Shared infrastructure used by every area.
 What should the Corp install, where, and is that better than another action?
 Shared design: [specs/install-decisions-design.md](specs/install-decisions-design.md).
 The [regression ownership table](specs/install-decisions-design.md#corrected-regression-baseline-and-ownership)
-maps the five default-off recovery gates to these layers and L3.5.1/L7.1,
+maps the five historically default-off recovery flags to these layers and L3.5.1/L7.1,
 including the remaining empty-Archives reward-valuation gap. Future I-layer
 baselines must capture the corrected policy rather than the old unconditional
 behaviors.
-I0 → I1 → I2 → I4 → I3 run in order: I2 (ICE selection) is the first
+I0 → I1 → I2 → I4 → I3 records the dependency sequence, not an automatic
+implementation queue. The roadmap is a set of possible solutions to observed
+weaknesses. Historically, I2 (ICE selection) is the first
 intentional policy change, I4 (agendas) decides where and when to install and
 score agendas and tells I2 which empty remote it will score in, and I3 then
 tests whether a persistent remote role and asset opportunity cost still add
@@ -260,19 +271,13 @@ I9 comes last.
 - **Status:** ready
 - **Depends on:** I2, I4, F4, L8.4
 - **Ticket:** [I3-remote-role-and-root-suitability.md](../backlog/I3-remote-role-and-root-suitability.md)
-- **Goal:** Keep a persistent scoring remote, chosen by projected breach hazard, and charge other installs the scoring value they displace. Reuse L8.9's placement/allocation/lifetime tools and test legitimate bare asset-spam remotes.
+- **Goal:** Assess and repair scoring-room availability from current playtests, including whether to replace an installed asset or prepare another remote. Re-scope the older persistent-role/value proposal with I4; preserve useful assets and legitimate bare asset-spam remotes. Owner playtesting decides adoption.
 
 ### I3.1 Deck game-plan profile
 - **Status:** proposed
 - **Depends on:** I3, F4
 - **Spec:** [I3.1-deck-game-plan-profile.md](specs/I3.1-deck-game-plan-profile.md)
 - **Goal:** Record explainable starting-deck composition and mechanic evidence, including shell/asset-spam, glacier and hybrid contrasts, without changing decisions. Does not block I3/I5; later consumers need their own evidence and gate.
-
-### I4 Agenda installation and scoring commitment
-- **Status:** in-progress
-- **Depends on:** I2, F4
-- **Ticket:** [I4-agenda-installation-and-scoring-commitment.md](../backlog/code-review/I4-agenda-installation-and-scoring-commitment.md)
-- **Goal:** Install an agenda where expected points beat holding it, then advance it to a score without the global reserve stalling the plan.
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed
@@ -319,6 +324,7 @@ I9 comes last.
 | I2 | ICE selection by marginal security | [I2-ice-selection-by-marginal-security](../backlog/done/I2-ice-selection-by-marginal-security.md) | [server security evaluation](architecture.md#server-security-evaluation) |
 | I2.2 | R&D protection lateness investigation | [I2.2-rnd-protection-lateness-investigation](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | [install-planning architecture](architecture.md#install-planning-today) |
 | I2.3 | HQ-first, R&D-second opening ICE gate | [I2.3-hq-then-rnd-opening-ice-gate](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | [install planning](architecture.md#install-planning-today) |
+| I4 | Agenda installation and scoring commitment | [I4-agenda-installation-and-scoring-commitment](../backlog/done/I4-agenda-installation-and-scoring-commitment.md) | [Agenda scoring plans (I4)](architecture.md#agenda-scoring-plans-i4) |
 
 ## Reactive commitment (R)
 
