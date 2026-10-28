@@ -621,12 +621,6 @@ body.card-zoom-active canvas {
   z-index: 3;
 }
 
-/* Keep gameplay choices clickable while a zoomed card raises the canvas
-   above the top-left menu. */
-body.card-zoom-active #footer {
-  z-index: 4;
-}
-
 #footer {
   z-index: 2;
   position: fixed;
@@ -648,19 +642,13 @@ body.card-zoom-active #footer {
   box-sizing: border-box;
 }
 
-/* Keep a permanent rail above the 65px footer. The canvas uses this same
-   reservation, so passing never overlays cards or shifts the options panel. */
-:root {
-  --pass-priority-rail-height: 80px;
-  --game-footer-height: 65px;
-}
+/* Overlay shown only while passing; the board keeps its full viewport. */
 #passpriority {
   display: none;
   position: fixed;
   right: 64px;
-  bottom: calc(var(--game-footer-height) + 6px);
-  height: calc(var(--pass-priority-rail-height) - 12px);
-  z-index: 3;
+  bottom: 6px;
+  z-index: 2;
   max-width: calc(100vw - 80px);
   box-sizing: border-box;
   flex-direction: column;

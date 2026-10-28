@@ -559,6 +559,7 @@ function FanHand(player) {
   for (var i = 0; i < handOfCards.length; i++) {
     var rotAmt = -totalFanRotation * 0.5 + fanIterator * i;
     var offsetY = -350 * Math.cos(1.7 * rotAmt * (Math.PI / 180)) + 300;
+    if (player === viewingPlayer) offsetY *= 1.1; //match the larger hand cards
     if (viewingPlayer == corp) rotAmt += 180; //hands face the viewer, like all non-ICE cards
     handOfCards[i].renderer.SetRotation(rotAmt);
     var nonViewingHandOffsetY = 35;
@@ -840,7 +841,7 @@ function Render() {
   if (viewingPlayer == runner)
     gripCascade = new CardRenderer.Cascade(
       RenderCards(runner.grip, FaceUpNoTint),
-      spreadXStep,
+      spreadXStep * 1.1,
       0,
       hostingX
     );
@@ -884,7 +885,7 @@ function Render() {
   if (viewingPlayer == corp)
     corpHandCascade = new CardRenderer.Cascade(
       RenderCards(corp.HQ.cards, FaceUpNoTint),
-      spreadXStep,
+      spreadXStep * 1.1,
       0,
       hostingX
     );
@@ -1040,12 +1041,7 @@ function Render() {
 
   //scale field to match approximate height (do this BEFORE any apply, so that cards are rendered in the new field)
   var w = window.innerWidth;
-  //Reserve the footer and persistent priority rail even when passing is off.
-  //Keeping the reservation stable also preserves board positions and focus.
-  var layoutStyle = window.getComputedStyle(document.documentElement);
-  var bottomReserve = parseFloat(layoutStyle.getPropertyValue("--game-footer-height")) +
-    parseFloat(layoutStyle.getPropertyValue("--pass-priority-rail-height"));
-  var h = Math.max(1, window.innerHeight - (bottomReserve || 0));
+  var h = window.innerHeight;
   cardRenderer.app.view.style.width = w + "px";
   cardRenderer.app.view.style.height = h + "px";
   cardRenderer.app.stage.pivot.x = w * 0.5;

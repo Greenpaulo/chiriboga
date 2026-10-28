@@ -1145,9 +1145,9 @@ var CardRenderer = {
         this.knownSprite.anchor.set(-0.35, 1.2);
 	    if (Math.round(Math.abs(2*this.knownSprite.rotation/Math.PI)) == 1) this.knownSprite.anchor.set(-1, 0.6);
         //change scale as required
-        var scalingratio = 0.5;
+        var scalingratio = pixi_cardBaseScale(this.card);
         if (this.zoomed && (this.faceUp || this.canView)) {
-          scalingratio = fieldZoom;
+          scalingratio = 1.5 * fieldZoom; //readable preview at normal browser zoom
 		  //load high-res version, if not already loaded/loading
 		  // Determine whether to use hi-res images: LocalStorage setting overrides gauntletConfig
 		  var useHiRes = false;
@@ -1244,7 +1244,7 @@ var CardRenderer = {
           scalingratio = (fieldZoom * window.innerHeight) / 419;
         //animate the scale
         var scaleDiff = scalingratio - this.sprite.scale.y;
-        var scalingSpeed = -0.5 * scaleDiff + 1; //creates a custom scale animation curve. Realistically this assumes -1 < x < 1
+        var scalingSpeed = Math.max(0.1, -0.5 * scaleDiff + 1); //keep larger previews growing even on zoomed-out boards
         this.sprite.scale.y += scalingSpeed * delta;
         //now clamp
         if (scalingSpeed > 0) {
@@ -1307,6 +1307,7 @@ var CardRenderer = {
         } else {
           this.dummy.alpha = 1.0;
         }
+        this.dummy.scale.set(pixi_cardBaseScale(this.card)); //hover target matches the unzoomed card
         this.dummy.x = this.storedPosition.x;
         this.dummy.y = this.storedPosition.y;
         this.dummy.rotation = this.storedRotation;
@@ -1473,8 +1474,7 @@ var CardRenderer = {
       var savedAnchorX = this.sprite.anchor.x;
       var savedAnchorY = this.sprite.anchor.y;
       this.sprite.rotation = this.storedRotation;
-      this.sprite.scale.x = 0.5;
-      this.sprite.scale.y = 0.5;
+      this.sprite.scale.x = this.sprite.scale.y = pixi_cardBaseScale(this.card);
       this.sprite.anchor.set(0.5, 0.5);
 
       //now compute extents
@@ -2365,6 +2365,15 @@ var pixi_mousePosition = { x: 0, y: 0 };
 var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = timeout running
 var pixi_holdCard = null; //for touch and hold
 var pixi_zoomedCards = new Set();
+
+//Enlarge only the viewing player's hand; cards return to board size on leaving it.
+function pixi_cardBaseScale(card) {
+  var inViewingHand = card.cardLocation && (
+    (viewingPlayer === runner && card.cardLocation === runner.grip) ||
+    (viewingPlayer === corp && card.cardLocation === corp.HQ.cards)
+  );
+  return inViewingHand ? 0.55 : 0.5;
+}
 
 //The game field is one transparent canvas, so a sprite cannot independently
 //cross the DOM stacking context used by the fixed menu. Raise that canvas only

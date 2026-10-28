@@ -701,7 +701,7 @@ function EnumeratePhase() {
       optionList.push(id);
     }
   }
-  //offer Pass until end of turn beside Continue in eligible human paid-ability response windows
+  //offer Auto-pass priority beside Continue in eligible human paid-ability response windows
   if (activePlayer.AI == null && buttoned.includes("n") && totalNumberOfOptions > 1 && PassPriorityOffered(optionList)) {
     footerHtml += PassPriorityButtonHTML();
   }
@@ -1054,7 +1054,7 @@ function MakeChoice() {
 }
 
 // BEGIN PassPriority
-//"Pass until end of turn" for a human player. While enabled, Main() submits the
+//"Auto-pass priority" for a human player. While enabled, Main() submits the
 //normal Continue ("n") in ordinary paid-ability response windows, so the response
 //loop, opponent opportunities and phase advancement run exactly as if Continue
 //had been clicked. It never applies to AI players, triggered-effect windows,
@@ -1063,7 +1063,7 @@ function MakeChoice() {
 var passPriority = { player: null, turn: null };
 var passPriorityRendered = null; //last rendered state, so re-rendering never steals keyboard focus
 var passPriorityHelpText =
-  "Pass in ordinary paid-ability response windows for the rest of this turn. " +
+  "Automatically pass optional priority windows for the rest of this turn. Required choices still pause. " +
   "This declines paid abilities and, where the window allows them, optional rez and score opportunities. " +
   "You are still asked about triggered effects, actions, breaking subroutines, rezzing approached ice, access and jack out.";
 
@@ -1082,7 +1082,7 @@ function PassPriorityWindows() {
 var passPriorityCommands = ["n", "trigger", "rez", "score"];
 
 /**
- * Whether the current window is one that Pass until end of turn may pass for player.
+ * Whether the current window is one that Auto-pass priority may pass for player.
  *
  * @method PassPriorityWindowEligible
  * @param {Player} player the player holding priority
@@ -1124,7 +1124,7 @@ function PassPriorityShouldAutoPass(optionList) {
   return PassPriorityActive(activePlayer) && PassPriorityWindowEligible(activePlayer, optionList);
 }
 
-//Whether to offer the Pass until end of turn button in this window.
+//Whether to offer the Auto-pass priority button in this window.
 function PassPriorityOffered(optionList) {
   if (TutorialReplacer !== null || TutorialWhitelist !== null || TutorialBlacklist !== null) return false;
   if (typeof specifiedMentor !== "undefined" && specifiedMentor != "") return false;
@@ -1136,7 +1136,7 @@ function PassPriorityButtonHTML() {
   return (
     '<button id="footerbutton-passpriority" class="button" onclick="PassPriorityEnable();" title="' +
     passPriorityHelpText +
-    '">Pass until end of turn</button>'
+    '">Auto-pass priority</button>'
   );
 }
 
@@ -1177,9 +1177,9 @@ function RenderPassPriorityControl() {
   passPriorityRendered = visible;
   if (visible) {
     $("#passpriority").html(
-      '<span class="passpriority-text">Passing until end of turn</span>' +
+      '<span class="passpriority-text">Auto-passing priority</span>' +
         '<button id="passpriority-resume" class="button" onclick="PassPriorityResume();" title="Stop passing: you will be offered the next response opportunity. ' +
-        passPriorityHelpText.replace("Pass in", "Passing covers") +
+        passPriorityHelpText +
         '">Resume Priority</button>'
     );
     $("#passpriority").addClass("active");
