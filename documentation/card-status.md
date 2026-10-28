@@ -24,18 +24,18 @@ in card-sets.md.
 
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
+| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
+| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
+| `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
+| `downfall` | playable | 65 | 65 | 0 | 0 | 0 | 55 / 61 | false / false | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 30 | 0 | 40 / 62 | true / true | no |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
-| `downfall` | in-progress | 65 | 65 | 0 | 8 | 0 | 47 / 61 | true / true | no |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
 | `automatainitiative` | not-implemented | 65 | 3 | 62 | 0 | 0 | 3 / 3 | true / true | no |
-| `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
-| `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
-| `uprising` | not-implemented | 65 | 6 | 59 | 0 | 0 | 6 / 6 | true / true | no |
 | `rebellion` | not-implemented | 65 | 2 | 63 | 0 | 0 | 2 / 2 | true / true | no |
-| `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
+| `vantagepoint` | playable | 66 | 66 | 0 | 0 | 0 | 60 / 62 | false / false | no |
 
 ## config.js disagreements
 
@@ -61,22 +61,48 @@ None.
 
 None.
 
-### `systemupdate2021` (sets/systemupdate2021.js)
+### `elevation` (sets/elevation.js)
 
 None.
 
 ### `downfall` (sets/downfall.js)
 
-- 26052 Focus Group: 1 scaffold marker(s)
-- 26053 Game Over: 1 scaffold marker(s)
-- 26054 Increased Drop Rates: 1 scaffold marker(s)
-- 26055 Divested Trust: 1 scaffold marker(s)
-- 26056 SDS Drone Deployment: 1 scaffold marker(s)
-- 26061 Secure and Protect: 1 scaffold marker(s)
-- 26062 Reduced Service: 1 scaffold marker(s)
-- 26063 Vulnerability Audit: 1 scaffold marker(s)
+None.
 
-### `elevation` (sets/elevation.js)
+### `uprising` (sets/uprising.js)
+
+- 26101 Drafter: 2 scaffold marker(s)
+- 26102 Týr: 2 scaffold marker(s)
+- 26103 NEXT Activation Command: 1 scaffold marker(s)
+- 26104 Scapenet: 1 scaffold marker(s)
+- 26105 Tranquility Home Grid: 1 scaffold marker(s)
+- 26106 Flower Sermon: 1 scaffold marker(s)
+- 26107 Prāna Condenser: 1 scaffold marker(s)
+- 26108 Engram Flush: 2 scaffold marker(s)
+- 26109 Konjin: 2 scaffold marker(s)
+- 26110 Hyoubu Precog Manifold: 1 scaffold marker(s)
+- 26111 Kakurenbo: 1 scaffold marker(s)
+- 26112 La Costa Grid: 1 scaffold marker(s)
+- 26113 GameNET: Where Dreams are Real: 1 scaffold marker(s)
+- 26114 Bellona: 1 scaffold marker(s)
+- 26115 F2P: 2 scaffold marker(s)
+- 26116 Gold Farmer: 2 scaffold marker(s)
+- 26117 Digital Rights Management: 1 scaffold marker(s)
+- 26118 SYNC Rerouting: 1 scaffold marker(s)
+- 26119 Ganked!: 1 scaffold marker(s)
+- 26120 Earth Station: SEA Headquarters: 1 scaffold marker(s)
+- 26121 Transport Monopoly: 1 scaffold marker(s)
+- 26122 Wall to Wall: 1 scaffold marker(s)
+- 26123 Akhet: 2 scaffold marker(s)
+- 26124 Colossus: 2 scaffold marker(s)
+- 26125 Winchester: 2 scaffold marker(s)
+- 26126 Argus Crackdown: 1 scaffold marker(s)
+- 26127 Cayambe Grid: 1 scaffold marker(s)
+- 26128 Cyberdex Sandbox: 1 scaffold marker(s)
+- 26129 False Lead: 1 scaffold marker(s)
+- 26130 NAPD Cordon: 1 scaffold marker(s)
+
+### `systemupdate2021` (sets/systemupdate2021.js)
 
 None.
 
@@ -94,10 +120,11 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 | Set | Grip cards | AIWorthKeeping | Subtype fallback only | Neither | Intent hook without AIWorthKeeping |
 |---|---:|---:|---:|---:|---:|
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
-| `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
+| `downfall` | 28 | 13 | 3 | 12 | 2 |
+| `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
-| **Total** | 115 | 55 | 25 | 35 | 7 |
+| **Total** | 143 | 68 | 28 | 47 | 9 |
 
 **Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
 
@@ -106,6 +133,8 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30023 Pantograph
 - 30033 Smartware Distributor
 - 30034 Verbal Plasticity
+- 26022 Spec Work
+- 26027 The Artist
 - 31038 Prepaid VoicePAD
 - 36011 Sell Out
 
@@ -114,15 +143,21 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30007 Fermenter
 - 30022 DZMZ Optimizer
 - 30027 Telework Contract
+- 35010 Cacophony
+- 35011 Rent Rioters
+- 35022 Open Market
+- 35034 Side Hustle
+- 26001 Isolation
+- 26002 Demolisher
+- 26007 Fencer Fueno
+- 26009 Trickster Taka
+- 26018 The Class Act
+- 26026 Rezeki
 - 31010 Liberated Account
 - 31024 Security Testing
 - 31035 Aesop’s Pawnshop
 - 31036 Professional Contacts
 - 31039 Earthrise Hotel
-- 35010 Cacophony
-- 35011 Rent Rioters
-- 35022 Open Market
-- 35034 Side Hustle
 - 36003 The Tungsten Tailor
 - 36007 Nurse Hạnh
 - 36016 Underdome Irregulars
@@ -138,6 +173,27 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30029 Overclock
 - 30033 Smartware Distributor
 - 30034 Verbal Plasticity
+- 35003 Charm Offensive
+- 35005 Shred
+- 35007 Gourmand
+- 35014 Clean Getaway
+- 35015 Lie Low
+- 35016 Maintenance Access
+- 35017 Transfer of Wealth
+- 35025 Illumination
+- 35029 Azimat
+- 26011 Always Have a Backup Plan
+- 26012 Blueberry!™ Diesel
+- 26013 Flip Switch
+- 26014 Lucky Charm
+- 26020 In the Groove
+- 26021 Khusyuk
+- 26022 Spec Work
+- 26025 Pelangi
+- 26027 The Artist
+- 26028 Direct Access
+- 26029 Rejig
+- 26030 Whistleblower
 - 31003 En Passant
 - 31004 Retrieval Run
 - 31005 Clot
@@ -154,15 +210,6 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 31034 Paricia
 - 31037 Dirty Laundry
 - 31038 Prepaid VoicePAD
-- 35003 Charm Offensive
-- 35005 Shred
-- 35007 Gourmand
-- 35014 Clean Getaway
-- 35015 Lie Low
-- 35016 Maintenance Access
-- 35017 Transfer of Wealth
-- 35025 Illumination
-- 35029 Azimat
 - 36005 Lampades
 - 36011 Sell Out
 - 36012 Tailgate

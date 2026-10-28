@@ -582,8 +582,22 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
   //currently giving whoever's turn it is priority...not sure this is always going to be right
   TriggeredResponsePhase(playerTurn, "responseOnWouldTrash", [cards], function() {
     UninstallInterrupts(cards, function () {
+    // Public turn facts for Uprising cards, captured while trashed cards are still
+    // in place: a faceup event trashed from any location (Aniccam) and an installed
+    // program trashed (Simulchip). Facedown installed cards have no card type.
+    var runnerEventTrashed = false, runnerInstalledProgramTrashed = false;
+    for (var i=0; i<cards.length; i++) {
+      var installedFacedown = CheckInstalled(cards[i]) && !cards[i].faceUp;
+      if (cards[i].player != runner || installedFacedown) continue;
+      if (cards[i].cardType == "event") runnerEventTrashed = true;
+      else if (cards[i].cardType == "program" && CheckInstalled(cards[i])) runnerInstalledProgramTrashed = true;
+    }
 	//loop through all the cards (move cards, lose information about HQ cards, cancel encounters if relevant, set host to null, and log message)
 	//BUT fire the on trashed trigger just once, when all this is one (i.e. for all cards at once)
+	//Runner cards leaving the grip or stack, captured before they move (Buffer Drive).
+	var runnerGripOrStackCards = cards.filter(function (card) {
+	  return card.cardLocation == runner.grip || card.cardLocation == runner.stack;
+	});
 	for (var i=0; i<cards.length; i++) {
 	  var card = cards[i];
 	  card.host = null;
@@ -610,6 +624,10 @@ function Trash(cards, canBePrevented, afterTrashing, context, fromDamage, trashi
     if (trashingPlayer == corp && runner.identityCard && runner.identityCard.faction && directlyTrashed.some(function (card) {
       return card.faction == runner.identityCard.faction;
     })) trashEvent.corpRunnerFactionOrdinal = RecordTurnEvent("corpTrashRunnerFaction");
+    if (runnerEventTrashed) trashEvent.runnerEventOrdinal = RecordTurnEvent("runnerEventTrashed");
+    if (runnerInstalledProgramTrashed) RecordTurnEvent("runnerInstalledProgramTrashed");
+    trashEvent.runnerGripOrStackCards = runnerGripOrStackCards;
+    trashEvent.runnerGripOrStackOrdinal = runnerGripOrStackCards.length > 0 ? RecordTurnEvent("runnerGripOrStackTrash") : 0;
 	//first the automatic triggers
 	AutomaticTriggers("automaticOnTrash", [cards, trashingPlayer, directlyTrashed, trashEvent]);
     if (fromDamage) {
@@ -915,8 +933,13 @@ function Install(
 				}
 				var finishInstall = function(cardsTrashed) {
 				  //install done, card becomes active
+				  if (installingCard.player === corp && installingCard.cardType === "ice" &&
+				      corp.AI && typeof corp.AI._recordCompletedIceInstall === "function")
+				    corp.AI._recordCompletedIceInstall(installingCard, GetServer(installingCard));
 				  if (installingCard.player == runner && installingCard.cardType == "hardware")
 					RecordTurnEvent("runnerHardwareInstall");
+				  if (installingCard.player == runner && CheckSubType(installingCard, "Companion"))
+					RecordTurnEvent("runnerCompanionUse");
 				  //first the automatic triggers
 				  AutomaticTriggers("automaticOnInstall", [installingCard]);
 				  
@@ -961,6 +984,8 @@ function Install(
 	  if (allowCancel) {
 		installTrashPhase.Cancel = {
 		  trash: function () {
+			if (installingCard.player === corp && corp.AI && typeof corp.AI._cancelOpeningIceInstall === "function")
+			  corp.AI._cancelOpeningIceInstall(installingCard);
 			ChangePhase(oldPhase, true);
 			MoveCard(installingCard, oldLocation);
 			if (typeof onCancelResolve === "function")
@@ -1091,6 +1116,11 @@ function Play(card, onPlayResolve, context) {
  * @param {Subroutine} subroutine the subroutine to break
  */
 function Break(subroutine) {
+  // Printed break limits (Afshar) forbid this break on every breaker path.
+  if (CardEffectsForbid("break", subroutine)) {
+    Log('Subroutine "' + subroutine.text + '" cannot be broken');
+    return;
+  }
   subroutine.broken = true;
   //particle effect
   var card = GetApproachEncounterIce();
@@ -1152,6 +1182,8 @@ function TriggerAbility(card, ability, onTriggerResolve, context) {
     if (typeof onTriggerResolve === "function") onTriggerResolve.call(context);
     //Log("Triggered \""+ability.text+"\"");
     Log("Using " + GetTitle(card, true) + ":");
+    // Ability-use watchers (e.g. The Back counts hardware used during a run).
+    AutomaticTriggers("automaticOnAbilityUsed", [card, ability]);
     ability.Resolve.call(card, params); //call in context of the card
   };
   var player = card.player;
@@ -1206,7 +1238,7 @@ function Damage(damageType, num, canBePrevented, afterTrashing, context) {
 	//opportunity for prevention has passed, intended.damage will now be done
     Log("Runner takes " + intended.damage + " " + intended.damageType + " damage");
 	if (intended.damageType == "core") {
-		runner.coreDamage++;
+		runner.coreDamage += intended.damage; //each point reduces maximum hand size
 	}
 	//if damage is greater than grip length, flatline
     if (intended.damage > runner.grip.length) {
@@ -1271,7 +1303,7 @@ function Purge(afterPurge, context) {
  * @param {int} num number of cards to attempt to draw
  * @param {function()} [afterDraw] called after drawing is complete (even if no cards are drawn)
  * @param {Object} [context] for afterDraw
- * @returns {int} the number of cards drawn
+ * @returns {int|undefined} number moved immediately, or undefined while interrupted; use afterDraw for completion
  */
 function Draw(player, num=1, afterDraw, context) {
   if (!suppressCreditDrawSound) {
@@ -1279,50 +1311,72 @@ function Draw(player, num=1, afterDraw, context) {
     else if (num === 2) PlaySound('drawCard2');
     else if (num >= 3) PlaySound('drawCard3');
   }
-  num += ModifyingTriggers("modifyDraw", player, -num); //lower limit of -num means the total will not be any lower than zero
-  if (num < 1) return 0;
-  RecordTurnEvent(player == corp ? "corpDraw" : "runnerDraw");
-  var cards = [];
-  //draw for corp (lose if impossible)
-  if (player == corp) {
-    var maxDraw = corp.RnD.cards.length;
-    if (maxDraw < num) {
-      PlayerWin(runner, "Corp attempted to draw a card from empty R&D");
-      return 0;
-    } else {
-      for (var i = 0; i < num; i++) {
-		cards.push(corp.RnD.cards[corp.RnD.cards.length - 1]);
-        MoveCardByIndex(
-          corp.RnD.cards.length - 1,
-          corp.RnD.cards,
-          corp.HQ.cards
-        );
+  num += ModifyingTriggers("modifyDraw", player, -num);
+  if (num < 1) {
+    if (typeof afterDraw === "function") afterDraw.call(context);
+    return 0;
+  }
+  var eventName = player == corp ? "corpDraw" : "runnerDraw";
+  var draw = {player: player, count: num, firstThisTurn: TurnEventCount(eventName) == 0};
+  //Reserve this occurrence before interrupt resolution (which may itself draw).
+  RecordTurnEvent(eventName);
+  var drawn; //undefined until the interrupt continuation actually moves cards
+  var resumed = false;
+  function completeDraw() {
+    if (resumed) return;
+    resumed = true;
+    var cards = [];
+    //draw for corp (lose if impossible)
+    if (player == corp) {
+      var maxDraw = corp.RnD.cards.length;
+      if (maxDraw < num) {
+        PlayerWin(runner, "Corp attempted to draw a card from empty R&D");
+        drawn = 0;
+        return;
+      } else {
+        for (var i = 0; i < num; i++) {
+          cards.push(corp.RnD.cards[corp.RnD.cards.length - 1]);
+          MoveCardByIndex(
+            corp.RnD.cards.length - 1,
+            corp.RnD.cards,
+            corp.HQ.cards
+          );
+        }
       }
     }
-  }
-  //draw for runner (break if impossible)
-  else if (player == runner) {
-    var maxDraw = runner.stack.length;
-    if (maxDraw < num) num = maxDraw;
-    for (var i = 0; i < num; i++) {
-	  cards.push(runner.stack[runner.stack.length - 1]);
-      MoveCardByIndex(runner.stack.length - 1, runner.stack, runner.grip);
+    //draw for runner (break if impossible)
+    else if (player == runner) {
+      var maxDraw = runner.stack.length;
+      if (maxDraw < num) num = maxDraw;
+      for (var i = 0; i < num; i++) {
+        cards.push(runner.stack[runner.stack.length - 1]);
+        MoveCardByIndex(runner.stack.length - 1, runner.stack, runner.grip);
+      }
     }
+    drawn = num;
+    //write to log
+    if (num == 1) Log(PlayerName(player) + " drew a card");
+    else if (num > 1) Log(PlayerName(player) + " drew " + num + " cards");
+    if (maxDraw == num) {
+      if (player == corp) Log("R&D is empty");
+      else if (player == runner) Log("Stack is empty");
+      else LogError("No player specified for Draw");
+    }
+    //currently giving whoever's turn it is priority...not sure this is always going to be right
+    TriggeredResponsePhase(playerTurn, "responseOnCardsDrawn", [cards], function() {
+      if (typeof afterDraw == 'function') afterDraw.call(context);
+    }, "Cards Drawn");
   }
-  //write to log
-  if (num == 1) Log(PlayerName(player) + " drew a card");
-  else if (num > 1) Log(PlayerName(player) + " drew " + num + " cards");
-  if (maxDraw == num) {
-    if (player == corp) Log("R&D is empty");
-    else if (player == runner) Log("Stack is empty");
-    else LogError("No player specified for Draw");
-  }
-  //currently giving whoever's turn it is priority...not sure this is always going to be right
-  TriggeredResponsePhase(playerTurn, "responseOnCardsDrawn", [cards], function() {
-	if (typeof afterDraw == 'function') afterDraw.call(context);
-  }, "Cards Drawn");
-
-  return num;
+  //Inactive conditions must not make an otherwise synchronous draw suspend
+  //(for example, a Corp draw while the Runner has a first-draw interrupt).
+  var interrupts = ChoicesActiveTriggers("responseOnWouldDraw").some(function (choice) {
+    var interrupt = choice.card.responseOnWouldDraw;
+    return typeof interrupt.Enumerate !== "function" || interrupt.Enumerate.call(choice.card, draw).length > 0;
+  });
+  if (interrupts)
+    TriggeredResponsePhase(playerTurn, "responseOnWouldDraw", [draw], completeDraw, "Would Draw Cards");
+  else completeDraw();
+  return drawn;
 }
 
 /**
@@ -1367,11 +1421,16 @@ function GainClicks(player, num) {
  */
 // Notify source-dependent spend responses only after a payment is complete.
 // The continuation waits for optional damage/prevention and all responses.
-function CreditSpendResponses(player, outsideAmount, doing, card, afterSpend, context) {
+// `sources` lists the installed cards whose hosted credits paid (Keiko).
+// Printed subtypes only: no effect grants Companion, and payment must not
+// depend on the active-trigger scan.
+function CreditSpendResponses(player, outsideAmount, doing, card, afterSpend, context, sources = []) {
+  if (player == runner && sources.some(function (source) { return (source.subTypes || []).includes("Companion"); }))
+    RecordTurnEvent("runnerCompanionUse");
   if (outsideAmount > 0 && ActiveCards(null).some(function (source) {
     return source && source.responseOnCreditsSpent && CheckHasAbilities(source);
   })) {
-    TriggeredResponsePhase(playerTurn, "responseOnCreditsSpent", [player, outsideAmount, doing, card],
+    TriggeredResponsePhase(playerTurn, "responseOnCreditsSpent", [player, outsideAmount, doing, card, sources],
       function () { if (typeof afterSpend == "function") afterSpend.call(context); }, "Credits spent");
   } else if (typeof afterSpend == "function") afterSpend.call(context);
 }
@@ -1383,7 +1442,7 @@ function SpendHostedCredits(player, source, amount, afterSpend, context) {
   UpdateCounters();
   Log(PlayerName(player) + " spent " + amount + " credits from " + GetTitle(source, true));
   if (typeof source.onCreditsSpent == "function") source.onCreditsSpent.call(source, amount);
-  CreditSpendResponses(player, amount, "using", source, afterSpend, context);
+  CreditSpendResponses(player, amount, "using", source, afterSpend, context, [source]);
 }
 
 function SpendCredits(
@@ -1396,6 +1455,7 @@ function SpendCredits(
   deferredResponses
 ) {
   var outsideSpent = 0;
+  var spentSources = [];
   var temporaryAvailable = function () {
     return player == runner ? Math.max(0, runner.temporaryCredits || 0) : 0;
   };
@@ -1415,6 +1475,7 @@ function SpendCredits(
 
   function spendFromCard(source, amount) {
     source.credits -= amount;
+    if (!spentSources.includes(source)) spentSources.push(source);
     num -= amount;
     outsideSpent += amount;
     if (amount == 1)
@@ -1452,9 +1513,9 @@ function SpendCredits(
       return;
     }
     if (deferredResponses) {
-      deferredResponses.push({player: player, outsideAmount: outsideSpent, doing: doing, card: card});
+      deferredResponses.push({player: player, outsideAmount: outsideSpent, doing: doing, card: card, sources: spentSources});
       if (typeof afterSpend == "function") afterSpend.call(context);
-    } else CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context);
+    } else CreditSpendResponses(player, outsideSpent, doing, card, afterSpend, context, spentSources);
   }
 
   function choosePaymentSource() {
@@ -2253,7 +2314,7 @@ function PsiGame(callback, context) {
         if (index >= payments.length) { callback.call(context, corpChoice.bid != runnerChoice.bid); return; }
         var payment = payments[index];
         CreditSpendResponses(payment.player, payment.outsideAmount, payment.doing, payment.card,
-          function () { respond(index + 1); });
+          function () { respond(index + 1); }, null, payment.sources);
       }
       pay(0);
     }, "Psi Game: Runner bid", "Choose a secret bid");

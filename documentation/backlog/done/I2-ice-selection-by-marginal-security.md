@@ -18,7 +18,7 @@ already committed in `63fb5df`; adoption starts from `596a264`.
 **Remaining diagnostic concern:** the passing gate still redistributes central
 theft: R&D 2.109 → 2.454 points, HQ 1.750 → 1.347. Overall central theft
 3.858 → 3.800 passes its frozen guard. The earlier sample found late R&D
-protection; this run does not establish that timing is fixed. Tracked by [I2.2](../code-review/I2.2-rnd-protection-lateness-investigation.md),
+protection; this run does not establish that timing is fixed. Tracked by [I2.2](../done/I2.2-rnd-protection-lateness-investigation.md),
 to investigate before I3 design freeze; changing the ranking would need a new gate.
 
 **I2.2 disposition (2026-10-22):** [Investigation findings](../../corp-ai/measurements/I2.2-rnd-protection-lateness.md)

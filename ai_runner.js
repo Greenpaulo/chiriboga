@@ -87,6 +87,28 @@ class RunnerAI {
     return Math.max(0, Math.min(n - 1, Math.floor(this._random() * n)));
   }
 
+  //Choose the program to trash for a steal cost (e.g. SDS Drone Deployment):
+  //an AIOkToTrash card, else a non-icebreaker, else the cheapest by install
+  //cost plus hosted credits and virus counters. Returns one of the choices.
+  _stealCostProgramOption(choices) {
+    var rank = function (card) {
+      var tier = 1;
+      if (typeof card.AIOkToTrash == "function" && card.AIOkToTrash.call(card)) tier = 0;
+      else if (CheckSubType(card, "Icebreaker")) tier = 2;
+      return {tier: tier, cost: (card.installCost || 0) + Counters(card, "credits") + Counters(card, "virus")};
+    };
+    var best = choices[0];
+    var bestRank = rank(best.card);
+    for (var i = 1; i < choices.length; i++) {
+      var candidate = rank(choices[i].card);
+      if (candidate.tier < bestRank.tier || (candidate.tier == bestRank.tier && candidate.cost < bestRank.cost)) {
+        best = choices[i];
+        bestRank = candidate;
+      }
+    }
+    return best;
+  }
+
   _cardsOkToTrashOnInstall(installedRunnerCards) {
 	var okToTrash = [];
     for (var i = 0; i < installedRunnerCards.length; i++) {
@@ -661,6 +683,27 @@ class RunnerAI {
     return best;
   }
 
+  //trigger a planned paid-ability install once its ability is offered (null if none is due)
+  //the plan expires when it is no longer the Runner's turn or a new turn begins
+  _pendingAbilityTrigger(optionList) {
+    var pending = this._pendingAbilityInstall;
+    if (!pending) return null;
+    if (playerTurn != runner || currentPhase.identifier == "Runner 1.1" || currentPhase.identifier == "Runner 1.2" ||
+        !ActiveCards(runner).includes(pending.source)) {
+      this._pendingAbilityInstall = null;
+      return null;
+    }
+    if (!optionList.includes("trigger")) return null;
+    var limitTo = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+    if (!ChoicesAbility(pending.source, limitTo).some(function (a) { return a.alt == pending.alt; })) return null;
+    this._pendingAbilityInstall = null;
+    if (typeof pending.select == "function") pending.select();
+    return this._returnPreference(optionList, "trigger", {
+      cardToTrigger: pending.source,
+      abilityAlt: pending.alt,
+    });
+  }
+
   //sets this.preferred to prefs and returns indexOf cmd in optionList
   //don't forget to return the result!
   _returnPreference(optionList, cmd, prefs) {
@@ -1150,14 +1193,16 @@ class RunnerAI {
 			runEventDiscount += activeCards[i].AIRunEventDiscount.call(activeCards[i],server,runEventCardToUse);
 		}
 	}
-	//if a bonus breaker is defined, a click is needed to install it, and a card slot (reduce max damage by 1)
+	//Charge the offered install cost; only hand installs and event tutors need setup clicks and a grip card.
 	if (bonusBreaker) {
 		//for now we assume pool credit is used to install/tutor the card
 		poolCreditOffset -= bonusBreaker.cost;
 		//assume two clicks needed to install it and prep (somewhat arbitrary but reduces the chance of install without run)
-		clickOffset -= 2;
-		//take into account one less card in grip
-		damageOffset -= 1;
+		if (!bonusBreaker.ability) {
+		  clickOffset -= 2;
+		  //hand installs and event tutors consume a card from grip
+		  damageOffset -= 1;
+		}
 		//since this is a hypothetical install we may need to temporarily modify some things
 		if (typeof bonusBreaker.card.AIPrepareHypotheticalForRC == "function") {
 			bonusBreaker.card.AIPrepareHypotheticalForRC.call(bonusBreaker.card,bonusBreaker.host);
@@ -1559,6 +1604,10 @@ console.log(this.preferred);
 	  return this._indexOfBestDiscardOption(optionList);
     }
 
+	//a planned paid-ability install (AIAbilityInstallBreakers or an AIInstallDiscountAbility followUp)
+	var pendingAbilityChoice = this._pendingAbilityTrigger(optionList);
+	if (pendingAbilityChoice !== null) return pendingAbilityChoice;
+
 	if (runner.tags > 0) {
 		//check for events that could be played to remove tags (ranked by number of tags removed, 0 to not play)
 		if (optionList.includes("play")) {
@@ -1609,6 +1658,24 @@ console.log(this.preferred);
 		}
 	}
 	
+	//installed cards declaring a useful paid ability outside runs (e.g. Simulchip):
+	//AITriggerInPaidWindow() returns the ability alt to use now, or a falsy value
+	if (optionList.includes("trigger") && attackedServer === null) {
+		var paidWindowCards = ActiveCards(runner);
+		var paidLimitTo = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+		for (var i = 0; i < paidWindowCards.length; i++) {
+			if (typeof paidWindowCards[i].AITriggerInPaidWindow != "function") continue;
+			var paidAlt = paidWindowCards[i].AITriggerInPaidWindow.call(paidWindowCards[i]);
+			if (!paidAlt) continue;
+			if (!ChoicesAbility(paidWindowCards[i], paidLimitTo).some(function (a) { return a.alt == paidAlt; })) continue;
+			this._log("there is a card I would trigger in this paid ability window");
+			return this._returnPreference(optionList, "trigger", {
+				cardToTrigger: paidWindowCards[i],
+				abilityAlt: paidAlt,
+			});
+		}
+	}
+
     if (optionList.includes("jack")) {
       if (currentPhase.identifier == "Run 4.3" && approachIce == 0) {
         //past last ice, choosing whether to approach server
@@ -1992,6 +2059,7 @@ console.log(this.preferred);
 
     //if run is an option, assess the possible runs
     if (optionList.includes("run")) {
+      this._pendingAbilityInstall = null; //replanned below
       //go through all the servers
       this.serverList = [
         { server: corp.HQ },
@@ -2184,10 +2252,11 @@ console.log(this.preferred);
 		//consider icebreakers that could be installed to improve run cost
 		//bonusBreaker is an object containing card, tutor, host, and cost
 		this.serverList[i].bonusBreaker = null; //by default don't pre-install a breaker
-        if (runner.clickTracker > 1) {
-			//start by preparing a list of unique affordable breakers to consider
+        {
+			//Paid abilities can install a breaker even on the last click.
 			var uniqueAffordableBreakers = []; // as {card, tutor, host}
 			var dontCheckAgain = []; //titles we've already checked
+			if (runner.clickTracker > 1) {
 			//from cards worth keeping in hand
 			if (optionList.includes("install")) {
 			  for (var k = 0; k < this.cardsWorthKeeping.length; k++) {
@@ -2263,6 +2332,33 @@ console.log(this.preferred);
 						}
 					}
 				}
+			  }
+			}
+			}
+			//and from installed cards whose paid abilities install a breaker (AIAbilityInstallBreakers, e.g. Self-modifying Code)
+			//no click is needed, so the ability can be used in the run's first paid ability window
+			var abilitySources = ActiveCards(runner);
+			var installedForAbility = InstalledCards(runner);
+			for (var k = 0; k < abilitySources.length; k++) {
+			  var abilitySource = abilitySources[k];
+			  if (typeof abilitySource.AIAbilityInstallBreakers != "function" || !CheckHasAbilities(abilitySource)) continue;
+			  // Search offers may follow hidden Stack order; break ranking ties by title.
+			  var abilityOffers = (abilitySource.AIAbilityInstallBreakers.call(abilitySource, installedForAbility) || []).slice().sort(function (a, b) {
+				var ta = a && a.card ? a.card.title : "", tb = b && b.card ? b.card.title : "";
+				return ta < tb ? -1 : ta > tb ? 1 : 0;
+			  });
+			  for (var j = 0; j < abilityOffers.length; j++) {
+				var abilityOffer = abilityOffers[j];
+				if (!abilityOffer || !abilityOffer.card || dontCheckAgain.includes(abilityOffer.card.title)) continue;
+				dontCheckAgain.push(abilityOffer.card.title);
+				if (!CheckInstall(abilityOffer.card)) continue;
+				var abilityChoices = ChoicesCardInstall(abilityOffer.card, true); //true ignores credit cost (offer.cost covers it)
+				if (abilityChoices.length < 1) continue;
+				var abilityPreferred = 0;
+				if (typeof abilityOffer.card.AIPreferredInstallChoice == "function") abilityPreferred = abilityOffer.card.AIPreferredInstallChoice(abilityChoices);
+				if (abilityPreferred < 0) continue;
+				uniqueAffordableBreakers.push({ card:abilityOffer.card, tutor:null, host:abilityChoices[abilityPreferred].host, cost:abilityOffer.cost,
+				  ability:{ source:abilitySource, alt:abilityOffer.alt, select:abilityOffer.select, card:abilityOffer.card } });
 			  }
 			}
 			//rank the unique icebreakers (by matches with ice that have no matching breaker installed * ELO)
@@ -2436,7 +2532,20 @@ console.log(this.preferred);
 		  }
 		  //if we still want to commit to this breaker, let's install it (via tutor if relevant)
 		  if (this.serverList[0].bonusBreaker) {
-			if (this.serverList[0].bonusBreaker.tutor) return this._returnPreference(optionList, "play", {
+			//a paid ability installs it: use it now if offered here, otherwise in the next paid ability window (see _pendingAbilityTrigger)
+			if (this.serverList[0].bonusBreaker.ability) {
+			  var bonusAbility = this.serverList[0].bonusBreaker.ability;
+			  if (typeof bonusAbility.select == "function") bonusAbility.select();
+			  var bonusAbilityLimit = currentPhase.identifier == "Runner 1.3" ? "click" : "";
+			  if (optionList.includes("trigger") && ChoicesAbility(bonusAbility.source, bonusAbilityLimit).some(function (a) { return a.alt == bonusAbility.alt; }))
+				return this._returnPreference(optionList, "trigger", {
+				  cardToTrigger: bonusAbility.source,
+				  abilityAlt: bonusAbility.alt,
+				});
+			  this._pendingAbilityInstall = bonusAbility;
+			  this._log("I will use "+bonusAbility.source.title+" to install "+bonusAbility.card.title+" in the next paid ability window");
+			}
+			else if (this.serverList[0].bonusBreaker.tutor) return this._returnPreference(optionList, "play", {
               cardToPlay: this.serverList[0].bonusBreaker.tutor,
 			  //currently relying on the tutor AI to make the best choice here (rather than setting nextPrefs)
             });
@@ -3021,6 +3130,8 @@ console.log(this.preferred);
 				var discounted = this._installDiscountAbility(this.preferred.cardToInstall, this.preferred.hostToInstallTo);
 				if (discounted) {
 					if (typeof discounted.offer.select == "function") discounted.offer.select();
+					//an offer may need a paid ability afterwards (e.g. Paule's Cafe hosts, then installs the hosted card)
+					this._pendingAbilityInstall = discounted.offer.followUp || null;
 					ret = this._returnPreference(inputOptionList, "trigger", {
 						cardToTrigger: discounted.card,
 						abilityAlt: discounted.offer.alt,

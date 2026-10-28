@@ -111,6 +111,20 @@ worth-keeping cards (tutor play cost). Rank = visible ICE on the server lacking
 `_matchingBreakerInstalled()` that the candidate matches
 (`_breakerMatchesIce()`), times its `elo`; the best positive rank wins.
 
+Installed active cards can also offer breakers through
+`AIAbilityInstallBreakers(installed)`, including on the last click. Offers
+are scanned in title order to keep tied ranks independent of hidden Stack
+order. Each supplies its total credit cost and an ability plan (`source`,
+`alt`, optional `select`, and target `card`). If the ability is legal and
+`trigger` is offered immediately, the planner runs `select` and returns the
+trigger preference without storing a pending plan. Otherwise, the chosen run
+stores the plan in `_pendingAbilityInstall`. `_pendingAbilityTrigger()` triggers
+this deferred plan at the next window where the ability is legal, running
+`select` before setting the trigger preference. `AIInstallDiscountAbility` can
+also supply a pending `followUp`.
+Plans clear when consumed, when their source leaves play, on the Corp turn,
+or at the Runner's next turn-start phases (Runner 1.1/1.2).
+
 **Cost.** `_commonRunCalculationChecksAsync(server, runEventCardToUse, ...)`
 sets offsets and calls `_calculateBestCompleteRunAsync()`:
 
@@ -118,7 +132,9 @@ sets offsets and calls `_calculateBestCompleteRunAsync()`:
   foresight adds a fixed +3 pool credits, −1 click and +3 damage allowance;
 - each active card adds `AIRunPoolCreditOffset(server, runEventCardToUse)` to
   the pool and `AIRunEventDiscount(server, runEventCardToUse)` to the discount;
-- a bonus breaker costs its cost, two clicks and one card of damage allowance,
+- a bonus breaker pays its offered credit cost; hand installs and event tutors
+  also cost two setup clicks and one card of damage allowance, while paid-ability
+  offers incur neither setup deduction,
   around `AIPrepareHypotheticalForRC(host)` / `AIRestoreHypotheticalFromRC()`;
 - a run event adds `AIRunEventExtraCredits` to non-pool credits, pays play cost
   minus discount (minimum 0) from the pool, costs one card of damage allowance,
@@ -366,6 +382,12 @@ costs under 0.8, and otherwise switches to an exit strategy.
   advanced is left alone. Otherwise above 2 beats trashing; trash is chosen
   whenever offered, with no value comparison; then a card trigger above 1, any
   trigger at 1, a card trigger above 0, else no action.
+
+For program steal costs, `RunnerAI._stealCostProgramOption(choices)` prefers
+an `AIOkToTrash` program, then a non-Icebreaker, then an Icebreaker. Within each
+tier it chooses the lowest install cost plus hosted credits and virus counters.
+`PayStealCostPrograms` trashes the chosen program as an unpreventable cost before
+`Steal`. The Runner still steals whenever legally offered.
 
 ## What the Runner AI knows
 

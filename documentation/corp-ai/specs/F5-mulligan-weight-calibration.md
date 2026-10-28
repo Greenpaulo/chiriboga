@@ -111,3 +111,20 @@ If no candidate passes, keep the current weights, record the sweep in
 - [ ] Gate evidence is recorded in the Resolution: F4 command, deck pairs, seed count, metrics, baseline vs candidate, and the threshold met. Only then is the option switched on by default.
 - [ ] `documentation/corp-ai/architecture.md` describes the calibrated weights and any rejected sets.
 - [ ] `node tests/run-all-tests.js` passes.
+
+## I2.3 evidence handoff (2026-10-22)
+
+The [HQ-first/R&D-second comparison](../measurements/I2.3-hq-then-rnd-opening-ice-gate.md)
+was rejected: R&D coverage/theft improved while combined central theft, scoring
+and wins worsened. Its [opening-hand and boundary diagnostics](../measurements/I2.3-opening-diagnostics.json)
+separate initially offered, kept/redrawn and compulsory-first-draw supply.
+The actual paired hands/mulligan events match; the offered-choice metadata
+defect is documented explicitly. Printed ICE counts and costs alone do not
+prove suitability or joint rez affordability. This did not test a two-ICE
+mulligan rule or change draw/economy ordering. Any such candidate remains
+separately gated; seeds 5001–6000 are now exposed.
+
+The owner subsequently requested keeping the placement option default off for
+his own games. The batch failure does not decide his manual configuration or
+establish performance against him. This retention does not change this item's
+separate gate requirements.

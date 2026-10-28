@@ -232,6 +232,8 @@ def generate_card_stub(card):
         lines.append(f"  influenceLimit: {inf_limit},")
         if side == "runner":
             lines.append(f"  link: {card.get('base_link', 0)},")
+        if card.get("text"):
+            lines.append("  // TODO: Add abilities or responseOn triggers")
 
     elif type_code in ("event", "operation"):
         lines.append(f"  playCost: {card.get('cost', 0)},")

@@ -30,6 +30,7 @@ IDs are unique across both areas.
 | `R` | Corp: reactive commitment | Is it better to hold or reorder an action for a visible future condition? |
 | `P` | Corp: principle debt | Corp code that breaks a principle and must be migrated |
 | `W` | Runner: hand keep and discard | Which Grip cards are worth keeping, playing or installing, and which go first? |
+| `T` | Runner: run targeting | Which server should the Runner run, and what risk does it take there? |
 | `D` | Runner: principle debt | Runner code that breaks a principle and must be migrated |
 
 ## Item lifecycle
@@ -316,6 +317,23 @@ that justifies switching the default to `true`.
 ### When a gate fails
 
 A gated ticket tests one idea; a failed gate answers it. So:
+
+**Owner-requested manual playtesting exception.** If the owner explicitly asks
+to retain a failed candidate for playing against a human, keep its option
+default off, its implementation and deterministic tests. Record the request
+and date in the Resolution using this exact form:
+
+```markdown
+**Manual playtesting:** owner-requested — `<option>`, <date>; defaults to off.
+```
+
+Keep the failed F4 evidence and a `not adopted` Outcome describing default
+adoption; manual retention is not a
+passed gate. The owner can enable the option locally for games. Batch results
+do not establish how the candidate performs against that owner. This exception
+requires an actual owner instruction, not an agent's inference from a failure.
+`ticket.js check` accepts the recorded exception only with an explicit false
+option default, and the retained candidate's tests belong in the green suite.
 
 - **The ticket closes.** It moves to `done/` with
   `**Outcome:** not adopted — gate failed <date> (<the deciding metric>)`

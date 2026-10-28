@@ -2569,7 +2569,7 @@ function MaxHandSize(player) {
  * @param {Player} player to perform draw for
  * @param {function()} [afterDraw] called after drawing is complete (even if no cards are drawn)
  * @param {Object} [context] for afterDraw
- * @returns {int} number of cards drawn (including effects)
+ * @returns {int|undefined} immediate draw count, or undefined while interrupted; use afterDraw
  */
 function BasicActionDraw(player, afterDraw, context) {
   var num = 1;
@@ -2642,6 +2642,8 @@ function PlayerCanLook(player, card) {
   if (card == accessingCard) return true;
   if (player == runner && card.knownToRunner) return true;
   if (player == null) return false;
+  if (typeof currentPhase !== "undefined" && currentPhase && currentPhase.privateLook &&
+      currentPhase.privateLook.player == player && currentPhase.privateLook.cards.includes(card)) return true;
   if (card.cardLocation == PlayerHand(player)) return true;
   if (
     typeof player.identityCard.setAsideCards != "undefined" &&
@@ -3094,6 +3096,12 @@ function MoveCardTriggers(card, locationfrom, locationto) {
 
   //the above parts use cardLocation as it was
   card.cardLocation = locationto;
+  //Interrupts that replace how a card enters a score area (Project Vacheron).
+  //They resolve before any later win check sees the new agenda points.
+  if (locationto !== null && locationfrom !== locationto &&
+      (locationto == corp.scoreArea || locationto == runner.scoreArea) &&
+      typeof card.interruptOnAddedToScoreArea == "function")
+    card.interruptOnAddedToScoreArea.call(card, locationto, locationfrom);
 
   //once a card being accessed moves to another zone, the access ends immediately. (NRDB Q&A for NBN:Reality Plus)
   //we do this last because it uses the new cardLocation
@@ -3411,6 +3419,16 @@ function InstallDestination(installingCard, destination = null) {
   return null; //don't want to return a new empty array because we don't want to install to it
 }
 
+// Whether a card has a [trash] ability (one with trashing itself in its cost).
+// Cards declare trashAbility: true unless an ability text names [trash].
+function HasTrashAbility(card) {
+  if (!card) return false;
+  if (card.trashAbility) return true;
+  return (card.abilities || []).some(function (ability) {
+    return typeof ability.text == "string" && ability.text.indexOf("[trash]") > -1;
+  });
+}
+
 /**
  * Gets the available credit pool for a player, including bad publicity but not recurring credits.<br/>Nothing is logged.
  *
@@ -3549,13 +3567,15 @@ function PlayClickCost(card) {
  *
  * @method StealCost
  * @param {Card} card agenda being accessed
- * @returns {{credits:int, clicks:int}} additional steal costs
+ * `programs` counts installed programs the Runner must trash (SDS Drone Deployment).
+ * @returns {{credits:int, clicks:int, programs:int}} additional steal costs
  */
 function StealCost(card) {
-  var ret = { credits: 0, clicks: 0 };
+  var ret = { credits: 0, clicks: 0, programs: 0 };
   if (card && card.stealCost) {
     ret.credits += card.stealCost.credits || 0;
     ret.clicks += card.stealCost.clicks || 0;
+    ret.programs += card.stealCost.programs || 0;
   }
   var triggerList = ChoicesActiveTriggers("modifyStealCost");
   for (var i = 0; i < triggerList.length; i++) {
@@ -3566,10 +3586,57 @@ function StealCost(card) {
     if (!modification) continue;
     ret.credits += modification.credits || 0;
     ret.clicks += modification.clicks || 0;
+    ret.programs += modification.programs || 0;
   }
   ret.credits = Math.max(0, ret.credits);
   ret.clicks = Math.max(0, ret.clicks);
+  ret.programs = Math.max(0, ret.programs);
   return ret;
+}
+
+/**
+ * Installed Runner programs that can be trashed to pay a steal cost.
+ *
+ * @method StealCostProgramChoices
+ * @returns {Object[]} card choices
+ */
+function StealCostProgramChoices() {
+  return ChoicesInstalledCards(runner, function (card) {
+    return CheckCardType(card, ["program"]) && CheckTrash(card);
+  });
+}
+
+/**
+ * Pay a steal cost's program trashes one at a time (a cost: not preventable).
+ *
+ * @method PayStealCostPrograms
+ * @param {Card} agenda being stolen
+ * @param {int} count programs still to trash
+ * @param {function} afterPaying called once all are trashed
+ */
+function PayStealCostPrograms(agenda, count, afterPaying) {
+  var choices = StealCostProgramChoices();
+  if (count < 1 || choices.length < 1) {
+    afterPaying();
+    return;
+  }
+  if (runner.AI != null && typeof runner.AI._stealCostProgramOption == "function")
+    runner.AI.preferred = {
+      title: "Steal cost",
+      option: runner.AI._stealCostProgramOption(choices),
+    };
+  DecisionPhase(
+    runner,
+    choices,
+    function (params) {
+      Trash(params.card, false, function () {
+        PayStealCostPrograms(agenda, count - 1, afterPaying);
+      }, null, undefined, runner);
+    },
+    "Steal cost",
+    "Trash 1 installed program to steal " + GetTitle(agenda, true),
+    null,
+  );
 }
 
 /**
@@ -4004,9 +4071,10 @@ function ChoicesSubroutine(iceCard, triggeredSubroutine) {
  * Gets list of unbroken subroutines on ice being encountered.<br/>Nothing is logged.
  *
  * @method ChoicesEncounteredSubroutines
+ * @param {Subroutine[]} [selectedBreaks] pending breaks to exclude and include in break limits
  * @returns {Params[]} list of subroutines to choose from (each object has .subroutine and .label)
  */
-function ChoicesEncounteredSubroutines() {
+function ChoicesEncounteredSubroutines(selectedBreaks) {
   var ret = [];
   //Check if ice still exists (might have been trashed during encounter)
   if (
@@ -4018,7 +4086,11 @@ function ChoicesEncounteredSubroutines() {
   }
   for (var i = 0; i < attackedServer.ice[approachIce].subroutines.length; i++) {
     var subroutine = attackedServer.ice[approachIce].subroutines[i];
-    if (!subroutine.broken && !subroutine._lockedFromBreak) {
+    if (
+      !subroutine.broken && !subroutine._lockedFromBreak &&
+      !(selectedBreaks || []).includes(subroutine) &&
+      !CardEffectsForbid("break", subroutine, selectedBreaks)
+    ) {
       var params = {};
       params.subroutine = subroutine;
       params.label = subroutine.text;

@@ -41,5 +41,5 @@ registerPrecon({
         "36045": 2  // The Red Room
     },
     // sets: The set codes this deck is designed with
-    sets: ["core", "sg", "elev", "vp"]
+    sets: ["df", "sg", "elev", "vp"]
 });

@@ -140,6 +140,42 @@ global `traceStrength` and before either player raises strength; a response
 may change `traceStrength` (Flip Switch sets it to 0). With no response the
 trace continues synchronously.
 
+### Drawing and private look decisions
+
+`Draw(player, count, afterDraw, context)` applies `modifyDraw` once, then
+offers `responseOnWouldDraw: { Enumerate(draw), Resolve, text }` before moving
+cards. Its occurrence parameter is a read-only snapshot with `player`, `count`
+(after modifiers) and `firstThisTurn`. The turn's draw occurrence is reserved
+before interrupts, so nested draws and installation after an earlier draw do
+not create a second first draw. A zero or modified-to-zero draw completes its
+callback without recording an occurrence. An empty-stack positive draw still
+records its occurrence.
+
+Enumerations must be safe to repeat, including the applicability check before
+the window opens. Once all interrupts finish, the engine moves/logs the draw,
+opens `responseOnCardsDrawn` with the actual cards, then calls `afterDraw` in
+`context` exactly once. `Draw` returns the number moved immediately, or
+`undefined` while an interrupt suspends movement. Use its callback for any
+instruction that follows the draw; `BasicActionDraw` follows the same contract.
+An inapplicable interrupt does not suspend a draw. Corp deck-out ends the game
+instead of continuing the instruction.
+
+An enumerated response may set `privateLook: true` to grant its controller a
+private look at its card choices for that decision. Use ordinary `{card, label}`
+choices, without `button`, for the shared selectable card grid. Build labels
+from the privately looked-at cards' titles, rather than a public reveal. The
+decision's `privateLook` holds its player and exact card references;
+`PlayerCanLook` grants access only within that decision. The grid filters to
+that player and those cards. Leaving the decision clears the grid and resize
+cache, without setting persistent visibility flags. The Class Act uses this
+path before bottoming a card and resuming the draw.
+
+Automatic hooks cannot suspend for draws or other decisions. Keep synchronous
+bookkeeping there, and perform draws in an enumerated response: Side Hustle
+places credits automatically and pays out in its install/run-begin response;
+Nurse Hạnh records the Archives turn-faceup event automatically and draws in
+the ensuing breach response window.
+
 ### Response windows
 
 Every enumerated trigger in a response window must be resolved before the
@@ -213,9 +249,9 @@ modifyInstallCost: Resolve(card, destination); // destination is a server or hos
 modifyTrashCost: Resolve(card);
 modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
-modifyStealCost: Resolve(card); // returns {credits, clicks} additional costs
+modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
-modifyCannot: Resolve(id, card); // id = "steal"|"trash"|"score"; return true to forbid
+modifyCannot: Resolve(id, card, selectedBreaks); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid; optional selectedBreaks includes pending selections for multi-break limits
 ```
 
 ### Click Ability
@@ -236,6 +272,12 @@ An ability with `availableFromHQ: true` is included by Corp ability discovery
 while its card is in HQ, even though the card is inactive there. Its enumeration
 must check HQ location, action-click legality, credit/trash costs and targets.
 The flag does not make other abilities on the card active.
+
+`TriggerAbility` fires `automaticOnAbilityUsed(card, ability)` on active cards
+(and on cards whose hook sets `availableWhenInactive`) after the ability's
+choice is confirmed and before its `Resolve` runs. The Back (26082) uses it to
+count the first hardware use during a run each turn. It covers paid abilities
+used through the trigger command, not optional `responseOn*` triggers.
 
 ### canBeRezzed (conditional)
 
@@ -343,7 +385,7 @@ EndTheRun();
 Trace(strength, callback); // callback(successful: bool)
 Break(subroutine);
 CheckUnbrokenSubroutines();
-ChoicesEncounteredSubroutines(); // unbroken + unlocked subs (respects _lockedFromBreak)
+ChoicesEncounteredSubroutines(selectedBreaks); // unbroken + unlocked subs; optional pending selections count toward break limits
 Rez(card, ignoreAllCosts, onRezResolve, context, allowCancel, costReduction, afterRezResponses);
 ```
 
@@ -362,12 +404,18 @@ runner.grip / runner.stack / runner.heap;
 ```js
 CheckCardType(card, ["ice","asset",...])
 CheckSubType(card, "Barrier")
-StealCost(card); // {credits, clicks}, including printed and active additional costs
+StealCost(card); // {credits, clicks, programs}, including printed `stealCost` and active additional costs;
+// programs = installed programs the Runner trashes (PayStealCostPrograms, unpreventable)
 InstalledCards(player)
 ChoicesInstalledCards(player, filterFn)
 ChoicesArrayCards(array, filterFn)
 ChoicesHandInstall(player, filterFn)
+HasTrashAbility(card) // true for trashAbility: true, or an ability text naming [trash]
 ```
+
+Cards whose [trash] ability is not named in an `abilities` text (prevention
+interrupts, or abilities with a different label) declare `trashAbility: true`
+so heap-recursion effects such as The Back can find them.
 
 ### Decisions
 
@@ -736,8 +784,22 @@ the event may have happened before the card became active. Check the engine's
 turn counter instead: `TurnEventCount(name)` is 1 during the first such event,
 and `ChangePhase` clears every count when a turn begins. Recorded names:
 `"runnerHardwareInstall"` (in `Install`, before install triggers),
+`"runnerCompanionUse"` (in `Install` for a Runner companion, and once per
+payment that spent hosted credits from a companion, before
+`responseOnCreditsSpent(player, outsideAmount, doing, card, sources)`),
+`"runnerSuccessfulRun"` (Run 5.1 in `phase.js`, after declaring success and
+before `automaticOnRunSuccessful`),
+`"runnerEventTrashed"` (once per `Trash` batch containing a Runner event that
+was not installed facedown, before trash callbacks; also recorded by
+`TrashResolvedRunnerCard` when the first resolved event enters the pending
+post-action batch),
+`"runnerInstalledProgramTrashed"` (once per `Trash` batch containing a Runner
+program that was installed faceup, before trash callbacks),
+`"runnerGripOrStackTrash"` (once per `Trash` batch with cards originating in
+the Runner's grip or Stack, before trash callbacks),
 `"runnerDraw"` and `"corpDraw"` (in `Draw`, before cards move). Record a new
-event with `RecordTurnEvent(name)` at its single engine call site.
+event with `RecordTurnEvent(name)` at the engine event boundary, independently
+of whether an interested card is active.
 
 ```js
 responseOnInstall: { Enumerate: function (card) {
@@ -749,7 +811,7 @@ responseOnInstall: { Enumerate: function (card) {
 ### Ice weakens itself each encounter (Sandstone pattern)
 
 ```js
-responseOnEncounter: { Resolve: function() { AddCounters(this, "virus", 1); }, automatic: true },
+automaticOnEncounter: { Resolve: function(ice) { if (ice == this) AddCounters(this, "virus", 1); } },
 modifyStrength: { Resolve: function(card) { if (card==this) return -Counters(this,"virus"); return 0; } },
 ```
 
@@ -758,7 +820,7 @@ modifyStrength: { Resolve: function(card) { if (card==this) return -Counters(thi
 ```js
 modifyStrength: {
   Resolve: function(card) {
-    if (card != this && this.rezzed && CheckCardType(card, ["ice"])) {
+    if (this.rezzed && CheckCardType(card, ["ice"])) {
       var s = GetServer(this);
       if (s != null && GetServer(card) == s) return 1;
     }
@@ -770,9 +832,11 @@ modifyStrength: {
 ### Prevent steal/trash for run duration (Trebuchet pattern)
 
 ```js
-_flag: false,
-modifyCannot:    { Resolve: function(id) { return this._flag && (id==="steal"||id==="trash"); } },
-responseOnRunEnds: { Resolve: function() { this._flag = false; }, automatic: true },
+// In the subroutine: a lingering effect survives the ICE being trashed or derezzed.
+AddLingeringEffect({
+  modifyCannot: { Resolve: function(id, card) { return card && card.player == corp && (id=="steal"||id=="trash"); } },
+  responseOnRunEnds: { Resolve: function() { RemoveLingeringEffect(this); }, automatic: true },
+});
 ```
 
 ### Asset with click ability (once per turn)
@@ -964,3 +1028,20 @@ engine records it once per simultaneous direct trash, before automatic
 callbacks. It includes earlier trashes while the interested card was inactive
 and survives nested callbacks. Hosted collateral does not count as a direct
 player trash. This event counter resets with the other turn counters.
+
+`trashEvent.runnerEventOrdinal` is the stable turn ordinal of a batch that
+trashed a Runner event (absent on other `Trash` batches).
+`trashEvent.runnerGripOrStackCards` captures the cards originating in the grip
+or Stack before movement; `runnerGripOrStackOrdinal`
+is that batch's turn ordinal, or zero when the list is empty. These fields are
+recorded before `automaticOnTrash` and `responseOnTrash`, so nested responses
+do not change the original event's ordinal.
+
+Resolved played events use `TrashResolvedRunnerCard` rather than `Trash`:
+post-action cleanup batches them and opens
+`responseOnPlayedEventTrashed(cards, trashEvent)` when the Runner passes the
+post-action window, before continuing to the next action or ending the action
+phase. This separate response receives the batched events and their
+`runnerEventOrdinal`; it does not emit the ordinary trash callbacks or the
+other `trashEvent` fields. Cards responding to any trashed event must support
+both windows (Aniccam pattern).

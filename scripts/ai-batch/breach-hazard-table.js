@@ -271,7 +271,8 @@ function build(fitReport, heldoutReport) {
   };
 }
 
-module.exports = {KINDS, ORDERED, BUCKETS, ICE_GROUPS, MIN_CELL, cellCounts, deriveTable, reliability, oneIceSplit, pointValue, build};
+module.exports = {KINDS, ORDERED, BUCKETS, ICE_GROUPS, MIN_CELL, RELIABILITY_MIN, MAX_MAE, cellCounts, deriveKind, deriveTable,
+  clusteredIntervals, reliability, oneIceSplit, pointValue, build};
 
 if (require.main === module) {
   const args = process.argv.slice(2);

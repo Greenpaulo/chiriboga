@@ -734,6 +734,32 @@ does not yet compare concrete options by their outcome.
   `scoreBreakdown`. Admission, same-turn bookkeeping and the critical
   interrupt's thresholds are unchanged.
 
+- **I2.3 optional manual opening (option `openingHqThenRdIce`, default off).**
+  The owner requested retaining this policy for his own games despite its failed
+  AI-vs-AI adoption gate; see [the measured result and retention decision](measurements/I2.3-hq-then-rnd-opening-ice-gate.md).
+  With it on, `_openingIceTarget()` requires HQ before the first completed Corp
+  ICE install and R&D before the second. Later installs use current I2. The
+  central replaces soft server admission in `_marginalIceInstallOptions()`;
+  `_iceInstallOptions()` rejects other destinations, including new-remote
+  fallback. Existing suitability and affordability groups still rank cards.
+  `_openingIceChoice()` checks final selections, preferred returns and singleton
+  card-granted installs. Non-ICE actions retain their ordering; this does not
+  force ICE as the first two actions or add pressure to draw more ICE.
+  `_openingIceServerChoices()` preserves card context in destination-only
+  effects. Optional unavailable choices decline; forced choices carry explicit
+  reasons. `_criticalBreachDefenseAction()` can inspect unconstrained candidates
+  but authorizes exceptions only after its existing public-risk thresholds.
+  `_openingIceEmergencyInstall()` applies those thresholds to optional
+  fixed-destination run installs. Winning scores keep their priority.
+  `_recordCompletedIceInstall()` counts literal engine completions before
+  automatic install responses and emits ordinal/destination/reason telemetry.
+  Reinstalls count again; movement, rez, cancellation and hypotheticals do not.
+  A fresh AI resets the count. Singleton parameters unrelated to ICE destination
+  selection retain their original path, including mulligan parameters.
+  Historical first-seen measurements retain their former contract. Failed F4
+  results do not establish performance against the owner; no global default
+  adoption or successful human-game gate is claimed.
+
   [I2.2's investigation](measurements/I2.2-rnd-protection-lateness.md)
   retains this allocation trade-off. Replays show affordable, admitted R&D ICE
   losing to higher-scored remote preparation, with useful counterexamples in
@@ -759,6 +785,70 @@ handlers. Event Horizon uses the final movement paid window (`Run 4.5`,
 against a potentially winning breach or to save an agenda on the Runner's
 last click. This paid-ability selection is separate from ordering simultaneous
 callback triggers.
+
+### Agenda scoring plans (I4)
+
+Behind `agendaCommitmentPlan` (default off for owner-directed manual playtesting), an
+installed agenda is advanced under a completion plan instead of waiting on
+the global rez reserve (`_sufficientEconomy()`), which the I4 probe found
+blocking about 30% of Corp actions while an agenda sat unfinished.
+
+- `_agendaCompletionPlan(agenda, destination, startTurn, evaluation, installed)`
+  (M3) finds the fewest Runner turns, up to `CORP_AI_I2_HORIZON_RUNNER_TURNS`,
+  before the agenda can be scored. Each turn advances as far as
+  `_potentialAdvancement()` allows with that turn's clicks and credits (spare
+  clicks become credits), counting operations, one-shot upgrades and identity
+  hooks. Credits for the server's planned ICE rezzes (`defenceReserve`) and an
+  unrezzed `AIScoringSupport` upgrade's rez (`_scoringSupport()`) are never
+  spent on advancing.
+- `_plannedAgendaToAdvance()` picks the installed agenda whose plan scores
+  within the horizon, advances this turn and leaves the Corp at least
+  `defenceReserve` credits after the advance. Advancing must gain more points
+  (exposure E instead of E + 1 at the server's held next-turn I2 hazard) than
+  I2's best ICE for that server saves (`_bestDefencePoints()`, its credit
+  score divided by `CORP_AI_POINT_VALUE`). `Phase_Main()` then admits that
+  agenda alone to its advance block; an agenda that can score this turn
+  (`almostDoneAgenda`) still takes precedence.
+- With `agendaExposureTable` as well (default off), score fast reads
+  `CORP_AI_AGENDA_EXPOSURE_TABLE` instead of I2's table: the steal hazard per
+  Runner turn of an agenda in a remote, by whether it carries counters, the
+  remote's ICE count (0, 1, 2+) and I2's margin bucket (measured; see
+  `documentation/corp-ai/measurements/I4-3f46a2a-agenda-exposure-calibration.json`).
+  `_agendaAdvanceGain()` compares advancing now (each exposed turn on the
+  advanced row) with waiting: for an agenda with no counters, the burst plan
+  (`_agendaCompletionPlan(..., burst = true)`: no counters until one turn
+  finishes it, spare clicks become credits) on the no-counters row; for one
+  already advanced, one more exposed turn. It does not advance when waiting
+  is worth as much.
+- With `agendaDestinationPlan` as well (default off),
+  `_agendaCommitmentOptions()` compares every available remote and a new
+  remote against holding in HQ. It uses the better of advancing now and burst
+  completion on the exposure table when `agendaExposureTable` is enabled.
+  `_rankedInstallOptionsCore()` installs into the selected destination or
+  records a hold for the indefinite-hold guard. The choice counts forced
+  agenda discard, prefers installation within 0.1 points of holding, and first
+  minimises game-losing steal risk (band 2). A safe remote can be reused after
+  scoring without assigning a persistent server role.
+- When both destination planning and I2 marginal ICE ranking are enabled,
+  `_agendaIcePlan()` supplies I2's empty-remote designation: the highest-EV
+  agenda selected for installation, its destination and its own points.
+  All-held agendas supply no designation; a new remote is distinct from no
+  destination. A chosen remote absent from the legacy walk is considered
+  subject to posture and layer policy. Existing central and occupied-remote
+  stakes remain unchanged. `_agendaIceExposure()` recomputes M3 completion
+  after the ICE installation click and cost, counting only exposed Runner
+  turns before scoring within the remaining horizon; hypothetical resources
+  are restored even on exceptions. New ICE rez cost remains in I2's existing
+  candidate score. This is coordination of the two consumers, not joint
+  action search. With destination planning off, I2 keeps its original empty
+  scoring-remote designation.
+
+All three I4 options remain off by default. On 2026-10-26 the owner chose
+manual flag comparisons for adoption instead of the former batch statistical
+guards. Focused decision tests and regression checks remain required. The
+historical part 1 batch failed its win-rate improvement and bluff-correlation
+checks; that result does not establish the quality of the combined policy
+against a human and does not cover the later ICE coordination seam.
 
 ## Not yet modelled: holding and trigger ordering
 

@@ -7,7 +7,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const {createRootTracker, playGame} = require('../scripts/ai-batch/headless');
+const {createRootTracker, playGame, agendaTurnSnapshot} = require('../scripts/ai-batch/headless');
 const collector = name => require(path.join(__dirname, '..', 'scripts', 'ai-batch', 'collectors', name + '.js'));
 const COLLECTORS = ['installOutcomes', 'successfulRunsByServer', 'corpInsolventTurns', 'stallTurns', 'unusedCreditsAtEnd'].map(collector);
 
@@ -185,6 +185,53 @@ test('upgrade uses belong to the active installation only', () => {
   assert.strictEqual(out.upgradesUsed, 1);
 });
 
+test('I4 agendaCommitment counts idle installed agendas and HQ holds with a free remote', () => {
+  const c = collector('agendaCommitment');
+  const state = {};
+  const counters = new WeakMap();
+  const {corp} = board();
+  const remote = {serverName: 'Remote 0', ice: [], root: []};
+  corp.remoteServers.push(remote);
+  const agenda = {title: 'A', cardType: 'agenda', advancement: 0};
+  const asset = {title: 'B', cardType: 'asset'};
+  const endTurn = () => c.onEvent({type: 'turnEnd', side: 'corp', agendas: agendaTurnSnapshot(corp, counters)}, state);
+  c.onEvent({type: 'gameStart'}, state);
+  corp.HQ.cards.push(agenda);
+  endTurn(); // held while Remote 0 is empty: hold
+  corp.HQ.cards.splice(0, 1); remote.root.push(agenda);
+  endTurn(); // installed, no counter: idle; no free remote
+  agenda.advancement = 2;
+  endTurn(); // advanced: not idle
+  endTurn(); // not advanced again: idle
+  remote.root.splice(0, 1); corp.scoreArea.push(agenda);
+  remote.root.push(asset); corp.HQ.cards.push({title: 'C', cardType: 'agenda'});
+  endTurn(); // scored; agenda held but the only remote holds an asset: neither
+  c.onEvent({type: 'turnEnd', side: 'runner'}, state);
+  assert.deepStrictEqual(c.finish(state), {idleAgendaTurns: 2, hqHoldTurns: 1});
+  assert.deepStrictEqual(Object.keys(c.directions).sort(),
+    ['agendaCommitment.hqHoldTurns', 'agendaCommitment.idleAgendaTurns']);
+});
+
+test('I4 remoteAgendaRisk pools steal rates by ICE count and counters', () => {
+  const c = collector('remoteAgendaRisk');
+  const row = (iceCount, counters, stolen, bucket = '0..1') =>
+    ({serverName: 'Remote 0', iceCount, rezzedIce: 0, counters, points: 2, bucket, stolen});
+  const games = [[row(0, 0, true), row(1, 2, false)], [row(1, 0, false), row(3, 1, true, '>=10')]].map(servers => {
+    const state = {};
+    c.onEvent({type: 'gameStart'}, state);
+    servers.forEach((server, turn) => c.onEvent({type: 'remoteAgendaTurn', turn, servers: [server]}, state));
+    return state;
+  });
+  assert.deepStrictEqual(c.finish(games[0]), {turns: 2, stolen: 1});
+  const out = c.summarize(games.map(c.samples));
+  assert.deepStrictEqual(Object.fromEntries(Object.entries(out.byIceAndCounters).map(([k, v]) => [k, [v.turns, v.stolen, v.games]])),
+    {'0 ice / 0 counters': [1, 1, 1], '1 ice / 0 counters': [1, 0, 1], '1 ice / 1+ counters': [1, 0, 1],
+      '2+ ice / 1+ counters': [1, 1, 1]});
+  assert.deepStrictEqual(Object.keys(out.byBucket), ['0..1', '>=10']);
+  const [low, high] = c._test.wilson(5, 50);
+  assert.ok(low > 0.04 && low < 0.05 && high > 0.21 && high < 0.22);
+});
+
 test('turn collectors count runs, insolvency, stalls and credits left', () => {
   const out = play(g => {
     g.corpTurn({credits: 0, hand: [{cardType: 'ice', playCost: null}], unrezzedIceRezCosts: []}); // insolvent, able
@@ -300,6 +347,28 @@ test('strandedUnrezzedIceCost counts install credits of ICE never rezzed', () =>
   assert.strictEqual(stranded.directions['strandedUnrezzedIceCost.credits'], 'lower');
 });
 
+test('openingCentralCoverage records occupancy, censored boundaries and raw printed hand supply', () => {
+  const c = collector('openingCentralCoverage');
+  for (const [hq, rd, both] of [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 1]]) {
+    const state = {};
+    c.onEvent({type: 'gameStart'}, state);
+    c.onEvent({type: 'turnEnd', side: 'runner', turn: 1, centralIce: {hq: 9, rd: 9}}, state);
+    c.onEvent({type: 'turnEnd', side: 'corp', turn: 1, centralIce: {hq, rd}}, state);
+    assert.deepStrictEqual(c.finish(state), {turn1: {observed: 1, both}, turn2: {observed: 0, both: 0}});
+    const offered = [{card: 'Expensive', cardType: 'ice', rezCost: 15}, {card: 'Unsuitable', cardType: 'ice', rezCost: 0}];
+    c.onEvent({type: 'openingHand', stage: 'offered', mulligan: true, credits: 5, cards: offered}, state);
+    c.onEvent({type: 'openingHand', stage: 'kept', mulligan: true, credits: 5, cards: []}, state);
+    c.onEvent({type: 'openingHand', stage: 'firstDraw', mulligan: null, credits: 5, cards: [offered[0]]}, state);
+    offered[0].rezCost = 1;
+    assert.strictEqual(c.samples(state).hands.offered.cards[0].rezCost, 15, 'sample is detached');
+    assert.strictEqual(c.samples(state).hands.kept.cards.length, 0);
+    assert.strictEqual(c.samples(state).hands.firstDraw.cards.length, 1);
+    assert.strictEqual(c.samples(state).hands.firstDraw.cards[0].rezCost, 15, 'first draw is detached');
+    c.onEvent({type: 'gameEnd'}, state);
+    assert.strictEqual(c.finish(state).turn2.observed, 0, 'early end does not fabricate a boundary');
+  }
+});
+
 async function observedWrappers() {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'install-outcomes-'));
   try {
@@ -372,4 +441,85 @@ async function observedWrappers() {
     console.log(tests + ' I0 collector tests passed.');
   } finally { fs.rmSync(tmp, {recursive: true, force: true}); }
 }
-observedWrappers().catch(error => { console.error('FAIL observed headless wrappers\n' + error.stack); process.exitCode = 1; });
+main().catch(error => { console.error('FAIL observed headless wrappers\n' + error.stack); process.exitCode = 1; });
+
+async function openingCompletedWrappers() {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'opening-completion-'));
+  try {
+    const setupFile = path.join(tmp, 'setup.js');
+    fs.writeFileSync(setupFile, `
+      StartGame = function() {
+        playerTurn = corp; corp.creditPool = 30;
+        ChangePhase(phases.corpActionMain); __stop();
+        var parent = currentPhase;
+        var cards = corp.RnD.cards.filter(function(c) {return c.cardType === "ice";});
+        var wall = cards[0], other = cards[1];
+        var counts = [];
+        function settle(target) {
+          for (var hops = 0; currentPhase !== target && hops < 40; hops++) {
+            if (currentPhase.Resolve.n) currentPhase.Resolve.n.call(currentPhase, {});
+            else if (currentPhase.Resolve.continue) currentPhase.Resolve.continue.call(currentPhase, {});
+            else throw Error('Unexpected install response: ' + currentPhase.identifier);
+          }
+          if (currentPhase !== target) throw Error('Install response did not finish');
+        }
+        function install(card, server) {
+          Install(card, server, true);
+          var phase = currentPhase;
+          phase.Resolve.n(); settle(parent);
+          phase.Resolve.n(); // stale continuation must not count a second time
+          counts.push(corp.AI._completedIceInstalls);
+        }
+        install(wall, corp.HQ);
+        Install(other, corp.RnD, true);
+        currentPhase.Cancel.trash();
+        counts.push(corp.AI._completedIceInstalls);
+        ChangePhase(parent);
+        Rez(wall, true); settle(parent);
+        MoveCard(wall, corp.RnD.ice);
+        counts.push(corp.AI._completedIceInstalls);
+        MoveCard(wall, corp.HQ.cards);
+        install(wall, corp.RnD);
+        Trash(wall, false); settle(parent);
+        counts.push(corp.AI._completedIceInstalls);
+        install(wall, corp.HQ);
+        AIHypothetical.depth++;
+        try {corp.AI._recordCompletedIceInstall(other, corp.RnD);} finally {AIHypothetical.depth--;}
+        ChangePhase(phases.runnerStartResponse); __stop();
+        MoveCard(wall, corp.RnD.ice);
+        ChangePhase(phases.corpStartDraw); __stop();
+        MoveCard(other, corp.HQ.ice); // movement is not installation
+        ChangePhase(phases.runnerStartResponse); __stop();
+        __report = function() {return {counts: counts, ordinal: corp.AI._completedIceInstalls,
+          hq: corp.HQ.ice.length, rd: corp.RnD.ice.length};};
+        PlayerWin(corp, 'Opening installation completion observation');
+      };
+    `);
+    const results = [];
+    let observed;
+    for (const observe of [false, true]) {
+      const events = [], state = {};
+      const coverage = collector('openingCentralCoverage');
+      const result = await playGame({streamPrefix: 'opening-completion-test', corpFile: 'Gateway Corp.js',
+        runnerFile: 'Gateway Runner.js', setFiles: ['sets/systemgateway.js'], timeoutMs: 10000,
+        observe, setupFile, onEvent: event => {events.push(event); coverage.onEvent(event, state);}});
+      assert.deepStrictEqual(result.errors, []);
+      assert.strictEqual(result.winner, 'corp');
+      assert.deepStrictEqual(result.report.counts, [1, 1, 1, 2, 2, 3]);
+      assert.strictEqual(result.report.ordinal, 3);
+      results.push(result);
+      if (observe) observed = {events, metrics: coverage.finish(state), samples: coverage.samples(state)};
+    }
+    assert.strictEqual(results[0].logHash, results[1].logHash, 'passive events preserve engine logs');
+    assert.deepStrictEqual(results[0].report, results[1].report);
+    assert.deepStrictEqual(observed.samples.installs.map(i => [i.ordinal, i.actual]), [[1, 'hq'], [2, 'rd'], [3, 'hq']]);
+    assert.deepStrictEqual(observed.metrics, {turn1: {observed: 1, both: 0}, turn2: {observed: 1, both: 1}});
+    tests++;
+  } finally {fs.rmSync(tmp, {recursive: true, force: true});}
+}
+
+async function main() {
+  await observedWrappers();
+  await openingCompletedWrappers();
+  console.log('I2.3 real completion, cancellation, reinstall, movement and boundary identity passed.');
+}
