@@ -1602,6 +1602,7 @@ cardSet[26015] = {
 // [trash], X hosted power counters: Derez the ice you are encountering if its strength is X or less. Take 1 tag.
 cardSet[26017] = {
   title: "“Baklan” Bochkin",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1448,
   imageFile: "26017.png",
   player: runner,
@@ -1736,7 +1737,7 @@ cardSet[26018] = {
       var choices = ChoicesArrayCards(looked);
       choices.forEach(function (choice) {
         //This instruction grants the Runner a look, not a public reveal.
-        choice.label = "Bottom of stack: " + choice.card.title;
+        choice.label = "Bottom of stack: " + (viewingPlayer === runner ? choice.card.title : GetTitle(choice.card, true));
       });
       if (runner.AI) return [choices[this._aiBottomIndex(looked)]];
       return choices;

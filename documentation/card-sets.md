@@ -18,12 +18,12 @@ generated [card-status.md](card-status.md).
 | `systemupdate2021` | playable | |
 | `elevation` | playable | All 82 metadata cards have definitions. The six previously missing NBN cards have gameplay and baseline AI tests; see new-sets/elevation-missing-cards-implementation.md. |
 | `vantagepoint` | playable | All 13 batches implemented. Playable by user decision on 2026-10-16 under the two-stage workflow; outstanding rules/AI findings remain in the [optimisation queue](new-sets/records/vantagepoint.md#optimisation-queue) and [review](new-sets/reviews/vantage-point/vantagepoint-set-review.md). Review approval is outstanding. |
-| `downfall` | in-progress | Batch implementation in progress; hidden and untested. See [tracker](new-sets/current-set-implementation.md). |
+| `downfall` | playable | All 13 batches implemented; implementation integration checks passed and made playable on 2026-10-23 under the two-stage workflow. Optional strategy work remains in the [optimisation queue](new-sets/records/downfall.md#optimisation-queue); no independent review yet. |
 | `creationandcontrol` | not-implemented | Every card is defined but mechanics are incomplete (see `documentation/new-sets/creation_and_control_audit.md`). |
 | `midnightsun` | not-implemented | |
 | `parhelion` | not-implemented | |
 | `automatainitiative` | not-implemented | |
-| `uprising` | not-implemented | |
+| `uprising` | in-progress | Batch implementation in progress; hidden and untested. See [tracker](new-sets/current-set-implementation.md). |
 | `rebellion` | not-implemented | |
 | `coreset` | deprecated | Legacy set; System Gateway and System Update 2021 reprint many of its cards. |
 

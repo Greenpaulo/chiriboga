@@ -125,6 +125,10 @@ test('optional access responses interrupt bulk access', () => {
   assert.strictEqual(run('currentPhase.triggerCallbackName'), 'responseOnAccess');
   run('currentPhase.Resolve.n.call(currentPhase);'); //pass priority to Corp
   assert.strictEqual(run('currentPhase.Enumerate.trigger.call(currentPhase).length'), 1);
+  run('currentPhase.Resolve.trigger.call(currentPhase, {card: c, id: 0});');
+  assert.strictEqual(run('currentPhase.player'), context.corp);
+  run('currentPhase.Resolve.continue(currentPhase.Enumerate.continue()[0]);');
+  assert.strictEqual(run('automaticCount'), 1, 'the selected access response must resolve');
 });
 
 test('an optional installed access ability remains available', () => {

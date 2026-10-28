@@ -541,6 +541,7 @@ cardSet[30006] = {
 };
 cardSet[30007] = {
   title: "Fermenter",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   imageFile: "30007.png",
   elo: 1685,
   player: runner,

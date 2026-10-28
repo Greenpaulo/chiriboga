@@ -138,8 +138,8 @@ var setRegistry = {
       file: "downfall",
       code: "df",
       name: "Downfall",
-      hidden: true,
-      untested: true,
+      hidden: false,
+      untested: false,
       idRange: [26001, 26065],
     },
     uprising: {
@@ -190,7 +190,7 @@ var setRegistry = {
       untested: true,
       idRange: [34066, 34130],
     },
-    
+
     vantagepoint: {
       file: "vantagepoint",
       code: "vp",
@@ -226,8 +226,9 @@ var setRegistry = {
     "systemgateway",
     "systemupdate2021",
     "elevation",
-    // Playable sets are decided in documentation/card-sets.md. Vantage Point is
-    // in progress, hidden and untested until its last batches are complete.
+    // Playable sets are decided in documentation/card-sets.md. Vantage Point and
+    // Downfall are playable but not selected by default; Uprising is in progress,
+    // hidden and untested until its batches are complete.
     // 'uprising',
     // 'midnightsun',
     // 'parhelion',

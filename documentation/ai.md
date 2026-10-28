@@ -2330,8 +2330,10 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEffectiveIceSubtypes(ice, server, index)` | function | Add/remove effective ice subtypes for Corp security planning |
 | `AIModifyIceAI(iceAI, startIceIdx)` | function | Apply route-aware changes to the Run Calculator's ice description; `knownToEvaluator` distinguishes visible from synthetic statistics |
 | `AITriggerToRemoveTags()` | function | Return the alt of a paid ability that removes tags without a click, or falsy |
-| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes |
-| `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select}` when this card's ability can install the grip card more cheaply than the basic install action |
+| `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes, and one with `strengthMod` and `target` changes that ice's strength for the rest of the route |
+| `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
+| `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
+| `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select, followUp?}` when this card's ability can install the grip card more cheaply than the basic install action; `followUp` names a paid ability to trigger next |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
 | `AIDisabledByPurge` | boolean | Treat this installed Runner card's public AI effects as absent in a hypothetical purge because the purge trashes or disables it |
@@ -2367,6 +2369,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIPlayToDraw` | number | Priority for playing this card to draw |
 | `AIDrawInstall()` | function | Priority for installing this draw-enabling card |
 | `AIIcebreakerTutor(installed)` | function | Return eligible icebreakers, or `[]` when none are available |
+| `AIAbilityInstallBreakers(installed)` | function | Installed card: offer `[{card, cost, alt, select}]` icebreakers its paid ability can install; the run planner uses one in the next paid ability window (Uprising batch 6) |
 | `AIPermitMoreLeeches(installed)` | function | Card-specific install limit check |
 
 ### Corp AI Hooks
@@ -2713,8 +2716,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
   route's `paymentPoolOnly` policy during live payment; absent a route it tries
   the safer pool first. `SpendCredits` offers human temporary-credit choices
   when a source-sensitive hazard is active. A completed payment emits
-  `responseOnCreditsSpent(player, outsideAmount, doing, card)` before its
-  continuation. `SpendHostedCredits` sends required stealth payments through
+  `responseOnCreditsSpent(player, outsideAmount, doing, card, sources)` before its
+  continuation (`sources`: the cards whose hosted credits paid, possibly empty). `SpendHostedCredits` sends required stealth payments through
   the same checkpoint, including Corsair, Lampades and Baker before redirect.
   Shackleton's optional response uses normal title/option preferences; only
   choosing damage consumes its opportunity, reset at both turn boundaries.
@@ -2772,6 +2775,16 @@ if (!runner.AI || runner.AI.rc !== rc) {
   trigger or option whose `alt` matches during that encounter, so the card's
   `responseOnEncounter` choice must carry the same `alt`. Return `[]` when the
   option does not apply. Read-only.
+  Since Uprising batch 4 the calculator also passes `point` (the route point
+  before this encounter, or `null` at the starting encounter) and `rc`:
+  `AIEncounterOptions(iceIdx, iceAI, point, rc)`. Use `point.persistents` to
+  enforce once-per-turn options along one route and
+  `point.restrictedCreditsSpent` plus `rc._restrictedCreditsUsed` for shared
+  restricted budgets. A persistent may carry `restrictedCredits: n`:
+  `ValidateEncounterPoint` then charges `n` credits as restricted (stealth-only)
+  spending, with the same `restrictedCreditsSpent`/`restrictedCreditsPaid`
+  accounting as Corsair's reduction, and excludes the branch on pool-only or
+  unaffordable routes.
 - Always Have a Backup Plan uses `AIRunEventExtraPotential` and
   `AIEncounterOptions`. During its second run (or while evaluating one) the
   encounter options add a bypass persistent for the last ice encountered in the
@@ -2893,6 +2906,32 @@ if (!runner.AI || runner.AI.rc !== rc) {
 ---
 
 ---
+
+### Uprising Batch 1 card hooks
+
+- Hoshiko Shiro (26066) is passive: `automaticOnAccess` counts accesses on the
+  Runner turn, `responseOnRunnerTurnBegins` applies the flip side, and
+  `responseOnRunnerDiscardEnds` flips. No AI decision exists.
+- Moshing (26067) returns one AI play option whose `cards` are the three grip
+  cards `_indexOfBestDiscardOption` would drop first, only when none is in
+  `_cardsWorthKeeping`; `AIWouldPlay` uses the same check. It is reached
+  through `AIOrdinaryEconomyPlay` and `AIPlayToDraw: 1`.
+- Devil Charm (26068) uses `AIEncounterAbility`: before any other action on an
+  ice it adds a point with persistent `{use, target, iceIdx, strengthMod: -6}`
+  and a `misc_moderate` effect for the lost hardware. `rc.IceAct` adds
+  `strengthMod` from persistents targeting the encountered ice to its strength
+  (shared change, also later in the route because the effect lasts the run).
+  In the live `responseOnEncounter` window the card sets `runner.AI.preferred`
+  to use or decline from whether the best route uses it on this ice; the decision
+  is fixed for the encounter and the route is replanned after use.
+  `AIReducesIceStrength` returns 6 while installed (Leech-style: the Corp sees
+  the single use on every ice), and `AIInstallBeforeRun` returns 1 for a server
+  with visible strength 4+ ice.
+- Gachapon (26069) uses `AIDrawTrigger: 1` with `AIWouldTrigger` (stack of 6+,
+  1+ install credit, a basic breaker type missing from rig and grip) and
+  `AIDrawInstall`. It installs a missing-type breaker first, otherwise the
+  highest-ELO non-wasteful card, and shuffles back the three cards that score
+  highest on worth-keeping, missing type and ELO.
 
 ## 8. Step-by-Step Worked Example
 
@@ -3369,3 +3408,224 @@ optimisation work.
   rezzes it at the first Corp opportunity in a run on its server. Its subroutine
   is modelled as `loseCredits`. While rezzed, its `modifyStrength` boost is read by
   `Strength()` in Runner and Corp security calculations.
+
+### Uprising batch 2 card hooks
+
+- Keiko uses `AIWastefulToInstall` (another console installed),
+  `AIWorthKeeping` and `AIEconomyInstall` (2 with a non-hardware companion
+  installed or in grip, else 1; 0 when wasteful). Its gains are mandatory
+  `responseOnInstall` and `responseOnCreditsSpent` triggers gated on
+  `TurnEventCount("runnerCompanionUse") == 1`.
+- Odore uses `AIImplementBreaker`: 3[c] for +3 strength and one 2[c] branch for
+  any number of sentry subroutines; with 3+ installed virtual resources the
+  break costs 0, because the 0[c] single break is repeatable. The free break is
+  listed first in `abilities`, so the run-path executor's card-level trigger uses
+  it whenever legal; the "any number" follow-up's Continue carries
+  `alt: "continue"`.
+- Mystic Maemi uses `AIEconomyInstall` (2 with an event in grip, else 1) and
+  `AIWorthKeeping`. Its `canUseCredits("playing", event)` lets `FullCheckPlay`
+  and AI payment use the stash for events. `AIKeepsStash()` (card-local,
+  read-only) decides the turn-end choice: trash a random grip card when the grip
+  holds 2+ cards or a lone card `_cardsWorthKeeping` rejects; otherwise trash
+  Maemi (forced with an empty grip).
+- Paladin Poemu uses `AIEconomyInstall` and `AIWorthKeeping`; AI install
+  payments spend its credits first through `SpendCredits`. `AITrashChoice(choices)`
+  (card-local) picks the turn-end trash: `AIOkToTrash` cards first, then the
+  lowest install cost plus hosted credits and counters, with icebreakers (+20)
+  and consoles (+15) protected; Poemu itself is a candidate valued with its
+  credits.
+
+### Uprising batch 3 card hooks
+
+- Bravado uses `AIRunEventExtraPotential` (0 for unprotected servers, else
+  `0.6 + 0.1 × ice`) and `AIBreachNotRequired`, because it pays 6 credits plus 1
+  per distinct passed ice when the run ends, successful or not.
+- Boomerang uses `AIImplementBreaker` on its chosen ice: one free use per run
+  calculation, breaking 1 or 2 subroutines (no credit cost; the trash is not
+  priced). It deliberately has no `AIMatchingBreakerInstalled`, so the one-shot
+  break never makes its ice count as permanently covered for Runner threat or
+  Corp security planning. `AIInstallBeforeRun(server)` returns 1 when the server
+  has rezzed ice without a matching installed breaker; the install choice picks
+  the most threatening ice on `runner.AI.cachedPathServer`, else the most
+  threatening ice overall. The AI always accepts the end-of-run shuffle.
+- Mu Safecracker uses `AIAdditionalAccess(server)` and `AIInstallBeforeRun(server)`
+  (HQ with 1, R&D with 2 currently spendable stealth credits) and
+  `AICentralPressure(server)` (`{additionalAccess: 1}`, counting recurring stealth
+  credits as refilled outside the Runner's turn). Only installed stealth cards
+  whose `canUseCredits("using", mu)` allows it can pay; the AI always pays.
+- Prognostic Q-Loop always takes the free look. `AIDrawTrigger: 2` with
+  `AIWouldTrigger()` uses the reveal ability in a non-click paid window (for
+  example after an action) only when the top card is one it looked at, is a
+  program or hardware that passes `_commonCardToInstallChecks`, and the Runner
+  can pay 1 plus its install cost. `AIDrawInstall` returns 1.
+- Swift uses `AIEconomyInstall` (2 with a run event in grip, else 1; 0 when a
+  console is installed), `AIWastefulToInstall` and `AIWorthKeeping`. Its click
+  gain is not yet included in run-event click planning.
+
+### Uprising batch 4
+
+- Afterimage (26079) uses `AIImplementBreaker`: 1[c] breaks up to 2 sentry
+  subroutines from any credits once at strength; below strength it emits a
+  `StrModify` +2 paid from stealth credits only, recorded as restricted
+  spending (shared with Corsair's `restrictedCreditsSpent`) and bounded by
+  the stealth credits available for that prospective run
+  (`_AIStealthCredits(server)` reads them under `AIWithRunContext`, so
+  run-only sources such as Penumbral Toolkit count). `AIEncounterOptions`
+  offers its once-per-turn sentry bypass as a persistent with
+  `restrictedCredits: 2` and alt `"afterimage_bypass"`, matching its
+  `responseOnEncounter` choice; one bypass per route and none after
+  `bypassUsedThisTurn`. `AIRunRestrictedCredits(server)` reports stealth
+  credits that are neither generically spendable (`canUseCredits("", null)`)
+  nor already offered through `AIRunPoolCreditOffset`. For Corp security,
+  `AIBypassesOneIce(iceCard, server)` is true for a sentry while the bypass is
+  unused this turn and 2 public stealth credits are available; the 2-credit
+  bypass cost is not priced there. `AIMatchingBreakerInstalled`,
+  `AIPreferredInstallChoice` and `AIWorthKeeping` are standard killer hooks.
+- Makler (26080) is a standard `AIImplementBreaker` fracter (2[c] +2 strength,
+  2[c] break up to 2). Its first-full-break 1[c] gain is not modelled in route
+  pricing.
+- Penumbral Toolkit (26081) follows Touchstone: `canUseCredits` during runs and
+  `AIRunPoolCreditOffset` reporting its hosted credits for pre-run planning.
+  `AIEconomyInstall` returns 3 while the HQ-success discount makes it free,
+  otherwise 1; `AIWorthKeeping` is true.
+- The Back (26082) uses `AIEconomyTrigger: 1` with `AIWouldTrigger`: trigger
+  when it has a power counter, the heap has a card with a [trash] ability
+  (`HasTrashAbility`), and either its counters cover every eligible heap card
+  (2 per counter) or it has 3+ counters. When resolving for the AI it offers
+  only the highest-ELO eligible heap card at each pick (`_AIHeapOrder`).
+  `AIWorthKeeping` is true while installed hardware has an ability to use.
+  Counters come from the engine's new `automaticOnAbilityUsed(card, ability)`
+  trigger, fired by `TriggerAbility` when any card ability resolves.
+
+### Uprising batch 5 card hooks
+
+- Harmony AR Therapy uses `AIWouldPlay()` and `AIWorthKeeping()`: it is worth
+  playing when `_icebreakerInPileNotInHandOrArray(runner.heap, …)` finds a needed
+  breaker in the Heap, or the Stack has under 5 cards and the Heap at least 3.
+  `AIHeapCards()` resolves the choice: that breaker first, then the highest-ELO
+  cards, at most 5 with different names.
+- Aniccam has no AI hook: its draw is mandatory, and the Runner AI installs it as
+  its desired Console.
+- Simulchip uses `AITriggerInPaidWindow()`, the Corp hook name, which now also
+  has a Runner consumer. In a decision with `trigger` and no run in progress,
+  the Runner AI triggers an active card's ability whose `alt` the hook returns.
+  In `Runner 1.3` it considers only click abilities. Simulchip returns
+  `"simulchip_install"` only when an installed program has already been trashed
+  this turn (cost waived) and a needed Heap breaker is installable after the 3[c]
+  discount. Its resolution helpers `AICostChoice(choices)` (lowest-value
+  program, keeping icebreakers) and `AIHeapInstallChoice(choices)` (the needed
+  breaker, else the highest ELO) choose the AI's targets. All are read-only
+  apart from Simulchip's own temporary discount flag.
+- Cordyceps uses `AIWastefulToInstall()` (no central ice, or fewer than 2
+  installed ice) and `AIChooseSwap(server)`. Its success response offers the AI
+  only the swap that most lowers `_iceThreatScore` for the central just run:
+  known ice protecting it for ice protecting another server. It declines when
+  no swap lowers it.
+- Euler's `AIImplementBreaker` prices code gates at 1[c] per +1 strength and,
+  on its install turn (`installedThisTurn`), free single breaks; otherwise
+  2[c] breaks up to 2. Its free ability is listed first, so a planned break uses
+  it while available. `AIPreferredInstallChoice` keeps the last click.
+
+### Uprising batch 6 card hooks
+
+- `AIAbilityInstallBreakers(installedRunnerCards)` (new) is read from active,
+  ability-enabled Runner cards by the run planner's breaker-acquisition step
+  (`uniqueAffordableBreakers` in `ai_runner.js`). It returns
+  `[{card, cost, alt, select}]`: an icebreaker the card's paid ability can
+  install, the total credits (ability cost plus discounted install cost), the
+  ability `alt`, and an optional `select()` that targets that card for the
+  ability's AI choice. Titles already in the grip, installed or offered by a
+  tutor are skipped. Offers are scanned in title order so tied ranks do not
+  depend on hidden Stack order. The planner offsets the pool by `cost` only,
+  reserving no setup clicks or grip card for paid-ability installs. Because the
+  action phase (`Runner 1.3`) offers click abilities only, a chosen offer that is not
+  triggerable now is stored as `runner.AI._pendingAbilityInstall` and the AI
+  makes the run; `_pendingAbilityTrigger` triggers it in the next paid ability
+  window (normally the first Run 2.1 approach, or Runner 1.3* after another
+  action). Pending plans expire when it is not the Runner's turn or a new turn
+  begins, and are replanned at every action-phase run assessment. The hook must
+  be read-only; it may inspect the Runner's own stack (the Runner can search
+  it). Self-modifying Code offers stack icebreakers at `2 + InstallCost`;
+  Paule's Café offers hosted icebreakers at `1 + discounted InstallCost`.
+- `AIInstallDiscountAbility` offers may carry `followUp: {source, alt, card,
+  select}`. `CommandChoice` stores it as the pending ability after triggering
+  the offer, so a two-step route (Paule's Café: [click] host, then 1[c]
+  install) completes through the same pending consumer. Café offers only when
+  unique connections make host-and-install cheaper than a direct install
+  (discount of 2 or more; saving reported as discount minus 1).
+- Penrose: `AIImplementBreaker` breaks code gates for 1[c], and barriers only
+  while `installedThisTurn` or when it is the run planner's hypothetical
+  `rc.bonusBreaker`. Its +3 pump is modelled like Corsair's restricted stealth
+  payment (`restrictedCreditsSpent` / `restrictedCreditsPaid`), and
+  `AIRunRestrictedCredits` reports stealth credits outside the generic budget
+  (Mantle's), so pool credits never fund the pump.
+- Self-modifying Code: `AIInstallBeforeRun` and `AIWorthKeeping` require 2
+  free MU and a stack icebreaker; its uncalled ability-use hook and mis-typed
+  `AIIcebreakerTutor` (returned a card, read only for playable events) were
+  removed. Cybertrooper Talut's `AIEconomyInstall` returns 1 only when a
+  non-AI icebreaker waits in the grip; its boost reaches the run calculator
+  through `modifyStrength`. Mantle keeps `AIEconomyInstall`/`AIWorthKeeping`;
+  Corp security counts its credit through `canUseCredits("using", breaker)`.
+
+### Uprising batch 7 card hooks
+
+- Buffer Drive's trash response reads `trashEvent.runnerGripOrStackOrdinal`
+  and `trashEvent.runnerGripOrStackCards`, which `Trash()` records once per
+  trash event (the turn event `runnerGripOrStackTrash` counts events before the
+  card was installed; discarding is not trashing). For the AI, its `Enumerate`
+  offers only `AIBufferDriveChoice(cards)`: a needed icebreaker
+  (`_icebreakerInPileNotInHandOrArray`), else the first card worth keeping,
+  else the first trashed card. The AI never passes; bottoming has no cost.
+- Buffer Drive's remove-from-game ability uses `AIBufferDriveHeapChoice()`
+  (a needed icebreaker in the heap, or `null`) for both its AI target and
+  `AIWouldTrigger()`. Its draw-trigger priority of 1 lets the existing Runner
+  draw-trigger loop use it when the AI wants cards. This happens only in a paid-ability window such as
+  post-action `Runner 1.3*`, because the action phase limits that loop to click
+  abilities. The breaker is then drawn by the AI's next draw.
+- Daily Casts keeps `AIEconomyInstall()` 3 and `AIWorthKeeping()` true. Its
+  turn-start trigger is non-automatic so the empty trash opens normal trash
+  windows.
+- DreamNet's trigger uses the turn event `runnerSuccessfulRun`, recorded when a
+  run is declared successful, so only the turn's first successful run draws,
+  including when that run happened before DreamNet was installed.
+  `AIDreamNetGainsCredit()` is true with a Digital identity or at least 2 link.
+  `AIDrawInstall()` returns 2, and `AIEconomyInstall()` returns 1 only when the
+  credit clause applies.
+
+### Uprising batch 8 card hooks
+
+- Megaprix Qualifier and Project Vacheron use `agendaPointsForPlayer` (see §7)
+  for their variable value: +1 while Megaprix hosts an agenda counter, 0 while
+  Vacheron is in the Runner's score area with counters. Corp scoring, protection
+  and steal-risk estimates still read printed `agendaPoints`; see the Uprising
+  optimisation queue.
+- Project Vacheron uses the engine hook `interruptOnAddedToScoreArea(scoreArea,
+  locationfrom)` (not an AI hook). `MoveCardTriggers` calls it when a card enters
+  either score area, after `cardLocation` is updated and before the
+  after-command win check. It covers `Steal` and every other move into the
+  Runner's score area; Vacheron returns early for the Corp's score area and for
+  Archives. Its gained "Runner's turn begins" ability is a
+  `responseOnRunnerTurnBegins` with `availableWhenInactive`, because
+  score-area cards are not active.
+- Bass CH1R180G4 uses `AITriggerWhenCan`. Its AI-only `Enumerate` guard offers
+  the ability when one more click finishes an installed agenda this turn and
+  the remaining advancements (plus rez cost if unrezzed) are affordable
+  (`_aiScoreBurstAgenda`), or when it is the last click. `AIRezWhenCan()` rezzes
+  it for that burst, or on the Corp's turn for the last click with at least 5
+  spare credits. It also uses `AIWorthInstalling` (non-scoring remote; unique)
+  and `AIAvoidInstallingOverThis`.
+- Cerebral Overwriter follows Urtica Cipher: `canBeAdvanced`,
+  `AIAdvancementLimit()` 3, `RezUsability` false and `AIPunishesAccess(server)`.
+  `AIPunishesAccess` returns the hosted advancement counters when it is in that
+  server's root and the Corp can pay 3[c], otherwise 0. Its access response
+  sets `corp.AI.preferred` to pay whenever it is offered (at least one counter
+  and 3[c] available).
+- Vaporframe Fabricator follows Calvin B4L3Y (`AIRezWhenCan` with 3 credits to
+  spare after the rez, `AIWorthInstalling` with at least 3 cards in HQ, and
+  `AIAvoidInstallingOverThis`). Its click ability is offered to the AI only when
+  `_bestInstallOption(choices, true)` ranks one of the cost-free HQ installs,
+  and not when an installed agenda needs every remaining click to be finished.
+  The install decision and the Runner-trash response both choose with
+  `_bestInstallOption(choices, false)`. The response is offered to the AI only
+  when that ranking accepts an install; it excludes the root of the trashed
+  card's server but still allows ice protecting it.

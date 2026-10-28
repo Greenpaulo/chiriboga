@@ -83,9 +83,9 @@ Edited JavaScript syntax checks and `git diff --check` pass. The first full
 run identified the old tracker-test assumption and an empty-trash context
 lookup; both were repaired before the passing full run.
 
-Batch 1 is Complete. At this batch’s handoff, batch 2 was next. The current
-implementation queue is maintained in [the tracker](current-set-implementation.md);
-the set remains In progress, hidden and untested.
+Batch 1 is Complete. At this batch’s handoff, batch 2 was next. Downfall's
+queues are now maintained in [the set record](records/downfall.md); the set was
+marked Implemented and playable on 2026-10-23.
 
 ## Batch 2 — 26005–26009
 
@@ -884,3 +884,12 @@ which exposes counters a turn early. Weigh CSR Campaign's draw against hand
 size and discard. Choose when to reveal Rime instead of always rezzing at the
 first run window. The Runner AI does not anticipate an unrezzed Rime's +1
 strength (hidden information).
+
+## Implementation integration — 2026-10-23
+
+The §8 implementation checks passed after batch 13 (details in the
+[set record](records/downfall.md#implementation-integration-checks--2026-10-23)).
+Downfall is Implemented and playable, with `hidden: false` and `untested: false`.
+It is not a default `decklauncherSets` entry, and its economy/draw cards are not
+yet in the curated `DeckBuildFromAllowedSets()` role pools. No manual browser
+play was performed. Strategy work stays in the optimisation queue.

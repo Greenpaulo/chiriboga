@@ -3,7 +3,7 @@
 This is the maintained Vantage Point record for completed implementation,
 independent review and optimisation. New implementation work follows the set
 marked `In progress` in the [implementation backlog](../card-implementation-backlog.md)
-and the [active tracker](../current-set-implementation.md), currently Downfall.
+and the [active tracker](../current-set-implementation.md), currently Uprising.
 
 User-facing prompts and operating instructions are in
 `documentation/new-sets/card-set-agent-operator-guide.md`.

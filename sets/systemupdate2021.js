@@ -1421,6 +1421,7 @@ cardSet[31020] = {
 
 cardSet[31021] = {
   title: "Abagnale",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   imageFile: "31021.png",
   cardText: "Interface -> 1 credit: Break 1 code gate subroutine. 2 credits: +2 strength. trash: Bypass the code gate you are encountering.",
   elo: 1598,

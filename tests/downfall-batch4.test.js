@@ -318,6 +318,26 @@ test('Runner AI triggers Baklan during the encounter its path planned', async ()
 });
 
 // ---------------- The Class Act ----------------
+for (const viewer of ['runner', 'corp']) {
+  test('Class Act text choices protect stack titles for ' + viewer + ' viewer', () => {
+    setUpBoard({installed: [ID.ClassAct], stack: [ID.Diesel, ID.SureGamble, ID.T400]});
+    run('viewingPlayer = ' + viewer + '; Draw(runner, 1);');
+    let reached = false;
+    settle((choices, card) => {
+      if (card && card.title === 'The Class Act') {
+        reached = true;
+        for (const choice of choices) {
+          assert.strictEqual(choice.label, 'Bottom of stack: ' +
+            (viewer === 'runner' ? choice.card.title : 'hidden card'));
+          assert.strictEqual(context.PlayerCanLook(context.corp, choice.card), false);
+        }
+      }
+      return choices[0];
+    });
+    assert.ok(reached, 'must exercise the actual private-look decision');
+  });
+}
+
 test('The Class Act sends 1 of the top X cards to the bottom on the first draw each turn', () => {
   setUpBoard({installed: [ID.ClassAct], stack: [ID.HedgeFund, ID.Diesel, ID.SureGamble, ID.T400]});
   // stack top is the last element: T400, then Sure Gamble
@@ -609,6 +629,7 @@ test('Exile install-trigger draw can suspend for Class Act', () => {
 test('DreamNet finishes its credit instruction after the interrupt and draw', () => {
   setUpBoard({installed: [ID.ClassAct, 26095], stack: [ID.Diesel, ID.SureGamble]});
   run(`runner.identityCard.subTypes.push('Digital');
+    RecordTurnEvent('runnerSuccessfulRun');
     TriggeredResponsePhase(runner, 'responseOnRunSuccessful', [], function () {}, 'Successful');`);
   let saw = false;
   settle((choices, card) => {

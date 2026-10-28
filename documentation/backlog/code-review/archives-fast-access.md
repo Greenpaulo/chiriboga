@@ -10,7 +10,7 @@
 
 Implemented from `8ceda83`.
 
-- Renamed the existing bulk action to **Fast access**, with a tooltip explaining when it stops. Individual access is still available.
+- Kept the existing bulk action label **Access All** and added a tooltip explaining when it stops. Individual access is still available.
 - `phases.runAccessingCard.IsRoutineArchivesAccess()` limits silent presentation and short timer scheduling to human bulk access to non-agendas in the Archives pile. Routine cards neither zoom nor update the history thumbnail, avoiding flashes; normal access events, knowledge and access-complete bookkeeping remain intact.
 - Agendas, installed root cards, cards with their own access effects, optional access responses and available access abilities retain normal presentation. Global automatic counters run silently; presentation is checked again after those automatic effects in case they enable an access ability. This matters for cards which count all accesses: merely having such a counter must not make the whole pile pop up.
 - `ResolveChoice()` uses zero-delay asynchronous timers only for routine bulk access selection/continuation steps. It does not change global game speed, narration preferences or interrupt timing.
