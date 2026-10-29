@@ -1238,13 +1238,17 @@ var CardRenderer = {
             }
           }
         }
-        // Fit the displayed orientation (source images are 300x419).
-        var fitWidth = this.forceIceRotation ? 419 : 300;
-        var fitHeight = this.forceIceRotation ? 300 : 419;
-        if ((scalingratio * fitWidth) / fieldZoom > window.innerWidth)
-          scalingratio = (fieldZoom * window.innerWidth) / fitWidth;
-        if ((scalingratio * fitHeight) / fieldZoom > window.innerHeight)
-          scalingratio = (fieldZoom * window.innerHeight) / fitHeight;
+        // Fit every animation frame, including intermediate rotation angles.
+        var cosRotation = Math.abs(Math.cos(this.sprite.rotation));
+        var sinRotation = Math.abs(Math.sin(this.sprite.rotation));
+        var fitWidth = 300 * cosRotation + 419 * sinRotation;
+        var fitHeight = 300 * sinRotation + 419 * cosRotation;
+        var previewArea = {left: 0, top: 0,
+          right: fieldZoom * window.innerWidth, bottom: fieldZoom * window.innerHeight};
+        if (this.zoomed && (this.faceUp || this.canView)) previewArea = pixi_cardPreviewArea();
+        scalingratio = Math.min(scalingratio,
+          (previewArea.right - previewArea.left) / fitWidth,
+          (previewArea.bottom - previewArea.top) / fitHeight);
         //animate the scale
         var scaleDiff = scalingratio - this.sprite.scale.y;
         var scalingSpeed = Math.max(0.1, -0.5 * scaleDiff + 1); //keep larger previews growing even on zoomed-out boards
@@ -1284,24 +1288,14 @@ var CardRenderer = {
             }
           }
           //prevent card going off the screen (except when can't see front e.g. choosing card for access in Corp hand)
-		  if (showFace) {
-			  if (this.sprite.x - 0.5 * this.sprite.width < 0)
-				this.sprite.x = 0.5 * this.sprite.width;
-			  if (
-				this.sprite.x + 0.5 * this.sprite.width >
-				cardRenderer.app.renderer.width
-			  )
-				this.sprite.x =
-				  cardRenderer.app.renderer.width - 0.5 * this.sprite.width;
-			  if (this.sprite.y - 0.5 * this.sprite.height < 0)
-				this.sprite.y = 0.5 * this.sprite.height;
-			  if (
-				this.sprite.y + 0.5 * this.sprite.height >
-				cardRenderer.app.renderer.height
-			  )
-				this.sprite.y =
-				  cardRenderer.app.renderer.height - 0.5 * this.sprite.height;
-		  }
+          if (showFace) {
+            var halfWidth = 0.5 * fitWidth * this.sprite.scale.y;
+            var halfHeight = 0.5 * fitHeight * this.sprite.scale.y;
+            this.sprite.x = Math.max(previewArea.left + halfWidth,
+              Math.min(this.sprite.x, previewArea.right - halfWidth));
+            this.sprite.y = Math.max(previewArea.top + halfHeight,
+              Math.min(this.sprite.y, previewArea.bottom - halfHeight));
+          }
         }
 
         //and dummy needs to be positioned correctly
@@ -2377,6 +2371,24 @@ function pixi_cardBaseScale(card) {
     (viewingPlayer === corp && card.cardLocation === corp.HQ.cards)
   );
   return inViewingHand ? 0.55 : 0.5;
+}
+
+// Keep reading previews clear of visible bottom controls without resizing the board.
+// DOM rectangles use CSS pixels; stage coordinates also account for the Corp view.
+function pixi_cardPreviewArea() {
+  var bottom = window.innerHeight;
+  for (var id of ["footer", "passpriority"]) {
+    var panel = document.getElementById(id);
+    if (!panel) continue;
+    var rect = panel.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.left < window.innerWidth)
+      bottom = Math.min(bottom, Math.max(1, rect.top - 4));
+  }
+  var stage = cardRenderer.app.stage;
+  var first = stage.toLocal({x: 0, y: 0});
+  var last = stage.toLocal({x: window.innerWidth * fieldZoom, y: bottom * fieldZoom});
+  return {left: Math.min(first.x, last.x), top: Math.min(first.y, last.y),
+    right: Math.max(first.x, last.x), bottom: Math.max(first.y, last.y)};
 }
 
 //The game field is one transparent canvas, so a sprite cannot independently
