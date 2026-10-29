@@ -588,11 +588,13 @@
     };
 
     var playAreaBackgroundRequest = 0;
+    var playAreaBackgroundSelection = '';
 
     // Keep the grid and watermark until artwork loads; ignore superseded requests.
     function applyPlayAreaBackground(filename) {
       var request = ++playAreaBackgroundRequest;
       var valid = playAreaBackgrounds.indexOf(filename) !== -1;
+      playAreaBackgroundSelection = valid ? filename : '';
       document.body.classList.remove('image-background');
       document.body.style.removeProperty('--play-area-background');
       document.body.style.removeProperty('--play-area-background-darkness');
@@ -605,6 +607,15 @@
             typeof darkness === 'number' && Number.isFinite(darkness) ? Math.max(0, Math.min(1, darkness)) : 0.35);
           document.body.style.setProperty('--play-area-background', 'url("' + artwork.src + '")');
           document.body.classList.add('image-background');
+        };
+        artwork.onerror = function() {
+          if (request !== playAreaBackgroundRequest) return;
+          playAreaBackgroundSelection = '';
+          var backgroundSelect = document.getElementById('background-select');
+          if (backgroundSelect) backgroundSelect.value = '';
+          try {
+            localStorage.setItem('chiriboga-background', '');
+          } catch (e) {}
         };
         artwork.src = 'images/bg/' + encodeURIComponent(filename);
       }
@@ -655,9 +666,8 @@
         option.textContent = filename.replace(/\.[^.]+$/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2');
         backgroundSelect.appendChild(option);
       });
-      try {
-        backgroundSelect.value = applyPlayAreaBackground(localStorage.getItem('chiriboga-background'));
-      } catch (e) {}
+      // Reflect the startup request without restarting it or clearing loaded artwork.
+      backgroundSelect.value = playAreaBackgroundSelection;
       try {
         var s = localStorage.getItem('chiriboga-settings');
         if (s) {
