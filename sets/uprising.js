@@ -3707,11 +3707,48 @@ cardSet[26101] = {
   subTypes: ["Sentry"],
   rezCost: 3,
   strength: 3,
+  _installChoices: function () {
+    return ChoicesArrayInstall(corp.archives.cards.concat(corp.HQ.cards), true);
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "You may add 1 card from Archives to HQ.",
+      visual: { y: 67, h: 32 },
+      Resolve: function () {
+        var choices = ChoicesArrayCards(corp.archives.cards);
+        if (!choices.length) return;
+        choices.push({ card: null, label: "Continue", button: "Continue" });
+        if (corp.AI) {
+          var best = corp.AI._bestRecurToHQOption(choices.filter(function (c) { return c.card; }), null, true);
+          corp.AI.preferred = { title: this.title, option: best || choices[choices.length - 1] };
+        }
+        DecisionPhase(corp, choices, function (params) {
+          if (params.card) MoveCard(params.card, corp.HQ.cards);
+        }, this.title, "Add 1 card from Archives to HQ?", this);
+      },
+    },
+    {
+      text: "You may install 1 card from Archives or HQ, ignoring all costs.",
+      visual: { y: 102, h: 32 },
+      Resolve: function () {
+        var choices = this._installChoices();
+        if (!choices.length) return;
+        choices.push({ card: null, label: "Continue", button: "Continue" });
+        if (corp.AI) {
+          var best = corp.AI._bestInstallOption(choices, false);
+          corp.AI.preferred = { title: this.title, option: best >= 0 ? choices[best] : choices[choices.length - 1] };
+        }
+        DecisionPhase(corp, choices, function (params) {
+          if (params.card) Install(params.card, params.server, true, null, true, null, this, null, null, false);
+        }, this.title, "Install 1 card, ignoring all costs?", this, "install");
+      },
+    },
   ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  AIImplementIce: function (rc, result) {
+    result.sr = [
+      [corp.archives.cards.length ? ["misc_moderate"] : []],
+      [this._installChoices().length ? ["misc_moderate"] : []],
+    ];
     return result;
   },
 };
@@ -3732,12 +3769,59 @@ cardSet[26102] = {
   subTypes: ["Sentry", "Bioroid", "AP", "Destroyer"],
   rezCost: 10,
   strength: 7,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+  unique: true,
+  runnerAbilities: [
+    {
+      text: "Lose [click]: Break 1 subroutine on this ice. The Corp gets +1 allotted [click] next turn.",
+      runnerAbility: true,
+      Enumerate: function () {
+        if (!CheckEncounter() || GetApproachEncounterIce() !== this || !CheckClicks(runner, 1)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        LoseClicks(runner, 1);
+        Break(params.subroutine);
+        AddTempBonusClicks(corp, 1);
+      },
+    },
   ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  subroutines: [
+    { text: "Do 2 core damage.", visual: { y: 108, h: 16 }, Resolve: function () { Damage("core", 2, true); } },
+    {
+      text: "Trash 1 installed Runner card. Gain 3[c].",
+      visual: { y: 127, h: 16 },
+      Resolve: function () {
+        var choices = ChoicesInstalledCards(runner, CheckTrash);
+        if (!choices.length) { GainCredits(corp, 3, "", this); return; }
+        if (corp.AI) {
+          var best = choices.slice().sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); })[0];
+          corp.AI.preferred = { title: this.title, option: best };
+        }
+        DecisionPhase(corp, choices, function (params) {
+          Trash(params.card, true, function () { GainCredits(corp, 3, "", this); }, this);
+        }, this.title, "Trash 1 installed Runner card", this, "trash");
+      },
+    },
+    { text: "End the run.", visual: { y: 148, h: 16 }, Resolve: function () { EndTheRun(); } },
+  ],
+  AIImplementIce: function (rc, result) {
+    result.sr = [[["coreDamage", "coreDamage"]],
+      [[InstalledCards(runner).length ? "misc_serious" : "misc_moderate"]], [["endTheRun"]]];
     return result;
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft) {
+    if (iceAI.ice !== this || clicksLeft < 1) return result;
+    var breaks = rc.SrBreak(this, iceAI, point, 1);
+    for (var i = 0; i < breaks.length; i++) {
+      breaks[i].runner_clicks_spent += 1;
+      // A real consequence in addition to the click cost: the Corp gains a click.
+      breaks[i].effects = breaks[i].effects.concat([["misc_moderate"]]);
+    }
+    return result.concat(breaks);
+  },
+  AIBreakCost: function (iceCard, count) {
+    if (iceCard !== this) return null;
+    return { credits: 0, clicks: count };
   },
 };
 
@@ -3755,9 +3839,28 @@ cardSet[26103] = {
   cardType: "operation",
   subTypes: ["Lockdown"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  trashCost: 4,
+  Enumerate: function () {
+    var active = ActiveLockdown();
+    return !active || active === this ? [{}] : [];
   },
+  Resolve: function () { Log("NEXT Activation Command is active until the next Corp turn"); },
+  modifyStrength: {
+    Resolve: function (card) { return CheckCardType(card, ["ice"]) ? 2 : 0; },
+  },
+  modifyCannot: {
+    Resolve: function (id, card) {
+      return id === "breakUsing" && !CheckSubType(card, "Icebreaker");
+    },
+  },
+  AIWouldPlay: function () {
+    if (ActiveLockdown()) return false;
+    // A temporary defence is useful for the immediately following Runner turn.
+    return InstalledCards(corp).some(function (card) {
+      return card.cardType === "ice" && (card.rezzed || CheckCredits(corp, RezCost(card)));
+    });
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Scapenet (26104)
@@ -3773,9 +3876,37 @@ cardSet[26104] = {
   cardType: "operation",
   subTypes: ["Gray Ops"],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  successfulRunLastTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.successfulRunLastTurn = false; },
+    automatic: true, availableWhenInactive: true,
   },
+  responseOnRunSuccessful: {
+    Resolve: function () { if (playerTurn === runner) this.successfulRunLastTurn = true; },
+    automatic: true, availableWhenInactive: true,
+  },
+  _targets: function () {
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckSubType(card, "Chip") || CheckSubType(card, "Virtual");
+    });
+  },
+  Enumerate: function () { return this.successfulRunLastTurn ? [{}] : []; },
+  Resolve: function () {
+    Trace(7, function (successful) {
+      if (!successful) return;
+      var choices = this._targets();
+      if (!choices.length) return;
+      if (corp.AI) {
+        var best = choices.slice().sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); })[0];
+        corp.AI.preferred = { title: this.title, option: best };
+      }
+      DecisionPhase(corp, choices, function (params) {
+        Uninstall(params.card, removedFromGame);
+      }, this.title, "Remove 1 installed chip or virtual card from the game", this);
+    }, this);
+  },
+  AIWouldPlay: function () { return this.successfulRunLastTurn && this._targets().length > 0; },
+  AIPlayWhenCan: 2,
 };
 
 //Tranquility Home Grid (26105)
@@ -3793,7 +3924,40 @@ cardSet[26105] = {
   subTypes: ["Region"],
   rezCost: 1,
   trashCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  installOnlyIn: function (server) { return !server || typeof server.cards === "undefined"; },
+  responseOnInstall: {
+    Enumerate: function (card) {
+      var server = GetServer(this);
+      if (!server || card.cardLocation !== server.root || server.rootInstallsThisTurn !== 1) return [];
+      var choices = [
+        { id: 0, label: "Gain 2[c]", button: "Gain 2[c]" },
+        { id: 1, label: "Draw 1 card", button: "Draw 1 card" },
+      ];
+      if (corp.AI) {
+        var draw = corp.HQ.cards.length < 3 && Credits(corp) >= 6 && corp.RnD.cards.length > 1;
+        corp.AI.preferred = { title: this.responseOnInstall.text, option: choices[draw ? 1 : 0] };
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (params.id === 0) GainCredits(corp, 2, "", this);
+      else Draw(corp, 1);
+    },
+    text: "Tranquility Home Grid: gain 2[c] or draw 1 card",
+  },
+  AIWorthInstalling: function (remotes) {
+    for (var i = 0; i < remotes.length; i++) {
+      if (!remotes[i].root.some(function (card) { return CheckSubType(card, "Region"); })) return i;
+    }
+    return -1;
+  },
+  AIPreferredUpgradeServer: function (servers) {
+    return servers.find(function (server) {
+      return typeof server.cards === "undefined" && server.ice.length > 0 &&
+        !server.root.some(function (card) { return CheckSubType(card, "Region"); });
+    }) || null;
+  },
+  AIRezWhenCan: function () { return CheckCredits(corp, RezCost(this)); },
 };
 
 //Flower Sermon (26106)

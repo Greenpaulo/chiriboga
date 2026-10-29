@@ -3629,3 +3629,46 @@ optimisation work.
   `_bestInstallOption(choices, false)`. The response is offered to the AI only
   when that ranking accepts an install; it excludes the root of the trashed
   card's server but still allows ice protecting it.
+
+### Uprising batch 9 card hooks
+
+- Drafter uses `AIImplementIce` to value Archives recovery and legal free installs.
+  Its resolution selects recovery through `_bestRecurToHQOption` and an install
+  through `_bestInstallOption(choices, false)`, then supplies a preferred option
+  to the real Corp selector. Both optional subroutines allow declining; installs
+  include HQ and Archives, retain destination legality and ignore all costs.
+- Týr uses `AIImplementIce` for two `coreDamage`, an installed-card trash plus
+  three Corp credits, and end the run. `AIImplementBreaker` offers one break per
+  Runner click through `rc.SrBreak`; each branch adds `misc_moderate` for the
+  Corp's extra next-turn click without mutating sibling branches. `AIBreakCost`
+  reports the same Runner click price to Corp security. Native breaking is
+  forbidden while NEXT Activation Command is active. Future Corp click use is
+  valued coarsely rather than planned.
+- NEXT Activation Command uses `AIWouldPlay` and `AIPlayWhenCan: 1`: play with
+  rezzed or affordable ICE, and hold while a Lockdown is already active. The
+  active operation's `modifyStrength` adds two to ICE in both evaluators.
+  `modifyCannot.Resolve("breakUsing", sourceCard)` forbids non-Icebreakers,
+  including ICE-owned Runner abilities. `LegalBreakChoices` removes their
+  subroutine choices from ability discovery, activation and Runner decisions;
+  unrelated abilities remain available. Runner `IceAct` and Corp matching,
+  hosted-break and native-break pricing consume the same prohibition. This
+  hook uses public source-card subtypes and is safe outside a run. The effect
+  lasts only while the operation remains active; it is removed at the next
+  Corp turn-begins checkpoint before pending conditional abilities resolve.
+- Scapenet uses `AIWouldPlay` and `AIPlayWhenCan: 2` for the successful-run
+  opportunity with an installed Chip/Virtual target. After a successful trace,
+  its preferred option ranks the public legal targets by ELO; uninstalling to
+  removed-from-game preserves uninstall interrupts and hosted-card cleanup.
+  Trace bids use the existing shared trace selection policy.
+- Tranquility Home Grid uses `AIPreferredUpgradeServer` for protected remotes
+  without a Region, `AIWorthInstalling` for eligible empty protected remotes,
+  and `AIRezWhenCan` with the actual rez cost. Its install response prefers
+  credits, or draw with fewer than three HQ cards, at least six credits and
+  more than one R&D card. The engine counts all root installs, including those
+  while the Grid is unrezzed; counters reset at the start of each player's turn.
+
+Baseline evidence is in `tests/uprising-integration.test.js`: actual free
+installs and Corp choices, Týr's Runner ability and run-calculator branches,
+operation command selection, failed and successful traces, Lockdown duration
+and shared restrictions, protected-remote upgrade selection, and real draw and
+credit responses. Strategic trade-offs are tracked separately.

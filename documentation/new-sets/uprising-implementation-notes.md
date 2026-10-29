@@ -427,3 +427,78 @@ action-phase selector for Bass (score burst) and Cerebral Overwriter (advance
 up to 3), and uses AI `preferred` choices for Overwriter's payment and
 Vaporframe's installs. Deeper strategy is queued in the tracker's optimisation
 queue.
+
+### Batch 9 (26101–26105) — 2026-10-29, Codex
+
+Gameplay and shared contracts:
+
+- **Drafter** offers optional Archives recovery and an optional HQ/Archives
+  install ignoring all costs through the existing free-install engine path.
+  Install legality and Region/unique replacement remain with `Install`.
+- **Týr** has a Runner-only encounter ability, losing one click per break and
+  using `AddTempBonusClicks(corp, 1)` for each activation. The bonus stacks,
+  survives removal of the ICE and is consumed by the next `ResetClicks(corp)`.
+  Its second subroutine still gains three credits if no target exists or trash
+  is prevented; gain follows the trash/prevention sequence. Core damage is
+  represented as `coreDamage` in the run calculator.
+- **Lockdown** shared support keeps these operations in `corp.resolvingCards`,
+  where they remain active, while ordinary resolved operations leave as before.
+  `CheckPlay` prevents another Lockdown. The local Comprehensive Rules v26.03,
+  **3.5.1c** and **11.2**, require expiry after recurring refill at the next
+  Corp turn-begins checkpoint, before pending conditional abilities resolve;
+  the opening Corp paid window is earlier and keeps the Lockdown active.
+- **NEXT Activation Command** raises all ICE strength by two. The source-card
+  prohibition is `modifyCannot("breakUsing", sourceCard)`, consumed by ability
+  discovery, activation and Runner decision choices, Runner `IceAct`, and Corp
+  matching/native/hosted break accounting. This includes Runner-paid abilities
+  on Corp ICE and leaves unrelated non-breaking abilities available. Restrictions
+  disappear when the operation leaves play; no permanent ICE flags are added.
+- **Scapenet** tracks successful Runner-turn runs, resets on the next Runner
+  turn, traces at base seven, and removes an installed Chip/Virtual only after
+  success. `Uninstall(card, removedFromGame)` preserves uninstall interrupts
+  and normal hosted-card cleanup rather than leaving a removed host installed.
+- **Tranquility Home Grid** installs only in remote roots. The engine records
+  `server.rootInstallsThisTurn` at completed installs before install responses,
+  including unrezzed cards and the Grid's own install, and resets it each turn.
+  Only the first root install qualifies; installing ICE never qualifies.
+- ICE overlay positions were measured with `scripts/subvis/audit.js` and
+  checked with its ASCII gutter view: Drafter `(67,32), (102,32)`; Týr
+  `(108,16), (127,16), (148,16)`. No card artwork was opened.
+
+Baseline AI evidence (`tests/uprising-integration.test.js`): real Corp choices
+recover an agenda and perform a useful free install; real rez selection uses
+both ICE with credit guards; Týr's Runner ability and `IceAct` pay the click
+and account for the Corp benefit without mutating sibling paths; the real
+operation command consumer selects NEXT and Scapenet; trace failure/no-target
+paths and removal work; the upgrade planner selects a protected remote and the
+response selector chooses useful credits/draw through real engine helpers.
+Existing Corp security/pricing focused suites also pass.
+
+Queued optimisation (implementation is complete separately): Drafter uses the
+existing recurrence/install rankings without comparing a recover-then-install
+sequence or correcting their paid-install inhibition for every free install.
+Týr values each extra future Corp click as `misc_moderate`, without planning
+that turn or comparing breaker payments against the benefit given to the Corp.
+NEXT is played opportunistically with useful ICE, without comparing a scoring
+window or competing actions. Scapenet ranks targets by ELO and uses existing
+trace bids, without comparing credit attrition or saving it for a better target.
+Tranquility uses protected-remote placement and simple hand/credit thresholds,
+without predicting repeated installs or the best time to rez for the next one.
+Independent strategic review and owner adoption are not claimed.
+
+Final validation: Node **20.19.0** (`.nvmrc`), `node tests/run-all-tests.js`:
+**135 full test files passed**, exit **0**, including Corp decision fixtures
+and decision snapshots. The first full attempt exposed three older isolated
+harnesses without `command.js`; the shared restriction helper now tolerates
+that test environment. All three affected files and the Uprising integration
+checks passed before the repaired full run. Final logs and collected exit status:
+`/tmp/chiriboga-uprising9-full-repaired.log` and
+`/tmp/chiriboga-uprising9-full-repaired.exit`.
+
+Also passed: all edited JavaScript syntax checks, Uprising integration,
+`corp-server-security` (197 cases), `L9.1-breaker-pricing` (44 cases), AI hook
+documentation, subroutine visuals, Eternal format, format-pool deck generation,
+decklauncher identity changes, regenerated card status and `git diff --check`.
+The batch brief reports no unfinished markers for all five cards. All five
+existing ELO values are unchanged. No browser playtest or independent review
+is claimed. Next implementation batch: **10 (26106–26108)**.

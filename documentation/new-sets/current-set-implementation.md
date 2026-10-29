@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**8 complete, 8 outstanding** (`8 Pending`, `0 In progress`, `0 Blocked`).
+**9 complete, 7 outstanding** (`7 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -59,7 +59,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 6 | 26088–26092 | Complete | Claude, 2026-10-23 | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut, Paule's Café. Existing three verified and repaired. |
 | 7 | 26093–26095 | Complete | Claude, 2026-10-23 | Neutral Runner: Buffer Drive, Daily Casts, DreamNet. Existing Daily Casts and DreamNet repaired and verified. |
 | 8 | 26096–26100 | Complete | Claude, 2026-10-23 | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
-| 9 | 26101–26105 | Pending | — | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
+| 9 | 26101–26105 | Complete | Codex, 2026-10-29 | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
 | 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
 | 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
 | 12 | 26113–26116 | Pending | — | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
@@ -81,6 +81,8 @@ the shared Lockdown mechanic first needed in batch 9.
 | 7 | 26093–26095 | 2026-10-23 | Claude | `tests/uprising-batch7.test.js` | Buffer Drive implemented: grip/stack trash response through a new `Trash()` event record, remove-from-game heap recovery and AI choices. Daily Casts empty-trash now uses `Trash()`. DreamNet used to draw on every successful run; it now draws only on the first, counted with a new turn event. See [notes](uprising-implementation-notes.md#batch-7--2026-10-23). |
 | 8 | 26096–26100 | 2026-10-23 | Claude | `tests/uprising-batch8.test.js` | Megaprix/Vacheron variable points via `agendaPointsForPlayer`; new `interruptOnAddedToScoreArea` engine hook in `MoveCardTriggers` (Vacheron counters before the win check); core damage now counts every point; Bass score-burst/last-click AI; Cerebral Overwriter ambush AI; Vaporframe free installs through `_bestInstallOption`. |
 
+| 9 | 26101–26105 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Drafter recovery/free installs; Týr click breaks and next-turn Corp bonus; shared Lockdown lifecycle and NEXT strength/break-source restrictions in both AIs; Scapenet trace/removal; Tranquility root-install bookkeeping and economy/draw. Real selectors and focused security/pricing checks; final full suite recorded in notes. |
+
 ## Batch-review log
 
 No independent reviews recorded.
@@ -90,7 +92,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**8 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**9 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
@@ -103,6 +105,8 @@ initialised when each implementation batch completes.
 | 6 | 26088–26092 | Pending | — | SMC/Café installs only before a run (first paid window), not reactively mid-run on unexpected ice; planner reserves 2 clicks for ability installs; Talut boost not applied to hypothetical installs; Café hosts only for a strict ≥2-connection saving (no storage/overflow hosting); Runner run budget ignores Mantle's credit for ordinary breaks. |
 | 7 | 26093–26095 | Pending | — | Buffer Drive: the AI recovers a needed breaker only in a paid-ability window, after an action-phase draw. It is not valued as damage/mill protection when installing (generic install path only). DreamNet draw is not counted in run potential. |
 | 8 | 26096–26100 | Pending | — | Corp scoring/protection and steal-risk estimates read printed points: Megaprix second-copy bonus and Vacheron 0-point steal not valued. Bass is not part of the fast-advance search (only exact one-click bursts or last click). Vaporframe free installs are ranked with paid-install inhibition, so cost-free outer ice is undervalued; no plan for its trash response as bait. Cerebral Overwriter fires whenever affordable (no credit-reserve trade-off); advancement limit fixed at 3. |
+
+| 9 | 26101–26105 | Pending | — | Drafter recurrence/free-install sequencing and cost inhibition; Týr future Corp click valuation; NEXT scoring-window timing; Scapenet ELO targets/shared trace bids; Tranquility placement and install/rez timing. See implementation notes for baseline evidence and limits. |
 
 ## Optimisation log
 

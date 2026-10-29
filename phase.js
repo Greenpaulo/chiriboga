@@ -415,10 +415,14 @@ phaseTemplates.globalTriggers = {
       ) {
         corp.AI._prepareProtectionPrioritiesForCorpTurn();
       }
+      // CR 3.5.1c: expire Lockdowns after recurring credits refill, before
+      // pending turn-begins conditionals can trigger (below).
+      // Cleanup runs after the refill loop so active recurring effects still apply.
       ApplyToAllActiveCards(function (card) {
         if (typeof card.recurringCredits !== "undefined")
           card.credits = card.recurringCredits;
       }, currentPhase.player);
+      if (currentPhase.identifier == "Corp 1.2") CleanupCorpResolvingCards(true);
 	  //AI keeps track of how many turns (each player's turn counts as 1) a card (agenda/asset/upgrade) has been installed a server
 	  for (var i=0; i<corp.remoteServers.length; i++) {
 		for (var j=0; j<corp.remoteServers[i].root.length; j++) {
@@ -635,9 +639,7 @@ function CombineResponseWithPhase(
   responsePhase.exceptionCondition = exceptionCondition;
   responsePhase.PreEnumerate = function () {
     //since this is post-action, this is also where we clean up any resolving cards that still remain
-    while (corp.resolvingCards.length > 0) {
-      MoveCard(corp.resolvingCards[0], corp.archives.cards);
-    }
+    CleanupCorpResolvingCards();
 
     //check whether we can use a combined phase (see below)
     var combineResponse = false;
@@ -2177,7 +2179,12 @@ function ChangePhase(src, skipInit = false) {
   if (currentPhase.identifier == "Corp 1.1") playerTurn = corp;
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
+  {
     turnEventCounts = {};
+    [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).forEach(function (server) {
+      server.rootInstallsThisTurn = 0;
+    });
+  }
   //turn boundary: Pass until end of turn lasts for the current turn only
   if (!skipInit && (currentPhase === phases.corpStartDraw || currentPhase === phases.runnerStartResponse) &&
       typeof PassPriorityReset == "function")
@@ -2311,6 +2318,7 @@ function DecisionPhase(
   command = "continue",
   cancelCallback
 ) {
+  if (player === runner) choices = LegalBreakChoices(context, choices);
   var decisionPhase = {
     Enumerate: {},
     Resolve: {},

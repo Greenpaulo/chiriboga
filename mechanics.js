@@ -932,6 +932,10 @@ function Install(
 				  }
 				}
 				var finishInstall = function(cardsTrashed) {
+                  if (installingCard.player === corp && installingCard.cardType !== "ice") {
+                    var installedServer = GetServer(installingCard);
+                    if (installedServer) installedServer.rootInstallsThisTurn = (installedServer.rootInstallsThisTurn || 0) + 1;
+                  }
 				  //install done, card becomes active
 				  if (installingCard.player === corp && installingCard.cardType === "ice" &&
 				      corp.AI && typeof corp.AI._recordCompletedIceInstall === "function")
@@ -1167,7 +1171,7 @@ function TriggerAbility(card, ability, onTriggerResolve, context) {
   var oldPhase = currentPhase; //in case of cancel
   var choices = [{}]; //assume valid by default
   if (typeof ability.Enumerate === "function") {
-    choices = ability.Enumerate.call(card); //call in context of the card
+    choices = LegalBreakChoices(card, ability.Enumerate.call(card)); //call in context of the card
   }
   var instruction = GetTitle(card, true);
   if (typeof ability.text !== "undefined") instruction = ability.text;

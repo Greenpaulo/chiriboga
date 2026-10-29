@@ -251,7 +251,7 @@ modifyRezCost: Resolve(card);
 modifyPlayClickCost: Resolve(card); // modifies the 1-click/Double 2-click play cost
 modifyStealCost: Resolve(card); // returns {credits, clicks, programs} additional costs
 modifyMaxHandSize: Resolve(player);
-modifyCannot: Resolve(id, card, selectedBreaks); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid; optional selectedBreaks includes pending selections for multi-break limits
+modifyCannot: Resolve(id, card, selectedBreaks); // id = "steal"|"trash"|"score", or "break" with a subroutine as card (Afshar); return true to forbid; optional selectedBreaks includes pending selections for multi-break limits; "breakUsing" with the source card forbids that card from breaking (NEXT Activation Command)
 ```
 
 ### Click Ability

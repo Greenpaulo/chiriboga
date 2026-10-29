@@ -4354,6 +4354,23 @@ function ChoicesForfeitableAgendas(player) {
   });
 }
 
+// A source restriction applies to subroutine choices, including ICE-owned
+// Runner abilities. Keep non-breaking abilities on the same card available.
+function LegalBreakChoices(card, choices) {
+  if (!card || typeof CardEffectsForbid !== "function" || !CardEffectsForbid("breakUsing", card)) return choices;
+  return choices.filter(function (choice) { return !choice.subroutine; });
+}
+
+function ActiveLockdown() {
+  return corp.resolvingCards.find(function (card) { return CheckSubType(card, "Lockdown"); }) || null;
+}
+
+function CleanupCorpResolvingCards(expireLockdowns = false) {
+  corp.resolvingCards.slice().forEach(function (card) {
+    if (expireLockdowns || !CheckSubType(card, "Lockdown")) MoveCard(card, corp.archives.cards);
+  });
+}
+
 /**
  * Gets list of valid/legal abilities on a card.<br/>Nothing is logged.
  *
@@ -4381,7 +4398,7 @@ function ChoicesAbility(card, limitTo = "", abilitiesProperty = "abilities") {
           !card[abilitiesProperty][i].availableInRunnerScoreArea) continue;
       checkedClick = false;
       checkedAccess = false;
-      var choices = card[abilitiesProperty][i].Enumerate.call(card);
+      var choices = LegalBreakChoices(card, card[abilitiesProperty][i].Enumerate.call(card));
       var acceptable = true;
       if (limitTo == "click") acceptable = checkedClick;
       else if (limitTo == "access") acceptable = checkedAccess;

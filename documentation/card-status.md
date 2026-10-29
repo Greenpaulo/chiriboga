@@ -29,7 +29,7 @@ in card-sets.md.
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `downfall` | playable | 65 | 65 | 0 | 0 | 0 | 55 / 61 | false / false | no |
-| `uprising` | in-progress | 65 | 65 | 0 | 30 | 0 | 40 / 62 | true / true | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 25 | 0 | 43 / 62 | true / true | no |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
@@ -71,11 +71,6 @@ None.
 
 ### `uprising` (sets/uprising.js)
 
-- 26101 Drafter: 2 scaffold marker(s)
-- 26102 Týr: 2 scaffold marker(s)
-- 26103 NEXT Activation Command: 1 scaffold marker(s)
-- 26104 Scapenet: 1 scaffold marker(s)
-- 26105 Tranquility Home Grid: 1 scaffold marker(s)
 - 26106 Flower Sermon: 1 scaffold marker(s)
 - 26107 Prāna Condenser: 1 scaffold marker(s)
 - 26108 Engram Flush: 2 scaffold marker(s)

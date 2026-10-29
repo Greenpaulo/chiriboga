@@ -345,7 +345,8 @@ class RunCalculator {
     var creditsLeft = this.basePoolCredits + this.baseOtherCredits + (point.restrictedCreditsPaid || 0) - point.runner_credits_spent - point.runner_credits_lost;
 
     //apply icebreaker specific details
-	if (typeof card.AIImplementBreaker == "function") {
+	if (typeof card.AIImplementBreaker == "function" &&
+        !(typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card))) {
 		result = card.AIImplementBreaker.call(card,this,result,point,server,cardStrength,iceAI,iceStrength,clicksLeft,creditsLeft);
 	}
     //non-breaker encounter abilities that change how breakers apply (e.g. Pelangi)
