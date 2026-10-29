@@ -2178,6 +2178,10 @@ function ChangePhase(src, skipInit = false) {
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
     turnEventCounts = {};
+  //turn boundary: Pass until end of turn lasts for the current turn only
+  if (!skipInit && (currentPhase === phases.corpStartDraw || currentPhase === phases.runnerStartResponse) &&
+      typeof PassPriorityReset == "function")
+    PassPriorityReset();
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1") &&
       corp.AI && typeof corp.AI._publicPostureTurnBegins === "function")
     corp.AI._publicPostureTurnBegins(playerTurn == corp ? "corp" : "runner");

@@ -1145,9 +1145,9 @@ var CardRenderer = {
         this.knownSprite.anchor.set(-0.35, 1.2);
 	    if (Math.round(Math.abs(2*this.knownSprite.rotation/Math.PI)) == 1) this.knownSprite.anchor.set(-1, 0.6);
         //change scale as required
-        var scalingratio = 0.5;
+        var scalingratio = pixi_cardBaseScale(this.card);
         if (this.zoomed && (this.faceUp || this.canView)) {
-          scalingratio = fieldZoom;
+          scalingratio = 1.5 * fieldZoom; //readable preview at normal browser zoom
 		  //load high-res version, if not already loaded/loading
 		  // Determine whether to use hi-res images: LocalStorage setting overrides gauntletConfig
 		  var useHiRes = false;
@@ -1224,7 +1224,8 @@ var CardRenderer = {
             this.card === GetMostRelevantIce()
           )
         ) {
-          scalingratio = 0.5; //this is different to forceCropped since it also unzooms dragging cards
+          // Preserve hand size on a stationary press; shrink once dragging starts.
+          scalingratio = !this.zoomed && !pixi_dragMoved ? pixi_cardBaseScale(this.card) : 0.5;
           //special rules for facedown cards
           if (!this.faceUp) {
             this.flipProgress = -1.0;
@@ -1237,14 +1238,20 @@ var CardRenderer = {
             }
           }
         }
-        //make sure card isn't bigger than screen (assumes image dimensions 300x419)
-        if ((scalingratio * 300) / fieldZoom > window.innerWidth)
-          scalingratio = (fieldZoom * window.innerWidth) / 300;
-        if ((scalingratio * 419) / fieldZoom > window.innerHeight)
-          scalingratio = (fieldZoom * window.innerHeight) / 419;
+        // Fit every animation frame, including intermediate rotation angles.
+        var cosRotation = Math.abs(Math.cos(this.sprite.rotation));
+        var sinRotation = Math.abs(Math.sin(this.sprite.rotation));
+        var fitWidth = 300 * cosRotation + 419 * sinRotation;
+        var fitHeight = 300 * sinRotation + 419 * cosRotation;
+        var previewArea = {left: 0, top: 0,
+          right: fieldZoom * window.innerWidth, bottom: fieldZoom * window.innerHeight};
+        if (this.zoomed && (this.faceUp || this.canView)) previewArea = pixi_cardPreviewArea();
+        scalingratio = Math.min(scalingratio,
+          (previewArea.right - previewArea.left) / fitWidth,
+          (previewArea.bottom - previewArea.top) / fitHeight);
         //animate the scale
         var scaleDiff = scalingratio - this.sprite.scale.y;
-        var scalingSpeed = -0.5 * scaleDiff + 1; //creates a custom scale animation curve. Realistically this assumes -1 < x < 1
+        var scalingSpeed = Math.max(0.1, -0.5 * scaleDiff + 1); //keep larger previews growing even on zoomed-out boards
         this.sprite.scale.y += scalingSpeed * delta;
         //now clamp
         if (scalingSpeed > 0) {
@@ -1281,24 +1288,14 @@ var CardRenderer = {
             }
           }
           //prevent card going off the screen (except when can't see front e.g. choosing card for access in Corp hand)
-		  if (showFace) {
-			  if (this.sprite.x - 0.5 * this.sprite.width < 0)
-				this.sprite.x = 0.5 * this.sprite.width;
-			  if (
-				this.sprite.x + 0.5 * this.sprite.width >
-				cardRenderer.app.renderer.width
-			  )
-				this.sprite.x =
-				  cardRenderer.app.renderer.width - 0.5 * this.sprite.width;
-			  if (this.sprite.y - 0.5 * this.sprite.height < 0)
-				this.sprite.y = 0.5 * this.sprite.height;
-			  if (
-				this.sprite.y + 0.5 * this.sprite.height >
-				cardRenderer.app.renderer.height
-			  )
-				this.sprite.y =
-				  cardRenderer.app.renderer.height - 0.5 * this.sprite.height;
-		  }
+          if (showFace) {
+            var halfWidth = 0.5 * fitWidth * this.sprite.scale.y;
+            var halfHeight = 0.5 * fitHeight * this.sprite.scale.y;
+            this.sprite.x = Math.max(previewArea.left + halfWidth,
+              Math.min(this.sprite.x, previewArea.right - halfWidth));
+            this.sprite.y = Math.max(previewArea.top + halfHeight,
+              Math.min(this.sprite.y, previewArea.bottom - halfHeight));
+          }
         }
 
         //and dummy needs to be positioned correctly
@@ -1307,6 +1304,7 @@ var CardRenderer = {
         } else {
           this.dummy.alpha = 1.0;
         }
+        this.dummy.scale.set(pixi_cardBaseScale(this.card)); //hover target matches the unzoomed card
         this.dummy.x = this.storedPosition.x;
         this.dummy.y = this.storedPosition.y;
         this.dummy.rotation = this.storedRotation;
@@ -1473,8 +1471,7 @@ var CardRenderer = {
       var savedAnchorX = this.sprite.anchor.x;
       var savedAnchorY = this.sprite.anchor.y;
       this.sprite.rotation = this.storedRotation;
-      this.sprite.scale.x = 0.5;
-      this.sprite.scale.y = 0.5;
+      this.sprite.scale.x = this.sprite.scale.y = pixi_cardBaseScale(this.card);
       this.sprite.anchor.set(0.5, 0.5);
 
       //now compute extents
@@ -2360,11 +2357,39 @@ function pixi_shouldDimCounterWhileReadingZoom(counter) {
 
 var pixi_draggingData = null;
 var pixi_draggingCard = null;
+var pixi_dragMoved = false; //latched only after the movement threshold is crossed
 var pixi_mouseStart = { x: 0, y: 0 };
 var pixi_mousePosition = { x: 0, y: 0 };
 var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = timeout running
 var pixi_holdCard = null; //for touch and hold
 var pixi_zoomedCards = new Set();
+
+//Enlarge only the viewing player's hand; cards return to board size on leaving it.
+function pixi_cardBaseScale(card) {
+  var inViewingHand = card.cardLocation && (
+    (viewingPlayer === runner && card.cardLocation === runner.grip) ||
+    (viewingPlayer === corp && card.cardLocation === corp.HQ.cards)
+  );
+  return inViewingHand ? 0.55 : 0.5;
+}
+
+// Keep reading previews clear of visible bottom controls without resizing the board.
+// DOM rectangles use CSS pixels; stage coordinates also account for the Corp view.
+function pixi_cardPreviewArea() {
+  var bottom = window.innerHeight;
+  for (var id of ["footer", "passpriority"]) {
+    var panel = document.getElementById(id);
+    if (!panel) continue;
+    var rect = panel.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.left < window.innerWidth)
+      bottom = Math.min(bottom, Math.max(1, rect.top - 4));
+  }
+  var stage = cardRenderer.app.stage;
+  var first = stage.toLocal({x: 0, y: 0});
+  var last = stage.toLocal({x: window.innerWidth * fieldZoom, y: bottom * fieldZoom});
+  return {left: Math.min(first.x, last.x), top: Math.min(first.y, last.y),
+    right: Math.max(first.x, last.x), bottom: Math.max(first.y, last.y)};
+}
 
 //The game field is one transparent canvas, so a sprite cannot independently
 //cross the DOM stacking context used by the fixed menu. Raise that canvas only
@@ -2384,6 +2409,7 @@ var pixi_subroutineDelay = 0; //to help prevent unwanted card unzoom when select
 
 function pixi_onDragStart(event) {
   pixi_holdCard = this.card;
+  pixi_dragMoved = false;
   pixi_holdZoom = false;
   //note this is all in the context of sprite
   if (event.data.pointerType == "touch") {
@@ -2435,6 +2461,7 @@ function pixi_onDragEnd(event) {
   this.alpha = 1;
   this.dragging = false;
   pixi_draggingCard = null;
+  pixi_dragMoved = false;
   // set the interaction data to null
   this.data = null;
   pixi_draggingData = null;
@@ -2461,6 +2488,7 @@ function pixi_onDragMove(event) {
   }
 
   if (this.dragging) {
+    pixi_dragMoved = true;
     this.position.x = pixi_mousePosition.x;
     this.position.y = pixi_mousePosition.y;
   }

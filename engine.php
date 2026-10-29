@@ -691,6 +691,7 @@
   <button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' });"></button>
   <div id="fps"></div>
   <div id="footer"></div>
+  <div id="passpriority" role="status" aria-live="polite"></div>
   <div id="modal" class="modal">
     <div id="modalcontent" class="modal-content"></div>
   </div>
