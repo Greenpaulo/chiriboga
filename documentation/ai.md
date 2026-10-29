@@ -3672,3 +3672,46 @@ installs and Corp choices, Týr's Runner ability and run-calculator branches,
 operation command selection, failed and successful traces, Lockdown duration
 and shared restrictions, protected-remote upgrade selection, and real draw and
 credit responses. Strategic trade-offs are tracked separately.
+
+### Uprising batch 10 card hooks
+
+- Flower Sermon (26106) uses `AITriggerWhenCan` through the Corp trigger
+  selector. Its enumeration offers the free draw/filter on the Corp's action
+  phase with a counter, an unused turn opportunity, two cards remaining in R&D,
+  and room in HQ. The return choice uses `preferred` and ranks only the Corp's
+  own hand: lowest ELO non-agenda first. It never inspects R&D order to decide
+  whether to activate. Both turn-begin hooks reset its once-per-turn use.
+- Prāna Condenser (26107) uses `AIWorthInstalling(emptyProtectedRemotes)` to
+  request a new remote when its rez cost is affordable and no copy is installed;
+  `AIRezWhenCan()` supplies its ordinary paid-window rez route. Its optional
+  `responsePreventableDamage` decision uses `preferred` to exchange one
+  nonlethal net damage for a power counter and 3 credits, preserving an immediate
+  flatline instead. The real response window permits this once per damage
+  packet. `AITriggerWhenCan` supplies the two-click cash-out route, offered to
+  the AI when counters exceed the public grip size; it pays the trash cost
+  before dealing damage. Optional prevention does not reduce the damage threat
+  modeled by ICE, since the Corp may decline it.
+- Engram Flush (26108) chooses its encounter type using only public installed
+  cards and the heap, defaulting to event when no type has evidence. After the
+  subroutine reveals the grip, `preferred` selects the highest-ELO legal matching
+  card; humans may decline. The revealed grip remains visible for the target
+  decision using the existing `privateLook` permission, which expires on leaving
+  that decision. Encounter/run cleanup removes the chosen type.
+- Engram's `AIImplementIce(rc, result, maxCorpCred, incomplete)` supplies two
+  `trashGripCard` subroutine effects and a numeric `result.gripTrashLimit` (0–2).
+  `RunCalculator.ValidateEncounterPoint` caps these effects across the unbroken
+  subroutines in that encounter, additionally capping loss by grip cards remaining
+  after earlier modeled damage, draws and targeted trashes. Either surviving subroutine can trash the
+  sole target but two cannot trash it twice. `PointCost` values each at 0.8;
+  `ValidPoint` subtracts them from later damage capacity, floored at zero so
+  trash alone never flatlines. Finite-run continuation budgets include that
+  grip loss. A zero limit supplies blank subroutine effects. Only the
+  Runner-owned calculator reads grip types, using the chosen type in a live
+  encounter or the largest type group before the choice. Corp calculators use
+  public grip size only. This is optional punishment, not an end-the-run or
+  damage effect; it cannot establish a mandatory security lockout by itself.
+
+Baseline evidence is in `tests/uprising-integration.test.js`: real Corp command,
+install, rez and target selectors; the real prevention trigger window; and
+Runner/Corp run-calculator consumers. Deeper activation, type-prediction and
+competing-plan policies are recorded in the set's optimisation queue.

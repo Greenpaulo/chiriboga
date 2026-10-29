@@ -389,6 +389,10 @@ class RunCalculator {
 	  var creditPayment = 0;
 	  var creditLoss = 0;
 	  var clickLoss = 0;
+      var gripCardsTrashed = 0;
+      var previousEffects = this.TotalEffect(point);
+      var gripCardsLeft = Math.max(0, runner.grip.length + (previousEffects.gainGripCard || 0) -
+        this.TotalDamage(previousEffects) - (previousEffects.trashGripCard || 0));
 	  // Encounter options may carry restricted (stealth-only) payments, e.g.
 	  // Afterimage's bypass: {restrictedCredits: n} on an encounter persistent.
 	  var restrictedPayment = (encounter_persistents || []).reduce(function (sum, p) {
@@ -449,6 +453,21 @@ class RunCalculator {
 			  }
 		  }
 		  
+          // Targeted grip trash is finite and is not damage (an empty grip cannot flatline).
+          else if (eff == "trashGripCard" && iceAI) {
+            if (gripCardsTrashed < (iceAI.gripTrashLimit || 0) && gripCardsLeft > 0) {
+              gripCardsTrashed++;
+              gripCardsLeft--;
+            } else {
+              encounter_effects.splice(j, 1);
+              j--;
+            }
+          }
+
+          else if (eff == "netDamage" || eff == "meatDamage" || eff == "coreDamage") {
+            gripCardsLeft = Math.max(0, gripCardsLeft - 1);
+          }
+
           // A resolved self-trash removes this layer from subsequent traversals.
           else if (eff == "trashIce" && iceAI) {
             encounter_effects.splice(j, 1);
@@ -463,7 +482,7 @@ class RunCalculator {
             if (gained + (this._stackCardsConsumed || 0) >= runner.stack.length) {
               encounter_effects.splice(j, 1);
               j--;
-            }
+            } else gripCardsLeft++;
           }
 
           // Credit gains enter the pool immediately, before later ICE payments.
@@ -857,6 +876,7 @@ class RunCalculator {
       result += 1.3 * this.TotalDamage(totalEffect); //during 1.0 the runner seemed too willing to take damage
       if (totalEffect.tag) result += 2.4 * totalEffect.tag; //not sure about this
       if (totalEffect.misc_serious) result += 3.0 * totalEffect.misc_serious; //was 1.5 for quite some time but I think this wasn't enough
+      if (totalEffect.trashGripCard) result += 0.8 * totalEffect.trashGripCard;
       if (totalEffect.misc_moderate) result += 0.8 * totalEffect.misc_moderate;
       if (totalEffect.misc_minor) result += 0.3 * totalEffect.misc_minor;
 
@@ -912,7 +932,7 @@ class RunCalculator {
 		  if (damageLimit < 0) damageLimit = 0;
 		  //now check damage against limit
 		  reason = "damage";
-          if (totalDamage <= damageLimit + (totalEffect.gainGripCard || 0)) {
+          if (totalDamage <= Math.max(0, damageLimit + (totalEffect.gainGripCard || 0) - (totalEffect.trashGripCard || 0))) {
             var totalTag = 0;
             if (totalEffect.tag) totalTag += totalEffect.tag;
 			//update tag limit based on clicks and credits spent (unless it is set to Infinity)
@@ -1377,7 +1397,7 @@ class RunCalculator {
       icePoint.runner_credits_lost;
     var firstEffects = this.TotalEffect(icePoint);
     var gainedCards = firstEffects.gainGripCard || 0;
-    var firstDamage = this.TotalDamage(firstEffects) - gainedCards;
+    var firstDamage = this.TotalDamage(firstEffects) + (firstEffects.trashGripCard || 0) - gainedCards;
     var futureOther = this._poolOnly ? 0 : (corp.badPublicity || 0);
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
     // Before a run, bad-publicity credits are included in the pool budget.

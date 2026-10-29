@@ -1236,6 +1236,8 @@ function Discard(card) {
  * @param {Object} [context] for afterTrashing
  */
 function Damage(damageType, num, canBePrevented, afterTrashing, context) {
+  // Legacy callers omit context for Corp damage; explicit Runner sources remain distinct.
+  intended.damageSourcePlayer = context && context.player ? context.player : corp;
   intended.damageType = damageType;
   intended.damage = num;
   var applyDamage = function() {

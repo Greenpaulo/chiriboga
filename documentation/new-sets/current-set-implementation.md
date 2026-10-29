@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**9 complete, 7 outstanding** (`7 Pending`, `0 In progress`, `0 Blocked`).
+**10 complete, 6 outstanding** (`6 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -60,7 +60,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 7 | 26093–26095 | Complete | Claude, 2026-10-23 | Neutral Runner: Buffer Drive, Daily Casts, DreamNet. Existing Daily Casts and DreamNet repaired and verified. |
 | 8 | 26096–26100 | Complete | Claude, 2026-10-23 | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
 | 9 | 26101–26105 | Complete | Codex, 2026-10-29 | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
-| 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
+| 10 | 26106–26108 | Complete | Codex, 2026-10-29 | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
 | 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
 | 12 | 26113–26116 | Pending | — | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
 | 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
@@ -83,6 +83,8 @@ the shared Lockdown mechanic first needed in batch 9.
 
 | 9 | 26101–26105 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Drafter recovery/free installs; Týr click breaks and next-turn Corp bonus; shared Lockdown lifecycle and NEXT strength/break-source restrictions in both AIs; Scapenet trace/removal; Tranquility root-install bookkeeping and economy/draw. Real selectors and focused security/pricing checks; final full suite recorded in notes. |
 
+| 10 | 26106–26108 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Flower Sermon draw/filter and turn limits; Prāna damage prevention/economy and trash-cost cash-out; Engram type/reveal/target sequence and finite grip-loss run modeling. Real Corp selectors, prevention window and both calculators. |
+
 ## Batch-review log
 
 No independent reviews recorded.
@@ -92,7 +94,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**9 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**10 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
@@ -107,6 +109,8 @@ initialised when each implementation batch completes.
 | 8 | 26096–26100 | Pending | — | Corp scoring/protection and steal-risk estimates read printed points: Megaprix second-copy bonus and Vacheron 0-point steal not valued. Bass is not part of the fast-advance search (only exact one-click bursts or last click). Vaporframe free installs are ranked with paid-install inhibition, so cost-free outer ice is undervalued; no plan for its trash response as bait. Cerebral Overwriter fires whenever affordable (no credit-reserve trade-off); advancement limit fixed at 3. |
 
 | 9 | 26101–26105 | Pending | — | Drafter recurrence/free-install sequencing and cost inhibition; Týr future Corp click valuation; NEXT scoring-window timing; Scapenet ELO targets/shared trace bids; Tranquility placement and install/rez timing. See implementation notes for baseline evidence and limits. |
+
+| 10 | 26106–26108 | Pending | — | Flower Sermon off-turn/access-defense timing and return sequencing; Prāna prevention-aware kill combos and economy trade-offs; Engram type prediction and contextual target values. Hypothetical grip contents across earlier ICE/reruns remain approximate. See implementation notes. |
 
 ## Optimisation log
 

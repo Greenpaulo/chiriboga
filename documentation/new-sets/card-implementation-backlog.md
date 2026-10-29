@@ -66,10 +66,10 @@ verification; see the [transition snapshot](history/downfall-2026-10-23-implemen
 ### Uprising
 
 Active implementation set (26066–26130). `sets/uprising.js` defines all 65 cards.
-Batches 1–9 (26066–26105) are complete with baseline AI, including the six
+Batches 1–10 (26066–26108) are complete with baseline AI, including the six
 pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095), which were
 verified and repaired where needed. Their optimisation rows are Pending in the
-tracker. Batches 10–16 (26106–26130) remain scaffolds with TODO markers. See the
+tracker. Batches 11–16 (26109–26130) remain scaffolds with TODO markers. See the
 [active tracker](current-set-implementation.md) and
 [implementation notes](uprising-implementation-notes.md).
 

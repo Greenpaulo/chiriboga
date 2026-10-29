@@ -3974,7 +3974,51 @@ cardSet[26106] = {
   subTypes: [],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  usedThisTurn: false,
+  responseOnScored: {
+    Resolve: function () { if (intended.score == this) AddCounters(this, "agenda", 5); },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; }, automatic: true,
+  },
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; }, automatic: true,
+  },
+  abilities: [{
+    text: "Hosted agenda counter: Reveal the top card of R&D, draw 2, then put 1 card from HQ on R&D.",
+    Enumerate: function () {
+      if (this.usedThisTurn || !CheckCounters(this, "agenda", 1)) return [];
+      if (corp.AI && (corp.RnD.cards.length < 2 || corp.HQ.cards.length >= MaxHandSize(corp) ||
+          playerTurn != corp || !CheckActionClicks(corp, 1))) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      this.usedThisTurn = true;
+      RemoveCounters(this, "agenda", 1);
+      var drawAndReturn = function () {
+        Draw(corp, 2, function () {
+          var choices = ChoicesArrayCards(corp.HQ.cards);
+          if (!choices.length) return;
+          if (corp.AI) {
+            // Own hand only: keep the strongest immediate cards, bury a low-ELO non-agenda.
+            var best = choices[0];
+            var value = function (card) { return (card.elo || 0) + (card.cardType == "agenda" ? 1000 : 0); };
+            choices.forEach(function (choice) { if (value(choice.card) < value(best.card)) best = choice; });
+            corp.AI.preferred = {title: this.title, option: best};
+          }
+          DecisionPhase(corp, choices, function (params) {
+            MoveCard(params.card, corp.RnD.cards);
+            Log("1 card added from HQ to the top of R&D");
+          }, this.title, "Add 1 card to the top of R&D", this);
+        }, this);
+      };
+      if (corp.RnD.cards.length)
+        Reveal(corp.RnD.cards[corp.RnD.cards.length - 1], drawAndReturn, this, runner, false, corp);
+      else drawAndReturn.call(this);
+    },
+  }],
+  AITriggerWhenCan: true,
 };
 
 //Prāna Condenser (26107)
@@ -3991,7 +4035,48 @@ cardSet[26107] = {
   subTypes: [],
   rezCost: 1,
   trashCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  power: 0,
+  responsePreventableDamage: {
+    Enumerate: function () {
+      return intended.damageType == "net" && intended.damage > 0 &&
+        intended.damageSourcePlayer != runner ? [{}] : [];
+    },
+    Resolve: function () {
+      var choices = [{use: true, label: "Prevent 1 net damage and gain 3 credits", button: "Prevent"},
+        {use: false, label: "Do not prevent", button: "Continue"}];
+      if (corp.AI) corp.AI.preferred = {title: this.title,
+        option: choices[intended.damage > runner.grip.length ? 1 : 0]};
+      DecisionPhase(corp, choices, function (params) {
+        if (!params.use || intended.damageType != "net" || intended.damage < 1) return;
+        intended.damage--;
+        AddCounters(this, "power", 1);
+        GainCredits(corp, 3, "", this);
+      }, this.title, "Prevent 1 net damage?", this);
+    },
+    text: "Prāna Condenser: prevent 1 net damage",
+  },
+  abilities: [{
+    text: "[click][click], [trash]: Do 1 net damage for each hosted power counter.",
+    Enumerate: function () {
+      if (!this.rezzed || !CheckActionClicks(corp, 2) || !CheckTrash(this)) return [];
+      if (corp.AI && Counters(this, "power") <= runner.grip.length) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var amount = Counters(this, "power");
+      SpendClicks(corp, 2);
+      Trash(this, false, function () { Damage("net", amount, true, null, this); }, this);
+    },
+  }],
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (!CheckCredits(corp, this.rezCost, "rezzing", this) || InstalledCards(corp).some(function (card) {
+      return card.title == "Prāna Condenser";
+    })) return -1;
+    return emptyProtectedRemotes.length;
+  },
+  AIRezWhenCan: function () { return true; },
+  AITriggerWhenCan: true,
 };
 
 //Engram Flush (26108)
@@ -4009,11 +4094,75 @@ cardSet[26108] = {
   subTypes: ["Code Gate", "Observer"],
   rezCost: 2,
   strength: 5,
+  chosenType: null,
+  responseOnEncounter: {
+    Enumerate: function () { return GetApproachEncounterIce() == this ? [{}] : []; },
+    Resolve: function () {
+      this.chosenType = null;
+      var choices = ["event", "hardware", "program", "resource", "identity", "agenda", "asset", "ice", "operation", "upgrade"]
+        .map(function (type) { return {type: type, label: type, button: type}; });
+      if (corp.AI) {
+        var observed = runner.heap.concat(InstalledCards(runner));
+        var best = choices[0], highest = -1;
+        choices.forEach(function (choice) {
+          var count = observed.filter(function (card) { return card.cardType == choice.type; }).length;
+          if (count > highest) { best = choice; highest = count; }
+        });
+        corp.AI.preferred = {title: this.title, option: best};
+      }
+      DecisionPhase(corp, choices, function (params) {
+        this.chosenType = params.type;
+        Log(GetTitle(this) + " chose " + params.type);
+      }, this.title, "Choose a card type", this);
+    },
+    text: "Choose a card type",
+  },
+  responseOnEncounterEnds: {
+    Resolve: function () { this.chosenType = null; }, automatic: true, availableWhenInactive: true,
+  },
+  responseOnRunEnds: {
+    Resolve: function () { this.chosenType = null; }, automatic: true, availableWhenInactive: true,
+  },
+  _revealGrip: function () {
+    var source = this, revealed = runner.grip.slice(), chosenType = this.chosenType;
+    function revealNext(index) {
+      if (index < revealed.length) {
+        Reveal(revealed[index], function () { revealNext(index + 1); }, source, corp, false, corp);
+        return;
+      }
+      var choices = ChoicesArrayCards(revealed.filter(function (card) {
+        return card.cardLocation == runner.grip && card.cardType == chosenType && CheckTrash(card);
+      }));
+      if (!choices.length) return;
+      choices.push({card: null, label: "Do not trash a card", button: "Continue"});
+      if (corp.AI) {
+        var best = choices[0];
+        choices.forEach(function (choice) { if (choice.card && choice.card.elo > best.card.elo) best = choice; });
+        corp.AI.preferred = {title: source.title, option: best};
+      }
+      var decision = DecisionPhase(corp, choices, function (params) {
+        if (params.card) Trash(params.card, true, null, source);
+      }, source.title, "Trash up to 1 revealed " + chosenType, source);
+      // The entire grip was revealed, but this permission lasts only for this decision.
+      decision.privateLook = {player: corp, cards: revealed};
+    }
+    revealNext(0);
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {text: "Reveal the grip.", Resolve: function () { this._revealGrip(); }, visual: {y: 162, h: 16}},
+    {text: "Reveal the grip.", Resolve: function () { this._revealGrip(); }, visual: {y: 182, h: 16}},
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var count = runner.grip.length;
+    // Only the Runner's calculator may inspect the grip. Corp probes use its public size.
+    if (runner.AI && runner.AI.rc == rc) {
+      var types = {};
+      runner.grip.forEach(function (card) { types[card.cardType] = (types[card.cardType] || 0) + 1; });
+      count = this.chosenType ? (types[this.chosenType] || 0) :
+        Object.keys(types).reduce(function (max, type) { return Math.max(max, types[type]); }, 0);
+    }
+    result.gripTrashLimit = Math.min(2, count);
+    result.sr = result.gripTrashLimit > 0 ? [[["trashGripCard"]], [["trashGripCard"]]] : [[[]], [[]]];
     return result;
   },
 };

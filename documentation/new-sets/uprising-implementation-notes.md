@@ -502,3 +502,66 @@ decklauncher identity changes, regenerated card status and `git diff --check`.
 The batch brief reports no unfinished markers for all five cards. All five
 existing ELO values are unchanged. No browser playtest or independent review
 is claimed. Next implementation batch: **10 (26106–26108)**.
+
+### Batch 10 (26106–26108) — 2026-10-29, Codex
+
+- Flower Sermon gains five counters on its own score, spends a counter without
+  a click, reveals before drawing two, and returns a mandatory HQ choice only
+  after the draw and its responses finish. Either turn boundary resets use.
+  Human activation can deck out, including an empty R&D; the counter is still
+  spent and the return instruction does not continue after a failed Corp draw.
+  The baseline AI uses its ordinary trigger selector for a safe action-phase
+  draw with room in HQ, then returns a low-ELO non-agenda from its own hand.
+- Prāna Condenser is unique. Its optional interrupt uses the existing
+  `responsePreventableDamage` window: once per packet, prevent one remaining net
+  damage, add one power counter and gain three credits. Declining, damage of
+  another type, fully prevented and unpreventable damage give no reward.
+  `Damage` now records `intended.damageSourcePlayer` from the source card's
+  context (`context.player`), defaulting to Corp for legacy callers that omit
+  context. Explicit Runner-sourced damage cannot feed Prāna. Callers using this
+  distinction must pass their source card as the existing context argument.
+  Its two-click cash-out snapshots counters and trashes the asset as a cost
+  before dealing preventable net damage. Baseline AI installs/rezzes it, takes
+  nonlethal economy exchanges, preserves lethal damage, and cashes out when
+  counters exceed the public grip size. It does not model prevention tools when
+  judging the apparent kill.
+- Engram Flush chooses from all card types before revealing the grip, reveals
+  every card with the existing reveal API (including actor notifications), then
+  optionally trashes one legal matching card. A second subroutine reveals the
+  current grip anew. Reveals clear temporary face-up state; a decision-scoped
+  `privateLook` grants access to the revealed grip only while choosing a target.
+  The chosen type clears on encounter and run end, even if inactive. The Corp
+  chooses a type from public installed/heap frequencies and ranks revealed
+  targets by ELO; it never reads the hidden grip to select the encounter type.
+- Shared calculator addition: `trashGripCard` with `gripTrashLimit` caps finite
+  targeted grip loss across the surviving subroutines and the remaining grip
+  after earlier modeled damage, draws and targeted trashes. Card loss has its own
+  route cost, reduces later damage capacity and finite-run continuation budgets,
+  and never counts as damage or a flatline by itself. The Runner calculator may
+  count matching types; the Corp calculator uses only grip size. No new AI hook
+  name is introduced.
+
+Baseline evidence: `tests/uprising-integration.test.js` exercises useful real
+Corp draw/trigger, install, rez and revealed-card choices, the real prevention
+window's once-per-packet consumption, full mechanics/cost ordering and guards,
+cleanup, and both run calculators. No browser/manual-play evidence is claimed.
+
+Optional deeper strategy: Flower Sermon activation during the Runner's turn,
+HQ access defense and return-card sequencing; Prāna damage-versus-economy and
+prevention-aware kill combinations; Engram type prediction from previously
+revealed hands and contextual target value. Run modeling uses a type-count
+prior rather than maintaining exact hypothetical grip contents through earlier
+ICE, targeted trashes or subsequent runs.
+
+Final verification: syntax checks for all edited JavaScript, the Uprising focused
+integration test, AI-hook documentation, Eternal format, format-aware deck pool,
+deck-launcher identity changes, batch brief (all three cards have no unfinished
+markers), regenerated card status, and `git diff --check` passed. The initial
+Node 20.19.0 full run passed all 135 files. A subsequent focused depletion
+regression exposed overcounting grip trash after earlier damage; it was fixed
+and its focused tests passed before repeating final validation on the final
+source state.
+The final full rerun also exited 0: **135 full test files passed**, including
+Corp decision fixtures and decision snapshots. Output and exit status were
+saved to `/tmp/uprising-batch10-final-full.log` and
+`/tmp/uprising-batch10-final-full.exit` respectively.

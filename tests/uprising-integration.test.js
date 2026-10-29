@@ -70,6 +70,8 @@ const put = (card, zone) => {card.cardLocation = zone; card.renderer = renderer(
 const card = id => Object.assign({}, c.cardSet[id]);
 let decisions = [];
 const realDecisionPhase = c.DecisionPhase;
+const realTriggeredResponsePhase = c.TriggeredResponsePhase;
+const realOpportunityForAvoidPrevent = c.OpportunityForAvoidPrevent;
 c.DecisionPhase = (player, choices, resolve, title, instruction, context, command, cancel) => {
   if (player === runner) choices = c.LegalBreakChoices(context, choices);
   const decision = {player, choices, title, command, cancel, choose: option => resolve.call(context, option)};
@@ -376,3 +378,231 @@ assert.strictEqual(guardedDecision.Enumerate.continue().length, 1);
 assert.strictEqual(guardedDecision.Enumerate.continue()[0].subroutine, null);
 
 if (process.env.VERBOSE) console.log('uprising batch 9: gameplay and real AI consumers passed');
+
+// Batch 10: Flower Sermon score counters, free paid draw/filter and turn limits.
+reset();
+const sermon = put(card(26106), corp.scoreArea);
+c.intended.score = {}; sermon.responseOnScored.Resolve.call(sermon);
+assert.strictEqual(c.Counters(sermon, 'agenda'), 0, 'other scores add no counters');
+c.intended.score = sermon; sermon.responseOnScored.Resolve.call(sermon);
+assert.strictEqual(sermon.agenda, 5);
+const corpFiller = (title, elo = 1500) => ({title, elo, player: corp, cardType: 'operation', subTypes: [], playCost: 0});
+const runnerFiller = (title, type = 'event', elo = 1500) => ({title, elo, player: runner, cardType: type, subTypes: []});
+const bottom = put(corpFiller('Bottom'), corp.RnD.cards);
+const returnCard = put(corpFiller('Low value card', 1000), corp.RnD.cards);
+const top = put(corpFiller('Top', 1900), corp.RnD.cards);
+put(corpFiller('Useful HQ card', 1800), corp.HQ.cards);
+let sermonCommands = c.EnumeratePhase();
+assert.strictEqual(sermonCommands[ai.Choice(sermonCommands, 'command')], 'trigger', 'real selector uses scored draw/filter');
+assert.strictEqual(ai.preferred.cardToTrigger, sermon); ai.preferred = null;
+const sermonAbility = c.ChoicesTriggerableAbilities(corp).find(option => option.card === sermon);
+c.TriggerAbility(sermon, sermonAbility.ability);
+d = decisions.shift(); d.choose(d.choices[0]);
+assert.strictEqual(sermon.agenda, 4); assert.strictEqual(corp.clickTracker, 3, 'agenda ability costs no clicks');
+assert.strictEqual(top.faceUp, true); assert.strictEqual(corp.HQ.cards.length, 1, 'reveal precedes draw');
+decisions.shift().choose({});
+assert.strictEqual(top.faceUp, false); assert(corp.HQ.cards.includes(top));
+d = decisions.shift(); assert.strictEqual(select(d).card, returnCard, 'real selector returns a low-value non-agenda');
+assert.strictEqual(corp.RnD.cards[corp.RnD.cards.length - 1], returnCard);
+assert.strictEqual(sermon.abilities[0].Enumerate.call(sermon).length, 0, 'once per turn');
+sermon.responseOnRunnerTurnBegins.Resolve.call(sermon);
+assert.strictEqual(sermon.usedThisTurn, false);
+sermon.responseOnCorpTurnBegins.Resolve.call(sermon);
+corp.RnD.cards.length = 1;
+assert.strictEqual(sermon.abilities[0].Enumerate.call(sermon).length, 0, 'AI avoids deck-out');
+const savedCorpAI10 = corp.AI; corp.AI = null;
+c.playerTurn = runner;
+assert.strictEqual(sermon.abilities[0].Enumerate.call(sermon).length, 1, 'human may use it during either turn');
+sermon.agenda = 0;
+assert.strictEqual(sermon.abilities[0].Enumerate.call(sermon).length, 0, 'counter required');
+corp.AI = savedCorpAI10;
+
+// Prāna: install/rez consumers, one prevention per damage packet, and lethal cash-out.
+reset();
+const prana = put(card(26107), corp.HQ.cards);
+let pranaInstalls = c.ChoicesCardInstall(prana);
+const pranaInstallIndex = ai._bestInstallOption(pranaInstalls, false);
+assert(pranaInstallIndex >= 0); assert.strictEqual(pranaInstalls[pranaInstallIndex].card, prana);
+c.MoveCard(prana, remote().root); c.InvalidateActiveTriggerCandidateCache();
+c.playerTurn = runner; c.activePlayer = corp; c.currentPhase = c.phases.runnerPostAction;
+let pranaCommands = c.EnumeratePhase();
+assert.strictEqual(pranaCommands[ai.Choice(pranaCommands, 'command')], 'rez');
+assert.strictEqual(ai.preferred.cardToRez, prana); ai.preferred = null;
+corp.creditPool = 0;
+assert(!c.EnumeratePhase().includes('rez'), 'cannot rez without credits');
+corp.creditPool = 10; prana.rezzed = true; c.InvalidateActiveTriggerCandidateCache();
+put(runnerFiller('Grip one'), runner.grip); put(runnerFiller('Grip two'), runner.grip);
+let preventionPackets = 0;
+const priorPrevention10 = c.OpportunityForAvoidPrevent;
+c.OpportunityForAvoidPrevent = (player, name, params, after) => {
+  assert.strictEqual(name, 'responsePreventableDamage'); preventionPackets++;
+  const choices = prana.responsePreventableDamage.Enumerate.call(prana);
+  if (choices.length) {
+    prana.responsePreventableDamage.Resolve.call(prana);
+    select(decisions.shift());
+  }
+  after();
+};
+c.Damage('net', 2, true, null, {player: corp});
+assert.strictEqual(preventionPackets, 1); assert.strictEqual(prana.power, 1);
+assert.strictEqual(corp.creditPool, 13); assert.strictEqual(runner.grip.length, 1, 'prevents one, not whole packet');
+c.Damage('net', 1, true, null, {player: runner});
+assert.strictEqual(prana.power, 1, 'does not prevent Runner-sourced damage');
+put(runnerFiller('Replacement'), runner.grip);
+c.Damage('meat', 1, true);
+assert.strictEqual(prana.power, 1, 'net only');
+put(runnerFiller('Unpreventable victim'), runner.grip);
+c.Damage('net', 1, false);
+assert.strictEqual(prana.power, 1, 'unpreventable damage offers no prevention');
+put(runnerFiller('Decline victim'), runner.grip);
+c.OpportunityForAvoidPrevent = (player, name, params, after) => {
+  prana.responsePreventableDamage.Resolve.call(prana);
+  d = decisions.shift(); d.choose(d.choices.find(option => !option.use)); after();
+};
+c.Damage('net', 1, true);
+assert.strictEqual(prana.power, 1, 'human may decline');
+c.intended.damageType = 'net'; c.intended.damage = 2; c.intended.damageSourcePlayer = corp;
+prana.responsePreventableDamage.Resolve.call(prana);
+assert.strictEqual(select(decisions.shift()).use, false, 'AI preserves lethal damage');
+c.OpportunityForAvoidPrevent = priorPrevention10;
+c.playerTurn = corp; c.activePlayer = corp; c.currentPhase = c.phases.corpActionMain;
+prana.power = 2; corp.clickTracker = 1;
+assert(!c.ChoicesTriggerableAbilities(corp).some(option => option.card === prana), 'two clicks required');
+corp.clickTracker = 3;
+put(runnerFiller('Cash-out victim'), runner.grip);
+pranaCommands = c.EnumeratePhase();
+assert.strictEqual(pranaCommands[ai.Choice(pranaCommands, 'command')], 'trigger');
+assert.strictEqual(ai.preferred.cardToTrigger, prana); ai.preferred = null;
+const pranaTrigger = c.ChoicesTriggerableAbilities(corp).find(option => option.card === prana);
+let pranaDamage, pranaWasTrashed = false;
+c.Damage = (type, amount, preventable) => {
+  pranaDamage = [type, amount, preventable]; pranaWasTrashed = corp.archives.cards.includes(prana);
+};
+c.TriggerAbility(prana, pranaTrigger.ability); d = decisions.shift(); d.choose(d.choices[0]);
+c.Damage = realDamage;
+assert.deepStrictEqual(pranaDamage, ['net', 2, true]); assert(pranaWasTrashed, 'trash cost paid before damage');
+assert.strictEqual(corp.clickTracker, 1);
+assert(!c.ChoicesTriggerableAbilities(corp).some(option => option.card === prana), 'trashed asset inactive');
+
+// Engram: public-only type prior, reveals, optional legal target, second reveal and cleanup.
+reset();
+const flush = put(card(26108), corp.HQ.ice); flush.rezzed = true;
+c.attackedServer = corp.HQ; c.approachIce = 0; c.encountering = true;
+put(runnerFiller('Observed hardware', 'hardware'), runner.heap);
+const gripHigh = put(runnerFiller('High value hardware', 'hardware', 2000), runner.grip);
+const gripLow = put(runnerFiller('Low value hardware', 'hardware', 1000), runner.grip);
+const gripEvent = put(runnerFiller('Unmatched event'), runner.grip);
+assert.strictEqual(flush.responseOnEncounter.Enumerate.call(flush).length, 1);
+flush.responseOnEncounter.Resolve.call(flush);
+assert.strictEqual(select(decisions.shift()).type, 'hardware', 'real selector uses observed board, not hidden grip');
+const finishGripReveals = count => {
+  for (let i = 0; i < count; i++) {
+    const reveal = decisions.shift(); assert(reveal.title.startsWith('Revealing ')); reveal.choose({});
+  }
+};
+flush.subroutines[0].Resolve.call(flush); finishGripReveals(3);
+d = decisions.shift(); assert(!d.choices.some(option => option.card === gripEvent));
+assert.strictEqual(select(d).card, gripHigh, 'real selector trashes highest-value matching revealed card');
+assert(runner.heap.includes(gripHigh)); assert(!gripLow.faceUp && !gripEvent.faceUp, 'reveal leaves no persistent visibility');
+flush.subroutines[1].Resolve.call(flush); finishGripReveals(2);
+d = decisions.shift(); d.choose(d.choices.find(option => !option.card));
+assert(runner.grip.includes(gripLow), 'human may decline optional trash');
+flush.chosenType = 'program'; flush.subroutines[0].Resolve.call(flush); finishGripReveals(2);
+assert.strictEqual(decisions.length, 0, 'no chosen-type target completes after reveal');
+flush.responseOnEncounterEnds.Resolve.call(flush); assert.strictEqual(flush.chosenType, null);
+flush.chosenType = 'event'; flush.responseOnRunEnds.Resolve.call(flush); assert.strictEqual(flush.chosenType, null);
+c.MoveCard(gripLow, runner.heap); c.MoveCard(gripEvent, runner.heap);
+flush.subroutines[0].Resolve.call(flush); assert.strictEqual(decisions.length, 0, 'empty grip is harmless');
+
+// Both calculators use a finite, non-damage model; breaking either subroutine
+// protects the only matching card. The Corp calculator never inspects grip types.
+put(runnerFiller('One matching card', 'hardware'), runner.grip);
+put(runnerFiller('Other type', 'event'), runner.grip);
+flush.chosenType = 'hardware';
+const flushAI = rc.IceAI(flush, 10);
+assert.strictEqual(flushAI.gripTrashLimit, 1);
+const flushPoint = rc.EmptyPoint(0);
+const trashPath = rc.ValidateEncounterPoint(-1, flushPoint, false, ['trashGripCard', 'trashGripCard'], [], flushAI);
+assert.strictEqual(rc.TotalEffect(trashPath).trashGripCard, 1, 'one card cannot be trashed twice');
+assert(!rc.TotalEffect(trashPath).netDamage, 'targeted trash is not damage');
+assert.strictEqual(flushPoint.effects.length, 0, 'input branch unchanged');
+const oneSubPath = rc.ValidateEncounterPoint(-1, flushPoint, false, ['trashGripCard'], [], flushAI);
+assert.strictEqual(rc.TotalEffect(oneSubPath).trashGripCard, 1, 'either surviving subroutine still threatens the card');
+flush.chosenType = 'program';
+const noTargetPath = rc.ValidateEncounterPoint(-1, flushPoint, false, ['trashGripCard', 'trashGripCard'], [], rc.IceAI(flush, 10));
+assert(!rc.TotalEffect(noTargetPath).trashGripCard, 'Runner calculator recognizes no matching type');
+const corpRC10 = ai._securityRunCalculator();
+assert.strictEqual(corpRC10.IceAI(flush, 10, false, false, -1, corp).gripTrashLimit, 2, 'Corp uses public grip size');
+assert.strictEqual(ai._countETRSubroutines(flush), 0);
+
+if (process.env.VERBOSE) console.log('uprising batch 10: gameplay and real AI consumers passed');
+
+// Targeted trash reduces later damage capacity without causing a flatline itself.
+assert(rc.ValidPoint(trashPath, 0, 4, 10, 0, Infinity).valid, 'trash alone is legal even with zero damage budget');
+const afterTrashDamage = rc.ValidateEncounterPoint(-1, trashPath, false, ['netDamage', 'netDamage'], [], null);
+assert(!rc.ValidPoint(afterTrashDamage, 2, 4, 10, 0, Infinity).valid, 'lost grip card reduces subsequent damage capacity');
+assert(rc.PointCost(trashPath) > 0, 'targeted trash has a cost in route ranking');
+
+// Exercise the real triggered window: the prevention cannot be repeated on one packet.
+reset();
+const windowPrana = put(card(26107), remote().root); windowPrana.rezzed = true;
+for (let i = 0; i < 4; i++) put(runnerFiller('Packet victim ' + i), runner.grip);
+c.InvalidateActiveTriggerCandidateCache();
+c.TriggeredResponsePhase = realTriggeredResponsePhase;
+c.OpportunityForAvoidPrevent = realOpportunityForAvoidPrevent;
+c.Damage('net', 3, true);
+const preventionWindow = c.currentPhase;
+const windowTriggers = preventionWindow.Enumerate.trigger();
+assert.strictEqual(windowTriggers.length, 1); assert.strictEqual(windowTriggers[0].card, windowPrana);
+preventionWindow.Resolve.trigger(windowTriggers[0]);
+d = decisions.shift(); d.choose(d.choices[0]); select(decisions.shift());
+c.currentPhase = preventionWindow;
+assert.strictEqual(preventionWindow.Enumerate.trigger().length, 0, 'one interrupt per damage instance');
+assert.strictEqual(windowPrana.power, 1); assert.strictEqual(c.intended.damage, 2);
+// Return through the real window to apply the remaining damage.
+preventionWindow.Resolve.n({}); preventionWindow.Resolve.n({});
+// Trash's response window may have no candidates and complete synchronously.
+assert.strictEqual(runner.grip.length, 2);
+
+// Engram's ordinary rez route is useful with a grip to threaten and affordable.
+c.TriggeredResponsePhase = (player, name, params, after) => {if (after) after();};
+c.OpportunityForAvoidPrevent = priorPrevention10;
+reset();
+const rezFlush = put(card(26108), corp.HQ.ice);
+put({title: 'Protected agenda', player: corp, cardType: 'agenda', subTypes: [], agendaPoints: 2, advancementRequirement: 3}, corp.HQ.cards);
+put(runnerFiller('Hidden event'), runner.grip);
+c.attackedServer = corp.HQ; c.approachIce = 0; c.playerTurn = runner; c.activePlayer = corp;
+c.currentPhase = c.phases.runApproachIce; runner.clickTracker = 0;
+const flushRezCommands = c.EnumeratePhase();
+assert.strictEqual(flushRezCommands[ai.Choice(flushRezCommands, 'command')], 'rez');
+assert.strictEqual(ai.preferred.cardToRez, rezFlush); ai.preferred = null;
+corp.creditPool = 1;
+assert(!c.EnumeratePhase().includes('rez'), 'Engram printed rez cost is enforced');
+
+// Flower Sermon still pays its cost if a human chooses a draw that decks out.
+reset();
+const emptySermon = put(card(26106), corp.scoreArea); emptySermon.agenda = 1;
+const oldWin10 = c.PlayerWin; let deckOut10 = null;
+c.PlayerWin = (winner, reason) => {deckOut10 = {winner, reason};};
+corp.AI = null;
+emptySermon.abilities[0].Resolve.call(emptySermon);
+assert.strictEqual(deckOut10.winner, runner); assert.strictEqual(emptySermon.agenda, 0);
+assert.strictEqual(decisions.length, 0, 'deck-out does not continue to the return instruction');
+corp.AI = savedCorpAI10; c.PlayerWin = oldWin10;
+
+// Earlier ICE can empty the grip before Engram; it cannot trash nonexistent cards.
+reset();
+put(runnerFiller('Before damage 1'), runner.grip);
+put(runnerFiller('Before damage 2'), runner.grip);
+const priorDamage10 = rc.ValidateEncounterPoint(0, rc.EmptyPoint(1), false, ['netDamage', 'netDamage'], [], null);
+const depletedGrip10 = rc.ValidateEncounterPoint(-1, priorDamage10, false,
+  ['trashGripCard', 'trashGripCard'], [], {gripTrashLimit: 2});
+assert(!rc.TotalEffect(depletedGrip10).trashGripCard, 'prior damage leaves no grip cards to trash');
+const sameEncounterDepleted10 = rc.ValidateEncounterPoint(-1, rc.EmptyPoint(0), false,
+  ['netDamage', 'netDamage', 'trashGripCard'], [], {gripTrashLimit: 2});
+assert(!rc.TotalEffect(sameEncounterDepleted10).trashGripCard, 'effect order also caps loss within an encounter');
+const priorTrash10 = rc.ValidateEncounterPoint(0, rc.EmptyPoint(1), false,
+  ['trashGripCard', 'trashGripCard'], [], {gripTrashLimit: 2});
+const afterPriorTrash10 = rc.ValidateEncounterPoint(-1, priorTrash10, false,
+  ['trashGripCard'], [], {gripTrashLimit: 2});
+assert.strictEqual(rc.TotalEffect(afterPriorTrash10).trashGripCard, 2, 'earlier targeted trashes also deplete the grip');
