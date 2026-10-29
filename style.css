@@ -621,6 +621,15 @@ body.card-zoom-active canvas {
   z-index: 3;
 }
 
+/* Keep decision and resume controls available during forced subroutine zoom. */
+body.card-zoom-active #footer {
+  z-index: 4;
+}
+
+body.card-zoom-active #passpriority {
+  z-index: 4;
+}
+
 #footer {
   z-index: 2;
   position: fixed;

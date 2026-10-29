@@ -841,7 +841,7 @@ function Render() {
   if (viewingPlayer == runner)
     gripCascade = new CardRenderer.Cascade(
       RenderCards(runner.grip, FaceUpNoTint),
-      spreadXStep * 1.1,
+      spreadXStep,
       0,
       hostingX
     );

@@ -1224,7 +1224,8 @@ var CardRenderer = {
             this.card === GetMostRelevantIce()
           )
         ) {
-          scalingratio = 0.5; //this is different to forceCropped since it also unzooms dragging cards
+          // Preserve hand size on a stationary press; shrink once dragging starts.
+          scalingratio = !this.zoomed && !pixi_dragMoved ? pixi_cardBaseScale(this.card) : 0.5;
           //special rules for facedown cards
           if (!this.faceUp) {
             this.flipProgress = -1.0;
@@ -1237,11 +1238,13 @@ var CardRenderer = {
             }
           }
         }
-        //make sure card isn't bigger than screen (assumes image dimensions 300x419)
-        if ((scalingratio * 300) / fieldZoom > window.innerWidth)
-          scalingratio = (fieldZoom * window.innerWidth) / 300;
-        if ((scalingratio * 419) / fieldZoom > window.innerHeight)
-          scalingratio = (fieldZoom * window.innerHeight) / 419;
+        // Fit the displayed orientation (source images are 300x419).
+        var fitWidth = this.forceIceRotation ? 419 : 300;
+        var fitHeight = this.forceIceRotation ? 300 : 419;
+        if ((scalingratio * fitWidth) / fieldZoom > window.innerWidth)
+          scalingratio = (fieldZoom * window.innerWidth) / fitWidth;
+        if ((scalingratio * fitHeight) / fieldZoom > window.innerHeight)
+          scalingratio = (fieldZoom * window.innerHeight) / fitHeight;
         //animate the scale
         var scaleDiff = scalingratio - this.sprite.scale.y;
         var scalingSpeed = Math.max(0.1, -0.5 * scaleDiff + 1); //keep larger previews growing even on zoomed-out boards
@@ -2360,6 +2363,7 @@ function pixi_shouldDimCounterWhileReadingZoom(counter) {
 
 var pixi_draggingData = null;
 var pixi_draggingCard = null;
+var pixi_dragMoved = false; //latched only after the movement threshold is crossed
 var pixi_mouseStart = { x: 0, y: 0 };
 var pixi_mousePosition = { x: 0, y: 0 };
 var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = timeout running
@@ -2393,6 +2397,7 @@ var pixi_subroutineDelay = 0; //to help prevent unwanted card unzoom when select
 
 function pixi_onDragStart(event) {
   pixi_holdCard = this.card;
+  pixi_dragMoved = false;
   pixi_holdZoom = false;
   //note this is all in the context of sprite
   if (event.data.pointerType == "touch") {
@@ -2444,6 +2449,7 @@ function pixi_onDragEnd(event) {
   this.alpha = 1;
   this.dragging = false;
   pixi_draggingCard = null;
+  pixi_dragMoved = false;
   // set the interaction data to null
   this.data = null;
   pixi_draggingData = null;
@@ -2470,6 +2476,7 @@ function pixi_onDragMove(event) {
   }
 
   if (this.dragging) {
+    pixi_dragMoved = true;
     this.position.x = pixi_mousePosition.x;
     this.position.y = pixi_mousePosition.y;
   }
