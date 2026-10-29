@@ -1,0 +1,2934 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Topan: Ormas Leader,3 Wildcat Strike,3 Botulus,3 Buzzsaw,3 Fermenter,3 Leech,1 Docklands Pass,3 Creative Commission,3 Echelon,3 Jailbreak,3 Sure Gamble,3 T400 Memory Diamond,3 Verbal Plasticity,2 Scrounge,3 Bling,3 Gourmand,3 Rising Tide,2 Clean Getaway]
+[Hyoubu Institute: Absolute Clarity,1 Fully Operational,3 Project Yagi-Uda,3 Sting!,3 Public Health Portal,2 Storgotic Resonator,2 Saisentan,1 Complete Image,2 Letheia Nisei,3 Urtica Cipher,1 Neurospike,3 Send a Message,2 Palisade,3 Hedge Fund,1 Proprionegation,2 Empiricist,3 Mycoweb,3 Semak-samun,3 Peer Review,1 Mitra Aman,3 Measured Response,2 Lionsmane,2 The Red Room]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Palisade,Mycoweb,Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gourmand,Echelon,Creative Commission,Botulus]
+Corp drew a card
+Corp spent one click
+Corp installed ice protecting HQ
+Corp spent one click
+Corp spent 4 credits
+Played Peer Review
+Corp gained one credit
+The Red Room revealed
+Project Yagi-Uda revealed
+Mycoweb revealed
+Corp gained 7 credits
+Rewinding...
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Palisade,Mycoweb,Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Jailbreak,Creative Commission,Echelon,Fermenter,Fermenter]
+Corp drew a card
+Corp spent one click
+Corp installed ice protecting HQ
+Corp spent one click
+Corp installed a card in root of R&D
+Corp spent one click
+Corp installed ice protecting R&D
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Jailbreak,Creative Commission,Echelon,Fermenter,Fermenter]
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0973592442736255, cost 3.2)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0965334078507025, cost 4.5)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: there's one I would play
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost 1 click
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by installing Fermenter?
+AI: there is a card I would install for economy
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 4 card(s) in hand: [Jailbreak,Verbal Plasticity,Fermenter,Echelon]
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+Corp spent one click
+Corp gained one credit
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 3 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 4 card(s) in hand: [Jailbreak,Verbal Plasticity,Fermenter,Echelon]
+1 virus counter placed on Fermenter
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 0.9708652857755646, cost 4.5)
+AI: Don't want to run right now
+AI: maybe by installing Verbal Plasticity?
+AI: there is a card I would install for draw
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 3 credits
+Runner installed Verbal Plasticity
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 0.9466820130166335, cost 4.6)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 0.9557203563584401, cost 4.5)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by installing Fermenter?
+AI: there is a card I would install for economy
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+Corp spent one credit
+Corp rezzed The Red Room
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 3 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Echelon,Botulus,Scrounge,Jailbreak,Echelon]
+Corp drew a card
+Rewinding...
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 3 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Echelon,Botulus,Scrounge,Jailbreak,Echelon]
+Corp drew a card
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+Corp spent one click
+Corp drew a card
+Corp spent one click
+Corp drew a card
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response,Hedge Fund]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 5 card(s) in hand: [Echelon,Botulus,Scrounge,Jailbreak,Echelon]
+1 virus counter placed on Fermenter
+1 virus counter placed on Fermenter
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0571113029823356, cost 4.5)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 0.9084638847615227, cost 4.5)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: More credits could be nice
+AI: there is a card I would trigger for economy
+AI: a relevant preference has been set
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0092596854572826, cost 4.6)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: More credits could be nice
+AI: Ok not economy, something else?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent one credit
+Runner installed Rising Tide
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Best server to run is Archives with 0.6 potential and 0.0 cost
+RC: Approach server.
+RC: Approach server.
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 3 credits
+Played Clean Getaway
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+Runner gained 6 credits
+Hedge Fund accessed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response,Hedge Fund]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Jailbreak,Echelon,Echelon]
+Corp drew a card
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp rezzed Urtica Cipher
+Rewinding...
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response,Hedge Fund]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Jailbreak,Echelon,Echelon]
+Corp drew a card
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp spent one credit
+Card advanced
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 5 card(s) in hand: [Scrounge,Botulus,Jailbreak,Echelon,Echelon]
+1 virus counter placed on Fermenter
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Best server to run is Remote 1 with 5.1 potential and 3.9 cost
+RC: Approach server.
+RC: Approach server.
+AI: a relevant preference has been set
+Runner spent one click
+Run initiated attacking Remote 1
+Corp rezzed Urtica Cipher
+Approaching Remote 1
+Run successful
+Urtica Cipher accessed
+Runner takes 3 net damage
+Scrounge trashed
+Botulus trashed
+Jailbreak trashed
+Runner spent 2 credits
+Urtica Cipher trashed
+Run ends
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0985096466844595, cost 4.5)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: there is a card I would trigger for economy
+AI: a relevant preference has been set
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 5 card(s) in hand: [Echelon,Wildcat Strike,T400 Memory Diamond,Buzzsaw,Echelon]
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of HQ
+Corp spent one click
+Corp drew a card
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 5 card(s) in hand: [Echelon,Wildcat Strike,T400 Memory Diamond,Buzzsaw,Echelon]
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0776869461851453, cost 5.9)
+AI: Don't want to run right now
+AI: there is an event card I would play to draw
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Played Wildcat Strike
+Runner drew 4 cards
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0203244593521932, cost 4.5)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: maybe by installing T400 Memory Diamond?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Runner installed T400 Memory Diamond
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.063590589613367, cost 5.9)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: maybe by installing T400 Memory Diamond?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Runner installed T400 Memory Diamond
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: I don't need more of these
+Runner discarded Bling
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Sting!,Measured Response]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 7 card(s) in hand: [Fermenter,Echelon,Buzzsaw,Leech,Bling,Buzzsaw,Echelon]
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 7 card(s) in hand: [Fermenter,Echelon,Buzzsaw,Leech,Bling,Buzzsaw,Echelon]
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.074915626675816, cost 5.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.026967507384431, cost 5.9)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: More credits could be nice
+AI: maybe by installing Fermenter?
+AI: there is a card I would install for economy
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent one credit
+Runner installed Fermenter
+1 virus counter placed on Fermenter
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0680834728760444, cost 5.9)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: More credits could be nice
+AI: Ok not economy, something else?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Runner installed Bling
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+AI: More credits could be nice
+Runner spent one click
+Runner gained one credit
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 7 card(s) in hand: [Leech,Scrounge,Jailbreak,Buzzsaw,Buzzsaw,Echelon,Echelon]
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+Sting! scored
+Sting! net damage triggered
+Runner takes 1 net damage
+Echelon trashed
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 6 card(s) in hand: [Leech,Scrounge,Jailbreak,Buzzsaw,Buzzsaw,Echelon]
+1 virus counter placed on Fermenter
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.000323138960085, cost 5.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0228568515348837, cost 4.5)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Favouring setup (potential 1.0947149311377775, cost 4.5)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: Ok not economy, something else?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 4 credits
+Runner installed Buzzsaw
+AI: Suspected HQ:  (info HQ score: 0.0)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+Runner spent one click
+Runner gained one credit
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 7 card(s) in hand: [Scrounge,Buzzsaw,Wildcat Strike,Jailbreak,Verbal Plasticity,Leech,Echelon]
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of a remote server
+Rewinding...
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 7 card(s) in hand: [Scrounge,Buzzsaw,Wildcat Strike,Jailbreak,Verbal Plasticity,Leech,Echelon]
+Corp drew a card
+Corp spent one click
+Corp spent 4 credits
+Played Peer Review
+Corp gained one credit
+Public Health Portal revealed
+Neurospike revealed
+Project Yagi-Uda revealed
+Measured Response revealed
+Corp gained 7 credits
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp drew a card
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Sting!]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 7 card(s) in hand: [Scrounge,Buzzsaw,Wildcat Strike,Jailbreak,Verbal Plasticity,Leech,Echelon]
+1 virus counter placed on Fermenter
+AI: Suspected HQ: [1 Public Health Portal, 0.8 certainty][1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 3.6)
+AI: Favouring setup (potential 1.0629464491125595, cost 5.9)
+AI: Don't want to run right now
+AI: there is an event card I would play to draw
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Played Wildcat Strike
+Runner gained 6 credits
+AI: Suspected HQ: [1 Public Health Portal, 0.8 certainty][1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 3.6)
+AI: Favouring setup (potential 1.0894458980328687, cost 5.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ: [1 Public Health Portal, 0.8 certainty][1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 3.6)
+AI: Favouring setup (potential 1.0568127243952588, cost 5.9)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: there is a card I would trigger for economy
+AI: a relevant preference has been set
+Using Fermenter:
+Runner spent one click
+Fermenter trashed
+Runner gained 6 credits
+AI: Suspected HQ: [1 Public Health Portal, 0.8 certainty][1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 3.6)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner drew a card
+AI: I don't need more of these
+Runner discarded Verbal Plasticity
+AI: I don't need more of these
+Runner discarded Bling
+Corp spent 3 credits
+Corp rezzed Public Health Portal
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Sting!]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 7 card(s) in hand: [Echelon,Leech,Botulus,Buzzsaw,Jailbreak,Wildcat Strike,Scrounge]
+Reveal the top card of R&D and gain 2[c] triggered
+Mycoweb revealed
+Corp gained 2 credits
+Corp drew a card
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp spent one credit
+Card advanced
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 7 card(s) in hand: [Echelon,Leech,Botulus,Buzzsaw,Jailbreak,Wildcat Strike,Scrounge]
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.8)
+AI: Best server to run is Remote 3 with 5.1 potential and 7.1 cost
+RC: Approach unrezzed ice.
+RC: Choose first option at subroutine 1
+RC: Choose first option at subroutine 2
+RC: Approach server.
+RC: Approach server.
+AI: a relevant preference has been set
+Runner spent one click
+Run initiated attacking Remote 3
+Approaching outermost piece of ice protecting Remote 3
+Corp spent 8 credits
+Corp rezzed Mycoweb
+Encountering Mycoweb
+Firing You may install 1 piece of ice from Archives, ignoring all costs. on Mycoweb:
+Firing You may rez 1 installed piece of ice, paying 2[c] less. on Mycoweb:
+Corp spent 4 credits
+Corp rezzed Lionsmane
+Firing Resolve 1 subroutine on a rezzed sentry. on Mycoweb:
+Firing Do 2 net damage. on Lionsmane:
+Runner takes 2 net damage
+Jailbreak trashed
+Scrounge trashed
+Firing Resolve 1 subroutine on another rezzed code gate. on Mycoweb:
+Approaching Remote 3
+Run successful
+Sting! accessed
+Sting! stolen
+Sting! net damage triggered
+Runner takes 2 net damage
+Botulus trashed
+Leech trashed
+Run ends
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.8)
+AI: Favouring setup (potential 0.9240942765071902, cost 1.9)
+AI: Don't want to run right now
+AI: there is an event card I would play to draw
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Played Wildcat Strike
+Runner gained 6 credits
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.8)
+AI: Favouring setup (potential 0.9787059146564067, cost 1.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.8 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.8)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 0 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 20 credit(s), 0 tag(s) and 5 card(s) in hand: [Buzzsaw,Leech,Echelon,Gourmand,Buzzsaw]
+Reveal the top card of R&D and gain 2[c] triggered
+Urtica Cipher revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 0 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 20 credit(s), 0 tag(s) and 5 card(s) in hand: [Buzzsaw,Leech,Echelon,Gourmand,Buzzsaw]
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Best server to run is Remote 3 with 5.0 potential and 10.0 cost
+RC: Approach Mycoweb.
+RC: Modify strength of Buzzsaw by 1 with Buzzsaw
+RC: Modify strength of Buzzsaw by 1 with Buzzsaw
+RC: Break subroutines 1 and 2 with Buzzsaw
+RC: Break subroutines 3 and 4 with Buzzsaw
+RC: Approach server.
+RC: Approach server.
+AI: I should install Gourmand before running
+AI: a relevant preference has been set
+Runner spent one click
+Runner installed Gourmand
+Host top card of stack on Bling triggered
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+AI: AI (Installed): No decision made, choosing at random from:
+AI: [{host:true,label:Host top card of stack on Bling,button:Host,command:continue},{host:false,label:Decline,button:Decline,command:continue}]
+AI: Current phase identifier: Installed
+AI: Current phase title: Bling
+AI: Executing command: continue
+Verbal Plasticity hosted on Bling
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Best server to run is Remote 3 with 5.1 potential and 10.0 cost
+RC: Approach Mycoweb.
+RC: Modify strength of Buzzsaw by 1 with Buzzsaw
+RC: Modify strength of Buzzsaw by 1 with Buzzsaw
+RC: Break subroutines 1 and 2 with Buzzsaw
+RC: Break subroutines 3 and 4 with Buzzsaw
+RC: Approach server.
+RC: Approach server.
+AI: a relevant preference has been set
+Runner spent one click
+Run initiated attacking Remote 3
+Approaching outermost piece of ice protecting Remote 3
+All options have usability false, skipping phase
+Encountering Mycoweb
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent 3 credits
+Buzzsaw gets +1 strength
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent 3 credits
+Buzzsaw gets +1 strength
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent one credit
+Subroutine You may install 1 piece of ice from Archives, ignoring all costs. broken
+Subroutine You may rez 1 installed piece of ice, paying 2[c] less. broken
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent one credit
+Subroutine Resolve 1 subroutine on a rezzed sentry. broken
+Subroutine Resolve 1 subroutine on another rezzed code gate. broken
+All options have usability false, skipping phase
+Approaching Remote 3
+Run successful
+Urtica Cipher accessed
+Runner takes 4 net damage
+Buzzsaw trashed
+Leech trashed
+Echelon trashed
+Buzzsaw trashed
+Runner spent 2 credits
+Urtica Cipher trashed
+Run ends
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+Verbal Plasticity trashed
+Bling trashed 1 hosted card(s)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 0 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 3 card(s) in hand: [Creative Commission,Gourmand,Sure Gamble]
+Reveal the top card of R&D and gain 2[c] triggered
+Complete Image revealed
+Corp gained 2 credits
+Corp drew a card
+Valid option with undefined label:
+{id:grip,label:Reveal a random card from the grip,command:continue}
+Valid option with undefined label:
+{id:stack,label:Reveal the top card of the stack,command:continue}
+Using Hyoubu Institute: Absolute Clarity:
+Corp spent one click
+Sure Gamble revealed
+Corp spent one click
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 2 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Complete Image]
+SPOILER: Runner has 10 credit(s), 0 tag(s) and 3 card(s) in hand: [Creative Commission,Gourmand,Sure Gamble]
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Favouring setup (potential 1.0602378122796452, cost 6.1)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Best server to run is Remote 3 with 1.7 potential and 5.5 cost
+RC: Approach Mycoweb.
+RC: Choose first option at subroutine 1
+RC: Choose first option at subroutine 2
+RC: Choose second option at subroutine 3
+RC: Choose first option at subroutine 4
+RC: Approach server.
+RC: Approach server.
+AI: I should install Gourmand before running
+AI: a relevant preference has been set
+Runner spent one click
+Runner installed Gourmand
+Host top card of stack on Bling triggered
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: AI (Installed): No decision made, choosing at random from:
+AI: [{host:true,label:Host top card of stack on Bling,button:Host,command:continue},{host:false,label:Decline,button:Decline,command:continue}]
+AI: Current phase identifier: Installed
+AI: Current phase title: Bling
+AI: Executing command: continue
+Sure Gamble hosted on Bling
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Best server to run is Remote 3 with 1.5 potential and 6.3 cost
+RC: Approach Mycoweb.
+RC: Modify strength of Buzzsaw by 1 with Buzzsaw
+RC: Modify strength of Buzzsaw by 1 with Buzzsaw
+RC: Break subroutines 1 and 3 with Buzzsaw
+RC: Approach server.
+RC: Approach server.
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 3 credits
+Played Clean Getaway
+Run initiated attacking Remote 3
+Approaching outermost piece of ice protecting Remote 3
+Encountering Mycoweb
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent 3 credits
+Buzzsaw gets +1 strength
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent 3 credits
+Buzzsaw gets +1 strength
+AI: a relevant preference has been set
+Using Buzzsaw:
+Runner spent one credit
+Subroutine You may install 1 piece of ice from Archives, ignoring all costs. broken
+Subroutine Resolve 1 subroutine on a rezzed sentry. broken
+Firing You may rez 1 installed piece of ice, paying 2[c] less. on Mycoweb:
+Corp spent one credit
+Corp rezzed Palisade
+Firing Resolve 1 subroutine on another rezzed code gate. on Mycoweb:
+Approaching Remote 3
+Run successful
+Runner gained 6 credits
+Urtica Cipher accessed
+Runner takes 2 net damage
+Rising Tide trashed
+Creative Commission trashed
+Runner spent 2 credits
+Urtica Cipher trashed
+Run ends
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+Sure Gamble trashed
+Bling trashed 1 hosted card(s)
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 1 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Complete Image]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 2 card(s) in hand: [Jailbreak,Sure Gamble]
+Reveal the top card of R&D and gain 2[c] triggered
+Send a Message revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of a remote server
+Valid option with undefined label:
+{id:grip,label:Reveal a random card from the grip,command:continue}
+Valid option with undefined label:
+{id:stack,label:Reveal the top card of the stack,command:continue}
+Using Hyoubu Institute: Absolute Clarity:
+Corp spent one click
+Sure Gamble revealed
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Complete Image]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 2 card(s) in hand: [Jailbreak,Sure Gamble]
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Favouring setup (potential 1.0213366398257226, cost 5.5)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew a card
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+Corp spent one credit
+Corp rezzed The Red Room
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Complete Image]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 7 card(s) in hand: [Creative Commission,T400 Memory Diamond,Sure Gamble,Sure Gamble,Botulus,Jailbreak,Rising Tide]
+Reveal the top card of R&D and gain 2[c] triggered
+Peer Review revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp spent 4 credits
+Played Peer Review
+Complete Image revealed
+Neurospike revealed
+Project Yagi-Uda revealed
+Measured Response revealed
+AI: Suspected HQ: [1 Neurospike, 1.0 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 3.9)
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.9 certainty][1 Measured Response, 1.0 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.1)
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][1 Measured Response, 1.0 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.3)
+Corp gained 7 credits
+Corp spent one click
+Corp gained one credit
+Corp spent one click
+Corp gained one credit
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Complete Image]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 7 card(s) in hand: [Creative Commission,T400 Memory Diamond,Sure Gamble,Sure Gamble,Botulus,Jailbreak,Rising Tide]
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Favouring setup (potential 1.0745908080214346, cost 3.2)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Favouring setup (potential 0.9867071557074426, cost 3.2)
+AI: Don't want to run right now
+AI: Maybe the excess grip situation could be improved
+AI: maybe by installing T400 Memory Diamond?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Runner installed T400 Memory Diamond
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Favouring setup (potential 0.9516963091699192, cost 5.5)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: maybe by playing a card?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: maybe by playing a card?
+AI: there's one I would play
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Neurospike,Complete Image]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 7 card(s) in hand: [Echelon,Sure Gamble,Botulus,Sure Gamble,Docklands Pass,Rising Tide,Jailbreak]
+Reveal the top card of R&D and gain 2[c] triggered
+Proprionegation revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+All options have usability false, skipping phase
+Corp discarded Neurospike
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Complete Image,Proprionegation]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 7 card(s) in hand: [Echelon,Sure Gamble,Botulus,Sure Gamble,Docklands Pass,Rising Tide,Jailbreak]
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Best server to run is Remote 3 with 5.0 potential and 10.7 cost
+RC: Approach Mycoweb.
+RC: Choose first option at subroutine 1
+RC: Choose first option at subroutine 2
+RC: Choose second option at subroutine 3
+RC: Choose first option at subroutine 4
+RC: Approach server.
+RC: Approach server.
+AI: a relevant preference has been set
+Runner spent one click
+Run initiated attacking Remote 3
+Approaching outermost piece of ice protecting Remote 3
+All options have usability false, skipping phase
+Encountering Mycoweb
+Firing You may install 1 piece of ice from Archives, ignoring all costs. on Mycoweb:
+Firing You may rez 1 installed piece of ice, paying 2[c] less. on Mycoweb:
+Firing Resolve 1 subroutine on a rezzed sentry. on Mycoweb:
+Firing Do 2 net damage. on Lionsmane:
+Runner takes 2 net damage
+Sure Gamble trashed
+Rising Tide trashed
+Firing Resolve 1 subroutine on another rezzed code gate. on Mycoweb:
+All options have usability false, skipping phase
+Approaching Remote 3
+Run successful
+Send a Message accessed
+Send a Message stolen
+1 power counter placed on The Red Room
+You may rez 1 installed piece of ice, ignoring all costs triggered
+Corp rezzed Mycoweb
+Run ends
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Favouring setup (potential 1.0101846070179998, cost 3.2)
+AI: Don't want to run right now
+Runner spent one click
+Runner drew 2 cards
+Stack is empty
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Favouring setup (potential 0.9281780337311859, cost 3.2)
+AI: Don't want to run right now
+AI: More credits could be nice
+AI: maybe by playing a card?
+AI: there's one I would play
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty][1 Complete Image, 1.0 certainty] (info HQ score: 4.4)
+AI: Don't want to run right now
+AI: More credits could be nice
+Runner spent one click
+Runner gained one credit
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Complete Image,Proprionegation]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 6 card(s) in hand: [Docklands Pass,Leech,Echelon,Jailbreak,Gourmand,Botulus]
+Reveal the top card of R&D and gain 2[c] triggered
+Storgotic Resonator revealed
+Corp gained 2 credits
+Corp drew a card
+Using Hyoubu Institute: Absolute Clarity:
+Corp spent one click
+Botulus revealed
+Corp spent one click
+Corp spent 4 credits
+Played Complete Image
+Valid option with undefined label:
+{name:\\Knickknack\\ O'Brian,label:\\Knickknack\\ O'Brian,command:continue}
+Valid option with undefined label:
+{name:Abagnale,label:Abagnale,command:continue}
+Valid option with undefined label:
+{name:Access to Globalsec,label:Access to Globalsec,command:continue}
+Valid option with undefined label:
+{name:Account Siphon,label:Account Siphon,command:continue}
+Valid option with undefined label:
+{name:Aesop's Pawnshop,label:Aesop's Pawnshop,command:continue}
+Valid option with undefined label:
+{name:Afterimage,label:Afterimage,command:continue}
+Valid option with undefined label:
+{name:Aircheck,label:Aircheck,command:continue}
+Valid option with undefined label:
+{name:Akamatsu Mem Chip,label:Akamatsu Mem Chip,command:continue}
+Valid option with undefined label:
+{name:Always Have a Backup Plan,label:Always Have a Backup Plan,command:continue}
+Valid option with undefined label:
+{name:Aniccam,label:Aniccam,command:continue}
+Valid option with undefined label:
+{name:Armitage Codebusting,label:Armitage Codebusting,command:continue}
+Valid option with undefined label:
+{name:Atman,label:Atman,command:continue}
+Valid option with undefined label:
+{name:Aurora,label:Aurora,command:continue}
+Valid option with undefined label:
+{name:Avgustina Ivanovskaya,label:Avgustina Ivanovskaya,command:continue}
+Valid option with undefined label:
+{name:Ayla \\Bios\\ Rahim: Simulant Specialist,label:Ayla \\Bios\\ Rahim: Simulant Specialist,command:continue}
+Valid option with undefined label:
+{name:Az McCaffrey: Mechanical Prodigy,label:Az McCaffrey: Mechanical Prodigy,command:continue}
+Valid option with undefined label:
+{name:Azimat,label:Azimat,command:continue}
+Valid option with undefined label:
+{name:Bahia Bands,label:Bahia Bands,command:continue}
+Valid option with undefined label:
+{name:Baker,label:Baker,command:continue}
+Valid option with undefined label:
+{name:Bank Job,label:Bank Job,command:continue}
+Valid option with undefined label:
+{name:Barry \\Baz\\ Wong: Tri-Maf Veteran,label:Barry \\Baz\\ Wong: Tri-Maf Veteran,command:continue}
+Valid option with undefined label:
+{name:Battering Ram,label:Battering Ram,command:continue}
+Valid option with undefined label:
+{name:Begemot,label:Begemot,command:continue}
+Valid option with undefined label:
+{name:Beta Build,label:Beta Build,command:continue}
+Valid option with undefined label:
+{name:Bling,label:Bling,command:continue}
+Valid option with undefined label:
+{name:Blueberry!™ Diesel,label:Blueberry!™ Diesel,command:continue}
+Valid option with undefined label:
+{name:Boomerang,label:Boomerang,command:continue}
+Valid option with undefined label:
+{name:Borrowed Goods,label:Borrowed Goods,command:continue}
+Valid option with undefined label:
+{name:Borrowed Satellite,label:Borrowed Satellite,command:continue}
+Valid option with undefined label:
+{name:Botulus,label:Botulus,command:continue}
+Valid option with undefined label:
+{name:Bravado,label:Bravado,command:continue}
+Valid option with undefined label:
+{name:Buffer Drive,label:Buffer Drive,command:continue}
+Valid option with undefined label:
+{name:Bukhgalter,label:Bukhgalter,command:continue}
+Valid option with undefined label:
+{name:Buzzsaw,label:Buzzsaw,command:continue}
+Valid option with undefined label:
+{name:Cacophony,label:Cacophony,command:continue}
+Valid option with undefined label:
+{name:Career Fair,label:Career Fair,command:continue}
+Valid option with undefined label:
+{name:Carmen,label:Carmen,command:continue}
+Valid option with undefined label:
+{name:Carnivore,label:Carnivore,command:continue}
+Valid option with undefined label:
+{name:Cezve,label:Cezve,command:continue}
+Valid option with undefined label:
+{name:Chain Reaction,label:Chain Reaction,command:continue}
+Valid option with undefined label:
+{name:Chakana,label:Chakana,command:continue}
+Valid option with undefined label:
+{name:Chameleon,label:Chameleon,command:continue}
+Valid option with undefined label:
+{name:Charm Offensive,label:Charm Offensive,command:continue}
+Valid option with undefined label:
+{name:Chastushka,label:Chastushka,command:continue}
+Valid option with undefined label:
+{name:Chisel,label:Chisel,command:continue}
+Valid option with undefined label:
+{name:Chromatophores,label:Chromatophores,command:continue}
+Valid option with undefined label:
+{name:Clean Getaway,label:Clean Getaway,command:continue}
+Valid option with undefined label:
+{name:Cleaver,label:Cleaver,command:continue}
+Valid option with undefined label:
+{name:Climactic Showdown,label:Climactic Showdown,command:continue}
+Valid option with undefined label:
+{name:Cloak,label:Cloak,command:continue}
+Valid option with undefined label:
+{name:Clone Chip,label:Clone Chip,command:continue}
+Valid option with undefined label:
+{name:Clot,label:Clot,command:continue}
+Valid option with undefined label:
+{name:Coalescence,label:Coalescence,command:continue}
+Valid option with undefined label:
+{name:Conduit,label:Conduit,command:continue}
+Valid option with undefined label:
+{name:Cookbook,label:Cookbook,command:continue}
+Valid option with undefined label:
+{name:Cordyceps,label:Cordyceps,command:continue}
+Valid option with undefined label:
+{name:Corroder,label:Corroder,command:continue}
+Valid option with undefined label:
+{name:Corsair,label:Corsair,command:continue}
+Valid option with undefined label:
+{name:Crash Space,label:Crash Space,command:continue}
+Valid option with undefined label:
+{name:Creative Commission,label:Creative Commission,command:continue}
+Valid option with undefined label:
+{name:Crypsis,label:Crypsis,command:continue}
+Valid option with undefined label:
+{name:Cyber-Cypher,label:Cyber-Cypher,command:continue}
+Valid option with undefined label:
+{name:Cyberfeeder,label:Cyberfeeder,command:continue}
+Valid option with undefined label:
+{name:Cybertrooper Talut,label:Cybertrooper Talut,command:continue}
+Valid option with undefined label:
+{name:DZMZ Optimizer,label:DZMZ Optimizer,command:continue}
+Valid option with undefined label:
+{name:Dagger,label:Dagger,command:continue}
+Valid option with undefined label:
+{name:Daily Casts,label:Daily Casts,command:continue}
+Valid option with undefined label:
+{name:Data Dealer,label:Data Dealer,command:continue}
+Valid option with undefined label:
+{name:Datasucker,label:Datasucker,command:continue}
+Valid option with undefined label:
+{name:Decoy,label:Decoy,command:continue}
+Valid option with undefined label:
+{name:Demolisher,label:Demolisher,command:continue}
+Valid option with undefined label:
+{name:Demolition Run,label:Demolition Run,command:continue}
+Valid option with undefined label:
+{name:Desperado,label:Desperado,command:continue}
+Valid option with undefined label:
+{name:Detente,label:Detente,command:continue}
+Valid option with undefined label:
+{name:Devadatta Drone,label:Devadatta Drone,command:continue}
+Valid option with undefined label:
+{name:Devil Charm,label:Devil Charm,command:continue}
+Valid option with undefined label:
+{name:Dewi Subrotoputri: Pedagogical Dhalang,label:Dewi Subrotoputri: Pedagogical Dhalang,command:continue}
+Valid option with undefined label:
+{name:Diesel,label:Diesel,command:continue}
+Valid option with undefined label:
+{name:Direct Access,label:Direct Access,command:continue}
+Valid option with undefined label:
+{name:Dirty Laundry,label:Dirty Laundry,command:continue}
+Valid option with undefined label:
+{name:Djinn,label:Djinn,command:continue}
+Valid option with undefined label:
+{name:Docklands Pass,label:Docklands Pass,command:continue}
+Valid option with undefined label:
+{name:Dr. Nuka Vrolyck,label:Dr. Nuka Vrolyck,command:continue}
+Valid option with undefined label:
+{name:DreamNet,label:DreamNet,command:continue}
+Valid option with undefined label:
+{name:Déjà Vu,label:Déjà Vu,command:continue}
+Valid option with undefined label:
+{name:Earthrise Hotel,label:Earthrise Hotel,command:continue}
+Valid option with undefined label:
+{name:Easy Mark,label:Easy Mark,command:continue}
+Valid option with undefined label:
+{name:Echelon,label:Echelon,command:continue}
+Valid option with undefined label:
+{name:Egret,label:Egret,command:continue}
+Valid option with undefined label:
+{name:Emergency Shutdown,label:Emergency Shutdown,command:continue}
+Valid option with undefined label:
+{name:En Passant,label:En Passant,command:continue}
+Valid option with undefined label:
+{name:Escher,label:Escher,command:continue}
+Valid option with undefined label:
+{name:Esâ Afontov: Eco-Insurrectionist,label:Esâ Afontov: Eco-Insurrectionist,command:continue}
+Valid option with undefined label:
+{name:Euler,label:Euler,command:continue}
+Valid option with undefined label:
+{name:Exile: Streethawk,label:Exile: Streethawk,command:continue}
+Valid option with undefined label:
+{name:Exploratory Romp,label:Exploratory Romp,command:continue}
+Valid option with undefined label:
+{name:Feedback Filter,label:Feedback Filter,command:continue}
+Valid option with undefined label:
+{name:Femme Fatale,label:Femme Fatale,command:continue}
+Valid option with undefined label:
+{name:Fencer Fueno,label:Fencer Fueno,command:continue}
+Valid option with undefined label:
+{name:Fermenter,label:Fermenter,command:continue}
+Valid option with undefined label:
+{name:Flip Switch,label:Flip Switch,command:continue}
+Valid option with undefined label:
+{name:Flux Capacitor,label:Flux Capacitor,command:continue}
+Valid option with undefined label:
+{name:Forged Activation Orders,label:Forged Activation Orders,command:continue}
+Valid option with undefined label:
+{name:Fransofia Ward,label:Fransofia Ward,command:continue}
+Valid option with undefined label:
+{name:Freelance Coding Contract,label:Freelance Coding Contract,command:continue}
+Valid option with undefined label:
+{name:GAMEDRAGON™ Pro,label:GAMEDRAGON™ Pro,command:continue}
+Valid option with undefined label:
+{name:Gabriel Santiago: Consummate Professional,label:Gabriel Santiago: Consummate Professional,command:continue}
+Valid option with undefined label:
+{name:Gachapon,label:Gachapon,command:continue}
+Valid option with undefined label:
+{name:Gauss,label:Gauss,command:continue}
+Valid option with undefined label:
+{name:Ghosttongue,label:Ghosttongue,command:continue}
+Valid option with undefined label:
+{name:Gordian Blade,label:Gordian Blade,command:continue}
+Valid option with undefined label:
+{name:Gourmand,label:Gourmand,command:continue}
+Valid option with undefined label:
+{name:Grimoire,label:Grimoire,command:continue}
+Valid option with undefined label:
+{name:Hackerspace,label:Hackerspace,command:continue}
+Valid option with undefined label:
+{name:Hantu,label:Hantu,command:continue}
+Valid option with undefined label:
+{name:Harmony AR Therapy,label:Harmony AR Therapy,command:continue}
+Valid option with undefined label:
+{name:Hiram “0mission” Svensson: Shadow of the Past,label:Hiram “0mission” Svensson: Shadow of the Past,command:continue}
+Valid option with undefined label:
+{name:Hoshiko Shiro: Untold Protagonist,label:Hoshiko Shiro: Untold Protagonist,command:continue}
+Valid option with undefined label:
+{name:Ice Analyzer,label:Ice Analyzer,command:continue}
+Valid option with undefined label:
+{name:Ice Carver,label:Ice Carver,command:continue}
+Valid option with undefined label:
+{name:Illumination,label:Illumination,command:continue}
+Valid option with undefined label:
+{name:Imp,label:Imp,command:continue}
+Valid option with undefined label:
+{name:In the Groove,label:In the Groove,command:continue}
+Valid option with undefined label:
+{name:Infiltration,label:Infiltration,command:continue}
+Valid option with undefined label:
+{name:Inside Job,label:Inside Job,command:continue}
+Valid option with undefined label:
+{name:Inti,label:Inti,command:continue}
+Valid option with undefined label:
+{name:Isolation,label:Isolation,command:continue}
+Valid option with undefined label:
+{name:Jailbreak,label:Jailbreak,command:continue}
+Valid option with undefined label:
+{name:Joy Ride,label:Joy Ride,command:continue}
+Valid option with undefined label:
+{name:K2CP Turbine,label:K2CP Turbine,command:continue}
+Valid option with undefined label:
+{name:Kate \\Mac\\ McCaffrey: Digital Tinker,label:Kate \\Mac\\ McCaffrey: Digital Tinker,command:continue}
+Valid option with undefined label:
+{name:Keiko,label:Keiko,command:continue}
+Valid option with undefined label:
+{name:Ken \\Express\\ Tenma: Disappeared Clone,label:Ken \\Express\\ Tenma: Disappeared Clone,command:continue}
+Valid option with undefined label:
+{name:Khusyuk,label:Khusyuk,command:continue}
+Valid option with undefined label:
+{name:Kompromat,label:Kompromat,command:continue}
+Valid option with undefined label:
+{name:Lampades,label:Lampades,command:continue}
+Valid option with undefined label:
+{name:Lat: Ethical Freelancer,label:Lat: Ethical Freelancer,command:continue}
+Valid option with undefined label:
+{name:Leech,label:Leech,command:continue}
+Valid option with undefined label:
+{name:Legwork,label:Legwork,command:continue}
+Valid option with undefined label:
+{name:Lemuria Codecracker,label:Lemuria Codecracker,command:continue}
+Valid option with undefined label:
+{name:Levy AR Lab Access,label:Levy AR Lab Access,command:continue}
+Valid option with undefined label:
+{name:Liberated Account,label:Liberated Account,command:continue}
+Valid option with undefined label:
+{name:Lie Low,label:Lie Low,command:continue}
+Valid option with undefined label:
+{name:Lucky Charm,label:Lucky Charm,command:continue}
+Valid option with undefined label:
+{name:Madani,label:Madani,command:continue}
+Valid option with undefined label:
+{name:Magdalene Keino-Chemutai: Cryptarchitect,label:Magdalene Keino-Chemutai: Cryptarchitect,command:continue}
+Valid option with undefined label:
+{name:Maglectric Rapid (748 Mod),label:Maglectric Rapid (748 Mod),command:continue}
+Valid option with undefined label:
+{name:Magnum Opus,label:Magnum Opus,command:continue}
+Valid option with undefined label:
+{name:Maintenance Access,label:Maintenance Access,command:continue}
+Valid option with undefined label:
+{name:Makler,label:Makler,command:continue}
+Valid option with undefined label:
+{name:Mantle,label:Mantle,command:continue}
+Valid option with undefined label:
+{name:Marjanah,label:Marjanah,command:continue}
+Valid option with undefined label:
+{name:Marrow,label:Marrow,command:continue}
+Valid option with undefined label:
+{name:Masterwork (v37),label:Masterwork (v37),command:continue}
+Valid option with undefined label:
+{name:Mayfly,label:Mayfly,command:continue}
+Valid option with undefined label:
+{name:Medium,label:Medium,command:continue}
+Valid option with undefined label:
+{name:Methuselah,label:Methuselah,command:continue}
+Valid option with undefined label:
+{name:Mimic,label:Mimic,command:continue}
+Valid option with undefined label:
+{name:Modded,label:Modded,command:continue}
+Valid option with undefined label:
+{name:Monolith,label:Monolith,command:continue}
+Valid option with undefined label:
+{name:Moshing,label:Moshing,command:continue}
+Valid option with undefined label:
+{name:Mu Safecracker,label:Mu Safecracker,command:continue}
+Valid option with undefined label:
+{name:MuslihaT: Multifarious Marketeer,label:MuslihaT: Multifarious Marketeer,command:continue}
+Valid option with undefined label:
+{name:Mutual Favor,label:Mutual Favor,command:continue}
+Valid option with undefined label:
+{name:Mystic Maemi,label:Mystic Maemi,command:continue}
+Valid option with undefined label:
+{name:Net Shield,label:Net Shield,command:continue}
+Valid option with undefined label:
+{name:Networking,label:Networking,command:continue}
+Valid option with undefined label:
+{name:Ninja,label:Ninja,command:continue}
+Valid option with undefined label:
+{name:No Free Lunch,label:No Free Lunch,command:continue}
+Valid option with undefined label:
+{name:Noise: Hacker Extraordinaire,label:Noise: Hacker Extraordinaire,command:continue}
+Valid option with undefined label:
+{name:Num,label:Num,command:continue}
+Valid option with undefined label:
+{name:Nurse Hạnh,label:Nurse Hạnh,command:continue}
+Valid option with undefined label:
+{name:Odore,label:Odore,command:continue}
+Valid option with undefined label:
+{name:Omni-drive,label:Omni-drive,command:continue}
+Valid option with undefined label:
+{name:Open Market,label:Open Market,command:continue}
+Valid option with undefined label:
+{name:Overclock,label:Overclock,command:continue}
+Valid option with undefined label:
+{name:Paladin Poemu,label:Paladin Poemu,command:continue}
+Valid option with undefined label:
+{name:Pantograph,label:Pantograph,command:continue}
+Valid option with undefined label:
+{name:Parasite,label:Parasite,command:continue}
+Valid option with undefined label:
+{name:Paricia,label:Paricia,command:continue}
+Valid option with undefined label:
+{name:Pauleʼs Café,label:Pauleʼs Café,command:continue}
+Valid option with undefined label:
+{name:Pelangi,label:Pelangi,command:continue}
+Valid option with undefined label:
+{name:Pennyshaver,label:Pennyshaver,command:continue}
+Valid option with undefined label:
+{name:Penrose,label:Penrose,command:continue}
+Valid option with undefined label:
+{name:Penumbral Toolkit,label:Penumbral Toolkit,command:continue}
+Valid option with undefined label:
+{name:Physarum Entangler,label:Physarum Entangler,command:continue}
+Valid option with undefined label:
+{name:Pipeline,label:Pipeline,command:continue}
+Valid option with undefined label:
+{name:Prepaid VoicePAD,label:Prepaid VoicePAD,command:continue}
+Valid option with undefined label:
+{name:Principia,label:Principia,command:continue}
+Valid option with undefined label:
+{name:Professional Contacts,label:Professional Contacts,command:continue}
+Valid option with undefined label:
+{name:Prognostic Q-Loop,label:Prognostic Q-Loop,command:continue}
+Valid option with undefined label:
+{name:Quetzal: Free Spirit,label:Quetzal: Free Spirit,command:continue}
+Valid option with undefined label:
+{name:Rabbit Hole,label:Rabbit Hole,command:continue}
+Valid option with undefined label:
+{name:Read-Write Share,label:Read-Write Share,command:continue}
+Valid option with undefined label:
+{name:Red Team,label:Red Team,command:continue}
+Valid option with undefined label:
+{name:Reina Roja: Freedom Fighter,label:Reina Roja: Freedom Fighter,command:continue}
+Valid option with undefined label:
+{name:Rejig,label:Rejig,command:continue}
+Valid option with undefined label:
+{name:Rent Rioters,label:Rent Rioters,command:continue}
+Valid option with undefined label:
+{name:René \\Loup\\ Arcemont: Party Animal,label:René \\Loup\\ Arcemont: Party Animal,command:continue}
+Valid option with undefined label:
+{name:Retrieval Run,label:Retrieval Run,command:continue}
+Valid option with undefined label:
+{name:Revolver,label:Revolver,command:continue}
+Valid option with undefined label:
+{name:Rezeki,label:Rezeki,command:continue}
+Valid option with undefined label:
+{name:Rielle \\Kit\\ Peddler: Transhuman,label:Rielle \\Kit\\ Peddler: Transhuman,command:continue}
+Valid option with undefined label:
+{name:Rielle “Kit” Peddler: Transhuman,label:Rielle “Kit” Peddler: Transhuman,command:continue}
+Valid option with undefined label:
+{name:Rising Tide,label:Rising Tide,command:continue}
+Valid option with undefined label:
+{name:Ritual,label:Ritual,command:continue}
+Valid option with undefined label:
+{name:Rotary,label:Rotary,command:continue}
+Valid option with undefined label:
+{name:Running Hot,label:Running Hot,command:continue}
+Valid option with undefined label:
+{name:Ryō \\Phoenix\\ Ōno: Out of the Ashes,label:Ryō \\Phoenix\\ Ōno: Out of the Ashes,command:continue}
+Valid option with undefined label:
+{name:Saci,label:Saci,command:continue}
+Valid option with undefined label:
+{name:Sacrificial Construct,label:Sacrificial Construct,command:continue}
+Valid option with undefined label:
+{name:Sahasrara,label:Sahasrara,command:continue}
+Valid option with undefined label:
+{name:Same Old Thing,label:Same Old Thing,command:continue}
+Valid option with undefined label:
+{name:Sang Kancil,label:Sang Kancil,command:continue}
+Valid option with undefined label:
+{name:Scavenge,label:Scavenge,command:continue}
+Valid option with undefined label:
+{name:Scrounge,label:Scrounge,command:continue}
+Valid option with undefined label:
+{name:Scrubber,label:Scrubber,command:continue}
+Valid option with undefined label:
+{name:Security Testing,label:Security Testing,command:continue}
+Valid option with undefined label:
+{name:Self-modifying Code,label:Self-modifying Code,command:continue}
+Valid option with undefined label:
+{name:Sell Out,label:Sell Out,command:continue}
+Valid option with undefined label:
+{name:Shred,label:Shred,command:continue}
+Valid option with undefined label:
+{name:Side Hustle,label:Side Hustle,command:continue}
+Valid option with undefined label:
+{name:Simulchip,label:Simulchip,command:continue}
+Valid option with undefined label:
+{name:Sipa,label:Sipa,command:continue}
+Valid option with undefined label:
+{name:Smartware Distributor,label:Smartware Distributor,command:continue}
+Valid option with undefined label:
+{name:Sneakdoor Beta,label:Sneakdoor Beta,command:continue}
+Valid option with undefined label:
+{name:Spec Work,label:Spec Work,command:continue}
+Valid option with undefined label:
+{name:Special Order,label:Special Order,command:continue}
+Valid option with undefined label:
+{name:Stargate,label:Stargate,command:continue}
+Valid option with undefined label:
+{name:Steelskin Scarring,label:Steelskin Scarring,command:continue}
+Valid option with undefined label:
+{name:Steve Cambridge: Master Grifter,label:Steve Cambridge: Master Grifter,command:continue}
+Valid option with undefined label:
+{name:Stick and Poke,label:Stick and Poke,command:continue}
+Valid option with undefined label:
+{name:Stimhack,label:Stimhack,command:continue}
+Valid option with undefined label:
+{name:Stoneship Chart Room,label:Stoneship Chart Room,command:continue}
+Valid option with undefined label:
+{name:Stowaway,label:Stowaway,command:continue}
+Valid option with undefined label:
+{name:Supercorridor,label:Supercorridor,command:continue}
+Valid option with undefined label:
+{name:Sure Gamble,label:Sure Gamble,command:continue}
+Valid option with undefined label:
+{name:Swift,label:Swift,command:continue}
+Valid option with undefined label:
+{name:T400 Memory Diamond,label:T400 Memory Diamond,command:continue}
+Valid option with undefined label:
+{name:Tailgate,label:Tailgate,command:continue}
+Valid option with undefined label:
+{name:Take a Dive,label:Take a Dive,command:continue}
+Valid option with undefined label:
+{name:Telework Contract,label:Telework Contract,command:continue}
+Valid option with undefined label:
+{name:Test Run,label:Test Run,command:continue}
+Valid option with undefined label:
+{name:The Artist,label:The Artist,command:continue}
+Valid option with undefined label:
+{name:The Back,label:The Back,command:continue}
+Valid option with undefined label:
+{name:The Catalyst,label:The Catalyst,command:continue}
+Valid option with undefined label:
+{name:The Class Act,label:The Class Act,command:continue}
+Valid option with undefined label:
+{name:The Maker's Eye,label:The Maker's Eye,command:continue}
+Valid option with undefined label:
+{name:The Nihilist,label:The Nihilist,command:continue}
+Valid option with undefined label:
+{name:The Personal Touch,label:The Personal Touch,command:continue}
+Valid option with undefined label:
+{name:The Professor: Keeper of Knowledge,label:The Professor: Keeper of Knowledge,command:continue}
+Valid option with undefined label:
+{name:The Source,label:The Source,command:continue}
+Valid option with undefined label:
+{name:The Toolbox,label:The Toolbox,command:continue}
+Valid option with undefined label:
+{name:The Tungsten Tailor,label:The Tungsten Tailor,command:continue}
+Valid option with undefined label:
+{name:Tinkering,label:Tinkering,command:continue}
+Valid option with undefined label:
+{name:Topan: Ormas Leader,label:Topan: Ormas Leader,command:continue}
+Valid option with undefined label:
+{name:Touchstone,label:Touchstone,command:continue}
+Valid option with undefined label:
+{name:Tranquilizer,label:Tranquilizer,command:continue}
+Valid option with undefined label:
+{name:Transfer of Wealth,label:Transfer of Wealth,command:continue}
+Valid option with undefined label:
+{name:Tread Lightly,label:Tread Lightly,command:continue}
+Valid option with undefined label:
+{name:Trickster Taka,label:Trickster Taka,command:continue}
+Valid option with undefined label:
+{name:Tāo Salonga: Telepresence Magician,label:Tāo Salonga: Telepresence Magician,command:continue}
+Valid option with undefined label:
+{name:Underdome Irregulars,label:Underdome Irregulars,command:continue}
+Valid option with undefined label:
+{name:Unity,label:Unity,command:continue}
+Valid option with undefined label:
+{name:Utae,label:Utae,command:continue}
+Valid option with undefined label:
+{name:VRcation,label:VRcation,command:continue}
+Valid option with undefined label:
+{name:Verbal Plasticity,label:Verbal Plasticity,command:continue}
+Valid option with undefined label:
+{name:Virtual Intelligence, P.I.: “You Can Call Me Vic”,label:Virtual Intelligence, P.I.: “You Can Call Me Vic”,command:continue}
+Valid option with undefined label:
+{name:Whistleblower,label:Whistleblower,command:continue}
+Valid option with undefined label:
+{name:Wildcat Strike,label:Wildcat Strike,command:continue}
+Valid option with undefined label:
+{name:Word on the Street,label:Word on the Street,command:continue}
+Valid option with undefined label:
+{name:Wyldside,label:Wyldside,command:continue}
+Valid option with undefined label:
+{name:Wyrm,label:Wyrm,command:continue}
+Valid option with undefined label:
+{name:Xanadu,label:Xanadu,command:continue}
+Valid option with undefined label:
+{name:Yog.0,label:Yog.0,command:continue}
+Valid option with undefined label:
+{name:Zahya Sadeghi: Versatile Smuggler,label:Zahya Sadeghi: Versatile Smuggler,command:continue}
+Valid option with undefined label:
+{name:“Baklan” Bochkin,label:“Baklan” Bochkin,command:continue}
+Complete Image names Botulus
+Runner takes 1 net damage
+Jailbreak trashed
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Proprionegation,Storgotic Resonator]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 5 card(s) in hand: [Docklands Pass,Leech,Echelon,Gourmand,Botulus]
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty] (info HQ score: 3.4)
+AI: Favouring setup (potential 0.9512763906075236, cost 3.2)
+AI: Don't want to run right now
+AI: More credits could be nice
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty] (info HQ score: 3.4)
+AI: Favouring setup (potential 0.9129865288747672, cost 3.2)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+AI: there's one I could install
+AI: a relevant preference has been set
+Runner spent one click
+Runner spent 2 credits
+Runner installed Docklands Pass
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty] (info HQ score: 3.4)
+AI: Favouring setup (potential 1.036637826835158, cost 3.2)
+AI: Don't want to run right now
+AI: More credits could be nice
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][2 Measured Response, 0.6 certainty] (info HQ score: 3.4)
+AI: Don't want to run right now
+AI: More credits could be nice
+Runner spent one click
+Runner gained one credit
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Proprionegation,Storgotic Resonator]
+SPOILER: Runner has 13 credit(s), 0 tag(s) and 4 card(s) in hand: [Leech,Echelon,Gourmand,Botulus]
+Reveal the top card of R&D and gain 2[c] triggered
+Measured Response revealed
+Corp gained 2 credits
+Corp drew a card
+Rewinding...
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Complete Image,Proprionegation]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 6 card(s) in hand: [Docklands Pass,Leech,Echelon,Jailbreak,Gourmand,Botulus]
+Reveal the top card of R&D and gain 2[c] triggered
+Corp gained one credit
+Storgotic Resonator revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp spent 5 credits
+Played Measured Response
+Runner takes 4 meat damage
+Jailbreak trashed
+Docklands Pass trashed
+Botulus trashed
+Leech trashed
+Using Hyoubu Institute: Absolute Clarity:
+Corp spent one click
+Echelon revealed
+Corp spent one click
+Corp spent 4 credits
+Played Complete Image
+Valid option with undefined label:
+{name:\\Knickknack\\ O'Brian,label:\\Knickknack\\ O'Brian,command:continue}
+Valid option with undefined label:
+{name:Abagnale,label:Abagnale,command:continue}
+Valid option with undefined label:
+{name:Access to Globalsec,label:Access to Globalsec,command:continue}
+Valid option with undefined label:
+{name:Account Siphon,label:Account Siphon,command:continue}
+Valid option with undefined label:
+{name:Aesop's Pawnshop,label:Aesop's Pawnshop,command:continue}
+Valid option with undefined label:
+{name:Afterimage,label:Afterimage,command:continue}
+Valid option with undefined label:
+{name:Aircheck,label:Aircheck,command:continue}
+Valid option with undefined label:
+{name:Akamatsu Mem Chip,label:Akamatsu Mem Chip,command:continue}
+Valid option with undefined label:
+{name:Always Have a Backup Plan,label:Always Have a Backup Plan,command:continue}
+Valid option with undefined label:
+{name:Aniccam,label:Aniccam,command:continue}
+Valid option with undefined label:
+{name:Armitage Codebusting,label:Armitage Codebusting,command:continue}
+Valid option with undefined label:
+{name:Atman,label:Atman,command:continue}
+Valid option with undefined label:
+{name:Aurora,label:Aurora,command:continue}
+Valid option with undefined label:
+{name:Avgustina Ivanovskaya,label:Avgustina Ivanovskaya,command:continue}
+Valid option with undefined label:
+{name:Ayla \\Bios\\ Rahim: Simulant Specialist,label:Ayla \\Bios\\ Rahim: Simulant Specialist,command:continue}
+Valid option with undefined label:
+{name:Az McCaffrey: Mechanical Prodigy,label:Az McCaffrey: Mechanical Prodigy,command:continue}
+Valid option with undefined label:
+{name:Azimat,label:Azimat,command:continue}
+Valid option with undefined label:
+{name:Bahia Bands,label:Bahia Bands,command:continue}
+Valid option with undefined label:
+{name:Baker,label:Baker,command:continue}
+Valid option with undefined label:
+{name:Bank Job,label:Bank Job,command:continue}
+Valid option with undefined label:
+{name:Barry \\Baz\\ Wong: Tri-Maf Veteran,label:Barry \\Baz\\ Wong: Tri-Maf Veteran,command:continue}
+Valid option with undefined label:
+{name:Battering Ram,label:Battering Ram,command:continue}
+Valid option with undefined label:
+{name:Begemot,label:Begemot,command:continue}
+Valid option with undefined label:
+{name:Beta Build,label:Beta Build,command:continue}
+Valid option with undefined label:
+{name:Bling,label:Bling,command:continue}
+Valid option with undefined label:
+{name:Blueberry!™ Diesel,label:Blueberry!™ Diesel,command:continue}
+Valid option with undefined label:
+{name:Boomerang,label:Boomerang,command:continue}
+Valid option with undefined label:
+{name:Borrowed Goods,label:Borrowed Goods,command:continue}
+Valid option with undefined label:
+{name:Borrowed Satellite,label:Borrowed Satellite,command:continue}
+Valid option with undefined label:
+{name:Botulus,label:Botulus,command:continue}
+Valid option with undefined label:
+{name:Bravado,label:Bravado,command:continue}
+Valid option with undefined label:
+{name:Buffer Drive,label:Buffer Drive,command:continue}
+Valid option with undefined label:
+{name:Bukhgalter,label:Bukhgalter,command:continue}
+Valid option with undefined label:
+{name:Buzzsaw,label:Buzzsaw,command:continue}
+Valid option with undefined label:
+{name:Cacophony,label:Cacophony,command:continue}
+Valid option with undefined label:
+{name:Career Fair,label:Career Fair,command:continue}
+Valid option with undefined label:
+{name:Carmen,label:Carmen,command:continue}
+Valid option with undefined label:
+{name:Carnivore,label:Carnivore,command:continue}
+Valid option with undefined label:
+{name:Cezve,label:Cezve,command:continue}
+Valid option with undefined label:
+{name:Chain Reaction,label:Chain Reaction,command:continue}
+Valid option with undefined label:
+{name:Chakana,label:Chakana,command:continue}
+Valid option with undefined label:
+{name:Chameleon,label:Chameleon,command:continue}
+Valid option with undefined label:
+{name:Charm Offensive,label:Charm Offensive,command:continue}
+Valid option with undefined label:
+{name:Chastushka,label:Chastushka,command:continue}
+Valid option with undefined label:
+{name:Chisel,label:Chisel,command:continue}
+Valid option with undefined label:
+{name:Chromatophores,label:Chromatophores,command:continue}
+Valid option with undefined label:
+{name:Clean Getaway,label:Clean Getaway,command:continue}
+Valid option with undefined label:
+{name:Cleaver,label:Cleaver,command:continue}
+Valid option with undefined label:
+{name:Climactic Showdown,label:Climactic Showdown,command:continue}
+Valid option with undefined label:
+{name:Cloak,label:Cloak,command:continue}
+Valid option with undefined label:
+{name:Clone Chip,label:Clone Chip,command:continue}
+Valid option with undefined label:
+{name:Clot,label:Clot,command:continue}
+Valid option with undefined label:
+{name:Coalescence,label:Coalescence,command:continue}
+Valid option with undefined label:
+{name:Conduit,label:Conduit,command:continue}
+Valid option with undefined label:
+{name:Cookbook,label:Cookbook,command:continue}
+Valid option with undefined label:
+{name:Cordyceps,label:Cordyceps,command:continue}
+Valid option with undefined label:
+{name:Corroder,label:Corroder,command:continue}
+Valid option with undefined label:
+{name:Corsair,label:Corsair,command:continue}
+Valid option with undefined label:
+{name:Crash Space,label:Crash Space,command:continue}
+Valid option with undefined label:
+{name:Creative Commission,label:Creative Commission,command:continue}
+Valid option with undefined label:
+{name:Crypsis,label:Crypsis,command:continue}
+Valid option with undefined label:
+{name:Cyber-Cypher,label:Cyber-Cypher,command:continue}
+Valid option with undefined label:
+{name:Cyberfeeder,label:Cyberfeeder,command:continue}
+Valid option with undefined label:
+{name:Cybertrooper Talut,label:Cybertrooper Talut,command:continue}
+Valid option with undefined label:
+{name:DZMZ Optimizer,label:DZMZ Optimizer,command:continue}
+Valid option with undefined label:
+{name:Dagger,label:Dagger,command:continue}
+Valid option with undefined label:
+{name:Daily Casts,label:Daily Casts,command:continue}
+Valid option with undefined label:
+{name:Data Dealer,label:Data Dealer,command:continue}
+Valid option with undefined label:
+{name:Datasucker,label:Datasucker,command:continue}
+Valid option with undefined label:
+{name:Decoy,label:Decoy,command:continue}
+Valid option with undefined label:
+{name:Demolisher,label:Demolisher,command:continue}
+Valid option with undefined label:
+{name:Demolition Run,label:Demolition Run,command:continue}
+Valid option with undefined label:
+{name:Desperado,label:Desperado,command:continue}
+Valid option with undefined label:
+{name:Detente,label:Detente,command:continue}
+Valid option with undefined label:
+{name:Devadatta Drone,label:Devadatta Drone,command:continue}
+Valid option with undefined label:
+{name:Devil Charm,label:Devil Charm,command:continue}
+Valid option with undefined label:
+{name:Dewi Subrotoputri: Pedagogical Dhalang,label:Dewi Subrotoputri: Pedagogical Dhalang,command:continue}
+Valid option with undefined label:
+{name:Diesel,label:Diesel,command:continue}
+Valid option with undefined label:
+{name:Direct Access,label:Direct Access,command:continue}
+Valid option with undefined label:
+{name:Dirty Laundry,label:Dirty Laundry,command:continue}
+Valid option with undefined label:
+{name:Djinn,label:Djinn,command:continue}
+Valid option with undefined label:
+{name:Docklands Pass,label:Docklands Pass,command:continue}
+Valid option with undefined label:
+{name:Dr. Nuka Vrolyck,label:Dr. Nuka Vrolyck,command:continue}
+Valid option with undefined label:
+{name:DreamNet,label:DreamNet,command:continue}
+Valid option with undefined label:
+{name:Déjà Vu,label:Déjà Vu,command:continue}
+Valid option with undefined label:
+{name:Earthrise Hotel,label:Earthrise Hotel,command:continue}
+Valid option with undefined label:
+{name:Easy Mark,label:Easy Mark,command:continue}
+Valid option with undefined label:
+{name:Echelon,label:Echelon,command:continue}
+Valid option with undefined label:
+{name:Egret,label:Egret,command:continue}
+Valid option with undefined label:
+{name:Emergency Shutdown,label:Emergency Shutdown,command:continue}
+Valid option with undefined label:
+{name:En Passant,label:En Passant,command:continue}
+Valid option with undefined label:
+{name:Escher,label:Escher,command:continue}
+Valid option with undefined label:
+{name:Esâ Afontov: Eco-Insurrectionist,label:Esâ Afontov: Eco-Insurrectionist,command:continue}
+Valid option with undefined label:
+{name:Euler,label:Euler,command:continue}
+Valid option with undefined label:
+{name:Exile: Streethawk,label:Exile: Streethawk,command:continue}
+Valid option with undefined label:
+{name:Exploratory Romp,label:Exploratory Romp,command:continue}
+Valid option with undefined label:
+{name:Feedback Filter,label:Feedback Filter,command:continue}
+Valid option with undefined label:
+{name:Femme Fatale,label:Femme Fatale,command:continue}
+Valid option with undefined label:
+{name:Fencer Fueno,label:Fencer Fueno,command:continue}
+Valid option with undefined label:
+{name:Fermenter,label:Fermenter,command:continue}
+Valid option with undefined label:
+{name:Flip Switch,label:Flip Switch,command:continue}
+Valid option with undefined label:
+{name:Flux Capacitor,label:Flux Capacitor,command:continue}
+Valid option with undefined label:
+{name:Forged Activation Orders,label:Forged Activation Orders,command:continue}
+Valid option with undefined label:
+{name:Fransofia Ward,label:Fransofia Ward,command:continue}
+Valid option with undefined label:
+{name:Freelance Coding Contract,label:Freelance Coding Contract,command:continue}
+Valid option with undefined label:
+{name:GAMEDRAGON™ Pro,label:GAMEDRAGON™ Pro,command:continue}
+Valid option with undefined label:
+{name:Gabriel Santiago: Consummate Professional,label:Gabriel Santiago: Consummate Professional,command:continue}
+Valid option with undefined label:
+{name:Gachapon,label:Gachapon,command:continue}
+Valid option with undefined label:
+{name:Gauss,label:Gauss,command:continue}
+Valid option with undefined label:
+{name:Ghosttongue,label:Ghosttongue,command:continue}
+Valid option with undefined label:
+{name:Gordian Blade,label:Gordian Blade,command:continue}
+Valid option with undefined label:
+{name:Gourmand,label:Gourmand,command:continue}
+Valid option with undefined label:
+{name:Grimoire,label:Grimoire,command:continue}
+Valid option with undefined label:
+{name:Hackerspace,label:Hackerspace,command:continue}
+Valid option with undefined label:
+{name:Hantu,label:Hantu,command:continue}
+Valid option with undefined label:
+{name:Harmony AR Therapy,label:Harmony AR Therapy,command:continue}
+Valid option with undefined label:
+{name:Hiram “0mission” Svensson: Shadow of the Past,label:Hiram “0mission” Svensson: Shadow of the Past,command:continue}
+Valid option with undefined label:
+{name:Hoshiko Shiro: Untold Protagonist,label:Hoshiko Shiro: Untold Protagonist,command:continue}
+Valid option with undefined label:
+{name:Ice Analyzer,label:Ice Analyzer,command:continue}
+Valid option with undefined label:
+{name:Ice Carver,label:Ice Carver,command:continue}
+Valid option with undefined label:
+{name:Illumination,label:Illumination,command:continue}
+Valid option with undefined label:
+{name:Imp,label:Imp,command:continue}
+Valid option with undefined label:
+{name:In the Groove,label:In the Groove,command:continue}
+Valid option with undefined label:
+{name:Infiltration,label:Infiltration,command:continue}
+Valid option with undefined label:
+{name:Inside Job,label:Inside Job,command:continue}
+Valid option with undefined label:
+{name:Inti,label:Inti,command:continue}
+Valid option with undefined label:
+{name:Isolation,label:Isolation,command:continue}
+Valid option with undefined label:
+{name:Jailbreak,label:Jailbreak,command:continue}
+Valid option with undefined label:
+{name:Joy Ride,label:Joy Ride,command:continue}
+Valid option with undefined label:
+{name:K2CP Turbine,label:K2CP Turbine,command:continue}
+Valid option with undefined label:
+{name:Kate \\Mac\\ McCaffrey: Digital Tinker,label:Kate \\Mac\\ McCaffrey: Digital Tinker,command:continue}
+Valid option with undefined label:
+{name:Keiko,label:Keiko,command:continue}
+Valid option with undefined label:
+{name:Ken \\Express\\ Tenma: Disappeared Clone,label:Ken \\Express\\ Tenma: Disappeared Clone,command:continue}
+Valid option with undefined label:
+{name:Khusyuk,label:Khusyuk,command:continue}
+Valid option with undefined label:
+{name:Kompromat,label:Kompromat,command:continue}
+Valid option with undefined label:
+{name:Lampades,label:Lampades,command:continue}
+Valid option with undefined label:
+{name:Lat: Ethical Freelancer,label:Lat: Ethical Freelancer,command:continue}
+Valid option with undefined label:
+{name:Leech,label:Leech,command:continue}
+Valid option with undefined label:
+{name:Legwork,label:Legwork,command:continue}
+Valid option with undefined label:
+{name:Lemuria Codecracker,label:Lemuria Codecracker,command:continue}
+Valid option with undefined label:
+{name:Levy AR Lab Access,label:Levy AR Lab Access,command:continue}
+Valid option with undefined label:
+{name:Liberated Account,label:Liberated Account,command:continue}
+Valid option with undefined label:
+{name:Lie Low,label:Lie Low,command:continue}
+Valid option with undefined label:
+{name:Lucky Charm,label:Lucky Charm,command:continue}
+Valid option with undefined label:
+{name:Madani,label:Madani,command:continue}
+Valid option with undefined label:
+{name:Magdalene Keino-Chemutai: Cryptarchitect,label:Magdalene Keino-Chemutai: Cryptarchitect,command:continue}
+Valid option with undefined label:
+{name:Maglectric Rapid (748 Mod),label:Maglectric Rapid (748 Mod),command:continue}
+Valid option with undefined label:
+{name:Magnum Opus,label:Magnum Opus,command:continue}
+Valid option with undefined label:
+{name:Maintenance Access,label:Maintenance Access,command:continue}
+Valid option with undefined label:
+{name:Makler,label:Makler,command:continue}
+Valid option with undefined label:
+{name:Mantle,label:Mantle,command:continue}
+Valid option with undefined label:
+{name:Marjanah,label:Marjanah,command:continue}
+Valid option with undefined label:
+{name:Marrow,label:Marrow,command:continue}
+Valid option with undefined label:
+{name:Masterwork (v37),label:Masterwork (v37),command:continue}
+Valid option with undefined label:
+{name:Mayfly,label:Mayfly,command:continue}
+Valid option with undefined label:
+{name:Medium,label:Medium,command:continue}
+Valid option with undefined label:
+{name:Methuselah,label:Methuselah,command:continue}
+Valid option with undefined label:
+{name:Mimic,label:Mimic,command:continue}
+Valid option with undefined label:
+{name:Modded,label:Modded,command:continue}
+Valid option with undefined label:
+{name:Monolith,label:Monolith,command:continue}
+Valid option with undefined label:
+{name:Moshing,label:Moshing,command:continue}
+Valid option with undefined label:
+{name:Mu Safecracker,label:Mu Safecracker,command:continue}
+Valid option with undefined label:
+{name:MuslihaT: Multifarious Marketeer,label:MuslihaT: Multifarious Marketeer,command:continue}
+Valid option with undefined label:
+{name:Mutual Favor,label:Mutual Favor,command:continue}
+Valid option with undefined label:
+{name:Mystic Maemi,label:Mystic Maemi,command:continue}
+Valid option with undefined label:
+{name:Net Shield,label:Net Shield,command:continue}
+Valid option with undefined label:
+{name:Networking,label:Networking,command:continue}
+Valid option with undefined label:
+{name:Ninja,label:Ninja,command:continue}
+Valid option with undefined label:
+{name:No Free Lunch,label:No Free Lunch,command:continue}
+Valid option with undefined label:
+{name:Noise: Hacker Extraordinaire,label:Noise: Hacker Extraordinaire,command:continue}
+Valid option with undefined label:
+{name:Num,label:Num,command:continue}
+Valid option with undefined label:
+{name:Nurse Hạnh,label:Nurse Hạnh,command:continue}
+Valid option with undefined label:
+{name:Odore,label:Odore,command:continue}
+Valid option with undefined label:
+{name:Omni-drive,label:Omni-drive,command:continue}
+Valid option with undefined label:
+{name:Open Market,label:Open Market,command:continue}
+Valid option with undefined label:
+{name:Overclock,label:Overclock,command:continue}
+Valid option with undefined label:
+{name:Paladin Poemu,label:Paladin Poemu,command:continue}
+Valid option with undefined label:
+{name:Pantograph,label:Pantograph,command:continue}
+Valid option with undefined label:
+{name:Parasite,label:Parasite,command:continue}
+Valid option with undefined label:
+{name:Paricia,label:Paricia,command:continue}
+Valid option with undefined label:
+{name:Pauleʼs Café,label:Pauleʼs Café,command:continue}
+Valid option with undefined label:
+{name:Pelangi,label:Pelangi,command:continue}
+Valid option with undefined label:
+{name:Pennyshaver,label:Pennyshaver,command:continue}
+Valid option with undefined label:
+{name:Penrose,label:Penrose,command:continue}
+Valid option with undefined label:
+{name:Penumbral Toolkit,label:Penumbral Toolkit,command:continue}
+Valid option with undefined label:
+{name:Physarum Entangler,label:Physarum Entangler,command:continue}
+Valid option with undefined label:
+{name:Pipeline,label:Pipeline,command:continue}
+Valid option with undefined label:
+{name:Prepaid VoicePAD,label:Prepaid VoicePAD,command:continue}
+Valid option with undefined label:
+{name:Principia,label:Principia,command:continue}
+Valid option with undefined label:
+{name:Professional Contacts,label:Professional Contacts,command:continue}
+Valid option with undefined label:
+{name:Prognostic Q-Loop,label:Prognostic Q-Loop,command:continue}
+Valid option with undefined label:
+{name:Quetzal: Free Spirit,label:Quetzal: Free Spirit,command:continue}
+Valid option with undefined label:
+{name:Rabbit Hole,label:Rabbit Hole,command:continue}
+Valid option with undefined label:
+{name:Read-Write Share,label:Read-Write Share,command:continue}
+Valid option with undefined label:
+{name:Red Team,label:Red Team,command:continue}
+Valid option with undefined label:
+{name:Reina Roja: Freedom Fighter,label:Reina Roja: Freedom Fighter,command:continue}
+Valid option with undefined label:
+{name:Rejig,label:Rejig,command:continue}
+Valid option with undefined label:
+{name:Rent Rioters,label:Rent Rioters,command:continue}
+Valid option with undefined label:
+{name:René \\Loup\\ Arcemont: Party Animal,label:René \\Loup\\ Arcemont: Party Animal,command:continue}
+Valid option with undefined label:
+{name:Retrieval Run,label:Retrieval Run,command:continue}
+Valid option with undefined label:
+{name:Revolver,label:Revolver,command:continue}
+Valid option with undefined label:
+{name:Rezeki,label:Rezeki,command:continue}
+Valid option with undefined label:
+{name:Rielle \\Kit\\ Peddler: Transhuman,label:Rielle \\Kit\\ Peddler: Transhuman,command:continue}
+Valid option with undefined label:
+{name:Rielle “Kit” Peddler: Transhuman,label:Rielle “Kit” Peddler: Transhuman,command:continue}
+Valid option with undefined label:
+{name:Rising Tide,label:Rising Tide,command:continue}
+Valid option with undefined label:
+{name:Ritual,label:Ritual,command:continue}
+Valid option with undefined label:
+{name:Rotary,label:Rotary,command:continue}
+Valid option with undefined label:
+{name:Running Hot,label:Running Hot,command:continue}
+Valid option with undefined label:
+{name:Ryō \\Phoenix\\ Ōno: Out of the Ashes,label:Ryō \\Phoenix\\ Ōno: Out of the Ashes,command:continue}
+Valid option with undefined label:
+{name:Saci,label:Saci,command:continue}
+Valid option with undefined label:
+{name:Sacrificial Construct,label:Sacrificial Construct,command:continue}
+Valid option with undefined label:
+{name:Sahasrara,label:Sahasrara,command:continue}
+Valid option with undefined label:
+{name:Same Old Thing,label:Same Old Thing,command:continue}
+Valid option with undefined label:
+{name:Sang Kancil,label:Sang Kancil,command:continue}
+Valid option with undefined label:
+{name:Scavenge,label:Scavenge,command:continue}
+Valid option with undefined label:
+{name:Scrounge,label:Scrounge,command:continue}
+Valid option with undefined label:
+{name:Scrubber,label:Scrubber,command:continue}
+Valid option with undefined label:
+{name:Security Testing,label:Security Testing,command:continue}
+Valid option with undefined label:
+{name:Self-modifying Code,label:Self-modifying Code,command:continue}
+Valid option with undefined label:
+{name:Sell Out,label:Sell Out,command:continue}
+Valid option with undefined label:
+{name:Shred,label:Shred,command:continue}
+Valid option with undefined label:
+{name:Side Hustle,label:Side Hustle,command:continue}
+Valid option with undefined label:
+{name:Simulchip,label:Simulchip,command:continue}
+Valid option with undefined label:
+{name:Sipa,label:Sipa,command:continue}
+Valid option with undefined label:
+{name:Smartware Distributor,label:Smartware Distributor,command:continue}
+Valid option with undefined label:
+{name:Sneakdoor Beta,label:Sneakdoor Beta,command:continue}
+Valid option with undefined label:
+{name:Spec Work,label:Spec Work,command:continue}
+Valid option with undefined label:
+{name:Special Order,label:Special Order,command:continue}
+Valid option with undefined label:
+{name:Stargate,label:Stargate,command:continue}
+Valid option with undefined label:
+{name:Steelskin Scarring,label:Steelskin Scarring,command:continue}
+Valid option with undefined label:
+{name:Steve Cambridge: Master Grifter,label:Steve Cambridge: Master Grifter,command:continue}
+Valid option with undefined label:
+{name:Stick and Poke,label:Stick and Poke,command:continue}
+Valid option with undefined label:
+{name:Stimhack,label:Stimhack,command:continue}
+Valid option with undefined label:
+{name:Stoneship Chart Room,label:Stoneship Chart Room,command:continue}
+Valid option with undefined label:
+{name:Stowaway,label:Stowaway,command:continue}
+Valid option with undefined label:
+{name:Supercorridor,label:Supercorridor,command:continue}
+Valid option with undefined label:
+{name:Sure Gamble,label:Sure Gamble,command:continue}
+Valid option with undefined label:
+{name:Swift,label:Swift,command:continue}
+Valid option with undefined label:
+{name:T400 Memory Diamond,label:T400 Memory Diamond,command:continue}
+Valid option with undefined label:
+{name:Tailgate,label:Tailgate,command:continue}
+Valid option with undefined label:
+{name:Take a Dive,label:Take a Dive,command:continue}
+Valid option with undefined label:
+{name:Telework Contract,label:Telework Contract,command:continue}
+Valid option with undefined label:
+{name:Test Run,label:Test Run,command:continue}
+Valid option with undefined label:
+{name:The Artist,label:The Artist,command:continue}
+Valid option with undefined label:
+{name:The Back,label:The Back,command:continue}
+Valid option with undefined label:
+{name:The Catalyst,label:The Catalyst,command:continue}
+Valid option with undefined label:
+{name:The Class Act,label:The Class Act,command:continue}
+Valid option with undefined label:
+{name:The Maker's Eye,label:The Maker's Eye,command:continue}
+Valid option with undefined label:
+{name:The Nihilist,label:The Nihilist,command:continue}
+Valid option with undefined label:
+{name:The Personal Touch,label:The Personal Touch,command:continue}
+Valid option with undefined label:
+{name:The Professor: Keeper of Knowledge,label:The Professor: Keeper of Knowledge,command:continue}
+Valid option with undefined label:
+{name:The Source,label:The Source,command:continue}
+Valid option with undefined label:
+{name:The Toolbox,label:The Toolbox,command:continue}
+Valid option with undefined label:
+{name:The Tungsten Tailor,label:The Tungsten Tailor,command:continue}
+Valid option with undefined label:
+{name:Tinkering,label:Tinkering,command:continue}
+Valid option with undefined label:
+{name:Topan: Ormas Leader,label:Topan: Ormas Leader,command:continue}
+Valid option with undefined label:
+{name:Touchstone,label:Touchstone,command:continue}
+Valid option with undefined label:
+{name:Tranquilizer,label:Tranquilizer,command:continue}
+Valid option with undefined label:
+{name:Transfer of Wealth,label:Transfer of Wealth,command:continue}
+Valid option with undefined label:
+{name:Tread Lightly,label:Tread Lightly,command:continue}
+Valid option with undefined label:
+{name:Trickster Taka,label:Trickster Taka,command:continue}
+Valid option with undefined label:
+{name:Tāo Salonga: Telepresence Magician,label:Tāo Salonga: Telepresence Magician,command:continue}
+Valid option with undefined label:
+{name:Underdome Irregulars,label:Underdome Irregulars,command:continue}
+Valid option with undefined label:
+{name:Unity,label:Unity,command:continue}
+Valid option with undefined label:
+{name:Utae,label:Utae,command:continue}
+Valid option with undefined label:
+{name:VRcation,label:VRcation,command:continue}
+Valid option with undefined label:
+{name:Verbal Plasticity,label:Verbal Plasticity,command:continue}
+Valid option with undefined label:
+{name:Virtual Intelligence, P.I.: “You Can Call Me Vic”,label:Virtual Intelligence, P.I.: “You Can Call Me Vic”,command:continue}
+Valid option with undefined label:
+{name:Whistleblower,label:Whistleblower,command:continue}
+Valid option with undefined label:
+{name:Wildcat Strike,label:Wildcat Strike,command:continue}
+Valid option with undefined label:
+{name:Word on the Street,label:Word on the Street,command:continue}
+Valid option with undefined label:
+{name:Wyldside,label:Wyldside,command:continue}
+Valid option with undefined label:
+{name:Wyrm,label:Wyrm,command:continue}
+Valid option with undefined label:
+{name:Xanadu,label:Xanadu,command:continue}
+Valid option with undefined label:
+{name:Yog.0,label:Yog.0,command:continue}
+Valid option with undefined label:
+{name:Zahya Sadeghi: Versatile Smuggler,label:Zahya Sadeghi: Versatile Smuggler,command:continue}
+Valid option with undefined label:
+{name:“Baklan” Bochkin,label:“Baklan” Bochkin,command:continue}
+Complete Image names Echelon
+Runner takes 1 net damage
+Echelon trashed
+Valid option with undefined label:
+{name:\\Knickknack\\ O'Brian,label:\\Knickknack\\ O'Brian,command:continue}
+Valid option with undefined label:
+{name:Abagnale,label:Abagnale,command:continue}
+Valid option with undefined label:
+{name:Access to Globalsec,label:Access to Globalsec,command:continue}
+Valid option with undefined label:
+{name:Account Siphon,label:Account Siphon,command:continue}
+Valid option with undefined label:
+{name:Aesop's Pawnshop,label:Aesop's Pawnshop,command:continue}
+Valid option with undefined label:
+{name:Afterimage,label:Afterimage,command:continue}
+Valid option with undefined label:
+{name:Aircheck,label:Aircheck,command:continue}
+Valid option with undefined label:
+{name:Akamatsu Mem Chip,label:Akamatsu Mem Chip,command:continue}
+Valid option with undefined label:
+{name:Always Have a Backup Plan,label:Always Have a Backup Plan,command:continue}
+Valid option with undefined label:
+{name:Aniccam,label:Aniccam,command:continue}
+Valid option with undefined label:
+{name:Armitage Codebusting,label:Armitage Codebusting,command:continue}
+Valid option with undefined label:
+{name:Atman,label:Atman,command:continue}
+Valid option with undefined label:
+{name:Aurora,label:Aurora,command:continue}
+Valid option with undefined label:
+{name:Avgustina Ivanovskaya,label:Avgustina Ivanovskaya,command:continue}
+Valid option with undefined label:
+{name:Ayla \\Bios\\ Rahim: Simulant Specialist,label:Ayla \\Bios\\ Rahim: Simulant Specialist,command:continue}
+Valid option with undefined label:
+{name:Az McCaffrey: Mechanical Prodigy,label:Az McCaffrey: Mechanical Prodigy,command:continue}
+Valid option with undefined label:
+{name:Azimat,label:Azimat,command:continue}
+Valid option with undefined label:
+{name:Bahia Bands,label:Bahia Bands,command:continue}
+Valid option with undefined label:
+{name:Baker,label:Baker,command:continue}
+Valid option with undefined label:
+{name:Bank Job,label:Bank Job,command:continue}
+Valid option with undefined label:
+{name:Barry \\Baz\\ Wong: Tri-Maf Veteran,label:Barry \\Baz\\ Wong: Tri-Maf Veteran,command:continue}
+Valid option with undefined label:
+{name:Battering Ram,label:Battering Ram,command:continue}
+Valid option with undefined label:
+{name:Begemot,label:Begemot,command:continue}
+Valid option with undefined label:
+{name:Beta Build,label:Beta Build,command:continue}
+Valid option with undefined label:
+{name:Bling,label:Bling,command:continue}
+Valid option with undefined label:
+{name:Blueberry!™ Diesel,label:Blueberry!™ Diesel,command:continue}
+Valid option with undefined label:
+{name:Boomerang,label:Boomerang,command:continue}
+Valid option with undefined label:
+{name:Borrowed Goods,label:Borrowed Goods,command:continue}
+Valid option with undefined label:
+{name:Borrowed Satellite,label:Borrowed Satellite,command:continue}
+Valid option with undefined label:
+{name:Botulus,label:Botulus,command:continue}
+Valid option with undefined label:
+{name:Bravado,label:Bravado,command:continue}
+Valid option with undefined label:
+{name:Buffer Drive,label:Buffer Drive,command:continue}
+Valid option with undefined label:
+{name:Bukhgalter,label:Bukhgalter,command:continue}
+Valid option with undefined label:
+{name:Buzzsaw,label:Buzzsaw,command:continue}
+Valid option with undefined label:
+{name:Cacophony,label:Cacophony,command:continue}
+Valid option with undefined label:
+{name:Career Fair,label:Career Fair,command:continue}
+Valid option with undefined label:
+{name:Carmen,label:Carmen,command:continue}
+Valid option with undefined label:
+{name:Carnivore,label:Carnivore,command:continue}
+Valid option with undefined label:
+{name:Cezve,label:Cezve,command:continue}
+Valid option with undefined label:
+{name:Chain Reaction,label:Chain Reaction,command:continue}
+Valid option with undefined label:
+{name:Chakana,label:Chakana,command:continue}
+Valid option with undefined label:
+{name:Chameleon,label:Chameleon,command:continue}
+Valid option with undefined label:
+{name:Charm Offensive,label:Charm Offensive,command:continue}
+Valid option with undefined label:
+{name:Chastushka,label:Chastushka,command:continue}
+Valid option with undefined label:
+{name:Chisel,label:Chisel,command:continue}
+Valid option with undefined label:
+{name:Chromatophores,label:Chromatophores,command:continue}
+Valid option with undefined label:
+{name:Clean Getaway,label:Clean Getaway,command:continue}
+Valid option with undefined label:
+{name:Cleaver,label:Cleaver,command:continue}
+Valid option with undefined label:
+{name:Climactic Showdown,label:Climactic Showdown,command:continue}
+Valid option with undefined label:
+{name:Cloak,label:Cloak,command:continue}
+Valid option with undefined label:
+{name:Clone Chip,label:Clone Chip,command:continue}
+Valid option with undefined label:
+{name:Clot,label:Clot,command:continue}
+Valid option with undefined label:
+{name:Coalescence,label:Coalescence,command:continue}
+Valid option with undefined label:
+{name:Conduit,label:Conduit,command:continue}
+Valid option with undefined label:
+{name:Cookbook,label:Cookbook,command:continue}
+Valid option with undefined label:
+{name:Cordyceps,label:Cordyceps,command:continue}
+Valid option with undefined label:
+{name:Corroder,label:Corroder,command:continue}
+Valid option with undefined label:
+{name:Corsair,label:Corsair,command:continue}
+Valid option with undefined label:
+{name:Crash Space,label:Crash Space,command:continue}
+Valid option with undefined label:
+{name:Creative Commission,label:Creative Commission,command:continue}
+Valid option with undefined label:
+{name:Crypsis,label:Crypsis,command:continue}
+Valid option with undefined label:
+{name:Cyber-Cypher,label:Cyber-Cypher,command:continue}
+Valid option with undefined label:
+{name:Cyberfeeder,label:Cyberfeeder,command:continue}
+Valid option with undefined label:
+{name:Cybertrooper Talut,label:Cybertrooper Talut,command:continue}
+Valid option with undefined label:
+{name:DZMZ Optimizer,label:DZMZ Optimizer,command:continue}
+Valid option with undefined label:
+{name:Dagger,label:Dagger,command:continue}
+Valid option with undefined label:
+{name:Daily Casts,label:Daily Casts,command:continue}
+Valid option with undefined label:
+{name:Data Dealer,label:Data Dealer,command:continue}
+Valid option with undefined label:
+{name:Datasucker,label:Datasucker,command:continue}
+Valid option with undefined label:
+{name:Decoy,label:Decoy,command:continue}
+Valid option with undefined label:
+{name:Demolisher,label:Demolisher,command:continue}
+Valid option with undefined label:
+{name:Demolition Run,label:Demolition Run,command:continue}
+Valid option with undefined label:
+{name:Desperado,label:Desperado,command:continue}
+Valid option with undefined label:
+{name:Detente,label:Detente,command:continue}
+Valid option with undefined label:
+{name:Devadatta Drone,label:Devadatta Drone,command:continue}
+Valid option with undefined label:
+{name:Devil Charm,label:Devil Charm,command:continue}
+Valid option with undefined label:
+{name:Dewi Subrotoputri: Pedagogical Dhalang,label:Dewi Subrotoputri: Pedagogical Dhalang,command:continue}
+Valid option with undefined label:
+{name:Diesel,label:Diesel,command:continue}
+Valid option with undefined label:
+{name:Direct Access,label:Direct Access,command:continue}
+Valid option with undefined label:
+{name:Dirty Laundry,label:Dirty Laundry,command:continue}
+Valid option with undefined label:
+{name:Djinn,label:Djinn,command:continue}
+Valid option with undefined label:
+{name:Docklands Pass,label:Docklands Pass,command:continue}
+Valid option with undefined label:
+{name:Dr. Nuka Vrolyck,label:Dr. Nuka Vrolyck,command:continue}
+Valid option with undefined label:
+{name:DreamNet,label:DreamNet,command:continue}
+Valid option with undefined label:
+{name:Déjà Vu,label:Déjà Vu,command:continue}
+Valid option with undefined label:
+{name:Earthrise Hotel,label:Earthrise Hotel,command:continue}
+Valid option with undefined label:
+{name:Easy Mark,label:Easy Mark,command:continue}
+Valid option with undefined label:
+{name:Echelon,label:Echelon,command:continue}
+Valid option with undefined label:
+{name:Egret,label:Egret,command:continue}
+Valid option with undefined label:
+{name:Emergency Shutdown,label:Emergency Shutdown,command:continue}
+Valid option with undefined label:
+{name:En Passant,label:En Passant,command:continue}
+Valid option with undefined label:
+{name:Escher,label:Escher,command:continue}
+Valid option with undefined label:
+{name:Esâ Afontov: Eco-Insurrectionist,label:Esâ Afontov: Eco-Insurrectionist,command:continue}
+Valid option with undefined label:
+{name:Euler,label:Euler,command:continue}
+Valid option with undefined label:
+{name:Exile: Streethawk,label:Exile: Streethawk,command:continue}
+Valid option with undefined label:
+{name:Exploratory Romp,label:Exploratory Romp,command:continue}
+Valid option with undefined label:
+{name:Feedback Filter,label:Feedback Filter,command:continue}
+Valid option with undefined label:
+{name:Femme Fatale,label:Femme Fatale,command:continue}
+Valid option with undefined label:
+{name:Fencer Fueno,label:Fencer Fueno,command:continue}
+Valid option with undefined label:
+{name:Fermenter,label:Fermenter,command:continue}
+Valid option with undefined label:
+{name:Flip Switch,label:Flip Switch,command:continue}
+Valid option with undefined label:
+{name:Flux Capacitor,label:Flux Capacitor,command:continue}
+Valid option with undefined label:
+{name:Forged Activation Orders,label:Forged Activation Orders,command:continue}
+Valid option with undefined label:
+{name:Fransofia Ward,label:Fransofia Ward,command:continue}
+Valid option with undefined label:
+{name:Freelance Coding Contract,label:Freelance Coding Contract,command:continue}
+Valid option with undefined label:
+{name:GAMEDRAGON™ Pro,label:GAMEDRAGON™ Pro,command:continue}
+Valid option with undefined label:
+{name:Gabriel Santiago: Consummate Professional,label:Gabriel Santiago: Consummate Professional,command:continue}
+Valid option with undefined label:
+{name:Gachapon,label:Gachapon,command:continue}
+Valid option with undefined label:
+{name:Gauss,label:Gauss,command:continue}
+Valid option with undefined label:
+{name:Ghosttongue,label:Ghosttongue,command:continue}
+Valid option with undefined label:
+{name:Gordian Blade,label:Gordian Blade,command:continue}
+Valid option with undefined label:
+{name:Gourmand,label:Gourmand,command:continue}
+Valid option with undefined label:
+{name:Grimoire,label:Grimoire,command:continue}
+Valid option with undefined label:
+{name:Hackerspace,label:Hackerspace,command:continue}
+Valid option with undefined label:
+{name:Hantu,label:Hantu,command:continue}
+Valid option with undefined label:
+{name:Harmony AR Therapy,label:Harmony AR Therapy,command:continue}
+Valid option with undefined label:
+{name:Hiram “0mission” Svensson: Shadow of the Past,label:Hiram “0mission” Svensson: Shadow of the Past,command:continue}
+Valid option with undefined label:
+{name:Hoshiko Shiro: Untold Protagonist,label:Hoshiko Shiro: Untold Protagonist,command:continue}
+Valid option with undefined label:
+{name:Ice Analyzer,label:Ice Analyzer,command:continue}
+Valid option with undefined label:
+{name:Ice Carver,label:Ice Carver,command:continue}
+Valid option with undefined label:
+{name:Illumination,label:Illumination,command:continue}
+Valid option with undefined label:
+{name:Imp,label:Imp,command:continue}
+Valid option with undefined label:
+{name:In the Groove,label:In the Groove,command:continue}
+Valid option with undefined label:
+{name:Infiltration,label:Infiltration,command:continue}
+Valid option with undefined label:
+{name:Inside Job,label:Inside Job,command:continue}
+Valid option with undefined label:
+{name:Inti,label:Inti,command:continue}
+Valid option with undefined label:
+{name:Isolation,label:Isolation,command:continue}
+Valid option with undefined label:
+{name:Jailbreak,label:Jailbreak,command:continue}
+Valid option with undefined label:
+{name:Joy Ride,label:Joy Ride,command:continue}
+Valid option with undefined label:
+{name:K2CP Turbine,label:K2CP Turbine,command:continue}
+Valid option with undefined label:
+{name:Kate \\Mac\\ McCaffrey: Digital Tinker,label:Kate \\Mac\\ McCaffrey: Digital Tinker,command:continue}
+Valid option with undefined label:
+{name:Keiko,label:Keiko,command:continue}
+Valid option with undefined label:
+{name:Ken \\Express\\ Tenma: Disappeared Clone,label:Ken \\Express\\ Tenma: Disappeared Clone,command:continue}
+Valid option with undefined label:
+{name:Khusyuk,label:Khusyuk,command:continue}
+Valid option with undefined label:
+{name:Kompromat,label:Kompromat,command:continue}
+Valid option with undefined label:
+{name:Lampades,label:Lampades,command:continue}
+Valid option with undefined label:
+{name:Lat: Ethical Freelancer,label:Lat: Ethical Freelancer,command:continue}
+Valid option with undefined label:
+{name:Leech,label:Leech,command:continue}
+Valid option with undefined label:
+{name:Legwork,label:Legwork,command:continue}
+Valid option with undefined label:
+{name:Lemuria Codecracker,label:Lemuria Codecracker,command:continue}
+Valid option with undefined label:
+{name:Levy AR Lab Access,label:Levy AR Lab Access,command:continue}
+Valid option with undefined label:
+{name:Liberated Account,label:Liberated Account,command:continue}
+Valid option with undefined label:
+{name:Lie Low,label:Lie Low,command:continue}
+Valid option with undefined label:
+{name:Lucky Charm,label:Lucky Charm,command:continue}
+Valid option with undefined label:
+{name:Madani,label:Madani,command:continue}
+Valid option with undefined label:
+{name:Magdalene Keino-Chemutai: Cryptarchitect,label:Magdalene Keino-Chemutai: Cryptarchitect,command:continue}
+Valid option with undefined label:
+{name:Maglectric Rapid (748 Mod),label:Maglectric Rapid (748 Mod),command:continue}
+Valid option with undefined label:
+{name:Magnum Opus,label:Magnum Opus,command:continue}
+Valid option with undefined label:
+{name:Maintenance Access,label:Maintenance Access,command:continue}
+Valid option with undefined label:
+{name:Makler,label:Makler,command:continue}
+Valid option with undefined label:
+{name:Mantle,label:Mantle,command:continue}
+Valid option with undefined label:
+{name:Marjanah,label:Marjanah,command:continue}
+Valid option with undefined label:
+{name:Marrow,label:Marrow,command:continue}
+Valid option with undefined label:
+{name:Masterwork (v37),label:Masterwork (v37),command:continue}
+Valid option with undefined label:
+{name:Mayfly,label:Mayfly,command:continue}
+Valid option with undefined label:
+{name:Medium,label:Medium,command:continue}
+Valid option with undefined label:
+{name:Methuselah,label:Methuselah,command:continue}
+Valid option with undefined label:
+{name:Mimic,label:Mimic,command:continue}
+Valid option with undefined label:
+{name:Modded,label:Modded,command:continue}
+Valid option with undefined label:
+{name:Monolith,label:Monolith,command:continue}
+Valid option with undefined label:
+{name:Moshing,label:Moshing,command:continue}
+Valid option with undefined label:
+{name:Mu Safecracker,label:Mu Safecracker,command:continue}
+Valid option with undefined label:
+{name:MuslihaT: Multifarious Marketeer,label:MuslihaT: Multifarious Marketeer,command:continue}
+Valid option with undefined label:
+{name:Mutual Favor,label:Mutual Favor,command:continue}
+Valid option with undefined label:
+{name:Mystic Maemi,label:Mystic Maemi,command:continue}
+Valid option with undefined label:
+{name:Net Shield,label:Net Shield,command:continue}
+Valid option with undefined label:
+{name:Networking,label:Networking,command:continue}
+Valid option with undefined label:
+{name:Ninja,label:Ninja,command:continue}
+Valid option with undefined label:
+{name:No Free Lunch,label:No Free Lunch,command:continue}
+Valid option with undefined label:
+{name:Noise: Hacker Extraordinaire,label:Noise: Hacker Extraordinaire,command:continue}
+Valid option with undefined label:
+{name:Num,label:Num,command:continue}
+Valid option with undefined label:
+{name:Nurse Hạnh,label:Nurse Hạnh,command:continue}
+Valid option with undefined label:
+{name:Odore,label:Odore,command:continue}
+Valid option with undefined label:
+{name:Omni-drive,label:Omni-drive,command:continue}
+Valid option with undefined label:
+{name:Open Market,label:Open Market,command:continue}
+Valid option with undefined label:
+{name:Overclock,label:Overclock,command:continue}
+Valid option with undefined label:
+{name:Paladin Poemu,label:Paladin Poemu,command:continue}
+Valid option with undefined label:
+{name:Pantograph,label:Pantograph,command:continue}
+Valid option with undefined label:
+{name:Parasite,label:Parasite,command:continue}
+Valid option with undefined label:
+{name:Paricia,label:Paricia,command:continue}
+Valid option with undefined label:
+{name:Pauleʼs Café,label:Pauleʼs Café,command:continue}
+Valid option with undefined label:
+{name:Pelangi,label:Pelangi,command:continue}
+Valid option with undefined label:
+{name:Pennyshaver,label:Pennyshaver,command:continue}
+Valid option with undefined label:
+{name:Penrose,label:Penrose,command:continue}
+Valid option with undefined label:
+{name:Penumbral Toolkit,label:Penumbral Toolkit,command:continue}
+Valid option with undefined label:
+{name:Physarum Entangler,label:Physarum Entangler,command:continue}
+Valid option with undefined label:
+{name:Pipeline,label:Pipeline,command:continue}
+Valid option with undefined label:
+{name:Prepaid VoicePAD,label:Prepaid VoicePAD,command:continue}
+Valid option with undefined label:
+{name:Principia,label:Principia,command:continue}
+Valid option with undefined label:
+{name:Professional Contacts,label:Professional Contacts,command:continue}
+Valid option with undefined label:
+{name:Prognostic Q-Loop,label:Prognostic Q-Loop,command:continue}
+Valid option with undefined label:
+{name:Quetzal: Free Spirit,label:Quetzal: Free Spirit,command:continue}
+Valid option with undefined label:
+{name:Rabbit Hole,label:Rabbit Hole,command:continue}
+Valid option with undefined label:
+{name:Read-Write Share,label:Read-Write Share,command:continue}
+Valid option with undefined label:
+{name:Red Team,label:Red Team,command:continue}
+Valid option with undefined label:
+{name:Reina Roja: Freedom Fighter,label:Reina Roja: Freedom Fighter,command:continue}
+Valid option with undefined label:
+{name:Rejig,label:Rejig,command:continue}
+Valid option with undefined label:
+{name:Rent Rioters,label:Rent Rioters,command:continue}
+Valid option with undefined label:
+{name:René \\Loup\\ Arcemont: Party Animal,label:René \\Loup\\ Arcemont: Party Animal,command:continue}
+Valid option with undefined label:
+{name:Retrieval Run,label:Retrieval Run,command:continue}
+Valid option with undefined label:
+{name:Revolver,label:Revolver,command:continue}
+Valid option with undefined label:
+{name:Rezeki,label:Rezeki,command:continue}
+Valid option with undefined label:
+{name:Rielle \\Kit\\ Peddler: Transhuman,label:Rielle \\Kit\\ Peddler: Transhuman,command:continue}
+Valid option with undefined label:
+{name:Rielle “Kit” Peddler: Transhuman,label:Rielle “Kit” Peddler: Transhuman,command:continue}
+Valid option with undefined label:
+{name:Rising Tide,label:Rising Tide,command:continue}
+Valid option with undefined label:
+{name:Ritual,label:Ritual,command:continue}
+Valid option with undefined label:
+{name:Rotary,label:Rotary,command:continue}
+Valid option with undefined label:
+{name:Running Hot,label:Running Hot,command:continue}
+Valid option with undefined label:
+{name:Ryō \\Phoenix\\ Ōno: Out of the Ashes,label:Ryō \\Phoenix\\ Ōno: Out of the Ashes,command:continue}
+Valid option with undefined label:
+{name:Saci,label:Saci,command:continue}
+Valid option with undefined label:
+{name:Sacrificial Construct,label:Sacrificial Construct,command:continue}
+Valid option with undefined label:
+{name:Sahasrara,label:Sahasrara,command:continue}
+Valid option with undefined label:
+{name:Same Old Thing,label:Same Old Thing,command:continue}
+Valid option with undefined label:
+{name:Sang Kancil,label:Sang Kancil,command:continue}
+Valid option with undefined label:
+{name:Scavenge,label:Scavenge,command:continue}
+Valid option with undefined label:
+{name:Scrounge,label:Scrounge,command:continue}
+Valid option with undefined label:
+{name:Scrubber,label:Scrubber,command:continue}
+Valid option with undefined label:
+{name:Security Testing,label:Security Testing,command:continue}
+Valid option with undefined label:
+{name:Self-modifying Code,label:Self-modifying Code,command:continue}
+Valid option with undefined label:
+{name:Sell Out,label:Sell Out,command:continue}
+Valid option with undefined label:
+{name:Shred,label:Shred,command:continue}
+Valid option with undefined label:
+{name:Side Hustle,label:Side Hustle,command:continue}
+Valid option with undefined label:
+{name:Simulchip,label:Simulchip,command:continue}
+Valid option with undefined label:
+{name:Sipa,label:Sipa,command:continue}
+Valid option with undefined label:
+{name:Smartware Distributor,label:Smartware Distributor,command:continue}
+Valid option with undefined label:
+{name:Sneakdoor Beta,label:Sneakdoor Beta,command:continue}
+Valid option with undefined label:
+{name:Spec Work,label:Spec Work,command:continue}
+Valid option with undefined label:
+{name:Special Order,label:Special Order,command:continue}
+Valid option with undefined label:
+{name:Stargate,label:Stargate,command:continue}
+Valid option with undefined label:
+{name:Steelskin Scarring,label:Steelskin Scarring,command:continue}
+Valid option with undefined label:
+{name:Steve Cambridge: Master Grifter,label:Steve Cambridge: Master Grifter,command:continue}
+Valid option with undefined label:
+{name:Stick and Poke,label:Stick and Poke,command:continue}
+Valid option with undefined label:
+{name:Stimhack,label:Stimhack,command:continue}
+Valid option with undefined label:
+{name:Stoneship Chart Room,label:Stoneship Chart Room,command:continue}
+Valid option with undefined label:
+{name:Stowaway,label:Stowaway,command:continue}
+Valid option with undefined label:
+{name:Supercorridor,label:Supercorridor,command:continue}
+Valid option with undefined label:
+{name:Sure Gamble,label:Sure Gamble,command:continue}
+Valid option with undefined label:
+{name:Swift,label:Swift,command:continue}
+Valid option with undefined label:
+{name:T400 Memory Diamond,label:T400 Memory Diamond,command:continue}
+Valid option with undefined label:
+{name:Tailgate,label:Tailgate,command:continue}
+Valid option with undefined label:
+{name:Take a Dive,label:Take a Dive,command:continue}
+Valid option with undefined label:
+{name:Telework Contract,label:Telework Contract,command:continue}
+Valid option with undefined label:
+{name:Test Run,label:Test Run,command:continue}
+Valid option with undefined label:
+{name:The Artist,label:The Artist,command:continue}
+Valid option with undefined label:
+{name:The Back,label:The Back,command:continue}
+Valid option with undefined label:
+{name:The Catalyst,label:The Catalyst,command:continue}
+Valid option with undefined label:
+{name:The Class Act,label:The Class Act,command:continue}
+Valid option with undefined label:
+{name:The Maker's Eye,label:The Maker's Eye,command:continue}
+Valid option with undefined label:
+{name:The Nihilist,label:The Nihilist,command:continue}
+Valid option with undefined label:
+{name:The Personal Touch,label:The Personal Touch,command:continue}
+Valid option with undefined label:
+{name:The Professor: Keeper of Knowledge,label:The Professor: Keeper of Knowledge,command:continue}
+Valid option with undefined label:
+{name:The Source,label:The Source,command:continue}
+Valid option with undefined label:
+{name:The Toolbox,label:The Toolbox,command:continue}
+Valid option with undefined label:
+{name:The Tungsten Tailor,label:The Tungsten Tailor,command:continue}
+Valid option with undefined label:
+{name:Tinkering,label:Tinkering,command:continue}
+Valid option with undefined label:
+{name:Topan: Ormas Leader,label:Topan: Ormas Leader,command:continue}
+Valid option with undefined label:
+{name:Touchstone,label:Touchstone,command:continue}
+Valid option with undefined label:
+{name:Tranquilizer,label:Tranquilizer,command:continue}
+Valid option with undefined label:
+{name:Transfer of Wealth,label:Transfer of Wealth,command:continue}
+Valid option with undefined label:
+{name:Tread Lightly,label:Tread Lightly,command:continue}
+Valid option with undefined label:
+{name:Trickster Taka,label:Trickster Taka,command:continue}
+Valid option with undefined label:
+{name:Tāo Salonga: Telepresence Magician,label:Tāo Salonga: Telepresence Magician,command:continue}
+Valid option with undefined label:
+{name:Underdome Irregulars,label:Underdome Irregulars,command:continue}
+Valid option with undefined label:
+{name:Unity,label:Unity,command:continue}
+Valid option with undefined label:
+{name:Utae,label:Utae,command:continue}
+Valid option with undefined label:
+{name:VRcation,label:VRcation,command:continue}
+Valid option with undefined label:
+{name:Verbal Plasticity,label:Verbal Plasticity,command:continue}
+Valid option with undefined label:
+{name:Virtual Intelligence, P.I.: “You Can Call Me Vic”,label:Virtual Intelligence, P.I.: “You Can Call Me Vic”,command:continue}
+Valid option with undefined label:
+{name:Whistleblower,label:Whistleblower,command:continue}
+Valid option with undefined label:
+{name:Wildcat Strike,label:Wildcat Strike,command:continue}
+Valid option with undefined label:
+{name:Word on the Street,label:Word on the Street,command:continue}
+Valid option with undefined label:
+{name:Wyldside,label:Wyldside,command:continue}
+Valid option with undefined label:
+{name:Wyrm,label:Wyrm,command:continue}
+Valid option with undefined label:
+{name:Xanadu,label:Xanadu,command:continue}
+Valid option with undefined label:
+{name:Yog.0,label:Yog.0,command:continue}
+Valid option with undefined label:
+{name:Zahya Sadeghi: Versatile Smuggler,label:Zahya Sadeghi: Versatile Smuggler,command:continue}
+Valid option with undefined label:
+{name:“Baklan” Bochkin,label:“Baklan” Bochkin,command:continue}
+Complete Image names Ayla Bios Rahim: Simulant Specialist
+Runner takes 1 net damage
+Gourmand trashed
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Project Yagi-Uda,Proprionegation,Storgotic Resonator]
+SPOILER: Runner has 12 credit(s), 0 tag(s) and 0 card(s) in hand: []
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+AI: More credits could be nice
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.5 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.9)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Project Yagi-Uda,Proprionegation,Storgotic Resonator]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Reveal the top card of R&D and gain 2[c] triggered
+Measured Response revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp installed a card in root of a remote server
+Corp spent one click
+Corp gained one credit
+Corp spent one click
+Corp spent one credit
+Card advanced
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Proprionegation,Storgotic Resonator,Measured Response]
+SPOILER: Runner has 16 credit(s), 0 tag(s) and 0 card(s) in hand: []
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.6 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 3.1)
+AI: Gotta do some prep
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.6 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 3.1)
+AI: Gotta do some prep
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.6 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 3.1)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][2 Project Yagi-Uda, 0.6 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 3.1)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Proprionegation,Storgotic Resonator,Measured Response]
+SPOILER: Runner has 20 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Reveal the top card of R&D and gain 2[c] triggered
+Semak-samun revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+Project Yagi-Uda scored
+1 power counter placed on The Red Room
+0 agenda counters placed on Project Yagi-Uda
+Corp spent one click
+Corp installed a card in root of a remote server
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Storgotic Resonator,Measured Response,Semak-samun]
+SPOILER: Runner has 20 credit(s), 0 tag(s) and 0 card(s) in hand: []
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Storgotic Resonator,Measured Response,Semak-samun]
+SPOILER: Runner has 24 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Reveal the top card of R&D and gain 2[c] triggered
+The Red Room revealed
+Corp gained 2 credits
+Corp drew a card
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp spent one credit
+Card advanced
+Corp spent one click
+Corp gained one credit
+All options have usability false, skipping phase
+All options have usability false, skipping phase
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Storgotic Resonator,Measured Response,Semak-samun,The Red Room]
+SPOILER: Runner has 24 credit(s), 0 tag(s) and 0 card(s) in hand: []
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+AI: Suspected HQ: [2 Neurospike, 0.6 certainty][1 Project Yagi-Uda, 0.7 certainty][1 Measured Response, 0.6 certainty] (info HQ score: 2.5)
+AI: Don't want to run right now
+AI: Don't need more credits right now
+AI: Ok not economy, something else?
+Runner spent one click
+Runner gained one credit
+All options have usability false, skipping phase
+ERROR: .responseOnRunnerDiscardEnds.Enumerate on Bling will be ignored because it is set to automatic (consider moving the checks into .Resolve)
+All options have usability false, skipping phase
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Storgotic Resonator,Measured Response,Semak-samun,The Red Room]
+SPOILER: Runner has 28 credit(s), 0 tag(s) and 0 card(s) in hand: []
+Reveal the top card of R&D and gain 2[c] triggered
+Storgotic Resonator revealed
+Corp gained 2 credits
+Corp drew a card
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Public Health Portal]
+SPOILER: Remote 1: [Proprionegation]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(35002, [30020,30007,35014,35004,30004,30028,30007,30002,35006,30025,30002,30007,30034,35006,30028,35004,30004,30008,30002,30005,30008,30025,30005,30034,35009,30020,35014,30030,30020,30030,35009,30030,30028,30013,30004,30008,30025,35007], [], [], [30034,30031,30031,35006,30031,35009,30005,35007,35007], [26041,30069], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(26039, [30075,30075,30045,35055,30045,30045,35055,30049,35078,26045], [26041,30069,30072,26046,26042,26036,30075,36041,35055,26044,35056,26040,26042,35078,30069,26044,35054,35052,35052], [26040,26043,35078,35054,36045,26043], [], [36045,35053], [26046,30072,36041], [[26042,35053,35054],[35048,35053]], [26041,26040], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].AITurnsInstalled=1;
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[1].AITurnsInstalled=5;
+runner.scoreArea[1].rezzed=false;
+runner.heap[1].host=null;
+runner.heap[3].host=null;
+runner.heap[4].host=null;
+runner.heap[5].host=null;
+runner.heap[6].host=null;
+runner.heap[8].hostedCards = [];
+runner.heap[9].host=null;
+runner.heap[11].host=null;
+runner.heap[13].hostedCards = [];
+runner.heap[14].host=null;
+runner.heap[15].host=null;
+runner.heap[16].host=null;
+runner.heap[17].host=null;
+runner.heap[19].host=null;
+runner.heap[20].host=null;
+runner.heap[21].host=null;
+runner.heap[22].host=null;
+runner.heap[23].host=null;
+runner.heap[23].notInstalled=false;
+runner.heap[24].host=null;
+runner.heap[25].host=null;
+runner.heap[27].host=null;
+runner.heap[27].notInstalled=false;
+runner.heap[29].host=null;
+runner.heap[30].host=null;
+runner.heap[32].host=null;
+runner.heap[33].host=null;
+runner.heap[34].host=null;
+runner.heap[35].host=null;
+runner.heap[36].host=null;
+runner.heap[37].host=null;
+runner.rig.hardware[2].hostedCards = [];
+corp.scoreArea[0].faceUp=true;
+corp.scoreArea[0].AITurnsInstalled=2;
+corp.scoreArea[1].faceUp=true;
+corp.scoreArea[1].AITurnsInstalled=2;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[2].rezzed=true;
+corp.archives.cards[2].host=null;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[4].host=null;
+corp.archives.cards[5].faceUp=true;
+corp.archives.cards[5].host=null;
+corp.archives.cards[6].faceUp=true;
+corp.archives.cards[8].faceUp=true;
+corp.archives.cards[9].faceUp=true;
+corp.RnD.root[0].rezzed=true;
+corp.RnD.root[0].power=2;
+corp.RnD.cards[3].firstApproach=false;
+corp.HQ.root[0].firstApproach=false;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.remoteServers[0].root[0].rezzed=true;
+corp.remoteServers[0].root[0].AITurnsInstalled=22;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[1].root[0].advancement=2;
+corp.remoteServers[1].root[0].AITurnsInstalled=4;
+corp.remoteServers[1].ice[0].rezzed=true;
+corp.remoteServers[1].AISuccessfulRuns=4;
+corp.archives.AISuccessfulRuns=1;
+if (runner.AI) runner.AI.suspectedHQCards = [{title:'Neurospike',cardType:'operation',copies:2,uncertainty:0.3911111111111111},{title:'Project Yagi-Uda',cardType:'agenda',copies:1,uncertainty:0.2926933333333334},{title:'Measured Response',cardType:'operation',copies:1,uncertainty:0.4303111111111111},];
+
+Version reference: Thu Oct 29 2026 11:31:44 GMT+0000 (Greenwich Mean Time)

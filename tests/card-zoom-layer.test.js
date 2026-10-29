@@ -81,7 +81,7 @@ const preview = ({width = 1440, height = 1000, zoom = 1, enlarged = true, faceUp
   scaleContext.viewingPlayer = side;
   const card = {zoomed: enlarged, faceUp, canView, flipProgress: 1, forceIceRotation: rotated,
     card: {player: side, cardType: 'event', cardLocation: hand ? (side === runner ? runner.grip : corp.HQ.cards) : []},
-    sprite: {x: width * zoom, y: height * zoom, rotation: rotated && !transition ? Math.PI / 2 : 0, scale: {x: 0.5, y: 0.5}},
+    sprite: {x: width * zoom, y: side === runner ? height * zoom : 0, rotation: rotated && !transition ? Math.PI / 2 : 0, scale: {x: 0.5, y: 0.5}},
     storedPosition: {x: 0, y: 0}, glowSprite: {}, SetTextureToBack() {}};
   scaleContext.pixi_holdCard = dragging || pressed ? card : null;
   scaleContext.pixi_dragMoved = dragging;
@@ -100,17 +100,12 @@ const preview = ({width = 1440, height = 1000, zoom = 1, enlarged = true, faceUp
         card.sprite.x + bounds.width * zoom / 2 <= area.right + 1e-9 &&
         card.sprite.y - bounds.height * zoom / 2 >= area.top - 1e-9 &&
         card.sprite.y + bounds.height * zoom / 2 <= area.bottom + 1e-9,
-        'reading preview must stay clear of the visible controls on every frame');
-      const screenY = side === runner ? card.sprite.y / zoom : height - card.sprite.y / zoom;
-      for (const panel of Object.values(controls)) {
-        if (panel.width > 0 && panel.height > 0) {
-          assert(screenY + bounds.height / 2 <= panel.top - 4 + 1e-9,
-            'the rendered card must end above the actual control rectangle');
-        }
-      }
+        'reading preview must remain inside the viewport on every frame');
+
     }
   }
-  return bounds;
+  const screenY = side === runner ? card.sprite.y / zoom : height - card.sprite.y / zoom;
+  return {...bounds, bottom: screenY + bounds.height / 2};
 };
 for (const zoom of [1, 2, 4]) {
   const bounds = preview({zoom});
@@ -138,6 +133,11 @@ for (const side of [runner, corp]) {
         top: size.height - 90, width: 156, height: 84};
       for (const controls of [{footer}, {footer, passpriority}]) {
         preview({...size, side, zoom, rotated: true, transition: true, controls});
+        const handPreview = preview({...size, side, zoom, hand: true, controls});
+        assert(Math.abs(handPreview.bottom - size.height) < 0.001,
+          'hovered hand cards must align with the screen bottom even with visible controls');
+        assert.deepStrictEqual(handPreview, preview({...size, side, zoom, hand: true}),
+          'footer and priority controls must not shift or shrink hand previews');
       }
       const normal = preview({...size, side, zoom});
       const hidden = preview({...size, side, zoom, controls: {passpriority: {...passpriority, width: 0, height: 0}}});
@@ -189,6 +189,55 @@ for (const availability of [0, 1, 2]) {
   pointerContext.pixi_onDragEnd.call(sprite, event(0));
   assert.strictEqual(pointerContext.pixi_dragMoved, false, 'release resets movement for the next press');
 }
+
+// Moving a reading preview above controls must not end hover on its original card.
+const hoverStart = rendererSource.indexOf('this.sprite.pointerout = function (event)');
+const hoverEnd = rendererSource.indexOf('//some extras to support touch', hoverStart);
+assert(hoverStart >= 0 && hoverEnd > hoverStart);
+let hoveredTarget;
+const hoverContext = {pixi_draggingCard: null, $: () => ({prop() {}})};
+vm.createContext(hoverContext);
+const hoveringCard = {zoomed: true, hover: true, storedPosition: {x: 600, y: 730},
+  storedRotation: 0, UpdateGlow() {}, ToggleZoom() { this.zoomed = !this.zoomed; },
+  app: {renderer: {plugins: {interaction: {hitTest(point) {
+    assert.strictEqual(hoveringCard.sprite.interactive, false, 'test the original hover target behind the preview');
+    assert.deepStrictEqual(point, {x: 600, y: 730});
+    return hoveredTarget;
+  }}}}}};
+hoveringCard.sprite = {card: hoveringCard, interactive: true, x: 600, y: 400};
+hoverContext.owner = hoveringCard;
+vm.runInContext('(function() {' + rendererSource.slice(hoverStart, hoverEnd) + '}).call(owner);', hoverContext);
+const originalTarget = {card: hoveringCard};
+const leaveEvent = {type: 'pointerout', data: {pointerType: 'mouse', global: {x: 600, y: 730}}};
+hoveredTarget = originalTarget;
+for (let frame = 0; frame < 4; frame++) {
+  hoveringCard.sprite.pointerout(leaveEvent);
+  assert.strictEqual(hoveringCard.zoomed, true, 'stationary pointer on original hand card must not trigger a zoom loop');
+  assert.strictEqual(hoveringCard.hover, true);
+  assert.strictEqual(hoveringCard.sprite.interactive, true);
+}
+for (const target of [null, {card: {}}]) {
+  hoveringCard.zoomed = hoveringCard.hover = true;
+  hoveredTarget = target;
+  hoveringCard.sprite.pointerout(leaveEvent);
+  assert.strictEqual(hoveringCard.zoomed, false, 'leaving the original card must close its preview');
+  assert.strictEqual(hoveringCard.hover, false);
+  assert.strictEqual(hoveringCard.sprite.x, 600);
+  assert.strictEqual(hoveringCard.sprite.y, 730);
+}
+hoveringCard.zoomed = hoveringCard.hover = true;
+hoveredTarget = originalTarget;
+hoveringCard.sprite.pointerout();
+assert.strictEqual(hoveringCard.zoomed, false, 'explicit ticker unzoom must still work without an event');
+for (const event of [
+  {type: 'pointerout', data: {pointerType: 'touch'}},
+  {type: 'pointerupoutside', data: {pointerType: 'mouse'}},
+]) {
+  hoveringCard.zoomed = hoveringCard.hover = true;
+  hoveringCard.sprite.pointerout(event);
+  assert.strictEqual(hoveringCard.zoomed, false, 'touch dismissal and release outside must still close previews');
+}
+
 
 const initSource = fs.readFileSync(path.join(root, 'init.js'), 'utf8');
 const gripStart = initSource.indexOf('  var gripCascade;');
