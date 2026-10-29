@@ -1,10 +1,48 @@
 # I4 Agenda installation and scoring commitment
 
-**Outcome:** not adopted as default — implementation complete for flag-based owner playtesting; all three I4 options remain off by default. Independent review and an owner decision on defaults remain.
+**Outcome:** not adopted — owner adoption decision pending; implementation merged and the three separate flags remain available for owner playtesting. Recorded batch results below are historical evidence.
 
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](../done/I2-ice-selection-by-marginal-security.md) phase A, [I3](../I3-remote-role-and-root-suitability.md) (now follows I4)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](I2-ice-selection-by-marginal-security.md) phase A, [I3](../I3-remote-role-and-root-suitability.md) (now follows I4)
 **Verified against code:** dd5d256 (2026-10-26; remaining destination/hold seam and scenarios rechecked against current code, then implemented below).
+
+## Current owner playtest setup — 2026-10-29
+
+Paul explicitly requested keeping `agendaCommitmentPlan` and
+`agendaExposureTable` enabled by default for his current games;
+`agendaDestinationPlan` stays off. See [the recorded setup](../../ai-playtesting.md#current-corp-investigation).
+Default-off statements below describe earlier implementation and gate states,
+not this current owner-authorized setup. Adoption remains pending.
+
+## Playtest follow-up — 2026-10-28
+
+Follow [the current owner-playtesting workflow](../../ai-playtesting.md).
+The owner reports preferring `agendaCommitmentPlan=true`,
+`agendaExposureTable=true`, `agendaDestinationPlan=false`: use I4 for advancing
+installed agendas without adopting its destination/hold decisions. This is a
+reported working combination, not a permanent default decision.
+
+Two observations need to be kept distinct:
+
+- With destination planning off, `corp_wont_play_an_agenda.txt` shows prolonged
+  holding while an asset occupies the only protected remote. The
+  [existing agenda-stall ticket](../../bugs/corp-agenda-held-while-secure-remote-available.md)
+  contains a reconstructed reproduction, including a separate relative-score
+  rejection after removing the asset. Coordinate placement/hold with
+  [I3](../I3-remote-role-and-root-suitability.md)'s asset-reuse scope. Do not
+  implement a competing legacy-placement bypass simply to close that bug.
+- The owner separately reports that enabling destination planning produced
+  undefended agenda installs on the last click. That observation is not
+  reproduced by this log, which uses destination planning off. Capture and
+  reproduce it before selecting a fix; neither a bare remote nor a last-click
+  install is automatically wrong in every position.
+
+I4 owns whether, where and when to install an agenda or hold it; I3 owns making
+and keeping a suitable remote available, including considering replacement of
+an installed asset. Any follow-up remains separately switchable and judged in
+owner playtesting. Do not enable Part 2 to repair the off-path stall or claim
+that a merged I4 settles either observation. No implementation change or new
+statistical gate is authorized merely by this follow-up note.
 
 ## Resolution
 
@@ -472,7 +510,7 @@ gate has twice made the Corp weaker:
 [`fa1182c`](../../corp-ai-regression/findings.md#causal-test-on-the-harness-tip)
 ("never score into an insecure remote"; removing only that gate recovered
 +7.6 pp win rate and +0.79 points scored per game) and the
-[L9.0.1 gate failure](../done/L9.0.1-adopt-honest-lockout.md#resolution)
+[L9.0.1 gate failure](L9.0.1-adopt-honest-lockout.md#resolution)
 (−2.9 pp win rate, −0.28 points scored, +0.18 stolen). The owner's 2026-10-14
 playtests (one tester, not a measurement) found the Corp easy to beat: it
 holds agendas too long, plays some into weak remotes and then leaves them

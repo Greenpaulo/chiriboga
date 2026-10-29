@@ -1,10 +1,15 @@
-# Judging whether an AI change plays better
+# Automated comparisons of AI changes
 
-This guide is for you, the project owner. It explains what a **gate** is, why
-the roadmap now uses them, what you do at each step, and how to read the
-results. The agent-facing rules are in
-[ai-planning.md](ai-planning.md#acceptance-gates); you should not need to read
-those.
+**Current workflow (2026-10-28):** [Improving the AI through playtesting](ai-playtesting.md)
+owns strategic priorities and adoption. Paul tries behaviour through flags and
+decides what to keep. Batch pass/fail results are supporting evidence, not an
+automatic instruction to enable or remove behaviour.
+
+The material below describes the earlier statistical adoption workflow and
+remains a reference for an explicitly requested measured comparison. Its
+mandatory batches, automatic default changes and failed-option removal do not
+apply to owner-controlled playtesting. Agent-facing gate formats live in
+[ai-planning.md](ai-planning.md#acceptance-gates).
 
 ## The problem gates solve
 

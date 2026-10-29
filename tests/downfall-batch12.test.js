@@ -306,6 +306,8 @@ c.MoveCard(weak, corp.archives.cards); decisions = [];
 sap.Resolve.call(sap); assert.strictEqual(decisions.length, 0);
 
 // Corp AI: plays the tutor for an unprotected central with stopping ICE in R&D only.
+// Exercise normal ICE selection independently of the optional opening policy.
+ai.options.openingHqThenRdIce = false;
 reset(); grip(5);
 const sap2 = put(card(26061), corp.HQ.cards);
 const etr = put(ice('Stopper', ['Barrier'], 3, ['End the run.'], {rezzed: false, rezCost: 3, elo: 1500}), corp.RnD.cards);
@@ -328,6 +330,29 @@ assert(!sap2.AIWouldPlay(), 'a cheaper HQ install competes');
 c.MoveCard(handWall, corp.archives.cards);
 for (const card of corp.RnD.cards.slice()) if (card.cardType == 'ice') c.MoveCard(card, corp.archives.cards);
 assert(!sap2.AIWouldPlay(), 'no ICE to find');
+// Default options: the opening policy sends the tutor's stopping ICE to HQ.
+reset(); grip(5);
+const defaultAI = vm.runInContext('new CorpAI()', c);
+defaultAI._log = () => {};
+const sapDefault = put(card(26061), corp.HQ.cards);
+const defaultStopper = put(ice('Opening stopper', ['Barrier'], 3, ['End the run.'],
+  {rezzed: false, rezCost: 3, elo: 1500}), corp.RnD.cards);
+put(ice('Opening taxer', ['Sentry'], 1, ['The Runner loses 1[c].'],
+  {rezzed: false, rezCost: 1, elo: 1900}), corp.RnD.cards);
+put({title: 'Agenda', player: corp, cardType: 'agenda', subTypes: [], agendaPoints: 2,
+  advancementRequirement: 3}, corp.HQ.cards);
+corp.creditPool = 6;
+corp.AI = defaultAI;
+try {
+  assert(sapDefault.AIWouldPlay(), 'default AI finds the tutor useful');
+  c.MoveCard(sapDefault, corp.resolvingCards); c.InvalidateActiveTriggerCandidateCache();
+  sapDefault.Resolve.call(sapDefault);
+  const defaultPick = await chooseAI(corp);
+  assert.strictEqual(defaultPick.card, defaultStopper, 'default AI tutors stopping ICE');
+  assert.strictEqual(defaultPick.server, corp.HQ, 'default opening installs first ICE on HQ');
+} finally {
+  corp.AI = ai;
+}
 console.log('Downfall batch 12: mechanics, resource guards, cleanup and real AI consumers passed.');
 }
 main().catch(error => {console.error(error.stack); process.exitCode = 1;});

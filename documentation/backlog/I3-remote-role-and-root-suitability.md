@@ -4,6 +4,58 @@
 **Read first:** [L8.9 tool recipe](../ai-batch-harness.md#using-install-observations-in-the-i-tickets), [L8.9 delivery](done/L8.9-observable-defense-parity.md), `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](done/I2-ice-selection-by-marginal-security.md), [deception gate reconciliation](../corp-ai/deception-gates.md)
 **Verified against code:** faccb78 (2026-10-23)
 
+## Current scope — owner playtesting, 2026-10-28
+
+Follow [the owner-playtesting workflow](../ai-playtesting.md). This scope
+amendment supersedes conflicting sequencing, candidate exclusions and batch
+adoption requirements below. The older code-verification line and design are
+historical; this amendment is not a claim that the whole proposal has been
+re-grounded or approved for implementation.
+
+The owner currently prefers I4 advancement and exposure on, destination
+planning off. Do not make I4's destination flag a prerequisite for benefiting
+from I3, silently enable it, or replace the disabled behaviour under another
+flag. Decide the smallest supported I3 change from observed problems.
+
+**Evidence:** [agenda-stall ticket](../bugs/corp-agenda-held-while-secure-remote-available.md),
+`corp_wont_play_an_agenda.txt` and
+`tests/pending/corp-agenda-blocked-by-occupied-remote.test.js`.
+The log records six ICE installs, two protecting the asset remote, before the
+final agenda-heavy hand. A difficult draw is a contributing possibility, not a
+sufficient diagnosis. The reconstructed board has a counterless Storgotic
+Resonator occupying the only protected remote. Current replacement logic can
+reuse some aging assets, but excludes Hostile assets such as this one. Clearing
+the asset still leaves a relative Archives-score rejection with five agendas
+in HQ. Neither observation proves that installing an agenda is the best move.
+
+**Ownership and design questions before implementation:**
+
+- I3 owns whether a protected remote should remain available for scoring,
+  including considering replacement of a still-installed asset. The older
+  scenario about a remote left empty after an asset goes away is insufficient.
+- Compare retaining the asset, replacing it and preparing another scoring
+  remote, using its remaining usefulness and the available clicks/credits.
+  A Hostile subtype or zero counters alone must not decide replacement.
+  Do not force agenda installation when drawing or waiting is reasonable.
+- I4 owns the agenda install/hold choice and its timing. The relative-bar bug
+  is linked evidence for the I3/I4 plan, not authorization for an independent
+  bypass of the old scoring-server predicate. Keep the destination/hold
+  option independent; the owner's reported undefended last-click agenda
+  installs remain an I4 follow-up, not something this log demonstrates.
+- I5 owns a general asset-value system. I3 should not invent that entire system
+  merely to address this example; document a narrow missing input or split
+  required work before implementation. Use card hooks, not title exceptions.
+- Keep the agenda/trap information boundary, retain useful assets in
+  contrasting positions, and account for the runner's resources using only
+  information available to the Corp.
+
+First re-ground the affected candidate generation and consumer paths, then
+revise the design around the selected behaviour. Persistent roles, new value
+formulas and collectors in the older proposal are possible means, not work
+that must all be built to close this playtest weakness.
+
+## Earlier grounding and proposal context
+
 Dependency state at faccb78: L8.4 is done and adopted (`postureEpochs`
 defaults to `true`); F4 is done; I2 is done and adopted (`iceMarginalSecurity`
 defaults to `true`). I2 delivered M1 (`_breachMargin()`), M2's next-turn
@@ -23,7 +75,9 @@ assumptions (re-grounded 2026-10-23):
   code holds the next-turn hazard over `CORP_AI_I2_HORIZON_RUNNER_TURNS` (2)
   with no projected-income drift. `_breachHazard()`/`_projectedRunnerIncome()`
   exist but no decision reads them. I9 owns M2 recalibration under I3's roles.
-- **M3 and M5 do not exist.** Both are I4-owned in the design note.
+- **M3 and M5 were absent at that earlier revision.** I4 has since delivered
+  completion plans and HQ holding-risk estimates. Reuse those implementations
+  where the selected consumer needs them; do not recreate them in I3.
   `POINT_VALUE` is `CORP_AI_POINT_VALUE` (4.4) in `ai_corp.js`.
 
 **Before design freeze:** incorporate the [I2.2 retain disposition](../corp-ai/measurements/I2.2-rnd-protection-lateness.md)
@@ -57,14 +111,6 @@ owner's playtests: proceed only if the Corp still drifts away from a safe
 remote or crowds it with assets, and re-ground §2 and §5 against I4's code.
 Seeds 6001–7000 stay reserved for I3.
 
-<!-- roadmap-blocker:start -->
-## Blocker
-
-**Blocked on:** **I4** (`in-progress`).
-
-This ticket cannot proceed until that item is `done`. This section is generated by `node scripts/roadmap.js blockers --fix`.
-<!-- roadmap-blocker:end -->
-
 ## Goal
 Name one scoring remote and keep it: the remote with the best projected
 per-turn breach hazard (M2) after investment the Corp can afford, kept across
@@ -87,6 +133,7 @@ lost scoring EV as opportunity cost." Owner's playtest note: "if it manages to
 build a secure remote then keep getting agendas in and keep scoring."
 
 ## Current behaviour
+Historical snapshot; use the current scope above and re-ground before building.
 Verified at faccb78 in `ai_corp.js` (re-grounded 2026-10-23; previously 60fa0d7).
 
 - `_emptyProtectedRemotes()` lists remotes with ICE and no agenda/asset root
@@ -151,6 +198,9 @@ Verified at faccb78 in `ai_corp.js` (re-grounded 2026-10-23; previously 60fa0d7)
   example `protectionIce`), not a remote role.
 
 ## Design
+
+Earlier proposal, subject to the current scope amendment above. In particular,
+excluding every occupied asset root would not address the new reuse question.
 
 All values are in expected agenda points over the design note's short horizon
 `H` Runner turns; credits convert only through the design note's single
@@ -291,17 +341,41 @@ boundary; no deception safety rule is weakened.
 4. Same Corp board, R&D breached every turn (high R&D M2) versus not:
    `_expectedScoringStakes(scoringRemote)` is lower in the leaking case, and
    I2's ranking moves toward the R&D ICE candidate.
-5. A spent-asset remote with one ICE becomes the scoring remote rather than a
-   new remote being opened when its projected M2 is lower (design note edge
-   case 1).
-6. Agenda/trap substitution: replacing the scoring remote's agenda with an
+5. Reuse a protected remote left empty after an asset departs. Also exercise
+   the new log's still-installed, counterless Hostile asset: compare replacement
+   with keeping it and building elsewhere. Include an asset with useful remaining
+   abilities/counters that should be kept, an ordinary aging asset, and a remote
+   where an exposed agenda would be a bad risk. Test the selected behaviour
+   with I4 destination planning off, not just with all I4 flags on.
+6. After removing the asset from the reconstructed board, exercise the separate
+   Archives-relative rejection. Record which I3/I4 consumer owns any changed
+   placement decision; do not silently change every `_isAScoringServer()` reader.
+7. Agenda/trap substitution: replacing the scoring remote's agenda with an
    Ambush leaves its role and `_expectedScoringStakes` unchanged.
-7. Information boundary: substituting hidden Runner Grip cards leaves every
+8. Information boundary: substituting hidden Runner Grip cards leaves every
    role, stake and cost unchanged.
-8. `remoteRoles` off: install decisions and decision snapshots are identical
+9. `remoteRoles` off: install decisions and decision snapshots are identical
    to the baseline.
 
 ## Acceptance gate
+Human gate. Option `remoteRoles` (Corp AI), new behaviour off unless the owner
+requests otherwise. Owner-controlled playtesting under
+`documentation/ai-playtesting.md`; no fixed sample or numerical thresholds.
+Assess: making and reusing a protected scoring remote without discarding useful
+assets, starving central defence or forcing exposed agenda installs.
+Adoption: Paul decides after playtesting; record the tested flags and decision.
+The reported working setup has `agendaCommitmentPlan=true`,
+`agendaExposureTable=true`, `agendaDestinationPlan=false` and
+`openingHqThenRdIce=true`; capture the actual configuration used for each test.
+
+## Historical F4 comparison proposal
+
+Not a current adoption requirement or an instruction to build every collector.
+Retained for provenance and an optional comparison if the owner requests it.
+The baseline/default assumptions and start-board availability below predate the
+current playtest evidence and must be refreshed before any such run. Seeds
+6001–7000 remain reserved; this documentation change runs no games.
+
 Expected effect: small direct redirection in pool games. Legacy code already
 keeps generic assets off the strongest empty remote and 12 of the 13
 `AIWorthInstalling` hooks avoid scoring servers. Most of I3's effect reaches
@@ -396,24 +470,17 @@ per-central never-protected count if the existing collectors do not supply it.
   advanced agenda to reuse a remote is out of scope.
 
 ## Acceptance criteria
-- [ ] Use the L8.9 tool recipe on current matching reports; record destination, allocation, lifetime and per-deck coverage evidence in the Resolution.
-- [ ] Exercise a shell/asset-spam counterexample with a protected scoring room and legitimate bare disposable roots, and state any missing representative pool/topology coverage.
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] Every root install candidate carries the target remote's current and proposed role and its `opportunityCost` in points; a displaced `scoring` role is named in its reasons.
-- [ ] The behaviour change ships behind an AI option that defaults to off (named in the Resolution).
-- [ ] The gate is ready to run: every collector and start board it names exists and is tested, and a `--quick` run of each gate command completes and reports at least one game changed by the options.
-- [ ] Applicable gate evidence is recorded in the Resolution.
-      For F4: exact command, committed deck pairs, paired seeds, seed count,
-      every metric's baseline/candidate result and bootstrap 95% confidence
-      interval, guarded-regression result, pass conditions and thresholds; an
-      improvement interval's lower bound must be above zero. Only then is the
-      option switched on by default.
-- [ ] The `remoteRoles` collector exists, declares its metrics report-only, and is tested.
-- [ ] Every other collector the gate commands name (`centralStolen`, `corpInsolventTurns`, `strandedUnrezzedIceCost`, `bluffSingleVariableCorrelation`, `realizedIceByRootType`, `installOutcomes`, `openingCentralCoverage`) runs in the `--quick` gate run.
-- [ ] With `remoteRoles` on, `_iceStake()`'s pre-I3 designated-remote stake and fix 3's `exposureTurns` delay are replaced by `_expectedScoringStakes()`; with it off they are unchanged.
-- [ ] The Resolution records I2.2's report-only central evidence: HQ and R&D theft separately, first-ICE timing with never-protected and bare-through-turn-2 shares (with censoring), and early/late/never-protected R&D cases.
-- [ ] The `scoring-remote` start boards exist, each `NOTE` names its source log or what was adapted, and they are tested.
-- [ ] New or changed card-facing hooks are documented in `documentation/ai.md`.
-- [ ] The Resolution lists the cards updated in each set in scope and confirms none were missed.
-- [ ] `documentation/corp-ai/architecture.md` describes the scoring remote, its persistence and the stakes it supplies to I2 and I4, and no longer says I3 will consume `_classifyRunnerMacroThreat().focus`.
-- [ ] `node tests/run-all-tests.js` passes.
+- [ ] When this work fixes `corp-agenda-held-while-secure-remote-available.md`, update that bug's Resolution and validation evidence, move its passing reproduction into the green suite, and run `node scripts/ticket.js move documentation/bugs/corp-agenda-held-while-secure-remote-available.md code-review` as part of the I3 handoff. Hand off both tickets for review; do not leave the fixed bug in the open folder or move it directly to `done/`.
+- [ ] Resolve the linked bug `documentation/bugs/corp-agenda-held-while-secure-remote-available.md` as part of this work, not a separate future pickup. Run `tests/pending/corp-agenda-blocked-by-occupied-remote.test.js`, record the disposition of both cases in that bug, and carry it through review/closure alongside the relevant I3/I4 change. A fixed case must pass unchanged and enter the green suite; if its strategic expectation is refuted, record the evidence and the resulting disposition. Do not close I3 with this bug silently left open: any genuinely separate remaining work needs an explicit owner and tracked follow-up.
+- [ ] Re-ground the affected I3/I4 code paths and agree a scoped design against the current playtest evidence before implementation; do not build the older full role/value proposal by default.
+- [ ] Record whether the agenda-heavy hand justifies waiting, drawing, preparing another remote or replacing the asset, distinguishing test facts from strategic preference.
+- [ ] Exercise the source board and asset-removed variation; record how the selected I3/I4 change handles each. If an expectation is unsupported, document the evidence rather than weakening it to obtain a pass.
+- [ ] Any fixed pending reproduction passes unchanged and moves into the green suite. Evidence that remains unresolved is explicitly tracked, not claimed fixed by a partial change.
+- [ ] Test retained useful assets, ordinary aging assets, Hostile assets with and without useful remaining abilities, and agenda/trap substitution. No card-title special cases or blanket Hostile/zero-counter replacement rule.
+- [ ] The chosen behaviour works with I4 destination planning off; installing or holding an agenda stays an explicit I4 ownership decision.
+- [ ] New strategic behaviour ships under a named AI flag, initially off unless Paul requests otherwise; its comment describes the playtest behaviour plainly. Unrelated decisions retain their existing meaning.
+- [ ] Record the tested flags, useful logs and contrasting outcomes, and hand off the behaviour for owner playtesting. Record Paul's adoption decision separately from implementation completion; leave it pending if not yet given.
+- [ ] Preserve lawful hidden-information use, hypothetical restoration, deterministic randomness and relevant central-defence/tactical regressions.
+- [ ] New or changed AI card hooks are documented in `documentation/ai.md`, and affected playable sets are covered.
+- [ ] `documentation/corp-ai/architecture.md` describes only the behaviour actually implemented.
+- [ ] Required focused tests and the final full ticket check pass under `tests/README.md`.

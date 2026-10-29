@@ -61,6 +61,11 @@ vm.runInContext('reviewAI = new CorpAI(); reviewAI._log = function() {}; runnerR
 const ai = context.reviewAI;
 // Legacy scenarios keep their frozen policy; I2 scenarios opt in below.
 ai.options.iceMarginalSecurity = false;
+// Historical policy scenarios opt into newer policies individually.
+ai.options.openingHqThenRdIce = false;
+ai.options.emptyArchivesRunPressure = false;
+ai.options.agendaCommitmentPlan = false;
+ai.options.agendaExposureTable = false;
 const marginInvariant = require('./breach-margin-invariant')(ai); // I2 M1 on every evaluation
 const card = id => Object.assign({}, context.cardSet[id]);
 const ice = (texts, effects, extra) => Object.assign({title: 'Regression ice', player: corp,
@@ -2198,20 +2203,23 @@ test('emergency draw preserves ordinary economy and agenda-flood safeguards', ()
     ai._sufficientEconomy = oldEconomy;
   }
 });
-test('regression options default off and are independent between AI instances', () => {
+test('regression option defaults respect owner playtesting and are independent between AI instances', () => {
   const first = vm.runInContext('new CorpAI()', context);
   const second = vm.runInContext('new CorpAI()', context);
   const names = ['secureScoringServerGate', 'serverAtRiskInstallOverride',
     'committedAgendaReserveBypass', 'emptyArchivesRunPressure', 'valuelessServerDebtReset'];
   for (const name of names) {
-    assert.strictEqual(first.options[name], false);
-    first.options[name] = true;
-    assert.strictEqual(second.options[name], false);
+    const expected = name === 'emptyArchivesRunPressure';
+    assert.strictEqual(first.options[name], expected);
+    first.options[name] = !expected;
+    assert.strictEqual(second.options[name], expected);
   }
   assert.strictEqual(vm.runInContext('Object.isFrozen(CorpAI.DEFAULT_OPTIONS)', context), true);
 });
 test('committed agenda reserve bypass changes the actual main-phase decision only when enabled', () => {
   const gated = vm.runInContext('new CorpAI()', context);
+  // Isolate the pre-I4 reserve-bypass policy.
+  gated.options.agendaCommitmentPlan = false;
   gated._log = () => {};
   const agenda = {player: corp, cardType: 'agenda', agendaPoints: 2,
     advancement: 1, AIScoringPlanCommitted: true};

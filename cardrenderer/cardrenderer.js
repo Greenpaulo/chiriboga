@@ -736,6 +736,20 @@ var CardRenderer = {
       };
       this.sprite.pointerout = function (event) {
         if (pixi_draggingCard == this.card) return; //if card trails behind mouse by a frame, prevent weirdness
+        // Preview clamping can move the sprite off a stationary mouse. Keep
+        // reading while the original card's hover target is still underneath.
+        if (this.card.zoomed && event && event.type === "pointerout" &&
+            event.data && event.data.pointerType !== "touch") {
+          var interactive = this.interactive;
+          this.interactive = false;
+          var hit;
+          try {
+            hit = this.card.app.renderer.plugins.interaction.hitTest(event.data.global);
+          } finally {
+            this.interactive = interactive;
+          }
+          if (hit && hit.card === this.card) return;
+        }
         if (this.card.zoomed) {
           this.card.ToggleZoom();
           //restore its position and rotation (it may have been moved for zoom by touch code)
@@ -2373,20 +2387,12 @@ function pixi_cardBaseScale(card) {
   return inViewingHand ? 0.55 : 0.5;
 }
 
-// Keep reading previews clear of visible bottom controls without resizing the board.
-// DOM rectangles use CSS pixels; stage coordinates also account for the Corp view.
+// Fit reading previews to the full viewport, preserving bottom-aligned hand cards.
+// Controls retain their own higher CSS layer; they must not lift the whole preview.
 function pixi_cardPreviewArea() {
-  var bottom = window.innerHeight;
-  for (var id of ["footer", "passpriority"]) {
-    var panel = document.getElementById(id);
-    if (!panel) continue;
-    var rect = panel.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.left < window.innerWidth)
-      bottom = Math.min(bottom, Math.max(1, rect.top - 4));
-  }
   var stage = cardRenderer.app.stage;
   var first = stage.toLocal({x: 0, y: 0});
-  var last = stage.toLocal({x: window.innerWidth * fieldZoom, y: bottom * fieldZoom});
+  var last = stage.toLocal({x: window.innerWidth * fieldZoom, y: window.innerHeight * fieldZoom});
   return {left: Math.min(first.x, last.x), top: Math.min(first.y, last.y),
     right: Math.max(first.x, last.x), bottom: Math.max(first.y, last.y)};
 }
