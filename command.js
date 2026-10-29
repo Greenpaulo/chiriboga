@@ -701,6 +701,10 @@ function EnumeratePhase() {
       optionList.push(id);
     }
   }
+  //offer Auto-pass priority beside Continue in eligible human paid-ability response windows
+  if (activePlayer.AI == null && buttoned.includes("n") && totalNumberOfOptions > 1 && PassPriorityOffered(optionList)) {
+    footerHtml += PassPriorityButtonHTML();
+  }
   //if the only button is 'Continue' but there are other non-button options, include auto-continue option
   if (buttoned.length == 1 && buttoned.includes("n") && totalNumberOfOptions > 1) {
 	  footerHtml += AutoContinueButtonHTML(true); //true means show even if auto is off
@@ -1048,3 +1052,140 @@ function MakeChoice() {
   }
   $("#modalcontent").html(modalText);
 }
+
+// BEGIN PassPriority
+//"Auto-pass priority" for a human player. While enabled, Main() submits the
+//normal Continue ("n") in ordinary paid-ability response windows, so the response
+//loop, opponent opportunities and phase advancement run exactly as if Continue
+//had been clicked. It never applies to AI players, triggered-effect windows,
+//action phases or windows offering any other decision. It lasts for the current
+//turn only (see PassPriorityReset callers: turn boundary, new game, rewind, game end).
+var passPriority = { player: null, turn: null };
+var passPriorityRendered = null; //last rendered state, so re-rendering never steals keyboard focus
+var passPriorityHelpText =
+  "Automatically pass optional priority windows for the rest of this turn. Required choices still pause. " +
+  "This declines paid abilities and, where the window allows them, optional rez and score opportunities. " +
+  "You are still asked about triggered effects, actions, breaking subroutines, rezzing approached ice, access and jack out.";
+
+//The ordinary paid-ability response windows (built from the standard response templates).
+//Triggered-effect pseudophases (TriggeredResponsePhase) are separate objects and never match.
+function PassPriorityWindows() {
+  return [
+    phases.corpStartDraw, phases.corpActionStart, phases.corpPostAction, phases.corpDiscardResponse,
+    phases.runnerStartResponse, phases.runnerPostAction, phases.runnerDiscardResponse,
+    phases.runApproachIce, phases.runEncounterIce, phases.runDecideContinue, phases.runResponseBeforeApproach,
+  ];
+}
+
+//Commands that may be declined by passing. Any other command (e.g. jack) means the
+//window holds a different decision, so it keeps its stop.
+var passPriorityCommands = ["n", "trigger", "rez", "score"];
+
+/**
+ * Whether the current window is one that Auto-pass priority may pass for player.
+ *
+ * @method PassPriorityWindowEligible
+ * @param {Player} player the player holding priority
+ * @param {String[]} optionList commands available (from EnumeratePhase)
+ * @returns {boolean} true if passing here only declines paid abilities/rez/score
+ */
+function PassPriorityWindowEligible(player, optionList) {
+  if (!player || player.AI != null) return false;
+  if (!PassPriorityWindows().includes(currentPhase)) return false;
+  //encounter window: the Runner's breaker decisions happen here
+  if (currentPhase === phases.runEncounterIce && player == runner) return false;
+  if (!optionList.includes("n")) return false;
+  for (var i = 0; i < optionList.length; i++) {
+    if (!passPriorityCommands.includes(optionList[i])) return false;
+  }
+  //rezzing the approached ice is a run decision, not an ordinary paid ability
+  if (typeof phaseOptions.rez !== "undefined") {
+    for (var i = 0; i < phaseOptions.rez.length; i++) {
+      var rezCard = phaseOptions.rez[i].card;
+      if (rezCard && rezCard.cardType == "ice" && CheckApproach() &&
+          rezCard === attackedServer.ice[approachIce]) return false;
+    }
+  }
+  return true;
+}
+
+//Whether player is currently passing until end of turn.
+function PassPriorityActive(player) {
+  return (
+    passPriority.player != null &&
+    passPriority.player === player &&
+    passPriority.turn === playerTurn
+  );
+}
+
+//Whether Main() should submit Continue for the active (human) player now.
+function PassPriorityShouldAutoPass(optionList) {
+  if (!activePlayer || activePlayer.AI != null) return false;
+  return PassPriorityActive(activePlayer) && PassPriorityWindowEligible(activePlayer, optionList);
+}
+
+//Whether to offer the Auto-pass priority button in this window.
+function PassPriorityOffered(optionList) {
+  if (TutorialReplacer !== null || TutorialWhitelist !== null || TutorialBlacklist !== null) return false;
+  if (typeof specifiedMentor !== "undefined" && specifiedMentor != "") return false;
+  if (PassPriorityActive(activePlayer)) return false;
+  return PassPriorityWindowEligible(activePlayer, optionList);
+}
+
+function PassPriorityButtonHTML() {
+  return (
+    '<button id="footerbutton-passpriority" class="button" onclick="PassPriorityEnable();" title="' +
+    passPriorityHelpText +
+    '">Auto-pass priority</button>'
+  );
+}
+
+//Enable passing for the human active player and pass the current opportunity.
+function PassPriorityEnable() {
+  if (!activePlayer || activePlayer.AI != null) return;
+  passPriority.player = activePlayer;
+  passPriority.turn = playerTurn;
+  //an Auto skip timer must not also submit this window
+  autoContinueTimer = 0.0;
+  $("#timerbar").hide();
+  RenderPassPriorityControl();
+  ExecuteChosen("n");
+}
+
+//Restore normal stops from the next legal opportunity (an opportunity already passed is not recovered).
+function PassPriorityResume() {
+  passPriority.player = null;
+  passPriority.turn = null;
+  //Auto skip would otherwise immediately pass the resumed window
+  autoContinue = false;
+  autoContinueTimer = 0.0;
+  $("#autocontinue").html(AutoContinueButtonStr());
+  RenderPassPriorityControl();
+}
+
+//Clear passing without touching Auto skip (turn boundary, new game, rewind, game end).
+function PassPriorityReset() {
+  passPriority.player = null;
+  passPriority.turn = null;
+  RenderPassPriorityControl();
+}
+
+//Show or hide the persistent Resume Priority control (#passpriority, outside #footer).
+function RenderPassPriorityControl() {
+  var visible = passPriority.player != null && passPriority.turn === playerTurn;
+  if (passPriorityRendered === visible) return;
+  passPriorityRendered = visible;
+  if (visible) {
+    $("#passpriority").html(
+      '<span class="passpriority-text">Auto-passing priority</span>' +
+        '<button id="passpriority-resume" class="button" onclick="PassPriorityResume();" title="Stop passing: you will be offered the next response opportunity. ' +
+        passPriorityHelpText +
+        '">Resume Priority</button>'
+    );
+    $("#passpriority").addClass("active");
+  } else {
+    $("#passpriority").removeClass("active");
+    $("#passpriority").html("");
+  }
+}
+// END PassPriority

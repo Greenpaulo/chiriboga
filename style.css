@@ -621,9 +621,12 @@ body.card-zoom-active canvas {
   z-index: 3;
 }
 
-/* Keep gameplay choices clickable while a zoomed card raises the canvas
-   above the top-left menu. */
+/* Keep decision and resume controls available during forced subroutine zoom. */
 body.card-zoom-active #footer {
+  z-index: 4;
+}
+
+body.card-zoom-active #passpriority {
   z-index: 4;
 }
 
@@ -646,6 +649,36 @@ body.card-zoom-active #footer {
   animation: flicker 0.12s infinite;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+/* Overlay shown only while passing; the board keeps its full viewport. */
+#passpriority {
+  display: none;
+  position: fixed;
+  right: 64px;
+  bottom: 6px;
+  z-index: 2;
+  max-width: calc(100vw - 80px);
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-green-dark);
+  border-radius: 10px;
+  color: var(--crt-green);
+  font-size: 13px;
+  text-align: center;
+}
+#passpriority.active {
+  display: flex;
+}
+#passpriority button:focus-visible,
+#footerbutton-passpriority:focus-visible {
+  outline: 2px solid var(--crt-green);
+  outline-offset: 2px;
 }
 
 #header {
