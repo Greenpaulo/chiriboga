@@ -5,7 +5,8 @@
 // CHOICETYPE: command
 // OPTIONS: install, advance, gain, draw
 // EXPECT: !advance
-// SETUP: corp.creditPool=6; corp.clickTracker=3; runner.creditPool=5
+// SETUP: corp.creditPool=6; corp.clickTracker=3; runner.creditPool=5; reviewAI.options.openingHqThenRdIce=false; reviewAI.options.emptyArchivesRunPressure=false; reviewAI.options.agendaCommitmentPlan=false; reviewAI.options.agendaExposureTable=false
+// NOTE: Pin the historical option configuration independently of owner playtest defaults.
 // NOTE: I4 option off on the board of i4-score-fast-advances-planned-agenda.txt: the legacy global rez reserve blocks advancing.
 RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
 CorpTestField(30035, [], [30075, 30075, 30075], [30064, 30064], [], [31046], [30062], [[30067, 31077]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

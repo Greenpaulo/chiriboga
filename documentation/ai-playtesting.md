@@ -105,6 +105,13 @@ Paul's reported preferred combination in this discussion had
 playtest preference, not a frozen configuration or a claim about today's file.
 Record the actual options on each new log.
 
+On 2026-10-29, while addressing PR #77, Paul explicitly requested keeping
+`openingHqThenRdIce`, `emptyArchivesRunPressure`, `agendaCommitmentPlan` and
+`agendaExposureTable` enabled in `CorpAI.DEFAULT_OPTIONS` for his current
+games. This is an owner-authorized playtest setup, not permanent adoption or
+a passed historical batch gate. Tests assert these current defaults; new
+strategic options still start off unless Paul requests otherwise.
+
 The [agenda-stall ticket](bugs/corp-agenda-held-while-secure-remote-available.md)
 and [I3](backlog/I3-remote-role-and-root-suitability.md) now share the evidence
 from `corp_wont_play_an_agenda.txt`. I4 owns agenda install/hold and advancement;

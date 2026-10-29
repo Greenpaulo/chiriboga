@@ -332,16 +332,19 @@ adds its option there and reads `this.options.<camelCaseName>`, which
 defaults to `false`. Its deterministic tests set the option on the instance
 under test, and F4 runs the candidate with it on (`--corp-option <name>=true`
 or `--runner-option <name>=true`; see
-[ai-batch-harness.md](ai-batch-harness.md)). Gate evidence is the only thing
-that justifies switching the default to `true`.
+[ai-batch-harness.md](ai-batch-harness.md)). For owner-controlled playtesting,
+an explicit owner instruction can also set a default to `true`; record the request and date in
+[ai-playtesting.md](ai-playtesting.md). That setup does not establish permanent
+adoption or turn historical gate evidence into a pass.
 
 ### When a gate fails
 
 A gated ticket tests one idea; a failed gate answers it. So:
 
 **Owner-requested manual playtesting exception.** If the owner explicitly asks
-to retain a failed candidate for playing against a human, keep its option
-default off, its implementation and deterministic tests. Record the request
+to retain a failed candidate for playing against a human, keep its
+implementation and deterministic tests. Its option stays off unless the owner
+explicitly requests otherwise. For default-off retention, record the request
 and date in the Resolution using this exact form:
 
 ```markdown

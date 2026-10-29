@@ -1,10 +1,18 @@
 # I4 Agenda installation and scoring commitment
 
-**Outcome:** implementation merged; the three separate flags remain available for owner playtesting. Recorded batch results below are historical evidence, not a final owner decision on which behaviour to keep.
+**Outcome:** not adopted — owner adoption decision pending; implementation merged and the three separate flags remain available for owner playtesting. Recorded batch results below are historical evidence.
 
 **Roadmap item:** I4 · **Depends on:** I2, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md` (principle 6), [install-decisions-design.md: Scoring-risk model](../../corp-ai/specs/install-decisions-design.md#scoring-risk-model-2026-10-16), [I2](I2-ice-selection-by-marginal-security.md) phase A, [I3](../I3-remote-role-and-root-suitability.md) (now follows I4)
 **Verified against code:** dd5d256 (2026-10-26; remaining destination/hold seam and scenarios rechecked against current code, then implemented below).
+
+## Current owner playtest setup — 2026-10-29
+
+Paul explicitly requested keeping `agendaCommitmentPlan` and
+`agendaExposureTable` enabled by default for his current games;
+`agendaDestinationPlan` stays off. See [the recorded setup](../../ai-playtesting.md#current-corp-investigation).
+Default-off statements below describe earlier implementation and gate states,
+not this current owner-authorized setup. Adoption remains pending.
 
 ## Playtest follow-up — 2026-10-28
 

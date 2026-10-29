@@ -36,6 +36,10 @@ function newAI() {
   const ai = new context.CorpAI();
   // I0/I1 telemetry cases exercise the frozen legacy install policy.
   ai.options.iceMarginalSecurity = false;
+  ai.options.openingHqThenRdIce = false;
+  ai.options.emptyArchivesRunPressure = false;
+  ai.options.agendaCommitmentPlan = false;
+  ai.options.agendaExposureTable = false;
   ai._log = () => {};
   ai._securityCacheEnabled = false;
   ai._random = () => { throw new Error('telemetry must not consume randomness'); };
@@ -320,7 +324,7 @@ test('I1: every eligible record carries a score breakdown and a reason, and note
   assert.strictEqual(JSON.stringify(notes.installCandidates[0]), JSON.stringify(ranked.candidates.map(r => ai._traceInstallCandidate(r))));
 });
 
-// I2.3 is retained for owner-requested manual playtesting, default off.
+// I2.3 is enabled by owner request for current manual playtesting.
 function openingAI() {
   const ai = candidateAI({affordable: [iceA, iceB], economy: true});
   ai.options.iceMarginalSecurity = true;
@@ -330,8 +334,11 @@ function openingAI() {
   return ai;
 }
 
-test('manual opening flag defaults off, selects HQ then R&D, and yields to I2 after two completions', () => {
-  assert.strictEqual(new context.CorpAI().options.openingHqThenRdIce, false);
+test('owner playtest defaults stay enabled; opening selects HQ then R&D and yields to I2 after two completions', () => {
+  const defaults = new context.CorpAI().options;
+  for (const option of ['openingHqThenRdIce', 'emptyArchivesRunPressure', 'agendaCommitmentPlan', 'agendaExposureTable']) {
+    assert.strictEqual(defaults[option], true, option + ' enabled for owner playtesting');
+  }
   const ai = openingAI(), card = {...iceA, player: corp}, history = [];
   ai._iceInstallTelemetry = (card, target, record) => history.push(record);
   ai.options.openingHqThenRdIce = false;

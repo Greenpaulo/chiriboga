@@ -22,7 +22,7 @@ const cells = spec => {
   for (const [kind, bucket, turns, breached] of spec) out[kind][bucket] = {turns, breached};
   return out;
 };
-const source = fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8');
+const source = fs.readFileSync(path.join(root, 'ai_corp.js'), 'utf8').replace(/\r\n/g, '\n');
 const constant = name => vm.runInNewContext(
   new RegExp('const ' + name + ' = ([\\s\\S]*?);\\n').exec(source)[1]);
 

@@ -558,8 +558,8 @@
     // Discover available play-area artwork from images/bg.
     var playAreaBackgrounds = <?php
       $backgrounds = array();
-      foreach (glob(__DIR__ . '/images/bg/*') as $background) {
-        if (is_file($background) && preg_match('/\.(jpe?g|png|webp|gif|avif)$/i', $background)) {
+      foreach (glob(__DIR__ . '/images/bg/*') ?: array() as $background) {
+        if (is_file($background) && preg_match('/\.(jpe?g|png|webp|gif|avif)$/i', $background) && preg_match('//u', basename($background)) === 1) {
           $backgrounds[] = basename($background);
         }
       }
@@ -587,17 +587,26 @@
       "Worlds2020.jpg": 0.55,
     };
 
+    var playAreaBackgroundRequest = 0;
+
+    // Keep the grid and watermark until artwork loads; ignore superseded requests.
     function applyPlayAreaBackground(filename) {
+      var request = ++playAreaBackgroundRequest;
       var valid = playAreaBackgrounds.indexOf(filename) !== -1;
-      document.body.classList.toggle('image-background', valid);
+      document.body.classList.remove('image-background');
+      document.body.style.removeProperty('--play-area-background');
+      document.body.style.removeProperty('--play-area-background-darkness');
       if (valid) {
-        var darkness = playAreaBackgroundDarkness[filename];
-        document.body.style.setProperty('--play-area-background-darkness',
-          typeof darkness === 'number' && Number.isFinite(darkness) ? Math.max(0, Math.min(1, darkness)) : 0.35);
-        document.body.style.setProperty('--play-area-background', 'url("images/bg/' + encodeURIComponent(filename) + '")');
-      } else {
-        document.body.style.removeProperty('--play-area-background');
-        document.body.style.removeProperty('--play-area-background-darkness');
+        var artwork = new Image();
+        artwork.onload = function() {
+          if (request !== playAreaBackgroundRequest) return;
+          var darkness = playAreaBackgroundDarkness[filename];
+          document.body.style.setProperty('--play-area-background-darkness',
+            typeof darkness === 'number' && Number.isFinite(darkness) ? Math.max(0, Math.min(1, darkness)) : 0.35);
+          document.body.style.setProperty('--play-area-background', 'url("' + artwork.src + '")');
+          document.body.classList.add('image-background');
+        };
+        artwork.src = 'images/bg/' + encodeURIComponent(filename);
       }
       return valid ? filename : '';
     }
@@ -609,7 +618,7 @@
       } catch (e) {}
     }
 
-    // Apply the background before the playing area is rendered.
+    // Start loading the saved background before the playing area is rendered.
     try {
       applyPlayAreaBackground(localStorage.getItem('chiriboga-background'));
     } catch (e) {}

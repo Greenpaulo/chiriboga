@@ -306,6 +306,8 @@ c.MoveCard(weak, corp.archives.cards); decisions = [];
 sap.Resolve.call(sap); assert.strictEqual(decisions.length, 0);
 
 // Corp AI: plays the tutor for an unprotected central with stopping ICE in R&D only.
+// Exercise normal ICE selection independently of the optional opening policy.
+ai.options.openingHqThenRdIce = false;
 reset(); grip(5);
 const sap2 = put(card(26061), corp.HQ.cards);
 const etr = put(ice('Stopper', ['Barrier'], 3, ['End the run.'], {rezzed: false, rezCost: 3, elo: 1500}), corp.RnD.cards);
