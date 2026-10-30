@@ -4014,6 +4014,27 @@ competing-plan policies are recorded in the set's optimisation queue.
 - All-nighter uses `AITriggerInPaidWindow()` (`"allnighter_gain"`) only once a
   Runner turn has begun with it installed, so install-and-use is never click
   neutral in one turn.
+- Green Level Clearance uses `AIEconomyPlay: 2`; Government Contracts needs no
+  hook: its scored `[click], [click]: Gain 4[c].` label is found by the Corp's
+  click-economy ability search.
+- Dedicated Server and Net Police use `AIWorthInstalling` (new remote, only
+  while `_economyAssetWanted()` and, respectively, unrezzed ice exists or the
+  Runner has link) and `AIRezWhenCan` on the same conditions. Net Police's X is
+  `variableRecurringCredits()` (the Runner's link) through `RecurringCredits`.
+- Bullfrog's `AIBullfrogDestination()` is read when the Corp AI wins the psi
+  game: it returns the other existing server with the most (rezzed) ice,
+  heavily avoiding remotes holding an agenda; the decision is filtered to that
+  single server. Its subroutine is modelled as `misc_moderate`.
+- Uroboros models both traces as successful (`misc_moderate`, `endTheRun`).
+  Its run ban is a lingering `modifyCannot("run")` effect read by the shared
+  `RunForbidden`.
+- Tyrant: `canBeAdvanced` is a function (rezzed only); `AIAdvancementLimit()`
+  asks for 1 counter on a rezzed Tyrant with none, then follows Ice Wall's
+  protect-this-server rule. `AIImplementIce` emits one `endTheRun` per counter.
+- Oversight AI's `AIOversightTarget()` returns the unrezzed installed ice with
+  the highest rez cost; `AIWouldPlay()` requires that cost to be at least 4,
+  and the play enumeration offers the AI only that target.
+
 ### Genesis: What Lies Ahead card hooks
 
 - Whizzard: Master Gamer is the first identity with `recurringCredits`; the

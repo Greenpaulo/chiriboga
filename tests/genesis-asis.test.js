@@ -53,6 +53,7 @@ const PRELUDE = `
   }
   function actionPhase() { return currentPhase === phases.runnerActionMain && !attackedServer; }
   function corpAction() { return currentPhase === phases.corpActionMain && !attackedServer; }
+  function corpTurn() { playerTurn = corp; corp.clickTracker = 3; ChangePhase(phases.corpActionMain); }
   function inEncounter() { return currentPhase.identifier == 'Run 3.1'; }
 `;
 
@@ -317,6 +318,166 @@ const cases = {
     runner.identityCard.link = 2;
     uc.responseOnRunnerTurnBegins.Resolve.call(uc);
     check(runner.creditPool == 1 && uc.AIEconomyInstall() > 0, 'gains 1 with 2 link; AI values it');`,
+
+  // ---- Corp sub-batch ----
+  // Green Level Clearance: gain 3, draw 1; declared economy play.
+  glc: `
+    corpTurn();
+    var glc = inst(2070, corp.HQ.cards);
+    var hq = corp.HQ.cards.length;
+    choose('play', function(c) { return c.card === glc; });
+    settle(corpAction, 'play resolves');
+    check(corp.creditPool == 12 && corp.HQ.cards.length == hq && corp.clickTracker == 2, 'paid 1, gained 3, drew 1 (net HQ size unchanged)');
+    var glc2 = inst(2070, corp.HQ.cards);
+    check(corp.AI._economyCards().includes('Green Level Clearance'), 'Corp AI lists it as an economy play');`,
+
+  // Hourglass: three lose-click subroutines.
+  hourglass: `
+    runner.AI = null;
+    var hg = ice(2071, corp.archives);
+    MakeRun(corp.archives);
+    settle(actionPhase, 'run resolves');
+    check(runner.clickTracker == 1, 'lost 3 clicks');
+    check(hg.AIImplementIce(runner.AI ? runner.AI.rc : {}, {sr: []}).sr.length == 3, 'three modelled subroutines');`,
+
+  // Dedicated Server: 2 recurring credits only for rezzing ice.
+  dedicated: `
+    corpTurn();
+    var ds = inst(2072, corp.HQ.root); ds.rezzed = true; ds.credits = 2;
+    var enigma = inst(ENIGMA, corp.archives.ice);
+    var agenda = corp.HQ.cards.find(function(c) { return c.cardType == 'agenda'; });
+    corp.creditPool = 1;
+    check(AvailableCredits(corp, 'rezzing', enigma) == 3, 'hosted credits count for ice rez');
+    check(AvailableCredits(corp, 'advancing', enigma) == 1, 'not for other spending');
+    check(ds.AIRezWhenCan(), 'AI rezzes it while unrezzed ice exists');
+    check(ds.AIWorthInstalling([]) == 0 || !corp.AI._economyAssetWanted(), 'AI installs it in a new remote when economy is wanted');
+    Rez(enigma);
+    settle(function() { return enigma.rezzed || corpAction(); }, 'rez resolves');
+    check(enigma.rezzed && ds.credits == 0 && corp.creditPool == 0, 'Enigma rezzed with 2 hosted + 1 pool');
+    check(!ds.AIRezWhenCan() && ds.AIWorthInstalling([]) == -1, 'no unrezzed ice: AI not interested');`,
+
+  // Bullfrog: psi game; different bids move it outermost on another server and the run continues there.
+  bullfrog: `
+    runner.AI = null; var corpAI = corp.AI; corp.AI = null;
+    var bf = ice(2073, corp.HQ);
+    var rndIce = ice(PALISADE, corp.RnD);
+    MakeRun(corp.HQ);
+    settle(inEncounter, 'encounter Bullfrog');
+    settle(function() { return currentPhase.title == 'Psi Game: Corp bid'; }, 'psi game starts');
+    choose('continue', function(c) { return c.bid === 1; });
+    choose('continue', function(c) { return c.bid === 0; });
+    settle(function() { return offered('continue').some(function(c) { return c.server; }); }, 'Corp chooses a server');
+    check(!offered('continue').some(function(c) { return c.server === corp.HQ; }), 'only other servers');
+    choose('continue', function(c) { return c.server === corp.RnD; });
+    check(attackedServer === corp.RnD && corp.RnD.ice[corp.RnD.ice.length - 1] === bf && approachIce == corp.RnD.ice.length - 1, 'moved outermost on R&D; run now on R&D');
+    check(corp.HQ.ice.length == 0 && corp.creditPool == 9, 'left HQ; Corp paid its bid');
+    settle(function() { return GetApproachEncounterIce() === rndIce || actionPhase(); }, 'run continues inward');
+    check(GetApproachEncounterIce() === rndIce, 'next ice is Palisade on R&D');
+    settle(actionPhase, 'run ends');
+    corp.AI = corpAI;
+    check(bf.AIBullfrogDestination() === corp.HQ || bf.AIBullfrogDestination() === corp.archives, 'AI destination is another server');
+    var hqIce = ice(PALISADE, corp.HQ); ice(PALISADE, corp.HQ);
+    check(bf.AIBullfrogDestination() === corp.HQ, 'AI sends the run to the most-iced server');`,
+
+  // Uroboros: trace 4 subs: no more runs this turn; end the run.
+  uroboros: `
+    runner.AI = null; var corpAI = corp.AI; corp.AI = null;
+    var uro = ice(2074, corp.archives);
+    MakeRun(corp.archives);
+    settle(actionPhase, 'both traces succeed at base 4 against 0 link');
+    check(log.filter(function(m) { return m == 'Trace successful'; }).length == 2 && log.includes('Uroboros: the Runner cannot make another run this turn'), 'both subroutines fired');
+    check(RunForbidden(corp.HQ) && offered('run').length == 0, 'no further runs this turn');
+    check(MakeRun(corp.HQ) === false, 'MakeRun refuses too');
+    lingeringEffects.slice().forEach(function(e) { if (e.responseOnCorpTurnBegins) e.responseOnCorpTurnBegins.Resolve.call(e); });
+    check(!RunForbidden(corp.HQ), 'restriction ends when the next turn begins');
+    corp.AI = corpAI;
+    var model = uro.AIImplementIce({}, {sr: []}).sr;
+    check(model.length == 2 && model[1][0][0] == 'endTheRun', 'modelled as successful traces');`,
+
+  // Net Police: X recurring credits = link, trace-only.
+  netPolice: `
+    var np = inst(2075, corp.HQ.root); np.rezzed = true;
+    runner.identityCard.link = 2;
+    check(RecurringCredits(np) == 2, 'X equals link');
+    np.credits = RecurringCredits(np);
+    corp.creditPool = 0;
+    check(AvailableCredits(corp, 'trace') == 2 && AvailableCredits(corp, 'rezzing') == 0, 'trace-only credits');
+    check(np.AIRezWhenCan(), 'AI rezzes against link');
+    runner.identityCard.link = 0;
+    check(RecurringCredits(np) == 0 && np.AIWorthInstalling([]) == -1 && !np.AIRezWhenCan(), 'worthless with no link');`,
+
+  // Because We Built It: 1 recurring credit to advance ice.
+  bwbi: `
+    corpTurn();
+    var id = inst(2076, []); corp.identityCard = id; id.credits = 1;
+    var wall = ice(31077, corp.HQ);
+    var agenda = inst(2077, corp.HQ.root);
+    corp.creditPool = 0;
+    check(AvailableCredits(corp, 'advancing', wall) == 1 && AvailableCredits(corp, 'advancing', agenda) == 0, 'ice-advance only');
+    check(!offered('advance').some(function(c) { return c.card === agenda; }), 'cannot advance the agenda with it');
+    choose('advance', function(c) { return c.card === wall; });
+    settle(corpAction, 'advance resolves');
+    check(Counters(wall, 'advancement') == 1 && id.credits == 0, 'advanced Ice Wall with the identity credit');`,
+
+  // Government Contracts: scored, [click][click]: gain 4.
+  govContracts: `
+    corpTurn();
+    var gc = inst(2077, corp.HQ.root);
+    check(gc.abilities[0].Enumerate.call(gc).length == 0, 'not usable unscored');
+    MoveCard(gc, corp.scoreArea);
+    check(corp.AI._clickAbilityLikeAvailable(/(gain|take)\\s*\\d*\\s*\\[c\\]/gmi) === gc, 'Corp AI economy search finds it');
+    choose('trigger', function(c) { return c.card === gc; });
+    settle(corpAction, 'ability resolves');
+    check(corp.creditPool == 14 && corp.clickTracker == 1, 'spent 2 clicks, gained 4');
+    check(gc.abilities[0].Enumerate.call(gc).length == 0, 'needs 2 clicks');`,
+
+  // Tyrant: advanceable only while rezzed; an ETR per counter.
+  tyrant: `
+    corpTurn();
+    var ty = inst(2078, corp.HQ.ice);
+    check(!CheckAdvance(ty) && ty.AIAdvancementLimit() == 0, 'unrezzed: not advanceable');
+    ty.rezzed = true;
+    check(CheckAdvance(ty) && ty.subroutines.length == 0 && ty.AIAdvancementLimit() == 1, 'rezzed: advanceable, no subs yet, AI wants 1');
+    choose('advance', function(c) { return c.card === ty; });
+    settle(corpAction, 'advance resolves');
+    check(ty.subroutines.length == 1 && ty.subroutines[0].text == 'End the run.', 'gained one ETR');
+    PlaceAdvancement(ty, 2);
+    ty.automaticOnAnyChange.Resolve.call(ty);
+    check(ty.subroutines.length == 3 && ty.AIImplementIce({}, {sr: []}).sr.length == 3, 'three counters: three ETR, modelled');
+    var other = inst(2078, corp.archives.ice); other.rezzed = true;
+    check(other.subroutines.length == 0, 'instances do not share subroutines');`,
+
+  // Oversight AI: free rez + hosted condition; host trashed when fully broken.
+  oversight: `
+    corpTurn(); var corpAI = corp.AI; corp.AI = null;
+    var enigma = inst(ENIGMA, corp.archives.ice);
+    var ov = inst(2079, corp.HQ.cards);
+    choose('play', function(c) { return c.card === ov; });
+    choose('continue', function(c) { return c.card === enigma; });
+    settle(function() { return currentPhase.identifier == "Corp 2.2" && !attackedServer && !!ov.host; }, "play resolves");
+    check(enigma.rezzed && corp.creditPool == 9 && enigma.hostedCards.includes(ov) && ov.host === enigma, 'Enigma rezzed free; Oversight AI hosted');
+    check(ov.cardLocation !== corp.archives.cards, 'not trashed by play cleanup');
+    choose("gain");
+    settle(function() { return currentPhase.identifier == "Corp 2.2" && corp.clickTracker == 1; }, "Corp keeps acting after the play");
+    check(corp.creditPool == 10, "basic gain still works");
+    playerTurn = runner; runner.clickTracker = 4; ChangePhase(phases.runnerActionMain); runner.AI = null;
+    var fon = inst(2062, runner.rig.programs);
+    MakeRun(corp.archives);
+    settle(inEncounter, 'encounter Enigma');
+    fon.abilities[1].Resolve.call(fon, {});
+    var subs = fon.abilities[0].Enumerate.call(fon);
+    fon.abilities[0].Resolve.call(fon, subs[0]);
+    choose('continue', function(c) { return !!c.subroutine; });
+    settle(actionPhase, 'run ends');
+    check(enigma.cardLocation === corp.archives.cards && ov.cardLocation === corp.archives.cards, 'host and condition trashed after a full break');
+    corp.AI = corpAI;
+    var hg = inst(2071, corp.HQ.ice), cheap = inst(ENIGMA, corp.RnD.ice);
+    var ov2 = inst(2079, corp.HQ.cards);
+    check(ov2.AIWouldPlay() && ov2.AIOversightTarget() === hg, 'AI targets the 5-cost Hourglass');
+    var aiChoices = ov2.Enumerate.call(ov2);
+    check(aiChoices.length == 1 && aiChoices[0].card === hg, 'AI play choice is that ice');
+    hg.rezzed = true;
+    check(!ov2.AIWouldPlay(), 'AI skips a 3-cost target');`,
 };
 
 async function main() {

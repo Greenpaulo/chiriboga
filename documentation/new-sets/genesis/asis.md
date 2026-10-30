@@ -40,3 +40,36 @@ Deferred optimisation:
 - Doppelgänger: target uses cached potentials from before the first run.
 - All-nighter: used at the first opportunity of a later turn rather than when
   the extra click enables a specific plan.
+
+## Sub-batch 2 — Corp (2070–2079)
+
+| ID | Card | ELO | Mechanics | Baseline AI |
+| --- | --- | --- | --- | --- |
+| 2070 | Green Level Clearance | 1519 | gain 3[c], draw 1 | `AIEconomyPlay` 2 |
+| 2071 | Hourglass | 1208 | 3× lose [click] | `AIImplementIce` 3× `loseClicks` |
+| 2072 | Dedicated Server | 1169 | 2 recurring credits, `canUseCredits` rezzing ice | `AIWorthInstalling`, `AIRezWhenCan` while unrezzed ice exists |
+| 2073 | Bullfrog | 1279 | psi game; different bids move it outermost on another server, run continues there (`attackedServer`/`approachIce` updated, Runner path cache cleared) | `AIBullfrogDestination`; sub modelled `misc_moderate` |
+| 2074 | Uroboros | 1342 | Trace[4] no more runs this turn (lingering `modifyCannot("run")`, ends at next turn begin); Trace[4] ETR | traces modelled successful |
+| 2075 | Net Police | 1048 | X recurring credits (= link) for traces via `variableRecurringCredits` | `AIWorthInstalling`/`AIRezWhenCan` with link ≥ 1 |
+| 2076 | Weyland: Because We Built It | 1142 | 1 recurring credit, `canUseCredits` advancing ice | none needed (spent by the advance action) |
+| 2077 | Government Contracts | 1301 | scored: [click][click] gain 4[c] | found by Corp click-economy search |
+| 2078 | Tyrant | 967 | `canBeAdvanced` function (rezzed only); one ETR per advancement counter, synced on any change/advance/encounter | `AIAdvancementLimit`, `AIImplementIce` |
+| 2079 | Oversight AI | 1585 | rez ice free; hosted as condition counter (moved to `hostedCards`, not trashed by play cleanup); trashes host when all its subroutines are broken in one encounter (`automaticOnSubroutineBroken`, `availableWhenInactive`) | `AIOversightTarget`, `AIWouldPlay` (rez cost ≥ 4) |
+
+Shared helpers used (from other packs, merged from `sets/genesis-cycle`):
+`RunForbidden`/`modifyCannot("run")` (Uroboros), `CheckAdvance` function form
+(Tyrant), `RecurringCredits`/`variableRecurringCredits` (Net Police). No new
+shared engine helpers in this sub-batch.
+
+Deferred optimisation:
+
+- Tyrant: the AI never rezzes it at 0 counters on approach (the run calculator
+  sees no subroutines), so outside Oversight AI it stays unrezzed; ice can only
+  be rezzed during runs in this engine.
+- Weyland BWBI: the AI does not seek ice advancement to use its credit.
+- Oversight AI: target is the most expensive unrezzed ice, ignoring how easily
+  the Runner can fully break it.
+- Uroboros/Bullfrog: traces and psi bids are not priced in the run calculator.
+- Net Police/Dedicated Server: placed in a new remote; no trashing-risk policy.
+
+Blocked: none.

@@ -3209,7 +3209,7 @@ cardSet[2069] = {
 cardSet[2070] = {
   title: "Green Level Clearance",
   imageFile: "02070.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1519,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 1,
@@ -3217,8 +3217,11 @@ cardSet[2070] = {
   subTypes: ["Transaction"],
   playCost: 1,
   Resolve: function (params) {
-    // TODO: Implement effect
+    GainCredits(corp, 3, "", this);
+    Draw(corp, 1);
   },
+  //net +2[c] and a card: a modest main-phase economy play
+  AIEconomyPlay: 2,
 };
 
 //Hourglass (2071)
@@ -3228,7 +3231,7 @@ cardSet[2070] = {
 cardSet[2071] = {
   title: "Hourglass",
   imageFile: "02071.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1208,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 2,
@@ -3237,10 +3240,30 @@ cardSet[2071] = {
   rezCost: 5,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "The Runner loses [click], if able.",
+      Resolve: function () {
+        LoseClicks(runner, 1);
+      },
+      visual: { y: 59, h: 16 },
+    },
+    {
+      text: "The Runner loses [click], if able.",
+      Resolve: function () {
+        LoseClicks(runner, 1);
+      },
+      visual: { y: 79, h: 16 },
+    },
+    {
+      text: "The Runner loses [click], if able.",
+      Resolve: function () {
+        LoseClicks(runner, 1);
+      },
+      visual: { y: 99, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["loseClicks"]], [["loseClicks"]], [["loseClicks"]]];
     return result;
   },
 };
@@ -3251,7 +3274,7 @@ cardSet[2071] = {
 cardSet[2072] = {
   title: "Dedicated Server",
   imageFile: "02072.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1169,
   player: corp,
   faction: "Jinteki",
   influence: 2,
@@ -3259,7 +3282,26 @@ cardSet[2072] = {
   subTypes: ["Facility"],
   rezCost: 3,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  recurringCredits: 2,
+  //Use these credits to rez ice.
+  canUseCredits: function (doing, card) {
+    if (doing != "rezzing" || !card) return false;
+    return CheckCardType(card, ["ice"]);
+  },
+  _unrezzedIce: function () {
+    return InstalledCards(corp).some(function (card) {
+      return CheckCardType(card, ["ice"]) && !card.rezzed;
+    });
+  },
+  //AI: an economy asset for decks with unrezzed ice to pay for, in its own remote.
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (!corp.AI._economyAssetWanted()) return -1;
+    if (!this._unrezzedIce()) return -1;
+    return emptyProtectedRemotes.length;
+  },
+  AIRezWhenCan: function () {
+    return this._unrezzedIce();
+  },
 };
 
 //Bullfrog (2073)
@@ -3267,7 +3309,7 @@ cardSet[2072] = {
 cardSet[2073] = {
   title: "Bullfrog",
   imageFile: "02073.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1279,
   player: corp,
   faction: "Jinteki",
   influence: 2,
@@ -3275,12 +3317,79 @@ cardSet[2073] = {
   subTypes: ["Code Gate", "Deflector", "Psi"],
   rezCost: 3,
   strength: 4,
+  _otherServers: function () {
+    var here = GetServer(this);
+    return ChoicesExistingServers().filter(function (choice) {
+      return choice.server != here;
+    });
+  },
+  //Move to the outermost position of another server; a run through this ice
+  //continues from its new position (CR: the attacked server changes).
+  _moveTo: function (server) {
+    var from = GetServer(this);
+    if (!from || !server || server == from) return;
+    var wasAttacked = attackedServer == from && from.ice[approachIce] == this;
+    MoveCard(this, server.ice);
+    Log(GetTitle(this, true) + " moved to the outermost position protecting " + ServerName(server));
+    if (wasAttacked) {
+      attackedServer = server;
+      approachIce = server.ice.length - 1;
+      Log("The run continues against " + ServerName(server));
+      if (runner.AI != null) runner.AI.cachedBestPath = null;
+    }
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "You and the Runner secretly spend 0[c], 1[c] or 2[c]. Reveal spent credits. If you and the Runner spent a different number of credits and this ice is installed, move this ice to the outermost position protecting another server.",
+      Resolve: function () {
+        PsiGame(function (different) {
+          if (!different || !CheckInstalled(this)) return;
+          var choices = this._otherServers();
+          if (choices.length < 1) return;
+          if (corp.AI) {
+            var best = this.AIBullfrogDestination();
+            var picked = choices.find(function (c) { return c.server == best; });
+            if (picked) choices = [picked];
+          }
+          DecisionPhase(
+            corp,
+            choices,
+            function (params) {
+              if (params && params.server && CheckInstalled(this)) this._moveTo(params.server);
+            },
+            "Bullfrog",
+            "Choose another server to move Bullfrog to",
+            this
+          );
+        }, this);
+      },
+      visual: { y: 104, h: 64 },
+    },
   ],
+  //The psi game cannot be priced; the redirect is treated as a moderate threat.
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_moderate"]]];
     return result;
+  },
+  //AI: send the run to the other server with the most ice, avoiding remotes
+  //that hold an agenda (Corp-known).
+  AIBullfrogDestination: function () {
+    var best = null;
+    var bestScore = -Infinity;
+    var choices = this._otherServers();
+    for (var i = 0; i < choices.length; i++) {
+      var server = choices[i].server;
+      var hasAgenda = (server.root || []).some(function (card) {
+        return CheckCardType(card, ["agenda"]);
+      });
+      var score = server.ice.length * 2 - (hasAgenda ? 10 : 0);
+      for (var j = 0; j < server.ice.length; j++) if (server.ice[j].rezzed) score++;
+      if (score > bestScore) {
+        bestScore = score;
+        best = server;
+      }
+    }
+    return best;
   },
 };
 
@@ -3290,7 +3399,7 @@ cardSet[2073] = {
 cardSet[2074] = {
   title: "Uroboros",
   imageFile: "02074.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1342,
   player: corp,
   faction: "NBN",
   influence: 2,
@@ -3299,10 +3408,52 @@ cardSet[2074] = {
   rezCost: 6,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[4]. If successful, the Runner cannot make another run this turn.",
+      Resolve: function () {
+        Trace(4, function (successful) {
+          if (!successful) return;
+          Log("Uroboros: the Runner cannot make another run this turn");
+          //A lingering effect survives Uroboros being derezzed or trashed; it
+          //ends when the next turn begins (whichever player's turn that is).
+          var effect = {
+            title: "Uroboros",
+            modifyCannot: {
+              Resolve: function (id) {
+                return id == "run";
+              },
+            },
+            responseOnCorpTurnBegins: {
+              Resolve: function () {
+                RemoveLingeringEffect(effect);
+              },
+              automatic: true,
+            },
+            responseOnRunnerTurnBegins: {
+              Resolve: function () {
+                RemoveLingeringEffect(effect);
+              },
+              automatic: true,
+            },
+          };
+          AddLingeringEffect(effect);
+        }, this);
+      },
+      visual: { y: 104, h: 32 },
+    },
+    {
+      text: "Trace[4]. If successful, end the run.",
+      Resolve: function () {
+        Trace(4, function (successful) {
+          if (successful) EndTheRun();
+        }, this);
+      },
+      visual: { y: 140, h: 32 },
+    },
   ],
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_moderate"]], [["endTheRun"]]];
     return result;
   },
 };
@@ -3313,7 +3464,7 @@ cardSet[2074] = {
 cardSet[2075] = {
   title: "Net Police",
   imageFile: "02075.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1048,
   player: corp,
   faction: "NBN",
   influence: 2,
@@ -3321,7 +3472,24 @@ cardSet[2075] = {
   subTypes: [],
   rezCost: 1,
   trashCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  //X[recurring-c], X = the Runner's link, read by the shared refills through RecurringCredits().
+  recurringCredits: 0,
+  variableRecurringCredits: function () {
+    return Link();
+  },
+  //Use these credits during traces.
+  canUseCredits: function (doing, card) {
+    return doing == "trace";
+  },
+  //AI: only worth a slot against a Runner with link, in its own remote.
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (Link() < 1) return -1;
+    if (!corp.AI._economyAssetWanted()) return -1;
+    return emptyProtectedRemotes.length;
+  },
+  AIRezWhenCan: function () {
+    return Link() >= 1;
+  },
 };
 
 //Weyland Consortium: Because We Built It (2076)
@@ -3330,14 +3498,19 @@ cardSet[2075] = {
 cardSet[2076] = {
   title: "Weyland Consortium: Because We Built It",
   imageFile: "02076.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1142,
   player: corp,
   faction: "Weyland Consortium",
   cardType: "identity",
   subTypes: ["Megacorp"],
   deckSize: 45,
   influenceLimit: 15,
-  // TODO: Add abilities or responseOn triggers
+  recurringCredits: 1,
+  //Use this credit to advance ice.
+  canUseCredits: function (doing, card) {
+    if (doing != "advancing" || !card) return false;
+    return CheckCardType(card, ["ice"]);
+  },
 };
 
 //Government Contracts (2077)
@@ -3345,7 +3518,7 @@ cardSet[2076] = {
 cardSet[2077] = {
   title: "Government Contracts",
   imageFile: "02077.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1301,
   player: corp,
   faction: "Weyland Consortium",
   influence: 0,
@@ -3353,7 +3526,22 @@ cardSet[2077] = {
   subTypes: [],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  //Usable while scored. The label's "Gain 4[c]" is matched by the Corp AI's
+  //click-economy ability search (_clickAbilityLikeAvailable).
+  abilities: [
+    {
+      text: "[click], [click]: Gain 4[c].",
+      Enumerate: function () {
+        if (this.cardLocation !== corp.scoreArea) return [];
+        if (!CheckActionClicks(corp, 2)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 2);
+        GainCredits(corp, 4, "", this);
+      },
+    },
+  ],
 };
 
 //Tyrant (2078)
@@ -3361,7 +3549,7 @@ cardSet[2077] = {
 cardSet[2078] = {
   title: "Tyrant",
   imageFile: "02078.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 967,
   player: corp,
   faction: "Weyland Consortium",
   influence: 2,
@@ -3369,12 +3557,62 @@ cardSet[2078] = {
   subTypes: ["Barrier"],
   rezCost: 7,
   strength: 4,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
+  advancement: 0,
+  //You can advance this ice if it is rezzed (CheckAdvance accepts a function).
+  canBeAdvanced: function () {
+    return !!this.rezzed;
+  },
+  //It gains "End the run." for each hosted advancement counter. Gained
+  //subroutine objects are kept so a count change never mutates shared arrays.
+  subroutines: [],
+  _gained: [],
+  _syncSubroutines: function () {
+    var n = Counters(this, "advancement");
+    if (this.subroutines.length == n) return;
+    var gained = this._gained.slice();
+    while (gained.length < n) {
+      gained.push({
+        text: "End the run.",
+        Resolve: function () {
+          EndTheRun();
+        },
+        visual: { y: 104 + 20 * (gained.length % 5), h: 16 },
+      });
+    }
+    this._gained = gained;
+    this.subroutines = gained.slice(0, n);
+  },
+  automaticOnAnyChange: {
+    Resolve: function () {
+      this._syncSubroutines();
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnAdvance: {
+    Resolve: function (card) {
+      if (card == this) this._syncSubroutines();
+    },
+  },
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (ice == this) this._syncSubroutines();
+    },
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [];
+    var n = Counters(this, "advancement");
+    for (var i = 0; i < n; i++) result.sr.push([["endTheRun"]]);
     return result;
+  },
+  //AI: give a rezzed Tyrant its first subroutine; add more while its server
+  //needs protection and no other ice is affordable (Ice Wall policy).
+  AIAdvancementLimit: function () {
+    if (!this.rezzed) return 0;
+    var counters = Counters(this, "advancement");
+    if (counters < 1) return 1;
+    var thisServer = GetServer(this);
+    if (corp.AI._affordableIce(thisServer) < 1 && corp.AI._serverToProtect() == thisServer) return counters + 1;
+    return 0;
   },
 };
 
@@ -3383,15 +3621,68 @@ cardSet[2078] = {
 cardSet[2079] = {
   title: "Oversight AI",
   imageFile: "02079.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1585,
   player: corp,
   faction: "Weyland Consortium",
   influence: 2,
   cardType: "operation",
   subTypes: ["Condition"],
   playCost: 1,
+  _targets: function () {
+    return InstalledCards(corp).filter(function (card) {
+      return CheckCardType(card, ["ice"]) && !card.rezzed && !card.host;
+    });
+  },
+  Enumerate: function () {
+    var choices = ChoicesArrayCards(this._targets());
+    if (corp.AI) {
+      var best = this.AIOversightTarget();
+      choices = choices.filter(function (c) { return c.card == best; });
+    }
+    return choices;
+  },
+  //Rez a piece of ice, ignoring all costs, then host this operation on it as
+  //a condition counter (faceUp, not trashed by the play cleanup).
   Resolve: function (params) {
-    // TODO: Implement effect
+    var ice = params.card;
+    if (!ice) return;
+    Rez(ice, true, function () {
+      if (!CheckInstalled(ice)) return;
+      if (!ice.hostedCards) ice.hostedCards = [];
+      MoveCard(this, ice.hostedCards);
+      this.host = ice;
+      this.faceUp = true;
+      Log("Oversight AI hosted on " + GetTitle(ice, true) + " as a condition counter");
+    }, this);
+  },
+  //"Trash host ice if all its subroutines are broken during a single encounter."
+  //Breaks only happen during an encounter and reset when it ends.
+  automaticOnSubroutineBroken: {
+    Resolve: function (subroutine) {
+      var host = this.host;
+      if (!host || !host.hostedCards || !host.hostedCards.includes(this)) return;
+      if (!CheckEncounter() || GetApproachEncounterIce() != host) return;
+      if (!host.subroutines || host.subroutines.length < 1) return;
+      for (var i = 0; i < host.subroutines.length; i++) {
+        if (!host.subroutines[i].broken) return;
+      }
+      Log("Oversight AI: every subroutine on " + GetTitle(host, true) + " was broken");
+      Trash(host, true);
+    },
+    availableWhenInactive: true,
+  },
+  //AI: the free rez is worth a card when it saves at least 4[c].
+  AIOversightTarget: function () {
+    var best = null;
+    var targets = this._targets();
+    for (var i = 0; i < targets.length; i++) {
+      if (!best || RezCost(targets[i]) > RezCost(best)) best = targets[i];
+    }
+    return best;
+  },
+  AIWouldPlay: function () {
+    var best = this.AIOversightTarget();
+    return !!best && RezCost(best) >= 4;
   },
 };
 
