@@ -71,6 +71,9 @@ does): Spinal Modem 1416 (20007), Morning Star 1393 (20014), Peacock 1146
   trigger fires between success and callback); the printed order is after.
 - The Helpful AI's boost is a lingering effect removed at the end of either
   player's turn.
+- Subroutine `visual` values come from `scripts/subvis/audit.js --preset ffg`. Snowflake was
+  checked with `zoom.js`: its subroutine prints on 4 lines (rows 61–118), so it
+  uses `{y: 89, h: 64}`; the audit still flags it (detector read 1 line).
 - Ash's lock is stored as `lockedServer` (availableWhenInactive) so it lasts for
   the run even if Ash is trashed on access; cleared by
   `automaticOnRunEndCleanup`.

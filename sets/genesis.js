@@ -516,10 +516,10 @@ cardSet[2012] = {
   rezCost: 15,
   strength: 8,
   subroutines: [
-    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
-    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
-    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
-    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 101, h: 16 } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 119, h: 16 } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 136, h: 16 } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 154, h: 16 } },
   ],
   //Lose [click]: Break 1 subroutine on this ice. Only the Runner can use this ability.
   abilities: [
@@ -680,6 +680,7 @@ cardSet[2015] = {
           if (different) EndTheRun();
         }, this);
       },
+      visual: { y: 89, h: 64 },
     },
   ],
   //The Psi game is modelled as ending the run (conservative, as traces are modelled as successful).
@@ -762,6 +763,7 @@ cardSet[2017] = {
       Resolve: function () {
         EndTheRun();
       },
+      visual: { y: 100, h: 16 },
     },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
@@ -798,6 +800,7 @@ cardSet[2019] = {
           if (successful) GainCredits(corp, 3);
         }, this);
       },
+      visual: { y: 73, h: 32 },
     },
     {
       text: "Trace[2]. If successful, end the run.",
@@ -806,6 +809,7 @@ cardSet[2019] = {
           if (successful) EndTheRun();
         }, this);
       },
+      visual: { y: 98, h: 16 },
     },
   ],
   //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
@@ -863,6 +867,7 @@ cardSet[2020] = {
           if (successful) AddTags(1, function () { EndTheRun(); }, this);
         }, this);
       },
+      visual: { y: 143, h: 32 },
     },
   ],
   //Counters to buy: one above the strongest installed killer or AI breaker (2 if none),
