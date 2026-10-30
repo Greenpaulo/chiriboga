@@ -1,0 +1,926 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Az McCaffrey: Mechanical Prodigy,3 Always Have a Backup Plan,2 Blueberry!™ Diesel,2 Flip Switch,3 Lucky Charm,2 Masterwork (v37),1 Bukhgalter,2 “Baklan” Bochkin,2 The Class Act,1 Gauss,1 The Artist,2 Direct Access,1 Rejig,1 Mutual Favor,1 Carmen,1 Marjanah,2 Red Team,3 Creative Commission,1 Overclock,3 Sure Gamble,2 T400 Memory Diamond,2 Detente,2 Sang Kancil,2 Fransofia Ward,2 Open Market,1 Underdome Irregulars]
+[PT Untaian: Life's Building Blocks,1 Manegarm Skunkworks,1 Longevity Serum,2 Urtica Cipher,3 Karunā,3 Hansei Review,2 Anoetic Void,3 Spin Doctor,3 Clearinghouse,2 Send a Message,2 Palisade,3 Whitespace,2 Hedge Fund,3 Proprionegation,3 Sericulture Expansion,2 Empiricist,2 Mycoweb,3 Semak-samun,3 Peer Review,2 Mitra Aman,1 Flyswatter,3 Petty Cash]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 4.75; fresh-hand expectation 4.64
+AI: Opening hand meets fresh-hand expectation
+Corp chose to keep
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Urtica Cipher,Hedge Fund,Proprionegation,Manegarm Skunkworks,Whitespace]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Artist,Red Team,Always Have a Backup Plan,T400 Memory Diamond,The Class Act]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Proprionegation,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.051,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:1,required:hq,actual:hq,reason:requiredCentral,group:0,score:-2}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Proprionegation,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Proprionegation,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Proprionegation,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.443,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.062,W:0,hazard:0.031,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of R&D
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Hedge Fund,Proprionegation,Urtica Cipher,Clearinghouse]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Artist,Red Team,Always Have a Backup Plan,T400 Memory Diamond,The Class Act]
+Runner spent one click
+Runner spent 3 credits
+Runner installed The Class Act
+Runner spent one click
+Runner spent 2 credits
+Played Always Have a Backup Plan
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 2 credits
+Corp rezzed Whitespace
+Encountering Whitespace
+Firing The Runner loses 3[c]. on Whitespace:
+Runner lost 0 credits
+Firing If the Runner has 6[c] or less, end the run. on Whitespace:
+Run ends
+You may run the attacked server again triggered
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+Encountering Whitespace
+Bypass the last ice encountered during the first run triggered
+Whitespace bypassed
+Approaching HQ
+Run successful
+Proprionegation accessed
+Proprionegation stolen
+Run ends
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+The Class Act: Draw 4 cards triggered
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew 4 cards
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 3 card(s) in hand: [Clearinghouse,Urtica Cipher,Hedge Fund]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 7 card(s) in hand: [The Artist,Red Team,T400 Memory Diamond,Open Market,Blueberry!™ Diesel,Bukhgalter,Creative Commission]
+Corp drew a card
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 4 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:2,required:rd,actual:rd,reason:requiredCentral,group:0,score:-3}
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Urtica Cipher,Clearinghouse,Clearinghouse,Hedge Fund]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 7 card(s) in hand: [The Artist,Red Team,T400 Memory Diamond,Open Market,Blueberry!™ Diesel,Bukhgalter,Creative Commission]
+Runner spent one click
+Runner spent one credit
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Runner spent 4 credits from Open Market
+Runner installed The Artist
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Urtica Cipher,Clearinghouse,Clearinghouse,Hedge Fund]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 4 card(s) in hand: [Red Team,T400 Memory Diamond,Blueberry!™ Diesel,Bukhgalter]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:3,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [2.370344129554656]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Clearinghouse,Hedge Fund,Peer Review,Clearinghouse]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 4 card(s) in hand: [Red Team,T400 Memory Diamond,Blueberry!™ Diesel,Bukhgalter]
+1 credit taken from Open Market
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Using The Artist:
+Runner spent one click
+Runner spent 2 credits
+Runner installed Bukhgalter
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+Corp did not rez ice
+Approaching Remote 0
+Run successful
+Urtica Cipher accessed
+Runner takes 2 net damage
+Blueberry!™ Diesel trashed
+Red Team trashed
+Runner spent 2 credits
+Urtica Cipher trashed
+Run ends
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Clearinghouse,Hedge Fund,Peer Review,Clearinghouse]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 2 card(s) in hand: [T400 Memory Diamond,Sang Kancil]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Longevity Serum,band2:false,best:install Remote 0,options:[{kind:install,server:Remote 0,ev:1.622,W:0,hazard:0.095,exposureTurns:1,deferred:undefined},{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:Remote 0,ev:1.51,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.622}]}
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.2989703989704]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Longevity Serum in Remote 0: exposure 1, advance gain -1.354, defence gain 0.000
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Posture bluff epoch 4: neutral (install)
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Hedge Fund might be good economy play?
+AI: a relevant preference has been set
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Longevity Serum in Remote 0: exposure 2, advance gain -2.336, defence gain 0.000
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 3 vs 8.5 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+PT Untaian: Place 1 advancement counter triggered
+Corp spent one credit
+1 advancement token placed on [hidden card]
+PT Untaian: Life's Building Blocks places 1 advancement counter on [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 3 card(s) in hand: [Clearinghouse,Peer Review,Clearinghouse]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 2 card(s) in hand: [T400 Memory Diamond,Sang Kancil]
+1 credit taken from Open Market
+Open Market trashed (empty)
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Using The Artist:
+Runner spent one click
+Runner spent 2 credits
+Runner installed Sang Kancil
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching outermost piece of ice protecting Remote 0
+AI: Rez this is better than Semak-samun in R&D
+AI: I will rez the approached ice
+Corp spent 7 credits
+Corp rezzed Empiricist
+Encountering Empiricist
+Using Bukhgalter:
+Runner spent one credit
+Bukhgalter gets +1 strength
+Using Bukhgalter:
+Runner spent one credit
+Bukhgalter gets +1 strength
+Using Bukhgalter:
+Runner spent one credit
+Bukhgalter gets +1 strength
+Using Bukhgalter:
+Runner spent one credit
+Bukhgalter gets +1 strength
+Using Bukhgalter:
+Runner spent one credit
+Subroutine Do 1 net damage. Give the Runner 1 tag. broken
+Using Bukhgalter:
+Runner spent one credit
+Subroutine Do 2 net damage. broken
+Using Bukhgalter:
+Runner spent one credit
+Subroutine Draw 1 card. You may add 1 card from HQ to the top of R&D. broken
+Runner gained 2 credits
+Bukhgalter fully broke Empiricist, gaining 2[c]
+Approaching Remote 0
+Run successful
+Longevity Serum accessed
+Longevity Serum stolen
+Run ends
+Runner spent one click
+Runner gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 2 credit(s) and 3 card(s) in hand: [Clearinghouse,Peer Review,Clearinghouse]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [T400 Memory Diamond]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: [4.025]
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+Corp spent one click
+Corp drew a card
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 4 with 0 agenda(s) - protection score penalized
+AI: But no I don't want to draw right now
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 4 card(s) in hand: [Petty Cash,Spin Doctor,Clearinghouse,Peer Review]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 1 card(s) in hand: [T400 Memory Diamond]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner installed Underdome Irregulars
+Runner spent one click
+Run initiated attacking R&D
+Approaching outermost piece of ice protecting R&D
+AI: Rezzing Semak-samun prevents a game-winning breach on R&D
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+Resolve Underdome Irregulars triggered
+Runner drew 2 cards
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 0 credit(s) and 4 card(s) in hand: [Petty Cash,Spin Doctor,Clearinghouse,Peer Review]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,Masterwork (v37),Flip Switch]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 3 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 7 with 0 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Karunā,Clearinghouse,Petty Cash,Spin Doctor,Peer Review]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,Masterwork (v37),Flip Switch]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner installed Marjanah
+Runner spent one click
+Runner spent one credit
+Runner installed Masterwork (v37)
+Masterwork (v37): Draw 1 card triggered
+Runner drew a card
+Resolve Underdome Irregulars triggered
+Underdome Irregulars trashed
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 0 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 0 agenda(s) - protection score penalized
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Karunā,Clearinghouse,Petty Cash,Spin Doctor,Peer Review]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,Flip Switch,The Class Act]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Nothing to advance
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.5 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:4,required:null,actual:hq,reason:currentI2,group:null,score:null}
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Nothing to advance (can't afford it)
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: HQ WEAKER THAN R&D: protection 1.55 vs 5.5 with 1 agenda(s) - protection score penalized
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Peer Review,Spin Doctor,Petty Cash,Sericulture Expansion,Clearinghouse]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,Flip Switch,The Class Act]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Run initiated attacking R&D
+Masterwork (v37): You may install 1 piece of hardware triggered
+Runner spent one credit
+Runner installed Flip Switch
+Masterwork (v37): Draw 1 card triggered
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Approaching outermost piece of ice protecting R&D
+Encountering Semak-samun
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent 2 credits
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+AI: Could do 0 damage on breach
+Corp spent 2 credits
+Corp rezzed Manegarm Skunkworks
+Approaching R&D
+Whenever the Runner approaches this server triggered
+Runner spent 2 clicks
+Run successful
+Manegarm Skunkworks accessed
+Runner spent 3 credits
+Manegarm Skunkworks trashed
+Mycoweb accessed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 2 credit(s) and 5 card(s) in hand: [Peer Review,Spin Doctor,Petty Cash,Sericulture Expansion,Clearinghouse]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Overclock]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:5,required:null,actual:remote,reason:currentI2,group:null,score:null}
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Peer Review,Spin Doctor,Petty Cash,Clearinghouse,Sericulture Expansion]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Overclock]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Runner spent one credit
+Played Overclock
+5 credits placed on Overclock
+Run initiated attacking HQ
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting HQ
+Corp did not rez ice
+Approaching next piece of ice protecting HQ
+Encountering Whitespace
+Using Sang Kancil:
+Runner spent one credit from Overclock
+Subroutine The Runner loses 3[c]. broken
+Using Sang Kancil:
+Runner spent one credit from Overclock
+Subroutine If the Runner has 6[c] or less, end the run. broken
+Approaching HQ
+Run successful
+Peer Review accessed
+Run ends
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 3 credit(s) and 5 card(s) in hand: [Petty Cash,Spin Doctor,Peer Review,Sericulture Expansion,Clearinghouse]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Carmen]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Petty Cash,Petty Cash,Spin Doctor,Clearinghouse,Sericulture Expansion]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Carmen]
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 5 card(s) in hand: [Petty Cash,Petty Cash,Spin Doctor,Clearinghouse,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Carmen]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 5 card(s) in hand: [Petty Cash,Clearinghouse,Anoetic Void,Petty Cash,Sericulture Expansion]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Carmen]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Run initiated attacking Remote 1
+Masterwork (v37): You may install 1 piece of hardware triggered
+Corp rezzed Spin Doctor
+Corp drew 2 cards
+Using Spin Doctor:
+Spin Doctor removed from the game
+AI: I know this one
+[hidden card] shuffled into R&D from Archives
+AI: I know this one
+Urtica Cipher shuffled into R&D from Archives
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting HQ
+AI: Rez this is better than Mycoweb in Remote 0
+AI: I will rez the approached ice
+Corp spent 4 credits
+Corp rezzed Karunā
+Using Flip Switch:
+Flip Switch trashed
+Runner jacked out
+Run ends
+Runner spent one click
+Run initiated attacking HQ
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting HQ
+Encountering Karunā
+Using Bukhgalter:
+Runner spent one credit
+Bukhgalter gets +1 strength
+Using Bukhgalter:
+Runner spent one credit
+Bukhgalter gets +1 strength
+Using Bukhgalter:
+Runner spent one credit
+Subroutine Do 2 net damage. broken
+Using Bukhgalter:
+Runner spent one credit
+Subroutine Do 2 net damage. The Runner may jack out. broken
+Runner gained 2 credits
+Bukhgalter fully broke Karunā, gaining 2[c]
+Approaching next piece of ice protecting HQ
+Encountering Whitespace
+Using Sang Kancil:
+Runner spent one credit
+Subroutine The Runner loses 3[c]. broken
+Firing If the Runner has 6[c] or less, end the run. on Whitespace:
+Approaching HQ
+Run successful
+Anoetic Void accessed
+Runner spent one credit
+Anoetic Void trashed
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 4 credit(s) and 6 card(s) in hand: [Palisade,Sericulture Expansion,Clearinghouse,Petty Cash,Petty Cash,Palisade]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Carmen]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.465,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.465,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent 2 credits
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:6,required:null,actual:hq,reason:currentI2,group:null,score:null}
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Sericulture Expansion,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 4 credit(s) and 5 card(s) in hand: [Sericulture Expansion,Petty Cash,Palisade,Clearinghouse,Petty Cash]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 3 card(s) in hand: [T400 Memory Diamond,The Class Act,Carmen]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Run initiated attacking R&D
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting R&D
+Encountering Semak-samun
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent one credit
+Marjanah gets +1 strength
+Using Marjanah:
+Runner spent 2 credits
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching R&D
+Run successful
+Send a Message accessed
+Send a Message stolen
+Runner has reached 7 agenda points
+Runner wins
+Corp (PT Untaian: Life's Building Blocks) agenda points: 0
+Runner (Az McCaffrey: Mechanical Prodigy) agenda points: 7
+R&D size: 29
+Grip size: 3
+Agendas were stolen from: [HQ,remote,R&D]
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: [Clearinghouse]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(26010, [26011,30020,26012,30018,35022,36016,30029,30020,26013], [35018,30011,30031,30020,26029,26017,26028,35018,30030,26028,26012,26014,26011,26011,35021,30030,35022,35020,26024,26014,35021,26014,26013,26015,30030,30018,26017], [30031,26018,30015], [26018,26027,26015,26016,35020,30016], [35048,30044,30069], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [30075,30042,30050,35055], [35056,30061,30069,30053,35055,35048,30074,30048,35048,35052,30074,30048,30045,35049,35049,35081,30050,35054,30047,35056,30053,35053,30047,35055,30075,35079,35054,30048,30045], [35049,35081,30072,30061,35081], [], [35054], [30074,30047,30072], [[30061,35052,35053]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[1].AITurnsInstalled=1;
+runner.scoreArea[1].AICardsDiscarded=[];
+runner.scoreArea[1].rezzed=false;
+runner.scoreArea[1].AIScoringPlanCommitted=true;
+runner.grip[2].madeSuccessfulRunThisTurn=true;
+runner.stack[1].madeSuccessfulRunThisTurn=true;
+runner.stack[25].runRnD=true;
+runner.heap[2].host=null;
+runner.heap[3].runRnD=true;
+runner.heap[3].host=null;
+runner.heap[5].host=null;
+runner.heap[8].host=null;
+runner.rig.resources[1].usedCreditThisTurn=true;
+runner.rig.programs[0].brokenThisEncounter=[];
+runner.rig.programs[2].madeSuccessfulRunThisTurn=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].rezzed=true;
+corp.archives.cards[1].host=null;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[2].host=null;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.cards[12].host=null;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.remoteServers[0].root[0].AITurnsInstalled=13;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].AISuccessfulRuns=2;
+corp.RnD.AISuccessfulRuns=2;
+corp.HQ.AISuccessfulRuns=3;
+
+Version reference: Fri Oct 30 2026 15:22:40 GMT+0000 (Greenwich Mean Time)

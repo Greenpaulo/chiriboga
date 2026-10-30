@@ -9882,7 +9882,7 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   // weaker than HQ and cannot be improved), then install and advance there.
   // Never installs an agenda from HQ into a remote without ICE unless it
   // scores before the Runner's next turn.
-  scoringPlan: false,
+  scoringPlan: true,
 
   // I10 version 2: the scoring plan also installs scoring upgrades
   // (AIIsScoringUpgrade) and, when no ICE can be installed, defensive upgrades

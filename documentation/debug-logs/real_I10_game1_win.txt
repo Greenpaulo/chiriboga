@@ -1,0 +1,322 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Az McCaffrey: Mechanical Prodigy,3 Always Have a Backup Plan,2 Blueberry!™ Diesel,2 Flip Switch,3 Lucky Charm,2 Masterwork (v37),1 Bukhgalter,2 “Baklan” Bochkin,2 The Class Act,1 Gauss,1 The Artist,2 Direct Access,1 Rejig,1 Mutual Favor,1 Carmen,1 Marjanah,2 Red Team,3 Creative Commission,1 Overclock,3 Sure Gamble,2 T400 Memory Diamond,2 Detente,2 Sang Kancil,2 Fransofia Ward,2 Open Market,1 Underdome Irregulars]
+[PT Untaian: Life's Building Blocks,1 Longevity Serum,3 Urtica Cipher,3 Hansei Review,2 Spin Doctor,2 Send a Message,3 Regolith Mining License,3 Whitespace,3 Hedge Fund,3 Proprionegation,3 Sericulture Expansion,2 Byte!,1 Phật Gioan Baotixita,3 Semak-samun,3 Peer Review,2 Mitra Aman,3 Touch-ups,1 Measured Response,2 Flyswatter,3 Petty Cash,3 Lionsmane]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 2.25; fresh-hand expectation 4.15
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Whitespace,Peer Review,Proprionegation,Send a Message,Lionsmane]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Class Act,Fransofia Ward,Masterwork (v37),Lucky Charm,Creative Commission]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:wait,reason:no affordable protection,margin:8,card:null}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:1,required:hq,actual:hq,reason:requiredCentral,group:0,score:-2}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring plan {agenda:Proprionegation,server:new remote,step:wait,reason:no affordable protection,margin:8,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:wait,reason:no affordable protection,margin:8,card:null}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:2,required:rd,actual:rd,reason:requiredCentral,group:0,score:-6}
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Proprionegation,Send a Message,Peer Review,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Class Act,Fransofia Ward,Masterwork (v37),Lucky Charm,Creative Commission]
+Runner spent one click
+Runner spent 3 credits
+Runner installed The Class Act
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 2 credits
+Runner installed Masterwork (v37)
+Masterwork (v37): Draw 1 card triggered
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+The Class Act: Draw 4 cards triggered
+Runner drew 4 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Proprionegation,Send a Message,Peer Review,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 7 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,Always Have a Backup Plan,Gauss,T400 Memory Diamond,Red Team]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:wait,reason:no affordable protection,margin:8,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Proprionegation,server:new remote,step:wait,reason:no affordable protection,margin:8,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: Scoring plan {agenda:Sericulture Expansion,server:new remote,step:wait,reason:no affordable protection,margin:8,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Send a Message,Proprionegation,Spin Doctor,Sericulture Expansion,Peer Review]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 7 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,Always Have a Backup Plan,Gauss,T400 Memory Diamond,Red Team]
+Runner spent one click
+Runner spent 4 credits
+Runner installed Red Team
+12 credits loaded onto Red Team
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Run ends
+Runner spent one click
+Runner spent 2 credits
+Runner installed Gauss
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Send a Message,Proprionegation,Spin Doctor,Sericulture Expansion,Peer Review]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,Always Have a Backup Plan,T400 Memory Diamond]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:protect,reason:Runner can afford to breach,margin:6,card:Semak-samun}
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:3,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: Scoring plan {agenda:Sericulture Expansion,server:Remote 0,step:install,reason:no further protection; remote no weaker than HQ,margin:6,card:Sericulture Expansion}
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Sericulture Expansion in Remote 0: exposure 1, advance gain -1.354, defence gain 0.000
+AI: Nothing to advance (can't afford it)
+AI: Posture bluff epoch 3: neutral (install)
+AI: Scoring plan {agenda:Send a Message,server:new remote,step:wait,reason:no affordable protection,margin:6,card:null}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 10 credit(s) and 4 card(s) in hand: [Spin Doctor,Peer Review,Proprionegation,Send a Message]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 5 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,Always Have a Backup Plan,T400 Memory Diamond]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Run ends
+Runner spent one click
+Runner spent 2 credits
+Played Always Have a Backup Plan
+Run initiated attacking Remote 0
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Remote 0
+AI: I will rez the approached ice
+Corp spent 3 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Using Gauss:
+Runner spent 2 credits
+Gauss gets +2 strength
+Using Gauss:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching Remote 0
+Run successful
+Sericulture Expansion accessed
+Sericulture Expansion stolen
+Run ends
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 4 card(s) in hand: [Spin Doctor,Peer Review,Proprionegation,Send a Message]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,T400 Memory Diamond]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring plan {agenda:Send a Message,server:Remote 0,step:install,reason:no further protection; remote no weaker than HQ,margin:6,card:Send a Message}
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Send a Message in Remote 0: exposure 1, advance gain 0.943, defence gain 0.000
+AI: Posture bluff epoch 4: neutral (install)
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Send a Message in Remote 0: exposure 1, advance gain 1.473, defence gain 0.000
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Proprionegation,Byte!,Peer Review,Spin Doctor]
+SPOILER: Runner has 3 credit(s), 0 tag(s) and 4 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,T400 Memory Diamond]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Run initiated attacking Remote 0
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Remote 0
+Encountering Semak-samun
+Using Gauss:
+Runner spent 2 credits
+Gauss gets +2 strength
+Using Gauss:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching Remote 0
+Run successful
+Send a Message accessed
+Send a Message stolen
+You may rez 1 installed piece of ice, ignoring all costs triggered
+AI: I know this one
+Corp rezzed Lionsmane
+Run ends
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Run ends
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 4 card(s) in hand: [Proprionegation,Byte!,Peer Review,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,T400 Memory Diamond]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring plan {agenda:Proprionegation,server:Remote 0,step:install,reason:no further protection; remote no weaker than HQ,margin:8,card:Proprionegation}
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Proprionegation in Remote 0: exposure 1, advance gain 0.629, defence gain 0.000
+AI: I could advance a card by 2 with these cards: [null,null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+AI: I could do 0 damage with these cards: []
+AI: I4 plan for Proprionegation in Remote 0: exposure 1, advance gain 0.982, defence gain 0.000
+AI: I could advance a card by 1 with these cards: [null]
+Corp spent one click
+Corp spent one credit
+Card advanced
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 3 credit(s) and 4 card(s) in hand: [Urtica Cipher,Byte!,Peer Review,Spin Doctor]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Fransofia Ward,Lucky Charm,Red Team,T400 Memory Diamond]
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Run initiated attacking Remote 0
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Remote 0
+Encountering Semak-samun
+Using Gauss:
+Runner spent 2 credits
+Gauss gets +2 strength
+Using Gauss:
+Runner spent one credit
+Subroutine End the run unless the Runner suffers 3 net damage. broken
+Approaching Remote 0
+Run successful
+Proprionegation accessed
+Proprionegation stolen
+Runner has reached 7 agenda points
+Runner wins
+Corp (PT Untaian: Life's Building Blocks) agenda points: 0
+Runner (Az McCaffrey: Mechanical Prodigy) agenda points: 7
+R&D size: 39
+Grip size: 6
+Agendas were stolen from: [remote,remote,remote]
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 0: []
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(26010, [30020,26011], [26018,36016,30029,30020,30020,35022,35022,30011,26011,26017,26029,26017,26014,26014,26028,30031,26015,35020,26028,26013,30016,30030,35020,30015,35018,26011,30030,35018,30030,26016,26012,26012,26027], [35021,26014,30018,30031,26013,35021], [26018,30018,26015,26024], [35049,30069,35048], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35047, [], [35049,30048,30075,30044,30071,30075,35055,35081,35079,35048,35056,30074,35051,35054,35067,35078,30048,35055,30053,30048,35054,30045,30074,35067,36041,35048,35056,30075,35067,35049,30071,36041,35079,35081,35050,30071,30045,35081,30069], [30045,35050,35055,30053], [], [36041], [30074], [[35054]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.scoreArea[0].AITurnsInstalled=1;
+runner.scoreArea[0].rezzed=false;
+runner.scoreArea[0].AIScoringPlanCommitted=true;
+runner.scoreArea[1].AITurnsInstalled=1;
+runner.scoreArea[1].rezzed=false;
+runner.scoreArea[1].AIScoringPlanCommitted=true;
+runner.scoreArea[2].AITurnsInstalled=1;
+runner.scoreArea[2].rezzed=false;
+runner.scoreArea[2].AIScoringPlanCommitted=true;
+runner.stack[7].madeSuccessfulRunThisTurn=true;
+runner.stack[20].madeSuccessfulRunThisTurn=true;
+runner.stack[23].madeSuccessfulRunThisTurn=true;
+runner.stack[29].brokenThisEncounter=[];
+runner.rig.resources[1].credits=3;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.cards[3].AICardsDiscarded=[];
+corp.RnD.cards[15].successfulRunLastTurn=true;
+corp.remoteServers[0].ice[0].rezzed=true;
+corp.remoteServers[0].AISuccessfulRuns=3;
+corp.archives.AISuccessfulRuns=3;
+
+Version reference: Fri Oct 30 2026 16:03:07 GMT+0000 (Greenwich Mean Time)
