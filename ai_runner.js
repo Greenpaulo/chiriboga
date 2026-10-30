@@ -812,7 +812,7 @@ class RunnerAI {
 	//console.error("crp "+ServerName(data.server)+(data.incomplete?" incomplete":" complete"));
     data.clicks = runner.clickTracker + data.clickOffset;
 	data.poolCredits = runner.creditPool + data.poolCreditOffset; //just credit pool
-	data.otherCredits = AvailableCredits(runner) - runner.creditPool + data.otherCreditOffset; //sources other than credit pool
+	data.otherCredits = AvailableCredits(runner) - (CreditPoolCanBeUsed(runner, "spend") ? runner.creditPool : 0) + data.otherCreditOffset; //sources other than credit pool
     data.damageLimit = runner.grip.length + data.damageOffset; //(this gets updated during the run calculation if data.clicks is used up)
     //this works because potentials are calculated before costs in (optionList.includes("run")). Note the false here prevents an infinite loop
     if (this._getCachedPotential(data.server) < 2.0)

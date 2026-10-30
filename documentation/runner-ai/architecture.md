@@ -363,6 +363,31 @@ engine calls `RecalculateRunIfNeeded()`, which keeps a complete path when the
 server is central, still has root cards, cannot be breached anyway, or the path
 costs under 0.8, and otherwise switches to an exit strategy.
 
+Konjin's `AIForcedEncounterIce` selects another installed, rezzed ICE from
+public information, ranked by subroutine count and strength. `IceAI` exposes
+that target only for known, rezzed or affordable Konjin. `EncounterOptions`
+passes it to `ValidateEncounterPoint`, whose child search prices encounter
+effects and ordinary breaker routes using remaining credits, clicks and
+finite-use persistents. The search preserves calculator ownership and restores
+its temporary data in `finally`; it suppresses recursive forced pricing and
+caps the child search at 2,000 iterations. It keeps one cheapest child outcome,
+without jointly optimizing alternative targets or future finite-tool uses.
+The differing-bids route competes with a `misc_moderate` matching-bids route;
+this is approximate Psi risk pricing. Live forced encounters substitute the
+child ICE at the suspended route position and clear cached paths on return.
+
+`AIRunSuccessChance(server)` multiplies active Corp cards' public survival
+probabilities into ordinary access potential before passive Runner rewards.
+Hyoubu Precog Manifold uses the matching-bid probability under uniform
+affordable Psi bids for its chosen server while active. This grades route
+risk without declaring deterministic prevention or charging optional bids as
+mandatory passage costs.
+
+Run-path setup and target-aware `PayCredits` subtract the credit pool from
+`AvailableCredits` only when that pool is usable for the relevant payment.
+Temporary and eligible hosted credits remain available under a pool lock;
+`PayCredits` tracks their spend separately from pool debits.
+
 - **Jack out.** Past the last ICE (Run 4.3 at index 0) the AI approaches,
   except after a Conduit run when the known top of R&D is not an agenda.
   Elsewhere it jacks out when no complete path from the next ICE exists.

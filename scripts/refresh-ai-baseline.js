@@ -17,7 +17,7 @@ function refreshBaseline(root, runBatch = args => {
   // Reject unusable provenance before spending time on games or moving evidence.
   const git = args => spawnSync('git', args, {cwd: root, encoding: 'utf8'});
   const head = git(['rev-parse', '--verify', 'HEAD']);
-  const status = git(['status', '--porcelain']);
+  const status = git(['status', '--porcelain', '--untracked-files=all']);
   if (head.status !== 0 || status.status !== 0) {
     throw new Error('Cannot verify a clean, committed Git build; current baseline was preserved.');
   }

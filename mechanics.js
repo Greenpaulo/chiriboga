@@ -709,6 +709,7 @@ function Install(
   installingCard.renderer.destinationPosition.x = installingCard.renderer.sprite.x;
   installingCard.renderer.destinationPosition.y = installingCard.renderer.sprite.y;
   var host = null;
+  var createdServer = null;
   var installCommitted = false;
   var installResolved = false;
   var commitInstall = function() {
@@ -993,6 +994,10 @@ function Install(
 			  corp.AI._cancelOpeningIceInstall(installingCard);
 			ChangePhase(oldPhase, true);
 			MoveCard(installingCard, oldLocation);
+            if (createdServer && createdServer.root.length === 0 && createdServer.ice.length === 0) {
+              var serverIndex = corp.remoteServers.indexOf(createdServer);
+              if (serverIndex > -1) corp.remoteServers.splice(serverIndex, 1);
+            }
 			if (typeof onCancelResolve === "function")
 			  onCancelResolve.call(context);
 			Cancel();
@@ -1016,6 +1021,7 @@ function Install(
   if (installingCard.player == corp) {
     if (destination == null) {
       destination = NewServer("Remote " + corp.serverIncrementer++, false);
+      createdServer = destination;
       corp.remoteServers.push(destination);
 	  Log("Corp created a new remote server");
 	  //currently giving whoever's turn it is priority...not sure this is always going to be right

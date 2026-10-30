@@ -607,6 +607,34 @@ const afterPriorTrash10 = rc.ValidateEncounterPoint(-1, priorTrash10, false,
   ['trashGripCard'], [], {gripTrashLimit: 2});
 assert.strictEqual(rc.TotalEffect(afterPriorTrash10).trashGripCard, 2, 'earlier targeted trashes also deplete the grip');
 
+// Locked-pool route accounting retains temporary and eligible hosted credits.
+reset();
+put({title: 'Pool lock', player: runner, cardType: 'resource', subTypes: [],
+  preventCreditPoolUse(player) { return player === runner; }}, runner.rig.resources);
+const paymentSource11 = put({title: 'Payment source', player: runner, cardType: 'hardware', subTypes: [], credits: 2,
+  canUseCredits(doing) { return doing === '' || doing === 'using'; }}, runner.rig.hardware);
+runner.temporaryCredits = 2; runner.creditPool = 10;
+const routeInputs11 = runner.AI._calculateRunPathPieceBegin({server: corp.HQ,
+  clickOffset: 0, poolCreditOffset: 0, otherCreditOffset: 0, damageOffset: 0});
+assert.strictEqual(routeInputs11.otherCredits, 4, 'route setup subtracts only an available pool');
+rc.baseOtherCredits = routeInputs11.otherCredits; rc.basePoolCredits = routeInputs11.poolCredits;
+rc._poolOnly = false;
+let paidOutside11 = rc.PayCredits(point(), 3, 'using', paymentSource11, corp.HQ);
+assert(paidOutside11, 'temporary and hosted credits pay with the pool locked');
+assert.strictEqual(paidOutside11.runner_credits_spent, 3);
+assert.strictEqual(paidOutside11.runner_credits_lost, 0);
+assert(rc.PayCredits(paidOutside11, 1, 'using', paymentSource11, corp.HQ));
+assert.strictEqual(rc.PayCredits(paidOutside11, 2, 'using', paymentSource11, corp.HQ), null, 'cannot reuse outside credits or spend the locked pool');
+assert.strictEqual(rc.PayCredits(point(), 3, 'stealing', null, corp.HQ), null, 'ineligible hosted credits cannot pay');
+rc._poolOnly = true;
+assert.strictEqual(rc.PayCredits(point(), 1, 'using', paymentSource11, corp.HQ), null);
+rc._poolOnly = false;
+runner.rig.resources.length = 0; c.InvalidateActiveTriggerCandidateCache();
+paidOutside11 = rc.PayCredits(point(), 5, 'using', paymentSource11, corp.HQ);
+assert.strictEqual(paidOutside11.runner_credits_spent, 4, 'unlocked payments still prefer outside credits');
+assert.strictEqual(paidOutside11.runner_credits_lost, 1);
+runner.temporaryCredits = 0;
+
 // Batch 11: Psi, nested encounters, Archives installs and mandatory counters.
 reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
 const konjin = put(card(26109), corp.HQ.ice); konjin.rezzed = true;
@@ -629,6 +657,14 @@ assert.strictEqual(c.GetApproachEncounterIce(), otherIce);
 assert.strictEqual(c.encounteredIce, otherIce);
 assert.strictEqual(c.attackedServer, corp.HQ, 'forced encounter does not redirect the run');
 assert.strictEqual(c.approachIce, 0);
+const forcedBreak11 = c.ChoicesEncounteredSubroutines();
+assert.strictEqual(forcedBreak11.length, 1, 'forced ICE supplies breakable subroutines despite empty parent');
+assert.strictEqual(forcedBreak11[0].subroutine, otherIce.subroutines[0]);
+assert.strictEqual(c.ChoicesEncounteredSubroutines([otherIce.subroutines[0]]).length, 0);
+c.Break(forcedBreak11[0].subroutine);
+assert(otherIce.subroutines[0].broken, 'breaking a forced encounter choice changes the child ICE');
+assert.strictEqual(konjin.subroutines.length, 0);
+otherIce.subroutines[0].broken = false;
 const originalForced = c.forcedEncounters[0]; originalForced.phase = suspended11;
 c.ChangePhase(c.phases.runSubroutines); c.subroutine = 1;
 c.phases.runSubroutines.Resolve.n();
@@ -680,6 +716,18 @@ assert(paths11.some(path => path[path.length - 1].runner_credits_spent === 0), '
 assert(!calcKonjin.AIWorthwhileIce());
 calcKonjin.rezzed = false; taxIce11.rezzed = true;
 assert(!calc11.IceAI(calcKonjin, 2).forcedEncounterIce, 'unaffordable unrezzed Konjin cannot force an encounter');
+
+// Run-end cleanup clears a forced encounter still on the stack.
+reset(); c.forcedEncounters = [];
+const runEndForeign11 = remote();
+const runEndIce11 = put(wall('Run end ICE'), runEndForeign11.ice); runEndIce11.rezzed = true;
+assert(c.ForceEncounter(runEndIce11));
+assert.strictEqual(c.forcedEncounters.length, 1);
+c.playerTurn = corp; c.currentPhase = c.phases.runEnds;
+c.phases.runEnds.Resolve.n();
+assert.strictEqual(c.forcedEncounters.length, 0, 'run end clears the pending forced encounter');
+assert.strictEqual(c.GetApproachEncounterIce(), null, 'run end exposes neither child nor parent ICE');
+assert.strictEqual(c.ChoicesEncounteredSubroutines().length, 0);
 
 // Manifold: legal play/target through real Corp command selection and Psi timing.
 reset(); c.runSuccessDeclared = false;
@@ -798,6 +846,26 @@ assert.strictEqual(c.currentPhase.title, 'Trash Before Install');
 c.currentPhase.Cancel.trash();
 assert(corp.archives.cards.includes(handAgenda11) && !handAgenda11.advancement, 'cancellation grants no counters');
 assert(c.removedFromGame.includes(handKak11), 'cancelled optional install still removes operation');
+assert(corp.remoteServers.includes(handRemote11), 'cancellation preserves the existing destination');
+for (const origin of [corp.HQ.cards, corp.archives.cards]) {
+  const cancelledCard11 = put({title: 'Cancelled root install', player: corp, cardType: 'asset', subTypes: []}, origin);
+  const beforeServers11 = corp.remoteServers.length;
+  let cleaned11 = false;
+  c.Install(cancelledCard11, null, false, null, true, null, null, () => {
+    cleaned11 = true;
+    assert.strictEqual(corp.remoteServers.length, beforeServers11, 'cancel callback sees the new empty remote removed');
+  });
+  assert.strictEqual(corp.remoteServers.length, beforeServers11 + 1);
+  c.currentPhase.Cancel.trash();
+  assert(cleaned11 && origin.includes(cancelledCard11), 'cancellation restores HQ or Archives card');
+}
+// Server-creation responses may populate the new server before cancellation.
+const populatedCancel11 = put({title: 'Cancelled asset', player: corp, cardType: 'asset', subTypes: []}, corp.HQ.cards);
+c.Install(populatedCancel11, null);
+const populatedServer11 = corp.remoteServers[corp.remoteServers.length - 1];
+put(wall(), populatedServer11.ice);
+c.currentPhase.Cancel.trash();
+assert(corp.remoteServers.includes(populatedServer11), 'cancellation preserves a newly populated server');
 reset();
 const noTargetKak11 = put(card(26111), corp.resolvingCards);
 noTargetKak11.Resolve(); d = decisions.shift(); d.choose({cards: []});

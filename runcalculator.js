@@ -249,7 +249,8 @@ class RunCalculator {
   PayCredits(point, amount, doing, card, server) {
     return AIWithRunContext(server, () => {
       var outside = this._poolOnly ? 0 : Math.min(this.baseOtherCredits,
-        Math.max(0, AvailableCredits(runner, doing, card) - runner.creditPool));
+        Math.max(0, AvailableCredits(runner, doing, card) -
+          (CreditPoolCanBeUsed(runner, "spend", doing, card) ? runner.creditPool : 0)));
       var outsideLeft = Math.max(0, outside - point.runner_credits_spent);
       var fromOutside = Math.min(amount, outsideLeft);
       var fromPool = amount - fromOutside;

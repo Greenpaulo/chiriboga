@@ -32,7 +32,7 @@ const writeOld = (root, name = 'baseline.json') => {
 const writeReport = (root, changes = {}) => fs.writeFileSync(path.join(root, 'bench/baseline.json'),
   JSON.stringify({kind: 'ai-batch-report', dirty: false, games: Array(1000).fill({}), failures: [], ...changes}));
 
-for (const state of ['untracked', 'staged', 'modified', 'no repository', 'no commit']) {
+for (const state of ['untracked', 'hidden untracked', 'staged', 'modified', 'no repository', 'no commit']) {
   test(`rejects ${state} before running games or changing evidence`, root => {
     const previous = writeOld(root);
     writeReport(root);
@@ -46,6 +46,7 @@ for (const state of ['untracked', 'staged', 'modified', 'no repository', 'no com
     } else {
       fs.writeFileSync(path.join(root, 'new-file.txt'), 'uncommitted');
       if (state === 'staged') git(root, ['add', 'new-file.txt']);
+      if (state === 'hidden untracked') git(root, ['config', 'status.showUntrackedFiles', 'no']);
     }
     assert.throws(() => refreshBaseline(root, () => assert.fail('must not run')),
       /clean, committed/);
