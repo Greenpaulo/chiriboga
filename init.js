@@ -1838,6 +1838,20 @@ function SpansToCST(selecter) {
 	return ret.join(', ');
 }
 
+/**
+ * Number of cards a player draws for a starting hand or mulligan.
+ * An identity can replace the default 5 with `startingHandSize` (Andromeda: 9).
+ *
+ * @method StartingHandSize
+ * @param {Player} player corp or runner
+ * @returns {int} starting hand size
+ */
+function StartingHandSize(player) {
+  var identity = player ? player.identityCard : null;
+  if (identity && typeof identity.startingHandSize == "number") return identity.startingHandSize;
+  return 5;
+}
+
 function StartGame() {
   // Determine game mode from URL parameters and track it in Google Analytics
   var gameMode = 'Regular';
@@ -1859,13 +1873,14 @@ function StartGame() {
 	TriggeredResponsePhase(runner, "responseOnBeforeStartingHand", [], function() {
     for (
       var i = 0;
-      i < 5;
+      i < Math.max(StartingHandSize(corp), StartingHandSize(runner));
       i++ //no need to call triggers because no cards are active during setup
     ) {
-      MoveCardByIndex(corp.RnD.cards.length - 1, corp.RnD.cards, corp.HQ.cards);
-      MoveCardByIndex(runner.stack.length - 1, runner.stack, runner.grip);
+      if (i < StartingHandSize(corp)) MoveCardByIndex(corp.RnD.cards.length - 1, corp.RnD.cards, corp.HQ.cards);
+      if (i < StartingHandSize(runner)) MoveCardByIndex(runner.stack.length - 1, runner.stack, runner.grip);
     }
-    Log("Each player has taken five credits and drawn five cards");	
+    if (StartingHandSize(corp) == 5 && StartingHandSize(runner) == 5) Log("Each player has taken five credits and drawn five cards");
+    else Log("Each player has taken five credits; the Corp drew " + StartingHandSize(corp) + " cards and the Runner drew " + StartingHandSize(runner) + " cards");
 	Render();
 	if (accessibilityMode == "text") {
 	  if (viewingPlayer == runner) Log("Your hand is "+SpansToCST("#runner-grip span"));

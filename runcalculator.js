@@ -149,8 +149,11 @@ class RunCalculator {
 
     }
 	
-	//passive effects (assuming Runner only for now)
-	var activeCards = ActiveCards(runner);
+	//passive effects: Runner cards, plus public run-scoped Corp effects (Sensei)
+	//(Corp cards already active for the Runner are listed once)
+	var activeCards = ActiveCards(runner).concat(ActiveCards(corp).filter(function (card) {
+	  return card.player == corp && !card.activeForOpponent;
+	}));
 	for (var i = 0; i < activeCards.length; i++) {
 	  if (typeof activeCards[i].AIModifyIceAI == 'function') {
 		result = activeCards[i].AIModifyIceAI.call(activeCards[i],result,startIceIdx);
@@ -1341,9 +1344,11 @@ class RunCalculator {
 		  }
 		  var highestTrashDiscount = 0;
 		  if (htcCard) {
-			  for (var i=0; i<installedRunnerCards.length; i++) {
-				if (typeof installedRunnerCards[i].AIReducesTrashCost == "function") {
-					var ictd = installedRunnerCards[i].AIReducesTrashCost.call(installedRunnerCards[i],htcCard);
+			  //the identity can also pay trash costs (Whizzard: Master Gamer)
+			  var trashReducers = installedRunnerCards.concat(runner.identityCard ? [runner.identityCard] : []);
+			  for (var i=0; i<trashReducers.length; i++) {
+				if (typeof trashReducers[i].AIReducesTrashCost == "function") {
+					var ictd = trashReducers[i].AIReducesTrashCost.call(trashReducers[i],htcCard);
 					if (ictd > highestTrashDiscount) highestTrashDiscount = ictd;
 				}
 			  }

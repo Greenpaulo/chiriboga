@@ -19,10 +19,13 @@ order of the availability table. A user-requested different set takes precedence
 | ------------------ | ------ | ----- |
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
 | `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
-| `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in the [active tracker](current-set-implementation.md). |
-| `genesis` | Pending | Genesis Cycle (`wla`, `ta`, `ce`, `asis`, `hs`, `fp`) as one set, IDs 2001-2120, scaffolded in `sets/genesis.js`. 105 cards to implement; 15 reprints already defined elsewhere are `DUPLICATE` comments and need `ACCEPTED_MISSING_DEFINITIONS` entries in `scripts/card-status.js` before the set can become playable. |
+| `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in its Set record below. |
+| `genesis` | In progress | Genesis Cycle (`wla`, `ta`, `ce`, `asis`, `hs`, `fp`) as one set, IDs 2001-2120, scaffolded in `sets/genesis.js`. 103 cards to implement; 17 reprints already defined elsewhere are `DUPLICATE` comments and need `ACCEPTED_MISSING_DEFINITIONS` entries in `scripts/card-status.js` before the set can become playable. Five of six pack batches are merged (87 cards); Future Proof remains. See the [active tracker](current-set-implementation.md). |
 
-Uprising is active. Downfall retains its [maintained set record](records/downfall.md)
+The Genesis Cycle is active in the [tracker](current-set-implementation.md).
+Uprising retains its [maintained set record](records/uprising.md) and
+[immutable transition snapshot](history/uprising-2026-10-30-implementation-transition.md).
+Downfall retains its [maintained set record](records/downfall.md)
 and [immutable transition snapshot](history/downfall-2026-10-23-implementation-transition.md);
 no set review exists yet. Vantage Point retains its [maintained set record](records/vantagepoint.md),
 [immutable transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
@@ -66,14 +69,15 @@ verification; see the [transition snapshot](history/downfall-2026-10-23-implemen
 
 ### Uprising
 
-Active implementation set (26066–26130). `sets/uprising.js` defines all 65 cards.
+Implemented set (26066–26130). `sets/uprising.js` defines all 65 cards.
 Batches 1–16 (26066–26130) are complete with baseline AI, including the six
 pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095), which were
 verified and repaired where needed. The §8 implementation checks passed on
-2026-10-30 and Uprising is playable. Their optimisation rows are Pending in the
-tracker. See the
-[active tracker](current-set-implementation.md) and
-[implementation notes](uprising-implementation-notes.md).
+2026-10-30 and Uprising is playable. Their optimisation rows are Pending in the set record.
+See the [implementation notes](uprising-implementation-notes.md).
+
+**Set record:** [Uprising](records/uprising.md), preserving both queues, logs and
+verification; see the [transition snapshot](history/uprising-2026-10-30-implementation-transition.md).
 
 `sets/downfall.js` defines all 65 cards and no recorded gameplay gaps remain:
 the Runner gaps closed in batches 1–6 and the Corp gaps in batches 7–13.

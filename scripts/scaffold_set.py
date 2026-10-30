@@ -194,8 +194,8 @@ def find_titles_in_other_sets(sets_dir, own_filename):
             continue
         with open(path, "r", encoding="utf-8") as f:
             content = f.read()
-        for card_id, title in re.findall(r'^\w+\[(\d+)\]\s*=\s*\{\s*\n\s*title:\s*"([^"]+)"', content, re.M):
-            titles.setdefault(title, (name, int(card_id)))
+        for card_id, _, title in re.findall(r'^\w+\[(\d+)\]\s*=\s*\{\s*\n\s*title:\s*(["\'])(.+?)\2', content, re.M):
+            titles.setdefault(title.replace("\\'", "'"), (name, int(card_id)))
     return titles
 
 
