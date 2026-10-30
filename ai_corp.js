@@ -2696,6 +2696,7 @@ class CorpAI {
         effect != "gainCredits" &&
         effect != "gainGripCard" &&
         effect != "trashIce" &&
+        effect != "payIceCredits" &&
         effect != "payCredits"
       )
         return true;
@@ -2826,6 +2827,11 @@ class CorpAI {
     for (var type of Object.keys(counters)) {
       if (typeof counters[type] != "number" || !isFinite(counters[type]) || counters[type] < 0)
         return {status: "unknown"};
+    }
+    if (typeof iceCard.AIBreakCreditLoss == "function") {
+      var indices = this._requiredSubroutineIndices(iceCard, false, evaluationContext).slice(0, count);
+      var loss = iceCard.AIBreakCreditLoss(indices);
+      price.credits += Math.min(loss, Math.max(0, runner.creditPool + (runner.temporaryCredits || 0) - price.credits));
     }
     return {status: "priced", credits: price.credits, clicks: price.clicks,
       counters: Object.assign({}, counters), breaker: breaker};

@@ -2377,6 +2377,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | Hook | Type | Purpose |
 |---|---|---|
 | `AIImplementIce(rc, result, maxCred, incomplete)` | function | Describe what subroutines do in the run calculator |
+| `AIForcedEncounterIce()` | function | Public rezzed ICE target, priced by the ordinary encounter search (Uprising batch 11) |
+| `AIRunSuccessChance(server)` | function | Public stochastic breach survival, consumed by Runner access potential (Uprising batch 11) |
 | `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
@@ -3715,3 +3717,78 @@ Baseline evidence is in `tests/uprising-integration.test.js`: real Corp command,
 install, rez and target selectors; the real prevention trigger window; and
 Runner/Corp run-calculator consumers. Deeper activation, type-prediction and
 competing-plan policies are recorded in the set's optimisation queue.
+
+### Uprising batch 11 card hooks
+
+- `AIForcedEncounterIce()` returns another installed, rezzed ICE or `null`.
+  It is a read-only, public-board selector, safe outside a run. Konjin uses
+  the same target ranking for its live choice and `RunCalculator.IceAI`.
+  `EncounterOptions` carries that target to `ValidateEncounterPoint`, which
+  prices its encounter effects and subroutines with the ordinary breaker
+  search, using remaining credits, clicks and finite-use persistents. Both
+  sides' calculators use this consumer. Child pricing temporarily swaps only
+  calculator-local encounter data and restores it in `finally`, preserving
+  calculator identity for hooks that distinguish private Runner information
+  from Corp-public information. The baseline conservatively prices
+  the differing-bids outcome alongside a `misc_moderate` matching-bids
+  risk route, rather than claiming a deterministic lockout. Psi bid prediction, alternative target comparisons,
+  and joint allocation of finite tools across alternative child paths remain
+  optimisation work. Live forced encounters substitute the child ICE at the
+  suspended route position, then discard cached paths on return.
+- `AIRunSuccessChance(server)` returns a number in `[0, 1]`, the public
+  probability that stochastic success responses allow a breach. It must be
+  pure and safe outside a run, using only public/Corp-known information.
+  The shared utility multiplies active Corp cards' probabilities; the Runner
+  command planner multiplies the server's ordinary access potential before
+  adding passive run rewards. This is graded risk, not `AIPreventBreach` or a
+  permanent end-the-run resource. Hyoubu Precog Manifold returns matching-bid
+  probability under the existing uniform affordable Psi bid policy, only for
+  its chosen server while the Lockdown is active. Optional Psi bids are not
+  mandatory passage costs. The active-card lifecycle removes this modifier
+  when the Lockdown expires or is trashed.
+- Kakurenbo uses `AIPlayWhenCan`, `AIWouldPlay`, and `_bestInstallOption` to
+  play with all three clicks and its play credits available, trashing a useful
+  HQ install target if necessary and installing an agenda/advanceable ambush
+  in a legal remote. No target means hold. Future scoring/kill combinations
+  and Archives concealment strategy are separate optimisation work.
+- La Costa Grid uses `AIIsScoringUpgrade`, `AIPreferredUpgradeServer`, and
+  `AIRezWhenCan` for a remote agenda's next-turn counter, and the real Corp
+  choice consumer for its mandatory root target. Already-placed counters feed
+  ordinary advancement planning; future counters are not booked as present
+  counters or an advancement-requirement reduction.
+
+### Uprising batch 12 card hooks
+
+- F2P's `AIImplementBreaker` supplies native two-credit breaks through the
+  ordinary Runner encounter command and subroutine selectors. It declines
+  while tagged (including tags predicted earlier in the route), outside its
+  own ICE, or without funds. `AIBreakCost(ice, count)` exposes the same public,
+  read-only linear price to Corp security; tagged Runners have no native route.
+  The Corp's ordinary ICE install/rez and threat-target consumers handle F2P.
+- `AIBreakCreditLoss(indices)` on ICE returns the non-negative credit loss
+  caused by breaking those printed subroutine indices. It must be pure and
+  use public rules only. Gold Farmer returns one per printed subroutine;
+  granted subroutines contribute zero. `RunCalculator.IceAct` charges newly
+  broken indices after activation, saturating at remaining temporary/pool
+  credits and excluding hosted credits. Corp breaker pricing adds the public
+  break-trigger debit, capped by funds remaining after activation. Bypasses
+  cause no break loss. Future shared-source allocation remains optimisation.
+- `rc.PayCredits(point, amount, doing, card, server)` models card-targeted
+  payments against eligible outside sources and the pool. It returns a copied
+  point or `null` when unaffordable. The existing `runner_credits_lost` ledger
+  also carries pool-only payment debits; these are costs, not damage. Generic
+  outside-budget credits do not automatically qualify as native ICE payments.
+  `payIceCredits` uses this consumer for one credit paid to the modeled ICE;
+  repeat it for larger costs. Gold Farmer uses three entries per pay-or-end
+  branch. Bellona's known-root steal cost uses the same consumer. Live
+  temporary credits qualify; icebreaker-only recurring credits do not.
+- Bellona uses standard agenda installation/scoring, `stealCost`, and the
+  automatic score-income response. Run planning reserves the greatest known
+  root agenda steal payment; hidden card identities remain unavailable. Central
+  random/multiaccess forecasts and score-income sequencing remain optimisation.
+- GameNET's mandatory income follows actual Corp-caused payments and losses,
+  with no activation policy or optional AI hook. Engine source scopes survive
+  trace/Psi decisions and payment continuations. Pool/hosted/temporary payment
+  of several credits is one event, while separate printed break losses are
+  separate events. Zero payments/losses and basic access trash payments do not
+  trigger income. Future income is not booked as present rez money.

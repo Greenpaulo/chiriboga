@@ -28,6 +28,7 @@ function MakeRun(server, ignoreAdditionalCosts = false) {
   if (!ignoreAdditionalCosts && !CanPayAdditionalRunCosts(server)) return false;
   SpendClicks(runner, cost.clicks);
   function beginRun() {
+  runSuccessDeclared = false;
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
@@ -66,13 +67,13 @@ function MakeRun(server, ignoreAdditionalCosts = false) {
  * @method Bypass
  */
 function Bypass() {
-	Log(GetTitle(attackedServer.ice[approachIce], true)+" bypassed");
+	Log(GetTitle(GetApproachEncounterIce(), true)+" bypassed");
 	//clear AI run cache (the bypassed ice needs to be ignored)
 	if (runner.AI != null) {
 		runner.AI.cachedBestPath = null; //force a recalculation
 	}
-	phases.runEncounterEnd.next = phases.runPassesIce; //this needs to be said because it's not constant what happens when the encounter ends (e.g. the run may end)
-  var ice = attackedServer.ice[approachIce];
+	phases.runEncounterEnd.next = forcedEncounters.length ? ForcedEncounterReturnPhase(false) : phases.runPassesIce; //this needs to be said because it's not constant what happens when the encounter ends (e.g. the run may end)
+  var ice = GetApproachEncounterIce();
   TriggeredResponsePhase(playerTurn, "responseOnBypassed", [ice], function () {
     ChangePhase(phases.runEncounterEnd);
   }, "Ice Bypassed");
@@ -1125,7 +1126,9 @@ function Break(subroutine) {
     Log('Subroutine "' + subroutine.text + '" cannot be broken');
     return;
   }
+  if (subroutine.broken) return;
   subroutine.broken = true;
+  AutomaticTriggers("automaticOnSubroutineBroken", [subroutine]);
   //particle effect
   var card = GetApproachEncounterIce();
   if (card && typeof subroutine.visual !== "undefined") {
@@ -1154,7 +1157,7 @@ function Trigger(card, triggerable, params, customVerb='Using') {
   if (typeof triggerable.text !== "undefined")
     Log(customVerb+' "' + triggerable.text + '" on ' + GetTitle(card) + ":");
   else Log(customVerb+" " + GetTitle(card) + ":");
-  triggerable.Resolve.call(card, params); //call in context of the card
+  WithCardAbilitySource(card, function () { triggerable.Resolve.call(card, params); }); //call in context of the card
 }
 
 /**
@@ -1188,7 +1191,7 @@ function TriggerAbility(card, ability, onTriggerResolve, context) {
     Log("Using " + GetTitle(card, true) + ":");
     // Ability-use watchers (e.g. The Back counts hardware used during a run).
     AutomaticTriggers("automaticOnAbilityUsed", [card, ability]);
-    ability.Resolve.call(card, params); //call in context of the card
+    WithCardAbilitySource(card, function () { ability.Resolve.call(card, params); }); //call in context of the card
   };
   var player = card.player;
   if (ability.opponentOnly) {
@@ -1430,6 +1433,24 @@ function GainClicks(player, num) {
 // `sources` lists the installed cards whose hosted credits paid (Keiko).
 // Printed subtypes only: no effect grants Companion, and payment must not
 // depend on the active-trigger scan.
+var resolvingCardAbility = null;
+function WithCardAbilitySource(source, callback) {
+  var previous = resolvingCardAbility;
+  resolvingCardAbility = source || previous;
+  try { return callback(); }
+  finally { resolvingCardAbility = previous; }
+}
+function CardCreditAbilitySource(doing, card) {
+  // Paying a trash cost is a basic access action, not a Corp card ability.
+  if (doing == "paying trash costs") return null;
+  if (card && card.player == corp && (doing == "using" || doing == "stealing")) return card;
+  return resolvingCardAbility || automaticTriggerSource;
+}
+function NotifyRunnerCreditChange(player, amount, source) {
+  if (player == runner && amount > 0 && attackedServer && source && source.player == corp)
+    AutomaticTriggers("automaticOnCorpCausedRunnerCreditChange", [amount, source]);
+}
+
 function CreditSpendResponses(player, outsideAmount, doing, card, afterSpend, context, sources = []) {
   if (player == runner && sources.some(function (source) { return (source.subTypes || []).includes("Companion"); }))
     RecordTurnEvent("runnerCompanionUse");
@@ -1460,6 +1481,8 @@ function SpendCredits(
   context,
   deferredResponses
 ) {
+  var paymentAmount = num;
+  var abilitySource = CardCreditAbilitySource(doing, card);
   var outsideSpent = 0;
   var spentSources = [];
   var temporaryAvailable = function () {
@@ -1518,6 +1541,7 @@ function SpendCredits(
       );
       return;
     }
+    NotifyRunnerCreditChange(player, paymentAmount, abilitySource);
     if (deferredResponses) {
       deferredResponses.push({player: player, outsideAmount: outsideSpent, doing: doing, card: card, sources: spentSources});
       if (typeof afterSpend == "function") afterSpend.call(context);
@@ -1889,7 +1913,7 @@ function LoseClicks(player, num) {
  * @param {int} num number of credits to lose
  * @returns {int} number of credits lost
  */
-function LoseCredits(player, num) {
+function LoseCredits(player, num, source) {
   var numberLost = 0;
   //automatically lose temporary credits first if possible
   if (runner.temporaryCredits > 0) {
@@ -1913,6 +1937,7 @@ function LoseCredits(player, num) {
   else if (numberLost > 1)
     Log(PlayerName(player) + " lost " + numberLost + " credits");
   else Log(PlayerName(player) + " lost 0 credits");
+  NotifyRunnerCreditChange(player, numberLost, source || resolvingCardAbility || automaticTriggerSource);
   return numberLost;
 }
 
@@ -1922,6 +1947,7 @@ function LoseCredits(player, num) {
  * @method RunUnsuccessful
  */
 function RunUnsuccessful() {
+  if (runSuccessDeclared) { ChangePhase(phases.runEnds); return; }
   PlaySound('runUnsuccessful');
     // Remove run-active class and clear watermark
     document.body.classList.remove('run-active');
@@ -1929,6 +1955,11 @@ function RunUnsuccessful() {
     if (watermark) {
       watermark.textContent = '';
     }
+  if (forcedEncounters.length) {
+    phases.runEncounterEnd.next = ForcedEncounterReturnPhase(true);
+    ChangePhase(phases.runEncounterEnd);
+    return;
+  }
   var originalPhase = currentPhase;
   //if the original phase was subroutines, call .n to ensure encounter ends
   if (originalPhase.identifier == "Run Subroutines") {
@@ -2432,4 +2463,31 @@ function TraceStrengthDecisions(baseStrength, callback, context) {
     this,
 	"trace",
   );
+}
+
+// A forced encounter suspends the current encounter/response phase, not the run.
+function ForceEncounter(ice) {
+  if (!ice || !ice.rezzed || !CheckInstalled(ice)) return false;
+  forcedEncounters.push({ice: ice, phase: currentPhase, encounteredIce: encounteredIce,
+    encountering: encountering, subroutine: subroutine,
+    broken: (ice.subroutines || []).map(function (sr) { return sr.broken; })});
+  UnbreakAll(ice);
+  if (runner.AI) runner.AI.cachedBestPath = null;
+  ChangePhase(phases.runEncounterIce);
+  return true;
+}
+function ForcedEncounterReturnPhase(endingRun) {
+  return {player: runner, title: "Resume suspended encounter", identifier: "Forced encounter return",
+    Init: function () {
+      var frame = forcedEncounters.pop();
+      (frame.ice.subroutines || []).forEach(function (sr, i) { sr.broken = frame.broken[i]; });
+      encounteredIce = frame.encounteredIce;
+      encountering = frame.encountering && !!encounteredIce && CheckInstalled(encounteredIce);
+      subroutine = frame.subroutine;
+      if (runner.AI) runner.AI.cachedBestPath = null;
+      if (endingRun) {
+        phases.runEncounterEnd.next = forcedEncounters.length ? ForcedEncounterReturnPhase(true) : phases.runUnsuccessful;
+        ChangePhase(phases.runEncounterEnd);
+      } else ChangePhase(frame.phase, true);
+    }};
 }

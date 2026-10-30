@@ -1306,6 +1306,8 @@ function GetMostRelevantIce() {
  * @returns {Card} card or null
  */
 function GetApproachEncounterIce() {
+  if (typeof forcedEncounters !== "undefined" && forcedEncounters.length)
+    return forcedEncounters[forcedEncounters.length - 1].ice;
   if (approachIce < 0) return null;
   if (attackedServer == null) return null;
   if (approachIce > attackedServer.ice.length - 1) return null;
@@ -3555,7 +3557,7 @@ function PlayCost(card) {
  * @returns {int} click cost to play the card
  */
 function PlayClickCost(card) {
-  var ret = CheckSubType(card, "Double") ? 2 : 1;
+  var ret = CheckSubType(card, "Triple") ? 3 : CheckSubType(card, "Double") ? 2 : 1;
   ret += ModifyingTriggers("modifyPlayClickCost", card, -ret);
   return ret;
 }
@@ -3980,7 +3982,9 @@ function AutomaticTriggers(callbackName, parameters = []) {
     var previousSource = automaticTriggerSource;
     automaticTriggerSource = triggerList[i].card;
     try {
-      triggerList[i].card[callbackName].Resolve.apply(triggerList[i].card, parameters);
+      WithCardAbilitySource(triggerList[i].card, function () {
+        triggerList[i].card[callbackName].Resolve.apply(triggerList[i].card, parameters);
+      });
     } finally {
       automaticTriggerSource = previousSource;
     }
@@ -4655,6 +4659,13 @@ function TriggeredResponsePhase(
   secondCallbackName = "",
   secondEnumerateParams = [],
 ) {
+  var abilitySource = resolvingCardAbility || automaticTriggerSource;
+  if (typeof afterOpportunity == "function") {
+    var originalAfterOpportunity = afterOpportunity;
+    afterOpportunity = function () {
+      return WithCardAbilitySource(abilitySource, originalAfterOpportunity);
+    };
+  }
   //skip this whole thing if it would trigger nothing
   var wouldTriggerNothing = true;
   if (ChoicesActiveTriggers(callbackName).length > 0)
@@ -5989,4 +6000,12 @@ function FindCardDefWithMostSimilarTitle(str) {
     }
   }
   return cardSet[mostSimilarIndex];
+}
+
+// Public stochastic breach survival. Does not assert deterministic prevention.
+function AIRunSuccessChance(server) {
+  return ActiveCards(corp).reduce(function (chance, card) {
+    return typeof card.AIRunSuccessChance === "function" ?
+      chance * Math.max(0, Math.min(1, card.AIRunSuccessChance.call(card, server))) : chance;
+  }, 1);
 }

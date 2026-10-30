@@ -36,7 +36,7 @@ selection if none is queued.
 
 ## Status summary
 
-**10 complete, 6 outstanding** (`6 Pending`, `0 In progress`, `0 Blocked`).
+**12 complete, 4 outstanding** (`4 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
@@ -61,8 +61,8 @@ the shared Lockdown mechanic first needed in batch 9.
 | 8 | 26096–26100 | Complete | Claude, 2026-10-23 | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
 | 9 | 26101–26105 | Complete | Codex, 2026-10-29 | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
 | 10 | 26106–26108 | Complete | Codex, 2026-10-29 | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
-| 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
-| 12 | 26113–26116 | Pending | — | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
+| 11 | 26109–26112 | Complete | Codex, 2026-10-29 | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
+| 12 | 26113–26116 | Complete | Codex, 2026-10-29 | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
 | 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
 | 14 | 26120–26123 | Pending | — | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
 | 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
@@ -85,6 +85,10 @@ the shared Lockdown mechanic first needed in batch 9.
 
 | 10 | 26106–26108 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Flower Sermon draw/filter and turn limits; Prāna damage prevention/economy and trash-cost cash-out; Engram type/reveal/target sequence and finite grip-loss run modeling. Real Corp selectors, prevention window and both calculators. |
 
+| 11 | 26109–26112 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Konjin nested Psi encounters and shared finite-resource pricing; Manifold Lockdown/server targeting and stochastic breach risk; Kakurenbo Triple/trash/conceal/install/counters/removal; La Costa mandatory root advancement. Real play, rez, target, turn-response and Runner planning consumers. |
+
+| 12 | 26113–26116 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | GameNET attributed credit events; Bellona steal/score costs; F2P native breaks/bounce/tag; Gold Farmer printed-break losses and payments. Real selectors and both run/security models; validation recorded in notes. |
+
 ## Batch-review log
 
 No independent reviews recorded.
@@ -94,7 +98,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**10 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**12 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
@@ -111,6 +115,10 @@ initialised when each implementation batch completes.
 | 9 | 26101–26105 | Pending | — | Drafter recurrence/free-install sequencing and cost inhibition; Týr future Corp click valuation; NEXT scoring-window timing; Scapenet ELO targets/shared trace bids; Tranquility placement and install/rez timing. See implementation notes for baseline evidence and limits. |
 
 | 10 | 26106–26108 | Pending | — | Flower Sermon off-turn/access-defense timing and return sequencing; Prāna prevention-aware kill combos and economy trade-offs; Engram type prediction and contextual target values. Hypothetical grip contents across earlier ICE/reruns remain approximate. See implementation notes. |
+
+| 11 | 26109–26112 | Pending | — | Konjin contextual target/bid policy, matching-bid risk calibration and joint finite-tool alternatives; Manifold server priority/bid prediction; Kakurenbo concealment and install/advance sequencing; La Costa advanceable-asset targets and future-turn scoring forecasts. See implementation notes. |
+
+| 12 | 26113–26116 | Pending | — | GameNET income/bid incentives and rez reserves; Bellona score-income sequencing/central multiaccess forecasts; F2P contextual bounce/tag trade-offs; Gold Farmer scarce/shared-credit mixed break/pay paths and repeated runs. See implementation notes. |
 
 ## Optimisation log
 

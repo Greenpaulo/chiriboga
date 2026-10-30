@@ -6,6 +6,7 @@
 function AIIceEncounterSaveState() {
 	var stored = {};
 	stored.encountering = encountering;
+	stored.forcedEncounters = typeof forcedEncounters === "undefined" ? [] : forcedEncounters;
 	stored.attackedServer = attackedServer;
 	stored.approachIce = approachIce;
 	return stored;
@@ -15,12 +16,14 @@ function AIIceEncounterModifyState(iceCard) {
 	var ics = GetServer(iceCard);
 	if (!ics) return false;
 	encountering = true;
+	forcedEncounters = [];
 	attackedServer = ics;
 	approachIce = ics.ice.indexOf(iceCard);
 	return true;
 }
 function AIIceEncounterRestoreState(stored) {
 	encountering = stored.encountering;
+	forcedEncounters = stored.forcedEncounters;
 	attackedServer = stored.attackedServer;
 	approachIce = stored.approachIce;
 }
@@ -2186,6 +2189,8 @@ console.log(this.preferred);
         }
 
 		//extra potential from passive card abilities
+		if (typeof AIRunSuccessChance === "function")
+		  this.serverList[i].potential *= AIRunSuccessChance(this.serverList[i].server);
 		var basePotential = this.serverList[i].potential;
 		var activeCards = ActiveCards(runner);
 		

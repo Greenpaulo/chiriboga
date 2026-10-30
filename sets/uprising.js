@@ -4180,13 +4180,44 @@ cardSet[26109] = {
   subTypes: ["Mythic", "Psi"],
   rezCost: 3,
   strength: 3,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
-    return result;
+  unique: true,
+  // Konjin has no printed subroutines; its entire threat is the encounter ability.
+  subroutines: [],
+  _targets: function () {
+    return InstalledCards(corp).filter(function (ice) {
+      return ice !== this && ice.cardType === "ice" && ice.rezzed;
+    }, this);
   },
+  responseOnEncounter: {
+    Enumerate: function (ice) { return ice === this ? [{}] : []; },
+    Resolve: function () {
+      PsiGame(function (different) {
+        if (!different) return;
+        var choices = ChoicesArrayCards(this._targets());
+        if (!choices.length) return;
+        choices.push({card: null, label: "Decline", button: "Decline"});
+        if (corp.AI) {
+          var best = this.AIForcedEncounterIce();
+          corp.AI.preferred = {title: this.title, option: choices.find(function (choice) { return choice.card === best; }) || choices[choices.length - 1]};
+        }
+        DecisionPhase(corp, choices, function (params) {
+          if (params.card && this._targets().includes(params.card)) ForceEncounter(params.card);
+        }, this.title, "Choose another rezzed piece of ice", this);
+      }, this);
+    },
+    text: "Play a Psi Game",
+  },
+  AIForcedEncounterIce: function () {
+    // Public board only. Prefer a substantial ICE; target ranking is deliberately
+    // independent of a recursive run calculation (which may be evaluating Konjin).
+    var choices = this._targets();
+    choices.sort(function (a, b) {
+      return ((b.subroutines || []).length * 3 + Strength(b)) - ((a.subroutines || []).length * 3 + Strength(a));
+    });
+    return choices[0] || null;
+  },
+  AIWorthwhileIce: function () { return this._targets().length > 0; },
+  AIImplementIce: function (rc, result) { return result; },
 };
 
 //Hyoubu Precog Manifold (26110)
@@ -4203,8 +4234,36 @@ cardSet[26110] = {
   cardType: "operation",
   subTypes: ["Lockdown", "Psi"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  trashCost: 4,
+  chosenServer: null,
+  Enumerate: function () {
+    var active = ActiveLockdown();
+    if (active && active !== this) return [];
+    var choices = ChoicesExistingServers();
+    if (corp.AI) {
+      var best = choices.find(function (choice) {
+        return choice.server.root.some(function (card) { return card.cardType === "agenda"; });
+      }) || choices.find(function (choice) { return choice.server === corp.HQ; });
+      return best ? [best] : [];
+    }
+    return choices;
+  },
+  Resolve: function (params) { this.chosenServer = params.server; },
+  responseOnRunSuccessful: {
+    Enumerate: function () { return attackedServer === this.chosenServer ? [{}] : []; },
+    Resolve: function () {
+      PsiGame(function (different) { if (different) EndTheRun(); }, this);
+    },
+    text: "Play a Psi Game",
+  },
+  AIWouldPlay: function () { return !ActiveLockdown(); },
+  AIPlayWhenCan: 1,
+  AIRunSuccessChance: function (server) {
+    if (server !== this.chosenServer) return 1;
+    // Existing Psi bids are uniform over affordable choices for both AIs.
+    var corpBids = Math.min(2, AvailableCredits(corp, "psi")) + 1;
+    var runnerBids = Math.min(2, AvailableCredits(runner, "psi")) + 1;
+    return Math.min(corpBids, runnerBids) / (corpBids * runnerBids);
   },
 };
 
@@ -4222,9 +4281,61 @@ cardSet[26111] = {
   cardType: "operation",
   subTypes: ["Triple"],
   playCost: 2,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () { return [{}]; },
+  _installChoices: function (src) {
+    return ChoicesArrayInstall(src, false, function (card) {
+      return CheckCardType(card, ["agenda", "asset", "upgrade"]);
+    }).filter(function (choice) { return !choice.server || typeof choice.server.cards === "undefined"; });
   },
+  _preferredInstall: function (choices) {
+    // Two counters are useful even on cards that cannot be advanced normally,
+    // but the baseline AI prioritises agendas/advanceable ambushes.
+    var useful = choices.filter(function (choice) {
+      return choice.card.cardType === "agenda" || choice.card.canBeAdvanced;
+    });
+    if (!useful.length) return null;
+    var index = corp.AI._bestInstallOption(useful, false);
+    return index < 0 ? null : useful[index];
+  },
+  Resolve: function () {
+    var choices = ChoicesHandCards(corp);
+    choices.push({label: "Trash selected cards", button: "Trash 0 cards",
+      multiSelectDynamicButtonText: function (n) { return "Trash " + n + " cards"; }});
+    choices.forEach(function (choice) { choice.cards = Array(corp.HQ.cards.length).fill(null); });
+    if (corp.AI) {
+      var target = this._preferredInstall(this._installChoices(corp.archives.cards.concat(corp.HQ.cards)));
+      choices = [{cards: target && corp.HQ.cards.includes(target.card) ? [target.card] : []}];
+      corp.AI.preferred = {title: this.title, option: choices[0]};
+    }
+    DecisionPhase(corp, choices, function (params) {
+      var cards = (params.cards || []).filter(function (card, i, all) {
+        return card && corp.HQ.cards.includes(card) && all.indexOf(card) === i;
+      });
+      var afterTrash = function () {
+        corp.archives.cards.forEach(function (card) { card.faceUp = false; card.knownToRunner = false; });
+        var installs = this._installChoices(corp.archives.cards);
+        installs.push({card: null, label: "Decline", button: "Decline"});
+        if (corp.AI) corp.AI.preferred = {title: this.title, option: this._preferredInstall(installs.filter(function (choice) { return choice.card; })) || installs[installs.length - 1]};
+        DecisionPhase(corp, installs, function (choice) {
+          if (!choice.card) { RemoveFromGame(this); return; }
+          Install(choice.card, choice.server, false, null, true, null, this,
+            function () { RemoveFromGame(this); }, null, true,
+            function () {
+              if (CheckInstalled(choice.card)) PlaceAdvancement(choice.card, 2);
+              RemoveFromGame(this);
+            });
+        }, this.title, "Install a card from Archives in a remote root?", this);
+      };
+      if (cards.length) Trash(cards, false, afterTrash, this);
+      else afterTrash.call(this);
+    }, this.title, "Trash any number of cards from HQ", this);
+  },
+  AIWouldPlay: function () {
+    return corp.clickTracker >= PlayClickCost(this) && CheckCredits(corp, PlayCost(this), "playing", this) &&
+      !!this._preferredInstall(this._installChoices(corp.archives.cards.concat(corp.HQ.cards.filter(function (card) { return card !== this; }, this))));
+  },
+  AIPlayWhenCan: 1,
+  AIIsRecurOrTutor: true,
 };
 
 //La Costa Grid (26112)
@@ -4242,11 +4353,42 @@ cardSet[26112] = {
   subTypes: ["Region", "Seedy"],
   rezCost: 3,
   trashCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  installOnlyIn: function (server) { return !server || typeof server.cards === "undefined"; },
+  responseOnCorpTurnBegins: {
+    Enumerate: function () {
+      var server = GetServer(this);
+      var choices = server ? ChoicesArrayCards(server.root) : [];
+      if (corp.AI && choices.length) {
+        var useful = choices.filter(function (choice) {
+          return choice.card.cardType === "agenda" && Counters(choice.card, "advancement") < AdvancementRequirement(choice.card);
+        });
+        useful.sort(function (a, b) { return (AdvancementRequirement(a.card) - Counters(a.card, "advancement")) - (AdvancementRequirement(b.card) - Counters(b.card, "advancement")); });
+        return [useful[0] || choices[0]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      var server = GetServer(this);
+      if (server && server.root.includes(params.card)) PlaceAdvancement(params.card, 1);
+    },
+    text: "Place 1 advancement counter",
+  },
+  AIIsScoringUpgrade: true,
+  AIPreferredUpgradeServer: function (servers) {
+    return servers.find(function (server) {
+      return server && typeof server.cards === "undefined" && server.root.some(function (card) { return card.cardType === "agenda"; });
+    }) || servers.find(function (server) { return server && typeof server.cards === "undefined" && server.ice.length > 0; }) || null;
+  },
+  AIRezWhenCan: function () {
+    var server = GetServer(this);
+    return playerTurn === runner && !!server && server.root.some(function (card) {
+      return card.cardType === "agenda" && Counters(card, "advancement") < AdvancementRequirement(card);
+    });
+  },
+  AILimitPerServer: function () { return 1; },
 };
 
 //GameNET: Where Dreams are Real (26113)
-// Whenever a Corp card ability causes the Runner to spend or lose at least 1[c] during a run, gain 1[c].
 cardSet[26113] = {
   title: "GameNET: Where Dreams are Real",
   imageFile: "26113.png",
@@ -4257,12 +4399,12 @@ cardSet[26113] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 17,
-  // TODO: Add abilities or responseOn triggers
+  automaticOnCorpCausedRunnerCreditChange: {
+    Resolve: function () { GainCredits(corp, 1); },
+  },
 };
 
 //Bellona (26114)
-// As an additional cost to steal this agenda, the Runner must pay 5[c].
-// When you score this agenda, gain 5[c].
 cardSet[26114] = {
   title: "Bellona",
   imageFile: "26114.png",
@@ -4274,13 +4416,14 @@ cardSet[26114] = {
   subTypes: ["Expansion"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  stealCost: { credits: 5 },
+  responseOnScored: {
+    Resolve: function () { if (intended.score == this) GainCredits(corp, 5); },
+    automatic: true,
+  },
 };
 
 //F2P (26115)
-// 2[c]: Break 1 subroutine on this ice. Only the Runner can use this ability, and only if they are not tagged.
-// ↳ Add 1 installed Runner card to the grip.
-// ↳ Give the Runner 1 tag.
 cardSet[26115] = {
   title: "F2P",
   imageFile: "26115.png",
@@ -4292,19 +4435,54 @@ cardSet[26115] = {
   subTypes: ["Sentry"],
   rezCost: 4,
   strength: 5,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  activeForOpponent: true,
+  abilities: [{
+    text: "2[c]: Break 1 subroutine on this ice",
+    opponentOnly: true,
+    Enumerate: function () {
+      if (activePlayer != runner || !encountering || GetApproachEncounterIce() != this ||
+          !this.rezzed || runner.tags > 0 || !CheckCredits(runner, 2, "using", this)) return [];
+      return this.subroutines.filter(function (sr) { return !sr.broken; }).map(function (sr) {
+        return {subroutine: sr, label: '2[c]: Break "' + sr.text + '"'};
+      });
+    },
+    Resolve: function (params) {
+      SpendCredits(runner, 2, "using", this, function () { Break(params.subroutine); }, this);
+    },
+  }],
+  subroutines: [{
+    text: "Add 1 installed Runner card to the grip.",
+    Resolve: function () {
+      var choices = ChoicesInstalledCards(runner);
+      if (!choices.length) return;
+      // Reuse the Corp's public threat ranking to pick a useful bounce target.
+      if (corp.AI) corp.AI.preferred = {title: this.title, option: choices[corp.AI._bestTrashOption(choices)]};
+      DecisionPhase(corp, choices, function (params) { Uninstall(params.card, runner.grip); },
+        this.title, "Add 1 installed Runner card to the grip", this);
+    },
+    visual: {y: 74, h: 32},
+  }, {
+    text: "Give the Runner 1 tag.",
+    Resolve: function () { AddTags(1); },
+    visual: {y: 106, h: 16},
+  }],
+  AIImplementIce: function (rc, result) {
+    result.sr = [[rc.precalculated.runnerInstalledCardsLength > 0 ? ["misc_moderate"] : []], [["tag"]]];
     return result;
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (iceAI.ice != this || runner.tags > 0 || (rc.TotalEffect(point).tag || 0) > 0 || creditsLeft < 2) return result;
+    var breaks = rc.SrBreak(this, iceAI, point, 1);
+    breaks = breaks.map(function (p) { return rc.PayCredits(p, 2, "using", this, server); }, this).filter(Boolean);
+    return result.concat(breaks);
+  },
+  AIBreakCost: function (ice, count) {
+    if (ice != this || runner.tags > 0) return null;
+    return {credits: 2 * count, clicks: 0};
   },
 };
 
 //Gold Farmer (26116)
-// Whenever the Runner breaks a printed subroutine on this ice, they lose 1[c].
-// ↳ End the run unless the Runner pays 3[c].
-// ↳ End the run unless the Runner pays 3[c].
 cardSet[26116] = {
   title: "Gold Farmer",
   imageFile: "26116.png",
@@ -4316,12 +4494,43 @@ cardSet[26116] = {
   subTypes: ["Barrier"],
   rezCost: 3,
   strength: 1,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
-  AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+  automaticOnSubroutineBroken: {
+    Resolve: function (sr) {
+      if (GetApproachEncounterIce() == this && this.subroutines.includes(sr) && sr.goldFarmerPrinted)
+        LoseCredits(runner, 1, this);
+    },
+  },
+  _payOrEnd: function () {
+    var choices = [];
+    if (CheckCredits(runner, 3, "using", this)) choices.push({pay: true, label: "Pay 3[c]"});
+    choices.push({pay: false, label: "End the run"});
+    if (runner.AI) runner.AI.preferred = {title: this.title,
+      option: choices[runner.AI.cachedComplete ? 0 : choices.length - 1]};
+    DecisionPhase(runner, choices, function (params) {
+      if (params.pay) SpendCredits(runner, 3, "using", this);
+      else EndTheRun();
+    }, this.title, "Pay 3[c] or end the run", this);
+  },
+  subroutines: [{
+    text: "End the run unless the Runner pays 3[c].",
+    goldFarmerPrinted: true,
+    Resolve: function () { this._payOrEnd(); },
+    visual: {y: 74, h: 32},
+  }, {
+    text: "End the run unless the Runner pays 3[c].",
+    goldFarmerPrinted: true,
+    Resolve: function () { this._payOrEnd(); },
+    visual: {y: 106, h: 32},
+  }],
+  AIImplementIce: function (rc, result) {
+    result.sr = [
+      [["payIceCredits", "payIceCredits", "payIceCredits"], ["endTheRun"]],
+      [["payIceCredits", "payIceCredits", "payIceCredits"], ["endTheRun"]],
+    ];
     return result;
+  },
+  AIBreakCreditLoss: function (indices) {
+    return indices.filter(function (i) { return this.subroutines[i] && this.subroutines[i].goldFarmerPrinted; }, this).length;
   },
 };
 

@@ -606,3 +606,438 @@ const priorTrash10 = rc.ValidateEncounterPoint(0, rc.EmptyPoint(1), false,
 const afterPriorTrash10 = rc.ValidateEncounterPoint(-1, priorTrash10, false,
   ['trashGripCard'], [], {gripTrashLimit: 2});
 assert.strictEqual(rc.TotalEffect(afterPriorTrash10).trashGripCard, 2, 'earlier targeted trashes also deplete the grip');
+
+// Batch 11: Psi, nested encounters, Archives installs and mandatory counters.
+reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
+const konjin = put(card(26109), corp.HQ.ice); konjin.rezzed = true;
+const foreign = remote();
+const otherIce = put(wall('Foreign ETR'), foreign.ice); otherIce.rezzed = true;
+const facedownIce = put(wall('Unrezzed'), corp.RnD.ice);
+assert(konjin.unique && konjin.subroutines.length === 0, 'printed unique ICE has no subroutines');
+assert.strictEqual(konjin.responseOnEncounter.Enumerate.call(konjin, otherIce).length, 0);
+c.attackedServer = corp.HQ; c.approachIce = 0; c.encounteredIce = konjin; c.encountering = true;
+const suspended11 = {player: runner, identifier: 'Suspended encounter response', title: 'Suspended'};
+c.currentPhase = suspended11;
+konjin.responseOnEncounter.Resolve.call(konjin);
+d = decisions.shift(); assert(d.title.includes('Corp bid')); d.choose(d.choices.find(o => o.bid === 0));
+d = decisions.shift(); d.choose(d.choices.find(o => o.bid === 1));
+d = decisions.shift();
+assert(d.choices.some(o => o.card === otherIce));
+assert(!d.choices.some(o => o.card === facedownIce || o.card === konjin), 'only another rezzed ICE is legal');
+assert.strictEqual(select(d).card, otherIce, 'real Corp choice selects useful rezzed ICE');
+assert.strictEqual(c.GetApproachEncounterIce(), otherIce);
+assert.strictEqual(c.encounteredIce, otherIce);
+assert.strictEqual(c.attackedServer, corp.HQ, 'forced encounter does not redirect the run');
+assert.strictEqual(c.approachIce, 0);
+const originalForced = c.forcedEncounters[0]; originalForced.phase = suspended11;
+c.ChangePhase(c.phases.runSubroutines); c.subroutine = 1;
+c.phases.runSubroutines.Resolve.n();
+assert.strictEqual(c.currentPhase, c.phases.runEncounterEnd);
+c.ChangePhase(c.phases.runEncounterEnd.next);
+assert.strictEqual(c.currentPhase, suspended11);
+assert.strictEqual(c.GetApproachEncounterIce(), konjin);
+assert.strictEqual(c.encounteredIce, konjin);
+assert(c.encountering && c.forcedEncounters.length === 0, 'parent resumes without a new encounter or a pass');
+// Matching bids leave the encounter unchanged; decline is also available.
+decisions = []; c.currentPhase = suspended11;
+konjin.responseOnEncounter.Resolve.call(konjin);
+d = decisions.shift(); d.choose(d.choices[0]); d = decisions.shift(); d.choose(d.choices[0]);
+assert.strictEqual(decisions.length, 0); assert.strictEqual(c.forcedEncounters.length, 0);
+konjin.responseOnEncounter.Resolve.call(konjin);
+d = decisions.shift(); d.choose(d.choices[0]); d = decisions.shift(); d.choose(d.choices[1]);
+d = decisions.shift(); d.choose(d.choices.find(o => !o.card)); assert.strictEqual(c.forcedEncounters.length, 0);
+// Forced bypass finishes only the child; ETR unwinds both encounters.
+c.currentPhase = suspended11; c.ForceEncounter(otherIce); c.Bypass();
+c.ChangePhase(c.phases.runEncounterEnd.next);
+assert.strictEqual(c.GetApproachEncounterIce(), konjin);
+c.currentPhase = suspended11; c.ForceEncounter(otherIce); c.EndTheRun(false);
+c.ChangePhase(c.phases.runEncounterEnd.next);
+assert.strictEqual(c.currentPhase, c.phases.runEncounterEnd, 'parent encounter also ends');
+c.ChangePhase(c.phases.runEncounterEnd.next);
+assert.strictEqual(c.currentPhase, c.phases.runUnsuccessful);
+assert.strictEqual(c.forcedEncounters.length, 0);
+// Real calculators model the extra encounter and leave the board untouched.
+reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
+const calcKonjin = put(card(26109), corp.HQ.ice); calcKonjin.rezzed = true;
+const calcForeign = remote(); const taxIce11 = put(wall('Tax ICE'), calcForeign.ice); taxIce11.rezzed = true;
+taxIce11.AIImplementIce = function (calc, result) {
+  result.sr = [[Array(calc === runner.AI.rc ? 2 : 3).fill('payCredits')]]; return result;
+};
+const calc11 = runner.AI.rc;
+let paths11 = calc11.Calculate(corp.HQ, 4, 10, 0, 5, 5, false, null, 0);
+assert(paths11.length);
+assert(paths11.some(path => calc11.TotalEffect(path[path.length - 1]).misc_moderate), 'matching bids remain a graded-risk route, not a guaranteed block');
+const conditional11 = calc11._forcedEncounterPoint(calc11.EmptyPoint(0), taxIce11);
+assert.strictEqual(conditional11.runner_credits_spent, 2, 'differing-bids branch prices the selected extra ICE through the real breaker/effect search with Runner ownership');
+const corpCalc11 = ai._securityRunCalculator();
+corpCalc11.Calculate(corp.HQ, 4, 10, 0, 5, 5, false, null, 0);
+const corpConditional11 = corpCalc11._forcedEncounterPoint(corpCalc11.EmptyPoint(0), taxIce11);
+assert.strictEqual(corpConditional11.runner_credits_spent, 3, 'Corp child pricing retains Corp ownership and public information');
+assert.strictEqual(c.attackedServer, null); assert.strictEqual(c.forcedEncounters.length, 0);
+taxIce11.rezzed = false;
+paths11 = calc11.Calculate(corp.HQ, 4, 10, 0, 5, 5, false, null, 0);
+assert(paths11.some(path => path[path.length - 1].runner_credits_spent === 0), 'no target means no phantom extra encounter');
+assert(!calcKonjin.AIWorthwhileIce());
+calcKonjin.rezzed = false; taxIce11.rezzed = true;
+assert(!calc11.IceAI(calcKonjin, 2).forcedEncounterIce, 'unaffordable unrezzed Konjin cannot force an encounter');
+
+// Manifold: legal play/target through real Corp command selection and Psi timing.
+reset(); c.runSuccessDeclared = false;
+const manifold11 = put(card(26110), corp.HQ.cards);
+const protected11 = remote(); put({title: 'Remote agenda', player: corp, cardType: 'agenda', subTypes: [], agendaPoints: 2, advancementRequirement: 3}, protected11.root);
+commands = c.EnumeratePhase();
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'play');
+assert.strictEqual(ai.preferred.cardToPlay, manifold11); ai.preferred = null;
+c.Play(manifold11); d = decisions.shift();
+assert.strictEqual(select(d).server, protected11);
+assert.strictEqual(c.ActiveLockdown(), manifold11);
+c.CleanupCorpResolvingCards(); assert(corp.resolvingCards.includes(manifold11));
+const competing11 = put(card(26103), corp.HQ.cards);
+assert(!c.FullCheckPlay(competing11), 'one active Lockdown at a time');
+c.attackedServer = corp.HQ; assert.strictEqual(manifold11.responseOnRunSuccessful.Enumerate.call(manifold11).length, 0);
+c.attackedServer = protected11; c.runSuccessDeclared = true;
+assert.strictEqual(manifold11.responseOnRunSuccessful.Enumerate.call(manifold11).length, 1);
+manifold11.responseOnRunSuccessful.Resolve.call(manifold11);
+d = decisions.shift(); d.choose(d.choices[0]); d = decisions.shift(); d.choose(d.choices[0]);
+assert.notStrictEqual(c.currentPhase, c.phases.runEnds, 'matching bids permit breach');
+manifold11.responseOnRunSuccessful.Resolve.call(manifold11);
+d = decisions.shift(); d.choose(d.choices[0]); d = decisions.shift(); d.choose(d.choices[1]);
+assert.strictEqual(c.currentPhase, c.phases.runEnds, 'different bids end a successful run without marking it unsuccessful');
+assert.strictEqual(c.AIRunSuccessChance(protected11), 1 / 3, 'public Psi probability is graded, not a permanent lock');
+assert.strictEqual(c.AIRunSuccessChance(corp.HQ), 1);
+corp.creditPool = 0; runner.creditPool = 0;
+assert.strictEqual(c.AIRunSuccessChance(protected11), 1, 'forced zero bids cannot stop a breach');
+const restrictedPsi11 = put({title: 'Non-Psi credits', player: corp, cardType: 'asset', subTypes: [], rezzed: true, credits: 2,
+  canUseCredits(doing) {return doing === ''; }}, protected11.root);
+assert.strictEqual(c.AIRunSuccessChance(protected11), 1, 'restricted non-Psi credits do not create additional legal bids');
+c.CleanupCorpResolvingCards(true); assert.strictEqual(c.ActiveLockdown(), null);
+assert.strictEqual(c.AIRunSuccessChance(protected11), 1, 'expires on the next Corp turn');
+
+// Kakurenbo: real play route, Triple costs, hand trash, concealment, optional
+// remote-root install, post-install counters and remove-from-game cleanup.
+reset(); c.runSuccessDeclared = false;
+const kak11 = put(card(26111), corp.HQ.cards);
+const kakRemote11 = remote(); put(wall(), kakRemote11.ice);
+const archived11 = put({title: 'Archived agenda', player: corp, cardType: 'agenda', subTypes: [], agendaPoints: 2,
+  advancementRequirement: 3, elo: 1800, faceUp: true, knownToRunner: true}, corp.archives.cards);
+assert.strictEqual(c.PlayClickCost(kak11), 3);
+corp.clickTracker = 2; assert(!c.FullCheckPlay(kak11));
+corp.clickTracker = 3; corp.creditPool = 1; assert(!c.FullCheckPlay(kak11));
+corp.creditPool = 5;
+commands = c.EnumeratePhase(); assert.strictEqual(commands[ai.Choice(commands, 'command')], 'play');
+assert.strictEqual(ai.preferred.cardToPlay, kak11); ai.preferred = null;
+c.Play(kak11); d = decisions.shift(); d.choose(d.choices[0]);
+d = decisions.shift(); select(d); // AI trashes zero when the target is already in Archives.
+d = decisions.shift(); assert(d.choices.every(o => !o.card || !o.server || typeof o.server.cards === 'undefined'));
+assert.strictEqual(select(d).card, archived11); finishInstall();
+assert(c.CheckInstalled(archived11) && c.GetServer(archived11) !== corp.HQ);
+assert.strictEqual(archived11.advancement, 2);
+assert(c.removedFromGame.includes(kak11));
+assert(!archived11.knownToRunner);
+// Human trash-many and decline, including Archives cards which were faceup.
+reset();
+const humanKak11 = put(card(26111), corp.resolvingCards);
+const oldArchive11 = put(wall(), corp.archives.cards); oldArchive11.faceUp = true;
+const discardA11 = put(card(26106), corp.HQ.cards), discardB11 = put(wall(), corp.HQ.cards);
+humanKak11.Resolve(); d = decisions.shift(); d.choose({cards: [discardA11, discardB11]});
+assert(corp.archives.cards.includes(discardA11) && corp.archives.cards.includes(discardB11));
+assert(corp.archives.cards.every(card => !card.faceUp));
+d = decisions.shift(); d.choose(d.choices.find(o => !o.card)); assert(c.removedFromGame.includes(humanKak11));
+reset(); const emptyKak11 = put(card(26111), corp.HQ.cards);
+assert(!emptyKak11.AIWouldPlay(), 'AI holds with no useful install');
+assert(c.FullCheckPlay(emptyKak11), 'humans may play with no install target');
+
+// La Costa: remote/Region legality, mandatory arbitrary-root placement,
+// useful real rez/trigger consumers and no next-turn counters booked early.
+reset();
+const coastServer11 = remote(); put(wall(), coastServer11.ice);
+const coast11 = put(card(26112), corp.HQ.cards);
+assert(!c.CheckInstallDestination(coast11, corp.HQ)); assert(c.CheckInstallDestination(coast11, coastServer11));
+const coastAgenda11 = put(card(26106), coastServer11.root);
+c.MoveCard(coast11, coastServer11.root);
+c.playerTurn = runner; c.activePlayer = corp; c.currentPhase = c.phases.runnerDiscardResponse;
+commands = c.EnumeratePhase(); assert.strictEqual(commands[ai.Choice(commands, 'command')], 'rez');
+assert.strictEqual(ai.preferred.cardToRez, coast11); ai.preferred = null;
+coast11.rezzed = true;
+const coastChoices11 = coast11.responseOnCorpTurnBegins.Enumerate.call(coast11);
+corp.AI = null;
+assert(coast11.responseOnCorpTurnBegins.Enumerate.call(coast11).some(o => o.card === coast11), 'printed effect can advance itself or any root card');
+corp.AI = ai;
+c.currentPhase = {title: coast11.title, identifier: 'Decision', player: corp};
+const coastChoice11 = coastChoices11[ai.Choice(coastChoices11, 'select')];
+assert.strictEqual(coastChoice11.card, coastAgenda11);
+coast11.responseOnCorpTurnBegins.Resolve.call(coast11, coastChoice11);
+assert.strictEqual(coastAgenda11.advancement, 1);
+coast11.responseOnCorpTurnBegins.Resolve.call(coast11, {card: coast11});
+assert.strictEqual(coast11.advancement, 1, 'not restricted to cards you can advance');
+assert.strictEqual(coast11.AIPreferredUpgradeServer([corp.HQ, coastServer11]), coastServer11);
+const illegalCoast11 = put(card(26112), corp.HQ.cards);
+c.Install(illegalCoast11, coastServer11);
+assert.strictEqual(c.currentPhase.Enumerate.n().length, 0, 'must trash the existing Region before completing install');
+c.currentPhase.Resolve.trash({card: coast11}); finishInstall();
+assert(coastServer11.root.includes(illegalCoast11) && !coastServer11.root.includes(coast11), 'exactly one Region remains');
+
+// Additional normal-use guards and cancellation paths.
+reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
+const rezKonjin11 = put(card(26109), corp.HQ.ice);
+const rezTargetServer11 = remote(); const rezTarget11 = put(wall(), rezTargetServer11.ice); rezTarget11.rezzed = true;
+put(card(26106), corp.HQ.cards);
+c.attackedServer = corp.HQ; c.approachIce = 0; c.playerTurn = runner; c.activePlayer = corp;
+c.currentPhase = c.phases.runApproachIce; runner.clickTracker = 0;
+commands = c.EnumeratePhase(); assert.strictEqual(commands[ai.Choice(commands, 'command')], 'rez');
+assert.strictEqual(ai.preferred.cardToRez, rezKonjin11); ai.preferred = null;
+corp.creditPool = 2; assert(!c.EnumeratePhase().includes('rez'), 'Konjin rez cost is enforced');
+reset(); c.runSuccessDeclared = false;
+const handKak11 = put(card(26111), corp.resolvingCards);
+const handAgenda11 = put({title: 'HQ agenda', player: corp, cardType: 'agenda', subTypes: [], advancementRequirement: 3, agendaPoints: 2, elo: 1800}, corp.HQ.cards);
+const handRemote11 = remote(); put(wall(), handRemote11.ice);
+handKak11.Resolve(); select(decisions.shift());
+assert(corp.archives.cards.includes(handAgenda11), 'AI trashes a useful HQ card for the advanced install');
+select(decisions.shift());
+assert.strictEqual(c.currentPhase.title, 'Trash Before Install');
+c.currentPhase.Cancel.trash();
+assert(corp.archives.cards.includes(handAgenda11) && !handAgenda11.advancement, 'cancellation grants no counters');
+assert(c.removedFromGame.includes(handKak11), 'cancelled optional install still removes operation');
+reset();
+const noTargetKak11 = put(card(26111), corp.resolvingCards);
+noTargetKak11.Resolve(); d = decisions.shift(); d.choose({cards: []});
+d = decisions.shift(); assert.strictEqual(d.choices.length, 1); d.choose(d.choices[0]);
+assert(c.removedFromGame.includes(noTargetKak11));
+// Exercise the actual mandatory turn-begin response window, rather than only
+// calling the counter-placement callback.
+reset();
+const turnServer11 = remote(); const turnCoast11 = put(card(26112), turnServer11.root); turnCoast11.rezzed = true;
+const turnAgenda11 = put(card(26106), turnServer11.root);
+c.TriggeredResponsePhase = realTriggeredResponsePhase;
+c.TriggeredResponsePhase(corp, 'responseOnCorpTurnBegins', [], () => {}, 'Corp turn begins');
+const turnWindow11 = c.currentPhase;
+const turnTriggers11 = turnWindow11.Enumerate.trigger();
+const turnTrigger11 = turnTriggers11.find(o => o.card === turnCoast11);
+assert(turnTrigger11, 'rezzed Grid reaches actual turn-begin response collection');
+turnWindow11.Resolve.trigger(turnTrigger11);
+assert.strictEqual(select(decisions.shift()).card, turnAgenda11);
+assert.strictEqual(turnAgenda11.advancement, 1, 'actual response trigger advances the agenda');
+c.TriggeredResponsePhase = (player, name, params, after) => {if (after) after();};
+
+(async function batch11PlannerChecks() {
+// Manifold reaches the Runner's actual command-planning consumer, and only
+// discounts access potential while its response can still fire.
+reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
+const risk11 = put(card(26110), corp.resolvingCards); risk11.chosenServer = corp.RnD;
+put(card(26106), corp.RnD.cards);
+c.playerTurn = runner; c.activePlayer = runner; c.currentPhase = c.phases.runnerActionMain;
+runner.AI.preferred = null; runner.AI.cachedBestPath = null;
+await runner.AI._internalChoiceDetermination(c.EnumeratePhase(), 'command');
+const penalised11 = runner.AI._getCachedPotential(corp.RnD);
+c.MoveCard(risk11, corp.archives.cards); runner.AI.preferred = null; runner.AI.cachedBestPath = null;
+await runner.AI._internalChoiceDetermination(c.EnumeratePhase(), 'command');
+const unpenalised11 = runner.AI._getCachedPotential(corp.RnD);
+assert(unpenalised11 > 0 && Math.abs(penalised11 * 3 - unpenalised11) < 1e-8,
+  'real Runner command planner discounts the protected server by matching-bid probability');
+
+// Single-use breakers spent on the child cannot also break its later ordinary
+// encounter. The matching-bids branch stays available instead of a false lock.
+reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
+const repeatTarget11 = put(wall('Repeated target'), corp.HQ.ice); repeatTarget11.rezzed = true;
+const outerKonjin11 = put(card(26109), corp.HQ.ice); outerKonjin11.rezzed = true;
+const boom11 = put(card(26075), runner.rig.hardware); boom11.chosenCard = repeatTarget11;
+paths11 = calc11.Calculate(corp.HQ, 4, 10, 0, 5, 5, false, null, 1);
+assert(paths11.length, 'matching-bids route still permits completion');
+assert(paths11.every(path => path[path.length - 1].persistents.filter(p => p.use === boom11).length <= 1),
+  'forced and normal encounters share finite-use resources');
+assert(paths11.some(path => calc11.TotalEffect(path[path.length - 1]).misc_moderate), 'one Boomerang cannot cover both encounters');
+// A live child recalculation addresses the child, even when it protects a
+// different server. Hypothetical probes restore the live overlay on failure.
+reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
+const liveKonjin11 = put(card(26109), corp.HQ.ice); liveKonjin11.rezzed = true;
+const liveRemote11 = remote(); const liveTax11 = put(wall('Live tax'), liveRemote11.ice); liveTax11.rezzed = true;
+liveTax11.AIImplementIce = function (calc, result) { result.sr = [[['payCredits']]]; return result; };
+c.attackedServer = corp.HQ; c.approachIce = 0; c.encounteredIce = liveKonjin11; c.encountering = true;
+c.ForceEncounter(liveTax11);
+paths11 = calc11.Calculate(corp.HQ, 4, 10, 0, 5, 5, false, null, 0);
+assert(paths11.length && paths11.every(path => path[path.length - 1].runner_credits_spent >= 1));
+assert.strictEqual(c.GetApproachEncounterIce(), liveTax11);
+assert.throws(() => c.AIWithIceEncounter(liveKonjin11, () => {throw Error('probe failure');}), /probe failure/);
+assert.strictEqual(c.GetApproachEncounterIce(), liveTax11, 'exception restores live forced encounter');
+assert.strictEqual(c.attackedServer, corp.HQ);
+
+const batchCard12 = id => Object.assign(card(id), {subroutines: (c.cardSet[id].subroutines || []).map(sr => Object.assign({}, sr))});
+const selectRunner12 = async decision => {
+  c.currentPhase = {title: decision.title, identifier: 'Decision', player: runner};
+  const index = await runner.AI._internalChoiceDetermination(decision.choices, 'select');
+  assert(index >= 0 && index < decision.choices.length);
+  const option = decision.choices[index]; decision.choose(option); return option;
+};
+// Batch 12: GameNET attribution follows actual triggers and deferred decisions.
+reset(); c.forcedEncounters = []; runner.temporaryCredits = 0; runner.tags = 0;
+const game12 = batchCard12(26113); corp.identityCard = game12; c.InvalidateActiveTriggerCandidateCache();
+const gold12 = put(batchCard12(26116), corp.HQ.ice); gold12.rezzed = true;
+c.attackedServer = corp.HQ; c.approachIce = 0; c.encounteredIce = gold12; c.encountering = true;
+c.playerTurn = runner; c.activePlayer = runner;
+c.SpendCredits(runner, 3, 'using', gold12);
+assert.strictEqual(corp.creditPool, 11, 'one gain for a three-credit Corp ability payment');
+c.SpendCredits(runner, 0, 'using', gold12);
+c.SpendCredits(runner, 1, 'using', {player: runner});
+c.SpendCredits(runner, 1, 'paying trash costs', gold12);
+assert.strictEqual(corp.creditPool, 11, 'zero payments, breaker costs and basic access trash costs do not trigger');
+runner.creditPool = 0; c.LoseCredits(runner, 3, gold12);
+assert.strictEqual(corp.creditPool, 11, 'zero actual loss does not trigger');
+runner.creditPool = 2; c.Trigger(gold12, {Resolve() {c.LoseCredits(runner, 3);}});
+assert.strictEqual(corp.creditPool, 12, 'inferred card source and saturated loss trigger once');
+c.attackedServer = null; runner.creditPool = 5; c.SpendCredits(runner, 2, 'using', gold12);
+assert.strictEqual(corp.creditPool, 12, 'off-run payments do not trigger');
+assert.strictEqual(c.resolvingCardAbility, null, 'source scope cleans up');
+assert.throws(() => c.WithCardAbilitySource(gold12, () => {throw Error('source cleanup');}), /source cleanup/);
+assert.strictEqual(c.resolvingCardAbility, null);
+// Actual delayed DecisionPhase callback retains the source after Trigger returns.
+c.attackedServer = corp.HQ; runner.creditPool = 5;
+c.DecisionPhase = realDecisionPhase;
+c.Trigger(gold12, {Resolve() {c.DecisionPhase(runner, [{}], function () {c.LoseCredits(runner, 1);}, 'Delayed loss');}});
+c.currentPhase.Resolve.continue({});
+assert.strictEqual(corp.creditPool, 13, 'asynchronous Corp ability loss retains its source');
+c.DecisionPhase = (player, choices, resolve, title, instruction, context, command, cancel) => {
+  if (player === runner) choices = c.LegalBreakChoices(context, choices);
+  const decision = {player, choices, title, command, cancel, choose: option => resolve.call(context, option)};
+  decisions.push(decision); return decision;
+};
+// Printed breaks trigger individually; granted subroutines and repeated breaks do not.
+runner.creditPool = 3; c.Break(gold12.subroutines[0]); c.Break(gold12.subroutines[1]);
+assert.strictEqual(runner.creditPool, 1); assert.strictEqual(corp.creditPool, 15);
+c.Break(gold12.subroutines[0]); assert.strictEqual(runner.creditPool, 1);
+const extra12 = {text: 'Granted subroutine'}; gold12.subroutines = gold12.subroutines.concat([extra12]);
+c.Break(extra12); assert.strictEqual(runner.creditPool, 1, 'granted subroutine has no printed-break penalty');
+c.UnbreakAll(gold12); runner.creditPool = 0; c.Break(gold12.subroutines[0]);
+assert.strictEqual(corp.creditPool, 15, 'breaking at zero credits is legal and grants no GameNET income');
+runner.creditPool = 0; runner.temporaryCredits = 1; c.Break(gold12.subroutines[1]);
+assert.strictEqual(runner.temporaryCredits, 0); assert.strictEqual(corp.creditPool, 16);
+// Pay-or-end mechanics and real Runner selector follow a complete route.
+runner.creditPool = 3; runner.AI.cachedComplete = true;
+gold12.subroutines[0].Resolve.call(gold12);
+assert((await selectRunner12(decisions.shift())).pay); assert.strictEqual(runner.creditPool, 0);
+gold12.subroutines[1].Resolve.call(gold12); d = decisions.shift();
+assert.strictEqual(d.choices.length, 1); assert(!d.choices[0].pay);
+// Bellona uses actual steal legality/payment and the automatic score response.
+reset(); runner.temporaryCredits = 0; c.encounteredIce = null;
+const bellServer12 = remote(); const bell12 = put(batchCard12(26114), bellServer12.root);
+bell12.knownToRunner = true; c.attackedServer = bellServer12; c.accessingCard = bell12;
+c.playerTurn = runner; c.activePlayer = runner; c.currentPhase = c.phases.runAccessingCard;
+runner.creditPool = 4; assert(!c.CheckSteal(), 'cannot steal without five credits');
+runner.creditPool = 5; assert(c.CheckSteal());
+commands = ['steal', 'n']; assert.strictEqual(commands[await runner.AI._internalChoiceDetermination(commands, 'command')], 'steal');
+c.phases.runAccessingCard.Resolve.steal();
+assert.strictEqual(runner.creditPool, 0); assert(runner.scoreArea.includes(bell12));
+assert.strictEqual(corp.creditPool, 11, 'GameNET sees the additional steal payment');
+reset(); const scoredBell12 = put(batchCard12(26114), corp.scoreArea); c.intended.score = scoredBell12;
+c.TriggeredResponsePhase = realTriggeredResponsePhase;
+c.TriggeredResponsePhase(corp, 'responseOnScored', [], () => {}, 'Scored');
+assert.strictEqual(corp.creditPool, 15, 'mandatory score response grants five');
+c.TriggeredResponsePhase = (player, name, params, after) => {if (after) after();};
+// Known Bellona costs enter the real run planner and cannot use breaker credits.
+reset(); runner.temporaryCredits = 0; c.encounteredIce = null;
+const knownServer12 = remote(); const knownBell12 = put(batchCard12(26114), knownServer12.root); knownBell12.knownToRunner = true;
+const rc12 = runner.AI.rc;
+assert.strictEqual(rc12.Calculate(knownServer12, 4, 4, 10, 5, 5, false).length, 0, 'restricted breaker funds cannot pay steal cost');
+let paths12 = rc12.Calculate(knownServer12, 4, 5, 0, 5, 5, false);
+assert(paths12.length && paths12.every(p => p[p.length - 1].runner_credits_spent + p[p.length - 1].runner_credits_lost >= 5));
+knownBell12.knownToRunner = false;
+paths12 = rc12.Calculate(knownServer12, 4, 4, 0, 5, 5, false);
+assert(paths12.length, 'unknown agenda identity does not leak into run costs');
+// F2P: useful self-break path through RunCalculator and Runner command/target selectors.
+reset(); runner.temporaryCredits = 0; runner.tags = 0; c.encounteredIce = null;
+const f2p12 = put(batchCard12(26115), corp.HQ.ice); f2p12.rezzed = true;
+const bounce12 = put(Object.assign({}, c.cardSet[30006]), runner.rig.programs);
+paths12 = rc12.Calculate(corp.HQ, 4, 4, 0, 0, 0, false, null, 0);
+assert(paths12.length && paths12.some(p => p[p.length - 1].runner_credits_spent + p[p.length - 1].runner_credits_lost === 4), 'four credits avoid both F2P subroutines without a breaker');
+runner.AI.cachedBestPath = paths12[paths12.length - 1]; runner.AI.cachedPathServer = corp.HQ; runner.AI.cachedComplete = true;
+c.attackedServer = corp.HQ; c.approachIce = 0; c.encounteredIce = f2p12; c.encountering = true;
+c.playerTurn = runner; c.activePlayer = runner; c.currentPhase = c.phases.runEncounterIce;
+runner.creditPool = 4; runner.AI.preferred = null;
+commands = c.EnumeratePhase();
+assert.strictEqual(commands[await runner.AI._internalChoiceDetermination(commands, 'command')], 'trigger');
+assert.strictEqual(runner.AI.preferred.cardToTrigger, f2p12);
+c.TriggerAbility(f2p12, f2p12.abilities[0]);
+const breakOption12 = await selectRunner12(decisions.shift());
+assert(breakOption12.subroutine.broken); assert.strictEqual(runner.creditPool, 2);
+assert.strictEqual(corp.creditPool, 11, 'F2P ability payment triggers GameNET');
+c.UnbreakAll(f2p12); runner.tags = 1; assert.strictEqual(f2p12.abilities[0].Enumerate.call(f2p12).length, 0);
+paths12 = rc12.Calculate(corp.HQ, 4, 10, 0, 0, 0, false, null, 0);
+assert(paths12.every(p => p.every(n => n.sr_broken.every(b => b.use !== f2p12))), 'tagged Runner cannot use native break route');
+runner.tags = 0; runner.creditPool = 1;
+assert.strictEqual(f2p12.abilities[0].Enumerate.call(f2p12).length, 0);
+c.encountering = false; runner.creditPool = 4;
+assert.strictEqual(f2p12.abilities[0].Enumerate.call(f2p12).length, 0);
+// Corp chooses an installed card, and Uninstall cleans up hosted cards.
+c.activePlayer = corp; const host12 = put({title: 'Hosted card', player: runner, cardType: 'program', subTypes: [], host: bounce12}, []);
+bounce12.hostedCards = [host12];
+f2p12.subroutines[0].Resolve.call(f2p12); assert.strictEqual(select(decisions.shift()).card, bounce12);
+assert(runner.grip.includes(bounce12)); assert(runner.heap.includes(host12), 'hosted cards are trashed on bounce');
+f2p12.subroutines[0].Resolve.call(f2p12); assert.strictEqual(decisions.length, 0);
+f2p12.subroutines[1].Resolve.call(f2p12); assert.strictEqual(runner.tags, 1);
+// Gold Farmer break tax and pay-through alternatives in both real calculators.
+reset(); runner.tags = 0; runner.temporaryCredits = 0; c.encounteredIce = null;
+const tax12 = put(batchCard12(26116), corp.HQ.ice); tax12.rezzed = true;
+const cleaver12 = put(card(30006), runner.rig.programs);
+paths12 = rc12.Calculate(corp.HQ, 4, 10, 0, 5, 5, false, null, 0);
+assert(paths12.length);
+assert(paths12.some(p => p.some(n => n.sr_broken.length === 2 && n.runner_credits_lost === 2)), 'printed break losses enter the real search');
+assert.strictEqual(ai._breakerPrice(tax12, cleaver12, 2, corp.HQ, 0).credits, 3, 'Corp pricing includes activation and two credit losses');
+runner.rig.programs.length = 0; c.InvalidateActiveTriggerCandidateCache();
+paths12 = rc12.Calculate(corp.HQ, 4, 6, 0, 5, 5, false, null, 0);
+assert(paths12.length && paths12.every(p => p[p.length - 1].runner_credits_spent + p[p.length - 1].runner_credits_lost === 6), 'no-breaker route pays six');
+assert.strictEqual(rc12.Calculate(corp.HQ, 4, 5, 0, 5, 5, false, null, 0).length, 0);
+assert.strictEqual(rc12.Calculate(corp.HQ, 4, 0, 6, 5, 5, false, null, 0).length, 0,
+  'Gold Farmer payments cannot use an anonymous breaker-only credit budget');
+runner.temporaryCredits = 6;
+assert(rc12.Calculate(corp.HQ, 4, 0, 6, 5, 5, false, null, 0).length, 'temporary credits can fund Gold Farmer');
+runner.temporaryCredits = 0;
+reset(); c.encounteredIce = null; runner.tags = 0;
+const restrictedF2P12 = put(batchCard12(26115), corp.HQ.ice); restrictedF2P12.rezzed = true;
+put(card(30006), runner.rig.programs);
+assert.strictEqual(rc12.Calculate(corp.HQ, 4, 0, 4, 0, 0, false, null, 0).length, 0,
+  'F2P self-breaking cannot use breaker-only funds');
+runner.temporaryCredits = 4;
+assert(rc12.Calculate(corp.HQ, 4, 0, 4, 0, 0, false, null, 0).length, 'temporary credits can fund F2P');
+runner.temporaryCredits = 0;
+// Native F2P pricing is read-only, public and unavailable when tagged.
+runner.tags = 0; assert.strictEqual(ai._iceSelfBreakCost(f2p12, 1, corp.HQ).credits, 2);
+runner.tags = 1; assert.strictEqual(ai._iceSelfBreakCost(f2p12, 1, corp.HQ), null);
+corp.identityCard = {player: corp, title: 'Corp', subTypes: []}; runner.tags = 0;
+
+// Trace and Psi payments inherit the initiating Corp card through real decisions.
+reset(); corp.identityCard = game12; c.InvalidateActiveTriggerCandidateCache();
+c.attackedServer = corp.HQ; c.playerTurn = runner; c.activePlayer = runner;
+c.DecisionPhase = realDecisionPhase;
+c.Trigger(gold12, {Resolve() {c.PsiGame(function () {}, this);}});
+c.currentPhase.Resolve.continue({bid: 0}); c.currentPhase.Resolve.continue({bid: 1});
+assert.strictEqual(corp.creditPool, 11, 'Psi Runner bid triggers once after committing both bids');
+c.Trigger(gold12, {Resolve() {c.Trace(1, function () {}, this);}});
+c.currentPhase.Resolve.trace({num: 0}); c.currentPhase.Resolve.trace({num: 1});
+assert.strictEqual(corp.creditPool, 12, 'trace payment retains initiating Corp source');
+assert.strictEqual(c.resolvingCardAbility, null);
+c.DecisionPhase = (player, choices, resolve, title, instruction, context, command, cancel) => {
+  if (player === runner) choices = c.LegalBreakChoices(context, choices);
+  const decision = {player, choices, title, command, cancel, choose: option => resolve.call(context, option)};
+  decisions.push(decision); return decision;
+};
+// Corp's normal install/rez and scoring consumers need no card-specific heuristic.
+for (const id of [26115, 26116]) {
+  reset(); runner.tags = 0; c.encounteredIce = null;
+  const ice = put(batchCard12(id), corp.HQ.ice);
+  put(card(26114), corp.HQ.cards);
+  c.attackedServer = corp.HQ; c.approachIce = 0; c.playerTurn = runner; c.activePlayer = corp;
+  c.currentPhase = c.phases.runApproachIce; runner.clickTracker = 0;
+  commands = c.EnumeratePhase();
+  assert.strictEqual(commands[ai.Choice(commands, 'command')], 'rez');
+  assert.strictEqual(ai.preferred.cardToRez, ice); ai.preferred = null;
+  corp.creditPool = ice.rezCost - 1;
+  assert(!c.EnumeratePhase().includes('rez'), id + ': insufficient credits suppress rez');
+}
+reset(); c.encounteredIce = null;
+const scoreServer12 = remote(); const readyBell12 = put(batchCard12(26114), scoreServer12.root); readyBell12.advancement = 5;
+c.currentPhase = c.phases.corpPostAction;
+commands = c.EnumeratePhase();
+assert.strictEqual(commands[ai.Choice(commands, 'command')], 'score');
+assert.strictEqual(ai.preferred.cardToScore, readyBell12);
+corp.identityCard = {player: corp, title: 'Corp', subTypes: []}; c.InvalidateActiveTriggerCandidateCache();
+
+})().catch(error => {console.error(error); process.exitCode = 1;});

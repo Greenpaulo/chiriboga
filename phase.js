@@ -108,19 +108,19 @@ phaseTemplates.standardResponse = {
     } else if (currentPhase.identifier == "Run 3.1") {
       //Run: Encounter Ice (Nisei 2021 3.1)
       SetHistoryThumbnail(
-        attackedServer.ice[approachIce].imageFile,
+        GetApproachEncounterIce().imageFile,
         "",
         "transform: rotate(90deg);"
       );
-      Log("Encountering " + GetTitle(attackedServer.ice[approachIce], true));
+      Log("Encountering " + GetTitle(GetApproachEncounterIce(), true));
       encountering = true;
-      encounteredIce = attackedServer.ice[approachIce]; //store reference to the ice being encountered
+      encounteredIce = GetApproachEncounterIce(); //store reference to the ice being encountered
       RecordPublicPostureEvent("iceEncountered", encounteredIce, attackedServer);
 	  //first the automatic triggers
-      AutomaticTriggers("automaticOnEncounter", [attackedServer.ice[approachIce]]);
+      AutomaticTriggers("automaticOnEncounter", [GetApproachEncounterIce()]);
 	  //then the Enumerate ones
 	  //currently giving whoever's turn it is priority...not sure this is always going to be right
-	  TriggeredResponsePhase(playerTurn, "responseOnEncounter", [attackedServer.ice[approachIce]], function () {}, "Encounter");
+	  TriggeredResponsePhase(playerTurn, "responseOnEncounter", [GetApproachEncounterIce()], function () {}, "Encounter");
     } else if (currentPhase.identifier == "Run 4.3") {
       //Run: Movement (Nisei 2021 4.3)
       movement = true;
@@ -332,7 +332,9 @@ function AddTriggersToTriggerList(triggerName) {
             " will be ignored because it is set to automatic (consider moving the checks into .Resolve)"
         );
       var oldPhase = currentPhase;
-      initialList[i].card[triggerName].Resolve.call(initialList[i].card);
+      WithCardAbilitySource(initialList[i].card, function () {
+        initialList[i].card[triggerName].Resolve.call(initialList[i].card);
+      });
       //phase shouldn't change during automatic triggers (except for game end)
       if (oldPhase !== currentPhase && currentPhase.instruction !== "Game Over") {
         LogError(
@@ -472,6 +474,7 @@ phaseTemplates.globalTriggers = {
 	  if (modifySuccess == 0) {
 		  //now declare successful
 		  Log("Run successful");
+		  runSuccessDeclared = true;
 		  PlaySound('runSuccessful');
 		  if (
 			corp.AI &&
@@ -1473,14 +1476,14 @@ phases.runSubroutines = {
   title: "Run: Subroutines",
   identifier: "Run Subroutines",
   Init: function () {
-    if (approachIce > attackedServer.ice.length - 1) subroutine = -1;
+    if (!GetApproachEncounterIce() || !CheckInstalled(GetApproachEncounterIce())) subroutine = -1;
     //if ice was trashed or changed (e.g. Chisel trashed host ice), skip subroutines
-    else if (encounteredIce && attackedServer.ice[approachIce] !== encounteredIce) {
+    else if (encounteredIce && GetApproachEncounterIce() !== encounteredIce) {
       subroutine = -1; //the ice at this position is not the one we were encountering
     }
     //if ice was trashed, any remaining subroutines won't fire
     else {
-      var approachedIce = attackedServer.ice[approachIce];
+      var approachedIce = GetApproachEncounterIce();
       if (typeof approachedIce.subroutines === "undefined") {
         LogError(
           GetTitle(approachedIce) +
@@ -1492,14 +1495,14 @@ phases.runSubroutines = {
   },
   Enumerate: {
     trigger: function () {
-      if (approachIce >= attackedServer.ice.length) subroutine = -1; //e.g. data mine trashes itself
+      if (!GetApproachEncounterIce() || !CheckInstalled(GetApproachEncounterIce())) subroutine = -1; //e.g. data mine trashes itself
       if (subroutine < 0) return [];
       //if ice was trashed or changed (e.g. Chisel), skip subroutines
-      if (encounteredIce && attackedServer.ice[approachIce] !== encounteredIce) {
+      if (encounteredIce && GetApproachEncounterIce() !== encounteredIce) {
         subroutine = -1;
         return [];
       }
-      var approachedIce = attackedServer.ice[approachIce];
+      var approachedIce = GetApproachEncounterIce();
       //ice derezzed during the encounter (e.g. "Baklan" Bochkin) has no active subroutines
       if (!approachedIce.rezzed) {
         subroutine = -1;
@@ -1539,7 +1542,7 @@ phases.runSubroutines = {
       if (currentPhase.identifier == "Run Subroutines") {
         //phase hasn't been changed by external force, need to choose it here:
         //subroutines done; approach next ice or continue run (no need to check for run end because EndTheRun calls ChangePhase)
-        ChangePhase(phases.runPassesIce); //approachIce will be decremented if runner continues
+        ChangePhase(forcedEncounters.length ? ForcedEncounterReturnPhase(false) : phases.runPassesIce, forcedEncounters.length > 0); //approachIce will be decremented if runner continues
       }
       //move to 'encounter ends' pseudo phase
       phases.runEncounterEnd.next = currentPhase;
@@ -1858,6 +1861,8 @@ phases.runEnds.Resolve.n = function () {
       );
     runner.temporaryCredits = 0;
     autoAccessing = false;
+    forcedEncounters = [];
+    runSuccessDeclared = false;
     attackedServer = null;
     approachIce = -1;
     encountering = false;
@@ -2319,6 +2324,8 @@ function DecisionPhase(
   cancelCallback
 ) {
   if (player === runner) choices = LegalBreakChoices(context, choices);
+  var abilitySource = resolvingCardAbility || automaticTriggerSource ||
+    (context && context.cardType ? context : null);
   var decisionPhase = {
     Enumerate: {},
     Resolve: {},
@@ -2329,8 +2336,7 @@ function DecisionPhase(
   decisionPhase.Resolve[command] = function (params) {
     IncrementPhase(true); //return to original phase before callback in case the callback needs to change phase
 	if (typeof callback == 'function') {
-		if (typeof context !== "undefined") callback.call(context, params);
-		else callback(params);
+        WithCardAbilitySource(abilitySource, function () { callback.call(context, params); });
 	}
   };
   decisionPhase.player = player;

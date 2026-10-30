@@ -1045,3 +1045,39 @@ phase. This separate response receives the batched events and their
 `runnerEventOrdinal`; it does not emit the ordinary trash callbacks or the
 other `trashEvent` fields. Cards responding to any trashed event must support
 both windows (Aniccam pattern).
+
+## Uprising forced encounters and Triple operations
+
+`ForceEncounter(ice)` suspends the current response/encounter phase and starts
+an encounter with another installed, rezzed ICE. The attacked server and run
+position stay unchanged. `GetApproachEncounterIce()` returns the child while
+it is active. Subroutine resolution and bypass use that accessor; after the
+child's encounter-end responses, the saved phase, encountered ICE, subroutine
+index and broken flags are restored without firing a pass or another encounter
+trigger for the parent. Ending the run unwinds encounter-end responses for the
+child and parent before the unsuccessful-run phase. Run cleanup clears the
+stack. Hypothetical ICE probes temporarily clear and then restore the overlay.
+
+`PlayClickCost(card)` includes Triple's two additional clicks (3 total), as
+well as Double's one additional click. Active modifiers apply afterward.
+`runSuccessDeclared` is set when success is declared, reset at run initiation
+and cleanup, and prevents later end-the-run effects from emitting an
+unsuccessful-run event. They go to run-end responses instead.
+
+## Uprising Corp-caused credit changes
+
+`WithCardAbilitySource(card, callback)` scopes the cause of a card ability,
+restoring it in `finally`. `Trigger`, paid abilities, automatic responses and
+nested `DecisionPhase`/trigger-response continuations preserve this source.
+`SpendCredits` captures it before payment-source choices; explicit `using` a
+Corp card and additional `stealing` costs also attribute that Corp source.
+Basic access trash costs do not count as Corp abilities.
+
+`LoseCredits(player, amount, source?)` accepts an explicit cause, otherwise
+using the scoped card/automatic trigger. After a positive Runner payment or
+actual loss during a run, `automaticOnCorpCausedRunnerCreditChange` receives
+`(amount, source)`. GameNET gains one credit per event, regardless of amount.
+The event is synchronous and automatic; its handlers must not open phases.
+`automaticOnSubroutineBroken(subroutine)` fires for a newly broken subroutine
+before the ordinary response window. Gold Farmer checks ownership and its
+printed-subroutine marker, then loses a credit with itself as the cause.

@@ -565,3 +565,129 @@ The final full rerun also exited 0: **135 full test files passed**, including
 Corp decision fixtures and decision snapshots. Output and exit status were
 saved to `/tmp/uprising-batch10-final-full.log` and
 `/tmp/uprising-batch10-final-full.exit` respectively.
+
+## Batch 11 — 2026-10-29
+
+Implemented Konjin (26109), Hyoubu Precog Manifold (26110), Kakurenbo (26111)
+and La Costa Grid (26112), preserving printed metadata and existing ELO values.
+
+- Konjin is unique and correctly has no subroutines. Its mandatory encounter
+  Psi game offers another rezzed ICE or decline on different bids. The shared
+  `ForceEncounter` stack leaves the attacked server/run position intact, fires
+  the child's encounter effects, and returns through encounter-end responses
+  to the suspended parent without passing the child or retriggering Konjin.
+  Bypass, run ending, removed targets, broken-state restoration, path-cache
+  invalidation and hypothetical-probe restoration use the same lifecycle.
+  Its live AI target and calculator use the same public ranking. The ordinary
+  breaker/effect search prices the child with remaining resources and shares
+  finite-use persistents with later ordinary encounters. It retains calculator
+  ownership for side-aware hooks and restores local pricing state in `finally`.
+  A graded matching-bid
+  branch prevents the stochastic defense becoming a guaranteed lockout.
+- Manifold uses the shared Lockdown lifecycle, only triggers on successful
+  runs against its chosen server, and can trigger on repeated runs. The Corp
+  proactively plays it for a remote agenda, otherwise HQ, with legal Lockdown
+  checks. Runner access potential uses the public matching-bid probability
+  under the existing uniform affordable Psi policy. Expiry removes the risk;
+  zero-credit bids cannot create a fictitious lockout. A shared success flag
+  ensures an end-the-run effect after success goes to run-end responses
+  without declaring the already-successful run unsuccessful.
+- Kakurenbo pays all three clicks through `PlayClickCost`, trashes any number
+  from HQ, conceals all Archives cards, optionally installs an asset, agenda
+  or upgrade in a remote root at normal install costs, places two counters
+  after installation/responses, and removes itself even after decline/cancel.
+  The AI uses real legal install ranking to identify an agenda/advanceable
+  ambush in HQ or Archives. Its multi-select supplies an actual option object;
+  a preferred object containing a different `cards` array is not consumed by
+  the Corp selector. No useful target means hold the operation.
+- La Costa is remote-only and uses the engine's Region install restriction.
+  Its mandatory turn response can put a counter on any root card, including
+  itself or another card which cannot be advanced normally. The real trigger
+  window selects a useful agenda for the AI. It installs in an agenda/protected
+  remote and rezzes during the Runner turn for the next turn's counter. Future
+  counters are not treated as a permanent requirement reduction or booked early.
+
+Baseline evidence in `tests/uprising-integration.test.js`: real Corp play and
+rez commands, actual card/target choices, a real mandatory turn-begin response
+window, the real Runner command planner's stochastic access discount, nested
+encounter return/bypass/end timing, both affordable and illegal/no-target
+cases, Psi-restricted funding, Triple costs, Archives concealment, cancellation and removal, Region
+replacement, actual child calculator pricing, finite breaker use across child
+and ordinary encounters, and exception-safe hypothetical state restoration. Supplemental conditional
+pricing regressions distinguish Runner-owned and Corp-owned child calculations.
+No browser/manual-play evidence or independent review approval is claimed.
+
+Queued deeper strategy: Konjin target ranking ignores contextual breaker/kill
+value, Psi bids retain the shared uniform policy, matching-bid threat weight
+is heuristic, and child pricing retains one cheapest conditional route rather
+than jointly allocating alternatives across the whole run. Manifold server
+selection does not compare all future threats. Kakurenbo does not optimise
+Archives bluffing, all competing scoring lines, or its two-counter bonus in
+install ranking. La Costa does not forecast future turn counters in scoring
+search, and its AI target ranking prioritises agendas over advanceable assets.
+These are separate from completed baseline implementation and owner adoption.
+
+Verification: focused Uprising integration, AI-hook documentation, Eternal
+format, format-aware deck pool, deck-launcher identity changes, JavaScript
+syntax and diff whitespace checks passed. Batch brief reports no unfinished
+markers for all four cards; Konjin's empty subroutine list is intentional and
+printed. Generated card status refreshed. Final full-suite result is recorded
+below after collection.
+
+Final validation on Node **20.19.0** exited **0**: **135 full test files
+passed**, including Corp decision fixtures, decision snapshots and integration
+coverage. The first run identified missing dependencies in three older isolated
+harnesses; those harnesses were updated without weakening their assertions.
+After a passing full run, final side-ownership and restricted-Psi-funding
+regressions also passed, followed by this full validation of the final source.
+Stdout/stderr: `/tmp/uprising-batch11-verified-full.log`; separately recorded
+exit status: `/tmp/uprising-batch11-verified-full.exit`.
+
+## Batch 12 — 2026-10-29
+
+Implemented 26113–26116, preserving exact ELO and metadata. GameNET gains once
+per actual positive Corp-caused Runner payment/loss during a run. Source
+attribution survives ordinary triggers, paid abilities, automatic responses,
+trace/Psi decisions and delayed payment continuations. It excludes zero losses,
+Runner breaker costs, off-run payments and basic access trash costs. Bellona
+uses the standard five-credit steal cost and mandatory five-credit score gain.
+F2P offers untagged Runner-only two-credit breaks during its own encounter,
+mandatory Corp-selected installed-card bounce (including hosted-card cleanup),
+and a tag subroutine. Gold Farmer taxes each printed break, with a marker that
+excludes granted subroutines, and offers two independent pay-three-or-end choices.
+
+Baseline evidence in `tests/uprising-integration.test.js`: real Runner command
+and subroutine selection for F2P; Corp target selection for its bounce; normal
+Corp rez selection with affordability guards for both ICE; Bellona steal/score
+commands and automatic score responses; Runner run search with known/unknown
+Bellona, F2P native breaks and tagged/resource exclusions, Gold Farmer breaker
+losses and payment alternatives; Corp native/breaker pricing. Tests also exercise
+GameNET through actual triggers, delayed DecisionPhase callbacks and trace/Psi
+payments, saturation at zero, repeated/granted breaks and temporary-credit loss.
+No browser/manual play evidence is claimed.
+
+Shared changes are scoped card-ability source propagation and automatic credit
+notifications, a newly-broken-subroutine automatic notification, target-aware
+calculator payment budgeting, known-root agenda steal costs, and the ICE-owned
+`AIBreakCreditLoss` consumer in Runner search and Corp pricing. Target-aware
+payments use the existing pool-debit ledger, so breaker-only credits cannot
+subsidise F2P/Gold Farmer/Bellona and losses never consume hosted credits.
+
+Optimisation queued: GameNET future income versus current rez reserves and
+payment/bid incentives; Bellona score-income sequencing and central random or
+multiaccess cost forecasts; F2P contextual bounce/reinstall disruption and tag
+trade-offs; Gold Farmer mixed break/pay planning with scarce/shared credit
+sources and repeated-run forecasts. These are separate from implementation and
+owner adoption; no independent review is claimed.
+
+Validation: Node v20.19.0 (`.nvmrc`), focused Uprising integration, AI-hook
+documentation, Eternal format, format-aware deckbuilding and identity-change
+checks passed. The final `node tests/run-all-tests.js` passed all **135 full
+test files** (exit 0), including Corp decision fixtures and snapshots. The
+first full run exposed three isolated test-harness dependencies on new credit
+source context; their globals/helper extraction were updated without changing
+assertions, and all three focused checks passed before the successful rerun.
+`node --check` passed for changed implementation JavaScript; generated card
+status is current, batch 12 has no unfinished markers or empty effects, and
+`git diff --check` passed. Batch 13 (26117–26119) is next; Uprising stays hidden
+and untested until its remaining implementation batches complete.
