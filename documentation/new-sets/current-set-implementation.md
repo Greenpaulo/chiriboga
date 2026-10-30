@@ -61,8 +61,8 @@ In progress batch, and the tracker files above are editable again.
 **6 complete, 0 outstanding** (`0 Pending`, `0 In progress`, `0 Blocked`).
 All 103 intended definitions and 17 mapped duplicate reprints are integrated
 into `sets/genesis-cycle`. Implementation and §8 integration checks are
-complete; independent review/optimisation remain separate. Playability remains
-in-progress, hidden and untested by Paul's explicit instruction.
+complete; independent review/optimisation remain separate. Genesis is now
+playable, visible and tested; Paul enabled Genesis for Eternal on 2026-10-30.
 
 ## Batch queue
 
@@ -178,17 +178,19 @@ generates legal Runner/Corp decks for every eligible identity in every legal
 format, including Genesis in Eternal. Syntax checks cover all edited JS;
 `git diff --check` passes. No PHP changed; no browser playtest claimed.
 
-Paul explicitly withheld playability changes. `documentation/card-sets.md`
-and `config.js` retain their in-progress / hidden / untested state; enabling
-Genesis still requires his approval. All implementation batches are complete,
+Paul enabled Genesis for Eternal on 2026-10-30. `documentation/card-sets.md`
+marks it playable and `config.js` sets `hidden: false`, `untested: false`.
+Eternal already includes the `gen` set code. All implementation batches are complete,
 independent review is Not requested, and all six optimisation rows are Pending.
 
 Final validation: `node tests/run-all-tests.js` on Node 20.19.0 passed all
 **146 full test files** (exit 0), including Corp decision fixtures, snapshots
-and integration tests. The initial run found four failures; after focused
+and integration tests. Repeated after enabling Genesis; all 146 files passed
+on the enabled configuration. Availability, format-pool, decklauncher and
+card-status checks also passed. The initial run found four failures; after focused
 repairs and passing affected regressions, the corrected full run passed. Logs:
-`/tmp/genesis-final-suite-retry.log`, exit status
-`/tmp/genesis-final-suite-retry.exit`. No next set is queued; stop after this batch.
+`/tmp/genesis-enabled-suite.log`, exit status
+`/tmp/genesis-enabled-suite.exit`. No next set is queued; stop after this batch.
 
 ## Changing the active set
 

@@ -20,7 +20,7 @@ order of the availability table. A user-requested different set takes precedence
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
 | `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
 | `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in its Set record below. |
-| `genesis` | Implemented | All six Genesis Cycle packs (103 new definitions, 17 accepted duplicate reprints), IDs 2001–2120. §8 integration checks completed 2026-10-30. Playability remains in-progress / hidden / untested by Paul's explicit instruction. Six optimisation batches Pending; see the [active tracker](current-set-implementation.md) and [Future Proof record](genesis/fp.md). |
+| `genesis` | Implemented | All six Genesis Cycle packs (103 new definitions, 17 accepted duplicate reprints), IDs 2001–2120. §8 integration checks completed 2026-10-30. Enabled and playable in Eternal by Paul on 2026-10-30. Six optimisation batches Pending; see the [active tracker](current-set-implementation.md) and [Future Proof record](genesis/fp.md). |
 
 The Genesis Cycle is active in the [tracker](current-set-implementation.md).
 Uprising retains its [maintained set record](records/uprising.md) and

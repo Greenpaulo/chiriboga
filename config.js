@@ -115,8 +115,8 @@ var setRegistry = {
       file: "genesis",
       code: "gen",
       name: "Genesis Cycle",
-      hidden: true,
-      untested: true,
+      hidden: false,
+      untested: false,
       idRange: [2001, 2120],
     },
     creationandcontrol: {

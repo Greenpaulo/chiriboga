@@ -115,6 +115,6 @@ manual-playtest evidence is claimed.
 ## Status
 
 All 16 non-duplicate cards implemented; no implementation blocker. Independent
-strategic review remains separate. Genesis playability is unchanged by Paul's
-explicit instruction: `card-sets.md` stays in-progress and registry
-`hidden: true`, `untested: true` remain in place.
+strategic review remains separate. Paul enabled Genesis for Eternal on
+2026-10-30: `card-sets.md` marks it playable and the registry now has
+`hidden: false`, `untested: false`. Eternal includes the `gen` set code.
