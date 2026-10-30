@@ -257,6 +257,183 @@ test('Plascrete Carapace: 4 power counters prevent meat damage, trashed when emp
   assert(runner.heap.includes(pc), 'trashed when empty');
 });
 
+// ---------------------------------------------------------------- corp cards
+let ended = 0, tagsGiven = 0;
+c.EndTheRun = () => {ended++;};
+c.AddTags = (num, after, ctx) => {tagsGiven += num; if (after) after.call(ctx);};
+const corpReset = () => {
+  reset(); ended = 0; tagsGiven = 0;
+  corp.identityCard = {player: corp, title: 'Corp', subTypes: []};
+  c.playerTurn = corp; c.activePlayer = corp; c.currentPhase = c.phases.corpActionMain;
+  corp.AI.preferred = null;
+};
+// Resolve a trace: Corp bid, then Runner bid.
+const answerTrace = (corpBid = 0, runnerBid = 0) => {
+  let d = decisions.shift(); assert(d && d.player === corp, 'corp trace decision'); d.choose({num: corpBid});
+  d = decisions.shift(); assert(d && d.player === runner, 'runner trace decision'); d.choose({num: runnerBid});
+};
+
+test('Haas-Bioroid: Stronger Together: bioroid ice +1 strength, seen by the run calculator', () => {
+  corpReset();
+  const server = remote();
+  const bio = put(ice('Bio Wall', 'Barrier', 5, 1, {subTypes: ['Barrier', 'Bioroid']}), server.ice);
+  const plain = ice('Plain', 'Barrier', 5, 1);
+  put(card(2004), runner.rig.programs);
+  assert.strictEqual(runCost(server), 1);
+  corp.identityCard = card(2010); c.InvalidateActiveTriggerCandidateCache();
+  assert.strictEqual(c.Strength(bio), 6);
+  assert.strictEqual(c.Strength(plain), 5, 'non-bioroid unchanged');
+  assert.strictEqual(runCost(server), Infinity, 'Morning Star (5) can no longer break it');
+});
+
+test('Mandatory Upgrades: one more allotted click while scored by the Corp', () => {
+  corpReset();
+  const mu = card(2011);
+  c.ResetClicks(corp); assert.strictEqual(corp.clickTracker, 3);
+  put(mu, corp.scoreArea);
+  c.ResetClicks(corp); assert.strictEqual(corp.clickTracker, 4);
+  c.ResetClicks(runner); assert.strictEqual(runner.clickTracker, 4, 'Runner unaffected');
+  corp.scoreArea = []; put(mu, runner.scoreArea);
+  c.ResetClicks(corp); assert.strictEqual(corp.clickTracker, 3, 'stolen: no effect');
+});
+
+test('Janus 1.0: four core-damage subroutines, Runner click-break priced by the planner', () => {
+  corpReset();
+  const server = remote();
+  const janus = put(card(2012), server.ice); janus.rezzed = true; janus.knownToRunner = true;
+  janus.subroutines[0].Resolve.call(janus);
+  assert.deepStrictEqual(damage.map(d => ({...d})), [{type: 'core', num: 1, canBePrevented: true}]);
+  const paths = runner.AI.rc.Calculate(server, 4, 0, 0, 0, 5, false); //no damage allowed
+  assert(paths.length, 'runnable by spending clicks');
+  assert.strictEqual(paths[0][paths[0].length - 1].runner_clicks_spent, 4, 'one click per subroutine');
+  assert.strictEqual(janus.AIBreakCost(janus, 4).clicks, 4);
+  const iceAI = runner.AI.rc.IceAI(janus, 10);
+  assert.strictEqual(JSON.stringify(iceAI.sr), JSON.stringify([[['coreDamage']], [['coreDamage']], [['coreDamage']], [['coreDamage']]]));
+});
+
+test('Ash 2X3ZB9CY: successful trace restricts access to Ash for the run', () => {
+  corpReset();
+  const server = remote();
+  const agenda = put({title: 'Agenda', player: corp, cardType: 'agenda', agendaPoints: 2, advancementRequirement: 3}, server.root);
+  const ash = put(card(2013), server.root); ash.rezzed = true;
+  c.playerTurn = runner; c.attackedServer = server;
+  assert.strictEqual(ash.AIRezWhenCan(), true, 'rez during a run on its server');
+  assert.strictEqual(ash.responseOnRunSuccessful.Enumerate.call(ash).length, 1);
+  ash.responseOnRunSuccessful.Resolve.call(ash);
+  answerTrace(0, 0);
+  let list = c.AccessCardList();
+  assert.ok(list.length === 1 && list[0] === ash, 'only Ash can be accessed');
+  c.AutomaticTriggers('automaticOnRunEndCleanup', [[]]);
+  list = c.AccessCardList();
+  assert.strictEqual(list.length, 2, 'cleared at run end');
+  // Unsuccessful trace: no restriction.
+  ash.responseOnRunSuccessful.Resolve.call(ash);
+  runner.identityCard.link = 5; answerTrace(0, 0);
+  assert.strictEqual(c.AccessCardList().length, 2);
+  assert.strictEqual(c.ServerAccessLimit(server), 0, 'Corp/Runner planning sees the access cap');
+  assert(ash.AIDefensiveValue(server) > 0);
+  c.attackedServer = corp.HQ; assert.strictEqual(ash.AIRezWhenCan(), false);
+  assert(agenda);
+});
+
+test('Braintrust: agenda counters from overadvancement lower ice rez costs while scored', () => {
+  corpReset();
+  const server = remote();
+  const bt = put(card(2014), server.root); bt.advancement = 7;
+  const wall = ice('Wall', 'Barrier', 3, 1, {rezCost: 5, rezzed: false});
+  c.Score(bt);
+  assert(corp.scoreArea.includes(bt));
+  assert.strictEqual(c.Counters(bt, 'agenda'), 2, '4 over 3 -> 2 counters');
+  assert.strictEqual(c.RezCost(wall), 3);
+  assert.strictEqual(c.RezCost({cardType: 'asset', rezCost: 5}), 5, 'ice only');
+  const bt2 = put(card(2014), remote().root); bt2.advancement = 4;
+  c.Score(bt2);
+  assert.strictEqual(c.Counters(bt2, 'agenda'), 0, '1 over: no counter');
+  corp.scoreArea = [bt2]; c.InvalidateActiveTriggerCandidateCache();
+  assert.strictEqual(c.RezCost(wall), 5);
+});
+
+test('Snowflake: psi game ends the run only when bids differ', () => {
+  corpReset();
+  const sf = card(2015);
+  const play = (cb, rb) => {
+    sf.subroutines[0].Resolve.call(sf);
+    let d = decisions.shift(); d.choose(d.choices[cb]);
+    d = decisions.shift(); d.choose(d.choices[rb]);
+  };
+  play(1, 1); assert.strictEqual(ended, 0);
+  assert.strictEqual(corp.creditPool, 9, 'bids are spent');
+  play(0, 2); assert.strictEqual(ended, 1);
+  assert.strictEqual(JSON.stringify(runner.AI.rc.IceAI(Object.assign(sf, {rezzed: true, knownToRunner: true}), 10).sr), '[[["endTheRun"]]]');
+});
+
+test('Restructured Datapool: click trace for a tag; Corp AI uses it on an untagged Runner', () => {
+  corpReset();
+  const dp = put(card(2016), corp.scoreArea);
+  assert.strictEqual(dp.abilities[0].Enumerate.call(dp).length, 1);
+  c.currentPhase = {identifier: 'Corp 2.2', title: "Corporation's Action Phase"};
+  const ret = corp.AI.Choice(['trigger', 'gain', 'draw'], 'command');
+  assert.strictEqual(ret, 0, 'AI triggers the scored agenda');
+  assert.strictEqual(corp.AI.preferred.cardToTrigger, dp);
+  dp.abilities[0].Resolve.call(dp, {});
+  assert.strictEqual(corp.clickTracker, 2);
+  answerTrace(0, 0);
+  assert.strictEqual(tagsGiven, 1);
+  assert.strictEqual(dp.abilities[0].Enumerate.call(dp).length, 0, 'AI: once per turn');
+  dp.responseOnCorpTurnBegins.Resolve.call(dp);
+  runner.tags = 1;
+  assert.strictEqual(dp.abilities[0].Enumerate.call(dp).length, 0, 'AI: not against a tagged Runner');
+  const savedAI = corp.AI; corp.AI = null;
+  assert.strictEqual(dp.abilities[0].Enumerate.call(dp).length, 1, 'human may always use it');
+  corp.AI = savedAI;
+  corp.scoreArea = []; put(dp, remote().root); runner.tags = 0;
+  assert.strictEqual(dp.abilities[0].Enumerate.call(dp).length, 0, 'only while scored');
+});
+
+test('TMI: derezzed after an unsuccessful rez trace; AI rez guard', () => {
+  corpReset();
+  const tmi = put(card(2017), corp.HQ.ice); tmi.rezzed = true;
+  tmi.responseOnRez.Resolve.call(tmi);
+  answerTrace(0, 0);
+  assert.strictEqual(tmi.rezzed, true, 'successful trace keeps it rezzed');
+  runner.identityCard.link = 2;
+  tmi.responseOnRez.Resolve.call(tmi);
+  answerTrace(0, 0);
+  assert.strictEqual(tmi.rezzed, false, 'unsuccessful: derezzed');
+  corp.creditPool = 3; assert.strictEqual(tmi.RezUsability(), false, 'needs credits to win the trace');
+  corp.creditPool = 4; assert.strictEqual(tmi.RezUsability(), true);
+});
+
+test('Caduceus: trace subroutines gain 3 credits and end the run', () => {
+  corpReset();
+  const cad = card(2019);
+  cad.subroutines[0].Resolve.call(cad); answerTrace(0, 0);
+  assert.strictEqual(corp.creditPool, 13);
+  cad.subroutines[1].Resolve.call(cad); answerTrace(0, 0);
+  assert.strictEqual(ended, 1);
+  runner.identityCard.link = 3;
+  cad.subroutines[1].Resolve.call(cad); answerTrace(0, 0);
+  assert.strictEqual(ended, 1, 'unsuccessful trace does not end the run');
+});
+
+test('Dracō: rez-time credits become power counters and strength; trace tags and ends the run', () => {
+  corpReset();
+  const draco = put(card(2020), corp.HQ.ice); draco.rezzed = true;
+  put({title: 'Killer', player: runner, cardType: 'program', subTypes: ['Icebreaker', 'Killer'], strength: 2}, runner.rig.programs);
+  draco.responseOnRez.Resolve.call(draco);
+  const d = decisions.shift();
+  assert.strictEqual(corp.AI.preferred.option.id, 3, 'AI buys one above the strongest killer');
+  d.choose(corp.AI.preferred.option);
+  assert.strictEqual(c.Counters(draco, 'power'), 3);
+  assert.strictEqual(corp.creditPool, 7);
+  assert.strictEqual(c.Strength(draco), 3);
+  corp.creditPool = 3;
+  assert.strictEqual(draco._aiCounters(), 1, 'keeps a reserve');
+  draco.subroutines[0].Resolve.call(draco); answerTrace(0, 0);
+  assert.strictEqual(tagsGiven, 1); assert.strictEqual(ended, 1);
+  assert.strictEqual(JSON.stringify(runner.AI.rc.IceAI(draco, 10).sr), '[[["tag","endTheRun"]]]');
+});
+
 (async () => {
   for (const {name, fn} of tests) {
     try {

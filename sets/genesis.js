@@ -459,22 +459,30 @@ cardSet[2009] = {
 cardSet[2010] = {
   title: "Haas-Bioroid: Stronger Together",
   imageFile: "02010.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1288,
   player: corp,
   faction: "Haas-Bioroid",
   cardType: "identity",
   subTypes: ["Megacorp"],
   deckSize: 45,
   influenceLimit: 15,
-  // TODO: Add abilities or responseOn triggers
+  //Read through Strength() by the engine, the run calculator and Corp security.
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card && CheckCardType(card, ["ice"]) && CheckSubType(card, "Bioroid")) return 1;
+      return 0;
+    },
+  },
 };
 
 //Mandatory Upgrades (2011)
 // You have 1 additional [click] to spend each turn.
+// Ruling (NSG 2026.04): allotted clicks are gained in the draw phase, so scoring or
+// forfeiting mid-turn does not change clicks already gained that turn.
 cardSet[2011] = {
   title: "Mandatory Upgrades",
   imageFile: "02011.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1420,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 0,
@@ -482,7 +490,12 @@ cardSet[2011] = {
   subTypes: ["Initiative"],
   advancementRequirement: 6,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  //Active only while in the Corp's score area (read by ResetClicks).
+  modifyAllottedClicks: {
+    Resolve: function (player) {
+      return player == corp && corp.scoreArea.includes(this) ? 1 : 0;
+    },
+  },
 };
 
 //Janus 1.0 (2012)
@@ -494,7 +507,7 @@ cardSet[2011] = {
 cardSet[2012] = {
   title: "Janus 1.0",
   imageFile: "02012.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1372,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 3,
@@ -503,11 +516,52 @@ cardSet[2012] = {
   rezCost: 15,
   strength: 8,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); } },
   ],
+  //Lose [click]: Break 1 subroutine on this ice. Only the Runner can use this ability.
+  abilities: [
+    {
+      text: "Break 1 subroutine on this ice",
+      Enumerate: function () {
+        if (!CheckClicks(runner, 1)) return [];
+        if (activePlayer !== runner) return [];
+        if (!encountering) return [];
+        if (GetApproachEncounterIce() != this) return [];
+        var choices = [];
+        for (var i = 0; i < this.subroutines.length; i++) {
+          var subroutine = this.subroutines[i];
+          if (!subroutine.broken)
+            choices.push({ subroutine: subroutine, label: 'Lose [click]: Break "' + subroutine.text + '"' });
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        Break(params.subroutine);
+      },
+      opponentOnly: true,
+    },
+  ],
+  activeForOpponent: true,
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["coreDamage"]], [["coreDamage"]], [["coreDamage"]], [["coreDamage"]]];
     return result;
+  },
+  //Runner click-break, as Eli 1.0.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (this == iceAI.ice && clicksLeft > 0) {
+      var breakresult = rc.SrBreak(this, iceAI, point, 1);
+      for (var j = 0; j < breakresult.length; j++) breakresult[j].runner_clicks_spent += 1;
+      result = result.concat(breakresult);
+    }
+    return result;
+  },
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 
@@ -516,7 +570,7 @@ cardSet[2012] = {
 cardSet[2013] = {
   title: "Ash 2X3ZB9CY",
   imageFile: "02013.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1789,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 2,
@@ -524,7 +578,54 @@ cardSet[2013] = {
   subTypes: ["Bioroid"],
   rezCost: 2,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //The server whose run is restricted; lasts for the run even if Ash leaves play.
+  lockedServer: null,
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (!attackedServer || attackedServer != GetServer(this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var server = attackedServer;
+      Trace(4, function (successful) {
+        if (!successful) return;
+        this.lockedServer = server;
+        Log("The Runner cannot access cards other than " + GetTitle(this, true) + " for the remainder of this run");
+      }, this);
+    },
+    text: "Ash 2X3ZB9CY: Trace[4]",
+  },
+  modifyAccessCardAllowed: {
+    Resolve: function (card) {
+      if (!this.lockedServer || attackedServer != this.lockedServer || card == this) return 0;
+      return 1;
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      this.lockedServer = null;
+    },
+    availableWhenInactive: true,
+  },
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
+  AIAccessLimit: function (server) {
+    return CheckInstalled(this) && this.rezzed && GetServer(this) == server ? 0 : Infinity;
+  },
+  AIDefensiveValue: function (server) {
+    if (!server) return 0;
+    if (server == corp.HQ) return 3;
+    if (typeof server.cards == "undefined") return 2; //remote: protects its agenda or asset
+    return 1;
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  //Rez during a run on this server, before it is declared successful.
+  AIRezWhenCan: function () {
+    return CheckInstalled(this) && attackedServer !== null && attackedServer == GetServer(this);
+  },
 };
 
 //Braintrust (2014)
@@ -533,7 +634,7 @@ cardSet[2013] = {
 cardSet[2014] = {
   title: "Braintrust",
   imageFile: "02014.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1443,
   player: corp,
   faction: "Jinteki",
   influence: 0,
@@ -541,7 +642,21 @@ cardSet[2014] = {
   subTypes: ["Research"],
   advancementRequirement: 3,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      var over = Counters(this, "advancement") - 3;
+      if (over >= 2) AddCounters(this, "agenda", Math.floor(over / 2));
+    },
+    automatic: true,
+  },
+  //Active only while in the Corp's score area. RezCost() feeds the AI rez decisions.
+  modifyRezCost: {
+    Resolve: function (card) {
+      if (!corp.scoreArea.includes(this) || !card || !CheckCardType(card, ["ice"])) return 0;
+      return -Counters(this, "agenda");
+    },
+  },
 };
 
 //Snowflake (2015)
@@ -549,7 +664,7 @@ cardSet[2014] = {
 cardSet[2015] = {
   title: "Snowflake",
   imageFile: "02015.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1279,
   player: corp,
   faction: "Jinteki",
   influence: 2,
@@ -558,10 +673,18 @@ cardSet[2015] = {
   rezCost: 1,
   strength: 3,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Psi game: end the run if the bids differ.",
+      Resolve: function () {
+        PsiGame(function (different) {
+          if (different) EndTheRun();
+        }, this);
+      },
+    },
   ],
+  //The Psi game is modelled as ending the run (conservative, as traces are modelled as successful).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]]];
     return result;
   },
 };
@@ -571,7 +694,7 @@ cardSet[2015] = {
 cardSet[2016] = {
   title: "Restructured Datapool",
   imageFile: "02016.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1275,
   player: corp,
   faction: "NBN",
   influence: 0,
@@ -579,7 +702,33 @@ cardSet[2016] = {
   subTypes: ["Initiative"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  _aiUsedThisTurn: false,
+  responseOnCorpTurnBegins: { Resolve: function () { this._aiUsedThisTurn = false; }, automatic: true },
+  abilities: [
+    {
+      text: "[click]: Trace[2]. If successful, give the Runner 1 tag.",
+      Enumerate: function () {
+        if (!corp.scoreArea.includes(this) || !CheckActionClicks(corp, 1)) return [];
+        if (corp.AI && !this._aiWouldUse()) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        this._aiUsedThisTurn = true;
+        Trace(2, function (successful) {
+          if (successful) AddTags(1);
+        }, this);
+      },
+    },
+  ],
+  //Once per turn against an untagged Runner when the Corp can outbid the public link plus a
+  //2-credit Runner boost and still keep 2 credits.
+  _aiWouldUse: function () {
+    if (this._aiUsedThisTurn || runner.tags > 0) return false;
+    var needed = Math.max(0, Link() + 2 + 1 - 2);
+    return AvailableCredits(corp, "trace") >= needed + 2;
+  },
+  AITriggerWhenCan: true,
 };
 
 //TMI (2017)
@@ -588,7 +737,7 @@ cardSet[2016] = {
 cardSet[2017] = {
   title: "TMI",
   imageFile: "02017.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1215,
   player: corp,
   faction: "NBN",
   influence: 1,
@@ -596,12 +745,32 @@ cardSet[2017] = {
   subTypes: ["Barrier"],
   rezCost: 3,
   strength: 5,
+  responseOnRez: {
+    Enumerate: function (card) {
+      return card == this ? [{}] : [];
+    },
+    Resolve: function () {
+      Trace(2, function (successful) {
+        if (!successful && this.rezzed) Derez(this);
+      }, this);
+    },
+    text: "TMI: Trace[2]",
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]]];
     return result;
+  },
+  //AI: rez only with enough left after the rez cost to beat the public link.
+  RezUsability: function () {
+    return AvailableCredits(corp, "rezzing", this) >= RezCost(this) + Math.max(0, Link() + 1 - 2);
   },
 };
 
@@ -613,7 +782,7 @@ cardSet[2017] = {
 cardSet[2019] = {
   title: "Caduceus",
   imageFile: "02019.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1544,
   player: corp,
   faction: "Weyland Consortium",
   influence: 2,
@@ -622,10 +791,26 @@ cardSet[2019] = {
   rezCost: 3,
   strength: 3,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[3]. If successful, the Corp gains 3[c].",
+      Resolve: function () {
+        Trace(3, function (successful) {
+          if (successful) GainCredits(corp, 3);
+        }, this);
+      },
+    },
+    {
+      text: "Trace[2]. If successful, end the run.",
+      Resolve: function () {
+        Trace(2, function (successful) {
+          if (successful) EndTheRun();
+        }, this);
+      },
+    },
   ],
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_minor"]], [["endTheRun"]]];
     return result;
   },
 };
@@ -637,7 +822,7 @@ cardSet[2019] = {
 cardSet[2020] = {
   title: "Dracō",
   imageFile: "02020.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1255,
   player: corp,
   faction: "Neutral",
   influence: 0,
@@ -645,11 +830,56 @@ cardSet[2020] = {
   subTypes: ["Sentry", "Tracer"],
   rezCost: 1,
   strength: 0,
+  power: 0,
+  responseOnRez: {
+    Enumerate: function (card) {
+      return card == this ? [{}] : [];
+    },
+    Resolve: function () {
+      var choices = [];
+      for (var x = 0; x <= 20 && CheckCredits(corp, x, ""); x++)
+        choices.push({ id: x, label: "Spend " + x + "[c] for " + x + " power counters", button: x + "[c]" });
+      if (corp.AI) corp.AI.preferred = { title: this.title, option: choices[Math.min(this._aiCounters(), choices.length - 1)] };
+      DecisionPhase(corp, choices, function (params) {
+        var x = params.id;
+        if (x < 1) return;
+        SpendCredits(corp, x, "", null, function () {
+          AddCounters(this, "power", x);
+        }, this);
+      }, this.title, "Spend credits to place power counters", this);
+    },
+    text: "Dracō: place power counters",
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      return card == this ? Counters(this, "power") : 0;
+    },
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[2]. If successful, give the Runner 1 tag and end the run.",
+      Resolve: function () {
+        Trace(2, function (successful) {
+          if (successful) AddTags(1, function () { EndTheRun(); }, this);
+        }, this);
+      },
+    },
   ],
+  //Counters to buy: one above the strongest installed killer or AI breaker (2 if none),
+  //keeping 2 credits back. Read-only.
+  _aiCounters: function () {
+    var strongest = 0, found = false;
+    InstalledCards(runner).forEach(function (card) {
+      if (CheckSubType(card, "Icebreaker") && (CheckSubType(card, "Killer") || CheckSubType(card, "AI"))) {
+        found = true;
+        strongest = Math.max(strongest, Strength(card));
+      }
+    });
+    var target = found ? Math.min(strongest + 1, 6) : 2;
+    return Math.max(0, Math.min(target, AvailableCredits(corp) - 2));
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["tag", "endTheRun"]]];
     return result;
   },
 };

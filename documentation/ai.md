@@ -3950,3 +3950,14 @@ competing-plan policies are recorded in the set's optimisation queue.
   offers the AI the breaker named by the cached path.
 - Plascrete Carapace uses `AIMeatDamagePrevention()` (remaining power
   counters) and, for the AI, offers only the maximum prevention.
+- Corp cards reuse existing contracts: Ash 2X3ZB9CY (`modifyAccessCardAllowed`
+  lock that survives Ash leaving play, `AIAccessLimit` 0 in its server with the
+  trace modelled as successful, `AIDefensiveValue`, `AILimitPerServer`,
+  `AIRezWhenCan` during a run on its server); Janus 1.0 (Eli 1.0 click-break
+  `AIImplementBreaker`/`AIBreakCost`, `coreDamage` subroutines); TMI
+  (`RezUsability`: rez only with credits left to beat public link by one);
+  Restructured Datapool (`AITriggerWhenCan` with an `Enumerate` gate: once per
+  Corp turn, untagged Runner, credits to outbid link plus a 2-credit boost);
+  Dracō (inline `corp.AI.preferred` counter purchase). Mandatory Upgrades is
+  the first `modifyAllottedClicks` card; Braintrust lowers `RezCost` via
+  `modifyRezCost`, so AI rez/affordability checks see it.
