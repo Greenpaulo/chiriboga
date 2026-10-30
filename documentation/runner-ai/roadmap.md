@@ -66,6 +66,13 @@ Which server should the Runner run, and what risk does it take there?
 - **Spec:** [T1-advanced-card-trap-caution.md](specs/T1-advanced-card-trap-caution.md)
 - **Goal:** Treat an advanced face-down card as possibly a trap, from public information, instead of nearly always running it.
 
+### T2 Check fresh remote installs
+
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [T2-check-fresh-remote-installs.md](specs/T2-check-fresh-remote-installs.md)
+- **Goal:** Check a fresh unadvanced remote card the Runner can afford to breach, as a human does, instead of leaving it about nine turns in ten. The Corp's steal-risk tables and batch gates are calibrated against this behaviour; recalibrate them after adoption.
+
 ## Principle debt (D)
 
 Existing Runner AI code that breaks a shared principle.

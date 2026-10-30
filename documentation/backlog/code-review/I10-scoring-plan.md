@@ -80,9 +80,12 @@ that defence stubbed out the plan protects a new remote and the fixture fails).
    asset play when no agenda is in hand.
 2. Then add `scoringPlanCardSteps: true` with a deck carrying scoring or
    defensive upgrades (SanSan City Grid, Manegarm Skunkworks, Anoetic Void).
-3. Separately, `economyAssetsWhenRich: true`: rich Corp installs Regolith-type
+3. Add `scoringPlanDigForIce: true` if waiting turns click for credits with
+   agendas stuck in HQ and no ICE in hand: the plan then draws for ICE
+   (fixture `i10-plan-digs-for-ice`, from `real_I10_game1_win.txt`).
+4. Separately, `economyAssetsWhenRich: true`: rich Corp installs Regolith-type
    assets rather than clicking for credits.
-4. Log lines start `AI: Scoring plan {...}` with step and reason.
+5. Log lines start `AI: Scoring plan {...}` with step and reason.
 
 ## Implementation plan
 

@@ -895,7 +895,11 @@ record). With an agenda in HQ it chooses, in order:
    for that server (`_marginalIceInstallOptions(..., [target])`, or
    `_affordableIce()` with `iceMarginalSecurity` off), up to three ICE. It
    gives way to the opening ICE order.
-5. Otherwise the click falls through to the ordinary flow.
+5. Otherwise the click falls through to the ordinary flow. With
+   `scoringPlanDigForIce` (default off) and no ICE in HQ, the waiting plan
+   draws instead, while drawing keeps the hand within its limit; the
+   ordinary flow would refuse to draw from a breachable HQ holding two
+   agendas and click for credits.
 
 Readiness uses the Runner's public breach margin rather than
 `CORP_AI_AGENDA_EXPOSURE_TABLE`: that table measures the Runner AI, which

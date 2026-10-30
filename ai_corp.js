@@ -5886,7 +5886,18 @@ class CorpAI {
       step: plan.step, reason: plan.reason, margin: plan.margin,
       card: plan.install ? GetTitle(plan.install.cardToInstall) : null,
     }));
-    if (!plan.install) return -1;
+    if (!plan.install) {
+      //scoringPlanDigForIce: waiting with no ICE in HQ, draw for it instead of
+      //a basic credit, while drawing leaves the hand within its limit.
+      if (plan.step == "wait" && this.options.scoringPlanDigForIce &&
+          optionList.includes("draw") && corp.RnD.cards.length > 0 &&
+          PlayerHand(corp).length < MaxHandSize(corp) &&
+          !corp.HQ.cards.some((card) => CheckCardType(card, ["ice"]))) {
+        this._log("Scoring plan: digging for ICE");
+        return optionList.indexOf("draw");
+      }
+      return -1;
+    }
     return this._returnPreference(optionList, "install", plan.install);
   }
 
@@ -9881,4 +9892,8 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   // Economy assets whose install hook declines while the Corp is rich are
   // still installed when the Corp would otherwise take a basic economy action.
   economyAssetsWhenRich: false,
+
+  // I10: when the scoring plan is waiting because HQ has no ICE, draw to
+  // find some instead of clicking for a credit. Requires scoringPlan.
+  scoringPlanDigForIce: false,
 });

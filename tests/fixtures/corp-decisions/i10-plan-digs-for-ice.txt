@@ -1,0 +1,13 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, n
+// EXPECT: draw
+// EXPECT_LOG: Scoring plan: digging for ICE
+// SETUP: corp.creditPool=6; corp.clickTracker=3; runner.creditPool=10; reviewAI.options.scoringPlan=true; reviewAI.options.scoringPlanDigForIce=true; reviewAI.options.iceMarginalSecurity=true; reviewAI._completedIceInstalls=3
+// NOTE: I10 scoringPlanDigForIce: the plan is waiting (Remote 0 breachable, no ICE in HQ) with two agendas in hand, where the ordinary flow refuses to draw from a breachable HQ (real_I10_game1_win.txt); the Corp draws to find ICE instead of clicking for a credit.
+RunnerTestField(30019, [], [30030,30030,30011,30020,30006,30005,30026,31033,30018,30027], [30030,30020,30011], [31006], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [30075,30064,31077,30072,30070,30067,30075,31081,30062,30068], [35049,30067], [31077], [31077], [30074,31077], [[31077]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=true;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.remoteServers[0].ice[0].rezzed=true;
