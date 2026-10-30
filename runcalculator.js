@@ -1072,6 +1072,21 @@ class RunCalculator {
     return {valid: valid.valid, reason: valid.reason};
   }
   
+  //Run-begin "pay or take tags" taxes from active Corp operations (AIRunBeginTax,
+  //SYNC Rerouting). Computed once per calculation: pay from the pool when it
+  //covers the tax, otherwise the start point carries the tags.
+  _applyRunBeginTaxes(data) {
+    var sources = typeof corp !== "undefined" && corp.resolvingCards ? corp.resolvingCards : [];
+    for (var i = 0; i < sources.length; i++) {
+      if (typeof sources[i].AIRunBeginTax !== "function") continue;
+      var tax = sources[i].AIRunBeginTax(data.server);
+      if (!tax) continue;
+      if (tax.credits > 0 && data.poolCredits - this._runStartCosts.credits >= tax.credits)
+        this._runStartCosts = {clicks: this._runStartCosts.clicks, credits: this._runStartCosts.credits + tax.credits};
+      else this._runStartTags += tax.tags || 0;
+    }
+  }
+
   //Helper to create an empty pathing point
   EmptyPoint(iceIdx) {
 	  var ret = {
@@ -1088,7 +1103,7 @@ class RunCalculator {
                 card_str_mods: [],
 				persistents: [],
                 sr_broken: [],
-                effects: [],
+                effects: this._runStartTags ? [Array(this._runStartTags).fill("tag")] : [],
               };
 	  return ret;
   }
@@ -1131,6 +1146,8 @@ class RunCalculator {
     var installedRunnerCards = InstalledCards(runner);
 	this._runStartCosts = (this._securityPlanning || this._continuationRun || !attackedServer) && typeof AdditionalRunCosts == "function" ?
       AdditionalRunCosts(data.server) : {clicks: 0, credits: 0};
+	this._runStartTags = 0;
+	if (this._securityPlanning || this._continuationRun || !attackedServer) this._applyRunBeginTaxes(data);
     data.clickLimit = data.clicks; //this is maybe not ideal (e.g. Enigma might break things)
 	data.poolCreditLimit = data.poolCredits; //same as above, maybe
     if (typeof OutsideCreditDamageSources == "function" && OutsideCreditDamageSources(data.server).length &&

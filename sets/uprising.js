@@ -4548,9 +4548,71 @@ cardSet[26117] = {
   cardType: "operation",
   subTypes: [],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  successfulHQRunLastTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.successfulHQRunLastTurn = false; },
+    automatic: true, availableWhenInactive: true,
   },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (playerTurn === runner && attackedServer === corp.HQ) this.successfulHQRunLastTurn = true;
+    },
+    automatic: true, availableWhenInactive: true,
+  },
+  Enumerate: function () { return this.successfulHQRunLastTurn ? [] : [{}]; },
+  // Remote-root install options from HQ (agenda, asset or upgrade), at normal costs.
+  _installChoices: function () {
+    return ChoicesArrayInstall(corp.HQ.cards, false, function (card) {
+      return CheckCardType(card, ["agenda", "asset", "upgrade"]);
+    }).filter(function (choice) { return !choice.server || typeof choice.server.cards === "undefined"; });
+  },
+  _offerInstall: function () {
+    var choices = this._installChoices();
+    if (!choices.length) return;
+    choices.push({card: null, label: "Do not install", button: "Continue"});
+    if (corp.AI) {
+      var useful = choices.filter(function (choice) { return choice.card; });
+      var index = corp.AI._bestInstallOption(useful, false);
+      corp.AI.preferred = {title: this.title, option: index < 0 ? choices[choices.length - 1] : useful[index]};
+    }
+    DecisionPhase(corp, choices, function (params) {
+      if (!params.card || !corp.HQ.cards.includes(params.card)) return;
+      Install(params.card, params.server, false, null, true, null, this);
+    }, this.title, "You may install 1 card from HQ in the root of a remote server", this);
+  },
+  Resolve: function () {
+    // Lasting restriction for this turn only (turn events reset at each turn begin).
+    RecordTurnEvent("corpCannotScore");
+    Log("The Corp cannot score agendas for the remainder of the turn");
+    var choices = ChoicesArrayCards(corp.RnD.cards, function (card) { return CheckCardType(card, ["agenda"]); });
+    // A search for a card with a characteristic may fail to find one.
+    choices.push({card: null, label: "Find nothing", button: "Find nothing"});
+    if (corp.AI) {
+      var best = choices.filter(function (choice) { return choice.card; }).sort(function (a, b) {
+        return (b.card.agendaPoints - a.card.agendaPoints) || ((b.card.elo || 0) - (a.card.elo || 0));
+      })[0];
+      corp.AI.preferred = {title: this.title, option: best || choices[choices.length - 1]};
+    }
+    DecisionPhase(corp, choices, function (params) {
+      Shuffle(corp.RnD.cards);
+      Log("R&D shuffled");
+      if (!params.card || params.card.cardLocation !== corp.RnD.cards) { this._offerInstall(); return; }
+      Reveal(params.card, function () {
+        MoveCard(params.card, corp.HQ.cards);
+        Log(GetTitle(params.card) + " added to HQ");
+        this._offerInstall();
+      }, this);
+    }, this.title, "Search R&D for 1 agenda", this);
+  },
+  AIWouldPlay: function () {
+    if (this.successfulHQRunLastTurn) return false;
+    if (!corp.RnD.cards.some(function (card) { return CheckCardType(card, ["agenda"]); })) return false;
+    // Only tutor when HQ lacks an agenda to commit, and never give up a score this turn.
+    if (corp.HQ.cards.some(function (card) { return CheckCardType(card, ["agenda"]); })) return false;
+    return !corp.AI._fullyAdvanceableAgendaInstalled();
+  },
+  AIPlayWhenCan: 1,
+  AIIsRecurOrTutor: true,
 };
 
 //SYNC Rerouting (26118)
@@ -4566,9 +4628,34 @@ cardSet[26118] = {
   cardType: "operation",
   subTypes: ["Lockdown"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  trashCost: 3,
+  Enumerate: function () {
+    var active = ActiveLockdown();
+    return !active || active === this ? [{}] : [];
   },
+  Resolve: function () { Log("SYNC Rerouting is active until the next Corp turn"); },
+  responseOnRunBegins: {
+    Enumerate: function () { return [{}]; },
+    Resolve: function () {
+      var choices = [];
+      if (CheckCredits(runner, 4)) choices.push({id: 0, label: "Pay 4[c]", button: "Pay 4[c]"});
+      choices.push({id: 1, label: "Take 1 tag", button: "Take 1 tag"});
+      // Runner AI: matches AIRunBeginTax, which charged 4[c] when the pool covers it.
+      if (runner.AI) runner.AI.preferred = {title: this.title, option: choices[0]};
+      DecisionPhase(runner, choices, function (params) {
+        if (params.id === 0) SpendCredits(runner, 4);
+        else AddTags(1);
+      }, this.title, "Pay 4[c] or take 1 tag", this);
+    },
+    text: "SYNC Rerouting: give the Runner 1 tag unless they pay 4[c]",
+  },
+  AIWouldPlay: function () {
+    if (ActiveLockdown()) return false;
+    // A run tax: useful against a poor Runner, or when tags can be punished.
+    return runner.creditPool < 10 || corp.HQ.cards.some(function (card) { return !!card.AITagPunishment; });
+  },
+  AIPlayWhenCan: 1,
+  AIRunBeginTax: function () { return {credits: 4, tags: 1}; },
 };
 
 //Ganked! (26119)
@@ -4585,7 +4672,89 @@ cardSet[26119] = {
   subTypes: ["Ambush"],
   rezCost: 0,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  storedFaceUp: false,
+  automaticOnAccess: {
+    Resolve: function (card) {
+      if (card != this) return;
+      this.storedFaceUp = this.faceUp;
+      if (this.cardLocation == corp.RnD.cards) {
+        this.faceUp = true;
+        this.knownToRunner = true;
+        Log(GetTitle(this) + " revealed");
+      }
+    },
+  },
+  _targets: function (server) {
+    if (!server) return [];
+    return server.ice.filter(function (ice) { return ice.rezzed; });
+  },
+  _bestTarget: function (targets) {
+    // Public board only: prefer the ICE with the most subroutines, then strength.
+    return targets.slice().sort(function (a, b) {
+      return ((b.subroutines || []).length * 3 + Strength(b)) - ((a.subroutines || []).length * 3 + Strength(a));
+    })[0] || null;
+  },
+  // The server it is in: a root, HQ or R&D. A card already in Archives cannot be trashed.
+  _server: function () {
+    if (this.cardLocation === corp.HQ.cards) return corp.HQ;
+    if (this.cardLocation === corp.RnD.cards) return corp.RnD;
+    return GetServer(this);
+  },
+  responseOnAccess: {
+    Enumerate: function () {
+      if (accessingCard != this || !attackedServer) return [];
+      return this._targets(this._server()).length ? [{}] : [];
+    },
+    Resolve: function () {
+      var server = this._server();
+      var choices = ChoicesArrayCards(this._targets(server));
+      if (!choices.length) return;
+      choices.push({card: null, label: "Do not trash Ganked!", button: "Decline"});
+      if (corp.AI) {
+        var best = this._bestTarget(this._targets(server));
+        corp.AI.preferred = {title: this.title, option: choices.find(function (choice) { return choice.card === best; }) || choices[choices.length - 1]};
+      }
+      DecisionPhase(corp, choices, function (params) {
+        if (!params.card || !this._targets(server).includes(params.card) || accessingCard != this) return;
+        var ice = params.card;
+        Trash(this, false, function () {
+          // Ganked! is no longer being accessed; resume any further access after the encounter.
+          ResolveAccess();
+          if (!attackedServer || !ice.rezzed || !CheckInstalled(ice)) return;
+          var position = attackedServer.ice.indexOf(ice);
+          ForceEncounter(ice, position >= 0 ? position : undefined);
+        }, this);
+      }, this.title, "Trash Ganked! to make the Runner encounter a rezzed piece of ice protecting this server?", this);
+    },
+    text: "Ganked!: trash it to make the Runner encounter a rezzed piece of ice",
+  },
+  automaticOnAccessComplete: {
+    Resolve: function (card) {
+      if (card == this && card.cardLocation != corp.archives.cards && !this.storedFaceUp) this.faceUp = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  AILimitPerServer: function () { return 1; },
+  // Only useful where rezzed ICE protects the server: an agenda remote, else the best central.
+  AIPreferredUpgradeServer: function (legalServers) {
+    var self = this;
+    var iced = legalServers.filter(function (server) { return self._targets(server).length > 0 &&
+      !server.root.some(function (card) { return card.title === self.title; }); });
+    var remote = iced.find(function (server) {
+      return typeof server.cards === "undefined" &&
+        server.root.some(function (card) { return CheckCardType(card, ["agenda"]); });
+    });
+    if (remote) return remote;
+    var centrals = iced.filter(function (server) { return typeof server.cards !== "undefined"; });
+    centrals.sort(function (a, b) { return self._targets(b).length - self._targets(a).length; });
+    return centrals[0] || null;
+  },
+  AIPunishesAccess: function (server) {
+    if (!server || !(server.root || []).includes(this)) return 0;
+    var best = this._bestTarget(this._targets(server));
+    return best ? Math.max(1, (best.subroutines || []).length) : 0;
+  },
 };
 
 //Earth Station: SEA Headquarters (26120)

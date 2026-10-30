@@ -460,6 +460,8 @@ function CheckScore(card,ignoreRequirement=false) {
 	  if (card.advancement < AdvancementRequirement(card)) return false;
   }
   if (CardEffectsForbid("score", card)) return false; //forbidden by card effects
+  //"cannot score agendas for the remainder of the turn" (Digital Rights Management)
+  if (typeof TurnEventCount === "function" && TurnEventCount("corpCannotScore") > 0) return false;
   return true;
 }
 

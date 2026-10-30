@@ -691,3 +691,73 @@ assertions, and all three focused checks passed before the successful rerun.
 status is current, batch 12 has no unfinished markers or empty effects, and
 `git diff --check` passed. Batch 13 (26117–26119) is next; Uprising stays hidden
 and untested until its remaining implementation batches complete.
+
+## Batch 13 — 2026-10-30, Claude
+
+Implemented Digital Rights Management (26117), SYNC Rerouting (26118) and
+Ganked! (26119), preserving metadata and existing ELO values.
+
+- **Digital Rights Management** tracks a successful HQ run during the Runner's
+  turn from any zone (Scapenet pattern), resetting when the next Runner turn
+  begins. Resolution records the `corpCannotScore` turn event first, then
+  searches R&D for an agenda (a "find nothing" choice is allowed: searching for
+  a characteristic may fail), shuffles R&D, reveals the agenda to the Runner,
+  adds it to HQ, and offers an optional install of any agenda, asset or upgrade
+  from HQ in a remote root (including a new remote) at normal install costs.
+  `CheckScore` refuses while the turn event is set; turn events reset at each
+  turn begin, which ends "for the remainder of the turn". A turn event avoids
+  an always-present `modifyCannot` candidate on every copy in the deck, so
+  `CardEffectsForbid` callers (including run-calculator break checks) do no
+  extra work.
+- **SYNC Rerouting** uses the shared Lockdown lifecycle (`ActiveLockdown`,
+  `CheckPlay`, expiry at the next Corp turn) and keeps its printed 3 trash cost
+  for access from HQ (CR 3.5.3). Its `responseOnRunBegins` fires for every run
+  while it is active, offering "Pay 4[c]" only when affordable.
+- **Ganked!** reveals itself when accessed in R&D and restores its facedown state
+  afterwards elsewhere (Increased Drop Rates pattern). On access during a run,
+  in a root, HQ or R&D (not Archives: a card already there cannot be trashed),
+  the Corp may trash it (a cost, not preventable) to choose a rezzed ICE
+  protecting that server. Its access is then completed (`ResolveAccess`) and
+  `ForceEncounter(ice, position)` starts the encounter at that ICE's position.
+  When the encounter ends the access window resumes and further accesses
+  continue. If the run ends during it, encounter-end windows unwind and the
+  run goes to Run 6.4 (the run stays successful). Remaining accesses are
+  skipped. Run 6.4 cleanup restores R&D card visibility hidden during
+  multi-access.
+
+Shared changes: `checks.js` `CheckScore` (turn event); `mechanics.js`
+`ForceEncounter` optional `approachIndex` saved/restored in the frame,
+`ForcedEncounterReturnPhase` sends a post-success run end to `runEnds`, and
+`RunUnsuccessful` unwinds forced encounters before the success-declared
+shortcut; `phase.js` Run 6.4 cleanup; `runcalculator.js`
+`_applyRunBeginTaxes` (new `AIRunBeginTax` hook, scanned only on
+`corp.resolvingCards` once per calculation) and the start point's tag effect.
+
+Baseline AI evidence (`tests/uprising-batch13.test.js`): real Corp command
+selection plays DRM and SYNC; the real Corp selector tutors the highest-point
+agenda and installs it through `_bestInstallOption`; DRM guards (agenda in HQ,
+none in R&D, scorable agenda installed, last-turn HQ run) and the scoring
+restriction/reset; Lockdown exclusivity; the real async Runner selector pays
+SYNC's 4 credits and takes the tag when it cannot; the Runner run calculator
+charges 4 credits or one tag at the start point and nothing after expiry;
+Ganked!'s real Corp choice targets the strongest rezzed ICE, the encounter
+resumes access or ends the run without an unsuccessful run, decline/no-ice/no-run
+guards; Corp upgrade placement through `_bestServerToUpgrade` and
+`AIPunishesAccess`.
+
+Queued optimisation: DRM ranks agendas by points only and does not compare
+the tutor with scoring windows beyond "no scorable agenda" or plan the follow-up
+advance; SYNC is played on a Runner credit threshold or tag-punishment card,
+and the Runner always pays when affordable (tags are only priced by the
+generic tag limit when unaffordable); Ganked! ranks targets by subroutine
+count/strength without considering installed breakers, and the Runner's run
+planning does not anticipate forced encounters from access (the live encounter
+search sees the forced ICE, then inner ICE it will not meet). No browser
+playtest or independent review is claimed.
+
+Validation: `tests/uprising-batch13.test.js`, `tests/uprising-integration.test.js`
+(Konjin forced-encounter regressions), `tests/ai-hook-docs.test.js`,
+`corp-server-security` (197), `L9.1-breaker-pricing` (44), Eternal format,
+format-aware deck pool and identity-change checks passed; `node --check` for
+every changed JavaScript file. Batch brief reports no unfinished markers.
+The full suite is deferred to the coordinator's consolidated run.

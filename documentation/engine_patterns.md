@@ -1058,6 +1058,17 @@ trigger for the parent. Ending the run unwinds encounter-end responses for the
 child and parent before the unsuccessful-run phase. Run cleanup clears the
 stack. Hypothetical ICE probes temporarily clear and then restore the overlay.
 
+`ForceEncounter(ice, approachIndex)` optionally sets `approachIce` for an
+encounter started outside the ICE sequence (Ganked! during access), so run
+planning sees the ICE at its position; the frame restores the previous value.
+Ending the run during a forced encounter after success was declared unwinds the
+encounter-end windows and goes to Run 6.4, not the unsuccessful-run phase.
+Run 6.4 cleanup also makes R&D cards hidden during multi-access visible again.
+
+Recording the `corpCannotScore` turn event (`RecordTurnEvent`) makes
+`CheckScore` refuse agendas until turn events reset at the next turn begins
+(Digital Rights Management).
+
 `PlayClickCost(card)` includes Triple's two additional clicks (3 total), as
 well as Double's one additional click. Active modifiers apply afterward.
 `runSuccessDeclared` is set when success is declared, reset at run initiation
