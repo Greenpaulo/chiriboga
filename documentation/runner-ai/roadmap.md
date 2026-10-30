@@ -73,6 +73,13 @@ Which server should the Runner run, and what risk does it take there?
 - **Spec:** [T2-check-fresh-remote-installs.md](specs/T2-check-fresh-remote-installs.md)
 - **Goal:** Check a fresh unadvanced remote card the Runner can afford to breach, as a human does, instead of leaving it about nine turns in ten. The Corp's steal-risk tables and batch gates are calibrated against this behaviour; recalibrate them after adoption.
 
+### T3 Face-down card risk from public information
+
+- **Status:** proposed
+- **Depends on:** none
+- **Spec:** [T3-face-down-card-risk.md](specs/T3-face-down-card-risk.md)
+- **Goal:** Price the risk of unknown root cards from faction, cards shown this game and advancement, replacing the fixed Hokusai Grid, Urtica Cipher and Clearinghouse guesses. Do after T2; recalibrate the Corp once after both.
+
 ## Principle debt (D)
 
 Existing Runner AI code that breaks a shared principle.

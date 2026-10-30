@@ -42,6 +42,8 @@ ICE, advanced agendas were stolen at 0.26–0.34 per Runner turn against
   and how long it has sat there).
 - Charge the trap's expected cost (damage, tags, credits) in the run
   calculator from the same estimate, not only for the named cards above.
+  [T3](T3-face-down-card-risk.md) now owns this shared estimate for all
+  face-down cards; T1 should reuse it rather than build its own.
 - Keep advanced cards attractive when the Runner can afford the worst case
   (enough cards in grip, no tags to fear).
 
