@@ -2386,6 +2386,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIImplementIce(rc, result, maxCred, incomplete)` | function | Describe what subroutines do in the run calculator |
 | `AIForcedEncounterIce()` | function | Public rezzed ICE target, priced by the ordinary encounter search (Uprising batch 11) |
 | `AIRunSuccessChance(server)` | function | Public stochastic breach survival, consumed by Runner access potential (Uprising batch 11) |
+| `AIRunBeginTax(server)` | function | Active operation run-begin pay-or-tag tax, charged once per run calculation (Uprising batch 13) |
 | `AIIceSpecificEffect(poolCredits, otherCredits, clicks)` | function | Replace a context-sensitive ICE effect using resources left after earlier effects |
 | `AIImplementBreaker` | function | For bioroid ice: how the runner click-breaks them |
 | `AIWorthwhileIce(server, purpose)` | function | Return true if ice is worth installing there |
@@ -3799,3 +3800,35 @@ competing-plan policies are recorded in the set's optimisation queue.
   of several credits is one event, while separate printed break losses are
   separate events. Zero payments/losses and basic access trash payments do not
   trigger income. Future income is not booked as present rez money.
+
+### Uprising batch 13 card hooks
+
+- `AIRunBeginTax(server)` on an active Corp operation in `corp.resolvingCards`
+  returns `{credits, tags}` ("give the Runner `tags` unless they pay
+  `credits`") or `null`. It must be pure and public. `RunCalculator`
+  consumes it once per calculation in `CalculatePieceBegin`, under the same
+  fresh-run condition as `AdditionalRunCosts` (Runner planning outside a run,
+  continuation runs and Corp security planning): it adds the credits to the
+  start point's pool loss when the pool covers them, otherwise the start point
+  carries the tags. It is not a run legality cost. SYNC Rerouting returns
+  `{credits: 4, tags: 1}`; its live `responseOnRunBegins` decision sets the
+  Runner AI's `preferred` to pay whenever 4 credits are affordable, matching
+  the model. Only `corp.resolvingCards` is scanned, so the hook adds no
+  per-node work.
+- SYNC Rerouting uses the shared Lockdown lifecycle, `AIWouldPlay` (no active
+  Lockdown; Runner pool below 10 or an `AITagPunishment` card in HQ) and
+  `AIPlayWhenCan`.
+- Digital Rights Management uses `AIWouldPlay` (an agenda remains in R&D, none
+  in HQ, no installed agenda can be scored this turn, legal play condition),
+  `AIPlayWhenCan` and `AIIsRecurOrTutor`. Its inline choices tutor the
+  highest-point agenda and install through `_bestInstallOption`. "Cannot score
+  for the remainder of the turn" records the `corpCannotScore` turn event,
+  which `CheckScore` refuses until turn events reset.
+- Ganked! uses `AIPreferredUpgradeServer` (an agenda remote with rezzed ICE,
+  else the central with the most rezzed ICE, one per server, otherwise hold),
+  `AILimitPerServer` and `AIPunishesAccess`. Its inline Corp choice always
+  trashes it for the rezzed ICE with the most subroutines, then strength.
+  `ForceEncounter(ice, approachIndex)` places that encounter at the ICE's own
+  position (restored when the encounter returns), so the Runner's ordinary
+  encounter planner sees it. Ending the run during it goes to run end, not an
+  unsuccessful run.

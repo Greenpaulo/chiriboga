@@ -29,7 +29,7 @@ in card-sets.md.
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `downfall` | playable | 65 | 65 | 0 | 0 | 0 | 55 / 61 | false / false | no |
-| `uprising` | in-progress | 65 | 65 | 0 | 14 | 0 | 48 / 62 | true / true | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 11 | 0 | 51 / 62 | true / true | no |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
@@ -71,9 +71,6 @@ None.
 
 ### `uprising` (sets/uprising.js)
 
-- 26117 Digital Rights Management: 1 scaffold marker(s)
-- 26118 SYNC Rerouting: 1 scaffold marker(s)
-- 26119 Ganked!: 1 scaffold marker(s)
 - 26120 Earth Station: SEA Headquarters: 1 scaffold marker(s)
 - 26121 Transport Monopoly: 1 scaffold marker(s)
 - 26122 Wall to Wall: 1 scaffold marker(s)
