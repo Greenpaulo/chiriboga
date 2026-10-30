@@ -25,7 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `genesis` | in-progress | 120 | 105 | 15 | 87 | 6 | 27 / 98 | true / true | no |
+| `genesis` | in-progress | 120 | 104 | 16 | 70 | 6 | 37 / 97 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -64,6 +64,7 @@ None.
 - 02018 Project Atlas: no definition
 - 02022 Liberated Account: no definition
 - 02033 Trick of Light: no definition
+- 02043 Emergency Shutdown: no definition
 - 02047 Test Run: no definition
 - 02051 Project Vitruvius: no definition
 - 02056 Pop-up Window: no definition
@@ -93,23 +94,6 @@ None.
 - 02038 Amazon Industrial Zone: 2 scaffold marker(s)
 - 02039 Executive Retreat: 2 scaffold marker(s)
 - 02040 Freelancer: 2 scaffold marker(s)
-- 02041 Nerve Agent: 2 scaffold marker(s)
-- 02042 Joshua B.: 2 scaffold marker(s)
-- 02043 Emergency Shutdown: 2 scaffold marker(s)
-- 02044 Muresh Bodysuit: 2 scaffold marker(s)
-- 02045 Snitch: 2 scaffold marker(s)
-- 02046 Chaos Theory: Wünderkind: 2 scaffold marker(s)
-- 02048 Dinosaurus: 2 scaffold marker(s)
-- 02049 Personal Workshop: 2 scaffold marker(s)
-- 02050 Public Sympathy: 2 scaffold marker(s)
-- 02052 Viper: 3 scaffold marker(s)
-- 02053 Edge of World: 2 scaffold marker(s)
-- 02054 Sunset: 2 scaffold marker(s)
-- 02055 Marked Accounts: 2 scaffold marker(s)
-- 02057 Woodcutter: 3 scaffold marker(s)
-- 02058 Commercialization: 2 scaffold marker(s)
-- 02059 Private Contracts: 2 scaffold marker(s)
-- 02060 Chimera: 3 scaffold marker(s)
 - 02061 Disrupter: 2 scaffold marker(s)
 - 02062 Force of Nature: 2 scaffold marker(s)
 - 02064 Doppelgänger: 2 scaffold marker(s)
