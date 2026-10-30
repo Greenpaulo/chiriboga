@@ -67,4 +67,4 @@ Tests: `tests/genesis-hs.test.js` (real engine + both AIs).
 
 ## Status
 
-All 17 non-duplicate cards implemented; none blocked. `documentation/card-status.md` was not regenerated here (shared generated file; coordinator to regenerate after merge).
+All 17 non-duplicate cards implemented; none blocked. `documentation/card-status.md` regenerated on this branch (generated file: on merge conflicts, rerun `node scripts/card-status.js`). Fast suite (`node tests/run-all-tests.js --fast`): 139 files passed.
