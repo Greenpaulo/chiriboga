@@ -4682,11 +4682,71 @@ cardSet[26124] = {
   subTypes: ["Sentry", "Destroyer"],
   rezCost: 6,
   strength: 4,
+  advancement: 0,
+  canBeAdvanced: true,
+  //It gets +1 strength for each hosted advancement counter.
+  modifyStrength: {
+    Resolve: function (card) {
+      return card == this ? Counters(this, "advancement") : 0;
+    },
+  },
+  //Corp chooses one installed Runner card of the type, then continues (also when there is none or the trash is prevented).
+  _trashOne: function (cardType, after) {
+    var self = this;
+    var done = function () { if (after) after.call(self); };
+    var choices = ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, [cardType]) && CheckTrash(card);
+    });
+    if (choices.length < 1) {
+      done();
+      return;
+    }
+    DecisionPhase(
+      corp,
+      choices,
+      function (params) {
+        Trash(params.card, true, done, this);
+      },
+      this.title,
+      "Trash 1 installed " + cardType,
+      this,
+      "trash"
+    );
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Give the Runner 1 tag. If there are 3 or more hosted advancement counters, instead give the Runner 2 tags.",
+      Resolve: function () {
+        AddTags(CheckCounters(this, "advancement", 3) ? 2 : 1);
+      },
+      visual: { y: 104, h: 48 },
+    },
+    {
+      text: "Trash 1 installed program. If there are 3 or more hosted advancement counters, instead trash 1 installed program and 1 installed resource.",
+      Resolve: function () {
+        //the counter check is made once, when the subroutine resolves
+        var andResource = CheckCounters(this, "advancement", 3);
+        this._trashOne("program", function () {
+          if (andResource) this._trashOne("resource");
+        });
+      },
+      visual: { y: 156, h: 64 },
+    },
   ],
+  //Like Pharos, advance only once rezzed (keeps the ice secret), up to the 3-counter threshold.
+  AIAdvancementLimit: function () {
+    if (!this.rezzed) return 0;
+    return 3;
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var full = CheckCounters(this, "advancement", 3);
+    result.sr = [full ? [["tag", "tag"]] : [["tag"]]];
+    var installed = InstalledCards(runner);
+    var hasProgram = installed.some(function (card) { return CheckCardType(card, ["program"]); });
+    var hasResource = full && installed.some(function (card) { return CheckCardType(card, ["resource"]); });
+    if (hasProgram) result.sr.push([["misc_serious"]]);
+    else if (hasResource) result.sr.push([["misc_moderate"]]);
+    else result.sr.push([[]]); //blank keeps subroutine indices aligned
     return result;
   },
 };
@@ -4706,11 +4766,88 @@ cardSet[26125] = {
   subTypes: ["Sentry", "Destroyer", "Tracer"],
   rezCost: 4,
   strength: 4,
+  _traceTrash: function (baseStrength, cardType) {
+    Trace(baseStrength, function (successful) {
+      if (!successful) return;
+      var choices = ChoicesInstalledCards(runner, function (card) {
+        return CheckCardType(card, [cardType]) && CheckTrash(card);
+      });
+      if (choices.length < 1) return;
+      DecisionPhase(
+        corp,
+        choices,
+        function (params) {
+          Trash(params.card, true);
+        },
+        this.title,
+        "Trash 1 installed " + cardType,
+        this,
+        "trash"
+      );
+    }, this);
+  },
+  //The gained subroutine. Card instances are deep copies, so each Winchester owns its own object.
+  _hqSubroutine: {
+    text: "Trace[3]. If successful, end the run.",
+    Resolve: function () {
+      Trace(3, function (successful) {
+        if (successful) EndTheRun();
+      }, this);
+    },
+    visual: { y: 196, h: 32 },
+  },
+  _protectingHQ: function () {
+    return corp.HQ.ice.includes(this);
+  },
+  //Keep the gained subroutine last, and only while protecting HQ. A new array is
+  //assigned so that copies sharing the printed array are never mutated.
+  _syncHqSubroutine: function () {
+    var gained = this._hqSubroutine;
+    var others = this.subroutines.filter(function (sr) { return sr !== gained; });
+    if (this._protectingHQ()) {
+      if (this.subroutines[this.subroutines.length - 1] === gained) return;
+      gained.broken = false;
+      this.subroutines = others.concat([gained]);
+    } else if (others.length != this.subroutines.length) this.subroutines = others;
+  },
+  automaticOnAnyChange: {
+    Resolve: function () {
+      this._syncHqSubroutine();
+    },
+    availableWhenInactive: true,
+  },
+  //Also at encounter, before subroutines can be broken or resolve (covers ice moved since the last command).
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (ice == this) this._syncHqSubroutine();
+    },
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[4]. If successful, trash 1 installed program.",
+      Resolve: function () {
+        this._traceTrash(4, "program");
+      },
+      visual: { y: 104, h: 32 },
+    },
+    {
+      text: "Trace[3]. If successful, trash 1 installed piece of hardware.",
+      Resolve: function () {
+        this._traceTrash(3, "hardware");
+      },
+      visual: { y: 140, h: 48 },
+    },
   ],
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var installed = InstalledCards(runner);
+    var hasProgram = installed.some(function (card) { return CheckCardType(card, ["program"]); });
+    var hasHardware = installed.some(function (card) { return CheckCardType(card, ["hardware"]); });
+    result.sr = [
+      hasProgram ? [["misc_serious"]] : [[]],
+      hasHardware ? [["misc_moderate"]] : [[]],
+    ];
+    if (this._protectingHQ()) result.sr.push([["endTheRun"]]);
     return result;
   },
 };
@@ -4728,8 +4865,37 @@ cardSet[26126] = {
   cardType: "operation",
   subTypes: ["Lockdown", "Gray Ops"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  trashCost: 4,
+  //shared Lockdown lifecycle: stays in corp.resolvingCards until the next Corp turn begins
+  Enumerate: function () {
+    var active = ActiveLockdown();
+    return !active || active === this ? [{}] : [];
+  },
+  Resolve: function () {
+    Log("Argus Crackdown is active until the next Corp turn");
+  },
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (attackedServer && attackedServer.ice.length > 0) return [{}];
+      return [];
+    },
+    Resolve: function () {
+      Damage("meat", 2, true);
+    },
+    text: "Argus Crackdown: do 2 meat damage",
+  },
+  //The Runner usually has to run through ice next turn; with no ice installed it does nothing.
+  AIWouldPlay: function () {
+    if (ActiveLockdown()) return false;
+    return [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).some(function (server) {
+      return server.ice.length > 0;
+    });
+  },
+  AIPlayWhenCan: 1,
+  //Runner run planning: active Lockdown damage on a successful run against an iced server.
+  AIRunSuccessfulMeatDamage: function (server) {
+    if (!corp.resolvingCards.includes(this) || !server || server.ice.length < 1) return 0;
+    return 2;
   },
 };
 
@@ -4748,7 +4914,99 @@ cardSet[26127] = {
   subTypes: ["Region"],
   rezCost: 3,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  //An advanced card hosts 1 or more advancement counters (CR 1.18.4).
+  _advancedIceCount: function (server) {
+    if (!server) return 0;
+    return server.ice.filter(function (ice) { return Counters(ice, "advancement") > 0; }).length;
+  },
+  //Unadvanced ice first (each raises the tax), then ice that benefits from counters, then rezzed, then outermost.
+  _preferredIce: function (choices) {
+    var score = function (ice) {
+      return (Counters(ice, "advancement") > 0 ? 0 : 100) + (ice.canBeAdvanced ? 10 : 0) + (ice.rezzed ? 5 : 0);
+    };
+    var best = null;
+    for (var i = choices.length - 1; i > -1; i--) {
+      if (!best || score(choices[i].card) > score(best.card)) best = choices[i];
+    }
+    return best;
+  },
+  responseOnCorpTurnBegins: {
+    Enumerate: function () {
+      var server = GetServer(this);
+      var choices = server ? ChoicesArrayCards(server.ice) : [];
+      if (corp.AI && choices.length) return [this._preferredIce(choices)];
+      return choices;
+    },
+    Resolve: function (params) {
+      var server = GetServer(this);
+      if (server && params.card && server.ice.includes(params.card)) PlaceAdvancement(params.card, 1);
+    },
+    text: "Place 1 advancement counter on a piece of ice protecting this server",
+  },
+  responseOnApproachServer: {
+    Enumerate: function () {
+      if (attackedServer == GetServer(this)) return [{}];
+      return [];
+    },
+    Resolve: function () {
+      //the amount is calculated when the cost is paid, as one payment (CR 1.16.2b); a cost of 0 is paid (CR 1.16.1d)
+      var cost = 2 * this._advancedIceCount(GetServer(this));
+      if (cost < 1) {
+        Log("Cayambe Grid: no advanced ice, nothing to pay");
+        return;
+      }
+      var choices = [];
+      if (CheckCredits(runner, cost, "", this))
+        choices.push({ id: 0, label: "Pay " + cost + "[c]", button: "Pay " + cost + "[c]" });
+      choices.push({ id: 1, label: "End the run", button: "End the run" });
+      if (runner.AI != null) {
+        var choice = choices[choices.length - 1];
+        //pay only when the rest of the run (including this payment) can still be completed
+        if (choices.length > 1 && runner.AI._calculateBestCompleteRun(attackedServer, 0, 0, 0, 0, null, approachIce))
+          choice = choices[0];
+        runner.AI.preferred = { title: this.title, option: choice }; //title must match currentPhase.title
+      }
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          if (params.id == 0) SpendCredits(runner, cost, "", this);
+          else EndTheRun();
+        },
+        this.title,
+        this.title,
+        this
+      );
+    },
+    text: "Whenever the Runner approaches this server",
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  AIDefensiveValue: function (server) {
+    //the tax needs ice protecting the server
+    if (!server || server.ice.length < 1) return 0;
+    return 3;
+  },
+  //Rez during the Runner's turn so the first counter arrives when the Corp turn begins.
+  AIRezWhenCan: function () {
+    var server = GetServer(this);
+    return playerTurn === runner && !!server && server.ice.length > 0;
+  },
+  //Last-moment rez at approach (Phase_Movement) when the tax is already non-zero.
+  AIWouldTrigger: function (server) {
+    return this._advancedIceCount(server || GetServer(this)) > 0;
+  },
+  AIApproachDefense: function (server) {
+    var advanced = this._advancedIceCount(server);
+    if (advanced < 1) return null;
+    return { runnerOptions: [{ credits: 2 * advanced, clicks: 0 }], corpEndsRunUses: 0 };
+  },
+  //Runner run planning: approach payment while rezzed (public counters only).
+  AIRunApproachCredits: function (server) {
+    if (!this.rezzed || server !== GetServer(this)) return 0;
+    return 2 * this._advancedIceCount(server);
+  },
 };
 
 //Cyberdex Sandbox (26128)

@@ -65,7 +65,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 12 | 26113–26116 | Complete | Codex, 2026-10-29 | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
 | 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
 | 14 | 26120–26123 | Pending | — | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
-| 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
+| 15 | 26124–26127 | Complete | Claude, 2026-10-30 | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
 | 16 | 26128–26130 | Pending | — | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
 
 ## Completion log
@@ -88,6 +88,8 @@ the shared Lockdown mechanic first needed in batch 9.
 | 11 | 26109–26112 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | Konjin nested Psi encounters and shared finite-resource pricing; Manifold Lockdown/server targeting and stochastic breach risk; Kakurenbo Triple/trash/conceal/install/counters/removal; La Costa mandatory root advancement. Real play, rez, target, turn-response and Runner planning consumers. |
 
 | 12 | 26113–26116 | 2026-10-29 | Codex | `tests/uprising-integration.test.js` | GameNET attributed credit events; Bellona steal/score costs; F2P native breaks/bounce/tag; Gold Farmer printed-break losses and payments. Real selectors and both run/security models; validation recorded in notes. |
+
+| 15 | 26124–26127 | 2026-10-30 | Claude | `tests/uprising-batch15.test.js` | Colossus advanceable strength/threshold subs; Winchester traces and HQ-only gained ETR subroutine; Argus Crackdown Lockdown meat damage on iced servers; Cayambe Grid counter placement and approach tax. New Runner calculator hooks `AIRunSuccessfulMeatDamage`, `AIRunApproachCredits`; Corp security via `AIApproachDefense`. Focused tests only (no full suite, per batch-parallel instructions). See notes. |
 
 ## Batch-review log
 
@@ -119,6 +121,8 @@ initialised when each implementation batch completes.
 | 11 | 26109–26112 | Pending | — | Konjin contextual target/bid policy, matching-bid risk calibration and joint finite-tool alternatives; Manifold server priority/bid prediction; Kakurenbo concealment and install/advance sequencing; La Costa advanceable-asset targets and future-turn scoring forecasts. See implementation notes. |
 
 | 12 | 26113–26116 | Pending | — | GameNET income/bid incentives and rez reserves; Bellona score-income sequencing/central multiaccess forecasts; F2P contextual bounce/tag trade-offs; Gold Farmer scarce/shared-credit mixed break/pay paths and repeated runs. See implementation notes. |
+
+| 15 | 26124–26127 | Pending | — | Winchester traces priced as certain (no link/bid model) in both run and security evaluation; Colossus advance timing vs. other spending; Argus play timing (played whenever any ice exists) and kill-combo planning; Cayambe target ice/rez timing, and the Runner's approach payment requires the planner's full complete run (including budgeted trash costs). See implementation notes. |
 
 ## Optimisation log
 

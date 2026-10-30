@@ -2413,6 +2413,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIETRTrashesSelf` | boolean | A declared global ETR consumes its own ICE layer |
 | `AIRunExtraRuns(server)` | function | Public self-consuming ICE defense requires an additional ordinary run; see Batch 12 contracts below |
 | `AIRunSuccessfulDamage(server)` | function | Public available hand damage after a successful run |
+| `AIRunSuccessfulMeatDamage(server)` | function | Active Corp operation in `corp.resolvingCards` (a Lockdown): meat damage on a successful run against `server` (Uprising batch 15) |
+| `AIRunApproachCredits(server)` | function | Rezzed root card: credits the Runner must pay on approaching `server` to continue the run (Uprising batch 15) |
 | `AIEconomyCard` | boolean | Mark a non-Transaction, non-Advertisement Corp economy card for opening-hand evaluation |
 | `AIWouldTrigger()` | function | Return true to allow upgrade ability to fire |
 | `AIFastAdvance` | bool | True if this operation is used for fast advancing |
@@ -2941,6 +2943,38 @@ if (!runner.AI || runner.AI.rc !== rc) {
   `AIDrawInstall`. It installs a missing-type breaker first, otherwise the
   highest-ELO non-wasteful card, and shuffles back the three cards that score
   highest on worth-keeping, missing type and ELO.
+
+### Uprising Batch 15 card hooks
+
+- `AIRunSuccessfulMeatDamage(server)`: read by the Runner run calculator once
+  per calculation (`CalculatePieceBegin`, complete runs only) for each card in
+  `corp.resolvingCards`. Return the meat damage the active operation does when
+  a run on `server` is successful, or 0. It is added as `meatDamage` effects
+  regardless of breach (meat prevention applies), and skipped when the
+  server's successful run is prevented. Read-only; public information only.
+  Argus Crackdown (26126) returns 2 while it is active and `server` has ice.
+- `AIRunApproachCredits(server)`: read by the same calculator step for each
+  root card of `server` that has its abilities. Return the credits the Runner
+  must pay when approaching the server to avoid the run ending, or 0. Added to
+  the approach credits before breach costs; an unaffordable total excludes
+  complete runs. Read-only; count only public state. Cayambe Grid (26127)
+  returns 2 per advanced ice protecting the server while rezzed.
+- Colossus (26124): `AIAdvancementLimit` 3 once rezzed (as Pharos);
+  `AIImplementIce` gives 1 or 2 `tag` and a program trash (`misc_serious`),
+  or `misc_moderate` when only a resource is at risk at 3+ counters.
+- Winchester (26125): the HQ subroutine is a card-owned `_hqSubroutine` object
+  appended to `subroutines` by `automaticOnAnyChange` and `automaticOnEncounter`
+  while it protects HQ. `AIImplementIce` adds an `endTheRun` entry only on HQ
+  and models each Trace as successful (link and bids are not priced).
+- Argus Crackdown (26126): shared Lockdown lifecycle; `AIWouldPlay` with
+  `AIPlayWhenCan: 1` plays it when no Lockdown is active and any server has ice.
+- Cayambe Grid (26127): `AIApproachDefense` returns one Runner option of 2[c]
+  per advanced ice (`null` when none), `AIDefensiveValue` 3 for a server with
+  ice, `AIRezWhenCan` during the Runner's turn with ice in the server,
+  `AIWouldTrigger` for the last-moment rez when the tax is non-zero, and
+  `AILimitPerServer` 1. The turn-begin placement prefers unadvanced ice, then
+  advanceable, then rezzed, then outermost. At approach the Runner AI pays when
+  `_calculateBestCompleteRun` still finds a complete run.
 
 ## 8. Step-by-Step Worked Example
 
