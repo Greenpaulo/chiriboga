@@ -117,4 +117,5 @@ does): Spinal Modem 1416 (20007), Morning Star 1393 (20014), Peacock 1146
 ## Validation
 
 - Focused: `node tests/genesis-wla.test.js` (17/17), `node tests/ai-hook-docs.test.js`.
-- Fast suite: see final report.
+- `node tests/run-all-tests.js --fast`: exit 0, 139 files passed (after regenerating
+  `documentation/card-status.md` and adding subroutine visuals).
