@@ -137,7 +137,7 @@ class RunnerAI {
     for (var i = 0; i < choices.length; i++) {
       var destination = null;
       if (typeof choices[i].host !== "undefined") destination = choices[i].host;
-      if (card.memoryCost <= this._spareMemoryUnits(installedRunnerCards,destination)) return false;
+      if (MemoryCost(card) <= this._spareMemoryUnits(installedRunnerCards,destination)) return false;
     }
     return true;
   }

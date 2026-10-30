@@ -20,12 +20,21 @@ Tests: `tests/genesis-hs.test.js` (real engine + both AIs).
 | Kraken 2090 | 1305 | Needs a steal this turn (`TurnEventCount("runnerAgendaStolen")`); choose a server with ice; the Corp chooses and trashes 1 of its ice | Runner: `AIPlayWhenCan` 2, server choice prefers fewest ice and R&D/HQ/loaded remotes. Corp: trashes its lowest rez-cost ice |
 | Kati Jones 2091 | 1652 | Unique; two click abilities, card shares one use per turn | `AIEconomyTrigger` 2 with new `AIEconomyTriggerAlt` (place until 9 hosted or credits < 3, then take) |
 
+## Sub-batch B (Runner): Pheromones, Creeper
+
+| Card | ELO | Mechanics | Baseline AI |
+| --- | --- | --- | --- |
+| Pheromones 2086 | 1370 | `recurringCredits: 0` + `variableRecurringCredits()` = virus counters; `canUseCredits` only while `attackedServer == corp.HQ`; +1 virus counter on each successful HQ run | `AIRunPoolCreditOffset` (HQ only), `AIWorthKeeping`/`AIInstallBeforeRun` for HQ |
+| Creeper 2089 | 1051 | `variableMemoryCost()`: 0 MU with 2+ link (also uninstalled); 2[c] break 1 sentry sub, 1[c] +1 strength for the encounter | `AIImplementBreaker` (Sentry, 1/1 pump, 2/1 break), `AIPreferredInstallChoice` |
+
 ## Shared engine/AI helpers added (for de-duplication on merge)
 
 - `StartingHandSize(player)` (init.js): identity `startingHandSize` or 5; used by `StartGame` opening draw and `Mulligan` (command.js).
 - `turnEventCards`, `RecordTurnEventCard(name, card)`, `TurnEventCards(name)` (utility.js), cleared with `turnEventCounts` in `ChangePhase` (phase.js).
 - `AddCounters` (mechanics.js) records `"runnerProgramVirusCounters"` (count and card) for virus counters placed on installed Runner programs.
 - `Steal` (mechanics.js) records turn event `"runnerAgendaStolen"`.
+- `MemoryCost(card)` (utility.js): `variableMemoryCost()` or `memoryCost`; replaces direct `memoryCost` reads in `InstalledMemoryCost`, `ChoicesCardInstall` MU checks, the install MU check (mechanics.js) and `RunnerAI._installWouldExceedMU`.
+- `RecurringCredits(card)` (utility.js): `variableRecurringCredits()` or `recurringCredits`; used by the install and turn-begin refills (mechanics.js, phase.js).
 - `AIEconomyTriggerAlt()` hook consumed in RunnerAI's economy trigger path (ai_runner.js); documented in `documentation/ai.md`.
 
 ## Deferred optimisation notes
@@ -33,4 +42,5 @@ Tests: `tests/genesis-hs.test.js` (real engine + both AIs).
 - Surge: the virus-counter record does not check who placed the counters (Corp effects placing virus counters on Runner programs do not exist in playable sets).
 - Kraken: Runner server choice ignores agenda-scoring threat; Corp choice is rez cost only, not positional value.
 - Replicator: AI always fetches a copy, even of unique/console hardware it cannot use twice.
+- Creeper: dropping below 2 link after install does not force trashing programs over the MU limit (engine has no general MU re-check).
 - Kati Jones: fixed 9-credit cash-out threshold; no planning of a big turn.

@@ -812,7 +812,7 @@ function Install(
 				typeof (installingCard.memoryCost !== "undefined")
 			  ) {
 				if (
-				  installingCard.memoryCost + InstalledMemoryCost(destination) >
+				  MemoryCost(installingCard) + InstalledMemoryCost(destination) >
 				  MemoryUnits(destination)
 				)
 				  return [];
@@ -891,7 +891,7 @@ function Install(
 				  runner.AI.LoseInfoAboutHQCards(null, installingCard.cardType); //one less card in corp hand
 				if (host != null) installingCard.host = host;
 				if (typeof installingCard.recurringCredits !== "undefined")
-				  installingCard.credits = installingCard.recurringCredits;
+				  installingCard.credits = RecurringCredits(installingCard);
 				var outStr = GetTitle(installingCard, true);
 				if (CheckCardType(installingCard, ["agenda", "asset", "upgrade"]))
 				  outStr =

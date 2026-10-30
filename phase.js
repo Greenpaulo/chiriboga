@@ -422,7 +422,7 @@ phaseTemplates.globalTriggers = {
       // Cleanup runs after the refill loop so active recurring effects still apply.
       ApplyToAllActiveCards(function (card) {
         if (typeof card.recurringCredits !== "undefined")
-          card.credits = card.recurringCredits;
+          card.credits = RecurringCredits(card);
       }, currentPhase.player);
       if (currentPhase.identifier == "Corp 1.2") CleanupCorpResolvingCards(true);
 	  //AI keeps track of how many turns (each player's turn counts as 1) a card (agenda/asset/upgrade) has been installed a server

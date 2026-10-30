@@ -45,7 +45,7 @@ const run = code => vm.runInContext(code, context);
 const ID = {
   HB: 30035, Tao: 30019, HedgeFund: 30075, SureGamble: 30030, Diesel: 31027, T400: 30031,
   IceWall: 31077, Enigma: 31081, Palisade: 30072, HostileTakeover: 31071, PAD: 31080,
-  Imp: 31007, Cleaver: 30006, VoicePAD: 31038,
+  Imp: 31007, Rototurret: 31046, Cleaver: 30006, VoicePAD: 31038,
   Surge: 2081, Andromeda: 2083, HQInterface: 2085, Pheromones: 2086, QualityTime: 2087, Replicator: 2088,
   Creeper: 2089, Kraken: 2090, Kati: 2091, Eve: 2092, Rework: 2093, Whirlpool: 2094, DataHound: 2096,
   Bernice: 2097, Salvage: 2098, Simone: 2099, Foxfire: 2100,
@@ -313,6 +313,49 @@ test('Runner AI builds Kati Jones up and cashes out a large stash', async () => 
   // the preference selects the matching ability
   const optionList = run('ChoicesTriggerableAbilities(runner, "click")').filter(o => o.card == kati);
   assert(optionList.some(o => o.alt == 'take'));
+});
+
+// ---------------- Pheromones ----------------
+test('Pheromones gains a counter per successful HQ run and refills X credits usable only on HQ runs', () => {
+  setUpBoard({installed: [ID.Pheromones], hq: [ID.HedgeFund, ID.HedgeFund], credits: 0});
+  const ph = run('runner.rig.programs[0]');
+  assert.strictEqual(Number(ph.credits || 0), 0, 'X = 0 at install');
+  driveRun('corp.archives');
+  assert.strictEqual(Number(ph.virus || 0), 0, 'Archives run: no counter');
+  driveRun('corp.HQ');
+  driveRun('corp.HQ');
+  assert.strictEqual(ph.virus, 2, 'one counter per successful HQ run');
+  run('ChangePhase(phases.runnerStartResponse)'); settle();
+  assert.strictEqual(ph.credits, 2, 'refilled to the number of virus counters');
+  run('attackedServer = corp.HQ');
+  assert.strictEqual(run('AvailableCredits(runner, "using", null)'), 2, 'usable during a run on HQ');
+  run('attackedServer = corp.RnD');
+  assert.strictEqual(run('AvailableCredits(runner, "using", null)'), 0, 'not on other servers');
+  run('attackedServer = null');
+  assert.strictEqual(ph.AIRunPoolCreditOffset.call(ph, run('corp.HQ')), 2, 'Runner AI counts them for HQ');
+  assert.strictEqual(ph.AIRunPoolCreditOffset.call(ph, run('corp.RnD')), 0);
+});
+
+// ---------------- Creeper ----------------
+test('Creeper costs 0 MU with 2 link, breaks sentries for 2 and pumps for 1 for the encounter', () => {
+  setUpBoard({grip: [ID.Creeper], installed: [ID.Imp, ID.Imp, ID.Imp, ID.Imp], credits: 10});
+  const creeper = run('runner.grip[0]');
+  assert.strictEqual(run('MemoryCost(runner.grip[0])'), 1);
+  assert.strictEqual(run('ChoicesCardInstall(runner.grip[0], true).length > 0 && InstalledMemoryCost() + MemoryCost(runner.grip[0]) <= MemoryUnits()'), false, 'no MU with 1 link');
+  run('runner.identityCard.link = 2');
+  assert.strictEqual(run('MemoryCost(runner.grip[0])'), 0, '0 MU with 2 link, even in the grip');
+  run('Install(runner.grip[0], null, false, null, true)'); settle();
+  assert(byTitle(run('runner.rig.programs'), 'Creeper'), 'installed alongside 4 MU of programs');
+  assert.strictEqual(run('InstalledMemoryCost()'), 4);
+  assert.deepStrictEqual(Array.from(creeper.abilities.map(a => a.text)), ['Break 1 sentry subroutine.', '+1 strength.']);
+});
+
+test('Run calculator uses Creeper against sentries', () => {
+  setUpBoard({installed: [ID.Creeper], hqIce: [ID.Rototurret], credits: 10, ai: true});
+  const withCreeper = run('runner.AI._getCachedCost(corp.HQ)');
+  assert(withCreeper !== Infinity, 'HQ is runnable with Creeper');
+  setUpBoard({installed: [], hqIce: [ID.Rototurret], credits: 10, ai: true});
+  assert.strictEqual(run('runner.AI._getCachedCost(corp.HQ)'), Infinity, 'no breaker: not runnable');
 });
 
 (async () => {

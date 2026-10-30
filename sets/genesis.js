@@ -1471,7 +1471,7 @@ cardSet[2085] = {
 cardSet[2086] = {
   title: "Pheromones",
   imageFile: "02086.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1370,
   player: runner,
   faction: "Criminal",
   influence: 2,
@@ -1479,7 +1479,38 @@ cardSet[2086] = {
   subTypes: ["Virus"],
   installCost: 2,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  //X recurring credits: RecurringCredits (utility.js) refills to the current virus counters
+  recurringCredits: 0,
+  variableRecurringCredits: function () {
+    return Counters(this, "virus");
+  },
+  canUseCredits: function (doing, card) {
+    //only during runs on HQ
+    return attackedServer == corp.HQ;
+  },
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (attackedServer == corp.HQ) AddCounters(this, "virus", 1);
+    },
+    automatic: true,
+  },
+  //hosted credits pay for anything during HQ runs
+  AIRunPoolCreditOffset: function (server, runEventCardToUse) {
+    if (server != corp.HQ) return 0;
+    return this.credits || 0;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //grows with HQ runs, so keep if HQ can be run
+    return runner.AI._getCachedCost(corp.HQ) != Infinity;
+  },
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost, runClickCost) {
+    if (server != corp.HQ) return 0;
+    if (!runner.AI.cardsWorthKeeping.includes(this)) return 0;
+    return 1; //a counter from this run starts the credits
+  },
+  AIWastefulToInstall: function () {
+    return runner.rig.programs.some(card => card.title == this.title);
+  },
 };
 
 //Quality Time (2087)
@@ -1575,7 +1606,7 @@ cardSet[2088] = {
 cardSet[2089] = {
   title: "Creeper",
   imageFile: "02089.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1051,
   player: runner,
   faction: "Shaper",
   influence: 1,
@@ -1583,6 +1614,12 @@ cardSet[2089] = {
   subTypes: ["Icebreaker", "Killer", "Cloud"],
   installCost: 5,
   memoryCost: 1,
+  //MemoryCost (utility.js) reads this for install legality and MU totals, installed or not.
+  //Limitation: losing link after install does not force a program trash for exceeded MU.
+  variableMemoryCost: function () {
+    if (Link() >= 2) return 0;
+    return this.memoryCost;
+  },
   strength: 2,
   strengthBoost: 0,
   modifyStrength: {
@@ -1592,8 +1629,56 @@ cardSet[2089] = {
     },
   },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break 1 sentry subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 2, "using", this, function () {
+          Break(params.subroutine);
+        }, this);
+      },
+    },
+    {
+      text: "+1 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return []; //interface usability, as other breakers
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Sentry")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 1, "using", this, function () {
+          BoostStrength(this, 1);
+        }, this);
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    result = result.concat(
+      rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Sentry"],
+        1, 1, 2, 1, creditsLeft)
+    ); //cost to str, amt to str, cost to brk, amt to brk
+    return result;
+  },
+  AIPreferredInstallChoice: function (choices) {
+    //don't install if this is last click
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
 };
 
 //Kraken (2090)
