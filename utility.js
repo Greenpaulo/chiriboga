@@ -3960,6 +3960,19 @@ function RecordTurnEvent(name) {
   turnEventCounts[name] = (turnEventCounts[name] || 0) + 1;
   return turnEventCounts[name];
 }
+/**
+ * Cards involved in named public events this turn, for conditions that refer
+ * back to "that card" (Surge: a program that received virus counters).
+ * Cleared with turnEventCounts when a turn begins. Each card is listed once.
+ */
+var turnEventCards = {};
+function RecordTurnEventCard(name, card) {
+  if (!turnEventCards[name]) turnEventCards[name] = [];
+  if (!turnEventCards[name].includes(card)) turnEventCards[name].push(card);
+}
+function TurnEventCards(name) {
+  return turnEventCards[name] ? turnEventCards[name].slice() : [];
+}
 function TurnEventCount(name) {
   return turnEventCounts[name] || 0;
 }

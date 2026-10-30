@@ -1355,16 +1355,45 @@ cardSet[2079] = {
 cardSet[2081] = {
   title: "Surge",
   imageFile: "02081.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1443,
   player: runner,
   faction: "Anarch",
   influence: 1,
   cardType: "event",
   subTypes: [],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  //AddCounters records installed Runner programs that received virus counters this turn.
+  //Limitation: the record does not distinguish who placed the counters (in practice only Runner effects do).
+  Enumerate: function () {
+    return ChoicesArrayCards(TurnEventCards("runnerProgramVirusCounters"), function (card) {
+      return CheckInstalled(card) && CheckCardType(card, ["program"]);
+    });
   },
+  Resolve: function (params) {
+    AddCounters(params.card, "virus", 2);
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //only useful with a virus program that gains counters
+    for (var i = 0; i < installedRunnerCards.length; i++) {
+      if (CheckSubType(installedRunnerCards[i], "Virus")) return true;
+    }
+    for (var j = 0; j < runner.grip.length; j++) {
+      if (CheckCardType(runner.grip[j], ["program"]) && CheckSubType(runner.grip[j], "Virus")) return true;
+    }
+    return false;
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  //prefer the program that already has the most virus counters (usually the one being built up)
+  AIPreferredPlayChoice: function (choices) {
+    var best = 0;
+    for (var i = 1; i < choices.length; i++) {
+      if (Counters(choices[i].card, "virus") > Counters(choices[best].card, "virus")) best = i;
+    }
+    return best;
+  },
+  AIPlayWhenCan: 2, //window closes at end of turn
 };
 
 // cardSet[2082] = Xanadu - DUPLICATE: systemupdate2021.js has Xanadu (card 31012)
@@ -1374,7 +1403,7 @@ cardSet[2081] = {
 cardSet[2083] = {
   title: "Andromeda: Dispossessed Ristie",
   imageFile: "02083.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 2063,
   player: runner,
   faction: "Criminal",
   cardType: "identity",
@@ -1382,7 +1411,8 @@ cardSet[2083] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 1,
-  // TODO: Add abilities or responseOn triggers
+  //StartingHandSize (init.js) reads this for the opening draw and mulligan.
+  startingHandSize: 9,
 };
 
 // cardSet[2084] = Networking - DUPLICATE: systemupdate2021.js has Networking (card 31020)
@@ -1392,14 +1422,46 @@ cardSet[2083] = {
 cardSet[2085] = {
   title: "HQ Interface",
   imageFile: "02085.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1520,
   player: runner,
   faction: "Criminal",
   influence: 2,
   cardType: "hardware",
   subTypes: [],
   installCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  modifyBreachAccess: {
+    //NOTE: modifyBreachAccess may be called multiple times (e.g. when determining new candidates)
+    Resolve: function () {
+      if (attackedServer == corp.HQ) return 1;
+      return 0;
+    },
+  },
+  //passive bonus to HQ accesses (assumes the card is or will be active)
+  AIAdditionalAccess: function (server) {
+    if (server == corp.HQ) return 1;
+    return 0;
+  },
+  //public, out-of-run description for Corp central-security planning
+  AICentralPressure: function (server) {
+    if (server == corp.HQ) return { additionalAccess: 1 };
+    return {};
+  },
+  AIWastefulToInstall: function () {
+    //effects stack, but a second copy is rarely worth 4 credits more than other cards
+    for (var i = 0; i < runner.rig.hardware.length; i++) {
+      if (runner.rig.hardware[i].title == this.title) return true;
+    }
+    return false;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //keep if HQ can be run
+    return runner.AI._getCachedCost(corp.HQ) != Infinity;
+  },
+  AIInstallBeforeRun: function (server, potential, useRunEvent, runCreditCost, runClickCost) {
+    if (server != corp.HQ) return 0;
+    if (!runner.AI.cardsWorthKeeping.includes(this)) return 0;
+    return 1; //the consumer checks the run remains affordable after installing
+  },
 };
 
 //Pheromones (2086)
@@ -1425,7 +1487,7 @@ cardSet[2086] = {
 cardSet[2087] = {
   title: "Quality Time",
   imageFile: "02087.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1599,
   player: runner,
   faction: "Shaper",
   influence: 1,
@@ -1433,8 +1495,18 @@ cardSet[2087] = {
   subTypes: [],
   playCost: 3,
   Resolve: function (params) {
-    // TODO: Implement effect
+    Draw(runner, 5);
   },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //keep if need card draw
+    return runner.grip.length < 4;
+  },
+  AIWouldPlay: function () {
+    //prevent wild overdraw (5 cards in, this card out) and keep a little money afterwards
+    if (runner.AI._currentOverDraw() + 4 > runner.AI._maxOverDraw()) return false;
+    return AvailableCredits(runner, "playing", this) >= PlayCost(this) + 1;
+  },
+  AIPlayToDraw: 2, //strong draw, but costs credits
 };
 
 //Replicator (2088)
@@ -1442,14 +1514,58 @@ cardSet[2087] = {
 cardSet[2088] = {
   title: "Replicator",
   imageFile: "02088.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1382,
   player: runner,
   faction: "Shaper",
   influence: 2,
   cardType: "hardware",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  _replicatorCopyInStack: function (card) {
+    for (var i = runner.stack.length - 1; i >= 0; i--) {
+      if (runner.stack[i] != card && runner.stack[i].title == card.title) return runner.stack[i];
+    }
+    return null;
+  },
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (!card || card.player != runner || !CheckCardType(card, ["hardware"])) return [];
+      //searching without a copy only shuffles, so the option is offered only when a copy exists
+      if (!this._replicatorCopyInStack(card)) return [];
+      var choices = [
+        { id: 1, label: "Search stack for another " + GetTitle(card), button: "Search", replicatorTarget: card },
+        { id: 0, label: "Do not search", button: "Continue" },
+      ];
+      //**AI code: always take the copy unless the grip is already over-full
+      if (runner.AI != null) {
+        if (runner.grip.length >= MaxHandSize(runner)) return [choices[1]];
+        return [choices[0]];
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params || params.id !== 1) return;
+      var copy = this._replicatorCopyInStack(params.replicatorTarget);
+      if (!copy) {
+        Shuffle(runner.stack);
+        return;
+      }
+      MoveCard(copy, runner.grip);
+      Reveal(copy, function () {
+        Shuffle(runner.stack);
+        Log("Runner added " + GetTitle(copy) + " to grip and shuffled the stack");
+      }, this);
+    },
+    text: "Replicator: search stack for another copy",
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    //worth it when hardware in grip or rig has a copy left in the stack
+    var hardware = runner.rig.hardware.concat(runner.grip);
+    for (var i = 0; i < hardware.length; i++) {
+      if (hardware[i] != this && CheckCardType(hardware[i], ["hardware"]) && this._replicatorCopyInStack(hardware[i])) return true;
+    }
+    return false;
+  },
 };
 
 //Creeper (2089)
@@ -1486,16 +1602,70 @@ cardSet[2089] = {
 cardSet[2090] = {
   title: "Kraken",
   imageFile: "02090.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1305,
   player: runner,
   faction: "Neutral",
   influence: 0,
   cardType: "event",
   subTypes: [],
   playCost: 3,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  //Steal records the "runnerAgendaStolen" turn event.
+  Enumerate: function () {
+    if (TurnEventCount("runnerAgendaStolen") < 1) return [];
+    var choices = [];
+    var servers = ChoicesExistingServers();
+    for (var i = 0; i < servers.length; i++) {
+      if (servers[i].server.ice.length > 0) choices.push(servers[i]);
+    }
+    return choices;
   },
+  Resolve: function (params) {
+    var server = params.server;
+    if (!server || server.ice.length < 1) return;
+    var choices = ChoicesArrayCards(server.ice);
+    DecisionPhase(
+      corp,
+      choices,
+      function (choice) {
+        Log("Corp trashes " + GetTitle(choice.card, true) + " for Kraken");
+        Trash(choice.card, true, null, null, null, corp);
+      },
+      "Kraken",
+      "Choose ice to trash",
+      this
+    );
+    //**AI code: the Corp keeps its most expensive ice and trashes the cheapest (outermost on ties)
+    if (corp.AI != null) {
+      var choice = choices[0];
+      for (var i = 1; i < choices.length; i++) {
+        if (choices[i].card.rezCost <= choice.card.rezCost) choice = choices[i];
+      }
+      corp.AI.preferred = { title: "Kraken", option: choice };
+    }
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  //prefer to open the most valuable server: fewest ice, R&D/HQ or a loaded remote
+  AIPreferredPlayChoice: function (choices) {
+    var best = -1;
+    var bestScore = -Infinity;
+    for (var i = 0; i < choices.length; i++) {
+      var server = choices[i].server;
+      var score = 2 / server.ice.length;
+      if (server == corp.RnD) score += 3;
+      else if (server == corp.HQ) score += 2;
+      else if (server == corp.archives) score += 0;
+      else if (server.root.length > 0) score += 2;
+      else score += 0.5;
+      if (score > bestScore) {
+        bestScore = score;
+        best = i;
+      }
+    }
+    return best;
+  },
+  AIPlayWhenCan: 2, //window closes at end of turn
 };
 
 //Kati Jones (2091)
@@ -1505,14 +1675,82 @@ cardSet[2090] = {
 cardSet[2091] = {
   title: "Kati Jones",
   imageFile: "02091.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1652,
   player: runner,
   faction: "Neutral",
   influence: 0,
   cardType: "resource",
   subTypes: ["Connection"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  usedThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      this.usedThisTurn = false;
+    },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  abilities: [
+    {
+      text: "[click]: Place 3[c] on this resource.",
+      alt: "place",
+      Enumerate: function () {
+        if (this.usedThisTurn) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        this.usedThisTurn = true;
+        AddCounters(this, "credits", 3);
+      },
+    },
+    {
+      text: "[click]: Take all credits from this resource.",
+      alt: "take",
+      Enumerate: function () {
+        if (this.usedThisTurn) return [];
+        if (!CheckActionClicks(runner, 1)) return [];
+        if (!CheckCounters(this, "credits", 1)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        this.usedThisTurn = true;
+        var amount = Counters(this, "credits");
+        RemoveCounters(this, "credits", amount);
+        GainCredits(runner, amount, "", this);
+      },
+    },
+  ],
+  //take once the stash is large or money is needed now; otherwise keep building it
+  AIEconomyTriggerAlt: function () {
+    var hosted = Counters(this, "credits");
+    if (hosted >= 9) return "take";
+    if (hosted >= 3 && Credits(runner) < 3) return "take";
+    return "place";
+  },
+  AIWouldTrigger: function () {
+    return !this.usedThisTurn;
+  },
+  AIWorthKeeping: function (installedRunnerCards, spareMU) {
+    return true;
+  },
+  AIWastefulToInstall: function () {
+    return this.unique && runner.rig.resources.some(card => card.title == this.title);
+  },
+  AIEconomyInstall: function () {
+    return 2; //good long-term economy
+  },
+  AIEconomyTrigger: 2, //priority 2 (moderate)
 };
 
 //Eve Campaign (2092)

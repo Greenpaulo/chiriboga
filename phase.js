@@ -2191,6 +2191,7 @@ function ChangePhase(src, skipInit = false) {
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
   {
     turnEventCounts = {};
+    turnEventCards = {};
     [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).forEach(function (server) {
       server.rootInstallsThisTurn = 0;
     });

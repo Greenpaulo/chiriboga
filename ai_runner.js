@@ -2916,9 +2916,13 @@ console.log(this.preferred);
 		}
         if (cardToTrigger) {
           this._log("there is a card I would trigger for economy");
-		  return this._returnPreference(optionList, "trigger", {
-			cardToTrigger: cardToTrigger,
-          }); //assumes no parameters for now
+          var econTriggerPref = { cardToTrigger: cardToTrigger };
+          //AIEconomyTriggerAlt: which of a multi-ability card's abilities (by alt) to use for economy
+          if (typeof cardToTrigger.AIEconomyTriggerAlt == "function") {
+            var econTriggerAlt = cardToTrigger.AIEconomyTriggerAlt.call(cardToTrigger);
+            if (typeof econTriggerAlt !== "undefined" && econTriggerAlt !== null) econTriggerPref.abilityAlt = econTriggerAlt;
+          }
+          return this._returnPreference(optionList, "trigger", econTriggerPref);
         }
       }
 	  
