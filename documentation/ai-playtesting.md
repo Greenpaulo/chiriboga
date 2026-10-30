@@ -103,7 +103,7 @@ it almost every time. So batches reward Corp behaviour that humans punish:
 I10's first readiness fallback raised the smoke-run Corp win rate from 31.9%
 to 46.7% while losing three agendas in one owner game, and I4's steal-risk
 table, built from the same Runner, rates undefended agenda installs as nearly
-safe. Until [T2](runner-ai/specs/T2-check-fresh-remote-installs.md) changes
+safe. Until [T2](backlog/T2-check-fresh-remote-installs.md) changes
 the Runner and the Corp's steal-risk tables are rebuilt, treat any batch gain
 that comes from installing agendas or assets into weak remotes as suspect.
 

@@ -1,8 +1,8 @@
 # T2 Check fresh remote installs
 
 **Roadmap item:** T2 · **Depends on:** none · **Sets:** playable sets
-**Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`, [T1](T1-advanced-card-trap-caution.md)
-**Verified against code:** f1b130d (2026-10-30)
+**Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`, [T3](../runner-ai/specs/T3-face-down-card-risk.md)
+**Verified against code:** 527db6f (2026-10-30)
 
 ## Goal
 
@@ -82,11 +82,37 @@ potential and path cost, the Runner's log lines and the chosen action.
    Runner had a breachable remote with a fresh install and did not run it;
    record, per turn, the targets considered and why the remote lost. Report the
    cause before choosing a design.
-2. **Change** behind a Runner option (proposed `checkFreshRemotes`, default
-   off): a fresh unadvanced remote install the Runner can afford to breach is
-   a run target comparable to a central access, valued from public
-   information only (the card is face down; it may be an asset or trap). Keep
-   T1's caution for advanced cards separate.
+2. **Change** behind Runner option `checkFreshRemotes` (default off),
+   approved by Paul 2026-10-30. All in `ai_runner.js` run selection:
+   - **Remember install timing.** At the Runner's first action decision each
+     turn, record the face-down cards in every remote root. A card is
+     *fresh* when it was not there at the previous record (installed since
+     the Runner's last turn). Card positions and install timing are public;
+     nothing reads the card. The engine has no install-turn field, so the
+     Runner AI keeps this itself.
+   - **Value.** A remote holding a fresh, unadvanced, face-down card gets
+     potential 1.7 (named constant) instead of 1.0, once per remote. After
+     the ±0.1 jitter that stays above the "Favouring setup" (1.1) and
+     "Favouring econ" (1.5) gates and above R&D (1.0, 1.5 with HQ empty),
+     but below HQ with a known agenda (about 2.0 or more) and below an
+     advanced face-down card (5.0). `AIRunSuccessChance` and run-event
+     extras apply as before.
+   - **Affordability.** The higher value applies only when the best path's
+     credit spend (spent + lost) is at most half the Runner's available
+     credits and the path carries no tag or serious effect. Otherwise the
+     remote keeps 1.0, so an expensive or dangerous remote is still left
+     alone, as now. Because the path is calculated after potential, apply
+     the value after the path calculation and update `cachedPotentials`.
+   - **Grip guard.** No higher value when the Runner's grip after the run
+     would be under 3 cards: an unpriced Snare! (3 net damage) could
+     flatline it. T3 replaces this with a proper public trap estimate.
+   - **Log.** `Fresh install in <server> worth checking (potential …,
+     credits …)` when the value applies, so tests and playtest logs show
+     the reason.
+   - Out of scope: the blanket Hokusai Grid damage assumption and other
+     trap pricing ([T3](../runner-ai/specs/T3-face-down-card-risk.md)); advanced cards
+     ([T1](../runner-ai/specs/T1-advanced-card-trap-caution.md), parked); the setup and econ
+     gates themselves.
 3. **Recalibrate afterwards** (Corp side, existing scripts): with the option
    on, rebuild `CORP_AI_AGENDA_EXPOSURE_TABLE` and `CORP_AI_BREACH_HAZARD_TABLE`
    and refresh batch baselines. Then re-check which Corp options (I4's
@@ -97,17 +123,23 @@ potential and path cost, the Runner's log lines and the chosen action.
 
 - Use only public information: the card is face down; advancement counters,
   install turn and server ICE are public. No reading of the card's identity.
-- Traps (Urtica Cipher, Snare!) make blind checking costly; the value of a
-  check must account for that from public deck evidence, as T1 does.
+- Traps (Urtica Cipher, Snare!) make blind checking costly. T2 only guards
+  against a flatline (grip guard); pricing traps from public deck evidence
+  is [T3](../runner-ai/specs/T3-face-down-card-risk.md). The run calculator's flatline check
+  is unchanged.
 
 ## Test scenarios
 
 1. Runner with spare clicks and credits, a breachable remote holding a fresh
-   unadvanced card, and no stronger central reason: the Runner runs the
-   remote. Logged reason names the fresh install.
-2. Same board with the remote unaffordable: the Runner does not run it.
-3. A central with a stronger public reason (e.g. HQ full of known agendas
-   pressure) still wins.
+   unadvanced card, cards worth keeping in grip, and no stronger central
+   reason: the Runner runs the remote. Logged reason names the fresh install.
+2. Same board with the remote unaffordable (breach needs more than half the
+   Runner's credits): the Runner does not run it; no fresh-install log.
+3. A central with a stronger public reason (HQ with a known agenda) still
+   wins.
+4. The same card one Runner turn later (no longer fresh): valued 1.0 as now.
+5. Grip of 2 cards: no higher value (grip guard).
+6. Option off: decisions unchanged from today on the scenario 1 board.
 
 ## Acceptance gate
 

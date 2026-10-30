@@ -69,9 +69,9 @@ Which server should the Runner run, and what risk does it take there?
 
 ### T2 Check fresh remote installs
 
-- **Status:** proposed
+- **Status:** ready
 - **Depends on:** none
-- **Spec:** [T2-check-fresh-remote-installs.md](specs/T2-check-fresh-remote-installs.md)
+- **Ticket:** [T2-check-fresh-remote-installs.md](../backlog/T2-check-fresh-remote-installs.md)
 - **Goal:** Check a fresh unadvanced remote card the Runner can afford to breach, as a human does, instead of leaving it about nine turns in ten. The Corp's steal-risk tables and batch gates are calibrated against this behaviour; recalibrate them after adoption.
 
 ### T3 Face-down card risk from public information
