@@ -100,7 +100,7 @@ async function settle(pick = choices => choices[0]) {
     }
     for (const cmd of ['continue', 'trace', 'trash']) {
       const choices = options(cmd);
-      if (choices.length > 0) { const picked = await pick(choices, phase); phase.Resolve[cmd](picked === undefined ? choices[0] : picked); break; }
+      if (choices.length > 0) { const picked = await pick(choices, phase, cmd); phase.Resolve[cmd](picked === undefined ? choices[0] : picked); break; }
     }
     if (run('currentPhase') !== phase) continue;
     if (options('n').length > 0) { phase.Resolve.n({}); continue; }
@@ -111,9 +111,10 @@ async function settle(pick = choices => choices[0]) {
 }
 // Let the AI of the deciding player answer every pending decision.
 function settleAI() {
-  return settle(async (choices, phase) => {
+  return settle(async (choices, phase, cmd) => {
     const player = phase.player;
     if (!player || !player.AI) return choices[0];
+    run(`executingCommand = "${cmd}"`);
     run('currentPhase').title = phase.title;
     const index = player === run("runner") ? await player.AI.SelectChoice(choices) : player.AI.Choice(choices, "select");
     return choices[index >= 0 ? index : 0];
@@ -296,14 +297,13 @@ test('Notoriety needs successful HQ, R&D and Archives runs this turn and scores 
   assert.strictEqual(run('AgendaPoints(runner)'), 1);
 });
 
-test('successful central runs are counted per server by the run phase', async () => {
+test('the run-success phase counts successful runs per central server', async () => {
   setUpBoard({});
-  run('attackedServer = corp.archives; runSuccessDeclared = false;');
-  // the declaration code lives in the run success phase; exercise its counter directly
-  run('RecordTurnEvent("runnerSuccessfulRunArchives")');
-  assert.strictEqual(run('TurnEventCount("runnerSuccessfulRunArchives")'), 1);
-  const src = fs.readFileSync(path.join(root, 'phase.js'), 'utf8');
-  assert(src.includes('RecordTurnEvent("runnerSuccessfulRunHQ")'));
+  for (const [server, name] of [["corp.archives", "Archives"], ["corp.RnD", "RnD"], ["corp.HQ", "HQ"]]) {
+    run(`attackedServer = ${server}; ChangePhase(phases.runSuccessful);`);
+    assert.strictEqual(run(`TurnEventCount("runnerSuccessfulRun${name}")`), 1, name);
+  }
+  assert.strictEqual(run('TurnEventCount("runnerSuccessfulRun")'), 3);
 });
 
 // ---------------- Snowball ----------------
@@ -472,6 +472,159 @@ test('Sensei AI: serious only with ice inward; once fired the run calculator add
   assert.deepStrictEqual(after[after.length - 1], [['endTheRun']]);
   run(`encounteredIce = ${wall}; attackedServer = corp.HQ; approachIce = 0; AutomaticTriggers("automaticOnEncounter", [${wall}])`);
   assert.strictEqual(srs(wall).length, before + 1, 'live granted row counted once');
+});
+
+// ---------------- Big Brother ----------------
+test('Big Brother: only while tagged, gives 2 tags; the Corp AI plays it as tag punishment', async () => {
+  setUpBoard({hq: [ID.BigBrother], installed: [ID.Employee], corpTurn: true, corpAI: true, hqIce: [ID.IceWall], rndIce: [ID.IceWall], archivesIce: [ID.IceWall]});
+  const bb = hqCard('Big Brother');
+  assert.strictEqual(run(`FullCheckPlay(${bb})`), null, 'untagged');
+  run('runner.tags = 1');
+  const c = corpCommand();
+  assert.strictEqual(c.cmd, 'play');
+  assert.strictEqual(c.pref.cardToPlay.title, 'Big Brother');
+  playCard(bb);
+  await settle();
+  assert.strictEqual(run('runner.tags'), 3);
+});
+
+// ---------------- ChiLo City Grid ----------------
+test('ChiLo City Grid tags on a successful trace during a run on its server only', async () => {
+  setUpBoard({remotes: [[ID.ChiLo, ID.Hostile, ID.Sherlock]], corpCredits: 0, credits: 0});
+  run('corp.remoteServers[0].root[0].rezzed = true; InvalidateActiveTriggerCandidateCache();');
+  const chilo = 'corp.remoteServers[0].root[0]';
+  run(`attackedServer = corp.remoteServers[0]`);
+  let result = null;
+  run('Trace(3, function (s) { globalThis.__traceResult = s; })');
+  await settle();
+  assert.strictEqual(run('__traceResult'), true);
+  assert.strictEqual(run('runner.tags'), 1, 'ChiLo tag');
+  run('attackedServer = corp.HQ; runner.tags = 0;');
+  assert.strictEqual(run(`${chilo}.responseOnTraceSuccessful.Enumerate.call(${chilo}, 3).length`), 0, 'other server');
+  run('attackedServer = null');
+  assert.strictEqual(run(`${chilo}.responseOnTraceSuccessful.Enumerate.call(${chilo}, 3).length`), 0, 'no run');
+});
+
+test('ChiLo City Grid AI: placed behind tracer ice and rezzed when that server is run', async () => {
+  setUpBoard({remotes: [[ID.Hostile, ID.IceWall], [ID.HedgeFund, ID.Sherlock]], hq: [ID.ChiLo], corpAI: true, corpCredits: 6});
+  const ch = hqCard('ChiLo City Grid');
+  assert.strictEqual(run(`${ch}.AIPreferredUpgradeServer([corp.HQ, corp.remoteServers[0], corp.remoteServers[1]]) === corp.remoteServers[1]`), true);
+  assert.strictEqual(run(`${ch}.AIPreferredUpgradeServer([corp.HQ, corp.remoteServers[0]])`), null, 'no tracer: hold');
+  setUpBoard({remotes: [[ID.ChiLo, ID.Sherlock]], corpAI: true, corpCredits: 6});
+  const placed = 'corp.remoteServers[0].root[0]';
+  assert.strictEqual(run(`${placed}.AIRezWhenCan()`), false, 'not before a run');
+  run('attackedServer = corp.remoteServers[0]');
+  assert.strictEqual(run(`${placed}.AIRezWhenCan()`), true);
+});
+
+// ---------------- Power Grid Overload ----------------
+test('Power Grid Overload: needs a successful run last turn; trashes hardware costing up to the trace margin', async () => {
+  setUpBoard({hq: [ID.PGO], installed: [ID.Dyson, ID.E3], corpTurn: true, corpCredits: 5, credits: 0});
+  const pgo = hqCard('Power Grid Overload');
+  assert.strictEqual(run(`FullCheckPlay(${pgo})`), null);
+  run(`playerTurn = runner; ${pgo}.responseOnRunSuccessful.Resolve.call(${pgo}); playerTurn = corp;`);
+  assert(run(`FullCheckPlay(${pgo})`));
+  playCard(pgo);
+  const pgoR = find('corp.resolvingCards', 'Power Grid Overload');
+  // Corp boosts by 2: strength 4 vs link 1 (Dyson) -> margin 3: Dyson (3) and e3 (2) are legal
+  await settle((choices) => choices.find(c => c.num === 2) || choices[0]);
+  assert.deepStrictEqual(titles(run('runner.heap')), ['Dyson Mem Chip']);
+  run(`${pgoR}.responseOnRunnerTurnBegins.Resolve.call(${pgoR})`);
+  assert.strictEqual(run(`${pgoR}.successfulRunLastTurn`), false);
+});
+
+test('Power Grid Overload AI: plays it and boosts the trace enough to reach its best hardware target', async () => {
+  setUpBoard({hq: [ID.PGO], installed: [ID.Dyson], corpTurn: true, corpAI: true, corpCredits: 8, credits: 0,
+    hqIce: [ID.IceWall], rndIce: [ID.IceWall], archivesIce: [ID.IceWall]});
+  const pgo = hqCard('Power Grid Overload');
+  run(`playerTurn = runner; ${pgo}.responseOnRunSuccessful.Resolve.call(${pgo}); playerTurn = corp;`);
+  const c = corpCommand();
+  assert.strictEqual(c.cmd, 'play');
+  assert.strictEqual(c.pref.cardToPlay.title, 'Power Grid Overload');
+  run(`SpendCredits(corp, 1)`);
+  playCard(pgo);
+  await settleAI();
+  assert.deepStrictEqual(titles(run('runner.heap')), ['Dyson Mem Chip'], 'margin reached the 3-cost chip');
+  setUpBoard({hq: [ID.PGO], installed: [ID.Dyson], corpTurn: true, corpAI: true, corpCredits: 2});
+  run(`${hqCard('Power Grid Overload')}.successfulRunLastTurn = true`);
+  assert.strictEqual(run(`${hqCard('Power Grid Overload')}.AIWouldPlay()`), false, 'cannot afford to reach any hardware');
+});
+
+// ---------------- Amazon Industrial Zone ----------------
+test('Amazon Industrial Zone offers a 3-cheaper rez of ice installed protecting its server', async () => {
+  setUpBoard({remotes: [[ID.AIZ]], hq: [ID.Enigma], corpTurn: true, corpCredits: 1});
+  const aiz = 'corp.remoteServers[0].root[0]';
+  run(`${aiz}.rezzed = true; InvalidateActiveTriggerCandidateCache();`);
+  run(`MoveCard(corp.HQ.cards[0], corp.remoteServers[0].ice)`);
+  const ice = 'corp.remoteServers[0].ice[0]';
+  const offer = run(`${aiz}.responseOnInstall.Enumerate.call(${aiz}, ${ice})`);
+  assert.strictEqual(offer.length, 2, 'rez or decline');
+  assert.strictEqual(offer[0].label.includes('0[c]'), true, 'Enigma 3 - 3');
+  run(`${aiz}.responseOnInstall.Resolve.call(${aiz}, ${aiz}.responseOnInstall.Enumerate.call(${aiz}, ${ice})[0])`);
+  await settle();
+  assert.strictEqual(run(`${ice}.rezzed`), true);
+  assert.strictEqual(run('corp.creditPool'), 1);
+  run(`MoveCard(corp.remoteServers[0].ice[0], corp.HQ.ice)`);
+  run('corp.HQ.ice[0].rezzed = false');
+  assert.strictEqual(run(`${aiz}.responseOnInstall.Enumerate.call(${aiz}, corp.HQ.ice[0]).length`), 0, 'other server');
+});
+
+test('Amazon Industrial Zone AI: takes the discounted rez through the install response and places in a scoring remote', async () => {
+  setUpBoard({remotes: [[ID.AIZ]], hq: [ID.Enigma], corpTurn: true, corpAI: true, corpCredits: 2});
+  const aiz = 'corp.remoteServers[0].root[0]';
+  run(`${aiz}.rezzed = true; InvalidateActiveTriggerCandidateCache();`);
+  run(`Install(corp.HQ.cards[0], corp.remoteServers[0])`);
+  await settleAI();
+  assert.strictEqual(run('corp.remoteServers[0].ice.length'), 1);
+  assert.strictEqual(run('corp.remoteServers[0].ice[0].rezzed'), true);
+  assert.strictEqual(run(`${aiz}.AIPreferredUpgradeServer([corp.HQ, corp.RnD]) === corp.HQ`), true);
+  assert.strictEqual(run(`${aiz}.AIRezWhenCan()`), false, 'no ice in HQ to follow');
+});
+
+// ---------------- Executive Retreat ----------------
+test('Executive Retreat: on score shuffles HQ into R&D with 1 counter; click+counter draws 5; AI uses it', async () => {
+  setUpBoard({hq: [ID.HedgeFund, ID.Hostile, ID.Retreat], rnd: [ID.HedgeFund, ID.HedgeFund, ID.HedgeFund, ID.HedgeFund, ID.HedgeFund],
+    corpTurn: true, corpAI: true, hqIce: [ID.IceWall], rndIce: [ID.IceWall], archivesIce: [ID.IceWall]});
+  const er = hqCard('Executive Retreat');
+  run(`MoveCard(${er}, corp.scoreArea)`);
+  const scored = find('corp.scoreArea', 'Executive Retreat');
+  run(`${scored}.onScore.Resolve.call(${scored})`);
+  assert.strictEqual(run('corp.HQ.cards.length'), 0);
+  assert.strictEqual(run('corp.RnD.cards.length'), 7);
+  assert.strictEqual(run(`Counters(${scored}, "agenda")`), 1);
+  const c = corpCommand();
+  assert.strictEqual(c.cmd, 'trigger', 'the AI draws 5 with an empty HQ');
+  assert.strictEqual(c.pref.cardToTrigger.title, 'Executive Retreat');
+  run(`${scored}.abilities[0].Resolve.call(${scored})`);
+  await settle();
+  assert.strictEqual(run('corp.HQ.cards.length'), 5);
+  assert.strictEqual(run('corp.clickTracker'), 2);
+  assert.strictEqual(run(`${scored}.abilities[0].Enumerate.call(${scored}).length`), 0, 'counter spent');
+});
+
+// ---------------- Freelancer ----------------
+test('Freelancer: only while tagged; trashes up to 2 resources, AI picks the most valuable', async () => {
+  const daily = idOf('Telework Contract');
+  setUpBoard({hq: [ID.Freelancer], installed: [ID.Employee, daily, idOf('Smartware Distributor')], corpTurn: true});
+  const fl = hqCard('Freelancer');
+  assert.strictEqual(run(`FullCheckPlay(${fl})`), null);
+  run('runner.tags = 1');
+  playCard(fl);
+  await settle((choices) => choices.find(ch => ch.card && ch.card.title === 'Compromised Employee') || choices[choices.length - 1]);
+  assert.deepStrictEqual(titles(run('runner.heap')), ['Compromised Employee'], 'Done after one');
+  setUpBoard({hq: [ID.Freelancer], installed: [ID.Employee, daily, idOf('Smartware Distributor')], corpTurn: true, corpAI: true,
+    hqIce: [ID.IceWall], rndIce: [ID.IceWall], archivesIce: [ID.IceWall]});
+  run('runner.tags = 1');
+  const c = corpCommand();
+  assert.strictEqual(c.cmd, 'play');
+  assert.strictEqual(c.pref.cardToPlay.title, 'Freelancer');
+  playCard(hqCard('Freelancer'));
+  await settleAI();
+  assert.strictEqual(run('runner.heap.length'), 2);
+  assert(!titles(run('runner.heap')).includes('Smartware Distributor'), 'lowest-ELO resource kept');
+  setUpBoard({hq: [ID.Freelancer], corpTurn: true, corpAI: true});
+  run('runner.tags = 1');
+  assert.strictEqual(run(`FullCheckPlay(${hqCard('Freelancer')})`), null, 'AI does not play it without targets');
 });
 
 (async () => {

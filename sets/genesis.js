@@ -1034,16 +1034,29 @@ cardSet[2034] = {
 cardSet[2035] = {
   title: "Big Brother",
   imageFile: "02035.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1287,
   player: corp,
   faction: "NBN",
   influence: 1,
   cardType: "operation",
   subTypes: ["Gray Ops"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () {
+    return CheckTags(1) ? [{}] : [];
   },
+  Resolve: function (params) {
+    AddTags(2);
+  },
+  AITagPunishment: 1,
+  // Extra tags pay off when the Corp can punish them: a resource to trash or another punishment in HQ.
+  AIWouldPlay: function () {
+    if (!CheckTags(1)) return false;
+    var self = this;
+    return runner.rig.resources.length > 0 || corp.HQ.cards.some(function (card) {
+      return card !== self && card.AITagPunishment && card.title !== self.title;
+    });
+  },
+  AIPlayWhenCan: 1,
 };
 
 //ChiLo City Grid (2036)
@@ -1052,7 +1065,7 @@ cardSet[2035] = {
 cardSet[2036] = {
   title: "ChiLo City Grid",
   imageFile: "02036.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1285,
   player: corp,
   faction: "NBN",
   influence: 2,
@@ -1060,7 +1073,35 @@ cardSet[2036] = {
   subTypes: ["Region"],
   rezCost: 3,
   trashCost: 6,
-  // TODO: Add abilities or responseOn triggers
+  responseOnTraceSuccessful: {
+    Enumerate: function (margin) {
+      if (!attackedServer || attackedServer != GetServer(this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      AddTags(1);
+    },
+    text: "ChiLo City Grid: give the Runner 1 tag",
+  },
+  _tracerIce: function (server) {
+    return server ? server.ice.filter(function (ice) { return CheckSubType(ice, "Tracer"); }) : [];
+  },
+  AILimitPerServer: function () { return 1; },
+  // Only useful behind tracer ice: the server with the most tracers, else hold.
+  AIPreferredUpgradeServer: function (legalServers) {
+    var best = null, bestCount = 0;
+    for (var i = 0; i < legalServers.length; i++) {
+      var count = this._tracerIce(legalServers[i]).length;
+      if (count > bestCount) { bestCount = count; best = legalServers[i]; }
+    }
+    return best;
+  },
+  // Rez while its server is being run and it has tracer ice to back.
+  AIRezWhenCan: function () {
+    var server = GetServer(this);
+    return !!attackedServer && attackedServer == server && this._tracerIce(server).length > 0 &&
+      CheckCredits(corp, RezCost(this), "rezzing", this);
+  },
 };
 
 //Power Grid Overload (2037)
@@ -1069,16 +1110,74 @@ cardSet[2036] = {
 cardSet[2037] = {
   title: "Power Grid Overload",
   imageFile: "02037.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1375,
   player: corp,
   faction: "Weyland Consortium",
   influence: 1,
   cardType: "operation",
   subTypes: [],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  successfulRunLastTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.successfulRunLastTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
   },
+  responseOnRunSuccessful: {
+    Resolve: function () { if (playerTurn === runner) this.successfulRunLastTurn = true; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  _hardware: function (maxCost) {
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["hardware"]) && (card.installCost || 0) <= maxCost && CheckTrash(card);
+    });
+  },
+  // The most valuable hardware the Corp can afford to reach, with the trace
+  // boost that reaches it even if the Runner spends all trace credits on link.
+  _aiPlan: function (corpCredits) {
+    var targets = this._hardware(Infinity).sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });
+    var runnerTrace = AvailableCredits(runner, "trace");
+    for (var i = 0; i < targets.length; i++) {
+      var cost = targets[i].card.installCost || 0;
+      var minimum = Math.max(0, cost + Link() - 2);
+      if (minimum > corpCredits) continue;
+      return { card: targets[i].card, boost: Math.min(corpCredits, minimum + runnerTrace) };
+    }
+    return null;
+  },
+  Enumerate: function () {
+    return this.successfulRunLastTurn ? [{}] : [];
+  },
+  Resolve: function (params) {
+    //**AI code: trace strength preference (matched by option.num)
+    var plan = null;
+    if (corp.AI) {
+      plan = this._aiPlan(AvailableCredits(corp, "trace"));
+      if (plan) corp.AI.preferred = { command: "trace", strengthToIncrease: plan.boost };
+    }
+    Trace(2, function (successful) {
+      if (!successful) return;
+      var x = traceStrength - linkStrength;
+      var choices = this._hardware(x);
+      if (choices.length < 1) {
+        Log("No hardware with install cost " + x + " or less");
+        return;
+      }
+      if (corp.AI) {
+        var best = choices.slice().sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); })[0];
+        corp.AI.preferred = { title: this.title, option: best };
+      }
+      DecisionPhase(corp, choices, function (target) {
+        Trash(target.card, true);
+      }, this.title, "Trash 1 installed piece of hardware with install cost " + x + " or less", this);
+    }, this);
+  },
+  AIWouldPlay: function () {
+    if (!this.successfulRunLastTurn) return false;
+    return !!this._aiPlan(AvailableCredits(corp, "trace") - PlayCost(this));
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Amazon Industrial Zone (2038)
@@ -1087,7 +1186,7 @@ cardSet[2037] = {
 cardSet[2038] = {
   title: "Amazon Industrial Zone",
   imageFile: "02038.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1270,
   player: corp,
   faction: "Weyland Consortium",
   influence: 1,
@@ -1095,7 +1194,38 @@ cardSet[2038] = {
   subTypes: ["Region"],
   rezCost: 4,
   trashCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  responseOnInstall: {
+    Enumerate: function (card) {
+      if (!card || !CheckCardType(card, ["ice"]) || card.rezzed) return [];
+      var server = GetServer(this);
+      if (!server || server.ice.indexOf(card) < 0) return [];
+      var cost = Math.max(0, RezCost(card) - 3);
+      var decline = { id: 1, card: card, label: "Do not rez", button: "Do not rez" };
+      if (!CheckCredits(corp, cost, "rezzing", card)) return [decline];
+      var rez = { id: 0, card: card, label: "Rez " + GetTitle(card, true) + " for " + cost + "[c]", button: "Rez (" + cost + "[c])" };
+      //**AI code: a discounted rez is worth taking whenever affordable
+      if (corp.AI) return [rez];
+      return [rez, decline];
+    },
+    Resolve: function (params) {
+      if (!params || params.id !== 0 || params.card.rezzed) return;
+      Rez(params.card, false, null, null, false, 3);
+    },
+    text: "Amazon Industrial Zone: rez the installed ice, lowering its rez cost by 3",
+  },
+  AILimitPerServer: function () { return 1; },
+  // Where future ice goes: a scoring remote first, then HQ.
+  AIPreferredUpgradeServer: function (legalServers) {
+    for (var i = 0; i < legalServers.length; i++) {
+      if (typeof legalServers[i].cards === "undefined" && corp.AI._isAScoringServer(legalServers[i])) return legalServers[i];
+    }
+    return legalServers.indexOf(corp.HQ) > -1 ? corp.HQ : null;
+  },
+  // Rez ahead of the next ice install when there is ice in HQ to follow it.
+  AIRezWhenCan: function () {
+    var iceInHQ = corp.HQ.cards.some(function (card) { return CheckCardType(card, ["ice"]); });
+    return iceInHQ && CheckCredits(corp, RezCost(this) + 1, "rezzing", this);
+  },
 };
 
 //Executive Retreat (2039)
@@ -1104,7 +1234,7 @@ cardSet[2038] = {
 cardSet[2039] = {
   title: "Executive Retreat",
   imageFile: "02039.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1248,
   player: corp,
   faction: "Neutral",
   influence: 0,
@@ -1112,7 +1242,34 @@ cardSet[2039] = {
   subTypes: [],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  onScore: {
+    Resolve: function () {
+      AddCounters(this, "agenda", 1);
+      var hand = corp.HQ.cards.slice();
+      for (var i = 0; i < hand.length; i++) {
+        MoveCard(hand[i], corp.RnD.cards);
+        hand[i].knownToRunner = false;
+      }
+      Shuffle(corp.RnD.cards);
+      Log("HQ shuffled into R&D");
+    },
+  },
+  abilities: [
+    {
+      text: "[click], hosted agenda counter: Draw 5 cards.",
+      Enumerate: function () {
+        if (this.cardLocation != corp.scoreArea) return [];
+        if (!CheckActionClicks(corp, 1) || !CheckCounters(this, "agenda", 1)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        RemoveCounters(this, "agenda", 1);
+        Draw(corp, 5);
+      },
+    },
+  ],
+  AIDrawAbility: 5,
 };
 
 //Freelancer (2040)
@@ -1121,16 +1278,52 @@ cardSet[2039] = {
 cardSet[2040] = {
   title: "Freelancer",
   imageFile: "02040.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1271,
   player: corp,
   faction: "Neutral",
   influence: 0,
   cardType: "operation",
   subTypes: ["Gray Ops"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _targets: function (excluded) {
+    return ChoicesInstalledCards(runner, function (card) {
+      return CheckCardType(card, ["resource"]) && CheckTrash(card) && excluded.indexOf(card) < 0;
+    });
   },
+  Enumerate: function () {
+    if (!CheckTags(1)) return [];
+    //**AI code: only worth a card with a resource to trash
+    if (corp.AI && this._targets([]).length < 1) return [];
+    return [{}];
+  },
+  Resolve: function (params) {
+    this._trashNext([], 2);
+  },
+  _trashNext: function (chosen, remaining) {
+    var choices = this._targets(chosen);
+    if (remaining < 1 || choices.length < 1) {
+      if (chosen.length > 0) Trash(chosen, true);
+      return;
+    }
+    choices.push({ card: null, label: "Done", button: "Done" });
+    if (corp.AI) {
+      var best = choices.slice(0, -1).sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); })[0];
+      corp.AI.preferred = { title: this.title, option: best };
+    }
+    DecisionPhase(corp, choices, function (params) {
+      if (!params.card) {
+        if (chosen.length > 0) Trash(chosen, true);
+        return;
+      }
+      chosen.push(params.card);
+      this._trashNext(chosen, remaining - 1);
+    }, this.title, "Trash up to " + remaining + " resource" + (remaining == 1 ? "" : "s"), this);
+  },
+  AITagPunishment: 1,
+  AIWouldPlay: function () {
+    return CheckTags(1) && this._targets([]).length > 0;
+  },
+  AIPlayWhenCan: 2,
 };
 
 //Nerve Agent (2041)

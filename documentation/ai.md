@@ -3928,3 +3928,44 @@ competing-plan policies are recorded in the set's optimisation queue.
   option and known-root run planning), `AIWouldPlay()` (no active Lockdown and
   an agenda in HQ or a remote) and `AIPlayWhenCan`. Runner run planning does
   not price the cost on unknown cards.
+
+### Genesis Trace Amount card hooks
+
+- `AIModifyIceAI(iceAI, startIceIdx)` is also read from active Corp cards
+  (Corp cards already active for the Runner are listed once). Sensei uses it
+  to add `endTheRun` to every other ICE once its subroutine has fired this run
+  (public); during a live encounter it replaces the default row of the granted
+  subroutine instead of adding a second one. Its `AIImplementIce` is
+  `misc_serious` only while ICE inward of it remains, else `misc_minor`.
+- Replicating Perfection declares `modifyCannot("run", server)`, read through
+  `RunForbidden(server)` by `CanPayAdditionalRunCosts` (basic run, `MakeRun`,
+  run-event server choices) and by the Runner AI's server list, which drops
+  forbidden servers before computing potentials. The AI does not plan a central
+  run to unlock remotes (optimisation).
+- Vamp: `AIBreachReplacementValue`, `AIBreachNotRequired` and
+  `AIRunEventExtraPotential` on HQ when at least 4 credits can be drained; the
+  AI spends `min(Corp credits, available credits)` and otherwise breaches.
+- Satellite Uplink `AIWouldPlay()` needs two unknown facedown Corp cards, two
+  clicks and 5 credits; it exposes unknown remote roots before unrezzed ICE.
+- e3 Feedback Implants filters its `responseOnSubroutineBroken` choices for
+  the AI to one subroutine still listed in `cachedBestPath` breaks for the
+  encountered ICE (else decline). The Run Calculator does not price e3.
+- Compromised Employee and Notoriety use `AIEconomyInstall` and
+  `AIWouldPlay`/`AIPlayWhenCan` (Runner window-of-opportunity plays).
+- Snowball uses `AIImplementBreaker` at its current strength (this run's
+  growth included; in-route growth is not modelled).
+- Encryption Protocol: `AIWorthInstalling` (one copy, new remote, two clicks
+  left) and `AIRezWhenCan`. Sherlock 1.0: `AIImplementIce`
+  (`misc_moderate` per trace), click `AIImplementBreaker` and `AIBreakCost`.
+- ChiLo City Grid: `AIPreferredUpgradeServer` (server with most Tracer ICE,
+  else hold), `AILimitPerServer`, `AIRezWhenCan` during a run on its server.
+- Power Grid Overload: `AIWouldPlay`/`AIPlayWhenCan`; it sets
+  `corp.AI.preferred = {command: "trace", strengthToIncrease}` so the trace
+  margin reaches its highest-ELO hardware even if the Runner spends all trace
+  credits. Sherlock and ChiLo traces use the default (no boost).
+- Amazon Industrial Zone: its `responseOnInstall` offers the AI only the
+  discounted rez when affordable; `AIPreferredUpgradeServer` (scoring remote,
+  then HQ) and `AIRezWhenCan` (ICE in HQ to follow).
+- Executive Retreat uses `AIDrawAbility: 5`. Big Brother and Freelancer use
+  `AITagPunishment`, `AIWouldPlay` and `AIPlayWhenCan` (Big Brother only with a
+  resource or another punishment to follow; Freelancer only with a resource).

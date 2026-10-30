@@ -140,6 +140,20 @@ global `traceStrength` and before either player raises strength; a response
 may change `traceStrength` (Flip Switch sets it to 0). With no response the
 trace continues synchronously.
 
+```js
+responseOnTraceSuccessful: { Enumerate(margin), Resolve } // after a successful trace, before its "if successful" callback
+```
+
+`margin` is `traceStrength - linkStrength`; both globals remain readable in
+the trace callback (Power Grid Overload). ChiLo City Grid checks
+`attackedServer` for "during a run on this server".
+
+Other Genesis Trace Amount engine additions: `Expose(card, afterExpose,
+context)` calls `afterExpose` when the expose finishes or is prevented
+(chained exposes); turn events `runnerSuccessfulRunHQ/RnD/Archives` and
+`runnerCentralRunInitiated`; `modifyCannot("run", server)` read by
+`RunForbidden(server)` inside `CanPayAdditionalRunCosts`.
+
 ### Drawing and private look decisions
 
 `Draw(player, count, afterDraw, context)` applies `modifyDraw` once, then
