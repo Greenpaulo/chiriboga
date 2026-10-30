@@ -25,7 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `genesis` | in-progress | 120 | 105 | 15 | 105 | 9 | 19 / 98 | true / true | no |
+| `genesis` | in-progress | 120 | 105 | 15 | 87 | 8 | 32 / 98 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -93,24 +93,6 @@ None.
 - 02017 TMI: 3 scaffold marker(s)
 - 02019 Caduceus: 3 scaffold marker(s)
 - 02020 Dracō: 3 scaffold marker(s)
-- 02021 Vamp: 2 scaffold marker(s)
-- 02023 Satellite Uplink: 2 scaffold marker(s)
-- 02024 e3 Feedback Implants: 2 scaffold marker(s)
-- 02025 Compromised Employee: 2 scaffold marker(s)
-- 02026 Notoriety: 2 scaffold marker(s)
-- 02027 Snowball: 2 scaffold marker(s)
-- 02028 Dyson Mem Chip: 2 scaffold marker(s)
-- 02029 Encryption Protocol: 2 scaffold marker(s)
-- 02030 Sherlock 1.0: 3 scaffold marker(s)
-- 02031 Jinteki: Replicating Perfection: 2 scaffold marker(s)
-- 02032 Fetal AI: 2 scaffold marker(s)
-- 02034 Sensei: 3 scaffold marker(s)
-- 02035 Big Brother: 2 scaffold marker(s)
-- 02036 ChiLo City Grid: 2 scaffold marker(s)
-- 02037 Power Grid Overload: 2 scaffold marker(s)
-- 02038 Amazon Industrial Zone: 2 scaffold marker(s)
-- 02039 Executive Retreat: 2 scaffold marker(s)
-- 02040 Freelancer: 2 scaffold marker(s)
 - 02041 Nerve Agent: 2 scaffold marker(s)
 - 02042 Joshua B.: 2 scaffold marker(s)
 - 02043 Emergency Shutdown: 2 scaffold marker(s)
@@ -183,7 +165,6 @@ None.
 - 02004 Morning Star: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02006 Peacock: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02007 ZU.13 Key Master: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02027 Snowball: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02062 Force of Nature: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02066 Deus X: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02089 Creeper: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`

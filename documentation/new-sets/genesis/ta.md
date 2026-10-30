@@ -43,7 +43,7 @@ same card under its reprint code (noted above). No card is blocked.
   `runnerSuccessfulRunRnD`, `runnerSuccessfulRunArchives` beside the existing
   `runnerSuccessfulRun`. Other "made a successful run on X this turn" cards can
   use these.
-- `utility.js` `RunForbidden(server)` = `CardEffectsForbid("run", server)`,
+- `utility.js` `RunForbidden(server)` (active `modifyCannot("run", server)` effects),
   checked first in `CanPayAdditionalRunCosts` (basic run, MakeRun, run event
   server choices). New `modifyCannot` id: `"run"` with the server.
 - `ai_runner.js`: the Runner's run server list drops `RunForbidden` servers.
@@ -77,8 +77,8 @@ Big Brother, Power Grid Overload, Executive Retreat, Freelancer), run
 calculator paths/IceAI (Snowball, Sherlock, Sensei), AI decision filtering
 (Vamp, e3, AIZ, PGO trace boost, Freelancer targets).
 
-`documentation/card-status.md` was not regenerated (shared generated file;
-coordinator to run `node scripts/card-status.js`).
+`documentation/card-status.md` regenerated on this branch (generated file; rerun
+`node scripts/card-status.js` after merging the other packs).
 
 ## Deferred optimisation
 
