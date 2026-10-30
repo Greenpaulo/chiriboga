@@ -1064,7 +1064,9 @@ function Render() {
     totalServersWidth;
   if (totalFieldWidth < 1000) totalFieldWidth = 1000; //this is approximately 1 remote with ice
   var fieldWidthRatio = (totalFieldWidth + arbitraryHistorySpacer) / w;
-  var largestRatio = Math.max(fieldHeightRatio, fieldWidthRatio);
+  // Fit against the opening browser density so a browser zoom does not get
+  // cancelled by shrinking the board and every interface panel in response.
+  var largestRatio = Math.max(fieldHeightRatio, fieldWidthRatio) / pixi_browserZoom();
   if (largestRatio > 1.0) {
     fieldZoom = largestRatio;
     interfaceScale = 1.0 / fieldZoom;

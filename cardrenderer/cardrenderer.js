@@ -1161,7 +1161,7 @@ var CardRenderer = {
         //change scale as required
         var scalingratio = pixi_cardBaseScale(this.card);
         if (this.zoomed && (this.faceUp || this.canView)) {
-          scalingratio = 1.5 * fieldZoom; //readable preview at normal browser zoom
+          scalingratio = 1.5 * fieldZoom / pixi_browserZoom(); //keep reading previews at their original screen size
 		  //load high-res version, if not already loaded/loading
 		  // Determine whether to use hi-res images: LocalStorage setting overrides gauntletConfig
 		  var useHiRes = false;
@@ -1548,6 +1548,7 @@ var CardRenderer = {
   //Create one of these to initialise a renderer
   Renderer: class {
     constructor(resizeCallback, accessibilityMode="default") {
+      this.browserPixelRatio = window.devicePixelRatio || 1; //display density when the game opens
       var w = window.innerWidth;
       var h = window.innerHeight;
       this.app = new PIXI.Application(w, h, { transparent: true });
@@ -2377,6 +2378,12 @@ var pixi_mousePosition = { x: 0, y: 0 };
 var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = timeout running
 var pixi_holdCard = null; //for touch and hold
 var pixi_zoomedCards = new Set();
+
+// Desktop browser zoom changes devicePixelRatio as well as the CSS viewport.
+// Use a relative density so Retina displays keep their normal starting scale.
+function pixi_browserZoom() {
+  return (window.devicePixelRatio || 1) / cardRenderer.browserPixelRatio;
+}
 
 //Enlarge only the viewing player's hand; cards return to board size on leaving it.
 function pixi_cardBaseScale(card) {
