@@ -869,6 +869,53 @@ historical part 1 batch failed its win-rate improvement and bluff-correlation
 checks; that result does not establish the quality of the combined policy
 against a human and does not cover the later ICE coordination seam.
 
+### Scoring plan (I10)
+
+Behind `scoringPlan` (default off; owner playtesting decides adoption),
+`Phase_Main()` asks `_scoringPlanAction()` for the click after its advance
+block and before ordinary installs, emergency recovery and economy. Earlier
+interrupts (immediate wins, rezzes, kill combos, the critical breach defence,
+purge and advancing an installed agenda) still come first. The plan owns
+agenda installs from HQ: `_rankedInstallOptionsCore()` offers none while the
+option is on, except the existing install-and-fast-advance win.
+
+`_scoringPlan()` is recomputed from the board each click (no stored plan
+record). With an agenda in HQ it chooses, in order:
+
+1. **Score this turn:** an agenda and remote with room (or a new remote) whose
+   `_agendaCompletionPlan()` has zero exposed Runner turns. No protection is
+   needed.
+2. **Target:** the remote with room and ICE whose `_breachMargin()` is lowest
+   (the Runner has the least to spare), else an empty remote, else a new one.
+3. **Install** the agenda (fewest exposed turns, then most points) when
+   `_scoringPlanReady()` holds: the target has ICE and either the Runner's
+   margin is negative, or no protection can be added this click and the
+   target is no easier to breach than HQ, or HQ is over the hand limit with
+   agendas.
+4. **Protect** the target with `_scoringPlanProtection()`: the I2-ranked ICE
+   for that server (`_marginalIceInstallOptions(..., [target])`, or
+   `_affordableIce()` with `iceMarginalSecurity` off), up to three ICE. It
+   gives way to the opening ICE order.
+5. Otherwise the click falls through to the ordinary flow.
+
+Readiness uses the Runner's public breach margin rather than
+`CORP_AI_AGENDA_EXPOSURE_TABLE`: that table measures the Runner AI, which
+steals an unadvanced agenda from a bare remote only about 12% of turns, so it
+rates unprotected installs as nearly safe against a human.
+
+With `scoringPlanCardSteps` as well (default off), `_scoringPlanUpgrade()`
+adds card-declared steps through existing hooks: an `AIIsScoringUpgrade`
+upgrade is installed on the target before the agenda, and an upgrade with a
+positive `AIDefensiveValue` protects the target when no ICE can be installed.
+Advancing operations and abilities are already counted by
+`_potentialAdvancement()` in step 1.
+
+`economyAssetsWhenRich` (default off) changes `_economyAssetWanted()`, the
+shared condition of the economy assets whose `AIWorthInstalling` declined
+whenever `_sufficientEconomy(false)` held: inside
+`_bestMainPhaseEconomyOption()`, where the alternative is a basic economy
+action, a rich Corp installs them too.
+
 ## Not yet modelled: holding and trigger ordering
 
 - Credit holds exist only for installed cards: `_sufficientEconomy()` sums

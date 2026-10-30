@@ -112,6 +112,11 @@ games. This is an owner-authorized playtest setup, not permanent adoption or
 a passed historical batch gate. Tests assert these current defaults; new
 strategic options still start off unless Paul requests otherwise.
 
+On 2026-10-30 Paul chose [I10](backlog/I10-scoring-plan.md) (scoring plan) in
+place of I3 and asked for version 1 and version 2 behind separate options for
+sequential playtests: `scoringPlan` first, then `scoringPlanCardSteps`, plus
+`economyAssetsWhenRich`. All three start off.
+
 The [agenda-stall ticket](bugs/corp-agenda-held-while-secure-remote-available.md)
 and [I3](backlog/I3-remote-role-and-root-suitability.md) now share the evidence
 from `corp_wont_play_an_agenda.txt`. I4 owns agenda install/hold and advancement;

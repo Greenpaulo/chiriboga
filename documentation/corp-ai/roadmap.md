@@ -280,9 +280,9 @@ I9 comes last.
 - **Parked because:** superseded by I10 (owner decision 2026-10-30). Adding remote-role scores to the click-by-click ranking repeats the pattern whose recommendations were dropped in play; I10 owns scoring-room availability and asset reuse inside an explicit plan.
 
 ### I10 Scoring plan
-- **Status:** proposed
+- **Status:** in-progress
 - **Depends on:** I2, I4
-- **Spec:** [I10-scoring-plan.md](specs/I10-scoring-plan.md)
+- **Ticket:** [I10-scoring-plan.md](../backlog/code-review/I10-scoring-plan.md)
 - **Goal:** A multi-turn plan that prepares and protects a remote, installs an agenda there and advances it to scoring, choosing the Corp's clicks while active. Version 1 covers ICE, install and click-advance; card-declared advance operations and defensive/scoring upgrades follow after owner playtesting.
 
 ### I3.1 Deck game-plan profile

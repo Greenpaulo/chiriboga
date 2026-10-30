@@ -6470,7 +6470,7 @@ cardSet[31080] = {
   //**AI code for installing (return -1 to not install, index in emptyProtectedRemotes to install in a specific server, or emptyProtectedRemotes.length to install in a new server)
   AIWorthInstalling: function (emptyProtectedRemotes) {
 	//only install if we're not already rich (unless installing from Archives)
-    if ( ( !corp.AI._sufficientEconomy(false) ) || this.cardLocation == corp.archives.cards) {
+    if ( ( corp.AI._economyAssetWanted() ) || this.cardLocation == corp.archives.cards) {
         //choose the first non-scoring server (create one if necessary)
         for (var j = 0; j < emptyProtectedRemotes.length; j++) {
           if ( !corp.AI._isAScoringServer(emptyProtectedRemotes[j]) ) return j;

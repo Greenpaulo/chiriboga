@@ -5156,7 +5156,24 @@ class CorpAI {
   }
 
   //enact best economy (called from main phase)
+  //Economy asset install hooks: wanted unless the Corp is rich. With
+  //economyAssetsWhenRich, also wanted inside the economy fallback, where the
+  //alternative is a basic economy action.
+  _economyAssetWanted() {
+    if (!this._sufficientEconomy(false)) return true;
+    return !!this.options.economyAssetsWhenRich && this._economyFallbackDepth > 0;
+  }
+
   _bestMainPhaseEconomyOption(optionList) {
+    this._economyFallbackDepth = (this._economyFallbackDepth || 0) + 1;
+    try {
+      return this._bestMainPhaseEconomyOptionCore(optionList);
+    } finally {
+      this._economyFallbackDepth--;
+    }
+  }
+
+  _bestMainPhaseEconomyOptionCore(optionList) {
     var installedCards = InstalledCards(corp);
 
     if (optionList.includes("advance") && Credits(corp) > 0) {
@@ -5854,6 +5871,147 @@ class CorpAI {
     if (!this._agendaHolds) this._agendaHolds = new WeakMap();
     if (!this._agendaHolds.has(agenda)) this._agendaHolds.set(agenda, new Set());
     this._agendaHolds.get(agenda).add(this._postureEpoch);
+  }
+
+  //I10 (scoringPlan): the install preference for this click of an explicit
+  //scoring plan, or -1 to leave the click to the ordinary flow. Top level only.
+  _scoringPlanAction(optionList) {
+    if (!this.options.scoringPlan || this._hypotheticalDepth > 0) return -1;
+    if (!optionList.includes("install")) return -1;
+    var plan = this._scoringPlan();
+    if (!plan) return -1;
+    this._log("Scoring plan " + JSON.stringify({
+      agenda: plan.agenda ? GetTitle(plan.agenda) : null,
+      server: plan.server ? ServerName(plan.server) : "new remote",
+      step: plan.step, reason: plan.reason, margin: plan.margin,
+      card: plan.install ? GetTitle(plan.install.cardToInstall) : null,
+    }));
+    if (!plan.install) return -1;
+    return this._returnPreference(optionList, "install", plan.install);
+  }
+
+  //I10: this click's step towards scoring an agenda from HQ, or null with no
+  //agenda in HQ. Recomputed from the board every click, so it never goes
+  //stale. Steps, in order: install an agenda that scores before the Runner's
+  //next turn; (scoringPlanCardSteps) a scoring upgrade for the target; install
+  //into a ready target; protect the target. Readiness uses the Runner's public
+  //breach margin, not the AI-calibrated steal hazard: that table reflects the
+  //Runner AI, which rarely checks an unadvanced card in a bare remote.
+  //Returns {agenda, server (null: new remote), step, reason, margin, install}.
+  _scoringPlan() {
+    var agendas = corp.HQ.cards.filter((card) => CheckCardType(card, ["agenda"]));
+    if (agendas.length < 1) return null;
+    var rooms = corp.remoteServers.filter((server) => this._remoteHasRoom(server));
+    if (typeof CorpRemoteServerLimitReached != "function" || !CorpRemoteServerLimitReached())
+      rooms = rooms.concat([null]);
+    var evaluations = new Map();
+    var evaluate = (server) => {
+      if (!evaluations.has(server))
+        evaluations.set(server, server ? this._evaluateServerSecurity(server) : this._detachedRemoteEvaluation());
+      return evaluations.get(server);
+    };
+    var plan = (agenda, server, step, reason, margin, card) => ({
+      agenda: agenda, server: server, step: step, reason: reason, margin: margin,
+      install: card ? {cardToInstall: card, serverToInstallTo: server, reason: "I10 scoring plan: " + step} : null,
+    });
+    //Most points, then fewest exposed Runner turns, then the more protected remote.
+    var bestAgenda = (server) => {
+      var best = null;
+      agendas.forEach((agenda) => {
+        var turns = this._agendaCompletionPlan(agenda, server, 0, evaluate(server)).exposureTurns;
+        var points = Number(agenda.agendaPoints) || 0;
+        if (!best || turns < best.turns || (turns == best.turns && points > best.points))
+          best = {agenda: agenda, turns: turns, points: points};
+      });
+      return best;
+    };
+    //1. Scoring before the Runner's next turn needs no protection.
+    var fastest = null;
+    rooms.forEach((server) => {
+      var best = bestAgenda(server);
+      if (best.turns != 0) return;
+      var ice = server ? server.ice.length : 0;
+      if (!fastest || best.points > fastest.points ||
+          (best.points == fastest.points && ice > fastest.ice))
+        fastest = {agenda: best.agenda, server: server, points: best.points, ice: ice};
+    });
+    if (fastest)
+      return plan(fastest.agenda, fastest.server, "install", "scores this turn", null, fastest.agenda);
+    //2. The target: the protected remote with room the Runner can least afford
+    //to breach, else an empty remote, else a new one.
+    var margin = (server) => {
+      var value = this._breachMargin(server, evaluate(server)).margin;
+      return value === null || typeof value == "undefined" ? Infinity : value;
+    };
+    var protectedRooms = rooms.filter((server) => server && server.ice.length > 0);
+    protectedRooms.sort((a, b) => margin(a) - margin(b) ||
+      this._protectionScore(b, {}, evaluate(b)) - this._protectionScore(a, {}, evaluate(a)));
+    var target = protectedRooms.length > 0 ? protectedRooms[0] :
+      rooms.find((server) => server && server.ice.length < 1) || null;
+    if (!rooms.includes(target)) return null; //remote limit reached and no room
+    var targetMargin = margin(target);
+    var protect = this._scoringPlanProtection(target);
+    var readyReason = this._scoringPlanReady(target, targetMargin, protect);
+    var shown = isFinite(targetMargin) ? targetMargin : null;
+    var agenda = bestAgenda(target).agenda;
+    //A scoring upgrade goes in before the agenda it helps.
+    if (this.options.scoringPlanCardSteps) {
+      var scoringUpgrade = this._scoringPlanUpgrade(target, true);
+      if (scoringUpgrade)
+        return plan(agenda, target, "prepare", "scoring upgrade", shown, scoringUpgrade);
+    }
+    if (readyReason) return plan(agenda, target, "install", readyReason, shown, agenda);
+    if (protect) return plan(agenda, target, "protect", "Runner can afford to breach", shown, protect);
+    return plan(agenda, target, "wait", "no affordable protection", shown, null);
+  }
+
+  //I10: why target (with Runner breach margin m) is ready for an agenda, or
+  //null. Never ready without ICE: the plan's first step installs it there.
+  _scoringPlanReady(target, m, protect) {
+    if (!target || target.ice.length < 1) return null;
+    if (m < 0) return "Runner cannot afford to breach";
+    //Holding is no safer than a remote the Runner can breach at least as
+    //cheaply as HQ, once the remote cannot be improved this click.
+    var hqMargin = this._breachMargin(corp.HQ).margin;
+    if (hqMargin === null || typeof hqMargin == "undefined") hqMargin = Infinity;
+    if (!protect && m <= hqMargin) return "no further protection; remote no weaker than HQ";
+    if (this._agendasInHand() > MaxHandSize(corp) - 1) return "agendas would be discarded";
+    return null;
+  }
+
+  //I10: the card that protects target this click (null: new remote), or null.
+  //ICE first, ranked by I2 for that server when iceMarginalSecurity is on; with
+  //scoringPlanCardSteps, a defensive upgrade when no ICE can be installed.
+  //Gives way to the opening ICE order and stops at three ICE.
+  _scoringPlanProtection(target) {
+    if (this._openingIceTarget() !== undefined) return null;
+    if (target && target.ice.length >= 3) return null;
+    var ice = null;
+    if (this.options.iceMarginalSecurity) {
+      var options = this._marginalIceInstallOptions(corp.HQ.cards, true,
+        this._sufficientEconomy(false, 4), {}, [target]);
+      var option = options.find((candidate) => candidate.serverToInstallTo === target);
+      if (option) ice = option.cardToInstall;
+    } else ice = this._affordableIce(target, corp.HQ.cards)[0] || null;
+    if (ice) return ice;
+    if (this.options.scoringPlanCardSteps) return this._scoringPlanUpgrade(target, false);
+    return null;
+  }
+
+  //I10 card steps: an affordable upgrade in HQ for target, either a scoring
+  //upgrade (AIIsScoringUpgrade) or one with AIDefensiveValue for it.
+  _scoringPlanUpgrade(target, scoring) {
+    //Uninhibited: the legacy scoring-server bar is what the plan replaces;
+    //uniqueness, Region and per-server limits still apply.
+    var preferences = this._upgradeInstallPreferences(target, corp.HQ.cards, false);
+    var found = preferences.find((preference) => {
+      var card = preference.cardToInstall;
+      if (preference.serverToInstallTo !== target || !CheckInstall(card) ||
+          InstallCost(card, target) > Credits(corp)) return false;
+      if (scoring) return !!card.AIIsScoringUpgrade;
+      return typeof card.AIDefensiveValue == "function" && card.AIDefensiveValue.call(card, target) > 0;
+    });
+    return found ? found.cardToInstall : null;
   }
 
   //Band 2 first (smallest W within 0.01), then EV. Owner amendment: an install
@@ -6680,6 +6838,10 @@ class CorpAI {
     var extendedAssetDestinations = null;
     for (var i = 0; i < cards.length; i++) {
       if (this._isHVT(cards[i])) {
+        //I10: with scoringPlan the plan owns agenda installs from HQ.
+        if (this.options.scoringPlan && CheckCardType(cards[i], ["agenda"]) &&
+            corp.HQ.cards.includes(cards[i]))
+          continue;
         //I4: the install/hold options are logged; with agendaDestinationPlan
         //they replace the scoring-server destinations for an agenda in HQ.
         var commitment = null;
@@ -9100,6 +9262,11 @@ class CorpAI {
       "Nothing to advance" + (sufficientEconomy ? "" : " (can't afford it)"),
     );
 
+    //I10: an active scoring plan takes the click before ordinary installs,
+    //emergency recovery and economy.
+    var scoringPlanAction = this._scoringPlanAction(optionList);
+    if (scoringPlanAction > -1) return scoringPlanAction;
+
     if (optionList.indexOf("install") != -1) {
       var priorityRankedInstallOptions = this._rankedInstallOptions(
         corp.HQ.cards,
@@ -9701,4 +9868,20 @@ CorpAI.DEFAULT_OPTIONS = Object.freeze({
   // —or to hold it in HQ. Requires agendaCommitmentPlan; intended alongside 
   // agendaExposureTable.
   agendaDestinationPlan: false,
+
+  // I10: an explicit scoring plan owns the click while an agenda is in HQ:
+  // protect a remote until the Runner cannot afford to breach it (or it is no
+  // weaker than HQ and cannot be improved), then install and advance there.
+  // Never installs an agenda from HQ into a remote without ICE unless it
+  // scores before the Runner's next turn.
+  scoringPlan: false,
+
+  // I10 version 2: the scoring plan also installs scoring upgrades
+  // (AIIsScoringUpgrade) and, when no ICE can be installed, defensive upgrades
+  // (AIDefensiveValue) on its remote. Requires scoringPlan.
+  scoringPlanCardSteps: false,
+
+  // Economy assets whose install hook declines while the Corp is rich are
+  // still installed when the Corp would otherwise take a basic economy action.
+  economyAssetsWhenRich: false,
 });

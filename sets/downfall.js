@@ -3715,7 +3715,7 @@ cardSet[26042] = {
   AIAvoidInstallingOverThis: true,
   AIEconomyCard: true,
   AIWorthInstalling: function (emptyProtectedRemotes) {
-    if (corp.AI._sufficientEconomy(false) && this.cardLocation != corp.archives.cards) return -1;
+    if (!corp.AI._economyAssetWanted() && this.cardLocation != corp.archives.cards) return -1;
     for (var i = 0; i < emptyProtectedRemotes.length; i++) {
       if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
     }
@@ -4088,7 +4088,7 @@ cardSet[26048] = {
     automatic: true,
   },
   AIWorthInstalling: function (emptyProtectedRemotes) {
-    if (corp.AI._sufficientEconomy(false) && this.cardLocation != corp.archives.cards) return -1;
+    if (!corp.AI._economyAssetWanted() && this.cardLocation != corp.archives.cards) return -1;
     for (var i = 0; i < emptyProtectedRemotes.length; i++)
       if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
     return emptyProtectedRemotes.length;
@@ -4132,7 +4132,7 @@ cardSet[26049] = {
     availableWhenInactive: true,
   },
   AIWorthInstalling: function (emptyProtectedRemotes) {
-    if (corp.AI._sufficientEconomy(false) && this.cardLocation != corp.archives.cards) return -1;
+    if (!corp.AI._economyAssetWanted() && this.cardLocation != corp.archives.cards) return -1;
     for (var i = 0; i < emptyProtectedRemotes.length; i++)
       if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
     return emptyProtectedRemotes.length;
@@ -4688,7 +4688,7 @@ cardSet[26057] = {
   ],
   // Economy remote: decline when the economy is already sufficient.
   AIWorthInstalling: function (emptyProtectedRemotes) {
-    if (corp.AI._sufficientEconomy(false)) return -1;
+    if (!corp.AI._economyAssetWanted()) return -1;
     for (var i = 0; i < emptyProtectedRemotes.length; i++) {
       if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
     }

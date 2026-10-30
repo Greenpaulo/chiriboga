@@ -5233,7 +5233,7 @@ cardSet[30071] = {
   //**AI code for installing (return -1 to not install, index in emptyProtectedRemotes to install in a specific server, or emptyProtectedRemotes.length to install in a new server)
   AIWorthInstalling: function (emptyProtectedRemotes) {
 	//only install if there isn't already a Regolith installed and we're not already rich (unless installing from Archives)
-    if ( ( !corp.AI._copyAlreadyInstalled(this) && !corp.AI._sufficientEconomy(false) ) || this.cardLocation == corp.archives.cards) {
+    if ( ( !corp.AI._copyAlreadyInstalled(this) && corp.AI._economyAssetWanted() ) || this.cardLocation == corp.archives.cards) {
         //choose the first non-scoring server (create one if necessary)
 		//but allow install into completely empty non-scoring servers if no HVTs in hand
         for (var j = 0; j < emptyProtectedRemotes.length; j++) {

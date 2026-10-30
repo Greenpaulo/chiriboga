@@ -6223,7 +6223,7 @@ cardSet[35062] = {
   //AI: Worth installing as economy
   AIWorthInstalling: function(emptyProtectedRemotes) {
     //Install if we need economy
-    if (!corp.AI._sufficientEconomy(false) || this.cardLocation == corp.archives.cards) {
+    if (corp.AI._economyAssetWanted() || this.cardLocation == corp.archives.cards) {
       //Choose the first non-scoring server
       for (var j = 0; j < emptyProtectedRemotes.length; j++) {
         if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
@@ -8623,6 +8623,16 @@ cardSet[35051] = {
       this._sharedResolve();
     },
     text: "Phật Gioan Baotixita: net damage",
+  },
+
+  //**AI code: install in its own new remote (never a protected scoring
+  //remote) so power counters build before agendas are scored or stolen.
+  AIWorthInstalling: function(emptyProtectedRemotes) {
+    return emptyProtectedRemotes.length;
+  },
+  //Counters are only placed while rezzed; rez outside runs.
+  AIRezWhenCan: function() {
+    return !attackedServer;
   },
 };
 

@@ -1,8 +1,101 @@
 # I10 Scoring plan
 
+**Outcome:** blocked — owner playtesting of `scoringPlan`, then `scoringPlanCardSteps`, decides adoption.
+
 **Roadmap item:** I10 · **Depends on:** I2, I4 · **Sets:** playable sets in `documentation/card-sets.md`
-**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, [install-decisions-design.md](install-decisions-design.md)
-**Verified against code:** 77909e6 (2026-10-30)
+**Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, [install-decisions-design.md](../../corp-ai/specs/install-decisions-design.md)
+**Verified against code:** 11129c5 (2026-10-30)
+**Source log:** `documentation/debug-logs/corp_didnt_install_single_agenda.txt`
+**Architecture:** [Scoring plan (I10)](../../corp-ai/architecture.md#scoring-plan-i10)
+
+## Resolution
+
+Implemented from `11129c5`.
+
+**Gate:** pending owner playtesting — `scoringPlan` defaults to off. Human
+gate; `scoringPlanCardSteps` and `economyAssetsWhenRich` are separate options,
+also off, for Paul to playtest after version 1.
+
+**Classification:** strategic preference (which legal install to make), so
+every behaviour change is behind a default-off option. The Phật Gioan
+Baotixita hooks fill a missing card AI declaration (the card was never
+installed) and are not gated, like other card-batch AI hooks.
+
+**What changed**
+- `scoringPlan` (v1): `_scoringPlanAction()` / `_scoringPlan()` in
+  `ai_corp.js`, called from `Phase_Main()` after the advance block. Steps:
+  score-this-turn install; install into a ready remote; protect the target
+  remote with ICE (I2-ranked for that server). Readiness is the Runner's
+  public breach margin (`_breachMargin()`), not I4's exposure table, which is
+  calibrated on the Runner AI (an unadvanced agenda in a bare remote: 11.8%
+  steal per turn). The legacy HQ-relative scoring bar no longer gates agenda
+  installs while the option is on; `_rankedInstallOptionsCore()` offers no
+  HQ agenda installs, so only the plan installs them.
+- `scoringPlanCardSteps` (v2): scoring upgrades (`AIIsScoringUpgrade`) go on
+  the target before the agenda; defensive upgrades (`AIDefensiveValue`)
+  protect it when no ICE can be installed. No new hook contracts.
+- `economyAssetsWhenRich`: seven economy assets (Regolith Mining License and
+  six others in System Gateway, System Update 2021, Downfall and Elevation)
+  call the new `_economyAssetWanted()`; with the option on, a rich Corp
+  installs them in the economy fallback instead of clicking for credits.
+- Phật Gioan Baotixita: `AIWorthInstalling` (always a new remote) and
+  `AIRezWhenCan` (outside runs).
+- Fixture runner: `EXPECT_LOG` directive, so fixtures assert the logged
+  reason; stubs for `CheckInstall`, `CheckInstallDestination`, `InstallCost`.
+
+**Departures from the design below**
+- No persistent plan record. The plan is recomputed from the board every
+  click, which keeps it stable (the same target wins while the board is
+  unchanged) without save/restore state or staleness.
+- Version 2 needs no new advance step: advancing operations and abilities are
+  already counted by `_potentialAdvancement()` in the score-this-turn check.
+  Asset replacement for room is limited to the existing obsolete-bluff rule
+  in `_remoteHasRoom()`; a fuller asset-value comparison remains I5.
+- Readiness adds two fallbacks so the plan cannot stall: install when no
+  protection can be added and the target is no easier to breach than HQ, or
+  when agendas would be discarded. Protection stops at three ICE.
+
+**Tests:** new green fixtures in `tests/fixtures/corp-decisions/`:
+`i10-plan-protects-new-remote` (scenarios 1 and 5),
+`i10-plan-installs-in-locked-remote` (2), `i10-plan-protects-breachable-remote`
+(3), `i10-plan-scores-this-turn-unprotected` (4), `i10-plan-v2-scoring-upgrade`,
+`i10-plan-v2-defensive-upgrade`, `economy-asset-when-rich`,
+`phat-gioan-baotixita-installs`. Scenario 7 (flag off unchanged): every
+existing fixture and decision snapshot passes unchanged. Scenario 6
+(emergency pre-emption) follows from call order in `Phase_Main()` and has no
+dedicated test.
+
+**Smoke check (not adoption evidence):** `node scripts/ai-batch.js --games 30`,
+210 games each, 0 failed: defaults Corp win 31.9%, scored 3.60; `scoringPlan`
+46.7%, scored 4.79; all three options 48.1%, scored 4.73.
+
+**Handoff for playtesting**
+1. Set `scoringPlan: true` (other options as now). Look for: a remote built
+   and ICE'd while agendas wait in HQ; agendas installed only into ICE'd
+   remotes (or when they score the same turn); no long click-for-credit
+   streaks with agendas in hand. Preserve: central ICE under real pressure,
+   asset play when no agenda is in hand.
+2. Then add `scoringPlanCardSteps: true` with a deck carrying scoring or
+   defensive upgrades (SanSan City Grid, Manegarm Skunkworks, Anoetic Void).
+3. Separately, `economyAssetsWhenRich: true`: rich Corp installs Regolith-type
+   assets rather than clicking for credits.
+4. Log lines start `AI: Scoring plan {...}` with step and reason.
+
+## Implementation plan
+
+Proposed at `11129c5`, 2026-10-30. **Approved 2026-10-30** (owner, in
+conversation: v1 and v2 behind separate flags, plus the two side fixes).
+
+- **Validation:** the source log shows I4 recommending installs that the
+  legacy path drops, no step that creates a scoring remote, and the
+  HQ-relative bar in `_isAScoringServer()` rising with each HQ ICE. I4's
+  install recommendations were unsafe because its exposure table is measured
+  on the Runner AI.
+- **Approach:** as in Resolution.
+- **Tests:** decision fixtures per scenario, with logged reasons.
+- **Risk:** shared `Phase_Main()` and install ranking; all changes inert with
+  the options off (existing fixtures/snapshots unchanged).
+- **Docs:** architecture, `ai.md`, roadmap, playtesting note.
 
 ## Goal
 Give the Corp an explicit, multi-turn plan to score: prepare a remote, protect
@@ -37,7 +130,7 @@ from HQ; the Corp clicked for credits about 20 times on 12–19 credits.
    (one ICE) never qualified while HQ held two; later the bar was met
    (`Scoring windows: [9.1]`) but the click went to "Critical server has no
    available ICE; seeking protection for HQ" instead. The
-   [L7.1.1 failure analysis](L7.1.1-horizon-aware-central-consequence.md)
+   [L7.1.1 failure analysis](../../corp-ai/specs/L7.1.1-horizon-aware-central-consequence.md)
    found the same coupling.
 4. **No click is planned across turns.** `Phase_Main` falls through
    advance → install → emergency recovery → economy → "Not sure what to do" →
@@ -162,7 +255,7 @@ Adoption: Paul decides after playtesting; record the tested flags and decision.
 
 ## Acceptance criteria
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
-- [ ] The behaviour change ships under `scoringPlan`, default off.
-- [ ] Any new card hook is documented in `documentation/ai.md`.
-- [ ] (Owner playtesting) The handoff names the tested flags, the behaviour to assess and contrasting cases; owner adoption remains explicit or pending.
-- [ ] `architecture.md` describes the scoring plan once merged.
+- [x] The behaviour change ships under `scoringPlan`, default off.
+- [x] Any new card hook is documented in `documentation/ai.md`.
+- [x] (Owner playtesting) The handoff names the tested flags, the behaviour to assess and contrasting cases; owner adoption remains explicit or pending.
+- [x] `architecture.md` describes the scoring plan.

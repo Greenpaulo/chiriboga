@@ -1,0 +1,13 @@
+// PHASE: Phase_Main
+// OPTIONS: gain, draw, install, play, n
+// EXPECT: install
+// EXPECT_CARD: Phật Gioan Baotixita
+// EXPECT_SERVER: NEW
+// SETUP: corp.creditPool=6; corp.clickTracker=3; runner.creditPool=5; reviewAI._completedIceInstalls=2
+// NOTE: Phật Gioan Baotixita declares AIWorthInstalling: it is installed in a new remote rather than left in HQ.
+RunnerTestField(30019, [], [30030,30030,30011,30020,30006,30005,30026,31033,30018,30027], [30030,30020,30011], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(35046, [], [30075,30064,31077,30072,30070,30067,30075,31081,30062,30068], [35051], [31077], [31077], [30074,31077], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.archives.ice[0].rezzed=true;
+corp.RnD.ice[0].rezzed=true;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;

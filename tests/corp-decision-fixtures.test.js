@@ -24,6 +24,7 @@
 //              // EXPECT_SERVER: HQ        (checks the preferred install target)
 //              // EXPECT_CARD: Semak-samun (checks the preferred card)
 //              // SETUP: corp.creditPool=6; corp.clickTracker=3   (needed for non-debug logs, which omit them)
+//              // EXPECT_LOG: Runner cannot afford   (some AI log line contains this text)
 //              // EXPECT_SKIPPED: R&D=layerPolicy:existingUnrezzedIceAndPoor
 //                                         (I0 telemetry: an ICE-protection walk passed over this server
 //                                          for this reason; the part after ':' is the layer-policy reason)
@@ -68,6 +69,10 @@ context.ActiveCards = player => {
 context.CheckHasAbilities = card => !card.disabled;
 context.CheckSubType = (card, type) => (card.subTypes || []).includes(type);
 context.CheckCardType = (card, types) => types.includes(card.cardType);
+context.CheckInstall = card => !!card;
+context.CheckInstallDestination = () => true;
+context.InstallCost = (card, destination) =>
+  card.cardType === 'ice' ? (destination ? destination.ice.length : 0) : (card.installCost || 0);
 context.CheckAdvance = card => card.canBeAdvanced || card.cardType === 'agenda';
 context.AgendaPoints = player => player.agendaPoints || 0;
 context.AgendaPointsToWin = () => 7;
@@ -292,7 +297,10 @@ files.forEach(file => {
           candidateSnapshots[file] = notes.installCandidates || [];
         }
       }
-      const ok = commandOK && serverOK && cardOK && skippedOK;
+      const expectedLog = directive('EXPECT_LOG');
+      const logOK = !expectedLog || decisionMessages.some(m => String(m).includes(expectedLog));
+      if (!logOK) skippedNote += ', no logged reason containing ' + JSON.stringify(expectedLog);
+      const ok = commandOK && serverOK && cardOK && skippedOK && logOK;
       const replayPath = identifier ? 'Choice ' + identifier : phase;
       const note = stubbed.length ? '  [auto-stubbed: ' + stubbed.join(', ') + ']' : '';
       if (ok) { passed++; if (showPasses) console.log('PASS ' + file + '  (' + replayPath + ' -> ' + chosen + ')' + note); }
