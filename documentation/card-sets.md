@@ -23,7 +23,7 @@ generated [card-status.md](card-status.md).
 | `midnightsun` | not-implemented | |
 | `parhelion` | not-implemented | |
 | `automatainitiative` | not-implemented | |
-| `uprising` | in-progress | Batch implementation in progress; hidden and untested. See [tracker](new-sets/current-set-implementation.md). |
+| `uprising` | playable | All 16 batches implemented; implementation integration checks passed and made playable on 2026-10-30 under the two-stage workflow. Optional strategy work remains in the [optimisation queue](new-sets/current-set-implementation.md); no independent review yet. |
 | `rebellion` | not-implemented | |
 | `coreset` | deprecated | Legacy set; System Gateway and System Update 2021 reprint many of its cards. |
 

@@ -29,7 +29,7 @@ in card-sets.md.
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `downfall` | playable | 65 | 65 | 0 | 0 | 0 | 55 / 61 | false / false | no |
-| `uprising` | in-progress | 65 | 65 | 0 | 11 | 0 | 51 / 62 | true / true | no |
+| `uprising` | playable | 65 | 65 | 0 | 0 | 0 | 57 / 62 | false / false | no |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
@@ -71,17 +71,7 @@ None.
 
 ### `uprising` (sets/uprising.js)
 
-- 26117 Digital Rights Management: 1 scaffold marker(s)
-- 26118 SYNC Rerouting: 1 scaffold marker(s)
-- 26119 Ganked!: 1 scaffold marker(s)
-- 26120 Earth Station: SEA Headquarters: 1 scaffold marker(s)
-- 26121 Transport Monopoly: 1 scaffold marker(s)
-- 26122 Wall to Wall: 1 scaffold marker(s)
-- 26123 Akhet: 2 scaffold marker(s)
-- 26124 Colossus: 2 scaffold marker(s)
-- 26125 Winchester: 2 scaffold marker(s)
-- 26126 Argus Crackdown: 1 scaffold marker(s)
-- 26127 Cayambe Grid: 1 scaffold marker(s)
+None.
 
 ### `systemupdate2021` (sets/systemupdate2021.js)
 
@@ -103,9 +93,10 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 | `systemgateway` | 31 | 12 | 12 | 7 | 5 |
 | `elevation` | 28 | 14 | 5 | 9 | 0 |
 | `downfall` | 28 | 13 | 3 | 12 | 2 |
+| `uprising` | 29 | 21 | 3 | 5 | 2 |
 | `systemupdate2021` | 33 | 9 | 8 | 16 | 1 |
 | `vantagepoint` | 23 | 20 | 0 | 3 | 1 |
-| **Total** | 143 | 68 | 28 | 47 | 9 |
+| **Total** | 172 | 89 | 31 | 52 | 11 |
 
 **Intent hook (`AIEconomyInstall`, `AIEconomyPlay`, `AIDrawInstall`, `AIDrawTrigger`) but no `AIWorthKeeping`:**
 
@@ -116,6 +107,8 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 30034 Verbal Plasticity
 - 26022 Spec Work
 - 26027 The Artist
+- 26069 Gachapon
+- 26093 Buffer Drive
 - 31038 Prepaid VoicePAD
 - 36011 Sell Out
 
@@ -134,6 +127,16 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 26009 Trickster Taka
 - 26018 The Class Act
 - 26026 Rezeki
+- 26070 Keiko
+- 26072 Mystic Maemi
+- 26073 Paladin Poemu
+- 26077 Prognostic Q-Loop
+- 26078 Swift
+- 26081 Penumbral Toolkit
+- 26088 Mantle
+- 26091 Cybertrooper Talut
+- 26094 Daily Casts
+- 26095 DreamNet
 - 31010 Liberated Account
 - 31024 Security Testing
 - 31035 Aesop’s Pawnshop
@@ -175,6 +178,11 @@ is never "worth keeping" and is discarded first. Runner roadmap items W0-W5 use 
 - 26028 Direct Access
 - 26029 Rejig
 - 26030 Whistleblower
+- 26067 Moshing
+- 26069 Gachapon
+- 26085 Simulchip
+- 26086 Cordyceps
+- 26093 Buffer Drive
 - 31003 En Passant
 - 31004 Retrieval Run
 - 31005 Clot
