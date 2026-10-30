@@ -10,6 +10,8 @@
  */
 function CheckAdvance(card) {
   if (card != null) {
+    //canBeAdvanced may be a function for conditional permission (e.g. Woodcutter: only while rezzed)
+    if (typeof card.canBeAdvanced == "function") return !!card.canBeAdvanced.call(card);
     if (card.canBeAdvanced) {
       return true;
     }

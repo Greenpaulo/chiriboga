@@ -2998,6 +2998,8 @@ var cardPropertyResets = [
   { propertyName: "chosenCard", defaultValue: null },
   { propertyName: "chosenServer", defaultValue: null },
   { propertyName: "chosenWord", defaultValue: "" },
+  //hosted-but-not-installed cards (Detente, Personal Workshop) stop being flagged once they leave
+  { propertyName: "notInstalled", defaultValue: false },
 ];
 function ResetProperties(card) {
   for (var i = 0; i < cardPropertyResets.length; i++) {

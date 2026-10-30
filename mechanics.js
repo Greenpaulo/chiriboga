@@ -2234,12 +2234,19 @@ function TrashPrograms(num) {
  * @method Expose
  * @param {Card} card the card to expose
  */
-function Expose(card) {
+function Expose(card, afterExpose, context) {
   var otherPlayer = runner;
   intended.expose = card; //if callback sets this to null, the expose will not happen
   if (intended.expose.player == runner) otherPlayer = corp;
+  //optional afterExpose(exposed) fires once viewing finishes, or immediately (false) if prevented
+  var finishExpose = function (exposed) {
+    if (typeof afterExpose === "function") afterExpose.call(context, exposed);
+  };
   OpportunityForAvoidPrevent(otherPlayer, "responsePreventableExpose", [], function () {
-    if (intended.expose == null) return;
+    if (intended.expose == null) {
+      finishExpose(false);
+      return;
+    }
     //temporarily turn card face up
     intended.expose.faceUp = true;
     intended.expose.knownToRunner = true; // Runner now knows what this card is
@@ -2251,6 +2258,7 @@ function Expose(card) {
         intended.expose.renderer.ToggleZoom();
       intended.expose.faceUp = false;
       intended.expose.renderer.FaceDown(); // Restore the visual display
+      finishExpose(true);
     }
     DecisionPhase(
       otherPlayer,

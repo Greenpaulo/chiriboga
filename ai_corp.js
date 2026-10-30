@@ -5208,6 +5208,24 @@ class CorpAI {
           cardToTrigger: economyAbilityCard,
         });
       }
+      //Card-declared click economy abilities the text pattern misses
+      //(AIEconomyTrigger priority, optional AIWouldTrigger; e.g. Marked Accounts).
+      var declaredEconomyTrigger = null;
+      var activeEconomyCards = ActiveCards(corp);
+      for (var aeIndex = 0; aeIndex < activeEconomyCards.length; aeIndex++) {
+        var aeCard = activeEconomyCards[aeIndex];
+        if (typeof aeCard.AIEconomyTrigger != "number" || aeCard.AIEconomyTrigger <= 0) continue;
+        if (declaredEconomyTrigger && declaredEconomyTrigger.AIEconomyTrigger >= aeCard.AIEconomyTrigger) continue;
+        if (ChoicesAbility(aeCard, true).length < 1) continue;
+        if (typeof aeCard.AIWouldTrigger == "function" && !aeCard.AIWouldTrigger.call(aeCard)) continue;
+        declaredEconomyTrigger = aeCard;
+      }
+      if (declaredEconomyTrigger) {
+        this._log("a card-declared click ability could provide economy");
+        return this._returnPreference(optionList, "trigger", {
+          cardToTrigger: declaredEconomyTrigger,
+        });
+      }
     }
 
     var emptyProtectedRemotes = this._emptyProtectedRemotes();
@@ -9242,7 +9260,7 @@ class CorpAI {
       //advanceable ice
       var installedCards = InstalledCards(corp);
       for (var i = 0; i < installedCards.length; i++) {
-        if (installedCards[i].canBeAdvanced) {
+        if (CheckAdvance(installedCards[i])) {
           //not if it has been disabled
           if (this._iceIsDisabled(installedCards[i])) continue;
           //ok let's check some more things
