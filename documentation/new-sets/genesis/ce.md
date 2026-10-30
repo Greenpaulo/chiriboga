@@ -86,6 +86,13 @@ Scaffold note: the duplicate detector missed Emergency Shutdown because
 Corp economy policy), guards and cleanup. `tests/subroutine-visual.test.js`
 and `tests/ai-hook-docs.test.js` pass.
 
+`node tests/run-all-tests.js --fast` (Node 22.14): only
+`card-status.test.js` failed, because `documentation/card-status.md` was
+intentionally not regenerated. `corp-ai-hypothetical-mutation.test.js`
+flagged the Personal Workshop helpers that set `notInstalled`. They were
+renamed to `hostCard` and `installIfEmpty`: real effects, not AI probes. That
+test now passes.
+
 ## Deferred optimisation
 
 - Joshua B.: the tag-risk heuristic is crude (untagged, 4+ credits). It
