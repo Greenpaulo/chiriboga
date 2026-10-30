@@ -226,6 +226,19 @@ class RunCalculator {
     }
   }
 
+  // Break restrictions cannot change within one calculation; each calculation
+  // replaces precalculated.activeCards, which invalidates this cache.
+  _breakUsingForbidden(card) {
+    var pre = this.precalculated;
+    if (pre.breakForbiddenFor !== pre.activeCards) {
+      pre.breakForbiddenFor = pre.activeCards;
+      pre.breakForbidden = new Map();
+    }
+    if (!pre.breakForbidden.has(card))
+      pre.breakForbidden.set(card, typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card));
+    return pre.breakForbidden.get(card);
+  }
+
   //check whether the given card is a .use in the persistents of the given point
   PersistentsUse(point,card) {
 	  for (var i=0; i<point.persistents.length; i++) {
@@ -423,7 +436,7 @@ class RunCalculator {
 
     //apply icebreaker specific details
 	if (typeof card.AIImplementBreaker == "function" &&
-        !(typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card))) {
+        !this._breakUsingForbidden(card)) {
 		result = card.AIImplementBreaker.call(card,this,result,point,server,cardStrength,iceAI,iceStrength,clicksLeft,creditsLeft);
 	}
     //non-breaker encounter abilities that change how breakers apply (e.g. Pelangi)

@@ -4356,7 +4356,8 @@ function ChoicesForfeitableAgendas(player) {
 // A source restriction applies to subroutine choices, including ICE-owned
 // Runner abilities. Keep non-breaking abilities on the same card available.
 function LegalBreakChoices(card, choices) {
-  if (!card || typeof CardEffectsForbid !== "function" || !CardEffectsForbid("breakUsing", card)) return choices;
+  if (!card || !Array.isArray(choices) || !choices.some(function (choice) { return choice.subroutine; }) ||
+      typeof CardEffectsForbid !== "function" || !CardEffectsForbid("breakUsing", card)) return choices;
   return choices.filter(function (choice) { return !choice.subroutine; });
 }
 

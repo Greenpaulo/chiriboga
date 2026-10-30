@@ -2407,6 +2407,14 @@ class CorpAI {
     return best;
   }
 
+  _breakUsingForbidden(card, evaluationContext) {
+    var cache = evaluationContext && evaluationContext.breakForbidden;
+    if (cache && cache.has(card)) return cache.get(card);
+    var forbidden = typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card);
+    if (cache) cache.set(card, forbidden);
+    return forbidden;
+  }
+
   _matchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
     if (!iceCard) return [];
     var installed = evaluationContext
@@ -2416,7 +2424,7 @@ class CorpAI {
     for (var i = 0; i < installed.length; i++) {
       var card = installed[i];
       if (card.player != runner || !CheckHasAbilities(card) ||
-          (typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card))) continue;
+          this._breakUsingForbidden(card, evaluationContext)) continue;
       if (
         typeof card.AIHostedBreakContribution == "function" ||
         card.host == iceCard
@@ -3507,6 +3515,7 @@ class CorpAI {
       requiredSubroutineIndices: new Map(),
       mandatorySubroutineIndices: new Map(),
       matchingBreakers: new Map(),
+      breakForbidden: new Map(),
       breakerPrices: new Map(),
       oneShotBypassAvailable: new Map(),
       icePlanInputs: new Map(),
