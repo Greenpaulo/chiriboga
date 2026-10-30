@@ -1909,6 +1909,16 @@ Marks a Corp economy operation for the main-phase economy policy. Higher
 values are considered first among card-declared economy plays; normal play
 legality, `Enumerate()` and `AIWouldPlay()` still decide whether it can be used.
 
+**`AIEconomyTrigger`** (number, Corp) and **`AIWouldTrigger()`**
+
+An active Corp card whose click ability provides economy but whose text the
+main-phase "gain/take N[c]" pattern does not match (Marked Accounts: "Place
+3[c] from the bank") declares a positive `AIEconomyTrigger` priority. The
+Corp main-phase economy policy (`_bestMainPhaseEconomyOptionCore`) then
+triggers the highest-priority such card with a currently enumerable ability,
+after the text-pattern check; an optional `AIWouldTrigger()` (read-only)
+returns false to skip it. Same names and meaning as the Runner hooks in §4.6.
+
 **`AIPlayWhenCan`** (number)
 
 Marks a Corp operation whose current opportunity should be used proactively.
@@ -2430,6 +2440,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AITagPunishment` | number | Min tags needed for this punishment op to fire |
 | `AIWouldPlay()` | function | Return true to play this operation |
 | `AIEconomyPlay` | number | Priority for treating a Corp operation as a main-phase economy play |
+| `AIEconomyTrigger` / `AIWouldTrigger()` | number / function | Corp click economy ability the gain/take text pattern misses (§5.6) |
 | `AIPlayWhenCan` | number | Priority for proactively using a currently valid Corp operation opportunity |
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
@@ -2986,6 +2997,35 @@ if (!runner.AI || runner.AI.rc !== rc) {
   `AILimitPerServer` 1. The turn-begin placement prefers unadvanced ice, then
   advanceable, then rezzed, then outermost. At approach the Runner AI pays when
   `_calculateBestCompleteRun` still finds a complete run.
+
+### Genesis: Cyber Exodus card hooks
+
+- Nerve Agent: `AIAdditionalAccess(server)` returns its virus counters for
+  HQ (a successful run adds one before the breach); the breach choice prefers
+  the maximum.
+- Joshua B.: `AIWouldTrigger()` gates the optional turn-begin click (untagged,
+  4+ credits) inside its own `Enumerate`.
+- Muresh Bodysuit: `AIMeatDamagePrevention()` returns 1 until used this turn.
+- Snitch: exposes unknown unrezzed ice; jacks out when the recomputed run from
+  the exposed ice cannot complete.
+- Personal Workshop: `AIEconomyTrigger: 1` + `AIWouldTrigger()` host the most
+  expensive non-wasteful program/hardware (install cost 2+);
+  `AIWorthKeeping` keeps it while such a target exists. The 1[c] ability is
+  not used by the AI (optimisation).
+- Public Sympathy: `AIWorthKeeping` when the grip exceeds the hand size.
+- Edge of World: `AIPunishesAccess(server)` = ice protecting the server when
+  3[c] is affordable.
+- Sunset: `AIPlayWhenCan: 1` + `AIWouldPlay`: reorders a server so the
+  strongest ice is outermost when that changes the order.
+- Marked Accounts: `AIEconomyTrigger: 1` with `AIWouldTrigger` (fewer than
+  2 hosted credits), `AIWorthInstalling`, `AIRezWhenCan`, `AIEconomyCard`.
+- Woodcutter: `AIAdvancementLimit` 3 once rezzed; `AIImplementIce` lists one
+  `netDamage` subroutine per counter.
+- Commercialization: `AIEconomyPlay: 2`, `AIWouldPlay` for 2+ credits.
+- Private Contracts: `AIWorthInstalling`, `AIRezWhenCan` (own action phase
+  with a click); the take ability matches the economy text pattern.
+- Chimera: the rez choice takes a subtype with no matching installed breaker;
+  unrezzed planning sees only Mythic.
 
 ## 8. Step-by-Step Worked Example
 

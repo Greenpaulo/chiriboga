@@ -705,7 +705,7 @@ cardSet[2040] = {
 cardSet[2041] = {
   title: "Nerve Agent",
   imageFile: "02041.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1515,
   player: runner,
   faction: "Anarch",
   influence: 2,
@@ -713,7 +713,48 @@ cardSet[2041] = {
   subTypes: ["Virus"],
   installCost: 3,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  accessAdditional: 0,
+  responseOnRunSuccessful: {
+    Resolve: function () {
+      if (attackedServer == corp.HQ) AddCounters(this, "virus", 1);
+    },
+    automatic: true,
+  },
+  //The number is chosen as HQ is breached (after any purge or counter change during the run).
+  responseOnBreach: {
+    Enumerate: function (server) {
+      if (server != corp.HQ || !CheckCounters(this, "virus", 2)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var choices = [];
+      for (var i = 0; i < Counters(this, "virus"); i++) {
+        choices.push({ num: i, label: "Access " + i + " additional card" + (i == 1 ? "" : "s"), button: "" + i });
+      }
+      //**AI code: access as many as possible
+      if (runner.AI) runner.AI.preferred = { title: this.title, option: choices[choices.length - 1] };
+      DecisionPhase(runner, choices, function (params) {
+        this.accessAdditional = params.num;
+      }, this.title, "Access additional cards from HQ", this);
+    },
+    text: "Nerve Agent: access additional cards",
+  },
+  modifyBreachAccess: {
+    Resolve: function () {
+      return attackedServer == corp.HQ ? this.accessAdditional : 0;
+    },
+  },
+  responseOnRunEnds: {
+    Resolve: function () {
+      this.accessAdditional = 0;
+    },
+    automatic: true,
+  },
+  //A successful HQ run adds a counter before the breach, so up to the current count can be chosen.
+  AIAdditionalAccess: function (server) {
+    if (server != corp.HQ || ServerSuccessfulRunPrevented(server)) return 0;
+    return Counters(this, "virus");
+  },
 };
 
 //Joshua B. (2042)
@@ -721,47 +762,87 @@ cardSet[2041] = {
 cardSet[2042] = {
   title: "Joshua B.",
   imageFile: "02042.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1629,
   player: runner,
   faction: "Anarch",
   influence: 3,
   cardType: "resource",
   subTypes: ["Connection"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
-};
-
-//Emergency Shutdown (2043)
-// Play only if you made a successful run on HQ this turn.
-// Derez 1 installed piece of ice.
-cardSet[2043] = {
-  title: "Emergency Shutdown",
-  imageFile: "02043.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
-  player: runner,
-  faction: "Criminal",
-  influence: 2,
-  cardType: "event",
-  subTypes: ["Sabotage"],
-  playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  tagAtTurnEnd: false,
+  responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      if (runner.AI != null) return this.AIWouldTrigger() ? [{ use: true }] : [];
+      return [
+        { use: true, label: "Gain [click] (take 1 tag when this turn ends)", button: "Gain [click]" },
+        { use: false, label: "Decline", button: "Decline" },
+      ];
+    },
+    Resolve: function (params) {
+      if (!params || !params.use) return;
+      GainClicks(runner, 1);
+      this.tagAtTurnEnd = true;
+    },
+    text: "Joshua B.: gain [click]",
+  },
+  //The delayed tag is a lasting effect: it applies even if Joshua B. leaves play this turn.
+  //Not automatic: taking a tag opens tag response windows.
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () {
+      return this.tagAtTurnEnd ? [{}] : [];
+    },
+    Resolve: function () {
+      if (!this.tagAtTurnEnd) return;
+      this.tagAtTurnEnd = false;
+      AddTags(1);
+    },
+    text: "Joshua B.: take 1 tag",
+    availableWhenInactive: true,
+  },
+  //Take the click only while untagged with enough credits to clear the tag next turn.
+  AIWouldTrigger: function () {
+    return runner.tags < 1 && Credits(runner) >= 4;
   },
 };
+
+// cardSet[2043] = Emergency Shutdown - DUPLICATE: systemupdate2021.js has Emergency Shutdown (card 31016)
 
 //Muresh Bodysuit (2044)
 // [interrupt] → The first time each turn you would suffer meat damage, prevent 1 meat damage.
 cardSet[2044] = {
   title: "Muresh Bodysuit",
   imageFile: "02044.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1182,
   player: runner,
   faction: "Criminal",
   influence: 1,
   cardType: "hardware",
   subTypes: ["Gear"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  usedThisTurn: false,
+  responseOnRunnerTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  responseOnCorpTurnBegins: {
+    Resolve: function () { this.usedThisTurn = false; },
+    automatic: true,
+    availableWhenInactive: true,
+  },
+  //Mandatory: fires on the first meat damage each turn.
+  responsePreventableDamage: {
+    Resolve: function () {
+      if (this.usedThisTurn || intended.damageType != "meat" || intended.damage < 1) return;
+      this.usedThisTurn = true;
+      intended.damage--;
+      Log("Muresh Bodysuit prevented 1 meat damage");
+    },
+    automatic: true,
+  },
+  AIMeatDamagePrevention: function () {
+    return this.usedThisTurn ? 0 : 1;
+  },
 };
 
 //Snitch (2045)
@@ -769,7 +850,7 @@ cardSet[2044] = {
 cardSet[2045] = {
   title: "Snitch",
   imageFile: "02045.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1526,
   player: runner,
   faction: "Criminal",
   influence: 2,
@@ -777,7 +858,49 @@ cardSet[2045] = {
   subTypes: [],
   installCost: 3,
   memoryCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  usedThisRun: false,
+  automaticOnRunBegins: {
+    Resolve: function () { this.usedThisRun = false; },
+  },
+  responseOnApproachIce: {
+    Enumerate: function (ice) {
+      if (this.usedThisRun || !CheckRunning() || !ice || ice.rezzed) return [];
+      //**AI code: nothing to learn from ice it already knows
+      if (runner.AI != null) return ice.knownToRunner ? [] : [{ use: true }];
+      return [
+        { use: true, label: "Expose " + GetTitle(ice, true), button: "Expose" },
+        { use: false, label: "Decline", button: "Decline" },
+      ];
+    },
+    Resolve: function (params) {
+      if (!params || !params.use) return;
+      var ice = attackedServer.ice[approachIce];
+      if (!ice || ice.rezzed) return;
+      this.usedThisRun = true;
+      Expose(ice, function () {
+        this._offerJackOut();
+      }, this);
+    },
+    text: "Snitch: expose approached ice",
+  },
+  _offerJackOut: function () {
+    if (!CheckRunning()) return;
+    var choices = [
+      { id: 1, label: "Jack out", button: "Jack out" },
+      { id: 0, label: "Continue the run", button: "Continue" },
+    ];
+    if (runner.AI) runner.AI.preferred = { title: this.title, option: choices[this._AIShouldJackOut() ? 0 : 1] };
+    DecisionPhase(runner, choices, function (params) {
+      if (params && params.id == 1) JackOut();
+    }, this.title, "Jack out?", this);
+  },
+  //Jack out when the run, now planned with the exposed ice known, cannot be completed.
+  _AIShouldJackOut: function () {
+    if (!runner.AI || !attackedServer) return false;
+    runner.AI.cachedBestPath = null;
+    runner.AI._cachedOrBestRun(attackedServer, approachIce);
+    return !runner.AI.cachedBestPath || !runner.AI.cachedComplete;
+  },
 };
 
 //Chaos Theory: Wünderkind (2046)
@@ -785,15 +908,15 @@ cardSet[2045] = {
 cardSet[2046] = {
   title: "Chaos Theory: Wünderkind",
   imageFile: "02046.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1566,
   player: runner,
   faction: "Shaper",
   cardType: "identity",
-  subTypes: ["G", "mod"],
+  subTypes: ["G-mod"],
   deckSize: 40,
   influenceLimit: 15,
   link: 0,
-  // TODO: Add abilities or responseOn triggers
+  memoryUnits: 1,
 };
 
 // cardSet[2047] = Test Run - DUPLICATE: systemupdate2021.js has Test Run (card 31028)
@@ -805,14 +928,26 @@ cardSet[2046] = {
 cardSet[2048] = {
   title: "Dinosaurus",
   imageFile: "02048.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1454,
   player: runner,
   faction: "Shaper",
   influence: 2,
   cardType: "hardware",
   subTypes: ["Console"],
   installCost: 5,
-  // TODO: Add abilities or responseOn triggers
+  hostedCards: [],
+  //Own memory pool, so the hosted breaker never counts against the general limit;
+  //canHost limits it to a single card.
+  hostingMU: 99,
+  canHost: function (card) {
+    if (!CheckCardType(card, ["program"]) || !CheckSubType(card, "Icebreaker") || CheckSubType(card, "AI")) return false;
+    return !this.hostedCards || this.hostedCards.length == 0;
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      return card && card.host == this ? 2 : 0;
+    },
+  },
 };
 
 //Personal Workshop (2049)
@@ -823,14 +958,123 @@ cardSet[2048] = {
 cardSet[2049] = {
   title: "Personal Workshop",
   imageFile: "02049.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1739,
   player: runner,
   faction: "Shaper",
   influence: 4,
   cardType: "resource",
   subTypes: ["Location"],
   installCost: 1,
-  // TODO: Add abilities or responseOn triggers
+  hostedCards: [],
+  _hostableChoices: function () {
+    return ChoicesArrayCards(runner.grip, function (card) {
+      return CheckCardType(card, ["program", "hardware"]);
+    });
+  },
+  _counterChoices: function () {
+    return ChoicesArrayCards(this.hostedCards || [], function (card) {
+      return CheckCounters(card, "power", 1);
+    });
+  },
+  //Hosted cards are not installed until their counters run out.
+  _host: function (card) {
+    var counters = InstallCost(card, null, false);
+    card.notInstalled = true;
+    MoveCard(card, this.hostedCards);
+    card.faceUp = true;
+    Log(GetTitle(card, true) + " hosted on Personal Workshop");
+    if (counters > 0) AddCounters(card, "power", counters);
+    this._installIfEmpty(card);
+  },
+  _removeCounter: function (card) {
+    if (!card || !(this.hostedCards || []).includes(card) || !CheckCounters(card, "power", 1)) return;
+    RemoveCounters(card, "power", 1);
+    this._installIfEmpty(card);
+  },
+  _installIfEmpty: function (card) {
+    if (!(this.hostedCards || []).includes(card) || CheckCounters(card, "power", 1)) return;
+    card.notInstalled = false;
+    Log(GetTitle(card, true) + " has no power counters left");
+    Install(card, null, true, null, true);
+  },
+  _chooseCounterToRemove: function (callback) {
+    var choices = this._counterChoices();
+    if (!choices.length) return;
+    if (choices.length == 1) {
+      callback.call(this, choices[0].card);
+      return;
+    }
+    //**AI code: finish the card closest to installing
+    if (runner.AI) {
+      var best = choices.slice().sort(function (a, b) {
+        return Counters(a.card, "power") - Counters(b.card, "power");
+      })[0];
+      runner.AI.preferred = { title: this.title, option: best };
+    }
+    DecisionPhase(runner, choices, function (params) {
+      callback.call(this, params.card);
+    }, this.title, "Remove 1 power counter from a hosted card", this);
+  },
+  abilities: [
+    {
+      text: "Host a program or piece of hardware from your grip on Personal Workshop.",
+      Enumerate: function () {
+        if (!CheckActionClicks(runner, 1)) return [];
+        var choices = this._hostableChoices();
+        //**AI code: host only the chosen target
+        if (runner.AI != null) {
+          var target = this._AIHostTarget();
+          choices = choices.filter(function (choice) { return choice.card == target; });
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        this._host(params.card);
+      },
+    },
+    {
+      text: "1[c]: Remove 1 power counter from a hosted card.",
+      alt: "personalworkshop_remove",
+      Enumerate: function () {
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return this._counterChoices();
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 1, "using", this, function () {
+          this._removeCounter(params.card);
+        }, this);
+      },
+    },
+  ],
+  responseOnRunnerTurnBegins: {
+    Enumerate: function () {
+      return this._counterChoices().length ? [{}] : [];
+    },
+    Resolve: function () {
+      this._chooseCounterToRemove(this._removeCounter);
+    },
+    text: "Personal Workshop: remove 1 power counter",
+  },
+  //Most expensive program or hardware the Runner would install anyway (not wasteful, MU fits).
+  _AIHostTarget: function () {
+    var best = null;
+    for (var i = 0; i < runner.grip.length; i++) {
+      var card = runner.grip[i];
+      if (!CheckCardType(card, ["program", "hardware"])) continue;
+      if (InstallCost(card, null, false) < 2) continue;
+      if (runner.AI && runner.AI._wastefulToInstall(card)) continue;
+      if (!best || InstallCost(card, null, false) > InstallCost(best, null, false)) best = card;
+    }
+    return best;
+  },
+  AIEconomyTrigger: 1,
+  AIWouldTrigger: function () {
+    return !!this._AIHostTarget();
+  },
+  AIWorthKeeping: function () {
+    return !!this._AIHostTarget();
+  },
 };
 
 //Public Sympathy (2050)
@@ -838,14 +1082,22 @@ cardSet[2049] = {
 cardSet[2050] = {
   title: "Public Sympathy",
   imageFile: "02050.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1303,
   player: runner,
   faction: "Neutral",
   influence: 0,
   cardType: "resource",
   subTypes: [],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  modifyMaxHandSize: {
+    Resolve: function (player) {
+      return player == runner ? 2 : 0;
+    },
+  },
+  //Worth it when the grip already exceeds or reaches the unmodified limit.
+  AIWorthKeeping: function () {
+    return runner.grip.length > MaxHandSize(runner);
+  },
 };
 
 // cardSet[2051] = Project Vitruvius - DUPLICATE: systemupdate2021.js has Project Vitruvius (card 31041)
@@ -856,7 +1108,7 @@ cardSet[2050] = {
 cardSet[2052] = {
   title: "Viper",
   imageFile: "02052.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1533,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 1,
@@ -865,10 +1117,28 @@ cardSet[2052] = {
   rezCost: 3,
   strength: 4,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[3]. If successful, the Runner loses [click], if able.",
+      Resolve: function () {
+        Trace(3, function (successful) {
+          if (successful) LoseClicks(runner, 1);
+        }, this);
+      },
+      visual: { y: 74, h: 32 },
+    },
+    {
+      text: "Trace[3]. If successful, end the run.",
+      Resolve: function () {
+        Trace(3, function (successful) {
+          if (successful) EndTheRun();
+        }, this);
+      },
+      visual: { y: 99, h: 16 },
+    },
   ],
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["loseClicks"]], [["endTheRun"]]];
     return result;
   },
 };
@@ -878,7 +1148,7 @@ cardSet[2052] = {
 cardSet[2053] = {
   title: "Edge of World",
   imageFile: "02053.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1420,
   player: corp,
   faction: "Jinteki",
   influence: 2,
@@ -886,7 +1156,42 @@ cardSet[2053] = {
   subTypes: ["Ambush"],
   rezCost: 0,
   trashCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  _iceCount: function () {
+    var server = GetServer(this);
+    return server && server.ice ? server.ice.length : 0;
+  },
+  responseOnAccess: {
+    Enumerate: function () {
+      if (accessingCard != this || !CheckInstalled(this)) return [];
+      //paying for 0 damage has no effect
+      if (this._iceCount() < 1 || !CheckCredits(corp, 3, "using", this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var damage = this._iceCount();
+      var choices = [
+        { id: 0, label: "Pay 3[c]: do " + damage + " core damage", button: "Pay 3[c]: " + damage + " core damage" },
+        { id: 1, label: "Continue", button: "Continue" },
+      ];
+      //**AI code: always fire
+      if (corp.AI) corp.AI.preferred = { title: this.title, option: choices[0] };
+      DecisionPhase(corp, choices, function (params) {
+        if (params.id != 0 || !CheckCredits(corp, 3, "using", this)) return;
+        SpendCredits(corp, 3, "using", this, function () {
+          if (typeof RecordPublicPostureEvent === "function") RecordPublicPostureEvent("trapFired", this);
+          Damage("core", this._iceCount(), true);
+        }, this);
+      }, this.title, this.title, this);
+    },
+  },
+  RezUsability: function () {
+    return false;
+  }, //never rez (for usability rather than legality)
+  AIPunishesAccess: function (server) {
+    if (!server || !server.root || !server.root.includes(this)) return 0;
+    if (Credits(corp) < 3) return 0;
+    return server.ice.length;
+  },
 };
 
 //Sunset (2054)
@@ -894,16 +1199,72 @@ cardSet[2053] = {
 cardSet[2054] = {
   title: "Sunset",
   imageFile: "02054.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1045,
   player: corp,
   faction: "Jinteki",
   influence: 1,
   cardType: "operation",
   subTypes: [],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _servers: function () {
+    return [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).filter(function (server) {
+      return server.ice.length > 1;
+    });
   },
+  //AI order (innermost first): ascending strength, so the strongest ice is outermost.
+  _AIOrder: function (server) {
+    return server.ice.map(function (ice, index) { return { ice: ice, index: index }; })
+      .sort(function (a, b) { return (Strength(a.ice) - Strength(b.ice)) || (a.index - b.index); })
+      .map(function (entry) { return entry.ice; });
+  },
+  _AIImproves: function (server) {
+    var order = this._AIOrder(server);
+    return order.some(function (ice, i) { return ice != server.ice[i] && Strength(ice) != Strength(server.ice[i]); });
+  },
+  Enumerate: function () {
+    var servers = this._servers();
+    if (corp.AI != null) {
+      var self = this;
+      servers = servers.filter(function (server) { return self._AIImproves(server); }).slice(0, 1);
+    }
+    return servers.map(function (server) {
+      return { server: server, label: server.serverName };
+    });
+  },
+  //Reorder in place: index 0 is innermost.
+  _applyOrder: function (server, innermostFirst) {
+    for (var i = 0; i < innermostFirst.length; i++) server.ice[i] = innermostFirst[i];
+    InvalidateActiveTriggerCandidateCache();
+    Log("Ice protecting " + server.serverName + " arranged");
+  },
+  Resolve: function (params) {
+    var server = params.server;
+    if (!server || server.ice.length < 2) return;
+    if (corp.AI != null) {
+      this._applyOrder(server, this._AIOrder(server));
+      return;
+    }
+    //Human: pick from outermost inwards.
+    var outermostFirst = [];
+    var remaining = server.ice.slice();
+    var chooseNext = function () {
+      if (remaining.length == 1) {
+        outermostFirst.push(remaining[0]);
+        this._applyOrder(server, outermostFirst.reverse());
+        return;
+      }
+      DecisionPhase(corp, ChoicesArrayCards(remaining), function (choice) {
+        outermostFirst.push(choice.card);
+        remaining.splice(remaining.indexOf(choice.card), 1);
+        chooseNext.call(this);
+      }, this.title, outermostFirst.length ? "Choose the next piece of ice (outermost to innermost)" : "Choose the outermost piece of ice", this);
+    };
+    chooseNext.call(this);
+  },
+  AIWouldPlay: function () {
+    return this.Enumerate().length > 0;
+  },
+  AIPlayWhenCan: 1,
 };
 
 //Marked Accounts (2055)
@@ -912,7 +1273,7 @@ cardSet[2054] = {
 cardSet[2055] = {
   title: "Marked Accounts",
   imageFile: "02055.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1373,
   player: corp,
   faction: "NBN",
   influence: 1,
@@ -920,7 +1281,39 @@ cardSet[2055] = {
   subTypes: ["Transaction"],
   rezCost: 0,
   trashCost: 5,
-  // TODO: Add abilities or responseOn triggers
+  responseOnCorpTurnBegins: {
+    Resolve: function () {
+      if (CheckCounters(this, "credits", 1)) TakeCredits(corp, this, 1);
+    },
+    automatic: true,
+  },
+  abilities: [
+    {
+      text: "Place 3[c] from the bank on Marked Accounts.",
+      Enumerate: function () {
+        if (!CheckActionClicks(corp, 1)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        LoadCredits(this, 3);
+      },
+    },
+  ],
+  AIEconomyCard: true,
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (!corp.AI._economyAssetWanted() && this.cardLocation != corp.archives.cards) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++)
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    return emptyProtectedRemotes.length;
+  },
+  AIRezWhenCan: function () { return true; },
+  //Reload once the stored credits run low (one is taken per turn).
+  AIEconomyTrigger: 1,
+  AIWouldTrigger: function () {
+    return Counters(this, "credits") < 2;
+  },
 };
 
 // cardSet[2056] = Pop-up Window - DUPLICATE: systemupdate2021.js has Pop-up Window (card 31065)
@@ -930,7 +1323,7 @@ cardSet[2055] = {
 cardSet[2057] = {
   title: "Woodcutter",
   imageFile: "02057.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1005,
   player: corp,
   faction: "Weyland Consortium",
   influence: 3,
@@ -938,11 +1331,47 @@ cardSet[2057] = {
   subTypes: ["Sentry", "AP"],
   rezCost: 4,
   strength: 2,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
+  //CheckAdvance accepts a function: only while rezzed.
+  canBeAdvanced: function () {
+    return !!this.rezzed;
+  },
+  //No printed subroutines; one gained per hosted advancement counter (no printed overlay position).
+  subroutines: [],
+  _gainedSubroutine: function () {
+    return {
+      text: "Do 1 net damage.",
+      woodcutterGained: true,
+      Resolve: function () {
+        Damage("net", 1, true);
+      },
+    };
+  },
+  _syncSubroutines: function () {
+    var wanted = Math.max(0, Counters(this, "advancement") || 0);
+    var current = this.subroutines.filter(function (sr) { return sr.woodcutterGained; }).length;
+    if (wanted == current) return;
+    var kept = this.subroutines.filter(function (sr) { return sr.woodcutterGained; }).slice(0, wanted);
+    while (kept.length < wanted) kept.push(this._gainedSubroutine());
+    this.subroutines = kept;
+  },
+  automaticOnAnyChange: {
+    Resolve: function () {
+      this._syncSubroutines();
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnEncounter: {
+    Resolve: function (ice) {
+      if (ice == this) this._syncSubroutines();
+    },
+  },
+  AIAdvancementLimit: function () {
+    return this.rezzed ? 3 : 0;
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    var n = Math.max(0, Counters(this, "advancement") || 0);
+    result.sr = [];
+    for (var i = 0; i < n; i++) result.sr.push([["netDamage"]]);
     return result;
   },
 };
@@ -952,15 +1381,36 @@ cardSet[2057] = {
 cardSet[2058] = {
   title: "Commercialization",
   imageFile: "02058.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1430,
   player: corp,
   faction: "Weyland Consortium",
   influence: 1,
   cardType: "operation",
   subTypes: ["Transaction"],
   playCost: 0,
+  Enumerate: function () {
+    var choices = ChoicesInstalledCards(corp, function (card) {
+      return CheckCardType(card, ["ice"]);
+    });
+    //**AI code: the ice with the most advancement tokens
+    if (corp.AI != null && choices.length > 1) {
+      choices = [choices.slice().sort(function (a, b) {
+        return Counters(b.card, "advancement") - Counters(a.card, "advancement");
+      })[0]];
+    }
+    return choices;
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    GainCredits(corp, Counters(params.card, "advancement") || 0, "", this);
+  },
+  _AIBestGain: function () {
+    var choices = this.Enumerate();
+    return choices.length ? Counters(choices[0].card, "advancement") || 0 : 0;
+  },
+  AIEconomyPlay: 2,
+  //Better than the basic click for credits.
+  AIWouldPlay: function () {
+    return this._AIBestGain() >= 2;
   },
 };
 
@@ -970,7 +1420,7 @@ cardSet[2058] = {
 cardSet[2059] = {
   title: "Private Contracts",
   imageFile: "02059.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1323,
   player: corp,
   faction: "Neutral",
   influence: 0,
@@ -978,7 +1428,41 @@ cardSet[2059] = {
   subTypes: ["Transaction"],
   rezCost: 3,
   trashCost: 5,
-  // TODO: Add abilities or responseOn triggers
+  automaticOnRez: {
+    Resolve: function (card) {
+      if (card == this) LoadCredits(this, 14);
+    },
+  },
+  abilities: [
+    {
+      text: "Take 2[c] from Private Contracts.",
+      Enumerate: function () {
+        if (!CheckActionClicks(corp, 1)) return [];
+        if (!CheckCounters(this, "credits", 1)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        TakeCredits(corp, this, 2);
+        if (!CheckCounters(this, "credits", 1)) Trash(this, true);
+      },
+    },
+  ],
+  AIEconomyCard: true,
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    if (!corp.AI._economyAssetWanted() && this.cardLocation != corp.archives.cards) return -1;
+    for (var i = 0; i < emptyProtectedRemotes.length; i++)
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[i])) return i;
+    return emptyProtectedRemotes.length;
+  },
+  //Rez in the Corp's own action phase with a click left to start drawing on it.
+  RezUsability: function () {
+    return currentPhase.identifier.substring(0, 6) == "Corp 2" && CheckClicks(corp, 1);
+  },
+  AIRezWhenCan: function () {
+    return playerTurn == corp && currentPhase.identifier.substring(0, 6) == "Corp 2" && CheckClicks(corp, 1);
+  },
 };
 
 //Chimera (2060)
@@ -988,7 +1472,7 @@ cardSet[2059] = {
 cardSet[2060] = {
   title: "Chimera",
   imageFile: "02060.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1433,
   player: corp,
   faction: "Neutral",
   influence: 0,
@@ -996,11 +1480,78 @@ cardSet[2060] = {
   subTypes: ["Mythic"],
   rezCost: 2,
   strength: 0,
+  chimeraSubtype: "",
+  responseOnRez: {
+    Enumerate: function (card) {
+      if (card != this) return [];
+      var choices = ["Sentry", "Code Gate", "Barrier"].map(function (subtype) {
+        return { subtype: subtype, label: "Chimera gains " + subtype, button: subtype };
+      });
+      //**AI code: a subtype the Runner has no matching installed breaker for
+      if (corp.AI != null) {
+        var pick = this._AISubtype();
+        choices = choices.filter(function (choice) { return choice.subtype == pick; });
+      }
+      return choices;
+    },
+    Resolve: function (params) {
+      this.chimeraSubtype = params.subtype;
+      Log("Chimera gains " + params.subtype);
+    },
+  },
+  modifySubTypes: {
+    Resolve: function (card) {
+      if (card == this && this.rezzed && this.chimeraSubtype) return { add: [this.chimeraSubtype] };
+      return {};
+    },
+    automatic: true,
+  },
+  automaticOnDerez: {
+    Resolve: function (card) {
+      if (card == this) this.chimeraSubtype = "";
+    },
+    availableWhenInactive: true,
+  },
+  _derezAtTurnEnd: function () {
+    if (this.rezzed && CheckInstalled(this)) Derez(this);
+    this.chimeraSubtype = "";
+  },
+  //Not automatic: Derez opens derez response windows.
+  responseOnRunnerDiscardEnds: {
+    Enumerate: function () { return this.rezzed ? [{}] : []; },
+    Resolve: function () { this._derezAtTurnEnd(); },
+    text: "Chimera: derez",
+  },
+  responseOnCorpDiscardEnds: {
+    Enumerate: function () { return this.rezzed ? [{}] : []; },
+    Resolve: function () { this._derezAtTurnEnd(); },
+    text: "Chimera: derez",
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 150, h: 16 },
+    },
   ],
+  _AISubtype: function () {
+    var breakerFor = { "Sentry": "Killer", "Code Gate": "Decoder", "Barrier": "Fracter" };
+    var installed = InstalledCards(runner);
+    var order = ["Barrier", "Code Gate", "Sentry"];
+    for (var i = 0; i < order.length; i++) {
+      var matched = installed.some(function (card) {
+        return CheckSubType(card, breakerFor[order[i]]) || (CheckSubType(card, "Icebreaker") && CheckSubType(card, "AI"));
+      });
+      if (!matched) return order[i];
+    }
+    return order[0];
+  },
+  //Unrezzed planning sees no subtype, so it is treated as unbreakable by type-specific breakers;
+  //the rez choice picks a subtype with no matching installed breaker.
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]]];
     return result;
   },
 };
