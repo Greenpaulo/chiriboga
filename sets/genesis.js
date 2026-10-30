@@ -977,21 +977,21 @@ cardSet[2049] = {
     });
   },
   //Hosted cards are not installed until their counters run out.
-  _host: function (card) {
+  hostCard: function (card) {
     var counters = InstallCost(card, null, false);
     card.notInstalled = true;
     MoveCard(card, this.hostedCards);
     card.faceUp = true;
     Log(GetTitle(card, true) + " hosted on Personal Workshop");
     if (counters > 0) AddCounters(card, "power", counters);
-    this._installIfEmpty(card);
+    this.installIfEmpty(card);
   },
   _removeCounter: function (card) {
     if (!card || !(this.hostedCards || []).includes(card) || !CheckCounters(card, "power", 1)) return;
     RemoveCounters(card, "power", 1);
-    this._installIfEmpty(card);
+    this.installIfEmpty(card);
   },
-  _installIfEmpty: function (card) {
+  installIfEmpty: function (card) {
     if (!(this.hostedCards || []).includes(card) || CheckCounters(card, "power", 1)) return;
     card.notInstalled = false;
     Log(GetTitle(card, true) + " has no power counters left");
@@ -1030,7 +1030,7 @@ cardSet[2049] = {
       },
       Resolve: function (params) {
         SpendClicks(runner, 1);
-        this._host(params.card);
+        this.hostCard(params.card);
       },
     },
     {
