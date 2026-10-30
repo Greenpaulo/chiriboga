@@ -616,6 +616,10 @@ const paymentSource11 = put({title: 'Payment source', player: runner, cardType: 
 runner.temporaryCredits = 2; runner.creditPool = 10;
 const routeInputs11 = runner.AI._calculateRunPathPieceBegin({server: corp.HQ,
   clickOffset: 0, poolCreditOffset: 0, otherCreditOffset: 0, damageOffset: 0});
+assert.strictEqual(routeInputs11.poolCredits, 0, 'locked pool is excluded from breaker-route budget');
+assert.strictEqual(runner.AI._calculateRunPathPieceBegin({server: corp.HQ,
+  clickOffset: 0, poolCreditOffset: 2, otherCreditOffset: 0, damageOffset: 0}).poolCredits, 2,
+  'hypothetical pool offset is preserved');
 assert.strictEqual(routeInputs11.otherCredits, 4, 'route setup subtracts only an available pool');
 rc.baseOtherCredits = routeInputs11.otherCredits; rc.basePoolCredits = routeInputs11.poolCredits;
 rc._poolOnly = false;
@@ -630,10 +634,24 @@ rc._poolOnly = true;
 assert.strictEqual(rc.PayCredits(point(), 1, 'using', paymentSource11, corp.HQ), null);
 rc._poolOnly = false;
 runner.rig.resources.length = 0; c.InvalidateActiveTriggerCandidateCache();
+const unlockedInputs11 = runner.AI._calculateRunPathPieceBegin({server: corp.HQ,
+  clickOffset: 0, poolCreditOffset: 0, otherCreditOffset: 0, damageOffset: 0});
+rc.basePoolCredits = unlockedInputs11.poolCredits; rc.baseOtherCredits = unlockedInputs11.otherCredits;
 paidOutside11 = rc.PayCredits(point(), 5, 'using', paymentSource11, corp.HQ);
 assert.strictEqual(paidOutside11.runner_credits_spent, 4, 'unlocked payments still prefer outside credits');
 assert.strictEqual(paidOutside11.runner_credits_lost, 1);
 runner.temporaryCredits = 0;
+
+// Breaker search must reject routes affordable only with locked pool credits.
+reset(); runner.temporaryCredits = 0;
+const budgetWall11 = put(wall('Budget wall'), corp.HQ.ice); budgetWall11.rezzed = true;
+put(card(30006), runner.rig.programs);
+put({title: 'Budget pool lock', player: runner, cardType: 'resource', subTypes: [],
+  preventCreditPoolUse(player) { return player === runner; }}, runner.rig.resources);
+assert.strictEqual(runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0), null,
+  'breaker route cannot use locked pool with no outside damage sources');
+runner.rig.resources.length = 0; c.InvalidateActiveTriggerCandidateCache();
+assert(runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0), 'same breaker route is affordable when pool unlocks');
 
 // Batch 11: Psi, nested encounters, Archives installs and mandatory counters.
 reset(); c.forcedEncounters = []; c.runSuccessDeclared = false;
@@ -721,11 +739,19 @@ assert(!calc11.IceAI(calcKonjin, 2).forcedEncounterIce, 'unaffordable unrezzed K
 reset(); c.forcedEncounters = [];
 const runEndForeign11 = remote();
 const runEndIce11 = put(wall('Run end ICE'), runEndForeign11.ice); runEndIce11.rezzed = true;
+const runEndParent11 = put(wall('Run end parent'), corp.HQ.ice); runEndParent11.rezzed = true;
+c.attackedServer = corp.HQ; c.approachIce = 0; c.encountering = true; c.encounteredIce = runEndParent11;
+assert.strictEqual(c.GetApproachEncounterIce(), runEndParent11);
 assert(c.ForceEncounter(runEndIce11));
+assert.strictEqual(c.GetApproachEncounterIce(), runEndIce11);
 assert.strictEqual(c.forcedEncounters.length, 1);
 c.playerTurn = corp; c.currentPhase = c.phases.runEnds;
 c.phases.runEnds.Resolve.n();
 assert.strictEqual(c.forcedEncounters.length, 0, 'run end clears the pending forced encounter');
+assert.strictEqual(c.attackedServer, null);
+assert.strictEqual(c.approachIce, -1);
+assert.strictEqual(c.encountering, false);
+assert.strictEqual(c.encounteredIce, null);
 assert.strictEqual(c.GetApproachEncounterIce(), null, 'run end exposes neither child nor parent ICE');
 assert.strictEqual(c.ChoicesEncounteredSubroutines().length, 0);
 

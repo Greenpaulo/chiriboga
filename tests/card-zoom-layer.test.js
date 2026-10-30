@@ -23,6 +23,25 @@ const context = {
 vm.createContext(context);
 vm.runInContext(rendererSource.slice(start, end), context);
 
+// Construct the real renderer with inert graphics/browser dependencies.
+const graphicsStub = new Proxy(function () {}, {
+  get: () => graphicsStub, apply: () => graphicsStub, construct: () => graphicsStub,
+});
+const constructorContext = {
+  window: {innerWidth: 1440, innerHeight: 1000, addEventListener() {}},
+  document: {body: {appendChild() {}, classList: {contains: () => false}}},
+  PIXI: graphicsStub, particleSystems: {interface: {}}, requestAnimationFrame() {},
+};
+vm.createContext(constructorContext);
+vm.runInContext(rendererSource, constructorContext);
+for (const openingRatio of [1, 1.33, 2.66]) {
+  constructorContext.window.devicePixelRatio = openingRatio;
+  vm.runInContext('cardRenderer = new CardRenderer.Renderer(function () {});', constructorContext);
+  assert.strictEqual(constructorContext.pixi_browserZoom(), 1, 'constructed renderer starts at neutral relative zoom');
+  constructorContext.window.devicePixelRatio = openingRatio * 1.5;
+  assert.strictEqual(constructorContext.pixi_browserZoom(), 1.5, 'constructed baseline measures subsequent zoom');
+}
+
 const first = {}, second = {};
 context.pixi_setCardZoomLayer(first, true);
 assert.strictEqual(active, true);

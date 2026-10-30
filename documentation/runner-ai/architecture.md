@@ -385,7 +385,8 @@ mandatory passage costs.
 
 Run-path setup and target-aware `PayCredits` subtract the credit pool from
 `AvailableCredits` only when that pool is usable for the relevant payment.
-Temporary and eligible hosted credits remain available under a pool lock;
+Run-path pool budgets also exclude a locked pool, preserving hypothetical
+pool offsets. Temporary and eligible hosted credits remain available under a pool lock;
 `PayCredits` tracks their spend separately from pool debits.
 
 - **Jack out.** Past the last ICE (Run 4.3 at index 0) the AI approaches,
