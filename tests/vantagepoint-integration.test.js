@@ -930,7 +930,7 @@ context.MoveCard = (card, destination, position) => {
 const betaChoices = betaBuild.Enumerate.call(betaBuild);
 assert.strictEqual(betaChoices.some((choice) => choice.card === virusProgram), false);
 const betaChoice = betaChoices.find(
-  (choice) => choice.card === nonVirusBreaker && choice.server === context.corp.HQ,
+  (choice) => choice.card === nonVirusBreaker,
 );
 installed = {corp: [], runner: []};
 const makeRun = context.MakeRun;
@@ -939,7 +939,10 @@ context.MakeRun = (server) => {
   assert(installed.runner.includes(nonVirusBreaker), '36019 starts its run with the program installed');
   makeRun(server);
 };
+decisions = [];
 betaBuild.Resolve.call(betaBuild, betaChoice);
+assert.strictEqual(decisions.length, 1, '36019 offers a separate server decision');
+decisions[0].choose(decisions[0].choices.find(choice => choice.server === context.corp.HQ));
 context.MakeRun = makeRun;
 assert.strictEqual(shuffled, true);
 assert.strictEqual(runTarget, context.corp.HQ);
@@ -2681,3 +2684,190 @@ assert.deepStrictEqual([36058, 36059, 36060].map(id => context.cardSet[id].subro
 assert.strictEqual(context.cardSet[36060].abilities[0].availableFromHQ, true);
 
 console.log('Vantage Point integration and Batch 1-12 behavior checks passed.');
+
+// Exercise Beta Build through the real install, response and decision phases.
+// Each playGame creates an isolated engine VM; no ordinary game simulation is needed.
+async function betaBuildEngineCases() {
+  const os = require('os');
+  const {playGame} = require('../scripts/ai-batch/headless');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'beta-build-engine-'));
+  try {
+    for (const scenario of ['HQ', 'R&D', 'Archives', 'Remote 0', 'Response remote', 'hosted', 'AI', 'AI fallback', 'uninstalled']) {
+      const setupFile = path.join(dir, 'setup.js');
+      fs.writeFileSync(setupFile, `
+        var betaReport = {runs: [], responses: 0};
+        __report = function() { return betaReport; };
+        StartGame = function() {
+          (async function() {
+            var scenario = ${JSON.stringify(scenario)};
+            playerTurn = runner;
+            ChangePhase(phases.runnerActionMain);
+            // One eligible program, plus a virus that must not be offered.
+            runner.stack.slice().forEach(function(card) { MoveCard(card, runner.heap); });
+            var program = InstanceCardsPush(30026, runner.stack, 1,
+              cardBackTexturesRunner, glowTextures, strengthTextures)[0];
+            var virus = InstanceCardsPush(30026, runner.stack, 1,
+              cardBackTexturesRunner, glowTextures, strengthTextures)[0];
+            virus.subTypes = ['Virus'];
+            var beta = InstanceCardsPush(36019, runner.resolvingCards, 1,
+              cardBackTexturesRunner, glowTextures, strengthTextures)[0];
+            var host = scenario === 'hosted' ? InstanceCardsPush(30026, runner.rig.programs, 1,
+              cardBackTexturesRunner, glowTextures, strengthTextures)[0] : null;
+            var remote = NewServer('Remote 0', false);
+            corp.remoteServers = [remote];
+            var stale = NewServer('Removed remote', false);
+            corp.remoteServers.push(stale);
+            var ai = runner.AI;
+            if (scenario.startsWith('AI')) {
+              ai.serverList = [{server: scenario === 'AI' ? remote : stale}];
+              ai._icebreakerInPileNotInHandOrArray = function() { return program; };
+            } else runner.AI = null;
+            // Keep intentional composite card/server dragging working, using
+            // the real geometry and click resolver before Beta Build's choice.
+            countersUI = {credits: {runner: {sprite: {}}, corp: {sprite: {}}},
+              tag: {runner: {sprite: {}}}};
+            corp.archives.xStart = 0; corp.archives.xEnd = 200;
+            corp.RnD.xStart = 200; corp.RnD.xEnd = 400;
+            corp.HQ.xStart = 400; corp.HQ.xEnd = 600;
+            remote.xStart = 600; remote.xEnd = 800;
+            pixi_playY = 0;
+            var visualStub = new Proxy(function() {}, {
+              get: function() { return visualStub; }, apply: function() { return visualStub; }
+            });
+            cardRenderer = new Proxy({MousePosition: function() { return {x: 300, y: 100}; }}, {
+              get: function(target, key) { return key in target ? target[key] : visualStub; }
+            });
+            program.renderer = new Proxy({card: program}, {
+              get: function(target, key) { return key in target ? target[key] : visualStub; }
+            });
+            DecisionPhase(runner, [
+              {card: program, server: corp.HQ, label: 'HQ'},
+              {card: program, server: corp.RnD, label: 'R&D'},
+              {card: virus, server: corp.HQ, label: 'Other card to HQ'}
+            ], function(choice) { betaReport.dragDestination = choice.server.serverName; },
+              'Intentional drag', '', beta);
+            validOptions = currentPhase.Enumerate.continue();
+            phaseOptions = {};
+            executingCommand = 'continue';
+            viewingPlayer = runner;
+            ResolveClick.call({}, program.renderer);
+            runner.creditPool = 0;
+            if (scenario === 'hosted') {
+              host.faceUp = true;
+              host.canHost = function(card) { return card === program; };
+              host.hostedCards = [];
+              program.installOnlyOn = function(card) { return card === host; };
+            }
+            program.responseOnInstall = {
+              Enumerate: function(card) { return card === this ? [{}] : []; },
+              Resolve: function() {
+                // A nested response decision must finish before run selection.
+                DecisionPhase(runner, [{label: 'Finish install response'}], function() {
+                  betaReport.responses++;
+                  corp.remoteServers.splice(corp.remoteServers.indexOf(stale), 1);
+                  corp.remoteServers.push(NewServer('Response remote', false));
+                }, 'Beta test install response', '', this);
+              },
+              automatic: true
+            };
+            var originalRun = MakeRun;
+            MakeRun = function(server) {
+              betaReport.runs.push(server.serverName);
+              betaReport.responsesAtRun = betaReport.responses;
+              betaReport.installedAtRun = InstalledCards(runner).includes(program);
+              originalRun(server);
+            };
+            var originalShuffle = Shuffle;
+            Shuffle = function(cards) {
+              if (cards === runner.stack) betaReport.shuffled = true;
+              originalShuffle(cards);
+            };
+            var choices = beta.Enumerate();
+            betaReport.programChoices = choices.length;
+            betaReport.onlyProgram = choices.every(function(choice) {
+              return choice.card === program && typeof choice.server === 'undefined';
+            });
+            var chosen = scenario.startsWith('AI')
+              ? choices[beta.AIPreferredPlayChoice(choices)] : choices.find(function(choice) {
+                return choice.card === program && (!host || choice.host === host);
+              });
+            betaReport.chosen = Boolean(chosen);
+            if (scenario.startsWith('AI')) beta.Resolve(chosen);
+            else {
+              DecisionPhase(runner, choices, beta.Resolve, 'Beta Build program', '', beta);
+              validOptions = choices;
+              executingCommand = 'continue';
+              viewingPlayer = runner;
+              var hovered = scenario === 'HQ' ? corp.HQ : scenario === 'Archives' ? corp.archives
+                : scenario === 'Remote 0' ? remote : corp.RnD;
+              cardRenderer.MousePosition = function() {
+                return {x: (hovered.xStart + hovered.xEnd) / 2, y: 100};
+              };
+              ResolveClick.call({}, program.renderer);
+              if (currentPhase.identifier !== 'Runner Install') throw new Error('Program click did not begin installation');
+            }
+            betaReport.noRunBeforeInstall = betaReport.runs.length === 0;
+            var hops = 0;
+            while (currentPhase.title !== 'Beta Build: choose server' && hops++ < 30) {
+              var phase = currentPhase;
+              var advanced = false;
+              for (var command of ['trigger', 'continue', 'n']) {
+                if (!phase.Enumerate[command] || !phase.Resolve[command]) continue;
+                var options = phase.Enumerate[command].call(phase);
+                if (!options.length) continue;
+                phase.Resolve[command].call(phase, options[0]);
+                advanced = true;
+                break;
+              }
+              if (!advanced) throw new Error('Cannot advance ' + phase.title);
+            }
+            if (currentPhase.title !== 'Beta Build: choose server') throw new Error('Missing server decision');
+            betaReport.noRunBeforeServer = betaReport.runs.length === 0;
+            betaReport.hosted = !host || program.host === host;
+            betaReport.credits = runner.creditPool;
+            var serverChoices = currentPhase.Enumerate.continue();
+            betaReport.servers = serverChoices.map(function(choice) { return choice.server.serverName; });
+            var serverChoice = scenario.startsWith('AI')
+              ? serverChoices[await ai._internalChoiceDetermination(serverChoices, 'select')]
+              : serverChoices.find(function(choice) { return choice.server.serverName === scenario; }) || serverChoices[0];
+            betaReport.serverChosen = serverChoice.server.serverName;
+            currentPhase.Resolve.continue(serverChoice);
+            if (scenario === 'uninstalled') {
+              Uninstall(program, runner.heap, function() {});
+            }
+            beta.responseOnRunEnds.Resolve.call(beta);
+            betaReport.returned = runner.stack.includes(program);
+            betaReport.uninstalled = runner.heap.includes(program);
+            betaReport.cleared = beta.lingeringEffectTarget === null && !beta.runningWithThis;
+            PlayerWin(corp, 'Beta Build engine checks complete');
+          })().catch(function(error) {
+            betaReport.failure = error.stack;
+            PlayerWin(corp, 'Beta Build engine check failed');
+          });
+        };
+      `);
+      const game = await playGame({corpFile: 'Zwicky Supermodernism.js', runnerFile: 'Magdalene CBB.js',
+        setFiles: ['sets/systemgateway.js', 'sets/systemupdate2021.js', 'sets/elevation.js', 'sets/vantagepoint.js'],
+        streamPrefix: '1:beta-build', setupFile, timeoutMs: 15000, stallMs: 3000});
+      const r = game.report;
+      assert(r && !r.failure, scenario + ': ' + JSON.stringify(r || game));
+      assert.strictEqual(r.programChoices, 1, scenario + ': only one eligible program/host');
+      assert.strictEqual(r.dragDestination, 'R&D', scenario + ': intentional dragging still selects a server');
+      assert(r.onlyProgram && r.chosen && r.noRunBeforeInstall && r.noRunBeforeServer, scenario);
+      assert.strictEqual(r.responses, 1, scenario + ': install response completed once');
+      assert.deepStrictEqual(r.servers, ['HQ', 'R&D', 'Archives', 'Remote 0', 'Response remote']);
+      const destination = scenario === 'AI' ? 'Remote 0' : ['HQ', 'R&D', 'Archives', 'Remote 0', 'Response remote'].includes(scenario) ? scenario : 'HQ';
+      assert.deepStrictEqual(r.runs, [destination], scenario + ': one run on the selected server');
+      assert.strictEqual(r.serverChosen, destination);
+      assert.strictEqual(r.responsesAtRun, 1);
+      assert(r.installedAtRun && r.hosted && r.shuffled && r.cleared, scenario);
+      assert.strictEqual(r.credits, 0, scenario + ': ignored install costs');
+      assert.strictEqual(r.returned, scenario !== 'uninstalled', scenario + ': return only installed target');
+      if (scenario === 'uninstalled') assert(r.uninstalled);
+    }
+  } finally {
+    fs.rmSync(dir, {recursive: true, force: true});
+  }
+  console.log('Beta Build real-engine install, response, server and AI checks passed (9 cases).');
+}
+betaBuildEngineCases().catch(error => { console.error(error.stack); process.exitCode = 1; });

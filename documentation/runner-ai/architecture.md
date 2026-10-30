@@ -104,6 +104,13 @@ potential; active cards add `AIRunExtraPotential(server, potential)` (only with
 `AIRunAbilityExtraPotential` (wins when higher) is added and remembered as
 `useRunEvent` or `useRunAbility`. The potential is then cached.
 
+**Beta Build.** Program and host selection is separate from the run destination.
+`AIPreferredPlayChoice` selects the preferred missing icebreaker from the offered
+installation choices, falling back to the first legal choice. After installation
+and its responses finish, the card offers the servers that currently exist. The
+AI chooses the first ranked `serverList` server if it is still offered, otherwise
+the first legal server choice. Resolving this second decision starts the run.
+
 **Bonus breakers.** With two or more clicks, candidates are installable
 Icebreaker or `AISpecialBreaker` cards in `this.cardsWorthKeeping` (install
 cost) and, with three or more, breakers from `AIIcebreakerTutor()` on playable

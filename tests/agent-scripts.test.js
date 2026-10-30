@@ -112,6 +112,8 @@ assert.strictEqual(reproductionChecksumMatches(checksumTicket, Buffer.from('asse
   'the checksum fallback rejects changed expectations');
 assert.strictEqual(reproductionChecksumMatches(checksumTicket, Buffer.from('assert.strictEqual(result, 1);\n')), false,
   'the checksum fallback requires an exact byte match, including line endings');
+assert.strictEqual(reproductionChecksumMatches(checksumTicket, Buffer.concat([pendingBytes, Buffer.from('// extra\n')])), false,
+  'the checksum fallback rejects changes outside assertions');
 assert.strictEqual(reproductionChecksumMatches('', pendingBytes), null,
   'a missing checksum cannot establish an untracked baseline');
 assert.strictEqual(reproductionChecksumMatches('**Reproduction SHA-256:** `invalid`', pendingBytes), null,

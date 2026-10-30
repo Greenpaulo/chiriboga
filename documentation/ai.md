@@ -877,6 +877,13 @@ AIWastefulToPlay: function() {
 
 If the event presents a choice on play, return the preferred index, or `-1` to decline playing:
 
+Beta Build uses this hook to choose an eligible program and host, preferring
+the missing icebreaker identified by the Runner AI. Its run destination is a
+separate decision after installation and install responses finish. That decision
+uses the first ranked server from the AI's existing server list if it still
+exists, otherwise the first legal server choice. Program choices contain no
+run destination, so selecting the program cannot also choose the server.
+
 ```js
 AIPreferredPlayChoice: function(choices) {
     return 0; // always choose the first option
