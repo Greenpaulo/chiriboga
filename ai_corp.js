@@ -6188,7 +6188,7 @@ class CorpAI {
     inhibit = true, //if inhibit is false, more willing installs are permitted (use this for free install&rez)
   ) {
     if (!this._installRecording())
-      return this._rankedInstallOptionsCore(cards, priorityOnly, inhibit);
+      return this._withoutBlockedNewRemotes(this._rankedInstallOptionsCore(cards, priorityOnly, inhibit));
     //I0/I1 telemetry: observe the unchanged ranking, its protection choices
     //and its candidate records. The legacy option list is returned as is,
     //duplicates included (Phase_Main compares ranked list lengths).
@@ -6204,7 +6204,14 @@ class CorpAI {
       "installCandidates",
       ranked.candidates.map((record) => this._traceInstallCandidate(record)),
     );
-    return ranked.options;
+    return this._withoutBlockedNewRemotes(ranked.options);
+  }
+
+  //A Corp remote-server limit (Earth Station) forbids new-remote installs; drop
+  //them so callers fall through to existing servers.
+  _withoutBlockedNewRemotes(options) {
+    if (typeof CorpRemoteServerLimitReached != "function" || !CorpRemoteServerLimitReached()) return options;
+    return options.filter(function (option) { return option.serverToInstallTo != null; });
   }
 
   //I1: install candidates as explicit records. The legacy generator keeps its

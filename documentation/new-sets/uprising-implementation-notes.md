@@ -761,3 +761,68 @@ Validation: `tests/uprising-batch13.test.js`, `tests/uprising-integration.test.j
 format-aware deck pool and identity-change checks passed; `node --check` for
 every changed JavaScript file. Batch brief reports no unfinished markers.
 The full suite is deferred to the coordinator's consolidated run.
+## Batch 14 — 2026-10-30, Claude
+
+Implemented 26120–26123, preserving exact ELO and metadata.
+
+- **Earth Station: SEA Headquarters.** Run taxes use `modifyRunCreditCost`
+  (front: 1 credit for HQ; flip side: 6 credits for any remote). The engine
+  charges them through `AdditionalRunCosts`, and the Runner run calculator
+  charges them as a run-start loss. The front's click ability flips it. On the
+  flip side, a successful HQ run flips it back (`automaticOnRunSuccessful`).
+  No flip-side image exists locally, so the face stays 26120 and the flip is
+  logged, as for Hoshiko. "Limit 1 remote server" is a new identity property,
+  `remoteServerLimit`. The engine helper `CorpRemoteServerLimitReached()`
+  (checks.js) makes `CheckInstallDestination(card, null)` reject new remotes,
+  so `ChoicesCardInstall` stops offering them. `CorpAI._rankedInstallOptions`
+  filters new-remote options through `_withoutBlockedNewRemotes`. Empty remotes
+  are already removed by the engine, so they do not count. Card effects that
+  call `Install(card, null)` directly bypass the limit (optimisation/audit
+  item). AI: `AITriggerWhenCan`, offered when a remote
+  root holds a card and no installed agenda needs exactly the remaining clicks.
+- **Transport Monopoly.** Scores with 2 agenda counters. Its once-per-turn
+  ability works only from the Corp's score area during a run. It adds a
+  lingering `modifyDeclareSuccess` effect, which phase.js reads at Run 5.1 as
+  for Crisium Grid. The effect is removed on `responseOnRunEnds` (Trebuchet
+  pattern), so it survives the agenda leaving the score area mid-run. The run
+  is then neither successful nor unsuccessful. AI: gated in `Enumerate` at
+  Run 4.5 just before the server approach (House of Knives pattern), and only
+  for remotes with agendas, HQ that is at least half agendas, or a known
+  game-winning breach. Never for R&D.
+- **Wall to Wall.** A mandatory turn-begin trigger, checked on resolution:
+  with another rezzed asset it resolves exactly 1 option and offers no
+  Done/skip; otherwise up to 3 options, with Done available. Each option can
+  be used once. The ICE option targets any installed ICE. Effects continue
+  after "Add this asset to HQ", because the triggered ability is independent
+  of its source. AI: useful ICE counter (below `AIAdvancementLimit`), then
+  credit, then draw; never bounces it. Install and rez timing follow CSR
+  Campaign.
+- **Akhet.** Advanceable. At 3+ counters it gets +3 strength (`modifyStrength`)
+  and the Afshar printed-break limit (`modifyCannot` plus `maxSrBroken`). The
+  first subroutine gains 1 credit and places a counter on any installed card
+  (Runner cards included). AI target: an agenda within 2 of scoring, then
+  itself, then another agenda or advanceable ICE below its limit.
+
+Evidence is in `tests/uprising-batch14.test.js`:
+
+- Engine and run-calculator taxes, and Runner run legality.
+- Flip and flip-back, the human limit, and the AI ranking without new remotes.
+- Corp AI flipping through `Phase_Main`.
+- Transport Monopoly counters, once-per-turn reset, lingering cleanup and the
+  stolen-copy guard. The AI's `Phase_Movement` use and its negative cases.
+- Wall to Wall both modes, ordering, bounce, and AI choices, rez and install.
+- Akhet strength, the live break limit, `IceAI` `maxSrBroken`, and subroutine
+  targets.
+
+Focused checks passed:
+
+- The batch test.
+- AI hook docs.
+- Uprising integration.
+- Eternal format, format pool and identity change.
+- Corp install-destination and install-decision tests.
+- Hypothetical guards.
+- Corp decision fixtures and snapshots.
+
+The full suite was not run in this parallel batch session. Optimisation is
+queued in the tracker.

@@ -367,7 +367,17 @@ function CheckPlay(card) {
  * @param {Server|Card} destination proposed server or host
  * @returns {Boolean} true if the destination is legal
  */
+// "Limit N remote servers" on the Corp identity (Earth Station): no new remote
+// once N exist. Empty remotes are removed by the engine, so they do not count.
+function CorpRemoteServerLimitReached() {
+  var id = typeof corp !== "undefined" && corp ? corp.identityCard : null;
+  if (!id || typeof id.remoteServerLimit !== "number") return false;
+  return corp.remoteServers.length >= id.remoteServerLimit;
+}
+
 function CheckInstallDestination(card, destination) {
+  if (destination == null && card && card.player == corp && CorpRemoteServerLimitReached())
+    return false;
   if (
     card &&
     card.player == corp &&
