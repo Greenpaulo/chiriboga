@@ -154,6 +154,14 @@ context)` calls `afterExpose` when the expose finishes or is prevented
 `runnerCentralRunInitiated`; `modifyCannot("run", server)` read by
 `RunForbidden(server)` inside `CanPayAdditionalRunCosts`.
 
+Genesis Future Proof extends the shared turn-event history with
+`PreviousTurnEventCount(name, player)`: `ChangePhase` snapshots the completed
+turn's counts at a player-turn boundary before clearing current events.
+Midseason Replacements reads `runnerAgendaStolen` from the preceding Runner
+turn. This includes events before the card was drawn. `CheckInstall` also
+consults an optional `installOnlyIf()` predicate (Data Leak Reversal), in
+addition to the existing cost, uniqueness and hosting checks.
+
 ### Drawing and private look decisions
 
 `Draw(player, count, afterDraw, context)` applies `modifyDraw` once, then

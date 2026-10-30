@@ -345,6 +345,9 @@ function CheckInstall(card) {
     return false;
   }
 
+  //printed install conditions ("Install only if ..."), e.g. Data Leak Reversal
+  if (typeof card.installOnlyIf === "function" && !card.installOnlyIf()) return false;
+
   return true;
 }
 

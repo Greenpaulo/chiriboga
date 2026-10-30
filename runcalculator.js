@@ -583,7 +583,12 @@ class RunCalculator {
             }
           }
 
-          else if (eff == "netDamage" || eff == "meatDamage" || eff == "coreDamage") {
+          else if (eff == "tag" && this._tagPreventionCost <= overallCreditsLeft) {
+            creditPayment += this._tagPreventionCost;
+            encounter_effects.splice(j, 1);
+            j--;
+          }
+          else if (eff == "netDamage" || eff == "meatDamage" || eff == "coreDamage" || eff == "unpreventableMeatDamage") {
             gripCardsLeft = Math.max(0, gripCardsLeft - 1);
           }
 
@@ -956,6 +961,7 @@ class RunCalculator {
         else result[p.effects[j][i]]++;
       }
     }
+    if (p.runEndMeatDamage) result.meatDamage = (result.meatDamage || 0) + p.runEndMeatDamage;
     if (p.runner_credits_spent > 0 && p.creditSpendDamage > 0)
       result.meatDamage = (result.meatDamage || 0) + p.creditSpendDamage;
     if (result.meatDamage && p.meatDamagePrevention)
@@ -969,6 +975,7 @@ class RunCalculator {
     if (totalEffect.netDamage) result += totalEffect.netDamage;
     if (totalEffect.meatDamage) result += totalEffect.meatDamage;
     if (totalEffect.coreDamage) result += totalEffect.coreDamage;
+    if (totalEffect.unpreventableMeatDamage) result += totalEffect.unpreventableMeatDamage;
     return result;
   }
 
@@ -995,7 +1002,7 @@ class RunCalculator {
       result += 0.8 * p.runner_clicks_spent;
       result += 0.3 * p.virus_counters_spent;
       var totalEffect = this.TotalEffect(p);
-      var rawMeat = (p.creditSpendDamage || 0) * Number(p.runner_credits_spent > 0) +
+      var rawMeat = (p.runEndMeatDamage || 0) + (p.creditSpendDamage || 0) * Number(p.runner_credits_spent > 0) +
         p.effects.reduce((sum, effects) => sum + (Array.isArray(effects) ? effects.filter(effect => effect == "meatDamage").length : 0), 0);
       result += 1.3 * Math.min(rawMeat, p.meatDamagePrevention || 0);
       result += 1.3 * this.TotalDamage(totalEffect); //during 1.0 the runner seemed too willing to take damage
@@ -1052,6 +1059,7 @@ class RunCalculator {
           if (totalEffect.netDamage) totalDamage += totalEffect.netDamage;
           if (totalEffect.meatDamage) totalDamage += totalEffect.meatDamage;
           if (totalEffect.coreDamage) totalDamage += totalEffect.coreDamage;
+          if (totalEffect.unpreventableMeatDamage) totalDamage += totalEffect.unpreventableMeatDamage;
 		  //update damage limit based on clicks spent (unless it is set to Infinity or already mid-run)
 		  if (clicksLeft < 1 && damageLimit != Infinity && !attackedServer && !this._securityPlanning) damageLimit = runner.grip.length - MaxHandSize(runner); //try to keep a full hand at end of turn
 		  if (damageLimit < 0) damageLimit = 0;
@@ -1129,6 +1137,7 @@ class RunCalculator {
   CopyPoint(point) {
 	  var ret = {
                 iceIdx: point.iceIdx,
+                runEndMeatDamage: point.runEndMeatDamage || 0,
                 runner_credits_spent: point.runner_credits_spent,
         paymentPoolOnly: !!this._poolOnly,
         creditSpendDamage: this._creditSpendDamage || 0,
@@ -1174,6 +1183,16 @@ class RunCalculator {
     this.baseClicks = data.clicks;
     this.basePoolCredits = data.poolCredits;
 	this.baseOtherCredits = data.otherCredits;
+    this._runEndDamageServer = data.server;
+    this._runEndDamageCards = data.incomplete || ServerSuccessfulRunPrevented(data.server) ? [] :
+      ActiveCards(corp).filter(function (card) {
+        return typeof card.AIRunEndMeatDamage == "function";
+      });
+    this._tagPreventionCost = InstalledCards(runner).reduce(function (cost, card) {
+      if (!CheckHasAbilities(card) || typeof card.AITagPreventionCost != "function") return cost;
+      var candidate = card.AITagPreventionCost.call(card);
+      return candidate > 0 ? Math.min(cost, candidate) : cost;
+    }, Infinity);
     this.paths = []; //completed paths
     this._creditSpendSources = (this._securityPlanning ? this._securityPlanning.damageSources :
       typeof OutsideCreditDamageSources == "function" ? OutsideCreditDamageSources(data.server) : []).filter(source =>
@@ -1360,7 +1379,7 @@ class RunCalculator {
         {
           clicks: approachClicks,
           credits: approachCredits,
-          stealCredits: highestStealCredits, stealAgenda: stealAgenda,
+          stealCredits: highestStealCredits, stealAgenda: stealAgenda, trashCard: htcCard,
           effects: approachEffects,
           tags: approachTags,
         },
@@ -1373,7 +1392,7 @@ class RunCalculator {
         data.approachOptions.push({
           clicks: approachClicks,
           credits: approachCredits,
-          stealCredits: highestStealCredits, stealAgenda: stealAgenda,
+          stealCredits: highestStealCredits, stealAgenda: stealAgenda, trashCard: htcCard,
           effects: approachEffects,
           tags: approachTags,
         });
@@ -1669,6 +1688,15 @@ class RunCalculator {
             data, possiblePath[possiblePath.length - 1], defender);
         }
         for (var continuationIndex = 0; continuationIndex < approachPoints.length; continuationIndex++) {
+          var endpoint = approachPoints[continuationIndex];
+          if (!data.incomplete && this._runEndDamageCards.length) {
+            var tags = runner.tags + (this.TotalEffect(endpoint).tag || 0);
+            endpoint.runEndMeatDamage = this._runEndDamageCards.reduce(function (sum, card) {
+              return sum + Math.max(0, card.AIRunEndMeatDamage.call(card, data.server, tags, {trashCard: data.approachOptions[j].trashCard}));
+            }, 0);
+            delete endpoint.valid;
+            delete endpoint.cost;
+          }
           var completedPath = possiblePath.concat([approachPoints[continuationIndex]]);
           var validity = this.ValidPath(completedPath, data.damageLimit, data.clickLimit, data.poolCreditLimit, data.otherCredits, data.tagLimit);
           if (validity.valid) finalpaths.push(completedPath);

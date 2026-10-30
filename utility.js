@@ -3996,6 +3996,11 @@ function ChoicesActiveTriggers(callbackName, player = null) {
  * ChangePhase clears them when a turn begins.
  */
 var turnEventCounts = {};
+var previousTurnEventCounts = {};
+var previousTurnEventPlayer = null;
+function PreviousTurnEventCount(name, player) {
+  return previousTurnEventPlayer == player ? previousTurnEventCounts[name] || 0 : 0;
+}
 function RecordTurnEvent(name) {
   turnEventCounts[name] = (turnEventCounts[name] || 0) + 1;
   return turnEventCounts[name];

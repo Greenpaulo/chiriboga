@@ -25,7 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `genesis` | in-progress | 120 | 104 | 16 | 17 | 2 | 75 / 97 | true / true | no |
+| `genesis` | in-progress | 120 | 103 | 17 | 0 | 0 | 88 / 96 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -73,28 +73,10 @@ None.
 - 02082 Xanadu: no definition
 - 02084 Networking: no definition
 - 02095 Hokusai Grid: no definition
+- 02101 Retrieval Run: no definition
 - 02110 Eli 1.0: no definition
 - 02112 Ronin: no definition
 - 02115 Project Beale: no definition
-- 02101 Retrieval Run: 2 scaffold marker(s)
-- 02102 Darwin: 2 scaffold marker(s)
-- 02103 Data Leak Reversal: 2 scaffold marker(s)
-- 02104 Faerie: 2 scaffold marker(s)
-- 02105 Mr. Li: 2 scaffold marker(s)
-- 02106 Indexing: 2 scaffold marker(s)
-- 02107 R&D Interface: 2 scaffold marker(s)
-- 02108 Deep Thought: 2 scaffold marker(s)
-- 02109 New Angeles City Hall: 2 scaffold marker(s)
-- 02111 Ruhr Valley: 2 scaffold marker(s)
-- 02113 Midori: 2 scaffold marker(s)
-- 02114 NBN: The World is Yours*: 2 scaffold marker(s)
-- 02116 Midseason Replacements: 2 scaffold marker(s)
-- 02117 Flare: 3 scaffold marker(s)
-- 02118 Dedicated Response Team: 2 scaffold marker(s)
-- 02119 Burke Bugs: 3 scaffold marker(s)
-- 02120 Corporate War: 2 scaffold marker(s)
-- 02102 Darwin: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02104 Faerie: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
 ### `systemgateway` (sets/systemgateway.js)
 
