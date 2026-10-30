@@ -1,0 +1,141 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Az McCaffrey: Mechanical Prodigy,3 Always Have a Backup Plan,2 Blueberry!™ Diesel,2 Flip Switch,3 Lucky Charm,2 Masterwork (v37),1 Bukhgalter,2 “Baklan” Bochkin,2 The Class Act,1 Gauss,1 The Artist,2 Direct Access,1 Rejig,1 Mutual Favor,1 Carmen,1 Marjanah,2 Red Team,3 Creative Commission,1 Overclock,3 Sure Gamble,2 T400 Memory Diamond,2 Detente,2 Sang Kancil,2 Fransofia Ward,2 Open Market,1 Underdome Irregulars]
+[Hyoubu Institute: Absolute Clarity,1 Fully Operational,3 Project Yagi-Uda,3 Sting!,3 Public Health Portal,2 Storgotic Resonator,2 Saisentan,1 Complete Image,2 Letheia Nisei,3 Urtica Cipher,1 Neurospike,3 Send a Message,2 Palisade,3 Hedge Fund,1 Proprionegation,2 Empiricist,3 Mycoweb,3 Semak-samun,3 Peer Review,1 Mitra Aman,3 Measured Response,2 Lionsmane,2 The Red Room]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 1.25; fresh-hand expectation 3.23
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner chose to keep
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Measured Response,Send a Message,Lionsmane,Mitra Aman,Sting!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Detente,Flip Switch,Open Market,Red Team,Blueberry!™ Diesel]
+Corp drew a card
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of HQ
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+Using Hyoubu Institute: Absolute Clarity:
+Corp spent one click
+Corp gained one credit
+Detente revealed
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Send a Message,Sting!,Lionsmane,Measured Response]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [Detente,Flip Switch,Open Market,Red Team,Blueberry!™ Diesel]
+Runner spent one click
+Runner spent one credit
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Runner spent 5 credits from Open Market
+Runner installed Red Team
+12 credits loaded onto Red Team
+Runner spent one click
+Run initiated attacking R&D
+Approaching R&D
+Run successful
+Peer Review accessed
+Run ends
+Runner spent one click
+Played Blueberry!™ Diesel
+Runner drew 2 cards
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 6 credit(s) and 4 card(s) in hand: [Send a Message,Sting!,Lionsmane,Measured Response]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 4 card(s) in hand: [Detente,Flip Switch,The Class Act,Sure Gamble]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 8 credit(s) and 4 card(s) in hand: [Send a Message,Sting!,Measured Response,Peer Review]
+SPOILER: Runner has 4 credit(s), 0 tag(s) and 4 card(s) in hand: [Detente,Flip Switch,The Class Act,Sure Gamble]
+1 credit taken from Open Market
+Open Market trashed (empty)
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 3 credits
+Runner installed The Class Act
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Run ends
+Runner spent one click
+Runner drew a card
+The Class Act: Add 1 card to the bottom of your stack triggered
+
+SPOILER: Contents of remote servers:
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(26010, [26012,35022,30030], [26013,26012,35021,26028,26015,26014,26017,30015,30030,30031,26011,26018,30011,35020,30030,30020,35021,26017,26011,26028,36016,26015,35020,30018,26014,35022,26016,26011,26027,35018,30031,30020,26014,26029,26024,30020,30029], [35018,26013,30016], [30018,26018], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(26039, [], [35053,26040,26044,26041,30072,35078,30075,26041,26044,30072,36045,35055,26042,30045,26042,35078,30045,30069,30075,35054,26043,26046,26046,26043,36045,35054,35052,35053,35048,35055,35054,26042,30069,30045,30049,30075,26040,26045,26036,35053,35052,26040], [30069,26041,35078,35055], [], [36041], [35056,36041], [], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.grip[2].madeSuccessfulRunThisTurn=true;
+runner.stack[7].madeSuccessfulRunThisTurn=true;
+runner.stack[12].madeSuccessfulRunThisTurn=true;
+runner.stack[23].runArchives=true;
+runner.stack[26].brokenThisEncounter=[];
+runner.rig.resources[0].credits=9;
+runner.rig.resources[0].runArchives=true;
+runner.rig.resources[1].installedThisTurn=true;
+corp.RnD.cards[5].successfulRunLastTurn=true;
+corp.RnD.cards[15].successfulRunLastTurn=true;
+corp.RnD.cards[21].firstApproach=false;
+corp.RnD.cards[22].firstApproach=false;
+corp.RnD.cards[37].successfulRunLastTurn=true;
+corp.HQ.cards[2].successfulRunLastTurn=true;
+corp.archives.AISuccessfulRuns=1;
+corp.RnD.AISuccessfulRuns=1;
+
+Version reference: Tue Oct 27 2026 09:46:09 GMT+0000 (Greenwich Mean Time)

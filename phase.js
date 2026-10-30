@@ -133,6 +133,8 @@ phaseTemplates.standardResponse = {
         var ret = ChoicesInstalledCards(corp, function (card) {
 			//corp can always rez upgrades and assets (except for usability)
 			var validRezTypes = ["upgrade", "asset"];
+			//ice such as Rime may be rezzed like non-ice cards during runs on its server
+			if (CheckRezAsNonIceDuringRun(card)) validRezTypes.push("ice");
 			//but only the approached (not encountered) ice
 			if (CheckApproach() && approachIce < attackedServer.ice.length) {
 				if (card == attackedServer.ice[approachIce]) validRezTypes.push("ice");
@@ -472,6 +474,8 @@ phaseTemplates.globalTriggers = {
 			typeof corp.AI._recordSuccessfulRunForProtection === "function"
 		  )
 			corp.AI._recordSuccessfulRunForProtection(attackedServer);
+		  //count it for "the first time each turn you make a successful run" (DreamNet)
+		  RecordTurnEvent("runnerSuccessfulRun");
 		  //and fire the pre-phase succesful automatics
 		  AutomaticTriggers("automaticOnRunSuccessful", [attackedServer]);
 	  }
@@ -583,6 +587,10 @@ phaseTemplates.globalTriggers = {
         instruction,
         card
       );
+      if (triggerCallback.privateLook) {
+        decisionPhase.privateLook = {player: card.player,
+          cards: choices.filter(function (choice) { return choice.card; }).map(function (choice) { return choice.card; })};
+      }
 	  if (typeof triggerCallback.footerText !== "undefined")
 		decisionPhase.footerText = triggerCallback.footerText;
     },
@@ -1625,6 +1633,7 @@ phases.runBreachServer = {
   title: "Run: Breach", //was 'Access' (i.e. access cards in server) but Nisei changed it so it's not confused with each individual access
   identifier: "Run 5.2",
   Init: function() {
+    autoAccessing = false; //bulk access belongs to this breach only
 	if (attackedServer == corp.archives) {
 	  var cardsTurnedFaceUp = attackedServer.cards.filter(function(card) {
 		return !card.faceUp;
@@ -1667,18 +1676,35 @@ phases.runAccessingCard = {
   requireHumanInput: true,
   title: "Run: Access",
   identifier: "Run Accessing",
+  //Conservatively keep normal presentation whenever an access may need attention.
+  IsRoutineArchivesAccess: function (card) {
+    if (typeof autoAccessing === "undefined" || !autoAccessing || runner.AI != null ||
+        attackedServer !== corp.archives || !card ||
+        card.cardLocation !== corp.archives.cards || card.cardType === "agenda") return false;
+    if (typeof card.automaticOnAccess !== "undefined" ||
+        typeof card.responseOnAccess !== "undefined" ||
+        typeof card.automaticOnAccessComplete !== "undefined") return false;
+    //Global automatic counters still run silently; optional responses need attention.
+    if (ChoicesActiveTriggers("responseOnAccess").length > 0) return false;
+    return ChoicesTriggerableAbilities(runner, "access").length === 0;
+  },
   Init: function () {
 	//add to accessed list to prevent accessing it a second time
     if (accessingCard.cardLocation == attackedServer.root) accessedCards.root.push(accessingCard);
 	else accessedCards.cards.push(accessingCard);
+    var routineAccess = this.IsRoutineArchivesAccess(accessingCard);
     if (viewingPlayer == runner) {
       accessingCard.renderer.canView = true;
-      SetHistoryThumbnail(accessingCard.imageFile, "Access");
-    } else SetHistoryThumbnail("Corp_back.png", "Access");
-    accessingCard.renderer.ToggleZoom();
+      if (!routineAccess) SetHistoryThumbnail(accessingCard.imageFile, "Access");
+    } else if (!routineAccess) SetHistoryThumbnail("Corp_back.png", "Access");
+    if (!routineAccess) accessingCard.renderer.ToggleZoom();
     RecordPublicPostureEvent("access", accessingCard, attackedServer);
 
     AutomaticTriggers("automaticOnAccess", [accessingCard]); //special case in CheckCallback allows for this to work even when card not active
+    if (routineAccess && accessingCard && !this.IsRoutineArchivesAccess(accessingCard)) {
+      SetHistoryThumbnail(viewingPlayer == runner ? accessingCard.imageFile : "Corp_back.png", "Access");
+      accessingCard.renderer.ToggleZoom();
+    }
     this.chosenString = "chosen";
     //since archived cards are already face up we can skip the flip-and-look-on-access step
     if (attackedServer == corp.archives) this.requireHumanInput = false;
@@ -1721,7 +1747,7 @@ phases.runAccessingCard = {
 		  return [{}];
 	  }
       var cost = StealCost(accessingCard);
-      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1) return [];
+      if (CheckSteal() && cost.credits < 1 && cost.clicks < 1 && cost.programs < 1) return [];
       return [{}];
     },
   },
@@ -1749,7 +1775,7 @@ phases.runAccessingCard = {
         agenda,
         function () {
           SpendClicks(runner, cost.clicks);
-          Steal();
+          PayStealCostPrograms(agenda, cost.programs, Steal);
         },
         this
       );
@@ -1829,6 +1855,7 @@ phases.runEnds.Resolve.n = function () {
         "Runner loses " + runner.temporaryCredits + " unspent temporary credits"
       );
     runner.temporaryCredits = 0;
+    autoAccessing = false;
     attackedServer = null;
     approachIce = -1;
     encountering = false;
@@ -1859,10 +1886,20 @@ phases.runnerPostAction = CreatePhaseFromTemplate(
   "Runner 1.3*",
   null
 );
+//A played event is trashed as it finishes resolving (Aniccam counts it). It
+//happens here, after resolution, because the action moves to this phase first.
+var runnerResolvedEventsTrashed = null;
+function TrashResolvedRunnerCard(card) {
+  MoveCard(card, runner.heap);
+  if (card.cardType != "event") return;
+  if (!runnerResolvedEventsTrashed)
+    runnerResolvedEventsTrashed = { cards: [], trashEvent: { runnerEventOrdinal: RecordTurnEvent("runnerEventTrashed") } };
+  runnerResolvedEventsTrashed.cards.push(card);
+}
 phases.runnerPostAction.Enumerate.n = function () {
   //since this is post-action, this is also where we clean up any resolving cards that still remain
   while (runner.resolvingCards.length > 0) {
-    MoveCard(runner.resolvingCards[0], runner.heap);
+    TrashResolvedRunnerCard(runner.resolvingCards[0]);
   }
   return [{}];
 };
@@ -1873,7 +1910,21 @@ phases.runnerPostAction.Enumerate.n = function () {
 //     ChangePhase(phases.runnerDiscardStart);
 //   } else IncrementPhase();
 // }; //if out of clicks, time to move on
+//Played events trashed as they finished resolving get one response window
+//("an event is trashed", e.g. Aniccam) before the post-action window closes.
+function RunnerPostActionContinue() {
+  if (runner.clickTracker < 1) {
+    ChangePhase(phases.runnerActionPhaseEnds);
+  } else IncrementPhase();
+}
 phases.runnerPostAction.Resolve.n = function () {
+  var trashed = runnerResolvedEventsTrashed;
+  runnerResolvedEventsTrashed = null;
+  if (trashed) {
+    TriggeredResponsePhase(playerTurn, "responseOnPlayedEventTrashed", [trashed.cards, trashed.trashEvent],
+      RunnerPostActionContinue, "Trashed");
+    return;
+  }
   if (runner.clickTracker < 1) {
     ChangePhase(phases.runnerActionPhaseEnds);
   } else IncrementPhase();
@@ -2113,6 +2164,12 @@ function ChangePhase(src, skipInit = false) {
 	
   var nextPhase = src;
   var previousPhase = currentPhase;
+  //Private looked-at cards must not remain in the cached grid after a decision.
+  if (previousPhase && previousPhase.privateLook && previousPhase !== nextPhase) {
+    viewingGrid = null;
+    previousViewingGrid = null;
+    viewingPile = null;
+  }
   currentPhase = nextPhase;
 
   var oldTurn = playerTurn;
@@ -2121,6 +2178,10 @@ function ChangePhase(src, skipInit = false) {
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
     turnEventCounts = {};
+  //turn boundary: Pass until end of turn lasts for the current turn only
+  if (!skipInit && (currentPhase === phases.corpStartDraw || currentPhase === phases.runnerStartResponse) &&
+      typeof PassPriorityReset == "function")
+    PassPriorityReset();
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1") &&
       corp.AI && typeof corp.AI._publicPostureTurnBegins === "function")
     corp.AI._publicPostureTurnBegins(playerTurn == corp ? "corp" : "runner");

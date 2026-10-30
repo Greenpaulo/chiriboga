@@ -2,9 +2,10 @@
 
 Implementation and independent optimisation/review are separate. Follow the
 batch-selection and transition rules in [the operator guide](card-set-agent-operator-guide.md).
-Vantage Point's maintained [set record](records/vantagepoint.md) and immutable
-[transition snapshot](history/vantagepoint-2026-10-16-implementation-transition.md)
-preserve both queues, logs and outstanding findings.
+Downfall's maintained [set record](records/downfall.md) and immutable
+[transition snapshot](history/downfall-2026-10-23-implementation-transition.md)
+preserve both queues, logs and outstanding findings; Vantage Point's are in
+[its set record](records/vantagepoint.md).
 
 ## Active set
 
@@ -12,16 +13,16 @@ preserve both queues, logs and outstanding findings.
 | ----- | ----- |
 | Status | Active |
 | Implementation status | In progress |
-| Set name | Downfall |
-| Registry key | `downfall` |
-| Pack code | `df` |
-| Definition file | `sets/downfall.js` |
+| Set name | Uprising |
+| Registry key | `uprising` |
+| Pack code | `ur` |
+| Definition file | `sets/uprising.js` |
 | Metadata file | `carddata/carddata.json` |
-| Card range | `26001–26065` |
+| Card range | `26066–26130` |
 | Registry state during batches | in-progress; hidden: true, untested: true |
-| Focused integration test | `tests/downfall-integration.test.js` |
-| Implementation notes | `documentation/new-sets/downfall-implementation-notes.md` |
-| Review directory | `documentation/new-sets/reviews/downfall` |
+| Focused integration test | `tests/uprising-integration.test.js` |
+| Implementation notes | `documentation/new-sets/uprising-implementation-notes.md` |
+| Review directory | `documentation/new-sets/reviews/uprising` |
 
 ## Batch selection rule
 
@@ -35,45 +36,50 @@ selection if none is queued.
 
 ## Status summary
 
-**10 complete, 3 outstanding** (`3 Pending`, `0 In progress`, `0 Blocked`).
+**8 complete, 8 outstanding** (`8 Pending`, `0 In progress`, `0 Blocked`).
 
 ## Batch queue
 
-The boundaries follow faction and complexity: four cards for the existing
-Anarch economy/console/Trojan plus the complex Stargate breach replacement;
-then Anarch virus resources, Criminal equipment, Shaper and Corp factions.
-No existing range is credited without tests.
+Boundaries follow faction, then complexity (4–5 cards where a batch has an
+identity, hosting, run/encounter redirects or a new shared mechanic; 3 for
+short faction groups, including neutral tails and the complex Jinteki and NBN
+groups in batches 10 and 13). Six cards already had definitions (26073, 26088, 26090,
+26091, 26094, 26095); none is credited without tests. The other 59 are
+`scripts/scaffold_set.py` stubs with TODO markers and dated ELO. See the
+[setup notes](uprising-implementation-notes.md) for per-batch risks, including
+the shared Lockdown mechanic first needed in batch 9.
 
 | Batch | Card IDs | Status | Owner / started | Notes/blocker |
 | ----: | -------- | ------ | --------------- | ------------- |
-| 1 | 26001–26004 | Complete | Codex / 2026-10-16 | Isolation, Demolisher, Chisel and Stargate: mechanics and real baseline AI consumers; all 95 regression files pass. |
-| 2 | 26005–26009 | Complete | PR #66 / reconciled 2026-10-20 | Utae, Climactic Showdown, Fencer Fueno, The Nihilist and Trickster Taka; real-engine mechanics and Runner/Corp AI choices. |
-| 3 | 26010–26014 | Complete | Claude / 2026-10-16 | Implemented on a branch from `main` in parallel with batch 1; see implementation notes. |
-| 4 | 26015–26018 | Complete | PR #66 / reconciled 2026-10-20 | Masterwork, Bukhgalter, Baklan and The Class Act; mechanics and Runner AI; install-cost probes restore state even on exceptions. |
-| 5 | 26019–26023 | Complete | PR #66 / reconciled 2026-10-20 | Lat, In the Groove, Khusyuk, Spec Work and Supercorridor; mechanics and Runner AI. |
-| 6 | 26024–26030 | Complete | PR #66 / reconciled 2026-10-20 | Gauss, Pelangi, Rezeki, The Artist, Direct Access, Rejig and Whistleblower; mechanics and Runner AI. |
-| 7 | 26031–26035 | Complete | PR #66 / reconciled 2026-10-20 | MirrorMorph, Architect Deployment Test, Calvin B4L3Y, Nanoetching Matrix and Hagen; mechanics and Corp AI. |
-| 8 | 26036–26040 | Complete | Codex / 2026-10-16 | Gameplay and baseline AI verified; focused/shared checks and all 95 full-suite test files pass (2026-10-18). |
-| 9 | 26041–26046 | Complete | Codex / 2026-10-22 | Damage, reveals, faction-trash counters and finite Psi repeat traversal; baseline AI; all 114 full-suite files pass. |
-| 10 | 26047–26051 | Complete | Codex / 2026-10-22 | Scored advancement, conditional/first-run income, ICE credit timing and revealing self-trash trap; real baseline AI consumers. |
-| 11 | 26052–26056 | Pending | — | Preserve and validate existing implementations. |
-| 12 | 26057–26061 | Pending | — | Preserve and validate existing implementations. |
-| 13 | 26062–26065 | Pending | — | Preserve and validate existing implementations. |
+| 1 | 26066–26069 | Complete | Claude, 2026-10-23 | Anarch: Hoshiko Shiro (flip identity), Moshing, Devil Charm, Gachapon. Complex. |
+| 2 | 26070–26073 | Complete | Claude, 2026-10-23 | Anarch companions: Keiko, Odore, Mystic Maemi, Paladin Poemu (existing, unverified). Complex. |
+| 3 | 26074–26078 | Complete | Claude, 2026-10-23 | Criminal: Bravado, Boomerang, Mu Safecracker, Prognostic Q-Loop, Swift. Complex. |
+| 4 | 26079–26082 | Complete | Claude, 2026-10-23 | Criminal stealth: Afterimage, Makler, Penumbral Toolkit, The Back. Complex. |
+| 5 | 26083–26087 | Complete | Claude, 2026-10-23 | Shaper: Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler. Complex. |
+| 6 | 26088–26092 | Complete | Claude, 2026-10-23 | Shaper: Mantle, Penrose, Self-modifying Code, Cybertrooper Talut, Paule's Café. Existing three verified and repaired. |
+| 7 | 26093–26095 | Complete | Claude, 2026-10-23 | Neutral Runner: Buffer Drive, Daily Casts, DreamNet. Existing Daily Casts and DreamNet repaired and verified. |
+| 8 | 26096–26100 | Complete | Claude, 2026-10-23 | Haas-Bioroid: Megaprix Qualifier, Project Vacheron, Bass CH1R180G4, Cerebral Overwriter, Vaporframe Fabricator. Complex. |
+| 9 | 26101–26105 | Pending | — | Haas-Bioroid: Drafter, Týr, NEXT Activation Command (first Lockdown), Scapenet, Tranquility Home Grid. Complex. |
+| 10 | 26106–26108 | Pending | — | Jinteki: Flower Sermon, Prāna Condenser, Engram Flush. Complex. |
+| 11 | 26109–26112 | Pending | — | Jinteki Psi/install: Konjin, Hyoubu Precog Manifold, Kakurenbo, La Costa Grid. Complex. |
+| 12 | 26113–26116 | Pending | — | NBN: GameNET (identity), Bellona, F2P, Gold Farmer. Complex. |
+| 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
+| 14 | 26120–26123 | Pending | — | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
+| 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
+| 16 | 26128–26130 | Pending | — | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
 
 ## Completion log
 
 | Batch | Card IDs | Completed | Agent | Focused tests | Notes |
 | ----: | -------- | --------- | ----- | ------------- | ----- |
-| 1 | 26001–26004 | 2026-10-16 | Codex | `tests/downfall-integration.test.js`; `tests/agent-scripts.test.js`; full `node tests/run-all-tests.js` | Gameplay and baseline AI complete. Additional trash-cost sequencing, effect-controller attribution, hidden-ICE model guard and scoped economy targeting. All 95 files pass on Node 20.19.0, including Corp fixtures and snapshots. |
-| 2 | 26005–26009 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch2.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 2 notes. |
-| 3 | 26010–26014 | 2026-10-16 | Claude | `tests/downfall-batch3.test.js`; full `node tests/run-all-tests.js` (95 files, Node 20.19.0) | Implemented Az McCaffrey, Always Have a Backup Plan, Blueberry!™ Diesel, Flip Switch and Lucky Charm; added a `responseOnTraceInitiated` window in `Trace` and the Runner AI `AITriggerToRemoveTags` consumer. |
-| 4 | 26015–26018 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch4.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 4 notes. |
-| 5 | 26019–26023 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch5.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 5 notes. |
-| 6 | 26024–26030 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch6.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 6 notes. |
-| 7 | 26031–26035 | 2026-10-20 (reconciled) | Codex | `tests/downfall-batch7.test.js` | PR #66 implementation verified against current code and focused regressions; see batch 7 notes. |
-| 8 | 26036–26040 | 2026-10-18 | Codex | `tests/downfall-batch8.test.js`; shared format, helper and hook checks; full suite (95 files) | Operations, run-entry costs, reveal income and agenda swaps with baseline AI; see implementation notes. |
-| 9 | 26041–26046 | 2026-10-22 | Codex | `tests/downfall-batch9.test.js`; required shared checks; full suite | Gameplay, real AI selectors and finite same-run retry model; all 114 files pass on Node 20.19.0. See batch 9 notes. |
-| 10 | 26047–26051 | 2026-10-22 | Codex | `tests/downfall-batch10.test.js`; batches 8–9 and set integration; required shared checks; full suite | Gameplay, real install/rez/trigger/run consumers, finite counter/self-trash and gifted-card accounting; all 115 full-suite files pass on Node 20.19.0. See batch 10 notes. |
+| 1 | 26066–26069 | 2026-10-23 | Claude | `tests/uprising-batch1.test.js` | Hoshiko access-driven flip; Moshing multi-select grip cost; Devil Charm encounter removal with a run-long lingering -6 and a Run Calculator `strengthMod` persistent (shared `IceAct` change); Gachapon set-aside dig with discounted install. Baseline AI through economy/draw play, encounter-window preference, `AIDrawTrigger`. |
+| 2 | 26070–26073 | 2026-10-23 | Claude | `tests/uprising-batch2.test.js` | Keiko, Odore, Mystic Maemi, Paladin Poemu (rewritten); engine records `runnerCompanionUse` and passes spent hosted `sources` to `responseOnCreditsSpent`. See notes. |
+| 3 | 26074–26078 | 2026-10-23 | Claude | `tests/uprising-batch3.test.js` (11 real-engine scenarios) | Bravado (distinct passed ice, pays on any run end), Boomerang (chosen ice, trash break 2, delayed heap-to-stack recursion), Mu Safecracker (stealth-only payment, +1 HQ/R&D access), Prognostic Q-Loop (first-run look, once-per-turn reveal/install), Swift (+1 MU, first run event click). No shared engine/AI changes. |
+| 4 | 26079–26082 | 2026-10-23 | Claude | `tests/uprising-batch4.test.js` | Afterimage stealth-only pump/bypass (restricted credits via encounter-option `restrictedCredits`), Makler, Penumbral Toolkit, The Back (new `automaticOnAbilityUsed` trigger, `HasTrashAbility` helper). See notes. |
+| 5 | 26083–26087 | 2026-10-23 | Claude | `tests/uprising-batch5.test.js` | Harmony AR Therapy, Aniccam, Simulchip, Cordyceps, Euler with baseline AI. Shared: `Trash()` records the `runnerEventTrashed`/`runnerInstalledProgramTrashed` turn events; played events trashed after resolving open `responseOnPlayedEventTrashed`; a Runner `AITriggerInPaidWindow()` consumer. See the [notes](uprising-implementation-notes.md#batch-5--2026-10-23). |
+| 6 | 26088–26092 | 2026-10-23 | Claude | `tests/uprising-batch6.test.js` | Penrose and Paule's Café implemented; SMC, Talut repaired (turn cleanup never fired, AI hooks uncalled); new `AIAbilityInstallBreakers` planner hook and pending paid-ability consumer in `ai_runner.js`. See implementation notes. |
+| 7 | 26093–26095 | 2026-10-23 | Claude | `tests/uprising-batch7.test.js` | Buffer Drive implemented: grip/stack trash response through a new `Trash()` event record, remove-from-game heap recovery and AI choices. Daily Casts empty-trash now uses `Trash()`. DreamNet used to draw on every successful run; it now draws only on the first, counted with a new turn event. See [notes](uprising-implementation-notes.md#batch-7--2026-10-23). |
+| 8 | 26096–26100 | 2026-10-23 | Claude | `tests/uprising-batch8.test.js` | Megaprix/Vacheron variable points via `agendaPointsForPlayer`; new `interruptOnAddedToScoreArea` engine hook in `MoveCardTriggers` (Vacheron counters before the win check); core damage now counts every point; Bass score-burst/last-click AI; Cerebral Overwriter ambush AI; Vaporframe free installs through `_bestInstallOption`. |
 
 ## Batch-review log
 
@@ -84,32 +90,26 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**10 Pending** (optional strategy work), 0 In progress, 0 Blocked,
-1 Awaiting review (bounded run-entry repair).
-
-Implementation is complete for batches 1–10; no independent batch review is recorded.
-PR-comment remediation is not an independent strategic review.
-Preserve subsequent review verdicts and ownership.
+**8 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+initialised when each implementation batch completes.
 
 | Batch | Card IDs | Status | Owner / started | Findings/evidence |
 | ----: | -------- | ------ | --------------- | ----------------- |
-| 1 | 26001–26004 | Pending | — | Optional strategy: Isolation's resource sacrifice versus other income; console competition; Chisel host/repeated-run plans; Stargate revealed target value, ordinary agenda steals, other breach replacements and Archives follow-up. [Notes](downfall-implementation-notes.md#focused-evidence-and-optimisation). |
-| 2 | 26005–26009 | Pending | — | Optional strategy: Server/trash value for Showdown, Utae break sequencing, hosted-credit/tag trade-offs and Nihilist counter spending. [Notes](downfall-implementation-notes.md#batch-2--2600526009). |
-| 3 | 26010–26014 | Pending | — | Deeper strategy: AI does not seek out Backup Plan; no Flip Switch jack-out policy and its trace decision ignores Corp boost credits; Lucky Charm not valued at install or sequenced after an HQ run; Blueberry bottom choice only spots redundant cards. See [notes](downfall-implementation-notes.md#deeper-strategy-optimisation-queue). |
-| 4 | 26015–26018 | Pending | — | Optional strategy: Bukhgalter full-break refund in run costing, Masterwork install trade-offs, Baklan thresholds and Class Act bottoming. [Notes](downfall-implementation-notes.md#batch-4--2601526018). |
-| 5 | 26019–26023 | Pending | — | Optional strategy: End-turn matching, In the Groove install order/draw choices, Khusyuk access value and Spec Work retention value. [Notes](downfall-implementation-notes.md#batch-5--2601926023). |
-| 6 | 26024–26030 | Pending | — | Optional strategy: Pelangi counter conservation/type choice, Artist install timing, Direct Access valuation, Rejig target value and Whistleblower timing. [Notes](downfall-implementation-notes.md#batch-6--2602426030). |
-| 7 | 26031–26035 | Pending | — | Optional strategy: MirrorMorph action ordering, Architect Deployment Test install value, draw/credit asset timing and Hagen program-trash value. [Notes](downfall-implementation-notes.md#batch-7--2603126035). |
-| 8 | 26036–26040 | Pending | — | Compare operation mode sequences, Cold Site setup budget, Hyoubu spare-click value and Yagi-Uda swap/overadvancement plans; see implementation notes. |
-| 8 run-entry repair | 26038 (shared run-event legality) | Awaiting review | — | Repaired event-only payment sources while reserving additional run costs; Prepaid VoicePAD + Dirty Laundry, shared funds and actual tax payment covered. All 109 full-suite files pass (2026-10-20). Optional batch strategy work remains Pending. |
-| 9 | 26041–26046 | Pending | — | Optional strategy: damage/counter timing versus scoring, Complete Image naming/play thresholds, Saisentan type priors and probabilistic damage pricing, Letheia bid/trash value and placement among protected servers. [Notes](downfall-implementation-notes.md#batch-9--2604126046). |
-| 10 | 26047–26051 | Pending | — | Optional strategy: scored-counter conservation and cross-agenda sequences; Daily Quest protection/reward trade-offs; Subscription rez timing; Congratulations! placement and Loot Box income versus gifted-card value. [Notes](downfall-implementation-notes.md#batch-10--2604726051). |
+| 1 | 26066–26069 | Pending | — | Hoshiko: run planning ignores the flip incentive/penalty. Moshing: plays only with three cards not worth keeping. Devil Charm: Corp security counts the single use on every ice; install heuristic is strength-only. Gachapon: digs only for a missing basic breaker type. See notes. |
+| 2 | 26070–26073 | Pending | — | Poemu/Maemi do not plan to spend the stash before 3 credits; Maemi keep/trash ignores stash value vs grip; Keiko priority ignores companion usage. See notes. |
+| 3 | 26074–26078 | Pending | — | Deeper strategy: Bravado as pure economy when no run is otherwise wanted; Boomerang trash not priced (may be spent where a cheap breaker would do) and target choice vs. future runs; Mu Safecracker always pays, ignoring later stealth-credit needs, and access estimate ignores credits spent breaking earlier in the run; Q-Loop knowledge can survive a stack shuffle that leaves the same card on top, and blind reveals are never used; Swift click gain absent from run-event click planning. See implementation notes. |
+| 4 | 26079–26082 | Pending | — | Corsair's `AIRunRestrictedCredits` still counts run-only stealth sources (Toolkit, Touchstone, Methuselah) that also report `AIRunPoolCreditOffset`, so with Corsair installed pre-run stealth budgets can double count; Makler's full-break 1[c] and Afterimage's once-per-turn bypass across finite reruns are not priced; Corp security does not price Afterimage's 2-credit bypass; The Back counts only abilities resolved through `TriggerAbility` (not optional hardware responses or hosted-credit spending) and picks heap cards by ELO. |
+| 5 | 26083–26087 | Pending | — | Deeper strategy only: Simulchip never pays the program-trash cost and is not used during runs (e.g. to recover a breaker trashed by a subroutine); Cordyceps only weakens the central just run, with unrezzed ice valued at the default threat estimate; Harmony AR Therapy ranks recovered cards by ELO, without deck-plan or Aniccam synergy; Aniccam has no event-count install valuation; Euler's install-turn free breaks are not anticipated when planning install-then-run. |
+| 6 | 26088–26092 | Pending | — | SMC/Café installs only before a run (first paid window), not reactively mid-run on unexpected ice; planner reserves 2 clicks for ability installs; Talut boost not applied to hypothetical installs; Café hosts only for a strict ≥2-connection saving (no storage/overflow hosting); Runner run budget ignores Mantle's credit for ordinary breaks. |
+| 7 | 26093–26095 | Pending | — | Buffer Drive: the AI recovers a needed breaker only in a paid-ability window, after an action-phase draw. It is not valued as damage/mill protection when installing (generic install path only). DreamNet draw is not counted in run potential. |
+| 8 | 26096–26100 | Pending | — | Corp scoring/protection and steal-risk estimates read printed points: Megaprix second-copy bonus and Vacheron 0-point steal not valued. Bass is not part of the fast-advance search (only exact one-click bursts or last click). Vaporframe free installs are ranked with paid-install inhibition, so cost-free outer ice is undervalued; no plan for its trash response as bait. Cerebral Overwriter fires whenever affordable (no credit-reserve trade-off); advancement limit fixed at 3. |
 
 ## Optimisation log
 
+No optimisation recorded.
+
 | Date | Batch / IDs | Finding / scope | Repairs and evidence | Remaining review scope |
 | ---- | ----------- | --------------- | -------------------- | ---------------------- |
-| 2026-10-20 | 8 / 26038 shared dependency | Required run-event affordability repair | Preserve event-only credits, reserve shared funds once; focused batch 8/3 and required shared checks pass; full suite passes all 109 files on Node 20.19.0. [Notes](downfall-implementation-notes.md#batch-8-run-event-payment-repair--2026-10-20). | Independently review run-event funding and Cold Site costs; broader optional strategy work remains Pending. |
 
 ## Set-wide review status
 
@@ -118,9 +118,8 @@ Not requested.
 ## Required shared verification
 
 ```sh
-node --check sets/downfall.js
-node tests/downfall-integration.test.js
-node tests/downfall-batch8.test.js
+node --check sets/uprising.js
+node tests/uprising-integration.test.js
 node tests/eternal-format.test.js
 node tests/deckbuild-format-pool.test.js
 node tests/decklauncher-identity-change.test.js

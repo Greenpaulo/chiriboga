@@ -55,6 +55,17 @@ generated in [../card-status.md](../card-status.md#runner-keep-coverage-playable
 - **Spec:** [W5-bespoke-logic-cleanup.md](specs/W5-bespoke-logic-cleanup.md)
 - **Goal:** Remove keep logic that duplicates a shared need; give Lampades, Sell Out and Tailgate real hooks.
 
+## Run targeting (T)
+
+Which server should the Runner run, and what risk does it take there?
+
+### T1 Caution with advanced face-down cards
+
+- **Status:** proposed
+- **Depends on:** F4
+- **Spec:** [T1-advanced-card-trap-caution.md](specs/T1-advanced-card-trap-caution.md)
+- **Goal:** Treat an advanced face-down card as possibly a trap, from public information, instead of nearly always running it.
+
 ## Principle debt (D)
 
 Existing Runner AI code that breaks a shared principle.

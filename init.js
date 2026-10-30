@@ -96,6 +96,7 @@ function Init() {
 		rewindStates.shift();
 	}
 	eval(rewindStates[0].code);
+	if (typeof PassPriorityReset == "function") PassPriorityReset(); //passing never survives a rewind
 	rewinding=false;
 	
 	//recreate renderers for all cards after restoring state
@@ -558,6 +559,7 @@ function FanHand(player) {
   for (var i = 0; i < handOfCards.length; i++) {
     var rotAmt = -totalFanRotation * 0.5 + fanIterator * i;
     var offsetY = -350 * Math.cos(1.7 * rotAmt * (Math.PI / 180)) + 300;
+    if (player === viewingPlayer) offsetY *= 1.1; //match the larger hand cards
     if (viewingPlayer == corp) rotAmt += 180; //hands face the viewer, like all non-ICE cards
     handOfCards[i].renderer.SetRotation(rotAmt);
     var nonViewingHandOffsetY = 35;
@@ -883,7 +885,7 @@ function Render() {
   if (viewingPlayer == corp)
     corpHandCascade = new CardRenderer.Cascade(
       RenderCards(corp.HQ.cards, FaceUpNoTint),
-      spreadXStep,
+      spreadXStep * 1.1,
       0,
       hostingX
     );
@@ -1367,6 +1369,8 @@ function Render() {
     //include at most 1 copy of each card
     var uniqueGrid = [];
     for (var i = 0; i < viewingGrid.length; i++) {
+      if (currentPhase.privateLook &&
+          (viewingPlayer != currentPhase.privateLook.player || !currentPhase.privateLook.cards.includes(viewingGrid[i]))) continue;
       if (!uniqueGrid.includes(viewingGrid[i])) uniqueGrid.push(viewingGrid[i]);
     }
     //now lay out the grid
@@ -1420,7 +1424,7 @@ function Render() {
       gridViewY += gridViewYStep;
     }
     //viewingGrid is just a once-off state but store it in case needed e.g. window resize
-    previousViewingGrid = viewingGrid;
+    previousViewingGrid = currentPhase.privateLook ? uniqueGrid : viewingGrid;
     viewingGrid = null;
   }
 
@@ -1846,6 +1850,7 @@ function StartGame() {
     });
   }
   
+  if (typeof PassPriorityReset == "function") PassPriorityReset(); //new game
   if (!currentPhase) IncrementPhase(); //move to first phase
   if (!skipShuffleAndDraw) {
     
@@ -1999,6 +2004,7 @@ async function Main() {
   if (autoExecute && currentPhase.requireHumanInput && activePlayer.AI == null)
     autoExecute = false; //special case if active player is human-controlled
   if (autoExecute) ExecuteChosen(optionList[0]);
+  else if (PassPriorityShouldAutoPass(optionList)) ExecuteChosen("n"); //human is passing until end of turn: submit the normal Continue
   else if (activePlayer.AI != null) {
     try {
 	  //active player is AI controlled
@@ -2131,12 +2137,8 @@ function debugAddCredit() {
   }
 }
 function debugDrawCard() {
-  if (viewingPlayer === runner && runner.stack.length > 0) {
-    runner.grip.push(runner.stack.pop());
-    Render();
-    EnumeratePhase();
-  } else if (viewingPlayer === corp && corp.RnD.cards.length > 0) {
-    corp.HQ.cards.paush(corp.RnD.cards.pop());
+  if ((viewingPlayer === runner || viewingPlayer === corp) && PlayerDeck(viewingPlayer).length > 0) {
+    Draw(viewingPlayer, 1);
     Render();
     EnumeratePhase();
   }

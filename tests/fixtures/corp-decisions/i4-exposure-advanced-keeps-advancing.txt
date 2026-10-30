@@ -1,0 +1,12 @@
+// PHASE: Phase_Main
+// IDENTIFIER: Corp 2.2
+// TITLE: Corporation's Action Phase
+// COMMAND:
+// CHOICETYPE: command
+// OPTIONS: install, advance, gain, draw
+// EXPECT: advance
+// SETUP: corp.creditPool=6; corp.clickTracker=2; runner.creditPool=5; reviewAI.options.agendaCommitmentPlan=true; reviewAI.options.iceMarginalSecurity=true; reviewAI.options.agendaExposureTable=true
+// NOTE: I4 exposure table: Offworld Office (needs 4) already shows 1 counter, so waiting hides nothing; advancing 2 now and 1 next turn is one exposed turn instead of two, so score fast still advances.
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [30075, 30075, 30075], [30064, 30064], [], [31046], [30062], [[30067, 31077]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+corp.remoteServers[0].root[0].advancement=1;

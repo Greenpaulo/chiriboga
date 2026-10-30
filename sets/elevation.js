@@ -158,6 +158,7 @@ cardSet[35005] = {
 
 cardSet[35011] = {
   title: "Rent Rioters",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1380,
   imageFile: "35011.png",
   player: runner,
@@ -488,7 +489,7 @@ cardSet[35034] = {
       var creditsToTake = this.credits;
       Log("Side Hustle pays out " + creditsToTake + " credits");
       TakeCredits(runner, this, creditsToTake);
-      //Use MoveCard to avoid phase change in automatic trigger (trash is unpreventable anyway)
+      //The unpreventable trash precedes the draw and its interrupt.
       Log(GetTitle(this, true) + " trashed");
       MoveCard(this, runner.heap);
       this.faceUp = true;
@@ -500,7 +501,6 @@ cardSet[35034] = {
     Resolve: function (card) {
       if (card == this) {
         PlaceCredits(this, 1);
-        this.checkAndTriggerPayout();
       }
     },
   },
@@ -508,10 +508,20 @@ cardSet[35034] = {
   automaticOnRunBegins: {
     Resolve: function (server) {
       PlaceCredits(this, 1);
-      this.checkAndTriggerPayout();
     },
   },
   
+  //Payout can draw and therefore must allow interrupt decisions.
+  responseOnInstall: {
+    Enumerate: function (card) {
+      return card == this && Counters(this, "credits") >= 6 ? [{}] : [];
+    },
+    Resolve: function () { this.checkAndTriggerPayout(); },
+  },
+  responseOnRunBegins: {
+    Enumerate: function () { return Counters(this, "credits") >= 6 ? [{}] : []; },
+    Resolve: function () { this.checkAndTriggerPayout(); },
+  },
   AIEconomyInstall: function() {
     //Good early game economy card
     return 2; //priority 2 (moderate - it takes time to pay off but is efficient)
@@ -1732,6 +1742,7 @@ cardSet[35006] = {
 
 cardSet[35007] = {
   title: "Gourmand",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1693,
   imageFile: "35007.png",
   player: runner,
@@ -3423,6 +3434,9 @@ function projectIngatanInstall(cardRef, cardToInstall) {
     serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   }
   
+  if (corp.AI && typeof corp.AI._openingIceServerChoices === "function")
+    serverChoices = corp.AI._openingIceServerChoices(cardToInstall, serverChoices);
+
   DecisionPhase(
     corp,
     serverChoices,
@@ -4241,6 +4255,9 @@ function poetriInstallCard(cardToInstall) {
     serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   }
   
+  if (corp.AI && typeof corp.AI._openingIceServerChoices === "function")
+    serverChoices = corp.AI._openingIceServerChoices(cardToInstall, serverChoices);
+
   DecisionPhase(
     corp,
     serverChoices,
@@ -4439,6 +4456,9 @@ function mycowebInstallIce(iceToInstall) {
   }
   serverChoices.push({ server: null, label: "New remote server", button: "New remote" });
   
+  if (corp.AI && typeof corp.AI._openingIceServerChoices === "function")
+    serverChoices = corp.AI._openingIceServerChoices(iceToInstall, serverChoices);
+
   DecisionPhase(
     corp,
     serverChoices,
@@ -5990,8 +6010,12 @@ cardSet[35071] = {
                     
                     //**AI code
                     if (corp.AI != null && serverChoices.length > 1) {
-                      //AI picks first available server option
-                      serverChoices = [serverChoices[0]];
+                      var openingIndex = 0;
+                      if (typeof corp.AI._openingIceServerChoices === "function") {
+                        serverChoices = corp.AI._openingIceServerChoices(foundCard, serverChoices);
+                        openingIndex = corp.AI._openingIceChoice(serverChoices, 0);
+                      }
+                      serverChoices = [serverChoices[openingIndex]];
                     }
                     
                     DecisionPhase(
@@ -9211,6 +9235,7 @@ cardSet[35058] = {
           if (choice.card.cardType == "asset") return choice.server == null &&
             RezCost(choice.card) <= Credits(corp);
           return choice.card.cardType == "ice" && choice.server &&
+            (typeof corp.AI._openingIceAllows !== "function" || corp.AI._openingIceAllows(choice.card, choice.server)) &&
             choice.server.cards && RezCost(choice.card) <= Credits(corp);
         });
         useful.sort(function (a, b) { return (b.card.elo || 0) - (a.card.elo || 0); });

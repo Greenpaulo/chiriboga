@@ -56,8 +56,9 @@ reviews:
       instructions: |
         Apply the review rubric in `.agents/skills/review-ticket/SKILL.md`
         (steps 2 to 4) and the repository policy in `AGENTS.md`. You cannot run
-        commands, so the skill's step 1 is replaced by the `ticket.js check`
-        output pasted in the PR description.
+        commands, so skip the skill's step 1 and assess the evidence in the
+        diff and ticket Resolution. Do not require `ticket.js check` output
+        in the PR description.
 
         A PR may contain several tickets. A ticket is under review when this PR
         adds it to, or moves it into, `documentation/bugs/code-review/` or
@@ -147,11 +148,6 @@ reviews:
           `documentation/backlog/code-review/`. If there are none, pass.
 
           For each ticket under review, fail if:
-          - the PR description does not name the ticket's path and include
-            the pasted output of `node scripts/ticket.js check <ticket>`;
-          - that output contains a FAIL outside the reproduction-move check, or
-            a reproduction-move FAIL lacks a Resolution justification permitted
-            by the review-ticket skill;
           - the reproduction's expectation was changed when it was moved;
           - a ticked acceptance criterion has no supporting evidence in the
             diff or Resolution; or

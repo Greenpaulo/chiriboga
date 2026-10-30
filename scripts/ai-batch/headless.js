@@ -68,6 +68,25 @@ function validateDeckPairs(pairs, setFiles) {
 // `leave` events. It reads only Corp-known or public state and never calls
 // engine functions. Cards already installed when the game starts (a start
 // board) are ignored until they leave and are installed again.
+// I4 agendaCommitment turn-end state: installed agendas whose counters did not
+// rise since the previous Corp turn end (counters: WeakMap card -> counters,
+// updated here), agendas in HQ, and whether a remote has no agenda or asset.
+function agendaTurnSnapshot(corp, counters) {
+  let idleInstalled = 0;
+  let remoteRoom = false;
+  corp.remoteServers.forEach(server => {
+    if (!server.root.some(card => card.cardType === 'agenda' || card.cardType === 'asset')) remoteRoom = true;
+    server.root.forEach(card => {
+      if (card.cardType !== 'agenda') return;
+      const now = Number(card.advancement) || 0;
+      if (now <= (counters.get(card) || 0)) idleInstalled++;
+      counters.set(card, now);
+    });
+  });
+  const inHQ = corp.HQ.cards.filter(card => card.cardType === 'agenda').length;
+  return {idleInstalled, inHQ, remoteRoom};
+}
+
 function createRootTracker(emit) {
   const ids = new WeakMap();
   let next = 0;
@@ -143,7 +162,8 @@ function createSecuritySignature() {
 // options: {streamPrefix, corpFile, runnerFile, setFiles, timeoutMs, start (fixture file),
 //   corpOptions, runnerOptions, telemetry, onEvent(event), setupFile, tail, fullLog,
 //   testOption (a no-op Corp option name, for the harness's own tests),
-//   securitySnapshot (L9.0: emit 'securitySnapshot' once per Runner turn)}
+//   securitySnapshot (L9.0: emit 'securitySnapshot' once per Runner turn),
+//   remoteAgendaSnapshot (I4: emit 'remoteAgendaTurn' at each Runner turn's end)}
 // Resolves to a summary: {winner, reason, turns, ms, steps, corpPoints,
 //   runnerPoints, logLines, logHash, errors, tail, log (with fullLog), report}.
 function playGame(options) {
@@ -280,6 +300,7 @@ function playGame(options) {
     observe();
     result = {winner: player === context.corp ? 'corp' : 'runner', reason};
     if (seen.run) { emitRun(); seen.run = null; }
+    closeRemoteAgendaTurn();
     if (roots) roots.observe(run('corp'), run('runner'), Math.ceil(turns / 2), true);
     emit('gameEnd', {winner: result.winner, reason, turns: Math.ceil(turns / 2), corpCredits: run('corp.creditPool')});
     setImmediate(done);
@@ -310,6 +331,32 @@ function playGame(options) {
         iceCount: s.ice.length, publicThreatRisk: r.publicThreatRisk, approachDefense: !!r.approachDefense,
         signature: __securitySignature(s)};
     })`)));
+  // I4: every remote holding an installed agenda when the Runner's turn
+  // begins (same moment as securitySnapshot), with its public ICE, rezzed ICE,
+  // the most advancement counters on an agenda there and I2's margin bucket.
+  // The agendas are kept by identity so the turn's end can say whether one
+  // was stolen. Read through the uncached evaluator, as securitySnapshot is.
+  const remoteAgendaRows = () => run(`corp.remoteServers.filter(function (s) {
+      return s.root.some(function (c) { return c.cardType == "agenda"; });
+    }).map(function (s) {
+      var agendas = s.root.filter(function (c) { return c.cardType == "agenda"; });
+      var m = corp.AI._breachMargin(s, corp.AI._evaluateServerSecurityUncached(s));
+      return {serverName: s.serverName, agendas: agendas, iceCount: s.ice.length,
+        rezzedIce: s.ice.filter(function (c) { return c.rezzed; }).length,
+        counters: Math.max.apply(null, agendas.map(function (c) { return Number(c.advancement) || 0; })),
+        points: Math.max.apply(null, agendas.map(function (c) { return c.agendaPoints || 0; })),
+        bucket: corp.AI._breachMarginBucket(m.margin)};
+    })`);
+  let remoteAgendaTurn = null;
+  const closeRemoteAgendaTurn = () => {
+    if (!remoteAgendaTurn) return;
+    const stolen = new Set(run('runner.scoreArea'));
+    emit('remoteAgendaTurn', {turn: remoteAgendaTurn.turn, servers: remoteAgendaTurn.rows.map(row => ({
+      serverName: row.serverName, iceCount: row.iceCount, rezzedIce: row.rezzedIce, counters: row.counters,
+      points: row.points, bucket: row.bucket, stolen: row.agendas.some(card => stolen.has(card))}))});
+    remoteAgendaTurn = null;
+  };
+  let remoteAgendaPending = false;
   let snapshotPending = false;
   let defenseSnapshotPending = false;
   context.__stop = () => {
@@ -317,17 +364,23 @@ function playGame(options) {
     observe();
     const side = run('playerTurn === corp ? "corp" : "runner"');
     if (side !== lastTurn) {
-      if (lastTurn) emit('turnEnd', {side: lastTurn, turn: Math.ceil(turns / 2)});
+      if (lastTurn === 'runner') closeRemoteAgendaTurn();
+      if (lastTurn && (lastTurn !== 'corp' || !options.observe)) emit('turnEnd', {side: lastTurn, turn: Math.ceil(turns / 2)});
       lastTurn = side; turns++;
       if (options.observe) emit('turnStart', side === 'corp' ? {side, turn: Math.ceil(turns / 2), corp: corpTurnState()} :
         {side, turn: Math.ceil(turns / 2)});
       snapshotPending = Boolean(options.securitySnapshot) && side === 'runner';
+      remoteAgendaPending = Boolean(options.remoteAgendaSnapshot) && side === 'runner';
       defenseSnapshotPending = Boolean(defense) && side === 'runner';
     }
     // The Runner's clicks are granted after its turn begins.
     if (snapshotPending && !seen.run && run('runner.clickTracker') > 0) {
       snapshotPending = false;
       emit('securitySnapshot', {turn: Math.ceil(turns / 2), servers: securitySnapshot()});
+    }
+    if (remoteAgendaPending && !seen.run && run('runner.clickTracker') > 0) {
+      remoteAgendaPending = false;
+      remoteAgendaTurn = {turn: Math.ceil(turns / 2), rows: remoteAgendaRows()};
     }
     // F12 observes settled turn-begin responses, immediately before the first
     // action. Granted clicks alone can still be inside a turn-begin response.
@@ -386,6 +439,10 @@ function playGame(options) {
     emit('iceInstalled', {card: card.title, server: kind, iceCount: server && server.ice ? server.ice.length : 0,
       turn: Math.ceil(turns / 2), rezCost: Number(card.rezCost) || 0, strength: Number(card.strength) || 0});
   };
+  // Literal completion history for I2.3; retain legacy first-seen metrics so
+  // prior gate reports remain comparable. No board scan can count reinstallations.
+  context.__completedIceInstall = (card, server, opening) => emit('corpIceInstallCompleted', {
+    card: card.title, server: serverKey(server), turn: Math.ceil(turns / 2), ...opening});
   if (options.telemetry) context.__decision = entry => {
     const counts = entry.side === 'corp' && context.__securityDecisionCounts;
     emit('decision', counts ? Object.assign({}, entry, {securityEvaluation: Object.assign({}, counts)}) : entry);
@@ -428,8 +485,49 @@ function playGame(options) {
     context.__trashing = (cards, accessing) => roots.trashing(cards, accessing);
     context.__cardUsed = card => emit('cardUsed', {id: roots.idOf(card), card: card.title});
     context.__cardCredits = (card, credits) => emit('cardCredits', {id: roots.idOf(card), card: card.title, credits});
+    context.__openingHand = (stage, mulligan) => {
+      const hand = run('corp.HQ.cards');
+      // Read only the actual known hand, never R&D order or suitability hooks.
+      emit('openingHand', {stage, mulligan, credits: run('corp.creditPool'),
+        cards: hand.map(card => ({id: card.setNumber, card: card.title, cardType: card.cardType,
+          rezCost: Number(card.rezCost) || 0}))});
+    };
+    // I4 agendaCommitment: counters at the previous Corp turn end, by card.
+    const agendaCounters = new WeakMap();
+    const agendaTurnState = () => agendaTurnSnapshot(run('corp'), agendaCounters);
+    context.__corpTurnEnd = () => emit('turnEnd', {side: 'corp', turn: Math.ceil(turns / 2),
+      centralIce: {hq: run('corp.HQ.ice.length'), rd: run('corp.RnD.ice.length')},
+      agendas: agendaTurnState()});
     // Event wrappers: they call the real functions unchanged and only record.
     run(`
+      corp.AI._iceInstallTelemetry = __completedIceInstall;
+      var openingMulliganObserved = false;
+      var openingMulliganChoice = corp.AI.Phase_Mulligan;
+      corp.AI.Phase_Mulligan = function(options) {
+        var choice = openingMulliganChoice.apply(this, arguments);
+        if (!openingMulliganObserved && (options[choice] === "m" || options[choice] === "n")) {
+          openingMulliganObserved = true;
+          __openingHand("offered", options[choice] === "m");
+          if (options[choice] !== "m") __openingHand("kept", false);
+        }
+        return choice;
+      };
+      var openingChangePhase = ChangePhase;
+      ChangePhase = function(next, skipInit) {
+        if (!skipInit && playerTurn === corp && next === phases.runnerStartResponse && AIHypothetical.depth === 0)
+          __corpTurnEnd();
+        return openingChangePhase.apply(this, arguments);
+      };
+      var openingFirstDrawObserved = false;
+      var openingTriggeredResponses = TriggeredResponsePhase;
+      TriggeredResponsePhase = function(player, name) {
+        if (!openingFirstDrawObserved && name === "responseOnCardsDrawn" &&
+            currentPhase === phases.corpEndDraw && AIHypothetical.depth === 0) {
+          openingFirstDrawObserved = true;
+          __openingHand("firstDraw", null);
+        }
+        return openingTriggeredResponses.apply(this, arguments);
+      };
       var __makeRun = MakeRun;
       MakeRun = function(server) { __runBegins(server); return __makeRun.apply(this, arguments); };
       var __automaticTriggers = AutomaticTriggers;
@@ -476,7 +574,13 @@ function playGame(options) {
         return __install.apply(this, arguments);
       };
       var __mulliganFn = Mulligan;
-      Mulligan = function() { __mulligan(activePlayer === corp ? "corp" : "runner"); return __mulliganFn.apply(this, arguments); };
+      Mulligan = function() {
+        var isCorp = activePlayer === corp;
+        __mulligan(isCorp ? "corp" : "runner");
+        var value = __mulliganFn.apply(this, arguments);
+        if (isCorp) __openingHand("kept", true);
+        return value;
+      };
       corp.AI._postureTelemetry = __posture;
       // I0: card use, credits from a card and trashes; never during an AI probe.
       var __trashFn = Trash;
@@ -672,4 +776,4 @@ function playGame(options) {
   return finished;
 }
 
-module.exports = {createSecuritySignature, playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, root};
+module.exports = {createSecuritySignature, playGame, readFixture, loadPrecon, validateDeckPairs, createRootTracker, createRealizedDefenseTracker, agendaTurnSnapshot, root};

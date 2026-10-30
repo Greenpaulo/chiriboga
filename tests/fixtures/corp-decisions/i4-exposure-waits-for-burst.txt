@@ -1,0 +1,11 @@
+// PHASE: Phase_Main
+// IDENTIFIER: Corp 2.2
+// TITLE: Corporation's Action Phase
+// COMMAND:
+// CHOICETYPE: command
+// OPTIONS: install, advance, gain, draw
+// EXPECT: !advance
+// SETUP: corp.creditPool=6; corp.clickTracker=2; runner.creditPool=5; reviewAI.options.agendaCommitmentPlan=true; reviewAI.options.iceMarginalSecurity=true; reviewAI.options.agendaExposureTable=true
+// NOTE: I4 exposure table: Project Vitruvius (needs 3, no counters) behind unrezzed Ice Wall with 2 clicks left. Advancing now shows counters for one Runner turn (advanced row); waiting and advancing all 3 next turn (burst plan) leaves it exposed one turn with none, stolen about a third as often, so score fast does not advance. Board otherwise as i4-score-fast-advances-planned-agenda.txt.
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [30075, 30075, 30075], [30064, 30064], [], [31046], [30062], [[31041, 31077]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

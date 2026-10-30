@@ -1,0 +1,11 @@
+// PHASE: Phase_Main
+// IDENTIFIER: Corp 2.2
+// TITLE: Corporation's Action Phase
+// COMMAND:
+// CHOICETYPE: command
+// OPTIONS: install, advance, gain, draw
+// EXPECT: !advance
+// SETUP: corp.creditPool=3; corp.clickTracker=3; runner.creditPool=5; reviewAI.options.agendaCommitmentPlan=true; reviewAI.options.iceMarginalSecurity=true
+// NOTE: I4 score fast keeps the defence reserve: Enigma (rez 3) is the agenda remote's planned rez and the Corp has 3 credits, so advancing would leave it unrezzable; no plan admits the agenda (with 5 credits it advances).
+RunnerTestField(30019, [], [], [], [], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(30035, [], [30075, 30075, 30075], [30064, 30064], [], [31046], [30062], [[30067, 31081]], [], cardBackTexturesCorp,glowTextures,strengthTextures);

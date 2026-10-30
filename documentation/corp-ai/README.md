@@ -8,6 +8,7 @@ template and commands work is shared with the Runner AI and described in
 |---|---|
 | [principles.md](principles.md) | Corp-specific rules, on top of [../ai-principles.md](../ai-principles.md) |
 | [architecture.md](architecture.md) | How the implemented Corp AI works today |
+| [../ai-playtesting.md](../ai-playtesting.md) | Current owner playtesting workflow and flag/adoption decisions |
 | [roadmap.md](roadmap.md) | One entry per item (areas L, F, I, R, P) |
 | [specs/](specs/) | Specs for `proposed` items, plus the install and reactive design notes |
 | [legacy/](legacy/) | The previous Corp AI roadmaps, kept for comparison only |

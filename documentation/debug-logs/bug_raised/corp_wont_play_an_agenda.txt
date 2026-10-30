@@ -1,0 +1,1347 @@
+Game begins
+\n %c %c %c PixiJS 4.7.0 - ✰ WebGL ✰  %c  %c  http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n
+[Az McCaffrey: Mechanical Prodigy,3 Always Have a Backup Plan,2 Blueberry!™ Diesel,2 Flip Switch,3 Lucky Charm,2 Masterwork (v37),1 Bukhgalter,2 “Baklan” Bochkin,2 The Class Act,1 Gauss,1 The Artist,2 Direct Access,1 Rejig,1 Mutual Favor,1 Carmen,1 Marjanah,2 Red Team,3 Creative Commission,1 Overclock,3 Sure Gamble,2 T400 Memory Diamond,2 Detente,2 Sang Kancil,2 Fransofia Ward,2 Open Market,1 Underdome Irregulars]
+[Hyoubu Institute: Absolute Clarity,1 Fully Operational,3 Project Yagi-Uda,3 Sting!,3 Public Health Portal,2 Storgotic Resonator,2 Saisentan,1 Complete Image,2 Letheia Nisei,3 Urtica Cipher,1 Neurospike,3 Send a Message,2 Palisade,3 Hedge Fund,1 Proprionegation,2 Empiricist,3 Mycoweb,3 Semak-samun,3 Peer Review,1 Mitra Aman,3 Measured Response,2 Lionsmane,2 The Red Room]
+Decoded r parameter:
+Decoded c parameter:
+Decks shuffled
+Each player has taken five credits and drawn five cards
+AI: Opening hand score 1.25; fresh-hand expectation 3.23
+AI: Fresh hand has better expected value - mulligan
+Corp took a mulligan
+Shuffled 5 cards into R&D
+Corp drew 5 cards
+Runner took a mulligan
+Shuffled 5 cards into stack
+Runner drew 5 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 5 credit(s) and 5 card(s) in hand: [Measured Response,Mycoweb,Fully Operational,Project Yagi-Uda,Project Yagi-Uda]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Class Act,Overclock,The Class Act,Direct Access,Detente]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+Using Hyoubu Institute: Absolute Clarity:
+Corp spent one click
+Corp gained one credit
+The Class Act revealed
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:1,required:hq,actual:hq,reason:requiredCentral,group:0,score:-6}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Fully Operational might be good economy play?
+Corp spent one click
+Corp spent one credit
+Played Fully Operational
+Corp gained 2 credits
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 7 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Mycoweb]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Class Act,Overclock,The Class Act,Direct Access,Detente]
+Runner spent one click
+Runner spent 3 credits
+Runner installed The Class Act
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 3 credits
+Runner installed Detente
+Runner spent one click
+Runner gained one credit
+The Class Act: Draw 4 cards triggered
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew 4 cards
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 7 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Mycoweb]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 7 card(s) in hand: [The Class Act,Overclock,Direct Access,“Baklan” Bochkin,Creative Commission,Creative Commission,Blueberry!™ Diesel]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Oh I know, I'll install something
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+Corp spent one click
+Corp installed ice protecting R&D
+AI: Opening ICE {ordinal:2,required:rd,actual:rd,reason:requiredCentral,group:null,score:null}
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.435,W:0,hazard:0.027,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.435,W:0,hazard:0.027,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.435,W:0,hazard:0.027,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.435,W:0,hazard:0.027,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 9 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Project Yagi-Uda,Measured Response,Peer Review]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 7 card(s) in hand: [The Class Act,Overclock,Direct Access,“Baklan” Bochkin,Creative Commission,Creative Commission,Blueberry!™ Diesel]
+Runner spent one click
+Runner spent one credit
+Runner installed “Baklan” Bochkin
+Runner spent one click
+Played Blueberry!™ Diesel
+Runner added 1 card to the bottom of the stack
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew 2 cards
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+Runner discarded Direct Access
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Project Yagi-Uda,Measured Response,Peer Review]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Class Act,Overclock,Creative Commission,Sang Kancil,Marjanah]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.393,W:0,hazard:0.038,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.393,W:0,hazard:0.038,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.393,W:0,hazard:0.038,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.393,W:0,hazard:0.038,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Maybe could draw an economy card?
+AI: HQ is breachable with 2 agendas in hand: not drawing
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 5 card(s) in hand: [The Class Act,Overclock,Creative Commission,Sang Kancil,Marjanah]
+Runner spent one click
+Run initiated attacking Remote 0
+Approaching Remote 0
+Run successful
+Public Health Portal accessed
+Runner spent 2 credits
+Public Health Portal trashed
+Run ends
+Runner spent one click
+Runner spent 3 credits
+Runner installed Sang Kancil
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 4 card(s) in hand: [Project Yagi-Uda,Peer Review,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [The Class Act,Overclock,Marjanah]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Measured Response,Project Yagi-Uda,Peer Review,Project Yagi-Uda,Measured Response]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 3 card(s) in hand: [The Class Act,Overclock,Marjanah]
+Runner spent one click
+Run initiated attacking HQ
+Approaching outermost piece of ice protecting HQ
+AI: I will rez the approached ice
+Corp spent 6 credits
+Corp rezzed Lionsmane
+Encountering Lionsmane
+1 power counter placed on “Baklan” Bochkin
+Firing Do 2 net damage. on Lionsmane:
+Runner takes 2 net damage
+Overclock trashed
+Marjanah trashed
+Firing Do 2 net damage unless the Runner pays 3[c]. on Lionsmane:
+Runner spent 3 credits
+Firing Do 2 net damage unless the Runner jacks out. on Lionsmane:
+Runner jacked out
+Run ends
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent one credit
+Runner installed Masterwork (v37)
+Masterwork (v37) is a console, the older card will be unpreventably trashed.
+Detente trashed
+Masterwork (v37): Draw 1 card triggered
+Runner drew a card
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 8 credit(s) and 5 card(s) in hand: [Measured Response,Project Yagi-Uda,Peer Review,Project Yagi-Uda,Measured Response]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [The Class Act,T400 Memory Diamond,Gauss]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Peer Review,Project Yagi-Uda,Project Yagi-Uda,Measured Response,Measured Response]
+SPOILER: Runner has 1 credit(s), 0 tag(s) and 3 card(s) in hand: [The Class Act,T400 Memory Diamond,Gauss]
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner drew a card
+Runner discarded The Class Act
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 11 credit(s) and 5 card(s) in hand: [Peer Review,Project Yagi-Uda,Project Yagi-Uda,Measured Response,Measured Response]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward,Sure Gamble]
+Corp drew a card
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed a card in root of R&D
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Peer Review,Project Yagi-Uda,Measured Response,Project Yagi-Uda,Measured Response]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward,Sure Gamble]
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Peer Review,Project Yagi-Uda,Measured Response,Project Yagi-Uda,Measured Response]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 16 credit(s) and 5 card(s) in hand: [Measured Response,Urtica Cipher,Measured Response,Project Yagi-Uda,Project Yagi-Uda]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 4 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward]
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+Runner spent one click
+Runner spent 2 credits
+Runner installed Fransofia Ward
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+DEBUG: ViewAllFronts is now OFF (AI behavior may change)
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner discarded T400 Memory Diamond
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 16 credit(s) and 5 card(s) in hand: [Measured Response,Urtica Cipher,Measured Response,Project Yagi-Uda,Project Yagi-Uda]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward,Creative Commission]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: I could do 0 damage with these cards: []
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Hedge Fund might be good economy play?
+Corp spent one click
+Corp spent 5 credits
+Played Hedge Fund
+Corp gained 9 credits
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Urtica Cipher,Measured Response,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 7 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward,Creative Commission]
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Played Blueberry!™ Diesel
+Runner added 1 card to the bottom of the stack
+Runner drew 2 cards
+Runner spent one click
+Runner spent 3 credits
+Runner installed The Artist
+Runner spent one click
+Runner spent one credit
+Played Creative Commission
+Runner gained 5 credits
+Runner lost no clicks
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Urtica Cipher,Measured Response,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward,Always Have a Backup Plan]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp created a new remote server
+Corp spent one click
+Corp installed a card in root of a remote server
+AI: a relevant preference has been set
+Corp spent 2 credits
+Corp rezzed Storgotic Resonator
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.42,W:0,hazard:0.031,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Urtica Cipher,Measured Response,Project Yagi-Uda,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Fransofia Ward,Always Have a Backup Plan]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 4 credits
+Runner installed Red Team
+12 credits loaded onto Red Team
+Runner discarded Fransofia Ward
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 21 credit(s) and 5 card(s) in hand: [Urtica Cipher,Measured Response,Project Yagi-Uda,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Always Have a Backup Plan,Underdome Irregulars]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.077,W:0,hazard:0.026,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.438,W:0,hazard:0.026,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.066,W:0,hazard:0.022,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.451,W:0,hazard:0.022,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.726,W:0,hazard:0.022,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.451,W:0,hazard:0.022,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.461,W:0,hazard:0.019,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.461,W:0,hazard:0.019,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.73,W:0,hazard:0.019,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.058,W:0,hazard:0.019,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.461,W:0,hazard:0.019,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.461,W:0,hazard:0.019,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.73,W:0,hazard:0.019,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.058,W:0,hazard:0.019,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 22 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Sting!,Send a Message]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 5 card(s) in hand: [T400 Memory Diamond,Gauss,Rejig,Always Have a Backup Plan,Underdome Irregulars]
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching Archives
+Run successful
+3 credits taken from Red Team
+Measured Response accessed
+Urtica Cipher accessed
+Peer Review accessed
+Public Health Portal accessed
+Hedge Fund accessed
+Peer Review accessed
+Peer Review accessed
+Public Health Portal accessed
+Fully Operational accessed
+Run ends
+Runner spent one click
+Runner installed Underdome Irregulars
+Runner spent one click
+Run initiated attacking R&D
+Masterwork (v37): You may install 1 piece of hardware triggered
+Runner spent 3 credits
+Runner installed T400 Memory Diamond
+Masterwork (v37): Draw 1 card triggered
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Approaching outermost piece of ice protecting R&D
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 9 credits
+Corp rezzed Mycoweb
+Encountering Mycoweb
+1 power counter placed on “Baklan” Bochkin
+Using Sang Kancil:
+Runner spent 3 credits
+Sang Kancil gets +2 strength
+Using Sang Kancil:
+Runner spent 3 credits
+Sang Kancil gets +2 strength
+Firing You may install 1 piece of ice from Archives, ignoring all costs. on Mycoweb:
+Firing You may rez 1 installed piece of ice, paying 2[c] less. on Mycoweb:
+Firing Resolve 1 subroutine on a rezzed sentry. on Mycoweb:
+AI: I don't have code to handle this situation: [Lionsmane,Run Subroutines,continue,[{card:Lionsmane,subroutine:{text:Do 2 net damage.,visual:{y:57,h:16},broken:false},label:Do 2 net damage.,command:continue},{card:Lionsmane,subroutine:{text:Do 2 net damage unless the Runner pays 3[c].,visual:{y:73,h:32},broken:false},label:Do 2 net damage unless the Runner pays 3[c].,command:continue},{card:Lionsmane,subroutine:{text:Do 2 net damage unless the Runner jacks out.,visual:{y:105,h:32},broken:false},label:Do 2 net damage unless the Runner jacks out.,command:continue}]]
+Firing Do 2 net damage. on Lionsmane:
+Runner takes 2 net damage
+Gauss trashed
+Rejig trashed
+Firing Resolve 1 subroutine on another rezzed code gate. on Mycoweb:
+Approaching R&D
+Run successful
+The Red Room accessed
+Palisade accessed
+Run ends
+Runner spent one click
+Played Mutual Favor
+Carmen revealed
+Carmen added to grip
+Resolve Underdome Irregulars triggered
+Runner drew 2 cards
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Project Yagi-Uda,Sting!,Send a Message]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Always Have a Backup Plan,Carmen,Masterwork (v37),Sure Gamble]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.053,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.733,W:0,hazard:0.018,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting Archives
+AI: Opening ICE {ordinal:3,required:null,actual:archives,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.064,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.727,W:0,hazard:0.021,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: Critical server has no available ICE; seeking protection for HQ
+AI: Drawing for ICE to protect the critical server
+Corp spent one click
+Corp drew a card
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.733,W:0,hazard:0.018,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.466,W:0,hazard:0.018,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.053,W:0,hazard:0.018,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting HQ
+AI: Opening ICE {ordinal:4,required:null,actual:hq,reason:currentI2,group:null,score:null}
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Sting!,Project Yagi-Uda,Project Yagi-Uda,Measured Response,Send a Message]
+SPOILER: Runner has 0 credit(s), 0 tag(s) and 4 card(s) in hand: [Always Have a Backup Plan,Carmen,Masterwork (v37),Sure Gamble]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Runner spent one click
+Runner gained one credit
+Resolve Underdome Irregulars triggered
+Underdome Irregulars trashed
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Sting!,Project Yagi-Uda,Project Yagi-Uda,Measured Response,Send a Message]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Always Have a Backup Plan,Carmen,Masterwork (v37),Sure Gamble]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.727,W:0,hazard:0.021,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.063,W:0,hazard:0.021,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.454,W:0,hazard:0.021,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+Corp spent one click
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:5,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.72,W:0,hazard:0.025,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.076,W:0,hazard:0.025,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.72,W:0,hazard:0.025,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.076,W:0,hazard:0.025,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.72,W:0,hazard:0.025,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.076,W:0,hazard:0.025,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.439,W:0,hazard:0.025,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 14 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Sting!,Send a Message,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 4 card(s) in hand: [Always Have a Backup Plan,Carmen,Masterwork (v37),Sure Gamble]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+Runner spent 2 credits
+Played Always Have a Backup Plan
+Run initiated attacking Remote 1
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Remote 1
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 4 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+1 power counter placed on “Baklan” Bochkin
+Using “Baklan” Bochkin:
+3 power counters removed from “Baklan” Bochkin
+“Baklan” Bochkin trashed
+Semak-samun derezzed
+1 tag added
+Approaching Remote 1
+Run successful
+Storgotic Resonator accessed
+Run ends
+Runner spent one click
+Runner spent 2 credits
+1 tag removed
+Runner spent one click
+Runner spent 3 credits
+Runner installed Carmen
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 10 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Sting!,Send a Message,Measured Response,Project Yagi-Uda]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.012,W:0,hazard:0.004,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.758,W:0,hazard:0.004,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.012,W:0,hazard:0.004,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.758,W:0,hazard:0.004,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.012,W:0,hazard:0.004,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.758,W:0,hazard:0.004,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.012,W:0,hazard:0.004,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.515,W:0,hazard:0.004,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.758,W:0,hazard:0.004,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Send a Message,Project Yagi-Uda,Sting!]
+SPOILER: Runner has 2 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Runner spent one click
+Run initiated attacking HQ
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting HQ
+AI: Rezzing Semak-samun prevents a game-winning breach on HQ
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 4 credits
+Corp rezzed Semak-samun
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner gained one credit
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Measured Response,Send a Message,Project Yagi-Uda,Sting!]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 2 card(s) in hand: [Masterwork (v37),Sure Gamble]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Sting!,Send a Message,Project Yagi-Uda,Lionsmane]
+SPOILER: Runner has 5 credit(s), 0 tag(s) and 2 card(s) in hand: [Masterwork (v37),Sure Gamble]
+Runner spent one click
+Runner spent 5 credits
+Played Sure Gamble
+Runner gained 9 credits
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Run initiated attacking HQ
+Masterwork (v37): You may install 1 piece of hardware triggered
+Runner spent one credit
+Runner installed Lucky Charm
+Masterwork (v37): Draw 1 card triggered
+Runner drew a card
+Approaching outermost piece of ice protecting HQ
+Encountering Semak-samun
+Firing End the run unless the Runner suffers 3 net damage. on Semak-samun:
+Run ends
+Runner spent one click
+Runner spent 2 credits
+Runner installed Open Market
+6 credits loaded onto Open Market
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Sting!,Send a Message,Project Yagi-Uda,Lionsmane]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.021,W:0,hazard:0.007,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.021,W:0,hazard:0.007,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.752,W:0,hazard:0.007,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.021,W:0,hazard:0.007,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.021,W:0,hazard:0.007,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.752,W:0,hazard:0.007,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Just need a tiny bit more cash
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.021,W:0,hazard:0.007,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.021,W:0,hazard:0.007,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.504,W:0,hazard:0.007,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.752,W:0,hazard:0.007,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: a relevant preference has been set
+AI: phase is trash before install
+AI: not helpful to trash anything right now
+Corp spent one click
+Corp spent one credit
+Corp installed ice protecting a remote server
+AI: Opening ICE {ordinal:6,required:null,actual:remote,reason:currentI2,group:null,score:null}
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.026,W:0,hazard:0.009,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.499,W:0,hazard:0.009,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.026,W:0,hazard:0.009,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.499,W:0,hazard:0.009,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.749,W:0,hazard:0.009,exposureTurns:undefined,deferred:0.764}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 13 credit(s) and 5 card(s) in hand: [Send a Message,Project Yagi-Uda,Send a Message,Project Yagi-Uda,Sting!]
+SPOILER: Runner has 6 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+1 credit taken from Open Market
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner spent one credit from Open Market
+Runner installed “Baklan” Bochkin
+Using The Artist:
+Runner spent one click
+Runner gained 2 credits
+Using Red Team:
+Runner spent one click
+Run initiated attacking Archives
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Archives
+AI: I will rez the approached ice
+AI: a relevant preference has been set
+Corp spent 4 credits
+Corp rezzed Palisade
+Encountering Palisade
+1 power counter placed on “Baklan” Bochkin
+Firing End the run. on Palisade:
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 9 credit(s) and 5 card(s) in hand: [Send a Message,Project Yagi-Uda,Send a Message,Project Yagi-Uda,Sting!]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+Corp drew a card
+AI: Nothing to advance (can't afford it)
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance (can't afford it)
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: I am feeling poor
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Send a Message,Sting!,Project Yagi-Uda,Send a Message]
+SPOILER: Runner has 9 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+1 credit taken from Open Market
+Runner spent one click
+The Class Act: Add 1 card to the bottom of your stack triggered
+The Class Act: a card was added to the bottom of the stack
+Runner drew a card
+Runner spent one click
+Runner spent one credit from Open Market
+Runner installed Open Market
+6 credits loaded onto Open Market
+Runner spent one click
+Runner drew a card
+Runner spent one click
+Runner spent 2 credits
+Played Always Have a Backup Plan
+Run initiated attacking Archives
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Archives
+Encountering Palisade
+1 power counter placed on “Baklan” Bochkin
+Firing End the run. on Palisade:
+Run ends
+You may run the attacked server again triggered
+Run initiated attacking Archives
+Masterwork (v37): You may install 1 piece of hardware triggered
+Approaching outermost piece of ice protecting Archives
+Encountering Palisade
+1 power counter placed on “Baklan” Bochkin
+Bypass the last ice encountered during the first run triggered
+Palisade bypassed
+Approaching Archives
+Run successful
+Saisentan accessed
+Measured Response accessed
+Measured Response accessed
+Measured Response accessed
+Urtica Cipher accessed
+Peer Review accessed
+Public Health Portal accessed
+Hedge Fund accessed
+Peer Review accessed
+Peer Review accessed
+Public Health Portal accessed
+Fully Operational accessed
+Run ends
+AI: I don't have code to handle this situation: [Corporation's Draw Phase,Corp 1.1,n,[n,rez]]
+SPOILER: At start of Corp turn:
+SPOILER: Corp has 12 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Send a Message,Sting!,Project Yagi-Uda,Send a Message]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+Corp drew a card
+AI: Nothing to advance
+AI: No obvious install options
+AI: No obvious economy option
+AI: Not sure what to do
+AI: Nothing good to do...
+AI: No desired install options were available, using arbitrary option.
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: Nothing to advance
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: No obvious install options
+AI: No obvious economy option
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Sting!,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:0.764,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:0.736,W:0,hazard:0.016,exposureTurns:undefined,deferred:0.764}]}
+AI: I4 agenda options {agenda:Project Yagi-Uda,band2:false,best:install new remote,options:[{kind:install,server:new remote,ev:1.529,W:0,hazard:0.118,exposureTurns:1,deferred:undefined},{kind:hold,server:new remote,ev:1.473,W:0,hazard:0.016,exposureTurns:undefined,deferred:1.529}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: I4 agenda options {agenda:Send a Message,band2:false,best:hold none,options:[{kind:install,server:new remote,ev:-0.665,W:0,hazard:0.118,exposureTurns:null,deferred:undefined},{kind:hold,server:none,ev:-0.048,W:0,hazard:0.016,exposureTurns:undefined,deferred:0}]}
+AI: Scoring windows for empty servers: []
+AI: Scoring windows for empty servers: []
+AI: Not sure what to do
+AI: Nothing good to do...
+Corp spent one click
+Corp gained one credit
+AI: considering discard options...
+Corp discarded [hidden card]
+AI: I don't have code to handle this situation: [Runner's Turn Begins,Runner 1.1,n,[n,rez]]
+SPOILER: At start of Runner turn:
+SPOILER: Corp has 15 credit(s) and 5 card(s) in hand: [Project Yagi-Uda,Sting!,Project Yagi-Uda,Send a Message,Send a Message]
+SPOILER: Runner has 8 credit(s), 0 tag(s) and 1 card(s) in hand: [Masterwork (v37)]
+1 credit taken from Open Market
+1 credit taken from Open Market
+DEBUG: ViewAllFronts is now ON (AI behavior may change)
+
+SPOILER: Contents of remote servers:
+SPOILER: Remote 1: [Storgotic Resonator]
+
+=== DECISION SNAPSHOTS (Corp AI, oldest first; 0 recorded, recorder cost 0.0ms total, 0.0ms worst) ===
+
+RunnerTestField(26010, [26012,30020,26028,30020,30029,30016,35018,26018,30030,30031,26012,30020,35021,26024,26029,30011,36016,30030,26017,26011,30030,26011], [26014,26013,26028,26014,26013,35018,26016,30018,35020,26011], [26015], [26018,35021,26027,30018,35022,26017,35022,26015,30031,26014,35020,30015], [], cardBackTexturesRunner,glowTextures,strengthTextures);
+CorpTestField(26039, [26036,26042,35055,35055,30075,26042,35055,30045,35078,35078,35078,26044,26044], [30075,26042,35048,26046,35054,26041,26040,35053,30049,30045,26045,35053,26046,26043,35052,36045,30069,35056,30075,35052,26041,30072,30045], [26040,26041,26040,30069,30069], [30072], [36045,35053], [36041,35054], [[26043,35054,36041]], [], cardBackTexturesCorp,glowTextures,strengthTextures);
+runner.stack[6].brokenThisEncounter=[];
+runner.heap[4].host=null;
+runner.heap[5].host=null;
+runner.heap[6].hostedCards = [];
+runner.heap[6].host=null;
+runner.heap[13].host=null;
+runner.heap[14].host=null;
+runner.heap[15].installingCard=runner.rig.programs[1];
+runner.heap[16].host=null;
+runner.heap[18].encounteredThisRun=true;
+runner.heap[18].host=null;
+runner.rig.resources[3].credits=9;
+runner.rig.resources[4].credits=1;
+runner.rig.resources[5].power=3;
+runner.rig.resources[5].encounteredThisRun=true;
+runner.rig.resources[6].credits=5;
+corp.archives.ice[0].rezzed=true;
+corp.archives.cards[0].faceUp=true;
+corp.archives.cards[1].faceUp=true;
+corp.archives.cards[1].host=null;
+corp.archives.cards[2].faceUp=true;
+corp.archives.cards[3].faceUp=true;
+corp.archives.cards[4].faceUp=true;
+corp.archives.cards[5].faceUp=true;
+corp.archives.cards[6].faceUp=true;
+corp.archives.cards[7].faceUp=true;
+corp.archives.cards[8].faceUp=true;
+corp.archives.cards[9].faceUp=true;
+corp.archives.cards[10].faceUp=true;
+corp.archives.cards[11].faceUp=true;
+corp.RnD.root[0].knownToRunner=true;
+corp.RnD.ice[0].rezzed=true;
+corp.RnD.cards[3].firstApproach=false;
+corp.RnD.cards[12].firstApproach=false;
+corp.HQ.ice[0].rezzed=true;
+corp.HQ.ice[1].rezzed=true;
+corp.remoteServers[0].root[0].rezzed=true;
+corp.remoteServers[0].root[0].AITurnsInstalled=17;
+corp.remoteServers[0].ice[0].knownToRunner=true;
+corp.remoteServers[0].AISuccessfulRuns=1;
+corp.archives.AISuccessfulRuns=2;
+corp.RnD.AISuccessfulRuns=1;
+
+Version reference: Wed Oct 28 2026 12:46:52 GMT+0000 (GMT+00:00)

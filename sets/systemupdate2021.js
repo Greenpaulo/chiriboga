@@ -1421,6 +1421,7 @@ cardSet[31020] = {
 
 cardSet[31021] = {
   title: "Abagnale",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   imageFile: "31021.png",
   cardText: "Interface -> 1 credit: Break 1 code gate subroutine. 2 credits: +2 strength. trash: Bypass the code gate you are encountering.",
   elo: 1598,
@@ -4134,6 +4135,9 @@ cardSet[31048] = {
 	GainClicks(corp,2);
   },
   AIFastAdvance:true, //is a card for fast advancing
+  AIFastAdvanceCounters: function () {
+    return {counters: 0, clicks: 2};
+  },
 };
 
 cardSet[31049] = {
@@ -5619,6 +5623,13 @@ cardSet[31068] = {
 	);
   },
   AIFastAdvance:true, //is a card for fast advancing
+  //X counters for X credits, X at most the Runner's tags; needs at least 2 credits.
+  AIFastAdvanceCounters: function (card, context) {
+    if (context && context.resolving) return this.AIPlayedWithCost;
+    if (!context || context.credits < 2) return 0;
+    var x = Math.min(context.credits, runner.tags, context.remaining);
+    return x > 0 ? {counters: x, credits: -x} : 0;
+  },
 };
 
 cardSet[31069] = {
@@ -5640,6 +5651,9 @@ cardSet[31069] = {
     },
   },
   AIIsScoringUpgrade: true,
+  AIScoringSupport: function (agenda, server) {
+    return server && server.root.includes(this) ? {requirementDelta: -1, requiresRez: true} : null;
+  },
   RezUsability: function () {
 	var server = GetServer(this);
 	var agendaInThisServer = null;
@@ -5729,6 +5743,11 @@ cardSet[31072] = {
   AIAdvancementLimit: function() {
 	var maxThisTurn = Math.min(corp.AI._clicksLeft(), Credits(corp))+this.advancement;  
 	return Math.max(4,maxThisTurn);
+  },
+  //Every advance gains 2 credits, or 3 once it has 5 or more counters.
+  AIAdvanceCreditGain: function (thisTurn, advancedInPlan, context) {
+    var before = context ? context.advancementSoFar : Counters(this, "advancement");
+    return before < 4 ? 2 : 3;
   },
 };
 

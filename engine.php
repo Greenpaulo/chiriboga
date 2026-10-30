@@ -555,6 +555,85 @@
 
 <body id="body" onload="Init();">
   <script>
+    // Discover available play-area artwork from images/bg.
+    var playAreaBackgrounds = <?php
+      $backgrounds = array();
+      foreach (glob(__DIR__ . '/images/bg/*') ?: array() as $background) {
+        if (is_file($background) && preg_match('/\.(jpe?g|png|webp|gif|avif)$/i', $background) && preg_match('//u', basename($background)) === 1) {
+          $backgrounds[] = basename($background);
+        }
+      }
+      natcasesort($backgrounds);
+      echo json_encode(array_values($backgrounds), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    ?>;
+
+    // Per-image darkness: 0 = original image, 1 = fully black.
+    // Images without an entry use 0.35.
+    var playAreaBackgroundDarkness = {
+      "Apex.jpg": 0.55,
+      "Beanstalk.jpg": 0.55,
+      "DysonMemChip.jpg": 0.55,
+      "FastTrack.jpg": 0.55,
+      "FindTheTruth.jpg": 0.55,
+      "Freelancer.jpg": 0.55,
+      "Grimoire.jpg": 0.55,
+      "Logos.jpg": 0.55,
+      "MushinNoShin.jpg": 0.55,
+      "ProjectAtlas.jpg": 0.35,
+      "PushYourLuck.jpg": 0.55,
+      "RumorMill.jpg": 0.55,
+      "TheRoot.jpg": 0.35,
+      "TrafficJam.jpg": 0.55,
+      "Worlds2020.jpg": 0.55,
+    };
+
+    var playAreaBackgroundRequest = 0;
+    var playAreaBackgroundSelection = '';
+
+    // Keep the grid and watermark until artwork loads; ignore superseded requests.
+    function applyPlayAreaBackground(filename) {
+      var request = ++playAreaBackgroundRequest;
+      var valid = playAreaBackgrounds.indexOf(filename) !== -1;
+      playAreaBackgroundSelection = valid ? filename : '';
+      document.body.classList.remove('image-background');
+      document.body.style.removeProperty('--play-area-background');
+      document.body.style.removeProperty('--play-area-background-darkness');
+      if (valid) {
+        var artwork = new Image();
+        artwork.onload = function() {
+          if (request !== playAreaBackgroundRequest) return;
+          var darkness = playAreaBackgroundDarkness[filename];
+          document.body.style.setProperty('--play-area-background-darkness',
+            typeof darkness === 'number' && Number.isFinite(darkness) ? Math.max(0, Math.min(1, darkness)) : 0.35);
+          document.body.style.setProperty('--play-area-background', 'url("' + artwork.src + '")');
+          document.body.classList.add('image-background');
+        };
+        artwork.onerror = function() {
+          if (request !== playAreaBackgroundRequest) return;
+          playAreaBackgroundSelection = '';
+          var backgroundSelect = document.getElementById('background-select');
+          if (backgroundSelect) backgroundSelect.value = '';
+          try {
+            localStorage.setItem('chiriboga-background', '');
+          } catch (e) {}
+        };
+        artwork.src = 'images/bg/' + encodeURIComponent(filename);
+      }
+      return valid ? filename : '';
+    }
+
+    function changePlayAreaBackground(filename) {
+      var selected = applyPlayAreaBackground(filename);
+      try {
+        localStorage.setItem('chiriboga-background', selected);
+      } catch (e) {}
+    }
+
+    // Start loading the saved background before the playing area is rendered.
+    try {
+      applyPlayAreaBackground(localStorage.getItem('chiriboga-background'));
+    } catch (e) {}
+
     // Apply CRT setting immediately to avoid flash of effects
     (function() {
       try {
@@ -580,6 +659,15 @@
       } catch (e) {}
     }
     document.addEventListener('DOMContentLoaded', function() {
+      var backgroundSelect = document.getElementById('background-select');
+      playAreaBackgrounds.forEach(function(filename) {
+        var option = document.createElement('option');
+        option.value = filename;
+        option.textContent = filename.replace(/\.[^.]+$/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+        backgroundSelect.appendChild(option);
+      });
+      // Reflect the startup request without restarting it or clearing loaded artwork.
+      backgroundSelect.value = playAreaBackgroundSelection;
       try {
         var s = localStorage.getItem('chiriboga-settings');
         if (s) {
@@ -613,6 +701,7 @@
   <button class="fullscreen-button" onclick="document.getElementById('body').requestFullscreen({ navigationUI: 'hide' });"></button>
   <div id="fps"></div>
   <div id="footer"></div>
+  <div id="passpriority" role="status" aria-live="polite"></div>
   <div id="modal" class="modal">
     <div id="modalcontent" class="modal-content"></div>
   </div>
@@ -634,6 +723,10 @@
       <div class="menu-options">
         <button id="exittomenu" onclick="window.location.href='index.php';" class="button">EXIT TO MAIN MENU</button>
         <button onclick="DownloadCapturedLog();" class="button">DOWNLOAD DEBUG LOG</button>
+        <label for="background-select">BACKGROUND</label>
+        <select id="background-select" class="button" onchange="changePlayAreaBackground(this.value)">
+          <option value="">Default (green/red)</option>
+        </select>
         <select id="rewind-select" disabled class="button">
           <option value="">UNDO</option>
         </select>

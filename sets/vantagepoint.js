@@ -696,9 +696,17 @@ cardSet[36007] = {
   subTypes: ["Connection"],
   installCost: 1,
   unique: true,
+  archivesDrawPending: false,
   automaticOnArchivesCardsTurnedFaceUp: {
     Resolve: function (cards) {
-      if (cards.length >= 2) Draw(runner, 2);
+      this.archivesDrawPending = cards.length >= 2;
+    },
+  },
+  responseOnBreach: {
+    Enumerate: function () { return this.archivesDrawPending ? [{}] : []; },
+    Resolve: function () {
+      this.archivesDrawPending = false;
+      Draw(runner, 2);
     },
   },
   AIWorthKeeping: function () {

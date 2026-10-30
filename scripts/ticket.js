@@ -17,8 +17,8 @@
 // keeps a linked roadmap item's status in step: code-review/ or remediation/
 // set it to in-progress, and done/ turns its entry into a Done-table row.
 const fs = require('fs');
-const crypto = require('crypto');
 const path = require('path');
+const {createHash} = require('crypto');
 const {spawnSync} = require('child_process');
 const {parseRoadmap, parseAll, itemPath, resolveFrom, rebaseLinks, blockerState,
   blockerMismatches, blockers} = require('./roadmap.js');
@@ -30,14 +30,6 @@ const FAMILIES = ['bugs', 'backlog'];
 const run = (cmd, args) => spawnSync(cmd, args, {cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
 const git = (...args) => run('git', args);
 const rel = file => path.relative(root, path.resolve(root, file)).split(path.sep).join('/');
-
-// A reproduction created in the current worktree has no Git baseline. Record
-// its digest before implementation; this fallback requires the entire file to
-// remain unchanged, a stricter comparison than the assertion-only Git check.
-function untrackedReproductionMatches(resolution, contents) {
-  const match = (resolution || '').match(/^\*\*Untracked reproduction SHA-256:\*\* `([0-9a-f]{64})`\s*$/m);
-  return Boolean(match && crypto.createHash('sha256').update(contents).digest('hex') === match[1]);
-}
 
 function ticketFamily(ticket) {
   const match = rel(ticket).match(/^documentation\/(bugs|backlog)\//);
@@ -389,21 +381,48 @@ function startBoardsTagged(tags) {
 
 // The ticket's state in one line (ai-planning.md, "When a gate fails").
 const outcomeLine = text => (text.match(/^\*\*Outcome:\*\*\s*(.+)$/m) || [])[1];
-// A failed idea is removed, not left switched off.
-const failedGateResult = (option, setting, code = '') => {
+// Only the complete declaration prescribed in ai-planning.md permits retention.
+function hasManualPlaytesting(option, resolution) {
+  const declaration = (resolution || '').match(/^\*\*Manual playtesting:\*\* owner-requested — `(\w+)`, \d{4}-\d{2}-\d{2}; defaults to off\.[ \t]*\r?$/m);
+  return Boolean(option && declaration && declaration[1] === option);
+}
+
+// Failed ideas are normally removed. The owner may explicitly retain one
+// default-off for manual playtesting without adopting it as the default.
+const failedGateResult = (option, setting, code = '', manualPlaytesting = false) => {
   //A removed option may share its name with an existing evaluation field.
   //Inspect option accesses, ignoring comments and opaque string contents.
   const tokens = reproductionTokens(code);
   const keys = ["'" + option + "'", '"' + option + '"', '`' + option + '`'];
-  const accessed = tokens.some((token, i) => token === 'options' && (
-    (['.', '?.'].includes(tokens[i + 1]) && tokens[i + 2] === option) ||
-    (tokens[i + 1] === '[' && keys.includes(tokens[i + 2])) ||
-    (tokens[i + 1] === '?.' && tokens[i + 2] === '[' && keys.includes(tokens[i + 3]))));
+  let accessed = false, read = false;
+  tokens.forEach((token, i) => {
+    if (token !== 'options') return;
+    let end;
+    if (['.', '?.'].includes(tokens[i + 1]) && tokens[i + 2] === option) end = i + 3;
+    else {
+      const bracket = i + (tokens[i + 1] === '?.' ? 2 : 1);
+      if (tokens[bracket] === '[' && keys.includes(tokens[bracket + 1]) && tokens[bracket + 2] === ']')
+        end = bracket + 3;
+    }
+    if (end === undefined) return;
+    accessed = true;
+    // Locate the beginning of a dotted receiver, e.g. this.ai.options.x.
+    let start = i;
+    while (['.', '?.'].includes(tokens[start - 1]) && /^[$\w]+$/.test(tokens[start - 2] || '')) start -= 2;
+    // Parentheses do not turn assignment/deletion targets into reads.
+    while (tokens[start - 1] === '(' && tokens[end] === ')') { start--; end++; }
+    const assignment = tokens[end] === '=' && !['=', '>'].includes(tokens[end + 1]);
+    const receiverRead = ['.', '?.', '[', '('].includes(tokens[end]);
+    if (receiverRead || (!assignment && tokens[start - 1] !== 'delete')) read = true;
+  });
   const structure = tokens.map(token => keys.includes(token) ? option :
     /^['"`]/.test(token) ? '' : token).join(' ');
   const destructured = new RegExp('\\{[^{}]*\\b' + option +
     '\\b[^{}]*\\}\\s*=\\s*(?:\\w+\\s*(?:\\?\\.|\\.)\\s*)*options\\b')
     .test(structure);
+  if (manualPlaytesting) return setting === 'false' && (read || destructured)
+    ? ['PASS', 'Gate failed; owner-requested manual playtesting retains ' + option + ' default off.']
+    : ['FAIL', 'Manual playtesting retention requires ' + option + ' to have an explicit false default and a live option read.'];
   return setting || accessed || destructured ?
     ['FAIL', 'Gate failed but ' + option + ' is still in the code; remove the option and its branch.'] :
     ['PASS', 'Gate failed and ' + option + ' has been removed.'];
@@ -435,6 +454,8 @@ function check(ticket, {fast = false} = {}) {
 
   const outcome = outcomeLine(text);
   const gate = ((resolution || '').match(/^\*\*Gate:\*\*\s*(.+)$/m) || [])[1];
+  const optionName = gate && (gate.match(/`(\w+)`/) || [])[1];
+  const manualPlaytesting = hasManualPlaytesting(optionName, resolution);
   const outcomeIssue = outcomeProblem(outcome, gate);
   if (outcomeIssue) report(...outcomeIssue);
   const notAdopted = outcome && /^not adopted\b/i.test(outcome);
@@ -442,7 +463,7 @@ function check(ticket, {fast = false} = {}) {
   const reproLine = (text.match(/^\*\*Reproduction:\*\*(.*)$/m) || [])[1] || '';
   const pending = (reproLine.match(/`(tests\/[^`]+)`/) || [])[1];
   const green = pending && greenPathFor(pending);
-  if (notAdopted) {
+  if (notAdopted && !manualPlaytesting) {
     if (!pending) report('WARN', 'No reproduction path on the **Reproduction:** line; reproduction checks skipped.');
     else if (!green) report('FAIL', 'Not adopted, but reproduction ' + pending + ' is not a pending path.');
     else if (!fs.existsSync(path.join(root, pending)))
@@ -463,11 +484,12 @@ function check(ticket, {fast = false} = {}) {
         if (added) original = git('show', added + ':' + pending);
       }
       if (original.status !== 0) {
-        if (untrackedReproductionMatches(resolution, fs.readFileSync(path.join(root, green))))
-          report('PASS', 'Untracked reproduction matches its recorded original SHA-256 byte for byte.');
-        else if (/^\*\*Untracked reproduction SHA-256:\*\*/m.test(resolution || ''))
-          report('FAIL', 'Untracked reproduction does not match its recorded original SHA-256.');
-        else report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        const checksumMatch = reproductionChecksumMatches(text, fs.readFileSync(path.join(root, green)));
+        if (checksumMatch === null)
+          report('WARN', 'Could not find the pending version of ' + pending + ' to compare.');
+        else report(checksumMatch ? 'PASS' : 'FAIL', checksumMatch
+          ? 'Reproduction matches its recorded SHA-256; the recording order is not verified.'
+          : 'Reproduction differs from its recorded pending SHA-256.');
       } else {
         const before = original.stdout.split('\n');
         const after = fs.readFileSync(path.join(root, green), 'utf8').split('\n');
@@ -510,7 +532,7 @@ function check(ticket, {fast = false} = {}) {
     const failed = gate && /^failed\b/i.test(gate);
     if (!gate) report('FAIL', 'Gated ticket: the Resolution needs a "**Gate:** passed | pending <gate> | failed — `<option>` …" line.');
     else if (!option) report('FAIL', 'The **Gate:** line does not name its AI option in backticks.');
-    else if (failed) report(...failedGateResult(option, setting, code));
+    else if (failed) report(...failedGateResult(option, setting, code, manualPlaytesting));
     else if (!setting) report('FAIL', 'AI option ' + option + ' has no default in ai_corp.js or ai_runner.js.');
     else if (!passed && setting === 'true') report('FAIL', 'Gate not passed but ' + option + ' defaults to on: ' + gate);
     else if (!passed) report('WARN', 'Gate not passed; ' + option + ' defaults to off: ' + gate);
@@ -518,7 +540,7 @@ function check(ticket, {fast = false} = {}) {
     // The gate's setup is part of the ticket: every collector and start board
     // its gate commands name must exist before review.
     // A not-adopted ticket's gate is history; its boards may have been rebuilt or dropped since.
-    if (!notAdopted) for (const problem of gateSetupProblems(text)) report('FAIL', problem);
+    if (!notAdopted || manualPlaytesting) for (const problem of gateSetupProblems(text)) report('FAIL', problem);
   }
 
   for (const [level, message] of results) console.log(level.padEnd(4) + ' ' + message);
@@ -545,9 +567,18 @@ function check(ticket, {fast = false} = {}) {
   process.exitCode = failed ? 1 : 0;
 }
 
-module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus,
-  closeRoadmapItem, reproductionExpectationsMatch, untrackedReproductionMatches,
-  gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem};
+//For a pending reproduction supplied untracked, record this digest before
+//editing/moving it. Prefer Git history whenever it exists; this fallback checks
+//the entire file byte-for-byte, rather than only its assertions.
+function reproductionChecksumMatches(text, contents) {
+  const match = text.match(/^\*\*Reproduction SHA-256:\*\* `([a-f0-9]{64})`\s*$/m);
+  if (!match) return null;
+  return createHash('sha256').update(contents).digest('hex') === match[1];
+}
+
+module.exports = {ticketSummary, ticketInventory, validateBlockerMarkers, move, setRoadmapStatus, reproductionChecksumMatches,
+  closeRoadmapItem, reproductionExpectationsMatch, gateSetupProblems, outcomeLine, failedGateResult, outcomeProblem,
+  hasManualPlaytesting};
 
 if (require.main === module) {
   const [command, ticket, stage] = process.argv.slice(2);

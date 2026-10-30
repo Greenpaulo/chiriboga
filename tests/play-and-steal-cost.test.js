@@ -60,7 +60,7 @@ modifiers = [
 ];
 assert.deepStrictEqual(
   JSON.parse(JSON.stringify(context.StealCost(agenda))),
-  {credits: 3, clicks: 1},
+  {credits: 3, clicks: 1, programs: 0},
 );
 assert.strictEqual(context.CheckSteal(), true);
 runner.clickTracker = 0;
@@ -77,12 +77,13 @@ assert(
 );
 assert(
   phaseSource.includes('var cost = StealCost(agenda)') &&
-    phaseSource.includes('SpendClicks(runner, cost.clicks)'),
-  'access resolution pays additional steal costs',
+    phaseSource.includes('SpendClicks(runner, cost.clicks)') &&
+    phaseSource.includes('PayStealCostPrograms(agenda, cost.programs, Steal)'),
+  'access resolution pays additional steal costs, including program trashes',
 );
 assert(
   phaseSource.includes(
-    'if (CheckSteal() && cost.credits < 1 && cost.clicks < 1) return [];',
+    'if (CheckSteal() && cost.credits < 1 && cost.clicks < 1 && cost.programs < 1) return [];',
   ),
   'access resolution keeps a decline option when stealing has an additional cost',
 );

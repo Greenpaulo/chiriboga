@@ -18,7 +18,7 @@ not strategic tuning. `AIPreferredPlayChoice` retains its existing missing-break
 preference over program choices. The subsequent decision uses the existing
 top-ranked server when still legal, otherwise its first legal choice. The hook
 signature is unchanged; the separated choices are documented in
-`documentation/ai.md`. No existing Runner architecture description changes.
+`documentation/ai.md` and `documentation/runner-ai/architecture.md`.
 
 The pending reproduction moved byte for byte to
 `tests/beta-build-program-click-selects-server.test.js`; its original pending
@@ -33,24 +33,32 @@ shuffle, return/uninstall behavior, and intentional composite drag selection.
 Headless visual sprites are stubbed; exact browser stack-grid placement remains
 outside automated coverage.
 
-**Untracked reproduction SHA-256:** `1474e80ce7e2f760308534cde8493cd85f63224e54d2eea3f7aa1f5d6928b41d`
+**Reproduction SHA-256:** `1474e80ce7e2f760308534cde8493cd85f63224e54d2eea3f7aa1f5d6928b41d`
 
 Workflow deviation: the reproduction arrived untracked, and neither the starting
 commit nor Git history contains its pending version. A copy saved before
-implementation supplies the digest above. To meet the approved plan's requirement
-to validate it without committing, `scripts/ticket.js` now accepts a documented
-SHA-256 fallback only when Git cannot provide the original. It requires the
-entire green file to match, fails on a malformed/mismatched recorded digest, and
-leaves the Git comparison unchanged when history exists. Focused tests in
+implementation supplies the digest above. The SHA-256 fallback in
+`scripts/ticket.js` is used only when Git cannot provide the original. During PR
+conflict resolution, the equivalent implementation from `main` was retained and
+this ticket adopted its `Reproduction SHA-256` field. It requires the entire
+green file to match a valid digest, fails on a mismatch, and warns when the
+digest is missing or malformed. Git comparison remains unchanged when history
+exists. Focused tests in
 `tests/agent-scripts.test.js` cover unchanged bytes, altered assertions, added
 comments, missing baselines and malformed hashes. `tests/README.md` documents
 the convention. The helper and AI-hook documentation checks pass.
 
-Final verification: `node scripts/ticket.js check documentation/bugs/code-review/beta-build-program-click-selects-server.md`
+Original implementation verification: `node scripts/ticket.js check documentation/bugs/code-review/beta-build-program-click-selects-server.md`
 passed on Node v20.19.0, exit 0: all 116 full-suite test files passed, including
 decision fixtures and snapshots; the original-reproduction checksum comparison
 also passed. Output: `/tmp/beta-build-ticket-check.log`; exit status:
 `/tmp/beta-build-ticket-check.exit`. No commit made.
+
+PR review and merge verification: the Runner architecture now documents both
+choices. After merging current `main`, the same full ticket check passed on
+Node v20.19.0, exit 0: all 136 full-suite files passed, including decision
+fixtures and snapshots. The reproduction checksum also passed. Output:
+`/tmp/chiriboga-pr70-check.log`; exit status: `/tmp/chiriboga-pr70-check.exit`.
 
 ## Implementation plan
 

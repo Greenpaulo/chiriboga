@@ -8,7 +8,7 @@ const {EventEmitter} = require('events');
 const scriptDir = path.resolve(__dirname, '../scripts');
 const source = fs.readFileSync(path.join(scriptDir, 'import-precon.js'), 'utf8');
 
-async function importDeck(identity, cards) {
+async function importDeck(identity, cards, expectedError) {
   let output;
   const errors = [];
   const context = {
@@ -42,6 +42,11 @@ async function importDeck(identity, cards) {
   };
   vm.runInNewContext(source, context, {filename: 'import-precon.js'});
   await new Promise(resolve => setImmediate(resolve));
+  if (expectedError) {
+    assert(errors.some(message => expectedError.test(message)), errors.join('\n'));
+    assert.strictEqual(output, undefined, 'An unknown set must fail before writing a precon');
+    return;
+  }
   assert.deepStrictEqual(errors, []);
   assert(output, 'Importer must write a precon');
   const identityCard = JSON.parse(fs.readFileSync(
@@ -67,7 +72,29 @@ async function importDeck(identity, cards) {
 
   const existing = await importDeck('31001', {'01001': 1, '30030': 3, '31002': 1});
   assert.deepStrictEqual(Array.from(existing.sets).sort(), ['core', 'sg', 'su21']);
-  console.log('Precon importer regression cases passed (3 cases).');
+  const splitReleases = await importDeck('26010', {
+    '03001': 1, '26065': 1, '26066': 1, '26130': 1,
+    '33001': 1, '33065': 1, '33066': 1, '33128': 1,
+    '34001': 1, '34065': 1, '34066': 1, '34130': 1,
+  });
+  assert.deepStrictEqual(Array.from(splitReleases.sets).sort(),
+    ['cac', 'df', 'ms', 'ph', 'rwr', 'tai', 'ur'],
+    'Use the configured ranges, including both sides of split-release boundaries');
+  const downfallIdentity = await importDeck('26010', {'30030': 3});
+  assert.deepStrictEqual(Array.from(downfallIdentity.sets), ['sg', 'df']);
+
+  for (const name of ['Az', 'Hyoubu', 'Nebula']) {
+    let precon;
+    vm.runInNewContext(fs.readFileSync(path.join(scriptDir,
+      `../precons/[Standard So Far] - ${name}.js`), 'utf8'),
+      {registerPrecon: value => { precon = value; }});
+    const imported = await importDeck(precon.identity, precon.cards);
+    assert.deepStrictEqual(Array.from(imported.sets), ['df', 'sg', 'elev', 'vp']);
+    assert.deepStrictEqual(Array.from(precon.sets), Array.from(imported.sets),
+      `The committed ${name} precon must agree with a fresh import`);
+  }
+  await importDeck('30001', {'99999': 1}, /Cannot determine set for card 99999/);
+  console.log('Precon importer regression cases passed (9 cases).');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;

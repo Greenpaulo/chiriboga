@@ -541,6 +541,7 @@ cardSet[30006] = {
 };
 cardSet[30007] = {
   title: "Fermenter",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   imageFile: "30007.png",
   elo: 1685,
   player: runner,
@@ -3156,6 +3157,8 @@ cardSet[30039] = {
 			  }
 			  //AI can nope out if it realises there are no good options (better to keep the ice in hand)
 			  if (!wouldRez && params.id == 0) return; //the decision phase is skipped
+			  if (typeof corp.AI._openingIceEmergencyInstall === "function" &&
+			      !corp.AI._openingIceEmergencyInstall(harcc, attackedServer)) return;
 			  corp.AI._log("I choose this one");			  
 			  corp.AI.preferred = { command: "install", cardToInstall: harcc, serverToInstallTo:attackedServer };
 			}
@@ -3316,6 +3319,12 @@ cardSet[30040] = {
     PlaceAdvancement(params.card, 2);
   },
   AIFastAdvance:true, //is a card for fast advancing
+  //Cannot target a card installed this turn.
+  AIFastAdvanceCounters: function (card, context) {
+    if (!card || (context && context.installedThisTurn)) return 0;
+    if (context && context.thisTurn === false) return 2;
+    return this.cardsInstalledThisTurn.includes(card) ? 0 : 2;
+  },
 };
 cardSet[30041] = {
   title: "Sprint",
@@ -4557,6 +4566,10 @@ cardSet[30059] = {
     Resolve: function (card) {
       if (card.advancement == 1) GainCredits(corp, 2, "", this); //if it has 1 now then it had none before
     },
+  },
+  //Read from corp.identityCard by the advancement search (context: card, advancementSoFar).
+  AIAdvanceCreditGain: function (thisTurn, advancedInPlan, context) {
+    return context && context.advancementSoFar < 1 ? 2 : 0;
   },
 };
 cardSet[30060] = {

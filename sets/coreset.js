@@ -615,10 +615,8 @@ coreSet[1016] = {
   unique: true,
   responseOnRunnerTurnBegins: {
     Resolve: function () {
-      Draw(runner, 2);
-      LoseClicks(runner, 1);
+      Draw(runner, 2, function () { LoseClicks(runner, 1); });
     },
-    automatic: true, //for usability, this is not strict implementation
   },
 };
 var gabrielSantiagoMadeSuccessfulRunOnHQThisTurn = false;
@@ -1240,6 +1238,7 @@ coreSet[1029] = {
 };
 coreSet[1030] = {
   title: "Crash Space",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1531,
   imageFile: "01030.png",
   player: runner,
@@ -1367,6 +1366,7 @@ coreSet[1031] = {
 };
 coreSet[1032] = {
   title: "Decoy",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1240,
   imageFile: "01032.png",
   player: runner,
@@ -2061,6 +2061,7 @@ coreSet[1046] = {
 // coreSet[1047] = Aesop's Pawnshop  - DUPLICATE: System Update 2021 has Aesop's Pawnshop (card 31035)
 coreSet[1048] = {
   title: "Sacrificial Construct",
+  trashAbility: true, //[trash] ability (HasTrashAbility)
   elo: 1661,
   imageFile: "01048.png",
   player: runner,

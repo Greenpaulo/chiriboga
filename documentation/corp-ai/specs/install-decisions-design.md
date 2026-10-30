@@ -7,6 +7,30 @@ to that phase; this note holds the question, principles, architecture, score
 discipline, gate conventions, test plan, migration strategy and definition of
 done they share.
 
+## Current planning amendment — 2026-10-28
+
+[Owner-controlled playtesting](../../ai-playtesting.md) determines priorities
+and strategic adoption. The older numerical gates, mandatory collectors and
+sequence assumptions below are historical proposals unless explicitly selected
+for a measured comparison. They do not override the roadmap or the owner's
+flag choices. This scoped amendment does not re-verify every earlier formula
+or code claim; re-ground affected sections before implementation.
+
+I2 and I4 are implemented. I3's next step is to assess the observed need for a
+scoring remote and asset reuse against the owner's actual configuration.
+I4 advancement/exposure on with destination planning off is a supported
+playtest combination; future work must not assume every merged I4 consumer
+is enabled. Keep agenda installation/holding (I4), scoring-room availability
+and replacement choices (I3), and broader asset value (I5) coordinated.
+
+The [agenda-stall evidence](../../bugs/corp-agenda-held-while-secure-remote-available.md)
+exposes occupied-root exclusion plus a separate relative-score rejection.
+It does not establish that the final agenda-heavy hand demands installation,
+or justify a universal "trash zero-counter assets" rule. The owner's separate
+report of bare last-click I4 installs is an investigation lead, not a verified
+root cause. Revise the selected I3/I4 design rather than adding a competing
+legacy-placement heuristic outside these items.
+
 ## Question and scope
 
 The server-security area (`L` items) answers:
@@ -50,7 +74,7 @@ card-definition example.
 
 ## Measurement handoff from L8.9
 
-[L8.9](../../backlog/code-review/L8.9-observable-defense-parity.md) delivers passive installation,
+[L8.9](../../backlog/done/L8.9-observable-defense-parity.md) delivers passive installation,
 defense and lifecycle tools; it owns no admission/holding rule. I3/I4/I5 retain
 those decisions. Before changing installation policy, use the
 [tool recipe](../../ai-batch-harness.md#using-install-observations-in-the-i-tickets)
@@ -69,12 +93,13 @@ passive observation with identity tests when a consumer's claim needs that data.
 ## Corrected regression baseline and ownership
 
 The [2026-10-05 recovery](../../corp-ai-regression/gated-fix-handoff.md)
-gates five existing policies, all default-off. Future install work must start
-from this corrected policy, not assume the old strict behaviors remain
-unconditional. Preserve all five settings in baseline/candidate comparisons
-unless a named experiment explicitly tests a gate. Hold prerequisite I-layer
-options identical in both arms and capture/back-fill the corresponding control;
-an old I0 report with different effective options is not a matching control.
+put five policies behind default-off options. That is historical provenance,
+not a requirement that Paul's current playtest configuration keep them off.
+Record the actual flags and build used for a new investigation. For a measured
+comparison, hold prerequisite settings identical in both arms and capture the
+corresponding control; an old I0 report with different effective options is
+not a matching control. Do not restore an old policy accidentally while
+implementing an unrelated change.
 
 The current F4 `gate` command clears all explicit option overrides in its
 baseline arm; it does not retain prerequisite override flags there. A single
@@ -86,7 +111,7 @@ metric checks, or add an explicitly designed harness capability before using
 the gate. Do not pass prerequisite `--corp-option` flags and assume both arms
 receive them.
 
-| Disabled policy | Roadmap owner / coverage |
+| Historically gated policy | Roadmap owner / coverage |
 |---|---|
 | `secureScoringServerGate` | I4 owns safe agenda destinations and scoring plans; I3/I6 consume scoring-server suitability. The PR 19 winning-steal concern is tracked in I4. |
 | `serverAtRiskInstallOverride` | I2 owns whether another ICE layer buys useful security; I7.1 compares that install with credits/draw, and I7.2/I8 account for competing scoring plans. |
@@ -132,17 +157,18 @@ not certify unrelated design assumptions or acceptance gates.
 | I0 | F4 |
 | I1 | I0 |
 | I2 | I1, F2, F4, L7.1 |
-| I3 | I2, F4, L8.4 |
-| I4, I5 | I3, F4 |
+| I4 | I2, F4 |
+| I3 | I2, I4, F4, L8.4 |
+| I5 | I3, L8.10, F4 |
 | I6 | I3, I4, F4 |
 | I7.1 | I2, F2, F4 |
 | I7.2 | I4, I5, I6, F4 |
 | I8 | I7.1, I7.2, F2, F4 |
 | I9 | I8, F4 |
 
-F4 appears on every gated item because `documentation/ai-planning.md` requires
-it; it is otherwise implied through I0. I4 and I5 can
-proceed in parallel once I3 has defined roles; I6 needs both roles (I3) and
+These recorded dependencies include F4 as shared infrastructure, not a
+requirement to run a statistical adoption gate. I4 ran before I3; I3 now
+revisits remote availability using I4 and playtest evidence. I5 follows I3; I6 needs both roles (I3) and
 agenda plans (I4). I7 is split: I7.1 compares ICE with credit and draw and
 needs only I2; I7.2 compares root installs, operations and advancement with
 other actions and needs I4, I5 and I6. The R1 items (reserve and optionality)
@@ -446,8 +472,9 @@ because refusing to install can also lose.
    before/after-commit log-hash parity as L9.0 did (phase A has no option to
    switch).
 2. Reliability check of M2 on held-out seeds.
-3. I2 consumer, then I3, then I4, each behind its own option and gate. I4 is
-   the item expected to move win rate; its gate improves `winRate` and
+3. Current order is I2 consumer, then I4, then scoped I3 work, each with
+   separate owner-controlled flags. The earlier statistical proposal treated
+   I4 as the item expected to move win rate; its gate improves `winRate` and
    `pointsScored` with guards on `pointsStolen` and remote theft.
 
 **Known risks.**
@@ -467,6 +494,13 @@ because refusing to install can also lose.
   this EV.
 
 ## Acceptance gates
+
+Current strategic adoption follows [ai-playtesting.md](../../ai-playtesting.md).
+The numerical comparison requirements below apply only when explicitly
+requested; they do not require building collectors or changing flags for
+owner playtesting. Keep code/test completion separate from owner adoption.
+
+### Earlier statistical comparison requirements
 
 Every item that changes what the Corp does (I2 to I9) is gated under
 `documentation/ai-planning.md` ("Acceptance gates") and lists F4 in
@@ -589,6 +623,16 @@ suitability. They must not each recreate the global server-selection algorithm.
 - **Mitigation:** `_remoteRole(server)` dynamically evaluates an empty server's
   upgraded potential rather than being permanently locked to its historical
   role.
+
+**Still-installed asset case (2026-10-28).** The new log has a Hostile asset
+with no counters still occupying the only protected remote. Current aging
+replacement rules exclude Hostile assets, and I4's destination list also uses
+`_remoteHasRoom()`. An empty-after-trash scenario does not cover this choice.
+I3 must consider whether to replace an installed asset or prepare another
+remote, preserving assets with useful remaining abilities. I4 decides whether
+an agenda should then be installed; I5 supplies broader asset value when
+needed. Treat this as a design question, not a blanket removal of the Hostile
+exception or proof that replacement is always better.
 
 ### 2. Hidden cost collisions in multi-click planning (I8)
 

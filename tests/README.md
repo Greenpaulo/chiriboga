@@ -100,6 +100,12 @@ parallel file durations is not a measured sequential baseline.
 
 ## Adding and maintaining coverage
 
+If a pending reproduction arrived untracked and has no Git history, record
+its SHA-256 before editing or moving it as `**Reproduction SHA-256:**` followed
+by the backticked digest in the ticket. The ticket checker uses that fallback
+only when no pending version exists in Git, and requires the complete moved
+file to match byte-for-byte.
+
 Add a ticket regression to the existing behaviour suite when its setup fits.
 Use named or parameterised cases for variations; a ticket does not require a new
 file. Keep genuinely different decision paths even when they exercise the same
@@ -111,14 +117,6 @@ above. Save full-run stdout/stderr
 and its exit status separately, following `AGENTS.md` for long runs.
 
 Consolidated regressions:
-
-When a pending reproduction was created in the current worktree and has no Git
-history, record its SHA-256 before implementation in the ticket's Resolution
-as `**Untracked reproduction SHA-256:** \`<64 lowercase hex digits>\``.
-The ticket checker uses that digest only when Git has no original pending file;
-the moved green reproduction must then match the complete original file byte
-for byte. A mismatch fails validation. Keep extra coverage in an existing suite
-so the original reproduction can remain unchanged.
 
 | Former file | Current suite |
 | --- | --- |
