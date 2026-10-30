@@ -3835,7 +3835,13 @@ function AdditionalRunCosts(server) {
     credits: ModifyingTriggers("modifyRunCreditCost", server, 0),
   };
 }
+// A card effect may forbid running on a server: modifyCannot("run", server)
+// (Jinteki: Replicating Perfection). Checked by every run-initiation gate.
+function RunForbidden(server) {
+  return CardEffectsForbid("run", server);
+}
 function CanPayAdditionalRunCosts(server, clicksRequired = 0, creditsRequired = 0, event = null) {
+  if (RunForbidden(server)) return false;
   var cost = AdditionalRunCosts(server);
   if (event && creditsRequired > 0) {
     // FullCheckPlay checks event affordability separately. Reserve only the

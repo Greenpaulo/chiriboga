@@ -32,6 +32,8 @@ function MakeRun(server, ignoreAdditionalCosts = false) {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
+  //"whenever the Runner runs on a central server" (Replicating Perfection)
+  if (typeof server.cards !== "undefined") RecordTurnEvent("runnerCentralRunInitiated");
   RecordPublicPostureEvent("runInitiated", null, server);
   //Corp AI posture epochs treat a run on the server as a boundary (L8.4)
   if (corp.AI && typeof corp.AI._notePostureChallenge === "function")
@@ -2234,12 +2236,17 @@ function TrashPrograms(num) {
  * @method Expose
  * @param {Card} card the card to expose
  */
-function Expose(card) {
+// afterExpose (optional) runs once the expose finishes or is prevented, so
+// effects that expose several cards can chain (Satellite Uplink).
+function Expose(card, afterExpose, context) {
+  function finish() {
+    if (typeof afterExpose == "function") afterExpose.call(context);
+  }
   var otherPlayer = runner;
   intended.expose = card; //if callback sets this to null, the expose will not happen
   if (intended.expose.player == runner) otherPlayer = corp;
   OpportunityForAvoidPrevent(otherPlayer, "responsePreventableExpose", [], function () {
-    if (intended.expose == null) return;
+    if (intended.expose == null) { finish(); return; }
     //temporarily turn card face up
     intended.expose.faceUp = true;
     intended.expose.knownToRunner = true; // Runner now knows what this card is
@@ -2251,6 +2258,7 @@ function Expose(card) {
         intended.expose.renderer.ToggleZoom();
       intended.expose.faceUp = false;
       intended.expose.renderer.FaceDown(); // Restore the visual display
+      finish();
     }
     DecisionPhase(
       otherPlayer,
@@ -2447,7 +2455,16 @@ function TraceStrengthDecisions(baseStrength, callback, context) {
               var successful = traceStrength > linkStrength;
               if (successful) Log("Trace successful");
               else Log("Trace unsuccessful");
-              callback.call(context, successful);
+              if (!successful) {
+                callback.call(context, successful);
+                return;
+              }
+              //"whenever there is a successful trace" (ChiLo City Grid); the
+              //margin is the amount the trace strength exceeded the link strength
+              TriggeredResponsePhase(playerTurn, "responseOnTraceSuccessful",
+                [traceStrength - linkStrength], function () {
+                  callback.call(context, successful);
+                }, "Trace Successful");
             },
             this
           );

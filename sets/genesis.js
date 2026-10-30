@@ -373,15 +373,82 @@ cardSet[2020] = {
 cardSet[2021] = {
   title: "Vamp",
   imageFile: "02021.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1745,
   player: runner,
   faction: "Anarch",
   influence: 2,
   cardType: "event",
   subTypes: ["Run", "Sabotage"],
   playCost: 0,
+  runningWithThis: false,
+  breachReplacementQueued: false,
   Resolve: function (params) {
-    // TODO: Implement effect
+    this.runningWithThis = true;
+    this.breachReplacementQueued = false;
+    MakeRun(corp.HQ);
+  },
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      this.breachReplacementQueued = this.runningWithThis && server === corp.HQ;
+    },
+  },
+  specialOnInsteadOfBreaching: {
+    Enumerate: function () {
+      if (!this.breachReplacementQueued) return [];
+      // Optional replacement: the engine also offers a normal breach.
+      if (runner.AI != null && this._vampAIAmount() < 1) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      this.breachReplacementQueued = false;
+      var max = AvailableCredits(runner);
+      var choices = [];
+      for (var x = 0; x <= max; x++)
+        choices.push({ x: x, label: "Spend " + x + "[c]", button: x + "[c]" });
+      //**AI code
+      if (runner.AI != null) {
+        var amount = this._vampAIAmount();
+        choices = [choices[Math.min(amount, choices.length - 1)]];
+      }
+      DecisionPhase(
+        runner,
+        choices,
+        function (params) {
+          if (params.x < 1) {
+            Log(GetTitle(this) + ": no credits spent");
+            return;
+          }
+          SpendCredits(runner, params.x, "using", this, function () {
+            var lost = LoseCredits(corp, params.x);
+            Log(GetTitle(this) + ": Corp loses " + lost + "[c]");
+            AddTags(1);
+          }, this);
+        },
+        "Vamp",
+        "Choose X",
+        this,
+      );
+    },
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      this.runningWithThis = false;
+      this.breachReplacementQueued = false;
+    },
+    availableWhenInactive: true,
+  },
+  // Spend up to the Corp's credits; worth a tag only for a meaningful swing.
+  _vampAIAmount: function () {
+    var x = Math.min(corp.creditPool, AvailableCredits(runner));
+    return x >= 4 ? x : 0;
+  },
+  AIBreachReplacementValue: 2,
+  AIBreachNotRequired: true,
+  AIRunEventExtraPotential: function (server, potential) {
+    if (server != corp.HQ || ServerSuccessfulRunPrevented(server)) return 0;
+    var x = Math.min(corp.creditPool, AvailableCredits(runner));
+    if (x < 4) return 0;
+    return x >= 8 ? 2.0 : x >= 6 ? 1.0 : 0.5;
   },
 };
 
@@ -392,15 +459,69 @@ cardSet[2021] = {
 cardSet[2023] = {
   title: "Satellite Uplink",
   imageFile: "02023.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1150,
   player: runner,
   faction: "Criminal",
   influence: 3,
   cardType: "event",
   subTypes: [],
   playCost: 2,
+  // Only facedown installed Corp cards can be exposed.
+  _exposeTargets: function (excluded) {
+    return ChoicesInstalledCards(corp, function (card) {
+      return !card.rezzed && !card.faceUp && excluded.indexOf(card) < 0;
+    });
+  },
+  // Unknown remote roots first (agenda or trap?), then unknown ice outermost first.
+  _exposeAIChoice: function (choices) {
+    var best = null, bestScore = -Infinity;
+    for (var i = 0; i < choices.length; i++) {
+      var card = choices[i].card;
+      if (!card) continue;
+      var score = card.knownToRunner ? -10 : 0;
+      if (card.cardType != "ice") score += 5 + Counters(card, "advancement");
+      else {
+        var server = GetServer(card);
+        if (server) score += server.ice.indexOf(card) / 10;
+      }
+      if (score > bestScore) { bestScore = score; best = choices[i]; }
+    }
+    return best && bestScore > -10 ? best : null;
+  },
   Resolve: function (params) {
-    // TODO: Implement effect
+    this._exposeNext([], 2);
+  },
+  _exposeNext: function (exposed, remaining) {
+    if (remaining < 1) return;
+    var choices = this._exposeTargets(exposed);
+    if (choices.length < 1) return;
+    choices.push({ card: null, label: "Done", button: "Done" });
+    //**AI code
+    if (runner.AI != null) {
+      var pick = this._exposeAIChoice(choices);
+      choices = [pick || choices[choices.length - 1]];
+    }
+    DecisionPhase(
+      runner,
+      choices,
+      function (params) {
+        if (!params.card) return;
+        exposed.push(params.card);
+        Expose(params.card, function () {
+          this._exposeNext(exposed, remaining - 1);
+        }, this);
+      },
+      "Satellite Uplink",
+      "Expose up to " + remaining + " card" + (remaining == 1 ? "" : "s"),
+      this,
+    );
+  },
+  AIWouldPlay: function () {
+    var unknown = this._exposeTargets([]).filter(function (choice) {
+      return !choice.card.knownToRunner;
+    });
+    // Information is worth a click and 2[c] only with spare resources.
+    return unknown.length >= 2 && runner.clickTracker >= 2 && Credits(runner) >= 5;
   },
 };
 
@@ -409,14 +530,54 @@ cardSet[2023] = {
 cardSet[2024] = {
   title: "e3 Feedback Implants",
   imageFile: "02024.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1595,
   player: runner,
   faction: "Criminal",
   influence: 2,
   cardType: "hardware",
   subTypes: ["Mod"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  responseOnSubroutineBroken: {
+    Enumerate: function (subroutine) {
+      if (!CheckEncounter()) return [];
+      var ice = GetApproachEncounterIce();
+      if (!ice || ice.subroutines.indexOf(subroutine) < 0) return [];
+      if (!CheckCredits(runner, 1, "using", this)) return [];
+      var choices = ChoicesEncounteredSubroutines().map(function (choice) {
+        return { subroutine: choice.subroutine, label: '1[c]: Break "' + choice.subroutine.text + '"' };
+      });
+      if (choices.length < 1) return [];
+      var decline = { subroutine: null, label: "Do not use e3 Feedback Implants", button: "Continue" };
+      //**AI code
+      if (runner.AI != null) {
+        var planned = this._e3PlannedSubroutine(ice, choices);
+        return [planned || decline];
+      }
+      choices.push(decline);
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params || !params.subroutine) return;
+      SpendCredits(runner, 1, "using", this, function () {
+        Break(params.subroutine);
+      }, this);
+    },
+    text: "e3 Feedback Implants: pay 1[c] to break 1 subroutine",
+  },
+  // A subroutine the current run plan still means to break on this ice: e3
+  // replaces that planned breaker use (the plan skips subroutines already broken).
+  _e3PlannedSubroutine: function (ice, choices) {
+    var path = runner.AI && runner.AI.cachedBestPath;
+    if (!path) return null;
+    for (var i = 0; i < path.length; i++) {
+      if (path[i].iceIdx != approachIce || !path[i].sr_broken) continue;
+      for (var j = 0; j < path[i].sr_broken.length; j++) {
+        var sr = ice.subroutines[path[i].sr_broken[j].idx];
+        for (var k = 0; k < choices.length; k++) if (choices[k].subroutine === sr) return choices[k];
+      }
+    }
+    return null;
+  },
 };
 
 //Compromised Employee (2025)
@@ -426,14 +587,27 @@ cardSet[2024] = {
 cardSet[2025] = {
   title: "Compromised Employee",
   imageFile: "02025.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1361,
   player: runner,
   faction: "Criminal",
   influence: 1,
   cardType: "resource",
   subTypes: ["Connection", "Link"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  recurringCredits: 1,
+  canUseCredits: function (doing, card) {
+    return doing == "trace";
+  },
+  automaticOnRez: {
+    Resolve: function (card) {
+      if (card && card.player == corp && CheckCardType(card, ["ice"])) GainCredits(runner, 1, "", this);
+    },
+  },
+  AIEconomyInstall: function () {
+    // Pays back over the Corp's coming ice rezzes; one copy is enough.
+    if (runner.rig.resources.some(function (card) { return card.title == "Compromised Employee"; })) return 0;
+    return 1;
+  },
 };
 
 //Notoriety (2026)
@@ -442,16 +616,30 @@ cardSet[2025] = {
 cardSet[2026] = {
   title: "Notoriety",
   imageFile: "02026.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1671,
   player: runner,
   faction: "Shaper",
   influence: 1,
   cardType: "event",
   subTypes: [],
   playCost: 1,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  _eligible: function () {
+    return TurnEventCount("runnerSuccessfulRunHQ") > 0 && TurnEventCount("runnerSuccessfulRunRnD") > 0 &&
+      TurnEventCount("runnerSuccessfulRunArchives") > 0;
   },
+  Enumerate: function () {
+    return this._eligible() ? [{}] : [];
+  },
+  Resolve: function (params) {
+    this.agendaPoints = 1;
+    this.faceUp = true;
+    MoveCard(this, runner.scoreArea);
+    Log(GetTitle(this) + " added to the Runner's score area (1 point)");
+  },
+  AIWouldPlay: function () {
+    return this._eligible();
+  },
+  AIPlayWhenCan: 3,
 };
 
 //Snowball (2027)
@@ -461,7 +649,7 @@ cardSet[2026] = {
 cardSet[2027] = {
   title: "Snowball",
   imageFile: "02027.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1269,
   player: runner,
   faction: "Shaper",
   influence: 2,
@@ -471,15 +659,73 @@ cardSet[2027] = {
   memoryCost: 1,
   strength: 1,
   strengthBoost: 0,
+  runStrengthBoost: 0,
   modifyStrength: {
     Resolve: function (card) {
-      if (card == this) return this.strengthBoost;
+      if (card == this) return this.strengthBoost + this.runStrengthBoost;
       return 0;
     },
   },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break 1 barrier subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 1, "using", this, function () {
+          Break(params.subroutine);
+          if (params.subroutine.broken) {
+            this.runStrengthBoost++;
+            Log(GetTitle(this) + " gets +1 strength for the remainder of this run");
+          }
+        }, this);
+      },
+    },
+    {
+      text: "+1 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 1, "using", this, function () {
+          BoostStrength(this, 1);
+        }, this);
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      this.runStrengthBoost = 0;
+    },
+    availableWhenInactive: true,
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    // Current strength already includes this run's snowball bonus; later
+    // in-route growth is not modelled (conservative).
+    return result.concat(
+      rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Barrier"], 1, 1, 1, 1, creditsLeft),
+    );
+  },
+  AIPreferredInstallChoice: function (choices) {
+    if (runner.clickTracker < 2) return -1;
+    return 0;
+  },
 };
 
 //Dyson Mem Chip (2028)
@@ -487,14 +733,19 @@ cardSet[2027] = {
 cardSet[2028] = {
   title: "Dyson Mem Chip",
   imageFile: "02028.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1281,
   player: runner,
   faction: "Neutral",
   influence: 0,
   cardType: "hardware",
   subTypes: ["Chip", "Link"],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  memoryUnits: 1,
+  link: 1,
+  AIWorthKeeping: function (installed, spareMU) {
+    // Keep it while memory is tight.
+    return spareMU < 1;
+  },
 };
 
 //Encryption Protocol (2029)
