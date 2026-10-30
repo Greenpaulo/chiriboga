@@ -1827,6 +1827,22 @@ console.log(this.preferred);
 
     if (currentPhase.identifier == "Run 3.1" || currentPhase.identifier == "Encounter") {
       //mid-encounter
+      //installed cards declaring a useful non-breaking encounter ability (e.g. Crescentus):
+      //AITriggerDuringEncounter() returns the ability alt to use now, or a falsy value
+      if (optionList.includes("trigger")) {
+        var encounterCards = ActiveCards(runner);
+        for (var eci = 0; eci < encounterCards.length; eci++) {
+          if (typeof encounterCards[eci].AITriggerDuringEncounter != "function") continue;
+          var encounterAlt = encounterCards[eci].AITriggerDuringEncounter.call(encounterCards[eci]);
+          if (!encounterAlt) continue;
+          if (!ChoicesAbility(encounterCards[eci]).some(function (a) { return a.alt == encounterAlt; })) continue;
+          this._log("there is a card I would trigger during this encounter");
+          return this._returnPreference(optionList, "trigger", {
+            cardToTrigger: encounterCards[eci],
+            abilityAlt: encounterAlt,
+          });
+        }
+      }
       //console.log("Mid-encounter bestpath:");
       //calculate run path from this point (the 0s mean no credit/click/damage offset)
       //ideally complete runs

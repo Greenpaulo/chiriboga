@@ -2344,6 +2344,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes, and one with `strengthMod` and `target` changes that ice's strength for the rest of the route |
 | `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
 | `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
+| `AITriggerDuringEncounter()` | function | Runner: return the alt of a non-breaking encounter ability to use now (checked first at each mid-encounter `trigger` decision), or falsy (Crescentus) |
 | `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select, followUp?}` when this card's ability can install the grip card more cheaply than the basic install action; `followUp` names a paid ability to trigger next |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
@@ -3928,3 +3929,27 @@ competing-plan policies are recorded in the set's optimisation queue.
   option and known-root run planning), `AIWouldPlay()` (no active Lockdown and
   an agenda in HQ or a remote) and `AIPlayWhenCan`. Runner run planning does
   not price the cost on unknown cards.
+
+### Genesis: A Study in Static card hooks
+
+- Disrupter reuses Flip Switch's `AIWouldZeroTrace()` in its
+  `responseOnTraceInitiated` enumeration (no turn restriction).
+- Doppelgänger's `AIDoppelgangerTarget()` is read during its `responseOnRunEnds`
+  enumeration: among existing servers it returns the one with the highest cached
+  potential that also has a complete run path from the outermost ice, or `null`
+  to decline. It is called after a successful run, so cached potentials are from
+  the turn's last evaluation.
+- Crescentus declares `AITriggerDuringEncounter()`: it returns
+  `"crescentus_derez"` while the encountered rezzed ice is fully broken and its
+  rez cost is at least 3. `RunnerAI` checks every active Runner card's
+  `AITriggerDuringEncounter()` at the start of each mid-encounter (`Run 3.1` /
+  `Encounter`) decision that offers `trigger`, before following the run path,
+  and triggers the named ability when `ChoicesAbility` lists it.
+- Deus X: `AIImplementBreaker` breaks any number of subroutines on `AP` ice for
+  0 credits, once per run (`{use: this}` persistent); the trashed program is not
+  priced. `AIWouldPreventNetDamage()` is read during its
+  `responsePreventableDamage` enumeration (reads `intended.damage`): prevent when
+  the damage would empty the grip or is 2 or more.
+- All-nighter uses `AITriggerInPaidWindow()` (`"allnighter_gain"`) only once a
+  Runner turn has begun with it installed, so install-and-use is never click
+  neutral in one turn.
