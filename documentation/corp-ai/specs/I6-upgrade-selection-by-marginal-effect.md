@@ -1,6 +1,6 @@
 # I6 Upgrade selection by marginal effect
 
-**Roadmap item:** I6 · **Depends on:** I3, I4, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
+**Roadmap item:** I6 · **Depends on:** I10, I4, F4 · **Sets:** playable sets (`documentation/card-sets.md`)
 **Read first:** `documentation/ai-principles.md`, `documentation/corp-ai/principles.md`, `documentation/corp-ai/specs/install-decisions-design.md`
 **Verified against code:** 376f32c (2026-09-25)
 

@@ -39,17 +39,20 @@ is recorded in the done tables and the historical merge plan.
 | — | [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) | done (merged) | I2 retained; I3/I9 constraints carried into the I3 ticket |
 | — | [I2.3](../backlog/done/I2.3-hq-then-rnd-opening-ice-gate.md) | done (merged; recorded gate failed) | HQ-first/R&D-second opening retained behind `openingHqThenRdIce` for Paul's manual playtests. Merged in PR #74 (`afe7614`) |
 | — | [I4](../backlog/done/I4-agenda-installation-and-scoring-commitment.md) | done (merged; manual playtesting continues) | Agenda advancement, theft-risk table and install/hold choices delivered behind separate flags; recorded part 1 gate failed. When destination planning is enabled, ICE placement follows the chosen agenda destination. No final choice of flags is recorded here |
-| 1 | [I3](../backlog/I3-remote-role-and-root-suitability.md), coordinated with I4 follow-up | ready (scope revision first) | Use the agenda-stall log to assess scoring-room availability and replacement of an installed asset with little current use. Work with I4 advancement/exposure on and destination planning off; do not implement the full older role/value design or a separate placement bypass automatically. Seeds 6001–7000 remain reserved |
+| — | [I3](../backlog/I3-remote-role-and-root-suitability.md) | parked (superseded by I10) | Persistent-role/value design not built; scoring-room availability and asset reuse move into I10 |
+| 1 | [I10](specs/I10-scoring-plan.md) | proposed | Multi-turn scoring plan behind `scoringPlan`: prepare and protect a remote, install, advance, score. Owner playtesting decides adoption |
 
 F11, F12, I2 and L8.9 are done and merged. L8.2 was not adopted (full gate
 failed; policy removed), while its observer/collector repairs remain.
 I2.3 and I4 are also merged; neither remains in the implementation queue.
-I3's formal dependencies are complete. The current next step is revising its
-scope against the [agenda-stall evidence](../bugs/corp-agenda-held-while-secure-remote-available.md),
-not automatically implementing its old design. I4 owns agenda placement and
-holding; I3 owns making a scoring remote available, including asset reuse.
-The owner separately reported undefended last-click installs with I4 destination
-planning on; that needs a captured decision before selecting a repair.
+Owner direction 2026-10-30: the Corp's main weakness is that it does not know
+how to score. With `agendaDestinationPlan` off it never builds a scoring remote
+and loses agendas from HQ; with it on, agendas go into unprepared remotes and
+are stolen the same turn. Both are one missing concept, so I3 is parked and
+[I10](specs/I10-scoring-plan.md) adds an explicit scoring plan that owns the
+clicks while active, using I2 and I4 as inputs. Evidence:
+`documentation/debug-logs/corp_didnt_install_single_agenda.txt` and the
+[agenda-stall ticket](../bugs/corp-agenda-held-while-secure-remote-available.md).
 
 [I2.2](../backlog/done/I2.2-rnd-protection-lateness-investigation.md) is
 merged. Its investigation retains the adopted trade-off, with reproducible
@@ -255,8 +258,10 @@ intentional policy change, I4 (agendas) decides where and when to install and
 score agendas and tells I2 which empty remote it will score in, and I3 then
 tests whether a persistent remote role and asset opportunity cost still add
 anything (owner decision 2026-10-23: the playtest symptoms were agendas held in
-HQ and left unadvanced, which I4 addresses directly). I5 (assets, after L8.10
-mechanics/diagnostics) follows I3; I6 (upgrades) follows I3 and I4. I7.1
+HQ and left unadvanced, which I4 addresses directly). Owner decision
+2026-10-30: I3 is parked and I10 (scoring plan) takes its place in the
+sequence. I5 (assets, after L8.10 mechanics/diagnostics) follows I10; I6
+(upgrades) follows I10 and I4. I7.1
 compares ICE installs with credits and draw as soon as I2 is done; I7.2 compares root
 installs, operations and advancing once I4–I6 are done. I8 needs both I7s, and
 I9 comes last.
@@ -268,26 +273,33 @@ I9 comes last.
 - **Goal:** Value public non-agenda rewards from successful empty-Archives runs as a bounded I2 score component, so Archives is protected only when those rewards outweigh the ICE.
 
 ### I3 Remote role and root suitability
-- **Status:** ready
+- **Status:** parked
 - **Depends on:** I2, I4, F4, L8.4
 - **Ticket:** [I3-remote-role-and-root-suitability.md](../backlog/I3-remote-role-and-root-suitability.md)
 - **Goal:** Assess and repair scoring-room availability from current playtests, including whether to replace an installed asset or prepare another remote. Re-scope the older persistent-role/value proposal with I4; preserve useful assets and legitimate bare asset-spam remotes. Owner playtesting decides adoption.
+- **Parked because:** superseded by I10 (owner decision 2026-10-30). Adding remote-role scores to the click-by-click ranking repeats the pattern whose recommendations were dropped in play; I10 owns scoring-room availability and asset reuse inside an explicit plan.
+
+### I10 Scoring plan
+- **Status:** proposed
+- **Depends on:** I2, I4
+- **Spec:** [I10-scoring-plan.md](specs/I10-scoring-plan.md)
+- **Goal:** A multi-turn plan that prepares and protects a remote, installs an agenda there and advances it to scoring, choosing the Corp's clicks while active. Version 1 covers ICE, install and click-advance; card-declared advance operations and defensive/scoring upgrades follow after owner playtesting.
 
 ### I3.1 Deck game-plan profile
 - **Status:** proposed
-- **Depends on:** I3, F4
+- **Depends on:** I10, F4
 - **Spec:** [I3.1-deck-game-plan-profile.md](specs/I3.1-deck-game-plan-profile.md)
 - **Goal:** Record explainable starting-deck composition and mechanic evidence, including shell/asset-spam, glacier and hybrid contrasts, without changing decisions. Does not block I3/I5; later consumers need their own evidence and gate.
 
 ### I5 Asset, ambush and economy value
 - **Status:** proposed
-- **Depends on:** I3, L8.10, F4
+- **Depends on:** I10, L8.10, F4
 - **Spec:** [I5-asset-ambush-and-economy-value.md](specs/I5-asset-ambush-and-economy-value.md)
 - **Goal:** Compare root assets by expected board value instead of hook-chosen indices. Reuse L8.9's per-deck/route observations; assess shell deployment and holding coverage without a universal ICE requirement.
 
 ### I6 Upgrade selection by marginal effect
 - **Status:** proposed
-- **Depends on:** I3, I4, F4
+- **Depends on:** I10, I4, F4
 - **Spec:** [I6-upgrade-selection-by-marginal-effect.md](specs/I6-upgrade-selection-by-marginal-effect.md)
 - **Goal:** Place upgrades where they change the outcome on that server.
 
@@ -307,7 +319,7 @@ I9 comes last.
 - **Status:** proposed
 - **Depends on:** I7.1, I7.2, F2, F4
 - **Spec:** [I8-multi-click-short-horizon-planning.md](specs/I8-multi-click-short-horizon-planning.md)
-- **Goal:** Evaluate installs as parts of short two- or three-action plans.
+- **Goal:** Evaluate installs as parts of short two- or three-action plans. The scoring line moves to I10; I8 keeps general planning and can reuse I10's plan record.
 
 ### I9 Calibration, simulation and simplification
 - **Status:** proposed
