@@ -340,6 +340,140 @@ test('Dyson Mem Chip gives +1 MU and +1 link; the AI installs it', async () => {
   assert.strictEqual(c.pref.cardToInstall.title, 'Dyson Mem Chip');
 });
 
+// ---------------- Encryption Protocol ----------------
+test('Encryption Protocol raises installed trash costs while rezzed; the Corp AI installs and rezzes it', async () => {
+  setUpBoard({remotes: [[ID.Encryption], [idOf('PAD Campaign')]], hq: [], corpTurn: true});
+  const pad = installedCorp('PAD Campaign');
+  const ep = installedCorp('Encryption Protocol');
+  const base = run(`TrashCost(${pad})`);
+  run(`${ep}.rezzed = true; InvalidateActiveTriggerCandidateCache();`);
+  assert.strictEqual(run(`TrashCost(${pad})`), base + 1);
+  assert.strictEqual(run(`TrashCost(${ep})`), 3, 'itself too');
+  assert.strictEqual(run(`TrashCost(cardSet[${ID.Encryption}])`), 2, 'uninstalled cards unaffected');
+  setUpBoard({hq: [ID.Encryption], corpTurn: true, corpAI: true, hqIce: [ID.IceWall], rndIce: [ID.IceWall], archivesIce: [ID.IceWall]});
+  const c = corpCommand();
+  assert.strictEqual(c.cmd, 'install');
+  assert.strictEqual(c.pref.cardToInstall.title, 'Encryption Protocol');
+  setUpBoard({remotes: [[ID.Encryption]], hq: [ID.Encryption], corpAI: true, corpTurn: true});
+  assert.strictEqual(run(`${hqCard('Encryption Protocol')}.AIWorthInstalling([])`), -1, 'one copy at a time');
+  assert.strictEqual(run(`${installedCorp('Encryption Protocol')}.AIRezWhenCan()`), true);
+});
+
+// ---------------- Sherlock 1.0 ----------------
+test('Sherlock 1.0: a successful trace adds an installed program to the top of the stack', async () => {
+  setUpBoard({hqIce: [ID.Sherlock], installed: [ID.Corroder], stack: [ID.SureGamble], corpAI: true});
+  const sh = 'corp.HQ.ice[0]';
+  run(`attackedServer = corp.HQ; approachIce = 0; Trigger(${sh}, ${sh}.subroutines[0])`);
+  await settle(); // Corp keeps strength 4, Runner (link 0) does not pay
+  assert.deepStrictEqual(titles(run('runner.rig.programs')), []);
+  assert.strictEqual(run('runner.stack[runner.stack.length - 1].title'), 'Corroder', 'top of the stack');
+  // unsuccessful: link matches the trace strength
+  setUpBoard({hqIce: [ID.Sherlock], installed: [ID.Corroder, ID.Dyson], credits: 5});
+  run('runner.rig.hardware[0].link = 4');
+  run(`attackedServer = corp.HQ; approachIce = 0; Trigger(${sh}, ${sh}.subroutines[1])`);
+  await settle();
+  assert.deepStrictEqual(titles(run('runner.rig.programs')), ['Corroder']);
+});
+
+test('Sherlock 1.0: the Runner may lose clicks to break; AI models click breaks and ICE effects', async () => {
+  setUpBoard({hqIce: [ID.Sherlock], runnerAI: true, credits: 0});
+  encounter('corp.HQ');
+  const sh = 'corp.HQ.ice[0]';
+  assert.strictEqual(run(`${sh}.abilities[0].Enumerate.call(${sh}).length`), 2);
+  run(`${sh}.abilities[0].Resolve.call(${sh}, ${sh}.abilities[0].Enumerate.call(${sh})[0])`);
+  assert.strictEqual(run('runner.clickTracker'), 3);
+  assert.strictEqual(run(`${sh}.subroutines[0].broken`), true);
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(run(`${sh}.AIBreakCost(${sh}, 2)`))), {credits: 0, clicks: 2, counters: 0});
+  run(`UnbreakAll(${sh}); currentPhase = phases.runnerActionMain; encountering = false; attackedServer = null; approachIce = -1;`);
+  const p = run('runner.AI._calculateBestCompleteRun(corp.HQ, 0, 0, 0, 0, null, corp.HQ.ice.length - 1)');
+  assert(p, "a complete path exists");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(run(`runner.AI.rc.IceAI(${sh}, 10).sr`))), [[["misc_moderate"]], [["misc_moderate"]]]);
+});
+
+// ---------------- Jinteki: Replicating Perfection ----------------
+test('Replicating Perfection: no remote runs until the Runner has run a central server this turn', async () => {
+  setUpBoard({corpId: ID.RP, remotes: [[ID.Hostile]]});
+  const remote = 'corp.remoteServers[0]';
+  assert.strictEqual(run(`RunForbidden(${remote})`), true);
+  assert.strictEqual(run('RunForbidden(corp.HQ)'), false);
+  const runTargets = () => Array.from(run('phases.runnerActionMain.Enumerate.run()'), c => c.server.serverName);
+  assert(!runTargets().includes('Remote 0'));
+  assert.strictEqual(run(`MakeRun(${remote})`), false, 'MakeRun refuses');
+  run('MakeRun(corp.archives)');
+  assert.strictEqual(run('attackedServer === corp.archives'), true);
+  run('currentPhase = phases.runnerActionMain; attackedServer = null;');
+  assert.strictEqual(run(`RunForbidden(${remote})`), false, 'ignored for the rest of the turn');
+  run('turnEventCounts = {}');
+  assert.strictEqual(run(`RunForbidden(${remote})`), true, 'restored next turn');
+});
+
+test('Replicating Perfection: the Runner AI does not plan a forbidden remote run', async () => {
+  setUpBoard({corpId: ID.RP, remotes: [[ID.Hostile]], runnerAI: true, credits: 5,
+    hqIce: [ID.Enigma], rndIce: [ID.Enigma], archivesIce: [ID.Enigma]});
+  const c = await runnerCommand();
+  assert(!(c.cmd === 'run' && c.pref.serverToRun === run('corp.remoteServers[0]')), 'no remote run');
+  const planned = () => run('runner.AI.cachedPotentials.some(function (e) { return e.server === corp.remoteServers[0]; })');
+  assert.strictEqual(planned(), false, 'remote left out of the run plan');
+  run('RecordTurnEvent("runnerCentralRunInitiated")');
+  await runnerCommand();
+  assert.strictEqual(planned(), true, 'remote considered once allowed');
+});
+
+// ---------------- Fetal AI ----------------
+test('Fetal AI: revealed in R&D, 2 net damage on access outside Archives, 2 credits to steal', async () => {
+  setUpBoard({rnd: [ID.HedgeFund, ID.FetalAI], grip: [ID.SureGamble, ID.SureGamble, ID.SureGamble]});
+  const f = 'corp.RnD.cards[1]';
+  run(`accessingCard = ${f}; ${f}.automaticOnAccess.Resolve.call(${f}, ${f});`);
+  assert.strictEqual(run(`${f}.faceUp`), true, 'revealed');
+  assert.strictEqual(run(`${f}.responseOnAccess.Enumerate.call(${f}).length`), 1);
+  run(`${f}.responseOnAccess.Resolve.call(${f})`);
+  await settle();
+  assert.strictEqual(run('runner.grip.length'), 1, '2 net damage');
+  assert.strictEqual(run(`StealCost(${f}).credits`), 2);
+  run(`${f}.automaticOnAccessComplete.Resolve.call(${f}, ${f})`);
+  assert.strictEqual(run(`${f}.faceUp`), false, 'facedown again in R&D');
+  setUpBoard({archives: [ID.FetalAI]});
+  run('accessingCard = corp.archives.cards[0]');
+  assert.strictEqual(run('corp.archives.cards[0].responseOnAccess.Enumerate.call(corp.archives.cards[0]).length'), 0, 'not in Archives');
+});
+
+// ---------------- Sensei ----------------
+test('Sensei: later ice gains End the run while encountered, for the rest of the run', async () => {
+  setUpBoard({hqIce: [ID.IceWall, ID.Sensei]});
+  const wall = 'corp.HQ.ice[0]', sensei = 'corp.HQ.ice[1]';
+  run(`attackedServer = corp.HQ; approachIce = 1; Trigger(${sensei}, ${sensei}.subroutines[0])`);
+  encounter('corp.HQ', 0);
+  assert.strictEqual(run(`${wall}.subroutines.length`), 2);
+  assert.strictEqual(run(`${wall}.subroutines[1].text`), 'End the run.');
+  run(`AutomaticTriggers("automaticOnEncounter", [${sensei}])`);
+  assert.strictEqual(run(`${sensei}.subroutines.length`), 1, 'not Sensei itself');
+  assert.strictEqual(run(`${wall}.subroutines.length`), 1, 'previous encounter grant removed');
+  run(`encounteredIce = ${wall}; AutomaticTriggers("automaticOnEncounter", [${wall}]);`);
+  run(`${sensei}.responseOnEncounterEnds.Resolve.call(${sensei})`);
+  assert.strictEqual(run(`${wall}.subroutines.length`), 1, 'only while encountered');
+  run(`AutomaticTriggers("automaticOnRunEndCleanup", [[]])`);
+  assert.strictEqual(run(`${sensei}.senseiActive`), false);
+  run(`AutomaticTriggers("automaticOnEncounter", [${wall}])`);
+  assert.strictEqual(run(`${wall}.subroutines.length`), 1, 'effect ended with the run');
+});
+
+test('Sensei AI: serious only with ice inward; once fired the run calculator adds End the run to other ice', async () => {
+  setUpBoard({hqIce: [ID.IceWall, ID.Sensei], runnerAI: true});
+  const wall = 'corp.HQ.ice[0]', sensei = 'corp.HQ.ice[1]';
+  const srs = expr => JSON.parse(JSON.stringify(run(`runner.AI.rc.IceAI(${expr}, 10).sr`)));
+  assert.deepStrictEqual(srs(sensei), [[['misc_serious']]]);
+  setUpBoard({hqIce: [ID.Sensei, ID.IceWall], runnerAI: true});
+  assert.deepStrictEqual(srs('corp.HQ.ice[0]'), [[['misc_minor']]], 'innermost Sensei is harmless');
+  setUpBoard({hqIce: [ID.IceWall, ID.Sensei], runnerAI: true});
+  const before = srs(wall).length;
+  run(`${sensei}.senseiActive = true`);
+  const after = srs(wall);
+  assert.strictEqual(after.length, before + 1);
+  assert.deepStrictEqual(after[after.length - 1], [['endTheRun']]);
+  run(`encounteredIce = ${wall}; attackedServer = corp.HQ; approachIce = 0; AutomaticTriggers("automaticOnEncounter", [${wall}])`);
+  assert.strictEqual(srs(wall).length, before + 1, 'live granted row counted once');
+});
+
 (async () => {
 for (const {name, fn} of tests) {
   try { await fn(); cases++; if (verbose) console.log('ok   ' + name); }
