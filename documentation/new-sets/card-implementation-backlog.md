@@ -20,7 +20,7 @@ order of the availability table. A user-requested different set takes precedence
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
 | `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
 | `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in its Set record below. |
-| `genesis` | In progress | Genesis Cycle (`wla`, `ta`, `ce`, `asis`, `hs`, `fp`) as one set, IDs 2001-2120, scaffolded in `sets/genesis.js`. 103 cards to implement; 17 reprints already defined elsewhere are `DUPLICATE` comments and need `ACCEPTED_MISSING_DEFINITIONS` entries in `scripts/card-status.js` before the set can become playable. Five of six pack batches are merged (87 cards); Future Proof remains. See the [active tracker](current-set-implementation.md). |
+| `genesis` | Implemented | All six Genesis Cycle packs (103 new definitions, 17 accepted duplicate reprints), IDs 2001–2120. §8 integration checks completed 2026-10-30. Playability remains in-progress / hidden / untested by Paul's explicit instruction. Six optimisation batches Pending; see the [active tracker](current-set-implementation.md) and [Future Proof record](genesis/fp.md). |
 
 The Genesis Cycle is active in the [tracker](current-set-implementation.md).
 Uprising retains its [maintained set record](records/uprising.md) and
@@ -161,7 +161,7 @@ finished before their AI behaviour is assessed.
 Every completed definition should have a finite numeric `elo` copied from Trash
 or Busto. This audit checks numeric presence only; it does not verify each
 existing number against its dated source snapshot. Counts were recomputed on
-2026-10-23 by loading every registered set file; Uprising's 59 scaffolded
+2026-10-30 by loading every registered set file; Uprising's 59 scaffolded
 cards were filled from the 2026-10-23 ranking (see the `sets/uprising.js` header).
 
 | Set                         | Definitions | Numeric ELO | Missing numeric ELO |
@@ -178,7 +178,8 @@ cards were filled from the 2026-10-23 ranking (see the `sets/uprising.js` header
 | Rebellion Without Rehearsal |           2 |           2 |                   0 |
 | Core Set                    |          62 |          62 |                   0 |
 | Creation and Control        |          55 |          55 |                   0 |
-| **Total**                   |     **575** |     **575** |               **0** |
+| Genesis Cycle               |         103 |         103 |                   0 |
+| **Total**                   |     **678** |     **678** |               **0** |
 
 Backfill each value from the card's exact published ELO on the
 [Trash or Busto rankings](https://trash-or-busto.herokuapp.com/ranking). Do not

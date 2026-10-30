@@ -2196,7 +2196,7 @@ function ChangePhase(src, skipInit = false) {
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
   {
     if (oldTurn != playerTurn) {
-      previousTurnEventCounts = turnEventCounts;
+      previousTurnEventCounts = typeof turnEventCounts == "undefined" ? {} : turnEventCounts;
       previousTurnEventPlayer = oldTurn;
     }
     turnEventCounts = {};

@@ -26,8 +26,12 @@ const SCAFFOLD_MARKER = new RegExp([
 ].join('|'));
 const isScaffoldMarker = line => SCAFFOLD_MARKER.test(line);
 
-// No playable set currently has accepted missing definitions.
-const ACCEPTED_MISSING_DEFINITIONS = {};
+// Genesis reprints use the maintained definitions in System Update 2021 and
+// Uprising. Keep their original IDs absent to avoid duplicate deck-pool cards.
+const ACCEPTED_MISSING_DEFINITIONS = {
+  genesis: new Set(['2003', '2018', '2022', '2033', '2043', '2047', '2051',
+    '2056', '2063', '2080', '2082', '2084', '2095', '2101', '2110', '2112', '2115']),
+};
 
 function registry() {
   const context = {console};

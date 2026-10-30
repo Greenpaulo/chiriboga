@@ -72,7 +72,13 @@ alongside real command/choice/planner consumers, not ELO or hook returns alone.
 Other pack tests passed: WLA, TA, CE, ASIS and HS. Shared focused checks passed:
 `tests/ai-hook-docs.test.js`, `tests/eternal-format.test.js`,
 `tests/deckbuild-format-pool.test.js`, `tests/decklauncher-identity-change.test.js`
-and `tests/card-status.test.js`. Full-suite result is recorded in the tracker.
+and `tests/card-status.test.js`. The first full run found four integration
+failures: an invalid Flare overlay height and missing optional state/helpers in
+isolated run-calculator/phase harnesses. The overlay and initialization guards
+were corrected; the four affected regressions and all 41 FP cases then passed.
+Final `node tests/run-all-tests.js` on Node 20.19.0 passed all 146 files
+(exit 0), including decision fixtures/snapshots and integration tests. The
+tracker records the log and exit-status paths.
 
 Set-wide §8 checks: 120 metadata cards resolve to 103 unique definitions and
 17 existing reprints; titles, image filenames, local JPG images and finite ELO

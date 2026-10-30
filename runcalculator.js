@@ -13,6 +13,8 @@ class RunCalculator {
       iceAIs: [],
       cardStrengths: new Map(),
     };
+    this._runEndDamageCards = [];
+    this._tagPreventionCost = Infinity;
     this._calculationActive = false;
     this._ignoredIce = new Set();
     this._runnerPlanning = false;
@@ -1184,7 +1186,7 @@ class RunCalculator {
     this.basePoolCredits = data.poolCredits;
 	this.baseOtherCredits = data.otherCredits;
     this._runEndDamageServer = data.server;
-    this._runEndDamageCards = data.incomplete || ServerSuccessfulRunPrevented(data.server) ? [] :
+    this._runEndDamageCards = data.incomplete || (typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(data.server)) ? [] :
       ActiveCards(corp).filter(function (card) {
         return typeof card.AIRunEndMeatDamage == "function";
       });

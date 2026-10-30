@@ -13,7 +13,7 @@ Point's are in [records/downfall.md](records/downfall.md) and
 | Field | Value |
 | ----- | ----- |
 | Status | Active |
-| Implementation status | In progress |
+| Implementation status | Implemented |
 | Set name | Genesis Cycle |
 | Registry key | `genesis` |
 | Pack code | `wla` |
@@ -58,14 +58,17 @@ In progress batch, and the tracker files above are editable again.
 
 ## Status summary
 
-**5 complete, 1 outstanding** (`0 Pending`, `1 In progress`, `0 Blocked`). 87 of 103 cards are merged into `sets/genesis-cycle` (HEAD 0f8f0da); the fast suite passed there (143 files, 2026-10-30).
+**6 complete, 0 outstanding** (`0 Pending`, `0 In progress`, `0 Blocked`).
+All 103 intended definitions and 17 mapped duplicate reprints are integrated
+into `sets/genesis-cycle`. Implementation and §8 integration checks are
+complete; independent review/optimisation remain separate. Playability remains
+in-progress, hidden and untested by Paul's explicit instruction.
 
 ## Batch queue
 
 One batch per data pack. Card IDs are the pack range; the duplicate reprints
-listed below sit inside these ranges and are not implemented. Every listed card
-is a `scripts/scaffold_set.py` stub with TODO markers and dated ELO; none is
-credited without tests.
+listed below sit inside these ranges and reuse existing definitions. All
+non-duplicate cards now have gameplay, baseline AI and focused test evidence.
 
 | Batch | Card IDs | Status | Owner / started | Notes/blocker |
 | ----: | -------- | ------ | --------------- | ------------- |
@@ -74,14 +77,14 @@ credited without tests.
 | 3 | 2041–2060 | Complete | parallel agent, branch `genesis/ce`, merged 2026-10-30 | Cyber Exodus (16): 2041 Nerve Agent, 2042 Joshua B., 2044 Muresh Bodysuit, 2045 Snitch, 2046 Chaos Theory: Wünderkind, 2048 Dinosaurus, 2049 Personal Workshop, 2050 Public Sympathy, 2052 Viper, 2053 Edge of World, 2054 Sunset, 2055 Marked Accounts, 2057 Woodcutter, 2058 Commercialization, 2059 Private Contracts, 2060 Chimera. Record: [genesis/ce.md](genesis/ce.md). |
 | 4 | 2061–2080 | Complete | parallel agent, branch `genesis/asis`, merged 2026-10-30 | A Study in Static (18): 2061 Disrupter, 2062 Force of Nature, 2064 Doppelgänger, 2065 Crescentus, 2066 Deus X, 2067 All-nighter, 2068 Inside Man, 2069 Underworld Contact, 2070 Green Level Clearance, 2071 Hourglass, 2072 Dedicated Server, 2073 Bullfrog, 2074 Uroboros, 2075 Net Police, 2076 Weyland Consortium: Because We Built It, 2077 Government Contracts, 2078 Tyrant, 2079 Oversight AI. Record: [genesis/asis.md](genesis/asis.md). |
 | 5 | 2081–2100 | Complete | parallel agent, branch `genesis/hs`, merged 2026-10-30 | Humanity's Shadow (17): 2081 Surge, 2083 Andromeda: Dispossessed Ristie, 2085 HQ Interface, 2086 Pheromones, 2087 Quality Time, 2088 Replicator, 2089 Creeper, 2090 Kraken, 2091 Kati Jones, 2092 Eve Campaign, 2093 Rework, 2094 Whirlpool, 2096 Data Hound, 2097 Bernice Mai, 2098 Salvage, 2099 Simone Diego, 2100 Foxfire. Record: [genesis/hs.md](genesis/hs.md). |
-| 6 | 2101–2120 | In progress | stopped agent; WIP on branch `genesis/fp` (6ef6b2c), 2026-10-30 | **Resume here.** Branch is based on ce0fca6: merge `sets/genesis-cycle` into it first and reuse the merged shared helpers (see the other packs' records). WIP: Runner cards 2102–2109 written but unverified, with 2 failing cases in `tests/genesis-fp.test.js` (R&D Interface extra access; New Angeles City Hall trash on steal); Corp cards 2111–2120 are still scaffolds. Merge into `sets/genesis-cycle` when complete. Future Proof (16): 2102 Darwin, 2103 Data Leak Reversal, 2104 Faerie, 2105 Mr. Li, 2106 Indexing, 2107 R&D Interface, 2108 Deep Thought, 2109 New Angeles City Hall, 2111 Ruhr Valley, 2113 Midori, 2114 NBN: The World is Yours*, 2116 Midseason Replacements, 2117 Flare, 2118 Dedicated Response Team, 2119 Burke Bugs, 2120 Corporate War. Record: [genesis/fp.md](genesis/fp.md). |
+| 6 | 2101–2120 | Complete | Codex, `genesis/fp`, 2026-10-30 | Future Proof (16) completed from 6ef6b2c, merged through 8965ce1. Gameplay, baseline AI and 41 focused cases; shared event, run-cost, trace and jack-out helpers reused. Record: [genesis/fp.md](genesis/fp.md). |
 
 ### Duplicate reprints (not implemented)
 
-These 15 cards are already defined in another set and stay as
-`// cardSet[<id>] = <title> - DUPLICATE` comments in `sets/genesis.js`. Before
-Genesis can become playable they need `ACCEPTED_MISSING_DEFINITIONS` entries for
-`genesis` in `scripts/card-status.js` (not added yet).
+These 17 cards are already defined in another set and stay as
+`// cardSet[<id>] = <title> - DUPLICATE` comments in `sets/genesis.js`. Their IDs are recorded in
+`ACCEPTED_MISSING_DEFINITIONS.genesis` in `scripts/card-status.js`; this
+accepts only the 17 intentional duplicate omissions.
 
 | ID | Title | Defined in |
 | -: | ----- | ---------- |
@@ -112,6 +115,7 @@ Genesis can become playable they need `ACCEPTED_MISSING_DEFINITIONS` entries for
 | 2 | 2021–2040 | 2026-10-30 | parallel agent, `genesis/ta` | `tests/genesis-ta.test.js` (30 cases) | Merged 0a4b996. Kept ce's `Expose` callback and ta's `responseOnTraceSuccessful` (passes the trace margin). |
 | 5 | 2081–2100 | 2026-10-30 | parallel agent, `genesis/hs` | `tests/genesis-hs.test.js` (30 cases) | Merged 395bc63; fast suite passed (142 files). |
 | 4 | 2061–2080 | 2026-10-30 | parallel agent, `genesis/asis` | `tests/genesis-asis.test.js` (21 cases) | Merged 0f8f0da; fast suite passed (143 files). |
+| 6 | 2101–2120 | 2026-10-30 | Codex, `genesis/fp` | `tests/genesis-fp.test.js` (41 cases) | Completed Runner verification and eight Corp cards; mandatory encounter-end timing repaired for Faerie. Merged 8965ce1 into `sets/genesis-cycle`. |
 
 ## Batch-review log
 
@@ -122,7 +126,7 @@ No independent reviews recorded.
 
 ## Optimisation queue
 
-**5 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
+**6 Pending**, 0 In progress, 0 Blocked, 0 Awaiting review. Rows are
 initialised when each implementation batch completes. Each pack record lists
 its full deferred-optimisation notes.
 
@@ -133,6 +137,7 @@ its full deferred-optimisation notes.
 | 3 | 2041–2060 | Pending | — | See the deferred list in [genesis/ce.md](genesis/ce.md). |
 | 4 | 2061–2080 | Pending | — | The AI never rezzes Tyrant without advancement counters; Deus X trashing is not a run-planner cost; Uroboros and Bullfrog traces and psi games are not priced in the run calculator. See [genesis/asis.md](genesis/asis.md). |
 | 5 | 2081–2100 | Pending | — | "May jack out" cards in other sets bypass Whirlpool's lock; losing link after installing Creeper doesn't force an MU trash; the Runner AI uses default trace bidding. See [genesis/hs.md](genesis/hs.md). |
+| 6 | 2101–2120 | Pending | — | Darwin growth/purge planning; DLR tag-float timing; Indexing follow-up-run budget; Midori replacement ranking; trace-bid alternatives; Midseason punishment combos; Corporate War delay risk; DRT concealed-rez/access sequencing. See [genesis/fp.md](genesis/fp.md). |
 
 ## Optimisation log
 
@@ -160,6 +165,30 @@ Run focused batch tests, regenerate card status, and run
 `node tests/run-all-tests.js` on `.nvmrc` Node after the pack merges, including
 Corp decision fixtures and decision snapshots. Known-red pending reproductions
 are excluded.
+
+## Set-completion integration (2026-10-30)
+
+All six pack tests passed, together with the shared verification commands
+above, AI-hook documentation and decklauncher identity-change checks. §8 audit
+confirmed 120 metadata cards: 103 unique definitions with matching titles,
+local JPG images and numeric ELO, plus 17 mapped reprints. No scaffold or empty
+effect remains. Woodcutter, Tyrant and Salvage have intentionally empty printed
+subroutine arrays, populated from advancement counters. Format-pool regression
+generates legal Runner/Corp decks for every eligible identity in every legal
+format, including Genesis in Eternal. Syntax checks cover all edited JS;
+`git diff --check` passes. No PHP changed; no browser playtest claimed.
+
+Paul explicitly withheld playability changes. `documentation/card-sets.md`
+and `config.js` retain their in-progress / hidden / untested state; enabling
+Genesis still requires his approval. All implementation batches are complete,
+independent review is Not requested, and all six optimisation rows are Pending.
+
+Final validation: `node tests/run-all-tests.js` on Node 20.19.0 passed all
+**146 full test files** (exit 0), including Corp decision fixtures, snapshots
+and integration tests. The initial run found four failures; after focused
+repairs and passing affected regressions, the corrected full run passed. Logs:
+`/tmp/genesis-final-suite-retry.log`, exit status
+`/tmp/genesis-final-suite-retry.exit`. No next set is queued; stop after this batch.
 
 ## Changing the active set
 

@@ -5339,7 +5339,7 @@ cardSet[2117] = {
       }, this);
       if (corp.AI) corp.AI._preferTraceToBeat(6);
     },
-    visual: {y: 92, h: 62},
+    visual: {y: 92, h: 64},
   }],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
     //Like Winchester, model the trace as successful; damage is unpreventable.
