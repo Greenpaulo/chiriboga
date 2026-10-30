@@ -3325,7 +3325,7 @@ cardSet[2073] = {
   },
   //Move to the outermost position of another server; a run through this ice
   //continues from its new position (CR: the attacked server changes).
-  _moveTo: function (server) {
+  MoveToServer: function (server) {
     var from = GetServer(this);
     if (!from || !server || server == from) return;
     var wasAttacked = attackedServer == from && from.ice[approachIce] == this;
@@ -3355,7 +3355,7 @@ cardSet[2073] = {
             corp,
             choices,
             function (params) {
-              if (params && params.server && CheckInstalled(this)) this._moveTo(params.server);
+              if (params && params.server && CheckInstalled(this)) this.MoveToServer(params.server);
             },
             "Bullfrog",
             "Choose another server to move Bullfrog to",
