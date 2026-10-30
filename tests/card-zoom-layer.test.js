@@ -258,6 +258,21 @@ const fitContext = {pixi_browserZoom: context.pixi_browserZoom,
   serverSeparationX: 40, corp: {remoteServers: []}, totalServersWidth: 1100,
   arbitraryHistorySpacer: 55};
 vm.createContext(fitContext);
+// Opening/reloading at a saved zoom must not make that zoom the preview baseline.
+for (const density of [1, 2]) {
+  for (const openingZoom of [0.8, 1, 1.25, 1.5, 2]) {
+    Object.assign(context.window, {outerWidth: 1440, innerWidth: 1440 / openingZoom,
+      devicePixelRatio: density * openingZoom});
+    context.cardRenderer.browserPixelRatio = context.pixi_displayPixelRatio();
+    assert(Math.abs(context.cardRenderer.browserPixelRatio - density) < 1e-9);
+    for (const browserZoom of [1, 1.25, 1.5, 2]) {
+      const bounds = preview({width: 1440 / browserZoom, height: 1000 / browserZoom,
+        browserZoom, zoom: 2});
+      assert(Math.abs(bounds.width * browserZoom - 450) < 0.01,
+        'preview size must survive reload at increased zoom and returning to 100%');
+    }
+  }
+}
 for (const density of [1, 2]) {
   context.cardRenderer.browserPixelRatio = density;
   let startingScale;
@@ -270,8 +285,12 @@ for (const density of [1, 2]) {
     assert(Math.abs(fitContext.interfaceScale - startingScale) < 1e-9,
       'browser zoom must not trigger compensating UI shrinkage');
     const ordinary = preview({width, height, zoom: fitContext.fieldZoom, browserZoom, enlarged: false});
-    assert(Math.abs(ordinary.width * browserZoom - 150 * startingScale * browserZoom) < 1e-9,
-      'ordinary board cards must grow with browser zoom');
+    assert(height * fitContext.fieldZoom >= fitContext.runnerLargestHeight + fitContext.largestServerHeight - 1e-9,
+      'the logical board must fit both rigs without letting Runner cards overlap Corp cards');
+    assert(width * fitContext.fieldZoom >= fitContext.totalFieldWidth + fitContext.arbitraryHistorySpacer - 1e-9,
+      'the logical board must fit the servers horizontally');
+    assert(ordinary.width * browserZoom <= 150 * startingScale + 1e-9,
+      'crowded boards must retain automatic fitting when browser zoom changes');
     for (const side of [runner, corp]) {
       const enlarged = preview({width, height, zoom: fitContext.fieldZoom, browserZoom, side, hand: true});
       assert(Math.abs(enlarged.width * browserZoom - 450) < 0.01,

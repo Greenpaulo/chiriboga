@@ -1548,7 +1548,7 @@ var CardRenderer = {
   //Create one of these to initialise a renderer
   Renderer: class {
     constructor(resizeCallback, accessibilityMode="default") {
-      this.browserPixelRatio = window.devicePixelRatio || 1; //display density when the game opens
+      this.browserPixelRatio = pixi_displayPixelRatio(); //display density without the opening browser zoom
       var w = window.innerWidth;
       var h = window.innerHeight;
       this.app = new PIXI.Application(w, h, { transparent: true });
@@ -2379,8 +2379,17 @@ var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = t
 var pixi_holdCard = null; //for touch and hold
 var pixi_zoomedCards = new Set();
 
+// Estimate display density separately from desktop browser zoom at startup.
+// outerWidth stays in screen coordinates while innerWidth uses zoomed CSS pixels.
+// Snap the estimate to a 5% zoom step to ignore narrow window borders.
+function pixi_displayPixelRatio() {
+  var openingZoom = window.outerWidth > 0 && window.innerWidth > 0
+    ? Math.max(0.05, Math.round(window.outerWidth / window.innerWidth * 20) / 20)
+    : 1;
+  return (window.devicePixelRatio || 1) / openingZoom;
+}
+
 // Desktop browser zoom changes devicePixelRatio as well as the CSS viewport.
-// Use a relative density so Retina displays keep their normal starting scale.
 function pixi_browserZoom() {
   return (window.devicePixelRatio || 1) / cardRenderer.browserPixelRatio;
 }

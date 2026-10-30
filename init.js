@@ -1064,13 +1064,11 @@ function Render() {
     totalServersWidth;
   if (totalFieldWidth < 1000) totalFieldWidth = 1000; //this is approximately 1 remote with ice
   var fieldWidthRatio = (totalFieldWidth + arbitraryHistorySpacer) / w;
-  // Fit against the opening browser density so a browser zoom does not get
-  // cancelled by shrinking the board and every interface panel in response.
-  var largestRatio = Math.max(fieldHeightRatio, fieldWidthRatio) / pixi_browserZoom();
-  if (largestRatio > 1.0) {
-    fieldZoom = largestRatio;
-    interfaceScale = 1.0 / fieldZoom;
-  }
+  // The board must always fit the actual viewport to keep both rigs apart.
+  var largestRatio = Math.max(fieldHeightRatio, fieldWidthRatio);
+  if (largestRatio > 1.0) fieldZoom = largestRatio;
+  // Let browser zoom enlarge controls without changing the board fit.
+  interfaceScale = 1.0 / Math.max(1.0, largestRatio / pixi_browserZoom());
   var oldW = w;
   w *= fieldZoom;
   var oldH = h;
