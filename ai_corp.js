@@ -2396,7 +2396,21 @@ class CorpAI {
     return best;
   }
 
+  //Cached per security evaluation: subtype/ability checks scan every active trigger.
   _matchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
+    if (!iceCard) return [];
+    var cache = evaluationContext && evaluationContext.matchingBreakerLists;
+    if (!cache) return this._findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext);
+    if (!cache.has(iceCard)) cache.set(iceCard, new Map());
+    var byServer = cache.get(iceCard);
+    if (!byServer.has(server)) byServer.set(server, new Map());
+    var byIndex = byServer.get(server);
+    if (!byIndex.has(iceIndex))
+      byIndex.set(iceIndex, this._findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext));
+    return byIndex.get(iceIndex);
+  }
+
+  _findMatchingBreakersForIce(iceCard, server, iceIndex, evaluationContext) {
     if (!iceCard) return [];
     var installed = evaluationContext
       ? evaluationContext.runnerActiveCards
@@ -3500,6 +3514,7 @@ class CorpAI {
       requiredSubroutineIndices: new Map(),
       mandatorySubroutineIndices: new Map(),
       matchingBreakers: new Map(),
+      matchingBreakerLists: new Map(),
       breakerPrices: new Map(),
       oneShotBypassAvailable: new Map(),
       icePlanInputs: new Map(),
