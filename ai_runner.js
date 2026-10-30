@@ -2092,6 +2092,10 @@ console.log(this.preferred);
       for (var i = 0; i < corp.remoteServers.length; i++) {
         this.serverList.push({ server: corp.remoteServers[i] });
       }
+      //servers a card effect forbids running on (Replicating Perfection)
+      this.serverList = this.serverList.filter(function (entry) {
+        return !RunForbidden(entry.server);
+      });
       for (var i = 0; i < this.serverList.length; i++) {		  
         var server = this.serverList[i].server;
 

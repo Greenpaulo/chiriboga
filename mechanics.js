@@ -32,6 +32,8 @@ function MakeRun(server, ignoreAdditionalCosts = false) {
   PlaySound('runInitiated');
   //Declare attacked server (Nisei 2021 1.1)
   attackedServer = server;
+  //"whenever the Runner runs on a central server" (Replicating Perfection)
+  if (typeof server.cards !== "undefined") RecordTurnEvent("runnerCentralRunInitiated");
   RecordPublicPostureEvent("runInitiated", null, server);
   //Corp AI posture epochs treat a run on the server as a boundary (L8.4)
   if (corp.AI && typeof corp.AI._notePostureChallenge === "function")
@@ -2455,12 +2457,16 @@ function TraceStrengthDecisions(baseStrength, callback, context) {
               var successful = traceStrength > linkStrength;
               if (successful) Log("Trace successful");
               else Log("Trace unsuccessful");
-              //responseOnTraceSuccessful: triggers on a successful trace (e.g. Spinal Modem).
-              //With no triggers the callback runs synchronously, as before.
-              if (successful) TriggeredResponsePhase(playerTurn, "responseOnTraceSuccessful", [], function () {
-                callback.call(context, true);
-              }, "Trace Successful");
-              else callback.call(context, false);
+              if (!successful) {
+                callback.call(context, successful);
+                return;
+              }
+              //"whenever there is a successful trace" (ChiLo City Grid); the
+              //margin is the amount the trace strength exceeded the link strength
+              TriggeredResponsePhase(playerTurn, "responseOnTraceSuccessful",
+                [traceStrength - linkStrength], function () {
+                  callback.call(context, successful);
+                }, "Trace Successful");
             },
             this
           );
