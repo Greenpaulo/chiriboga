@@ -61,9 +61,10 @@ installed) and are not gated, like other card-batch AI hooks.
 (3), `i10-plan-scores-this-turn-unprotected` (4), `i10-plan-v2-scoring-upgrade`,
 `i10-plan-v2-defensive-upgrade`, `economy-asset-when-rich`,
 `phat-gioan-baotixita-installs`. Scenario 7 (flag off unchanged): every
-existing fixture and decision snapshot passes unchanged. Scenario 6
-(emergency pre-emption) follows from call order in `Phase_Main()` and has no
-dedicated test.
+existing fixture and decision snapshot passes unchanged. Scenario 6:
+`i10-plan-yields-to-critical-defence` (R&D unprotected with the Runner at 5
+points; the critical breach defence protects R&D before the plan acts; with
+that defence stubbed out the plan protects a new remote and the fixture fails).
 
 **Smoke check (not adoption evidence):** `node scripts/ai-batch.js --games 30`,
 210 games each, 0 failed: defaults Corp win 31.9%, scored 3.60; `scoringPlan`
@@ -254,7 +255,7 @@ Adoption: Paul decides after playtesting; record the tested flags and decision.
   profile (I3.1) is needed.
 
 ## Acceptance criteria
-- [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
+- [x] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [x] The behaviour change ships under `scoringPlan`, default off.
 - [x] Any new card hook is documented in `documentation/ai.md`.
 - [x] (Owner playtesting) The handoff names the tested flags, the behaviour to assess and contrasting cases; owner adoption remains explicit or pending.
