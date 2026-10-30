@@ -2832,16 +2832,27 @@ class CorpAI {
 
   //Restore public payment fields even if a faulty hook throws after changing them.
   //The standard calculator probe is private to the Corp and its method is restored.
+  //Only changed, added or removed own properties are written back: redefining every
+  //property of every active card per probe dominated Corp decision time.
   _withBreakerPricingState(breaker, iceCard, server, evaluate) {
     var encounter = AIIceEncounterSaveState();
     var objects = Array.from(new Set([runner, corp, breaker, iceCard].concat(ActiveCards(null))));
-    var saved = objects.map(object => Object.getOwnPropertyDescriptors(object));
+    var saved = objects.map(object => {
+      var keys = Object.keys(object);
+      return {keys: keys, values: keys.map(key => object[key])};
+    });
     return this._withHypothetical(() => {}, () => AIWithRunContext(server, evaluate), () => {
       AIIceEncounterRestoreState(encounter);
       objects.forEach((object, index) => {
-        for (var key of Object.keys(object))
-          if (!Object.prototype.hasOwnProperty.call(saved[index], key)) delete object[key];
-        Object.defineProperties(object, saved[index]);
+        var keys = saved[index].keys, values = saved[index].values;
+        var current = Object.keys(object);
+        if (current.length != keys.length || current.some((key, i) => key !== keys[i])) {
+          var known = new Set(keys);
+          for (var key of current) if (!known.has(key)) delete object[key];
+        }
+        for (var i = 0; i < keys.length; i++)
+          if (object[keys[i]] !== values[i] || !Object.prototype.hasOwnProperty.call(object, keys[i]))
+            object[keys[i]] = values[i];
       });
     });
   }
