@@ -1581,6 +1581,7 @@ phases.runDecideContinue = CreatePhaseFromTemplate(
 );
 phases.runDecideContinue.Enumerate.jack = function () {
   if (activePlayer == corp) return [];
+  if (!CheckJackOut()) return []; //e.g. Whirlpool
   else return [{}];
 };
 phases.runDecideContinue.Resolve.jack = function () {

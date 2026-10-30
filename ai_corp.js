@@ -5051,6 +5051,22 @@ class CorpAI {
   }
 
   //this is used either for trash-on-install corp, or trash Runner cards
+  //Credits the Corp should add to a trace of baseStrength to beat the Runner's
+  //link plus every credit they could spend, keeping `reserve` credits. Returns
+  //0 when that is unaffordable (the Runner could match any affordable bid).
+  //Read-only; uses public credit and link totals.
+  _traceSpendToBeat(baseStrength, reserve = 0) {
+    var needed = Link() + AvailableCredits(runner, "trace") - baseStrength + 1;
+    if (needed <= 0) return 0;
+    if (needed > AvailableCredits(corp, "trace") - reserve) return 0;
+    return needed;
+  }
+
+  //Set the preference for this trace's Corp strength decision (see _traceSpendToBeat).
+  _preferTraceToBeat(baseStrength, reserve = 0) {
+    this.preferred = { command: "trace", strengthToIncrease: this._traceSpendToBeat(baseStrength, reserve) };
+  }
+
   _bestTrashOption(optionList) {
     var rankedThreats = this._rankedThreats();
     for (var j = 0; j < rankedThreats.length; j++) {
