@@ -422,7 +422,7 @@ phaseTemplates.globalTriggers = {
       // Cleanup runs after the refill loop so active recurring effects still apply.
       ApplyToAllActiveCards(function (card) {
         if (typeof card.recurringCredits !== "undefined")
-          card.credits = card.recurringCredits;
+          card.credits = RecurringCredits(card);
       }, currentPhase.player);
       if (currentPhase.identifier == "Corp 1.2") CleanupCorpResolvingCards(true);
 	  //AI keeps track of how many turns (each player's turn counts as 1) a card (agenda/asset/upgrade) has been installed a server
@@ -1585,6 +1585,7 @@ phases.runDecideContinue = CreatePhaseFromTemplate(
 );
 phases.runDecideContinue.Enumerate.jack = function () {
   if (activePlayer == corp) return [];
+  if (!CheckJackOut()) return []; //e.g. Whirlpool
   else return [{}];
 };
 phases.runDecideContinue.Resolve.jack = function () {
@@ -2195,6 +2196,7 @@ function ChangePhase(src, skipInit = false) {
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
   {
     turnEventCounts = {};
+    turnEventCards = {};
     [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).forEach(function (server) {
       server.rootInstallsThisTurn = 0;
     });

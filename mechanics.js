@@ -814,7 +814,7 @@ function Install(
 				typeof (installingCard.memoryCost !== "undefined")
 			  ) {
 				if (
-				  installingCard.memoryCost + InstalledMemoryCost(destination) >
+				  MemoryCost(installingCard) + InstalledMemoryCost(destination) >
 				  MemoryUnits(destination)
 				)
 				  return [];
@@ -893,7 +893,7 @@ function Install(
 				  runner.AI.LoseInfoAboutHQCards(null, installingCard.cardType); //one less card in corp hand
 				if (host != null) installingCard.host = host;
 				if (typeof installingCard.recurringCredits !== "undefined")
-				  installingCard.credits = installingCard.recurringCredits;
+				  installingCard.credits = RecurringCredits(installingCard);
 				var outStr = GetTitle(installingCard, true);
 				if (CheckCardType(installingCard, ["agenda", "asset", "upgrade"]))
 				  outStr =
@@ -2107,6 +2107,7 @@ function Steal() {
 	
     MoveCard(intended.steal, runner.scoreArea);
     RecordPublicPostureEvent("agendaStolen", intended.steal, postureStealServer);
+    if (typeof RecordTurnEvent == "function") RecordTurnEvent("runnerAgendaStolen");
     intended.steal.faceUp = true;
     if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(intended.steal);
     Log(GetTitle(intended.steal, true) + " stolen");
@@ -2320,6 +2321,11 @@ function AddCounters(card, counter, num = 1) {
   if (typeof card[counter] === "undefined") card[counter] = 0;
   card[counter] += num;
   if (counter == "advancement" && num > 0) RecordPublicPostureEvent("advancementPlaced", card, null, num);
+  //Surge: remember installed Runner programs that received virus counters this turn
+  if (counter == "virus" && num > 0 && typeof RecordTurnEventCard == "function" && card.player == runner && CheckCardType(card, ["program"]) && CheckInstalled(card)) {
+    RecordTurnEvent("runnerProgramVirusCounters");
+    RecordTurnEventCard("runnerProgramVirusCounters", card);
+  }
   if (num == 1)
     Log("1 " + counter + " counter placed on " + GetTitle(card, true));
   else Log(num + " " + counter + " counters placed on " + GetTitle(card, true));

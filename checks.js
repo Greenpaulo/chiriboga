@@ -282,6 +282,17 @@ function CheckApproach() {
 }
 
 /**
+ * Checks whether the Runner may jack out: card effects can forbid it with
+ * modifyCannot("jackOut", null) (Whirlpool).
+ *
+ * @method CheckJackOut
+ * @returns {Boolean} true if jacking out is allowed
+ */
+function CheckJackOut() {
+  return !CardEffectsForbid("jackOut", null);
+}
+
+/**
  * Checks if ice is being encountered.
  *
  * @method CheckEncounter

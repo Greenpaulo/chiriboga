@@ -40,7 +40,7 @@ vm.runInContext('runner.AI = new RunnerAI(); runner.AI._log = function () {}; ru
 const renderer = () => ({FaceUp() {}, FaceDown() {}, ToggleZoom() {}, zoomed: false,
   sprite: {x: 0, y: 0, visible: true}, destinationPosition: {x: 0, y: 0}});
 const put = (card, zone) => {card.cardLocation = zone; card.renderer = renderer(); zone.push(card); c.InvalidateActiveTriggerCandidateCache(); return card;};
-// Real InstanceCard (decks.js) so InitInstance runs, as in a game.
+// Real InstanceCard (decks.js), as in a game.
 const card = id => c.InstanceCard(id);
 let decisions = [];
 c.DecisionPhase = (player, choices, resolve, title, instruction, context) => {
@@ -199,13 +199,13 @@ test('Peacock and ZU.13 Key Master: code gate breakers; ZU.13 is free with 2 lin
   runner.rig.programs = []; c.InvalidateActiveTriggerCandidateCache();
   const zu = put(card(2007), runner.rig.programs);
   assert.strictEqual(runCost(server), 5, '3 to pump, 1 per subroutine');
-  assert.strictEqual(zu.memoryCost, 1);
+  assert.strictEqual(c.MemoryCost(zu), 1);
   assert.strictEqual(c.InstalledMemoryCost(), 1);
   runner.identityCard.link = 2;
-  assert.strictEqual(zu.memoryCost, 0, 'with 2 link');
+  assert.strictEqual(c.MemoryCost(zu), 0, 'with 2 link');
   assert.strictEqual(c.InstalledMemoryCost(), 0);
   const inGrip = card(2007);
-  assert.strictEqual(inGrip.memoryCost, 0, 'even if not installed');
+  assert.strictEqual(c.MemoryCost(inGrip), 0, 'even if not installed');
   assert.strictEqual(peacock.elo + zu.elo, 1146 + 1604);
 });
 

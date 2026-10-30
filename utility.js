@@ -2928,7 +2928,7 @@ function InstalledMemoryCost(destination = null, ignoreCards = []) {
   for (var i = 0; i < arrayToCheck.length; i++) {
     if (typeof arrayToCheck[i].memoryCost !== "undefined")
       if (!ignoreCards.includes(arrayToCheck[i]))
-        imu += arrayToCheck[i].memoryCost;
+        imu += MemoryCost(arrayToCheck[i]);
   }
   return imu;
 }
@@ -3718,6 +3718,34 @@ function Link() {
 }
 
 /**
+ * Memory cost of a program. A card may declare `variableMemoryCost()` for a
+ * printed cost that depends on game state, even when not installed (Creeper).
+ *
+ * @method MemoryCost
+ * @param {Card} card program
+ * @returns {int} memory cost (0 if none)
+ */
+function MemoryCost(card) {
+  if (typeof card.variableMemoryCost == "function") return card.variableMemoryCost.call(card);
+  if (typeof card.memoryCost !== "undefined") return card.memoryCost;
+  return 0;
+}
+
+/**
+ * Number of recurring credits a card refills to. A card may declare
+ * `variableRecurringCredits()` alongside `recurringCredits` for an X value
+ * (Pheromones: its virus counters).
+ *
+ * @method RecurringCredits
+ * @param {Card} card with recurringCredits
+ * @returns {int} recurring credits
+ */
+function RecurringCredits(card) {
+  if (typeof card.variableRecurringCredits == "function") return card.variableRecurringCredits.call(card);
+  return card.recurringCredits;
+}
+
+/**
  * Gets the runner's memory units, including effects.<br/>Nothing is logged.
  *
  * @method MemoryUnits
@@ -3971,6 +3999,19 @@ var turnEventCounts = {};
 function RecordTurnEvent(name) {
   turnEventCounts[name] = (turnEventCounts[name] || 0) + 1;
   return turnEventCounts[name];
+}
+/**
+ * Cards involved in named public events this turn, for conditions that refer
+ * back to "that card" (Surge: a program that received virus counters).
+ * Cleared with turnEventCounts when a turn begins. Each card is listed once.
+ */
+var turnEventCards = {};
+function RecordTurnEventCard(name, card) {
+  if (!turnEventCards[name]) turnEventCards[name] = [];
+  if (!turnEventCards[name].includes(card)) turnEventCards[name].push(card);
+}
+function TurnEventCards(name) {
+  return turnEventCards[name] ? turnEventCards[name].slice() : [];
 }
 function TurnEventCount(name) {
   return turnEventCounts[name] || 0;
@@ -4250,7 +4291,7 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
                     card,
                   )) &&
                 (typeof card.memoryCost === "undefined" ||
-                  card.memoryCost <= MemoryUnits(validHosts[j].card))
+                  MemoryCost(card) <= MemoryUnits(validHosts[j].card))
               ) {
                 //make sure you could even install this if you trashed everything
                 validHosts[j].host = validHosts[j].card;
@@ -4277,7 +4318,7 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
                     card,
                   )) &&
                 (typeof card.memoryCost === "undefined" ||
-                  card.memoryCost <= MemoryUnits(validHosts[j].card))
+                  MemoryCost(card) <= MemoryUnits(validHosts[j].card))
               ) {
                 //make sure you could even install this if you trashed everything
                 validHosts[j].host = validHosts[j].card;
@@ -4293,7 +4334,7 @@ function ChoicesCardInstall(card, ignoreCreditCost = false) {
               (ignoreCreditCost ||
                 CheckCredits(runner, InstallCost(card), "installing", card)) &&
               (typeof card.memoryCost === "undefined" ||
-                card.memoryCost <= MemoryUnits())
+                MemoryCost(card) <= MemoryUnits())
             ) {
               //make sure you could even install this if you trashed everything
               ret.push({

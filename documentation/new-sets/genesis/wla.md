@@ -48,7 +48,7 @@ does): Spinal Modem 1416 (20007), Morning Star 1393 (20014), Peacock 1146
 - `mechanics.js` `TraceStrengthDecisions`: new trigger `responseOnTraceSuccessful`
   (no params), fired via `TriggeredResponsePhase` after a successful trace and
   before the trace's success callback; synchronous when nothing responds.
-- `decks.js` `InstanceCard`: calls optional `card.InitInstance()` after the deep
+- (Replaced at merge by `variableMemoryCost` read through `MemoryCost()`, shared with Creeper.) - `decks.js` `InstanceCard`: calls optional `card.InitInstance()` after the deep
   copy (needed for accessors such as ZU.13's link-dependent `memoryCost`, which
   `jQuery.extend` would flatten).
 - `runcalculator.js`: trash-cost pricing also reads `AIReducesTrashCost` from

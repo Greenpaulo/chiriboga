@@ -632,6 +632,25 @@ AIEconomyTrigger: 2,  // click-for-credit type abilities
 AIEconomyTrigger: 1,  // slower economy
 ```
 
+**`AIEconomyTriggerAlt()`** (Runner, optional, with `AIEconomyTrigger`)
+
+For a card with several click abilities, return the `alt` of the ability the
+economy trigger path should use now (each ability declares its own `alt`).
+`RunnerAI` copies it into the trigger preference's `abilityAlt`, so the
+ability-selection decision picks the matching option. Return `undefined` or
+`null` to accept the first legal ability. Read-only; called only in the
+Runner's action phase after `ChoicesAbility` confirms the card can trigger,
+so the returned ability must be legal whenever `AIWouldTrigger` allows it.
+
+```js
+// Kati Jones (2091): keep building the stash, take it once it is large or money is short
+AIEconomyTriggerAlt: function () {
+  var hosted = Counters(this, "credits");
+  if (hosted >= 9 || (hosted >= 3 && Credits(runner) < 3)) return "take";
+  return "place";
+},
+```
+
 **`AIWouldTrigger()`**
 
 Return `true` to allow the ability to be triggered. Return `false` to skip it this turn. Use this for conditional economy cards:
@@ -2369,6 +2388,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |
 | `AIEconomyTrigger` | number | Priority for triggering economy ability |
+| `AIEconomyTriggerAlt()` | function | Runner: `alt` of the ability the economy trigger path uses on a multi-ability card |
 | `AIWouldTrigger()` | function | Return true to allow ability trigger |
 | `AIWouldPlay()` | function | Return true to play this event |
 | `AIWastefulToPlay()` | function | Return true if playing is wasteful |

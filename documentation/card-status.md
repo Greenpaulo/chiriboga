@@ -25,7 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `genesis` | in-progress | 120 | 104 | 16 | 52 | 5 | 50 / 97 | true / true | no |
+| `genesis` | in-progress | 120 | 104 | 16 | 35 | 4 | 63 / 97 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -94,23 +94,6 @@ None.
 - 02077 Government Contracts: 2 scaffold marker(s)
 - 02078 Tyrant: 3 scaffold marker(s)
 - 02079 Oversight AI: 2 scaffold marker(s)
-- 02081 Surge: 2 scaffold marker(s)
-- 02083 Andromeda: Dispossessed Ristie: 2 scaffold marker(s)
-- 02085 HQ Interface: 2 scaffold marker(s)
-- 02086 Pheromones: 2 scaffold marker(s)
-- 02087 Quality Time: 2 scaffold marker(s)
-- 02088 Replicator: 2 scaffold marker(s)
-- 02089 Creeper: 2 scaffold marker(s)
-- 02090 Kraken: 2 scaffold marker(s)
-- 02091 Kati Jones: 2 scaffold marker(s)
-- 02092 Eve Campaign: 2 scaffold marker(s)
-- 02093 Rework: 2 scaffold marker(s)
-- 02094 Whirlpool: 3 scaffold marker(s)
-- 02096 Data Hound: 3 scaffold marker(s)
-- 02097 Bernice Mai: 2 scaffold marker(s)
-- 02098 Salvage: 3 scaffold marker(s)
-- 02099 Simone Diego: 2 scaffold marker(s)
-- 02100 Foxfire: 2 scaffold marker(s)
 - 02101 Retrieval Run: 2 scaffold marker(s)
 - 02102 Darwin: 2 scaffold marker(s)
 - 02103 Data Leak Reversal: 2 scaffold marker(s)
@@ -130,7 +113,6 @@ None.
 - 02120 Corporate War: 2 scaffold marker(s)
 - 02062 Force of Nature: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02066 Deus X: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02089 Creeper: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02102 Darwin: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02104 Faerie: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
