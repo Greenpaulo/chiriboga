@@ -2195,6 +2195,10 @@ function ChangePhase(src, skipInit = false) {
   else if (currentPhase.identifier == "Runner 1.1") playerTurn = runner;
   if (!skipInit && (currentPhase.identifier == "Corp 1.1" || currentPhase.identifier == "Runner 1.1"))
   {
+    if (oldTurn != playerTurn) {
+      previousTurnEventCounts = turnEventCounts;
+      previousTurnEventPlayer = oldTurn;
+    }
     turnEventCounts = {};
     turnEventCards = {};
     [corp.HQ, corp.RnD, corp.archives].concat(corp.remoteServers).forEach(function (server) {

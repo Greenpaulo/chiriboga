@@ -4109,3 +4109,82 @@ competing-plan policies are recorded in the set's optimisation queue.
 - Executive Retreat uses `AIDrawAbility: 5`. Big Brother and Freelancer use
   `AITagPunishment`, `AIWouldPlay` and `AIPlayWhenCan` (Big Brother only with a
   resource or another punishment to follow; Freelancer only with a resource).
+
+### Genesis: Future Proof card hooks
+
+- Darwin uses `AIFixedStrength`, `AIImplementBreaker` (2[c] per subroutine,
+  no pump) and `AIPreferredInstallChoice`. `AIWantsCounter()` is a read-only
+  card-local helper called by its turn-begin response: buy one counter while
+  below the strongest visible rezzed ice (minimum target 3), retaining 2[c].
+- Data Leak Reversal uses the shared `runnerSuccessfulRunHQ/RnD/Archives`
+  turn events through `installOnlyIf()`, so drawing it after a successful run
+  still permits installation. `AIWorthKeeping` preserves it and the ordinary
+  keep-card installer installs it. `AITriggerInPaidWindow` returns `dlr_mill`
+  on the last click while tagged, with a nonempty R&D; the paid-window
+  consumer checks legal click timing through `ChoicesAbility`.
+- Faerie's `AIImplementBreaker` uses Sentry 1/1 pump and 0/1 break. A
+  `{use: this, faerieIce: ice}` persistent prevents using the same copy on
+  a later ice in that run. `AIPreferredInstallChoice` permits ordinary
+  breaker installation with a subsequent click available.
+- Mr. Li uses `AIDrawInstall`, `AIDrawTrigger: 1`, and `AIWouldTrigger` with
+  at least two stack cards. The inline `AIBottomChoice(choices)` helper
+  bottoms a card outside `_cardsInHandWorthKeeping()`, then lowest ELO.
+  It is called only for cards actually drawn and returns one offered choice.
+- Indexing uses `AIRunEventExtraPotential` (R&D, at least two R&D cards and
+  a follow-up click) and `AIBreachReplacementValue: 1`. Its replacement
+  declines on the last click. Inline ordering puts agendas on top, highest
+  printed points first, using only the privately looked-at cards.
+- R&D Interface uses `AIRunExtraPotential` (new R&D cards the extra access
+  would reveal), `AICentralPressure` (+1 access), `AIWorthKeeping` and
+  `AIInstallBeforeRun` for R&D. Deep Thought uses `AIRunExtraPotential`
+  while growing, `AIPublicRunPressure` (`growth: 1` on R&D),
+  `AIWorthKeeping`, `AIInstallBeforeRun` and an inline turn-begin policy
+  that always takes its free look when eligible.
+- New Angeles City Hall uses `AIWorthKeeping` and the ordinary keep-card
+  installer. Inline prevention pays for as many pending tags as affordable.
+  `AITagPreventionCost() -> positive number` declares the per-tag credit cost
+  of an installed repeatable tag-prevention ability (2 here). The run
+  calculator reads active installed Runner sources at calculation start and
+  uses the cheapest cost, consuming route credits for each new tag while
+  affordable; otherwise the tag remains. The hook is read-only, public,
+  and safe outside a run. It neither removes existing tags nor grants free
+  prevention. The current contract covers general run credits, without
+  reserving credits for future turns.
+- Ruhr Valley uses the shared `modifyRunClickCost` path, so run initiation,
+  event legality and both run evaluators see its extra click. Its
+  `AIIsScoringUpgrade`, `AIPreferredUpgradeServer`, `AIDefensiveValue`,
+  `AILimitPerServer` and `AIRezWhenCan` install it in an iced scoring remote
+  with its rez affordable, then rez during the Corp turn before a run starts.
+- Midori uses `AIIsScoringUpgrade`, `AIPreferredUpgradeServer`, `AIDefensiveValue`, `AILimitPerServer`
+  and `AIRezWhenCan` (own turn or movement before an approach, affordable HQ
+  ice available). Its approach response offers the Corp AI only the
+  highest-ELO affordable ice improving strength or subroutine count. The
+  Runner jack-out selector uses a recalculated route after the swap.
+  Planning/selection reads only public Runner state and the Corp's own HQ.
+- Midseason Replacements uses `AIPlayWhenCan: 1` and `AIWouldPlay`: previous
+  Runner turn steal, currently untagged Runner, play cost plus enough credits
+  to beat all public trace/link credits. It reuses `_preferTraceToBeat(6)`.
+- Flare and Burke Bugs use `AIImplementIce`, treating the trace as successful
+  as for Winchester. Flare uses `unpreventableMeatDamage` twice plus ETR and
+  a hardware-trash threat when hardware exists; Burke uses `misc_moderate`
+  only when a program exists. `unpreventableMeatDamage` is counted by
+  `TotalDamage`, path validation and Corp damage classification, without
+  subtracting meat prevention. Both use `_preferTraceToBeat`; Flare's Corp
+  trash selector takes highest ELO, Burke's Runner selector lowest ELO.
+- Dedicated Response Team uses `AIWorthInstalling` (tagged Runner,
+  affordable rez, non-scoring remote), `AIRezWhenCan` during a run while
+  tagged, and `AIAvoidInstallingOverThis`.
+  `AIRunEndMeatDamage(server, tags, context) -> nonnegative number` declares
+  preventable meat damage when a successful run ends. The calculator calls
+  each active Corp source once per completed route after approach effects,
+  with current tags plus route tags. `context.trashCard` is the known root
+  card the existing approach model pays to trash; a source being trashed
+  contributes zero. The amount is stored on the endpoint, shares finite
+  meat prevention with other damage, and is absent for incomplete runs or
+  prevented successful runs. Read-only, public state only, safe outside a
+  live run. DRT returns 2 while rezzed and `tags > 0`.
+- Corporate War uses `AIWouldScore() -> boolean`: `CorpAI.Phase_Score`
+  calls it before selecting a non-winning score. Return false to defer;
+  a game-winning score always bypasses this preference. The hook is read-only,
+  safe outside a run and may read only information available to the Corp.
+  Corporate War waits for 7 pool credits (or scores with an empty pool).

@@ -2770,6 +2770,7 @@ class CorpAI {
                       (effect) =>
                         effect == "netDamage" ||
                         effect == "meatDamage" ||
+                        effect == "unpreventableMeatDamage" ||
                         effect == "coreDamage",
                     ).length,
                 ),
@@ -7887,6 +7888,8 @@ class CorpAI {
         if (Counters(cardToScore, "advancement") < advLim) return -1; //don't score yet
       }
     }
+    if (!scoreWinsGame && typeof cardToScore.AIWouldScore == "function" &&
+        !cardToScore.AIWouldScore.call(cardToScore)) return -1;
     var serverToScoreIn = GetServer(cardToScore);
     //are there things we could rez to benefit?
     if (optionList.indexOf("rez") > -1) {

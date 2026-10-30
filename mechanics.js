@@ -1979,6 +1979,12 @@ function RunUnsuccessful() {
     ChangePhase(phases.runUnsuccessful, true); //true skips init because when encounter ends it will change to runUnsuccessful properly
     originalPhase.Resolve.n();
   } //just an ordinary phase change
+  else if (encountering) {
+    //Ending the run in an encounter paid window still ends that encounter
+    //before run-end responses (Faerie must trash itself after breaking).
+    phases.runEncounterEnd.next = phases.runUnsuccessful;
+    ChangePhase(phases.runEncounterEnd);
+  }
   else {
     ChangePhase(phases.runUnsuccessful);
   }

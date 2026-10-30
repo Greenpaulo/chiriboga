@@ -4723,32 +4723,9 @@ cardSet[2103] = {
   cardType: "resource",
   subTypes: ["Virtual", "Sabotage"],
   installCost: 0,
-  madeSuccessfulCentralRunThisTurn: false,
-  responseOnRunnerTurnBegins: {
-    Resolve: function () {
-      this.madeSuccessfulCentralRunThisTurn = false;
-    },
-    automatic: true,
-    availableWhenInactive: true,
-  },
-  responseOnCorpTurnBegins: {
-    Resolve: function () {
-      this.madeSuccessfulCentralRunThisTurn = false;
-    },
-    automatic: true,
-    availableWhenInactive: true,
-  },
-  responseOnRunSuccessful: {
-    Resolve: function () {
-      //central servers are the ones with a .cards pile
-      if (attackedServer && typeof attackedServer.cards !== "undefined")
-        this.madeSuccessfulCentralRunThisTurn = true;
-    },
-    automatic: true,
-    availableWhenInactive: true,
-  },
   installOnlyIf: function () {
-    return this.madeSuccessfulCentralRunThisTurn;
+    return playerTurn == runner && (TurnEventCount("runnerSuccessfulRunHQ") > 0 ||
+      TurnEventCount("runnerSuccessfulRunRnD") > 0 || TurnEventCount("runnerSuccessfulRunArchives") > 0);
   },
   abilities: [
     {
@@ -4886,6 +4863,7 @@ cardSet[2104] = {
 // [click]: Draw 2 cards. When you do, add 1 of those cards to the bottom of your stack.
 cardSet[2105] = {
   title: "Mr. Li",
+  unique: true,
   imageFile: "02105.png",
   elo: 1315,
   player: runner,
@@ -4941,6 +4919,7 @@ cardSet[2105] = {
     for (var i = 1; i < choices.length; i++) if (score(choices[i]) < score(best)) best = choices[i];
     return best;
   },
+  AIDrawInstall: function () { return runner.stack.length > 1 ? 1 : 0; },
   AIDrawTrigger: 1,
   AIWouldTrigger: function () {
     return runner.stack.length > 1;
@@ -4959,6 +4938,7 @@ cardSet[2106] = {
   cardType: "event",
   subTypes: ["Run"],
   playCost: 0,
+  Enumerate: function () { return [{server: corp.RnD}]; },
   runWasSuccessful: false,
   responseOnRunSuccessful: {
     Resolve: function () {
@@ -5057,6 +5037,10 @@ cardSet[2107] = {
       return attackedServer == corp.RnD ? 1 : 0;
     },
   },
+  AIWorthKeeping: function () { return runner.AI._getCachedCost(corp.RnD) != Infinity; },
+  AIInstallBeforeRun: function (server) {
+    return server == corp.RnD && runner.AI.cardsWorthKeeping.includes(this) ? 1 : 0;
+  },
   AIRunExtraPotential: function (server, potential) {
     if (server != corp.RnD || !runner.AI) return 0;
     var extra = runner.AI._countNewCardsThatWouldBeAccessedInRnD(2) - runner.AI._countNewCardsThatWouldBeAccessedInRnD(1);
@@ -5100,11 +5084,15 @@ cardSet[2108] = {
     },
     Resolve: function (params) {
       if (!params || !params.use || corp.RnD.cards.length < 1) return;
-      corp.RnD.cards[corp.RnD.cards.length - 1].knownToRunner = true;
+      var top = corp.RnD.cards[corp.RnD.cards.length - 1];
+      top.knownToRunner = true;
+      if (!runner.AI) DecisionPhase(runner, [{card: top}], function () {}, this.title, "Look at the top card of R&D", this);
       Log("Deep Thought: the Runner looks at the top card of R&D");
     },
     text: "Deep Thought: look at the top card of R&D",
   },
+  AIWorthKeeping: function () { return true; },
+  AIInstallBeforeRun: function (server) { return server == corp.RnD ? 1 : 0; },
   //AI: small bonus for R&D runs while the counters are still building.
   AIRunExtraPotential: function (server, potential) {
     if (server != corp.RnD || CheckCounters(this, "virus", 3)) return 0;
@@ -5121,6 +5109,7 @@ cardSet[2108] = {
 // When you steal an agenda, trash this resource.
 cardSet[2109] = {
   title: "New Angeles City Hall",
+  unique: true,
   imageFile: "02109.png",
   elo: 1572,
   player: runner,
@@ -5162,6 +5151,8 @@ cardSet[2109] = {
     },
     text: "New Angeles City Hall: trash this resource",
   },
+  AIWorthKeeping: function () { return true; },
+  AITagPreventionCost: function () { return 2; },
 };
 
 // cardSet[2110] = Eli 1.0 - DUPLICATE: systemupdate2021.js has Eli 1.0 (card 31043)
@@ -5172,7 +5163,7 @@ cardSet[2109] = {
 cardSet[2111] = {
   title: "Ruhr Valley",
   imageFile: "02111.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1387,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 3,
@@ -5180,7 +5171,19 @@ cardSet[2111] = {
   subTypes: ["Region"],
   rezCost: 6,
   trashCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  modifyRunClickCost: {
+    Resolve: function (server) { return GetServer(this) == server ? 1 : 0; },
+  },
+  AIPreferredUpgradeServer: function () {
+    if (!CheckCredits(corp, this.rezCost, "rezzing", this)) return null;
+    return corp.remoteServers.find(function (server) {
+      return server.ice.length > 0 && corp.AI._isAScoringServer(server);
+    }) || null;
+  },
+  AIIsScoringUpgrade: true,
+  AILimitPerServer: function () { return 1; },
+  AIRezWhenCan: function () { return playerTurn == corp && GetServer(this).ice.length > 0; },
+  AIDefensiveValue: function (server) { return server && server.ice.length ? 2 : 0; },
 };
 
 // cardSet[2112] = Ronin - DUPLICATE: systemupdate2021.js has Ronin (card 31053)
@@ -5190,7 +5193,7 @@ cardSet[2111] = {
 cardSet[2113] = {
   title: "Midori",
   imageFile: "02113.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1253,
   player: corp,
   faction: "Jinteki",
   influence: 3,
@@ -5198,7 +5201,71 @@ cardSet[2113] = {
   subTypes: ["Sysop"],
   rezCost: 0,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  usedThisRun: false,
+  automaticOnRunBegins: { Resolve: function () { this.usedThisRun = false; } },
+  automaticOnRunEndCleanup: { Resolve: function () { this.usedThisRun = false; }, availableWhenInactive: true },
+  _swapChoices: function () {
+    if (this.usedThisRun || !this.rezzed || attackedServer != GetServer(this) || !GetApproachEncounterIce()) return [];
+    return ChoicesArrayCards(corp.HQ.cards.filter(function (card) { return CheckCardType(card, ["ice"]); }));
+  },
+  _aiSwap: function (choices) {
+    var current = GetApproachEncounterIce();
+    var best = null;
+    for (var choice of choices) {
+      var ice = choice.card;
+      if (!CheckCredits(corp, RezCost(ice), "rezzing", ice)) continue;
+      if (Strength(ice) <= Strength(current) && ice.subroutines.length <= current.subroutines.length) continue;
+      if (!best || ice.elo > best.card.elo) best = choice;
+    }
+    return best;
+  },
+  responseOnApproachIce: {
+    Enumerate: function () {
+      var choices = this._swapChoices();
+      if (corp.AI) { var best = this._aiSwap(choices); return best ? [best] : []; }
+      return choices;
+    },
+    Resolve: function (params) {
+      var server = attackedServer, index = approachIce, oldIce = GetApproachEncounterIce(), newIce = params.card;
+      this.usedThisRun = true;
+      var swap = function () {
+        //Midori remains in the root, so the server cannot disappear during this swap.
+        MoveCard(oldIce, corp.HQ.cards);
+        MoveCard(newIce, server.ice, index);
+        newIce.rezzed = false;
+        newIce.faceUp = false;
+        approachIce = index;
+        Log("Midori swapped the approached ice with ice from HQ");
+        if (!CheckJackOut()) return;
+        var choices = [{jack: false, label: "Continue the run"}, {jack: true, label: "Jack out"}];
+        if (runner.AI) {
+          var path = runner.AI._calculateBestCompleteRun(server, 0, 0, 0, 0);
+          runner.AI.preferred = {title: this.title, option: choices[path ? 0 : 1]};
+        }
+        DecisionPhase(runner, choices, function (choice) { if (choice.jack) JackOut(); }, this.title, "You may jack out", this);
+      };
+      if (oldIce.hostedCards && oldIce.hostedCards.length)
+        Trash(oldIce.hostedCards.slice(), false, swap, this);
+      else swap.call(this);
+    },
+    text: "Midori: swap the approached ice with ice from HQ",
+  },
+  AIPreferredUpgradeServer: function () {
+    if (!corp.HQ.cards.some(function (card) {
+      return CheckCardType(card, ["ice"]) && CheckCredits(corp, RezCost(card), "rezzing", card);
+    })) return null;
+    return corp.remoteServers.find(function (server) {
+      return server.ice.length > 0 && corp.AI._isAScoringServer(server);
+    }) || null;
+  },
+  AIIsScoringUpgrade: true,
+  AILimitPerServer: function () { return 1; },
+  AIDefensiveValue: function (server) { return server && server.ice.length && corp.HQ.cards.some(function (c) { return CheckCardType(c, ["ice"]); }) ? 1 : 0; },
+  AIRezWhenCan: function () {
+    return !!GetServer(this) && (playerTurn == corp || (attackedServer == GetServer(this) && currentPhase.identifier == "Run 4.5")) &&
+      corp.HQ.cards.some(function (c) { return CheckCardType(c, ["ice"]) && CheckCredits(corp, RezCost(c), "rezzing", c); });
+  },
 };
 
 //NBN: The World is Yours* (2114)
@@ -5206,14 +5273,14 @@ cardSet[2113] = {
 cardSet[2114] = {
   title: "NBN: The World is Yours*",
   imageFile: "02114.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1245,
   player: corp,
   faction: "NBN",
   cardType: "identity",
   subTypes: ["Megacorp"],
   deckSize: 40,
   influenceLimit: 12,
-  // TODO: Add abilities or responseOn triggers
+  modifyMaxHandSize: { Resolve: function (player) { return player == corp ? 1 : 0; } },
 };
 
 // cardSet[2115] = Project Beale - DUPLICATE: systemupdate2021.js has Project Beale (card 31062)
@@ -5224,15 +5291,22 @@ cardSet[2114] = {
 cardSet[2116] = {
   title: "Midseason Replacements",
   imageFile: "02116.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1976,
   player: corp,
   faction: "NBN",
   influence: 4,
   cardType: "operation",
   subTypes: [],
   playCost: 5,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  Enumerate: function () { return PreviousTurnEventCount("runnerAgendaStolen", runner) > 0 ? [{}] : []; },
+  Resolve: function () {
+    Trace(6, function (successful) { if (successful) AddTags(traceStrength - linkStrength); }, this);
+    if (corp.AI) corp.AI._preferTraceToBeat(6);
+  },
+  AIPlayWhenCan: 1,
+  AIWouldPlay: function () {
+    if (!this.Enumerate().length || runner.tags > 0) return false;
+    return AvailableCredits(corp, "trace") - PlayCost(this) + 6 > Link() + AvailableCredits(runner, "trace");
   },
 };
 
@@ -5241,7 +5315,7 @@ cardSet[2116] = {
 cardSet[2117] = {
   title: "Flare",
   imageFile: "02117.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1309,
   player: corp,
   faction: "NBN",
   influence: 3,
@@ -5249,11 +5323,29 @@ cardSet[2117] = {
   subTypes: ["Sentry", "Tracer", "AP"],
   rezCost: 9,
   strength: 6,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
+  subroutines: [{
+    text: "Trace[6]. If successful, trash 1 piece of hardware, do 2 meat damage (cannot be prevented), and end the run.",
+    Resolve: function () {
+      Trace(6, function (successful) {
+        if (!successful) return;
+        var finish = function () { Damage("meat", 2, false, function () { EndTheRun(); }, this); };
+        var choices = ChoicesInstalledCards(runner, function (c) { return CheckCardType(c, ["hardware"]) && CheckTrash(c); });
+        if (!choices.length) { finish.call(this); return; }
+        if (corp.AI) {
+          var best = choices.slice().sort(function (a, b) { return b.card.elo - a.card.elo; })[0];
+          corp.AI.preferred = {title: this.title, option: best};
+        }
+        DecisionPhase(corp, choices, function (params) { Trash(params.card, true, finish, this); }, this.title, "Trash 1 piece of hardware", this, "trash");
+      }, this);
+      if (corp.AI) corp.AI._preferTraceToBeat(6);
+    },
+    visual: {y: 92, h: 62},
+  }],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    //Like Winchester, model the trace as successful; damage is unpreventable.
+    var effects = ["unpreventableMeatDamage", "unpreventableMeatDamage", "endTheRun"];
+    if (runner.rig.hardware.length) effects.unshift("misc_moderate");
+    result.sr = [[effects]];
     return result;
   },
 };
@@ -5263,7 +5355,7 @@ cardSet[2117] = {
 cardSet[2118] = {
   title: "Dedicated Response Team",
   imageFile: "02118.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1377,
   player: corp,
   faction: "Weyland Consortium",
   influence: 3,
@@ -5271,7 +5363,22 @@ cardSet[2118] = {
   subTypes: ["Hostile"],
   rezCost: 2,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  responseOnRunEnds: {
+    Enumerate: function () { return runner.tags > 0 && runSuccessDeclared ? [{}] : []; },
+    Resolve: function () { Damage("meat", 2, true); },
+    text: "Dedicated Response Team: do 2 meat damage",
+  },
+  AIWorthInstalling: function (remotes) {
+    if (runner.tags < 1 || !CheckCredits(corp, this.rezCost, "rezzing", this)) return -1;
+    for (var i = 0; i < remotes.length; i++) if (!corp.AI._isAScoringServer(remotes[i])) return i;
+    return remotes.length;
+  },
+  AIRezWhenCan: function () { return runner.tags > 0 && !!attackedServer; },
+  AIAvoidInstallingOverThis: true,
+  AIRunEndMeatDamage: function (server, tags, context) {
+    if (context && context.trashCard == this) return 0;
+    return this.rezzed && tags > 0 ? 2 : 0;
+  },
 };
 
 //Burke Bugs (2119)
@@ -5279,7 +5386,7 @@ cardSet[2118] = {
 cardSet[2119] = {
   title: "Burke Bugs",
   imageFile: "02119.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1146,
   player: corp,
   faction: "Weyland Consortium",
   influence: 1,
@@ -5287,11 +5394,25 @@ cardSet[2119] = {
   subTypes: ["Sentry", "Destroyer"],
   rezCost: 0,
   strength: 0,
-  subroutines: [
-    // { text: "...", Resolve: function () { ... } },
-  ],
+  subroutines: [{
+    text: "Trace[0]. If successful, the Runner trashes 1 program.",
+    Resolve: function () {
+      Trace(0, function (successful) {
+        if (!successful) return;
+        var choices = ChoicesInstalledCards(runner, function (c) { return CheckCardType(c, ["program"]) && CheckTrash(c); });
+        if (!choices.length) return;
+        if (runner.AI) {
+          var best = choices.slice().sort(function (a, b) { return a.card.elo - b.card.elo; })[0];
+          runner.AI.preferred = {title: this.title, option: best};
+        }
+        DecisionPhase(runner, choices, function (params) { Trash(params.card, true); }, this.title, "Trash 1 program", this, "trash");
+      }, this);
+      if (corp.AI) corp.AI._preferTraceToBeat(0);
+    },
+    visual: {y: 80, h: 32},
+  }],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[runner.rig.programs.length ? ["misc_moderate"] : []]];
     return result;
   },
 };
@@ -5301,7 +5422,7 @@ cardSet[2119] = {
 cardSet[2120] = {
   title: "Corporate War",
   imageFile: "02120.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1276,
   player: corp,
   faction: "Neutral",
   influence: 0,
@@ -5309,5 +5430,13 @@ cardSet[2120] = {
   subTypes: ["Expansion"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      if (corp.creditPool >= 7) GainCredits(corp, 7, "", this);
+      else LoseCredits(corp, corp.creditPool, this);
+    },
+    automatic: true,
+  },
+  AIWouldScore: function () { return corp.creditPool >= 7 || corp.creditPool == 0; },
 };
