@@ -9,7 +9,7 @@ setIdentifiers.push('gen');
 cardSet[2001] = {
   title: "Whizzard: Master Gamer",
   imageFile: "02001.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 2015,
   player: runner,
   faction: "Anarch",
   cardType: "identity",
@@ -17,7 +17,15 @@ cardSet[2001] = {
   deckSize: 45,
   influenceLimit: 15,
   link: 0,
-  // TODO: Add abilities or responseOn triggers
+  //Refilled with other recurring credits when the Runner's turn begins (phase.js Runner 1.2).
+  recurringCredits: 3,
+  credits: 0,
+  canUseCredits: function (doing, card) {
+    return doing == "paying trash costs" || doing == "trashing";
+  },
+  AIReducesTrashCost: function (card) {
+    return Math.min(TrashCost(card), this.credits || 0);
+  },
 };
 
 //Spinal Modem (2002)
@@ -28,14 +36,30 @@ cardSet[2001] = {
 cardSet[2002] = {
   title: "Spinal Modem",
   imageFile: "02002.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1416,
   player: runner,
   faction: "Anarch",
   influence: 2,
   cardType: "hardware",
   subTypes: ["Console"],
   installCost: 4,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  memoryUnits: 1,
+  recurringCredits: 2,
+  canUseCredits: function (doing, card) {
+    return doing == "using" && !!card && CheckSubType(card, "Icebreaker");
+  },
+  //Fired by TraceStrengthDecisions before the trace's own success effect resolves.
+  responseOnTraceSuccessful: {
+    Enumerate: function () {
+      return attackedServer !== null ? [{}] : [];
+    },
+    Resolve: function () {
+      Damage("core", 1, true);
+    },
+    automatic: true,
+    text: "Spinal Modem: suffer 1 core damage",
+  },
 };
 
 // cardSet[2003] = Imp - DUPLICATE: systemupdate2021.js has Imp (card 31007)
@@ -45,7 +69,7 @@ cardSet[2002] = {
 cardSet[2004] = {
   title: "Morning Star",
   imageFile: "02004.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1393,
   player: runner,
   faction: "Anarch",
   influence: 4,
@@ -54,16 +78,41 @@ cardSet[2004] = {
   installCost: 8,
   memoryCost: 2,
   strength: 5,
-  strengthBoost: 0,
-  modifyStrength: {
-    Resolve: function (card) {
-      if (card == this) return this.strengthBoost;
-      return 0;
-    },
+  //Repeated optional breaks after the first (pattern from Begemot).
+  SharedDecisionCallback: function (params) {
+    if (typeof params != "undefined") {
+      if (typeof params.subroutine != "undefined") Break(params.subroutine);
+      else return; //done breaking
+    }
+    var choices = ChoicesEncounteredSubroutines();
+    if (choices.length < 1) return;
+    for (var i = 0; i < choices.length; i++)
+      choices[i].label = "(Morning Star) Break another subroutine. -> " + choices[i].label;
+    choices.push({ id: choices.length, label: "Continue", button: "Continue" });
+    DecisionPhase(runner, choices, this.SharedDecisionCallback, "Break any number of barrier subroutines", "Morning Star", this);
   },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break any number of barrier subroutines",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Barrier")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 1, "using", this, function () {
+          Break(params.subroutine);
+          this.SharedDecisionCallback();
+        }, this);
+      },
+    },
   ],
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    return result.concat(rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Barrier"],
+      Infinity, 0, 1, iceAI.sr.length, creditsLeft)); //fixed strength, break any number for 1
+  },
 };
 
 //Cortez Chip (2005)
@@ -71,14 +120,62 @@ cardSet[2004] = {
 cardSet[2005] = {
   title: "Cortez Chip",
   imageFile: "02005.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1206,
   player: runner,
   faction: "Criminal",
   influence: 2,
   cardType: "hardware",
   subTypes: ["Chip"],
   installCost: 0,
-  // TODO: Add abilities or responseOn triggers
+  _aiTarget: null,
+  abilities: [
+    {
+      text: "[trash]: The Corp must pay 2[c] more to rez a piece of ice this turn.",
+      alt: "cortez_tax",
+      Enumerate: function () {
+        if (!CheckTrash(this)) return [];
+        var choices = ChoicesInstalledCards(corp, function (card) {
+          return CheckCardType(card, ["ice"]);
+        });
+        if (runner.AI && this._aiTarget) {
+          var target = this._aiTarget;
+          var preferred = choices.filter(function (choice) { return choice.card == target; });
+          if (preferred.length) return preferred;
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        var ice = params.card;
+        this._aiTarget = null;
+        Trash(this, false, function () {
+          //Modelled as a rez-cost increase for the rest of the turn (see documentation/new-sets/genesis/wla.md).
+          var effect = {
+            title: "Cortez Chip",
+            player: runner,
+            ice: ice,
+            modifyRezCost: {
+              Resolve: function (card) {
+                return card == this.ice ? 2 : 0;
+              },
+            },
+            responseOnRunnerTurnEnds: { Resolve: function () { RemoveLingeringEffect(this); }, automatic: true },
+            responseOnCorpTurnEnds: { Resolve: function () { RemoveLingeringEffect(this); }, automatic: true },
+          };
+          AddLingeringEffect(effect);
+          Log("The Corp must pay 2[c] more to rez " + GetTitle(ice, true) + " this turn");
+        }, this);
+      },
+    },
+  ],
+  //Use on an unrezzed ice being approached while the Corp's public credits are in a range
+  //where 2 more credits plausibly price out the rez.
+  AITriggerOnIceApproach: function (ice) {
+    if (!CheckInstalled(this) || !ice || ice.rezzed || !CheckCardType(ice, ["ice"])) return null;
+    var credits = AvailableCredits(corp);
+    if (credits < 1 || credits > 7) return null;
+    this._aiTarget = ice;
+    return "cortez_tax";
+  },
 };
 
 //Peacock (2006)
@@ -87,7 +184,7 @@ cardSet[2005] = {
 cardSet[2006] = {
   title: "Peacock",
   imageFile: "02006.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1146,
   player: runner,
   faction: "Criminal",
   influence: 2,
@@ -104,8 +201,48 @@ cardSet[2006] = {
     },
   },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break 1 code gate subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 2, "using", this, function () {
+          Break(params.subroutine);
+        }, this);
+      },
+    },
+    {
+      text: "+3 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 2, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendCredits(runner, 2, "using", this, function () {
+          BoostStrength(this, 3);
+        }, this);
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    return result.concat(rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Code Gate"],
+      2, 3, 2, 1, creditsLeft)); //cost to str, amt to str, cost to brk, amt to brk
+  },
 };
 
 //ZU.13 Key Master (2007)
@@ -115,7 +252,7 @@ cardSet[2006] = {
 cardSet[2007] = {
   title: "ZU.13 Key Master",
   imageFile: "02007.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1604,
   player: runner,
   faction: "Shaper",
   influence: 2,
@@ -123,6 +260,16 @@ cardSet[2007] = {
   subTypes: ["Icebreaker", "Decoder", "Cloud"],
   installCost: 1,
   memoryCost: 1,
+  //Card instances are deep copies (accessors would be flattened), so the
+  //link-dependent memory cost is installed on each instance by InstanceCard.
+  InitInstance: function () {
+    Object.defineProperty(this, "memoryCost", {
+      get: function () { return Link() >= 2 ? 0 : 1; },
+      set: function () {},
+      enumerable: true,
+      configurable: true,
+    });
+  },
   strength: 1,
   strengthBoost: 0,
   modifyStrength: {
@@ -132,8 +279,48 @@ cardSet[2007] = {
     },
   },
   abilities: [
-    // TODO: Add break and strength pump abilities
+    {
+      text: "Break 1 code gate subroutine.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        if (!CheckStrength(this)) return [];
+        return ChoicesEncounteredSubroutines();
+      },
+      Resolve: function (params) {
+        SpendCredits(runner, 1, "using", this, function () {
+          Break(params.subroutine);
+        }, this);
+      },
+    },
+    {
+      text: "+1 strength.",
+      Enumerate: function () {
+        if (!CheckEncounter()) return [];
+        if (CheckStrength(this)) return [];
+        if (!CheckUnbrokenSubroutines()) return [];
+        if (!CheckSubType(attackedServer.ice[approachIce], "Code Gate")) return [];
+        if (!CheckCredits(runner, 1, "using", this)) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendCredits(runner, 1, "using", this, function () {
+          BoostStrength(this, 1);
+        }, this);
+      },
+    },
   ],
+  responseOnEncounterEnds: {
+    Resolve: function () {
+      this.strengthBoost = 0;
+    },
+    automatic: true,
+  },
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    return result.concat(rc.ImplementIcebreaker(point, this, cardStrength, iceAI, iceStrength, ["Code Gate"],
+      1, 1, 1, 1, creditsLeft));
+  },
 };
 
 //The Helpful AI (2008)
@@ -142,14 +329,84 @@ cardSet[2007] = {
 cardSet[2008] = {
   title: "The Helpful AI",
   imageFile: "02008.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1222,
   player: runner,
   faction: "Shaper",
   influence: 2,
   cardType: "resource",
   subTypes: ["Connection", "Link", "Virtual"],
   installCost: 2,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  link: 1,
+  abilities: [
+    {
+      text: "[trash]: Choose an icebreaker. It has +2 strength until the end of the turn.",
+      alt: "helpfulai_boost",
+      Enumerate: function () {
+        if (!CheckTrash(this)) return [];
+        var choices = ChoicesInstalledCards(runner, function (card) {
+          return CheckSubType(card, "Icebreaker");
+        });
+        if (runner.AI && choices.length > 1) {
+          var target = this._aiTarget();
+          var preferred = choices.filter(function (choice) { return choice.card == target; });
+          if (preferred.length) return preferred;
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        var breaker = params.card;
+        Trash(this, false, function () {
+          AddLingeringEffect({
+            title: "The Helpful AI",
+            player: runner,
+            breaker: breaker,
+            modifyStrength: {
+              Resolve: function (card) {
+                return card == this.breaker ? 2 : 0;
+              },
+            },
+            responseOnRunnerTurnEnds: { Resolve: function () { RemoveLingeringEffect(this); }, automatic: true },
+            responseOnCorpTurnEnds: { Resolve: function () { RemoveLingeringEffect(this); }, automatic: true },
+          });
+          Log(GetTitle(breaker, true) + " has +2 strength until the end of the turn");
+          if (runner.AI) runner.AI.cachedBestPath = null;
+        }, this);
+      },
+    },
+  ],
+  //The icebreaker the planned route boosts, else the strongest matching breaker.
+  _aiTarget: function () {
+    var self = this, path = runner.AI ? runner.AI.cachedBestPath || [] : [];
+    for (var i = 0; i < path.length; i++) {
+      for (var j = 0; j < path[i].card_str_mods.length; j++) {
+        if (path[i].card_str_mods[j].use == self) return path[i].card_str_mods[j].card;
+      }
+    }
+    var ice = GetApproachEncounterIce(), best = null;
+    InstalledCards(runner).forEach(function (card) {
+      if (!CheckSubType(card, "Icebreaker")) return;
+      var matches = !ice || (card.subTypes || []).some(function (t) { return CheckSubType(ice, { Fracter: "Barrier", Decoder: "Code Gate", Killer: "Sentry" }[t] || "-"); });
+      if (matches && (!best || Strength(card) > Strength(best))) best = card;
+    });
+    return best;
+  },
+  //Run Calculator: once per route, trash for +2 strength on one icebreaker for the rest of the run
+  //(the route is shorter than the turn). Losing the link is charged as a minor cost.
+  AIEncounterAbility: function (rc, result, point, iceAI) {
+    if (!CheckInstalled(this) || point.sr_broken.length > 0) return result;
+    for (var i = 0; i < point.card_str_mods.length; i++) {
+      if (point.card_str_mods[i].use == this) return result;
+    }
+    var self = this;
+    InstalledCards(runner).forEach(function (card) {
+      if (!CheckSubType(card, "Icebreaker")) return;
+      var p = rc.StrModify(self, card, point, 2, true);
+      p.effects = p.effects.concat([["misc_minor"]]);
+      result.push(p);
+    });
+    return result;
+  },
 };
 
 //Plascrete Carapace (2009)
@@ -158,14 +415,43 @@ cardSet[2008] = {
 cardSet[2009] = {
   title: "Plascrete Carapace",
   imageFile: "02009.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1754,
   player: runner,
   faction: "Neutral",
   influence: 0,
   cardType: "hardware",
   subTypes: ["Gear"],
   installCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  power: 0,
+  automaticOnInstall: {
+    Resolve: function (card) {
+      if (card == this) AddCounters(this, "power", 4);
+    },
+  },
+  responsePreventableDamage: {
+    Enumerate: function () {
+      if (intended.damageType != "meat" || intended.damage < 1) return [];
+      if (!CheckCounters(this, "power", 1)) return [];
+      var max = Math.min(Counters(this, "power"), intended.damage);
+      var choices = [];
+      for (var i = 1; i <= max; i++)
+        choices.push({ prevent: i, label: "Spend " + i + " power counter(s): prevent " + i + " meat damage" });
+      choices.push({ prevent: 0, label: "Don't use Plascrete Carapace", button: "Continue" });
+      if (runner.AI) return [choices[max - 1]]; //prevent as much as possible
+      return choices;
+    },
+    Resolve: function (params) {
+      if (!params || !params.prevent) return;
+      RemoveCounters(this, "power", params.prevent);
+      intended.damage -= params.prevent;
+      Log(params.prevent + " meat damage prevented");
+      if (!CheckCounters(this, "power", 1)) Trash(this, false);
+    },
+    text: "Plascrete Carapace: prevent meat damage",
+  },
+  AIMeatDamagePrevention: function () {
+    return CheckInstalled(this) ? Counters(this, "power") : 0;
+  },
 };
 
 //Haas-Bioroid: Stronger Together (2010)
@@ -173,22 +459,30 @@ cardSet[2009] = {
 cardSet[2010] = {
   title: "Haas-Bioroid: Stronger Together",
   imageFile: "02010.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1288,
   player: corp,
   faction: "Haas-Bioroid",
   cardType: "identity",
   subTypes: ["Megacorp"],
   deckSize: 45,
   influenceLimit: 15,
-  // TODO: Add abilities or responseOn triggers
+  //Read through Strength() by the engine, the run calculator and Corp security.
+  modifyStrength: {
+    Resolve: function (card) {
+      if (card && CheckCardType(card, ["ice"]) && CheckSubType(card, "Bioroid")) return 1;
+      return 0;
+    },
+  },
 };
 
 //Mandatory Upgrades (2011)
 // You have 1 additional [click] to spend each turn.
+// Ruling (NSG 2026.04): allotted clicks are gained in the draw phase, so scoring or
+// forfeiting mid-turn does not change clicks already gained that turn.
 cardSet[2011] = {
   title: "Mandatory Upgrades",
   imageFile: "02011.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1420,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 0,
@@ -196,7 +490,12 @@ cardSet[2011] = {
   subTypes: ["Initiative"],
   advancementRequirement: 6,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  //Active only while in the Corp's score area (read by ResetClicks).
+  modifyAllottedClicks: {
+    Resolve: function (player) {
+      return player == corp && corp.scoreArea.includes(this) ? 1 : 0;
+    },
+  },
 };
 
 //Janus 1.0 (2012)
@@ -208,7 +507,7 @@ cardSet[2011] = {
 cardSet[2012] = {
   title: "Janus 1.0",
   imageFile: "02012.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1372,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 3,
@@ -217,11 +516,52 @@ cardSet[2012] = {
   rezCost: 15,
   strength: 8,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 101, h: 16 } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 119, h: 16 } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 136, h: 16 } },
+    { text: "Do 1 core damage.", Resolve: function () { Damage("core", 1, true); }, visual: { y: 154, h: 16 } },
   ],
+  //Lose [click]: Break 1 subroutine on this ice. Only the Runner can use this ability.
+  abilities: [
+    {
+      text: "Break 1 subroutine on this ice",
+      Enumerate: function () {
+        if (!CheckClicks(runner, 1)) return [];
+        if (activePlayer !== runner) return [];
+        if (!encountering) return [];
+        if (GetApproachEncounterIce() != this) return [];
+        var choices = [];
+        for (var i = 0; i < this.subroutines.length; i++) {
+          var subroutine = this.subroutines[i];
+          if (!subroutine.broken)
+            choices.push({ subroutine: subroutine, label: 'Lose [click]: Break "' + subroutine.text + '"' });
+        }
+        return choices;
+      },
+      Resolve: function (params) {
+        SpendClicks(runner, 1);
+        Break(params.subroutine);
+      },
+      opponentOnly: true,
+    },
+  ],
+  activeForOpponent: true,
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["coreDamage"]], [["coreDamage"]], [["coreDamage"]], [["coreDamage"]]];
     return result;
+  },
+  //Runner click-break, as Eli 1.0.
+  AIImplementBreaker: function (rc, result, point, server, cardStrength, iceAI, iceStrength, clicksLeft, creditsLeft) {
+    if (this == iceAI.ice && clicksLeft > 0) {
+      var breakresult = rc.SrBreak(this, iceAI, point, 1);
+      for (var j = 0; j < breakresult.length; j++) breakresult[j].runner_clicks_spent += 1;
+      result = result.concat(breakresult);
+    }
+    return result;
+  },
+  AIBreakCost: function (iceCard, subroutineCount, server) {
+    if (iceCard != this) return null;
+    return { credits: 0, clicks: subroutineCount, counters: 0 };
   },
 };
 
@@ -230,7 +570,7 @@ cardSet[2012] = {
 cardSet[2013] = {
   title: "Ash 2X3ZB9CY",
   imageFile: "02013.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1789,
   player: corp,
   faction: "Haas-Bioroid",
   influence: 2,
@@ -238,7 +578,54 @@ cardSet[2013] = {
   subTypes: ["Bioroid"],
   rezCost: 2,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  //The server whose run is restricted; lasts for the run even if Ash leaves play.
+  lockedServer: null,
+  responseOnRunSuccessful: {
+    Enumerate: function () {
+      if (!attackedServer || attackedServer != GetServer(this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      var server = attackedServer;
+      Trace(4, function (successful) {
+        if (!successful) return;
+        this.lockedServer = server;
+        Log("The Runner cannot access cards other than " + GetTitle(this, true) + " for the remainder of this run");
+      }, this);
+    },
+    text: "Ash 2X3ZB9CY: Trace[4]",
+  },
+  modifyAccessCardAllowed: {
+    Resolve: function (card) {
+      if (!this.lockedServer || attackedServer != this.lockedServer || card == this) return 0;
+      return 1;
+    },
+    availableWhenInactive: true,
+  },
+  automaticOnRunEndCleanup: {
+    Resolve: function () {
+      this.lockedServer = null;
+    },
+    availableWhenInactive: true,
+  },
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
+  AIAccessLimit: function (server) {
+    return CheckInstalled(this) && this.rezzed && GetServer(this) == server ? 0 : Infinity;
+  },
+  AIDefensiveValue: function (server) {
+    if (!server) return 0;
+    if (server == corp.HQ) return 3;
+    if (typeof server.cards == "undefined") return 2; //remote: protects its agenda or asset
+    return 1;
+  },
+  AILimitPerServer: function () {
+    return 1;
+  },
+  //Rez during a run on this server, before it is declared successful.
+  AIRezWhenCan: function () {
+    return CheckInstalled(this) && attackedServer !== null && attackedServer == GetServer(this);
+  },
 };
 
 //Braintrust (2014)
@@ -247,7 +634,7 @@ cardSet[2013] = {
 cardSet[2014] = {
   title: "Braintrust",
   imageFile: "02014.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1443,
   player: corp,
   faction: "Jinteki",
   influence: 0,
@@ -255,7 +642,21 @@ cardSet[2014] = {
   subTypes: ["Research"],
   advancementRequirement: 3,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score != this) return;
+      var over = Counters(this, "advancement") - 3;
+      if (over >= 2) AddCounters(this, "agenda", Math.floor(over / 2));
+    },
+    automatic: true,
+  },
+  //Active only while in the Corp's score area. RezCost() feeds the AI rez decisions.
+  modifyRezCost: {
+    Resolve: function (card) {
+      if (!corp.scoreArea.includes(this) || !card || !CheckCardType(card, ["ice"])) return 0;
+      return -Counters(this, "agenda");
+    },
+  },
 };
 
 //Snowflake (2015)
@@ -263,7 +664,7 @@ cardSet[2014] = {
 cardSet[2015] = {
   title: "Snowflake",
   imageFile: "02015.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1279,
   player: corp,
   faction: "Jinteki",
   influence: 2,
@@ -272,10 +673,19 @@ cardSet[2015] = {
   rezCost: 1,
   strength: 3,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Psi game: end the run if the bids differ.",
+      Resolve: function () {
+        PsiGame(function (different) {
+          if (different) EndTheRun();
+        }, this);
+      },
+      visual: { y: 89, h: 64 },
+    },
   ],
+  //The Psi game is modelled as ending the run (conservative, as traces are modelled as successful).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]]];
     return result;
   },
 };
@@ -285,7 +695,7 @@ cardSet[2015] = {
 cardSet[2016] = {
   title: "Restructured Datapool",
   imageFile: "02016.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1275,
   player: corp,
   faction: "NBN",
   influence: 0,
@@ -293,7 +703,33 @@ cardSet[2016] = {
   subTypes: ["Initiative"],
   advancementRequirement: 5,
   agendaPoints: 3,
-  // onScore: { Resolve: function () { ... } },
+  _aiUsedThisTurn: false,
+  responseOnCorpTurnBegins: { Resolve: function () { this._aiUsedThisTurn = false; }, automatic: true },
+  abilities: [
+    {
+      text: "[click]: Trace[2]. If successful, give the Runner 1 tag.",
+      Enumerate: function () {
+        if (!corp.scoreArea.includes(this) || !CheckActionClicks(corp, 1)) return [];
+        if (corp.AI && !this._aiWouldUse()) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        this._aiUsedThisTurn = true;
+        Trace(2, function (successful) {
+          if (successful) AddTags(1);
+        }, this);
+      },
+    },
+  ],
+  //Once per turn against an untagged Runner when the Corp can outbid the public link plus a
+  //2-credit Runner boost and still keep 2 credits.
+  _aiWouldUse: function () {
+    if (this._aiUsedThisTurn || runner.tags > 0) return false;
+    var needed = Math.max(0, Link() + 2 + 1 - 2);
+    return AvailableCredits(corp, "trace") >= needed + 2;
+  },
+  AITriggerWhenCan: true,
 };
 
 //TMI (2017)
@@ -302,7 +738,7 @@ cardSet[2016] = {
 cardSet[2017] = {
   title: "TMI",
   imageFile: "02017.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1215,
   player: corp,
   faction: "NBN",
   influence: 1,
@@ -310,12 +746,33 @@ cardSet[2017] = {
   subTypes: ["Barrier"],
   rezCost: 3,
   strength: 5,
+  responseOnRez: {
+    Enumerate: function (card) {
+      return card == this ? [{}] : [];
+    },
+    Resolve: function () {
+      Trace(2, function (successful) {
+        if (!successful && this.rezzed) Derez(this);
+      }, this);
+    },
+    text: "TMI: Trace[2]",
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "End the run.",
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 100, h: 16 },
+    },
   ],
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["endTheRun"]]];
     return result;
+  },
+  //AI: rez only with enough left after the rez cost to beat the public link.
+  RezUsability: function () {
+    return AvailableCredits(corp, "rezzing", this) >= RezCost(this) + Math.max(0, Link() + 1 - 2);
   },
 };
 
@@ -327,7 +784,7 @@ cardSet[2017] = {
 cardSet[2019] = {
   title: "Caduceus",
   imageFile: "02019.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1544,
   player: corp,
   faction: "Weyland Consortium",
   influence: 2,
@@ -336,10 +793,28 @@ cardSet[2019] = {
   rezCost: 3,
   strength: 3,
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[3]. If successful, the Corp gains 3[c].",
+      Resolve: function () {
+        Trace(3, function (successful) {
+          if (successful) GainCredits(corp, 3);
+        }, this);
+      },
+      visual: { y: 73, h: 32 },
+    },
+    {
+      text: "Trace[2]. If successful, end the run.",
+      Resolve: function () {
+        Trace(2, function (successful) {
+          if (successful) EndTheRun();
+        }, this);
+      },
+      visual: { y: 98, h: 16 },
+    },
   ],
+  //Traces are modelled as successful (conservative for the Runner; link and bids are not priced).
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_minor"]], [["endTheRun"]]];
     return result;
   },
 };
@@ -351,7 +826,7 @@ cardSet[2019] = {
 cardSet[2020] = {
   title: "Dracō",
   imageFile: "02020.png",
-  // TODO: Add the exact ELO from https://trash-or-busto.herokuapp.com/ranking
+  elo: 1255,
   player: corp,
   faction: "Neutral",
   influence: 0,
@@ -359,11 +834,57 @@ cardSet[2020] = {
   subTypes: ["Sentry", "Tracer"],
   rezCost: 1,
   strength: 0,
+  power: 0,
+  responseOnRez: {
+    Enumerate: function (card) {
+      return card == this ? [{}] : [];
+    },
+    Resolve: function () {
+      var choices = [];
+      for (var x = 0; x <= 20 && CheckCredits(corp, x, ""); x++)
+        choices.push({ id: x, label: "Spend " + x + "[c] for " + x + " power counters", button: x + "[c]" });
+      if (corp.AI) corp.AI.preferred = { title: this.title, option: choices[Math.min(this._aiCounters(), choices.length - 1)] };
+      DecisionPhase(corp, choices, function (params) {
+        var x = params.id;
+        if (x < 1) return;
+        SpendCredits(corp, x, "", null, function () {
+          AddCounters(this, "power", x);
+        }, this);
+      }, this.title, "Spend credits to place power counters", this);
+    },
+    text: "Dracō: place power counters",
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      return card == this ? Counters(this, "power") : 0;
+    },
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Trace[2]. If successful, give the Runner 1 tag and end the run.",
+      Resolve: function () {
+        Trace(2, function (successful) {
+          if (successful) AddTags(1, function () { EndTheRun(); }, this);
+        }, this);
+      },
+      visual: { y: 143, h: 32 },
+    },
   ],
+  //Counters to buy: one above the strongest installed killer or AI breaker (2 if none),
+  //keeping 2 credits back. Read-only.
+  _aiCounters: function () {
+    var strongest = 0, found = false;
+    InstalledCards(runner).forEach(function (card) {
+      if (CheckSubType(card, "Icebreaker") && (CheckSubType(card, "Killer") || CheckSubType(card, "AI"))) {
+        found = true;
+        strongest = Math.max(strongest, Strength(card));
+      }
+    });
+    var target = found ? Math.min(strongest + 1, 6) : 2;
+    return Math.max(0, Math.min(target, AvailableCredits(corp) - 2));
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["tag", "endTheRun"]]];
     return result;
   },
 };

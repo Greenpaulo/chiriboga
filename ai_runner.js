@@ -1679,6 +1679,24 @@ console.log(this.preferred);
 		}
 	}
 
+	//installed cards declaring a useful paid ability while approaching a piece of ice (e.g. Cortez Chip):
+	//AITriggerOnIceApproach(ice) returns the ability alt to use now, or a falsy value
+	if (optionList.includes("trigger") && attackedServer !== null && currentPhase.identifier == "Run 2.1") {
+		var approachedIce = GetApproachEncounterIce();
+		var approachCards = ActiveCards(runner);
+		for (var i = 0; approachedIce && i < approachCards.length; i++) {
+			if (typeof approachCards[i].AITriggerOnIceApproach != "function") continue;
+			var approachAlt = approachCards[i].AITriggerOnIceApproach.call(approachCards[i], approachedIce);
+			if (!approachAlt) continue;
+			if (!ChoicesAbility(approachCards[i]).some(function (a) { return a.alt == approachAlt; })) continue;
+			this._log("there is a card I would trigger while approaching this ice");
+			return this._returnPreference(optionList, "trigger", {
+				cardToTrigger: approachCards[i],
+				abilityAlt: approachAlt,
+			});
+		}
+	}
+
     if (optionList.includes("jack")) {
       if (currentPhase.identifier == "Run 4.3" && approachIce == 0) {
         //past last ice, choosing whether to approach server

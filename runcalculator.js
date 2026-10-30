@@ -1341,9 +1341,11 @@ class RunCalculator {
 		  }
 		  var highestTrashDiscount = 0;
 		  if (htcCard) {
-			  for (var i=0; i<installedRunnerCards.length; i++) {
-				if (typeof installedRunnerCards[i].AIReducesTrashCost == "function") {
-					var ictd = installedRunnerCards[i].AIReducesTrashCost.call(installedRunnerCards[i],htcCard);
+			  //the identity can also pay trash costs (Whizzard: Master Gamer)
+			  var trashReducers = installedRunnerCards.concat(runner.identityCard ? [runner.identityCard] : []);
+			  for (var i=0; i<trashReducers.length; i++) {
+				if (typeof trashReducers[i].AIReducesTrashCost == "function") {
+					var ictd = trashReducers[i].AIReducesTrashCost.call(trashReducers[i],htcCard);
 					if (ictd > highestTrashDiscount) highestTrashDiscount = ictd;
 				}
 			  }

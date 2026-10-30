@@ -2447,7 +2447,12 @@ function TraceStrengthDecisions(baseStrength, callback, context) {
               var successful = traceStrength > linkStrength;
               if (successful) Log("Trace successful");
               else Log("Trace unsuccessful");
-              callback.call(context, successful);
+              //responseOnTraceSuccessful: triggers on a successful trace (e.g. Spinal Modem).
+              //With no triggers the callback runs synchronously, as before.
+              if (successful) TriggeredResponsePhase(playerTurn, "responseOnTraceSuccessful", [], function () {
+                callback.call(context, true);
+              }, "Trace Successful");
+              else callback.call(context, false);
             },
             this
           );

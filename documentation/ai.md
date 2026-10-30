@@ -2344,6 +2344,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEncounterAbility(rc, result, point, iceAI)` | function | Add Run Calculator points for a non-breaker encounter ability; a persistent with `addSubTypes` makes later breaker steps see the gained subtypes, and one with `strengthMod` and `target` changes that ice's strength for the rest of the route |
 | `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
 | `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
+| `AITriggerOnIceApproach(ice)` | function | Runner: at Run 2.1 (approaching `ice`), return the alt of a paid ability to use now, or falsy. Read-only apart from caching its own target (Cortez Chip, Genesis) |
 | `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select, followUp?}` when this card's ability can install the grip card more cheaply than the basic install action; `followUp` names a paid ability to trigger next |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
@@ -3928,3 +3929,35 @@ competing-plan policies are recorded in the set's optimisation queue.
   option and known-root run planning), `AIWouldPlay()` (no active Lockdown and
   an agenda in HQ or a remote) and `AIPlayWhenCan`. Runner run planning does
   not price the cost on unknown cards.
+### Genesis: What Lies Ahead card hooks
+
+- Whizzard: Master Gamer is the first identity with `recurringCredits`; the
+  Runner 1.2 refill already covers identities. Its `AIReducesTrashCost(card)`
+  is read by the run calculator's trash-cost pricing, which now also consults
+  `runner.identityCard` alongside installed cards.
+- Spinal Modem uses the engine trigger `responseOnTraceSuccessful` (fired by
+  `TraceStrengthDecisions` after a successful trace, before the trace's own
+  success callback; synchronous when nothing responds). Runner run planning
+  does not yet price the core damage from traced subroutines.
+- Cortez Chip uses `AITriggerOnIceApproach(ice)`, consumed by the Runner
+  command selector at Run 2.1 during a run: return a paid-ability alt to
+  trigger now, or falsy. Cortez returns `cortez_tax` for an unrezzed approached
+  ice while the Corp's public available credits are 1–7, and caches that ice
+  so the ability's `Enumerate` offers only it to the AI.
+- The Helpful AI uses `AIEncounterAbility` to add, once per route, a
+  persistent +2 `card_str_mods` entry on an installed icebreaker (charged as
+  `misc_minor`); the encounter selector then triggers it, and its `Enumerate`
+  offers the AI the breaker named by the cached path.
+- Plascrete Carapace uses `AIMeatDamagePrevention()` (remaining power
+  counters) and, for the AI, offers only the maximum prevention.
+- Corp cards reuse existing contracts: Ash 2X3ZB9CY (`modifyAccessCardAllowed`
+  lock that survives Ash leaving play, `AIAccessLimit` 0 in its server with the
+  trace modelled as successful, `AIDefensiveValue`, `AILimitPerServer`,
+  `AIRezWhenCan` during a run on its server); Janus 1.0 (Eli 1.0 click-break
+  `AIImplementBreaker`/`AIBreakCost`, `coreDamage` subroutines); TMI
+  (`RezUsability`: rez only with credits left to beat public link by one);
+  Restructured Datapool (`AITriggerWhenCan` with an `Enumerate` gate: once per
+  Corp turn, untagged Runner, credits to outbid link plus a 2-credit boost);
+  Dracō (inline `corp.AI.preferred` counter purchase). Mandatory Upgrades is
+  the first `modifyAllottedClicks` card; Braintrust lowers `RezCost` via
+  `modifyRezCost`, so AI rez/affordability checks see it.
