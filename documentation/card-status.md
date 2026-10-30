@@ -25,7 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `genesis` | in-progress | 120 | 104 | 16 | 35 | 4 | 63 / 97 | true / true | no |
+| `genesis` | in-progress | 120 | 104 | 16 | 17 | 2 | 75 / 97 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -76,24 +76,6 @@ None.
 - 02110 Eli 1.0: no definition
 - 02112 Ronin: no definition
 - 02115 Project Beale: no definition
-- 02061 Disrupter: 2 scaffold marker(s)
-- 02062 Force of Nature: 2 scaffold marker(s)
-- 02064 Doppelgänger: 2 scaffold marker(s)
-- 02065 Crescentus: 2 scaffold marker(s)
-- 02066 Deus X: 2 scaffold marker(s)
-- 02067 All-nighter: 2 scaffold marker(s)
-- 02068 Inside Man: 2 scaffold marker(s)
-- 02069 Underworld Contact: 2 scaffold marker(s)
-- 02070 Green Level Clearance: 2 scaffold marker(s)
-- 02071 Hourglass: 3 scaffold marker(s)
-- 02072 Dedicated Server: 2 scaffold marker(s)
-- 02073 Bullfrog: 3 scaffold marker(s)
-- 02074 Uroboros: 3 scaffold marker(s)
-- 02075 Net Police: 2 scaffold marker(s)
-- 02076 Weyland Consortium: Because We Built It: 2 scaffold marker(s)
-- 02077 Government Contracts: 2 scaffold marker(s)
-- 02078 Tyrant: 3 scaffold marker(s)
-- 02079 Oversight AI: 2 scaffold marker(s)
 - 02101 Retrieval Run: 2 scaffold marker(s)
 - 02102 Darwin: 2 scaffold marker(s)
 - 02103 Data Leak Reversal: 2 scaffold marker(s)
@@ -111,8 +93,6 @@ None.
 - 02118 Dedicated Response Team: 2 scaffold marker(s)
 - 02119 Burke Bugs: 3 scaffold marker(s)
 - 02120 Corporate War: 2 scaffold marker(s)
-- 02062 Force of Nature: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02066 Deus X: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02102 Darwin: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02104 Faerie: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 
