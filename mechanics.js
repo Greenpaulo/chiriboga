@@ -2105,7 +2105,7 @@ function Steal() {
 	
     MoveCard(intended.steal, runner.scoreArea);
     RecordPublicPostureEvent("agendaStolen", intended.steal, postureStealServer);
-    RecordTurnEvent("runnerAgendaStolen");
+    if (typeof RecordTurnEvent == "function") RecordTurnEvent("runnerAgendaStolen");
     intended.steal.faceUp = true;
     if (runner.AI != null) runner.AI.LoseInfoAboutHQCards(intended.steal);
     Log(GetTitle(intended.steal, true) + " stolen");
@@ -2312,7 +2312,7 @@ function AddCounters(card, counter, num = 1) {
   card[counter] += num;
   if (counter == "advancement" && num > 0) RecordPublicPostureEvent("advancementPlaced", card, null, num);
   //Surge: remember installed Runner programs that received virus counters this turn
-  if (counter == "virus" && num > 0 && card.player == runner && CheckCardType(card, ["program"]) && CheckInstalled(card)) {
+  if (counter == "virus" && num > 0 && typeof RecordTurnEventCard == "function" && card.player == runner && CheckCardType(card, ["program"]) && CheckInstalled(card)) {
     RecordTurnEvent("runnerProgramVirusCounters");
     RecordTurnEventCard("runnerProgramVirusCounters", card);
   }
