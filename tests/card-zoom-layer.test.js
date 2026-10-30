@@ -61,7 +61,7 @@ const scaleContext = {
 };
 let panels = {};
 Object.assign(context, {window: scaleContext.window, fieldZoom: 1,
-  cardRenderer: {browserPixelRatio: 1, app: {stage: {toLocal: point => point}}}});
+  cardRenderer: {openingPixelRatio: 1, app: {stage: {toLocal: point => point}}}});
 context.document.getElementById = id => panels[id] ? {getBoundingClientRect: () => panels[id]} : null;
 const runner = {grip: []}, corp = {HQ: {cards: []}};
 Object.assign(context, {runner, corp, viewingPlayer: runner});
@@ -71,8 +71,8 @@ const rotationStart = rendererSource.indexOf('if (dispDiff.r > Math.PI)');
 const rotationEnd = rendererSource.indexOf('this.UpdateGlow();', rotationStart);
 vm.runInContext('function animateRotation(target) { var dispDiff = {r: target - this.sprite.rotation}; var deltaVec = {x: 0, y: 0, r: 0};' +
   rendererSource.slice(rotationStart, rotationEnd) + '}', scaleContext);
-const preview = ({width = 1440, height = 1000, zoom = 1, browserZoom = 1, enlarged = true, faceUp = true, canView = false, dragging = false, pressed = false, hand = false, side = runner, rotated = false, transition = false, controls = {}} = {}) => {
-  Object.assign(scaleContext.window, {innerWidth: width, innerHeight: height, devicePixelRatio: browserZoom * context.cardRenderer.browserPixelRatio});
+const preview = ({width = 1440, height = 1000, zoom = 1, browserZoom = 1, pixelRatio, enlarged = true, faceUp = true, canView = false, dragging = false, pressed = false, hand = false, side = runner, rotated = false, transition = false, controls = {}} = {}) => {
+  Object.assign(scaleContext.window, {innerWidth: width, innerHeight: height, devicePixelRatio: pixelRatio ?? browserZoom * context.cardRenderer.openingPixelRatio});
   scaleContext.fieldZoom = zoom;
   context.fieldZoom = zoom;
   panels = controls;
@@ -258,23 +258,38 @@ const fitContext = {pixi_browserZoom: context.pixi_browserZoom,
   serverSeparationX: 40, corp: {remoteServers: []}, totalServersWidth: 1100,
   arbitraryHistorySpacer: 55};
 vm.createContext(fitContext);
-// Opening/reloading at a saved zoom must not make that zoom the preview baseline.
-for (const density of [1, 2]) {
-  for (const openingZoom of [0.8, 1, 1.25, 1.5, 2]) {
-    Object.assign(context.window, {outerWidth: 1440, innerWidth: 1440 / openingZoom,
-      devicePixelRatio: density * openingZoom});
-    context.cardRenderer.browserPixelRatio = context.pixi_displayPixelRatio();
-    assert(Math.abs(context.cardRenderer.browserPixelRatio - density) < 1e-9);
-    for (const browserZoom of [1, 1.25, 1.5, 2]) {
-      const bounds = preview({width: 1440 / browserZoom, height: 1000 / browserZoom,
-        browserZoom, zoom: 2});
-      assert(Math.abs(bounds.width * browserZoom - 450) < 0.01,
-        'preview size must survive reload at increased zoom and returning to 100%');
+// Window chrome and docked panels cannot establish absolute startup zoom.
+// Use the actual opening pixel ratio as baseline, including non-grid zooms.
+for (const density of [1, 1.25, 2]) {
+  for (const openingZoom of [0.8, 1, 1.25, 1.33, 1.5, 2]) {
+    for (const panelWidth of [0, 432]) {
+      Object.assign(context.window, {outerWidth: 1440,
+        innerWidth: (1440 - panelWidth) / openingZoom,
+        devicePixelRatio: density * openingZoom});
+      context.cardRenderer.openingPixelRatio = context.pixi_openingPixelRatio();
+      assert.strictEqual(context.cardRenderer.openingPixelRatio, density * openingZoom,
+        'opening baseline uses the actual pixel ratio without viewport inference or rounding');
+      assert.strictEqual(context.pixi_browserZoom(), 1, 'opening zoom is the session baseline');
+      for (const actualZoom of [1, 1.33, 1.5, 2]) {
+        const bounds = preview({width: (1440 - panelWidth) / actualZoom, height: 2000 / actualZoom,
+          pixelRatio: density * actualZoom, zoom: 2});
+        assert(Math.abs(context.pixi_browserZoom() - actualZoom / openingZoom) < 1e-9,
+          'later zoom changes are measured exactly relative to opening zoom');
+        assert(Math.abs(bounds.width * actualZoom - 450 * openingZoom) < 0.01,
+          'preview retains its opening screen size without cancelling estimator errors');
+      }
+      // Opening and closing a panel after load must not change the zoom signal.
+      Object.assign(context.window, {innerWidth: 1008, devicePixelRatio: density * openingZoom});
+      assert.strictEqual(context.pixi_browserZoom(), 1);
+      context.window.innerWidth = 1440;
+      assert.strictEqual(context.pixi_browserZoom(), 1);
     }
   }
 }
+context.window.devicePixelRatio = undefined;
+assert.strictEqual(context.pixi_openingPixelRatio(), 1, 'missing pixel ratio has a neutral fallback');
 for (const density of [1, 2]) {
-  context.cardRenderer.browserPixelRatio = density;
+  context.cardRenderer.openingPixelRatio = density;
   let startingScale;
   for (const browserZoom of [1, 1.25, 1.5, 2, 0.8]) {
     const width = 1440 / browserZoom, height = 1000 / browserZoom;
