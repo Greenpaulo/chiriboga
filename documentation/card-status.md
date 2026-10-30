@@ -29,7 +29,7 @@ in card-sets.md.
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 59 / 68 | false / false | yes |
 | `downfall` | playable | 65 | 65 | 0 | 0 | 0 | 55 / 61 | false / false | no |
-| `uprising` | in-progress | 65 | 65 | 0 | 10 | 0 | 50 / 62 | true / true | no |
+| `uprising` | in-progress | 65 | 65 | 0 | 11 | 0 | 51 / 62 | true / true | no |
 | `systemupdate2021` | playable | 82 | 82 | 0 | 0 | 0 | 68 / 72 | false / false | yes |
 | `midnightsun` | not-implemented | 65 | 12 | 53 | 0 | 0 | 10 / 11 | true / true | no |
 | `parhelion` | not-implemented | 63 | 4 | 59 | 0 | 0 | 4 / 4 | true / true | no |
@@ -78,9 +78,10 @@ None.
 - 26121 Transport Monopoly: 1 scaffold marker(s)
 - 26122 Wall to Wall: 1 scaffold marker(s)
 - 26123 Akhet: 2 scaffold marker(s)
-- 26128 Cyberdex Sandbox: 1 scaffold marker(s)
-- 26129 False Lead: 1 scaffold marker(s)
-- 26130 NAPD Cordon: 1 scaffold marker(s)
+- 26124 Colossus: 2 scaffold marker(s)
+- 26125 Winchester: 2 scaffold marker(s)
+- 26126 Argus Crackdown: 1 scaffold marker(s)
+- 26127 Cayambe Grid: 1 scaffold marker(s)
 
 ### `systemupdate2021` (sets/systemupdate2021.js)
 

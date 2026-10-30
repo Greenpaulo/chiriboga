@@ -69,7 +69,8 @@ Active implementation set (26066–26130). `sets/uprising.js` defines all 65 car
 Batches 1–12 (26066–26116) are complete with baseline AI, including the six
 pre-existing definitions (26073, 26088, 26090, 26091, 26094, 26095), which were
 verified and repaired where needed. Their optimisation rows are Pending in the
-tracker. Batches 13–16 (26117–26130) remain scaffolds with TODO markers. See the
+tracker. Batch 16 (26128–26130) is complete; batches 13–15 (26117–26127) remain
+scaffolds with TODO markers. See the
 [active tracker](current-set-implementation.md) and
 [implementation notes](uprising-implementation-notes.md).
 

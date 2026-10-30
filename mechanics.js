@@ -1299,10 +1299,13 @@ function Purge(afterPurge, context) {
   });
   if (numPurged > 0) PlaySound('purge');
   Log("Virus counters purged");
+  // Ordinal for "the first time each turn you purge" (Cyberdex Sandbox).
+  var purgeOrdinal =
+    typeof RecordTurnEvent == "function" ? RecordTurnEvent("corpPurge") : 0;
   TriggeredResponsePhase(
     playerTurn,
     "responseOnPurge",
-    [numPurged],
+    [numPurged, purgeOrdinal],
     function () {
       if (typeof afterPurge === "function") afterPurge.call(context, numPurged);
     },

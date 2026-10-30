@@ -5482,7 +5482,42 @@ cardSet[26128] = {
   subTypes: ["Security"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  // Purge() records each purge's turn ordinal, including purges made before
+  // this agenda was scored (so a second purge this turn gains nothing).
+  responseOnPurge: {
+    Enumerate: function (numPurged, purgeOrdinal) {
+      return purgeOrdinal === 1 && corp.scoreArea.includes(this) ? [{}] : [];
+    },
+    Resolve: function () { GainCredits(corp, 4, "", this); },
+    automatic: true,
+    text: "Cyberdex Sandbox: gain 4[c]",
+  },
+  responseOnScored: {
+    Enumerate: function () { return intended.score == this ? [{}] : []; },
+    Resolve: function () {
+      var choices = [
+        { id: 1, label: "Purge virus counters", button: "Purge" },
+        { id: 0, label: "Do not purge", button: "Continue" },
+      ];
+      if (corp.AI) {
+        var purge = this.AIPurgeOnScore();
+        choices = choices.filter(function (choice) { return (choice.id == 1) === purge; });
+      }
+      DecisionPhase(corp, choices, function (params) {
+        if (params.id == 1) Purge();
+      }, this.title, "Purge virus counters?", this);
+    },
+    text: "Cyberdex Sandbox: you may purge virus counters",
+  },
+  AIPurgeIncome: function () {
+    return corp.scoreArea.includes(this) && TurnEventCount("corpPurge") < 1 ? 4 : 0;
+  },
+  AIPurgeOnScore: function () {
+    if (TurnEventCount("corpPurge") < 1) return true; // scored first, so the purge pays 4
+    return InstalledCards(runner).some(function (card) {
+      return Counters(card, "virus") > 0 || card.AIDisabledByPurge === true;
+    });
+  },
 };
 
 //False Lead (26129)
@@ -5498,7 +5533,30 @@ cardSet[26129] = {
   subTypes: ["Security"],
   advancementRequirement: 3,
   agendaPoints: 1,
-  // onScore: { Resolve: function () { ... } },
+  abilities: [
+    {
+      text: "Forfeit this agenda: If the Runner has 2 or more [click] remaining, they lose [click][click].",
+      Enumerate: function () {
+        if (!corp.scoreArea.includes(this) || this.cannotForfeit) return [];
+        if (corp.AI && !this.AITriggerInPaidWindow()) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        Forfeit(this, function () {
+          if (runner.clickTracker >= 2) LoseClicks(runner, 2);
+        });
+      },
+    },
+  ],
+  // Spend the point at the start of a Runner turn (outside a run) when the
+  // Runner is near winning or a Corp remote holds an agenda.
+  AITriggerInPaidWindow: function () {
+    if (playerTurn !== runner || attackedServer || runner.clickTracker < 2) return false;
+    if (AgendaPoints(runner) + 2 >= AgendaPointsToWin()) return true;
+    return corp.remoteServers.some(function (server) {
+      return corp.AI._agendaPointsInServer(server) > 0;
+    });
+  },
 };
 
 //NAPD Cordon (26130)
@@ -5514,7 +5572,24 @@ cardSet[26130] = {
   cardType: "operation",
   subTypes: ["Lockdown"],
   playCost: 0,
-  Resolve: function (params) {
-    // TODO: Implement effect
+  trashCost: 2,
+  Enumerate: function () {
+    var active = ActiveLockdown();
+    return !active || active === this ? [{}] : [];
   },
+  Resolve: function () { Log("NAPD Cordon is active until the next Corp turn"); },
+  modifyStealCost: {
+    Resolve: function (agenda) {
+      return { credits: 4 + 2 * (agenda ? Counters(agenda, "advancement") : 0) };
+    },
+  },
+  AIWouldPlay: function () {
+    if (ActiveLockdown()) return false;
+    // Taxes the next Runner turn's steals: useful while an agenda is exposed.
+    if (corp.AI._agendasInHand() > 0) return true;
+    return corp.remoteServers.some(function (server) {
+      return corp.AI._agendaPointsInServer(server) > 0;
+    });
+  },
+  AIPlayWhenCan: 1,
 };

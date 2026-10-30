@@ -2408,6 +2408,8 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIEmergencyDraw` | number | Immediate cards drawn after installing/rezzing this card during critical protection recovery |
 | `AIGlobalETRUses(server)` | function | Number of active global end-the-run uses the Corp will spend defending this server |
 | `AITriggerInPaidWindow()` | function | Declare a useful legal paid ability in the current window |
+| `AIPurgeIncome()` | function | Read-only credits this active Corp card gains if the Corp purges now; summed by `_purgeIncome()` for the main-phase purge decision (Uprising batch 16) |
+| `AIPurgeOnScore()` | function | Agenda: true when the optional on-score purge should be taken (Uprising batch 16) |
 | `AITriggerAfterTactics` | boolean | Delay an `AITriggerWhenCan` setup action until kills, scoring, defense and priority installs are considered |
 | `AIMandatoryPassCost(breaker, server, iceIndex, ai, evaluationContext)` | function | Price a mandatory ICE passage when ETR subroutines have payment alternatives |
 | `AIBreakCost(iceCard, subroutineCount, server)` | function | ICE: linear native `{credits, clicks}` costs for the honest verdict. Installed breaker: exact `{credits, clicks, counters}` costs for both verdicts; `null` means unknown (§5.3) |
@@ -3892,3 +3894,29 @@ competing-plan policies are recorded in the set's optimisation queue.
   Its first subroutine's inline counter choice prefers an installed agenda
   within 2 of its requirement, then Akhet below 3 counters, then any other
   agenda or advanceable ICE below its limit.
+### Uprising batch 16 card hooks
+
+- `Purge()` records the `corpPurge` turn event and passes its ordinal as the
+  second `responseOnPurge` parameter (`Enumerate(numPurged, purgeOrdinal)`),
+  so "the first time each turn you purge" counts purges made before the card
+  became active. Cyberdex Sandbox gains 4 only on ordinal 1 while scored.
+- Cyberdex Sandbox `AIPurgeIncome()` returns 4 while scored and no purge has
+  happened this turn, else 0. It must be read-only. The Corp main-phase purge
+  check (`Phase_Main`, after `_ordinaryPurgeOutcome()`) takes the basic purge
+  as an economy action when `_purgeIncome()` exceeds the three credits of
+  clicking and `_sufficientEconomy()` is false. It is evaluated only when the
+  purge command is legal, never in the run calculator.
+- Cyberdex Sandbox `AIPurgeOnScore()` filters its on-score decision for the
+  AI: purge while the income is still available, otherwise only when the
+  Runner has virus counters or purge-disabled cards. Humans get both choices.
+- False Lead's score-area paid ability uses `AITriggerInPaidWindow()` (Event
+  Horizon pattern: the ability's `Enumerate` returns nothing to the AI unless
+  the hook agrees, so generic "trigger" defaults cannot forfeit it). It fires
+  on the Runner's turn outside a run while the Runner has at least two clicks,
+  when the Runner is within two points of winning or a Corp remote holds an
+  agenda. Corp security does not model the lost Runner clicks.
+- NAPD Cordon uses the shared Lockdown lifecycle, `modifyStealCost` (4 plus 2
+  per advancement counter, read by `StealCost`/`CheckSteal`, the access steal
+  option and known-root run planning), `AIWouldPlay()` (no active Lockdown and
+  an agenda in HQ or a remote) and `AIPlayWhenCan`. Runner run planning does
+  not price the cost on unknown cards.

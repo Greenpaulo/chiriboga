@@ -189,6 +189,17 @@ class CorpAI {
     );
   }
 
+  //Credits active Corp cards would gain from a purge now (AIPurgeIncome hooks).
+  _purgeIncome() {
+    var cards = ActiveCards(corp);
+    var total = 0;
+    for (var i = 0; i < cards.length; i++) {
+      if (typeof cards[i].AIPurgeIncome == "function")
+        total += cards[i].AIPurgeIncome.call(cards[i]) || 0;
+    }
+    return total;
+  }
+
   _purgeServerHasStakes(server) {
     if (server == corp.HQ) return this._agendasInHand() > 0;
     if (server == corp.RnD || server == corp.archives)
@@ -8843,6 +8854,9 @@ class CorpAI {
       //would it be worth purging?
       if (optionList.indexOf("purge") > -1) {
         var purgeOutcome = this._ordinaryPurgeOutcome();
+        //Card-declared purge income (Cyberdex Sandbox) beats three basic credit clicks.
+        if (!purgeOutcome && !sufficientEconomy && this._purgeIncome() > 3)
+          purgeOutcome = { reason: "purge gains credits" };
         if (purgeOutcome) {
           this._log(purgeOutcome.reason);
           return optionList.indexOf("purge");

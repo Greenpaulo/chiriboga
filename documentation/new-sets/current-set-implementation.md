@@ -70,6 +70,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
 | 15 | 26124–26127 | Complete | Claude, 2026-10-30 | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
 | 16 | 26128–26130 | Pending | — | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
+| 16 | 26128–26130 | Complete | Claude, 2026-10-30 | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
 
 ## Completion log
 
@@ -96,6 +97,8 @@ the shared Lockdown mechanic first needed in batch 9.
 | 13 | 26117–26119 | 2026-10-30 | Claude | `tests/uprising-batch13.test.js` | DRM last-turn HQ restriction, agenda search/reveal/shuffle, optional remote-root install and `corpCannotScore` turn event in `CheckScore`; SYNC Lockdown run-begin pay-or-tag with `AIRunBeginTax` in the run calculator; Ganked! R&D reveal and access-time forced encounter (`ForceEncounter` approach index, post-success ETR to run end). Real Corp/Runner selectors and calculator. See notes. |
 
 | 15 | 26124–26127 | 2026-10-30 | Claude | `tests/uprising-batch15.test.js` | Colossus advanceable strength/threshold subs; Winchester traces and HQ-only gained ETR subroutine; Argus Crackdown Lockdown meat damage on iced servers; Cayambe Grid counter placement and approach tax. New Runner calculator hooks `AIRunSuccessfulMeatDamage`, `AIRunApproachCredits`; Corp security via `AIApproachDefense`. Focused tests only (no full suite, per batch-parallel instructions). See notes. |
+
+| 16 | 26128–26130 | 2026-10-30 | Claude | `tests/uprising-batch16.test.js` | Cyberdex Sandbox first-purge income via a new `corpPurge` turn event passed to `responseOnPurge`, optional score purge, purge-as-economy Corp AI (`AIPurgeIncome`); False Lead score-area forfeit ability gated by `AITriggerInPaidWindow`; NAPD Cordon Lockdown `modifyStealCost` (4 + 2/advancement). Focused tests only; full suite deferred to the batch 13–16 merge. |
 
 ## Batch-review log
 
@@ -132,6 +135,8 @@ initialised when each implementation batch completes.
 | 13 | 26117–26119 | Pending | — | DRM tutor target/sequence and scoring-turn timing; SYNC play timing and Runner pay-vs-tag trade-off (tags priced only by the generic tag limit); Ganked! target choice vs. installed breakers, Runner planning of forced encounters from access, and placement/bluff value. See implementation notes. |
 
 | 15 | 26124–26127 | Pending | — | Winchester traces priced as certain (no link/bid model) in both run and security evaluation; Colossus advance timing vs. other spending; Argus play timing (played whenever any ice exists) and kill-combo planning; Cayambe target ice/rez timing, and the Runner's approach payment requires the planner's full complete run (including budgeted trash costs). See implementation notes. |
+
+| 16 | 26128–26130 | Pending | — | Sandbox purge-for-income only when `_sufficientEconomy()` is false (no comparison with install/advance plans); False Lead timing is a turn-start heuristic, lost Runner clicks not modeled in Corp security; NAPD Cordon play timing (first click via `AIPlayWhenCan`), no Corp security/Runner planning for steal costs on unknown cards. See implementation notes. |
 
 ## Optimisation log
 

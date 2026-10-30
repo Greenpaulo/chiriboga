@@ -866,3 +866,48 @@ turn-begin response window, run calculator and Corp security evaluation).
   Runner grip size or kill combos. Cayambe target choice does not plan around
   derez/trash risk. The Runner pays the approach tax only when the planner's
   complete run (which budgets known root trash costs) is still affordable.
+## Batch 16 — 2026-10-30, Claude
+
+Neutral Corp: Cyberdex Sandbox (26128), False Lead (26129), NAPD Cordon (26130).
+Focused tests: `tests/uprising-batch16.test.js`.
+
+- **Shared engine:** `Purge()` (`mechanics.js`) records a `corpPurge` turn
+  event and passes its ordinal as the second `responseOnPurge` parameter.
+  Existing purge responses ignore it. Purges before Sandbox was scored count,
+  so a second purge in the turn (including the on-score purge after an earlier
+  one) gains nothing.
+- **Shared Corp AI:** `_purgeIncome()` sums `AIPurgeIncome()` from active Corp
+  cards; `Phase_Main` takes the basic purge when no ordinary purge outcome
+  applies, income exceeds 3 and `_sufficientEconomy()` is false. Evaluated
+  only when purge is legal (start of turn, three clicks); no run-calculator
+  cost.
+- **Cyberdex Sandbox:** optional on-score purge through a Corp decision; the
+  scored Sandbox is active when the purge resolves, so a first purge pays 4.
+  The AI purges while the income is available, otherwise only against public
+  virus counters or purge-disabled Runner cards.
+- **False Lead:** score-area paid ability, no click cost, usable in any Corp
+  paid window. The forfeit is paid even with fewer than two Runner clicks
+  (then nothing is lost). The AI ability is hidden unless
+  `AITriggerInPaidWindow()` agrees (Runner turn, outside a run, at least two
+  Runner clicks, Runner within two points of winning or a remote agenda
+  installed), so generic default "trigger" choices cannot forfeit it.
+- **NAPD Cordon:** shared Lockdown lifecycle (stays in `corp.resolvingCards`
+  until the next Corp turn begins; no second Lockdown). `modifyStealCost`
+  returns 4 + 2 per advancement counter on the accessed agenda; `StealCost`,
+  `CheckSteal` and the access phase already consume it, so an unaffordable
+  steal leaves only the decline option. Printed trash cost 2 is recorded as
+  metadata, as with NEXT; no engine path lets the Runner trash an active
+  Lockdown.
+- **Baseline evidence:** real `Score()` purge decision; real Corp command
+  selector chooses purge (Sandbox scored, Corp short of rez credits) and not
+  without Sandbox; real `Runner 1.1` paid window selects False Lead's trigger
+  only with stakes; real Corp command selector plays Cordon with an agenda in
+  HQ; real access phase enumerates, pays and declines the 8-credit steal, and
+  the Runner access selector steals when affordable; expiry removes the cost.
+- **Optimisation:** purge-for-income ignores competing install/advance plans;
+  False Lead uses a turn-start heuristic and lost Runner clicks are absent
+  from Corp security; Cordon plays at the first opportunity, and neither Corp
+  security nor Runner run planning prices steal costs on unknown cards.
+- **Validation:** focused tests only (batch file, `ai-hook-docs`, purge/steal
+  consumers, Corp decision fixtures and snapshots). The full suite and §5
+  integration checks are deferred to the batches 13–16 merge.
