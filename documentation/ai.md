@@ -632,6 +632,25 @@ AIEconomyTrigger: 2,  // click-for-credit type abilities
 AIEconomyTrigger: 1,  // slower economy
 ```
 
+**`AIEconomyTriggerAlt()`** (Runner, optional, with `AIEconomyTrigger`)
+
+For a card with several click abilities, return the `alt` of the ability the
+economy trigger path should use now (each ability declares its own `alt`).
+`RunnerAI` copies it into the trigger preference's `abilityAlt`, so the
+ability-selection decision picks the matching option. Return `undefined` or
+`null` to accept the first legal ability. Read-only; called only in the
+Runner's action phase after `ChoicesAbility` confirms the card can trigger,
+so the returned ability must be legal whenever `AIWouldTrigger` allows it.
+
+```js
+// Kati Jones (2091): keep building the stash, take it once it is large or money is short
+AIEconomyTriggerAlt: function () {
+  var hosted = Counters(this, "credits");
+  if (hosted >= 9 || (hosted >= 3 && Credits(runner) < 3)) return "take";
+  return "place";
+},
+```
+
 **`AIWouldTrigger()`**
 
 Return `true` to allow the ability to be triggered. Return `false` to skip it this turn. Use this for conditional economy cards:
@@ -1909,6 +1928,16 @@ Marks a Corp economy operation for the main-phase economy policy. Higher
 values are considered first among card-declared economy plays; normal play
 legality, `Enumerate()` and `AIWouldPlay()` still decide whether it can be used.
 
+**`AIEconomyTrigger`** (number, Corp) and **`AIWouldTrigger()`**
+
+An active Corp card whose click ability provides economy but whose text the
+main-phase "gain/take N[c]" pattern does not match (Marked Accounts: "Place
+3[c] from the bank") declares a positive `AIEconomyTrigger` priority. The
+Corp main-phase economy policy (`_bestMainPhaseEconomyOptionCore`) then
+triggers the highest-priority such card with a currently enumerable ability,
+after the text-pattern check; an optional `AIWouldTrigger()` (read-only)
+returns false to skip it. Same names and meaning as the Runner hooks in §4.6.
+
 **`AIPlayWhenCan`** (number)
 
 Marks a Corp operation whose current opportunity should be used proactively.
@@ -2345,6 +2374,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIDrawTrigger` | number | Priority for triggering this active card's ability when the Runner wants cards; `AIWouldTrigger()` can veto. In the action phase only click abilities qualify; free abilities are used in the post-action paid-ability window |
 | `AITriggerInPaidWindow()` | function | Runner: return the alt of a paid ability to use now outside a run, or falsy (Simulchip) |
 | `AITriggerDuringEncounter()` | function | Runner: return the alt of a non-breaking encounter ability to use now (checked first at each mid-encounter `trigger` decision), or falsy (Crescentus) |
+| `AITriggerOnIceApproach(ice)` | function | Runner: at Run 2.1 (approaching `ice`), return the alt of a paid ability to use now, or falsy. Read-only apart from caching its own target (Cortez Chip, Genesis) |
 | `AIInstallDiscountAbility(card, host)` | function | Offer `{alt, discount, select, followUp?}` when this card's ability can install the grip card more cheaply than the basic install action; `followUp` names a paid ability to trigger next |
 | `AIBypassesIce(ice, server, index)` | function | Return targeted bypass availability or credit cost |
 | `AIBypassesOutermostIce(server)` | function | Report a public one-shot outermost bypass |
@@ -2359,6 +2389,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AIRestoreHypotheticalFromRC()` | function | Post-run: restore state after run calculation |
 | `AIEconomyInstall()` | function | Return priority for economy install, 0 to skip |
 | `AIEconomyTrigger` | number | Priority for triggering economy ability |
+| `AIEconomyTriggerAlt()` | function | Runner: `alt` of the ability the economy trigger path uses on a multi-ability card |
 | `AIWouldTrigger()` | function | Return true to allow ability trigger |
 | `AIWouldPlay()` | function | Return true to play this event |
 | `AIWastefulToPlay()` | function | Return true if playing is wasteful |
@@ -2431,6 +2462,7 @@ if (!runner.AI || runner.AI.rc !== rc) {
 | `AITagPunishment` | number | Min tags needed for this punishment op to fire |
 | `AIWouldPlay()` | function | Return true to play this operation |
 | `AIEconomyPlay` | number | Priority for treating a Corp operation as a main-phase economy play |
+| `AIEconomyTrigger` / `AIWouldTrigger()` | number / function | Corp click economy ability the gain/take text pattern misses (§5.6) |
 | `AIPlayWhenCan` | number | Priority for proactively using a currently valid Corp operation opportunity |
 | `AIWouldPlayBeforeScore(card, server)` | function | Return true to play before scoring |
 | `AIIsRecurOrTutor` | bool | True for recursion/tutor ops (lower priority) |
@@ -2987,6 +3019,35 @@ if (!runner.AI || runner.AI.rc !== rc) {
   `AILimitPerServer` 1. The turn-begin placement prefers unadvanced ice, then
   advanceable, then rezzed, then outermost. At approach the Runner AI pays when
   `_calculateBestCompleteRun` still finds a complete run.
+
+### Genesis: Cyber Exodus card hooks
+
+- Nerve Agent: `AIAdditionalAccess(server)` returns its virus counters for
+  HQ (a successful run adds one before the breach); the breach choice prefers
+  the maximum.
+- Joshua B.: `AIWouldTrigger()` gates the optional turn-begin click (untagged,
+  4+ credits) inside its own `Enumerate`.
+- Muresh Bodysuit: `AIMeatDamagePrevention()` returns 1 until used this turn.
+- Snitch: exposes unknown unrezzed ice; jacks out when the recomputed run from
+  the exposed ice cannot complete.
+- Personal Workshop: `AIEconomyTrigger: 1` + `AIWouldTrigger()` host the most
+  expensive non-wasteful program/hardware (install cost 2+);
+  `AIWorthKeeping` keeps it while such a target exists. The 1[c] ability is
+  not used by the AI (optimisation).
+- Public Sympathy: `AIWorthKeeping` when the grip exceeds the hand size.
+- Edge of World: `AIPunishesAccess(server)` = ice protecting the server when
+  3[c] is affordable.
+- Sunset: `AIPlayWhenCan: 1` + `AIWouldPlay`: reorders a server so the
+  strongest ice is outermost when that changes the order.
+- Marked Accounts: `AIEconomyTrigger: 1` with `AIWouldTrigger` (fewer than
+  2 hosted credits), `AIWorthInstalling`, `AIRezWhenCan`, `AIEconomyCard`.
+- Woodcutter: `AIAdvancementLimit` 3 once rezzed; `AIImplementIce` lists one
+  `netDamage` subroutine per counter.
+- Commercialization: `AIEconomyPlay: 2`, `AIWouldPlay` for 2+ credits.
+- Private Contracts: `AIWorthInstalling`, `AIRezWhenCan` (own action phase
+  with a click); the take ability matches the economy text pattern.
+- Chimera: the rez choice takes a subtype with no matching installed breaker;
+  unrezzed planning sees only Mythic.
 
 ## 8. Step-by-Step Worked Example
 
@@ -3953,3 +4014,77 @@ competing-plan policies are recorded in the set's optimisation queue.
 - All-nighter uses `AITriggerInPaidWindow()` (`"allnighter_gain"`) only once a
   Runner turn has begun with it installed, so install-and-use is never click
   neutral in one turn.
+### Genesis: What Lies Ahead card hooks
+
+- Whizzard: Master Gamer is the first identity with `recurringCredits`; the
+  Runner 1.2 refill already covers identities. Its `AIReducesTrashCost(card)`
+  is read by the run calculator's trash-cost pricing, which now also consults
+  `runner.identityCard` alongside installed cards.
+- Spinal Modem uses the engine trigger `responseOnTraceSuccessful` (fired by
+  `TraceStrengthDecisions` after a successful trace, before the trace's own
+  success callback; synchronous when nothing responds). Runner run planning
+  does not yet price the core damage from traced subroutines.
+- Cortez Chip uses `AITriggerOnIceApproach(ice)`, consumed by the Runner
+  command selector at Run 2.1 during a run: return a paid-ability alt to
+  trigger now, or falsy. Cortez returns `cortez_tax` for an unrezzed approached
+  ice while the Corp's public available credits are 1–7, and caches that ice
+  so the ability's `Enumerate` offers only it to the AI.
+- The Helpful AI uses `AIEncounterAbility` to add, once per route, a
+  persistent +2 `card_str_mods` entry on an installed icebreaker (charged as
+  `misc_minor`); the encounter selector then triggers it, and its `Enumerate`
+  offers the AI the breaker named by the cached path.
+- Plascrete Carapace uses `AIMeatDamagePrevention()` (remaining power
+  counters) and, for the AI, offers only the maximum prevention.
+- Corp cards reuse existing contracts: Ash 2X3ZB9CY (`modifyAccessCardAllowed`
+  lock that survives Ash leaving play, `AIAccessLimit` 0 in its server with the
+  trace modelled as successful, `AIDefensiveValue`, `AILimitPerServer`,
+  `AIRezWhenCan` during a run on its server); Janus 1.0 (Eli 1.0 click-break
+  `AIImplementBreaker`/`AIBreakCost`, `coreDamage` subroutines); TMI
+  (`RezUsability`: rez only with credits left to beat public link by one);
+  Restructured Datapool (`AITriggerWhenCan` with an `Enumerate` gate: once per
+  Corp turn, untagged Runner, credits to outbid link plus a 2-credit boost);
+  Dracō (inline `corp.AI.preferred` counter purchase). Mandatory Upgrades is
+  the first `modifyAllottedClicks` card; Braintrust lowers `RezCost` via
+  `modifyRezCost`, so AI rez/affordability checks see it.
+
+
+### Genesis Trace Amount card hooks
+
+- `AIModifyIceAI(iceAI, startIceIdx)` is also read from active Corp cards
+  (Corp cards already active for the Runner are listed once). Sensei uses it
+  to add `endTheRun` to every other ICE once its subroutine has fired this run
+  (public); during a live encounter it replaces the default row of the granted
+  subroutine instead of adding a second one. Its `AIImplementIce` is
+  `misc_serious` only while ICE inward of it remains, else `misc_minor`.
+- Replicating Perfection declares `modifyCannot("run", server)`, read through
+  `RunForbidden(server)` by `CanPayAdditionalRunCosts` (basic run, `MakeRun`,
+  run-event server choices) and by the Runner AI's server list, which drops
+  forbidden servers before computing potentials. The AI does not plan a central
+  run to unlock remotes (optimisation).
+- Vamp: `AIBreachReplacementValue`, `AIBreachNotRequired` and
+  `AIRunEventExtraPotential` on HQ when at least 4 credits can be drained; the
+  AI spends `min(Corp credits, available credits)` and otherwise breaches.
+- Satellite Uplink `AIWouldPlay()` needs two unknown facedown Corp cards, two
+  clicks and 5 credits; it exposes unknown remote roots before unrezzed ICE.
+- e3 Feedback Implants filters its `responseOnSubroutineBroken` choices for
+  the AI to one subroutine still listed in `cachedBestPath` breaks for the
+  encountered ICE (else decline). The Run Calculator does not price e3.
+- Compromised Employee and Notoriety use `AIEconomyInstall` and
+  `AIWouldPlay`/`AIPlayWhenCan` (Runner window-of-opportunity plays).
+- Snowball uses `AIImplementBreaker` at its current strength (this run's
+  growth included; in-route growth is not modelled).
+- Encryption Protocol: `AIWorthInstalling` (one copy, new remote, two clicks
+  left) and `AIRezWhenCan`. Sherlock 1.0: `AIImplementIce`
+  (`misc_moderate` per trace), click `AIImplementBreaker` and `AIBreakCost`.
+- ChiLo City Grid: `AIPreferredUpgradeServer` (server with most Tracer ICE,
+  else hold), `AILimitPerServer`, `AIRezWhenCan` during a run on its server.
+- Power Grid Overload: `AIWouldPlay`/`AIPlayWhenCan`; it sets
+  `corp.AI.preferred = {command: "trace", strengthToIncrease}` so the trace
+  margin reaches its highest-ELO hardware even if the Runner spends all trace
+  credits. Sherlock and ChiLo traces use the default (no boost).
+- Amazon Industrial Zone: its `responseOnInstall` offers the AI only the
+  discounted rez when affordable; `AIPreferredUpgradeServer` (scoring remote,
+  then HQ) and `AIRezWhenCan` (ICE in HQ to follow).
+- Executive Retreat uses `AIDrawAbility: 5`. Big Brother and Freelancer use
+  `AITagPunishment`, `AIWouldPlay` and `AIPlayWhenCan` (Big Brother only with a
+  resource or another punishment to follow; Freelancer only with a resource).

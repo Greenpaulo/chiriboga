@@ -10,6 +10,8 @@
  */
 function CheckAdvance(card) {
   if (card != null) {
+    //canBeAdvanced may be a function for conditional permission (e.g. Woodcutter: only while rezzed)
+    if (typeof card.canBeAdvanced == "function") return !!card.canBeAdvanced.call(card);
     if (card.canBeAdvanced) {
       return true;
     }
@@ -277,6 +279,17 @@ function CheckApproach() {
     return true;
   }
   return false;
+}
+
+/**
+ * Checks whether the Runner may jack out: card effects can forbid it with
+ * modifyCannot("jackOut", null) (Whirlpool).
+ *
+ * @method CheckJackOut
+ * @returns {Boolean} true if jacking out is allowed
+ */
+function CheckJackOut() {
+  return !CardEffectsForbid("jackOut", null);
 }
 
 /**

@@ -25,7 +25,7 @@ in card-sets.md.
 | Set | Decision | Cards | Defined | Missing | Scaffold markers | Missing required AI hook | Any AI hook | config.js hidden / untested | Deck launcher |
 |---|---|---:|---:|---:|---:|---:|---:|---|---|
 | `coreset` | deprecated | 113 | 62 | 51 | 0 | 14 | 16 / 57 | true / true | no |
-| `genesis` | in-progress | 120 | 105 | 15 | 105 | 9 | 19 / 98 | true / true | no |
+| `genesis` | in-progress | 120 | 104 | 16 | 35 | 4 | 63 / 97 | true / true | no |
 | `creationandcontrol` | not-implemented | 55 | 55 | 0 | 0 | 4 | 8 / 49 | true / true | no |
 | `systemgateway` | playable | 77 | 77 | 0 | 0 | 0 | 55 / 68 | false / false | yes |
 | `elevation` | playable | 82 | 82 | 0 | 0 | 0 | 60 / 68 | false / false | yes |
@@ -64,6 +64,7 @@ None.
 - 02018 Project Atlas: no definition
 - 02022 Liberated Account: no definition
 - 02033 Trick of Light: no definition
+- 02043 Emergency Shutdown: no definition
 - 02047 Test Run: no definition
 - 02051 Project Vitruvius: no definition
 - 02056 Pop-up Window: no definition
@@ -75,59 +76,6 @@ None.
 - 02110 Eli 1.0: no definition
 - 02112 Ronin: no definition
 - 02115 Project Beale: no definition
-- 02001 Whizzard: Master Gamer: 2 scaffold marker(s)
-- 02002 Spinal Modem: 2 scaffold marker(s)
-- 02004 Morning Star: 2 scaffold marker(s)
-- 02005 Cortez Chip: 2 scaffold marker(s)
-- 02006 Peacock: 2 scaffold marker(s)
-- 02007 ZU.13 Key Master: 2 scaffold marker(s)
-- 02008 The Helpful AI: 2 scaffold marker(s)
-- 02009 Plascrete Carapace: 2 scaffold marker(s)
-- 02010 Haas-Bioroid: Stronger Together: 2 scaffold marker(s)
-- 02011 Mandatory Upgrades: 2 scaffold marker(s)
-- 02012 Janus 1.0: 3 scaffold marker(s)
-- 02013 Ash 2X3ZB9CY: 2 scaffold marker(s)
-- 02014 Braintrust: 2 scaffold marker(s)
-- 02015 Snowflake: 3 scaffold marker(s)
-- 02016 Restructured Datapool: 2 scaffold marker(s)
-- 02017 TMI: 3 scaffold marker(s)
-- 02019 Caduceus: 3 scaffold marker(s)
-- 02020 Dracō: 3 scaffold marker(s)
-- 02021 Vamp: 2 scaffold marker(s)
-- 02023 Satellite Uplink: 2 scaffold marker(s)
-- 02024 e3 Feedback Implants: 2 scaffold marker(s)
-- 02025 Compromised Employee: 2 scaffold marker(s)
-- 02026 Notoriety: 2 scaffold marker(s)
-- 02027 Snowball: 2 scaffold marker(s)
-- 02028 Dyson Mem Chip: 2 scaffold marker(s)
-- 02029 Encryption Protocol: 2 scaffold marker(s)
-- 02030 Sherlock 1.0: 3 scaffold marker(s)
-- 02031 Jinteki: Replicating Perfection: 2 scaffold marker(s)
-- 02032 Fetal AI: 2 scaffold marker(s)
-- 02034 Sensei: 3 scaffold marker(s)
-- 02035 Big Brother: 2 scaffold marker(s)
-- 02036 ChiLo City Grid: 2 scaffold marker(s)
-- 02037 Power Grid Overload: 2 scaffold marker(s)
-- 02038 Amazon Industrial Zone: 2 scaffold marker(s)
-- 02039 Executive Retreat: 2 scaffold marker(s)
-- 02040 Freelancer: 2 scaffold marker(s)
-- 02041 Nerve Agent: 2 scaffold marker(s)
-- 02042 Joshua B.: 2 scaffold marker(s)
-- 02043 Emergency Shutdown: 2 scaffold marker(s)
-- 02044 Muresh Bodysuit: 2 scaffold marker(s)
-- 02045 Snitch: 2 scaffold marker(s)
-- 02046 Chaos Theory: Wünderkind: 2 scaffold marker(s)
-- 02048 Dinosaurus: 2 scaffold marker(s)
-- 02049 Personal Workshop: 2 scaffold marker(s)
-- 02050 Public Sympathy: 2 scaffold marker(s)
-- 02052 Viper: 3 scaffold marker(s)
-- 02053 Edge of World: 2 scaffold marker(s)
-- 02054 Sunset: 2 scaffold marker(s)
-- 02055 Marked Accounts: 2 scaffold marker(s)
-- 02057 Woodcutter: 3 scaffold marker(s)
-- 02058 Commercialization: 2 scaffold marker(s)
-- 02059 Private Contracts: 2 scaffold marker(s)
-- 02060 Chimera: 3 scaffold marker(s)
 - 02061 Disrupter: 2 scaffold marker(s)
 - 02062 Force of Nature: 2 scaffold marker(s)
 - 02064 Doppelgänger: 2 scaffold marker(s)
@@ -146,23 +94,6 @@ None.
 - 02077 Government Contracts: 2 scaffold marker(s)
 - 02078 Tyrant: 3 scaffold marker(s)
 - 02079 Oversight AI: 2 scaffold marker(s)
-- 02081 Surge: 2 scaffold marker(s)
-- 02083 Andromeda: Dispossessed Ristie: 2 scaffold marker(s)
-- 02085 HQ Interface: 2 scaffold marker(s)
-- 02086 Pheromones: 2 scaffold marker(s)
-- 02087 Quality Time: 2 scaffold marker(s)
-- 02088 Replicator: 2 scaffold marker(s)
-- 02089 Creeper: 2 scaffold marker(s)
-- 02090 Kraken: 2 scaffold marker(s)
-- 02091 Kati Jones: 2 scaffold marker(s)
-- 02092 Eve Campaign: 2 scaffold marker(s)
-- 02093 Rework: 2 scaffold marker(s)
-- 02094 Whirlpool: 3 scaffold marker(s)
-- 02096 Data Hound: 3 scaffold marker(s)
-- 02097 Bernice Mai: 2 scaffold marker(s)
-- 02098 Salvage: 3 scaffold marker(s)
-- 02099 Simone Diego: 2 scaffold marker(s)
-- 02100 Foxfire: 2 scaffold marker(s)
 - 02101 Retrieval Run: 2 scaffold marker(s)
 - 02102 Darwin: 2 scaffold marker(s)
 - 02103 Data Leak Reversal: 2 scaffold marker(s)
@@ -180,13 +111,8 @@ None.
 - 02118 Dedicated Response Team: 2 scaffold marker(s)
 - 02119 Burke Bugs: 3 scaffold marker(s)
 - 02120 Corporate War: 2 scaffold marker(s)
-- 02004 Morning Star: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02006 Peacock: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02007 ZU.13 Key Master: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02027 Snowball: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02062 Force of Nature: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02066 Deus X: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
-- 02089 Creeper: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02102 Darwin: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 - 02104 Faerie: icebreaker without `AIImplementBreaker` or `AISpecialBreaker`
 

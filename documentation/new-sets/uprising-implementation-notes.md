@@ -2,7 +2,7 @@
 
 Rulings, engine changes and AI decisions for Uprising (`uprising`, pack `ur`,
 26066–26130). The batch queue, completion log and optimisation queue are in
-[the tracker](current-set-implementation.md).
+[the maintained set record](records/uprising.md).
 
 ## Setup — 2026-10-23
 
