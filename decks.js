@@ -90,6 +90,8 @@ function InstanceCard(
   card.cardDefinition = cardDefinition; //save in case we need to compare against defaults later
   card.player = player;
   card.setNumber = setNumber;
+  //InitInstance: optional per-instance setup, e.g. accessors that deep copying would flatten (ZU.13 Key Master)
+  if (typeof card.InitInstance === "function") card.InitInstance();
   if (typeof InvalidateActiveTriggerCandidateCache === "function")
     InvalidateActiveTriggerCandidateCache();
   //Do some special initialisations
