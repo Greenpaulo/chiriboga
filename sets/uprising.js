@@ -4596,6 +4596,8 @@ cardSet[26119] = {
 // Limit 1 remote server.
 // As an additional cost to run a remote server, the Runner must pay 6[c].
 // When the Runner makes a successful run on HQ, flip this identity.
+// No flip-side image is in the local data, so the face stays 26120; the flip
+// state is logged. remoteServerLimit is read by CheckInstallDestination.
 cardSet[26120] = {
   title: "Earth Station: SEA Headquarters",
   imageFile: "26120.png",
@@ -4606,7 +4608,57 @@ cardSet[26120] = {
   subTypes: ["Division"],
   deckSize: 45,
   influenceLimit: 15,
-  // TODO: Add abilities or responseOn triggers
+  //Limit 1 remote server (both sides).
+  remoteServerLimit: 1,
+  //false = front (SEA Headquarters), true = flip side
+  flipped: false,
+  _flip: function () {
+    this.flipped = !this.flipped;
+    Log(this.title + " flipped to its " + (this.flipped ? "flip" : "front") + " side");
+  },
+  //Front: 1[c] to run HQ. Flip side: 6[c] to run a remote server.
+  modifyRunCreditCost: {
+    Resolve: function (server) {
+      if (!server) return 0;
+      if (!this.flipped) return server == corp.HQ ? 1 : 0;
+      return typeof server.cards == "undefined" ? 6 : 0;
+    },
+  },
+  //Flip side: when the Runner makes a successful run on HQ, flip this identity.
+  automaticOnRunSuccessful: {
+    Resolve: function (server) {
+      if (this.flipped && server == corp.HQ) this._flip();
+    },
+  },
+  abilities: [
+    {
+      text: "[click]: Flip this identity.",
+      Enumerate: function () {
+        if (this.flipped) return [];
+        if (!CheckActionClicks(corp, 1)) return [];
+        //**AI code
+        if (corp.AI && !this._AIWantsFlip()) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        SpendClicks(corp, 1);
+        this._flip();
+      },
+    },
+  ],
+  //Flip once the remote holds something to protect, unless every remaining
+  //click is needed to finish an installed agenda this turn.
+  _AIWantsFlip: function () {
+    var guarded = corp.remoteServers.some(function (server) { return server.root.length > 0; });
+    if (!guarded) return false;
+    var clicks = corp.clickTracker;
+    return !InstalledCards(corp).some(function (card) {
+      if (!CheckCardType(card, ["agenda"])) return false;
+      var remaining = AdvancementRequirement(card) - Counters(card, "advancement");
+      return remaining == clicks && remaining <= Credits(corp);
+    });
+  },
+  AITriggerWhenCan: true,
 };
 
 //Transport Monopoly (26121)
@@ -4623,7 +4675,55 @@ cardSet[26121] = {
   subTypes: ["Initiative"],
   advancementRequirement: 4,
   agendaPoints: 2,
-  // onScore: { Resolve: function () { ... } },
+  usedThisTurn: false,
+  responseOnScored: {
+    Resolve: function () {
+      if (intended.score == this) AddCounters(this, "agenda", 2);
+    },
+    automatic: true,
+  },
+  responseOnCorpTurnBegins: { Resolve: function () { this.usedThisTurn = false; }, automatic: true },
+  responseOnRunnerTurnBegins: { Resolve: function () { this.usedThisTurn = false; }, automatic: true },
+  abilities: [
+    {
+      text: "Hosted agenda counter: This run cannot be declared successful.",
+      Enumerate: function () {
+        if (!attackedServer || this.usedThisTurn) return [];
+        if (!corp.scoreArea.includes(this)) return [];
+        if (!CheckCounters(this, "agenda", 1)) return [];
+        //**AI code
+        if (corp.AI && !this._AIWouldBlock()) return [];
+        return [{}];
+      },
+      Resolve: function () {
+        RemoveCounters(this, "agenda", 1);
+        this.usedThisTurn = true;
+        //A lingering effect: it lasts for this run even if the agenda leaves
+        //the score area. modifyDeclareSuccess is read by phase.js at Run 5.1.
+        AddLingeringEffect({
+          title: this.title,
+          modifyDeclareSuccess: { Resolve: function () { return 1; } },
+          responseOnRunEnds: { Resolve: function () { RemoveLingeringEffect(this); }, automatic: true },
+        });
+        Log(this.title + ": this run cannot be declared successful");
+      },
+    },
+  ],
+  //Only just before the Runner approaches the server, when the breach would
+  //expose agenda points the Corp knows about (or could lose the game).
+  _AIWouldBlock: function () {
+    if (currentPhase.identifier != "Run 4.5" || approachIce > 0) return false;
+    var server = attackedServer;
+    if (server == corp.RnD) return false; //R&D order is unknown to the Corp
+    var points = corp.AI._agendaPointsInServer(server);
+    if (points < 1) return false;
+    if (corp.AI._breachWouldBePrevented(ActiveCards(runner), server)) return false;
+    if (AgendaPoints(runner) + points >= AgendaPointsToWin()) return true;
+    if (typeof server.cards == "undefined") return true; //remote holding an agenda
+    //HQ/Archives: when agendas are a large share of what could be accessed
+    var agendas = corp.AI._agendasInServer(server);
+    return server == corp.HQ ? agendas * 2 >= server.cards.length : agendas > 0;
+  },
 };
 
 //Wall to Wall (26122)
@@ -4639,7 +4739,115 @@ cardSet[26122] = {
   subTypes: ["Advertisement"],
   rezCost: 1,
   trashCost: 3,
-  // TODO: Add abilities or responseOn triggers
+  unique: true,
+  _w2wUsed: [],
+  _w2wLimit: 0,
+  _w2wRequired: false,
+  _otherRezzedAssets: function () {
+    var self = this;
+    return InstalledCards(corp).some(function (card) {
+      return card != self && card.rezzed && CheckCardType(card, ["asset"]);
+    });
+  },
+  responseOnCorpTurnBegins: {
+    Enumerate: function () {
+      if (!this.rezzed || !CheckInstalled(this)) return [];
+      return [{}];
+    },
+    Resolve: function () {
+      this._w2wRequired = this._otherRezzedAssets();
+      this._w2wLimit = this._w2wRequired ? 1 : 3;
+      this._w2wUsed = [];
+      this._w2wChoose();
+    },
+    text: "Wall to Wall: resolve effects",
+  },
+  _w2wChoices: function () {
+    var used = this._w2wUsed;
+    var choices = [];
+    if (!used.includes(1)) choices.push({ id: 1, label: "Draw 1 card", button: "Draw 1" });
+    if (!used.includes(2)) choices.push({ id: 2, label: "Gain 1[c]", button: "Gain 1[c]" });
+    if (!used.includes(3) && InstalledCards(corp).some(function (card) { return CheckCardType(card, ["ice"]); }))
+      choices.push({ id: 3, label: "Place 1 advancement counter on an installed piece of ice", button: "Advance ice" });
+    if (!used.includes(4) && CheckInstalled(this))
+      choices.push({ id: 4, label: "Add Wall to Wall to HQ", button: "Add to HQ" });
+    //"Up to 3" may stop at any point; "resolve 1" must resolve one.
+    if (!this._w2wRequired) choices.push({ id: 0, label: "Done", button: "Done" });
+    return choices;
+  },
+  _w2wChoose: function () {
+    if (this._w2wUsed.length >= this._w2wLimit) return;
+    var choices = this._w2wChoices();
+    if (!choices.some(function (choice) { return choice.id > 0; })) return;
+    //**AI code
+    if (corp.AI) {
+      var preferred = this._AIChoice(choices);
+      corp.AI.preferred = { title: this.title, option: preferred };
+    }
+    var effectNumber = this._w2wUsed.length + 1;
+    DecisionPhase(corp, choices, function (params) {
+      if (!params || !params.id) return;
+      this._w2wUsed.push(params.id);
+      this._w2wResolve(params.id);
+    }, this.title, this._w2wRequired ? "Resolve 1 effect" : "Resolve effect " + effectNumber + " of up to 3", this);
+  },
+  _w2wResolve: function (id) {
+    var self = this;
+    if (id == 1) {
+      Draw(corp, 1, function () { self._w2wChoose(); });
+    } else if (id == 2) {
+      GainCredits(corp, 1, "", this);
+      this._w2wChoose();
+    } else if (id == 3) {
+      var iceChoices = ChoicesInstalledCards(corp, function (card) { return CheckCardType(card, ["ice"]); });
+      //**AI code
+      if (corp.AI) {
+        var target = this._AIIceTarget();
+        var option = iceChoices.find(function (choice) { return choice.card == target; }) || iceChoices[0];
+        corp.AI.preferred = { title: this.title, option: option };
+      }
+      DecisionPhase(corp, iceChoices, function (params) {
+        PlaceAdvancement(params.card, 1);
+        self._w2wChoose();
+      }, this.title, "Place 1 advancement counter on an installed piece of ice", this);
+    } else if (id == 4) {
+      MoveCard(this, corp.HQ.cards);
+      Log(this.title + " added to HQ");
+      this._w2wChoose();
+    }
+  },
+  //Ice whose printed effect still improves with more advancement counters.
+  _AIIceTarget: function () {
+    var best = null;
+    InstalledCards(corp).forEach(function (card) {
+      if (!CheckCardType(card, ["ice"]) || !card.canBeAdvanced || typeof card.AIAdvancementLimit != "function") return;
+      var limit = card.AIAdvancementLimit.call(card);
+      var counters = Counters(card, "advancement");
+      if (counters >= limit) return;
+      if (!best || limit - counters < best.need) best = { card: card, need: limit - counters };
+    });
+    return best ? best.card : null;
+  },
+  //Baseline: useful ice counter first, then credits, then a draw; never bounce.
+  _AIChoice: function (choices) {
+    var byId = function (id) { return choices.find(function (choice) { return choice.id == id; }); };
+    var drawOk = corp.RnD.cards.length > 2 && PlayerHand(corp).length < MaxHandSize(corp);
+    if (byId(3) && this._AIIceTarget()) return byId(3);
+    if (byId(2)) return byId(2);
+    if (byId(1) && drawOk) return byId(1);
+    return byId(0) || byId(2) || byId(1) || choices[0];
+  },
+  AIAvoidInstallingOverThis: true,
+  AIWorthInstalling: function (emptyProtectedRemotes) {
+    for (var j = 0; j < emptyProtectedRemotes.length; j++) {
+      if (!corp.AI._isAScoringServer(emptyProtectedRemotes[j])) return j;
+    }
+    return emptyProtectedRemotes.length;
+  },
+  //Rez at the end of the Runner's turn, just before its first trigger.
+  AIRezWhenCan: function () {
+    return currentPhase.identifier == "Runner 2.2";
+  },
 };
 
 //Akhet (26123)
@@ -4658,11 +4866,93 @@ cardSet[26123] = {
   subTypes: ["Barrier"],
   rezCost: 3,
   strength: 2,
+  canBeAdvanced: true,
+  _empowered: function () {
+    return CheckCounters(this, "advancement", 3);
+  },
+  modifyStrength: {
+    Resolve: function (card) {
+      return card == this && this._empowered() ? 3 : 0;
+    },
+  },
+  // Printed subroutines broken this encounter (broken flags reset when an encounter begins).
+  _printedBroken: function (selectedBreaks) {
+    var count = 0;
+    for (var i = 0; i < this.subroutines.length; i++) {
+      if (this.subroutines[i].printed &&
+        (this.subroutines[i].broken || (selectedBreaks || []).includes(this.subroutines[i]))) count++;
+    }
+    return count;
+  },
+  _breakLimitApplies: function () {
+    return this.rezzed && this._empowered();
+  },
+  // CardEffectsForbid("break", subroutine) is checked by ChoicesEncounteredSubroutines and Break.
+  modifyCannot: {
+    Resolve: function (id, subroutine, selectedBreaks) {
+      if (id !== "break" || !subroutine || !subroutine.printed) return false;
+      if (this.subroutines.indexOf(subroutine) < 0) return false;
+      if (!this._breakLimitApplies()) return false;
+      return this._printedBroken(selectedBreaks) >= 1;
+    },
+  },
   subroutines: [
-    // { text: "...", Resolve: function () { ... } },
+    {
+      text: "Gain 1[c]. Place 1 advancement counter on an installed card.",
+      printed: true,
+      Resolve: function () {
+        GainCredits(corp, 1, "", this);
+        var choices = ChoicesInstalledCards(null);
+        if (!choices.length) return;
+        //**AI code
+        if (corp.AI) {
+          var target = this._AICounterTarget();
+          var option = choices.find(function (choice) { return choice.card == target; }) || choices[0];
+          corp.AI.preferred = { title: this.title, option: option };
+        }
+        DecisionPhase(corp, choices, function (params) {
+          PlaceAdvancement(params.card, 1);
+        }, this.title, "Place 1 advancement counter on an installed card", this);
+      },
+      visual: { y: 132, h: 32 },
+    },
+    {
+      text: "End the run.",
+      printed: true,
+      Resolve: function () {
+        EndTheRun();
+      },
+      visual: { y: 166, h: 16 },
+    },
   ],
+  //Near-complete installed agenda, then this ice up to 3, then another agenda
+  //or advanceable ice short of its limit, else this ice.
+  _AICounterTarget: function () {
+    var self = this;
+    var agendas = InstalledCards(corp).filter(function (card) {
+      return CheckCardType(card, ["agenda"]) && AdvancementRequirement(card) > Counters(card, "advancement");
+    }).sort(function (a, b) {
+      return (AdvancementRequirement(a) - Counters(a, "advancement")) - (AdvancementRequirement(b) - Counters(b, "advancement"));
+    });
+    if (agendas.length && AdvancementRequirement(agendas[0]) - Counters(agendas[0], "advancement") <= 2) return agendas[0];
+    if (!this._empowered()) return this;
+    if (agendas.length) return agendas[0];
+    var ice = InstalledCards(corp).find(function (card) {
+      return card != self && CheckCardType(card, ["ice"]) && card.canBeAdvanced &&
+        typeof card.AIAdvancementLimit == "function" && Counters(card, "advancement") < card.AIAdvancementLimit.call(card);
+    });
+    return ice || this;
+  },
+  //Advance only once rezzed (as Pharos), up to the 3 counters that power it.
+  AIAdvancementLimit: function () {
+    if (!this.rezzed) return 0;
+    return 3;
+  },
   AIImplementIce: function (rc, result, maxCorpCred, incomplete) {
-    // result.sr = [[["..."]]];
+    result.sr = [[["misc_minor", "misc_minor"]], [["endTheRun"]]];
+    // SrBreak never plans more breaks than maxSrBroken on this encounter.
+    if (this._breakLimitApplies())
+      result.maxSrBroken = Math.max(0, 1 - this._printedBroken());
     return result;
   },
 };

@@ -3799,3 +3799,30 @@ competing-plan policies are recorded in the set's optimisation queue.
   of several credits is one event, while separate printed break losses are
   separate events. Zero payments/losses and basic access trash payments do not
   trigger income. Future income is not booked as present rez money.
+
+### Uprising batch 14 card hooks
+
+- Earth Station: SEA Headquarters uses `AITriggerWhenCan` for its front-side
+  click flip. The ability's `Enumerate` offers it to the AI only when a remote
+  root holds a card and no installed agenda needs every remaining click to
+  score this turn. Its run taxes use `modifyRunCreditCost`, which
+  `AdditionalRunCosts` charges in the engine and as the run calculator's
+  run-start loss. `remoteServerLimit: 1` on a Corp identity is read by
+  `CorpRemoteServerLimitReached()`: `CheckInstallDestination(card, null)`
+  rejects new remotes and `CorpAI._rankedInstallOptions` drops new-remote
+  options. The Runner does not yet value the HQ-run flip-back.
+- Transport Monopoly gates its run ability in `Enumerate` (House of Knives
+  pattern): the AI uses it at Run 4.5 just before the Runner approaches a
+  remote holding an agenda, HQ when agendas are at least half its cards, or any
+  non-R&D server whose known agendas would win the game. `modifyDeclareSuccess`
+  applies the effect; run begin/end cleanup clears it. Runner and Corp security
+  planning do not model the finite once-per-turn denial.
+- Wall to Wall uses `AIWorthInstalling`, `AIAvoidInstallingOverThis` and
+  `AIRezWhenCan` (end of Runner turn) as CSR Campaign does. Inline choices put
+  an advancement counter on ICE still below its `AIAdvancementLimit`, then take
+  the credit, then draw (R&D above 2, hand below maximum). The AI never returns it to HQ.
+- Akhet uses `AIAdvancementLimit` (3 once rezzed, as Pharos does) and
+  `AIImplementIce` with the Afshar `maxSrBroken` break limit at 3 counters.
+  Its first subroutine's inline counter choice prefers an installed agenda
+  within 2 of its requirement, then Akhet below 3 counters, then any other
+  agenda or advanceable ICE below its limit.

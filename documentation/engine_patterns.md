@@ -300,6 +300,12 @@ installOnlyIn: function(server) {
 `ChoicesCardInstall` and Corp upgrade planning both respect this hook. Runner
 card hosting restrictions continue to use `installOnlyOn(host)`.
 
+A Corp identity's `remoteServerLimit: N` ("Limit N remote servers", Earth
+Station) makes `CheckInstallDestination(card, null)` reject a new remote once
+`N` remotes exist (`CorpRemoteServerLimitReached()`); the Corp AI's install
+ranking drops those options. Card effects that call `Install(card, null)`
+directly must check it themselves.
+
 ---
 
 ## Engine Functions — Quick Reference
