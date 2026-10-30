@@ -20,6 +20,7 @@ order of the availability table. A user-requested different set takes precedence
 | `vantagepoint` | Implemented | All 13 batches; optimisation remains in its Set record below. |
 | `downfall` | Implemented | All 13 batches; §8 integration checks passed 2026-10-23; optimisation remains in its Set record below. |
 | `uprising` | Implemented | All 16 batches; §8 integration checks passed 2026-10-30; optimisation remains in the [active tracker](current-set-implementation.md). |
+| `genesis` | Pending | Genesis Cycle (`wla`, `ta`, `ce`, `asis`, `hs`, `fp`) as one set, IDs 2001-2120, scaffolded in `sets/genesis.js`. 105 cards to implement; 15 reprints already defined elsewhere are `DUPLICATE` comments and need `ACCEPTED_MISSING_DEFINITIONS` entries in `scripts/card-status.js` before the set can become playable. |
 
 Uprising is active. Downfall retains its [maintained set record](records/downfall.md)
 and [immutable transition snapshot](history/downfall-2026-10-23-implementation-transition.md);
