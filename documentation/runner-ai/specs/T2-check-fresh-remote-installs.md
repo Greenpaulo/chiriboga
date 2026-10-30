@@ -42,10 +42,39 @@ the reverse: running advanced cards almost every time).
   Removing it dropped the smoke run to 29.5%. The batch rewarded exactly the
   behaviour a human punishes.
 
-**Cause: not yet known.** The rate could come from target selection (fresh
-remote cards valued low), click/credit budgeting (centrals first, nothing
-left), or run feasibility estimates. The first step of this item is finding
-which, in `ai_runner.js` run targeting.
+**Cause (investigated 2026-10-30 at 582e580).** Target valuation, locked in
+by a low-value "setup" gate; a blanket damage assumption makes the gate trip.
+Not click/credit budgeting.
+
+Method: 420 seeded games (seeds 1–60, every pair in
+`tests/fixtures/ai-batch/deck-pool.json`, default options) with a read-only
+`--setup` probe wrapping `RunnerAI._internalChoiceDetermination`. For every
+Runner action decision while a remote held a face-down, unadvanced card
+installed since the Runner's previous turn, it recorded each server's
+potential and path cost, the Runner's log lines and the chosen action.
+
+- 1,610 Runner turns had such a remote with a feasible path; the Runner ran
+  it in 363 (22.5%; bare remotes 20%, iced 24%). Over the 3,115 decisions in
+  the turns it skipped: "Favouring setup" 68%, ran or planned another server
+  20%, "Favouring econ" 9%, other 3%.
+- **Valuation.** `ai_runner.js:2186` gives a fresh unadvanced remote card a
+  flat potential of 1.0, the same as R&D and an unknown HQ (≈1.0). After the
+  ±0.1 jitter it can never exceed 1.1, and nothing rewards checking it now,
+  before it is advanced or protected.
+- **Setup gate.** `ai_runner.js:2508–2514` abandons running for the click when
+  the best server's potential is below 1.1, its path cost above 1.0, and the
+  hand holds any card worth keeping (nearly always). A fresh remote is
+  therefore run only when its cost is at most 1.0 or the hand is empty of
+  setup. In 1,240 of the gate's 2,246 firings the fresh remote was the
+  top-ranked server. The "Favouring econ" gate (potential below 1.5 with a
+  priority economy card, `ai_runner.js:2501–2506`) blocks it the same way.
+- **Cost inflation.** `runcalculator.js:1308` assumes one net damage
+  (possible Hokusai Grid) for every unknown root card, whatever the Corp
+  deck; only one of the seven pool Corp decks contains Hokusai Grid. A bare
+  remote with one unknown card therefore costs at least 1.3 (2.6 against
+  Personal Evolution, which adds one more), so it always trips the gate.
+- When the gate does not fire, the remote ties R&D and HQ at ≈1.0 and wins
+  only on jitter.
 
 ## Design
 
@@ -97,7 +126,7 @@ Adoption: Paul decides after playtesting; record the tested flags and decision.
   runs); this item covers only the one with hard numbers.
 
 ## Acceptance criteria
-- [ ] The investigation's cause is recorded in this ticket before the design is chosen.
+- [x] The investigation's cause is recorded in this ticket before the design is chosen.
 - [ ] Every test scenario above is covered by a deterministic test that asserts the logged reason as well as the choice.
 - [ ] (Gated items) The behaviour change ships under a named AI flag, initially off unless the owner requests otherwise (named in the Resolution).
 - [ ] (Owner playtesting) The handoff names the tested flags, the behaviour to assess and contrasting cases; owner adoption remains explicit or pending.
