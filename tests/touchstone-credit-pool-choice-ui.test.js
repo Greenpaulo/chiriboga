@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '..');
 const runner = {side: 'runner', creditPool: 2, temporaryCredits: 0, AI: null};
 const corp = {side: 'corp', creditPool: 5, AI: {}};
 const context = {
+  attackedServer: null, automaticTriggerSource: null,
   console: {log() {}, warn() {}, error() {}},
   runner,
   corp,

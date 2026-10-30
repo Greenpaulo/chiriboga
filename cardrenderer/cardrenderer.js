@@ -1161,7 +1161,7 @@ var CardRenderer = {
         //change scale as required
         var scalingratio = pixi_cardBaseScale(this.card);
         if (this.zoomed && (this.faceUp || this.canView)) {
-          scalingratio = 1.5 * fieldZoom; //readable preview at normal browser zoom
+          scalingratio = 1.5 * fieldZoom / pixi_browserZoom(); //keep reading previews at their original screen size
 		  //load high-res version, if not already loaded/loading
 		  // Determine whether to use hi-res images: LocalStorage setting overrides gauntletConfig
 		  var useHiRes = false;
@@ -1548,6 +1548,7 @@ var CardRenderer = {
   //Create one of these to initialise a renderer
   Renderer: class {
     constructor(resizeCallback, accessibilityMode="default") {
+      this.openingPixelRatio = pixi_openingPixelRatio(); //session baseline, including any saved page zoom
       var w = window.innerWidth;
       var h = window.innerHeight;
       this.app = new PIXI.Application(w, h, { transparent: true });
@@ -2377,6 +2378,19 @@ var pixi_mousePosition = { x: 0, y: 0 };
 var pixi_holdTimeout = 0; //0 = timeout successful, -1 = ignore timeout, > 0 = timeout running
 var pixi_holdCard = null; //for touch and hold
 var pixi_zoomedCards = new Set();
+
+// A normal page cannot separate opening page zoom from display density.
+// Window widths are ambiguous (borders, docked panels and developer tools).
+// Keep the opening ratio as a session baseline without guessing absolute zoom.
+function pixi_openingPixelRatio() {
+  return window.devicePixelRatio || 1;
+}
+
+// Relative page zoom since startup. A display-density change also affects this
+// ratio; absolute zoom and cross-display calibration need a separate signal.
+function pixi_browserZoom() {
+  return (window.devicePixelRatio || 1) / cardRenderer.openingPixelRatio;
+}
 
 //Enlarge only the viewing player's hand; cards return to board size on leaving it.
 function pixi_cardBaseScale(card) {

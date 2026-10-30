@@ -343,6 +343,7 @@ function CheckInstall(card) {
  * @returns {Boolean} true if card can be played, false otherwise
  */
 function CheckPlay(card) {
+  if (card && CheckSubType(card, "Lockdown") && ActiveLockdown()) return false;
   //check card exists
   if (card == null) {
     return false;

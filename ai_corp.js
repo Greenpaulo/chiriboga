@@ -2404,7 +2404,8 @@ class CorpAI {
     var matches = [];
     for (var i = 0; i < installed.length; i++) {
       var card = installed[i];
-      if (card.player != runner || !CheckHasAbilities(card)) continue;
+      if (card.player != runner || !CheckHasAbilities(card) ||
+          (typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card))) continue;
       if (
         typeof card.AIHostedBreakContribution == "function" ||
         card.host == iceCard
@@ -2469,7 +2470,7 @@ class CorpAI {
     for (var i = 0; i < hosted.length; i++) {
       var card = hosted[i];
       if (card.player != runner || !CheckHasAbilities(card)) continue;
-      if (!this._isHostedVirusBreaker(card, iceCard)) continue;
+      if ((typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card)) || !this._isHostedVirusBreaker(card, iceCard)) continue;
       contribution +=
         typeof card.AIHostedBreakContribution == "function"
           ? card.AIHostedBreakContribution.call(card, iceCard)
@@ -2695,6 +2696,7 @@ class CorpAI {
         effect != "gainCredits" &&
         effect != "gainGripCard" &&
         effect != "trashIce" &&
+        effect != "payIceCredits" &&
         effect != "payCredits"
       )
         return true;
@@ -2825,6 +2827,11 @@ class CorpAI {
     for (var type of Object.keys(counters)) {
       if (typeof counters[type] != "number" || !isFinite(counters[type]) || counters[type] < 0)
         return {status: "unknown"};
+    }
+    if (typeof iceCard.AIBreakCreditLoss == "function") {
+      var indices = this._requiredSubroutineIndices(iceCard, false, evaluationContext).slice(0, count);
+      var loss = iceCard.AIBreakCreditLoss(indices);
+      price.credits += Math.min(loss, Math.max(0, runner.creditPool + (runner.temporaryCredits || 0) - price.credits));
     }
     return {status: "priced", credits: price.credits, clicks: price.clicks,
       counters: Object.assign({}, counters), breaker: breaker};
@@ -3637,7 +3644,8 @@ class CorpAI {
   //Cost of breaking `count` subroutines with the ICE's own Runner ability,
   //declared by AIBreakCost on the ICE, or null.
   _iceSelfBreakCost(iceCard, count, server) {
-    if (typeof iceCard.AIBreakCost != "function") return null;
+    if (typeof iceCard.AIBreakCost != "function" ||
+        (typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", iceCard))) return null;
     var cost = null;
     try {
       cost = iceCard.AIBreakCost.call(iceCard, iceCard, count, server);

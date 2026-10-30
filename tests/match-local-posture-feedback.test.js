@@ -27,6 +27,7 @@ function world(on = true, seed = 123) {
     // This posture-only world has no run-entry modifiers; their payment is
     // exercised with the real utility/check functions in downfall-batch8.test.js.
     AdditionalRunCosts: () => ({clicks: 0, credits: 0}), CanPayAdditionalRunCosts: () => true,
+    GetApproachEncounterIce: () => c.attackedServer ? c.attackedServer.ice[c.approachIce] : null,
     CheckCardType: (card, types) => types.includes(card.cardType), CheckSubType: (card, type) => (card.subTypes || []).includes(type),
     PlayerCanLook: (p, card) => p === corp || !!card.rezzed || !!card.faceUp,
     CheckAdvance: () => true, CheckInstalled: card => corp.remoteServers.some(s => s.root.includes(card)),

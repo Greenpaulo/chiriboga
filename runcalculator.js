@@ -166,9 +166,66 @@ class RunCalculator {
       }
     }
 
+    if (iceKnown && (ice.rezzed || maxCorpCred >= RezCost(ice)) && typeof ice.AIForcedEncounterIce === "function")
+      result.forcedEncounterIce = ice.AIForcedEncounterIce.call(ice);
     return result;
   }
-  
+
+  // Price the selected forced encounter with the ordinary breaker/effect search.
+  // Carry finite uses and remaining resources into and out of the child search.
+  _forcedEncounterPoint(point, ice) {
+    if (this._forcedPricing || !ice) return point;
+    // Keep calculator ownership: card hooks use runner.AI.rc identity to decide
+    // whether the Runner's private hand may inform their model.
+    var child = this;
+    var saved = {precalculated: this.precalculated, security: this._securityPlanning,
+      forced: this._forcedPricing, reason: this.reason};
+    try {
+      child._forcedPricing = true;
+      child.precalculated = Object.assign({}, this.precalculated, {iceAIs: []});
+      if (child._securityPlanning) child._securityPlanning = Object.assign({}, child._securityPlanning,
+        {eligibleIce: new Set([...child._securityPlanning.eligibleIce, ice])});
+      var iceAI = child.IceAI(ice, AvailableCredits(corp), false, false);
+      child.precalculated.iceAIs = [iceAI];
+      var seed = child.CopyPoint(point);
+      seed.iceIdx = 0;
+      seed.sr_broken = [];
+      // Parent encounter-local uses must not masquerade as child encounter uses.
+      seed.persistents = seed.persistents.map(function (p) {
+        return p.iceIdx === point.iceIdx ? Object.assign({}, p, {iceIdx: -1000}) : p;
+      });
+      var todo = [], best = null;
+      var server = {ice: [ice], root: [], serverName: "Forced encounter"};
+      child.EncounterOptions(0, iceAI, seed).forEach(function (option) {
+        var start = child.ValidateEncounterPoint(0, seed, false, option.effects.slice(), option.persistents, null, seed.card_str_mods, seed.persistents);
+        if (start) todo.push(start);
+      });
+      var loops = 0;
+      while (todo.length && loops++ < 2000) {
+        var current = todo.pop();
+        if (best && child.PointCost(current) >= child.PointCost(best)) continue;
+        if (current.iceIdx < 0) { best = current; continue; }
+        var directions = child.Directions(server, current, Infinity, runner.grip.length,
+          child.baseClicks, child.basePoolCredits, child.baseOtherCredits, Infinity, false);
+        todo.push(...directions);
+      }
+      if (!best) return null;
+      best.iceIdx = point.iceIdx;
+      best.sr_broken = point.sr_broken;
+      best.persistents = best.persistents.map(function (p) {
+        if (p.iceIdx === -1000) return Object.assign({}, p, {iceIdx: point.iceIdx});
+        if (p.iceIdx === 0) return Object.assign({}, p, {iceIdx: point.iceIdx + 0.5});
+        return p;
+      });
+      return best;
+    } finally {
+      this.precalculated = saved.precalculated;
+      this._securityPlanning = saved.security;
+      this._forcedPricing = saved.forced;
+      this.reason = saved.reason;
+    }
+  }
+
   //check whether the given card is a .use in the persistents of the given point
   PersistentsUse(point,card) {
 	  for (var i=0; i<point.persistents.length; i++) {
@@ -187,6 +244,26 @@ class RunCalculator {
   }
 
   //returns an array of points (results are options for breaking exactly num. For less, call this multiple times and combine)
+  // Target-aware non-breaker payment. Keep its pool debit separate so
+  // recurring credits restricted to icebreakers cannot subsidize it.
+  PayCredits(point, amount, doing, card, server) {
+    return AIWithRunContext(server, () => {
+      var outside = this._poolOnly ? 0 : Math.min(this.baseOtherCredits,
+        Math.max(0, AvailableCredits(runner, doing, card) -
+          (CreditPoolCanBeUsed(runner, "spend", doing, card) ? runner.creditPool : 0)));
+      var outsideLeft = Math.max(0, outside - point.runner_credits_spent);
+      var fromOutside = Math.min(amount, outsideLeft);
+      var fromPool = amount - fromOutside;
+      var poolLeft = Math.max(0, this.basePoolCredits - point.runner_credits_lost -
+        Math.max(0, point.runner_credits_spent - this.baseOtherCredits));
+      if (fromPool > poolLeft || (fromPool > 0 && !CreditPoolCanBeUsed(runner, "spend", doing, card))) return null;
+      var next = this.CopyPoint(point);
+      next.runner_credits_spent += fromOutside;
+      next.runner_credits_lost += fromPool;
+      return next;
+    });
+  }
+
   SrBreak(
     card,
     iceAI,
@@ -345,12 +422,29 @@ class RunCalculator {
     var creditsLeft = this.basePoolCredits + this.baseOtherCredits + (point.restrictedCreditsPaid || 0) - point.runner_credits_spent - point.runner_credits_lost;
 
     //apply icebreaker specific details
-	if (typeof card.AIImplementBreaker == "function") {
+	if (typeof card.AIImplementBreaker == "function" &&
+        !(typeof CardEffectsForbid === "function" && CardEffectsForbid("breakUsing", card))) {
 		result = card.AIImplementBreaker.call(card,this,result,point,server,cardStrength,iceAI,iceStrength,clicksLeft,creditsLeft);
 	}
     //non-breaker encounter abilities that change how breakers apply (e.g. Pelangi)
     if (typeof card.AIEncounterAbility == "function") {
       result = card.AIEncounterAbility.call(card, this, result, point, iceAI);
+    }
+    // Charge printed break-trigger losses after the ability's activation cost.
+    // Losses saturate at the remaining pool and cannot consume hosted credits.
+    if (iceAI.ice && typeof iceAI.ice.AIBreakCreditLoss == "function") {
+      result.forEach(function (next) {
+        var indices = next.sr_broken.filter(function (sr) {
+          return !point.sr_broken.some(function (old) { return old.idx == sr.idx; });
+        }).map(function (sr) { return sr.idx; });
+        var loss = iceAI.ice.AIBreakCreditLoss(indices);
+        var pool = Math.max(0, this.basePoolCredits - next.runner_credits_lost -
+          Math.max(0, next.runner_credits_spent - this.baseOtherCredits - (next.restrictedCreditsPaid || 0)));
+        var temporaryLeft = Math.max(0, Math.min(this.baseOtherCredits, runner.temporaryCredits || 0) - next.runner_credits_spent);
+        var temporaryLoss = Math.min(temporaryLeft, loss);
+        next.runner_credits_spent += temporaryLoss;
+        if (CreditPoolCanBeUsed(runner, "lose")) next.runner_credits_lost += Math.min(pool, loss - temporaryLoss);
+      }, this);
     }
     return result;
   }
@@ -388,6 +482,10 @@ class RunCalculator {
 	  var creditPayment = 0;
 	  var creditLoss = 0;
 	  var clickLoss = 0;
+      var gripCardsTrashed = 0;
+      var previousEffects = this.TotalEffect(point);
+      var gripCardsLeft = Math.max(0, runner.grip.length + (previousEffects.gainGripCard || 0) -
+        this.TotalDamage(previousEffects) - (previousEffects.trashGripCard || 0));
 	  // Encounter options may carry restricted (stealth-only) payments, e.g.
 	  // Afterimage's bypass: {restrictedCredits: n} on an encounter persistent.
 	  var restrictedPayment = (encounter_persistents || []).reduce(function (sum, p) {
@@ -434,6 +532,16 @@ class RunCalculator {
 		  }
 		  
 		  //apply payments (exclude path if not affordable)
+          else if (eff == "payIceCredits" && iceAI) {
+            encounter_effects.splice(j, 1); j--;
+            var paymentPoint = this.CopyPoint(point);
+            paymentPoint.runner_credits_spent += creditPayment;
+            paymentPoint.runner_credits_lost += creditLoss;
+            var paid = this.PayCredits(paymentPoint, 1, "using", iceAI.ice, GetServer(iceAI.ice));
+            if (!paid) { exclude_path = true; break; }
+            creditPayment += paid.runner_credits_spent - paymentPoint.runner_credits_spent;
+            creditLoss += paid.runner_credits_lost - paymentPoint.runner_credits_lost;
+          }
 		  else if (eff == "payCredits") {
 			  //remove from encounter_effects (will be included in total costs instead)
 			  encounter_effects.splice(j, 1); //remove 1 item at position j
@@ -448,6 +556,21 @@ class RunCalculator {
 			  }
 		  }
 		  
+          // Targeted grip trash is finite and is not damage (an empty grip cannot flatline).
+          else if (eff == "trashGripCard" && iceAI) {
+            if (gripCardsTrashed < (iceAI.gripTrashLimit || 0) && gripCardsLeft > 0) {
+              gripCardsTrashed++;
+              gripCardsLeft--;
+            } else {
+              encounter_effects.splice(j, 1);
+              j--;
+            }
+          }
+
+          else if (eff == "netDamage" || eff == "meatDamage" || eff == "coreDamage") {
+            gripCardsLeft = Math.max(0, gripCardsLeft - 1);
+          }
+
           // A resolved self-trash removes this layer from subsequent traversals.
           else if (eff == "trashIce" && iceAI) {
             encounter_effects.splice(j, 1);
@@ -462,7 +585,7 @@ class RunCalculator {
             if (gained + (this._stackCardsConsumed || 0) >= runner.stack.length) {
               encounter_effects.splice(j, 1);
               j--;
-            }
+            } else gripCardsLeft++;
           }
 
           // Credit gains enter the pool immediately, before later ICE payments.
@@ -515,7 +638,7 @@ class RunCalculator {
 			restrictedPayment - point.runner_credits_lost - creditLoss < 0) exclude_path = true;
 	  }
 	  if (!exclude_path) {
-		return {
+		var nextPoint = {
 		  iceIdx: nextIceIdx,
 		  runner_credits_spent: point.runner_credits_spent + creditPayment + restrictedPayment,
       paymentPoolOnly: !!this._poolOnly,
@@ -533,6 +656,9 @@ class RunCalculator {
 		  sr_broken: [],
 		  effects: point.effects.concat([encounter_effects]),
 		};
+        var forced = encounter_persistents.find(function (p) { return p.forcedEncounterIce; });
+        nextPoint.persistents = nextPoint.persistents.filter(function (p) { return !p.forcedEncounterIce; });
+        return forced ? this._forcedEncounterPoint(nextPoint, forced.forcedEncounterIce) : nextPoint;
 	  }
 	  //not a valid branch
 	  return null;
@@ -545,8 +671,11 @@ class RunCalculator {
 	  //standard from ice
 	  var encounterEffects = nextIceAI.encounterEffects;
 	  for (var i=0; i<encounterEffects.length; i++) {
-		encounterOptions.push({effects:encounterEffects[i], persistents:[]});
+		encounterOptions.push({effects:encounterEffects[i], persistents:
+        !this._forcedPricing && nextIceAI.forcedEncounterIce ? [{forcedEncounterIce: nextIceAI.forcedEncounterIce}] : []});
 	  }
+      if (!this._forcedPricing && nextIceAI.forcedEncounterIce)
+        encounterOptions.push({effects: ["misc_moderate"], persistents: []});
 	  //special from card effects
 	  //active cards
 	  var activeCards = this.precalculated.activeCards;
@@ -856,6 +985,7 @@ class RunCalculator {
       result += 1.3 * this.TotalDamage(totalEffect); //during 1.0 the runner seemed too willing to take damage
       if (totalEffect.tag) result += 2.4 * totalEffect.tag; //not sure about this
       if (totalEffect.misc_serious) result += 3.0 * totalEffect.misc_serious; //was 1.5 for quite some time but I think this wasn't enough
+      if (totalEffect.trashGripCard) result += 0.8 * totalEffect.trashGripCard;
       if (totalEffect.misc_moderate) result += 0.8 * totalEffect.misc_moderate;
       if (totalEffect.misc_minor) result += 0.3 * totalEffect.misc_minor;
 
@@ -911,7 +1041,7 @@ class RunCalculator {
 		  if (damageLimit < 0) damageLimit = 0;
 		  //now check damage against limit
 		  reason = "damage";
-          if (totalDamage <= damageLimit + (totalEffect.gainGripCard || 0)) {
+          if (totalDamage <= Math.max(0, damageLimit + (totalEffect.gainGripCard || 0) - (totalEffect.trashGripCard || 0))) {
             var totalTag = 0;
             if (totalEffect.tag) totalTag += totalEffect.tag;
 			//update tag limit based on clicks and credits spent (unless it is set to Infinity)
@@ -1133,7 +1263,8 @@ class RunCalculator {
 		  if (mightHitHokusai) approachEffects.push(["netDamage"]);
 		  //calculate any required trash payment, taking into account potential discount (just considering max for one known card trash cost with just one discounting ability atm)
 		  //note cards in server (e.g. in corp hand) are not considered atm
-		  var highestTrashCost = 0;
+		  var highestStealCredits = 0, stealAgenda = null;
+          var highestTrashCost = 0;
 		  var htcCard = null;
 		  for (var i = 0; i < knownCardsInRoot.length; i++) {
 			//special case: Urtica Cipher: no need to include trash cost but account for net damage
@@ -1145,7 +1276,11 @@ class RunCalculator {
 				}
 				approachEffects.push(approachEffect);
 			}
-            else if (typeof knownCardsInRoot[i].AIOnStealDamage == "function" &&
+            if (CheckCardType(knownCardsInRoot[i], ["agenda"]) && StealCost(knownCardsInRoot[i]).credits > highestStealCredits) {
+              highestStealCredits = StealCost(knownCardsInRoot[i]).credits;
+              stealAgenda = knownCardsInRoot[i];
+            }
+            if (typeof knownCardsInRoot[i].AIOnStealDamage == "function" &&
                 AgendaPoints(runner) + (knownCardsInRoot[i].agendaPoints || 0) < AgendaPointsToWin()) {
               var stealDamage = knownCardsInRoot[i].AIOnStealDamage.call(knownCardsInRoot[i]);
               approachEffects.push(Array(stealDamage).fill("netDamage"));
@@ -1175,6 +1310,7 @@ class RunCalculator {
         {
           clicks: approachClicks,
           credits: approachCredits,
+          stealCredits: highestStealCredits, stealAgenda: stealAgenda,
           effects: approachEffects,
           tags: approachTags,
         },
@@ -1187,6 +1323,7 @@ class RunCalculator {
         data.approachOptions.push({
           clicks: approachClicks,
           credits: approachCredits,
+          stealCredits: highestStealCredits, stealAgenda: stealAgenda,
           effects: approachEffects,
           tags: approachTags,
         });
@@ -1229,7 +1366,7 @@ class RunCalculator {
       for (var i = data.repeatDefenders.length ? data.server.ice.length - 1 : data.startIceIdx; i > -1; i--) {
         if (unknownIce == 0)
           this.precalculated.iceAIs[i] = this.IceAI(
-			data.server.ice[i], 
+			(typeof forcedEncounters !== "undefined" && forcedEncounters.length && !this._securityPlanning && data.server === attackedServer && i === approachIce ? GetApproachEncounterIce() : data.server.ice[i]),
 			maxCorpCred, 
 			false, 
 			data.incomplete,
@@ -1237,7 +1374,7 @@ class RunCalculator {
 		  ); //just assume the next unknown ice is dangerous
         else
           this.precalculated.iceAIs[i] = this.IceAI(
-            data.server.ice[i],
+            (typeof forcedEncounters !== "undefined" && forcedEncounters.length && !this._securityPlanning && data.server === attackedServer && i === approachIce ? GetApproachEncounterIce() : data.server.ice[i]),
             maxCorpCred,
             true,
 			data.incomplete,
@@ -1376,7 +1513,7 @@ class RunCalculator {
       icePoint.runner_credits_lost;
     var firstEffects = this.TotalEffect(icePoint);
     var gainedCards = firstEffects.gainGripCard || 0;
-    var firstDamage = this.TotalDamage(firstEffects) - gainedCards;
+    var firstDamage = this.TotalDamage(firstEffects) + (firstEffects.trashGripCard || 0) - gainedCards;
     var futureOther = this._poolOnly ? 0 : (corp.badPublicity || 0);
     var futureClicks = data.clickLimit - icePoint.runner_clicks_spent - 1;
     // Before a run, bad-publicity credits are included in the pool budget.
@@ -1465,6 +1602,11 @@ class RunCalculator {
 		var approachPoint = this.CopyPoint(possiblePath[possiblePath.length-1]);
 		approachPoint.iceIdx = -1;
 		approachPoint.runner_credits_spent += data.approachOptions[j].credits;
+        if (data.approachOptions[j].stealCredits) {
+          approachPoint = this.PayCredits(approachPoint, data.approachOptions[j].stealCredits,
+            "stealing", data.approachOptions[j].stealAgenda, data.server);
+          if (!approachPoint) continue;
+        }
 		approachPoint.runner_clicks_spent += data.approachOptions[j].clicks;
 		approachPoint.effects = approachPoint.effects.concat(data.approachOptions[j].effects);
         var approachPoints = [approachPoint];

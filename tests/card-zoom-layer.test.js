@@ -23,6 +23,25 @@ const context = {
 vm.createContext(context);
 vm.runInContext(rendererSource.slice(start, end), context);
 
+// Construct the real renderer with inert graphics/browser dependencies.
+const graphicsStub = new Proxy(function () {}, {
+  get: () => graphicsStub, apply: () => graphicsStub, construct: () => graphicsStub,
+});
+const constructorContext = {
+  window: {innerWidth: 1440, innerHeight: 1000, addEventListener() {}},
+  document: {body: {appendChild() {}, classList: {contains: () => false}}},
+  PIXI: graphicsStub, particleSystems: {interface: {}}, requestAnimationFrame() {},
+};
+vm.createContext(constructorContext);
+vm.runInContext(rendererSource, constructorContext);
+for (const openingRatio of [1, 1.33, 2.66]) {
+  constructorContext.window.devicePixelRatio = openingRatio;
+  vm.runInContext('cardRenderer = new CardRenderer.Renderer(function () {});', constructorContext);
+  assert.strictEqual(constructorContext.pixi_browserZoom(), 1, 'constructed renderer starts at neutral relative zoom');
+  constructorContext.window.devicePixelRatio = openingRatio * 1.5;
+  assert.strictEqual(constructorContext.pixi_browserZoom(), 1.5, 'constructed baseline measures subsequent zoom');
+}
+
 const first = {}, second = {};
 context.pixi_setCardZoomLayer(first, true);
 assert.strictEqual(active, true);
@@ -54,13 +73,14 @@ const scaleContext = {
   localStorage: {getItem: () => null}, strengthInfo: {ice: false},
   pixi_holdCard: null, pixi_holdZoom: false, pixi_dragMoved: false, delta: 1,
   OptionsAreOnlyUniqueSubroutines: () => false,
+  pixi_browserZoom: context.pixi_browserZoom,
   pixi_cardBaseScale: context.pixi_cardBaseScale,
   pixi_cardPreviewArea: context.pixi_cardPreviewArea,
   forceCropped: false, showFace: true,
 };
 let panels = {};
 Object.assign(context, {window: scaleContext.window, fieldZoom: 1,
-  cardRenderer: {app: {stage: {toLocal: point => point}}}});
+  cardRenderer: {openingPixelRatio: 1, app: {stage: {toLocal: point => point}}}});
 context.document.getElementById = id => panels[id] ? {getBoundingClientRect: () => panels[id]} : null;
 const runner = {grip: []}, corp = {HQ: {cards: []}};
 Object.assign(context, {runner, corp, viewingPlayer: runner});
@@ -70,8 +90,8 @@ const rotationStart = rendererSource.indexOf('if (dispDiff.r > Math.PI)');
 const rotationEnd = rendererSource.indexOf('this.UpdateGlow();', rotationStart);
 vm.runInContext('function animateRotation(target) { var dispDiff = {r: target - this.sprite.rotation}; var deltaVec = {x: 0, y: 0, r: 0};' +
   rendererSource.slice(rotationStart, rotationEnd) + '}', scaleContext);
-const preview = ({width = 1440, height = 1000, zoom = 1, enlarged = true, faceUp = true, canView = false, dragging = false, pressed = false, hand = false, side = runner, rotated = false, transition = false, controls = {}} = {}) => {
-  Object.assign(scaleContext.window, {innerWidth: width, innerHeight: height});
+const preview = ({width = 1440, height = 1000, zoom = 1, browserZoom = 1, pixelRatio, enlarged = true, faceUp = true, canView = false, dragging = false, pressed = false, hand = false, side = runner, rotated = false, transition = false, controls = {}} = {}) => {
+  Object.assign(scaleContext.window, {innerWidth: width, innerHeight: height, devicePixelRatio: pixelRatio ?? browserZoom * context.cardRenderer.openingPixelRatio});
   scaleContext.fieldZoom = zoom;
   context.fieldZoom = zoom;
   panels = controls;
@@ -248,4 +268,73 @@ const gripContext = {runner, viewingPlayer: runner, spreadXStep: 100, hostingX: 
 vm.createContext(gripContext);
 vm.runInContext(initSource.slice(gripStart, gripEnd), gripContext);
 assert.strictEqual(gripContext.gripCascade.step, 100, 'viewed Grip uses its original spacing to avoid increasing clipping');
-console.log('Card zoom layer, preview-size and hand-size regressions passed.');
+// Exercise the real board fit block at the CSS viewport sizes browser zoom yields.
+const fitStart = initSource.indexOf('  fieldZoom = 1.0;', initSource.indexOf('//zoom the field out'));
+const fitEnd = initSource.indexOf('  var oldW = w;', fitStart);
+assert(fitStart >= 0 && fitEnd > fitStart);
+const fitContext = {pixi_browserZoom: context.pixi_browserZoom,
+  runnerLargestHeight: 500, largestServerHeight: 600, scoredCascade: {width: 100},
+  serverSeparationX: 40, corp: {remoteServers: []}, totalServersWidth: 1100,
+  arbitraryHistorySpacer: 55};
+vm.createContext(fitContext);
+// Window chrome and docked panels cannot establish absolute startup zoom.
+// Use the actual opening pixel ratio as baseline, including non-grid zooms.
+for (const density of [1, 1.25, 2]) {
+  for (const openingZoom of [0.8, 1, 1.25, 1.33, 1.5, 2]) {
+    for (const panelWidth of [0, 432]) {
+      Object.assign(context.window, {outerWidth: 1440,
+        innerWidth: (1440 - panelWidth) / openingZoom,
+        devicePixelRatio: density * openingZoom});
+      context.cardRenderer.openingPixelRatio = context.pixi_openingPixelRatio();
+      assert.strictEqual(context.cardRenderer.openingPixelRatio, density * openingZoom,
+        'opening baseline uses the actual pixel ratio without viewport inference or rounding');
+      assert.strictEqual(context.pixi_browserZoom(), 1, 'opening zoom is the session baseline');
+      for (const actualZoom of [1, 1.33, 1.5, 2]) {
+        const bounds = preview({width: (1440 - panelWidth) / actualZoom, height: 2000 / actualZoom,
+          pixelRatio: density * actualZoom, zoom: 2});
+        assert(Math.abs(context.pixi_browserZoom() - actualZoom / openingZoom) < 1e-9,
+          'later zoom changes are measured exactly relative to opening zoom');
+        assert(Math.abs(bounds.width * actualZoom - 450 * openingZoom) < 0.01,
+          'preview retains its opening screen size without cancelling estimator errors');
+      }
+      // Opening and closing a panel after load must not change the zoom signal.
+      Object.assign(context.window, {innerWidth: 1008, devicePixelRatio: density * openingZoom});
+      assert.strictEqual(context.pixi_browserZoom(), 1);
+      context.window.innerWidth = 1440;
+      assert.strictEqual(context.pixi_browserZoom(), 1);
+    }
+  }
+}
+context.window.devicePixelRatio = undefined;
+assert.strictEqual(context.pixi_openingPixelRatio(), 1, 'missing pixel ratio has a neutral fallback');
+for (const density of [1, 2]) {
+  context.cardRenderer.openingPixelRatio = density;
+  let startingScale;
+  for (const browserZoom of [1, 1.25, 1.5, 2, 0.8]) {
+    const width = 1440 / browserZoom, height = 1000 / browserZoom;
+    Object.assign(context.window, {devicePixelRatio: density * browserZoom});
+    Object.assign(fitContext, {w: width, h: height});
+    vm.runInContext(initSource.slice(fitStart, fitEnd), fitContext);
+    if (startingScale === undefined) startingScale = fitContext.interfaceScale;
+    assert(Math.abs(fitContext.interfaceScale - startingScale) < 1e-9,
+      'browser zoom must not trigger compensating UI shrinkage');
+    const ordinary = preview({width, height, zoom: fitContext.fieldZoom, browserZoom, enlarged: false});
+    assert(height * fitContext.fieldZoom >= fitContext.runnerLargestHeight + fitContext.largestServerHeight - 1e-9,
+      'the logical board must fit both rigs without letting Runner cards overlap Corp cards');
+    assert(width * fitContext.fieldZoom >= fitContext.totalFieldWidth + fitContext.arbitraryHistorySpacer - 1e-9,
+      'the logical board must fit the servers horizontally');
+    assert(ordinary.width * browserZoom <= 150 * startingScale + 1e-9,
+      'crowded boards must retain automatic fitting when browser zoom changes');
+    for (const side of [runner, corp]) {
+      const enlarged = preview({width, height, zoom: fitContext.fieldZoom, browserZoom, side, hand: true});
+      assert(Math.abs(enlarged.width * browserZoom - 450) < 0.01,
+        'reading previews must retain their screen size at every browser zoom and display density');
+    }
+  }
+  // A real window resize at the same zoom still refits crowded boards.
+  Object.assign(context.window, {devicePixelRatio: density});
+  Object.assign(fitContext, {w: 720, h: 500});
+  vm.runInContext(initSource.slice(fitStart, fitEnd), fitContext);
+  assert(fitContext.interfaceScale < startingScale, 'window resizing must still fit the board');
+}
+console.log('Card zoom layer, preview-size, browser-zoom and hand-size regressions passed.');
