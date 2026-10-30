@@ -5951,7 +5951,7 @@ class CorpAI {
     if (!rooms.includes(target)) return null; //remote limit reached and no room
     var targetMargin = margin(target);
     var protect = this._scoringPlanProtection(target);
-    var readyReason = this._scoringPlanReady(target, targetMargin, protect);
+    var readyReason = this._scoringPlanReady(target, targetMargin);
     var shown = isFinite(targetMargin) ? targetMargin : null;
     var agenda = bestAgenda(target).agenda;
     //A scoring upgrade goes in before the agenda it helps.
@@ -5967,14 +5967,11 @@ class CorpAI {
 
   //I10: why target (with Runner breach margin m) is ready for an agenda, or
   //null. Never ready without ICE: the plan's first step installs it there.
-  _scoringPlanReady(target, m, protect) {
+  //A breachable remote is not ready even when HQ is as easy to breach: a
+  //remote run always finds the agenda, an HQ access only a random card.
+  _scoringPlanReady(target, m) {
     if (!target || target.ice.length < 1) return null;
     if (m < 0) return "Runner cannot afford to breach";
-    //Holding is no safer than a remote the Runner can breach at least as
-    //cheaply as HQ, once the remote cannot be improved this click.
-    var hqMargin = this._breachMargin(corp.HQ).margin;
-    if (hqMargin === null || typeof hqMargin == "undefined") hqMargin = Infinity;
-    if (!protect && m <= hqMargin) return "no further protection; remote no weaker than HQ";
     if (this._agendasInHand() > MaxHandSize(corp) - 1) return "agendas would be discarded";
     return null;
   }

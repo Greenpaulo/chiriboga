@@ -51,9 +51,11 @@ installed) and are not gated, like other card-batch AI hooks.
   already counted by `_potentialAdvancement()` in the score-this-turn check.
   Asset replacement for room is limited to the existing obsolete-bluff rule
   in `_remoteHasRoom()`; a fuller asset-value comparison remains I5.
-- Readiness adds two fallbacks so the plan cannot stall: install when no
-  protection can be added and the target is no easier to breach than HQ, or
-  when agendas would be discarded. Protection stops at three ICE.
+- Readiness adds one fallback: install when agendas would be discarded.
+  Protection stops at three ICE. (A second fallback, installing when the
+  remote was no easier to breach than HQ, was removed after
+  `real_I10_game1_win.txt`: it put three agendas into a one-ICE remote the
+  Runner broke every turn. Fixture `i10-plan-holds-agenda-from-breachable-remote`.)
 
 **Tests:** new green fixtures in `tests/fixtures/corp-decisions/`:
 `i10-plan-protects-new-remote` (scenarios 1 and 5),

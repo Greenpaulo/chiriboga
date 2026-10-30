@@ -889,9 +889,8 @@ record). With an agenda in HQ it chooses, in order:
    (the Runner has the least to spare), else an empty remote, else a new one.
 3. **Install** the agenda (fewest exposed turns, then most points) when
    `_scoringPlanReady()` holds: the target has ICE and either the Runner's
-   margin is negative, or no protection can be added this click and the
-   target is no easier to breach than HQ, or HQ is over the hand limit with
-   agendas.
+   margin is negative or HQ is over the hand limit with agendas. A remote as
+   easy to breach as HQ is not ready: a remote run always finds the agenda.
 4. **Protect** the target with `_scoringPlanProtection()`: the I2-ranked ICE
    for that server (`_marginalIceInstallOptions(..., [target])`, or
    `_affordableIce()` with `iceMarginalSecurity` off), up to three ICE. It
