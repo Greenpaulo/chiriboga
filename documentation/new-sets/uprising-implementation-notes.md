@@ -826,3 +826,43 @@ Focused checks passed:
 
 The full suite was not run in this parallel batch session. Optimisation is
 queued in the tracker.
+## Batch 15 — 2026-10-30, Claude
+
+Weyland Colossus, Winchester, Argus Crackdown and Cayambe Grid. Focused
+regressions: `tests/uprising-batch15.test.js` (real Corp/Runner selectors,
+turn-begin response window, run calculator and Corp security evaluation).
+
+- **Colossus** is advanceable while unrezzed (CR 1.18.3) and gets +1 strength
+  per counter. The 3-counter check is made when each subroutine resolves. At
+  3+ counters the second subroutine trashes a program and then a resource;
+  either is skipped if there is no target or the trash is prevented.
+- **Winchester** has a gained (not printed) third subroutine while protecting
+  HQ. Card instances are deep copies, so the gained subroutine is a card-owned
+  `_hqSubroutine` object kept last in `subroutines` by `automaticOnAnyChange`
+  and, as a fallback for ice moved mid-command, `automaticOnEncounter`. A new
+  array is assigned instead of mutating the printed one.
+- **Argus Crackdown** uses the shared Lockdown lifecycle (`trashCost: 4` is for
+  access from HQ/R&D, CR 3.5.3). "Protected by ice" is checked when the
+  successful-run trigger fires.
+- **Cayambe Grid**: an advanced card has at least one advancement counter
+  (CR 1.18.4); the counter can go on any ice in the server, including ice that
+  cannot be advanced. The approach cost is calculated at payment as one
+  aggregate payment (CR 1.16.2b, whose example is this card), and a cost of 0
+  is paid automatically (CR 1.16.1d). Region limit uses the shared install
+  check.
+- **Shared Runner calculator change** (`runcalculator.js`,
+  `CalculatePieceBegin`, complete-run approach block): two additive loops,
+  once per calculation (not per search node): `AIRunSuccessfulMeatDamage` on
+  `corp.resolvingCards` and `AIRunApproachCredits` on the server's root cards.
+  No new hooks run inside the breaker search.
+- **Baseline AI**: Corp plays Argus when no Lockdown is active and any server
+  has ice; advances rezzed Colossus to 3; installs Cayambe in iced servers,
+  rezzes it during the Runner's turn, and places counters on unadvanced ice
+  first. The Runner planner pays the Cayambe tax and avoids lethal Argus damage.
+  The Corp security evaluator adds 2 credits per advanced ice to the honest
+  break cost.
+- **Limitations (optimisation)**: Winchester traces are modelled as certain
+  in both evaluators (no link/bid pricing). Argus play timing is not linked to
+  Runner grip size or kill combos. Cayambe target choice does not plan around
+  derez/trash risk. The Runner pays the approach tax only when the planner's
+  complete run (which budgets known root trash costs) is still affordable.

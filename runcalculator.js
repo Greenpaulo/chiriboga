@@ -1209,6 +1209,21 @@ class RunCalculator {
 		}
 		approachEffects.push(hokEffect);
 	  }
+	  //Active Corp operations (Lockdowns such as Argus Crackdown) that do meat damage on a successful run.
+	  if (!(typeof ServerSuccessfulRunPrevented == "function" && ServerSuccessfulRunPrevented(data.server))) {
+	    for (var resolvingIndex = 0; resolvingIndex < corp.resolvingCards.length; resolvingIndex++) {
+	      var resolvingCard = corp.resolvingCards[resolvingIndex];
+	      if (typeof resolvingCard.AIRunSuccessfulMeatDamage != "function") continue;
+	      var resolvingMeat = resolvingCard.AIRunSuccessfulMeatDamage.call(resolvingCard, data.server);
+	      if (resolvingMeat > 0) approachEffects.push(Array(resolvingMeat).fill("meatDamage"));
+	    }
+	  }
+	  //Approach-server payments required by active root cards (Cayambe Grid), before any breach.
+	  for (var rootIndex = 0; rootIndex < data.server.root.length; rootIndex++) {
+	    var approachRootCard = data.server.root[rootIndex];
+	    if (typeof approachRootCard.AIRunApproachCredits == "function" && CheckHasAbilities(approachRootCard))
+	      approachCredits += approachRootCard.AIRunApproachCredits.call(approachRootCard, data.server);
+	  }
 	  //currently assumes the only cards that would prevent breach are installed Runner cards
 	  var breach = !runnerAI._breachWouldBePrevented(installedRunnerCards,data.server);
 	  //costs etc that may apply if breaching:

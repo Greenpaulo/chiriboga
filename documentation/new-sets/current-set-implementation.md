@@ -68,6 +68,7 @@ the shared Lockdown mechanic first needed in batch 9.
 | 13 | 26117–26119 | Pending | — | NBN: Digital Rights Management, SYNC Rerouting, Ganked! Complex. |
 | 14 | 26120–26123 | Complete | Claude, 2026-10-30 | Weyland: Earth Station (flip identity), Transport Monopoly, Wall to Wall, Akhet. Complex. |
 | 15 | 26124–26127 | Pending | — | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
+| 15 | 26124–26127 | Complete | Claude, 2026-10-30 | Weyland: Colossus, Winchester, Argus Crackdown, Cayambe Grid. Complex. |
 | 16 | 26128–26130 | Pending | — | Neutral Corp: Cyberdex Sandbox, False Lead, NAPD Cordon. |
 
 ## Completion log
@@ -93,6 +94,8 @@ the shared Lockdown mechanic first needed in batch 9.
 | 14 | 26120–26123 | 2026-10-30 | Claude | `tests/uprising-batch14.test.js` | Earth Station run taxes via `modifyRunCreditCost`, click flip/HQ flip-back and new `remoteServerLimit` (engine `CorpRemoteServerLimitReached` in `CheckInstallDestination`; Corp AI ranking drops new remotes); Transport Monopoly lingering `modifyDeclareSuccess`, once per turn; Wall to Wall 1-or-up-to-3 turn-begin choices; Akhet advanceable +3/break limit (Afshar pattern) and counter-placing subroutine. See notes. |
 
 | 13 | 26117–26119 | 2026-10-30 | Claude | `tests/uprising-batch13.test.js` | DRM last-turn HQ restriction, agenda search/reveal/shuffle, optional remote-root install and `corpCannotScore` turn event in `CheckScore`; SYNC Lockdown run-begin pay-or-tag with `AIRunBeginTax` in the run calculator; Ganked! R&D reveal and access-time forced encounter (`ForceEncounter` approach index, post-success ETR to run end). Real Corp/Runner selectors and calculator. See notes. |
+
+| 15 | 26124–26127 | 2026-10-30 | Claude | `tests/uprising-batch15.test.js` | Colossus advanceable strength/threshold subs; Winchester traces and HQ-only gained ETR subroutine; Argus Crackdown Lockdown meat damage on iced servers; Cayambe Grid counter placement and approach tax. New Runner calculator hooks `AIRunSuccessfulMeatDamage`, `AIRunApproachCredits`; Corp security via `AIApproachDefense`. Focused tests only (no full suite, per batch-parallel instructions). See notes. |
 
 ## Batch-review log
 
@@ -127,6 +130,8 @@ initialised when each implementation batch completes.
 | 14 | 26120–26123 | Pending | — | Earth Station: Corp flips whenever the remote holds a card (no front/flip comparison or HQ-pressure timing); Runner ignores the HQ flip-back incentive; install planning does not anticipate the single remote (agenda/asset contention). Transport Monopoly: neither side models the finite once-per-turn denial; HQ/Archives use is a coarse agenda-share test. Wall to Wall: fixed ice/credit/draw priority, never returns to HQ (trash dodge or freeing the remote). Akhet: Runner search ignores the subroutine raising its own counters to 3 mid-encounter; counter-target heuristic only. |
 
 | 13 | 26117–26119 | Pending | — | DRM tutor target/sequence and scoring-turn timing; SYNC play timing and Runner pay-vs-tag trade-off (tags priced only by the generic tag limit); Ganked! target choice vs. installed breakers, Runner planning of forced encounters from access, and placement/bluff value. See implementation notes. |
+
+| 15 | 26124–26127 | Pending | — | Winchester traces priced as certain (no link/bid model) in both run and security evaluation; Colossus advance timing vs. other spending; Argus play timing (played whenever any ice exists) and kill-combo planning; Cayambe target ice/rez timing, and the Runner's approach payment requires the planner's full complete run (including budgeted trash costs). See implementation notes. |
 
 ## Optimisation log
 
