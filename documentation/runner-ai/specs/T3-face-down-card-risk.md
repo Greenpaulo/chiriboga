@@ -85,8 +85,8 @@ flags and decision.
 
 ## Things to consider
 
-- T1 values advanced cards from the same agenda-versus-trap evidence; it
-  should reuse this estimate rather than build its own.
+- T1 (parked) would value advanced cards from the same agenda-versus-trap
+  evidence; if revived, it should reuse this estimate.
 - Do this after T2 and recalibrate the Corp once (T2 Design step 3) after
   both, rather than twice.
 - Central servers' upgrades are affected too, so this shifts run costs

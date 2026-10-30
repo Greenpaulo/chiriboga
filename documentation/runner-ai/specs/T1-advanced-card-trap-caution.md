@@ -4,6 +4,11 @@
 **Read first:** `documentation/ai-principles.md`, `documentation/runner-ai/principles.md`
 **Verified against code:** 3f46a2a
 
+**Parked 2026-10-30.** See the roadmap entry: wrong direction for the current
+batch-versus-playtest goal, no owner-playtest evidence, and the batch gate
+below predates the owner-playtesting route. Trap pricing now belongs to
+[T3](T3-face-down-card-risk.md).
+
 ## Goal
 
 Make the Runner treat an advanced face-down card in a remote as possibly a
